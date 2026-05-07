@@ -27,6 +27,7 @@ import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, t
 import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
+import { usePersistedState } from '../lib/usePersistedState';
 import { toast } from 'sonner';
 import { createClient } from '@supabase/supabase-js';
 import Campanas from './Campanas';
@@ -328,7 +329,12 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
-  const [mainTab, setMainTab] = useState<MainTab>('clientes');
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas'];
+  const [mainTab, setMainTab] = usePersistedState<MainTab>(
+    'tcd_admin_main_tab',
+    'clientes',
+    { validate: (v) => VALID_MAIN_TABS.includes(v) },
+  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -343,14 +349,23 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
-  const [detalleTab, setDetalleTab] = useState<DetalleTab>('resumen');
+  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'metricas', 'mensajes', 'notas', 'adn'];
+  const [detalleTab, setDetalleTab] = usePersistedState<DetalleTab>(
+    'tcd_admin_detalle_tab',
+    'resumen',
+    { validate: (v) => VALID_DETALLE_TABS.includes(v) },
+  );
   const [showNuevoCliente, setShowNuevoCliente] = useState(false);
   const [showMigrationWizard, setShowMigrationWizard] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
 
   // Campanas — cliente seleccionado
-  const [campanasClienteId, setCampanasClienteId] = useState<string | null>(null);
+  const [campanasClienteId, setCampanasClienteId] = usePersistedState<string | null>(
+    'tcd_admin_campanas_cliente',
+    null,
+    { validate: (v) => v === null || typeof v === 'string' },
+  );
   const [campanasClientePerfil, setCampanasClientePerfil] = useState<ProfileV2 | null>(null);
   const [campanasPerfilLoading, setCampanasPerfilLoading] = useState(false);
 
