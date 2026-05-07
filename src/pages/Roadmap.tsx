@@ -66,6 +66,7 @@ import TaskCoach from '../components/tasks/TaskCoach';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45 } from '../lib/diaValidator';
+import { usePersistedState } from '../lib/usePersistedState';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
@@ -123,7 +124,11 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
   const [qaVerde, setQaVerde] = useState(false);
-  const [pilarAbierto, setPilarAbierto] = useState<number | null>(null);
+  const [pilarAbierto, setPilarAbierto] = usePersistedState<number | null>(
+    'tcd_roadmap_pilar',
+    null,
+    { validate: (v) => v === null || (typeof v === 'number' && Number.isInteger(v)) },
+  );
   const [celebracion, setCelebracion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeMeta, setActiveMeta] = useState<string | null>(null); // codigo of active task

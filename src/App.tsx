@@ -45,10 +45,25 @@ function loadProfile(): Profile {
   return { nombre: 'Profesional', email: '', especialidad: '', fecha_inicio: today, plan: 'DWY' };
 }
 
+// Páginas válidas — fuente de verdad para validar lo guardado en localStorage
+const VALID_PAGES = [
+  'dashboard', 'roadmap', 'coach', 'metrics', 'mensajes',
+  'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
+] as const;
+const PAGE_STORAGE_KEY = 'tcd_current_page';
+
+function loadCurrentPage(): string {
+  try {
+    const saved = localStorage.getItem(PAGE_STORAGE_KEY);
+    if (saved && (VALID_PAGES as readonly string[]).includes(saved)) return saved;
+  } catch { /* noop */ }
+  return 'dashboard';
+}
+
 type AuthState = 'loading' | 'logged_out' | 'logged_in';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [currentPage, setCurrentPage] = useState<string>(loadCurrentPage);
   const [showSettings, setShowSettings] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
   const [profile, setProfile] = useState<Profile>(loadProfile);
@@ -161,6 +176,13 @@ export default function App() {
 
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
+  }, [currentPage]);
+
+  // Persistir la página actual para que sobreviva al refresh
+  useEffect(() => {
+    try {
+      localStorage.setItem(PAGE_STORAGE_KEY, currentPage);
+    } catch { /* noop */ }
   }, [currentPage]);
 
   const openSettings = () => {

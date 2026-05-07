@@ -19,6 +19,7 @@ import {
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
+import { usePersistedState } from '../lib/usePersistedState';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -166,7 +167,11 @@ export default function DiarioDirector({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [generandoResumen, setGenerandoResumen] = useState(false);
-  const [vista, setVista] = useState<'formulario' | 'historial'>('formulario');
+  const [vista, setVista] = usePersistedState<'formulario' | 'historial'>(
+    'tcd_diario_vista',
+    'formulario',
+    { validate: (v) => v === 'formulario' || v === 'historial' },
+  );
 
   const [respuestas, setRespuestas] = useState<EntradaDiario['respuestas']>({
     q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: '',

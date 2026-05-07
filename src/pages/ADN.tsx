@@ -38,6 +38,7 @@ import {
   type ADNSeccion,
   type ADNSeccionCodigo,
 } from '../lib/adnSchema';
+import { usePersistedState, setSerializers } from '../lib/usePersistedState';
 
 interface ADNProps {
   perfil: Partial<ProfileV2>;
@@ -186,8 +187,10 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
 
 export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
-  const [seccionesExpandidas, setSeccionesExpandidas] = useState<Set<ADNSeccionCodigo>>(
+  const [seccionesExpandidas, setSeccionesExpandidas] = usePersistedState<Set<ADNSeccionCodigo>>(
+    'tcd_adn_secciones',
     () => new Set(['IRR']),
+    setSerializers<ADNSeccionCodigo>(),
   );
 
   // Cargar outputs de hoja_de_ruta y mapear por adn_field

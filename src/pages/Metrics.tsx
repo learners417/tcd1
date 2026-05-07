@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { usePersistedState } from '../lib/usePersistedState';
 import { Plus, X, Lock, CheckCircle2, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V2 as SEED_ROADMAP } from '../lib/roadmapSeed';
@@ -405,7 +406,11 @@ function TabEmbudo({ userId }: { userId?: string }) {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Metrics({ userId }: { userId?: string }) {
-  const [tab, setTab] = useState<'progreso' | 'embudo'>('progreso');
+  const [tab, setTab] = usePersistedState<'progreso' | 'embudo'>(
+    'tcd_metrics_tab',
+    'progreso',
+    { validate: (v) => v === 'progreso' || v === 'embudo' },
+  );
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">

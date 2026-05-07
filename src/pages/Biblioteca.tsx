@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import { usePersistedState } from '../lib/usePersistedState';
 import {
   ArrowLeft,
   Sparkles,
@@ -161,7 +162,12 @@ interface BibliotecaProps {
 }
 
 export default function Biblioteca({ userId }: BibliotecaProps) {
-  const [activeTabId, setActiveTabId] = useState<ClinicaTabId>('C1');
+  const VALID_TABS: ClinicaTabId[] = ['C1', 'L', 'I1', 'N', 'I2', 'C2', 'A'];
+  const [activeTabId, setActiveTabId] = usePersistedState<ClinicaTabId>(
+    'tcd_biblioteca_tab',
+    'C1',
+    { validate: (v) => VALID_TABS.includes(v) },
+  );
   const [herramientaActivaId, setHerramientaActivaId] = useState<string | null>(null);
   const [videoActivo, setVideoActivo] = useState<VideoModulo | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);

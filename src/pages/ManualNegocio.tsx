@@ -22,6 +22,7 @@ import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
 import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
+import { usePersistedState, setSerializers } from '../lib/usePersistedState';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -388,8 +389,10 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function ManualNegocio({ perfil, userId, setCurrentPage }: ManualNegocioProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set([SECTIONS[0].id])
+  const [expanded, setExpanded] = usePersistedState<Set<string>>(
+    'tcd_manual_expanded',
+    () => new Set([SECTIONS[0].id]),
+    setSerializers<string>(),
   );
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
 
