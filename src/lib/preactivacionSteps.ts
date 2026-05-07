@@ -6,7 +6,7 @@
 
 export interface PreactivacionStepDef {
   id: string;
-  /** Label corto multilínea para columna (\n para wrap, ­ para soft hyphen). */
+  /** Label corto multilínea para columna. Usar \n para forzar salto de línea. */
   lbl: string;
   title: string;
   /** Detail rendered as HTML — puede contener <strong>. */
@@ -33,7 +33,7 @@ export const SECTIONS: PreactivacionSection[] = [
     items: [
       {
         id: 'identidad',
-        lbl: 'Identi­dad',
+        lbl: 'Identidad',
         title: 'Identidad resuelta: historia + propósito + legado',
         detail: 'Historia en versión corta (~50 palabras) como mínimo. Propósito en 1 frase. Declaración de legado. <strong>Que suene a la persona, no a plantilla.</strong>',
       },
@@ -132,13 +132,13 @@ export const SECTIONS: PreactivacionSection[] = [
     items: [
       {
         id: 'calendario',
-        lbl: 'Calen­dario',
+        lbl: 'Calendario',
         title: 'Calendario con disponibilidad real',
         detail: 'GHL/Calendly, zona horaria correcta, mín 10 slots/semana. Link Meet/Zoom automático.',
       },
       {
         id: 'recordatorios',
-        lbl: 'Recor­dato­rios',
+        lbl: 'Recorda\ntorios',
         title: 'Recordatorios automáticos',
         detail: 'Email + WhatsApp: 24hs antes + 1hr antes. Reduce no-shows del 40% al 15%.',
       },
@@ -175,7 +175,7 @@ export const SECTIONS: PreactivacionSection[] = [
       },
       {
         id: 'highlights',
-        lbl: 'Desta­cadas',
+        lbl: 'Destacadas',
         title: '3-4 historias destacadas',
         detail: 'Sobre Mí · Método · Testimonios · Agendar.',
       },
@@ -213,7 +213,7 @@ export const SECTIONS: PreactivacionSection[] = [
       },
       {
         id: 'skool_contenido',
-        lbl: 'Bienve­nida\n+ posts',
+        lbl: 'Bienvenida\n+ posts',
         title: 'Bienvenida + 5 posts pre-cargados',
         detail: 'Comunidad NO puede estar vacía. Reglas + contenido listo.',
       },
@@ -232,7 +232,7 @@ export const SECTIONS: PreactivacionSection[] = [
     items: [
       {
         id: 'seis_creativos',
-        lbl: '6 crea­tivos',
+        lbl: '6\ncreativos',
         title: '6 creativos: 2×N1 + 2×N2 + 2×N3',
         detail: 'Frío, tibio, caliente. Mín 2 formatos (reel + carrusel).',
       },

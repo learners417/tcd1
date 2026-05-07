@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check } from 'lucide-react';
 import { SECTIONS, STEPS, TOTAL_STEPS } from '../../../lib/preactivacionSteps';
 import {
@@ -49,9 +48,9 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 colSpan={sec.items.length}
                 className="sticky top-0 z-30 bg-[#141414] text-[#F5A623] uppercase tracking-widest"
                 style={{
-                  fontFamily: 'monospace',
+                  fontFamily: 'var(--font-body)',
                   fontSize: 12,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   letterSpacing: 1.5,
                   padding: '10px 0',
                   textAlign: 'center',
@@ -65,9 +64,9 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
             <th
               className="sticky right-0 top-0 z-40 bg-[#141414] text-[#F5A623]"
               style={{
-                fontFamily: 'monospace',
+                fontFamily: 'var(--font-body)',
                 fontSize: 12,
-                fontWeight: 600,
+                fontWeight: 700,
                 letterSpacing: 1.5,
                 padding: '10px 10px',
                 textAlign: 'center',
@@ -93,16 +92,13 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
             {STEPS.map((step, idx) => {
               const isFirstOfSection =
                 idx === 0 || STEPS[idx - 1].sectionId !== step.sectionId;
-              const lines = step.lbl
-                .replace(/­/g, '·')
-                .split('\n');
               return (
                 <th
                   key={step.id}
                   className="sticky bg-[#0F0F0F]"
                   style={{
                     top: 40,
-                    padding: '8px 4px 10px',
+                    padding: '10px 8px 12px',
                     fontWeight: 500,
                     verticalAlign: 'bottom',
                     borderBottom: '2px solid rgba(245,166,35,0.15)',
@@ -112,23 +108,18 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 >
                   <div
                     style={{
-                      fontFamily: 'monospace',
-                      fontSize: 11,
-                      color: 'rgba(255,255,255,0.65)',
-                      lineHeight: 1.35,
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: 'rgba(255,255,255,0.75)',
+                      lineHeight: 1.3,
                       textAlign: 'center',
-                      minWidth: 72,
-                      maxWidth: 84,
-                      wordBreak: 'break-word',
-                      hyphens: 'manual',
+                      minWidth: 84,
+                      whiteSpace: 'pre-line',
+                      wordBreak: 'keep-all',
                     }}
                   >
-                    {lines.map((line, i) => (
-                      <React.Fragment key={i}>
-                        {line}
-                        {i < lines.length - 1 && <br />}
-                      </React.Fragment>
-                    ))}
+                    {step.lbl}
                   </div>
                 </th>
               );
@@ -137,16 +128,17 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               className="sticky right-0 z-30 bg-[#0F0F0F]"
               style={{
                 top: 40,
-                padding: '8px 10px 10px',
+                padding: '10px 12px 12px',
                 borderBottom: '2px solid rgba(245,166,35,0.15)',
                 borderLeft: '2px solid #252830',
               }}
             >
               <div
                 style={{
-                  fontFamily: 'monospace',
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.65)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.75)',
                   textAlign: 'center',
                 }}
               >
@@ -180,9 +172,8 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         height: 36,
                         background: 'rgba(245,166,35,0.12)',
                         color: '#F5A623',
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                        fontWeight: 600,
+                        fontSize: 14,
+                        fontWeight: 700,
                       }}
                     >
                       {cl.initial}
@@ -199,9 +190,8 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         <div
                           className="truncate"
                           style={{
-                            color: 'rgba(255,255,255,0.45)',
-                            fontFamily: 'monospace',
-                            fontSize: 11,
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: 12,
                             maxWidth: 175,
                           }}
                         >
@@ -260,7 +250,6 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     borderBottom: '1px solid rgba(255,255,255,0.05)',
                     borderLeft: '2px solid #252830',
                     textAlign: 'center',
-                    fontFamily: 'monospace',
                     fontSize: 14,
                     minWidth: 84,
                     color: isComplete ? '#22C55E' : 'rgba(255,255,255,0.7)',

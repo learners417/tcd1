@@ -27,8 +27,8 @@ export default function ElCaminoView() {
                   height: 32,
                   background: 'rgba(245,166,35,0.12)',
                   color: '#F5A623',
-                  fontFamily: 'monospace',
-                  fontSize: 11,
+                  fontSize: 13,
+                  fontWeight: 700,
                   border: '1px solid rgba(245,166,35,0.15)',
                 }}
               >
@@ -42,9 +42,8 @@ export default function ElCaminoView() {
               </h3>
               <span
                 style={{
-                  fontFamily: 'monospace',
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.4)',
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.5)',
                 }}
               >
                 {sec.items.length} {sec.items.length === 1 ? 'paso' : 'pasos'}
@@ -58,12 +57,11 @@ export default function ElCaminoView() {
                   className="flex gap-4 items-start px-5 py-3.5 border-b border-[rgba(255,255,255,0.05)] last:border-b-0"
                 >
                   <div
-                    className="shrink-0 pt-0.5"
+                    className="shrink-0 pt-0.5 font-semibold"
                     style={{
-                      fontFamily: 'monospace',
-                      fontSize: 11,
-                      color: 'rgba(245,166,35,0.7)',
-                      minWidth: 28,
+                      fontSize: 13,
+                      color: 'rgba(245,166,35,0.8)',
+                      minWidth: 32,
                     }}
                   >
                     {sectionIdx + 1}.{itemIdx + 1}
