@@ -222,7 +222,7 @@ export async function fetchCreativos(
   }
 
   const creativos = data as Creativo[];
-  localStorage.setItem('tcd_creativos', JSON.stringify(creativos));
+  safeSetCreativosCache(creativos);
   return creativos;
 }
 
@@ -284,6 +284,24 @@ export function downloadImage(url: string, filename: string): void {
 
 // ─── localStorage fallbacks ──────────────────────────────────────────────────
 
+// El cache de creativos en localStorage solo sirve como fallback offline.
+// Strippeamos campos pesados (assets URLs largos, prompt_imagen serializado)
+// para que la lista no explote la cuota de ~5MB del navegador. Si igual no
+// entra, mejor borrar el cache que romper la lectura.
+function stripHeavyFields(creativos: Creativo[]): Creativo[] {
+  return creativos.map(({ assets: _assets, prompt_imagen: _prompt, ...rest }) => rest);
+}
+
+function safeSetCreativosCache(creativos: Creativo[]): void {
+  try {
+    localStorage.setItem('tcd_creativos', JSON.stringify(stripHeavyFields(creativos)));
+  } catch (err) {
+    // QuotaExceededError u otros — el cache es best-effort, no debe romper UX.
+    console.warn('No se pudo cachear creativos en localStorage:', err);
+    try { localStorage.removeItem('tcd_creativos'); } catch { /* ignore */ }
+  }
+}
+
 function loadCampanasFromLocal(): Campana[] {
   try {
     const saved = localStorage.getItem('tcd_campanas');
@@ -319,6 +337,6 @@ function saveCreativoLocal(creativo: Omit<Creativo, 'id' | 'created_at' | 'asset
     created_at: new Date().toISOString(),
   };
   const existing = loadCreativosFromLocal();
-  localStorage.setItem('tcd_creativos', JSON.stringify([full, ...existing]));
+  safeSetCreativosCache([full, ...existing]);
   return full;
 }
