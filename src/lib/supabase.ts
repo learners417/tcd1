@@ -517,6 +517,64 @@ export const ADMIN_TAREA_PRIORIDAD_LABELS: Record<AdminTareaPrioridad, string> =
   urgente: 'Urgente',
 };
 
+// ─── Agent Conversations (persistencia de chats con los 6 agentes IA) ───────
+
+export interface AgentConversationMessage {
+  rol: 'usuario' | 'agente';
+  contenido: string;
+}
+
+export interface AgentConversationRow {
+  id: string;
+  user_id: string;
+  agent_id: string;
+  messages: AgentConversationMessage[];
+  last_message_at: string;
+  created_at: string;
+}
+
+export const agentConversationsRepo = {
+  async load(userId: string, agentId: string): Promise<AgentConversationMessage[] | null> {
+    if (!supabase) return null;
+    const { data, error } = await supabase
+      .from('agent_conversations')
+      .select('messages')
+      .eq('user_id', userId)
+      .eq('agent_id', agentId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return (data.messages ?? []) as AgentConversationMessage[];
+  },
+
+  async save(
+    userId: string,
+    agentId: string,
+    messages: AgentConversationMessage[],
+  ): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('agent_conversations')
+      .upsert(
+        {
+          user_id: userId,
+          agent_id: agentId,
+          messages,
+          last_message_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,agent_id' },
+      );
+  },
+
+  async reset(userId: string, agentId: string): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('agent_conversations')
+      .delete()
+      .eq('user_id', userId)
+      .eq('agent_id', agentId);
+  },
+};
+
 // ─── Re-export tipos de Campañas & Creativos ─────────────────────────────────
 export type {
   Campana,
