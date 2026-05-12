@@ -52,10 +52,15 @@ export default function Agentes({ userId, perfil }: AgentesProps) {
   const knowledgeBaseRef = useRef<string>('');
 
   const completadas = useMemo(() => getCompletadas(), []);
+  const finDeConversacionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     getUserKnowledgeBase(userId).then((kb) => { knowledgeBaseRef.current = kb; });
   }, [userId]);
+
+  useEffect(() => {
+    finDeConversacionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [mensajes, cargando]);
 
   const iniciarAgente = useCallback(
     async (agente: ConfigAgente) => {
@@ -227,7 +232,7 @@ export default function Agentes({ userId, perfil }: AgentesProps) {
   // ─── Vista de conversación con agente activo ────────────────────────────────
   const IconActivo = AGENTE_ICON_MAP[agenteActivo.icon];
   return (
-    <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-300">
+    <div className="w-full flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-300">
       {/* Cabecera */}
       <div className="card-panel p-4 rounded-2xl mb-4 border border-[#F5A623]/20 bg-[#F5A623]/10">
         <div className="flex items-center justify-between">
@@ -301,6 +306,7 @@ export default function Agentes({ userId, perfil }: AgentesProps) {
             </div>
           </div>
         )}
+        <div ref={finDeConversacionRef} />
       </div>
 
       {/* Sugerencias rápidas */}
