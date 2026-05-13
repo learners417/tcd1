@@ -11,7 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
-import Mensajes from './pages/Mensajes';
+// import Mensajes from './pages/Mensajes'; // oculto hasta que esté usable
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -47,7 +47,7 @@ function loadProfile(): Profile {
 
 // Páginas válidas — fuente de verdad para validar lo guardado en localStorage
 const VALID_PAGES = [
-  'dashboard', 'roadmap', 'coach', 'metrics', 'mensajes',
+  'dashboard', 'roadmap', 'coach', 'metrics',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
 ] as const;
 const PAGE_STORAGE_KEY = 'tcd_current_page';
@@ -71,7 +71,6 @@ export default function App() {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const [profileLoading, setProfileLoading] = useState(false);
   const [supabaseProfile, setSupabaseProfile] = useState<SupabaseProfile | null>(null);
-  const [unreadMessages, setUnreadMessages] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
@@ -386,7 +385,6 @@ export default function App() {
         setCurrentPage={setCurrentPage}
         onOpenSettings={openSettings}
         onSignOut={handleSignOut}
-        messageBadge={unreadMessages}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(v => !v)}
         mobileOpen={mobileMenuOpen}
@@ -396,34 +394,28 @@ export default function App() {
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         <Topbar setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          {currentPage === 'mensajes' ? (
-            <div className="h-full">
-              <Mensajes userId={supabaseProfile?.id} onUnreadChange={setUnreadMessages} />
-            </div>
-          ) : (
-            <div className="p-6">
-              {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />}
-              {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-{currentPage === 'coach' && <Coach userId={supabaseProfile?.id} />}
-              {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
-              {currentPage === 'diario' && (
-                <DiarioDirector
-                  userId={supabaseProfile?.id}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
-                />
-              )}
-              {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} />}
-              {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} />}
-              {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
-              {currentPage === 'agentes' && (
-                <Agentes
-                  userId={supabaseProfile?.id}
-                  perfil={supabaseProfile ?? undefined}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
-                />
-              )}
-            </div>
-          )}
+          <div className="p-6">
+            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />}
+            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} />}
+            {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
+            {currentPage === 'diario' && (
+              <DiarioDirector
+                userId={supabaseProfile?.id}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+            {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} />}
+            {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} />}
+            {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
+            {currentPage === 'agentes' && (
+              <Agentes
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+          </div>
         </main>
       </div>
 

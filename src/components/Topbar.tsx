@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, Users, BookOpen, Library, Trophy, Shield, Menu } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu } from 'lucide-react';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 
@@ -13,7 +13,7 @@ const searchablePages = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Panel principal del programa' },
   { id: 'roadmap', label: 'Hoja de Ruta', icon: Map, desc: 'Tu progreso en los 90 días' },
   { id: 'coach', label: 'Coach IA', icon: MessageSquare, desc: 'Asistente IA con contexto de tu programa' },
-  { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' },
+  // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
   { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Seguimiento de tu embudo de ventas' },
   { id: 'diario', label: 'Diario', icon: BookOpen, desc: 'Reflexión diaria' },
   { id: 'biblioteca', label: 'Biblioteca', icon: Library, desc: 'Videos, herramientas, recursos' },
@@ -38,7 +38,7 @@ const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
 const URL_TO_PAGE: Record<string, string> = {
   '/hoja-de-ruta': 'roadmap',
   '/diario': 'diario',
-  '/mensajes': 'mensajes',
+  // '/mensajes': 'mensajes', // oculto hasta que esté usable
   '/metricas': 'metrics',
   '/admin/clientes': 'admin-clientes',
   '/admin/mensajes': 'admin-mensajes',

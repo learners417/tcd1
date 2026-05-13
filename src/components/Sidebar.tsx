@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Map as RoadmapIcon, MessageSquare, TrendingUp, Users, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna } from 'lucide-react';
+import { LayoutDashboard, Map as RoadmapIcon, MessageSquare, TrendingUp, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 
 interface SidebarProps {
@@ -70,7 +70,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
-        { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 },
+        // { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 }, // oculto hasta que la sección esté usable
         { id: 'biblioteca', icon: Library, label: 'Biblioteca' },
         { id: 'agentes', icon: Bot, label: 'Agentes IA' },
       ]
