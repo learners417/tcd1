@@ -19,6 +19,7 @@ import ManualNegocio from './pages/ManualNegocio';
 import ADN from './pages/ADN';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
+import Campanas from './pages/Campanas';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
 import { X, User, Bell, Shield, CreditCard, LogOut, Camera, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
@@ -49,6 +50,7 @@ function loadProfile(): Profile {
 const VALID_PAGES = [
   'dashboard', 'roadmap', 'coach', 'metrics',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
+  'campanas',
 ] as const;
 const PAGE_STORAGE_KEY = 'tcd_current_page';
 
@@ -410,6 +412,14 @@ export default function App() {
             {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
             {currentPage === 'agentes' && (
               <Agentes
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
+            {currentPage === 'campanas' && (
+              <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
                 geminiKey={import.meta.env.VITE_GEMINI_API_KEY}

@@ -28,6 +28,10 @@ export interface ContextoCoach {
   esCallDeVenta?: boolean;
   hayBloqueoPersistente?: boolean;
   baseDeConocimiento?: string;
+  /** Resumen rotativo de las últimas conversaciones · generado cada 20 msgs. */
+  coachHistorySummary?: string;
+  /** Texto plano con los niveles del sanador en los 7 entrenadores. */
+  nivelesEntrenadoresTexto?: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -291,9 +295,29 @@ El profesional está haciendo la revisión mensual. Estructura la conversación 
     ? `=== BASE DE CONOCIMIENTO DEL PROFESIONAL ===\nDocumentos generados con herramientas IA en tareas completadas. Usá esta información para personalizar absolutamente todo lo que respondés.\n\n${ctx.baseDeConocimiento}`.trim()
     : '';
 
+  // ─── Memoria persistente · resumen rotativo cada 20 msgs ────────────────────
+
+  const HISTORY_SECTION = ctx.coachHistorySummary
+    ? `=== HISTORIA RECIENTE DE NUESTRAS CONVERSACIONES ===\n${ctx.coachHistorySummary}\n\nUsá esto SOLO si es relevante a lo que el sanador trae hoy. NO referencies cada punto. Si conecta orgánicamente · referenciá uno.`.trim()
+    : '';
+
+  // ─── Progreso con los 7 entrenadores ────────────────────────────────────────
+
+  const ENTRENADORES_SECTION = ctx.nivelesEntrenadoresTexto
+    ? `=== PROGRESO CON LOS 7 ENTRENADORES ===\n${ctx.nivelesEntrenadoresTexto}\n\nSi el sanador pregunta "¿cómo voy?" o derivás a un entrenador · usá esto. Nivel 4 = Autónomo (ya no lo necesita).`.trim()
+    : '';
+
   // ─── Prompt final ───────────────────────────────────────────────────────────
 
-  return [BASE, CONTEXTO_USUARIO, CONOCIMIENTO_SECTION, DIARIO_SECTION, SECCIONES_CONDICIONALES]
+  return [
+    BASE,
+    CONTEXTO_USUARIO,
+    CONOCIMIENTO_SECTION,
+    HISTORY_SECTION,
+    ENTRENADORES_SECTION,
+    DIARIO_SECTION,
+    SECCIONES_CONDICIONALES,
+  ]
     .filter(Boolean)
     .join('\n\n');
 }

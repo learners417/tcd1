@@ -56,6 +56,17 @@ const FIELD_MAP: Record<AdnFieldKey, (p: Partial<ProfileV2>) => string> = {
     return a.lenguaje.join(' / ');
   },
 
+  // Mismas frases del avatar — Mateo las pide como "voz" del avatar
+  IRRavatar_voz: (p) => {
+    const a = p.adn_avatar;
+    if (!a?.lenguaje?.length) return PLACEHOLDER;
+    return a.lenguaje.join(' / ');
+  },
+
+  // Lo que ya probó sin éxito (P4 · análisis pacientes / journey)
+  IRRavatar_cementerio: (p) =>
+    nonEmpty(p.adn_pacientes_reales ?? p.adn_avatar_journey),
+
   IRRmatriz_a_infierno: (p) => nonEmpty(p.matriz_a),
   IRRmatriz_b_obstaculos: (p) => nonEmpty(p.matriz_b),
   IRRmatriz_c_cielo: (p) => nonEmpty(p.matriz_c),
@@ -65,10 +76,22 @@ const FIELD_MAP: Record<AdnFieldKey, (p: Partial<ProfileV2>) => string> = {
   IRRmetodo_nombre: (p) => nonEmpty(p.metodo_nombre),
   IRRmetodo_pasos: (p) => nonEmpty(p.metodo_pasos),
 
+  // Diferencial · resultado · garantía no tienen campos dedicados en ProfileV2
+  // todavía. El entrenador maneja el PLACEHOLDER explícitamente.
+  IRRmetodo_diferencial: () => PLACEHOLDER,
+  IRRmetodo_resultado: () => PLACEHOLDER,
+
   NEGlead_magnet: (p) => nonEmpty(p.lead_magnet),
   NEGoferta_mid: (p) => nonEmpty(p.oferta_mid),
   NEGoferta_low: (p) => nonEmpty(p.oferta_low),
   NEGoferta_high: (p) => nonEmpty(p.oferta_high),
+  NEGgarantia: () => PLACEHOLDER,
+  NEGescenarios_roas: (p) => nonEmpty(p.adn_escenarios_roas),
+
+  CAPscript_venta_W: (p) => nonEmpty(p.script_venta),
+  CAPlanding_copy: (p) => nonEmpty(p.adn_landing_copy),
+  CAPtriage_audios_5: (p) => nonEmpty(p.adn_triage_audios),
+  CAPseguimiento_secuencia: (p) => nonEmpty(p.adn_emails_nurture),
 };
 
 export function buildAdnContext(

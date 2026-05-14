@@ -575,6 +575,139 @@ export const agentConversationsRepo = {
   },
 };
 
+// ─── Agent Skill Progress (niveles, prácticas y scores por entrenador) ──────
+
+export interface AgentSkillProgressRow {
+  user_id: string;
+  agent_id: string;
+  practice_count: number;
+  scores: number[];
+  current_level: 1 | 2 | 3 | 4;
+  last_practice_at: string | null;
+}
+
+export const agentSkillProgressRepo = {
+  async load(userId: string, agentId: string): Promise<AgentSkillProgressRow | null> {
+    if (!supabase) return null;
+    const { data, error } = await supabase
+      .from('agent_skill_progress')
+      .select('user_id, agent_id, practice_count, scores, current_level, last_practice_at')
+      .eq('user_id', userId)
+      .eq('agent_id', agentId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as AgentSkillProgressRow;
+  },
+
+  async loadAll(userId: string): Promise<AgentSkillProgressRow[]> {
+    if (!supabase) return [];
+    const { data, error } = await supabase
+      .from('agent_skill_progress')
+      .select('user_id, agent_id, practice_count, scores, current_level, last_practice_at')
+      .eq('user_id', userId);
+    if (error || !data) return [];
+    return data as AgentSkillProgressRow[];
+  },
+
+  async upsert(
+    userId: string,
+    agentId: string,
+    next: { practice_count: number; scores: number[]; current_level: 1 | 2 | 3 | 4 },
+  ): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('agent_skill_progress')
+      .upsert(
+        {
+          user_id: userId,
+          agent_id: agentId,
+          practice_count: next.practice_count,
+          scores: next.scores,
+          current_level: next.current_level,
+          last_practice_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,agent_id' },
+      );
+  },
+
+  async reset(userId: string, agentId: string): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('agent_skill_progress')
+      .delete()
+      .eq('user_id', userId)
+      .eq('agent_id', agentId);
+  },
+};
+
+// ─── Coach IA Conversations (clon Javo · persistente + summary rotativo) ────
+
+export interface CoachConversationMessage {
+  role: 'assistant' | 'user';
+  content: string;
+}
+
+export interface CoachConversationRow {
+  user_id: string;
+  messages: CoachConversationMessage[];
+  summary: string | null;
+  last_summary_at_msg_count: number;
+  last_message_at: string;
+}
+
+export const coachConversationsRepo = {
+  async load(userId: string): Promise<CoachConversationRow | null> {
+    if (!supabase) return null;
+    const { data, error } = await supabase
+      .from('coach_conversations')
+      .select('user_id, messages, summary, last_summary_at_msg_count, last_message_at')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as CoachConversationRow;
+  },
+
+  async saveMessages(userId: string, messages: CoachConversationMessage[]): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('coach_conversations')
+      .upsert(
+        {
+          user_id: userId,
+          messages,
+          last_message_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
+  },
+
+  async updateSummary(
+    userId: string,
+    summary: string,
+    msgCount: number,
+  ): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('coach_conversations')
+      .update({
+        summary,
+        last_summary_at_msg_count: msgCount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId);
+  },
+
+  async reset(userId: string): Promise<void> {
+    if (!supabase) return;
+    await supabase
+      .from('coach_conversations')
+      .delete()
+      .eq('user_id', userId);
+  },
+};
+
 // ─── Re-export tipos de Campañas & Creativos ─────────────────────────────────
 export type {
   Campana,
