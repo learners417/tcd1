@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
 import {
@@ -1661,6 +1662,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <h2 className="text-lg font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#FFFFFF' }}>
             {headerTitles[mainTab]}
           </h2>
+          <div className="ml-auto flex items-center gap-2">
+            <NotificationBell
+              userId={adminProfile.id}
+              size="sm"
+              onNavigate={(url) => {
+                // Mapea accion_url → tab del panel admin
+                if (url.includes('/admin') && url.includes('tab=tareas')) setMainTab('tareas');
+                else if (url.includes('/admin/clientes')) setMainTab('clientes');
+                else if (url.includes('/admin/mensajes')) setMainTab('mensajes');
+              }}
+            />
+          </div>
         </header>
 
         <div className={`flex-1 scrollbar-hide ${mainTab === 'mensajes' ? 'overflow-hidden flex flex-col' : mainTab === 'pipeline' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto p-6'}`}>
