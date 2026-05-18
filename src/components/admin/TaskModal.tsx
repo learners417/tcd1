@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Loader2, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import type { AdminTarea, AdminTareaStatus, AdminTareaPrioridad } from '../../lib/supabase';
 import { ADMIN_TAREA_STATUS_LABELS, ADMIN_TAREA_PRIORIDAD_LABELS, ADMIN_TAREA_STATUSES } from '../../lib/supabase';
 import type { Profile } from '../../lib/supabase';
@@ -7,6 +8,11 @@ import CustomSelect from '../CustomSelect';
 import TaskDescriptionEditor from '../editor/TaskDescriptionEditor';
 import TaskComments from '../tasks/TaskComments';
 import TaskAttachments from '../tasks/TaskAttachments';
+import {
+  uploadTareaAdjunto,
+  createTareaComentario,
+  MAX_ATTACHMENT_BYTES,
+} from '../../lib/adminTasks';
 
 interface TaskModalProps {
   tarea?: AdminTarea | null;
@@ -21,7 +27,7 @@ interface TaskModalProps {
     prioridad: AdminTareaPrioridad;
     fecha_vencimiento: string | null;
     status: AdminTareaStatus;
-  }) => Promise<void>;
+  }) => Promise<AdminTarea | void>;
   onClose: () => void;
 }
 
@@ -36,6 +42,8 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
   const [status, setStatus] = useState<AdminTareaStatus>(tarea?.status ?? 'por_hacer');
   const [fechaVencimiento, setFechaVencimiento] = useState(tarea?.fecha_vencimiento ?? '');
   const [saving, setSaving] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [pendingComments, setPendingComments] = useState<string[]>([]);
 
   const isEditing = !!tarea;
 
@@ -48,11 +56,42 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
   const currentUserNombre =
     teamMembers.find(m => m.id === currentAdminId)?.nombre ?? 'Usuario';
 
+  async function flushPending(tareaId: string) {
+    if (pendingFiles.length > 0) {
+      for (const file of pendingFiles) {
+        if (file.size > MAX_ATTACHMENT_BYTES) {
+          toast.error(`"${file.name}" supera los 25 MB`);
+          continue;
+        }
+        try {
+          await uploadTareaAdjunto({ tarea_id: tareaId, autor_id: currentAdminId, file });
+        } catch (err) {
+          console.error('Error subiendo archivo adjunto:', err);
+          toast.error(`No se pudo subir "${file.name}"`);
+        }
+      }
+    }
+    if (pendingComments.length > 0) {
+      for (const contenido of pendingComments) {
+        try {
+          await createTareaComentario({
+            tarea_id: tareaId,
+            autor_id: currentAdminId,
+            contenido,
+          });
+        } catch (err) {
+          console.error('Error enviando comentario inicial:', err);
+          toast.error('No se pudo enviar un comentario inicial');
+        }
+      }
+    }
+  }
+
   async function handleSubmit() {
     if (!titulo.trim()) return;
     setSaving(true);
     try {
-      await onSave({
+      const result = await onSave({
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
         asignado_a: asignadoA || null,
@@ -61,6 +100,12 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
         fecha_vencimiento: fechaVencimiento || null,
         status,
       });
+
+      // Si se acaba de crear, subir adjuntos y comentarios pendientes
+      if (!isEditing && result && (pendingFiles.length > 0 || pendingComments.length > 0)) {
+        await flushPending(result.id);
+      }
+
       onClose();
     } finally {
       setSaving(false);
@@ -175,34 +220,44 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
             />
           </div>
 
-          {/* Adjuntos + Conversación: solo cuando la tarea ya existe */}
-          {isEditing && tarea && (
-            <>
-              <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
-                <TaskAttachments
-                  tareaId={tarea.id}
-                  currentUserId={currentAdminId}
-                />
-              </div>
+          {/* Adjuntos */}
+          <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
+            {isEditing && tarea ? (
+              <TaskAttachments
+                tareaId={tarea.id}
+                currentUserId={currentAdminId}
+              />
+            ) : (
+              <TaskAttachments
+                currentUserId={currentAdminId}
+                pendingFiles={pendingFiles}
+                onPendingFilesChange={setPendingFiles}
+              />
+            )}
+          </div>
 
-              <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
-                <TaskComments
-                  tareaId={tarea.id}
-                  tareaTitulo={tarea.titulo}
-                  creadoPor={tarea.creado_por}
-                  asignadoA={tarea.asignado_a}
-                  currentUserId={currentAdminId}
-                  currentUserNombre={currentUserNombre}
-                />
-              </div>
-            </>
-          )}
-
-          {!isEditing && (
-            <p className="text-[11px] text-[#FFFFFF]/30 italic">
-              Podrás adjuntar archivos y responder al creador una vez que guardes la tarea.
-            </p>
-          )}
+          {/* Conversación */}
+          <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
+            {isEditing && tarea ? (
+              <TaskComments
+                tareaId={tarea.id}
+                tareaTitulo={tarea.titulo}
+                creadoPor={tarea.creado_por}
+                asignadoA={tarea.asignado_a}
+                currentUserId={currentAdminId}
+                currentUserNombre={currentUserNombre}
+              />
+            ) : (
+              <TaskComments
+                tareaTitulo={titulo}
+                asignadoA={asignadoA || null}
+                currentUserId={currentAdminId}
+                currentUserNombre={currentUserNombre}
+                pendingComments={pendingComments}
+                onPendingCommentsChange={setPendingComments}
+              />
+            )}
+          </div>
         </div>
 
         {/* Footer */}

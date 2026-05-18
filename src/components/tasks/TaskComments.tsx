@@ -12,12 +12,18 @@ import {
 import { notificarComentarioTarea } from '../../lib/notifications';
 
 interface TaskCommentsProps {
-  tareaId: string;
+  tareaId?: string;
   tareaTitulo: string;
-  creadoPor: string;
+  creadoPor?: string;
   asignadoA: string | null;
   currentUserId: string;
   currentUserNombre: string;
+  /**
+   * Modo "pendiente": cuando no hay tareaId todavía (creación), los borradores
+   * se guardan en memoria y el padre los envía tras crear la tarea.
+   */
+  pendingComments?: string[];
+  onPendingCommentsChange?: (drafts: string[]) => void;
 }
 
 function formatRelative(iso: string): string {
@@ -40,14 +46,20 @@ function isEmpty(html: string): boolean {
 
 export default function TaskComments({
   tareaId, tareaTitulo, creadoPor, asignadoA, currentUserId, currentUserNombre,
+  pendingComments, onPendingCommentsChange,
 }: TaskCommentsProps) {
+  const isPending = !tareaId;
   const [comments, setComments] = useState<TareaComentario[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isPending);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!tareaId) {
+      setLoading(false);
+      return;
+    }
     let alive = true;
     setLoading(true);
     fetchTareaComentarios(tareaId)
@@ -62,10 +74,19 @@ export default function TaskComments({
 
   async function handleSend() {
     if (isEmpty(draft) || sending) return;
+
+    if (isPending) {
+      if (onPendingCommentsChange) {
+        onPendingCommentsChange([...(pendingComments ?? []), draft]);
+      }
+      setDraft('');
+      return;
+    }
+
     setSending(true);
     try {
       const nuevo = await createTareaComentario({
-        tarea_id: tareaId,
+        tarea_id: tareaId!,
         autor_id: currentUserId,
         contenido: draft,
       });
@@ -88,6 +109,13 @@ export default function TaskComments({
     }
   }
 
+  function handleRemovePending(index: number) {
+    if (!onPendingCommentsChange) return;
+    const next = [...(pendingComments ?? [])];
+    next.splice(index, 1);
+    onPendingCommentsChange(next);
+  }
+
   async function handleDelete(c: TareaComentario) {
     if (c.autor_id !== currentUserId) return;
     if (deletingId) return;
@@ -104,20 +132,56 @@ export default function TaskComments({
     }
   }
 
+  const pendingList = pendingComments ?? [];
+  const totalCount = isPending ? pendingList.length : comments.length;
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider">
         <MessageSquare className="w-3.5 h-3.5" />
         Conversación
-        {comments.length > 0 && (
+        {totalCount > 0 && (
           <span className="text-[10px] bg-[#F5A623]/15 text-[#F5A623] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
-            {comments.length}
+            {totalCount}
           </span>
         )}
       </div>
 
       {/* Hilo */}
-      {loading ? (
+      {isPending ? (
+        pendingList.length === 0 ? (
+          <div className="text-xs text-[#FFFFFF]/30 italic px-1">
+            Aún no hay comentarios. Escribí debajo para iniciar la conversación.
+          </div>
+        ) : (
+          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+            {pendingList.map((html, idx) => (
+              <div
+                key={idx}
+                className="rounded-xl px-3.5 py-2.5 border bg-[#F5A623]/8 border-[#F5A623]/20"
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-bold truncate text-[#F5A623]">
+                      {currentUserNombre}
+                    </span>
+                    <span className="text-[10px] text-[#F5A623]/70">se enviará al crear la tarea</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePending(idx)}
+                    className="p-1 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    title="Quitar comentario"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+                <RichTextViewer html={html} className="text-xs" />
+              </div>
+            ))}
+          </div>
+        )
+      ) : loading ? (
         <div className="text-xs text-[#FFFFFF]/30 italic px-1">Cargando…</div>
       ) : comments.length === 0 ? (
         <div className="text-xs text-[#FFFFFF]/30 italic px-1">

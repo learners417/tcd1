@@ -192,6 +192,7 @@ export default function TasksPipeline({ currentAdminId, teamMembers, clientes }:
 
   async function handleSave(data: Parameters<typeof createAdminTarea>[0] & { status: AdminTareaStatus }) {
     const adminNombre = teamMembers.find(m => m.id === currentAdminId)?.nombre ?? 'El equipo';
+    let created: AdminTarea | undefined;
     if (editingTarea) {
       await updateAdminTarea(editingTarea.id, data);
       toast.success('Tarea actualizada');
@@ -199,7 +200,7 @@ export default function TasksPipeline({ currentAdminId, teamMembers, clientes }:
         notificarTareaAsignada(data.asignado_a, data.titulo, adminNombre).catch(() => null);
       }
     } else {
-      await createAdminTarea({ ...data, creado_por: currentAdminId });
+      created = await createAdminTarea({ ...data, creado_por: currentAdminId });
       toast.success('Tarea creada');
       if (data.asignado_a && data.asignado_a !== currentAdminId) {
         notificarTareaAsignada(data.asignado_a, data.titulo, adminNombre).catch(() => null);
@@ -207,6 +208,7 @@ export default function TasksPipeline({ currentAdminId, teamMembers, clientes }:
     }
     await cargar();
     setEditingTarea(null);
+    return created;
   }
 
   function handleDelete(id: string) {

@@ -11,8 +11,14 @@ import {
 } from '../../lib/adminTasks';
 
 interface TaskAttachmentsProps {
-  tareaId: string;
+  tareaId?: string;
   currentUserId: string;
+  /**
+   * Modo "pendiente": cuando no hay tareaId todavía (creación), los archivos
+   * se mantienen en memoria local y luego el padre los sube tras crear la tarea.
+   */
+  pendingFiles?: File[];
+  onPendingFilesChange?: (files: File[]) => void;
 }
 
 function formatSize(bytes: number | null): string {
@@ -30,15 +36,25 @@ function getFileIcon(mime: string | null) {
   return FileIcon;
 }
 
-export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachmentsProps) {
+export default function TaskAttachments({
+  tareaId,
+  currentUserId,
+  pendingFiles,
+  onPendingFilesChange,
+}: TaskAttachmentsProps) {
+  const isPending = !tareaId;
   const [adjuntos, setAdjuntos] = useState<TareaAdjunto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isPending);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
+    if (!tareaId) {
+      setLoading(false);
+      return;
+    }
     let alive = true;
     setLoading(true);
     fetchTareaAdjuntos(tareaId)
@@ -54,6 +70,23 @@ export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachme
   async function handleFiles(files: FileList | File[]) {
     const list = Array.from(files);
     if (list.length === 0) return;
+
+    if (isPending) {
+      const valid: File[] = [];
+      for (const file of list) {
+        if (file.size > MAX_ATTACHMENT_BYTES) {
+          toast.error(`"${file.name}" supera los 25 MB`);
+          continue;
+        }
+        valid.push(file);
+      }
+      if (valid.length > 0 && onPendingFilesChange) {
+        onPendingFilesChange([...(pendingFiles ?? []), ...valid]);
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setUploading(true);
     try {
       for (const file of list) {
@@ -62,7 +95,7 @@ export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachme
           continue;
         }
         try {
-          const adj = await uploadTareaAdjunto({ tarea_id: tareaId, autor_id: currentUserId, file });
+          const adj = await uploadTareaAdjunto({ tarea_id: tareaId!, autor_id: currentUserId, file });
           setAdjuntos(prev => [adj, ...prev]);
           toast.success(`"${file.name}" subido`);
         } catch (err) {
@@ -74,6 +107,13 @@ export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachme
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  }
+
+  function handleRemovePending(index: number) {
+    if (!onPendingFilesChange) return;
+    const next = [...(pendingFiles ?? [])];
+    next.splice(index, 1);
+    onPendingFilesChange(next);
   }
 
   async function handleDownload(adj: TareaAdjunto) {
@@ -101,20 +141,57 @@ export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachme
     }
   }
 
+  const pendingList = pendingFiles ?? [];
+  const totalCount = isPending ? pendingList.length : adjuntos.length;
+
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2 text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider">
         <Paperclip className="w-3.5 h-3.5" />
         Archivos
-        {adjuntos.length > 0 && (
+        {totalCount > 0 && (
           <span className="text-[10px] bg-[#F5A623]/15 text-[#F5A623] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
-            {adjuntos.length}
+            {totalCount}
           </span>
         )}
       </div>
 
-      {/* Lista */}
-      {loading ? (
+      {/* Lista de pendientes (modo creación) */}
+      {isPending && pendingList.length > 0 && (
+        <div className="space-y-1.5">
+          {pendingList.map((file, idx) => {
+            const Icon = getFileIcon(file.type);
+            return (
+              <div
+                key={`${file.name}-${idx}`}
+                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-[#F5A623]/30 transition-colors"
+              >
+                <div className="w-8 h-8 shrink-0 rounded-md bg-[#F5A623]/10 text-[#F5A623] flex items-center justify-center">
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-[#FFFFFF] truncate">{file.name}</div>
+                  <div className="text-[10px] text-[#FFFFFF]/40 flex items-center gap-2">
+                    <span>{formatSize(file.size)}</span>
+                    <span className="text-[#F5A623]/70">· se subirá al crear la tarea</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemovePending(idx)}
+                  className="p-1.5 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  title="Quitar"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Lista existente (modo edición) */}
+      {!isPending && (loading ? (
         <div className="text-xs text-[#FFFFFF]/30 italic px-1">Cargando…</div>
       ) : adjuntos.length > 0 && (
         <div className="space-y-1.5">
@@ -159,7 +236,7 @@ export default function TaskAttachments({ tareaId, currentUserId }: TaskAttachme
             );
           })}
         </div>
-      )}
+      ))}
 
       {/* Dropzone */}
       <label
