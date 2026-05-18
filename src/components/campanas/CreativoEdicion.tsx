@@ -112,13 +112,20 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
           : undefined,
       );
 
-      // Resize a las dimensiones EXACTAS del original — el modelo respeta el
-      // ratio pero no garantiza pixeles identicos.
+      // Resize a las dimensiones EXACTAS del original. Usamos 'cover' porque
+      // OpenAI solo acepta 1024x1024, 1024x1536 y 1536x1024 — formatos como
+      // 4:5 (0.8) caen al preset 2:3 (0.667), mas vertical. Con 'contain' eso
+      // generaba bandas oscuras a los costados que hacian ver el resultado mas
+      // finito que el original. 'cover' recorta minimamente los bordes donde
+      // el modelo extendio el canvas (no hay contenido critico ahi porque la
+      // composicion sigue a la base) y devuelve la imagen exactamente con el
+      // tamano del original sin bandas.
       const resized = await resizeBase64ToExact(
         aiResult.imageBase64,
         aiResult.mimeType,
         baseImage.width,
         baseImage.height,
+        'cover',
       );
 
       setResult({
