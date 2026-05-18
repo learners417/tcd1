@@ -18,6 +18,7 @@ import { notificarTareaAsignada } from '../../../lib/notifications';
 import { toast } from 'sonner';
 import TaskCard from './TaskCard';
 import { getTeamColor, getInitials, UNASSIGNED_COLOR } from '../../../lib/teamColors';
+import { parseDateLocal } from '../../../lib/dateUtils';
 
 interface TaskByPersonViewProps {
   tareas: AdminTarea[];
@@ -51,7 +52,7 @@ function startOfDay(d: Date): Date {
 
 function getBucket(t: AdminTarea): Bucket {
   if (!t.fecha_vencimiento) return 'sinfecha';
-  const fv = startOfDay(new Date(t.fecha_vencimiento));
+  const fv = startOfDay(parseDateLocal(t.fecha_vencimiento));
   const today = startOfDay(new Date());
   const diff = Math.round((fv.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   if (diff < 0) return t.status === 'completadas' ? 'sinfecha' : 'vencidas';
@@ -123,8 +124,8 @@ function PersonColumn({
     // Cada bucket: ordenar por fecha asc
     for (const k of BUCKET_ORDER) {
       map[k].sort((a, b) => {
-        const av = a.fecha_vencimiento ? new Date(a.fecha_vencimiento).getTime() : Infinity;
-        const bv = b.fecha_vencimiento ? new Date(b.fecha_vencimiento).getTime() : Infinity;
+        const av = a.fecha_vencimiento ? parseDateLocal(a.fecha_vencimiento).getTime() : Infinity;
+        const bv = b.fecha_vencimiento ? parseDateLocal(b.fecha_vencimiento).getTime() : Infinity;
         return av - bv;
       });
     }

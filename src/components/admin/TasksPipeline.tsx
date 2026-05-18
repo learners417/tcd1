@@ -22,6 +22,7 @@ import {
   archivarTodasCompletadas,
 } from '../../lib/adminTasks';
 import { notificarTareaAsignada } from '../../lib/notifications';
+import { parseDateLocal } from '../../lib/dateUtils';
 
 interface TasksPipelineProps {
   currentAdminId: string;
@@ -103,13 +104,13 @@ export default function TasksPipeline({ currentAdminId, teamMembers, clientes }:
 
       if (filters.vencidas) {
         if (!t.fecha_vencimiento) return false;
-        if (new Date(t.fecha_vencimiento) >= now) return false;
+        if (parseDateLocal(t.fecha_vencimiento) >= now) return false;
         if (t.status === 'completadas') return false;
       }
 
       if (filters.estaSemana) {
         if (!t.fecha_vencimiento) return false;
-        const fv = new Date(t.fecha_vencimiento);
+        const fv = parseDateLocal(t.fecha_vencimiento);
         if (fv < wkStart || fv > wkEnd) return false;
       }
 
@@ -238,7 +239,14 @@ export default function TasksPipeline({ currentAdminId, teamMembers, clientes }:
     }
   }
 
-  const overdueCount = tareasHoy.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date()).length;
+  const overdueCount = tareasHoy.filter(t => {
+    if (!t.fecha_vencimiento) return false;
+    const fv = parseDateLocal(t.fecha_vencimiento);
+    fv.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return fv < today;
+  }).length;
 
   return (
     <div className="space-y-5 w-full max-w-full overflow-x-hidden">

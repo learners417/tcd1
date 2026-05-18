@@ -15,6 +15,7 @@ import {
 } from '../../../lib/supabase';
 import CustomSelect from '../../CustomSelect';
 import { getTeamColor, getInitials, STATUS_COLORS, PRIORITY_BG, UNASSIGNED_COLOR } from '../../../lib/teamColors';
+import { parseDateLocal } from '../../../lib/dateUtils';
 
 interface TaskListViewProps {
   tareas: AdminTarea[];
@@ -65,8 +66,8 @@ export default function TaskListView({
         case 'prioridad': r = PRIORIDAD_RANK[a.prioridad] - PRIORIDAD_RANK[b.prioridad]; break;
         case 'status':    r = ADMIN_TAREA_STATUSES.indexOf(a.status) - ADMIN_TAREA_STATUSES.indexOf(b.status); break;
         case 'fecha': {
-          const av = a.fecha_vencimiento ? new Date(a.fecha_vencimiento).getTime() : Infinity;
-          const bv = b.fecha_vencimiento ? new Date(b.fecha_vencimiento).getTime() : Infinity;
+          const av = a.fecha_vencimiento ? parseDateLocal(a.fecha_vencimiento).getTime() : Infinity;
+          const bv = b.fecha_vencimiento ? parseDateLocal(b.fecha_vencimiento).getTime() : Infinity;
           r = av - bv;
           break;
         }
@@ -129,11 +130,14 @@ export default function TaskListView({
           </thead>
           <tbody>
             {sorted.map(t => {
-              const isOverdue = t.fecha_vencimiento
-                && new Date(t.fecha_vencimiento) < new Date()
-                && t.status !== 'completadas';
-              const fecha = t.fecha_vencimiento
-                ? new Date(t.fecha_vencimiento).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+              const fvLocal = t.fecha_vencimiento ? parseDateLocal(t.fecha_vencimiento) : null;
+              const todayStart = new Date();
+              todayStart.setHours(0, 0, 0, 0);
+              const fvStart = fvLocal ? new Date(fvLocal) : null;
+              if (fvStart) fvStart.setHours(0, 0, 0, 0);
+              const isOverdue = !!fvStart && fvStart < todayStart && t.status !== 'completadas';
+              const fecha = fvLocal
+                ? fvLocal.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
                 : null;
               const yoSoyCreadorYNoAsignado =
                 t.creado_por === currentUserId && t.asignado_a !== currentUserId && !!t.asignado_a;

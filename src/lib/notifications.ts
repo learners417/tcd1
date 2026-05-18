@@ -48,6 +48,27 @@ function limpiarCola(): void {
 
 // ─── Función core ───────────────────────────────────────────────────────────────
 
+// La tabla `notificaciones` tiene RLS con políticas SELECT/UPDATE propias pero
+// SIN política INSERT — por diseño se insertan vía la función SECURITY DEFINER
+// `crear_notificacion`, definida en la migración admin_roles_notifications.sql.
+// Hacer .insert() directo con el anon key es silenciosamente rechazado por RLS.
+
+async function insertarNotificacionRPC(input: CrearNotificacionInput): Promise<{ ok: boolean; error?: unknown }> {
+  if (!supabase) return { ok: false, error: new Error('supabase not ready') };
+  const { error } = await supabase.rpc('crear_notificacion', {
+    p_usuario_id: input.usuario_id,
+    p_tipo: input.tipo,
+    p_titulo: input.titulo,
+    p_descripcion: input.descripcion ?? null,
+    p_accion_url: input.accion_url ?? null,
+  });
+  if (error) {
+    console.error('[notifications] crear_notificacion RPC error:', error);
+    return { ok: false, error };
+  }
+  return { ok: true };
+}
+
 export async function crearNotificacion(input: CrearNotificacionInput): Promise<void> {
   if (!isSupabaseReady() || !supabase) {
     guardarEnCola(input);
@@ -57,29 +78,20 @@ export async function crearNotificacion(input: CrearNotificacionInput): Promise<
   // Flush any queued notifications first
   const cola = leerColaOffline();
   if (cola.length > 0) {
-    const inserciones = cola.map((item) => ({
-      usuario_id: item.usuario_id,
-      tipo: item.tipo,
-      titulo: item.titulo,
-      descripcion: item.descripcion ?? null,
-      accion_url: item.accion_url ?? null,
-      leida: false,
-    }));
-
-    await supabase.from('notificaciones').insert(inserciones);
-    limpiarCola();
+    const pendientes: CrearNotificacionInput[] = [];
+    for (const item of cola) {
+      const res = await insertarNotificacionRPC(item);
+      if (!res.ok) pendientes.push(item);
+    }
+    if (pendientes.length === 0) {
+      limpiarCola();
+    } else {
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(pendientes));
+    }
   }
 
-  const { error } = await supabase.from('notificaciones').insert({
-    usuario_id: input.usuario_id,
-    tipo: input.tipo,
-    titulo: input.titulo,
-    descripcion: input.descripcion ?? null,
-    accion_url: input.accion_url ?? null,
-    leida: false,
-  });
-
-  if (error) {
+  const res = await insertarNotificacionRPC(input);
+  if (!res.ok) {
     guardarEnCola(input);
   }
 }

@@ -20,6 +20,7 @@ import {
   ADMIN_TAREA_PRIORIDAD_LABELS,
 } from '../../../lib/supabase';
 import { getTeamColor, getInitials, UNASSIGNED_COLOR, PRIORITY_BG } from '../../../lib/teamColors';
+import { parseDateLocal } from '../../../lib/dateUtils';
 
 interface TaskCardProps {
   tarea: AdminTarea;
@@ -60,7 +61,7 @@ function stripHtml(html: string): string {
 }
 
 function formatRelative(date: string): { label: string; overdue: boolean } {
-  const target = new Date(date);
+  const target = parseDateLocal(date);
   const now = new Date();
   target.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
