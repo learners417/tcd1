@@ -28,8 +28,8 @@ import {
   getUserIdFromJwt,
   getAdminClient,
   grantCreditsFromPayPal,
-} from '../../_lib/credits-server';
-import { captureOrder } from '../../_lib/paypal';
+} from '../../_lib/credits-server.js';
+import { captureOrder } from '../../_lib/paypal.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {

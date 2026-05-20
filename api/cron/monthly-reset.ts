@@ -14,7 +14,7 @@
  * a las rutas /api/cron/* si se configura CRON_SECRET en el dashboard.
  */
 
-import { getAdminClient } from '../_lib/credits-server';
+import { getAdminClient } from '../_lib/credits-server.js';
 
 export default async function handler(req: any, res: any) {
   // Vercel Cron auth: rechaza requests no-cron si CRON_SECRET esta configurado

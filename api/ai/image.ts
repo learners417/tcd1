@@ -36,7 +36,7 @@ import {
   extractJwt,
   getUserIdFromJwt,
   consumeCreditServer,
-} from '../_lib/credits-server';
+} from '../_lib/credits-server.js';
 
 // Vercel function config · maxDuration aplica solo si tu plan lo soporta.
 // Hobby = max 60s · Pro = hasta 300s · Enterprise = hasta 900s.

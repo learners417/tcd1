@@ -22,8 +22,8 @@ import {
   extractJwt,
   getUserIdFromJwt,
   getAdminClient,
-} from '../../_lib/credits-server';
-import { createOrder } from '../../_lib/paypal';
+} from '../../_lib/credits-server.js';
+import { createOrder } from '../../_lib/paypal.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {

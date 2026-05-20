@@ -22,8 +22,8 @@ import {
   getAdminClient,
   grantCreditsFromPayPal,
   refundPayPalOrder,
-} from '../../_lib/credits-server';
-import { verifyWebhookSignature, extractPayPalHeaders } from '../../_lib/paypal';
+} from '../../_lib/credits-server.js';
+import { verifyWebhookSignature, extractPayPalHeaders } from '../../_lib/paypal.js';
 
 interface PayPalWebhookEvent {
   id: string;
