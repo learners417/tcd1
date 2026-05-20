@@ -95,6 +95,52 @@ interface OpenAIImageResponse {
   error?: string;
 }
 
+/**
+ * Clasifica el error del endpoint /api/ai/image en un mensaje accionable.
+ * Distingue crash/timeout de Vercel (FUNCTION_INVOCATION_FAILED) de errores
+ * reales de OpenAI, payload, rate-limit y red. Extrae el request ID de Vercel
+ * cuando esta presente para que el usuario lo pueda ir a buscar a los logs.
+ */
+function classifyImageError(
+  status: number,
+  rawText: string,
+  parsed: (OpenAIImageResponse & { code?: string }) | null,
+): string {
+  // Vercel crash o timeout — el handler nunca respondio.
+  // Formato tipico: "A server error has occurred FUNCTION_INVOCATION_FAILED gru1::p2dwh-1779300347050-387cd0aa7d4b"
+  if (rawText.includes('FUNCTION_INVOCATION_FAILED')) {
+    const reqIdMatch = rawText.match(/[a-z0-9]+::([a-z0-9-]+)/i);
+    const reqId = reqIdMatch?.[1];
+    return reqId
+      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs · req ${reqId}`
+      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs.';
+  }
+
+  if (status === 413) {
+    return 'Las imágenes de referencia exceden el límite del servidor (4.5MB). Saca alguna o usá imágenes más livianas.';
+  }
+
+  if (status === 429) {
+    return 'Demasiados pedidos a OpenAI (rate-limit). Esperá 30s y volvé a probar.';
+  }
+
+  if (status === 401) {
+    return 'Sesión vencida — refrescá la página y volvé a entrar.';
+  }
+
+  // Errores con body JSON estructurado del endpoint
+  if (parsed?.error) {
+    return parsed.error;
+  }
+
+  // 5xx sin clasificar
+  if (status >= 500) {
+    return `Error del servidor (HTTP ${status}). ${rawText.slice(0, 200) || 'Sin detalle.'}`;
+  }
+
+  return `HTTP ${status}: ${rawText.slice(0, 200) || 'sin detalle'}`;
+}
+
 async function tryOpenAI(
   prompt: string,
   referenceImages: ReferenceImages | undefined,
@@ -145,7 +191,7 @@ async function tryOpenAI(
       throw new InsufficientCreditsError(parsed?.error || 'Sin creditos');
     }
 
-    throw new Error(parsed?.error || `HTTP ${resp.status}: ${text.slice(0, 200)}`);
+    throw new Error(classifyImageError(resp.status, text, parsed));
   }
 
   const data = await resp.json() as OpenAIImageResponse;
@@ -321,10 +367,13 @@ export async function generateImageWithFallback(
       /* attemptOffset */ 2,
     );
   } catch (geminiError) {
-    const gMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
-    throw new Error(
-      `Todos los modelos de imagen fallaron. OpenAI: ${openaiError.message} | Gemini: ${gMsg}`,
-    );
+    // Gemini queda como fallback silencioso. Si tambien falla, el usuario solo
+    // ve el error de OpenAI (que es el flujo primario) · el de Gemini va a la consola.
+    if (typeof console !== 'undefined') {
+      const gMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
+      console.error('[campanasImageGen] Fallback Gemini tambien fallo:', gMsg);
+    }
+    throw new Error(openaiError.message);
   }
 }
 

@@ -38,6 +38,10 @@ import {
   consumeCreditServer,
 } from '../_lib/credits-server';
 
+// Vercel function config · maxDuration aplica solo si tu plan lo soporta.
+// Hobby = max 60s · Pro = hasta 300s · Enterprise = hasta 900s.
+export const config = { maxDuration: 60 };
+
 interface ReferenceImage {
   base64: string;
   mimeType: string;
@@ -82,12 +86,32 @@ function isReferenceImage(v: unknown): v is ReferenceImage {
 }
 
 export default async function handler(req: any, res: any) {
+  // Wrapper global · captura CUALQUIER excepcion no manejada para evitar que
+  // Vercel devuelva FUNCTION_INVOCATION_FAILED opaco. Loguea con prefijo
+  // [/api/ai/image] para filtrar facil en Vercel Logs.
+  try {
+    return await handleImageRequest(req, res);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error('[/api/ai/image] UNCAUGHT', { msg, stack });
+    if (!res.headersSent) {
+      return res.status(500).json({
+        error: `Unhandled server error: ${msg}`,
+        code: 'UNHANDLED',
+      });
+    }
+  }
+}
+
+async function handleImageRequest(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
+    console.error('[/api/ai/image] OPENAI_API_KEY missing from env');
     return res.status(500).json({ error: 'OPENAI_API_KEY not configured' });
   }
 
@@ -143,6 +167,7 @@ export default async function handler(req: any, res: any) {
           code: 'INSUFFICIENT_CREDITS',
         });
       }
+      console.error('[/api/ai/image] consumeCreditServer failed', { msg, userId });
       return res.status(500).json({ error: `Credit check failed: ${msg}` });
     }
   }
@@ -192,6 +217,13 @@ export default async function handler(req: any, res: any) {
 
     if (!openaiRes.ok) {
       const text = await openaiRes.text();
+      console.error('[/api/ai/image] OpenAI returned error', {
+        status: openaiRes.status,
+        body: text.slice(0, 1000),
+        hasRefs,
+        size,
+        quality,
+      });
       // NOTA: el credito YA se consumio. Si OpenAI falla, el cliente debe
       // pedir refund al admin · ver TODO al principio del archivo.
       return res
@@ -215,6 +247,8 @@ export default async function handler(req: any, res: any) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error('[/api/ai/image] OpenAI fetch threw', { msg, stack });
     return res.status(500).json({ error: `Image generation failed: ${msg}` });
   }
 }
