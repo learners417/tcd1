@@ -39,6 +39,9 @@ import {
   type ADNSeccionCodigo,
 } from '../lib/adnSchema';
 import { usePersistedState, setSerializers } from '../lib/usePersistedState';
+import { PAISES, getPaisInfo } from '../lib/vozLocalizada';
+import CustomSelect from '../components/CustomSelect';
+import { toast } from 'sonner';
 
 interface ADNProps {
   perfil: Partial<ProfileV2>;
@@ -192,6 +195,32 @@ export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
     () => new Set(['IRR']),
     setSerializers<ADNSeccionCodigo>(),
   );
+  const [paisLocal, setPaisLocal] = useState<string>(perfil.pais ?? '');
+  const [savingPais, setSavingPais] = useState(false);
+
+  // Mantener el selector sincronizado si el perfil llega despues del primer render.
+  useEffect(() => {
+    if (perfil.pais && perfil.pais !== paisLocal) setPaisLocal(perfil.pais);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perfil.pais]);
+
+  async function guardarPais(nuevo: string) {
+    setPaisLocal(nuevo);
+    if (!isSupabaseReady() || !supabase || !userId) return;
+    setSavingPais(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ pais: nuevo })
+        .eq('id', userId);
+      if (error) throw error;
+      toast.success('Pais guardado · la IA va a adaptar el contenido al dialecto local');
+    } catch {
+      toast.error('No se pudo guardar el pais · probalo de nuevo');
+    } finally {
+      setSavingPais(false);
+    }
+  }
 
   // Cargar outputs de hoja_de_ruta y mapear por adn_field
   useEffect(() => {
@@ -297,6 +326,35 @@ export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
         >
           Ir a la Hoja de Ruta
         </button>
+      </div>
+
+      {/* Pais del profesional — afecta el dialecto del contenido publicable */}
+      <div className="card-panel p-6 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold mb-1">
+              Localizacion
+            </p>
+            <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
+            <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed max-w-xl">
+              Define el dialecto (voseo o tuteo) que la IA usa al generar tu landing, anuncios,
+              copies y guiones · para que tu avatar de cliente lo sienta natural. La voz del Coach
+              IA hacia vos no cambia.
+            </p>
+          </div>
+          {paisLocal && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[rgba(245,166,35,0.2)] bg-[#F5A623]/10 text-[#F5A623] shrink-0 uppercase tracking-wider">
+              {getPaisInfo(paisLocal)?.dialecto ?? 'tuteo'}
+            </span>
+          )}
+        </div>
+        <CustomSelect
+          value={paisLocal}
+          onChange={guardarPais}
+          placeholder={savingPais ? 'Guardando…' : 'Elegi tu pais'}
+          options={PAISES.map((p) => ({ value: p.codigo, label: `${p.nombre} (${p.dialecto})` }))}
+          className="w-full"
+        />
       </div>
 
       {/* Secciones */}
