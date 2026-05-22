@@ -48,6 +48,12 @@ interface ManualNegocioProps {
   perfil: Partial<ProfileV2>;
   userId?: string;
   setCurrentPage: (page: string) => void;
+  /**
+   * Notifica al contenedor (App.tsx) que cambiaron campos del perfil para
+   * que sincronice su estado local. Sin esto, el guardado va a DB pero el
+   * cache en memoria sigue viejo.
+   */
+  onProfileFieldUpdate?: (fields: Record<string, unknown>) => void;
 }
 
 // ── Section definitions ──────────────────────────────────────────────────────
@@ -391,7 +397,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export default function ManualNegocio({ perfil, userId, setCurrentPage }: ManualNegocioProps) {
+export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ManualNegocioProps) {
   const [expanded, setExpanded] = usePersistedState<Set<string>>(
     'tcd_manual_expanded',
     () => new Set([SECTIONS[0].id]),
@@ -409,6 +415,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage }: Manual
 
   async function guardarPais(nuevo: string) {
     setPaisLocal(nuevo);
+    onProfileFieldUpdate?.({ pais: nuevo });
     if (!isSupabaseReady() || !supabase || !userId) return;
     setSavingPais(true);
     try {
@@ -417,9 +424,14 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage }: Manual
         .update({ pais: nuevo })
         .eq('id', userId);
       if (error) throw error;
-      toast.success('Pais guardado · la IA va a adaptar el contenido al dialecto local');
-    } catch {
-      toast.error('No se pudo guardar el pais · probalo de nuevo');
+      toast.success('Pais guardado · la IA va a adaptar el contenido al tono local');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '';
+      toast.error(
+        msg.includes('column') && msg.includes('pais')
+          ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN pais text'
+          : 'No se pudo guardar el pais · probalo de nuevo',
+      );
     } finally {
       setSavingPais(false);
     }

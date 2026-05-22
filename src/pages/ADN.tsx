@@ -47,6 +47,13 @@ interface ADNProps {
   perfil: Partial<ProfileV2>;
   userId?: string;
   setCurrentPage: (page: string) => void;
+  /**
+   * Notifica al contenedor (App.tsx) que cambiaron campos del perfil para que
+   * sincronice su estado local. Sin esto, el guardado va a DB pero el cache
+   * en memoria sigue viejo · al navegar afuera y volver, el campo recien
+   * guardado se ve vacio.
+   */
+  onProfileFieldUpdate?: (fields: Record<string, unknown>) => void;
 }
 
 const ICONOS_SECCION: Record<ADNSeccionCodigo, LucideIcon> = {
@@ -188,7 +195,7 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
+export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
   const [seccionesExpandidas, setSeccionesExpandidas] = usePersistedState<Set<ADNSeccionCodigo>>(
     'tcd_adn_secciones',
@@ -206,6 +213,10 @@ export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
 
   async function guardarPais(nuevo: string) {
     setPaisLocal(nuevo);
+    // Optimista: actualizamos el estado del contenedor para que al volver a
+    // la pagina el selector siga mostrando el valor elegido (sin esto, la
+    // navegacion descarta el cambio porque App.tsx tiene un cache viejo).
+    onProfileFieldUpdate?.({ pais: nuevo });
     if (!isSupabaseReady() || !supabase || !userId) return;
     setSavingPais(true);
     try {
@@ -214,9 +225,14 @@ export default function ADN({ perfil, userId, setCurrentPage }: ADNProps) {
         .update({ pais: nuevo })
         .eq('id', userId);
       if (error) throw error;
-      toast.success('Pais guardado · la IA va a adaptar el contenido al dialecto local');
-    } catch {
-      toast.error('No se pudo guardar el pais · probalo de nuevo');
+      toast.success('Pais guardado · la IA va a adaptar el contenido al tono local');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '';
+      toast.error(
+        msg.includes('column') && msg.includes('pais')
+          ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN pais text'
+          : 'No se pudo guardar el pais · probalo de nuevo',
+      );
     } finally {
       setSavingPais(false);
     }
