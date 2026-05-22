@@ -1,5 +1,6 @@
 import type { ProfileV2 } from '../supabase';
 import type { AdnFieldKey } from './types';
+import { getPaisInfo, instruccionesDialecto } from '../vozLocalizada';
 
 /**
  * Mapper: nomenclatura simbólica del brief (IRRavatar_demografia, NEGoferta_mid)
@@ -98,8 +99,19 @@ export function buildAdnContext(
   perfil: Partial<ProfileV2>,
   fields: AdnFieldKey[],
 ): string {
-  if (fields.length === 0) return '(sin campos requeridos)';
-  return fields.map((f) => `- ${f}: ${FIELD_MAP[f](perfil)}`).join('\n');
+  const paisInfo = getPaisInfo(perfil.pais);
+  const paisLinea = paisInfo
+    ? `- País del profesional: ${paisInfo.nombre} (dialecto del contenido publicable: ${paisInfo.dialecto})`
+    : '- País del profesional: no especificado';
+
+  const camposLista = fields.length === 0
+    ? '(sin campos requeridos)'
+    : fields.map((f) => `- ${f}: ${FIELD_MAP[f](perfil)}`).join('\n');
+
+  // El bloque de dialecto SOLO aplica al contenido publicable (reels · stories ·
+  // carruseles · copies que el sanador publicará). La voz interna del entrenador
+  // hablando con el sanador queda regida por voz-javo.ts (voseo universal).
+  return `${paisLinea}\n${camposLista}\n\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican SOLO al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.\n- Tu voz como entrenador hablándole AL sanador queda en voseo (la voz Javo) — no cambies eso.\n- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
 }
 
 export function getNombreSanador(perfil: Partial<ProfileV2>): string {

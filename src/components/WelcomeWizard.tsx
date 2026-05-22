@@ -3,6 +3,8 @@ import { ArrowRight, Eye, EyeOff, Loader2, CheckCircle2, Sparkles, Map, Bot, Mes
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../lib/supabase';
 import { toast } from 'sonner';
+import { PAISES } from '../lib/vozLocalizada';
+import CustomSelect from './CustomSelect';
 
 interface WelcomeWizardProps {
   profile: Profile;
@@ -36,6 +38,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   // Step 2 — profile
   const [especialidad, setEspecialidad] = useState(profile.especialidad ?? '');
   const [especialidadOtro, setEspecialidadOtro] = useState('');
+  const [pais, setPais] = useState(profile.pais ?? '');
   const [ingresosMensuales, setIngresosMensuales] = useState('');
   const [horasSemana, setHorasSemana] = useState('');
   const [frustracion, setFrustracion] = useState('');
@@ -73,9 +76,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         : especialidad;
 
       if (supabase) {
-        // Guardar especialidad en perfil
-        if (espFinal) {
-          await supabase.from('profiles').update({ especialidad: espFinal }).eq('id', profile.id);
+        // Guardar especialidad y pais en perfil
+        const update: Record<string, string> = {};
+        if (espFinal) update.especialidad = espFinal;
+        if (pais) update.pais = pais;
+        if (Object.keys(update).length > 0) {
+          await supabase.from('profiles').update(update).eq('id', profile.id);
         }
 
         // Guardar energía y frustración como primera entrada del diario
@@ -249,6 +255,18 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                     className="mt-3 w-full bg-black/40 border border-[#F5A623]/30 rounded-xl px-4 py-2.5 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/60 transition-colors"
                   />
                 )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#FFFFFF]/60 uppercase tracking-wider mb-2">
+                  ¿Desde qué país trabajás? <span className="text-[#FFFFFF]/30 normal-case font-normal">(la IA adapta el dialecto de tus landings y copies)</span>
+                </label>
+                <CustomSelect
+                  value={pais}
+                  onChange={setPais}
+                  placeholder="Elegí tu país"
+                  options={PAISES.map(p => ({ value: p.codigo, label: `${p.nombre} (${p.dialecto})` }))}
+                />
               </div>
 
               <div>

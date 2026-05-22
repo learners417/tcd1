@@ -4,6 +4,7 @@
 import type { ProfileV2 } from './supabase';
 import type { CampanaFormState, AnguloCreativo, TipoCreativo, ObjetivoCampana, EstiloVisual, ImageMode, CustomText, ImageFormat } from './campanasTypes';
 import { ESTILO_VISUAL_OPTIONS, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
+import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
 
 // ─── Contexto ADN del profesional ────────────────────────────────────────────
 
@@ -20,10 +21,16 @@ export function adnContext(perfil: Partial<ProfileV2>): string {
   - LENGUAJE que usa: ${avatar.lenguaje?.join(', ') || 'no definido'}`
     : perfil.avatar_cliente ?? 'no definido';
 
+  const paisInfo = getPaisInfo(perfil.pais);
+  const paisLinea = paisInfo
+    ? `- Pais del profesional: ${paisInfo.nombre} (dialecto del contenido: ${paisInfo.dialecto})`
+    : '- Pais del profesional: no especificado (usar tuteo / espanol neutro)';
+
   return `
 === CONTEXTO DEL SANADOR ===
 - Nombre: ${perfil.nombre ?? 'Sanador'}
 - Especialidad: ${perfil.especialidad ?? 'salud'}
+${paisLinea}
 - Nicho: ${perfil.nicho ?? perfil.adn_nicho ?? 'no definido'}
 - PUV: ${perfil.adn_usp ?? 'no definido'}
 - Posicionamiento: ${perfil.posicionamiento ?? 'no definido'}
@@ -51,6 +58,8 @@ ${avatarStr}
 - Colores: ${perfil.identidad_colores ?? 'no definidos'}
 - Tipografia: ${perfil.identidad_tipografia ?? 'no definida'}
 - Tono de comunicacion: ${perfil.identidad_tono ?? 'no definido'}
+
+${instruccionesDialecto(perfil.pais)}
 `.trim();
 }
 

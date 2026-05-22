@@ -10,6 +10,7 @@ import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funnelCalcs';
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
+import { getPaisInfo } from './vozLocalizada';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,48 @@ function tarea_estrella_actual(tareas: HojaDeRutaItem[]): string {
     : `META ${pendiente.meta_codigo} del Pilar ${pendiente.pilar_numero}`;
 }
 
+/**
+ * Lista breve de las metas ★ ya completadas — útil para que el Coach NO
+ * vuelva a sugerir tareas hechas. Limitamos a 12 entradas para no inflar el
+ * prompt; las más relevantes son las recientes y las del pilar actual.
+ */
+function tareas_completadas_resumen(tareas: HojaDeRutaItem[]): string {
+  const hechas = tareas
+    .filter((t) => t.completada && t.es_estrella)
+    .sort((a, b) => a.pilar_numero - b.pilar_numero);
+  if (hechas.length === 0) return '';
+  const linea = hechas
+    .slice(0, 12)
+    .map((t) => {
+      const pilar = SEED_ROADMAP_V2.find((p) => p.numero === t.pilar_numero);
+      const meta = pilar?.metas.find((m) => m.codigo === t.meta_codigo);
+      return `${t.meta_codigo}${meta ? ` (${meta.titulo})` : ''}`;
+    })
+    .join(' · ');
+  return hechas.length > 12
+    ? `${linea} · y ${hechas.length - 12} más`
+    : linea;
+}
+
+/**
+ * Intenta extraer una PUV ("Ayudo a X a Y sin Z") del texto de adn_nicho
+ * o de cualquier campo grande del ADN. Sirve como fallback cuando la
+ * herramienta P5.2 generó la PUV pero la guardó dentro de adn_nicho en vez
+ * de adn_usp (bug histórico previo al fix de v7).
+ */
+function derivarPuvDeNicho(perfil: Partial<ProfileV2>): string | null {
+  if (perfil.adn_usp && perfil.adn_usp.trim().length > 0) return null;
+  const fuentes = [perfil.adn_nicho, perfil.posicionamiento, perfil.nicho].filter(
+    (v): v is string => typeof v === 'string' && v.trim().length > 0,
+  );
+  for (const fuente of fuentes) {
+    // Patrón clásico de PUV: "Ayudo a [avatar] a [resultado] sin [obstáculo]"
+    const match = fuente.match(/(Ayudo|Ayudamos|Hago que|Acompaño)\s+[^.\n]{20,200}/i);
+    if (match) return match[0].trim();
+  }
+  return null;
+}
+
 function energia_baja_consecutiva(entradas: Partial<DiarioEntradaV2>[]): boolean {
   const ultimas2 = entradas.slice(0, 2);
   return ultimas2.length === 2 && ultimas2.every((e) => (e.energia_nivel ?? 10) < 4);
@@ -86,7 +129,11 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
     : 999;
   const progresoPct = perfil.progreso_porcentaje ?? 0;
   const semaforoColor = semaforo(diasSinDiario, progresoPct);
-  const tareaEstrella = tareasHojaDeRuta.length > 0 ? tarea_estrella_actual(tareasHojaDeRuta) : 'Iniciar el programa';
+  const tareaEstrella = tareasHojaDeRuta.length > 0
+    ? tarea_estrella_actual(tareasHojaDeRuta)
+    : 'No tengo la Hoja de Ruta cargada · preguntale al sanador en qué pilar está antes de sugerir tareas.';
+  const tareasHechas = tareas_completadas_resumen(tareasHojaDeRuta);
+  const puvDerivada = derivarPuvDeNicho(perfil);
 
   // ─── Adaptación por nivel de avatar ────────────────────────────────────────
   const TONO_POR_NIVEL: Record<number, string> = {
@@ -107,6 +154,11 @@ Tu personalidad: directo, cálido, exigente cuando hace falta, nunca condescendi
 Tu objetivo en cada conversación: que el profesional salga con 1 acción concreta para ejecutar en las próximas 24 horas. No 5 acciones. Una.
 
 REGLA CLAVE: Si el usuario pregunta "¿qué hago?" o "¿cuál es mi próximo paso?", respondé con el próximo paso exacto de la Hoja de Ruta (ver TAREA PRIORITARIA ACTUAL). No inventes tareas que no existan en el programa.
+
+REGLA ANTI-DUPLICACIÓN (CRÍTICA): Antes de sugerir trabajar en un campo del ADN ("definí tu PUV" · "trabajá tu nicho" · "armá tu avatar" · etc.) revisá DOS cosas:
+  1. La sección "ADN DEL NEGOCIO" — si el campo ya tiene valor, ESTÁ HECHO. No vuelvas a pedirlo. Si dudás de la calidad del valor, pedile que lo refine, NO que lo cree.
+  2. La sección "META ★ YA COMPLETADAS EN LA HOJA DE RUTA" — esas tareas el sanador ya las tildó. No las mandes de nuevo. Si querés profundizar, decile explícitamente "ya lo tenés hecho · vamos a afinarlo".
+Si mandás a alguien a una tarea ya hecha · perdés credibilidad. Validá siempre el estado real antes de sugerir.
 
 Conocés su ADN completo (campos completados con herramientas IA), sus métricas del embudo de ventas, y su energía de los últimos 7 días. Usá toda esta información para personalizar cada respuesta.
   `.trim();
@@ -167,15 +219,29 @@ ${alertas.length > 0 ? `ALERTAS: ${alertas.map(d => `${d.etapa}: ${d.mensaje}`).
     ? `\n=== ENERGÍA PROMEDIO 7 DÍAS: ${energiaAvg.toFixed(1)}/10 ===${energiaAvg < 5 ? '\n⚠️ ENERGÍA BAJA — abordar esto en la conversación. Preguntar por sueño, alimentación, movimiento.' : ''}`
     : '';
 
+  const paisInfo = getPaisInfo(perfil.pais);
+  const paisLinea = paisInfo
+    ? `País: ${paisInfo.nombre} (dialecto del contenido publicable: ${paisInfo.dialecto})`
+    : 'País: no especificado';
+
+  const puvDerivadaSection = puvDerivada
+    ? `\n=== PUV DERIVADA DEL NICHO (fallback) ===\nEl sanador no tiene aún el campo "adn_usp" cargado · pero dentro de su texto de nicho/posicionamiento se detectó esta PUV: "${puvDerivada}". Considerala COMO HECHA al evaluar si pedirle trabajar la PUV. Si vas a profundizar, decile "ya tenés esta PUV trabajada · te propongo refinarla".`
+    : '';
+
+  const tareasHechasSection = tareasHechas
+    ? `\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n${tareasHechas}\nESTAS METAS ESTÁN HECHAS · no las vuelvas a sugerir como próximo paso. Si querés trabajar sobre ese tema, encuadralo como "refinar lo que ya tenés".`
+    : '\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n(ninguna registrada todavía — o la Hoja de Ruta no se cargó esta sesión · si el sanador menciona que ya hizo algo, creele y NO le mandes a hacerlo de nuevo)';
+
   const CONTEXTO_USUARIO = `
 === DATOS DEL PROFESIONAL ===
 Nombre: ${perfil.nombre ?? 'No especificado'}
 Especialidad: ${perfil.especialidad ?? 'No especificada'}
+${paisLinea}
 Nicho: ${perfil.nicho ?? perfil.adn_nicho ?? 'Aún no definido'}
 Avatar de cliente ideal: ${perfil.avatar_cliente ?? (perfil.adn_avatar ? perfil.adn_avatar.nombre_ficticio : 'Aún no definido')}
 Posicionamiento: ${perfil.posicionamiento ?? 'Aún no definido'}
 Historia de origen: ${perfil.historia_origen ? perfil.historia_origen.substring(0, 200) + '...' : perfil.historia_300 ? perfil.historia_300.substring(0, 200) + '...' : 'Aún no documentada'}
-${ADN_SECTION}
+${ADN_SECTION}${puvDerivadaSection}${tareasHechasSection}
 === ESTADO DEL PROGRAMA ===
 Día del programa: ${perfil.dia_programa ?? 1} de 90
 Pilar actual: ${perfil.pilar_actual ?? 0} de 14

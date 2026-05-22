@@ -29,6 +29,12 @@ export interface Profile {
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
+  /**
+   * Código ISO-like del país del profesional (ver src/lib/vozLocalizada.ts).
+   * Se usa para que la IA adapte el dialecto (voseo/tuteo) del contenido
+   * publicable (landings, anuncios, copies) al país del sanador.
+   */
+  pais?: string;
 }
 
 export interface AdminNote {

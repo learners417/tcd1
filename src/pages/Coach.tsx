@@ -26,6 +26,7 @@ import {
   isSupabaseReady,
   agentSkillProgressRepo,
   type PilarId,
+  type HojaDeRutaItem,
 } from '../lib/supabase';
 import {
   loadCoachState,
@@ -98,6 +99,9 @@ export default function Coach({ userId }: { userId?: string }) {
   const lastSummaryAtRef = useRef<number>(0);
   const nivelesEntrenadoresRef = useRef<Record<string, number>>({});
   const alcanzoNivel4Ref = useRef<boolean>(false);
+  // Estado real de la Hoja de Ruta · alimenta el system prompt para que el
+  // Coach sepa qué metas ★ están hechas y no las sugiera de nuevo.
+  const tareasHojaDeRutaRef = useRef<HojaDeRutaItem[]>([]);
 
   // ─── Carga inicial: state · perfil · niveles entrenadores ──────────────────
   useEffect(() => {
@@ -169,6 +173,18 @@ export default function Coach({ userId }: { userId?: string }) {
       .maybeSingle()
       .then(({ data }) => {
         if (data) supabaseProfileRef.current = data as Record<string, unknown>;
+      });
+  }, [userId]);
+
+  // ─── Hoja de Ruta fresca desde Supabase (estado real de las metas) ────────
+  useEffect(() => {
+    if (!userId || !isSupabaseReady() || !supabase) return;
+    supabase
+      .from('hoja_de_ruta')
+      .select('*')
+      .eq('usuario_id', userId)
+      .then(({ data }) => {
+        if (data) tareasHojaDeRutaRef.current = data as HojaDeRutaItem[];
       });
   }, [userId]);
 
@@ -308,6 +324,7 @@ export default function Coach({ userId }: { userId?: string }) {
           baseDeConocimiento: knowledgeBaseRef.current || undefined,
           coachHistorySummary: summaryRef.current ?? undefined,
           nivelesEntrenadoresTexto: nivelesTexto,
+          tareasHojaDeRuta: tareasHojaDeRutaRef.current,
         });
 
         let fullResponse = '';

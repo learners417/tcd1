@@ -459,6 +459,31 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     };
   }
 
+  // ─── Parse P5.2 "Definidor de Nicho y PUV" output ──────────────────────
+  // La herramienta H-P5.2 genera la descripcion del nicho + 3 variantes de
+  // PUV ("Ayudo a [avatar] a [resultado] sin [obstaculo]"). El campo
+  // adn_field declarado es solo adn_nicho · pero el documento maestro v7
+  // dice que la PUV vive en adn_usp. Antes de este fix · la PUV quedaba
+  // sepultada dentro de adn_nicho y el Coach pensaba que estaba vacia ·
+  // mandando al sanador a rehacer una tarea ya hecha (caso Sol).
+  function parseNichoYPuv(texto: string): { adn_nicho: string; adn_usp?: string } {
+    // 1) PUV recomendada por la IA (formato "GANADORA RECOMENDADA: ...")
+    const ganadora = texto.match(/GANADORA\s+RECOMENDADA\s*:?\s*([\s\S]*?)(?=\n\s*(?:C[OÓ]MO|VARIANTE|---|$))/i);
+    // 2) Primera variante "Ayudo a [avatar] a [resultado] sin [obstaculo]"
+    const ayudoA = texto.match(/Ayudo(?:mos)?\s+a\s+[^.\n]{15,250}/i);
+    // 3) Linea "VARIANTE 1:" si esta presente
+    const variante1 = texto.match(/VARIANTE\s*1\s*:?\s*([^\n]{15,250})/i);
+
+    const puv = (ganadora?.[1] ?? variante1?.[1] ?? ayudoA?.[0] ?? '')
+      .trim()
+      .replace(/^["'\s]+|["'\s]+$/g, '');
+
+    return {
+      adn_nicho: texto,
+      ...(puv.length > 0 ? { adn_usp: puv } : {}),
+    };
+  }
+
   // ─── Save ADN output from herramienta task ────────────────────────────
   const handleSaveADN = useCallback((pilarNum: number, meta: RoadmapMeta, outputTexto: string) => {
     const key = `${pilarNum}-${meta.codigo}`;
@@ -498,6 +523,10 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
             .filter(l => l.length > 0);
           profileUpdate = { [meta.adn_field]: items };
+        } else if (meta.adn_field === 'adn_nicho' && meta.codigo === 'P5.2') {
+          // P5.2 genera nicho + 3 PUVs · guardamos ambos campos para que el
+          // Coach IA no vuelva a mandar a definir la PUV (caso Sol).
+          profileUpdate = parseNichoYPuv(outputTexto);
         } else {
           profileUpdate = { [meta.adn_field]: outputTexto };
         }

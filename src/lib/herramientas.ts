@@ -3,6 +3,7 @@
  * Grupos A–E del Método CLÍNICA
  */
 import type { ProfileV2 } from './supabase';
+import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -44,14 +45,22 @@ export const EMOJI_TO_ICON: Record<string, string> = {
 // ─── Helpers de prompt ────────────────────────────────────────────────────────
 
 function contextoBase(perfil: Partial<ProfileV2>): string {
+  const paisInfo = getPaisInfo(perfil.pais);
+  const paisLinea = paisInfo
+    ? `- País del profesional: ${paisInfo.nombre} (dialecto del contenido: ${paisInfo.dialecto})`
+    : '- País del profesional: no especificado (usar español neutro / tuteo por defecto)';
+
   return `
 Contexto del profesional de salud:
 - Nombre: ${perfil.nombre ?? 'el profesional'}
 - Especialidad: ${perfil.especialidad ?? 'salud'}
+${paisLinea}
 - Nicho: ${perfil.nicho ?? 'no definido aún'}
 - Avatar de cliente ideal: ${perfil.avatar_cliente ?? 'no definido aún'}
 - Posicionamiento: ${perfil.posicionamiento ?? 'no definido aún'}
 - Historia de origen: ${perfil.historia_origen ?? 'no cargada aún'}
+
+${instruccionesDialecto(perfil.pais)}
 `.trim();
 }
 
