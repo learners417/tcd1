@@ -259,13 +259,13 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
               <div>
                 <label className="block text-xs font-semibold text-[#FFFFFF]/60 uppercase tracking-wider mb-2">
-                  ¿Desde qué país trabajás? <span className="text-[#FFFFFF]/30 normal-case font-normal">(la IA adapta el dialecto de tus landings y copies)</span>
+                  ¿Desde qué país trabajás? <span className="text-[#FFFFFF]/30 normal-case font-normal">(la IA adapta el tono de las respuestas y de tu contenido)</span>
                 </label>
                 <CustomSelect
                   value={pais}
                   onChange={setPais}
                   placeholder="Elegí tu país"
-                  options={PAISES.map(p => ({ value: p.codigo, label: `${p.nombre} (${p.dialecto})` }))}
+                  options={PAISES.map(p => ({ value: p.codigo, label: p.nombre }))}
                 />
               </div>
 

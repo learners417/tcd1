@@ -23,7 +23,7 @@ import type { ProfileV2 } from '../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
 import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import { usePersistedState, setSerializers } from '../lib/usePersistedState';
-import { PAISES, getPaisInfo } from '../lib/vozLocalizada';
+import { PAISES } from '../lib/vozLocalizada';
 import CustomSelect from '../components/CustomSelect';
 import { toast } from 'sonner';
 
@@ -530,28 +530,20 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage }: Manual
         </div>
       </div>
 
-      {/* Pais del profesional — afecta el dialecto del contenido publicable */}
+      {/* Pais del profesional — afecta el tono del contenido publicable */}
       <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl p-5">
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
-            <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
-              Define el dialecto (voseo o tuteo) que la IA usa al generar tu landing, anuncios,
-              copies y guiones para que tu avatar de cliente lo sienta natural. La voz del Coach
-              IA hacia vos no cambia.
-            </p>
-          </div>
-          {paisLocal && (
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[rgba(245,166,35,0.2)] bg-[#F5A623]/10 text-[#F5A623] shrink-0">
-              {getPaisInfo(paisLocal)?.dialecto ?? 'tuteo'}
-            </span>
-          )}
+        <div className="mb-3 min-w-0">
+          <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
+          <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+            La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
+            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia vos no cambia.
+          </p>
         </div>
         <CustomSelect
           value={paisLocal}
           onChange={guardarPais}
           placeholder={savingPais ? 'Guardando…' : 'Elegi tu pais'}
-          options={PAISES.map((p) => ({ value: p.codigo, label: `${p.nombre} (${p.dialecto})` }))}
+          options={PAISES.map((p) => ({ value: p.codigo, label: p.nombre }))}
           className="w-full"
         />
       </div>
