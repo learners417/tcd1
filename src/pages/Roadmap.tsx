@@ -63,9 +63,13 @@ import { NIVEL_NOMBRES, NIVEL_METADATA } from '../lib/supabase';
 import TaskVideo from '../components/tasks/TaskVideo';
 import TaskHerramientaIA from '../components/tasks/TaskHerramientaIA';
 import TaskCoach from '../components/tasks/TaskCoach';
+import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
+import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
+import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
+import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Dia45Banner from '../components/Dia45Banner';
-import { validarADNDia45 } from '../lib/diaValidator';
+import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
@@ -102,20 +106,57 @@ function getTypeBadge(tipo: string) {
   }
 }
 
+/**
+ * Cuenta cuántas piezas válidas tiene el usuario en `adn_validacion_organica`.
+ * v8 · P9A.4 guarda JSONB que viene de DB · puede ser undefined, null, string
+ * malformado, número, array vacío, o el objeto esperado `{ piezas: [...] }`.
+ * Esta función es defensiva contra todos esos casos y devuelve siempre un int ≥0.
+ */
+function contarPiezasValidacionOrganica(perfil?: { adn_validacion_organica?: unknown }): number {
+  const val = perfil?.adn_validacion_organica;
+  if (!val || typeof val !== 'object' || Array.isArray(val)) return 0;
+  const piezas = (val as { piezas?: unknown }).piezas;
+  if (!Array.isArray(piezas)) return 0;
+  return piezas.length;
+}
+
 /** Check if a task is unlocked within its pilar (previous orden tasks must be completed) */
 function isTaskUnlocked(
   meta: RoadmapMeta,
   pilar: RoadmapPilar,
   completadas: Set<string>,
+  perfil?: { adn_validacion_organica?: unknown },
 ): boolean {
-  if (meta.orden <= 1) return true;
-  // All tasks with lower orden must be completed
-  for (const m of pilar.metas) {
-    if (m.orden < meta.orden && !completadas.has(`${pilar.numero}-${m.codigo}`)) {
-      return false;
+  if (meta.orden > 1) {
+    // All tasks with lower orden must be completed
+    for (const m of pilar.metas) {
+      if (m.orden < meta.orden && !completadas.has(`${pilar.numero}-${m.codigo}`)) {
+        return false;
+      }
     }
   }
+
+  // v8 Regla #7 · No se corre publicidad a contenido no validado orgánicamente.
+  // P9A.5 (Config Meta Ads) requiere P9A.4 con ≥3 piezas validadas.
+  if (meta.codigo === 'P9A.5' && contarPiezasValidacionOrganica(perfil) < 3) {
+    return false;
+  }
+
   return true;
+}
+
+/** Mensaje de bloqueo específico cuando una tarea NO está desbloqueada. */
+function motivoBloqueo(
+  meta: RoadmapMeta,
+  perfil?: { adn_validacion_organica?: unknown },
+): string | null {
+  if (meta.codigo === 'P9A.5') {
+    const count = contarPiezasValidacionOrganica(perfil);
+    if (count < 3) {
+      return `Regla Video 9: no se corre publicidad a contenido no validado. Completá P9A.4 con ≥3 piezas (tenés ${count}).`;
+    }
+  }
+  return null;
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -139,6 +180,15 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     numero: number;
     nivelAlcanzado?: { numero: 1 | 2 | 3 | 4 | 5; nombre: string; descripcion: string };
   } | null>(null);
+  // v8 · Espejo de Identidad — modal de cierre de F1 al completar P3.
+  // Se muestra UNA SOLA VEZ por usuario (persistencia en localStorage para
+  // sobrevivir reloads · ref para evitar re-trigger en el mismo render loop).
+  const [espejoVisible, setEspejoVisible] = useState(false);
+  const espejoYaMostradoRef = useRef<boolean>(
+    typeof window !== 'undefined'
+      ? localStorage.getItem('tcd_espejo_identidad_mostrado') === '1'
+      : false,
+  );
   const [videosPorPilar, setVideosPorPilar] = useState<Record<string, string>>({});
   const prevCompletadasRef = useRef<Set<string>>(new Set());
   const detalleRef = useRef<HTMLDivElement>(null);
@@ -328,9 +378,10 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     [completadas, ventas, qaVerde],
   );
 
-  // ─── Validación Día 45 (Regla #5 v7) ────────────────────────────────────
+  // ─── Validación Día 45 (Regla #6 v8) ────────────────────────────────────
   const diaActual = perfil?.dia_programa ?? 1;
   const validacionDia45 = validarADNDia45(perfil ?? {}, diaActual);
+  const comparacionDia45 = compararFotoPartida(perfil ?? {});
 
   // ─── Enriquecer pilares con estado ─────────────────────────────────────
   const pilaresConEstado: PilarConEstado[] = seedConVideos.map((pilar) => {
@@ -391,6 +442,17 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           numero: pilar.numero,
           nivelAlcanzado,
         });
+        // v8 · Cierre F1 · al completar P3 mostramos el Espejo de Identidad
+        // una sola vez por usuario (no re-disparar en reloads ni en re-renders).
+        if (pilar.id === 'P3' && !espejoYaMostradoRef.current) {
+          espejoYaMostradoRef.current = true;
+          try {
+            localStorage.setItem('tcd_espejo_identidad_mostrado', '1');
+          } catch {
+            // localStorage no disponible (e.g. modo privado) · sin fallback
+          }
+          setEspejoVisible(true);
+        }
         break;
       }
     }
@@ -631,7 +693,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
         </div>
       </div>
 
-      {/* ── Banner Día 45 (Regla #5 v7) ── */}
+      {/* ── Banner Día 45 (Regla #6 v8) ── */}
       {validacionDia45.debeBloquearFase4 && (
         <Dia45Banner
           validacion={validacionDia45}
@@ -644,6 +706,11 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             }
           }}
         />
+      )}
+
+      {/* ── Comparación Foto de Partida vs ADN real (v8 · día ≥45) ── */}
+      {diaActual >= 45 && comparacionDia45.tieneFotoPartida && (
+        <ComparacionDia45 comparacion={comparacionDia45} diaActual={diaActual} />
       )}
 
       {/* ── Mapa visual por fases ── */}
@@ -831,7 +898,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                 const key = `${pilar.numero}-${meta.codigo}`;
                 const estaCompletada = completadas.has(key);
                 const tieneOutput = taskOutputs.has(key);
-                const unlocked = isTaskUnlocked(meta, pilar, completadas);
+                const unlocked = isTaskUnlocked(meta, pilar, completadas, perfil);
+                const bloqueoMsg = !unlocked ? motivoBloqueo(meta, perfil) : null;
                 const isActive = activeMeta === meta.codigo;
                 const badge = getTypeBadge(meta.tipo);
                 const BadgeIcon = badge.icon;
@@ -900,7 +968,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           )}
                           {!unlocked && (
                             <span className="text-xs text-[#FFFFFF]/30 font-medium flex items-center gap-1">
-                              <Lock className="w-3 h-3" /> Completá la tarea anterior primero
+                              <Lock className="w-3 h-3" />{' '}
+                              {bloqueoMsg ?? 'Completá la tarea anterior primero'}
                             </span>
                           )}
                         </div>
@@ -917,7 +986,30 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {meta.tipo === 'HERRAMIENTA' && (
+                        {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P0.2' && (
+                          <TaskFotoPartida
+                            meta={meta}
+                            valorExistente={perfil?.adn_autoevaluacion_dia1}
+                            onSaveADN={(output, scores) => {
+                              handleSaveADN(pilar.numero, meta, output);
+                              onProfileFieldUpdate?.({ adn_autoevaluacion_dia1: scores });
+                            }}
+                            isCompleted={estaCompletada}
+                          />
+                        )}
+                        {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P8.8' && (
+                          <TaskMapaMamuska
+                            meta={meta}
+                            perfil={perfil}
+                            valorExistente={perfil?.adn_metodo_mapeo_obstaculos}
+                            onSaveADN={(output, filas) => {
+                              handleSaveADN(pilar.numero, meta, output);
+                              onProfileFieldUpdate?.({ adn_metodo_mapeo_obstaculos: filas });
+                            }}
+                            isCompleted={estaCompletada}
+                          />
+                        )}
+                        {meta.tipo === 'HERRAMIENTA' && meta.codigo !== 'P0.2' && meta.codigo !== 'P8.8' && (
                           <TaskHerramientaIA
                             meta={meta}
                             perfil={perfil}
@@ -993,6 +1085,21 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               },
               { onConflict: 'usuario_id,pilar_numero' },
             );
+          }}
+        />
+      )}
+
+      {/* v8 · Espejo de Identidad · cierre F1 (al completar P3) */}
+      {espejoVisible && (
+        <EspejoIdentidadModal
+          historiaCorta={perfil?.historia_50}
+          propositoFrase={perfil?.proposito}
+          legadoDeclaracion={perfil?.legado}
+          cincoNo={perfil?.adn_cinco_no}
+          onConfirmar={() => setEspejoVisible(false)}
+          onEditar={() => {
+            setEspejoVisible(false);
+            onNavigate?.('adn');
           }}
         />
       )}

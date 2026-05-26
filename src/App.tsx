@@ -20,6 +20,7 @@ import ADN from './pages/ADN';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
+import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
 import { X, User, Bell, Shield, CreditCard, LogOut, Camera, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
@@ -423,6 +424,13 @@ export default function App() {
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
                 geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+            {currentPage === 'creador' && (
+              <CreadorContenido
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                setCurrentPage={setCurrentPage}
               />
             )}
           </div>

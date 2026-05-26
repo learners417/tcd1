@@ -53,30 +53,28 @@ export interface RoadmapPilar {
   es_hito?: boolean;
 }
 
-// ─── Los 14 Pilares — 49 Pasos — Versión Final Definitiva ──────────────────
+// ─── Los 14 Pilares — Versión v8 (mejoras.html · mayo 2026) ────────────────
 //
-// Regla #2 v7 (orden dentro de cada pilar): VIDEO → HERRAMIENTA → COACH.
+// Regla #2 v8 (orden dentro de cada pilar): VIDEO → HERRAMIENTA → COACH.
 // El enforcement técnico está en `isTaskUnlocked()` en Roadmap.tsx — nadie
 // puede completar una tarea con `orden: N+1` sin haber cerrado la de `orden: N`.
 //
 // Excepciones documentadas (no rompen el enforcement):
-//   - P0 (Onboarding): el VIDEO de bienvenida va al final del pilar según v7.
+//   - P0 (Onboarding): video filosófico (P0.0) abre, video operativo (P0.4) cierra.
 //   - P9B (Captación): cierra con dos COACH consecutivos por la cronología
 //     "practicar con Simulador → primera llamada real → debrief".
-//   - P11 (Análisis): sólo dos COACH mientras esperamos la expansión a las
-//     4 sub-tareas del v7 (revisión tablero · retrospectiva · plan ciclo 2 ·
-//     masterclass analytics).
+//   - P11 (Análisis): sólo dos COACH (retrospectiva + plan).
 
-export const SEED_ROADMAP_V3: RoadmapPilar[] = [
+export const SEED_ROADMAP_V8: RoadmapPilar[] = [
 
   // ══════════════════════════════════════════════════════════════════════════
-  // FASE 0: ONBOARDING · Días 1–3
+  // FASE 0: ONBOARDING · Días 1–3 · v8 (de 2 a 5 tareas)
   // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'P0',
     numero_orden: 0,
     titulo: 'Onboarding',
-    subtitulo: 'Bienvenida y ADN prototipo beta',
+    subtitulo: 'Bienvenida y Foto de Partida',
     color: '#F5A623',
     numero: 0,
     icon: 'Sprout',
@@ -87,27 +85,61 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     dias_fin: 3,
     metas: [
       {
-        codigo: 'P0.1',
-        titulo: 'Bienvenida: qué vas a construir en 90 días',
-        descripcion: 'Video que explica qué es el ADN del Negocio, por qué existe la app y qué va a pasar en los próximos 90 días.',
+        codigo: 'P0.0',
+        titulo: 'Lo que no sabés que no sabés',
+        descripcion: 'Video emocional · filosófico (10-12 min). Javo abre con: "Te voy a pedir que te abras a lo que no sabés que no sabés. No es solo con la mente que vas a lograr salir del estado actual." Es la puerta de entrada antes de cualquier dato.',
         tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
+        es_estrella: true,
+        tiempo_estimado: '12 min',
         orden: 1,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P0_1',
+        video_youtube_id: 'PLACEHOLDER_P0_0',
       },
       {
-        codigo: 'P0.2',
+        codigo: 'P0.1',
         titulo: 'Formulario de bienvenida',
-        descripcion: 'Respondé las preguntas iniciales: ¿A qué profesionales del mundo admirás? ¿Qué tienen ellos que vos querés tener? ¿Qué te impidió hasta ahora cobrar lo que vale tu trabajo? ¿Cómo te imaginás tu vida con $10K/mes extra? ¿Cuántos años ejercés tu profesión? ¿Presencial, online o mixto? ¿Cuántos pacientes pagando por mes? ¿Qué problema principal resolvés? La IA genera tu ADN prototipo beta.',
+        descripcion: 'Tono Javo. Profesión, antigüedad, pacientes activos, facturación del mes pasado (rango — nadie te pide número exacto), visión a 90 días, frustración actual, horas disponibles, experiencia digital previa. La IA genera tu ADN prototipo beta.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '20 min',
         orden: 2,
-        herramienta_id: 'H-P0.2',
+        herramienta_id: 'H-P0.1',
         usa_ia: true,
         adn_field: 'adn_formulario_bienvenida',
+      },
+      {
+        codigo: 'P0.2',
+        titulo: 'Foto de Partida (autoevaluación ciega)',
+        descripcion: 'Autoevaluación 1-5 en 8 dimensiones: historia · propósito · legado · avatar · método con nombre · escalera de ofertas · contenido por nivel · sistema autónomo. Esta foto queda guardada — al día 45 la app la compara con tu ADN real. Efecto revelación de "lo que no sabías que no sabías."',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '10 min',
+        orden: 3,
+        herramienta_id: 'H-P0.2',
+        usa_ia: false,
+        adn_field: 'adn_autoevaluacion_dia1',
+      },
+      {
+        codigo: 'P0.3',
+        titulo: 'Welcome Wizard',
+        descripcion: 'Tour de 5 minutos por la app: zona horaria, foto de perfil, Instagram, 3 objetivos a 90 días, compromiso explícito al programa.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: false,
+        tiempo_estimado: '5 min',
+        orden: 4,
+        herramienta_id: 'H-P0.3',
+        usa_ia: false,
+      },
+      {
+        codigo: 'P0.4',
+        titulo: 'Cómo funciona la app',
+        descripcion: 'Video operativo (6-8 min) de Javo: Hoja de Ruta, ADN del Negocio, Entrenadores, Métricas, sistema de desbloqueo, 5 niveles del Sanador, Diario del Fundador. Después de este video desbloqueás Nivel 1 (Sanador Despierto), Coach IA, Fase 1 y Diario.',
+        tipo: 'VIDEO',
+        es_estrella: false,
+        tiempo_estimado: '8 min',
+        orden: 5,
+        usa_ia: false,
+        video_youtube_id: 'PLACEHOLDER_P0_4',
       },
     ],
   },
@@ -147,8 +179,8 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P1.2',
-        titulo: 'Línea de tiempo vital',
-        descripcion: 'Anotá los 5 a 8 momentos que más te marcaron en la vida. Fracasos, enfermedades, cambios de rumbo, descubrimientos. No los ve nadie más — es el insumo para construir tu historia.',
+        titulo: 'Línea de tiempo vital (8 puntos)',
+        descripcion: 'Anotá los 8 momentos que más te marcaron: (1) un momento de infancia que te marcó · (2) crisis en adolescencia/juventud · (3) la experiencia que te llevó a elegir tu vocación real · (4) tu peor momento personal o profesional · (5) qué aprendiste de ese peor momento · (6) el momento bisagra · (7) qué está pasando ahora que te lleva a arrancar · (8) si pudieras volver a un momento y abrazarte… ¿cuántos años tenés y qué le dirías?',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -158,28 +190,41 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
         adn_field: 'adn_linea_tiempo',
       },
       {
-        codigo: 'P1.3',
-        titulo: 'Generador de Historia en 3 versiones',
-        descripcion: 'Usa tu línea de tiempo para generar: Historia 300 palabras (para la web), Historia 150 palabras (para redes), Historia 50 palabras (para presentaciones). Tres textareas editables.',
+        codigo: 'P1.2b',
+        titulo: 'Historia cruda (sin IA · 500 palabras)',
+        descripcion: 'Escribí tu historia como si se la estuvieras contando a alguien en un café. Sin estructura, sin marketing, sin filtros. Sin asistencia de IA. Este texto preserva la confrontación que el video pide — es el insumo más importante para que tu historia generada después no salga plana.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
-        tiempo_estimado: '25 min',
+        tiempo_estimado: '40 min',
         orden: 3,
-        herramienta_id: 'H-P1.3',
-        usa_ia: true,
-        adn_field: 'historia_300',
+        herramienta_id: 'H-P1.2b',
+        usa_ia: false,
+        adn_field: 'adn_historia_cruda',
         requiere_datos_de: ['P1.2'],
       },
       {
+        codigo: 'P1.3',
+        titulo: 'Generador de Historia en 3 versiones',
+        descripcion: 'Usa tu línea de tiempo + tu historia cruda para generar: Larga (~300 palabras · bio / landing), Media (~150 palabras · LinkedIn), Corta (~50 palabras · apertura de call). Las 3 son editables y hay toggle "Ver ejemplo de Javo" disponible.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '25 min',
+        orden: 4,
+        herramienta_id: 'H-P1.3',
+        usa_ia: true,
+        adn_field: 'historia_300',
+        requiere_datos_de: ['P1.2', 'P1.2b'],
+      },
+      {
         codigo: 'P1.4',
-        titulo: 'Revisión de la historia',
-        descripcion: 'Abrí el Coach y leele tu historia de 50 palabras. Preguntale: "¿Suena auténtica o suena a bio de LinkedIn?" Si hay algo forzado, el Coach te ayuda a ajustarlo.',
+        titulo: 'Validación de la historia',
+        descripcion: 'Abrí el Coach y preguntale exacto: "¿La historia corta de 50 palabras es lo suficientemente potente para abrir una llamada de venta? ¿La larga tiene arco emocional claro — problema, transformación, propósito?"',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 4,
+        orden: 5,
         usa_ia: false,
-        coach_instruccion: 'Abrí el Coach y leele tu historia de 50 palabras. Preguntale: "¿Suena auténtica o suena a bio de LinkedIn?" Si hay algo forzado, el Coach te ayuda a ajustarlo.',
+        coach_instruccion: '¿La historia corta de 50 palabras es lo suficientemente potente para abrir una llamada de venta? ¿La larga tiene arco emocional claro — problema, transformación, propósito?',
       },
     ],
   },
@@ -240,14 +285,40 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P2.4',
-        titulo: 'Test del propósito',
-        descripcion: 'Decile al Coach cuál es tu propósito. Preguntale: "Con este propósito, ¿qué tipo de pacientes rechazaría?" Si no podés responder fácilmente, el propósito todavía no está listo.',
+        titulo: 'Diagnóstico de la Capa (síndrome de la capa)',
+        descripcion: 'Del Video 3: "el síndrome de la capa es lo que aparece cuando tu propósito se debilita." Mapeá dónde HOY decís SÍ cuando deberías decir NO. Para cada SÍ: horas/semana que consume + costo energético (1-10). La IA te calcula el costo acumulado de tu capa.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '25 min',
+        orden: 4,
+        herramienta_id: 'H-P2.4',
+        usa_ia: true,
+        adn_field: 'adn_diagnostico_capa',
+        requiere_datos_de: ['P2.3'],
+      },
+      {
+        codigo: 'P2.5',
+        titulo: 'El Filtro del NO · Los 5 NO',
+        descripcion: 'Definí 5 cosas concretas a las que vas a decir NO en los próximos 90 días + 5 escenarios de práctica con feedback de la IA. Greg McKeown: "If it isn\'t a clear yes, then it\'s a clear no."',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 5,
+        herramienta_id: 'H-P2.5',
+        usa_ia: true,
+        adn_field: 'adn_cinco_no',
+        requiere_datos_de: ['P2.3'],
+      },
+      {
+        codigo: 'P2.6',
+        titulo: 'Validación de propósito',
+        descripcion: 'Decile al Coach cuál es tu propósito + tus 5 NO. Preguntale: "¿El propósito funciona como filtro real? ¿Mis 5 NO son concretos o genéricos?" Si no podés responder claro, el propósito todavía no está listo.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 4,
+        orden: 6,
         usa_ia: false,
-        coach_instruccion: 'Decile al Coach cuál es tu propósito. Preguntale: "Con este propósito, ¿qué tipo de pacientes rechazaría?" Si no podés responder fácilmente, el propósito todavía no está listo.',
+        coach_instruccion: '¿El propósito funciona como filtro real? ¿Mis 5 NO son concretos o genéricos?',
       },
     ],
   },
@@ -285,8 +356,8 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P3.2',
-        titulo: 'Carta al yo de dentro de 10 años',
-        descripcion: 'Es el año 2035. Lograste todo lo que querías lograr. ¿Cómo es tu vida? ¿A quiénes ayudaste? ¿Qué dejaste? ¿Cómo te sentís? Mínimo 200 palabras.',
+        titulo: 'Carta desde tu funeral',
+        descripcion: 'Ya no estás. Es el día de tu funeral. Alguien que te conoció bien sube a hablar. ¿Qué dice? Viktor Frankl: "Those who have a why to live can bear with almost any how." Mínimo 200 palabras, sin filtros. Lo que escribiste antes sigue siendo válido — la consigna nueva es para profundizar.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -382,14 +453,27 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P4.4',
+        titulo: 'Conexión avatar ↔ historia',
+        descripcion: 'Mirá tu línea de tiempo vital (P1.2). ¿En qué momento de TU historia se conecta el dolor de este avatar? La IA cruza automáticamente IDlinea_tiempo × IRRavatar_journey para mostrarte la conexión emocional que después usás en cada copy y cada llamada.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 4,
+        herramienta_id: 'H-P4.4',
+        usa_ia: true,
+        adn_field: 'adn_avatar_conexion_historia',
+        requiere_datos_de: ['P1.2', 'P4.3'],
+      },
+      {
+        codigo: 'P4.5',
         titulo: 'Validación del avatar',
-        descripcion: 'Contale al Coach quién es tu avatar. Preguntale: "¿Es suficientemente específico o sigue siendo vago?" Un avatar vago es "profesional de 35 a 50 años con estrés". Un avatar preciso es una persona real con una vida real.',
+        descripcion: 'Contale al Coach quién es tu avatar + la conexión con tu historia. Preguntale: "¿Es suficientemente específico o sigue siendo vago? ¿La conexión con mi historia tiene sentido o es forzada?" Un avatar vago es "profesional 35-50 con estrés". Un avatar preciso es una persona real con una vida real.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 4,
+        orden: 5,
         usa_ia: false,
-        coach_instruccion: 'Contale al Coach quién es tu avatar. Preguntale: "¿Es suficientemente específico o sigue siendo vago?" Un avatar vago es "profesional de 35 a 50 años con estrés". Un avatar preciso es una persona real con una vida real.',
+        coach_instruccion: '¿Es suficientemente específico mi avatar o sigue siendo vago? ¿La conexión con mi historia tiene sentido o es forzada?',
       },
     ],
   },
@@ -425,8 +509,8 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P5.2',
-        titulo: 'Definidor de Nicho y PUV',
-        descripcion: 'Campos: "¿A quién específicamente NO querés atender?" · "¿En qué problema sos claramente mejor que el promedio de tu especialidad?" · "¿Qué tenés vos que ningún colega tiene?" · "¿Qué grupo de personas te busca a vos y no a otro?" Genera: descripción del nicho (2-3 oraciones) + 3 versiones de PUV: "Ayudo a [avatar] a [resultado] sin [obstáculo que temen]."',
+        titulo: 'Embudo de 4 niveles (Mercado → Nicho → Micronicho → Avatar)',
+        descripcion: 'Definí los 4 niveles que cada vez son más estrechos. Ej de Javo: Mercado (negocios) → Nicho (negocios digitales) → Micronicho (profesionales de salud) → Avatar (profesional 40-50, hijos chicos, agenda llena). Sin el embudo claro la PUV sale genérica.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -437,14 +521,27 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P5.3',
+        titulo: 'Generador de PUV (para el nicho)',
+        descripcion: 'Importante v8: la PUV es para el NICHO, no para el avatar. Del Video 6: "Si viene la psicóloga o la médica o la kinesióloga, yo le puedo hacer la misma propuesta de valor." Fórmula: "Yo ayudo a [NICHO] a [resultado específico] para que [beneficio/sentimiento]."',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 3,
+        herramienta_id: 'H-P5.3',
+        usa_ia: true,
+        adn_field: 'adn_usp',
+        requiere_datos_de: ['P5.2'],
+      },
+      {
+        codigo: 'P5.4',
         titulo: 'Test de diferenciación',
-        descripcion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi especialidad, ¿todavía aplica?" Si la respuesta es sí, la PUV necesita más trabajo.',
+        descripcion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi nicho, ¿todavía aplica?" Si sí, la PUV necesita más trabajo. La PUV diferencia o no diferencia — no hay zona gris.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 3,
+        orden: 4,
         usa_ia: false,
-        coach_instruccion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi especialidad, ¿todavía aplica?" Si la respuesta es sí, la PUV necesita más trabajo.',
+        coach_instruccion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi nicho, ¿todavía aplica?" Si la respuesta es sí, la PUV necesita más trabajo.',
       },
     ],
   },
@@ -566,8 +663,8 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P7.3',
-        titulo: 'Generador de Método',
-        descripcion: 'Usa el proceso ya guardado + la Matriz A→B→C. Genera: 5 opciones de nombre para el método (el usuario elige una) + 3 a 7 pasos con nombre y descripción breve.',
+        titulo: 'Generador de Método (con nivel de oferta por paso)',
+        descripcion: 'Usa el proceso ya guardado + la Matriz A→B→C. Genera: 5 opciones de nombre (elegí una) + 3 a 7 pasos. v8: cada paso ahora incluye "Nivel de oferta" (gratuito · ultralow · protocolo) para que después la escalera de ofertas se mapee directo.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '25 min',
@@ -579,29 +676,42 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P7.4',
+        titulo: 'Mapeo Obstáculos B → Pasos del método',
+        descripcion: 'Para cada obstáculo de tu Matriz B (los obstáculos del avatar), identificá qué paso del método lo resuelve. Si quedan obstáculos sin paso, te falta cubrir algo. Si hay pasos sin obstáculo asignado, tal vez sobra.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 4,
+        herramienta_id: 'H-P7.4',
+        usa_ia: true,
+        adn_field: 'adn_metodo_mapeo_obstaculos',
+        requiere_datos_de: ['P6.3', 'P7.3'],
+      },
+      {
+        codigo: 'P7.5',
         titulo: 'Naming del método',
-        descripcion: 'Contale al Coach el nombre que elegiste para tu método. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?" El nombre tiene que evocar el resultado.',
+        descripcion: 'Contale al Coach el nombre que elegiste. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?" El nombre tiene que evocar el resultado.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 4,
+        orden: 5,
         usa_ia: false,
-        coach_instruccion: 'Contale al Coach el nombre que elegiste para tu método. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?" El nombre tiene que evocar el resultado.',
+        coach_instruccion: 'Contale al Coach el nombre que elegiste para tu método. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?"',
       },
     ],
   },
 
-  // ─── PILAR 8: Escalera de Ofertas · Días 42–45 ────────────────────────────
+  // ─── PILAR 8: Escalera de Ofertas · Días 42–45 · v8 (5 ofertas + Mamuska) ──
   {
     id: 'P8',
     numero_orden: 8,
     titulo: 'Escalera de Ofertas',
-    subtitulo: 'Los cuatro niveles de acceso a tu trabajo',
+    subtitulo: 'Las 5 ofertas sobre un mismo método',
     color: '#F5A623',
     numero: 8,
     icon: 'Building2',
     emoji: '🏗️',
-    estrellas_requeridas: 3,
+    estrellas_requeridas: 7,
     es_hito: true,
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P7',
@@ -609,24 +719,24 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     dias_inicio: 42,
     dias_fin: 45,
     metodo_letra: 'I',
-    hito_mensaje: 'ADN base completo. Es el momento de activar tu campaña. Para llegar a $10K en los próximos 45 días necesitás tomar al menos 30 llamadas. Eso empieza ahora.',
+    hito_mensaje: 'ADN base completo + escalera armada. Punto de no retorno. Pasaste de Sanador Narrado a Sanador Posicionado.',
     hito_tipo: 'urgent',
     metas: [
       {
         codigo: 'P8.1',
-        titulo: 'La escalera de valor: por qué necesitás los cuatro niveles',
-        descripcion: 'Video sobre la lógica de tener Lead Magnet + Low + Mid + High.',
+        titulo: 'Las 5 ofertas sobre un mismo método',
+        descripcion: 'Video 8 de Javo. "La P va a ser el lead magnet, la A va a ser el ultra low ticket, y el restante de las letras va a ser lo que completa el protocolo." Low = do it yourself, Mid = done with you, High = done for you.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '18 min',
         orden: 1,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P8_1',
       },
       {
         codigo: 'P8.2',
-        titulo: 'Diseñador de Oferta Mid',
-        descripcion: 'La Oferta Mid se construye primero porque es el producto principal. Campos: "¿Cuánto tiempo dura el protocolo completo?" · "¿Cuántas sesiones incluye?" · "¿Qué resultado concreto y medible garantizás?" · "¿Qué soporte adicional incluye?" · "¿Qué precio tenés en mente?" Usa el Método y la Matriz A→B→C del ADN.',
+        titulo: 'Diseñador de Oferta Mid (DWY · principal)',
+        descripcion: 'La Mid se construye primero porque es el producto principal. $1K-5K. DWY (Done With You). Campos: duración del protocolo, sesiones, resultado medible garantizado, soporte, precio. Usa el Método + Matriz A→B→C del ADN.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -637,27 +747,91 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P8.3',
-        titulo: 'Generador de Oferta High + Low + Lead Magnet',
-        descripcion: 'Usa la Oferta Mid ya guardada. Genera las otras 3: Oferta High ($4.000-$6.000, Mid amplificado con acceso directo), Oferta Low ($500-$1.000, primeras 2-3 sesiones), Lead Magnet (gratis o hasta $27, recurso que resuelve el primer dolor). Tres secciones editables.',
+        titulo: 'Diseñador de Ultra Low Ticket (DIY)',
+        descripcion: 'NUEVO v8 · 5ta oferta · $17-47. Es la 2da letra del método (la "A" del acrónimo CLÍNICA). DIY (Do It Yourself). Puerta de entrada al avatar — funciona como "comprador" en vez de "lead". Campos: nombre, precio, módulos cortos, resultado específico, garantía, horas/mes que consume.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '25 min',
         orden: 3,
         herramienta_id: 'H-P8.3',
         usa_ia: true,
-        adn_field: 'oferta_high',
+        adn_field: 'adn_oferta_ultralow',
         requiere_datos_de: ['P8.2'],
       },
       {
         codigo: 'P8.4',
-        titulo: 'Validación de precios',
-        descripcion: 'Mostrále al Coach tus 4 ofertas con precios. Preguntale: "¿Son coherentes con lo que cobra alguien de mi especialidad en mi mercado?" El objetivo es ni demasiado bajo (quema el posicionamiento) ni demasiado alto (genera fricción innecesaria).',
+        titulo: 'Diseñador de Lead Magnet ($0)',
+        descripcion: 'La P del método (1ra letra). Gratis. Resuelve el primer dolor del avatar y abre la puerta. Generalmente: PDF, video, mini-checklist. Campos: nombre, formato, entrega, qué pide a cambio (email + nombre).',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 4,
+        herramienta_id: 'H-P8.4',
+        usa_ia: true,
+        adn_field: 'lead_magnet',
+        requiere_datos_de: ['P8.2'],
+      },
+      {
+        codigo: 'P8.5',
+        titulo: 'Diseñador de Low (DIY)',
+        descripcion: 'Protocolo completo en formato DIY. $100-500. El avatar accede a tu método sin acompañamiento personal. Campos: duración, módulos, resultado, horas/mes que consume, bonus.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 5,
+        herramienta_id: 'H-P8.5',
+        usa_ia: true,
+        adn_field: 'oferta_low',
+        requiere_datos_de: ['P8.2'],
+      },
+      {
+        codigo: 'P8.6',
+        titulo: 'Diseñador de High (DFY)',
+        descripcion: 'Máximo acompañamiento. $5K+. DFY (Done For You). Lo hacemos nosotros. Campos: duración, modalidad, resultado, soporte (sesiones individuales, WhatsApp directo, etc.), horas/mes que consume.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '25 min',
+        orden: 6,
+        herramienta_id: 'H-P8.6',
+        usa_ia: true,
+        adn_field: 'oferta_high',
+        requiere_datos_de: ['P8.2'],
+      },
+      {
+        codigo: 'P8.7',
+        titulo: 'Matemática $10K (benchmarks 2026)',
+        descripcion: '3 escenarios de ROAS: Conservador 3x (~$3.300 inversión), Bueno 5x (~$2.000 con creativos validados + testimonios), Excepcional 7x+ (~$1.400 con comunidad + virales + retargeting). Define cuántas ventas de cada oferta necesitás para llegar a $10K/mes.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 7,
+        herramienta_id: 'H-P8.7',
+        usa_ia: true,
+        adn_field: 'adn_escenarios_roas',
+        requiere_datos_de: ['P8.2', 'P8.3', 'P8.4', 'P8.5', 'P8.6'],
+      },
+      {
+        codigo: 'P8.8',
+        titulo: 'Mapa Mamuska (verificación cruzada)',
+        descripcion: 'Pantalla final de F3. Cada fila: Obstáculo de Matriz B → Paso del Método → En qué oferta lo resuelve → Nivel de conciencia del avatar. Si hay filas vacías o inconsistentes, la app señala el gap antes de pasar a F4.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 8,
+        herramienta_id: 'H-P8.8',
+        usa_ia: false,
+        requiere_datos_de: ['P6.3', 'P7.3', 'P8.2', 'P8.3', 'P8.4', 'P8.5', 'P8.6'],
+      },
+      {
+        codigo: 'P8.9',
+        titulo: 'Validación de la escalera',
+        descripcion: 'Mostrále al Coach las 5 ofertas con precios + el Mapa Mamuska. Preguntale: "¿Son coherentes con lo que cobra alguien de mi especialidad en mi mercado? ¿La progresión Ultra Low → Low → Mid → High es lógica? ¿El Mapa Mamuska tiene gaps?"',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 4,
+        tiempo_estimado: '20 min',
+        orden: 9,
         usa_ia: false,
-        coach_instruccion: 'Mostrále al Coach tus 4 ofertas con precios. Preguntale: "¿Son coherentes con lo que cobra alguien de mi especialidad en mi mercado?" El objetivo es ni demasiado bajo (quema el posicionamiento) ni demasiado alto (genera fricción innecesaria).',
+        coach_instruccion: '¿Son coherentes mis 5 precios con mi mercado? ¿La progresión Ultra Low → Low → Mid → High es lógica? ¿El Mapa Mamuska tiene gaps?',
       },
     ],
   },
@@ -671,12 +845,12 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     id: 'P9A',
     numero_orden: 9,
     titulo: 'Infraestructura',
-    subtitulo: 'El embudo mínimo viable',
+    subtitulo: 'El embudo mínimo viable · validación orgánica obligatoria',
     color: '#F5A623',
     numero: 9,
     icon: 'Megaphone',
     emoji: '📣',
-    estrellas_requeridas: 3,
+    estrellas_requeridas: 5,
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P8',
     fase: 4,
@@ -721,26 +895,40 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
       },
       {
         codigo: 'P9A.4',
-        titulo: 'Genius Contenido — Plan semanal orgánico',
-        descripcion: 'Campo: "¿Qué objeción o miedo de tu avatar apareció más esta semana?" Genera 5 ideas de contenido: 2 reels, 2 posts, 1 carrusel. Cada idea: formato, hook de apertura, idea central, CTA. Este paso es recurrente — podés volver todas las semanas.',
+        titulo: 'Validación orgánica (mínimo 3 piezas) · OBLIGATORIO',
+        descripcion: 'Regla Video 9 de Javo: "No corro publicidad a un contenido que no está validado. Perdí $150.000 por esto." Publicá orgánicamente al menos 3 piezas (mix N1 toma de conciencia · N2 lead magnet · N3 retargeting) y registrá: nivel, fecha, views 72hs, comments, saves, DMs. La app calcula la pieza ganadora. Hasta que tengas ≥3 piezas registradas, P9A.5 (Meta Ads) queda bloqueado.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '60 min',
         orden: 4,
         herramienta_id: 'H-P9A.4',
-        usa_ia: true,
-        es_recurrente: true,
+        usa_ia: false,
+        adn_field: 'adn_validacion_organica',
+        requiere_datos_de: ['P9A.3'],
       },
       {
         codigo: 'P9A.5',
+        titulo: 'Configuración Meta Ads (Messages / Leads)',
+        descripcion: 'BLOQUEADO hasta completar P9A.4. Configurá la campaña optimizando Messages o Leads, NO Purchases. Meta necesita 50 conversiones por ad set por semana para salir de learning phase — imposible con high-ticket optimizando Purchases. Define audience, presupuesto inicial, creativos (de los validados orgánicamente), test A/B.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '45 min',
+        orden: 5,
+        herramienta_id: 'H-P9A.5',
+        usa_ia: false,
+        adn_field: 'adn_meta_config',
+        requiere_datos_de: ['P9A.4'],
+      },
+      {
+        codigo: 'P9A.6',
         titulo: 'Revisión del embudo antes de activar',
-        descripcion: 'Decile al Coach que ya tenés el copy de la landing y los anuncios listos. Preguntale: "¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro en GHL está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?" Si todo está, activá.',
+        descripcion: 'Decile al Coach que ya tenés el copy de la landing, los anuncios validados orgánicamente y la config de Meta lista. Preguntale: "¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?" Si todo está, activá.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 5,
+        orden: 6,
         usa_ia: false,
-        coach_instruccion: 'Decile al Coach que ya tenés el copy de la landing y los anuncios listos. Preguntale: "¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro en GHL está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?" Si todo está, activá.',
+        coach_instruccion: '¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?',
       },
     ],
   },
@@ -866,7 +1054,7 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     ],
   },
 
-  // ─── PILAR 10: Identidad Visual · Días 70–80 (Fase 4, en paralelo) ────────
+  // ─── PILAR 10: Identidad Visual · Días 70–80 · Fase 5 (v8) ────────────────
   {
     id: 'P10',
     numero_orden: 12,
@@ -879,7 +1067,7 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     estrellas_requeridas: 2,
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P9C',
-    fase: 4,
+    fase: 5,
     dias_inicio: 70,
     dias_fin: 80,
     metas: [
@@ -921,10 +1109,10 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // FASE 5: ANÁLISIS Y OPTIMIZACIÓN · Días 85–90
+  // FASE 6: ANÁLISIS Y OPTIMIZACIÓN · Días 85–90 · v8 (separado de F5)
   // ══════════════════════════════════════════════════════════════════════════
 
-  // ─── PILAR 11: Análisis · Días 85–90 ──────────────────────────────────────
+  // ─── PILAR 11: Análisis · Días 85–90 · Fase 6 (v8) ────────────────────────
   {
     id: 'P11',
     numero_orden: 13,
@@ -937,7 +1125,7 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
     estrellas_requeridas: 2,
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P10',
-    fase: 5,
+    fase: 6,
     dias_inicio: 85,
     dias_fin: 90,
     metodo_letra: 'A',
@@ -970,16 +1158,16 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = [
   },
 ];
 
-// ─── Helpers V3 ─────────────────────────────────────────────────────────────
+// ─── Helpers V8 ─────────────────────────────────────────────────────────────
 
 /** Total de metas en todo el programa (49) */
-export const TOTAL_METAS = SEED_ROADMAP_V3.reduce(
+export const TOTAL_METAS = SEED_ROADMAP_V8.reduce(
   (acc, pilar) => acc + pilar.metas.length,
   0,
 );
 
 /** Total de tareas ★ por pilar */
-export const ESTRELLAS_POR_PILAR: Record<string, number> = SEED_ROADMAP_V3.reduce(
+export const ESTRELLAS_POR_PILAR: Record<string, number> = SEED_ROADMAP_V8.reduce(
   (acc, pilar) => ({
     ...acc,
     [pilar.id]: pilar.metas.filter((m) => m.es_estrella).length,
@@ -1008,7 +1196,7 @@ export function calcularNivel(
   if (typeof pilarCompletado === 'number') {
     orden = pilarCompletado;
   } else {
-    const pilar = SEED_ROADMAP_V3.find((p) => p.id === pilarCompletado);
+    const pilar = SEED_ROADMAP_V8.find((p) => p.id === pilarCompletado);
     if (!pilar) return 1;
     orden = pilar.numero_orden;
   }
@@ -1052,15 +1240,22 @@ export interface GrupoFase {
 }
 
 export const FASES_ROADMAP: Omit<GrupoFase, 'pilares'>[] = [
-  { fase: 0, titulo: 'Fase 0 — Onboarding',              subtitulo: 'El Coach te conoce',                     dias: 'Días 1–3' },
+  { fase: 0, titulo: 'Fase 0 — Onboarding',              subtitulo: 'Bienvenida y Foto de Partida',           dias: 'Días 1–3' },
   { fase: 1, titulo: 'Fase 1 — Sprint de Identidad',     subtitulo: 'Quién sos',                              dias: 'Días 3–20',  metodo_letra: 'C' },
   { fase: 2, titulo: 'Fase 2 — Sprint de Mercado',       subtitulo: 'A quién servís',                         dias: 'Días 20–38', metodo_letra: 'LÍ' },
   { fase: 3, titulo: 'Fase 3 — Sprint de Oferta',        subtitulo: 'Qué ofrecés',                            dias: 'Días 36–45', metodo_letra: 'NI' },
-  { fase: 4, titulo: 'Fase 4 — Activación y Ventas',     subtitulo: 'Cómo llegás, vendés y te reconocen',     dias: 'Días 45–80', metodo_letra: 'C' },
-  { fase: 5, titulo: 'Fase 5 — Análisis y Optimización', subtitulo: 'Retrospectiva y cierre',                 dias: 'Días 85–90', metodo_letra: 'A' },
+  { fase: 4, titulo: 'Fase 4 — Activación y Ventas',     subtitulo: 'Cómo llegás, vendés y te reconocen',     dias: 'Días 45–75', metodo_letra: 'C' },
+  { fase: 5, titulo: 'Fase 5 — Identidad Visual',        subtitulo: 'El sistema visual que expresa quién sos', dias: 'Días 70–80' },
+  { fase: 6, titulo: 'Fase 6 — Análisis y Optimización', subtitulo: 'Retrospectiva y cierre',                 dias: 'Días 85–90', metodo_letra: 'A' },
 ];
 
-// ─── Backward compatibility alias ───────────────────────────────────────────
+// ─── Backward compatibility aliases ─────────────────────────────────────────
+// v3 fue renombrado a v8 durante la migracion del documento maestro. Mantenemos
+// alias para no romper imports legacy (Admin.tsx, ADN.tsx, Biblioteca.tsx,
+// migrationHojaDeRuta.ts, etc). Borrar cuando se migren todos los callers.
 
-/** @deprecated Usar SEED_ROADMAP_V3 */
-export const SEED_ROADMAP_V2 = SEED_ROADMAP_V3;
+/** @deprecated Usar SEED_ROADMAP_V8. */
+export const SEED_ROADMAP_V3 = SEED_ROADMAP_V8;
+
+/** @deprecated Usar SEED_ROADMAP_V8. */
+export const SEED_ROADMAP_V2 = SEED_ROADMAP_V8;

@@ -160,7 +160,7 @@ const PROFILE_ADN_SECTIONS: Array<{
     fields: ['matriz_a', 'matriz_b', 'matriz_c'] },
   { pilarNumero: 7, pilarTitulo: 'Método', metaCodigo: 'P7.3', metaTitulo: 'Método propio',
     fields: ['metodo_nombre', 'metodo_pasos'] },
-  { pilarNumero: 8, pilarTitulo: 'Ofertas', metaCodigo: 'P8.3', metaTitulo: 'Ofertas (high/mid/low)',
+  { pilarNumero: 8, pilarTitulo: 'Ofertas', metaCodigo: 'P8.2', metaTitulo: 'Escalera de 5 ofertas (mid/ultralow/lead/low/high)',
     fields: ['oferta_high', 'oferta_mid', 'oferta_low', 'lead_magnet'] },
   { pilarNumero: 10, pilarTitulo: 'Identidad', metaCodigo: 'P10.2', metaTitulo: 'Identidad visual y tono',
     fields: ['identidad_colores', 'identidad_tipografia', 'identidad_logo', 'identidad_tono'] },

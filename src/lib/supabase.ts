@@ -239,6 +239,79 @@ export interface ProfileV2 extends Profile {
   adn_retrospectiva?: string;             // P11.2 · MET
   adn_plan_ciclo_2?: string;              // P11.3 · MET
   adn_masterclass_analytics?: string;     // P11.4 · MET
+  // ── ADN v8 — Hoja de Ruta v8 (mejoras.html · mayo 2026) ──────────────────
+  // Migración: supabase/migrations/20260526_v8_adn_fields.sql
+  adn_historia_cruda?: string;            // P1.2b · ID — 500 palabras sin IA
+  adn_diagnostico_capa?: AdnDiagnosticoCapa;  // P2.4 · ID — síndrome de la capa
+  adn_cinco_no?: AdnCincoNo;              // P2.5 · ID — filtro del NO
+  adn_avatar_conexion_historia?: string;  // P4.4 · IRR — cruce avatar × historia
+  adn_mercado?: string;                   // P5.2 · IRR — nivel 1 del embudo
+  adn_metodo_mapeo_obstaculos?: AdnMapeoObstaculos[];  // P7.4 · IRR
+  adn_oferta_ultralow?: AdnOfertaUltralow;     // P8.3 · NEG — 5ta oferta $17-47
+  adn_validacion_organica?: AdnValidacionOrganica;  // P9A.4 · INF — obligatorio antes de ads
+  adn_autoevaluacion_dia1?: number[];     // P0.2 · META — 8 scores 1-5 (Foto de Partida)
+}
+
+// ─── Sub-tipos ADN v8 ────────────────────────────────────────────────────────
+
+/** P2.4 · Diagnóstico de la Capa (síndrome de la capa, Video 3). */
+export interface AdnDiagnosticoCapa {
+  sies: {
+    descripcion: string;       // a qué dijo "sí" cuando debería decir "no"
+    horas_semana: number;
+    costo_energetico: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  }[];
+  costo_acumulado_horas?: number;
+  costo_acumulado_energia?: number;
+}
+
+/** P2.5 · Los 5 NO (filtro del NO, Greg McKeown). */
+export interface AdnCincoNo {
+  nos: string[];                // 5 NOs concretos a 90 días
+  escenarios_practica?: {
+    escenario: string;
+    respuesta_usuario?: string;
+    feedback_ia?: string;
+  }[];
+}
+
+/** P7.4 · Mapeo Obstáculos B → Pasos del método. P8.8 lo enriquece con oferta + conciencia. */
+export interface AdnMapeoObstaculos {
+  obstaculo: string;            // de IRRmatriz_b_obstaculos
+  paso_metodo: string;          // de IRRmetodo_pasos
+  nota?: string;
+  /** P8.8 · oferta en la que se resuelve este obstáculo. */
+  oferta?: '' | 'lead_magnet' | 'ultralow' | 'low' | 'mid' | 'high';
+  /** P8.8 · nivel de conciencia del avatar cuando enfrenta este obstáculo. */
+  nivel_conciencia?: '' | 'A_unaware' | 'B_solution' | 'C_most';
+}
+
+/** P8.3 · Oferta Ultra Low ($17-47, DIY). Comparte schema con resto de ofertas. */
+export interface AdnOfertaUltralow {
+  nombre: string;
+  precio: number;               // USD
+  duracion?: string;
+  modulos?: string[];
+  resultado?: string;
+  bonus?: string[];
+  garantia?: string;
+  nivel_acompanamiento: 'DIY';  // Ultra Low siempre DIY
+  horas_mes_consume: number;
+}
+
+/** P9A.4 · Validación orgánica obligatoria antes de Meta Ads (Video 9, Javo). */
+export interface AdnValidacionOrganica {
+  piezas: {
+    id: string;
+    fecha: string;              // ISO date
+    nivel: 'N1' | 'N2' | 'N3';
+    views_72h: number;
+    comments: number;
+    saves: number;
+    dms: number;
+    titulo?: string;
+  }[];
+  pieza_ganadora_id?: string;
 }
 
 // ─── Tipos V3 — Versión Final Definitiva ─────────────────────────────────────
@@ -251,19 +324,33 @@ export type PilarId =
 export type TipoTarea = 'VIDEO' | 'HERRAMIENTA' | 'COACH';
 
 export type MetaCodigo =
-  | 'P0.1' | 'P0.2'
-  | 'P1.1' | 'P1.2' | 'P1.3' | 'P1.4'
-  | 'P2.1' | 'P2.2' | 'P2.3' | 'P2.4'
+  // P0 · Onboarding (v8 · 5 tareas)
+  | 'P0.0' | 'P0.1' | 'P0.2' | 'P0.3' | 'P0.4'
+  // P1 · Historia (v8 · 5 tareas, agrega P1.2b)
+  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4'
+  // P2 · Propósito (v8 · 6 tareas, agrega P2.4/P2.5, COACH a P2.6)
+  | 'P2.1' | 'P2.2' | 'P2.3' | 'P2.4' | 'P2.5' | 'P2.6'
+  // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
-  | 'P4.1' | 'P4.2' | 'P4.3' | 'P4.4'
-  | 'P5.1' | 'P5.2' | 'P5.3'
+  // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
+  | 'P4.1' | 'P4.2' | 'P4.3' | 'P4.4' | 'P4.5'
+  // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
+  | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
+  // P6 · Matriz ABC (sin cambios)
   | 'P6.1' | 'P6.2' | 'P6.3' | 'P6.4'
-  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.4'
-  | 'P8.1' | 'P8.2' | 'P8.3' | 'P8.4'
-  | 'P9A.1' | 'P9A.2' | 'P9A.3' | 'P9A.4' | 'P9A.5'
+  // P7 · Método (v8 · 5 tareas, agrega P7.4 mapeo, COACH a P7.5)
+  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.4' | 'P7.5'
+  // P8 · Escalera Ofertas (v8 · 9 tareas, agrega Ultra Low + Mamuska + separa ofertas)
+  | 'P8.1' | 'P8.2' | 'P8.3' | 'P8.4' | 'P8.5' | 'P8.6' | 'P8.7' | 'P8.8' | 'P8.9'
+  // P9A · Infraestructura (v8 · 6 tareas, agrega Validación orgánica + Meta Config)
+  | 'P9A.1' | 'P9A.2' | 'P9A.3' | 'P9A.4' | 'P9A.5' | 'P9A.6'
+  // P9B · Captación (sin cambios estructurales)
   | 'P9B.1' | 'P9B.2' | 'P9B.3' | 'P9B.4'
+  // P9C · Seguimiento (sin cambios)
   | 'P9C.1' | 'P9C.2' | 'P9C.3'
+  // P10 · Identidad Visual (sin cambios)
   | 'P10.1' | 'P10.2' | 'P10.3'
+  // P11 · Análisis (sin cambios)
   | 'P11.1' | 'P11.2';
 
 /** @deprecated Usar MetaCodigo (V3). Mantener para migración de datos existentes. */

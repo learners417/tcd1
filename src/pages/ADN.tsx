@@ -1,9 +1,9 @@
 /**
- * ADN.tsx — ADN del Negocio · v7
+ * ADN.tsx — ADN del Negocio · v8 (mejoras.html · mayo 2026)
  *
- * Renderiza los 56 campos del ADN agrupados en las 7 secciones del documento
- * maestro v7: ID (Identidad) · META (Meta/Onboarding) · IRR (Irresistible) ·
- * NEG (Negocio) · INF (Infraestructura) · CAP (Captación) · MET (Métricas).
+ * Renderiza los 65 campos del ADN agrupados en las 7 secciones del documento
+ * maestro v8: ID (Identidad) · META (Meta/Onboarding) · IRR (Irresistible) ·
+ * NEG (Negocio · 5 ofertas) · INF (Infraestructura) · CAP (Captación) · MET (Métricas).
  *
  * Fuente de datos: se mergea el Profile con los outputs completados en hoja_de_ruta
  * (mapeados vía `adn_field` en roadmapSeed.ts).
@@ -28,9 +28,9 @@ import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
-import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
+import { SEED_ROADMAP_V8 } from '../lib/roadmapSeed';
 import {
-  ADN_SCHEMA_V7,
+  ADN_SCHEMA_V8,
   calcularCompletitudSeccion,
   calcularCompletitudTotal,
   campoEstaCompleto,
@@ -250,7 +250,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         if (!data) return;
         const outputs: Record<string, string> = {};
         for (const row of data) {
-          const pilar = SEED_ROADMAP_V3.find((p) => p.numero === row.pilar_numero);
+          const pilar = SEED_ROADMAP_V8.find((p) => p.numero === row.pilar_numero);
           if (!pilar) continue;
           const meta = pilar.metas.find((m) => m.codigo === row.meta_codigo);
           if (!meta?.adn_field) continue;
@@ -304,7 +304,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
       {/* Header */}
       <div className="space-y-3">
         <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
-          Documento maestro v7 · 7 secciones · 56 campos
+          Documento maestro v8 · 7 secciones · 65 campos · 5 ofertas
         </p>
         <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
           ADN del Negocio
@@ -367,7 +367,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
 
       {/* Secciones */}
       <div className="space-y-4">
-        {ADN_SCHEMA_V7.map((seccion) => (
+        {ADN_SCHEMA_V8.map((seccion) => (
           <TarjetaSeccion
             key={seccion.codigo}
             seccion={seccion}
@@ -379,7 +379,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
       </div>
 
       <p className="text-xs text-[#FFFFFF]/30 text-center pt-4">
-        Versión alineada con el documento maestro v7 · método CLÍNICA
+        Versión alineada con el documento maestro v8 · método CLÍNICA
       </p>
     </div>
   );
