@@ -701,43 +701,23 @@ El resultado debe verse como si el MISMO diseñador hubiera creado ambas piezas.
   const fmtInfo = IMAGE_FORMAT_OPTIONS[fmt];
   const isYouTube = fmt === 'yt_thumbnail';
 
-  // Zona segura: dos fuentes de "zona muerta" que el modelo TIENE que evitar:
-  //   1) recorte interno (cover crop al normalizar el output de OpenAI/Gemini)
-  //   2) UI de la plataforma destino (username/likes de IG, botones de Stories,
-  //      duracion de YouTube, etc.)
-  // Las dos se suman en margenes por lado. Construimos un bloque MUY enfatico
-  // y lo posicionamos como bloque propio (no enterrado en REQUISITOS CRITICOS)
-  // porque la version anterior ponia texto pegado a los bordes y se perdia.
+  // Margen obligatorio: instruccion SIMPLE y DIRECTA, repetida en 3 lugares del
+  // prompt (apertura, despues del formato, y como ultimo bullet de REQUISITOS).
+  // Los bloques largos no funcionaban: gpt-image-2 los ignoraba y pegaba CTAs
+  // al borde inferior. Repeticion concisa funciona mejor que explicacion larga.
   const safeZone = SAFE_ZONE_BY_FORMAT[fmt];
   const sT = Math.round(safeZone.topPct * 100);
   const sB = Math.round(safeZone.bottomPct * 100);
   const sL = Math.round(safeZone.leftPct * 100);
   const sR = Math.round(safeZone.rightPct * 100);
-  const vCentral = 100 - sT - sB;
-  const hCentral = 100 - sL - sR;
-  const deadZoneLines: string[] = [];
-  if (sT > 0) deadZoneLines.push(`- Franja SUPERIOR: primer ${sT}% del alto${safeZone.reasonTop ? ` (${safeZone.reasonTop})` : ''}.`);
-  if (sB > 0) deadZoneLines.push(`- Franja INFERIOR: ultimo ${sB}% del alto${safeZone.reasonBottom ? ` (${safeZone.reasonBottom})` : ''}.`);
-  if (sL > 0) deadZoneLines.push(`- Franja IZQUIERDA: primer ${sL}% del ancho${safeZone.reasonLeft ? ` (${safeZone.reasonLeft})` : ''}.`);
-  if (sR > 0) deadZoneLines.push(`- Franja DERECHA: ultimo ${sR}% del ancho${safeZone.reasonRight ? ` (${safeZone.reasonRight})` : ''}.`);
-  const safeZoneBlock = deadZoneLines.length === 0
+  const marginParts: string[] = [];
+  if (sT > 0) marginParts.push(`primer ${sT}% del alto`);
+  if (sB > 0) marginParts.push(`ultimo ${sB}% del alto`);
+  if (sL > 0) marginParts.push(`primer ${sL}% del ancho`);
+  if (sR > 0) marginParts.push(`ultimo ${sR}% del ancho`);
+  const marginLine = marginParts.length === 0
     ? ''
-    : `
-=== ZONA SEGURA — OBLIGATORIO RESPETAR (PRIORIDAD MAXIMA) ===
-
-Esta imagen se publica en redes sociales. La UI de la plataforma TAPA los bordes Y el sistema recorta la imagen para ajustarla al formato exacto (${fmtInfo.width}x${fmtInfo.height}px). Todo lo que pongas en los bordes se va a PERDER o quedar TAPADO.
-
-ZONAS MUERTAS — en estas franjas SOLO puede haber fondo, atmosfera, escenografia difusa o extension del escenario. JAMAS texto legible, rostros, manos, ojos, CTAs, botones, badges, logos ni elementos importantes:
-${deadZoneLines.join('\n')}
-
-ZONA UTIL — TODO el contenido importante (titulares, subtitulos, datos clave, CTAs, botones, rostros, manos, productos, badges, logos) DEBE caer aqui:
-- Vertical: del ${sT}% al ${100 - sB}% del alto (zona util = ${vCentral}% central del alto)
-- Horizontal: del ${sL}% al ${100 - sR}% del ancho (zona util = ${hCentral}% central del ancho)
-
-REGLA MENTAL: Pensalo como un "title-safe area" de television o un poster con margenes amplios. Si el titulo, el CTA, un rostro, una mano o un dato importante TOCA cualquiera de los bordes definidos arriba, la pieza queda INUTILIZABLE en publicacion real.
-
-=== FIN DE ZONA SEGURA ===
-`;
+    : `MARGEN OBLIGATORIO: dejar VACIO (solo fondo o atmosfera, sin texto, sin CTAs, sin botones, sin rostros, sin manos, sin badges) el ${marginParts.join(' y el ')} de la imagen. Todo el contenido importante va al CENTRO. Si tocas los bordes con texto o CTA, la pieza queda INUTILIZABLE.`;
 
   // Bloque de continuidad narrativa/visual del carrusel
   const nc = options?.narrativeContext;
@@ -790,7 +770,7 @@ ${brandPaleta ? `PALETA DE MARCA (OBLIGATORIA — estos colores mandan sobre la 
 ` : ''}`
     : '';
 
-  return `Genera una imagen ${isYouTube ? 'de portada de YouTube' : 'publicitaria de ALTO IMPACTO para Meta Ads (Instagram/Facebook)'}.
+  return `${marginLine ? marginLine + '\n\n' : ''}Genera una imagen ${isYouTube ? 'de portada de YouTube' : 'publicitaria de ALTO IMPACTO para Meta Ads (Instagram/Facebook)'}.
 ${isYouTube ? 'Esta portada debe generar CLICKS. El hook visual es CRITICO — el usuario decide en 1 segundo si hace clic o no.' : 'Esta imagen debe FRENAR EL SCROLL. Tiene que ser visualmente tan potente que el usuario deje de scrollear en menos de 1 segundo.'}
 ${estiloOverrideHeader}
 NICHO: ${nicho}
@@ -812,10 +792,10 @@ ${userPromptSection}${narrativeBlock}${characterRefPrompt}${styleRefPrompt}${ins
 ${textoSection}
 
 ${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, accion, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
-${safeZoneBlock}
+${marginLine ? marginLine + '\n' : ''}
 REQUISITOS CRITICOS:
+- ${marginLine || 'Composicion centrada'}
 - Formato: ${fmtInfo.width}x${fmtInfo.height}px (aspect ratio ${fmt === 'yt_thumbnail' ? '16:9' : fmt})
-- Respetar la ZONA SEGURA definida arriba — ningun titulo, CTA, rostro ni elemento clave puede tocar los bordes marcados como zona muerta
 - La composicion debe ser PROFESIONAL, nivel agencia de publicidad
 - NO parecer imagen de stock generica — debe sentirse unica y con personalidad
 - NO incluir logos de Meta/Instagram
