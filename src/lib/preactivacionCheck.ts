@@ -4,9 +4,21 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { supabase } from './supabase';
-import { TOTAL_STEPS } from './preactivacionSteps';
+import { STEPS, TOTAL_STEPS } from './preactivacionSteps';
 
 export type ChecksByCliente = Map<string, Set<string>>;
+
+const VALID_STEP_IDS = new Set(STEPS.map((s) => s.id));
+
+function countValidChecks(checks: ChecksByCliente, clienteId: string): number {
+  const set = checks.get(clienteId);
+  if (!set) return 0;
+  let n = 0;
+  for (const id of set) {
+    if (VALID_STEP_IDS.has(id)) n++;
+  }
+  return n;
+}
 
 interface CheckRow {
   cliente_id: string;
@@ -103,10 +115,10 @@ export function isChecked(
 
 export function progressPct(checks: ChecksByCliente, clienteId: string): number {
   if (TOTAL_STEPS === 0) return 0;
-  const done = checks.get(clienteId)?.size ?? 0;
+  const done = Math.min(countValidChecks(checks, clienteId), TOTAL_STEPS);
   return Math.round((done / TOTAL_STEPS) * 100);
 }
 
 export function completedCount(checks: ChecksByCliente, clienteId: string): number {
-  return checks.get(clienteId)?.size ?? 0;
+  return countValidChecks(checks, clienteId);
 }
