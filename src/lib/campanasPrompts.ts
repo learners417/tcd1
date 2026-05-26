@@ -701,21 +701,43 @@ El resultado debe verse como si el MISMO diseñador hubiera creado ambas piezas.
   const fmtInfo = IMAGE_FORMAT_OPTIONS[fmt];
   const isYouTube = fmt === 'yt_thumbnail';
 
-  // Zona segura: el generador (OpenAI) entrega tamanos canonicos (1024/1536) que
-  // no calzan con los formatos de redes (1080x1350, 1080x1920, etc.). Despues de
-  // recibir la imagen hacemos resize 'cover' al tamano exacto, que recorta los
-  // bordes del eje que sobra. Si el modelo no sabe esto, suele pegar texto y
-  // rostros pegados al borde y se cortan. Le pedimos zona segura explicita.
+  // Zona segura: dos fuentes de "zona muerta" que el modelo TIENE que evitar:
+  //   1) recorte interno (cover crop al normalizar el output de OpenAI/Gemini)
+  //   2) UI de la plataforma destino (username/likes de IG, botones de Stories,
+  //      duracion de YouTube, etc.)
+  // Las dos se suman en margenes por lado. Construimos un bloque MUY enfatico
+  // y lo posicionamos como bloque propio (no enterrado en REQUISITOS CRITICOS)
+  // porque la version anterior ponia texto pegado a los bordes y se perdia.
   const safeZone = SAFE_ZONE_BY_FORMAT[fmt];
-  const safePaddingPct = Math.round((1 - safeZone.safePercent) / 2 * 100);
-  const safeZoneBlock = safeZone.axis === 'none'
+  const sT = Math.round(safeZone.topPct * 100);
+  const sB = Math.round(safeZone.bottomPct * 100);
+  const sL = Math.round(safeZone.leftPct * 100);
+  const sR = Math.round(safeZone.rightPct * 100);
+  const vCentral = 100 - sT - sB;
+  const hCentral = 100 - sL - sR;
+  const deadZoneLines: string[] = [];
+  if (sT > 0) deadZoneLines.push(`- Franja SUPERIOR: primer ${sT}% del alto${safeZone.reasonTop ? ` (${safeZone.reasonTop})` : ''}.`);
+  if (sB > 0) deadZoneLines.push(`- Franja INFERIOR: ultimo ${sB}% del alto${safeZone.reasonBottom ? ` (${safeZone.reasonBottom})` : ''}.`);
+  if (sL > 0) deadZoneLines.push(`- Franja IZQUIERDA: primer ${sL}% del ancho${safeZone.reasonLeft ? ` (${safeZone.reasonLeft})` : ''}.`);
+  if (sR > 0) deadZoneLines.push(`- Franja DERECHA: ultimo ${sR}% del ancho${safeZone.reasonRight ? ` (${safeZone.reasonRight})` : ''}.`);
+  const safeZoneBlock = deadZoneLines.length === 0
     ? ''
-    : `\nZONA SEGURA (CRITICO — NO NEGOCIABLE):
-- La imagen final se va a recortar para ajustarse al tamano exacto del formato (${fmtInfo.width}x${fmtInfo.height}px).
-- Vas a perder aproximadamente ${safePaddingPct}% de cada borde ${safeZone.axis === 'vertical' ? 'SUPERIOR e INFERIOR' : 'IZQUIERDO y DERECHO'} en el recorte.
-- TODO elemento importante (titulos, subtitulos, CTA, rostros, manos, ojos, logos, badges, datos clave) debe quedar DENTRO del ${Math.round(safeZone.safePercent * 100)}% ${safeZone.axis === 'vertical' ? 'CENTRAL VERTICAL' : 'CENTRAL HORIZONTAL'} de la imagen.
-- Los bordes ${safeZone.axis === 'vertical' ? 'superior e inferior' : 'izquierdo y derecho'} (~${safePaddingPct}% cada uno) deben contener SOLO fondo, atmosfera, extension de escenario o decoracion — NUNCA texto legible, rostros, ni elementos que se necesite ver completos.
-- Pensalo como un "title-safe area" de TV: actua como si tuvieras un margen invisible obligatorio en esos bordes.`;
+    : `
+=== ZONA SEGURA — OBLIGATORIO RESPETAR (PRIORIDAD MAXIMA) ===
+
+Esta imagen se publica en redes sociales. La UI de la plataforma TAPA los bordes Y el sistema recorta la imagen para ajustarla al formato exacto (${fmtInfo.width}x${fmtInfo.height}px). Todo lo que pongas en los bordes se va a PERDER o quedar TAPADO.
+
+ZONAS MUERTAS — en estas franjas SOLO puede haber fondo, atmosfera, escenografia difusa o extension del escenario. JAMAS texto legible, rostros, manos, ojos, CTAs, botones, badges, logos ni elementos importantes:
+${deadZoneLines.join('\n')}
+
+ZONA UTIL — TODO el contenido importante (titulares, subtitulos, datos clave, CTAs, botones, rostros, manos, productos, badges, logos) DEBE caer aqui:
+- Vertical: del ${sT}% al ${100 - sB}% del alto (zona util = ${vCentral}% central del alto)
+- Horizontal: del ${sL}% al ${100 - sR}% del ancho (zona util = ${hCentral}% central del ancho)
+
+REGLA MENTAL: Pensalo como un "title-safe area" de television o un poster con margenes amplios. Si el titulo, el CTA, un rostro, una mano o un dato importante TOCA cualquiera de los bordes definidos arriba, la pieza queda INUTILIZABLE en publicacion real.
+
+=== FIN DE ZONA SEGURA ===
+`;
 
   // Bloque de continuidad narrativa/visual del carrusel
   const nc = options?.narrativeContext;
@@ -790,9 +812,10 @@ ${userPromptSection}${narrativeBlock}${characterRefPrompt}${styleRefPrompt}${ins
 ${textoSection}
 
 ${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, accion, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
-
+${safeZoneBlock}
 REQUISITOS CRITICOS:
-- Formato: ${fmtInfo.width}x${fmtInfo.height}px (aspect ratio ${fmt === 'yt_thumbnail' ? '16:9' : fmt})${safeZoneBlock}
+- Formato: ${fmtInfo.width}x${fmtInfo.height}px (aspect ratio ${fmt === 'yt_thumbnail' ? '16:9' : fmt})
+- Respetar la ZONA SEGURA definida arriba — ningun titulo, CTA, rostro ni elemento clave puede tocar los bordes marcados como zona muerta
 - La composicion debe ser PROFESIONAL, nivel agencia de publicidad
 - NO parecer imagen de stock generica — debe sentirse unica y con personalidad
 - NO incluir logos de Meta/Instagram

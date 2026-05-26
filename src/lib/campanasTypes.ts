@@ -288,28 +288,74 @@ export const OPENAI_IMAGE_SIZE: Record<ImageFormat, '1024x1024' | '1024x1536' | 
 };
 
 // ─── Zona segura por formato ────────────────────────────────────────────────
-// OpenAI gpt-image-2 solo expone 4 tamanos (1024x1024 / 1024x1536 / 1536x1024 / auto)
-// que no coinciden con los formatos canonicos de redes (1080x1350 4:5, 1080x1920 9:16, etc.).
-// Generamos en el size mas cercano y despues hacemos resize 'cover' al tamano exacto.
-// Como cover recorta bordes para no dejar bandas, el modelo necesita saber que ~10%
-// de cada borde recortado se puede perder. Por eso agregamos al prompt una instruccion
-// de "zona segura" pidiendo que el texto y elementos clave queden en el area central.
+// Cada formato tiene 2 fuentes de "zona muerta" que el modelo TIENE que evitar:
+//   1) Recorte interno (cover crop): OpenAI entrega tamanos canonicos (1024/1536)
+//      que no calzan con los formatos de redes. Al normalizar con cover, recortamos
+//      bordes (~8-9% en el eje que sobra).
+//   2) UI de la plataforma de destino: Instagram tapa username arriba, likes/caption
+//      abajo. Stories/Reels tapan perfil arriba y botones de accion abajo. YouTube
+//      tapa la esquina inferior derecha con la duracion del video.
 //
-// axis: en que eje se recorta (donde tiene que dejar margen).
-// safePercent: que % del eje recortado queda visible despues del crop (calculado
-//   matematicamente desde la diferencia de aspect ratios source vs target).
+// Acumulamos AMBAS fuentes en margenes por lado (top/bottom/left/right) y se las
+// damos al modelo en el prompt como "zonas muertas" donde solo puede haber fondo.
+// Cuanto mas estrictos seamos, mas chance de que el modelo deje los CTA/titulos
+// en el area util central.
 
 export interface SafeZoneConfig {
-  axis: 'vertical' | 'horizontal' | 'none';
-  safePercent: number; // 1.0 = todo visible (sin crop)
+  topPct: number;       // 0.16 = primer 16% del alto reservado
+  bottomPct: number;
+  leftPct: number;
+  rightPct: number;
+  reasonTop?: string;
+  reasonBottom?: string;
+  reasonLeft?: string;
+  reasonRight?: string;
 }
 
 export const SAFE_ZONE_BY_FORMAT: Record<ImageFormat, SafeZoneConfig> = {
-  '1:1':          { axis: 'none',       safePercent: 1.00 }, // 1024x1024 → 1080x1080, solo upscale
-  '4:5':          { axis: 'vertical',   safePercent: 0.83 }, // 1024x1536 (2:3) → 1080x1350 (4:5), recorta arriba/abajo
-  '9:16':         { axis: 'horizontal', safePercent: 0.84 }, // 1024x1536 (2:3) → 1080x1920 (9:16), recorta lados
-  '16:9':         { axis: 'vertical',   safePercent: 0.84 }, // 1536x1024 (3:2) → 1920x1080 (16:9), recorta arriba/abajo
-  'yt_thumbnail': { axis: 'vertical',   safePercent: 0.84 }, // 1536x1024 (3:2) → 1280x720  (16:9), recorta arriba/abajo
+  '1:1': {
+    topPct: 0.12,
+    bottomPct: 0.15,
+    leftPct: 0.06,
+    rightPct: 0.06,
+    reasonTop: 'username y handle de Instagram',
+    reasonBottom: 'iconos de like, comentar y caption de Instagram',
+  },
+  '4:5': {
+    topPct: 0.16,
+    bottomPct: 0.18,
+    leftPct: 0.06,
+    rightPct: 0.06,
+    reasonTop: 'recorte al ajustar de 2:3 a 4:5 + username de Instagram',
+    reasonBottom: 'recorte al ajustar de 2:3 a 4:5 + iconos y caption de Instagram',
+  },
+  '9:16': {
+    topPct: 0.13,
+    bottomPct: 0.16,
+    leftPct: 0.08,
+    rightPct: 0.08,
+    reasonTop: 'foto de perfil y nombre del autor en Stories/Reels',
+    reasonBottom: 'botones de accion (Me gusta, Compartir, Comentar) en Stories/Reels',
+    reasonLeft: 'recorte al ajustar de 2:3 a 9:16',
+    reasonRight: 'recorte al ajustar de 2:3 a 9:16',
+  },
+  '16:9': {
+    topPct: 0.08,
+    bottomPct: 0.08,
+    leftPct: 0,
+    rightPct: 0,
+    reasonTop: 'recorte al ajustar de 3:2 a 16:9',
+    reasonBottom: 'recorte al ajustar de 3:2 a 16:9',
+  },
+  'yt_thumbnail': {
+    topPct: 0.08,
+    bottomPct: 0.10,
+    leftPct: 0,
+    rightPct: 0.10,
+    reasonTop: 'recorte al ajustar de 3:2 a 16:9',
+    reasonBottom: 'recorte + overlay de duracion del video en YouTube',
+    reasonRight: 'overlay de duracion del video en YouTube (esquina inferior derecha)',
+  },
 };
 
 // ─── Referencias, texto custom y control de slides ──────────────────────────
