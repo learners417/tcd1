@@ -54,6 +54,9 @@ export default async function handler(req: any, res: any) {
   const providerOverride = String(req.headers?.['x-ai-provider'] ?? '').toLowerCase();
   const forceDeepSeek = providerOverride === 'deepseek';
   const forceClaude = providerOverride === 'claude';
+  if (providerOverride) {
+    console.log(`[api/ai/stream] X-AI-Provider header recibido: "${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
+  }
 
   // ─── 0) Atajo: forzar DeepSeek (testing admin) ─────────────────────────
   if (forceDeepSeek) {

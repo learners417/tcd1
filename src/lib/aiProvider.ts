@@ -20,7 +20,7 @@
  * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
 
-import { buildProviderHeader } from './aiProviderOverride';
+import { buildProviderHeader, getAIProviderOverride } from './aiProviderOverride';
 
 const API_BASE = '/api/ai';
 
@@ -83,6 +83,11 @@ function makeError(status: number, detail: string): Error & { status: number } {
 // ─── Non-streaming text generation ──────────────────────────────────────────
 
 export async function generateText(options: AIGenerateOptions): Promise<string> {
+  const override = getAIProviderOverride();
+  if (override !== 'auto') {
+    // eslint-disable-next-line no-console
+    console.log(`[AI] generateText · override activo: ${override}`);
+  }
   let lastError: unknown;
   for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
@@ -101,6 +106,10 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
       if (typeof data?.text !== 'string') {
         throw new Error('IA API devolvio respuesta vacia');
       }
+      if (override !== 'auto' || data.provider === 'deepseek') {
+        // eslint-disable-next-line no-console
+        console.log(`[AI] generateText · respondio: ${data.provider}${data.forced ? ' (forzado)' : data.fallback_reason ? ' (fallback)' : ''}`);
+      }
       return data.text;
     } catch (err) {
       lastError = err;
@@ -118,6 +127,11 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
 export async function* streamText(
   options: AIGenerateOptions,
 ): AsyncGenerator<string> {
+  const override = getAIProviderOverride();
+  if (override !== 'auto') {
+    // eslint-disable-next-line no-console
+    console.log(`[AI] streamText · override activo: ${override}`);
+  }
   let lastError: unknown;
   for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
@@ -150,6 +164,10 @@ export async function* streamText(
             if (raw === '[DONE]') return;
             try {
               const parsed = JSON.parse(raw);
+              if (parsed.provider && (override !== 'auto' || parsed.provider === 'deepseek')) {
+                // eslint-disable-next-line no-console
+                console.log(`[AI] streamText · respondio: ${parsed.provider}${parsed.forced ? ' (forzado)' : parsed.fallback_reason ? ' (fallback)' : ''}`);
+              }
               if (parsed.text) yield parsed.text;
               if (parsed.error) throw new Error(parsed.error);
             } catch (e) {
