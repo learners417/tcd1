@@ -50,13 +50,16 @@ export default async function handler(req: any, res: any) {
     ? (messages as AIMessage[])
     : [{ role: 'user', content: prompt }];
 
-  // Override admin-only (header X-AI-Provider). Ver generate.ts para detalle.
-  const providerOverride = String(req.headers?.['x-ai-provider'] ?? '').toLowerCase();
+  // Override admin-only. Aceptamos ambas variantes (con y sin prefijo X-) por
+  // si algun CDN/proxy filtra headers no-estandar X-*. Ver generate.ts.
+  const rawHeaderXprefix = req.headers?.['x-ai-provider'];
+  const rawHeaderNoPrefix = req.headers?.['ai-provider'];
+  const providerOverride = String(rawHeaderXprefix ?? rawHeaderNoPrefix ?? '').toLowerCase();
   const forceDeepSeek = providerOverride === 'deepseek';
   const forceClaude = providerOverride === 'claude';
-  if (providerOverride) {
-    console.log(`[api/ai/stream] X-AI-Provider header recibido: "${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
-  }
+  // Log SIEMPRE · para confirmar que el header llega (o no) sin tener que
+  // dudar si la condicion del log es correcta.
+  console.log(`[api/ai/stream] headers IA · x-ai-provider="${rawHeaderXprefix ?? ''}" · ai-provider="${rawHeaderNoPrefix ?? ''}" · resolved="${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
 
   // ─── 0) Atajo: forzar DeepSeek (testing admin) ─────────────────────────
   if (forceDeepSeek) {

@@ -52,10 +52,13 @@ export function setAIProviderOverride(override: AIProviderOverride): void {
 }
 
 /**
- * Devuelve un header `X-AI-Provider` listo para meter en fetch · o `{}` si
- * no hay override. Pensado para ser desestructurado dentro del headers init.
+ * Devuelve headers de override listos para meter en fetch · o `{}` si no hay
+ * override. Mandamos DOS variantes (con y sin prefijo X-) porque algunos
+ * CDN/firewalls filtran headers no-estandar X-*. El server lee la primera
+ * que encuentre.
  */
 export function buildProviderHeader(): Record<string, string> {
   const override = getAIProviderOverride();
-  return override === 'auto' ? {} : { 'X-AI-Provider': override };
+  if (override === 'auto') return {};
+  return { 'X-AI-Provider': override, 'AI-Provider': override };
 }
