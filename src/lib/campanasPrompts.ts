@@ -3,7 +3,7 @@
  */
 import type { ProfileV2 } from './supabase';
 import type { CampanaFormState, AnguloCreativo, TipoCreativo, ObjetivoCampana, EstiloVisual, ImageMode, CustomText, ImageFormat } from './campanasTypes';
-import { ESTILO_VISUAL_OPTIONS, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
+import { ESTILO_VISUAL_OPTIONS, IMAGE_FORMAT_OPTIONS, SAFE_ZONE_BY_FORMAT } from './campanasTypes';
 import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
 
 // ─── Contexto ADN del profesional ────────────────────────────────────────────
@@ -701,6 +701,22 @@ El resultado debe verse como si el MISMO diseñador hubiera creado ambas piezas.
   const fmtInfo = IMAGE_FORMAT_OPTIONS[fmt];
   const isYouTube = fmt === 'yt_thumbnail';
 
+  // Zona segura: el generador (OpenAI) entrega tamanos canonicos (1024/1536) que
+  // no calzan con los formatos de redes (1080x1350, 1080x1920, etc.). Despues de
+  // recibir la imagen hacemos resize 'cover' al tamano exacto, que recorta los
+  // bordes del eje que sobra. Si el modelo no sabe esto, suele pegar texto y
+  // rostros pegados al borde y se cortan. Le pedimos zona segura explicita.
+  const safeZone = SAFE_ZONE_BY_FORMAT[fmt];
+  const safePaddingPct = Math.round((1 - safeZone.safePercent) / 2 * 100);
+  const safeZoneBlock = safeZone.axis === 'none'
+    ? ''
+    : `\nZONA SEGURA (CRITICO — NO NEGOCIABLE):
+- La imagen final se va a recortar para ajustarse al tamano exacto del formato (${fmtInfo.width}x${fmtInfo.height}px).
+- Vas a perder aproximadamente ${safePaddingPct}% de cada borde ${safeZone.axis === 'vertical' ? 'SUPERIOR e INFERIOR' : 'IZQUIERDO y DERECHO'} en el recorte.
+- TODO elemento importante (titulos, subtitulos, CTA, rostros, manos, ojos, logos, badges, datos clave) debe quedar DENTRO del ${Math.round(safeZone.safePercent * 100)}% ${safeZone.axis === 'vertical' ? 'CENTRAL VERTICAL' : 'CENTRAL HORIZONTAL'} de la imagen.
+- Los bordes ${safeZone.axis === 'vertical' ? 'superior e inferior' : 'izquierdo y derecho'} (~${safePaddingPct}% cada uno) deben contener SOLO fondo, atmosfera, extension de escenario o decoracion — NUNCA texto legible, rostros, ni elementos que se necesite ver completos.
+- Pensalo como un "title-safe area" de TV: actua como si tuvieras un margen invisible obligatorio en esos bordes.`;
+
   // Bloque de continuidad narrativa/visual del carrusel
   const nc = options?.narrativeContext;
   const narrativeBlock = nc
@@ -776,7 +792,7 @@ ${textoSection}
 ${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, accion, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
 
 REQUISITOS CRITICOS:
-- Formato: ${fmtInfo.width}x${fmtInfo.height}px (aspect ratio ${fmt === 'yt_thumbnail' ? '16:9' : fmt})
+- Formato: ${fmtInfo.width}x${fmtInfo.height}px (aspect ratio ${fmt === 'yt_thumbnail' ? '16:9' : fmt})${safeZoneBlock}
 - La composicion debe ser PROFESIONAL, nivel agencia de publicidad
 - NO parecer imagen de stock generica — debe sentirse unica y con personalidad
 - NO incluir logos de Meta/Instagram

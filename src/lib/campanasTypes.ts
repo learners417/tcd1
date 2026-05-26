@@ -287,6 +287,31 @@ export const OPENAI_IMAGE_SIZE: Record<ImageFormat, '1024x1024' | '1024x1536' | 
   'yt_thumbnail': '1536x1024', // horizontal
 };
 
+// ─── Zona segura por formato ────────────────────────────────────────────────
+// OpenAI gpt-image-2 solo expone 4 tamanos (1024x1024 / 1024x1536 / 1536x1024 / auto)
+// que no coinciden con los formatos canonicos de redes (1080x1350 4:5, 1080x1920 9:16, etc.).
+// Generamos en el size mas cercano y despues hacemos resize 'cover' al tamano exacto.
+// Como cover recorta bordes para no dejar bandas, el modelo necesita saber que ~10%
+// de cada borde recortado se puede perder. Por eso agregamos al prompt una instruccion
+// de "zona segura" pidiendo que el texto y elementos clave queden en el area central.
+//
+// axis: en que eje se recorta (donde tiene que dejar margen).
+// safePercent: que % del eje recortado queda visible despues del crop (calculado
+//   matematicamente desde la diferencia de aspect ratios source vs target).
+
+export interface SafeZoneConfig {
+  axis: 'vertical' | 'horizontal' | 'none';
+  safePercent: number; // 1.0 = todo visible (sin crop)
+}
+
+export const SAFE_ZONE_BY_FORMAT: Record<ImageFormat, SafeZoneConfig> = {
+  '1:1':          { axis: 'none',       safePercent: 1.00 }, // 1024x1024 → 1080x1080, solo upscale
+  '4:5':          { axis: 'vertical',   safePercent: 0.83 }, // 1024x1536 (2:3) → 1080x1350 (4:5), recorta arriba/abajo
+  '9:16':         { axis: 'horizontal', safePercent: 0.84 }, // 1024x1536 (2:3) → 1080x1920 (9:16), recorta lados
+  '16:9':         { axis: 'vertical',   safePercent: 0.84 }, // 1536x1024 (3:2) → 1920x1080 (16:9), recorta arriba/abajo
+  'yt_thumbnail': { axis: 'vertical',   safePercent: 0.84 }, // 1536x1024 (3:2) → 1280x720  (16:9), recorta arriba/abajo
+};
+
 // ─── Referencias, texto custom y control de slides ──────────────────────────
 
 export interface ReferenceImage {

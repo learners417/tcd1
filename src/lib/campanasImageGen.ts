@@ -12,7 +12,8 @@
  */
 import { GoogleGenAI } from '@google/genai';
 import type { ImageFormat, ImageQuality } from './campanasTypes';
-import { OPENAI_IMAGE_SIZE, IMAGE_QUALITY_DEFAULT } from './campanasTypes';
+import { OPENAI_IMAGE_SIZE, IMAGE_QUALITY_DEFAULT, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
+import { resizeBase64ToExact } from './imageUploadUtils';
 import { supabase } from './supabase';
 
 // Error tipado para que la UI muestre el modal de "comprar creditos"
@@ -293,6 +294,43 @@ async function tryGemini(
   throw lastError ?? new Error('Todos los modelos Gemini fallaron');
 }
 
+// ─── Normalizacion de tamano final ───────────────────────────────────────────
+
+/**
+ * Lleva el output de cualquier proveedor al tamano exacto del formato canonico
+ * de redes (ej: 1080x1350 para 4:5, 1080x1920 para 9:16). OpenAI gpt-image-2
+ * solo expone 1024x1024 / 1024x1536 / 1536x1024, y Gemini puede devolver
+ * cualquier cosa cercana al ratio pedido. Usa fit 'cover' para no dejar bandas.
+ *
+ * Si el resize falla por cualquier motivo (canvas, CORS, navegador raro),
+ * devolvemos la imagen original para no romper el flujo — el usuario igual ve
+ * algo. El log permite detectarlo.
+ */
+async function normalizeToFormat(
+  result: ImageGenResult,
+  format: ImageFormat,
+): Promise<ImageGenResult> {
+  const target = IMAGE_FORMAT_OPTIONS[format];
+  try {
+    const resized = await resizeBase64ToExact(
+      result.imageBase64,
+      result.mimeType,
+      target.width,
+      target.height,
+      'cover',
+    );
+    return {
+      ...result,
+      imageBase64: resized.base64,
+      mimeType: resized.mimeType,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[campanasImageGen] normalizeToFormat fallo, usando imagen original', msg);
+    return result;
+  }
+}
+
 // ─── Generador principal con cascada ─────────────────────────────────────────
 
 /**
@@ -328,7 +366,7 @@ export async function generateImageWithFallback(
       total: TOTAL_MODELS,
       status: 'success',
     });
-    return result;
+    return await normalizeToFormat(result, format);
   } catch (err) {
     // INSUFFICIENT_CREDITS · cortar la cascada (es decision de negocio, no falla)
     if (err instanceof InsufficientCreditsError) {
@@ -359,13 +397,14 @@ export async function generateImageWithFallback(
   }
 
   try {
-    return await tryGemini(
+    const result = await tryGemini(
       options.geminiKey,
       prompt,
       referenceImages,
       onProgress,
       /* attemptOffset */ 2,
     );
+    return await normalizeToFormat(result, format);
   } catch (geminiError) {
     // Gemini queda como fallback silencioso. Si tambien falla, el usuario solo
     // ve el error de OpenAI (que es el flujo primario) · el de Gemini va a la consola.
