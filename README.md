@@ -27,6 +27,7 @@ Configurar en `.env.local` (dev) y en **Vercel Dashboard → Settings → Enviro
 | `DEEPSEEK_API_KEY` | Recomendada | DeepSeek · fallback transparente si Claude falla por crédito agotado, rate limit, server error o timeout. ~10x más barato que Sonnet 4.6. |
 | `DEEPSEEK_MODEL` | Opcional | Override del modelo DeepSeek. Default: `deepseek-chat` (la versión estable más reciente de DeepSeek). |
 | `DEEPSEEK_MAX_TOKENS` | Opcional | Override del max_tokens enviado a DeepSeek. Default: 8192. |
+| `FORCE_AI_PROVIDER` | **Solo testing** | Forza el proveedor para TODAS las requests, ignora el header del switch admin y el fallback. Valores: `deepseek` o `claude`. **Acordate de quitarla al terminar de testear** o todos los usuarios reales usan ese proveedor. |
 
 ### Imágenes (independiente del fallback de texto)
 | Var | Requerida | Para qué |

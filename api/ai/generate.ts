@@ -44,15 +44,23 @@ export default async function handler(req: any, res: any) {
     ? (messages as AIMessage[])
     : [{ role: 'user', content: prompt }];
 
-  // Override admin-only. Aceptamos ambas variantes (con y sin prefijo X-) por
-  // si algun CDN/proxy filtra headers no-estandar X-*.
+  // Override global desde env var · tiene PRIORIDAD sobre el header del cliente.
+  // Util para testear DeepSeek cross-browser/cross-device sin depender del
+  // localStorage del switch admin. Setear en Vercel Dashboard → Settings →
+  // Environment Variables y redeployar. Acordate de quitarla cuando termines
+  // de testear · si se queda prendida afecta a TODOS los usuarios reales.
+  const envForce = String(process.env.FORCE_AI_PROVIDER ?? '').toLowerCase();
+  // Override admin-only via header. Aceptamos ambas variantes (con y sin X-)
+  // por si algun CDN/proxy filtra headers no-estandar X-*.
   const rawHeaderXprefix = req.headers?.['x-ai-provider'];
   const rawHeaderNoPrefix = req.headers?.['ai-provider'];
-  const providerOverride = String(rawHeaderXprefix ?? rawHeaderNoPrefix ?? '').toLowerCase();
+  const headerOverride = String(rawHeaderXprefix ?? rawHeaderNoPrefix ?? '').toLowerCase();
+  // Env var gana sobre header.
+  const providerOverride = envForce || headerOverride;
   const forceDeepSeek = providerOverride === 'deepseek';
   const forceClaude = providerOverride === 'claude';
-  // Log SIEMPRE · para confirmar que el header llega (o no) en cada request.
-  console.log(`[api/ai/generate] headers IA · x-ai-provider="${rawHeaderXprefix ?? ''}" · ai-provider="${rawHeaderNoPrefix ?? ''}" · resolved="${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
+  // Log SIEMPRE · para confirmar el origen del override en cada request.
+  console.log(`[api/ai/generate] FORCE_AI_PROVIDER env="${envForce}" · header x-ai-provider="${rawHeaderXprefix ?? ''}" ai-provider="${rawHeaderNoPrefix ?? ''}" · resolved="${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
 
   // ─── 0) Atajo: forzar DeepSeek (testing admin) ─────────────────────────
   if (forceDeepSeek) {
