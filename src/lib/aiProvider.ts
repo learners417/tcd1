@@ -20,7 +20,22 @@
  * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
 
+import { toast } from 'sonner';
 import { buildProviderHeader, getAIProviderOverride } from './aiProviderOverride';
+
+/**
+ * Cuando hay override activo, mostramos un toast inmediato con el provider
+ * que respondio. Permite verificar visualmente que el switch funciona sin
+ * tener que abrir DevTools / Network / Console.
+ */
+function notificarProvider(provider: string | undefined, forced: boolean): void {
+  const override = getAIProviderOverride();
+  if (override === 'auto') return;
+  if (!provider) return;
+  const emoji = provider === 'deepseek' ? '🐳' : provider === 'claude' ? '🤖' : '❓';
+  const label = forced ? 'forzado' : 'fallback';
+  toast.message(`${emoji} Respondio: ${provider} (${label})`, { duration: 2500 });
+}
 
 const API_BASE = '/api/ai';
 
@@ -110,6 +125,7 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
         // eslint-disable-next-line no-console
         console.log(`[AI] generateText · respondio: ${data.provider}${data.forced ? ' (forzado)' : data.fallback_reason ? ' (fallback)' : ''}`);
       }
+      notificarProvider(data.provider, Boolean(data.forced));
       return data.text;
     } catch (err) {
       lastError = err;
@@ -167,6 +183,7 @@ export async function* streamText(
               if (parsed.provider && (override !== 'auto' || parsed.provider === 'deepseek')) {
                 // eslint-disable-next-line no-console
                 console.log(`[AI] streamText · respondio: ${parsed.provider}${parsed.forced ? ' (forzado)' : parsed.fallback_reason ? ' (fallback)' : ''}`);
+                notificarProvider(parsed.provider, Boolean(parsed.forced));
               }
               if (parsed.text) yield parsed.text;
               if (parsed.error) throw new Error(parsed.error);
