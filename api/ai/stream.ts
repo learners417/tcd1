@@ -50,6 +50,36 @@ export default async function handler(req: any, res: any) {
     ? (messages as AIMessage[])
     : [{ role: 'user', content: prompt }];
 
+  // Override admin-only (header X-AI-Provider). Ver generate.ts para detalle.
+  const providerOverride = String(req.headers?.['x-ai-provider'] ?? '').toLowerCase();
+  const forceDeepSeek = providerOverride === 'deepseek';
+  const forceClaude = providerOverride === 'claude';
+
+  // ─── 0) Atajo: forzar DeepSeek (testing admin) ─────────────────────────
+  if (forceDeepSeek) {
+    if (!isDeepSeekConfigured()) {
+      return res.status(500).json({
+        error: 'DEEPSEEK_API_KEY not configured',
+        forced: 'deepseek',
+      });
+    }
+    try {
+      const { text, usage } = await callDeepSeek({
+        system: systemInstruction,
+        messages: aiMessages,
+        maxTokens: MAX_TOKENS,
+      });
+      startSseStream(res);
+      writeSseEvent(res, { text, provider: 'deepseek', forced: true, usage });
+      res.write('data: [DONE]\n\n');
+      return res.end();
+    } catch (dsErr) {
+      const dsMsg = dsErr instanceof Error ? dsErr.message : String(dsErr);
+      console.error('[api/ai/stream] DeepSeek (forced) failed:', dsMsg);
+      return res.status(502).json({ error: 'DeepSeek API error', details: dsMsg, forced: 'deepseek' });
+    }
+  }
+
   try {
     const client = new Anthropic({ apiKey });
 
@@ -97,7 +127,7 @@ export default async function handler(req: any, res: any) {
       model: MODEL,
     });
 
-    if (isDeepSeekConfigured() && claudeErrorShouldFallback(lastError)) {
+    if (!forceClaude && isDeepSeekConfigured() && claudeErrorShouldFallback(lastError)) {
       console.warn('[api/ai/stream] Falling back to DeepSeek due to Claude error');
       try {
         const { text, usage } = await callDeepSeek({
@@ -131,9 +161,11 @@ export default async function handler(req: any, res: any) {
       details: errorMsg,
       claudeStatus: errAny?.status ?? null,
       fallback_attempted: false,
-      fallback_reason: !isDeepSeekConfigured()
-        ? 'DEEPSEEK_API_KEY not configured'
-        : 'Error type does not warrant fallback',
+      fallback_reason: forceClaude
+        ? 'Provider forced to Claude (X-AI-Provider header)'
+        : !isDeepSeekConfigured()
+          ? 'DEEPSEEK_API_KEY not configured'
+          : 'Error type does not warrant fallback',
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);

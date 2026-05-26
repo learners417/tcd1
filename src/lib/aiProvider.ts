@@ -20,6 +20,8 @@
  * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
 
+import { buildProviderHeader } from './aiProviderOverride';
+
 const API_BASE = '/api/ai';
 
 const CLIENT_RETRIES = 2;
@@ -86,7 +88,7 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
     try {
       const res = await fetch(`${API_BASE}/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...buildProviderHeader() },
         body: JSON.stringify(options),
       });
 
@@ -121,7 +123,7 @@ export async function* streamText(
     try {
       const res = await fetch(`${API_BASE}/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...buildProviderHeader() },
         body: JSON.stringify(options),
       });
 
