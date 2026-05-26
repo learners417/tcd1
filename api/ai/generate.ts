@@ -11,7 +11,7 @@
  * proveedor respondio. El response JSON incluye `provider` para debugging.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { callDeepSeek, claudeErrorShouldFallback, isDeepSeekConfigured } from '../_lib/deepseek';
+import { callDeepSeek, claudeErrorShouldFallback, isDeepSeekConfigured } from '../_lib/deepseek.js';
 
 interface AIMessage {
   role: string;
