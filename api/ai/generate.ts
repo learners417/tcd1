@@ -1,8 +1,17 @@
 /**
- * Vercel Serverless Function — Non-streaming Claude text generation
- * Claude is the primary AI provider; frontend falls back to Gemini if this fails.
+ * Vercel Serverless Function — Non-streaming text generation.
+ *
+ * Cadena de proveedores (server-side, transparente para el frontend):
+ *   1) Claude (Anthropic) · modelo en const MODEL.
+ *   2) DeepSeek · solo si Claude falla con un error donde el fallback tiene
+ *      sentido (credito agotado, rate limit, server error, timeout).
+ *      Ver claudeErrorShouldFallback() en api/_lib/deepseek.ts.
+ *
+ * El frontend siempre llama a este mismo endpoint · no se entera de cual
+ * proveedor respondio. El response JSON incluye `provider` para debugging.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { callDeepSeek, claudeErrorShouldFallback, isDeepSeekConfigured } from '../_lib/deepseek';
 
 interface AIMessage {
   role: string;
@@ -29,17 +38,20 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  try {
-    const { prompt, systemInstruction, messages } = req.body;
+  const { prompt, systemInstruction, messages } = req.body ?? {};
 
+  const aiMessages: AIMessage[] = messages
+    ? (messages as AIMessage[])
+    : [{ role: 'user', content: prompt }];
+
+  // ─── 1) Claude (primario) ──────────────────────────────────────────────
+  try {
     const client = new Anthropic({ apiKey });
 
-    const claudeMessages: Anthropic.MessageParam[] = messages
-      ? messages.map((m: AIMessage) => ({
-          role: (m.role === 'model' ? 'assistant' : m.role) as 'user' | 'assistant',
-          content: m.content,
-        }))
-      : [{ role: 'user' as const, content: prompt }];
+    const claudeMessages: Anthropic.MessageParam[] = aiMessages.map((m) => ({
+      role: (m.role === 'model' ? 'assistant' : m.role) as 'user' | 'assistant',
+      content: m.content,
+    }));
 
     let lastError: unknown;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -53,7 +65,7 @@ export default async function handler(req: any, res: any) {
 
         const text =
           response.content[0].type === 'text' ? response.content[0].text : '';
-        return res.status(200).json({ text });
+        return res.status(200).json({ text, provider: 'claude' });
       } catch (err: any) {
         lastError = err;
         const isRetryable =
@@ -66,6 +78,7 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    // Claude fallo tras los reintentos · ver si vale fallback a DeepSeek
     const errAny = lastError as { status?: number; message?: string } | undefined;
     const errorMsg = errAny?.message ?? 'Unknown error';
     console.error('[api/ai/generate] Claude error after retries:', {
@@ -73,10 +86,42 @@ export default async function handler(req: any, res: any) {
       message: errorMsg,
       model: MODEL,
     });
+
+    if (isDeepSeekConfigured() && claudeErrorShouldFallback(lastError)) {
+      console.warn('[api/ai/generate] Falling back to DeepSeek due to Claude error');
+      try {
+        const { text, usage } = await callDeepSeek({
+          system: systemInstruction,
+          messages: aiMessages,
+          maxTokens: MAX_TOKENS,
+        });
+        return res.status(200).json({
+          text,
+          provider: 'deepseek',
+          fallback_reason: errorMsg,
+          usage,
+        });
+      } catch (dsErr) {
+        const dsMsg = dsErr instanceof Error ? dsErr.message : String(dsErr);
+        console.error('[api/ai/generate] DeepSeek fallback also failed:', dsMsg);
+        return res.status(502).json({
+          error: 'Both providers failed',
+          claude_error: errorMsg,
+          claude_status: errAny?.status ?? null,
+          deepseek_error: dsMsg,
+        });
+      }
+    }
+
+    // Sin fallback (DeepSeek no configurado o error no apto para fallback)
     return res.status(502).json({
       error: 'Claude API error',
       details: errorMsg,
       claudeStatus: errAny?.status ?? null,
+      fallback_attempted: false,
+      fallback_reason: !isDeepSeekConfigured()
+        ? 'DEEPSEEK_API_KEY not configured'
+        : 'Error type does not warrant fallback',
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown error';

@@ -63,8 +63,8 @@ function normalizeExtracted(raw: unknown): ExtractedProfile {
 }
 
 export async function extractFromText(texto: string): Promise<ExtractedProfile> {
-  // Usa el wrapper con fallback: intenta Claude (Vercel serverless) y
-  // si falla (ej. dev local sin `vercel dev`) cae a Gemini vía VITE_GEMINI_API_KEY.
+  // Usa el wrapper de IA: Claude (Vercel serverless) con fallback transparente
+  // a DeepSeek server-side si la cuenta Anthropic se queda sin credito o cae.
   const text = await generateText({
     systemInstruction: SYSTEM_PROMPT,
     prompt: `Extrae la información de negocio de este texto y devuelve SOLO JSON:\n\n${texto}`,

@@ -1,23 +1,28 @@
 /**
- * aiProvider.ts — Centralized AI text generation
+ * aiProvider.ts — Cliente unificado de generacion de texto.
  *
- * Cadena de fallback (texto):
- *   1) Claude API via Vercel serverless function (`/api/ai/generate`).
- *      Reintenta en el cliente errores transientes (502/503/504/timeouts).
- *   2) Gemini via SDK cliente (VITE_GEMINI_API_KEY).
- *      Reintenta cuando Gemini devuelve UNAVAILABLE/503 ("alta demanda").
+ * Cadena de proveedores:
+ *   1) Claude (Anthropic) · primario
+ *   2) DeepSeek · fallback transparente · server-side
  *
- * Si ambos proveedores fallan, se lanza un Error con mensaje legible para el
- * usuario que indica que ambos servicios de IA están saturados y los detalles
- * de cada uno quedan disponibles vía `cause` para debugging.
+ * IMPORTANTE: La conmutacion Claude → DeepSeek ocurre EN EL SERVER
+ * (api/ai/generate.ts y api/ai/stream.ts). Este archivo del cliente solo
+ * habla con `/api/ai/generate` y `/api/ai/stream` · no necesita saber cual
+ * proveedor respondio (aunque el backend devuelve `provider` en la respuesta
+ * por si se quiere loguear).
  *
- * Image generation stays on Gemini (see campanasImageGen.ts).
+ * Gemini ya NO es fallback de texto (movimos la contingencia a DeepSeek que
+ * es ~10x mas barato). Gemini sigue usandose para generacion de IMAGENES
+ * en campanasImageGen.ts · ese flujo es independiente.
+ *
+ * Reintentos del cliente: cuando el endpoint server devuelve un error
+ * transitorio (5xx · timeout) hacemos hasta CLIENT_RETRIES intentos con
+ * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
 
 const API_BASE = '/api/ai';
 
-const CLAUDE_RETRIES = 2;
-const GEMINI_RETRIES = 3;
+const CLIENT_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 1500;
 
 export interface AIGenerateOptions {
@@ -31,83 +36,53 @@ export interface AIGenerateOptions {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function getGeminiKey(): string {
-  return import.meta.env.VITE_GEMINI_API_KEY || '';
-}
-
 function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function isOverloadError(err: unknown): boolean {
+function isTransientError(err: unknown): boolean {
   if (!err) return false;
-  const e = err as { status?: number; code?: number; message?: string };
+  const e = err as { status?: number; message?: string };
   if (e.status === 429 || e.status === 502 || e.status === 503 || e.status === 504 || e.status === 529) {
     return true;
   }
   const msg = (e.message ?? '').toLowerCase();
   return (
-    msg.includes('unavailable') ||
-    msg.includes('overload') ||
-    msg.includes('alta demanda') ||
-    msg.includes('rate limit') ||
     msg.includes('timeout') ||
     msg.includes('etimedout') ||
-    msg.includes('econnreset')
+    msg.includes('econnreset') ||
+    msg.includes('network')
   );
 }
 
-function buildContents(options: AIGenerateOptions) {
-  return options.messages
-    ? options.messages.map((m) => ({
-        role: m.role === 'assistant' ? 'model' : m.role,
-        parts: [{ text: m.content }],
-      }))
-    : options.prompt;
+async function safeReadError(res: Response): Promise<string> {
+  try {
+    const text = await res.text();
+    if (!text) return '';
+    try {
+      const parsed = JSON.parse(text);
+      return parsed?.details || parsed?.error || text.slice(0, 200);
+    } catch {
+      return text.slice(0, 200);
+    }
+  } catch {
+    return '';
+  }
+}
+
+function makeError(status: number, detail: string): Error & { status: number } {
+  const err = new Error(
+    `IA API error: ${status}${detail ? ` — ${detail}` : ''}`,
+  ) as Error & { status: number };
+  err.status = status;
+  return err;
 }
 
 // ─── Non-streaming text generation ──────────────────────────────────────────
 
 export async function generateText(options: AIGenerateOptions): Promise<string> {
-  let claudeError: unknown;
-  try {
-    return await generateWithClaude(options);
-  } catch (e) {
-    claudeError = e;
-  }
-
-  try {
-    return await generateWithGemini(options);
-  } catch (geminiError) {
-    throw buildBothFailedError(claudeError, geminiError);
-  }
-}
-
-// ─── Streaming text generation ──────────────────────────────────────────────
-
-export async function* streamText(
-  options: AIGenerateOptions,
-): AsyncGenerator<string> {
-  let claudeError: unknown;
-  try {
-    yield* streamWithClaude(options);
-    return;
-  } catch (e) {
-    claudeError = e;
-  }
-
-  try {
-    yield* streamWithGemini(options);
-  } catch (geminiError) {
-    throw buildBothFailedError(claudeError, geminiError);
-  }
-}
-
-// ─── Claude (primary) ───────────────────────────────────────────────────────
-
-async function generateWithClaude(options: AIGenerateOptions): Promise<string> {
   let lastError: unknown;
-  for (let attempt = 0; attempt <= CLAUDE_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
       const res = await fetch(`${API_BASE}/generate`, {
         method: 'POST',
@@ -117,33 +92,32 @@ async function generateWithClaude(options: AIGenerateOptions): Promise<string> {
 
       const contentType = res.headers.get('content-type') || '';
       if (!res.ok || !contentType.includes('application/json')) {
-        const detail = await safeReadError(res);
-        const err = new Error(
-          `Claude API error: ${res.status}${detail ? ` — ${detail}` : ''}`,
-        ) as Error & { status?: number };
-        err.status = res.status;
-        throw err;
+        throw makeError(res.status, await safeReadError(res));
       }
 
       const data = await res.json();
       if (typeof data?.text !== 'string') {
-        throw new Error('Claude API devolvió respuesta vacía');
+        throw new Error('IA API devolvio respuesta vacia');
       }
       return data.text;
     } catch (err) {
       lastError = err;
-      if (!isOverloadError(err) || attempt === CLAUDE_RETRIES) break;
+      if (!isTransientError(err) || attempt === CLIENT_RETRIES) break;
       await delay(RETRY_BASE_DELAY_MS * (attempt + 1));
     }
   }
-  throw lastError;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('IA no pudo responder · proba de nuevo en unos segundos.');
 }
 
-async function* streamWithClaude(
+// ─── Streaming text generation ──────────────────────────────────────────────
+
+export async function* streamText(
   options: AIGenerateOptions,
 ): AsyncGenerator<string> {
   let lastError: unknown;
-  for (let attempt = 0; attempt <= CLAUDE_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
       const res = await fetch(`${API_BASE}/stream`, {
         method: 'POST',
@@ -153,12 +127,7 @@ async function* streamWithClaude(
 
       const contentType = res.headers.get('content-type') || '';
       if (!res.ok || !contentType.includes('text/event-stream')) {
-        const detail = await safeReadError(res);
-        const err = new Error(
-          `Claude API error: ${res.status}${detail ? ` — ${detail}` : ''}`,
-        ) as Error & { status?: number };
-        err.status = res.status;
-        throw err;
+        throw makeError(res.status, await safeReadError(res));
       }
 
       const reader = res.body!.getReader();
@@ -190,100 +159,11 @@ async function* streamWithClaude(
       }
     } catch (err) {
       lastError = err;
-      if (!isOverloadError(err) || attempt === CLAUDE_RETRIES) break;
+      if (!isTransientError(err) || attempt === CLIENT_RETRIES) break;
       await delay(RETRY_BASE_DELAY_MS * (attempt + 1));
     }
   }
-  throw lastError;
-}
-
-async function safeReadError(res: Response): Promise<string> {
-  try {
-    const text = await res.text();
-    if (!text) return '';
-    try {
-      const parsed = JSON.parse(text);
-      return parsed?.details || parsed?.error || text.slice(0, 200);
-    } catch {
-      return text.slice(0, 200);
-    }
-  } catch {
-    return '';
-  }
-}
-
-// ─── Gemini (fallback) ──────────────────────────────────────────────────────
-
-async function generateWithGemini(
-  options: AIGenerateOptions,
-): Promise<string> {
-  const key = getGeminiKey();
-  if (!key) throw new Error('No hay API key de Gemini configurada como fallback');
-
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey: key });
-  const contents = buildContents(options);
-
-  let lastError: unknown;
-  for (let attempt = 0; attempt <= GEMINI_RETRIES; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents,
-        ...(options.systemInstruction
-          ? { config: { systemInstruction: options.systemInstruction } }
-          : {}),
-      });
-      return response.text ?? '';
-    } catch (err) {
-      lastError = err;
-      if (!isOverloadError(err) || attempt === GEMINI_RETRIES) break;
-      await delay(RETRY_BASE_DELAY_MS * (attempt + 1));
-    }
-  }
-  throw lastError;
-}
-
-async function* streamWithGemini(
-  options: AIGenerateOptions,
-): AsyncGenerator<string> {
-  const key = getGeminiKey();
-  if (!key) throw new Error('No hay API key de Gemini configurada como fallback');
-
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey: key });
-  const contents = buildContents(options);
-
-  const stream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents,
-    ...(options.systemInstruction
-      ? { config: { systemInstruction: options.systemInstruction } }
-      : {}),
-  });
-
-  for await (const chunk of stream) {
-    if (chunk.text) yield chunk.text;
-  }
-}
-
-// ─── Error formatting ───────────────────────────────────────────────────────
-
-function describe(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === 'string') return err;
-  return 'error desconocido';
-}
-
-function buildBothFailedError(
-  claudeError: unknown,
-  geminiError: unknown,
-): Error {
-  const msg =
-    'Ambos proveedores de IA están saturados. Probá de nuevo en unos minutos.\n' +
-    `· Claude: ${describe(claudeError)}\n` +
-    `· Gemini: ${describe(geminiError)}`;
-  const err = new Error(msg) as Error & { cause?: unknown };
-  err.cause = { claude: claudeError, gemini: geminiError };
-  return err;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('IA no pudo responder · proba de nuevo en unos segundos.');
 }

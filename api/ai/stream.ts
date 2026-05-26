@@ -1,9 +1,17 @@
 /**
- * Vercel Serverless Function — Claude text generation returned as SSE
- * Uses non-streaming Claude internally (avoids Node.js streaming compatibility issues).
- * Returns the full response as a single SSE event so the client handles it uniformly.
+ * Vercel Serverless Function — Text generation devuelta como SSE.
+ *
+ * Internamente NO streamea: pide la respuesta completa al proveedor y la
+ * emite como un unico evento SSE. Esto evita problemas de streaming en
+ * Node.js + Vercel y deja al frontend manejarlo uniformemente.
+ *
+ * Cadena de proveedores (igual que generate.ts):
+ *   1) Claude (Anthropic)
+ *   2) DeepSeek fallback · solo si Claude falla y el error lo amerita
+ *      (credito agotado, rate limit, server error, timeout).
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { callDeepSeek, claudeErrorShouldFallback, isDeepSeekConfigured } from '../_lib/deepseek';
 
 interface AIMessage {
   role: string;
@@ -16,6 +24,16 @@ const MAX_RETRIES = 2;
 
 export const config = { maxDuration: 120 };
 
+function writeSseEvent(res: any, payload: object): void {
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+function startSseStream(res: any): void {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -26,18 +44,21 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  try {
-    const { prompt, systemInstruction, messages } = req.body;
+  const { prompt, systemInstruction, messages } = req.body ?? {};
 
+  const aiMessages: AIMessage[] = messages
+    ? (messages as AIMessage[])
+    : [{ role: 'user', content: prompt }];
+
+  try {
     const client = new Anthropic({ apiKey });
 
-    const claudeMessages: Anthropic.MessageParam[] = messages
-      ? messages.map((m: AIMessage) => ({
-          role: (m.role === 'model' ? 'assistant' : m.role) as 'user' | 'assistant',
-          content: m.content,
-        }))
-      : [{ role: 'user' as const, content: prompt }];
+    const claudeMessages: Anthropic.MessageParam[] = aiMessages.map((m) => ({
+      role: (m.role === 'model' ? 'assistant' : m.role) as 'user' | 'assistant',
+      content: m.content,
+    }));
 
+    // ─── 1) Claude (primario) ─────────────────────────────────────────────
     let lastError: unknown;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -51,10 +72,8 @@ export default async function handler(req: any, res: any) {
         const text =
           response.content[0].type === 'text' ? response.content[0].text : '';
 
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.write(`data: ${JSON.stringify({ text })}\n\n`);
+        startSseStream(res);
+        writeSseEvent(res, { text, provider: 'claude' });
         res.write('data: [DONE]\n\n');
         return res.end();
       } catch (err: any) {
@@ -69,10 +88,53 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    const errorMsg =
-      lastError instanceof Error ? lastError.message : String(lastError);
-    console.error('[api/ai/stream] Claude error:', errorMsg);
-    return res.status(502).json({ error: 'Claude API error', details: errorMsg });
+    // ─── 2) DeepSeek (fallback) ───────────────────────────────────────────
+    const errAny = lastError as { status?: number; message?: string } | undefined;
+    const errorMsg = errAny?.message ?? 'Unknown error';
+    console.error('[api/ai/stream] Claude error after retries:', {
+      status: errAny?.status,
+      message: errorMsg,
+      model: MODEL,
+    });
+
+    if (isDeepSeekConfigured() && claudeErrorShouldFallback(lastError)) {
+      console.warn('[api/ai/stream] Falling back to DeepSeek due to Claude error');
+      try {
+        const { text, usage } = await callDeepSeek({
+          system: systemInstruction,
+          messages: aiMessages,
+          maxTokens: MAX_TOKENS,
+        });
+        startSseStream(res);
+        writeSseEvent(res, {
+          text,
+          provider: 'deepseek',
+          fallback_reason: errorMsg,
+          usage,
+        });
+        res.write('data: [DONE]\n\n');
+        return res.end();
+      } catch (dsErr) {
+        const dsMsg = dsErr instanceof Error ? dsErr.message : String(dsErr);
+        console.error('[api/ai/stream] DeepSeek fallback also failed:', dsMsg);
+        return res.status(502).json({
+          error: 'Both providers failed',
+          claude_error: errorMsg,
+          claude_status: errAny?.status ?? null,
+          deepseek_error: dsMsg,
+        });
+      }
+    }
+
+    return res.status(502).json({
+      error: 'Claude API error',
+      details: errorMsg,
+      claudeStatus: errAny?.status ?? null,
+      fallback_attempted: false,
+      fallback_reason: !isDeepSeekConfigured()
+        ? 'DEEPSEEK_API_KEY not configured'
+        : 'Error type does not warrant fallback',
+    });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error('[api/ai/stream] Server error:', errorMsg);
