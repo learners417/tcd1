@@ -15,6 +15,45 @@ import { generateText } from '../../lib/aiProvider';
 import { toast } from 'sonner';
 import Markdown from 'react-markdown';
 
+/**
+ * Fallback v8 · construye un prompt genérico cuando la herramienta de la tarea
+ * NO está registrada en el catálogo `herramientas.ts`. Usa el título + descripción
+ * de la tarea + el contexto del ADN para que la IA genere algo útil. Esto evita
+ * que el botón "Generar con IA" quede inactivo silenciosamente.
+ */
+function buildPromptGenerico(meta: RoadmapMeta, perfil: Partial<ProfileV2>): string {
+  const contexto = [
+    perfil.especialidad ? `Profesión: ${perfil.especialidad}` : '',
+    perfil.nicho ? `Nicho: ${perfil.nicho}` : '',
+    perfil.metodo_nombre ? `Método propio: ${perfil.metodo_nombre}` : '',
+    perfil.metodo_pasos ? `Pasos del método: ${perfil.metodo_pasos}` : '',
+    perfil.matriz_a ? `Matriz A (dolores): ${perfil.matriz_a}` : '',
+    perfil.matriz_b ? `Matriz B (obstáculos): ${perfil.matriz_b}` : '',
+    perfil.matriz_c ? `Matriz C (transformación): ${perfil.matriz_c}` : '',
+    perfil.adn_usp ? `PUV: ${perfil.adn_usp}` : '',
+    perfil.proposito ? `Propósito: ${perfil.proposito}` : '',
+    perfil.historia_50 ? `Historia corta: ${perfil.historia_50}` : '',
+    perfil.oferta_mid ? `Oferta principal (Mid): ${perfil.oferta_mid}` : '',
+  ].filter(Boolean).join('\n');
+
+  return `Generá el output requerido para esta tarea del programa de 90 días para sanadores.
+
+TAREA: ${meta.codigo} · ${meta.titulo}
+
+DESCRIPCIÓN / INSTRUCCIONES:
+${meta.descripcion}
+
+CONTEXTO DEL PROFESIONAL (su ADN):
+${contexto || '(ADN aún incompleto · generá algo útil con la información disponible)'}
+
+FORMATO DE RESPUESTA:
+- Texto en markdown, listo para copiar al ADN del cliente
+- Sin disclaimers ("aquí está...", "te dejo...")
+- Voz del profesional, no de la IA
+- Si la tarea pide un formato específico (lista, párrafos, tabla), respetalo
+- Largo apropiado para el tipo de contenido (no inventes datos que no estén en el ADN)`;
+}
+
 interface TaskHerramientaIAProps {
   meta: RoadmapMeta;
   perfil?: Partial<ProfileV2>;
@@ -31,7 +70,11 @@ export default function TaskHerramientaIA({
 }: TaskHerramientaIAProps) {
   const herramienta = meta.herramienta_id ? getHerramienta(meta.herramienta_id) : null;
   const inputs = herramienta?.inputs ?? [];
-  const usaIA = herramienta ? (herramienta as any).usa_ia !== false : true;
+  // Si hay herramienta registrada, respeta su flag `usa_ia`. Si no hay, cae a
+  // `meta.usa_ia` del seed (v8: P0.3 y P1.2b son false; el resto true).
+  const usaIA = herramienta
+    ? (herramienta as { usa_ia?: boolean }).usa_ia !== false
+    : meta.usa_ia !== false;
 
   const [modo, setModo] = useState<Modo>(
     isCompleted && outputExistente ? 'guardado' : 'form'
@@ -57,7 +100,40 @@ export default function TaskHerramientaIA({
 
   // ─── Generate with AI ─────────────────────────────────────────────────────
   const handleGenerate = async () => {
-    if (!herramienta) return;
+    // Fallback v8: si la herramienta NO está registrada en el catálogo
+    // (`herramientas.ts`), igual permitimos avanzar. Dos sub-casos:
+    //   a) meta.usa_ia !== false → IA genérica con título+descripción+ADN
+    //   b) meta.usa_ia === false → guardar el texto que el usuario escribió
+    //      en el textarea libre (modo escritura pura · P0.3, P1.2b)
+    if (!herramienta) {
+      if (!usaIA) {
+        const libre = (formValues.__libre__ || '').trim();
+        if (!libre) {
+          toast.error('Escribí algo antes de guardar');
+          return;
+        }
+        setOutput(libre);
+        setModo('revision');
+        return;
+      }
+      setModo('generando');
+      try {
+        const promptGenerico = buildPromptGenerico(meta, perfil ?? {});
+        const text = await generateText({
+          prompt: promptGenerico,
+          systemInstruction:
+            'Sos un copywriter especialista en profesionales de la salud. Generás contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
+        });
+        setOutput(text);
+        setModo('revision');
+        setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al generar: ${msg}. Intentá de nuevo.`);
+        setModo('form');
+      }
+      return;
+    }
 
     if (usaIA) {
       setModo('generando');
@@ -67,8 +143,9 @@ export default function TaskHerramientaIA({
         setOutput(text);
         setModo('revision');
         setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      } catch {
-        toast.error('Error al generar. Intentá de nuevo.');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al generar: ${msg}. Intentá de nuevo.`);
         setModo('form');
       }
     } else {
@@ -213,6 +290,20 @@ export default function TaskHerramientaIA({
                 })
               )}
             </>
+          ) : !herramienta && !usaIA ? (
+            // v8 fallback · sin herramienta registrada y sin IA · textarea libre
+            <div className="space-y-2">
+              <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">
+                Escribí acá tu respuesta
+              </label>
+              <textarea
+                value={formValues.__libre__ || ''}
+                onChange={(e) => handleFieldChange('__libre__', e.target.value)}
+                placeholder={meta.descripcion.slice(0, 120) + '...'}
+                rows={8}
+                className="w-full input-field resize-y min-h-[180px]"
+              />
+            </div>
           ) : (
             // No inputs — herramienta uses previous ADN data
             <div className="card-panel p-5 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
@@ -229,7 +320,7 @@ export default function TaskHerramientaIA({
 
           <button
             onClick={handleGenerate}
-            disabled={!requiredFieldsFilled}
+            disabled={!requiredFieldsFilled && herramienta !== null}
             className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {usaIA ? (

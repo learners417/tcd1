@@ -16,11 +16,34 @@ import type { RoadmapMeta } from '../../lib/roadmapSeed';
 
 interface TaskFotoPartidaProps {
   meta: RoadmapMeta;
-  /** Valor existente (si el usuario ya tomó la foto antes). */
-  valorExistente?: number[];
+  /**
+   * Valor existente. Puede venir como `number[]` (formato correcto) o como `string`
+   * (datos legacy que se guardaron como JSON.stringify por bug en handleSaveADN).
+   * Parseamos defensivamente.
+   */
+  valorExistente?: number[] | string;
   /** Llamado al guardar. Output es JSON.stringify del array para reusar el flujo de outputs. */
   onSaveADN: (outputTexto: string, scores: number[]) => void;
   isCompleted: boolean;
+}
+
+/** Normaliza `valorExistente` que puede venir como array o como JSON string. */
+function parseValorExistente(valor: number[] | string | undefined): number[] | undefined {
+  if (!valor) return undefined;
+  if (Array.isArray(valor)) {
+    return valor.every((v) => typeof v === 'number') ? valor : undefined;
+  }
+  if (typeof valor === 'string') {
+    try {
+      const parsed = JSON.parse(valor);
+      if (Array.isArray(parsed) && parsed.every((v) => typeof v === 'number')) {
+        return parsed;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
 
 const SCORE_LABELS: Record<1 | 2 | 3 | 4 | 5, string> = {
@@ -37,10 +60,11 @@ export default function TaskFotoPartida({
   onSaveADN,
   isCompleted,
 }: TaskFotoPartidaProps) {
-  // Inicializa con valor existente o array de 3s (medio neutral).
+  // Inicializa con valor existente (parseado) o array de 3s (medio neutral).
   const [scores, setScores] = useState<number[]>(() => {
-    if (valorExistente && valorExistente.length === DIMENSIONES_FOTO_PARTIDA.length) {
-      return [...valorExistente];
+    const parsed = parseValorExistente(valorExistente);
+    if (parsed && parsed.length === DIMENSIONES_FOTO_PARTIDA.length) {
+      return [...parsed];
     }
     return DIMENSIONES_FOTO_PARTIDA.map(() => 3);
   });
@@ -48,8 +72,9 @@ export default function TaskFotoPartida({
 
   // Sincroniza si llega un valorExistente nuevo (ej. al re-abrir la tarea).
   useEffect(() => {
-    if (valorExistente && valorExistente.length === DIMENSIONES_FOTO_PARTIDA.length) {
-      setScores([...valorExistente]);
+    const parsed = parseValorExistente(valorExistente);
+    if (parsed && parsed.length === DIMENSIONES_FOTO_PARTIDA.length) {
+      setScores([...parsed]);
       setSaved(isCompleted);
     }
   }, [valorExistente, isCompleted]);

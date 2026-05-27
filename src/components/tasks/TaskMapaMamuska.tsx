@@ -33,9 +33,28 @@ function nuevoId(): string {
 interface TaskMapaMamuskaProps {
   meta: RoadmapMeta;
   perfil?: Partial<ProfileV2>;
-  valorExistente?: MamuskaFila[];
+  /**
+   * Valor existente. Puede venir como `AdnMapeoObstaculos[]` (correcto) o como
+   * `string` (datos legacy guardados como JSON.stringify). Parseamos defensivo.
+   */
+  valorExistente?: MamuskaFila[] | string;
   onSaveADN: (outputTexto: string, filas: MamuskaFila[]) => void;
   isCompleted: boolean;
+}
+
+/** Normaliza `valorExistente` que puede venir como array o como JSON string. */
+function parseValorExistente(valor: MamuskaFila[] | string | undefined): MamuskaFila[] | undefined {
+  if (!valor) return undefined;
+  if (Array.isArray(valor)) return valor;
+  if (typeof valor === 'string') {
+    try {
+      const parsed = JSON.parse(valor);
+      if (Array.isArray(parsed)) return parsed as MamuskaFila[];
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
 
 const OFERTA_LABELS: Record<MamuskaFila['oferta'], string> = {
@@ -79,8 +98,9 @@ export default function TaskMapaMamuska({
   // Si hay valor existente lo usamos. Sino, pre-llenamos con los mapeos de P7.4
   // (adn_metodo_mapeo_obstaculos) extendiendo cada fila con oferta + conciencia vacíos.
   const seedInicial = useMemo<MamuskaFilaConId[]>(() => {
-    if (valorExistente && valorExistente.length > 0) {
-      return valorExistente.map(conId);
+    const parsed = parseValorExistente(valorExistente);
+    if (parsed && parsed.length > 0) {
+      return parsed.map(conId);
     }
     const mapeoP7 = perfil?.adn_metodo_mapeo_obstaculos;
     if (Array.isArray(mapeoP7) && mapeoP7.length > 0) {
@@ -93,8 +113,9 @@ export default function TaskMapaMamuska({
   const [saved, setSaved] = useState(isCompleted);
 
   useEffect(() => {
-    if (valorExistente && valorExistente.length > 0) {
-      setFilas(valorExistente.map(conId));
+    const parsed = parseValorExistente(valorExistente);
+    if (parsed && parsed.length > 0) {
+      setFilas(parsed.map(conId));
       setSaved(isCompleted);
     }
   }, [valorExistente, isCompleted]);

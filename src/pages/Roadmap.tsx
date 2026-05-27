@@ -72,6 +72,24 @@ import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
 
+// ─── Constantes v8 ────────────────────────────────────────────────────────────
+
+/**
+ * Campos del perfil que se persisten como JSONB (array/objeto), no como text.
+ * El componente custom de cada tarea entrega el valor ya estructurado, pero el
+ * `onSaveADN` recibe el outputTexto como JSON.stringify(value). Para que la DB
+ * reciba el tipo correcto (y la re-hidratación al re-abrir la tarea funcione),
+ * parseamos el JSON antes del UPDATE. Si el parse falla, caemos al string raw.
+ */
+const CAMPOS_JSONB_ARRAY = new Set<string>([
+  'adn_autoevaluacion_dia1',         // P0.2 · Foto de Partida · number[]
+  'adn_metodo_mapeo_obstaculos',     // P7.4 + P8.8 (Mamuska) · AdnMapeoObstaculos[]
+  'adn_diagnostico_capa',            // P2.4 · AdnDiagnosticoCapa
+  'adn_cinco_no',                    // P2.5 · AdnCincoNo
+  'adn_oferta_ultralow',             // P8.3 · AdnOfertaUltralow
+  'adn_validacion_organica',         // P9A.4 · AdnValidacionOrganica
+]);
+
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
 type EstadoPilar = 'completado' | 'en_progreso' | 'bloqueado';
@@ -589,6 +607,15 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           // P5.2 genera nicho + 3 PUVs · guardamos ambos campos para que el
           // Coach IA no vuelva a mandar a definir la PUV (caso Sol).
           profileUpdate = parseNichoYPuv(outputTexto);
+        } else if (CAMPOS_JSONB_ARRAY.has(meta.adn_field)) {
+          // v8 · campos JSONB que reciben array/objeto desde el componente
+          // custom. outputTexto viene como JSON.stringify(arr); parseamos para
+          // que la DB reciba el tipo correcto y la re-hidratación funcione.
+          try {
+            profileUpdate = { [meta.adn_field]: JSON.parse(outputTexto) };
+          } catch {
+            profileUpdate = { [meta.adn_field]: outputTexto };
+          }
         } else {
           profileUpdate = { [meta.adn_field]: outputTexto };
         }
