@@ -1,41 +1,18 @@
 /**
  * aiProvider.ts — Cliente unificado de generacion de texto.
  *
- * Cadena de proveedores:
- *   1) Claude (Anthropic) · primario
- *   2) DeepSeek · fallback transparente · server-side
+ * Habla solo con `/api/ai/generate` y `/api/ai/stream`. El backend decide
+ * que proveedor usar (DeepSeek primario · Claude fallback). El cliente NO
+ * elige proveedor · si fuera necesario forzarlo se hace via env var
+ * server-side (FORCE_AI_PROVIDER en Vercel).
  *
- * IMPORTANTE: La conmutacion Claude → DeepSeek ocurre EN EL SERVER
- * (api/ai/generate.ts y api/ai/stream.ts). Este archivo del cliente solo
- * habla con `/api/ai/generate` y `/api/ai/stream` · no necesita saber cual
- * proveedor respondio (aunque el backend devuelve `provider` en la respuesta
- * por si se quiere loguear).
- *
- * Gemini ya NO es fallback de texto (movimos la contingencia a DeepSeek que
- * es ~10x mas barato). Gemini sigue usandose para generacion de IMAGENES
- * en campanasImageGen.ts · ese flujo es independiente.
+ * Gemini sigue usandose en campanasImageGen.ts para GENERACION de imagenes ·
+ * ese flujo es independiente y no usa este modulo.
  *
  * Reintentos del cliente: cuando el endpoint server devuelve un error
  * transitorio (5xx · timeout) hacemos hasta CLIENT_RETRIES intentos con
  * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
-
-import { toast } from 'sonner';
-import { buildProviderHeader, getAIProviderOverride } from './aiProviderOverride';
-
-/**
- * Cuando hay override activo, mostramos un toast inmediato con el provider
- * que respondio. Permite verificar visualmente que el switch funciona sin
- * tener que abrir DevTools / Network / Console.
- */
-function notificarProvider(provider: string | undefined, forced: boolean): void {
-  const override = getAIProviderOverride();
-  if (override === 'auto') return;
-  if (!provider) return;
-  const emoji = provider === 'deepseek' ? '🐳' : provider === 'claude' ? '🤖' : '❓';
-  const label = forced ? 'forzado' : 'fallback';
-  toast.message(`${emoji} Respondio: ${provider} (${label})`, { duration: 2500 });
-}
 
 const API_BASE = '/api/ai';
 
@@ -98,17 +75,12 @@ function makeError(status: number, detail: string): Error & { status: number } {
 // ─── Non-streaming text generation ──────────────────────────────────────────
 
 export async function generateText(options: AIGenerateOptions): Promise<string> {
-  const override = getAIProviderOverride();
-  if (override !== 'auto') {
-    // eslint-disable-next-line no-console
-    console.log(`[AI] generateText · override activo: ${override}`);
-  }
   let lastError: unknown;
   for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
       const res = await fetch(`${API_BASE}/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...buildProviderHeader() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
       });
 
@@ -121,11 +93,6 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
       if (typeof data?.text !== 'string') {
         throw new Error('IA API devolvio respuesta vacia');
       }
-      if (override !== 'auto' || data.provider === 'deepseek') {
-        // eslint-disable-next-line no-console
-        console.log(`[AI] generateText · respondio: ${data.provider}${data.forced ? ' (forzado)' : data.fallback_reason ? ' (fallback)' : ''}`);
-      }
-      notificarProvider(data.provider, Boolean(data.forced));
       return data.text;
     } catch (err) {
       lastError = err;
@@ -143,17 +110,12 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
 export async function* streamText(
   options: AIGenerateOptions,
 ): AsyncGenerator<string> {
-  const override = getAIProviderOverride();
-  if (override !== 'auto') {
-    // eslint-disable-next-line no-console
-    console.log(`[AI] streamText · override activo: ${override}`);
-  }
   let lastError: unknown;
   for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
     try {
       const res = await fetch(`${API_BASE}/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...buildProviderHeader() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
       });
 
@@ -180,11 +142,6 @@ export async function* streamText(
             if (raw === '[DONE]') return;
             try {
               const parsed = JSON.parse(raw);
-              if (parsed.provider && (override !== 'auto' || parsed.provider === 'deepseek')) {
-                // eslint-disable-next-line no-console
-                console.log(`[AI] streamText · respondio: ${parsed.provider}${parsed.forced ? ' (forzado)' : parsed.fallback_reason ? ' (fallback)' : ''}`);
-                notificarProvider(parsed.provider, Boolean(parsed.forced));
-              }
               if (parsed.text) yield parsed.text;
               if (parsed.error) throw new Error(parsed.error);
             } catch (e) {

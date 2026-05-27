@@ -23,11 +23,13 @@ Configurar en `.env.local` (dev) y en **Vercel Dashboard → Settings → Enviro
 ### Texto / IA (backend)
 | Var | Requerida | Para qué |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Sí | Claude · proveedor primario de texto (Coach, agentes, herramientas). |
-| `DEEPSEEK_API_KEY` | Recomendada | DeepSeek · fallback transparente si Claude falla por crédito agotado, rate limit, server error o timeout. ~10x más barato que Sonnet 4.6. |
+| `DEEPSEEK_API_KEY` | Sí | DeepSeek · proveedor primario de texto (Coach, agentes, herramientas). ~10x más barato que Claude Sonnet. |
+| `ANTHROPIC_API_KEY` | Sí | Claude · (1) fallback de texto cuando DeepSeek falla, (2) vision para describir imágenes adjuntas (DeepSeek V3/V4 no soporta vision). |
 | `DEEPSEEK_MODEL` | Opcional | Override del modelo DeepSeek. Default: `deepseek-chat` (la versión estable más reciente de DeepSeek). |
 | `DEEPSEEK_MAX_TOKENS` | Opcional | Override del max_tokens enviado a DeepSeek. Default: 8192. |
-| `FORCE_AI_PROVIDER` | **Solo testing** | Forza el proveedor para TODAS las requests, ignora el header del switch admin y el fallback. Valores: `deepseek` o `claude`. **Acordate de quitarla al terminar de testear** o todos los usuarios reales usan ese proveedor. |
+| `CLAUDE_MODEL` | Opcional | Override del modelo Claude. Default: `claude-sonnet-4-6`. |
+| `CLAUDE_MAX_TOKENS` | Opcional | Override del max_tokens enviado a Claude. Default: 16384. |
+| `FORCE_AI_PROVIDER` | **Solo testing** | Forza el proveedor para TODAS las requests, skipea la cadena default. Valores: `deepseek` o `claude`. **Acordate de quitarla al terminar de testear** o todos los usuarios reales usan ese proveedor. |
 
 ### Imágenes (independiente del fallback de texto)
 | Var | Requerida | Para qué |
@@ -49,14 +51,20 @@ Ver `src/lib/credits.ts` y `api/_lib/paypal.ts`.
 Frontend (aiProvider.ts)
         │
         ▼
-   /api/ai/generate  ──►  Claude (Anthropic)  ──►  OK
+   /api/ai/generate  ──►  DeepSeek (primary, barato)  ──►  OK
                               │
-                              ▼ (credit/rate/timeout)
-                          DeepSeek  ──►  OK ó error final
+                              ▼ (credit/rate/timeout/server error)
+                          Claude (fallback)  ──►  OK ó error final
+
    /api/ai/stream     ──►  (misma cadena, devuelve SSE)
+
+   /api/ai/describe-image  ──►  Claude (vision, sin fallback)
+                                DeepSeek no acepta imágenes.
 ```
 
-El fallback es **transparente** para el frontend. La respuesta JSON incluye `provider: 'claude' | 'deepseek'` para debugging.
+El fallback es **transparente** para el frontend. La respuesta JSON incluye `provider: 'claude' | 'deepseek'` y opcionalmente `fallback_reason` para debugging.
+
+**Pipeline de adjuntos con imágenes**: el cliente sube una imagen → `/api/ai/describe-image` la convierte a texto vía Claude Vision → el texto entra al prompt → `/api/ai/generate` o `/api/ai/stream` lo procesa (DeepSeek o Claude según disponibilidad). DeepSeek nunca ve la imagen, solo la descripción textual.
 
 ## Migraciones SQL
 

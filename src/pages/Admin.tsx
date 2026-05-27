@@ -17,7 +17,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Cpu,
+  Mail, KeyRound, Fingerprint, ChevronLeft,
 } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -28,7 +28,6 @@ import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, t
 import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
-import { getAIProviderOverride, setAIProviderOverride, type AIProviderOverride } from '../lib/aiProviderOverride';
 import { usePersistedState } from '../lib/usePersistedState';
 import { toast } from 'sonner';
 import { createClient } from '@supabase/supabase-js';
@@ -449,17 +448,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [adminAvatar, setAdminAvatar] = useState<string>(() => localStorage.getItem(`tcd_admin_avatar_${adminProfile.id}`) || '');
   const [guardandoAdmin, setGuardandoAdmin] = useState(false);
   const adminAvatarInputRef = useRef<HTMLInputElement>(null);
-
-  // AI provider override (solo owner) · testing del fallback DeepSeek sin
-  // tener que romper la API key de Anthropic.
-  const [aiOverride, setAiOverrideState] = useState<AIProviderOverride>(() => getAIProviderOverride());
-  function aplicarOverride(next: AIProviderOverride) {
-    setAIProviderOverride(next);
-    setAiOverrideState(next);
-    if (next === 'auto') toast.success('Proveedor de IA: auto (Claude → DeepSeek)');
-    else if (next === 'claude') toast.success('Proveedor de IA forzado: Claude');
-    else toast.success('Proveedor de IA forzado: DeepSeek');
-  }
 
   // Equipo
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -1653,41 +1641,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <Settings className="w-3.5 h-3.5" />
             </button>
           </div>
-          {/* AI provider override (solo owner · dev tool) */}
-          {adminRol === 'owner' && !sidebarCollapsed && (
-            <div className="mb-3 p-2.5 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.15)]">
-              <div className="flex items-center gap-1.5 mb-2 px-0.5">
-                <Cpu className="w-3 h-3 text-[#F5A623]" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#F5A623]">Proveedor IA</span>
-                {aiOverride !== 'auto' && (
-                  <span className="ml-auto px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-[#F5A623]/20 text-[#F5A623] uppercase tracking-wider">
-                    Forzado
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-1">
-                {(['auto', 'claude', 'deepseek'] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => aplicarOverride(opt)}
-                    className={`px-1 py-1 rounded-md text-[10px] font-semibold transition-colors capitalize ${
-                      aiOverride === opt
-                        ? 'bg-[#F5A623] text-[#0A0A0A]'
-                        : 'bg-black/30 text-[#FFFFFF]/50 hover:bg-black/50 hover:text-[#FFFFFF]'
-                    }`}
-                    title={
-                      opt === 'auto' ? 'Default: Claude · fallback DeepSeek si falla'
-                      : opt === 'claude' ? 'Forzar Claude · sin fallback'
-                      : 'Forzar DeepSeek · saltar Claude'
-                    }
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <button
             onClick={onSignOut}
             title={sidebarCollapsed ? 'Salir del sistema' : undefined}

@@ -133,19 +133,25 @@ async function safeReadText(res: Response): Promise<string> {
 }
 
 /**
- * Heuristica para decidir si vale la pena hacer fallback a DeepSeek tras un
- * error de Claude. Casos donde SI conviene:
- *   - Credito agotado de Anthropic (400 con "credit_balance")
+ * Heuristica generica: vale la pena hacer fallback al otro proveedor tras
+ * un error? Aplica tanto a errores de Claude como de DeepSeek porque ambos
+ * exponen codigos HTTP estandar de la familia OpenAI-like.
+ *
+ * Fallback SI:
+ *   - Credito agotado:
+ *       · Anthropic devuelve 400 con "credit_balance"
+ *       · DeepSeek devuelve 402 Payment Required ("insufficient_balance")
  *   - Rate limit / overload (429, 503, 529)
  *   - Server errors (500, 502, 504)
- *   - Timeouts de red
- * Casos donde NO conviene (probablemente DeepSeek tambien va a fallar o es
- * un problema de config que hay que resolver):
- *   - 401 / 403 (API key invalida)
- *   - 404 (modelo no existe en la cuenta · esto es config)
- *   - Otros 400 que no son credito (prompt malformado)
+ *   - Timeouts / fallas de red
+ *
+ * Fallback NO:
+ *   - 401 / 403 (API key invalida en ese proveedor · es config, no transient)
+ *   - 404 (modelo no existe · config)
+ *   - 422 (prompt malformado · el otro proveedor tambien lo rechazaria)
+ *   - Otros 400 no relacionados a credito
  */
-export function claudeErrorShouldFallback(err: unknown): boolean {
+export function shouldFallback(err: unknown): boolean {
   const e = err as { status?: number; message?: string } | undefined;
   if (!e) return false;
 
@@ -155,16 +161,25 @@ export function claudeErrorShouldFallback(err: unknown): boolean {
   if (status === 429 || status === 500 || status === 502 || status === 503 || status === 504 || status === 529) {
     return true;
   }
+  // Anthropic: 400 + credit_balance message
   if (status === 400 && (msg.includes('credit_balance') || msg.includes('credit balance'))) {
+    return true;
+  }
+  // DeepSeek: 402 Payment Required (insufficient balance)
+  if (status === 402 || msg.includes('insufficient_balance') || msg.includes('insufficient balance')) {
     return true;
   }
   if (
     msg.includes('etimedout') ||
     msg.includes('econnreset') ||
     msg.includes('socket hang up') ||
-    msg.includes('network')
+    msg.includes('network') ||
+    msg.includes('timeout')
   ) {
     return true;
   }
   return false;
 }
+
+/** @deprecated Use shouldFallback() · misma logica con mejor naming. */
+export const claudeErrorShouldFallback = shouldFallback;

@@ -2,30 +2,28 @@
  * Vercel Serverless Function — Non-streaming text generation.
  *
  * Cadena de proveedores (server-side, transparente para el frontend):
- *   1) Claude (Anthropic) · modelo en const MODEL.
- *   2) DeepSeek · solo si Claude falla con un error donde el fallback tiene
- *      sentido (credito agotado, rate limit, server error, timeout).
- *      Ver claudeErrorShouldFallback() en api/_lib/deepseek.ts.
+ *   1) DeepSeek (primary) · ~10x mas barato por request que Claude Sonnet
+ *   2) Claude (fallback) · solo si DeepSeek falla con un error donde el
+ *      fallback tiene sentido (credito agotado, rate limit, timeout, etc).
+ *      Ver shouldFallback() en api/_lib/deepseek.ts.
  *
- * El frontend siempre llama a este mismo endpoint · no se entera de cual
- * proveedor respondio. El response JSON incluye `provider` para debugging.
+ * Claude sigue siendo el unico proveedor con vision (api/ai/describe-image)
+ * porque DeepSeek V3/V4 no acepta imagenes. Cuando se atachan imagenes,
+ * el flujo es: describe-image (Claude Vision) → texto → /generate (DeepSeek).
+ *
+ * Override de testing: env var FORCE_AI_PROVIDER=deepseek|claude permite
+ * forzar un proveedor para TODA la app. Usar solo para testing, recordar
+ * borrarla del Vercel dashboard cuando se termina.
+ *
+ * El response JSON incluye `provider` para debugging desde el frontend.
  */
-import Anthropic from '@anthropic-ai/sdk';
-import { callDeepSeek, claudeErrorShouldFallback, isDeepSeekConfigured } from '../_lib/deepseek.js';
+import { callDeepSeek, isDeepSeekConfigured, shouldFallback } from '../_lib/deepseek.js';
+import { callClaude, isClaudeConfigured } from '../_lib/claude.js';
 
-interface AIMessage {
-  role: string;
-  content: string;
-}
-
-const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 16384;
-const MAX_RETRIES = 2;
 
 // Vercel function config · sin esto el default es 10s (hobby) o 60s (pro).
-// Los entrenadores tienen system prompts grandes (voz-javo + ADN + dialecto +
-// prompt especifico del agente) · Claude puede tardar mas de 10s y Vercel
-// devolveria 502 Bad Gateway. Alineado con stream.ts.
+// Los entrenadores tienen system prompts grandes; mejor margen de 120s.
 export const config = { maxDuration: 120 };
 
 export default async function handler(req: any, res: any) {
@@ -33,141 +31,114 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
-  }
-
   const { prompt, systemInstruction, messages } = req.body ?? {};
-
-  const aiMessages: AIMessage[] = messages
-    ? (messages as AIMessage[])
+  const aiMessages = messages
+    ? (messages as Array<{ role: string; content: string }>)
     : [{ role: 'user', content: prompt }];
 
-  // Override global desde env var · tiene PRIORIDAD sobre el header del cliente.
-  // Util para testear DeepSeek cross-browser/cross-device sin depender del
-  // localStorage del switch admin. Setear en Vercel Dashboard → Settings →
-  // Environment Variables y redeployar. Acordate de quitarla cuando termines
-  // de testear · si se queda prendida afecta a TODOS los usuarios reales.
+  // ─── Override de proveedor (testing) ──────────────────────────────────
   const envForce = String(process.env.FORCE_AI_PROVIDER ?? '').toLowerCase();
-  // Override admin-only via header. Aceptamos ambas variantes (con y sin X-)
-  // por si algun CDN/proxy filtra headers no-estandar X-*.
-  const rawHeaderXprefix = req.headers?.['x-ai-provider'];
-  const rawHeaderNoPrefix = req.headers?.['ai-provider'];
-  const headerOverride = String(rawHeaderXprefix ?? rawHeaderNoPrefix ?? '').toLowerCase();
-  // Env var gana sobre header.
-  const providerOverride = envForce || headerOverride;
-  const forceDeepSeek = providerOverride === 'deepseek';
-  const forceClaude = providerOverride === 'claude';
-  // Log SIEMPRE · para confirmar el origen del override en cada request.
-  console.log(`[api/ai/generate] FORCE_AI_PROVIDER env="${envForce}" · header x-ai-provider="${rawHeaderXprefix ?? ''}" ai-provider="${rawHeaderNoPrefix ?? ''}" · resolved="${providerOverride}" · forceDeepSeek=${forceDeepSeek} · forceClaude=${forceClaude} · deepseekConfigured=${isDeepSeekConfigured()}`);
+  const forceDeepSeek = envForce === 'deepseek';
+  const forceClaude = envForce === 'claude';
+  if (envForce) {
+    console.log(`[api/ai/generate] FORCE_AI_PROVIDER="${envForce}" activa · skip cadena default`);
+  }
 
-  // ─── 0) Atajo: forzar DeepSeek (testing admin) ─────────────────────────
-  if (forceDeepSeek) {
-    if (!isDeepSeekConfigured()) {
-      return res.status(500).json({
-        error: 'DEEPSEEK_API_KEY not configured',
-        forced: 'deepseek',
-      });
+  // ─── Path: forzar Claude (skip DeepSeek) ──────────────────────────────
+  if (forceClaude) {
+    if (!isClaudeConfigured()) {
+      return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured', forced: 'claude' });
     }
+    try {
+      const { text, usage } = await callClaude({
+        system: systemInstruction,
+        messages: aiMessages,
+        maxTokens: MAX_TOKENS,
+      });
+      return res.status(200).json({ text, provider: 'claude', forced: true, usage });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const status = (err as { status?: number })?.status;
+      console.error('[api/ai/generate] Claude (forced) failed:', { status, msg });
+      return res.status(502).json({ error: 'Claude API error', details: msg, claudeStatus: status ?? null, forced: 'claude' });
+    }
+  }
+
+  // ─── 1) DeepSeek (primary) ─────────────────────────────────────────────
+  let dsError: unknown = null;
+  if (isDeepSeekConfigured()) {
     try {
       const { text, usage } = await callDeepSeek({
         system: systemInstruction,
         messages: aiMessages,
         maxTokens: MAX_TOKENS,
       });
-      return res.status(200).json({ text, provider: 'deepseek', forced: true, usage });
-    } catch (dsErr) {
-      const dsMsg = dsErr instanceof Error ? dsErr.message : String(dsErr);
-      console.error('[api/ai/generate] DeepSeek (forced) failed:', dsMsg);
-      return res.status(502).json({ error: 'DeepSeek API error', details: dsMsg, forced: 'deepseek' });
+      return res.status(200).json({ text, provider: 'deepseek', ...(forceDeepSeek ? { forced: true } : {}), usage });
+    } catch (err) {
+      dsError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const status = (err as { status?: number })?.status;
+      console.error('[api/ai/generate] DeepSeek failed:', { status, msg });
     }
+  } else if (forceDeepSeek) {
+    return res.status(500).json({ error: 'DEEPSEEK_API_KEY not configured', forced: 'deepseek' });
+  } else {
+    console.warn('[api/ai/generate] DEEPSEEK_API_KEY no configurada · saltando a Claude');
   }
 
-  // ─── 1) Claude (primario) ──────────────────────────────────────────────
-  try {
-    const client = new Anthropic({ apiKey });
+  // Si forzaron DeepSeek, no caemos a Claude.
+  if (forceDeepSeek) {
+    const msg = dsError instanceof Error ? dsError.message : 'DeepSeek failed';
+    return res.status(502).json({ error: 'DeepSeek API error', details: msg, forced: 'deepseek' });
+  }
 
-    const claudeMessages: Anthropic.MessageParam[] = aiMessages.map((m) => ({
-      role: (m.role === 'model' ? 'assistant' : m.role) as 'user' | 'assistant',
-      content: m.content,
-    }));
-
-    let lastError: unknown;
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        const response = await client.messages.create({
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          ...(systemInstruction ? { system: systemInstruction } : {}),
-          messages: claudeMessages,
-        });
-
-        const text =
-          response.content[0].type === 'text' ? response.content[0].text : '';
-        return res.status(200).json({ text, provider: 'claude' });
-      } catch (err: any) {
-        lastError = err;
-        const isRetryable =
-          err?.status === 429 ||
-          err?.status === 500 ||
-          err?.status === 503 ||
-          err?.status === 529;
-        if (!isRetryable || attempt === MAX_RETRIES) break;
-        await new Promise((r) => setTimeout(r, (attempt + 1) * 2000));
-      }
-    }
-
-    // Claude fallo tras los reintentos · ver si vale fallback a DeepSeek
-    const errAny = lastError as { status?: number; message?: string } | undefined;
-    const errorMsg = errAny?.message ?? 'Unknown error';
-    console.error('[api/ai/generate] Claude error after retries:', {
-      status: errAny?.status,
-      message: errorMsg,
-      model: MODEL,
-    });
-
-    if (!forceClaude && isDeepSeekConfigured() && claudeErrorShouldFallback(lastError)) {
-      console.warn('[api/ai/generate] Falling back to DeepSeek due to Claude error');
-      try {
-        const { text, usage } = await callDeepSeek({
-          system: systemInstruction,
-          messages: aiMessages,
-          maxTokens: MAX_TOKENS,
-        });
-        return res.status(200).json({
-          text,
-          provider: 'deepseek',
-          fallback_reason: errorMsg,
-          usage,
-        });
-      } catch (dsErr) {
-        const dsMsg = dsErr instanceof Error ? dsErr.message : String(dsErr);
-        console.error('[api/ai/generate] DeepSeek fallback also failed:', dsMsg);
-        return res.status(502).json({
-          error: 'Both providers failed',
-          claude_error: errorMsg,
-          claude_status: errAny?.status ?? null,
-          deepseek_error: dsMsg,
-        });
-      }
-    }
-
-    // Sin fallback (DeepSeek no configurado, forzado Claude, o error no apto)
+  // ─── 2) Claude (fallback) ──────────────────────────────────────────────
+  // Solo fallback si el error de DeepSeek lo amerita (credito/rate/timeout).
+  // Si DeepSeek nunca se intento (no configurada) tambien caemos a Claude.
+  const dsAttempted = dsError !== null;
+  if (dsAttempted && !shouldFallback(dsError)) {
+    const msg = dsError instanceof Error ? dsError.message : 'DeepSeek error';
     return res.status(502).json({
-      error: 'Claude API error',
-      details: errorMsg,
-      claudeStatus: errAny?.status ?? null,
+      error: 'DeepSeek API error',
+      details: msg,
       fallback_attempted: false,
-      fallback_reason: forceClaude
-        ? 'Provider forced to Claude (X-AI-Provider header)'
-        : !isDeepSeekConfigured()
-          ? 'DEEPSEEK_API_KEY not configured'
-          : 'Error type does not warrant fallback',
+      fallback_reason: 'Error type does not warrant fallback (config issue)',
     });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[api/ai/generate] Server error:', errorMsg);
-    return res.status(500).json({ error: 'Server error', details: errorMsg });
+  }
+
+  if (!isClaudeConfigured()) {
+    const dsMsg = dsError instanceof Error ? dsError.message : 'DeepSeek failed';
+    return res.status(502).json({
+      error: dsAttempted ? 'DeepSeek failed and Claude not configured' : 'No AI providers configured',
+      deepseek_error: dsAttempted ? dsMsg : null,
+    });
+  }
+
+  if (dsAttempted) {
+    console.warn('[api/ai/generate] Falling back to Claude tras error de DeepSeek');
+  }
+
+  try {
+    const { text, usage } = await callClaude({
+      system: systemInstruction,
+      messages: aiMessages,
+      maxTokens: MAX_TOKENS,
+    });
+    const dsMsg = dsError instanceof Error ? dsError.message : undefined;
+    return res.status(200).json({
+      text,
+      provider: 'claude',
+      ...(dsAttempted ? { fallback_reason: dsMsg } : {}),
+      usage,
+    });
+  } catch (claudeErr) {
+    const claudeMsg = claudeErr instanceof Error ? claudeErr.message : String(claudeErr);
+    const dsMsg = dsError instanceof Error ? dsError.message : 'not attempted';
+    console.error('[api/ai/generate] Both providers failed:', { deepseek: dsMsg, claude: claudeMsg });
+    return res.status(502).json({
+      error: 'Both providers failed',
+      deepseek_error: dsMsg,
+      claude_error: claudeMsg,
+    });
   }
 }
