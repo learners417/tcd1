@@ -19,6 +19,7 @@
  */
 import { callDeepSeek, isDeepSeekConfigured, shouldFallback } from '../_lib/deepseek.js';
 import { callClaude, isClaudeConfigured } from '../_lib/claude.js';
+import { withSentry } from '../_lib/sentry.js';
 
 const MAX_TOKENS = 16384;
 
@@ -26,7 +27,7 @@ const MAX_TOKENS = 16384;
 // Los entrenadores tienen system prompts grandes; mejor margen de 120s.
 export const config = { maxDuration: 120 };
 
-export default async function handler(req: any, res: any) {
+async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -142,3 +143,5 @@ export default async function handler(req: any, res: any) {
     });
   }
 }
+
+export default withSentry(handler);
