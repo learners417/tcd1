@@ -55,7 +55,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   padding: '10px 0',
                   textAlign: 'center',
                   borderBottom: '1px solid rgba(245,166,35,0.15)',
-                  borderLeft: idx === 0 ? 'none' : '2px solid #252830',
+                  borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
                 }}
               >
                 {sec.short}
@@ -71,7 +71,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 padding: '10px 10px',
                 textAlign: 'center',
                 borderBottom: '1px solid rgba(245,166,35,0.15)',
-                borderLeft: '2px solid #252830',
+                borderLeft: '2px solid var(--matrix-section-divider)',
                 textTransform: 'uppercase',
               }}
             >
@@ -102,7 +102,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     fontWeight: 500,
                     verticalAlign: 'bottom',
                     borderBottom: '2px solid rgba(245,166,35,0.15)',
-                    borderLeft: isFirstOfSection ? '2px solid #252830' : 'none',
+                    borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
                   }}
                   title={step.title}
                 >
@@ -111,7 +111,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                       fontFamily: 'var(--font-body)',
                       fontSize: 12,
                       fontWeight: 500,
-                      color: 'rgba(255,255,255,0.75)',
+                      color: 'var(--matrix-header-text)',
                       lineHeight: 1.3,
                       textAlign: 'center',
                       minWidth: 84,
@@ -130,7 +130,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 top: 40,
                 padding: '10px 12px 12px',
                 borderBottom: '2px solid rgba(245,166,35,0.15)',
-                borderLeft: '2px solid #252830',
+                borderLeft: '2px solid var(--matrix-section-divider)',
               }}
             >
               <div
@@ -138,7 +138,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   fontFamily: 'var(--font-body)',
                   fontSize: 12,
                   fontWeight: 500,
-                  color: 'rgba(255,255,255,0.75)',
+                  color: 'var(--matrix-header-text)',
                   textAlign: 'center',
                 }}
               >
@@ -161,7 +161,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   style={{
                     padding: '0 14px',
                     height: 56,
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    borderBottom: '1px solid var(--matrix-row-divider)',
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         <div
                           className="truncate"
                           style={{
-                            color: 'rgba(255,255,255,0.5)',
+                            color: 'var(--matrix-subtitle-text)',
                             fontSize: 12,
                             maxWidth: 175,
                           }}
@@ -215,10 +215,10 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         textAlign: 'center',
                         verticalAlign: 'middle',
                         height: 56,
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        borderBottom: '1px solid var(--matrix-row-divider)',
                         borderLeft: isFirstOfSection
-                          ? '2px solid #252830'
-                          : '1px solid rgba(26,28,34,0.35)',
+                          ? '2px solid var(--matrix-section-divider)'
+                          : '1px solid var(--matrix-cell-divider)',
                       }}
                     >
                       <button
@@ -229,7 +229,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         style={{
                           width: 30,
                           height: 30,
-                          border: `2px solid ${on ? '#22C55E' : '#3a3d44'}`,
+                          border: `2px solid ${on ? '#22C55E' : 'var(--matrix-checkbox-off)'}`,
                           borderRadius: 7,
                           cursor: 'pointer',
                           background: on ? '#22C55E' : 'transparent',
@@ -247,12 +247,12 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   style={{
                     padding: '0 12px',
                     height: 56,
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    borderLeft: '2px solid #252830',
+                    borderBottom: '1px solid var(--matrix-row-divider)',
+                    borderLeft: '2px solid var(--matrix-section-divider)',
                     textAlign: 'center',
                     fontSize: 14,
                     minWidth: 84,
-                    color: isComplete ? '#22C55E' : 'rgba(255,255,255,0.7)',
+                    color: isComplete ? '#22C55E' : 'var(--matrix-pct-text)',
                     fontWeight: isComplete ? 700 : 500,
                   }}
                   title={`${done}/${TOTAL_STEPS} pasos`}

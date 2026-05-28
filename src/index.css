@@ -24,6 +24,16 @@
   --border-gold-strong: rgba(245, 166, 35, 0.5);
   --font-body: 'DM Sans', system-ui, sans-serif;
   --font-display: 'DM Serif Display', Georgia, serif;
+
+  /* Matrix-specific tokens (preactivacion grid) so the table can
+     theme cleanly without hardcoded hex inside inline styles. */
+  --matrix-section-divider: #252830;
+  --matrix-cell-divider: rgba(26, 28, 34, 0.35);
+  --matrix-row-divider: rgba(255, 255, 255, 0.05);
+  --matrix-header-text: rgba(255, 255, 255, 0.78);
+  --matrix-subtitle-text: rgba(255, 255, 255, 0.5);
+  --matrix-pct-text: rgba(255, 255, 255, 0.7);
+  --matrix-checkbox-off: #3a3d44;
 }
 
 html,
@@ -185,4 +195,218 @@ h1, h2, h3 {
   .badge-pulse {
     animation: badge-pulse 1.8s ease-in-out infinite;
   }
+}
+
+/* ─── Light theme overrides ─────────────────────────────────────────
+   Activated via [data-theme="light"] on <html>. Currently used only
+   in the admin view — see src/lib/theme.ts. The selectors target the
+   hardcoded Tailwind arbitrary-value classes that fill Admin.tsx so we
+   can flip the palette without rewriting thousands of lines of JSX.
+
+   Strategy:
+   - Light palette in the surface scale: #F3F5F8 (root) / #FFFFFF (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
+   - Text scale: #0F172A primary, rgba(15,23,42,X) for opacity variants.
+   - Gold accent stays #F5A623 for fills (gold-on-anything works) but
+     gold-as-text drops to #B45309 (amber-700) for AA contrast on white.
+   - Borders bump alpha so they read on white.
+   - Hover variants (`hover:`, `group-hover:`) get their own selectors
+     so row/card hover feedback still works in light mode.
+*/
+[data-theme="light"] {
+  --bg-root: #E8ECF1;
+  --bg-card: #FFFFFF;
+  --bg-surface2: #EAEDF2;
+  --accent-gold: #D97706;
+  --accent-gold-hover: #B45309;
+  --text-cream: #0F172A;
+  --text-muted: rgba(15, 23, 42, 0.7);
+  --border-gold: rgba(217, 119, 6, 0.4);
+  --border-gold-strong: rgba(217, 119, 6, 0.65);
+
+  --matrix-section-divider: rgba(217, 119, 6, 0.2);
+  --matrix-cell-divider: rgba(15, 23, 42, 0.06);
+  --matrix-row-divider: rgba(15, 23, 42, 0.08);
+  --matrix-header-text: rgba(15, 23, 42, 0.78);
+  --matrix-subtitle-text: rgba(15, 23, 42, 0.6);
+  --matrix-pct-text: rgba(15, 23, 42, 0.72);
+  --matrix-checkbox-off: rgba(15, 23, 42, 0.28);
+
+  color-scheme: light;
+}
+
+[data-theme="light"] html,
+[data-theme="light"] body,
+[data-theme="light"] #root {
+  background-color: var(--bg-root);
+  color: var(--text-cream);
+}
+
+/* ── Surface hierarchy ────────────────────────────────────────────
+   Body (root)        → #E8ECF1 (slate-100ish)
+   Sidebar/columns    → #FFFFFF   (sticky, max contrast against body)
+   Panel wrappers     → #F8FAFC   (subtle slate-50 — sits between body and cards)
+   Cards/popovers     → #FFFFFF   (pop on panel)
+   Surface2 (settings sidebar etc.) → #EEF1F5
+*/
+[data-theme="light"] .bg-\[\#0A0A0A\]    { background-color: #E8ECF1 !important; }
+[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
+[data-theme="light"] .bg-\[\#141414\]    { background-color: #F8FAFC !important; }
+[data-theme="light"] .bg-\[\#141414\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
+[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#1C1C1C\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1C1C1C\]\/20 { background-color: rgba(245, 166, 35, 0.06) !important; }
+[data-theme="light"] .bg-\[\#1C1C1C\]\/30 { background-color: rgba(245, 166, 35, 0.09) !important; }
+[data-theme="light"] .bg-\[\#1C1C1C\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
+[data-theme="light"] .bg-\[\#1C1C1C\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
+[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #EEF1F5 !important; }
+
+/* ── Surface backgrounds — Tailwind standard `white` token ───────── */
+[data-theme="light"] .bg-white\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .bg-white\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+
+/* ── Surface backgrounds — rgba shorthand variants ───────────────── */
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(15, 23, 42, 0.04) !important; }
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(15, 23, 42, 0.05) !important; }
+
+/* ── Hover-variant backgrounds — restore feedback in light mode ──── */
+[data-theme="light"] .hover\:bg-\[\#1C1C1C\]:hover        { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#1C1C1C\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
+[data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFFFF\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFFFF\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .group:hover .group-hover\:bg-\[\#141414\] { background-color: #EAEDF2 !important; }
+
+/* ── Light scrim overlays inside content (not modal backdrops) ───── */
+[data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.04) !important; }
+[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.06) !important; }
+[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.08) !important; }
+/* Modal scrims (bg-black/60/70/80) stay dark intentionally so modals
+   keep clear separation from the page underneath. */
+
+/* ── White-on-content overlays → invert to dark overlays ─────────── */
+[data-theme="light"] .bg-\[\#FFFFFF\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .bg-\[\#FFFFFF\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
+[data-theme="light"] .bg-\[\#FFFFFF\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .bg-\[\#FFFFFF\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+
+/* ── Text scale ─────────────────────────────────────────────────────
+   White-on-dark and slate-on-light are not symmetric perceptually:
+   dark text on white reads MUCH heavier than white text on black at
+   the same opacity. So we shift the mapping down a notch — what was
+   `/60` on white becomes ~0.6 slate, not 0.72. This keeps icons and
+   muted UI feeling soft instead of stamped. Mid range still hits AA.
+*/
+[data-theme="light"] .text-white       { color: #0F172A !important; }
+[data-theme="light"] .text-white\/90   { color: rgba(15, 23, 42, 0.9) !important; }
+[data-theme="light"] .text-white\/80   { color: rgba(15, 23, 42, 0.82) !important; }
+[data-theme="light"] .text-white\/70   { color: rgba(15, 23, 42, 0.72) !important; }
+[data-theme="light"] .text-white\/60   { color: rgba(15, 23, 42, 0.62) !important; }
+[data-theme="light"] .text-white\/50   { color: rgba(15, 23, 42, 0.58) !important; }
+[data-theme="light"] .text-white\/40   { color: rgba(15, 23, 42, 0.55) !important; }
+[data-theme="light"] .text-white\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+
+[data-theme="light"] .text-\[\#FFFFFF\]       { color: #0F172A !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
+[data-theme="light"] .text-\[\#FFFFFF\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
+
+/* ── Hover-variant text ──────────────────────────────────────────── */
+[data-theme="light"] .hover\:text-\[\#FFFFFF\]:hover     { color: #0F172A !important; }
+[data-theme="light"] .hover\:text-white:hover            { color: #0F172A !important; }
+[data-theme="light"] .group:hover .group-hover\:text-\[\#FFFFFF\] { color: #0F172A !important; }
+
+/* ── Placeholder text ────────────────────────────────────────────── */
+[data-theme="light"] .placeholder-\[\#FFFFFF\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
+[data-theme="light"] .placeholder-\[\#FFFFFF\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#FFFFFF\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
+[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
+[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+
+/* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
+[data-theme="light"] .text-\[\#F5A623\] { color: #B45309 !important; }
+
+/* ── Gold borders — bump alpha so they remain visible on white ───── */
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(217, 119, 6, 0.3) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(217, 119, 6, 0.32) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(217, 119, 6, 0.38) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(217, 119, 6, 0.42) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(217, 119, 6, 0.5) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(217, 119, 6, 0.6) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(217, 119, 6, 0.7) !important; }
+
+/* ── White borders — hex + Tailwind + rgba ───────────────────────── */
+[data-theme="light"] .border-\[\#FFFFFF\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .border-\[\#FFFFFF\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .border-\[\#FFFFFF\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
+[data-theme="light"] .border-white\/5           { border-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .border-white\/10          { border-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .border-white\/20          { border-color: rgba(15, 23, 42, 0.18) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(15, 23, 42, 0.1) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(15, 23, 42, 0.22) !important; }
+
+/* ── Inline-style fallback ───────────────────────────────────────────
+   React serializes `color: '#FFFFFF'` to `color: rgb(255, 255, 255)`
+   in the DOM style attribute, so we match both forms.            */
+[data-theme="light"] [style*="color: #FFFFFF"],
+[data-theme="light"] [style*="color:#FFFFFF"],
+[data-theme="light"] [style*="color: rgb(255, 255, 255)"],
+[data-theme="light"] [style*="color:rgb(255,255,255)"] {
+  color: #0F172A !important;
+}
+
+/* ── Shadow — soften the heavy black shadows on white surfaces ───── */
+[data-theme="light"] .shadow-2xl {
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+}
+[data-theme="light"] .shadow-xl {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+}
+[data-theme="light"] .shadow-black\/50 {
+  --tw-shadow-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+/* ── Tailwind Typography `prose-invert` ──────────────────────────────
+   `prose-invert` is the dark-bg variant of @tailwindcss/typography —
+   it swaps the prose color tokens to light values. On a light theme
+   panel that makes body text invisible. Remap the invert tokens to
+   slate so the output content (Markdown render, code blocks, lists,
+   etc.) keeps readable contrast without changing the className.
+*/
+[data-theme="light"] .prose-invert {
+  --tw-prose-invert-body: #0F172A;
+  --tw-prose-invert-headings: #0F172A;
+  --tw-prose-invert-lead: rgba(15, 23, 42, 0.78);
+  --tw-prose-invert-links: #B45309;
+  --tw-prose-invert-bold: #0F172A;
+  --tw-prose-invert-counters: rgba(15, 23, 42, 0.6);
+  --tw-prose-invert-bullets: rgba(15, 23, 42, 0.4);
+  --tw-prose-invert-hr: rgba(15, 23, 42, 0.15);
+  --tw-prose-invert-quotes: rgba(15, 23, 42, 0.85);
+  --tw-prose-invert-quote-borders: rgba(217, 119, 6, 0.4);
+  --tw-prose-invert-captions: rgba(15, 23, 42, 0.6);
+  --tw-prose-invert-code: #0F172A;
+  --tw-prose-invert-pre-code: #0F172A;
+  --tw-prose-invert-pre-bg: rgba(15, 23, 42, 0.05);
+  --tw-prose-invert-th-borders: rgba(15, 23, 42, 0.2);
+  --tw-prose-invert-td-borders: rgba(15, 23, 42, 0.1);
 }

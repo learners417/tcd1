@@ -17,7 +17,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
-  Mail, KeyRound, Fingerprint, ChevronLeft,
+  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon,
 } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -29,6 +29,7 @@ import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
+import { useAdminTheme } from '../lib/theme';
 import { toast } from 'sonner';
 import { createClient } from '@supabase/supabase-js';
 import Campanas from './Campanas';
@@ -448,6 +449,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [adminAvatar, setAdminAvatar] = useState<string>(() => localStorage.getItem(`tcd_admin_avatar_${adminProfile.id}`) || '');
   const [guardandoAdmin, setGuardandoAdmin] = useState(false);
   const adminAvatarInputRef = useRef<HTMLInputElement>(null);
+  const [theme, setTheme] = useAdminTheme();
 
   // Equipo
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -3380,6 +3382,40 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   placeholder="Ej: Coach Principal, Soporte Técnico..."
                   className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
                 />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Apariencia</label>
+                <div role="radiogroup" aria-label="Tema visual" className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={theme === 'dark'}
+                    onClick={() => setTheme('dark')}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-[#F5A623]/15 border-[rgba(245,166,35,0.5)] text-[#F5A623]'
+                        : 'bg-black/20 border-[rgba(245,166,35,0.15)] text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:border-[rgba(245,166,35,0.3)]'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    Oscuro
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={theme === 'light'}
+                    onClick={() => setTheme('light')}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
+                      theme === 'light'
+                        ? 'bg-[#F5A623]/15 border-[rgba(245,166,35,0.5)] text-[#F5A623]'
+                        : 'bg-black/20 border-[rgba(245,166,35,0.15)] text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:border-[rgba(245,166,35,0.3)]'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    Claro
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#FFFFFF]/40 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
               </div>
             </div>
 
