@@ -26,6 +26,7 @@ import LoadingScreen from './components/LoadingScreen';
 import { X, User, Bell, Shield, CreditCard, LogOut, Camera, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase, isSupabaseReady, type Profile as SupabaseProfile } from './lib/supabase';
 import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
+import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
 
 type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
@@ -107,6 +108,7 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         clearTimeout(safetyTimer);
+        setSentryUser(null);
         setSupabaseProfile(null);
         setAuthState('logged_out');
         return;
@@ -124,6 +126,8 @@ export default function App() {
         return;
       }
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        // Asociar usuario a Sentry para que los errores muestren quién los disparó.
+        setSentryUser({ id: session.user.id, email: session.user.email });
         // Only do a full profile load on real login / first load, not on tab refocus
         setProfileLoading(true);
         await loadSupabaseProfile(session.user.id);
