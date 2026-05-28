@@ -37,6 +37,7 @@ import {
   getUserIdFromJwt,
   consumeCreditServer,
 } from '../_lib/credits-server.js';
+import { withSentry, Sentry } from '../_lib/sentry.js';
 
 // Vercel function config · maxDuration aplica solo si tu plan lo soporta.
 // Hobby = max 60s · Pro = hasta 300s · Enterprise = hasta 900s.
@@ -85,7 +86,7 @@ function isReferenceImage(v: unknown): v is ReferenceImage {
   );
 }
 
-export default async function handler(req: any, res: any) {
+async function handler(req: any, res: any) {
   // Wrapper global · captura CUALQUIER excepcion no manejada para evitar que
   // Vercel devuelva FUNCTION_INVOCATION_FAILED opaco. Loguea con prefijo
   // [/api/ai/image] para filtrar facil en Vercel Logs.
@@ -95,6 +96,7 @@ export default async function handler(req: any, res: any) {
     const msg = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack : undefined;
     console.error('[/api/ai/image] UNCAUGHT', { msg, stack });
+    Sentry.captureException(err);
     if (!res.headersSent) {
       return res.status(500).json({
         error: `Unhandled server error: ${msg}`,
@@ -103,6 +105,8 @@ export default async function handler(req: any, res: any) {
     }
   }
 }
+
+export default withSentry(handler);
 
 async function handleImageRequest(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -249,6 +253,7 @@ async function handleImageRequest(req: any, res: any) {
     const msg = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack : undefined;
     console.error('[/api/ai/image] OpenAI fetch threw', { msg, stack });
+    Sentry.captureException(err);
     return res.status(500).json({ error: `Image generation failed: ${msg}` });
   }
 }

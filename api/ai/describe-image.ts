@@ -18,6 +18,7 @@
  *   { description: string } o { error: string }
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { withSentry, Sentry } from '../_lib/sentry.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 1500;
@@ -25,7 +26,7 @@ const ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gi
 
 const DEFAULT_INSTRUCTION = `Describi en detalle al personaje principal de esta imagen para que un modelo de imagen generativa pueda recrearlo: genero, edad aproximada, rasgos faciales (forma de cara, ojos, nariz, boca, menton), color y estilo de pelo, color de ojos, vello facial (barba, bigote) si tiene, tono de piel, vestuario completo (parte de arriba, parte de abajo, accesorios visibles), postura general y expresion. Devolve UN solo parrafo en espanol, maximo 200 palabras, sin saltos de linea ni listas. No describas el fondo ni la composicion — solo al personaje.`;
 
-export default async function handler(req: any, res: any) {
+async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -80,6 +81,9 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ description: description.trim() });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    Sentry.captureException(err);
     return res.status(500).json({ error: `Describe failed: ${msg}` });
   }
 }
+
+export default withSentry(handler);

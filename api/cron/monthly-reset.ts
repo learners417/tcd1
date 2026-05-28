@@ -15,8 +15,9 @@
  */
 
 import { getAdminClient } from '../_lib/credits-server.js';
+import { withSentry, Sentry } from '../_lib/sentry.js';
 
-export default async function handler(req: any, res: any) {
+async function handler(req: any, res: any) {
   // Vercel Cron auth: rechaza requests no-cron si CRON_SECRET esta configurado
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
@@ -32,6 +33,7 @@ export default async function handler(req: any, res: any) {
 
     if (error) {
       console.error('[cron/monthly-reset] failed', error);
+      Sentry.captureException(error);
       return res.status(500).json({ error: error.message });
     }
 
@@ -40,6 +42,9 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ ok: true, resetCount: count });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    Sentry.captureException(err);
     return res.status(500).json({ error: msg });
   }
 }
+
+export default withSentry(handler);
