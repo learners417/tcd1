@@ -212,3 +212,94 @@ export const EMPTY_METRICAS: MetricaSemanaV2 = {
   ingresos_cobrados: 0,
   horas_trabajadas_semana: 0,
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+//  v3 · Embudo del spec "Mi Embudo de Ventas · Métricas"
+//  Bloque A (orgánico) + Bloque B (ads) → 8 KPIs. ROAS y proyección también se
+//  calculan server-side al guardar (trigger); estas fórmulas son su espejo.
+// ════════════════════════════════════════════════════════════════════════════
+
+/** Plataformas de posts del bloque A (orgánico). Mapean 1:1 a columnas met_posts_*. */
+export const POSTS_PLATAFORMAS: { key: keyof MetricaSemanaV2; label: string }[] = [
+  { key: 'met_posts_reels_ig', label: 'Reels IG' },
+  { key: 'met_posts_feed_ig', label: 'IG feed' },
+  { key: 'met_posts_tiktok', label: 'TikTok' },
+  { key: 'met_posts_shorts', label: 'YouTube Shorts' },
+  { key: 'met_posts_facebook', label: 'Facebook' },
+  { key: 'met_posts_linkedin', label: 'LinkedIn' },
+];
+
+/** Opciones del selector único de plataforma de ads (bloque B). */
+export const ADS_PLATAFORMAS = ['Meta (IG/FB)', 'TikTok Ads', 'Google Ads', 'Sin ads'] as const;
+export type AdsPlataforma = (typeof ADS_PLATAFORMAS)[number];
+
+export interface EmbudoV3KPIs {
+  roas: number | null;
+  tasa_cierre: number | null; // %
+  pct_show: number | null; // %
+  costo_por_lead: number | null;
+  phr: number | null; // ingresos / horas
+  posts_totales: number;
+  pct_dm_formulario: number | null; // %
+  proyeccion_mes: number | null;
+}
+
+/** Suma de todos los posts del bloque A. */
+export function postsTotales(m: MetricaSemanaV2): number {
+  return POSTS_PLATAFORMAS.reduce((acc, p) => acc + (Number(m[p.key]) || 0), 0);
+}
+
+/** Días del período cargado (1 para "día", 7 para "semana", o el rango explícito). */
+export function diasDelPeriodo(m: MetricaSemanaV2): number {
+  if (m.met_fecha_inicio && m.met_fecha_fin) {
+    const ini = new Date(m.met_fecha_inicio + 'T00:00:00').getTime();
+    const fin = new Date(m.met_fecha_fin + 'T00:00:00').getTime();
+    const dias = Math.round((fin - ini) / 86400000) + 1;
+    if (dias > 0) return dias;
+  }
+  return m.met_periodo_tipo === 'dia' ? 1 : 7;
+}
+
+export function calcularEmbudoV3KPIs(m: MetricaSemanaV2): EmbudoV3KPIs {
+  const safe = (num: number, den: number) => (den > 0 ? num / den : null);
+  const pct = (num: number, den: number) => (den > 0 ? (num / den) * 100 : null);
+
+  const roas = safe(m.ingresos_cobrados, m.gasto_ads);
+  const tasa_cierre = pct(m.ventas_cerradas, m.llamadas_tomadas);
+  const pct_show = pct(m.shows, m.agendados);
+  const costo_por_lead = safe(m.gasto_ads, m.mensajes_recibidos);
+  const phr = safe(m.ingresos_cobrados, m.horas_trabajadas_semana);
+  const pct_dm_formulario = pct(m.formularios_completados, m.mensajes_recibidos);
+
+  const dias = diasDelPeriodo(m);
+  const proyeccion_mes = dias > 0 ? m.ingresos_cobrados * (30 / dias) : null;
+
+  return {
+    roas,
+    tasa_cierre,
+    pct_show,
+    costo_por_lead,
+    phr,
+    posts_totales: postsTotales(m),
+    pct_dm_formulario,
+    proyeccion_mes,
+  };
+}
+
+// Tonos de color por umbral (espejo del spec)
+export function roasTone(v: number | null): DiagnosticoNivel {
+  if (v === null) return 'alerta';
+  if (v < 2) return 'critico';
+  if (v <= 4) return 'alerta';
+  return 'ok';
+}
+export function cierreTone(pct: number | null): DiagnosticoNivel {
+  if (pct === null) return 'alerta';
+  if (pct < 10) return 'critico';
+  if (pct >= 20) return 'ok';
+  return 'alerta';
+}
+export function showTone(pct: number | null): DiagnosticoNivel {
+  if (pct === null) return 'alerta';
+  return pct < 50 ? 'alerta' : 'ok';
+}

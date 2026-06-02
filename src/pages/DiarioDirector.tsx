@@ -7,47 +7,60 @@ import {
   History,
   Check,
   Send,
-  BarChart2,
   Zap,
-  Battery,
-  BatteryLow,
+  Activity,
+  Brain,
+  Heart,
+  Award,
+  Target,
+  Scale,
+  TrendingUp,
+  HeartPulse,
   Moon,
   Salad,
-  Footprints,
-  TreePine,
+  Dumbbell,
+  Clock,
+  Users,
+  Lightbulb,
+  CloudRain,
+  UserX,
 } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
+import {
+  TAREAS_TAGS,
+  CHECKEOS_CHIPS,
+  LOGRO_MAX_CHARS,
+  BLOQUEO_MAX_CHARS,
+  calcularScore,
+  indiceBienestar,
+  focoNegocio,
+  equilibrioIntegral,
+  consistencia7d,
+  energiaPromedio7d,
+  rachaActiva,
+  etiquetaEnergia,
+  colorDimension,
+  toFechaStr,
+  type EntradaHistorica,
+} from '../lib/diarioCalcs';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-
-interface ModuloEnergetico {
-  durmio_bien: boolean;
-  comio_bien: boolean;
-  movio_cuerpo: boolean;
-  aire_libre: boolean;
-}
 
 interface EntradaDiario {
   id: string;
   fecha: string;
-  energia_nivel: number; // 1-10
-  emocion: string;
-  pensamiento_dominante: string;
-  aprendizaje: string;
-  accion_manana: string;
-  modulo_energetico: ModuloEnergetico;
-  respuestas: {
-    q1: string; // ¿Completaste tu tarea de hoy? (Sí/No)
-    q2: string; // ¿Cómo estuvo tu energía? (slider, stored as level)
-    q3: string; // ¿Hubo algo que te bloqueó? (textarea, optional)
-    q4: string; // ¿Cuál fue el momento más importante del día? (textarea, required)
-    q5: string; // ¿Tomaste llamadas hoy? (Sí/No, day>=45)
-    q6: string; // ¿Cuántas? ¿Cerraste alguna? (text, if q5=Sí)
-    q7: string; // ¿Qué objeción apareció? (textarea, optional, if q5=Sí)
-  };
+  energia: number; // 1-10
+  cuerpo: number; // 1-10
+  mente: number; // 1-10
+  emociones: number; // 1-10
+  logro: string;
+  tareas: string[];
+  checkeos: string[];
+  bloqueo: string;
+  score: number; // 0-100, server-side
 }
 
 interface ResumenSemana {
@@ -57,9 +70,26 @@ interface ResumenSemana {
   created_at: string;
 }
 
-// ─── Constantes ───────────────────────────────────────────────────────────────
+// Icono lucide por cada checkeo (sin emojis, según el sistema de diseño de la app)
+const CHECKEO_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  durmio_bien: Moon,
+  comio_bien: Salad,
+  entreno: Dumbbell,
+  tiempo_libre: Clock,
+  conecto_alguien: Users,
+  inspirado: Lightbulb,
+  ansioso: CloudRain,
+  solo: UserX,
+};
 
-// Day calculation from tcd_profile
+const DIMENSIONES = [
+  { key: 'cuerpo' as const, label: 'Cuerpo', icon: Activity },
+  { key: 'mente' as const, label: 'Mente', icon: Brain },
+  { key: 'emociones' as const, label: 'Emociones', icon: Heart },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function getCurrentDay(): number {
   try {
     const profile = localStorage.getItem('tcd_profile');
@@ -75,85 +105,99 @@ function getCurrentDay(): number {
   }
 }
 
-function calcEnergyAverage7d(allEntries: EntradaDiario[]): number | null {
-  const sorted = [...allEntries].sort((a, b) => b.fecha.localeCompare(a.fecha));
-  const last7 = sorted.slice(0, 7);
-  if (last7.length === 0) return null;
-  const sum = last7.reduce((acc, e) => acc + e.energia_nivel, 0);
-  return Math.round((sum / last7.length) * 10) / 10;
+function toHistorica(e: EntradaDiario): EntradaHistorica {
+  return {
+    fecha: e.fecha,
+    energia: e.energia,
+    cuerpo: e.cuerpo,
+    mente: e.mente,
+    emociones: e.emociones,
+    score: e.score,
+    bloqueo: e.bloqueo,
+    tareas: e.tareas,
+  };
 }
 
-const CHECKLIST_ENERGETICO: { key: keyof ModuloEnergetico; icon: React.ComponentType<{ className?: string }>; label: string }[] = [
-  { key: 'durmio_bien', icon: Moon, label: 'Dormí bien' },
-  { key: 'comio_bien', icon: Salad, label: 'Comí bien' },
-  { key: 'movio_cuerpo', icon: Footprints, label: 'Moví el cuerpo' },
-  { key: 'aire_libre', icon: TreePine, label: 'Tiempo al aire libre' },
-];
-
-function getTodayStr(): string {
-  return new Date().toISOString().split('T')[0];
+// Mapea una fila cruda de Supabase (con fallbacks a campos legacy) → EntradaDiario
+function mapRow(d: any): EntradaDiario {
+  return {
+    id: String(d.id),
+    fecha: d.fecha,
+    energia: d.energia_nivel ?? 5,
+    cuerpo: d.diario_cuerpo ?? 0,
+    mente: d.diario_mente ?? 0,
+    emociones: d.diario_emociones ?? 0,
+    logro: d.diario_logro ?? d.pensamiento_dominante ?? '',
+    tareas: Array.isArray(d.diario_tareas) ? d.diario_tareas : [],
+    checkeos: Array.isArray(d.diario_checkeos) ? d.diario_checkeos : [],
+    bloqueo: d.diario_bloqueo ?? '',
+    score: d.diario_score ?? 0,
+  };
 }
 
-function isDomingo(): boolean {
-  return new Date().getDay() === 0;
-}
+// ─── Escala 1–10 interactiva ───────────────────────────────────────────────────
 
-function calcStreak(entries: EntradaDiario[]): number {
-  if (entries.length === 0) return 0;
-  const hoy = new Date();
-  let racha = 0;
-  for (let i = 0; i < 30; i++) {
-    const fecha = new Date(hoy);
-    fecha.setDate(hoy.getDate() - i);
-    const fechaStr = fecha.toISOString().split('T')[0];
-    if (entries.some((e) => e.fecha === fechaStr)) {
-      racha++;
-    } else if (i > 0) {
-      break;
-    }
-  }
-  return racha;
-}
-
-// ─── Barra de energía ─────────────────────────────────────────────────────────
-
-function BarraEnergia({ valor, onChange }: { valor: number; onChange: (v: number) => void }) {
+function Escala10({
+  valor,
+  onChange,
+  color,
+}: {
+  valor: number;
+  onChange: (v: number) => void;
+  color?: (v: number) => string;
+}) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-[#FFFFFF]/40">Energía del día</span>
-        <span className={`text-sm font-bold ${valor >= 7 ? 'text-[#22C55E]' : valor >= 4 ? 'text-[#F5A623]' : 'text-[#EF4444]'}`}>
-          {valor}/10
-        </span>
-      </div>
-      <div className="flex gap-1">
-        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+    <div className="flex gap-1">
+      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+        const activo = n <= valor;
+        const fill = color ? color(valor) : '#F5A623';
+        return (
           <button
             key={n}
+            type="button"
             onClick={() => onChange(n)}
-            className={`flex-1 h-8 rounded-lg transition-all text-[10px] font-bold ${
-              n <= valor
-                ? n >= 7
-                  ? 'bg-[#22C55E] text-[#FFFFFF]'
-                  : n >= 4
-                  ? 'bg-[#F5A623] text-[#FFFFFF]'
-                  : 'bg-[#EF4444] text-[#FFFFFF]'
-                : 'bg-[#F5A623]/5 text-[#FFFFFF]/30 hover:bg-[#F5A623]/10'
-            }`}
-          >
-            {n}
-          </button>
-        ))}
-      </div>
-      <div className="flex justify-between text-[10px] text-[#FFFFFF]/30">
-        <span>Sin energía</span>
-        <span>Imparable</span>
-      </div>
+            aria-label={`Nivel ${n}`}
+            className="flex-1 h-7 rounded-md transition-all"
+            style={{
+              background: activo ? fill : 'rgba(245,166,35,0.08)',
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
 
-// ─── Componente principal ─────────────────────────────────────────────────────
+// ─── KPI card (post-guardado) ──────────────────────────────────────────────────
+
+function KpiCard({
+  label,
+  value,
+  icon: Icon,
+  tone = 'default',
+  delta,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: 'default' | 'green' | 'warn';
+  delta?: string;
+}) {
+  const valColor =
+    tone === 'green' ? 'text-[#22C55E]' : tone === 'warn' ? 'text-[#E09040]' : 'text-[#FFFFFF]';
+  return (
+    <div className="card-panel p-4 rounded-2xl border border-[rgba(245,166,35,0.12)]">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-[#F5A623]/60" />
+        <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest font-semibold">{label}</p>
+      </div>
+      <p className={`text-xl font-medium ${valColor}`}>{value}</p>
+      {delta && <p className="text-[10px] text-[#FFFFFF]/40 mt-0.5">{delta}</p>}
+    </div>
+  );
+}
+
+// ─── Componente principal ──────────────────────────────────────────────────────
 
 export default function DiarioDirector({
   userId,
@@ -173,36 +217,37 @@ export default function DiarioDirector({
     { validate: (v) => v === 'formulario' || v === 'historial' },
   );
 
-  const [respuestas, setRespuestas] = useState<EntradaDiario['respuestas']>({
-    q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: '',
-  });
-  const [energiaNivel, setEnergiaNivel] = useState(5);
-  const [moduloEnergetico, setModuloEnergetico] = useState<ModuloEnergetico>({
-    durmio_bien: false,
-    comio_bien: false,
-    movio_cuerpo: false,
-    aire_libre: false,
-  });
+  // Estado del formulario
+  const [energia, setEnergia] = useState(5);
+  const [cuerpo, setCuerpo] = useState(5);
+  const [mente, setMente] = useState(5);
+  const [emociones, setEmociones] = useState(5);
+  const [logro, setLogro] = useState('');
+  const [tareas, setTareas] = useState<string[]>([]);
+  const [checkeos, setCheckeos] = useState<string[]>([]);
+  const [bloqueo, setBloqueo] = useState('');
 
-  const todayStr = getTodayStr();
+  const todayStr = toFechaStr(new Date());
+  const hoy = new Date();
   const todayEntry = entries.find((e) => e.fecha === todayStr);
-  const streak = calcStreak(entries);
-  const esDomingo = isDomingo();
-  const currentDay = getCurrentDay();
-  const showConditional = currentDay >= 45;
+  const ayerStr = toFechaStr(new Date(hoy.getTime() - 86400000));
+  const ayerEntry = entries.find((e) => e.fecha === ayerStr);
 
-  // Energy average tracking
-  const energiaPromedio7d = calcEnergyAverage7d(entries);
+  const historicas = entries.map(toHistorica);
+  const racha = rachaActiva(historicas, hoy);
+  const esDomingo = hoy.getDay() === 0;
+  const energiaPromedio = energiaPromedio7d(historicas);
+
   useEffect(() => {
-    if (energiaPromedio7d !== null) {
-      localStorage.setItem('tcd_energia_promedio_7d', String(energiaPromedio7d));
+    if (energiaPromedio !== null) {
+      localStorage.setItem('tcd_energia_promedio_7d', String(energiaPromedio));
     }
-  }, [energiaPromedio7d]);
+  }, [energiaPromedio]);
 
   // ─── Cargar datos ─────────────────────────────────────────────────────────
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('tcd_diario_v2');
+      const saved = localStorage.getItem('tcd_diario_v3');
       if (saved) setEntries(JSON.parse(saved));
     } catch { /* noop */ }
 
@@ -215,7 +260,7 @@ export default function DiarioDirector({
         .select('*')
         .eq('user_id', userId)
         .order('fecha', { ascending: false })
-        .limit(30),
+        .limit(60),
       supabase
         .from('diario_resumen')
         .select('*')
@@ -225,93 +270,78 @@ export default function DiarioDirector({
         .maybeSingle(),
     ]).then(([{ data: raw }, { data: res }]) => {
       if (raw) {
-        const formatted: EntradaDiario[] = raw.map((d: any) => ({
-          id: String(d.id),
-          fecha: d.fecha,
-          energia_nivel: d.energia_nivel ?? d.respuestas?.q3 ?? 5,
-          emocion: d.emocion ?? d.respuestas?.q5 ?? '',
-          pensamiento_dominante: d.pensamiento_dominante ?? d.respuestas?.q4 ?? '',
-          aprendizaje: d.aprendizaje ?? d.respuestas?.q6 ?? '',
-          accion_manana: d.accion_manana ?? d.respuestas?.q7 ?? '',
-          modulo_energetico: d.modulo_energetico ?? { durmio_bien: false, comio_bien: false, movio_cuerpo: false, aire_libre: false },
-          respuestas: {
-            q1: d.respuestas?.q1 ?? '',
-            q2: d.respuestas?.q2 ?? d.respuestas?.cuello ?? '',
-            q3: d.respuestas?.q3 ?? d.respuestas?.victoria ?? '',
-            q4: d.respuestas?.q4 ?? '',
-            q5: d.respuestas?.q5 ?? '',
-            q6: d.respuestas?.q6 ?? d.respuestas?.aprendizaje ?? '',
-            q7: d.respuestas?.q7 ?? '',
-          },
-        }));
+        const formatted = raw.map(mapRow);
         setEntries(formatted);
-        localStorage.setItem('tcd_diario_v2', JSON.stringify(formatted));
+        localStorage.setItem('tcd_diario_v3', JSON.stringify(formatted));
       }
       if (res) setResumen(res as ResumenSemana);
     }).finally(() => setLoading(false));
   }, [userId]);
 
   // ─── Guardar entrada ──────────────────────────────────────────────────────
+  const toggle = (list: string[], id: string): string[] =>
+    list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+
   const handleGuardar = async () => {
-    if (!respuestas.q1) {
-      toast.error('Respondé si completaste tu tarea de hoy.');
+    if (!logro.trim()) {
+      toast.error('Contanos tu logro de hoy — queda en tu historial para siempre.');
       return;
     }
-    if (!respuestas.q4.trim()) {
-      toast.error('Contanos cuál fue el momento más importante del día.');
+    if (tareas.length === 0) {
+      toast.error('Marcá al menos una cosa en la que estuviste hoy.');
       return;
     }
 
     setSaving(true);
     try {
-      const respuestasToSave = {
-        ...respuestas,
-        q2: String(energiaNivel),
-      };
+      const input = { fecha: todayStr, energia, cuerpo, mente, emociones, logro, tareas, checkeos, bloqueo };
+      const scoreLocal = calcularScore(input);
 
       const entradaLocal: EntradaDiario = {
         id: String(Date.now()),
         fecha: todayStr,
-        energia_nivel: energiaNivel,
-        emocion: '',
-        pensamiento_dominante: respuestas.q4,
-        aprendizaje: '',
-        accion_manana: '',
-        modulo_energetico: moduloEnergetico,
-        respuestas: respuestasToSave,
+        energia, cuerpo, mente, emociones,
+        logro: logro.trim(),
+        tareas, checkeos,
+        bloqueo: bloqueo.trim(),
+        score: scoreLocal,
       };
 
       if (isSupabaseReady() && supabase && userId) {
-        const { data: saved } = await supabase
+        const { data: saved, error } = await supabase
           .from('diario_entradas')
           .upsert(
             {
               user_id: userId,
               fecha: todayStr,
-              energia_nivel: energiaNivel,
-              emocion: '',
-              pensamiento_dominante: respuestas.q4,
-              aprendizaje: '',
-              accion_manana: '',
-              modulo_energetico: moduloEnergetico,
-              respuestas: respuestasToSave,
+              energia_nivel: energia,
+              diario_cuerpo: cuerpo,
+              diario_mente: mente,
+              diario_emociones: emociones,
+              diario_logro: logro.trim(),
+              diario_tareas: tareas,
+              diario_checkeos: checkeos,
+              diario_bloqueo: bloqueo.trim() || null,
+              // back-compat con vistas legacy
+              pensamiento_dominante: logro.trim(),
             },
             { onConflict: 'user_id,fecha' },
           )
           .select()
           .single();
-        if (saved) entradaLocal.id = String(saved.id);
+        if (error) throw error;
+        if (saved) {
+          entradaLocal.id = String(saved.id);
+          entradaLocal.score = saved.diario_score ?? scoreLocal; // score autoritativo del server
+        }
       }
 
       const actualizadas = [entradaLocal, ...entries.filter((e) => e.fecha !== todayStr)];
       setEntries(actualizadas);
-      localStorage.setItem('tcd_diario_v2', JSON.stringify(actualizadas));
-      toast.success('Entrada del diario guardada. ¡Sigue así!');
+      localStorage.setItem('tcd_diario_v3', JSON.stringify(actualizadas));
+      toast.success(`Entrada guardada · Score del día: ${entradaLocal.score}/100`);
 
-      // Si es domingo → generar resumen semanal
-      if (esDomingo) {
-        await generarResumenSemana(actualizadas);
-      }
+      if (esDomingo) await generarResumenSemana(actualizadas);
     } catch {
       toast.error('Error al guardar. Intentá de nuevo.');
     } finally {
@@ -319,12 +349,11 @@ export default function DiarioDirector({
     }
   };
 
-  // ─── Generar resumen semanal (domingo) ────────────────────────────────────
+  // ─── Resumen semanal (domingo) ────────────────────────────────────────────
   const generarResumenSemana = useCallback(
     async (todasEntradas: EntradaDiario[]) => {
       if (!import.meta.env.VITE_GEMINI_API_KEY) return;
 
-      // Obtener las entradas de esta semana (L-V)
       const ahora = new Date();
       const lunes = new Date(ahora);
       lunes.setDate(ahora.getDate() - ahora.getDay() + 1);
@@ -332,58 +361,41 @@ export default function DiarioDirector({
         const fecha = new Date(e.fecha + 'T12:00:00');
         return fecha >= lunes;
       });
-
       if (entradasSemana.length < 1) return;
 
       setGenerandoResumen(true);
       try {
-        const prompt = `Sos el Coach de ${'"Tu Clínica Digital"'}. Analizá las entradas del Diario de esta semana y generá un resumen de patrones en formato JSON.
+        const prompt = `Sos el Coach de "Tu Clínica Digital". Analizá las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
 
-ENTRADAS DE LA SEMANA:
-${entradasSemana.map((e, i) => `
-Día ${i + 1} (${e.fecha}):
-- Energía: ${e.energia_nivel}/10
-- Fricción: ${e.respuestas.q2}
-- Acción tomada: ${e.respuestas.q3}
-- Pensamiento dominante: ${e.pensamiento_dominante}
-- Emoción: ${e.emocion}
-- Aprendizaje: ${e.aprendizaje}
-- Señales físicas: durmió bien=${e.modulo_energetico.durmio_bien}, comió bien=${e.modulo_energetico.comio_bien}
-`).join('\n')}
+ENTRADAS:
+${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
 
-Genera un JSON con EXACTAMENTE esta estructura:
+Devolvé SOLO este JSON:
 {
-  "racha": <número de días consecutivos del Diario>,
-  "energia_promedio": <número decimal con 1 decimal>,
+  "racha": <días consecutivos>,
+  "energia_promedio": <decimal 1>,
   "tendencia_energia": "subiendo" | "bajando" | "estable",
-  "bloqueo_recurrente": "<si q2 se repite 2+ veces, nombrarlo explícitamente. Si no, null>",
-  "correlacion_energia_resultados": "<una observación específica sobre si los días de mayor energía coinciden con las acciones de mayor impacto>",
-  "pensamiento_dominante_semana": "<el pensamiento que más se repitió, o null>",
-  "emocion_dominante": "<la emoción más frecuente y su patrón>",
-  "acciones_proxima_semana": ["<acción 1 concreta>", "<acción 2 concreta>", "<acción 3 concreta>"]
-}
-
-Respondé SOLO con el JSON, sin texto adicional.`;
+  "bloqueo_recurrente": "<si un bloqueo se repite 2+ veces, nombrarlo; si no, null>",
+  "emocion_dominante": "<patrón emocional de la semana>",
+  "acciones_proxima_semana": ["<acción 1>", "<acción 2>", "<acción 3>"]
+}`;
 
         const texto = await generateText({ prompt });
         const jsonMatch = texto.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('No JSON en respuesta');
-
-        const resumenJson = JSON.parse(jsonMatch[0]);
-        const resumenTexto = JSON.stringify(resumenJson);
+        if (!jsonMatch) throw new Error('No JSON');
+        const resumenTexto = JSON.stringify(JSON.parse(jsonMatch[0]));
 
         if (isSupabaseReady() && supabase && userId) {
-          const semanaInicio = lunes.toISOString().split('T')[0];
+          const semanaInicio = toFechaStr(lunes);
           await supabase.from('diario_resumen').upsert(
             { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto },
             { onConflict: 'user_id,semana_inicio' },
           );
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
-
-        toast.success('📊 Resumen de la semana generado por el Coach.');
+        toast.success('Resumen de la semana generado por el Coach.');
       } catch {
-        // Silencioso — el resumen es un nice-to-have
+        /* nice-to-have, silencioso */
       } finally {
         setGenerandoResumen(false);
       }
@@ -391,11 +403,18 @@ Respondé SOLO con el JSON, sin texto adicional.`;
     [geminiKey, userId],
   );
 
-  // ─── Alertas basadas en energía ──────────────────────────────────────────
-  const ultimasDosEntradas = entries.slice(0, 2);
-  const alertaEnergiaBaja =
-    ultimasDosEntradas.length === 2 &&
-    ultimasDosEntradas.every((e) => e.energia_nivel < 4);
+  // ─── KPIs (se muestran DESPUÉS de guardar) ────────────────────────────────
+  const kpis = todayEntry
+    ? {
+        indiceBienestar: indiceBienestar(todayEntry),
+        focoNegocio: focoNegocio(todayEntry.tareas),
+        equilibrio: equilibrioIntegral(todayEntry.cuerpo, todayEntry.mente, todayEntry.emociones),
+        consistencia: consistencia7d(historicas, hoy),
+        energia7d: energiaPromedio,
+        score: todayEntry.score,
+        deltaScore: ayerEntry ? todayEntry.score - ayerEntry.score : null,
+      }
+    : null;
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -405,29 +424,30 @@ Respondé SOLO con el JSON, sin texto adicional.`;
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-light text-[#FFFFFF] flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#F5A623]" /> Diario de Cierre
+            <BookOpen className="w-6 h-6 text-[#F5A623]" /> Diario del Fundador
           </h1>
           <p className="text-sm text-[#FFFFFF]/60 mt-1 flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5" />
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <span className="text-[#FFFFFF]/30">· Día {getCurrentDay()}</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {energiaPromedio7d !== null && (
+          {energiaPromedio !== null && (
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
-              energiaPromedio7d >= 7 ? 'text-[#22C55E] bg-emerald-500/10 border-emerald-500/20' :
-              energiaPromedio7d >= 4 ? 'text-[#F5A623] bg-[#F5A623]/10 border-[#F5A623]/20' :
+              energiaPromedio >= 7 ? 'text-[#22C55E] bg-emerald-500/10 border-emerald-500/20' :
+              energiaPromedio >= 4 ? 'text-[#F5A623] bg-[#F5A623]/10 border-[#F5A623]/20' :
               'text-[#EF4444] bg-red-500/10 border-red-500/20'
             }`}>
               <Zap className="w-3.5 h-3.5" />
-              <span className="text-sm font-bold">{energiaPromedio7d}</span>
+              <span className="text-sm font-bold">{energiaPromedio}</span>
               <span className="text-[10px] opacity-60">7d</span>
             </div>
           )}
-          {streak > 0 && (
+          {racha > 0 && (
             <div className="flex items-center gap-1.5 text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20">
               <Flame className="w-3.5 h-3.5" />
-              <span className="text-sm font-bold">{streak} días</span>
+              <span className="text-sm font-bold">{racha} días</span>
             </div>
           )}
           <button
@@ -440,34 +460,20 @@ Respondé SOLO con el JSON, sin texto adicional.`;
         </div>
       </div>
 
-      {/* Alerta de energía baja */}
-      {alertaEnergiaBaja && (
-        <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
-          <BatteryLow className="w-5 h-5 text-[#EF4444] shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-red-300">Energía baja por 2 días consecutivos</p>
-            <p className="text-xs text-red-400/70 mt-0.5">
-              El Coach detectó tu estado. Recordá: tu &quot;por qué&quot; es más grande que cualquier día difícil.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Resumen semanal (domingo) */}
+      {/* Resumen semanal */}
       {generandoResumen && (
         <div className="flex items-center gap-2 text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-2xl p-4">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
       )}
-
       {esDomingo && resumen && (() => {
         try {
           const datos = JSON.parse(resumen.resumen_texto);
           return (
             <div className="card-panel p-5 rounded-2xl border border-violet-500/20 bg-violet-500/5 space-y-4">
               <div className="flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-violet-400" />
+                <TrendingUp className="w-4 h-4 text-violet-400" />
                 <h3 className="text-sm font-medium text-violet-300">Resumen del Coach — Semana cerrada</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -486,17 +492,19 @@ Respondé SOLO con el JSON, sin texto adicional.`;
                   <p className="text-sm text-amber-200">{datos.bloqueo_recurrente}</p>
                 </div>
               )}
-              <div>
-                <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
-                <ul className="space-y-1.5">
-                  {datos.acciones_proxima_semana?.map((accion: string, i: number) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-[#FFFFFF]/80">
-                      <span className="text-[#F5A623] font-bold shrink-0">{i + 1}.</span>
-                      {accion}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {Array.isArray(datos.acciones_proxima_semana) && (
+                <div>
+                  <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
+                  <ul className="space-y-1.5">
+                    {datos.acciones_proxima_semana.map((accion: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#FFFFFF]/80">
+                        <span className="text-[#F5A623] font-bold shrink-0">{i + 1}.</span>
+                        {accion}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           );
         } catch { return null; }
@@ -506,190 +514,191 @@ Respondé SOLO con el JSON, sin texto adicional.`;
       {vista === 'formulario' && (
         <>
           {todayEntry ? (
-            <div className="card-panel p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30">
-                <Check className="w-6 h-6 text-[#22C55E]" />
+            <div className="space-y-6">
+              {/* Confirmación + Score */}
+              <div className="card-panel p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    <Check className="w-6 h-6 text-[#22C55E]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-medium text-[#22C55E]">Entrada del día completada</h3>
+                    <p className="text-sm text-[#22C55E]/70 mt-0.5">Tu cierre quedó guardado. Esto es lo que dicen tus números.</p>
+                  </div>
+                </div>
+
+                {/* Score grande */}
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl font-light text-[#F5A623]" style={{ fontFamily: 'var(--font-display)' }}>
+                    {todayEntry.score}
+                  </span>
+                  <div>
+                    <p className="text-xs text-[#FFFFFF]/40">de 100 puntos</p>
+                    {kpis?.deltaScore !== null && kpis?.deltaScore !== undefined && (
+                      <p className={`text-xs font-medium ${kpis.deltaScore >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                        {kpis.deltaScore >= 0 ? '▲' : '▼'} {Math.abs(kpis.deltaScore)} vs ayer
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-medium text-[#22C55E]">Entrada del día completada</h3>
-                <p className="text-sm text-[#22C55E]/70 mt-0.5">
-                  Energía: <strong>{todayEntry.energia_nivel}/10</strong> · Tarea: {todayEntry.respuestas.q1 || '—'}
-                </p>
-              </div>
+
+              {/* 6 KPIs */}
+              {kpis && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <KpiCard label="Índice de bienestar" value={`${kpis.indiceBienestar}`} icon={HeartPulse} tone="green" />
+                  <KpiCard label="Foco en negocio" value={`${kpis.focoNegocio}%`} icon={Target} tone={kpis.focoNegocio >= 60 ? 'green' : 'warn'} />
+                  <KpiCard label="Consistencia 7d" value={`${kpis.consistencia}%`} icon={TrendingUp} tone="green" />
+                  <KpiCard label="Equilibrio integral" value={`${kpis.equilibrio} / 10`} icon={Scale} />
+                  <KpiCard label="Promedio energía 7d" value={kpis.energia7d !== null ? `${kpis.energia7d}` : '—'} icon={Zap} tone="green" />
+                  <KpiCard label="Racha activa" value={`${racha} días`} icon={Flame} tone="green" />
+                </div>
+              )}
             </div>
           ) : (
-            <div className="card-panel p-6 rounded-2xl space-y-6">
-              <div className="flex items-center gap-3 mb-2">
+            <div className="card-panel p-6 rounded-2xl space-y-7">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30">
                   <BookOpen className="w-5 h-5 text-[#F5A623]" />
                 </div>
                 <div>
-                  <h2 className="text-base font-medium text-[#FFFFFF]">Cierre del día</h2>
-                  <p className="text-xs text-[#FFFFFF]/60">Lunes a viernes · 5–8 minutos</p>
+                  <h2 className="text-base font-medium text-[#FFFFFF]">¿Cómo fue hoy?</h2>
+                  <p className="text-xs text-[#FFFFFF]/60">Tu cierre diario · 5 minutos</p>
                 </div>
               </div>
 
-              {/* Q1: ¿Completaste tu tarea de hoy? */}
-              <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                  1. ¿Completaste tu tarea de hoy?
-                </label>
-                <div className="flex gap-3">
-                  {(['Sí', 'No'] as const).map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setRespuestas((prev) => ({ ...prev, q1: opt }))}
-                      className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
-                        respuestas.q1 === opt
-                          ? opt === 'Sí'
-                            ? 'bg-emerald-500/20 border-emerald-500/40 text-[#22C55E]'
-                            : 'bg-red-500/20 border-red-500/40 text-[#EF4444]'
-                          : 'bg-black/20 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/50 hover:bg-[#F5A623]/10'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Q2: Energía (slider) */}
+              {/* Energía general */}
               <div className="bg-[#1C1C1C]/30 rounded-xl p-4 border border-[rgba(245,166,35,0.1)]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider">2. ¿Cómo estuvo tu energía?</span>
-                </div>
-                <BarraEnergia valor={energiaNivel} onChange={setEnergiaNivel} />
-              </div>
-
-              {/* Q3: ¿Hubo algo que te bloqueó? (optional) */}
-              <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                  3. ¿Hubo algo que te bloqueó? <span className="text-[#FFFFFF]/30 normal-case">(opcional)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Si algo te frenó hoy, contalo acá..."
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
-                  value={respuestas.q3}
-                  onChange={(e) => setRespuestas((prev) => ({ ...prev, q3: e.target.value }))}
-                />
-              </div>
-
-              {/* Q4: Momento más importante (required) */}
-              <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                  4. ¿Cuál fue el momento más importante del día?
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="El momento que más te marcó hoy..."
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
-                  value={respuestas.q4}
-                  onChange={(e) => setRespuestas((prev) => ({ ...prev, q4: e.target.value }))}
-                />
-              </div>
-
-              {/* Conditional questions (day >= 45) */}
-              {showConditional && (
-                <>
-                  {/* Q5: ¿Tomaste llamadas hoy? */}
-                  <div>
-                    <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                      5. ¿Tomaste llamadas hoy?
-                    </label>
-                    <div className="flex gap-3">
-                      {(['Sí', 'No'] as const).map((opt) => (
-                        <button
-                          key={opt}
-                          onClick={() => setRespuestas((prev) => ({
-                            ...prev,
-                            q5: opt,
-                            ...(opt === 'No' ? { q6: '', q7: '' } : {}),
-                          }))}
-                          className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
-                            respuestas.q5 === opt
-                              ? opt === 'Sí'
-                                ? 'bg-emerald-500/20 border-emerald-500/40 text-[#22C55E]'
-                                : 'bg-[#F5A623]/20 border-[#F5A623]/40 text-[#F5A623]'
-                              : 'bg-black/20 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/50 hover:bg-[#F5A623]/10'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Q6 & Q7: Only if q5 === 'Sí' */}
-                  {respuestas.q5 === 'Sí' && (
-                    <>
-                      <div>
-                        <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                          6. ¿Cuántas? ¿Cerraste alguna?
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: 3 llamadas, cerré 1"
-                          className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all placeholder-[#FFFFFF]/30"
-                          value={respuestas.q6}
-                          onChange={(e) => setRespuestas((prev) => ({ ...prev, q6: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                          7. ¿Qué objeción apareció? <span className="text-[#FFFFFF]/30 normal-case">(opcional)</span>
-                        </label>
-                        <textarea
-                          rows={2}
-                          placeholder="Si hubo alguna objeción recurrente..."
-                          className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
-                          value={respuestas.q7}
-                          onChange={(e) => setRespuestas((prev) => ({ ...prev, q7: e.target.value }))}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
-              {/* Módulo energético-corporal */}
-              <div className="bg-[#1C1C1C]/30 rounded-xl p-4 border border-[rgba(245,166,35,0.1)]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Battery className="w-4 h-4 text-[#22C55E]" />
-                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider">
-                    Bienestar energético-corporal
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-yellow-400" /> Energía general del día
                   </span>
+                  <span className="text-sm font-bold text-[#F5A623]">{energia} · {etiquetaEnergia(energia)}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {CHECKLIST_ENERGETICO.map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() =>
-                        setModuloEnergetico((prev) => ({
-                          ...prev,
-                          [item.key]: !prev[item.key],
-                        }))
-                      }
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all ${
-                        moduloEnergetico[item.key]
-                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                          : 'bg-[#1C1C1C]/50 border-white/8 text-[#FFFFFF]/40 hover:bg-white/8'
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span className="text-xs">{item.label}</span>
-                      {moduloEnergetico[item.key] && <Check className="w-3 h-3 ml-auto" />}
-                    </button>
-                  ))}
+                <Escala10 valor={energia} onChange={setEnergia} />
+                {ayerEntry && (
+                  <p className="text-[11px] text-[#FFFFFF]/30 mt-2 text-center">
+                    Ayer tuviste <span className="text-[#22C55E]">{ayerEntry.energia}</span>
+                    {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
+                  </p>
+                )}
+              </div>
+
+              {/* 3 dimensiones */}
+              <div>
+                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-3 uppercase tracking-wider">
+                  Tus 3 dimensiones — ¿cómo estuvieron cuerpo · mente · emociones?
+                </label>
+                <div className="space-y-4">
+                  {DIMENSIONES.map((dim) => {
+                    const val = dim.key === 'cuerpo' ? cuerpo : dim.key === 'mente' ? mente : emociones;
+                    const set = dim.key === 'cuerpo' ? setCuerpo : dim.key === 'mente' ? setMente : setEmociones;
+                    return (
+                      <div key={dim.key} className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 w-28 shrink-0">
+                          <dim.icon className="w-4 h-4 text-[#F5A623]" />
+                          <span className="text-xs text-[#FFFFFF]/70">{dim.label}</span>
+                        </div>
+                        <div className="flex-1"><Escala10 valor={val} onChange={set} color={colorDimension} /></div>
+                        <span className="text-sm font-medium text-[#FFFFFF] w-5 text-right">{val}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Botón guardar */}
+              {/* Logro */}
+              <div>
+                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#F5A623]" /> Tu logro de hoy — ¿qué avance te enorgullece?
+                </label>
+                <textarea
+                  rows={2}
+                  maxLength={LOGRO_MAX_CHARS}
+                  placeholder="El avance del que estás orgulloso hoy..."
+                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
+                  value={logro}
+                  onChange={(e) => setLogro(e.target.value)}
+                />
+                <p className="text-[10px] text-[#FFFFFF]/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+              </div>
+
+              {/* ¿En qué estuviste? */}
+              <div>
+                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
+                  ¿En qué estuviste hoy? <span className="text-[#FFFFFF]/30 normal-case">(mínimo 1)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {TAREAS_TAGS.map((tag) => {
+                    const on = tareas.includes(tag.id);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => setTareas((prev) => toggle(prev, tag.id))}
+                        className={`text-xs px-3 py-2 rounded-lg border transition-all ${
+                          on
+                            ? 'border-[#F5A623]/40 text-[#FFFFFF] bg-[#F5A623]/10'
+                            : 'border-white/8 text-[#FFFFFF]/40 hover:bg-white/5'
+                        }`}
+                      >
+                        {tag.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bloqueo */}
+              <div>
+                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
+                  Bloqueos <span className="text-[#FFFFFF]/30 normal-case">(opcional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  maxLength={BLOQUEO_MAX_CHARS}
+                  placeholder="¿Algo te frenó hoy? Técnico, emocional, externo. No hay respuesta mala."
+                  className="w-full bg-black/20 border border-dashed border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
+                  value={bloqueo}
+                  onChange={(e) => setBloqueo(e.target.value)}
+                />
+              </div>
+
+              {/* Checkeos rápidos */}
+              <div className="bg-[#1C1C1C]/30 rounded-xl p-4 border border-[rgba(245,166,35,0.1)]">
+                <div className="flex items-center gap-2 mb-3">
+                  <HeartPulse className="w-4 h-4 text-[#22C55E]" />
+                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider">Checkeos rápidos</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {CHECKEOS_CHIPS.map((chip) => {
+                    const on = checkeos.includes(chip.id);
+                    const Icon = CHECKEO_ICONS[chip.id] ?? Check;
+                    const onColor = chip.positivo
+                      ? 'border-[#22C55E]/30 text-[#22C55E] bg-[#22C55E]/5'
+                      : 'border-[#E09040]/30 text-[#E09040] bg-[#E09040]/5';
+                    return (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        onClick={() => setCheckeos((prev) => toggle(prev, chip.id))}
+                        className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all ${
+                          on ? onColor : 'border-white/8 text-[#FFFFFF]/35 hover:bg-white/5'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        {chip.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Guardar */}
               <button
                 onClick={handleGuardar}
                 disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#FFFFFF] font-medium tracking-wide transition-all flex justify-center items-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
@@ -697,6 +706,9 @@ Respondé SOLO con el JSON, sin texto adicional.`;
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
+              <p className="text-[10px] text-[#FFFFFF]/30 text-center -mt-3">
+                El score se calcula y se muestra después de guardar.
+              </p>
             </div>
           )}
         </>
@@ -711,15 +723,10 @@ Respondé SOLO con el JSON, sin texto adicional.`;
             </div>
           )}
           {entries.length === 0 && !loading && (
-            <p className="text-center text-[#FFFFFF]/40 text-sm py-12">
-              Aún no hay entradas en el Diario.
-            </p>
+            <p className="text-center text-[#FFFFFF]/40 text-sm py-12">Aún no hay entradas en el Diario.</p>
           )}
           {entries.map((entrada) => (
-            <div
-              key={entrada.id}
-              className="card-panel p-5 rounded-2xl border-l-4 border-l-[#F5A623]/50 space-y-3"
-            >
+            <div key={entrada.id} className="card-panel p-5 rounded-2xl border-l-4 border-l-[#F5A623]/50 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-[#F5A623] font-medium">
                   {new Date(entrada.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
@@ -727,68 +734,51 @@ Respondé SOLO con el JSON, sin texto adicional.`;
                   })}
                 </span>
                 <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-[#F5A623]/15 text-[#F5A623]">
+                    {entrada.score}/100
+                  </span>
                   <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                    entrada.energia_nivel >= 7 ? 'bg-emerald-500/15 text-[#22C55E]' :
-                    entrada.energia_nivel >= 4 ? 'bg-[#F5A623]/15 text-[#F5A623]' :
+                    entrada.energia >= 7 ? 'bg-emerald-500/15 text-[#22C55E]' :
+                    entrada.energia >= 4 ? 'bg-[#F5A623]/15 text-[#F5A623]' :
                     'bg-red-500/15 text-[#EF4444]'
                   }`}>
-                    <Zap className="w-3 h-3 inline" /> {entrada.energia_nivel}/10
+                    <Zap className="w-3 h-3 inline" /> {entrada.energia}/10
                   </span>
-                  {entrada.emocion && (
-                    <span className="text-xs text-[#FFFFFF]/40">{entrada.emocion}</span>
-                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                {entrada.respuestas.q1 && (
-                  <div>
-                    <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Tarea completada</span>
-                    <p className="text-[#FFFFFF]/80 mt-0.5">{entrada.respuestas.q1}</p>
-                  </div>
-                )}
-                {entrada.respuestas.q3 && (
-                  <div>
-                    <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Bloqueo</span>
-                    <p className="text-[#FFFFFF]/80 mt-0.5">{entrada.respuestas.q3}</p>
-                  </div>
-                )}
-                {entrada.respuestas.q4 && (
-                  <div>
-                    <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Momento importante</span>
-                    <p className="text-[#FFFFFF]/80 mt-0.5">{entrada.respuestas.q4}</p>
-                  </div>
-                )}
-                {entrada.respuestas.q5 && (
-                  <div>
-                    <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Llamadas</span>
-                    <p className="text-[#FFFFFF]/80 mt-0.5">
-                      {entrada.respuestas.q5}
-                      {entrada.respuestas.q6 ? ` — ${entrada.respuestas.q6}` : ''}
-                    </p>
-                  </div>
-                )}
-                {entrada.respuestas.q7 && (
-                  <div>
-                    <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Objeción</span>
-                    <p className="text-[#FFFFFF]/80 mt-0.5">{entrada.respuestas.q7}</p>
-                  </div>
-                )}
+              {entrada.logro && (
+                <div>
+                  <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Logro</span>
+                  <p className="text-[#FFFFFF]/80 mt-0.5 text-sm">{entrada.logro}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 text-[11px] text-[#FFFFFF]/50">
+                <span>Cuerpo {entrada.cuerpo}</span>
+                <span>Mente {entrada.mente}</span>
+                <span>Emociones {entrada.emociones}</span>
               </div>
 
-              {/* Módulo energético */}
-              <div className="flex gap-1.5 flex-wrap">
-                {Object.entries(entrada.modulo_energetico)
-                  .filter(([, v]) => v)
-                  .map(([k]) => {
-                    const item = CHECKLIST_ENERGETICO.find((c) => c.key === k);
-                    return item ? (
-                      <span key={k} className="text-[10px] bg-[#F5A623]/5 px-2 py-1 rounded-full text-[#FFFFFF]/60 flex items-center gap-1">
-                        <item.icon className="w-3 h-3" /> {item.label}
+              {entrada.bloqueo && (
+                <div>
+                  <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Bloqueo</span>
+                  <p className="text-[#FFFFFF]/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
+                </div>
+              )}
+
+              {entrada.tareas.length > 0 && (
+                <div className="flex gap-1.5 flex-wrap">
+                  {entrada.tareas.map((id) => {
+                    const tag = TAREAS_TAGS.find((t) => t.id === id);
+                    return tag ? (
+                      <span key={id} className="text-[10px] bg-[#F5A623]/5 px-2 py-1 rounded-full text-[#FFFFFF]/60">
+                        {tag.label}
                       </span>
                     ) : null;
                   })}
-              </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

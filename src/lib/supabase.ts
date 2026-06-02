@@ -124,7 +124,7 @@ export interface MetricaSemanaV2 {
   id?: string;
   user_id: string;
   semana: string;
-  // 9 campos manuales del embudo
+  // 9 campos manuales del embudo (bloque B — ads)
   gasto_ads: number;
   mensajes_recibidos: number;
   formularios_completados: number;
@@ -135,6 +135,28 @@ export interface MetricaSemanaV2 {
   ingresos_cobrados: number;
   horas_trabajadas_semana: number;
   created_at?: string;
+
+  // ── v3 · período explícito (día/semana) ──
+  met_periodo_tipo?: 'dia' | 'semana';
+  met_fecha_inicio?: string; // YYYY-MM-DD
+  met_fecha_fin?: string; // YYYY-MM-DD
+
+  // ── v3 · bloque A · contenido orgánico ──
+  met_posts_reels_ig?: number;
+  met_posts_feed_ig?: number;
+  met_posts_tiktok?: number;
+  met_posts_shorts?: number;
+  met_posts_facebook?: number;
+  met_posts_linkedin?: number;
+  met_stories_ig?: number;
+  met_dms_organicos?: number;
+
+  // ── v3 · bloque B · selector de plataforma de ads ──
+  met_ads_plataforma?: string;
+
+  // ── v3 · KPIs calculados server-side al guardar ──
+  met_roas?: number;
+  met_proyeccion_mes?: number;
 }
 
 export interface BibliotecaVideo {

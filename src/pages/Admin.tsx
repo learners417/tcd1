@@ -30,6 +30,8 @@ import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
 import { useAdminTheme } from '../lib/theme';
+import { TAREAS_TAGS } from '../lib/diarioCalcs';
+import { calcularEmbudoV3KPIs, postsTotales } from '../lib/funnelCalcs';
 import { toast } from 'sonner';
 import { createClient } from '@supabase/supabase-js';
 import Campanas from './Campanas';
@@ -2062,28 +2064,42 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </div>
                             <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-5">
                               <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
-                              {detalleDiario[0] ? (
-                                <>
-                                  <p className="text-xs text-[#FFFFFF]/40 mb-2">{new Date(detalleDiario[0].fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-                                  {detalleDiario[0].respuestas?.q3 && (
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                      <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
-                                      <div className="flex gap-0.5">
-                                        {Array.from({ length: 10 }).map((_, i) => (
-                                          <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(detalleDiario[0].respuestas.q3) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
-                                        ))}
-                                      </div>
-                                      <span className="text-[10px] text-[#F5A623] font-bold">{detalleDiario[0].respuestas.q3}/10</span>
+                              {detalleDiario[0] ? (() => {
+                                const d0 = detalleDiario[0];
+                                const energia = d0.energia_nivel ?? d0.respuestas?.q3;
+                                const logro = d0.diario_logro ?? d0.respuestas?.q4;
+                                const freno = d0.diario_bloqueo ?? d0.respuestas?.q2;
+                                return (
+                                  <>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <p className="text-xs text-[#FFFFFF]/40">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                      {d0.diario_score != null && (
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623]">{d0.diario_score}/100</span>
+                                      )}
                                     </div>
-                                  )}
-                                  {detalleDiario[0].respuestas?.q4 && (
-                                    <p className="text-xs text-[#FFFFFF]/80 line-clamp-2"><span className="text-[#22C55E] font-bold">Acción: </span>{detalleDiario[0].respuestas.q4}</p>
-                                  )}
-                                  {detalleDiario[0].respuestas?.q2 && (
-                                    <p className="text-xs text-[#FFFFFF]/60 mt-1 line-clamp-1"><span className="text-[#F5A623] font-bold">Freno: </span>{detalleDiario[0].respuestas.q2}</p>
-                                  )}
-                                </>
-                              ) : <p className="text-xs text-[#FFFFFF]/30">Sin entradas de diario aún</p>}
+                                    {energia != null && (
+                                      <div className="flex items-center gap-1.5 mb-2">
+                                        <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
+                                        <div className="flex gap-0.5">
+                                          {Array.from({ length: 10 }).map((_, i) => (
+                                            <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(energia) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
+                                          ))}
+                                        </div>
+                                        <span className="text-[10px] text-[#F5A623] font-bold">{energia}/10</span>
+                                      </div>
+                                    )}
+                                    {(d0.diario_cuerpo != null) && (
+                                      <p className="text-[11px] text-[#FFFFFF]/50 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
+                                    )}
+                                    {logro && (
+                                      <p className="text-xs text-[#FFFFFF]/80 line-clamp-2"><span className="text-[#22C55E] font-bold">Logro: </span>{logro}</p>
+                                    )}
+                                    {freno && (
+                                      <p className="text-xs text-[#FFFFFF]/60 mt-1 line-clamp-1"><span className="text-[#F5A623] font-bold">Freno: </span>{freno}</p>
+                                    )}
+                                  </>
+                                );
+                              })() : <p className="text-xs text-[#FFFFFF]/30">Sin entradas de diario aún</p>}
                             </div>
                           </div>
 
@@ -2126,32 +2142,63 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <p className="text-[#FFFFFF]/40 text-sm text-center py-12">Sin entradas de diario</p>
                           ) : detalleDiario.map((entrada: any, i: number) => {
                             const r = entrada.respuestas ?? {};
+                            const energia = entrada.energia_nivel ?? r.q3;
+                            const esV3 = entrada.diario_cuerpo != null || entrada.diario_logro != null;
+                            const tagLabels = Array.isArray(entrada.diario_tareas)
+                              ? entrada.diario_tareas.map((id: string) => TAREAS_TAGS.find((t) => t.id === id)?.label ?? id)
+                              : [];
                             return (
                               <div key={i} className="p-6 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)]">
                                 <div className="flex items-center justify-between mb-4">
                                   <p className="text-sm font-semibold text-[#FFFFFF] tracking-wide">
                                     {new Date(entrada.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                   </p>
-                                  {r.q3 && (
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
-                                      <div className="flex gap-0.5">
-                                        {Array.from({ length: 10 }).map((_, idx) => (
-                                          <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(r.q3) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
+                                  <div className="flex items-center gap-2">
+                                    {entrada.diario_score != null && (
+                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623]">{entrada.diario_score}/100</span>
+                                    )}
+                                    {energia != null && (
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
+                                        <div className="flex gap-0.5">
+                                          {Array.from({ length: 10 }).map((_, idx) => (
+                                            <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(energia) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
+                                          ))}
+                                        </div>
+                                        <span className="text-[10px] text-[#F5A623] font-bold">{energia}/10</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                {esV3 ? (
+                                  <div className="space-y-3">
+                                    {entrada.diario_cuerpo != null && (
+                                      <div className="flex gap-6 text-xs">
+                                        <span className="text-[#FFFFFF]/60">Cuerpo <b className="text-[#FFFFFF]">{entrada.diario_cuerpo}</b></span>
+                                        <span className="text-[#FFFFFF]/60">Mente <b className="text-[#FFFFFF]">{entrada.diario_mente}</b></span>
+                                        <span className="text-[#FFFFFF]/60">Emociones <b className="text-[#FFFFFF]">{entrada.diario_emociones}</b></span>
+                                      </div>
+                                    )}
+                                    {entrada.diario_logro && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Logro</p><p className="text-xs text-[#FFFFFF]/80">{entrada.diario_logro}</p></div>}
+                                    {entrada.diario_bloqueo && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Bloqueo</p><p className="text-xs text-[#FFFFFF]/80">{entrada.diario_bloqueo}</p></div>}
+                                    {tagLabels.length > 0 && (
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {tagLabels.map((l: string, idx: number) => (
+                                          <span key={idx} className="text-[10px] bg-[#F5A623]/5 px-2 py-1 rounded-full text-[#FFFFFF]/60">{l}</span>
                                         ))}
                                       </div>
-                                      <span className="text-[10px] text-[#F5A623] font-bold">{r.q3}/10</span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  {r.q1 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Cómo se sintió</p><p className="text-xs text-[#FFFFFF]/80">{r.q1}</p></div>}
-                                  {r.q4 && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Acción tomada</p><p className="text-xs text-[#FFFFFF]/80">{r.q4}</p></div>}
-                                  {r.q5 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Pensamiento dominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q5}</p></div>}
-                                  {r.q2 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Lo que lo frenó</p><p className="text-xs text-[#FFFFFF]/80">{r.q2}</p></div>}
-                                  {r.q6 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Emoción predominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q6}</p></div>}
-                                  {r.q7 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Plan para mañana</p><p className="text-xs text-[#FFFFFF]/80">{r.q7}</p></div>}
-                                </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-2 gap-4">
+                                    {r.q1 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Cómo se sintió</p><p className="text-xs text-[#FFFFFF]/80">{r.q1}</p></div>}
+                                    {r.q4 && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Acción tomada</p><p className="text-xs text-[#FFFFFF]/80">{r.q4}</p></div>}
+                                    {r.q5 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Pensamiento dominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q5}</p></div>}
+                                    {r.q2 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Lo que lo frenó</p><p className="text-xs text-[#FFFFFF]/80">{r.q2}</p></div>}
+                                    {r.q6 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Emoción predominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q6}</p></div>}
+                                    {r.q7 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Plan para mañana</p><p className="text-xs text-[#FFFFFF]/80">{r.q7}</p></div>}
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
@@ -2251,16 +2298,39 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-6 text-center">
                                 <p className="text-sm text-[#FFFFFF]/40">El cliente aún no cargó métricas semanales.</p>
                               </div>
-                            ) : detalleMetricas.slice().reverse().map((m: any, i: number) => (
-                              <div key={i} className="p-5 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)] flex items-center justify-between mb-3">
-                                <span className="text-xs font-semibold text-[#FFFFFF]/60 bg-[#F5A623]/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
-                                <div className="flex gap-8">
-                                  <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.leads}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">leads</p></div>
-                                  <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.conversaciones ?? 0}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">llamadas</p></div>
-                                  <div className="text-center"><p className="text-[#22C55E] text-lg font-bold">{m.ventas}</p><p className="text-[10px] text-[#22C55E]/50 font-bold uppercase">ventas</p></div>
+                            ) : detalleMetricas.slice().reverse().map((m: any, i: number) => {
+                              const esV3 = m.met_fecha_inicio != null || m.met_roas != null || m.met_ads_plataforma != null;
+                              if (esV3) {
+                                const kpis = calcularEmbudoV3KPIs(m);
+                                const roas = m.met_roas ?? kpis.roas;
+                                const periodo = m.met_fecha_inicio
+                                  ? (m.met_periodo_tipo === 'dia'
+                                      ? new Date(m.met_fecha_inicio + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+                                      : `${new Date(m.met_fecha_inicio + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}–${m.met_fecha_fin ? new Date(m.met_fecha_fin + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : ''}`)
+                                  : m.semana;
+                                return (
+                                  <div key={i} className="p-5 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)] flex items-center justify-between mb-3">
+                                    <span className="text-xs font-semibold text-[#FFFFFF]/60 bg-[#F5A623]/5 px-2.5 py-1 rounded-lg">{periodo}</span>
+                                    <div className="flex gap-7">
+                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">ROAS</p></div>
+                                      <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{postsTotales(m)}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">posts</p></div>
+                                      <div className="text-center"><p className="text-[#22C55E] text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-[#22C55E]/50 font-bold uppercase">ventas</p></div>
+                                      <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">ingresos</p></div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div key={i} className="p-5 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)] flex items-center justify-between mb-3">
+                                  <span className="text-xs font-semibold text-[#FFFFFF]/60 bg-[#F5A623]/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
+                                  <div className="flex gap-8">
+                                    <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">leads</p></div>
+                                    <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">llamadas</p></div>
+                                    <div className="text-center"><p className="text-[#22C55E] text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-[#22C55E]/50 font-bold uppercase">ventas</p></div>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}

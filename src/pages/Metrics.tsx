@@ -1,41 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { usePersistedState } from '../lib/usePersistedState';
-import { Plus, X, Lock, CheckCircle2, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V2 as SEED_ROADMAP } from '../lib/roadmapSeed';
 import {
-  calcularFunnelKPIs,
-  diagnosticarEmbudo,
+  calcularEmbudoV3KPIs,
   formatPct,
   formatCurrency,
-  formatNumber,
   nivelColor,
-  nivelBgColor,
+  POSTS_PLATAFORMAS,
+  ADS_PLATAFORMAS,
+  postsTotales,
+  roasTone,
+  cierreTone,
+  showTone,
   EMPTY_METRICAS,
-  type FunnelKPIs,
-  type Diagnostico,
+  type DiagnosticoNivel,
 } from '../lib/funnelCalcs';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers de fecha / período ────────────────────────────────────────────────
 
-function getISOWeek(): string {
-  const d = new Date();
+function toFechaStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isoWeekString(d: Date): string {
   const startOfYear = new Date(d.getFullYear(), 0, 1);
   const weekNo = Math.ceil(((d.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
   return `${d.getFullYear()}-W${String(weekNo).padStart(2, '0')}`;
 }
 
+/** Lunes–domingo de la semana que contiene a `d`. */
+function weekRange(d: Date): { inicio: Date; fin: Date } {
+  const dia = d.getDay(); // 0=domingo
+  const offsetLunes = dia === 0 ? -6 : 1 - dia;
+  const inicio = new Date(d);
+  inicio.setDate(d.getDate() + offsetLunes);
+  const fin = new Date(inicio);
+  fin.setDate(inicio.getDate() + 6);
+  return { inicio, fin };
+}
+
+function fmtRango(inicio: Date, fin: Date): string {
+  const f = (x: Date) => x.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+  return `${f(inicio)} – ${f(fin)}`;
+}
+
 function loadMetricsLocal(): MetricaSemanaV2[] {
   try {
-    const saved = localStorage.getItem('tcd_metrics_v2');
+    const saved = localStorage.getItem('tcd_metrics_v3');
     if (!saved) return [];
     return JSON.parse(saved);
   } catch { return []; }
 }
 
 function saveMetricsLocal(data: MetricaSemanaV2[]) {
-  localStorage.setItem('tcd_metrics_v2', JSON.stringify(data));
+  localStorage.setItem('tcd_metrics_v3', JSON.stringify(data));
 }
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
@@ -50,48 +74,41 @@ function KPICard({ label, value, sub, highlight }: { label: string; value: strin
   );
 }
 
-// ─── Diagnostic Card ─────────────────────────────────────────────────────────
-
-function DiagnosticoCard({ d }: { d: Diagnostico }) {
+/** KPI con color según umbral (ok/alerta/critico). */
+function KPICardTone({ label, value, tone, sub }: { label: string; value: string; tone: DiagnosticoNivel; sub?: string }) {
   return (
-    <div className={`rounded-xl p-4 border ${nivelBgColor(d.nivel)}`}>
-      <div className="flex items-center justify-between mb-2">
-        <p className={`text-xs font-bold uppercase tracking-wider ${nivelColor(d.nivel)}`}>
-          {d.etapa}
-        </p>
-        <span className={`text-xs font-mono ${nivelColor(d.nivel)}`}>
-          {d.valor !== null ? (d.etapa.includes('Costo') ? `$${d.valor.toFixed(0)}` : `${d.valor.toFixed(1)}%`) : '—'}
-        </span>
-      </div>
-      <p className="text-sm text-[#FFFFFF]/80 leading-relaxed">{d.mensaje}</p>
+    <div className="card-panel p-4 rounded-2xl border-[rgba(245,166,35,0.1)]">
+      <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className={`text-2xl font-light tracking-tight ${nivelColor(tone)}`}>{value}</p>
+      {sub && <p className="text-xs text-[#FFFFFF]/40 mt-1">{sub}</p>}
     </div>
   );
 }
 
-// ─── 9-field Funnel Form ─────────────────────────────────────────────────────
+// ─── Inputs reutilizables ──────────────────────────────────────────────────────
 
-const FUNNEL_FIELDS: { key: keyof MetricaSemanaV2; label: string; placeholder: string; prefix?: string }[] = [
-  { key: 'gasto_ads', label: 'Gasto en Ads ($)', placeholder: '0', prefix: '$' },
-  { key: 'mensajes_recibidos', label: 'Mensajes recibidos', placeholder: '0' },
-  { key: 'formularios_completados', label: 'Formularios completados', placeholder: '0' },
-  { key: 'agendados', label: 'Agendados', placeholder: '0' },
-  { key: 'shows', label: 'Shows (se presentaron)', placeholder: '0' },
-  { key: 'llamadas_tomadas', label: 'Llamadas tomadas', placeholder: '0' },
-  { key: 'ventas_cerradas', label: 'Ventas cerradas', placeholder: '0' },
-  { key: 'ingresos_cobrados', label: 'Ingresos cobrados ($)', placeholder: '0', prefix: '$' },
-  { key: 'horas_trabajadas_semana', label: 'Horas trabajadas esta semana', placeholder: '0' },
-];
+function NumField({
+  label, value, onChange, prefix,
+}: { label: string; value: string; onChange: (v: string) => void; prefix?: string }) {
+  return (
+    <div>
+      <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">{label}</label>
+      <div className="relative">
+        {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FFFFFF]/30 text-sm">{prefix}</span>}
+        <input
+          type="number" step="any" min="0" value={value}
+          onChange={(e) => onChange(e.target.value)} placeholder="0"
+          className={`w-full input-field ${prefix ? 'pl-7' : ''}`}
+        />
+      </div>
+    </div>
+  );
+}
 
-// ─── Tab: Mi Progreso ────────────────────────────────────────────────────────
+// ─── Tab: Mi Progreso (sin cambios) ────────────────────────────────────────────
 
 function TabProgreso({ userId }: { userId?: string }) {
-  const [progData, setProgData] = useState({
-    semanaActual: 1,
-    totTareas: 90,
-    compTareas: 0,
-    diasDiario: 0,
-    hitos: 0,
-  });
+  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: 90, compTareas: 0, diasDiario: 0, hitos: 0 });
 
   useEffect(() => {
     const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
@@ -112,8 +129,9 @@ function TabProgreso({ userId }: { userId?: string }) {
       }
     } catch { /* noop */ }
 
-    const diary = JSON.parse(localStorage.getItem('tcd_diario_v2') || '{}');
-    const diasD = Array.isArray(diary.entries) ? diary.entries.length : 0;
+    const diaryRaw = localStorage.getItem('tcd_diario_v3') || localStorage.getItem('tcd_diario_v2') || '[]';
+    let diasD = 0;
+    try { const arr = JSON.parse(diaryRaw); diasD = Array.isArray(arr) ? arr.length : (Array.isArray(arr.entries) ? arr.entries.length : 0); } catch { /* noop */ }
 
     setProgData({ semanaActual: semActual, totTareas: tot, compTareas: comp, diasDiario: diasD, hitos: hitosComp });
   }, []);
@@ -159,18 +177,36 @@ function TabProgreso({ userId }: { userId?: string }) {
   );
 }
 
-// ─── Tab: Mi Embudo ──────────────────────────────────────────────────────────
+// ─── Tab: Mi Embudo (v3 · spec) ────────────────────────────────────────────────
 
 function TabEmbudo({ userId }: { userId?: string }) {
   const [data, setData] = useState<MetricaSemanaV2[]>(loadMetricsLocal);
-  const [showForm, setShowForm] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  // Load from Supabase on mount
+  // Período
+  const [periodoTipo, setPeriodoTipo] = useState<'dia' | 'semana'>('semana');
+  const [fechaRef, setFechaRef] = useState<string>(toFechaStr(new Date()));
+
+  // Plataforma de ads (selector único)
+  const [adsPlataforma, setAdsPlataforma] = useState<string>('Meta (IG/FB)');
+  const sinAds = adsPlataforma === 'Sin ads';
+
+  // Valores numéricos (bloque A + bloque B)
+  const [vals, setVals] = useState<Record<string, string>>({});
+  const setVal = (k: string, v: string) => setVals((prev) => ({ ...prev, [k]: v }));
+  const num = (k: string) => parseFloat(vals[k] || '0') || 0;
+
+  // Rango de fechas derivado del período
+  const refDate = new Date(fechaRef + 'T00:00:00');
+  const { inicio, fin } = periodoTipo === 'dia' ? { inicio: refDate, fin: refDate } : weekRange(refDate);
+  const periodoLabel = periodoTipo === 'dia'
+    ? refDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' })
+    : `Sem. ${fmtRango(inicio, fin)}`;
+
   useEffect(() => {
     if (!isSupabaseReady() || !supabase || !userId) return;
-    supabase.from('metricas_v2').select('*').eq('user_id', userId).order('semana')
+    supabase.from('metricas_v2').select('*').eq('user_id', userId)
+      .order('met_fecha_inicio', { ascending: true })
       .then(({ data: rows }) => {
         if (rows && rows.length > 0) {
           setData(rows as MetricaSemanaV2[]);
@@ -179,225 +215,240 @@ function TabEmbudo({ userId }: { userId?: string }) {
       });
   }, [userId]);
 
-  useEffect(() => {
-    saveMetricsLocal(data);
-  }, [data]);
+  useEffect(() => { saveMetricsLocal(data); }, [data]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const semana = getISOWeek();
+
+    const semana = periodoTipo === 'dia' ? toFechaStr(inicio) : isoWeekString(inicio);
 
     const entry: MetricaSemanaV2 = {
+      ...EMPTY_METRICAS,
       user_id: userId || '',
       semana,
-      gasto_ads: parseFloat(formValues.gasto_ads || '0'),
-      mensajes_recibidos: parseInt(formValues.mensajes_recibidos || '0'),
-      formularios_completados: parseInt(formValues.formularios_completados || '0'),
-      agendados: parseInt(formValues.agendados || '0'),
-      shows: parseInt(formValues.shows || '0'),
-      llamadas_tomadas: parseInt(formValues.llamadas_tomadas || '0'),
-      ventas_cerradas: parseInt(formValues.ventas_cerradas || '0'),
-      ingresos_cobrados: parseFloat(formValues.ingresos_cobrados || '0'),
-      horas_trabajadas_semana: parseFloat(formValues.horas_trabajadas_semana || '0'),
+      met_periodo_tipo: periodoTipo,
+      met_fecha_inicio: toFechaStr(inicio),
+      met_fecha_fin: toFechaStr(fin),
+      met_ads_plataforma: adsPlataforma,
+      // Bloque A — orgánico
+      met_posts_reels_ig: num('met_posts_reels_ig'),
+      met_posts_feed_ig: num('met_posts_feed_ig'),
+      met_posts_tiktok: num('met_posts_tiktok'),
+      met_posts_shorts: num('met_posts_shorts'),
+      met_posts_facebook: num('met_posts_facebook'),
+      met_posts_linkedin: num('met_posts_linkedin'),
+      met_stories_ig: num('met_stories_ig'),
+      met_dms_organicos: num('met_dms_organicos'),
+      // Bloque B — ads (si "Sin ads", se anulan los específicos de ads)
+      gasto_ads: sinAds ? 0 : num('gasto_ads'),
+      mensajes_recibidos: sinAds ? 0 : num('mensajes_recibidos'),
+      formularios_completados: sinAds ? 0 : num('formularios_completados'),
+      agendados: sinAds ? 0 : num('agendados'),
+      shows: sinAds ? 0 : num('shows'),
+      llamadas_tomadas: num('llamadas_tomadas'),
+      ventas_cerradas: num('ventas_cerradas'),
+      ingresos_cobrados: num('ingresos_cobrados'),
+      horas_trabajadas_semana: num('horas_trabajadas_semana'),
     };
 
+    let saved: MetricaSemanaV2 = entry;
     if (isSupabaseReady() && supabase && userId) {
-      await supabase.from('metricas_v2').upsert(
-        { ...entry, user_id: userId },
-        { onConflict: 'user_id,semana' },
-      );
+      const { data: row } = await supabase.from('metricas_v2')
+        .upsert({ ...entry, user_id: userId }, { onConflict: 'user_id,semana' })
+        .select().single();
+      if (row) saved = row as MetricaSemanaV2;
     }
 
-    setData(prev => {
-      const existing = prev.findIndex(m => m.semana === semana);
-      if (existing >= 0) return prev.map((m, i) => i === existing ? entry : m);
-      return [...prev, entry];
+    setData((prev) => {
+      const idx = prev.findIndex((m) => m.semana === semana);
+      if (idx >= 0) return prev.map((m, i) => (i === idx ? saved : m));
+      return [...prev, saved];
     });
 
-    setFormValues({});
-    setShowForm(false);
+    setVals({});
     setSaving(false);
   };
 
-  // Current week metrics & KPIs
-  const currentWeek: MetricaSemanaV2 = data[data.length - 1] ?? EMPTY_METRICAS;
-  const kpis = calcularFunnelKPIs(currentWeek);
-  const diagnosticos = diagnosticarEmbudo(kpis);
+  // KPIs de la fila recién cargada (preview en vivo desde el form)
+  const preview: MetricaSemanaV2 = {
+    ...EMPTY_METRICAS,
+    user_id: userId || '',
+    semana: '',
+    met_periodo_tipo: periodoTipo,
+    met_fecha_inicio: toFechaStr(inicio),
+    met_fecha_fin: toFechaStr(fin),
+    met_posts_reels_ig: num('met_posts_reels_ig'),
+    met_posts_feed_ig: num('met_posts_feed_ig'),
+    met_posts_tiktok: num('met_posts_tiktok'),
+    met_posts_shorts: num('met_posts_shorts'),
+    met_posts_facebook: num('met_posts_facebook'),
+    met_posts_linkedin: num('met_posts_linkedin'),
+    gasto_ads: sinAds ? 0 : num('gasto_ads'),
+    mensajes_recibidos: sinAds ? 0 : num('mensajes_recibidos'),
+    formularios_completados: sinAds ? 0 : num('formularios_completados'),
+    agendados: sinAds ? 0 : num('agendados'),
+    shows: sinAds ? 0 : num('shows'),
+    llamadas_tomadas: num('llamadas_tomadas'),
+    ventas_cerradas: num('ventas_cerradas'),
+    ingresos_cobrados: num('ingresos_cobrados'),
+    horas_trabajadas_semana: num('horas_trabajadas_semana'),
+  };
+  const kpis = calcularEmbudoV3KPIs(preview);
 
-  // Chart data
-  const chartData = data.map((m, i) => {
-    const k = calcularFunnelKPIs(m);
-    return {
-      name: `S${i + 1}`,
-      mensajes: m.mensajes_recibidos,
-      agendados: m.agendados,
-      ventas: m.ventas_cerradas,
-      ingresos: m.ingresos_cobrados,
-    };
-  });
+  // Datos del gráfico de evolución (ingresos / ventas por período cargado)
+  const chartData = data.map((m, i) => ({
+    name: m.met_fecha_inicio ? m.met_fecha_inicio.slice(5) : `#${i + 1}`,
+    ingresos: m.ingresos_cobrados,
+    ventas: m.ventas_cerradas,
+    posts: postsTotales(m),
+  }));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header + Add button */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-xl font-medium text-[#FFFFFF] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-            Mi Embudo de Ventas
-          </h2>
-          <p className="text-sm text-[#FFFFFF]/60">9 métricas semanales · 8 KPIs automáticos · Diagnóstico en tiempo real</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Cargar Semana
-        </button>
+      <div>
+        <h2 className="text-xl font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          Mi Embudo de Ventas
+        </h2>
+        <p className="text-sm text-[#FFFFFF]/60">Orgánico + Ads · 8 KPIs automáticos · carga diaria o semanal</p>
       </div>
 
-      {/* ── 9-field form ── */}
-      {showForm && (
-        <div className="card-panel p-6 rounded-2xl border-[#F5A623]/30 animate-in slide-in-from-top-4">
-          <div className="flex justify-between items-center mb-5">
-            <h3 className="text-lg font-medium text-[#FFFFFF]">Cargar métricas de la semana</h3>
-            <button onClick={() => setShowForm(false)} className="text-[#FFFFFF]/60 hover:text-[#FFFFFF]"><X className="w-5 h-5" /></button>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Período */}
+        <div className="card-panel p-5 rounded-2xl">
+          <p className="text-[10px] font-semibold tracking-widest uppercase text-[#F5A623] mb-3">¿Qué período cargás?</p>
+          <div className="flex gap-2 mb-3">
+            {(['dia', 'semana'] as const).map((t) => (
+              <button
+                key={t} type="button" onClick={() => setPeriodoTipo(t)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+                  periodoTipo === t
+                    ? 'bg-[#F5A623] border-[#F5A623] text-[#0A0806] font-semibold'
+                    : 'bg-black/20 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/50 hover:bg-[#F5A623]/10'
+                }`}
+              >
+                {t === 'dia' ? 'Día' : 'Semana'}
+              </button>
+            ))}
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {FUNNEL_FIELDS.map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">{f.label}</label>
-                  <div className="relative">
-                    {f.prefix && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FFFFFF]/30 text-sm">{f.prefix}</span>
-                    )}
-                    <input
-                      type="number"
-                      step="any"
-                      min="0"
-                      value={formValues[f.key] || ''}
-                      onChange={e => setFormValues(prev => ({ ...prev, [f.key]: e.target.value }))}
-                      placeholder={f.placeholder}
-                      className={`w-full input-field ${f.prefix ? 'pl-7' : ''}`}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-primary w-full disabled:opacity-50"
-            >
-              {saving ? 'Guardando...' : 'Guardar métricas de la semana'}
-            </button>
-          </form>
+          <div className="flex items-center justify-between gap-3">
+            <input
+              type="date" value={fechaRef} onChange={(e) => setFechaRef(e.target.value)}
+              className="input-field max-w-[180px]"
+            />
+            <span className="text-sm text-[#F5A623]/80">{periodoLabel}</span>
+          </div>
         </div>
-      )}
 
-      {data.length === 0 ? (
-        <div className="card-panel p-12 rounded-2xl border border-dashed border-[rgba(245,166,35,0.2)] text-center">
-          <TrendingUp className="w-12 h-12 text-[#F5A623]/30 mx-auto mb-4" />
-          <p className="text-sm font-medium text-[#FFFFFF]/80 mb-2">Todavía no hay métricas registradas</p>
-          <p className="text-xs text-[#FFFFFF]/40 max-w-sm mx-auto">
-            Cargá los datos de tu primera semana para ver los KPIs de tu embudo y el diagnóstico automático.
-          </p>
+        {/* Bloque A — Orgánico */}
+        <div className="card-panel p-5 rounded-2xl">
+          <div className="flex items-center gap-2 mb-4">
+            <Sprout className="w-4 h-4 text-[#22C55E]" />
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-[#22C55E]">A — Contenido orgánico</p>
+          </div>
+          <p className="text-xs text-[#FFFFFF]/40 mb-3">Posts publicados por plataforma</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+            {POSTS_PLATAFORMAS.map((p) => (
+              <NumField key={p.key} label={p.label} value={vals[p.key] || ''} onChange={(v) => setVal(p.key as string, v)} />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <NumField label="Stories IG" value={vals.met_stories_ig || ''} onChange={(v) => setVal('met_stories_ig', v)} />
+            <NumField label="DMs orgánicos recibidos" value={vals.met_dms_organicos || ''} onChange={(v) => setVal('met_dms_organicos', v)} />
+          </div>
+        </div>
+
+        {/* Bloque B — Ads */}
+        <div className="card-panel p-5 rounded-2xl">
+          <div className="flex items-center gap-2 mb-4">
+            <Megaphone className="w-4 h-4 text-[#F5A623]" />
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-[#F5A623]">B — Publicidad (Ads)</p>
+          </div>
+
+          <p className="text-xs text-[#FFFFFF]/40 mb-2">Plataforma activa este período</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {ADS_PLATAFORMAS.map((p) => (
+              <button
+                key={p} type="button" onClick={() => setAdsPlataforma(p)}
+                className={`text-xs px-3 py-2 rounded-lg border transition-all ${
+                  adsPlataforma === p
+                    ? 'bg-[#F5A623]/10 border-[#F5A623]/40 text-[#FFFFFF]'
+                    : 'border-[rgba(245,166,35,0.18)] text-[#FFFFFF]/40 hover:bg-white/5'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {!sinAds && (
+              <>
+                <NumField label="Gasto en ads ($)" prefix="$" value={vals.gasto_ads || ''} onChange={(v) => setVal('gasto_ads', v)} />
+                <NumField label="Mensajes / leads" value={vals.mensajes_recibidos || ''} onChange={(v) => setVal('mensajes_recibidos', v)} />
+                <NumField label="Formularios completados" value={vals.formularios_completados || ''} onChange={(v) => setVal('formularios_completados', v)} />
+                <NumField label="Llamadas agendadas" value={vals.agendados || ''} onChange={(v) => setVal('agendados', v)} />
+                <NumField label="Shows (se presentaron)" value={vals.shows || ''} onChange={(v) => setVal('shows', v)} />
+              </>
+            )}
+            <NumField label="Llamadas tomadas" value={vals.llamadas_tomadas || ''} onChange={(v) => setVal('llamadas_tomadas', v)} />
+            <NumField label="Ventas cerradas" value={vals.ventas_cerradas || ''} onChange={(v) => setVal('ventas_cerradas', v)} />
+            <NumField label="Ingresos cobrados ($)" prefix="$" value={vals.ingresos_cobrados || ''} onChange={(v) => setVal('ingresos_cobrados', v)} />
+            <NumField label="Horas trabajadas" value={vals.horas_trabajadas_semana || ''} onChange={(v) => setVal('horas_trabajadas_semana', v)} />
+          </div>
+        </div>
+
+        {/* KPIs en vivo */}
+        <div>
+          <p className="text-[10px] font-semibold tracking-widest uppercase text-[#22C55E] mb-3">KPIs calculados</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <KPICardTone label="ROAS" value={kpis.roas !== null ? `${kpis.roas.toFixed(1)}×` : '—'} tone={roasTone(kpis.roas)} />
+            <KPICardTone label="Tasa de cierre" value={formatPct(kpis.tasa_cierre)} tone={cierreTone(kpis.tasa_cierre)} />
+            <KPICardTone label="% Show" value={formatPct(kpis.pct_show)} tone={showTone(kpis.pct_show)} />
+            <KPICard label="Costo por lead" value={kpis.costo_por_lead !== null ? formatCurrency(kpis.costo_por_lead) : '—'} />
+            <KPICard label="PHR ($/hora)" value={kpis.phr !== null ? formatCurrency(kpis.phr) : '—'} highlight />
+            <KPICard label="Posts totales" value={String(kpis.posts_totales)} />
+            <KPICard label="% DM→Formulario" value={formatPct(kpis.pct_dm_formulario)} />
+            <KPICard label="Proyección mes" value={kpis.proyeccion_mes !== null ? formatCurrency(kpis.proyeccion_mes) : '—'} highlight />
+          </div>
+        </div>
+
+        <button type="submit" disabled={saving} className="btn-primary w-full disabled:opacity-50 flex items-center justify-center gap-2">
+          <Save className="w-4 h-4" /> {saving ? 'Guardando...' : `Guardar métricas del ${periodoTipo === 'dia' ? 'día' : 'la semana'}`}
+        </button>
+      </form>
+
+      {/* Evolución */}
+      {chartData.length > 1 ? (
+        <div className="card-panel p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase">Evolución de ingresos</h3>
+            <div className="flex gap-4 text-xs font-medium text-[#FFFFFF]/60">
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#F5A623]" /> Ingresos</div>
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" /> Ventas</div>
+            </div>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F5A623" stopOpacity={0.3} /><stop offset="95%" stopColor="#F5A623" stopOpacity={0} /></linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '8px', color: '#FFFFFF' }} />
+                <Area type="monotone" dataKey="ingresos" stroke="#F5A623" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
+                <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={0} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       ) : (
-        <>
-          {/* ── 8 KPIs grid ── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KPICard
-              label="Costo por mensaje"
-              value={kpis.costo_por_mensaje !== null ? `$${kpis.costo_por_mensaje.toFixed(2)}` : '—'}
-              sub="gasto / mensajes"
-            />
-            <KPICard
-              label="DM → Formulario"
-              value={formatPct(kpis.pct_dm_formulario !== null ? kpis.pct_dm_formulario * 100 : null)}
-              sub="formularios / mensajes"
-            />
-            <KPICard
-              label="Formulario → Agenda"
-              value={formatPct(kpis.pct_formulario_agenda !== null ? kpis.pct_formulario_agenda * 100 : null)}
-              sub="agendados / formularios"
-            />
-            <KPICard
-              label="Tasa de Show"
-              value={formatPct(kpis.pct_show !== null ? kpis.pct_show * 100 : null)}
-              sub="shows / agendados"
-            />
-            <KPICard
-              label="Tasa de Cierre"
-              value={formatPct(kpis.tasa_cierre !== null ? kpis.tasa_cierre * 100 : null)}
-              sub="ventas / llamadas"
-              highlight
-            />
-            <KPICard
-              label="Costo por Venta"
-              value={kpis.cpv !== null ? formatCurrency(kpis.cpv) : '—'}
-              sub="gasto / ventas"
-            />
-            <KPICard
-              label="Pesos por Hora Real"
-              value={kpis.phr !== null ? formatCurrency(kpis.phr) : '—'}
-              sub="ingresos / horas mensuales"
-              highlight
-            />
-            <KPICard
-              label="Proyección Mensual"
-              value={kpis.proyeccion_mensual !== null ? formatCurrency(kpis.proyeccion_mensual) : '—'}
-              sub="ventas × 4.33 × ticket"
-              highlight
-            />
-          </div>
-
-          {/* ── 6 Diagnósticos ── */}
-          {diagnosticos.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" /> Diagnóstico del Embudo
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {diagnosticos.map((d, i) => (
-                  <DiagnosticoCard key={i} d={d} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Evolution chart ── */}
-          {chartData.length > 1 && (
-            <div className="card-panel p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase">Evolución del Embudo</h3>
-                <div className="flex gap-4 text-xs font-medium text-[#FFFFFF]/60">
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#F5A623]" /> Mensajes</div>
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#FFB94D]" /> Agendados</div>
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" /> Ventas</div>
-                </div>
-              </div>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorMensajes" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F5A623" stopOpacity={0.3} /><stop offset="95%" stopColor="#F5A623" stopOpacity={0} /></linearGradient>
-                      <linearGradient id="colorAgendados" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#FFB94D" stopOpacity={0.3} /><stop offset="95%" stopColor="#FFB94D" stopOpacity={0} /></linearGradient>
-                      <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#22C55E" stopOpacity={0.3} /><stop offset="95%" stopColor="#22C55E" stopOpacity={0} /></linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
-                    <XAxis dataKey="name" stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                    <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '8px', color: '#FFFFFF' }} />
-                    <Area type="monotone" dataKey="mensajes" stroke="#F5A623" strokeWidth={2} fillOpacity={1} fill="url(#colorMensajes)" />
-                    <Area type="monotone" dataKey="agendados" stroke="#FFB94D" strokeWidth={2} fillOpacity={1} fill="url(#colorAgendados)" />
-                    <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={1} fill="url(#colorVentas)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-        </>
+        <div className="card-panel p-8 rounded-2xl border border-dashed border-[rgba(245,166,35,0.2)] text-center">
+          <TrendingUp className="w-10 h-10 text-[#F5A623]/30 mx-auto mb-3" />
+          <p className="text-sm text-[#FFFFFF]/60">Cargá al menos 2 períodos para ver la evolución de tus ingresos.</p>
+        </div>
       )}
     </div>
   );
