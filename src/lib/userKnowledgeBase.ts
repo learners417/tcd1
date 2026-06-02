@@ -36,6 +36,18 @@ function buildHerramientaToMetaMap(): Map<string, { pilarNumero: number; metaCod
   return map;
 }
 
+/**
+ * Extrae de forma segura un campo string de un valor desconocido.
+ * Protege contra `null`, el literal JSON `null` (que pasa el filtro
+ * `.not(col, 'is', null)` de Supabase) y valores no-objeto que en runtime
+ * romperían al acceder a una propiedad (TypeError: null is not an object).
+ */
+function safeStringField(value: unknown, field: string): string {
+  if (!value || typeof value !== 'object') return '';
+  const fieldValue = (value as Record<string, unknown>)[field];
+  return typeof fieldValue === 'string' ? fieldValue : '';
+}
+
 // ─── Fuente 1: Supabase hoja_de_ruta.output_generado ─────────────────────────
 
 async function fromHojaDeRuta(userId: string): Promise<KnowledgeEntry[]> {
@@ -56,8 +68,8 @@ async function fromHojaDeRuta(userId: string): Promise<KnowledgeEntry[]> {
     const meta = pilar?.metas.find((m) => m.codigo === row.meta_codigo);
     if (!pilar || !meta) continue;
 
-    const output = row.output_generado as Record<string, unknown>;
-    const texto = typeof output.texto === 'string' ? output.texto : '';
+    const output = row.output_generado;
+    const texto = safeStringField(output, 'texto');
     if (!texto) continue;
 
     entries.push({
@@ -67,7 +79,7 @@ async function fromHojaDeRuta(userId: string): Promise<KnowledgeEntry[]> {
       metaTitulo: meta.titulo,
       herramientaId: meta.herramienta_id,
       texto,
-      aprobadoEn: typeof output.aprobado_en === 'string' ? output.aprobado_en : undefined,
+      aprobadoEn: safeStringField(output, 'aprobado_en') || undefined,
     });
   }
 
@@ -97,8 +109,7 @@ async function fromHerramientasOutputs(userId: string): Promise<KnowledgeEntry[]
     const meta = pilar?.metas.find((m) => m.codigo === ref.metaCodigo);
     if (!pilar || !meta) continue;
 
-    const output = row.output as Record<string, unknown>;
-    const texto = typeof output.texto === 'string' ? output.texto : '';
+    const texto = safeStringField(row.output, 'texto');
     if (!texto) continue;
 
     entries.push({
@@ -222,8 +233,8 @@ function fromLocalStorage(): KnowledgeEntry[] {
       const raw = localStorage.getItem(key);
       if (!raw) continue;
 
-      const parsed = JSON.parse(raw) as Record<string, unknown>;
-      const texto = typeof parsed.texto === 'string' ? parsed.texto : '';
+      const parsed: unknown = JSON.parse(raw);
+      const texto = safeStringField(parsed, 'texto');
       if (!texto) continue;
 
       entries.push({
