@@ -339,7 +339,10 @@ export default function DiarioDirector({
               diario_tareas: tareas,
               diario_checkeos: checkeos,
               diario_bloqueo: bloqueo.trim() || null,
-              // back-compat con vistas legacy
+              // back-compat con esquema legacy: columnas previas al diario v3.
+              // `respuestas` es NOT NULL en la tabla vieja (cuestionario q1..q5);
+              // el diario v3 ya no la usa, pero hay que mandar un valor no-null.
+              respuestas: {},
               pensamiento_dominante: logro.trim(),
             },
             { onConflict: 'user_id,fecha' },
