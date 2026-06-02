@@ -4,7 +4,9 @@ import {Toaster} from 'sonner';
 import App from './App.tsx';
 import './index.css';
 import {initSentry, Sentry} from './lib/sentry';
+import {installDomTranslationGuard} from './lib/domTranslationGuard';
 
+installDomTranslationGuard();
 initSentry();
 
 function FallbackUI() {
