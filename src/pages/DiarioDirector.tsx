@@ -26,6 +26,7 @@ import {
   UserX,
 } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
+import { Sentry } from '../lib/sentry';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
@@ -46,6 +47,22 @@ import {
   toFechaStr,
   type EntradaHistorica,
 } from '../lib/diarioCalcs';
+
+/**
+ * Extrae un mensaje legible de un error desconocido, incluyendo los errores de
+ * Supabase/PostgREST (que son objetos planos con message/code/details/hint, no
+ * instancias de Error).
+ */
+function errorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === 'object') {
+    const e = err as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
+    const parts = [e.message, e.details, e.hint, e.code]
+      .filter((p): p is string => typeof p === 'string' && p.length > 0);
+    if (parts.length > 0) return parts.join(' · ');
+  }
+  return 'Error desconocido';
+}
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -342,8 +359,13 @@ export default function DiarioDirector({
       toast.success(`Entrada guardada · Score del día: ${entradaLocal.score}/100`);
 
       if (esDomingo) await generarResumenSemana(actualizadas);
-    } catch {
-      toast.error('Error al guardar. Intentá de nuevo.');
+    } catch (err) {
+      // Reportar a Sentry con contexto en vez de tragarse el error en silencio.
+      Sentry.captureException(err, {
+        tags: { feature: 'diario-fundador', action: 'guardar-entrada' },
+        extra: { fecha: todayStr, userId, message: errorMessage(err) },
+      });
+      toast.error(`Error al guardar: ${errorMessage(err)}`);
     } finally {
       setSaving(false);
     }
