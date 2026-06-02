@@ -4,11 +4,56 @@
 --   Bloque A (orgánico: posts por plataforma, stories, DMs) + Bloque B (ads)
 --   con período explícito (día/semana), ROAS y proyección SERVER-SIDE, y
 --   alarmas a Lupe (admins).
--- Aditiva sobre metricas_v2. Depende de notificar_lupe() (creada en
--- 20260601_diario_fundador_v3.sql, que corre antes por orden alfabético).
+--
+-- IMPORTANTE: la tabla metricas_v2 NUNCA se había creado en migraciones — el
+-- front escribía ahí y fallaba en silencio (las métricas vivían en localStorage).
+-- Esta migración la CREA con RLS y redirige get_user_metrics a leerla.
+--
+-- Depende de notificar_lupe() (creada en 20260601_diario_fundador_v3.sql, que
+-- corre antes por orden alfabético).
 -- ============================================================================
 
--- 1. COLUMNAS NUEVAS ---------------------------------------------------------
+-- 0. TABLA + RLS -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS metricas_v2 (
+  id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                 UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  semana                  TEXT        NOT NULL,  -- ISO week ("2026-W23") o fecha ("2026-06-01") si es día
+  -- 9 campos manuales del embudo (bloque B — ads)
+  gasto_ads               NUMERIC     DEFAULT 0,
+  mensajes_recibidos      INT         DEFAULT 0,
+  formularios_completados INT         DEFAULT 0,
+  agendados               INT         DEFAULT 0,
+  shows                   INT         DEFAULT 0,
+  llamadas_tomadas        INT         DEFAULT 0,
+  ventas_cerradas         INT         DEFAULT 0,
+  ingresos_cobrados       NUMERIC     DEFAULT 0,
+  horas_trabajadas_semana NUMERIC     DEFAULT 0,
+  created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (user_id, semana)
+);
+
+CREATE INDEX IF NOT EXISTS idx_metricas_v2_user ON metricas_v2(user_id);
+
+ALTER TABLE metricas_v2 ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "metricas_v2_own_read" ON metricas_v2;
+CREATE POLICY "metricas_v2_own_read" ON metricas_v2
+  FOR SELECT USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "metricas_v2_own_insert" ON metricas_v2;
+CREATE POLICY "metricas_v2_own_insert" ON metricas_v2
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "metricas_v2_own_update" ON metricas_v2;
+CREATE POLICY "metricas_v2_own_update" ON metricas_v2
+  FOR UPDATE USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "metricas_v2_own_delete" ON metricas_v2;
+CREATE POLICY "metricas_v2_own_delete" ON metricas_v2
+  FOR DELETE USING (user_id = auth.uid());
+
+-- 1. COLUMNAS v3 -------------------------------------------------------------
 ALTER TABLE metricas_v2 ADD COLUMN IF NOT EXISTS met_periodo_tipo  TEXT DEFAULT 'semana'; -- 'dia' | 'semana'
 ALTER TABLE metricas_v2 ADD COLUMN IF NOT EXISTS met_fecha_inicio  DATE;
 ALTER TABLE metricas_v2 ADD COLUMN IF NOT EXISTS met_fecha_fin     DATE;
@@ -175,5 +220,18 @@ $$;
 
 GRANT EXECUTE ON FUNCTION detectar_metricas_inactivas() TO authenticated;
 
--- 5. BACKFILL: recalcular met_roas / met_proyeccion_mes de filas existentes
-UPDATE metricas_v2 SET met_roas = met_roas WHERE TRUE;  -- dispara trg_metricas_kpis vía UPDATE
+-- 5. RPC del admin: leer las métricas v3 de un cliente -----------------------
+-- get_user_metrics existía leyendo la tabla vieja `metricas` (singular). Se
+-- redirige a metricas_v2 para que el dashboard de Lupe vea los datos nuevos.
+DROP FUNCTION IF EXISTS get_user_metrics(UUID);
+CREATE OR REPLACE FUNCTION get_user_metrics(target_user_id UUID)
+RETURNS SETOF metricas_v2
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT * FROM metricas_v2 WHERE user_id = target_user_id
+  ORDER BY COALESCE(met_fecha_inicio, created_at::date);
+$$;
+
+GRANT EXECUTE ON FUNCTION get_user_metrics(UUID) TO authenticated;
