@@ -3,6 +3,8 @@ import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip 
 import { usePersistedState } from '../lib/usePersistedState';
 import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
+import { reportError } from '../lib/errors';
+import { toast } from 'sonner';
 import { SEED_ROADMAP_V2 as SEED_ROADMAP } from '../lib/roadmapSeed';
 import {
   calcularEmbudoV3KPIs,
@@ -254,9 +256,20 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
     let saved: MetricaSemanaV2 = entry;
     if (isSupabaseReady() && supabase && userId) {
-      const { data: row } = await supabase.from('metricas_v2')
+      const { data: row, error } = await supabase.from('metricas_v2')
         .upsert({ ...entry, user_id: userId }, { onConflict: 'user_id,semana' })
         .select().single();
+      if (error) {
+        // No tragarse el error: reportar, avisar y NO limpiar el form (no se perdió lo cargado).
+        const msg = reportError(error, {
+          feature: 'metricas-embudo',
+          action: 'guardar-metricas',
+          extra: { semana, userId },
+        });
+        toast.error(`No se pudieron guardar las métricas: ${msg}`);
+        setSaving(false);
+        return;
+      }
       if (row) saved = row as MetricaSemanaV2;
     }
 
@@ -268,6 +281,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
     setVals({});
     setSaving(false);
+    toast.success('Métricas guardadas');
   };
 
   // KPIs de la fila recién cargada (preview en vivo desde el form)
