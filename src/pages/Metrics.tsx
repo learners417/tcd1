@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { usePersistedState } from '../lib/usePersistedState';
 import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
@@ -17,6 +17,7 @@ import {
   roasTone,
   cierreTone,
   showTone,
+  cpvTone,
   EMPTY_METRICAS,
   type DiagnosticoNivel,
 } from '../lib/funnelCalcs';
@@ -205,6 +206,9 @@ function TabEmbudo({ userId }: { userId?: string }) {
     ? refDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' })
     : `Sem. ${fmtRango(inicio, fin)}`;
 
+  // Clave única del período seleccionado (coincide con la columna `semana`).
+  const semanaActual = periodoTipo === 'dia' ? toFechaStr(inicio) : isoWeekString(inicio);
+
   useEffect(() => {
     if (!isSupabaseReady() || !supabase || !userId) return;
     supabase.from('metricas_v2').select('*').eq('user_id', userId)
@@ -219,11 +223,42 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
   useEffect(() => { saveMetricsLocal(data); }, [data]);
 
+  // Pre-cargar el formulario con lo ya guardado para el período seleccionado.
+  // Sin esto, re-guardar un período pisaba con 0 los campos no reingresados.
+  useEffect(() => {
+    const s = (n: number | null | undefined) => (n ? String(n) : '');
+    const existing = data.find((m) => m.semana === semanaActual);
+    if (!existing) {
+      setVals({}); // período sin datos: arrancar limpio
+      return;
+    }
+    setVals({
+      met_posts_reels_ig: s(existing.met_posts_reels_ig),
+      met_posts_feed_ig: s(existing.met_posts_feed_ig),
+      met_posts_tiktok: s(existing.met_posts_tiktok),
+      met_posts_shorts: s(existing.met_posts_shorts),
+      met_posts_facebook: s(existing.met_posts_facebook),
+      met_posts_linkedin: s(existing.met_posts_linkedin),
+      met_stories_ig: s(existing.met_stories_ig),
+      met_dms_organicos: s(existing.met_dms_organicos),
+      gasto_ads: s(existing.gasto_ads),
+      mensajes_recibidos: s(existing.mensajes_recibidos),
+      formularios_completados: s(existing.formularios_completados),
+      agendados: s(existing.agendados),
+      shows: s(existing.shows),
+      llamadas_tomadas: s(existing.llamadas_tomadas),
+      ventas_cerradas: s(existing.ventas_cerradas),
+      ingresos_cobrados: s(existing.ingresos_cobrados),
+      horas_trabajadas_semana: s(existing.horas_trabajadas_semana),
+    });
+    if (existing.met_ads_plataforma) setAdsPlataforma(existing.met_ads_plataforma);
+  }, [semanaActual, data]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
-    const semana = periodoTipo === 'dia' ? toFechaStr(inicio) : isoWeekString(inicio);
+    const semana = semanaActual;
 
     const entry: MetricaSemanaV2 = {
       ...EMPTY_METRICAS,
@@ -279,7 +314,8 @@ function TabEmbudo({ userId }: { userId?: string }) {
       return [...prev, saved];
     });
 
-    setVals({});
+    // No limpiamos el form: el efecto de pre-carga lo re-sincroniza con lo guardado,
+    // así los KPIs y el form siguen mostrando el período recién guardado.
     setSaving(false);
     toast.success('Métricas guardadas');
   };
@@ -324,7 +360,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <h2 className="text-xl font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Mi Embudo de Ventas
         </h2>
-        <p className="text-sm text-[#FFFFFF]/60">Orgánico + Ads · 8 KPIs automáticos · carga diaria o semanal</p>
+        <p className="text-sm text-[#FFFFFF]/60">Orgánico + Ads · 12 KPIs automáticos · carga diaria o semanal</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -419,11 +455,15 @@ function TabEmbudo({ userId }: { userId?: string }) {
             <KPICardTone label="ROAS" value={kpis.roas !== null ? `${kpis.roas.toFixed(1)}×` : '—'} tone={roasTone(kpis.roas)} />
             <KPICardTone label="Tasa de cierre" value={formatPct(kpis.tasa_cierre)} tone={cierreTone(kpis.tasa_cierre)} />
             <KPICardTone label="% Show" value={formatPct(kpis.pct_show)} tone={showTone(kpis.pct_show)} />
+            <KPICardTone label="Costo por venta" value={kpis.cpv !== null ? formatCurrency(kpis.cpv) : '—'} tone={cpvTone(kpis.cpv)} />
             <KPICard label="Costo por lead" value={kpis.costo_por_lead !== null ? formatCurrency(kpis.costo_por_lead) : '—'} />
+            <KPICard label="Ticket promedio" value={kpis.ticket_promedio !== null ? formatCurrency(kpis.ticket_promedio) : '—'} />
             <KPICard label="PHR ($/hora)" value={kpis.phr !== null ? formatCurrency(kpis.phr) : '—'} highlight />
-            <KPICard label="Posts totales" value={String(kpis.posts_totales)} />
-            <KPICard label="% DM→Formulario" value={formatPct(kpis.pct_dm_formulario)} />
             <KPICard label="Proyección mes" value={kpis.proyeccion_mes !== null ? formatCurrency(kpis.proyeccion_mes) : '—'} highlight />
+            <KPICard label="Posts totales" value={String(kpis.posts_totales)} />
+            <KPICard label="Posts / día" value={kpis.posts_por_dia !== null ? kpis.posts_por_dia.toFixed(1) : '—'} />
+            <KPICard label="% DM→Formulario" value={formatPct(kpis.pct_dm_formulario)} />
+            <KPICard label="% Formulario→Agenda" value={formatPct(kpis.pct_formulario_agenda)} />
           </div>
         </div>
 
@@ -431,6 +471,29 @@ function TabEmbudo({ userId }: { userId?: string }) {
           <Save className="w-4 h-4" /> {saving ? 'Guardando...' : `Guardar métricas del ${periodoTipo === 'dia' ? 'día' : 'la semana'}`}
         </button>
       </form>
+
+      {/* Contenido orgánico (posts publicados por período) */}
+      {chartData.some((d) => d.posts > 0) && (
+        <div className="card-panel p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase">Contenido orgánico publicado</h3>
+            <div className="flex items-center gap-2 text-xs font-medium text-[#FFFFFF]/60">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" /> Posts totales
+            </div>
+          </div>
+          <div className="h-[260px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} allowDecimals={false} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '8px', color: '#FFFFFF' }} />
+                <Bar dataKey="posts" fill="#22C55E" radius={[4, 4, 0, 0]} name="Posts" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {/* Evolución */}
       {chartData.length > 1 ? (

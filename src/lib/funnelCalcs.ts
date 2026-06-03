@@ -242,6 +242,11 @@ export interface EmbudoV3KPIs {
   posts_totales: number;
   pct_dm_formulario: number | null; // %
   proyeccion_mes: number | null;
+  // KPIs clave adicionales
+  ticket_promedio: number | null;      // ingresos / ventas
+  cpv: number | null;                  // costo por venta (gasto_ads / ventas)
+  pct_formulario_agenda: number | null; // %
+  posts_por_dia: number | null;        // ritmo de contenido orgánico
 }
 
 /** Suma de todos los posts del bloque A. */
@@ -274,15 +279,25 @@ export function calcularEmbudoV3KPIs(m: MetricaSemanaV2): EmbudoV3KPIs {
   const dias = diasDelPeriodo(m);
   const proyeccion_mes = dias > 0 ? m.ingresos_cobrados * (30 / dias) : null;
 
+  const ticket_promedio = safe(m.ingresos_cobrados, m.ventas_cerradas);
+  const cpv = safe(m.gasto_ads, m.ventas_cerradas);
+  const pct_formulario_agenda = pct(m.agendados, m.formularios_completados);
+  const totalPosts = postsTotales(m);
+  const posts_por_dia = dias > 0 ? totalPosts / dias : null;
+
   return {
     roas,
     tasa_cierre,
     pct_show,
     costo_por_lead,
     phr,
-    posts_totales: postsTotales(m),
+    posts_totales: totalPosts,
     pct_dm_formulario,
     proyeccion_mes,
+    ticket_promedio,
+    cpv,
+    pct_formulario_agenda,
+    posts_por_dia,
   };
 }
 
@@ -302,4 +317,10 @@ export function cierreTone(pct: number | null): DiagnosticoNivel {
 export function showTone(pct: number | null): DiagnosticoNivel {
   if (pct === null) return 'alerta';
   return pct < 50 ? 'alerta' : 'ok';
+}
+export function cpvTone(v: number | null): DiagnosticoNivel {
+  if (v === null) return 'alerta';
+  if (v > 250) return 'critico';
+  if (v > 100) return 'alerta';
+  return 'ok';
 }
