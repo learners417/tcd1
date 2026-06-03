@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
+import { getActiveDaysThisWeek } from '../lib/activity';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import TaskDetailModal from '../components/TaskDetailModal';
@@ -49,6 +50,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
     pilaresCompletados: 0,
     tareasHoy: [] as TareaHoy[],
     racha: 0,
+    diasConectados: 0,
   });
   const [proximoHito, setProximoHito] = useState<ProximoHito | null>(null);
   const [selectedTask, setSelectedTask] = useState<TareaHoy | null>(null);
@@ -125,6 +127,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         pilaresCompletados: pilaresComp,
         tareasHoy,
         racha: rachaLocal,
+        diasConectados: 0,
       });
       setProximoHito(hito);
 
@@ -187,6 +190,9 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
 
         const { data: qd } = await supabase.from('diario_entradas').select('id').eq('user_id', userId);
         if (qd) setData(prev => ({ ...prev, racha: qd.length }));
+
+        const diasConectados = await getActiveDaysThisWeek(userId);
+        setData(prev => ({ ...prev, diasConectados }));
       }
     }
     loadData();
@@ -218,11 +224,12 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
       </div>
 
       {/* ZONA B — 4 tarjetas de métricas clave */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard label="Semana actual" value={`${data.semanaActual}/13`} sub="Del programa" />
         <MetricCard label="Pilares completados" value={`${data.pilaresCompletados}/${SEED_ROADMAP_V2.length}`} sub="Desbloqueados" />
         <MetricCard label="Tareas completadas" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% del total`} />
         <MetricCard label="Días de diario" value={`${data.racha}`} sub={data.racha > 0 ? `${data.racha} entradas` : 'Sin entradas aún'} />
+        <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empezá hoy'} />
       </div>
 
       {/* ZONA C — Dos columnas */}

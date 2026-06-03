@@ -22,3 +22,15 @@ export function startOfDayLocal(date: Date): Date {
   out.setHours(0, 0, 0, 0);
   return out;
 }
+
+/**
+ * Formatea una fecha como `YYYY-MM-DD` usando la hora **local** (no UTC).
+ * Contraparte de `parseDateLocal`: evita el corrimiento de un día que produce
+ * `toISOString()` en zonas con offset negativo (Argentina UTC-3).
+ */
+export function formatDateLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}

@@ -26,6 +26,7 @@ import LoadingScreen from './components/LoadingScreen';
 import { X, User, Bell, Shield, CreditCard, LogOut, Camera, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase, isSupabaseReady, type Profile as SupabaseProfile } from './lib/supabase';
 import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
+import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
 
@@ -134,6 +135,8 @@ export default function App() {
         clearTimeout(safetyTimer);
         setProfileLoading(false);
         setAuthState('logged_in');
+        // Registrar el día como "conectado" (no bloqueante, idempotente, máx 1/día).
+        void recordTodayActivity(session.user.id);
       }
     });
 
