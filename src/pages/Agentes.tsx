@@ -28,6 +28,7 @@ import {
   Search,
   MessageCircle,
   PenLine,
+  Layers,
   Bot,
   BadgeDollarSign,
   ArrowRight,
@@ -76,6 +77,7 @@ const AGENTE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   Search,
   MessageCircle,
   PenLine,
+  Layers,
   BadgeDollarSign,
 };
 

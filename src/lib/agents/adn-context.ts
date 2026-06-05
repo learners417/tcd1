@@ -86,8 +86,23 @@ const FIELD_MAP: Record<AdnFieldKey, (p: Partial<ProfileV2>) => string> = {
   NEGoferta_mid: (p) => nonEmpty(p.oferta_mid),
   NEGoferta_low: (p) => nonEmpty(p.oferta_low),
   NEGoferta_high: (p) => nonEmpty(p.oferta_high),
+
+  // Oferta Ultra Low ($17-47, DIY) · objeto estructurado AdnOfertaUltralow.
+  NEGoferta_ultralow: (p) => {
+    const o = p.adn_oferta_ultralow;
+    if (!o) return PLACEHOLDER;
+    const parts = [
+      o.nombre,
+      o.precio ? `$${o.precio}` : '',
+      o.resultado,
+    ].filter(Boolean);
+    return parts.length ? parts.join(' · ') : PLACEHOLDER;
+  },
+
   NEGgarantia: () => PLACEHOLDER,
   NEGescenarios_roas: (p) => nonEmpty(p.adn_escenarios_roas),
+
+  IRRnicho: (p) => nonEmpty(p.adn_nicho ?? p.adn_micronicho ?? p.nicho),
 
   CAPscript_venta_W: (p) => nonEmpty(p.script_venta),
   CAPlanding_copy: (p) => nonEmpty(p.adn_landing_copy),
