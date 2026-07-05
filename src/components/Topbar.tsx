@@ -316,7 +316,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="¿A dónde querés ir?"
+                placeholder="¿A dónde quieres ir?"
                 className="bg-transparent border-none outline-none text-[#FFFFFF] text-sm w-full placeholder-[#FFFFFF]/40"
               />
               <button onClick={() => setShowSearch(false)} className="text-[#FFFFFF]/40 hover:text-[#FFFFFF]">
