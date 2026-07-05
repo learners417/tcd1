@@ -35,7 +35,7 @@ const RATING_CONFIG: Record<number, { titulo: string; mensaje: string; placehold
   },
   4: {
     titulo: 'Muy bueno',
-    mensaje: 'Gracias por tu feedback. Nos acercamos, pero nos gustaría saber qué nos faltó para llegar a las 5 estrellas y seguir mejorando para vos.',
+    mensaje: 'Gracias por tu feedback. Nos acercamos, pero nos gustaría saber qué nos faltó para llegar a las 5 estrellas y seguir mejorando para ti.',
     placeholder: '¿Qué podríamos mejorar para llegar a las 5 estrellas?',
   },
   3: {
@@ -199,7 +199,7 @@ export default function PilarUnlockedModal({
                     «{mentorPregunta}»
                   </p>
                   <p className="text-[10px] text-[#FFFFFF]/35 mt-2">
-                    No la respondas rápido. Llevála con vos hoy.
+                    No la respondas rápido. Llévala contigo hoy.
                   </p>
                 </div>
               )}
