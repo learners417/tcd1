@@ -25,7 +25,7 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(false);
 
     if (error) {
-      toast.error('Credenciales incorrectas. Verificá tu email y contraseña.');
+      toast.error('Credenciales incorrectas. Verifica tu email y contraseña.');
       return;
     }
 
