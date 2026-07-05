@@ -126,7 +126,9 @@ export function buildAdnContext(
   // El bloque de dialecto SOLO aplica al contenido publicable (reels · stories ·
   // carruseles · copies que el sanador publicará). La voz interna del entrenador
   // hablando con el sanador queda regida por voz-javo.ts (voseo universal).
-  return `${paisLinea}\n${camposLista}\n\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican SOLO al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.\n- Tu voz como entrenador hablándole AL sanador queda en voseo (la voz Javo) — no cambies eso.\n- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
+  return `${paisLinea}\n${camposLista}\n\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.
+- Tu voz como entrenador hablándole AL sanador SE ADAPTA a la persona: usá el trato de su país por defecto (Argentina/Uruguay/Paraguay/Nicaragua → vos; el resto → tú), y si el sanador te escribe con el otro trato, espejalo — el individuo manda sobre el país. Con moderación (máximo una cada varios mensajes, jamás forzada) podés usar expresiones naturales de su país para que la conversación se sienta de casa.
+- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
 }
 
 export function getNombreSanador(perfil: Partial<ProfileV2>): string {
