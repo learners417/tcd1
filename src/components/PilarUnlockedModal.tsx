@@ -18,6 +18,10 @@ interface PilarUnlockedModalProps {
   pilarDesbloqueado?: string;
   pilarNumero: number;
   nivelAlcanzado?: NivelAlcanzado;
+  /** Cinturón-planta ganado (rediseño 4 fases). */
+  cinturon?: { nombre: string; emoji: string; metafora: string };
+  /** La pregunta mayéutica del Mentor Javo en este umbral. */
+  mentorPregunta?: string;
   onClose: () => void;
   onContinuar?: () => void;
   onRating?: (rating: number, comentario: string) => Promise<void>;
@@ -56,6 +60,8 @@ export default function PilarUnlockedModal({
   pilarDesbloqueado,
   pilarNumero,
   nivelAlcanzado,
+  cinturon,
+  mentorPregunta,
   onClose,
   onContinuar,
   onRating,
@@ -172,6 +178,31 @@ export default function PilarUnlockedModal({
               </p>
 
               <div className="w-16 h-px bg-[var(--accent-gold)]/30 mx-auto mb-4" />
+
+              {cinturon && (
+                <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-gradient-to-b from-[var(--accent-gold)]/10 to-transparent p-5">
+                  <div className="text-4xl mb-2">{cinturon.emoji}</div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
+                    Cinturón ganado
+                  </p>
+                  <p className="text-xl font-semibold text-[#FFFFFF] mb-1">{cinturon.nombre}</p>
+                  <p className="text-xs italic text-[#FFFFFF]/60">{cinturon.metafora}</p>
+                </div>
+              )}
+
+              {mentorPregunta && (
+                <div className="mb-5 rounded-xl border border-[#FFFFFF]/15 bg-[#0A0A0A] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40 mb-2">
+                    El Mentor te espera con una pregunta
+                  </p>
+                  <p className="text-sm text-[#FFFFFF]/90 leading-relaxed italic">
+                    «{mentorPregunta}»
+                  </p>
+                  <p className="text-[10px] text-[#FFFFFF]/35 mt-2">
+                    No la respondas rápido. Llevála con vos hoy.
+                  </p>
+                </div>
+              )}
 
               {nivelAlcanzado && (
                 <div className="mb-5 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 p-4">
