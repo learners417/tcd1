@@ -173,7 +173,7 @@ function motivoBloqueo(
   if (meta.codigo === 'P9A.5') {
     const count = contarPiezasValidacionOrganica(perfil);
     if (count < 3) {
-      return `Regla Video 9: no se corre publicidad a contenido no validado. Completá P9A.4 con ≥3 piezas (tenés ${count}).`;
+      return `Regla Video 9: no se corre publicidad a contenido no validado. Completa P9A.4 con ≥3 piezas (tienes ${count}).`;
     }
   }
   return null;
@@ -541,6 +541,21 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   const nombreNivel = NIVEL_NOMBRES[nivel];
   const cinturonActual = calcularCinturon(pilarMasAltoCompletado);
 
+  // Banner de ritmo: día real del programa vs el día asignado de la próxima tarea pendiente
+  const diaPrograma = perfil?.fecha_inicio
+    ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(perfil.fecha_inicio).getTime()) / 86400000) + 1))
+    : 1;
+  let diaEsperado: number | null = null;
+  outer: for (const pil of pilaresConEstado) {
+    for (const m of pil.metas ?? []) {
+      if (!completadas.has(`${pil.numero}-${m.codigo}`)) {
+        diaEsperado = m.dia_asignado ?? null;
+        break outer;
+      }
+    }
+  }
+  const diasAtraso = diaEsperado !== null ? diaPrograma - diaEsperado : 0;
+
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
     async (pilarNum: number, meta: RoadmapMeta, pilarEstado: EstadoPilar) => {
@@ -737,6 +752,15 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           <div className="shrink-0 text-right">
             <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">Nivel actual</p>
             <p className="text-sm font-medium text-[#F5A623] mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-[#F5A623]/70">{cinturonActual.metafora}</span></p>
+            <p className="text-xs mt-1.5">
+              {diasAtraso <= 0 ? (
+                <span className="text-[#22C55E]">Día {diaPrograma} de 90 · vas al día ✓</span>
+              ) : diasAtraso <= 3 ? (
+                <span className="text-[#F5A623]">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
+              ) : (
+                <span className="text-[#EF4444]">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Coach hoy: juntos lo reacomodan.</span>
+              )}
+            </p>
             <p className="text-xs text-[#FFFFFF]/40">Nivel {nivel} de 5</p>
           </div>
         </div>
@@ -1058,7 +1082,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           {!unlocked && (
                             <span className="text-xs text-[#FFFFFF]/30 font-medium flex items-center gap-1">
                               <Lock className="w-3 h-3" />{' '}
-                              {bloqueoMsg ?? 'Completá la tarea anterior primero'}
+                              {bloqueoMsg ?? 'Completa la tarea anterior primero'}
                             </span>
                           )}
                         </div>
@@ -1153,7 +1177,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             <h3 className="text-lg font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               🎉 Registrar una venta
             </h3>
-            <p className="text-xs text-[#FFFFFF]/50 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza con vos.</p>
+            <p className="text-xs text-[#FFFFFF]/50 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
             <label className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Monto (USD)</label>
             <input
               type="number"
