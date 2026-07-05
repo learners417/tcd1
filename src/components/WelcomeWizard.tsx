@@ -140,14 +140,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP 1: PASSWORD ── */}
         {step === 'password' && (
-          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-8">
               <div className="w-12 h-12 rounded-2xl bg-[#F5A623] flex items-center justify-center mb-5 shadow-[0_0_20px_rgba(245,166,35,0.3)]">
                 <LockKeyhole className="w-5 h-5 text-[#0A0A0A]" />
               </div>
               <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-2">Hola, {nombreCorto}</h1>
               <p className="text-sm text-[#FFFFFF]/60 leading-relaxed">
-                Para empezar, elegí una contraseña personal. La contraseña temporal que te enviamos ya no va a funcionar después de esto.
+                Para empezar, elige una contraseña personal. La contraseña temporal que te enviamos ya no va a funcionar después de esto.
               </p>
             </div>
 
@@ -178,7 +178,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
-                  placeholder="Repetí la contraseña"
+                  placeholder="Repite la contraseña"
                   className={`w-full bg-black/40 border rounded-xl px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none transition-colors ${
                     confirmPassword && confirmPassword !== newPassword
                       ? 'border-red-500/50 focus:border-red-500/70'
@@ -208,19 +208,19 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               disabled={savingPwd || newPassword.length < 8 || newPassword !== confirmPassword}
               className="w-full mt-6 py-3.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0A0A] text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5A623]/20"
             >
-              {savingPwd ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
+              {savingPwd ? <Loader2 className="w-4 h-4 anímate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
             </button>
           </div>
         )}
 
         {/* ── STEP 2: PROFILE ── */}
         {step === 'profile' && (
-          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[#F5A623] flex items-center justify-center mb-5 shadow-[0_0_20px_rgba(245,166,35,0.3)]">
                 <UserCircle className="w-5 h-5 text-[#0A0A0A]" />
               </div>
-              <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-2">Contanos sobre vos</h1>
+              <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-2">Cuéntanos sobre ti</h1>
               <p className="text-sm text-[#FFFFFF]/60 leading-relaxed">
                 Esta info le sirve a tu acompañante para conocerte mejor desde el día 1 y que el Coach IA te dé respuestas más precisas.
               </p>
@@ -259,12 +259,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
               <div>
                 <label className="block text-xs font-semibold text-[#FFFFFF]/60 uppercase tracking-wider mb-2">
-                  ¿Desde qué país trabajás? <span className="text-[#FFFFFF]/30 normal-case font-normal">(la IA adapta el tono de las respuestas y de tu contenido)</span>
+                  ¿Desde qué país trabajas? <span className="text-[#FFFFFF]/30 normal-case font-normal">(la IA adapta el tono de las respuestas y de tu contenido)</span>
                 </label>
                 <CustomSelect
                   value={pais}
                   onChange={setPais}
-                  placeholder="Elegí tu país"
+                  placeholder="Elige tu país"
                   options={PAISES.map(p => ({ value: p.codigo, label: p.nombre }))}
                 />
               </div>
@@ -341,7 +341,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 disabled={savingProfile}
                 className="flex-1 py-3 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0A0A] text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5A623]/20"
               >
-                {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
+                {savingProfile ? <Loader2 className="w-4 h-4 anímate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
               </button>
             </div>
           </div>
@@ -349,7 +349,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP 3: WELCOME ── */}
         {step === 'welcome' && (
-          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl text-center animate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl text-center anímate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="w-16 h-16 rounded-2xl bg-[#22C55E] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
               <CheckCircle2 className="w-8 h-8 text-[#FFFFFF]" />
             </div>
@@ -359,7 +359,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               Ya estás dentro del programa.
             </p>
             <p className="text-sm text-[#FFFFFF]/80 leading-relaxed mb-6">
-              <span className="text-[#F5A623] font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Podés escribirnos en cualquier momento desde el Chat.
+              <span className="text-[#F5A623] font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
             </p>
 
             <div className="grid grid-cols-3 gap-3 mb-8">
@@ -387,7 +387,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP 4: GUIDE ── */}
         {step === 'guide' && (
-          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-6 text-center">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                 <Rocket className="w-5 h-5 text-[#FFFFFF]" />
@@ -401,8 +401,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 {
                   num: '1',
                   icon: Map,
-                  title: 'Abrí tu Hoja de Ruta',
-                  desc: 'Ahí están todos los pilares del programa. Mirá en qué pilar empezás y completá la primera tarea.',
+                  title: 'Abre tu Hoja de Ruta',
+                  desc: 'Ahí están todos los pilares del programa. Mira en qué pilar empiezas y completa la primera tarea.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
                     icon: 'bg-[#F5A623]/20',
@@ -431,7 +431,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 {
                   num: '3',
                   icon: Bot,
-                  title: 'Probá el Coach IA',
+                  title: 'Prueba el Coach IA',
                   desc: 'Hacele cualquier pregunta sobre tu negocio. Está entrenado para el contexto de profesionales de la salud.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
