@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import TaskChecklist from './TaskChecklist';
 
 interface TaskCoachProps {
   meta: RoadmapMeta;
@@ -35,16 +36,17 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
           {meta.titulo}
         </h3>
         <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        {meta.checklist && meta.checklist.length > 0 && (
+          <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
+        )}
       </div>
 
-      {/* Coach instruction */}
+      {/* Coach instruction — interna: NO se muestra; el Coach la recibe en su prompt */}
       {meta.coach_instruccion && (
-        <div className="card-panel p-5 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
-          <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-bold mb-3">
-            Instrucción para tu sesión con el Coach
-          </p>
-          <p className="text-sm text-[#FFFFFF]/80 leading-relaxed whitespace-pre-wrap">
-            {meta.coach_instruccion}
+        <div className="card-panel p-4 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
+          <p className="text-sm text-[#FFFFFF]/75 leading-relaxed">
+            💬 Tu Coach ya sabe exactamente qué van a trabajar hoy. Abrí el chat y decile:{' '}
+            <span className="text-[#F5A623] font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
           </p>
         </div>
       )}
