@@ -77,8 +77,8 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         // { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 }, // oculto hasta que la sección esté usable
         { id: 'biblioteca', icon: Library, label: 'Biblioteca' },
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido' },
-        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos' },
+        // { id: 'creador', icon: PenLine, label: 'Creador de Contenido' },   // oculto: compite con la Hoja de Ruta (P4.2-P4.3) — el cliente crea contenido EN el camino
+        // { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos' }, // oculto: ídem — minimalismo del camino único
       ]
     },
     {
@@ -86,7 +86,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'ajustes', icon: Settings, label: 'Ajustes', action: onOpenSettings },
         { id: 'salir', icon: LogOut, label: 'Salir', action: () => {
-          if (window.confirm('¿Estás seguro de que querés salir?')) {
+          if (window.confirm('¿Estás seguro de que quieres salir?')) {
             onSignOut();
           }
         }},
