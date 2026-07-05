@@ -180,7 +180,7 @@ export default function TaskWorkModal({
 
   // ── Generar con Gemini ──────────────────────────────────────────────────────
   const handleGenerar = useCallback(async () => {
-    if (!camposCompletos) { toast.error('Completá todos los campos requeridos.'); return; }
+    if (!camposCompletos) { toast.error('Completa todos los campos requeridos.'); return; }
     if (!herramienta) return;
 
     setModo('generando');
@@ -316,7 +316,7 @@ export default function TaskWorkModal({
             <div className="py-8 text-center space-y-4">
               <FileText className="w-10 h-10 text-[#FFFFFF]/30 mx-auto" />
               <p className="text-sm text-[#FFFFFF]/80">Esta tarea no tiene herramienta IA asignada.</p>
-              <p className="text-xs text-[#FFFFFF]/40">Completá la actividad según las instrucciones y marcá la tarea como lista desde la Hoja de Ruta.</p>
+              <p className="text-xs text-[#FFFFFF]/40">Completa la actividad según las instrucciones y marca la tarea como lista desde la Hoja de Ruta.</p>
             </div>
           )}
 
