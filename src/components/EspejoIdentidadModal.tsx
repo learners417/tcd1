@@ -83,9 +83,9 @@ export default function EspejoIdentidadModal({
 
         {/* 4 piezas */}
         <div className="space-y-5">
-          <Pieza titulo="Tu historia" valor={historiaCorta} fallback="Volvé a P1.3 para escribir tu historia de 50 palabras." />
-          <Pieza titulo="Tu propósito" valor={propositoFrase} fallback="Volvé a P2.3 para destilar tu propósito." />
-          <Pieza titulo="Tu legado" valor={legadoDeclaracion} fallback="Volvé a P3.3 para escribir tu declaración de legado." />
+          <Pieza titulo="Tu historia" valor={historiaCorta} fallback="Vuelve a P1.3 para escribir tu historia de 50 palabras." />
+          <Pieza titulo="Tu propósito" valor={propositoFrase} fallback="Vuelve a P2.3 para destilar tu propósito." />
+          <Pieza titulo="Tu legado" valor={legadoDeclaracion} fallback="Vuelve a P3.3 para escribir tu declaración de legado." />
 
           {/* 5 NOs · lista */}
           <div className="card-panel p-5 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
@@ -108,7 +108,7 @@ export default function EspejoIdentidadModal({
               </ul>
             ) : (
               <p className="text-sm text-[#FFFFFF]/40 italic">
-                Volvé a P2.5 para definir tus 5 NO.
+                Vuelve a P2.5 para definir tus 5 NO.
               </p>
             )}
           </div>
@@ -120,7 +120,7 @@ export default function EspejoIdentidadModal({
             className="text-lg md:text-xl text-[#FFFFFF]/90 leading-relaxed"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
-            Esto es lo que sos. Esto es lo que viniste a hacer.
+            Esto es lo que eres. Esto es lo que viniste a hacer.
             <br />
             Esto es lo que va a quedar.
           </p>
