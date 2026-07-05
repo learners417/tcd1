@@ -38,7 +38,7 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
           <p className="text-sm text-[#FFFFFF]/60">
             Faltan <span className="text-[#FFFFFF] font-semibold">{validacion.camposFaltantes.length}</span>{' '}
             campos críticos ({validacion.porcentajeCompleto}% completo). Gastar en ads con ADN incompleto
-            es quemar plata. Volvé a los pilares de abajo antes de seguir.
+            es quemar plata. Vuelve a los pilares de abajo antes de seguir.
           </p>
         </div>
       </div>
