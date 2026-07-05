@@ -50,7 +50,7 @@ export default function Oferta() {
       Genera 3 variantes de oferta (Conservadora, Media, Ambiciosa) para un programa de salud online.
       Asegúrate de que los precios estén en USD y sean realistas para un programa premium.
 
-      Respondé SOLO con un JSON array válido (sin markdown, sin texto adicional). Cada objeto debe tener:
+      Responde SOLO con un JSON array válido (sin markdown, sin texto adicional). Cada objeto debe tener:
       - id: "conservadora", "media", o "ambiciosa"
       - name: Nombre atractivo del programa
       - subtitle: Promesa principal en una línea
@@ -149,7 +149,7 @@ export default function Oferta() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500 flex flex-col relative pb-6">
+    <div className="max-w-5xl mx-auto space-y-6 anímate-in fade-in duration-500 flex flex-col relative pb-6">
       {/* Loading Overlay */}
       <AnimatePresence>
         {isGenerating && (
@@ -161,10 +161,10 @@ export default function Oferta() {
           >
             <div className="flex flex-col items-center max-w-md text-center">
               <div className="relative w-24 h-24 mb-8">
-                <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin" />
-                <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 anímate-spin" />
+                <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 anímate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-[#FFFFFF] animate-pulse" />
+                  <Sparkles className="w-8 h-8 text-[#FFFFFF] anímate-pulse" />
                 </div>
               </div>
               
@@ -200,7 +200,7 @@ export default function Oferta() {
               <Sparkles className="w-6 h-6 text-[#FFFFFF]" />
             </div>
             <div>
-              <h2 className="text-xl font-medium text-[#FFFFFF]">Describí qué querés ofrecer</h2>
+              <h2 className="text-xl font-medium text-[#FFFFFF]">Describí qué quieres ofrecer</h2>
               <p className="text-sm text-[#FFFFFF]/60">Cuanto más específico, mejor será la oferta generada.</p>
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function Oferta() {
       )}
 
       {step === 'variants' && (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 anímate-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between">
             <button 
               onClick={() => setStep('input')}
@@ -323,7 +323,7 @@ export default function Oferta() {
       )}
 
       {step === 'landing' && (
-        <div className="flex flex-col animate-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col anímate-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-6">
             <button 
               onClick={() => setStep('variants')}
