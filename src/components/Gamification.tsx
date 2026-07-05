@@ -64,7 +64,7 @@ const NIVELES: {
   {
     nivel: 2,
     nombre: 'Sanador Narrado',
-    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué vos?" en 30 segundos.',
+    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué tú?" en 30 segundos.',
     color: 'blue',
     icon: Target,
     pilaresRequeridos: [1, 2, 3],
