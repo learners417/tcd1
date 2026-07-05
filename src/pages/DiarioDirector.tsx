@@ -285,11 +285,11 @@ export default function DiarioDirector({
 
   const handleGuardar = async () => {
     if (!logro.trim()) {
-      toast.error('Contanos tu logro de hoy — queda en tu historial para siempre.');
+      toast.error('Cuéntanos tu logro de hoy — queda en tu historial para siempre.');
       return;
     }
     if (tareas.length === 0) {
-      toast.error('Marcá al menos una cosa en la que estuviste hoy.');
+      toast.error('Marca al menos una cosa en la que estuviste hoy.');
       return;
     }
 
@@ -375,7 +375,7 @@ export default function DiarioDirector({
 
       setGenerandoResumen(true);
       try {
-        const prompt = `Sos el Coach de "Tu Clínica Digital". Analizá las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
+        const prompt = `Eres el Coach de "Tu Clínica Digital". Analizá las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
 
 ENTRADAS:
 ${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
@@ -428,7 +428,7 @@ Devolvé SOLO este JSON:
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
 
       {/* Header */}
       <div className="flex justify-between items-end">
@@ -473,7 +473,7 @@ Devolvé SOLO este JSON:
       {/* Resumen semanal */}
       {generandoResumen && (
         <div className="flex items-center gap-2 text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-2xl p-4">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 anímate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
       )}
@@ -711,7 +711,7 @@ Devolvé SOLO este JSON:
                 className="w-full py-3.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+                  <><Loader2 className="w-4 h-4 anímate-spin" /> Guardando...</>
                 ) : (
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
@@ -729,7 +729,7 @@ Devolvé SOLO este JSON:
         <div className="space-y-4">
           {loading && entries.length === 0 && (
             <div className="flex items-center gap-2 text-[#FFFFFF]/40 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
+              <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (
