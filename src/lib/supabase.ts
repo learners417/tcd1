@@ -348,8 +348,8 @@ export type TipoTarea = 'VIDEO' | 'HERRAMIENTA' | 'COACH';
 export type MetaCodigo =
   // P0 · Onboarding (v8 · 5 tareas)
   | 'P0.0' | 'P0.1' | 'P0.2' | 'P0.3' | 'P0.4'
-  // P1 · Historia (v8 · 5 tareas, agrega P1.2b)
-  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4'
+  // P1 · Sanar el Dinero (rediseño 4 fases · protocolo de 7 días)
+  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4' | 'P1.5' | 'P1.6'
   // P2 · Propósito (v8 · 6 tareas, agrega P2.4/P2.5, COACH a P2.6)
   | 'P2.1' | 'P2.2' | 'P2.3' | 'P2.4' | 'P2.5' | 'P2.6'
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
