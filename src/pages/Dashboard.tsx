@@ -207,7 +207,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
   const nombreDisplay = data.profile.nombre || 'bienvenida';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
 
       {/* ZONA A — Header contextual */}
       <div className="relative overflow-hidden card-panel p-8 border border-[#F5A623]/20 bg-gradient-to-br from-[#F5A623]/[0.05] to-transparent">
@@ -215,7 +215,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         <div className="relative z-10">
           <p className="text-2xl font-light text-[#FFFFFF] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
           <p className="text-sm text-[#FFFFFF]/60 max-w-lg mb-6 leading-relaxed">
-            Estás en la <strong className="text-[#FFFFFF]/90">Semana {data.semanaActual} de 13</strong>. Tenés <strong className="text-[#F5A623]">{data.tareasHoy.length} {data.tareasHoy.length === 1 ? 'tarea pendiente' : 'tareas pendientes'}</strong> para avanzar con tu ADN.
+            Estás en la <strong className="text-[#FFFFFF]/90">Semana {data.semanaActual} de 13</strong>. Tienes <strong className="text-[#F5A623]">{data.tareasHoy.length} {data.tareasHoy.length === 1 ? 'tarea pendiente' : 'tareas pendientes'}</strong> para avanzar con tu ADN.
           </p>
           <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-[#F5A623] hover:text-[#FFB94D] transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-[#F5A623]/10 px-4 py-2 rounded-lg border border-[#F5A623]/20 w-max">
             Ver hoja de ruta <ChevronRight className="w-3.5 h-3.5" />
@@ -229,7 +229,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         <MetricCard label="Pilares completados" value={`${data.pilaresCompletados}/${SEED_ROADMAP_V2.length}`} sub="Desbloqueados" />
         <MetricCard label="Tareas completadas" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% del total`} />
         <MetricCard label="Días de diario" value={`${data.racha}`} sub={data.racha > 0 ? `${data.racha} entradas` : 'Sin entradas aún'} />
-        <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empezá hoy'} />
+        <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 
       {/* ZONA C — Dos columnas */}
@@ -248,7 +248,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
               <div className="py-10 text-center border border-dashed border-[rgba(245,166,35,0.15)] rounded-xl bg-[#1C1C1C]/30">
                 <CheckCircle2 className="w-8 h-8 text-[#22C55E]/50 mx-auto mb-3" />
                 <p className="text-sm text-[#FFFFFF]/60">Todo al día. Estás libre.</p>
-                <p className="text-xs text-[#FFFFFF]/30 mt-1">Revisá tu hoja de ruta para ver los próximos pilares.</p>
+                <p className="text-xs text-[#FFFFFF]/30 mt-1">Revisa tu hoja de ruta para ver los próximos pilares.</p>
               </div>
             ) : data.tareasHoy.map((t, idx) => (
               <div
@@ -301,7 +301,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
               const QUOTES = [
                 { text: "El éxito no se mide por lo que lográs, sino por los obstáculos que superás.", author: "Booker T. Washington" },
                 { text: "La mejor manera de predecir el futuro es creándolo.", author: "Peter Drucker" },
-                { text: "No esperes las condiciones perfectas. Empezá con lo que tenés.", author: "Arthur Ashe" },
+                { text: "No esperes las condiciones perfectas. Empieza con lo que tienes.", author: "Arthur Ashe" },
                 { text: "Tu consultorio es tu empresa. Tratalo como tal y los resultados van a cambiar.", author: "Método CLÍNICA" },
                 { text: "El profesional que domina su negocio, libera tiempo para su vocación.", author: "Método CLÍNICA" },
                 { text: "Cada paciente que llega es el resultado de un sistema, no de la suerte.", author: "Método CLÍNICA" },
@@ -314,31 +314,31 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
                 { text: "Automatizar lo repetitivo te libera para lo que realmente importa: tus pacientes.", author: "Método CLÍNICA" },
                 { text: "La clave no es priorizar tu agenda, sino agendar tus prioridades.", author: "Stephen Covey" },
                 { text: "Tu historia personal es tu mayor activo de marketing. Contala.", author: "Método CLÍNICA" },
-                { text: "Hacé lo que tenés que hacer hasta que puedas hacer lo que querés hacer.", author: "Oprah Winfrey" },
+                { text: "Haz lo que tienes que hacer hasta que puedas hacer lo que quieres hacer.", author: "Oprah Winfrey" },
                 { text: "El emprendedor siempre busca el cambio, responde a él y lo explota como una oportunidad.", author: "Peter Drucker" },
                 { text: "Si tu oferta no es irresistible, el problema no es el mercado. Es la oferta.", author: "Método CLÍNICA" },
                 { text: "La simplicidad es la máxima sofisticación.", author: "Leonardo da Vinci" },
                 { text: "Tu legado profesional se construye una decisión a la vez.", author: "Método CLÍNICA" },
-                { text: "Primero te ignoran, después se ríen de vos, después pelean con vos, y entonces ganás.", author: "Mahatma Gandhi" },
+                { text: "Primero te ignoran, después se ríen de ti, después pelean contigo, y entonces ganas.", author: "Mahatma Gandhi" },
                 { text: "La confianza en uno mismo es el primer secreto del éxito.", author: "Ralph Waldo Emerson" },
                 { text: "Un paciente bien atendido es la mejor estrategia de captación.", author: "Método CLÍNICA" },
                 { text: "La innovación distingue al líder del seguidor.", author: "Steve Jobs" },
-                { text: "No necesitás más pacientes. Necesitás un mejor sistema para los que ya tenés.", author: "Método CLÍNICA" },
-                { text: "Invertir en vos mismo es la mejor inversión que jamás harás.", author: "Warren Buffett" },
+                { text: "No necesitas más pacientes. Necesitás un mejor sistema para los que ya tienes.", author: "Método CLÍNICA" },
+                { text: "Invertir en ti mismo es la mejor inversión que jamás harás.", author: "Warren Buffett" },
                 { text: "El secreto de avanzar es empezar.", author: "Mark Twain" },
                 { text: "Cada día que construís tu sistema es un día menos de depender de la suerte.", author: "Método CLÍNICA" },
                 { text: "El que tiene un porqué para vivir puede soportar casi cualquier cómo.", author: "Friedrich Nietzsche" },
                 { text: "Tu clínica digital no es un gasto. Es la infraestructura de tu libertad.", author: "Método CLÍNICA" },
               ];
               const TIPS = [
-                "Completá tu diario hoy — 5 minutos que transforman tu semana.",
-                "Revisá tus métricas semanales para saber qué ajustar.",
-                "Definí tu oferta irresistible antes de invertir en publicidad.",
-                "Tu avatar ideal determina toda tu comunicación. ¿Ya lo tenés claro?",
+                "Completa tu diario hoy — 5 minutos que transforman tu semana.",
+                "Revisa tus métricas semanales para saber qué ajustar.",
+                "Define tu oferta irresistible antes de invertir en publicidad.",
+                "Tu avatar ideal determina toda tu comunicación. ¿Ya lo tienes claro?",
                 "El seguimiento post-consulta es donde se ganan las recomendaciones.",
                 "Medí tu tasa de cierre: ¿cuántos leads se convierten en pacientes?",
                 "Un embudo simple y funcional vale más que uno complejo sin resultados.",
-                "Escribí tu historia en 3 formatos: 300, 150 y 50 palabras.",
+                "Escribe tu historia en 3 formatos: 300, 150 y 50 palabras.",
                 "Tu propósito es tu filtro de decisiones. Todo lo demás es ruido.",
                 "Cada tarea completada es un ladrillo de tu clínica digital.",
               ];
