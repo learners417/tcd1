@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Map as RoadmapIcon, MessageSquare, TrendingUp, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
+import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
 interface SidebarProps {
   currentPage: string;
@@ -24,6 +25,7 @@ function getSidebarData() {
 
   let progress = 0;
   let hasPending = false;
+  let cinturon: Cinturon = CINTURONES[0];
   try {
     const saved = localStorage.getItem('tcd_hoja_ruta_v2');
     const completadasSet = new Set<string>(saved ? JSON.parse(saved) : []);
@@ -37,12 +39,14 @@ function getSidebarData() {
       }
     }
     progress = total === 0 ? 0 : Math.round((comp / total) * 100);
+    cinturon = cinturonDesdeProgreso(completadasSet);
   } catch { /* noop */ }
 
   const diff = Math.floor((new Date().getTime() - new Date(profile.fecha_inicio).getTime()) / (1000 * 60 * 60 * 24));
   const semana = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+  const diaPrograma = Math.max(1, Math.min(90, diff + 1));
 
-  return { profile, progress, hasPending, semana };
+  return { profile, progress, hasPending, semana, diaPrograma, cinturon };
 }
 
 export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, onSignOut, messageBadge = 0, collapsed, onToggleCollapse, mobileOpen, onMobileClose }: SidebarProps) {
@@ -123,7 +127,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
 
           <div className="bg-[#1C1C1C]/60 border border-[rgba(245,166,35,0.15)] rounded-xl p-3 relative group">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] text-[#FFFFFF]/50 font-medium tracking-wide">Semana {data.semana} de 13</span>
+              <span className="text-[10px] text-[#FFFFFF]/50 font-medium tracking-wide">{data.cinturon.emoji} {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
               <span className="text-[10px] text-[#FFFFFF] font-medium">{data.progress}%</span>
             </div>
             <div className="h-1 bg-[#FFFFFF]/10 rounded-full overflow-hidden">
