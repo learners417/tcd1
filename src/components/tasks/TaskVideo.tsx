@@ -54,10 +54,12 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             className="absolute inset-0 w-full h-full"
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#141414]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#141414] px-6 text-center">
             <Play className="w-12 h-12 text-[#F5A623]/50 mb-3" />
-            <p className="text-sm text-[#FFFFFF]/40">Video pendiente de configuración</p>
-            <p className="text-xs text-[#FFFFFF]/25 mt-1">El ID de YouTube se cargará próximamente</p>
+            <p className="text-sm text-[#FFFFFF]/70">Este contenido llega pronto</p>
+            <p className="text-xs text-[#FFFFFF]/45 mt-2 leading-relaxed max-w-sm">
+              Mientras tanto, tu Coach te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
+            </p>
           </div>
         )}
       </div>
