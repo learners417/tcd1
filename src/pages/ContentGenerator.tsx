@@ -94,7 +94,7 @@ export default function ContentGenerator() {
 
   const generateContent = async () => {
     if (!specialty.trim()) {
-      toast.error('Ingresá tu especialidad para generar contenido');
+      toast.error('Ingresa tu especialidad para generar contenido');
       return;
     }
     setGenerating(true);
@@ -131,10 +131,10 @@ export default function ContentGenerator() {
   const currentContent = content[activeTab];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
+    <div className="max-w-5xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Generador de Contenido</h1>
-        <p className="text-[#FFFFFF]/60">Creá contenido estratégico para redes sociales con IA</p>
+        <p className="text-[#FFFFFF]/60">Crea contenido estratégico para redes sociales con IA</p>
       </div>
 
       {/* Config panel */}
@@ -190,7 +190,7 @@ export default function ContentGenerator() {
             className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#FFFFFF] text-sm font-medium transition-all shadow-lg shadow-[#F5A623]/20 sm:ml-auto"
           >
             {generating ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
+              <><Loader2 className="w-4 h-4 anímate-spin" /> Generando...</>
             ) : (
               <><Sparkles className="w-4 h-4" /> Generar {TABS.find((t) => t.id === activeTab)?.label}</>
             )}
@@ -201,7 +201,7 @@ export default function ContentGenerator() {
       {/* Content display */}
       {generating ? (
         <div className="card-panel p-12 rounded-2xl flex flex-col items-center justify-center gap-4">
-          <Loader2 className="w-8 h-8 text-[#F5A623] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#F5A623] anímate-spin" />
           <p className="text-[#FFFFFF]/60 text-sm">Generando contenido con IA...</p>
         </div>
       ) : currentContent ? (
@@ -235,10 +235,10 @@ export default function ContentGenerator() {
         <div className="card-panel p-12 rounded-2xl text-center">
           <Sparkles className="w-10 h-10 text-[#F5A623]/40 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-[#FFFFFF] mb-2">
-            Generá tu {TABS.find((t) => t.id === activeTab)?.label}
+            Genera tu {TABS.find((t) => t.id === activeTab)?.label}
           </h3>
           <p className="text-sm text-[#FFFFFF]/60">
-            Completá tu especialidad y hacé clic en{' '}
+            Completa tu especialidad y haz clic en{' '}
             <span className="text-[#F5A623] font-medium">Generar</span> para crear contenido con IA.
           </p>
         </div>
