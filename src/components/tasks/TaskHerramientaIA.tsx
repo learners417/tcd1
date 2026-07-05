@@ -11,6 +11,7 @@ import {
 import type { ProfileV2 } from '../../lib/supabase';
 import { getHerramienta, type CampoInput, type Herramienta } from '../../lib/herramientas';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import TaskChecklist from './TaskChecklist';
 import { generateText } from '../../lib/aiProvider';
 import { toast } from 'sonner';
 import Markdown from 'react-markdown';
@@ -237,6 +238,9 @@ export default function TaskHerramientaIA({
           {meta.titulo}
         </h3>
         <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        {meta.checklist && meta.checklist.length > 0 && (
+          <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
+        )}
       </div>
 
       {/* ─── FORM MODE ─────────────────────────────────────────────────────── */}
