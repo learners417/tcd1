@@ -36,15 +36,15 @@ export interface PaisInfo {
  * El campo `modismos` es opcional y orientativo (la IA NO debe forzarlos).
  */
 export const PAISES: PaisInfo[] = [
-  { codigo: 'AR', nombre: 'Argentina', dialecto: 'voseo' },
-  { codigo: 'UY', nombre: 'Uruguay', dialecto: 'voseo' },
+  { codigo: 'AR', nombre: 'Argentina', dialecto: 'voseo', modismos: ['dale', 'buenísimo', 'de una'] },
+  { codigo: 'UY', nombre: 'Uruguay', dialecto: 'voseo', modismos: ['dale', 'de más'] },
   { codigo: 'PY', nombre: 'Paraguay', dialecto: 'voseo' },
-  { codigo: 'MX', nombre: 'México', dialecto: 'tuteo' },
-  { codigo: 'CO', nombre: 'Colombia', dialecto: 'tuteo' },
-  { codigo: 'PE', nombre: 'Perú', dialecto: 'tuteo' },
-  { codigo: 'CL', nombre: 'Chile', dialecto: 'tuteo' },
-  { codigo: 'VE', nombre: 'Venezuela', dialecto: 'tuteo' },
-  { codigo: 'EC', nombre: 'Ecuador', dialecto: 'tuteo' },
+  { codigo: 'MX', nombre: 'México', dialecto: 'tuteo', modismos: ['órale', 'con todo', 'va'] },
+  { codigo: 'CO', nombre: 'Colombia', dialecto: 'tuteo', modismos: ['listo', 'de una', 'bacano'] },
+  { codigo: 'PE', nombre: 'Perú', dialecto: 'tuteo', modismos: ['bacán', 'chévere'] },
+  { codigo: 'CL', nombre: 'Chile', dialecto: 'tuteo', modismos: ['bacán', 'al tiro'] },
+  { codigo: 'VE', nombre: 'Venezuela', dialecto: 'tuteo', modismos: ['chévere', 'fino'] },
+  { codigo: 'EC', nombre: 'Ecuador', dialecto: 'tuteo', modismos: ['de ley', 'chévere'] },
   { codigo: 'BO', nombre: 'Bolivia', dialecto: 'tuteo' },
   { codigo: 'PA', nombre: 'Panamá', dialecto: 'tuteo' },
   { codigo: 'CR', nombre: 'Costa Rica', dialecto: 'tuteo' },
