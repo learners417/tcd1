@@ -1,6 +1,13 @@
 import type { MetaCodigo, PilarId, TipoTarea } from './supabase';
 
-// ─── Tipos base V3 ──────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// SEED ROADMAP v3 — 4 FASES · Método CLINICA · Cinturones-planta · Plan 0-90
+// 34 tareas · checklists de autonomía · día asignado por tarea · Meta Business
+// Agent como filtro · validación pagada · Mentor Javo en umbrales · modo Coach
+// para videos. Incorpora las 22 decisiones confirmadas (jul 2026).
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ─── Tipos base (contrato intacto — NO cambiar firmas existentes) ────────────
 
 export type TipoDesbloqueo =
   | 'auto'
@@ -15,22 +22,28 @@ export interface RoadmapMeta {
   tipo: TipoTarea;
   es_estrella: boolean;
   tiempo_estimado: string;
-  orden: number;                       // secuencia dentro del pilar (1,2,3...)
-  herramienta_id?: string;             // para tipo HERRAMIENTA
-  usa_ia: boolean;                     // false para P1.2 y P3.2 (escritura pura)
-  adn_field?: string;                  // campo de ProfileV2 donde guarda
-  requiere_datos_de?: MetaCodigo[];    // dependencia explícita de datos
-  es_recurrente?: boolean;             // P9A.4: se puede usar repetidamente
-  video_youtube_id?: string;           // para tipo VIDEO (placeholder hasta que se suba el video)
-  coach_instruccion?: string;          // para tipo COACH (texto exacto)
+  orden: number;
+  herramienta_id?: string;
+  usa_ia: boolean;
+  adn_field?: string;
+  requiere_datos_de?: MetaCodigo[];
+  es_recurrente?: boolean;
+  video_youtube_id?: string;
+  coach_instruccion?: string;
+  /** Sub-pasos internos (checklist de autonomía). */
+  checklist?: string[];
+  /** Entrenador recomendado (sofi, mateo, caro, bruno, lucas, vera, diego) */
+  entrenador?: string;
+  /** Día nominal del programa (1-90) en que corresponde esta tarea. */
+  dia_asignado?: number;
 }
 
 export interface RoadmapPilar {
   id: PilarId;
-  numero_orden: number;                // 0-13 para display secuencial
+  numero_orden: number;
   titulo: string;
   subtitulo: string;
-  color: string;                       // hex color
+  color: string;
   desbloqueo: TipoDesbloqueo;
   pilar_prerequisito?: PilarId;
   metas: RoadmapMeta[];
@@ -40,1153 +53,812 @@ export interface RoadmapPilar {
   metodo_letra?: string;
   hito_mensaje?: string;
   hito_tipo?: 'milestone' | 'urgent' | 'checkpoint';
-  /** Lucide icon name for this pilar */
   icon: string;
-  // Backward compat aliases (para transición gradual)
-  /** @deprecated Usar id */
   numero: number;
-  /** @deprecated Usar icon */
   emoji?: string;
-  /** @deprecated Usar pilar_prerequisito + completar_anterior */
   estrellas_requeridas?: number;
-  /** @deprecated */
   es_hito?: boolean;
+  /** Cinturón que otorga completar este pilar (sistema planta/taekwondo) */
+  cinturon_otorga?: string;
+  /** La pregunta mayéutica del Mentor Javo al cruzar este umbral. */
+  mentor_pregunta?: string;
 }
 
-// ─── Los 14 Pilares — Versión v8 (mejoras.html · mayo 2026) ────────────────
-//
-// Regla #2 v8 (orden dentro de cada pilar): VIDEO → HERRAMIENTA → COACH.
-// El enforcement técnico está en `isTaskUnlocked()` en Roadmap.tsx — nadie
-// puede completar una tarea con `orden: N+1` sin haber cerrado la de `orden: N`.
-//
-// Excepciones documentadas (no rompen el enforcement):
-//   - P0 (Onboarding): video filosófico (P0.0) abre, video operativo (P0.4) cierra.
-//   - P9B (Captación): cierra con dos COACH consecutivos por la cronología
-//     "practicar con Simulador → primera llamada real → debrief".
-//   - P11 (Análisis): sólo dos COACH (retrospectiva + plan).
+// ─── Los 8 Pilares — 4 Fases · Método CLINICA ───────────────────────────────
 
 export const SEED_ROADMAP_V8: RoadmapPilar[] = [
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 0: ONBOARDING · Días 1–3 · v8 (de 2 a 5 tareas)
-  // ══════════════════════════════════════════════════════════════════════════
+  // ═══ FASE 0 · ONBOARDING ═══
   {
     id: 'P0',
     numero_orden: 0,
     titulo: 'Onboarding',
-    subtitulo: 'Bienvenida y Foto de Partida',
-    color: '#F5A623',
+    subtitulo: 'Tu punto de partida real',
+    color: '#9CA3AF',
     numero: 0,
-    icon: 'Sprout',
-    emoji: '🌱',
+    icon: 'Compass',
+    emoji: '🧭',
     desbloqueo: 'auto',
     fase: 0,
     dias_inicio: 1,
-    dias_fin: 3,
+    dias_fin: 1,
+    cinturon_otorga: 'blanco',
+    hito_mensaje: '🥋 Cinturón BLANCO — la semilla está plantada. Tu camino de 90 días empezó.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: '¿Qué versión de vos se termina hoy?',
     metas: [
       {
         codigo: 'P0.0',
-        titulo: 'Lo que no sabés que no sabés',
-        descripcion: 'Video emocional · filosófico (10-12 min). Javo abre con: "Te voy a pedir que te abras a lo que no sabés que no sabés. No es solo con la mente que vas a lograr salir del estado actual." Es la puerta de entrada antes de cualquier dato.',
+        titulo: 'Bienvenida: de profesional a director',
+        descripcion: 'Mirá el video de Javo (5 min): qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Coach te lo cuenta en 5 minutos.',
         tipo: 'VIDEO',
-        es_estrella: true,
-        tiempo_estimado: '12 min',
+        es_estrella: false,
+        tiempo_estimado: '5 min',
         orden: 1,
+        dia_asignado: 1,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P0_0',
-      },
-      {
-        codigo: 'P0.1',
-        titulo: 'Formulario de bienvenida',
-        descripcion: 'Tono Javo. Profesión, antigüedad, pacientes activos, facturación del mes pasado (rango — nadie te pide número exacto), visión a 90 días, frustración actual, horas disponibles, experiencia digital previa. La IA genera tu ADN prototipo beta.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 2,
-        herramienta_id: 'H-P0.1',
-        usa_ia: true,
-        adn_field: 'adn_formulario_bienvenida',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: si el video no está disponible, contale en 5 min: (1) la promesa — 10 pacientes de tu precio digno en 90 días y el SISTEMA para repetirlo; (2) las 4 fases — Sanar el Dinero, Tu Protocolo, Captación y Ventas, Servicio y Escala; (3) los cinturones — se ganan por hitos REALES verificados, como una planta que crece de semilla a árbol; (4) la regla — una tarea por día, 45-60 min; (5) el requisito — presupuesto de publicidad de ~$400-700 en los 90 días, que se autofinancia desde tu primera venta. Entregale el libro Sanadores Libres.',
       },
       {
         codigo: 'P0.2',
-        titulo: 'Foto de Partida (autoevaluación ciega)',
-        descripcion: 'Autoevaluación 1-5 en 8 dimensiones: historia · propósito · legado · avatar · método con nombre · escalera de ofertas · contenido por nivel · sistema autónomo. Esta foto queda guardada — al día 45 la app la compara con tu ADN real. Efecto revelación de "lo que no sabías que no sabías."',
+        titulo: 'Tu Foto de Partida',
+        descripcion: 'Completá tu radiografía honesta: cuánto facturás hoy, cuántas horas trabajás, y tu precio por hora real (PHR). Esta foto queda guardada — al día 45 la app te la muestra al lado de tu nueva realidad.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
-        tiempo_estimado: '10 min',
-        orden: 3,
+        tiempo_estimado: '15 min',
+        orden: 2,
+        dia_asignado: 1,
         herramienta_id: 'H-P0.2',
-        usa_ia: false,
+        usa_ia: true,
         adn_field: 'adn_autoevaluacion_dia1',
       },
       {
-        codigo: 'P0.3',
-        titulo: 'Welcome Wizard',
-        descripcion: 'Tour de 5 minutos por la app: zona horaria, foto de perfil, Instagram, 3 objetivos a 90 días, compromiso explícito al programa.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: false,
-        tiempo_estimado: '5 min',
-        orden: 4,
-        herramienta_id: 'H-P0.3',
-        usa_ia: false,
-      },
-      {
         codigo: 'P0.4',
-        titulo: 'Cómo funciona la app',
-        descripcion: 'Video operativo (6-8 min) de Javo: Hoja de Ruta, ADN del Negocio, Entrenadores, Métricas, sistema de desbloqueo, 5 niveles del Sanador, Diario del Fundador. Después de este video desbloqueás Nivel 1 (Sanador Despierto), Coach IA, Fase 1 y Diario.',
+        titulo: 'Cómo usar tu app + el pacto',
+        descripcion: 'Mirá el video operativo (5 min): la Hoja de Ruta, tus Entrenadores IA, el Diario, y cómo se ganan los cinturones. Cierra con el pacto: 1 hora por día, 90 días — con reglas claras: 1 pausa de hasta 14 días si la vida lo exige; pasado el día 90, extensión de $200 por 30 días más. El reloj es parte del método. Al terminar: Cinturón Blanco y se abre la Fase 1.',
         tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '8 min',
-        orden: 5,
+        es_estrella: true,
+        tiempo_estimado: '5 min',
+        orden: 3,
+        dia_asignado: 1,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P0_4',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: explicá la app en 5 min — la Hoja de Ruta muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cerrá con el pacto: 1 hora por día. Pedile que lo escriba con sus palabras.',
       },
     ],
   },
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 1: SPRINT DE IDENTIDAD · Días 3–20 · Letra C (Claridad)
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // ─── PILAR 1: Historia · Días 3–8 ─────────────────────────────────────────
+  // ═══ FASE 1 · SANAR EL DINERO ═══
   {
     id: 'P1',
     numero_orden: 1,
-    titulo: 'Historia',
-    subtitulo: 'Tu narrativa personal en 3 formatos',
+    titulo: 'Sanar el Dinero',
+    subtitulo: 'El protocolo de 7 días que destraba tu precio',
     color: '#F5A623',
     numero: 1,
-    icon: 'BookOpen',
-    emoji: '📖',
-    estrellas_requeridas: 1,
+    icon: 'HeartHandshake',
+    emoji: '💛',
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P0',
     fase: 1,
-    dias_inicio: 3,
-    dias_fin: 8,
-    metodo_letra: 'C',
+    dias_inicio: 2,
+    dias_fin: 7,
+    metodo_letra: 'C·L',
+    cinturon_otorga: 'amarillo',
+    hito_mensaje: '🥋 Cinturón AMARILLO — la raíz está en la tierra. Sanaste tu relación con el dinero y tenés TU número.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: 'Si tu hijo hiciera tu trabajo, ¿le dejarías cobrar lo que vos cobrabas?',
     metas: [
       {
         codigo: 'P1.1',
-        titulo: 'Por qué tu historia importa más que tu título',
-        descripcion: 'Video sobre la importancia de tu historia personal como herramienta de conexión y diferenciación.',
+        titulo: 'Por qué el dinero se sana primero',
+        descripcion: 'Mirá el video de Javo (6 min): ningún sistema de ventas funciona sobre una relación rota con el dinero. La historia del mártir que cobra poco "por vocación" — y por qué ese ya no vas a ser vos. Si el video no está aún, tu Coach te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '6 min',
         orden: 1,
+        dia_asignado: 2,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P1_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: contá la tesis en 5 min — el mártir del libro Sanadores Libres: el profesional brillante que cobra poco "por vocación" y termina fundido, sin tiempo y resentido. La ciencia: los money scripts (Klontz) se heredan y operan solos; el cuerpo los guarda (van der Kolk). Por eso esta semana trabajamos el dinero ANTES que el marketing: un sistema perfecto sobre una creencia rota produce autosabotaje. Los próximos 6 días: radiografía, lealtad, quema, cuerpo, EL NÚMERO, creencia nueva.',
       },
       {
         codigo: 'P1.2',
-        titulo: 'Línea de tiempo vital (8 puntos)',
-        descripcion: 'Anotá los 8 momentos que más te marcaron: (1) un momento de infancia que te marcó · (2) crisis en adolescencia/juventud · (3) la experiencia que te llevó a elegir tu vocación real · (4) tu peor momento personal o profesional · (5) qué aprendiste de ese peor momento · (6) el momento bisagra · (7) qué está pasando ahora que te lleva a arrancar · (8) si pudieras volver a un momento y abrazarte… ¿cuántos años tenés y qué le dirías?',
-        tipo: 'HERRAMIENTA',
+        titulo: 'Día 1-2 · Tu radiografía emocional',
+        descripcion: 'Abrí el chat con tu Coach y hacé el primer trabajo: decí tu precio actual en voz alta, registrá qué sentís, y rastreá de dónde viene esa incomodidad. Vas a salir con TU creencia raíz identificada en una frase — y una imagen generada por IA de esa "voz heredada", para verla afuera tuyo por primera vez.',
+        tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '30 min',
+        tiempo_estimado: '25 min',
         orden: 2,
-        herramienta_id: 'H-P1.2',
+        dia_asignado: 2,
         usa_ia: false,
-        adn_field: 'adn_linea_tiempo',
+        checklist: [
+          'Abrí el chat con el Coach y decile: "vengo a hacer la radiografía del dinero"',
+          'Decí tu precio actual en voz alta y contale qué sentiste',
+          'Completá las 4 frases: "El dinero es…", "La gente rica es…", "Cobrar caro a un paciente es…", "Si gano mucho, mi familia…"',
+          'Cerrá con tu creencia raíz escrita en UNA frase',
+        ],
+        coach_instruccion: 'Guiá la radiografía del dinero con los money scripts de Klontz (nombrá la ciencia: esto es psicología financiera, no autoayuda). Pedile que diga su precio actual en voz alta y describa qué siente en el cuerpo. Aplicá el test de las 4 frases (el dinero es… / la gente rica es… / cobrar caro es… / si gano mucho, mi familia…). Sus respuestas SON sus scripts: devolvéselos nombrados. Cerrá identificando LA creencia raíz en una frase textual. Ofrecé generar la imagen de esa "voz heredada" con la herramienta de imágenes.',
       },
       {
         codigo: 'P1.2b',
-        titulo: 'Historia cruda (sin IA · 500 palabras)',
-        descripcion: 'Escribí tu historia como si se la estuvieras contando a alguien en un café. Sin estructura, sin marketing, sin filtros. Sin asistencia de IA. Este texto preserva la confrontación que el video pide — es el insumo más importante para que tu historia generada después no salga plana.',
-        tipo: 'HERRAMIENTA',
+        titulo: 'Día 3 · La lealtad invisible',
+        descripcion: 'Con tu Coach: si prosperás de verdad, ¿a quién sentís que traicionás? El ejercicio del linaje — 3 generaciones y su relación con el dinero. La lealtad invisible a la familia, al gremio, al "sanador pobre pero noble". Verla es el 80% de soltarla. Salís con tu frase ancla: "Honro tu historia Y elijo distinto."',
+        tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '40 min',
+        tiempo_estimado: '20 min',
         orden: 3,
-        herramienta_id: 'H-P1.2b',
+        dia_asignado: 3,
         usa_ia: false,
-        adn_field: 'adn_historia_cruda',
-        requiere_datos_de: ['P1.2'],
+        checklist: [
+          'Escribí los nombres de 3 generaciones de tu familia',
+          'Al lado de cada uno: su relación con el dinero en una frase',
+          'Encontrá el patrón con el Coach: ¿a quién le sos fiel siendo pobre?',
+          'Escribí tu frase ancla: "Honro tu historia Y elijo distinto"',
+        ],
+        coach_instruccion: 'Explorá la lealtad invisible con el ejercicio del linaje (presentalo como marco simbólico de las lealtades familiares — no como ciencia; su poder es de sentido, y eso se dice honesto). 3 generaciones, la relación de cada una con el dinero. El patrón salta solo. Preguntá: ¿esa fidelidad es amor, o miedo disfrazado de amor? ¿Esa persona querría que vivas ajustado? Cerrá con la frase ancla escrita: "Honro tu historia Y elijo distinto" — se guarda y vuelve en los momentos de resistencia.',
       },
       {
         codigo: 'P1.3',
-        titulo: 'Generador de Historia en 3 versiones',
-        descripcion: 'Usa tu línea de tiempo + tu historia cruda para generar: Larga (~300 palabras · bio / landing), Media (~150 palabras · LinkedIn), Corta (~50 palabras · apertura de call). Las 3 son editables y hay toggle "Ver ejemplo de Javo" disponible.',
-        tipo: 'HERRAMIENTA',
+        titulo: 'Día 4 · La quema',
+        descripcion: 'El ritual que marca el quiebre. Escribí en papel la creencia heredada que ya no querés cargar, leela una última vez, y quemala físicamente. Subí la foto de las cenizas — queda en tu línea de tiempo. Al completarla ganás la punta amarilla: la semilla se abre.',
+        tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '25 min',
+        tiempo_estimado: '20 min',
         orden: 4,
-        herramienta_id: 'H-P1.3',
-        usa_ia: true,
-        adn_field: 'historia_300',
-        requiere_datos_de: ['P1.2', 'P1.2b'],
+        dia_asignado: 4,
+        usa_ia: false,
+        checklist: [
+          'Escribí tu creencia raíz en un papel, a mano',
+          'Leela en voz alta una última vez',
+          'Quemala (con cuidado y en lugar seguro)',
+          'Sacá foto de las cenizas y subila — queda en tu historia',
+          'Contale al Coach qué sentiste al verla arder',
+        ],
+        // CAPA 3: completar esta tarea otorga 'blanco_punta_amarilla' vía hitos_cinturon
+        coach_instruccion: 'Guiá el ritual de la quema. Presentalo honesto: es un RITUAL — y los rituales funcionan; la neurociencia lo respalda (acto motor + emoción + testigo consolida la reconsolidación de memoria mejor que el pensamiento solo). Que escriba la creencia a mano, la lea en voz alta una última vez, y la queme. Pedile la foto de las cenizas. Validá la emoción sin apurarla. Cerrá: esa creencia era prestada, nunca fue tuya. Celebrá la punta amarilla: la semilla se abre.',
       },
       {
         codigo: 'P1.4',
-        titulo: 'Validación de la historia',
-        descripcion: 'Abrí el Coach y preguntale exacto: "¿La historia corta de 50 palabras es lo suficientemente potente para abrir una llamada de venta? ¿La larga tiene arco emocional claro — problema, transformación, propósito?"',
+        titulo: 'Día 5 · El dinero en el cuerpo',
+        descripcion: 'Trabajo somático breve con tu Coach: escaneo corporal guiado, encontrá dónde se aloja la tensión cuando pensás en cobrar, y soltala con respiración 4-7-8. Registrás tu nivel de tensión antes y después (1-10). Para que el precio nuevo no sea solo mental.',
+        tipo: 'COACH',
+        es_estrella: false,
+        tiempo_estimado: '15 min',
+        orden: 5,
+        dia_asignado: 5,
+        usa_ia: false,
+        coach_instruccion: 'Trabajo somático (nombrá la ciencia: van der Kolk, el cuerpo lleva la cuenta). Escaneo corporal guiado paso a paso: ojos cerrados, imagina cobrando su precio nuevo a un paciente real, registra dónde aparece tensión (1-10). Respiración 4-7-8 (práctica yóguica, declarada como práctica) tres veces sobre esa zona. Repetir la escena. Registrar el después (1-10). Preguntá: ¿qué cambió?',
+      },
+      {
+        codigo: 'P1.5',
+        titulo: 'Día 6 · EL NÚMERO — tu precio justo',
+        descripcion: 'El momento central de la fase. La calculadora inversa te muestra: $10.000 ÷ 10 pacientes = $1.000 — el número no sale de tu miedo, sale de tu meta. Con tu Coach lo hacés TUYO: un número concreto, dicho en voz alta 3 veces sin disculparte (la tercera, grabándote un audio a vos mismo). El Coach no aprueba precios-disculpa.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '30 min',
+        orden: 6,
+        dia_asignado: 6,
+        usa_ia: false,
+        checklist: [
+          'Traé tu PHR de la Foto de Partida',
+          'Hacé la calculadora inversa con el Coach: de la meta al número',
+          'Proponé TU número (concreto, no un rango)',
+          'Decilo en voz alta 3 veces — la tercera, grabate un audio de WhatsApp a vos mismo',
+        ],
+        coach_instruccion: 'Ayudale a definir SU NÚMERO. La calculadora inversa primero: $10.000 ÷ 10 = $1.000 — el ancla viene de la meta, no del miedo (Kahneman: anclaje). Partí de su PHR y el valor de la transformación. Exigí un número concreto. Si propone un precio-disculpa, devolvelo: ¿ese precio refleja el valor o el miedo? Recordale su frase ancla del Día 3. El ejercicio de las 3 veces en voz alta (la tercera grabada en audio). Cierre filosófico (declarado como filosofía): el dinero es neutro — el significado se lo pusiste vos, y hoy elegís el significado. No apruebes hasta que lo diga sin disculparse.',
+      },
+      {
+        codigo: 'P1.6',
+        titulo: 'Día 7 · Tu creencia nueva',
+        descripcion: 'Cerrás el protocolo instalando la creencia elegida por vos: tu nueva frase sobre el dinero, en presente y con tus palabras. La IA te genera tu ESTANDARTE — una imagen-símbolo con tu frase, que se vuelve la pantalla de tu cinturón. Al completarla: Cinturón AMARILLO — la raíz está en la tierra. Y aparece por primera vez el Mentor.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
-        orden: 5,
+        orden: 7,
+        dia_asignado: 7,
         usa_ia: false,
-        coach_instruccion: '¿La historia corta de 50 palabras es lo suficientemente potente para abrir una llamada de venta? ¿La larga tiene arco emocional claro — problema, transformación, propósito?',
+        coach_instruccion: 'Cierre del protocolo: que formule su creencia nueva en una frase propia, en presente y primera persona. Que la escriba. Generale el ESTANDARTE con la herramienta de imágenes: una imagen-símbolo con su frase (estética: fondo oscuro, dorado, sobrio). Recordale: cada vez que dude del precio, vuelve a esta frase y esta imagen. Celebrá el Cinturón Amarillo: la raíz está en la tierra. Anunciá que el Mentor lo espera con una pregunta.',
       },
     ],
   },
 
-  // ─── PILAR 2: Propósito · Días 8–13 ───────────────────────────────────────
+  // ═══ FASE 2 · TU PROTOCOLO ═══
   {
     id: 'P2',
     numero_orden: 2,
-    titulo: 'Propósito',
-    subtitulo: 'El propósito como filtro de decisiones',
-    color: '#F5A623',
+    titulo: 'Tu Método con Nombre',
+    subtitulo: 'De servicios sueltos a un protocolo propio',
+    color: '#84CC16',
     numero: 2,
-    icon: 'Target',
-    emoji: '🎯',
-    estrellas_requeridas: 3,
+    icon: 'Cog',
+    emoji: '⚙️',
     desbloqueo: 'completar_anterior',
     pilar_prerequisito: 'P1',
-    fase: 1,
+    fase: 2,
     dias_inicio: 8,
-    dias_fin: 13,
-    metodo_letra: 'C',
+    dias_fin: 11,
+    metodo_letra: 'I',
+    cinturon_otorga: 'amarillo_punta_verde',
+    hito_mensaje: '🥋 Amarillo punta VERDE — el primer brote asoma. Tu método ya tiene nombre y estructura.',
+    hito_tipo: 'checkpoint',
+    mentor_pregunta: '¿Tu método existía antes de que lo nombraras — o recién ahora que tiene nombre te animás a verlo?',
     metas: [
       {
         codigo: 'P2.1',
-        titulo: 'El propósito como filtro de decisiones',
-        descripcion: 'Video sobre cómo el propósito funciona como filtro para todas las decisiones del negocio.',
+        titulo: 'Tu método propio: el activo que te diferencia',
+        descripcion: 'Mirá el video (6 min): por qué un método con nombre vale más que mil servicios sueltos, y cómo se poda: UNA transformación, UN protocolo, UN precio. Aplica igual si atendés pacientes o formás estudiantes. Si el video no está, tu Coach te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '6 min',
         orden: 1,
+        dia_asignado: 8,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P2_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: contá en 5 min — el profesional promedio vende horas sueltas (commodity, se compara por precio); el director vende UN método con nombre propio (activo, se compara por resultado). La poda: una transformación, un protocolo de 3-7 pasos, un precio. Su método YA existe en lo que hace — esta semana lo documentamos, lo nombramos y lo empaquetamos.',
       },
       {
         codigo: 'P2.2',
-        titulo: 'Los 5 por qué',
-        descripcion: 'Formulario encadenado de 5 preguntas. La primera aparece sola. Cuando respondés, aparece la segunda, y así. 1: "¿Por qué hacés lo que hacés?" 2: "¿Y eso por qué importa?" 3: "¿Y por qué eso importa para vos específicamente?" 4: "¿Qué cambiaría si más personas tuvieran esto?" 5: "¿Para qué estás realmente acá?"',
+        titulo: 'Documentá tu proceso + arrancá tu cuenta Meta',
+        descripcion: 'Dos cosas hoy. (1) Completá la herramienta con lo que YA hacés con cada paciente (o estudiante), paso a paso. (2) EN PARALELO, 15 min con Sofi: creá tu página de Facebook y tu Business Manager HOY — Meta tarda semanas en confiar en cuentas nuevas, y tu campaña del día 22 necesita una cuenta con historial. Empezar hoy es lo que separa un plan serio de uno de humo.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
-        tiempo_estimado: '20 min',
+        tiempo_estimado: '30 + 15 min',
         orden: 2,
-        herramienta_id: 'H-P2.2',
-        usa_ia: false,
-        adn_field: 'adn_cinco_por_que',
-      },
-      {
-        codigo: 'P2.3',
-        titulo: 'Destilador de Propósito',
-        descripcion: 'Usa las 5 respuestas ya guardadas. Genera 3 versiones de la oración de propósito con la estructura: "Ayudo a [quién específico] a [resultado concreto] para que [para qué más profundo]." Elegí una y editala.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 3,
-        herramienta_id: 'H-P2.3',
-        usa_ia: true,
-        adn_field: 'proposito',
-        requiere_datos_de: ['P2.2'],
-      },
-      {
-        codigo: 'P2.4',
-        titulo: 'Diagnóstico de la Capa (síndrome de la capa)',
-        descripcion: 'Del Video 3: "el síndrome de la capa es lo que aparece cuando tu propósito se debilita." Mapeá dónde HOY decís SÍ cuando deberías decir NO. Para cada SÍ: horas/semana que consume + costo energético (1-10). La IA te calcula el costo acumulado de tu capa.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 4,
-        herramienta_id: 'H-P2.4',
-        usa_ia: true,
-        adn_field: 'adn_diagnostico_capa',
-        requiere_datos_de: ['P2.3'],
-      },
-      {
-        codigo: 'P2.5',
-        titulo: 'El Filtro del NO · Los 5 NO',
-        descripcion: 'Definí 5 cosas concretas a las que vas a decir NO en los próximos 90 días + 5 escenarios de práctica con feedback de la IA. Greg McKeown: "If it isn\'t a clear yes, then it\'s a clear no."',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 5,
-        herramienta_id: 'H-P2.5',
-        usa_ia: true,
-        adn_field: 'adn_cinco_no',
-        requiere_datos_de: ['P2.3'],
-      },
-      {
-        codigo: 'P2.6',
-        titulo: 'Validación de propósito',
-        descripcion: 'Decile al Coach cuál es tu propósito + tus 5 NO. Preguntale: "¿El propósito funciona como filtro real? ¿Mis 5 NO son concretos o genéricos?" Si no podés responder claro, el propósito todavía no está listo.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 6,
-        usa_ia: false,
-        coach_instruccion: '¿El propósito funciona como filtro real? ¿Mis 5 NO son concretos o genéricos?',
-      },
-    ],
-  },
-
-  // ─── PILAR 3: Legado · Días 13–20 ─────────────────────────────────────────
-  {
-    id: 'P3',
-    numero_orden: 3,
-    titulo: 'Legado',
-    subtitulo: 'Legado vs. éxito financiero',
-    color: '#F5A623',
-    numero: 3,
-    icon: 'Sunrise',
-    emoji: '🌅',
-    estrellas_requeridas: 3,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P2',
-    fase: 1,
-    dias_inicio: 13,
-    dias_fin: 20,
-    metodo_letra: 'C',
-    hito_mensaje: 'Sabés quién sos, para qué estás y qué querés dejar. El siguiente paso es saber a quién servís.',
-    hito_tipo: 'milestone',
-    metas: [
-      {
-        codigo: 'P3.1',
-        titulo: 'Legado vs. éxito financiero',
-        descripcion: 'Video sobre la diferencia entre legado real y metas financieras.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P3_1',
-      },
-      {
-        codigo: 'P3.2',
-        titulo: 'Carta desde tu funeral',
-        descripcion: 'Ya no estás. Es el día de tu funeral. Alguien que te conoció bien sube a hablar. ¿Qué dice? Viktor Frankl: "Those who have a why to live can bear with almost any how." Mínimo 200 palabras, sin filtros. Lo que escribiste antes sigue siendo válido — la consigna nueva es para profundizar.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '30 min',
-        orden: 2,
-        herramienta_id: 'H-P3.2',
-        usa_ia: false,
-        adn_field: 'adn_carta_futuro',
-      },
-      {
-        codigo: 'P3.3',
-        titulo: 'Sintetizador de Legado',
-        descripcion: 'Usa la carta ya guardada. Genera el legado en 2 a 3 oraciones. Distingue legado de meta financiera. Textarea editable.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 3,
-        herramienta_id: 'H-P3.3',
-        usa_ia: true,
-        adn_field: 'legado',
-        requiere_datos_de: ['P3.2'],
-      },
-      {
-        codigo: 'P3.4',
-        titulo: 'Clarificación del legado',
-        descripcion: 'Decile al Coach tu legado. Preguntale: "Si en 10 años logré este legado pero no gané mucho dinero, ¿valió la pena?" Esa respuesta separa el legado real del ego.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 4,
-        usa_ia: false,
-        coach_instruccion: 'Decile al Coach tu legado. Preguntale: "Si en 10 años logré este legado pero no gané mucho dinero, ¿valió la pena?" Esa respuesta separa el legado real del ego.',
-      },
-    ],
-  },
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 2: SPRINT DE MERCADO · Días 20–38 · Letras L + Í
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // ─── PILAR 4: Avatar · Días 20–26 ─────────────────────────────────────────
-  {
-    id: 'P4',
-    numero_orden: 4,
-    titulo: 'Avatar',
-    subtitulo: 'Tu paciente ideal desde datos reales',
-    color: '#F5A623',
-    numero: 4,
-    icon: 'UserCircle',
-    emoji: '👤',
-    estrellas_requeridas: 3,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P3',
-    fase: 2,
-    dias_inicio: 20,
-    dias_fin: 26,
-    metodo_letra: 'L',
-    metas: [
-      {
-        codigo: 'P4.1',
-        titulo: 'Cómo construir el avatar desde datos reales',
-        descripcion: 'Video sobre cómo construir un avatar basado en pacientes reales, no en demografía inventada.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P4_1',
-      },
-      {
-        codigo: 'P4.2',
-        titulo: 'Análisis de 3 pacientes reales',
-        descripcion: '3 bloques iguales (Paciente 1, 2, 3). Para cada uno: "¿Qué problema tenía cuando llegó?" · "¿Cómo lo describía con sus propias palabras?" · "¿Qué intentó antes sin éxito?" · "¿Qué obtuvo después de trabajar juntos?" · "¿Cómo describe su vida ahora?"',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '40 min',
-        orden: 2,
-        herramienta_id: 'H-P4.2',
-        usa_ia: false,
-        adn_field: 'adn_pacientes_reales',
-      },
-      {
-        codigo: 'P4.3',
-        titulo: 'Constructor de Avatar',
-        descripcion: 'Usa los 3 análisis ya guardados. Genera: nombre ficticio, edad, profesión, situación de vida, dolores ×5 mínimo, sueños ×3 mínimo, objeciones ×3, lenguaje exacto que usa (3 a 5 frases textuales). Textarea editable.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 3,
-        herramienta_id: 'H-P4.3',
-        usa_ia: true,
-        adn_field: 'adn_avatar',
-        requiere_datos_de: ['P4.2'],
-      },
-      {
-        codigo: 'P4.4',
-        titulo: 'Conexión avatar ↔ historia',
-        descripcion: 'Mirá tu línea de tiempo vital (P1.2). ¿En qué momento de TU historia se conecta el dolor de este avatar? La IA cruza automáticamente IDlinea_tiempo × IRRavatar_journey para mostrarte la conexión emocional que después usás en cada copy y cada llamada.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 4,
-        herramienta_id: 'H-P4.4',
-        usa_ia: true,
-        adn_field: 'adn_avatar_conexion_historia',
-        requiere_datos_de: ['P1.2', 'P4.3'],
-      },
-      {
-        codigo: 'P4.5',
-        titulo: 'Validación del avatar',
-        descripcion: 'Contale al Coach quién es tu avatar + la conexión con tu historia. Preguntale: "¿Es suficientemente específico o sigue siendo vago? ¿La conexión con mi historia tiene sentido o es forzada?" Un avatar vago es "profesional 35-50 con estrés". Un avatar preciso es una persona real con una vida real.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 5,
-        usa_ia: false,
-        coach_instruccion: '¿Es suficientemente específico mi avatar o sigue siendo vago? ¿La conexión con mi historia tiene sentido o es forzada?',
-      },
-    ],
-  },
-
-  // ─── PILAR 5: Nicho + PUV · Días 26–31 ────────────────────────────────────
-  {
-    id: 'P5',
-    numero_orden: 5,
-    titulo: 'Nicho + PUV',
-    subtitulo: 'Nicho no es restricción, es amplificación',
-    color: '#F5A623',
-    numero: 5,
-    icon: 'Lightbulb',
-    emoji: '💡',
-    estrellas_requeridas: 3,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P4',
-    fase: 2,
-    dias_inicio: 26,
-    dias_fin: 31,
-    metodo_letra: 'Í',
-    metas: [
-      {
-        codigo: 'P5.1',
-        titulo: 'Nicho no es restricción, es amplificación',
-        descripcion: 'Video sobre cómo un nicho bien definido amplifica tu alcance en vez de limitarlo.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P5_1',
-      },
-      {
-        codigo: 'P5.2',
-        titulo: 'Embudo de 4 niveles (Mercado → Nicho → Micronicho → Avatar)',
-        descripcion: 'Definí los 4 niveles que cada vez son más estrechos. Ej de Javo: Mercado (negocios) → Nicho (negocios digitales) → Micronicho (profesionales de salud) → Avatar (profesional 40-50, hijos chicos, agenda llena). Sin el embudo claro la PUV sale genérica.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '30 min',
-        orden: 2,
-        herramienta_id: 'H-P5.2',
-        usa_ia: true,
-        adn_field: 'adn_nicho',
-      },
-      {
-        codigo: 'P5.3',
-        titulo: 'Generador de PUV (para el nicho)',
-        descripcion: 'Importante v8: la PUV es para el NICHO, no para el avatar. Del Video 6: "Si viene la psicóloga o la médica o la kinesióloga, yo le puedo hacer la misma propuesta de valor." Fórmula: "Yo ayudo a [NICHO] a [resultado específico] para que [beneficio/sentimiento]."',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 3,
-        herramienta_id: 'H-P5.3',
-        usa_ia: true,
-        adn_field: 'adn_usp',
-        requiere_datos_de: ['P5.2'],
-      },
-      {
-        codigo: 'P5.4',
-        titulo: 'Test de diferenciación',
-        descripcion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi nicho, ¿todavía aplica?" Si sí, la PUV necesita más trabajo. La PUV diferencia o no diferencia — no hay zona gris.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 4,
-        usa_ia: false,
-        coach_instruccion: 'Decile al Coach tu PUV. Preguntale: "Si borro mi nombre y pongo el de otro colega de mi nicho, ¿todavía aplica?" Si la respuesta es sí, la PUV necesita más trabajo.',
-      },
-    ],
-  },
-
-  // ─── PILAR 6: Matriz A→B→C · Días 31–38 ───────────────────────────────────
-  {
-    id: 'P6',
-    numero_orden: 6,
-    titulo: 'Matriz A→B→C',
-    subtitulo: 'Por qué el obstáculo es más importante que el dolor',
-    color: '#F5A623',
-    numero: 6,
-    icon: 'Triangle',
-    emoji: '🔺',
-    estrellas_requeridas: 2,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P5',
-    fase: 2,
-    dias_inicio: 31,
-    dias_fin: 38,
-    metodo_letra: 'Í',
-    hito_mensaje: 'Sabés a quién servís y qué lo tiene preso. El siguiente paso es convertir eso en un producto con precio.',
-    hito_tipo: 'milestone',
-    metas: [
-      {
-        codigo: 'P6.1',
-        titulo: 'La Matriz A→B→C: por qué el obstáculo es más importante que el dolor',
-        descripcion: 'Video explicativo sobre los 3 estados de la transformación del paciente.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P6_1',
-      },
-      {
-        codigo: 'P6.2',
-        titulo: 'Transformaciones reales de pacientes',
-        descripcion: '10 bloques colapsables. Mínimo 5 completados para poder avanzar. Para cada paciente: "Estado A — ¿Cómo llegó? ¿Qué le dolía? ¿Cómo lo describía?" · "Estado B — ¿Qué le impedía resolverlo solo? ¿Qué intentó antes?" · "Estado C — ¿Dónde terminó? ¿Qué cambió en su vida?"',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '60 min',
-        orden: 2,
-        herramienta_id: 'H-P6.2',
-        usa_ia: false,
-        adn_field: 'adn_transformaciones',
-      },
-      {
-        codigo: 'P6.3',
-        titulo: 'Constructor de Matriz A→B→C',
-        descripcion: 'Usa los casos ya guardados. Genera: Estado A (2-3 párrafos, experiencia emocional en lenguaje del paciente), Estado B (lista de 5-8 obstáculos — la razón por la que existe el programa), Estado C (2-3 párrafos, la vida sin el problema). Tres secciones editables.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 3,
-        herramienta_id: 'H-P6.3',
-        usa_ia: true,
-        adn_field: 'matriz_a',
-        requiere_datos_de: ['P6.2'],
-      },
-      {
-        codigo: 'P6.4',
-        titulo: 'Validación de la Matriz',
-        descripcion: 'Mostrále al Coach la lista de obstáculos del B. Preguntale: "¿Si mi paciente leyera esto, diría que le estoy hablando a él?" Si la respuesta no es un sí claro, el B necesita más trabajo.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 4,
-        usa_ia: false,
-        coach_instruccion: 'Mostrále al Coach la lista de obstáculos del B. Preguntale: "¿Si mi paciente leyera esto, diría que le estoy hablando a él?" Si la respuesta no es un sí claro, el B necesita más trabajo.',
-      },
-    ],
-  },
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 3: SPRINT DE OFERTA · Días 36–45 · Letras N + I
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // ─── PILAR 7: Método · Días 36–42 ─────────────────────────────────────────
-  {
-    id: 'P7',
-    numero_orden: 7,
-    titulo: 'Método',
-    subtitulo: 'Tu método propio como activo diferenciador',
-    color: '#F5A623',
-    numero: 7,
-    icon: 'Cog',
-    emoji: '⚙️',
-    estrellas_requeridas: 3,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P6',
-    fase: 3,
-    dias_inicio: 36,
-    dias_fin: 42,
-    metodo_letra: 'N',
-    metas: [
-      {
-        codigo: 'P7.1',
-        titulo: 'Tu método propio: cómo convertir lo que hacés en un activo diferenciador',
-        descripcion: 'Video sobre cómo transformar tu proceso en un método con nombre propio.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P7_1',
-      },
-      {
-        codigo: 'P7.2',
-        titulo: 'Documentador del proceso actual',
-        descripcion: 'Campos: "¿Qué pasa en el primer contacto con el paciente?" · "¿Cómo es la primera sesión?" · "¿Qué hacés en las sesiones siguientes, paso a paso?" · "¿Cómo sabés que el proceso terminó?" · "¿Cómo medís el resultado?" · "¿Cuánto tiempo dura el proceso completo?"',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '30 min',
-        orden: 2,
+        dia_asignado: 8,
         herramienta_id: 'H-P7.2',
         usa_ia: false,
         adn_field: 'adn_proceso_actual',
+        entrenador: 'sofi',
+        checklist: [
+          'Completá la herramienta: tu proceso paso a paso (primer contacto → sesiones → cierre → resultado)',
+          'Con Sofi: creá tu página de Facebook profesional (10 min, si no tenés)',
+          'Con Sofi: creá tu Business Manager en business.facebook.com y vinculá la página',
+          'Opcional pero recomendado: boosteá una publicación tuya a $1/día — tu cuenta empieza a ganar historial HOY',
+        ],
       },
       {
-        codigo: 'P7.3',
-        titulo: 'Generador de Método (con nivel de oferta por paso)',
-        descripcion: 'Usa el proceso ya guardado + la Matriz A→B→C. Genera: 5 opciones de nombre (elegí una) + 3 a 7 pasos. v8: cada paso ahora incluye "Nivel de oferta" (gratuito · ultralow · protocolo) para que después la escalera de ofertas se mapee directo.',
+        codigo: 'P2.3',
+        titulo: 'Tu avatar: los 3 mejores que tuviste',
+        descripcion: 'Elegí los 3 mejores pacientes (o estudiantes) que pasaron por vos y completá la herramienta. Extrae el patrón: quién es tu persona ideal, qué le duele, qué compró de verdad. ¿No tenés 3 pacientes todavía? Usá 3 personas cercanas que tengan el problema que resolvés — o tu propia historia: vos fuiste tu primer caso.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '25 min',
         orden: 3,
+        dia_asignado: 9,
+        herramienta_id: 'H-P4.2',
+        usa_ia: true,
+        adn_field: 'adn_avatar',
+      },
+      {
+        codigo: 'P2.4',
+        titulo: 'Generá tu método: nombre + pasos',
+        descripcion: 'La herramienta usa tu proceso documentado + tu avatar y genera: 5 opciones de nombre propio (elegís una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '25 min',
+        orden: 4,
+        dia_asignado: 10,
         herramienta_id: 'H-P7.3',
         usa_ia: true,
         adn_field: 'metodo_nombre',
-        requiere_datos_de: ['P7.2'],
+        requiere_datos_de: ['P2.2', 'P2.3'],
+        entrenador: 'diego',
       },
       {
-        codigo: 'P7.4',
-        titulo: 'Mapeo Obstáculos B → Pasos del método',
-        descripcion: 'Para cada obstáculo de tu Matriz B (los obstáculos del avatar), identificá qué paso del método lo resuelve. Si quedan obstáculos sin paso, te falta cubrir algo. Si hay pasos sin obstáculo asignado, tal vez sobra.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 4,
-        herramienta_id: 'H-P7.4',
-        usa_ia: true,
-        adn_field: 'adn_metodo_mapeo_obstaculos',
-        requiere_datos_de: ['P6.3', 'P7.3'],
-      },
-      {
-        codigo: 'P7.5',
-        titulo: 'Naming del método',
-        descripcion: 'Contale al Coach el nombre que elegiste. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?" El nombre tiene que evocar el resultado.',
+        codigo: 'P2.5',
+        titulo: 'Validá el nombre con tu Coach',
+        descripcion: 'Contale a tu Coach el nombre elegido. La prueba de fuego: ¿evoca el RESULTADO que logra tu paciente, o describe tu proceso técnico? El nombre tiene que prometer el destino. Al aprobar: Amarillo punta verde — el primer brote asoma.',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '10 min',
         orden: 5,
+        dia_asignado: 11,
         usa_ia: false,
-        coach_instruccion: 'Contale al Coach el nombre que elegiste para tu método. Preguntale: "¿El nombre evoca el resultado que logra el paciente, o describe el proceso técnico que uso?"',
+        coach_instruccion: 'Validá el nombre del método: ¿evoca el resultado del paciente o describe el proceso técnico? Si describe proceso, ayudale a girarlo hacia el resultado. Cuando el nombre prometa el destino, aprobá y celebrá: Amarillo punta verde, el primer brote asoma.',
       },
     ],
   },
 
-  // ─── PILAR 8: Escalera de Ofertas · Días 42–45 · v8 (5 ofertas + Mamuska) ──
   {
-    id: 'P8',
-    numero_orden: 8,
-    titulo: 'Escalera de Ofertas',
-    subtitulo: 'Las 5 ofertas sobre un mismo método',
-    color: '#F5A623',
-    numero: 8,
-    icon: 'Building2',
-    emoji: '🏗️',
-    estrellas_requeridas: 7,
-    es_hito: true,
+    id: 'P3',
+    numero_orden: 3,
+    titulo: 'Tu Oferta de $1.000',
+    subtitulo: 'Precio digno, garantía real, lista para vender',
+    color: '#22C55E',
+    numero: 3,
+    icon: 'Gem',
+    emoji: '💎',
     desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P7',
-    fase: 3,
-    dias_inicio: 42,
-    dias_fin: 45,
-    metodo_letra: 'I',
-    hito_mensaje: 'ADN base completo + escalera armada. Punto de no retorno. Pasaste de Sanador Narrado a Sanador Posicionado.',
-    hito_tipo: 'urgent',
+    pilar_prerequisito: 'P2',
+    fase: 2,
+    dias_inicio: 12,
+    dias_fin: 14,
+    metodo_letra: 'N',
+    cinturon_otorga: 'verde',
+    hito_mensaje: '🥋 Cinturón VERDE — la planta crece. Tu oferta está completa y tu precio en pie.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: '¿Qué cuesta más: sostener este precio, o sostener otra década del precio viejo?',
     metas: [
       {
-        codigo: 'P8.1',
-        titulo: 'Las 5 ofertas sobre un mismo método',
-        descripcion: 'Video 8 de Javo. "La P va a ser el lead magnet, la A va a ser el ultra low ticket, y el restante de las letras va a ser lo que completa el protocolo." Low = do it yourself, Mid = done with you, High = done for you.',
+        codigo: 'P3.1',
+        titulo: 'La oferta que se vende sola',
+        descripcion: 'Mirá el video (7 min): la ecuación de valor — resultado soñado × probabilidad, dividido demora × esfuerzo. Por qué tu oferta debe prometer transformación, no sesiones. Y la garantía como permiso para confiar. Si el video no está, tu Coach te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '18 min',
+        tiempo_estimado: '7 min',
         orden: 1,
+        dia_asignado: 12,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P8_1',
+        video_youtube_id: 'PLACEHOLDER_P3_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: la ecuación de valor de Hormozi en 5 min — valor = (resultado soñado × probabilidad percibida) ÷ (demora × esfuerzo). Su oferta debe subir los dos de arriba (transformación concreta + prueba) y bajar los dos de abajo (resultados visibles rápido + método que acompaña). Nadie compra sesiones: compran el después. Y la garantía no es riesgo — es el permiso que el paciente necesita para confiar.',
       },
       {
-        codigo: 'P8.2',
-        titulo: 'Diseñador de Oferta Mid (DWY · principal)',
-        descripcion: 'La Mid se construye primero porque es el producto principal. $1K-5K. DWY (Done With You). Campos: duración del protocolo, sesiones, resultado medible garantizado, soporte, precio. Usa el Método + Matriz A→B→C del ADN.',
+        codigo: 'P3.2',
+        titulo: 'Diseñá tu oferta principal',
+        descripcion: 'La herramienta arma tu oferta completa sobre tu método: qué transformación promete, qué incluye, cuánto dura, tu precio (el número del Día 6) y tu garantía. Todo en una página lista para presentar. Vera, tu entrenadora de precio, te ayuda si dudás.',
+        tipo: 'HERRAMIENTA',
+        es_estrella: true,
+        tiempo_estimado: '35 min',
+        orden: 2,
+        dia_asignado: 12,
+        herramienta_id: 'H-P8.3',
+        usa_ia: true,
+        adn_field: 'adn_oferta_mid',
+        requiere_datos_de: ['P2.4'],
+        entrenador: 'vera',
+      },
+      {
+        codigo: 'P3.3',
+        titulo: 'Defendé tu precio (roleplay)',
+        descripcion: 'Practicá con tu Coach: te va a decir "es caro", "lo tengo que pensar", "¿hay descuento?" — como un prospecto real. Repetí hasta defender tu precio 3 veces seguidas sin disculparte. Vera es tu entrenadora especialista si querés más práctica.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 3,
+        dia_asignado: 13,
+        usa_ia: false,
+        entrenador: 'vera',
+        checklist: [
+          'Abrí el chat y pedí el roleplay de defensa de precio',
+          'Superá la objeción "es caro" sin bajar el precio',
+          'Superá "lo tengo que pensar" con una pregunta, no con presión',
+          'Superá "¿hay descuento?" sin ceder — 3 seguidas y pasás',
+        ],
+        coach_instruccion: 'Roleplay de defensa de precio: hacé de prospecto que objeta "es caro" / "lo tengo que pensar" / "¿hay descuento?". Evaluá si defiende con seguridad o se disculpa. Si aparece el precio-disculpa, recordale su creencia nueva del Día 7 y su estandarte. Repetir hasta que defienda con calma 3 objeciones seguidas.',
+      },
+      {
+        codigo: 'P3.4',
+        titulo: 'Aprobación final de tu oferta',
+        descripcion: 'Presentale a tu Coach la oferta entera: transformación + qué incluye + precio + garantía. Si los 4 elementos están sólidos, ganás el Cinturón VERDE — la planta crece. Y se abre la Fase 3: salir a captar.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '15 min',
+        orden: 4,
+        dia_asignado: 14,
+        usa_ia: false,
+        coach_instruccion: 'Auditá la oferta final contra 4 criterios: (1) promete una transformación concreta, no sesiones; (2) el contenido es claro; (3) el precio es el número digno del Día 6, sin rebajas de miedo; (4) la garantía es real y específica. Solo si los 4 pasan, aprobá y otorgá el Cinturón Verde.',
+      },
+    ],
+  },
+
+  // ═══ FASE 3 · CAPTACIÓN Y VENTAS ═══
+  {
+    id: 'P4',
+    numero_orden: 4,
+    titulo: 'Tu Sistema de Captación',
+    subtitulo: 'El sistema que atrae, filtra y agenda solo',
+    color: '#38BDF8',
+    numero: 4,
+    icon: 'Magnet',
+    emoji: '🧲',
+    desbloqueo: 'completar_anterior',
+    pilar_prerequisito: 'P3',
+    fase: 3,
+    dias_inicio: 15,
+    dias_fin: 22,
+    metodo_letra: 'I',
+    cinturon_otorga: 'verde_punta_azul',
+    hito_mensaje: '🥋 Verde punta AZUL — la planta se estira al cielo. Tu campaña está ENCENDIDA y tu agente responde solo: empiezan a entrar interesados.',
+    hito_tipo: 'urgent',
+    mentor_pregunta: 'La campaña ya corre sin vos. ¿Qué vas a hacer con el tiempo que antes usabas para perseguir pacientes?',
+    metas: [
+      {
+        codigo: 'P4.1',
+        titulo: 'El embudo completo, sin humo',
+        descripcion: 'Mirá el video (8 min): el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Coach te lo cuenta.',
+        tipo: 'VIDEO',
+        es_estrella: false,
+        tiempo_estimado: '8 min',
+        orden: 1,
+        dia_asignado: 15,
+        usa_ia: false,
+        video_youtube_id: 'PLACEHOLDER_P9A_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: el circuito en 5 min — anuncio en Meta → clic abre WhatsApp → tu agente de IA (Meta Business Agent, nativo y gratis) responde al instante 24/7, hace las preguntas de filtro y agenda SOLO a los calificados → llamada → venta. Los datos: 55% de los leads llegan fuera de horario; 78% compra al primero que responde; responder en <5 min multiplica x21. Por eso el agente no es un lujo: ES el sistema. Los que hoy no califican van a tu Sala de Espera (canal) — nadie se pierde.',
+      },
+      {
+        codigo: 'P4.5',
+        titulo: 'Montá tu sistema: agente IA + agenda + cobro',
+        descripcion: 'El día grande de infraestructura. Activás tu Meta Business Agent (el empleado digital de tu WhatsApp — gratis, nativo), lo entrenás con el PDF que TCD te genera con TU oferta y TUS preguntas de filtro, montás tu agenda, tu medio de cobro probado, y tu Sala de Espera. Sofi te acompaña pieza por pieza.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '75 min',
+        orden: 2,
+        dia_asignado: 15,
+        usa_ia: false,
+        entrenador: 'sofi',
+        checklist: [
+          'Instalá WhatsApp Business (o convertí tu número actual — los chats se conservan; si preferís separar trabajo de vida personal, usá un número nuevo)',
+          'Activá tu agente: Herramientas → Meta Business Agent (5 min de configuración)',
+          'Descargá de la app tu PDF DE ENTRENAMIENTO (lo genera TCD con tu oferta, tu avatar y tus 3 preguntas de filtro) y subíselo al agente',
+          'Configurá el agente: responde SOLO a clientes que llegan de anuncios · tono cálido y profesional · las conversaciones clínicas te las deriva a vos SIEMPRE',
+          'Probalo: escribile desde el teléfono de alguien cercano como si fueras paciente',
+          'Creá tu link de agenda (Calendly gratis o similar) con 3+ horarios esta semana',
+          'Elegí tu medio de cobro según tu país (México/Argentina: MercadoPago · Colombia: Nequi/Bancolombia · Ecuador: Payphone · otros: PayPal) y PROBALO cobrándote $1 hoy',
+          'Creá tu canal de WhatsApp "Sala de Espera" — ahí van los que hoy no califican: 1 mensaje semanal de valor, nadie se pierde',
+          'PLAN B si el agente todavía no te aparece (Meta lo libera de a poco): mensaje de bienvenida con tus 3 preguntas + revisás 2 veces por día + pedí acceso desde la app de WhatsApp',
+        ],
+        coach_instruccion: 'Verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el PDF de TCD (preguntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
+      },
+      {
+        codigo: 'P4.2',
+        titulo: 'El mensaje que atrae a TU avatar',
+        descripcion: 'Generá con la herramienta el copy de tu página y tus anuncios: el mensaje que hace que tu persona ideal se detenga, se reconozca en el dolor y quiera hablar con vos. Usa tu avatar y tu oferta ya definidos.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
-        orden: 2,
-        herramienta_id: 'H-P8.2',
-        usa_ia: true,
-        adn_field: 'oferta_mid',
-      },
-      {
-        codigo: 'P8.3',
-        titulo: 'Diseñador de Ultra Low Ticket (DIY)',
-        descripcion: 'NUEVO v8 · 5ta oferta · $17-47. Es la 2da letra del método (la "A" del acrónimo CLÍNICA). DIY (Do It Yourself). Puerta de entrada al avatar — funciona como "comprador" en vez de "lead". Campos: nombre, precio, módulos cortos, resultado específico, garantía, horas/mes que consume.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
         orden: 3,
-        herramienta_id: 'H-P8.3',
-        usa_ia: true,
-        adn_field: 'adn_oferta_ultralow',
-        requiere_datos_de: ['P8.2'],
-      },
-      {
-        codigo: 'P8.4',
-        titulo: 'Diseñador de Lead Magnet ($0)',
-        descripcion: 'La P del método (1ra letra). Gratis. Resuelve el primer dolor del avatar y abre la puerta. Generalmente: PDF, video, mini-checklist. Campos: nombre, formato, entrega, qué pide a cambio (email + nombre).',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 4,
-        herramienta_id: 'H-P8.4',
-        usa_ia: true,
-        adn_field: 'lead_magnet',
-        requiere_datos_de: ['P8.2'],
-      },
-      {
-        codigo: 'P8.5',
-        titulo: 'Diseñador de Low (DIY)',
-        descripcion: 'Protocolo completo en formato DIY. $100-500. El avatar accede a tu método sin acompañamiento personal. Campos: duración, módulos, resultado, horas/mes que consume, bonus.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 5,
-        herramienta_id: 'H-P8.5',
-        usa_ia: true,
-        adn_field: 'oferta_low',
-        requiere_datos_de: ['P8.2'],
-      },
-      {
-        codigo: 'P8.6',
-        titulo: 'Diseñador de High (DFY)',
-        descripcion: 'Máximo acompañamiento. $5K+. DFY (Done For You). Lo hacemos nosotros. Campos: duración, modalidad, resultado, soporte (sesiones individuales, WhatsApp directo, etc.), horas/mes que consume.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 6,
-        herramienta_id: 'H-P8.6',
-        usa_ia: true,
-        adn_field: 'oferta_high',
-        requiere_datos_de: ['P8.2'],
-      },
-      {
-        codigo: 'P8.7',
-        titulo: 'Matemática $10K (benchmarks 2026)',
-        descripcion: '3 escenarios de ROAS: Conservador 3x (~$3.300 inversión), Bueno 5x (~$2.000 con creativos validados + testimonios), Excepcional 7x+ (~$1.400 con comunidad + virales + retargeting). Define cuántas ventas de cada oferta necesitás para llegar a $10K/mes.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 7,
-        herramienta_id: 'H-P8.7',
-        usa_ia: true,
-        adn_field: 'adn_escenarios_roas',
-        requiere_datos_de: ['P8.2', 'P8.3', 'P8.4', 'P8.5', 'P8.6'],
-      },
-      {
-        codigo: 'P8.8',
-        titulo: 'Mapa Mamuska (verificación cruzada)',
-        descripcion: 'Pantalla final de F3. Cada fila: Obstáculo de Matriz B → Paso del Método → En qué oferta lo resuelve → Nivel de conciencia del avatar. Si hay filas vacías o inconsistentes, la app señala el gap antes de pasar a F4.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 8,
-        herramienta_id: 'H-P8.8',
-        usa_ia: false,
-        requiere_datos_de: ['P6.3', 'P7.3', 'P8.2', 'P8.3', 'P8.4', 'P8.5', 'P8.6'],
-      },
-      {
-        codigo: 'P8.9',
-        titulo: 'Validación de la escalera',
-        descripcion: 'Mostrále al Coach las 5 ofertas con precios + el Mapa Mamuska. Preguntale: "¿Son coherentes con lo que cobra alguien de mi especialidad en mi mercado? ¿La progresión Ultra Low → Low → Mid → High es lógica? ¿El Mapa Mamuska tiene gaps?"',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '20 min',
-        orden: 9,
-        usa_ia: false,
-        coach_instruccion: '¿Son coherentes mis 5 precios con mi mercado? ¿La progresión Ultra Low → Low → Mid → High es lógica? ¿El Mapa Mamuska tiene gaps?',
-      },
-    ],
-  },
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 4: ACTIVACIÓN Y VENTAS · Días 45–80 · Letras N + I + C
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // ─── PILAR 9A: Infraestructura · Días 45–52 ──────────────────────────────
-  {
-    id: 'P9A',
-    numero_orden: 9,
-    titulo: 'Infraestructura',
-    subtitulo: 'El embudo mínimo viable · validación orgánica obligatoria',
-    color: '#F5A623',
-    numero: 9,
-    icon: 'Megaphone',
-    emoji: '📣',
-    estrellas_requeridas: 5,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P8',
-    fase: 4,
-    dias_inicio: 45,
-    dias_fin: 52,
-    metodo_letra: 'C',
-    metas: [
-      {
-        codigo: 'P9A.1',
-        titulo: 'El embudo mínimo viable para profesionales de salud',
-        descripcion: 'Video explicativo sobre el embudo: campaña → DM con palabra clave → respuesta automática → formulario de filtro → calendario → llamada → venta.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P9A_1',
-      },
-      {
-        codigo: 'P9A.2',
-        titulo: 'Generador de Copy de Landing Page',
-        descripcion: 'Sin campos nuevos. Usa Avatar + Matriz A→B→C + Oferta Mid del ADN. Genera el copy completo: headline, subheadline, sección del problema, obstáculos, solución, qué incluye, para quién es, para quién no es, preguntas frecuentes, llamado a la acción.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 2,
+        dia_asignado: 16,
         herramienta_id: 'H-P9A.2',
         usa_ia: true,
         adn_field: 'adn_landing_copy',
+        requiere_datos_de: ['P3.2'],
+        entrenador: 'mateo',
       },
       {
-        codigo: 'P9A.3',
-        titulo: 'Generador de 3 Anuncios para Meta',
-        descripcion: 'Sin campos nuevos. Usa el ADN. Genera 3 versiones: Anuncio desde el A (el dolor), Anuncio desde el B (el obstáculo), Anuncio desde el C (el sueño). Para cada versión: copy para imagen estática + guión de 30 segundos para video/reel.',
+        codigo: 'P4.3',
+        titulo: 'Grabá 3 piezas y validalas con datos REALES',
+        descripcion: 'Regla de Javo: "No corro publicidad sin validar. Perdí $150.000 por esto." Pero con una cuenta chica, el orgánico solo no alcanza como señal — así que validamos con datos pagados y baratos: publicás las 3 piezas orgánico (gratis, construye tu perfil) Y las corrés como 3 anuncios de $2/día durante 5 días. El algoritmo de Meta te dice cuál GANA con números reales, no con corazonadas. Mateo te arma los guiones; Caro te enseña a grabar.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 3,
-        herramienta_id: 'H-P9A.3',
-        usa_ia: true,
-        adn_field: 'adn_anuncios',
-      },
-      {
-        codigo: 'P9A.4',
-        titulo: 'Validación orgánica (mínimo 3 piezas) · OBLIGATORIO',
-        descripcion: 'Regla Video 9 de Javo: "No corro publicidad a un contenido que no está validado. Perdí $150.000 por esto." Publicá orgánicamente al menos 3 piezas (mix N1 toma de conciencia · N2 lead magnet · N3 retargeting) y registrá: nivel, fecha, views 72hs, comments, saves, DMs. La app calcula la pieza ganadora. Hasta que tengas ≥3 piezas registradas, P9A.5 (Meta Ads) queda bloqueado.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '60 min',
+        tiempo_estimado: '5 días (en paralelo)',
         orden: 4,
+        dia_asignado: 17,
         herramienta_id: 'H-P9A.4',
-        usa_ia: false,
+        usa_ia: true,
         adn_field: 'adn_validacion_organica',
-        requiere_datos_de: ['P9A.3'],
+        entrenador: 'mateo',
+        checklist: [
+          'Pedile a Mateo 3 guiones cortos basados en tu copy (dolor · autoridad · resultado)',
+          'Antes de grabar, 10 min con Caro: encuadre, luz y presencia (si te da vergüenza: primero audio, después cámara sin publicar, después publicás — 3 escalones)',
+          'Grabá las 3 piezas (cortas: 30-60 segundos cada una)',
+          'Publicalas orgánico en tu red principal (gratis, suma siempre)',
+          'Con Sofi: subí las 3 como anuncios — $2/día cada uno, 5 días (~$30 total)',
+          'Al día 5: la de menor costo por conversación GANA — esa es tu campeona',
+        ],
       },
       {
-        codigo: 'P9A.5',
-        titulo: 'Configuración Meta Ads (Messages / Leads)',
-        descripcion: 'BLOQUEADO hasta completar P9A.4. Configurá la campaña optimizando Messages o Leads, NO Purchases. Meta necesita 50 conversiones por ad set por semana para salir de learning phase — imposible con high-ticket optimizando Purchases. Define audience, presupuesto inicial, creativos (de los validados orgánicamente), test A/B.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '45 min',
-        orden: 5,
-        herramienta_id: 'H-P9A.5',
-        usa_ia: false,
-        adn_field: 'adn_meta_config',
-        requiere_datos_de: ['P9A.4'],
-      },
-      {
-        codigo: 'P9A.6',
-        titulo: 'Revisión del embudo antes de activar',
-        descripcion: 'Decile al Coach que ya tenés el copy de la landing, los anuncios validados orgánicamente y la config de Meta lista. Preguntale: "¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?" Si todo está, activá.',
+        codigo: 'P4.4',
+        titulo: '◆ ESCALÁ LA GANADORA — tu campaña real',
+        descripcion: 'El momento que cambia todo. Apagás las 2 perdedoras y tu pieza CAMPEONA sube a $5-8/día como campaña a WhatsApp — donde tu agente ya espera para filtrar y agendar. Subí el screenshot de la campaña activa — un Entrenador lo verifica y ganás Verde punta azul: la planta se estira al cielo.',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 6,
+        tiempo_estimado: '30 min',
+        orden: 5,
+        dia_asignado: 22,
         usa_ia: false,
-        coach_instruccion: '¿El mensaje de los anuncios habla exactamente al mismo avatar que la landing? ¿El formulario de filtro está configurado? ¿El calendario tiene al menos 3 horarios disponibles esta semana?',
+        entrenador: 'sofi',
+        checklist: [
+          'Apagá los 2 anuncios perdedores (sin culpa: pagaste $20 por saber la verdad)',
+          'Duplicá la ganadora como campaña "Interacción → WhatsApp" a $5-8/día',
+          'Verificá el circuito completo: clic → tu WhatsApp → el agente responde y filtra → agenda',
+          'Regla de oro: NO toques la campaña por 72 hs (fase de aprendizaje de Meta — cambiarla la resetea)',
+          'Sacá screenshot donde se vea el estado ACTIVO y el presupuesto — subilo acá',
+        ],
+        coach_instruccion: 'Checklist antes de aprobar: ¿escaló la pieza ganadora de la validación (no otra)? ¿el circuito completo funciona (clic → WhatsApp → agente filtra → agenda con horarios)? ¿entiende que NO debe tocar la campaña por 72 hs (aprendizaje de Meta)? Pedí el screenshot de la campaña ACTIVA: estado activo + presupuesto diario visibles. Si es válido, otorgá Verde punta azul y prepará la expectativa: en 24-72 hs llegan los primeros mensajes — la próxima fase le enseña a convertirlos.',
       },
     ],
   },
 
-  // ─── PILAR 9B: Captación · Días 52–72 ─────────────────────────────────────
   {
-    id: 'P9B',
-    numero_orden: 10,
-    titulo: 'Captación',
-    subtitulo: 'No estás vendiendo, estás evaluando',
-    color: '#F5A623',
-    numero: 9,
-    icon: 'Phone',
+    id: 'P5',
+    numero_orden: 5,
+    titulo: 'Vender sin Venderte',
+    subtitulo: 'Del primer mensaje a la llamada que convierte',
+    color: '#3B82F6',
+    numero: 5,
+    icon: 'PhoneCall',
     emoji: '📞',
-    estrellas_requeridas: 4,
     desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P9A',
-    fase: 4,
-    dias_inicio: 52,
-    dias_fin: 72,
+    pilar_prerequisito: 'P4',
+    fase: 3,
+    dias_inicio: 23,
+    dias_fin: 45,
     metodo_letra: 'C',
+    cinturon_otorga: 'azul',
+    hito_mensaje: '🥋 Cinturón AZUL — alcanzaste el cielo. Hiciste tu primera llamada de venta real. Lo que sigue es repetir.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: '¿Qué escuchaste en esa llamada que ningún curso te podía enseñar?',
     metas: [
       {
-        codigo: 'P9B.1',
-        titulo: 'La llamada de diagnóstico: no estás vendiendo, estás evaluando',
-        descripcion: 'Video sobre cómo encarar la llamada de diagnóstico sin vender.',
+        codigo: 'P5.1',
+        titulo: 'Anatomía de la llamada que cierra',
+        descripcion: 'Mirá el video (8 min): la estructura de la llamada — Apertura, Dolor, Cielo, Obstáculos, Cierre (la W). Por qué el que pregunta dirige. Cómo presentar el precio sin que tiemble la voz. Y la regla del decisor: si la decisión la comparte con alguien, ese alguien tiene que estar en la llamada. Si el video no está, tu Coach te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '8 min',
         orden: 1,
+        dia_asignado: 23,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P9B_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: la W en 5 min — (1) Apertura: preguntas, el que pregunta dirige; (2) Dolor: profundizar hasta lo que le cuesta de verdad; (3) Cielo: que él mismo describa su después; (4) Obstáculos: sacarlos ANTES del precio — y el más letal es el decisor ausente ("lo hablo con mi pareja" = llamada perdida; el decisor se invita ANTES); (5) Cierre: el precio con calma, silencio, y la pregunta de decisión. Vender es ayudar a decidir, no convencer.',
       },
       {
-        codigo: 'P9B.2',
-        titulo: 'Constructor de Script de Ventas',
-        descripcion: 'Sin campos nuevos. Usa Avatar + Matriz A→B→C del ADN. Genera el script completo de 45 minutos: apertura y encuadre, preguntas de diagnóstico, profundización del dolor, presentación de la solución, manejo de las 5 objeciones más comunes del avatar, cierre con precio.',
+        codigo: 'P5.2',
+        titulo: 'Tu script de ventas propio',
+        descripcion: 'Generá tu guion personalizado con la estructura de la W: las preguntas de apertura, cómo profundizar el dolor, cómo pintar el después, el manejo del decisor, y tu cierre natural — con tu oferta y tu precio ya integrados. Y un plus: Bruno, tu entrenador de mensajes, te enseña a manejar los WhatsApp que ya están llegando (subile un screenshot de una conversación real).',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '25 min',
         orden: 2,
+        dia_asignado: 23,
         herramienta_id: 'H-P9B.2',
         usa_ia: true,
-        adn_field: 'script_venta',
+        adn_field: 'adn_script_ventas',
+        requiere_datos_de: ['P3.2'],
+        entrenador: 'bruno',
       },
       {
-        codigo: 'P9B.3',
-        titulo: 'Preparación con el Simulador de Llamada',
-        descripcion: 'Antes de tu primera llamada real, abrí el Simulador de Llamada desde Entrenadores IA y practicá al menos 3 roleplays con tu avatar. Después volvé al Coach y preguntale: "Ya practiqué 3 simulaciones. ¿Qué patrones de objeción aparecieron? ¿Qué debería ajustar del script antes de la primera llamada real?" El simulador NO guarda nada en el ADN — solo entrena.',
+        codigo: 'P5.3',
+        titulo: 'Roleplay: practicá antes de la real',
+        descripcion: 'Tu Coach hace de prospecto difícil: objeta, duda, compara, y te tira las reales — "es caro", "lo hablo con mi pareja", "lo tengo que pensar". Practicá el guion completo hasta que fluya. Nadie entra al ring sin sparring. Lucas, tu entrenador de ventas, está para las rondas extra.',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '45 min',
+        tiempo_estimado: '30 min',
         orden: 3,
+        dia_asignado: 25,
         usa_ia: false,
-        coach_instruccion: 'Ya practiqué 3 simulaciones con el Simulador de Llamada. ¿Qué patrones de objeción aparecieron? ¿Qué debería ajustar del script antes de la primera llamada real?',
+        entrenador: 'lucas',
+        checklist: [
+          'Pedí el roleplay completo con tu script en mano',
+          'Completá la llamada entera: apertura → dolor → cielo → obstáculos → precio → cierre',
+          'Superá las 3 objeciones reales: "es caro" · "lo hablo con mi pareja" · "lo tengo que pensar"',
+          'Recibí las 2 mejoras del Coach, anotalas, y repetí una segunda simulación',
+        ],
+        coach_instruccion: 'Roleplay completo con SU script y la estructura W (Apertura-Dolor-Cielo-Obstáculos-Cierre). Hacé de prospecto realista con el banco de objeciones REALES: "es caro" (defensa sin disculpa), "lo hablo con mi pareja" (el decisor — enseñale a invitarlo a una próxima llamada con ambos, no a perseguir), "lo tengo que pensar" (pregunta que destapa la objeción real detrás). Evaluá apertura, manejo del dolor, presentación de precio con silencio posterior, y cierre. Dale 2 mejoras concretas. Repetir hasta una simulación sólida.',
       },
       {
-        codigo: 'P9B.4',
-        titulo: 'Debrief de la primera llamada real',
-        descripcion: 'Después de tu primera llamada real, vení al Coach y contale exactamente qué pasó: ¿llegó al precio? ¿qué objeción apareció que no esperabas? ¿cómo respondiste? ¿cerró o no? El Coach te ayuda a ajustar el script para la próxima.',
+        codigo: 'P5.4',
+        titulo: '◆ TU PRIMERA LLAMADA REAL',
+        descripcion: 'Atendé a tu primer prospecto real del sistema. No importa si no cierra — importa que la hiciste. Subí el screenshot del Meet/Zoom (podés tapar el nombre) y hacé el debrief con tu Coach. Ganás el Cinturón AZUL: alcanzaste el cielo.',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '60 min',
         orden: 4,
+        dia_asignado: 28,
         usa_ia: false,
-        coach_instruccion: 'Después de tu primera llamada real, vení al Coach y contale exactamente qué pasó: ¿llegó al precio? ¿qué objeción apareció que no esperabas? ¿cómo respondiste? ¿cerró o no? El Coach te ayuda a ajustar el script para la próxima.',
+        entrenador: 'lucas',
+        checklist: [
+          'Confirmale la cita al prospecto el mismo día (sube la asistencia del 50% al 70%)',
+          'Si mencionó pareja/socio en el filtro: invitá al decisor a la llamada',
+          'Tené tu script a mano (impreso o segunda pantalla)',
+          'Hacé la llamada — presencia, preguntas, calma en el precio',
+          'Sacá screenshot de la videollamada (tapá el nombre si querés)',
+          'Subí el screenshot y hacé el debrief con tu Coach',
+        ],
+        coach_instruccion: 'Debrief de la primera llamada real: pedile el screenshot del Meet/Zoom (debe verse la videollamada — puede tapar el nombre por privacidad). Verificá que sea real. El debrief: ¿qué funcionó? ¿dónde se trabó? ¿qué objeción no supo manejar? ¿estaba el decisor si correspondía? Cerrá con 1 ajuste para la próxima. Otorgá el Cinturón Azul: alcanzó el cielo. Anticipале la resistencia que viene: los primeros NO duelen — y son parte de la matemática (cierre 20% = 4 de 5 dicen no Y el sistema funciona).',
       },
     ],
   },
 
-  // ─── PILAR 9C: Seguimiento · Días 65–75 ───────────────────────────────────
+  // ═══ FASE 4 · SERVICIO Y ESCALA ═══
   {
-    id: 'P9C',
-    numero_orden: 11,
-    titulo: 'Seguimiento',
-    subtitulo: 'Automatizar la entrega sin perder el toque personal',
-    color: '#F5A623',
-    numero: 9,
-    icon: 'Handshake',
-    emoji: '🤝',
-    estrellas_requeridas: 3,
+    id: 'P6',
+    numero_orden: 6,
+    titulo: 'Cobrar y Entregar',
+    subtitulo: 'Tu primer pago y un servicio que no te consume',
+    color: '#EF4444',
+    numero: 6,
+    icon: 'BadgeDollarSign',
+    emoji: '🍎',
     desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P9B',
+    pilar_prerequisito: 'P5',
     fase: 4,
-    dias_inicio: 65,
-    dias_fin: 75,
+    dias_inicio: 29,
+    dias_fin: 55,
     metodo_letra: 'C',
+    cinturon_otorga: 'rojo',
+    hito_mensaje: '🥋 Cinturón ROJO — el fruto maduró. Cobraste tu primer paciente por el sistema. El mártir quedó atrás.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: '¿Quién sos ahora que ya no podés decir que no se puede?',
     metas: [
       {
-        codigo: 'P9C.1',
-        titulo: 'Automatizar la entrega sin perder el toque personal',
-        descripcion: 'Video sobre cómo automatizar procesos manteniendo la calidad del servicio.',
+        codigo: 'P6.1',
+        titulo: 'Entregar sin quemarte',
+        descripcion: 'Mirá el video (7 min): el protocolo de entrega — qué recibe tu paciente en las primeras 24 hs, cómo se organiza el seguimiento, qué se automatiza y qué se mantiene humano. Acá nace tu MiClínica Digital. Si el video no está, tu Coach te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '7 min',
         orden: 1,
+        dia_asignado: 30,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P9C_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: en 5 min — el error clásico es vender bien y entregar caótico (el paciente paga $1.000 y recibe silencio 3 días). El protocolo: (1) primeras 24 hs — bienvenida + primer paso concreto; (2) la primera sesión agendada YA en el momento del pago; (3) recordatorios y seguimiento con estructura (qué es automático, qué es humano); (4) el cierre del protocolo con medición del resultado. Todo esto después vive en MiClínica Digital — tu app operativa. Hoy lo documenta para tenerlo listo.',
       },
       {
-        codigo: 'P9C.2',
-        titulo: 'Documentador de Protocolo de Entrega',
-        descripcion: 'Campos: "¿Qué recibe el paciente en las primeras 24 horas después de pagar?" · "¿Cómo se configura la primera sesión?" · "¿Qué recordatorios automáticos necesita durante el protocolo?" · "¿Cómo se hace el seguimiento entre sesiones?" · "¿Qué pasa al terminar el protocolo?" Genera: email de bienvenida automático, lista de 5 automatizaciones prioritarias para GHL, protocolo de cierre.',
+        codigo: 'P6.2',
+        titulo: 'Tu protocolo de entrega',
+        descripcion: 'Documentá cómo entregás tu método: bienvenida, primera sesión, recordatorios, seguimiento entre sesiones, cierre. Queda estructurado y listo para cargarse en tu sistema operativo (MCD) cuando lo instales.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '30 min',
         orden: 2,
+        dia_asignado: 31,
         herramienta_id: 'H-P9C.2',
         usa_ia: true,
-        adn_field: 'adn_protocolo_servicio',
+        adn_field: 'adn_protocolo_entrega',
+        requiere_datos_de: ['P2.4'],
       },
       {
-        codigo: 'P9C.3',
-        titulo: 'Auditoría del sistema de entrega',
-        descripcion: 'Preguntale al Coach: "¿Si me voy 5 días sin internet, mi servicio sigue funcionando?" Describile el estado actual de tus automatizaciones. El Coach te dice qué falta.',
+        codigo: 'P6.3',
+        titulo: '◆ TU PRIMER PAGO',
+        descripcion: 'Alguien dijo que sí y pagó tu precio digno. Subí el comprobante (captura de transferencia, recibo de pasarela, o foto del efectivo — podés tapar datos sensibles). Tu Entrenador lo verifica y ganás el Cinturón ROJO: el fruto maduró. Este es el final del mártir.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
         orden: 3,
+        dia_asignado: 38,
         usa_ia: false,
-        coach_instruccion: 'Preguntale al Coach: "¿Si me voy 5 días sin internet, mi servicio sigue funcionando?" Describile el estado actual de tus automatizaciones. El Coach te dice qué falta.',
+        checklist: [
+          'Cerraste la venta: enviá el link/datos de cobro EN la llamada o apenas termina',
+          'Confirmá que el dinero se acreditó (no "me dijo que paga")',
+          'Sacá captura del comprobante (tapá datos sensibles si querés)',
+          'Subilo y celebrá con tu Coach — este momento es LA transformación',
+        ],
+        coach_instruccion: 'Verificación del primer pago: pedile el comprobante (captura de transferencia, recibo, o foto del efectivo — puede tapar datos sensibles). Verificá 3 cosas: monto visible, fecha reciente, coherencia con su precio declarado en el ADN. Si dudás, marcalo para revisión del equipo. Si es válido, otorgá el Cinturón Rojo y celebrá en serio: este momento separa al que lo intentó del que lo hizo. Preguntá cómo se siente cobrar su precio digno — y recordale reinvertir: la pauta ahora puede subir a $8-12/día, se paga sola.',
       },
     ],
   },
 
-  // ─── PILAR 10: Identidad Visual · Días 70–80 · Fase 5 (v8) ────────────────
   {
-    id: 'P10',
-    numero_orden: 12,
-    titulo: 'Identidad Visual',
-    subtitulo: 'El sistema visual que expresa quién sos',
-    color: '#F5A623',
-    numero: 10,
-    icon: 'Palette',
-    emoji: '🎨',
-    estrellas_requeridas: 2,
+    id: 'P7',
+    numero_orden: 7,
+    titulo: 'De 1 a 10 · Sanador Libre',
+    subtitulo: 'Repetir, medir, y que el sistema trabaje por vos',
+    color: '#111827',
+    numero: 7,
+    icon: 'Trophy',
+    emoji: '🌳',
     desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P9C',
-    fase: 5,
-    dias_inicio: 70,
-    dias_fin: 80,
-    metas: [
-      {
-        codigo: 'P10.1',
-        titulo: 'Identidad visual para profesionales de salud',
-        descripcion: 'Video sobre identidad visual alineada con tu nicho y posicionamiento.',
-        tipo: 'VIDEO',
-        es_estrella: false,
-        tiempo_estimado: '15 min',
-        orden: 1,
-        usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P10_1',
-      },
-      {
-        codigo: 'P10.2',
-        titulo: 'Generador de Sistema de Identidad',
-        descripcion: 'Sin campos nuevos. Usa Historia + Propósito + Avatar + Nicho del ADN. Genera: paleta de colores (primario, secundario, acento, neutros con justificación), tipografías de Google Fonts, tono de voz (5 palabras que SÍ y 5 que NO, con ejemplo), brief completo para diseñador o Canva.',
-        tipo: 'HERRAMIENTA',
-        es_estrella: true,
-        tiempo_estimado: '25 min',
-        orden: 2,
-        herramienta_id: 'H-P10.2',
-        usa_ia: true,
-        adn_field: 'adn_identidad_sistema',
-      },
-      {
-        codigo: 'P10.3',
-        titulo: 'Coherencia de la identidad',
-        descripcion: 'Mostrále al Coach tu paleta de colores y el tono de voz. Preguntale: "¿Es coherente con el tipo de paciente que quiero atraer y con lo que prometí en mi propósito?" Una fisioterapeuta para mujeres con dolor crónico no puede tener una identidad de startup tecnológica.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '15 min',
-        orden: 3,
-        usa_ia: false,
-        coach_instruccion: 'Mostrále al Coach tu paleta de colores y el tono de voz que generaste. Preguntale: "¿Es coherente con el tipo de paciente que quiero atraer y con lo que prometí en mi propósito?" Una fisioterapeuta para mujeres con dolor crónico no puede tener una identidad de startup tecnológica.',
-      },
-    ],
-  },
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // FASE 6: ANÁLISIS Y OPTIMIZACIÓN · Días 85–90 · v8 (separado de F5)
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // ─── PILAR 11: Análisis · Días 85–90 · Fase 6 (v8) ────────────────────────
-  {
-    id: 'P11',
-    numero_orden: 13,
-    titulo: 'Análisis y Optimización',
-    subtitulo: 'Retrospectiva y plan de ajuste',
-    color: '#F5A623',
-    numero: 11,
-    icon: 'BarChart3',
-    emoji: '📊',
-    estrellas_requeridas: 2,
-    desbloqueo: 'completar_anterior',
-    pilar_prerequisito: 'P10',
-    fase: 6,
-    dias_inicio: 85,
+    pilar_prerequisito: 'P6',
+    fase: 4,
+    dias_inicio: 43,
     dias_fin: 90,
     metodo_letra: 'A',
-    hito_mensaje: '¿ADN al 100%? ¿Ingresos del mes ≥ $10.000 USD? Si sí: celebración + certificado + opción de renovar. Si no: se activa la garantía.',
-    hito_tipo: 'checkpoint',
+    cinturon_otorga: 'negro',
+    hito_mensaje: '🥋 Cinturón NEGRO — el árbol da semillas. 10 pacientes, $10K, sistema andando. Sos un Sanador Libre. Y esto recién empieza.',
+    hito_tipo: 'milestone',
+    mentor_pregunta: 'El árbol ya da semillas. ¿A quién vas a enseñarle lo que aprendiste?',
     metas: [
       {
-        codigo: 'P11.1',
-        titulo: 'Retrospectiva con el Agente + plan con el Coach',
-        descripcion: 'Abrí el Agente de Retrospectiva Mensual desde Entrenadores IA y completá la retrospectiva (qué funcionó · qué no · cuello de botella según métricas del Dashboard). Después decile al Coach: "Ya hice la retrospectiva del ciclo. El cuello de botella que identifiqué fue X. ¿Qué plan concreto me sugerís para el ciclo 2 · Consolidar / Optimizar / Escalar?" El Agente NO guarda en el ADN — solo analiza.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '60 min',
+        codigo: 'P7.1',
+        titulo: 'La máquina de 10 por mes',
+        descripcion: 'Mirá el video (7 min): de la primera venta al sistema recurrente. Qué medir cada semana (interesados, llamadas, cierres), cuándo ajustar el anuncio, cuándo subir el presupuesto, y qué delegar primero. Si el video no está, tu Coach te lo cuenta.',
+        tipo: 'VIDEO',
+        es_estrella: false,
+        tiempo_estimado: '7 min',
         orden: 1,
+        dia_asignado: 43,
         usa_ia: false,
-        coach_instruccion: 'Ya hice la retrospectiva del ciclo con el Agente. El cuello de botella que identifiqué fue X. ¿Qué plan concreto me sugerís para el ciclo 2 · Consolidar / Optimizar / Escalar?',
+        video_youtube_id: 'PLACEHOLDER_P11_1',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: en 5 min — el sistema ya probó que funciona (hubo un pago). Ahora es un ciclo semanal: medir 4 números (interesados → agendados → llamadas → cierres), encontrar el cuello de botella, hacer UN ajuste. La pauta escala con la caja: $8-12/día tras la venta 1, $15-20 tras la 3. Cuidado con la meseta ("ya vendí 3, me relajo") y el autosabotaje cerca de la meta — son las dos resistencias clásicas de este tramo, y las vamos a nombrar cuando aparezcan.',
       },
       {
-        codigo: 'P11.2',
-        titulo: 'Plan de ajuste',
-        descripcion: 'Mostrále al Coach el diagnóstico que te dio el Agente de Retrospectiva. Preguntale: "¿Qué cambio concreto en el embudo o en el script me daría más impacto esta semana?" El Coach responde desde tu ADN y tus métricas reales.',
+        codigo: 'P7.2',
+        titulo: 'Tu revisión semanal (recurrente)',
+        descripcion: 'Cada semana, 20 minutos con tu Coach: revisás tus números del embudo, detectás dónde se cae (¿pocos interesados? ¿no agendan? ¿no cierran?) y hacés UN ajuste. Repetís del paciente #2 al #10. Tu progreso se ve en el contador: X/10 pacientes.',
         tipo: 'COACH',
         es_estrella: true,
-        tiempo_estimado: '15 min',
+        tiempo_estimado: '20 min/semana',
         orden: 2,
+        dia_asignado: 45,
         usa_ia: false,
-        coach_instruccion: 'Mostrále al Coach el diagnóstico que te dio el Agente de Retrospectiva. Preguntale: "¿Qué cambio concreto en el embudo o en el script me daría más impacto esta semana?" El Coach responde desde tu ADN y tus métricas reales.',
+        es_recurrente: true,
+        entrenador: 'lucas',
+        checklist: [
+          'Anotá tus números de la semana: interesados · llamadas agendadas · llamadas hechas · cierres',
+          'Identificá con el Coach el cuello de botella (dónde se cae la mayoría)',
+          'Definí UN solo ajuste para esta semana (no tres)',
+          'Registrá cada venta nueva — el contador X/10 avanza con vos',
+        ],
+        coach_instruccion: 'Revisión semanal de embudo: pedile sus números (leads, agendadas, hechas, cierres). Diagnosticá el cuello: pocos leads = el anuncio; no agendan = el filtro/agente; no cierran = la llamada (derivá a Lucas para roleplay). UN solo ajuste concreto por semana. Registrá el avance hacia los 10 y celebrá cada venta. Anticipá resistencias por tramo: semana 7-8 la meseta ("¿viniste por 3 o por la libertad?"); semana 10-11 el autosabotaje cerca de la meta — nombrarlo ANTES lo desarma.',
+      },
+      {
+        codigo: 'P7.3',
+        titulo: '◆ 10 PACIENTES · SANADOR LIBRE',
+        descripcion: 'La meta: 10 pacientes de tu precio digno, cobrados por tu sistema. Subí los comprobantes (o tu registro de ventas de la app) y tu Entrenador certifica tu Cinturón NEGRO. No con más horas — con mejor arquitectura. El árbol ya da semillas.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '20 min',
+        orden: 3,
+        dia_asignado: 83,
+        usa_ia: false,
+        coach_instruccion: 'Certificación del Cinturón Negro: pedile evidencia de los 10 pacientes cobrados (comprobantes o el registro de ventas). Verificá que la suma alcance ~$10K. Si es válido, certificá: Sanador Libre. La retrospectiva: ¿qué cambió en 90 días — en su negocio Y en él? El después: el sistema ahora produce 10/mes, su clínica opera en MiClínica Digital, y el cinturón negro es 1er dan — el Nivel 2 ($25K/mes) existe cuando esté listo.',
       },
     ],
   },
 ];
 
-// ─── Helpers V8 ─────────────────────────────────────────────────────────────
+// ─── Derivados (contrato intacto) ───────────────────────────────────────────
 
-/** Total de metas en todo el programa (49) */
 export const TOTAL_METAS = SEED_ROADMAP_V8.reduce(
-  (acc, pilar) => acc + pilar.metas.length,
+  (acc, p) => acc + p.metas.length,
   0,
 );
 
-/** Total de tareas ★ por pilar */
 export const ESTRELLAS_POR_PILAR: Record<string, number> = SEED_ROADMAP_V8.reduce(
-  (acc, pilar) => ({
-    ...acc,
-    [pilar.id]: pilar.metas.filter((m) => m.es_estrella).length,
-  }),
+  (acc, p) => {
+    acc[p.id] = p.metas.filter((m) => m.es_estrella).length;
+    return acc;
+  },
   {} as Record<string, number>,
 );
 
+// ─── CINTURONES — el sistema de progreso (planta/taekwondo) ────────────────
+
+export interface Cinturon {
+  id: string;
+  nombre: string;
+  emoji: string;
+  color: string;
+  color_punta?: string;
+  metafora: string;
+  orden: number;
+}
+
+export const CINTURONES: Cinturon[] = [
+  { id: 'blanco',                orden: 1, nombre: 'Blanco',                emoji: '⬜',   color: '#F4F4F5',                          metafora: 'La semilla' },
+  { id: 'blanco_punta_amarilla', orden: 2, nombre: 'Blanco punta amarilla', emoji: '⬜🟡', color: '#F4F4F5', color_punta: '#F5A623', metafora: 'La semilla se abre' },
+  { id: 'amarillo',              orden: 3, nombre: 'Amarillo',              emoji: '🟡',   color: '#F5A623',                          metafora: 'La raíz en la tierra' },
+  { id: 'amarillo_punta_verde',  orden: 4, nombre: 'Amarillo punta verde',  emoji: '🟡🟢', color: '#F5A623', color_punta: '#22C55E', metafora: 'El primer brote asoma' },
+  { id: 'verde',                 orden: 5, nombre: 'Verde',                 emoji: '🟢',   color: '#22C55E',                          metafora: 'La planta crece' },
+  { id: 'verde_punta_azul',      orden: 6, nombre: 'Verde punta azul',      emoji: '🟢🔵', color: '#22C55E', color_punta: '#3B82F6', metafora: 'Se estira hacia el cielo' },
+  { id: 'azul',                  orden: 7, nombre: 'Azul',                  emoji: '🔵',   color: '#3B82F6',                          metafora: 'Alcanza el cielo' },
+  { id: 'rojo',                  orden: 8, nombre: 'Rojo',                  emoji: '🔴',   color: '#EF4444',                          metafora: 'El fruto maduro' },
+  { id: 'negro',                 orden: 9, nombre: 'Negro',                 emoji: '⬛',   color: '#111827',                          metafora: 'El árbol que da semillas' },
+];
+
+/** Mapeo pilar completado → cinturón otorgado.
+ *  'blanco_punta_amarilla' NO está acá: se otorga al completar P1.3 (la quema),
+ *  vía hitos_cinturon (Capa 3). */
+const CINTURON_POR_PILAR: Record<string, string> = {
+  P0: 'blanco',
+  P1: 'amarillo',
+  P2: 'amarillo_punta_verde',
+  P3: 'verde',
+  P4: 'verde_punta_azul',
+  P5: 'azul',
+  P6: 'rojo',
+  P7: 'negro',
+};
+
+/** Calcula el cinturón según el pilar más alto completado. */
+export function calcularCinturon(pilarCompletado: PilarId | number | null): Cinturon {
+  const fallback = CINTURONES[0];
+  if (pilarCompletado === null || pilarCompletado === undefined) return fallback;
+  let id: string | undefined;
+  if (typeof pilarCompletado === 'number') {
+    const pilar = SEED_ROADMAP_V8.find((p) => p.numero_orden === pilarCompletado);
+    id = pilar ? CINTURON_POR_PILAR[pilar.id] : undefined;
+  } else {
+    id = CINTURON_POR_PILAR[pilarCompletado];
+  }
+  return CINTURONES.find((c) => c.id === id) ?? fallback;
+}
+
 /**
- * Determina el nivel de avatar (1-5) según el pilar más alto completado (v7).
- *
- * Triggers v7:
- *  - Nivel 1 · Sanador Despierto · post P0 (default)
- *  - Nivel 2 · Sanador Narrado · post P3 (Fase 1 cerrada)
- *  - Nivel 3 · Sanador Posicionado · post P8 (Fase 3 cerrada)
- *  - Nivel 4 · Sanador Activo · post P9A (infraestructura lista)
- *  - Nivel 5 · Sanador Libre · post P11 + $10K cerrado
- *
- * Nota: el flag `cerroPrimer10K` habilita el salto a Nivel 5.
- * Si es `false`, un usuario con P11 completado queda en Nivel 4 hasta validar ingresos.
+ * Nivel 1-5 (compatibilidad con el sistema anterior de "niveles del Sanador").
  */
 export function calcularNivel(
   pilarCompletado: PilarId | number,
@@ -1200,11 +872,12 @@ export function calcularNivel(
     if (!pilar) return 1;
     orden = pilar.numero_orden;
   }
-  if (orden >= 13 && cerroPrimer10K) return 5; // P11 completado + $10K
-  if (orden >= 9) return 4;                    // P9A completado
-  if (orden >= 8) return 3;                    // P8 completado
-  if (orden >= 3) return 2;                    // P3 completado
-  return 1;                                    // default (post P0)
+  if (orden >= 7 && cerroPrimer10K) return 5;
+  if (orden >= 6) return 4;
+  if (orden >= 4) return 4;
+  if (orden >= 3) return 3;
+  if (orden >= 2) return 2;
+  return 1;
 }
 
 /** Calcula el día del programa a partir de la fecha de inicio */
@@ -1240,22 +913,13 @@ export interface GrupoFase {
 }
 
 export const FASES_ROADMAP: Omit<GrupoFase, 'pilares'>[] = [
-  { fase: 0, titulo: 'Fase 0 — Onboarding',              subtitulo: 'Bienvenida y Foto de Partida',           dias: 'Días 1–3' },
-  { fase: 1, titulo: 'Fase 1 — Sprint de Identidad',     subtitulo: 'Quién sos',                              dias: 'Días 3–20',  metodo_letra: 'C' },
-  { fase: 2, titulo: 'Fase 2 — Sprint de Mercado',       subtitulo: 'A quién servís',                         dias: 'Días 20–38', metodo_letra: 'LÍ' },
-  { fase: 3, titulo: 'Fase 3 — Sprint de Oferta',        subtitulo: 'Qué ofrecés',                            dias: 'Días 36–45', metodo_letra: 'NI' },
-  { fase: 4, titulo: 'Fase 4 — Activación y Ventas',     subtitulo: 'Cómo llegás, vendés y te reconocen',     dias: 'Días 45–75', metodo_letra: 'C' },
-  { fase: 5, titulo: 'Fase 5 — Identidad Visual',        subtitulo: 'El sistema visual que expresa quién sos', dias: 'Días 70–80' },
-  { fase: 6, titulo: 'Fase 6 — Análisis y Optimización', subtitulo: 'Retrospectiva y cierre',                 dias: 'Días 85–90', metodo_letra: 'A' },
+  { fase: 0, titulo: 'Fase 0 — Onboarding',         subtitulo: 'Tu punto de partida real',                       dias: 'Día 1' },
+  { fase: 1, titulo: 'Fase 1 — Sanar el Dinero',    subtitulo: 'El protocolo que destraba tu precio',            dias: 'Días 2–7',   metodo_letra: 'C·L' },
+  { fase: 2, titulo: 'Fase 2 — Tu Protocolo',       subtitulo: 'Método con nombre + oferta lista',               dias: 'Días 8–14',  metodo_letra: 'I·N' },
+  { fase: 3, titulo: 'Fase 3 — Captación y Ventas', subtitulo: 'El sistema que atrae, filtra, agenda y cierra',  dias: 'Días 15–45', metodo_letra: 'I·C' },
+  { fase: 4, titulo: 'Fase 4 — Servicio y Escala',  subtitulo: 'Cobrar, entregar y llegar a 10 · puerta a MCD',  dias: 'Días 43–90', metodo_letra: 'A' },
 ];
 
-// ─── Backward compatibility aliases ─────────────────────────────────────────
-// v3 fue renombrado a v8 durante la migracion del documento maestro. Mantenemos
-// alias para no romper imports legacy (Admin.tsx, ADN.tsx, Biblioteca.tsx,
-// migrationHojaDeRuta.ts, etc). Borrar cuando se migren todos los callers.
-
-/** @deprecated Usar SEED_ROADMAP_V8. */
+// Aliases de compatibilidad (NO remover: los importan otras pantallas)
 export const SEED_ROADMAP_V3 = SEED_ROADMAP_V8;
-
-/** @deprecated Usar SEED_ROADMAP_V8. */
 export const SEED_ROADMAP_V2 = SEED_ROADMAP_V8;
