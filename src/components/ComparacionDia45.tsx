@@ -33,7 +33,7 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
             Día {diaActual} · Foto de Partida vs ADN real
           </p>
           <h3 className="text-lg font-medium text-[#FFFFFF] tracking-tight mb-1">
-            Mirá cuánto cambió tu percepción
+            Mira cuánto cambió tu percepción
           </h3>
           <p className="text-sm text-[#FFFFFF]/60">
             El día 1 te autoevaluaste sin saber lo que no sabías. Hoy, con el ADN
@@ -63,7 +63,7 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
 
       <p className="text-xs text-[#FFFFFF]/40 italic pt-2 border-t border-[#F5A623]/10">
         Los puntajes del día actual se derivan automáticamente del estado de tu ADN.
-        Completá los pilares pendientes para mejorarlos.
+        Completa los pilares pendientes para mejorarlos.
       </p>
     </div>
   );
