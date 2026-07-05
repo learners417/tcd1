@@ -36,6 +36,17 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
           {meta.titulo}
         </h3>
         <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(245,166,35,0.2)] bg-black mt-4">
+            <iframe
+              src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
+              title={`Tutorial: ${meta.titulo}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        )}
         {meta.checklist && meta.checklist.length > 0 && (
           <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
         )}
@@ -45,7 +56,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       {meta.coach_instruccion && (
         <div className="card-panel p-4 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
           <p className="text-sm text-[#FFFFFF]/75 leading-relaxed">
-            💬 Tu Coach ya sabe exactamente qué van a trabajar hoy. Abrí el chat y decile:{' '}
+            💬 Tu Coach ya sabe exactamente qué van a trabajar hoy. Abre el chat y dile:{' '}
             <span className="text-[#F5A623] font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
           </p>
         </div>
@@ -71,7 +82,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         ) : (
           <>
             <p className="text-xs text-[#FFFFFF]/55 text-center mb-3 leading-relaxed">
-              Cuando termines de hablar con el Coach, hacé clic acá para marcar este paso como completado y desbloquear el siguiente.
+              Cuando termines de hablar con el Coach, haz clic acá para marcar este paso como completado y desbloquear el siguiente.
             </p>
             <button
               onClick={handleCheck}
