@@ -261,9 +261,9 @@ export default function TaskAttachments({
           onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }}
         />
         {uploading ? (
-          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo…</>
+          <><Loader2 className="w-3.5 h-3.5 anímate-spin" /> Subiendo…</>
         ) : (
-          <><Upload className="w-3.5 h-3.5" /> Arrastrá archivos o hacé clic para subir <span className="text-[#FFFFFF]/25">(máx. 25 MB)</span></>
+          <><Upload className="w-3.5 h-3.5" /> Arrastrá archivos o haz clic para subir <span className="text-[#FFFFFF]/25">(máx. 25 MB)</span></>
         )}
       </label>
     </div>
