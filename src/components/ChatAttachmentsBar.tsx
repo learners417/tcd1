@@ -75,7 +75,7 @@ export function AttachButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={disabled}
-        title="Adjuntar archivo, foto o captura (también podés pegar con Ctrl+V)"
+        title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
         className={
           className ??
           'shrink-0 w-10 h-10 rounded-xl bg-[#F5A623]/10 hover:bg-[#F5A623]/20 border border-[rgba(245,166,35,0.2)] disabled:opacity-40 flex items-center justify-center text-[#F5A623] transition-colors'
