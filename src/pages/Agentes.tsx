@@ -70,6 +70,22 @@ import {
   SKILL_SNAPSHOT_EMPTY,
 } from '../lib/agents';
 
+/**
+ * CONTEXTO DEL REDISEÑO (jul 2026) — se antepone al system prompt de TODOS
+ * los entrenadores para alinearlos al modelo nuevo. Las configs individuales
+ * pueden mencionar la estructura vieja; ESTE bloque manda.
+ */
+const CONTEXTO_REDISENO = `=== CONTEXTO VIGENTE DEL PROGRAMA (manda sobre cualquier referencia anterior) ===
+El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
+· Fase 1 — Sanar el Dinero (P1, días 2-7): protocolo de 7 días; termina con SU precio definido.
+· Fase 2 — Tu Protocolo (P2 método con nombre · P3 oferta de $1.000, días 8-14).
+· Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
+· Fase 4 — Servicio y Escala (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
+El progreso se mide en CINTURONES (taekwondo/planta): Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
+YA NO EXISTEN en el programa: la escalera de 5 ofertas, la Matriz A→B→C, la PUV como tarea, los pilares de Historia/Propósito/Legado, los "niveles del Sanador". NO pidas trabajar nada de eso. Si tu especialidad los mencionaba, adaptá el mismo entrenamiento a lo que SÍ existe: su método con nombre (P2), su oferta única (P3), su avatar (P2.3), su script W (P5.2).
+TRATO: espejá el voseo o tuteo del usuario.
+=== FIN DEL CONTEXTO VIGENTE ===`;
+
 const AGENTE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Phone,
   CalendarDays,
@@ -305,7 +321,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         const snapshot = obtenerSnapshot(agenteActivo);
         const respuesta = await generateText({
           prompt: `${baseConocimiento}\n\n---HISTORIAL---\n${historial}\n\nAgente:`,
-          systemInstruction: agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
+          systemInstruction: CONTEXTO_REDISENO + '\n\n' + agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
         });
 
         const respuestaTexto = respuesta || 'Sin respuesta del agente.';
