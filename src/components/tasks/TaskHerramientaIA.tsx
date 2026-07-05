@@ -37,7 +37,7 @@ function buildPromptGenerico(meta: RoadmapMeta, perfil: Partial<ProfileV2>): str
     perfil.oferta_mid ? `Oferta principal (Mid): ${perfil.oferta_mid}` : '',
   ].filter(Boolean).join('\n');
 
-  return `Generá el output requerido para esta tarea del programa de 90 días para sanadores.
+  return `Genera el output requerido para esta tarea del programa de 90 días para sanadores.
 
 TAREA: ${meta.codigo} · ${meta.titulo}
 
@@ -45,7 +45,7 @@ DESCRIPCIÓN / INSTRUCCIONES:
 ${meta.descripcion}
 
 CONTEXTO DEL PROFESIONAL (su ADN):
-${contexto || '(ADN aún incompleto · generá algo útil con la información disponible)'}
+${contexto || '(ADN aún incompleto · genera algo útil con la información disponible)'}
 
 FORMATO DE RESPUESTA:
 - Texto en markdown, listo para copiar al ADN del cliente
@@ -110,7 +110,7 @@ export default function TaskHerramientaIA({
       if (!usaIA) {
         const libre = (formValues.__libre__ || '').trim();
         if (!libre) {
-          toast.error('Escribí algo antes de guardar');
+          toast.error('Escribe algo antes de guardar');
           return;
         }
         setOutput(libre);
@@ -123,7 +123,7 @@ export default function TaskHerramientaIA({
         const text = await generateText({
           prompt: promptGenerico,
           systemInstruction:
-            'Sos un copywriter especialista en profesionales de la salud. Generás contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
+            'Eres un copywriter especialista en profesionales de la salud. Generás contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
         });
         setOutput(text);
         setModo('revision');
@@ -198,7 +198,7 @@ export default function TaskHerramientaIA({
           onChange={e => handleFieldChange(campo.id, e.target.value)}
           className="w-full custom-select"
         >
-          <option value="">Seleccioná...</option>
+          <option value="">Selecciona...</option>
           {campo.opciones!.map(opt => (
             <option key={opt} value={opt}>{opt}</option>
           ))}
@@ -221,7 +221,7 @@ export default function TaskHerramientaIA({
   const requiredFieldsFilled = inputs.length === 0 || inputs.some(inp => (formValues[inp.id] || '').trim().length > 0);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 anímate-in fade-in duration-300">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -238,6 +238,17 @@ export default function TaskHerramientaIA({
           {meta.titulo}
         </h3>
         <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(245,166,35,0.2)] bg-black mt-4">
+            <iframe
+              src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
+              title={`Tutorial: ${meta.titulo}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        )}
         {meta.checklist && meta.checklist.length > 0 && (
           <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
         )}
@@ -298,7 +309,7 @@ export default function TaskHerramientaIA({
             // v8 fallback · sin herramienta registrada y sin IA · textarea libre
             <div className="space-y-2">
               <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">
-                Escribí acá tu respuesta
+                Escribe acá tu respuesta
               </label>
               <textarea
                 value={formValues.__libre__ || ''}
@@ -345,7 +356,7 @@ export default function TaskHerramientaIA({
       {/* ─── GENERATING ────────────────────────────────────────────────────── */}
       {modo === 'generando' && (
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[#F5A623] animate-spin mb-4" />
+          <Loader2 className="w-8 h-8 text-[#F5A623] anímate-spin mb-4" />
           <p className="text-sm text-[#FFFFFF]/60">Generando con IA...</p>
           <p className="text-xs text-[#FFFFFF]/30 mt-1">Esto puede tomar unos segundos</p>
         </div>
