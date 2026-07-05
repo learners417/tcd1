@@ -480,7 +480,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.5',
         titulo: 'Montá tu sistema: agente IA + agenda + cobro',
-        descripcion: 'El día grande de infraestructura. Activás tu Meta Business Agent (el empleado digital de tu WhatsApp — gratis, nativo), lo entrenás con el PDF que TCD te genera con TU oferta y TUS preguntas de filtro, montás tu agenda, tu medio de cobro probado, y tu Sala de Espera. Sofi te acompaña pieza por pieza.',
+        descripcion: 'El día grande de infraestructura. Activás tu Meta Business Agent (el empleado digital de tu WhatsApp — gratis, nativo), lo entrenás con el documento que tu Coach te genera con TU oferta y TUS preguntas de filtro, montás tu agenda, tu medio de cobro probado, y tu Sala de Espera. Sofi te acompaña pieza por pieza.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '75 min',
@@ -491,7 +491,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         checklist: [
           'Instalá WhatsApp Business (o convertí tu número actual — los chats se conservan; si preferís separar trabajo de vida personal, usá un número nuevo)',
           'Activá tu agente: Herramientas → Meta Business Agent (5 min de configuración)',
-          'Descargá de la app tu PDF DE ENTRENAMIENTO (lo genera TCD con tu oferta, tu avatar y tus 3 preguntas de filtro) y subíselo al agente',
+          'Pedile a tu Coach el DOCUMENTO DE ENTRENAMIENTO de tu agente (lo genera con tu oferta, tu avatar y tus 3 preguntas de filtro) — copialo, guardalo como PDF (Imprimir → Guardar como PDF) y subíselo al agente',
           'Configurá el agente: responde SOLO a clientes que llegan de anuncios · tono cálido y profesional · las conversaciones clínicas te las deriva a vos SIEMPRE',
           'Probalo: escribile desde el teléfono de alguien cercano como si fueras paciente',
           'Creá tu link de agenda (Calendly gratis o similar) con 3+ horarios esta semana',
@@ -499,7 +499,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Creá tu canal de WhatsApp "Sala de Espera" — ahí van los que hoy no califican: 1 mensaje semanal de valor, nadie se pierde',
           'PLAN B si el agente todavía no te aparece (Meta lo libera de a poco): mensaje de bienvenida con tus 3 preguntas + revisás 2 veces por día + pedí acceso desde la app de WhatsApp',
         ],
-        coach_instruccion: 'Verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el PDF de TCD (preguntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
+        coach_instruccion: 'Si te pide el DOCUMENTO DE ENTRENAMIENTO de su agente: generáselo COMPLETO y listo para copiar, con este formato: (1) QUIÉN SOY — nombre, profesión y su línea de posicionamiento; (2) MI OFERTA — la transformación, qué incluye, duración, precio y garantía (de su adn_oferta_mid); (3) A QUIÉN SIRVO — su avatar (dolores y señales de su persona ideal); (4) LAS 3 PREGUNTAS DE CALIFICACIÓN con redacción exacta — dolor ("¿qué te está pasando?"), urgencia ("¿hace cuánto lo venís cargando?"), capacidad ("el programa es una inversión de $[precio] — si vemos que es para vos, ¿estás en condiciones de tomarla?"); (5) QUÉ HACER — a los calificados: ofrecerles el link de agenda; a los no calificados: invitarlos con calidez al canal Sala de Espera; (6) REGLAS — tono cálido y profesional, jamás dar consejos clínicos ni discutir tratamientos: toda conversación clínica se deriva al humano. Después verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el documento (preguntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
       },
       {
         codigo: 'P4.2',
