@@ -68,6 +68,8 @@ import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
+import Graduacion from '../components/Graduacion';
+import { otorgarCinturonPorPilar, calcularCinturon } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
@@ -182,6 +184,43 @@ function motivoBloqueo(
 export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfileFieldUpdate }: Props) {
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
+  // T2/T3 · registrar venta + graduación (rediseño 4 fases)
+  const [ventaModal, setVentaModal] = useState(false);
+  const [ventaMonto, setVentaMonto] = useState('');
+  const [ventaGuardando, setVentaGuardando] = useState(false);
+  const [graduacionVisible, setGraduacionVisible] = useState(false);
+
+  const registrarVenta = async () => {
+    if (!supabase || ventaGuardando) return;
+    const monto = parseFloat(ventaMonto);
+    if (!monto || monto <= 0) return;
+    setVentaGuardando(true);
+    try {
+      const { data, error } = await supabase
+        .from('ventas_registradas')
+        .insert({
+          usuario_id: userId,
+          fecha: new Date().toISOString().slice(0, 10),
+          monto,
+          canal: 'llamada',
+        })
+        .select()
+        .single();
+      if (!error && data) {
+        const nuevas = [...ventas, data as VentaRegistrada];
+        setVentas(nuevas);
+        setVentaModal(false);
+        setVentaMonto('');
+        // La GRADUACIÓN: al llegar a 10, una sola vez.
+        if (nuevas.length >= 10 && !localStorage.getItem('tcd_graduacion_vista')) {
+          localStorage.setItem('tcd_graduacion_vista', '1');
+          setGraduacionVisible(true);
+        }
+      }
+    } finally {
+      setVentaGuardando(false);
+    }
+  };
   const [qaVerde, setQaVerde] = useState(false);
   const [pilarAbierto, setPilarAbierto] = usePersistedState<number | null>(
     'tcd_roadmap_pilar',
@@ -197,6 +236,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     desbloqueado?: string;
     numero: number;
     nivelAlcanzado?: { numero: 1 | 2 | 3 | 4 | 5; nombre: string; descripcion: string };
+    cinturon?: { nombre: string; emoji: string; metafora: string };
+    mentorPregunta?: string;
   } | null>(null);
   // v8 · Espejo de Identidad — modal de cierre de F1 al completar P3.
   // Se muestra UNA SOLA VEZ por usuario (persistencia en localStorage para
@@ -253,6 +294,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           .filter((r) => r.completada)
           .map((r) => `${r.pilar_numero}-${r.meta_codigo}`);
         setCompletadas(new Set(keys));
+        // Capa 4 · D8: la DB es la fuente de verdad — sincroniza el caché local
+        try { localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(keys)); } catch { /* noop */ }
 
         // QA verde check — legacy, ya no se usa en V3
         // pero mantenemos para no romper el estado
@@ -454,15 +497,25 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             }
           : undefined;
 
+        // Capa 3 · rediseño 4 fases: otorgar el cinturón (DB) y llevarlo al modal.
+        void otorgarCinturonPorPilar(pilar.id);
+        const cinturonGanado = calcularCinturon(pilar.id);
+
         setPilarUnlocked({
           completado: pilar.titulo,
           desbloqueado: nextPilar && nextPilar.estado !== 'bloqueado' ? nextPilar.titulo : undefined,
           numero: pilar.numero,
           nivelAlcanzado,
+          cinturon: {
+            nombre: cinturonGanado.nombre,
+            emoji: cinturonGanado.emoji,
+            metafora: cinturonGanado.metafora,
+          },
+          mentorPregunta: pilar.mentor_pregunta,
         });
         // v8 · Cierre F1 · al completar P3 mostramos el Espejo de Identidad
         // una sola vez por usuario (no re-disparar en reloads ni en re-renders).
-        if (pilar.id === 'P3' && !espejoYaMostradoRef.current) {
+        if (pilar.id === 'P1' && !espejoYaMostradoRef.current) {
           espejoYaMostradoRef.current = true;
           try {
             localStorage.setItem('tcd_espejo_identidad_mostrado', '1');
@@ -486,6 +539,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     .reduce((max, p) => Math.max(max, p.numero), -1);
   const nivel = calcularNivel(pilarMasAltoCompletado);
   const nombreNivel = NIVEL_NOMBRES[nivel];
+  const cinturonActual = calcularCinturon(pilarMasAltoCompletado);
 
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
@@ -677,12 +731,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               <MapIcon className="w-7 h-7 text-[#F5A623]" /> Hoja de Ruta
             </h1>
             <p className="text-base text-[#FFFFFF]/60 mt-1">
-              Método CLÍNICA · 90 días · 14 pilares · Objetivo: $10,000 USD/mes
+              Método CLINICA · 90 días · 4 fases · Objetivo: $10.000 USD
             </p>
           </div>
           <div className="shrink-0 text-right">
             <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">Nivel actual</p>
-            <p className="text-sm font-medium text-[#F5A623] mt-0.5">{nombreNivel}</p>
+            <p className="text-sm font-medium text-[#F5A623] mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-[#F5A623]/70">{cinturonActual.metafora}</span></p>
             <p className="text-xs text-[#FFFFFF]/40">Nivel {nivel} de 5</p>
           </div>
         </div>
@@ -707,9 +761,17 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             <p className="text-lg font-light text-[#FFFFFF]">{perfil?.dia_programa ?? 1}</p>
             <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Día de prog.</p>
           </div>
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">{ventas.length}</p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Ventas registradas</p>
+          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center relative">
+            <p className="text-lg font-light text-[#FFFFFF]">
+              {ventas.length}<span className="text-[#FFFFFF]/35 text-sm">/10</span>
+            </p>
+            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Pacientes</p>
+            <button
+              onClick={() => setVentaModal(true)}
+              className="mt-1.5 text-[10px] font-semibold text-[#F5A623] hover:text-[#FFB94D] transition-colors"
+            >
+              🎉 Registrar venta
+            </button>
           </div>
           <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
             <p className="text-lg font-light text-[#FFFFFF]">
@@ -1085,12 +1147,50 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       })()}
 
       {/* ── Pilar Completion Popup ── */}
+      {ventaModal && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setVentaModal(false)}>
+          <div className="max-w-sm w-full rounded-2xl border border-[#F5A623]/30 bg-[#141414] p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              🎉 Registrar una venta
+            </h3>
+            <p className="text-xs text-[#FFFFFF]/50 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza con vos.</p>
+            <label className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Monto (USD)</label>
+            <input
+              type="number"
+              value={ventaMonto}
+              onChange={(e) => setVentaMonto(e.target.value)}
+              placeholder="1000"
+              autoFocus
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-[#0A0A0A] border border-[#FFFFFF]/15 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:outline-none"
+            />
+            <button
+              onClick={registrarVenta}
+              disabled={ventaGuardando || !ventaMonto}
+              className="w-full py-3 rounded-xl bg-[#F5A623] text-black text-sm font-semibold hover:bg-[#FFB94D] transition-colors disabled:opacity-40"
+            >
+              {ventaGuardando ? 'Guardando…' : 'Registrar'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {graduacionVisible && (
+        <Graduacion
+          nombre={perfil?.nombre ?? undefined}
+          ventas={ventas.length}
+          onClose={() => setGraduacionVisible(false)}
+          onIrAlChat={() => onNavigate?.('coach')}
+        />
+      )}
+
       {pilarUnlocked && (
         <PilarUnlockedModal
           pilarCompletado={pilarUnlocked.completado}
           pilarDesbloqueado={pilarUnlocked.desbloqueado}
           pilarNumero={pilarUnlocked.numero}
           nivelAlcanzado={pilarUnlocked.nivelAlcanzado}
+          cinturon={pilarUnlocked.cinturon}
+          mentorPregunta={pilarUnlocked.mentorPregunta}
           onClose={() => setPilarUnlocked(null)}
           onContinuar={() => {
             // Open the next pilar
