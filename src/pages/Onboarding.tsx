@@ -20,7 +20,7 @@ const QUESTIONS: Pregunta[] = [
     id: 1,
     bloque: 1,
     tituloBloque: 'Tus Referentes',
-    question: '¿A qué 3-5 profesionales del sector salud o del coaching admiras? ¿Qué tienen que vos quisieras tener?',
+    question: '¿A qué 3-5 profesionales del sector salud o del coaching admiras? ¿Qué tienen que tú quisieras tener?',
     placeholder: 'Ej: Admiro a X porque tiene autoridad en redes sin sonar arrogante, a Y porque cobra bien y tiene lista de espera...',
   },
   {
@@ -59,14 +59,14 @@ const QUESTIONS: Pregunta[] = [
     id: 6,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Cuántos años llevás en tu profesión? ¿Cómo trabajás actualmente? (presencial / online / mixto)',
+    question: '¿Cuántos años llevás en tu profesión? ¿Cómo trabajas actualmente? (presencial / online / mixto)',
     placeholder: 'Ej: 8 años como nutricionista, trabajo de forma mixta: 60% presencial en consultorio y 40% online con pacientes del interior...',
   },
   {
     id: 7,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Cuántos pacientes pagantes tenés hoy? ¿Cuál es el principal problema que les resolvés?',
+    question: '¿Cuántos pacientes pagantes tienes hoy? ¿Cuál es el principal problema que les resolvés?',
     placeholder: 'Ej: Tengo 25 pacientes activos. Principalmente resuelvo el problema de la relación con la comida en mujeres que llevaron toda la vida haciendo dieta sin resultados sostenibles...',
   },
   {
@@ -124,7 +124,7 @@ export default function Onboarding() {
 
 Este prototipo es el punto de partida — NO es el ADN definitivo. Es una primera versión que los 10 pilares del programa irán refinando con trabajo real y datos reales.
 
-Analizá las respuestas y generá el ADN prototipo beta con este formato en markdown:
+Analizá las respuestas y genera el ADN prototipo beta con este formato en markdown:
 
 ## Tu ADN Prototipo Beta
 
@@ -132,7 +132,7 @@ Analizá las respuestas y generá el ADN prototipo beta con este formato en mark
 
 ---
 
-### Quién Sos (borrador inicial)
+### Quién Eres (borrador inicial)
 Párrafo breve sobre su identidad como sanador basado en sus referentes y lo que admira en ellos. Qué dice sobre sus valores el hecho de que admire a esas personas.
 
 ### A Quién Servís (hipótesis)
@@ -144,14 +144,14 @@ Basado en sus miedos, deseos y obstáculos: ¿qué sugieren sobre su motivación
 ### Objetivo Económico
 - **Meta:** $10,000 USD/mes extra
 - **Camino más probable:** 5 pacientes x $2,000 (Oferta Mid) — o la combinación que más se ajuste a su contexto
-- **Primer bloqueo a trabajar:** [identificá el mayor obstáculo mencionado]
+- **Primer bloqueo a trabajar:** [identifica el mayor obstáculo mencionado]
 
 ### Próximo Paso
-Desbloqueaste la **Fase 1: Sanar el Dinero**. Antes de tocar marketing, vas a sanar tu relación con el dinero en 7 días — porque ningún sistema de ventas funciona sobre una creencia rota. De ahí salís con TU precio digno definido, y recién entonces construimos tu método, tu oferta y tu sistema de captación.
+Desbloqueaste la **Fase 1: Sanar el Dinero**. Antes de tocar marketing, vas a sanar tu relación con el dinero en 7 días — porque ningún sistema de ventas funciona sobre una creencia rota. De ahí sales con TU precio digno definido, y recién entonces construimos tu método, tu oferta y tu sistema de captación.
 
 ---
 
-Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No seas genérico — conectá con lo específico que dijeron. Máximo 400 palabras en total.`,
+Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el usuario escribe en voseo, espejalo. No seas genérico — conectá con lo específico que dijeron. Máximo 400 palabras en total.`,
       });
       setProfile(text);
       setCurrentStep(QUESTIONS.length);
@@ -165,7 +165,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   };
 
   const resetOnboarding = () => {
-    if (window.confirm('¿Querés reiniciar el diagnóstico? Se borrarán todas las respuestas.')) {
+    if (window.confirm('¿Quieres reiniciar el diagnóstico? Se borrarán todas las respuestas.')) {
       setAnswers({});
       setProfile(null);
       setCurrentStep(0);
@@ -176,7 +176,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   // Show profile result
   if (profile) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
+      <div className="max-w-4xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
         <div className="flex items-end justify-between">
           <div>
             <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Tu ADN Prototipo Beta</h1>
@@ -206,7 +206,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
+    <div className="max-w-2xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Onboarding — Fase 0</h1>
         <p className="text-[#FFFFFF]/60">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
@@ -267,7 +267,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#FFFFFF] text-sm font-medium transition-all shadow-lg shadow-[#F5A623]/20"
             >
               {generating ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Analizando...</>
+                <><Loader2 className="w-4 h-4 anímate-spin" /> Analizando...</>
               ) : (
                 <><Sparkles className="w-4 h-4" /> Generar Perfil con IA</>
               )}
