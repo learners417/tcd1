@@ -153,7 +153,7 @@ export default function TaskComments({
       {isPending ? (
         pendingList.length === 0 ? (
           <div className="text-xs text-[#FFFFFF]/30 italic px-1">
-            Aún no hay comentarios. Escribí debajo para iniciar la conversación.
+            Aún no hay comentarios. Escribe debajo para iniciar la conversación.
           </div>
         ) : (
           <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
@@ -187,7 +187,7 @@ export default function TaskComments({
         <div className="text-xs text-[#FFFFFF]/30 italic px-1">Cargando…</div>
       ) : comments.length === 0 ? (
         <div className="text-xs text-[#FFFFFF]/30 italic px-1">
-          Aún no hay comentarios. Escribí debajo para iniciar la conversación.
+          Aún no hay comentarios. Escribe debajo para iniciar la conversación.
         </div>
       ) : (
         <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
@@ -233,7 +233,7 @@ export default function TaskComments({
         <RichTextEditor
           value={draft}
           onChange={setDraft}
-          placeholder="Escribí una respuesta… (Enter agrega línea, usá el botón para enviar)"
+          placeholder="Escribe una respuesta… (Enter agrega línea, usa el botón para enviar)"
           minHeight="60px"
         />
         <div className="flex justify-end mt-2">
