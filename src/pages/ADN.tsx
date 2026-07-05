@@ -353,7 +353,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
           <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed max-w-xl">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
-            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia vos no cambia.
+            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia ti no cambia.
           </p>
         </div>
         <CustomSelect
