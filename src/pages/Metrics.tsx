@@ -524,7 +524,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
       ) : (
         <div className="card-panel p-8 rounded-2xl border border-dashed border-[rgba(245,166,35,0.2)] text-center">
           <TrendingUp className="w-10 h-10 text-[#F5A623]/30 mx-auto mb-3" />
-          <p className="text-sm text-[#FFFFFF]/60">Cargá al menos 2 períodos para ver la evolución de tus ingresos.</p>
+          <p className="text-sm text-[#FFFFFF]/60">Carga al menos 2 períodos para ver la evolución de tus ingresos.</p>
         </div>
       )}
     </div>
