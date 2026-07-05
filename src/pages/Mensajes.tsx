@@ -22,7 +22,7 @@ interface MsgLocal {
 }
 
 const MOCK_MESSAGES: MsgLocal[] = [
-  { id: 1, author: 'Tu Clínica Digital', rol: 'bot', content: '¡Bienvenida a tu programa de 90 días! Tu canal privado está listo. Podés escribirle al equipo aquí.', time: 'Lun 09:00', isMe: false, channelId: 'privado' },
+  { id: 1, author: 'Tu Clínica Digital', rol: 'bot', content: '¡Bienvenida a tu programa de 90 días! Tu canal privado está listo. Puedes escribirle al equipo aquí.', time: 'Lun 09:00', isMe: false, channelId: 'privado' },
 ];
 
 function supabaseMsgToLocal(m: Mensaje, myUserId: string, myName?: string): MsgLocal {
@@ -306,7 +306,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         archivo_url: publicUrl,
       });
     } catch {
-      toast.error('Error subiendo archivo. Verificá que el bucket exista en Supabase.');
+      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
     } finally {
       setUploading(false);
     }
@@ -315,7 +315,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   const userNombre = myName;
 
   return (
-    <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden animate-in fade-in duration-500">
+    <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden anímate-in fade-in duration-500">
       {/* Sidebar Channels */}
       <div className="w-72 border-r border-[rgba(245,166,35,0.2)] bg-black/20 flex flex-col shrink-0">
         <div className="p-4 border-b border-[rgba(245,166,35,0.2)]">
@@ -389,7 +389,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             <div>
               <h2 className="text-[#FFFFFF] font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
               <p className="text-xs text-[#FFFFFF]/40">
-                {activeChannel === 'privado' ? 'Solo visible para vos y el equipo' : 'Canal público de la comunidad'}
+                {activeChannel === 'privado' ? 'Solo visible para ti y el equipo' : 'Canal público de la comunidad'}
               </p>
             </div>
           </div>
@@ -402,7 +402,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {loadingMsgs ? (
             <div className="flex items-center justify-center py-10">
-              <div className="w-5 h-5 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full anímate-spin" />
             </div>
           ) : activeMessages.length === 0 ? (
             <div className="text-center py-10">
@@ -498,7 +498,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                   handleSend(e as unknown as React.FormEvent);
                 }
               }}
-              placeholder={uploading ? 'Subiendo archivo...' : 'Escribí un mensaje al equipo...'}
+              placeholder={uploading ? 'Subiendo archivo...' : 'Escribe un mensaje al equipo...'}
               disabled={uploading}
               className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 px-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
               rows={1}
@@ -506,7 +506,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             <button type="submit" disabled={!input.trim() || uploading}
               className="w-[52px] h-[52px] shrink-0 rounded-xl bg-[#F5A623] hover:bg-[#F5A623] disabled:opacity-50 flex items-center justify-center text-[#FFFFFF] transition-colors shadow-lg shadow-[#F5A623]/20">
               {uploading
-                ? <div className="w-4 h-4 border-2 border-[rgba(245,166,35,0.3)] border-t-white rounded-full animate-spin" />
+                ? <div className="w-4 h-4 border-2 border-[rgba(245,166,35,0.3)] border-t-white rounded-full anímate-spin" />
                 : <Send className="w-5 h-5 ml-1" />
               }
             </button>
