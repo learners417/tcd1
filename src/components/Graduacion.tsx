@@ -36,7 +36,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: Grad
           className="text-3xl font-medium text-[#FFFFFF] mb-2"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
         >
-          {nombre ? `${nombre}, sos` : 'Sos'} un Sanador Libre
+          {nombre ? `${nombre}, eres` : 'Eres'} un Sanador Libre
         </h2>
         <p className="text-sm italic text-[#FFFFFF]/50 mb-6">
           El árbol que da semillas
@@ -45,8 +45,8 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: Grad
         <div className="rounded-xl border border-[#FFFFFF]/10 bg-[#0F0F0F] p-5 mb-6 text-left">
           <p className="text-sm text-[#FFFFFF]/80 leading-relaxed">
             <span className="text-[#F5A623] font-semibold">{ventas} pacientes</span> cobrados
-            con tu precio digno, por un sistema que construiste vos. Hace 90 días eras el
-            profesional que perseguía pacientes. Hoy sos el director de tu clínica digital.
+            con tu precio digno, por un sistema que construiste tú. Hace 90 días eras el
+            profesional que perseguía pacientes. Hoy eres el director de tu clínica digital.
             <span className="block mt-2 text-[#FFFFFF]/60">
               El mártir quedó atrás. Y esto recién empieza.
             </span>
