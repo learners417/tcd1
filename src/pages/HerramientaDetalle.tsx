@@ -77,7 +77,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
   // ─── Generar output con Gemini ─────────────────────────────────────────────
   const handleGenerar = useCallback(async () => {
     if (!camposCompletos) {
-      toast.error('Completá todos los campos requeridos.');
+      toast.error('Completa todos los campos requeridos.');
       return;
     }
     setGenerando(true);
@@ -170,7 +170,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
         {herramienta.inputs.some((c) => c.precargar && perfil?.[c.precargar as keyof ProfileV2]) && (
           <div className="mt-3 flex items-center gap-2 text-xs text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 rounded-xl px-3 py-2">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Campos pre-completados con tu perfil — revisá y ajustá si es necesario
+            Campos pre-completados con tu perfil — revisa y ajustá si es necesario
           </div>
         )}
       </div>
