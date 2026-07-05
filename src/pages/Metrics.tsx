@@ -5,7 +5,7 @@ import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
-import { SEED_ROADMAP_V2 as SEED_ROADMAP } from '../lib/roadmapSeed';
+import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_METAS } from '../lib/roadmapSeed';
 import {
   calcularEmbudoV3KPIs,
   formatPct,
@@ -111,7 +111,7 @@ function NumField({
 // ─── Tab: Mi Progreso (sin cambios) ────────────────────────────────────────────
 
 function TabProgreso({ userId }: { userId?: string }) {
-  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: 90, compTareas: 0, diasDiario: 0, hitos: 0 });
+  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: TOTAL_METAS, compTareas: 0, diasDiario: 0, hitos: 0 });
 
   useEffect(() => {
     const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
@@ -157,7 +157,7 @@ function TabProgreso({ userId }: { userId?: string }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label="Tareas completadas" value={progData.compTareas.toString()} sub={`${progData.compTareas}/${progData.totTareas} del total`} />
         <KPICard label="Días con diario" value={progData.diasDiario.toString()} sub={`${progData.diasDiario}/90 totales`} />
-        <KPICard label="Pilares completados" value={progData.hitos.toString()} sub={`${progData.hitos}/14 pilares`} />
+        <KPICard label="Pilares completados" value={progData.hitos.toString()} sub={`${progData.hitos}/${SEED_ROADMAP.length} pilares`} />
         <KPICard label="Semana actual" value={progData.semanaActual.toString()} sub="de 13 semanas" highlight />
       </div>
 
