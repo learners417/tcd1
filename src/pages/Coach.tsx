@@ -409,7 +409,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-[#F5A623]/10">
+    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden anímate-in fade-in duration-500 border border-[#F5A623]/10">
       <div className="p-5 border-b border-[rgba(245,166,35,0.15)] bg-[#F5A623]/[0.03] flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30">
@@ -476,15 +476,15 @@ export default function Coach({ userId }: { userId?: string }) {
                   ) : (
                     <span className="flex gap-1.5 items-center py-1">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </span>
@@ -542,7 +542,7 @@ export default function Coach({ userId }: { userId?: string }) {
             placeholder={
               isTyping
                 ? 'Tu coach está conectando ideas...'
-                : 'Mencioná tu duda · bloqueo · pegá una captura (Ctrl+V)...'
+                : 'Mencioná tu duda · bloqueo · pega una captura (Ctrl+V)...'
             }
             className="flex-1 bg-white/5 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all disabled:opacity-50 shadow-inner"
           />
