@@ -443,13 +443,13 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
   // ─── Vista principal: 3 categorías con cards ───────────────────────────────
   if (!agenteActivo) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+      <div className="max-w-4xl mx-auto space-y-8 pb-12 anímate-in fade-in duration-500">
         <div>
           <h1 className="text-2xl font-light text-white flex items-center gap-2">
             <Bot className="w-6 h-6 text-[#F5A623]" /> Entrenadores IA
           </h1>
           <p className="text-sm text-white/60 mt-1">
-            Cada uno entrena UNA habilidad hasta que la hacés sola. Se desbloquean
+            Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
             cuando avanzás en la Hoja de Ruta.
           </p>
         </div>
@@ -522,7 +522,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
   const autonomoActivo = snapshotActivo.current_level === 4;
 
   return (
-    <div className="w-full flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-300">
+    <div className="w-full flex flex-col h-[calc(100vh-8rem)] anímate-in fade-in duration-300">
       {/* Cabecera */}
       <div className="card-panel p-4 rounded-2xl mb-4 border border-[#F5A623]/20 bg-[#F5A623]/10">
         <div className="flex items-center justify-between">
@@ -578,7 +578,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         {cargandoConversacion && (
           <div className="flex justify-start">
             <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 anímate-spin" />
               Cargando conversación previa...
             </div>
           </div>
@@ -608,7 +608,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         {cargando && (
           <div className="flex justify-start">
             <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 anímate-spin" />
               Pensando...
             </div>
           </div>
@@ -663,7 +663,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               enviarMensaje(inputUsuario);
             }
           }}
-          placeholder="Escribí tu respuesta o pegá una captura (Ctrl+V)..."
+          placeholder="Escribe tu respuesta o pega una captura (Ctrl+V)..."
           rows={2}
           className="flex-1 bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all"
         />
@@ -811,7 +811,7 @@ interface ModalBloqueadoProps {
 function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm anímate-in fade-in"
       onClick={onCerrar}
     >
       <div
