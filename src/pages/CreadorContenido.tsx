@@ -111,7 +111,7 @@ function buildPrompt(
   const nivelExplicacion = NIVEL_META[nivel].descripcion;
 
   if (tipo === 'post') {
-    return `Generá un post para feed de Instagram de un profesional de la salud.
+    return `Genera un post para feed de Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -132,7 +132,7 @@ NO escribas hashtags al final. NO uses promesas exageradas.`;
   }
 
   if (tipo === 'carrusel') {
-    return `Generá un carrusel de 10 slides para Instagram de un profesional de la salud.
+    return `Genera un carrusel de 10 slides para Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -155,7 +155,7 @@ Para cada slide: 30-50 palabras máximo. Tono empático, voz propia.`;
   }
 
   // imagen
-  return `Generá un prompt detallado para Midjourney/DALL-E/Sora que acompañe contenido de Instagram de un profesional de la salud.
+  return `Genera un prompt detallado para Midjourney/DALL-E/Sora que acompañe contenido de Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -239,7 +239,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
   const handleGenerar = async () => {
     if (!tema.trim()) {
-      toast.error('Escribí un tema o ángulo concreto');
+      toast.error('Escribe un tema o ángulo concreto');
       return;
     }
     setGenerando(true);
@@ -249,7 +249,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       const result = await generateText({
         prompt,
         systemInstruction:
-          'Sos un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
+          'Eres un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
       });
       setOutput(result);
     } catch (err) {
@@ -275,7 +275,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="card-panel p-8 border border-[#F5A623]/20 bg-[#1C1C1C]/40 text-center space-y-3">
-          <Loader2 className="w-6 h-6 text-[#F5A623] animate-spin mx-auto" />
+          <Loader2 className="w-6 h-6 text-[#F5A623] anímate-spin mx-auto" />
           <p className="text-sm text-[#FFFFFF]/60">Verificando estado del programa…</p>
         </div>
       </div>
@@ -294,7 +294,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             Creador de Contenido
           </h1>
           <p className="text-[#FFFFFF]/60 max-w-xl">
-            Generá posts, carruseles y prompts de imagen usando los datos de tu ADN.
+            Genera posts, carruseles y prompts de imagen usando los datos de tu ADN.
             Esta herramienta NO escribe en tu ADN · sólo genera output para que copies
             y publiques manualmente.
           </p>
@@ -310,7 +310,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             </p>
             <p className="text-sm text-[#FFFFFF]/60 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
-              Volvé a la Hoja de Ruta y cerrá P6 antes de venir acá.
+              Vuelve a la Hoja de Ruta y cierra P6 antes de venir acá.
             </p>
           </div>
           <button
@@ -338,7 +338,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
           Creador de Contenido
         </h1>
         <p className="text-[#FFFFFF]/60 max-w-2xl">
-          Generá posts, carruseles o prompts de imagen alineados a tu método propio,
+          Genera posts, carruseles o prompts de imagen alineados a tu método propio,
           tu avatar y tu nivel de awareness. Esta herramienta NO escribe en tu ADN —
           el output queda acá para que lo copies y publiques.
         </p>
@@ -347,7 +347,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
         <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
-          1 · ¿Qué querés generar?
+          1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {(Object.entries(TIPO_META) as [TipoPieza, typeof TIPO_META.post][]).map(
@@ -447,7 +447,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       >
         {generando ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-4 h-4 anímate-spin" />
             Generando…
           </>
         ) : (
@@ -538,7 +538,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       )}
 
       <p className="text-xs text-[#FFFFFF]/30 text-center pt-4 italic">
-        Regla v8 · esta herramienta no escribe en tu ADN. Copiá lo que te sirva y publicalo
+        Regla v8 · esta herramienta no escribe en tu ADN. Copia lo que te sirva y publicalo
         cuando estés listo.
       </p>
     </div>
