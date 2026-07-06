@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Mic, Shield } from 'lucide-react';
 import { supabase, isSupabaseReady, type Mensaje } from '../lib/supabase';
+import { notificarAdminsMensaje } from '../lib/notifications';
 import { toast } from 'sonner';
 
 interface MensajesProps {
@@ -236,6 +237,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         receptor_id: null,
         contenido: text,
       });
+      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsMensaje(p?.nombre ?? 'Un cliente'); } catch { /* noop */ }
     } else {
       const newMessage: MsgLocal = {
         id: Date.now(),
