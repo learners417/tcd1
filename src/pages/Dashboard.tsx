@@ -3,6 +3,7 @@ import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, Mess
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
+import { calcularRacha, esDiaDescanso } from '../lib/racha';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import TaskDetailModal from '../components/TaskDetailModal';
@@ -238,7 +239,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
           );
         })()}
         <MetricCard label="Pasos del camino" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% recorrido`} />
-        <MetricCard label="Racha de diario" value={`${data.racha}`} sub={data.racha > 0 ? '¡Que no se corte! 🔥' : 'Escribe hoy la primera'} />
+        <MetricCard label="Racha" value={`${(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()} 🔥`} sub="Sesiones seguidas · el finde no la rompe" />
         <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 
@@ -247,20 +248,48 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         {/* Foco de Hoy (60%) */}
         <div className="lg:col-span-7 card-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[11px] font-bold text-[#FFFFFF] tracking-widest uppercase">Tu foco de hoy</h2>
+            <h2 className="text-[11px] font-bold text-[#FFFFFF] tracking-widest uppercase">Tu sesión de hoy</h2>
             <button onClick={() => setCurrentPage('roadmap')} className="text-[10px] text-[#FFFFFF]/40 hover:text-[#F5A623] uppercase font-bold tracking-wider transition-colors">
               Ir a tareas →
             </button>
           </div>
 
           <div className="space-y-3">
+            {(() => {
+              // Día de descanso del programa: el dojo respira
+              const diaProg = (() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })();
+              if (esDiaDescanso(diaProg) && data.tareasHoy.length > 0) {
+                return (
+                  <div className="py-12 text-center border border-[#22C55E]/20 rounded-2xl bg-gradient-to-b from-[#22C55E]/[0.06] to-transparent">
+                    <p className="text-4xl mb-3">🌿</p>
+                    <p className="text-base text-[#FFFFFF]/85 font-medium">Día de descanso — el dojo también respira</p>
+                    <p className="text-xs text-[#FFFFFF]/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
             {data.tareasHoy.length === 0 ? (
               <div className="py-10 text-center border border-dashed border-[rgba(245,166,35,0.15)] rounded-xl bg-[#1C1C1C]/30">
                 <CheckCircle2 className="w-8 h-8 text-[#22C55E]/50 mx-auto mb-3" />
                 <p className="text-sm text-[#FFFFFF]/60">Todo al día. Estás libre.</p>
-                <p className="text-xs text-[#FFFFFF]/30 mt-1">Revisa tu hoja de ruta para ver los próximos pilares.</p>
+                <p className="text-xs text-[#FFFFFF]/30 mt-1">Mira El Camino para ver lo que sigue.</p>
               </div>
-            ) : data.tareasHoy.map((t, idx) => (
+            ) : (
+              <>
+              {/* LA SESIÓN DE HOY — el hero del dojo */}
+              {data.tareasHoy[0] && (
+                <button
+                  onClick={() => setSelectedTask(data.tareasHoy[0])}
+                  className="w-full text-left rounded-2xl border-2 border-[#F5A623]/40 bg-gradient-to-br from-[#F5A623]/[0.10] to-transparent p-6 hover:border-[#F5A623]/70 hover:shadow-[0_0_30px_rgba(245,166,35,0.15)] transition-all group"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F5A623] mb-2">▶ Tu sesión de hoy</p>
+                  <p className="text-xl font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
+                  <p className="text-xs text-[#FFFFFF]/50 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
+                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5A623] text-black text-sm font-bold group-hover:bg-[#FFB94D] transition-colors">COMENZAR →</span>
+                </button>
+              )}
+              {data.tareasHoy.slice(1).map((t, idx) => (
               <div
                 key={idx}
                 className="group flex items-start gap-4 p-4 rounded-xl bg-[#1C1C1C]/30 border border-[rgba(245,166,35,0.1)] hover:bg-[#1C1C1C]/60 hover:border-[rgba(245,166,35,0.25)] transition-all cursor-pointer"
@@ -288,6 +317,8 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
                 </div>
               </div>
             ))}
+              </>
+            )}
           </div>
         </div>
 
