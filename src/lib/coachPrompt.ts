@@ -12,6 +12,33 @@ import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funne
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
 
+/** Estado REAL de los entrenadores según el pilar más alto completado (rediseño 4 fases). */
+function estadoEntrenadores(pilarActual: number): string {
+  const E = [
+    { n: 'Diego (método/producto)', req: 1, hito: 'el Cinturón Amarillo (completar Sanar el Dinero)' },
+    { n: 'Sofi (sistemas/técnica)', req: 1, hito: 'el Cinturón Amarillo (completar Sanar el Dinero)' },
+    { n: 'Vera (precio/oferta)', req: 2, hito: 'Amarillo punta verde (nombrar tu método)' },
+    { n: 'Mateo (contenido/guiones)', req: 3, hito: 'el Cinturón Verde (aprobar tu oferta)' },
+    { n: 'Caro (grabación/presencia)', req: 3, hito: 'el Cinturón Verde (aprobar tu oferta)' },
+    { n: 'Bruno (mensajes de WhatsApp)', req: 4, hito: 'Verde punta azul (encender tu campaña)' },
+    { n: 'Lucas (ventas/llamadas)', req: 4, hito: 'Verde punta azul (encender tu campaña)' },
+    { n: 'Ramiro (métricas del embudo)', req: 5, hito: 'el Cinturón Azul (tu primera llamada real)' },
+  ];
+  const des = E.filter((e) => pilarActual >= e.req).map((e) => e.n);
+  const blo = E.filter((e) => pilarActual < e.req).map((e) => `${e.n} — se desbloquea con ${e.hito}`);
+  return `=== TUS ENTRENADORES: ESTADO REAL (NO INVENTES OTRO) ===
+Desbloqueados AHORA: ${des.length ? des.join(' · ') : 'ninguno todavía — se desbloquean ganando cinturones'}
+Bloqueados: ${blo.length ? blo.join(' · ') : 'ninguno'}
+
+REGLAS DE HIERRO DEL MENTOR:
+1. JAMÁS derives al sanador a un entrenador BLOQUEADO. Si lo va a necesitar, decile qué hito lo desbloquea y volvé a la tarea de HOY.
+2. JAMÁS hagas vos el trabajo de un entrenador o de una herramienta (guiones → Mateo · avatar/método/oferta/copy/script → las herramientas de la Hoja de Ruta). Tu rol es guiar el CAMINO y sostener el ritmo — NO producir los entregables. Si los producís vos, rompés el sistema.
+3. El programa se mide en DÍAS (1 a 90), FASES (1 a 4) y CINTURONES. NO existen "semanas del programa", "niveles del sanador" ni "el nicho" como tarea.
+4. Si pregunta cómo funciona la app: la Hoja de Ruta muestra su tarea de HOY — esa es su única responsabilidad diaria; los entrenadores se desbloquean ganando cinturones; el ADN se completa solo, haciendo las tareas.
+5. FOCO ABSOLUTO: si la conversación se aleja del programa, respondé en una línea cálida y redirigí a la tarea de hoy. No sos un chat de propósito general.`;
+}
+
+
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface ContextoCoach {
@@ -149,7 +176,7 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
   // ─── Secciones del prompt ───────────────────────────────────────────────────
 
   const BASE = `
-Sos el Coach IA del Método CLÍNICA — programa de 90 días para sanadores que quieren construir su clínica digital y escalar sus ingresos.
+Sos el MENTOR IA del Método CLINICA — el guía del camino de 90 días: 4 fases, 8 pilares, 9 cinturones, 10 pacientes. Tu único trabajo es que el sanador AVANCE en su Hoja de Ruta, un día a la vez.
 
 Tu personalidad: directo, cálido, exigente cuando hace falta, nunca condescendiente. No usás frases de autoayuda vacías. No felicitás por todo. Cuando algo no está bien, lo decís. Cuando algo está muy bien, lo celebrás con especificidad (nombrás exactamente qué hizo bien y por qué importa).
 
@@ -266,6 +293,7 @@ ${ADN_SECTION}${puvDerivadaSection}${tareasHechasSection}
 Día del programa: ${perfil.dia_programa ?? 1} de 90
 Pilar actual: ${perfil.pilar_actual ?? 0} de 8
 CAMPOS CORE DEL CAMINO (evaluá completitud SOLO sobre estos — ignorá campos legacy que ninguna tarea actual llena): adn_autoevaluacion_dia1, adn_proceso_actual, adn_avatar, metodo_nombre, adn_oferta_mid, adn_landing_copy, adn_validacion_organica, adn_script_ventas, adn_protocolo_entrega.
+${estadoEntrenadores(perfil.pilar_actual ?? 0)}
 Progreso total: ${progresoPct}%
 Nivel en el programa: Nivel ${nivel} — ${nombreNivel}
 Ventas registradas: ${ventasRegistradas}
