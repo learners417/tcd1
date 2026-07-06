@@ -52,11 +52,11 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         )}
       </div>
 
-      {/* Coach instruction — interna: NO se muestra; el Coach la recibe en su prompt */}
+      {/* Coach instruction — interna: NO se muestra; el Mentor la recibe en su prompt */}
       {meta.coach_instruccion && (
         <div className="card-panel p-4 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
           <p className="text-sm text-[#FFFFFF]/75 leading-relaxed">
-            💬 Tu Coach ya sabe exactamente qué van a trabajar hoy. Abre el chat y dile:{' '}
+            💬 Tu Mentor ya sabe exactamente qué van a trabajar hoy. Abre el chat y dile:{' '}
             <span className="text-[#F5A623] font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
           </p>
         </div>
@@ -77,12 +77,12 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         {checked ? (
           <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E] text-base font-semibold">
             <CheckCircle2 className="w-5 h-5" />
-            Sesión con el Coach completada
+            Sesión con el Mentor completada
           </div>
         ) : (
           <>
             <p className="text-xs text-[#FFFFFF]/55 text-center mb-3 leading-relaxed">
-              Cuando termines de hablar con el Coach, haz clic acá para marcar este paso como completado y desbloquear el siguiente.
+              Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.
             </p>
             <button
               onClick={handleCheck}
