@@ -378,6 +378,7 @@ export type MetaCodigo =
   | 'P4.3b'
   | 'P4.3c'
   | 'P4.3d'
+  | 'P4.5b'
   | 'P5.5'
   | 'P6.4';
 
