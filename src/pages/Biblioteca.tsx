@@ -310,7 +310,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
           onClick={() => setHerramientaActivaId(null)}
           className="flex items-center gap-2 text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors uppercase tracking-wider font-bold mb-4 bg-[#F5A623]/5 hover:bg-[#F5A623]/10 px-4 py-2 rounded-xl w-max"
         >
-          <ArrowLeft className="w-4 h-4" /> Volver a Biblioteca
+          <ArrowLeft className="w-4 h-4" /> Volver a El Método
         </button>
         <HerramientaDetalle
           herramientaId={herramientaActivaId}
@@ -329,7 +329,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">
-          Biblioteca
+          El Método
         </h1>
         <p className="text-[#FFFFFF]/60 text-sm">
           Videos y herramientas IA del Método C·L·I·N·I·C·A.
