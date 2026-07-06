@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
@@ -43,7 +43,7 @@ import Markdown from 'react-markdown';
 
 type AdminRol = 'owner' | 'manager' | 'staff';
 type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas';
-type DetalleTab = 'resumen' | 'diario' | 'metricas' | 'mensajes' | 'notas' | 'adn';
+type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
 interface AdminProps {
@@ -358,7 +358,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
-  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'metricas', 'mensajes', 'notas', 'adn'];
+  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'metricas', 'mensajes', 'notas', 'adn'];
   const [detalleTab, setDetalleTab] = usePersistedState<DetalleTab>(
     'tcd_admin_detalle_tab',
     'resumen',
@@ -366,6 +366,32 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   );
   const [showNuevoCliente, setShowNuevoCliente] = useState(false);
   const [showMigrationWizard, setShowMigrationWizard] = useState(false);
+  // ── Evidencias del cliente (F-Admin: el visor) ──
+  const [evidenciasCliente, setEvidenciasCliente] = useState<{ meta: string; archivos: { name: string; path: string }[] }[]>([]);
+  const [evidenciasLoading, setEvidenciasLoading] = useState(false);
+  const cargarEvidenciasCliente = useCallback(async (clienteId: string) => {
+    if (!supabase) return;
+    setEvidenciasLoading(true);
+    try {
+      const base = `evidencias/${clienteId}`;
+      const { data: carpetas } = await supabase.storage.from('task-attachments').list(base, { limit: 60 });
+      const resultado: { meta: string; archivos: { name: string; path: string }[] }[] = [];
+      for (const c of carpetas ?? []) {
+        if (!c.name || c.name.startsWith('.')) continue;
+        const { data: archivos } = await supabase.storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
+        const files = (archivos ?? []).filter((f) => f.name && !f.name.startsWith('.')).map((f) => ({ name: f.name, path: `${base}/${c.name}/${f.name}` }));
+        if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
+      }
+      setEvidenciasCliente(resultado);
+    } finally {
+      setEvidenciasLoading(false);
+    }
+  }, []);
+  const abrirEvidencia = async (path: string) => {
+    if (!supabase) return;
+    const { data } = await supabase.storage.from('task-attachments').createSignedUrl(path, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
   const [clientSearch, setClientSearch] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
 
@@ -926,6 +952,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         setDetalleTareas(tareasDetalle);
         setDetalleDiario((d.data ?? []).slice(0, 3));
         setDetalleMetricas(m.data ?? []);
+      } else if (detalleTab === 'evidencias') {
+        if (selectedCliente) cargarEvidenciasCliente(selectedCliente.id);
       } else if (detalleTab === 'diario') {
         const { data } = await supabase.rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
@@ -1526,6 +1554,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
   const detailTabs: { id: DetalleTab; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: 'Resumen', icon: TrendingUp },
+    { id: 'evidencias', label: 'Evidencias', icon: ClipboardCheck },
     { id: 'diario', label: 'Diario', icon: Calendar },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
     { id: 'adn', label: 'ADN', icon: Fingerprint },
@@ -1539,6 +1568,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     const matchStatus = filtroStatus === 'ALL' || c.status === filtroStatus || (!c.status && filtroStatus === 'ACTIVE');
     return matchSearch && matchStatus;
   });
+  // La ronda de la mañana de Lupe: rojos primero, después amarillos — dentro de cada grupo, mayor atraso arriba
+  const SEMAFORO_PESO: Record<string, number> = { rojo: 0, amarillo: 1, verde: 2, gris: 3 };
+  const clientesOrdenados = [...filteredClientes].sort(
+    (a, b) => (SEMAFORO_PESO[a.semaforo] - SEMAFORO_PESO[b.semaforo]) || (b.dias_atraso - a.dias_atraso)
+  );
 
   // ─── SIDEBAR NAV CONFIG ───────────────────────────────────────────────────────
 
@@ -1770,7 +1804,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
                 {loading ? (
                   <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
-                ) : filteredClientes.length === 0 ? (
+                ) : clientesOrdenados.length === 0 ? (
                   <div className="text-center py-16">
                     <Users className="w-8 h-8 text-gray-700 mx-auto mb-3" />
                     <p className="text-[#FFFFFF]/40 text-sm">Sin clientes que coincidan</p>
@@ -1789,7 +1823,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredClientes.map(c => {
+                      {clientesOrdenados.map(c => {
                         const pct = c.tareas_total > 0
                           ? Math.round((c.tareas_completadas / c.tareas_total) * 100)
                           : (c.progreso_porcentaje ?? 0);
@@ -2177,7 +2211,33 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       )}
 
                       {/* ── DIARIO ── */}
-                      {detalleTab === 'diario' && (
+                      {detalleTab === 'evidencias' && (
+                <div className="space-y-4">
+                  <p className="text-xs text-[#FFFFFF]/50">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-[#F5A623]">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
+                  {evidenciasLoading ? (
+                    <p className="text-sm text-[#FFFFFF]/40">Cargando evidencias…</p>
+                  ) : evidenciasCliente.length === 0 ? (
+                    <div className="py-8 text-center border border-dashed border-[rgba(245,166,35,0.15)] rounded-xl">
+                      <p className="text-sm text-[#FFFFFF]/50">Todavía no subió evidencias.</p>
+                      <p className="text-xs text-[#FFFFFF]/30 mt-1">La primera llega con LA QUEMA (día 4).</p>
+                    </div>
+                  ) : (
+                    evidenciasCliente.map((g) => (
+                      <div key={g.meta} className="rounded-xl border border-[rgba(245,166,35,0.15)] bg-[#141414] p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#F5A623] mb-2">Sesión {g.meta}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {g.archivos.map((f) => (
+                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-[#F5A623]/10 border border-[#F5A623]/25 text-xs text-[#F5A623] hover:bg-[#F5A623]/20 transition-colors">
+                              📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              {detalleTab === 'diario' && (
                         <div className="space-y-4">
                           {detalleDiario.length === 0 ? (
                             <p className="text-[#FFFFFF]/40 text-sm text-center py-12">Sin entradas de diario</p>
