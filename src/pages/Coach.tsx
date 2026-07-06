@@ -347,7 +347,7 @@ export default function Coach({ userId }: { userId?: string }) {
         await persist(finales);
         await intentarRotarSummary(finales);
       } catch {
-        toast.error('Error de conexión con el Coach IA. Intentá de nuevo.');
+        toast.error('Error de conexión con el Mentor IA. Intentá de nuevo.');
         setMessages((prev) => {
           const next = [...prev];
           next[next.length - 1] = {
@@ -417,10 +417,10 @@ export default function Coach({ userId }: { userId?: string }) {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
-              Coach IA
+              Mentor IA
             </h2>
             <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-[#22C55E]" /> Clon de Javo · conoce todo tu ADN
+              <Sparkles className="w-3 h-3 text-[#22C55E]" /> Tu guía del camino · conoce tu ADN completo
             </p>
           </div>
         </div>
