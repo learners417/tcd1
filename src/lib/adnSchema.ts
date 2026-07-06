@@ -58,8 +58,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── ID · Identidad transversal · P1-P3 ────────────────────────────────────
   {
     codigo: 'ID',
-    titulo: 'Identidad',
-    subtitulo: 'Tu voz. Atraviesa todo el sistema.',
+    titulo: 'C·L — Conciencia y Liberación',
+    subtitulo: 'Fase 1 · Tu relación con el dinero y tu voz. Se completa en Sanar el Dinero.',
     pilarRange: 'P1-P3',
     campos: [
       { codigo: 'ID.linea_tiempo_8_puntos', label: 'Línea de tiempo vital (8 puntos)', pilarOrigen: 'P1.2', profileKey: 'adn_linea_tiempo' },
@@ -80,8 +80,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── META · Onboarding · P0 ────────────────────────────────────────────────
   {
     codigo: 'META',
-    titulo: 'Meta',
-    subtitulo: 'El snapshot con el que entraste.',
+    titulo: 'Punto de Partida',
+    subtitulo: 'Fase 0 · Tu foto inicial. Se llenó al entrar — es tu antes.',
     pilarRange: 'P0',
     campos: [
       { codigo: 'META.profesion', label: 'Profesión / especialidad', pilarOrigen: 'P0.1', profileKey: 'especialidad' },
@@ -99,8 +99,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── IRR · Irresistible · P4-P7 ────────────────────────────────────────────
   {
     codigo: 'IRR',
-    titulo: 'Irresistible',
-    subtitulo: 'A quién le hablás y por qué te eligen a vos.',
+    titulo: 'I — Identidad',
+    subtitulo: 'Fase 2 · Tu método con nombre y tu avatar: a quién sirves y por qué te eligen.',
     pilarRange: 'P4-P7',
     campos: [
       { codigo: 'IRR.avatar_demografia', label: 'Avatar · demografía', pilarOrigen: 'P4.3', profilePath: 'adn_avatar.edad', criticoDia45: true },
@@ -125,8 +125,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── NEG · Negocio · P7-P8 ─────────────────────────────────────────────────
   {
     codigo: 'NEG',
-    titulo: 'Negocio',
-    subtitulo: 'Tus ofertas y la matemática que cierra.',
+    titulo: 'N — Narrativa',
+    subtitulo: 'Fase 2 · Tu oferta y la matemática que cierra.',
     pilarRange: 'P7-P8',
     campos: [
       { codigo: 'NEG.proceso_actual', label: 'Proceso actual documentado', pilarOrigen: 'P7.5', profileKey: 'adn_proceso_actual' },
@@ -142,8 +142,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── INF · Infraestructura · P9A + P10 ─────────────────────────────────────
   {
     codigo: 'INF',
-    titulo: 'Infraestructura',
-    subtitulo: 'El embudo técnico y la identidad visual.',
+    titulo: 'I — Instalación',
+    subtitulo: 'Fase 3 · Tu sistema de captación: el agente, la agenda, la campaña.',
     pilarRange: 'P9A + P10',
     campos: [
       { codigo: 'INF.landing_copy_completo', label: 'Copy completo de landing', pilarOrigen: 'P9A.2', profileKey: 'adn_landing_copy' },
@@ -162,8 +162,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── CAP · Captación · P9B-P9C ─────────────────────────────────────────────
   {
     codigo: 'CAP',
-    titulo: 'Captación',
-    subtitulo: 'Cómo convertís mensajes en ventas.',
+    titulo: 'C — Cobro',
+    subtitulo: 'Fases 3-4 · Cómo conviertes mensajes en llamadas, y llamadas en pacientes.',
     pilarRange: 'P9B-P9C',
     campos: [
       { codigo: 'CAP.script_venta_W', label: 'Script de venta · la W', pilarOrigen: 'P9B.3', profileKey: 'script_venta' },
@@ -179,8 +179,8 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
   // ─── MET · Métricas · P11 ──────────────────────────────────────────────────
   {
     codigo: 'MET',
-    titulo: 'Métricas',
-    subtitulo: 'El cierre del ciclo y el plan del siguiente.',
+    titulo: 'A — Autonomía',
+    subtitulo: 'Fase 4 · De 1 a 10: el sistema trabajando por ti.',
     pilarRange: 'P11',
     campos: [
       { codigo: 'MET.tablero_cierre_ciclo', label: 'Tablero de cierre del ciclo', pilarOrigen: 'P11.1', profileKey: 'adn_tablero_cierre' },
