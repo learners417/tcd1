@@ -3,6 +3,7 @@ import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
 import { calcularCinturon } from '../lib/cinturones';
+import { notificarMensajeAdmin } from '../lib/notifications';
 import { esDiaDescanso } from '../lib/racha';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
@@ -1044,6 +1045,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: selectedCliente.id, contenido: texto
       });
       if (error) throw error;
+      void notificarMensajeAdmin(selectedCliente.id, adminProfile.nombre ?? 'El equipo');
     } catch {
       setDetalleMensajes(prev => prev.filter(m => m.id !== tempId));
       setMensajeInput(texto);
@@ -1085,6 +1087,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto
       });
       if (error) throw error;
+      void notificarMensajeAdmin(chatCliente.id, adminProfile.nombre ?? 'El equipo');
     } catch {
       setChatMessages(prev => prev.filter(m => m.id !== tempId));
       setChatInput(texto);
@@ -1751,8 +1754,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               TAB: ACTIVACIÓN (Checklist Pre-Activación por cliente)
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'pipeline' && (
-            <PreactivacionMatriz clientes={clientes} adminId={adminProfile.id} />
-          )}
+            <>
+              {/* G4 · El proceso de activación — la guía operativa de Lupe */}
+              <div className="rounded-2xl border border-[#F5A623]/25 bg-gradient-to-br from-[#F5A623]/[0.05] to-transparent p-5 mb-4 mx-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#F5A623] mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
+                <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-[#FFFFFF]/70 list-decimal list-inside">
+                  <li>Crear su subcuenta GHL desde el snapshot maestro</li>
+                  <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
+                  <li>Alta en MiClínica Digital (misma identidad)</li>
+                  <li>Bienvenida por WhatsApp: las 2 llaves + sus accesos</li>
+                  <li>Día 1: verificar el Pacto firmado y la Foto de Partida</li>
+                  <li>Semana 1: la ronda diaria del semáforo (verde = no tocar)</li>
+                  <li>Día 22-26: acompañar el montaje técnico (sistema + dominio)</li>
+                  <li>Día 29: verificar la campaña ENCENDIDA (evidencia en su ficha)</li>
+                </ol>
+              </div>
+              <PreactivacionMatriz clientes={clientes} adminId={adminProfile.id} />
+          </>
+            )}
 
           {/* ═══════════════════════════════════════════════════════════════════════
               TAB: CLIENTES
