@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
+import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import TaskDetailModal from '../components/TaskDetailModal';
@@ -215,7 +216,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         <div className="relative z-10">
           <p className="text-2xl font-light text-[#FFFFFF] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
           <p className="text-sm text-[#FFFFFF]/60 max-w-lg mb-6 leading-relaxed">
-            Estás en la <strong className="text-[#FFFFFF]/90">Semana {data.semanaActual} de 13</strong>. Tienes <strong className="text-[#F5A623]">{data.tareasHoy.length} {data.tareasHoy.length === 1 ? 'tarea pendiente' : 'tareas pendientes'}</strong> para avanzar con tu ADN.
+            Llevas <strong className="text-[#FFFFFF]/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Hoy tienes <strong className="text-[#F5A623]">{data.tareasHoy.length} {data.tareasHoy.length === 1 ? 'paso' : 'pasos'}</strong> para acercarte al siguiente.
           </p>
           <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-[#F5A623] hover:text-[#FFB94D] transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-[#F5A623]/10 px-4 py-2 rounded-lg border border-[#F5A623]/20 w-max">
             Ver hoja de ruta <ChevronRight className="w-3.5 h-3.5" />
@@ -225,10 +226,19 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
 
       {/* ZONA B — 4 tarjetas de métricas clave */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <MetricCard label="Semana actual" value={`${data.semanaActual}/13`} sub="Del programa" />
-        <MetricCard label="Pilares completados" value={`${data.pilaresCompletados}/${SEED_ROADMAP_V2.length}`} sub="Desbloqueados" />
-        <MetricCard label="Tareas completadas" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% del total`} />
-        <MetricCard label="Días de diario" value={`${data.racha}`} sub={data.racha > 0 ? `${data.racha} entradas` : 'Sin entradas aún'} />
+        {(() => {
+          let cint = CINTURONES[0];
+          try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); cint = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { /* noop */ }
+          const prox = CINTURONES.find((c) => c.orden === cint.orden + 1);
+          return (
+            <>
+              <MetricCard label="Tu cinturón" value={`${cint.emoji} ${cint.nombre}`} sub={cint.metafora} />
+              <MetricCard label="El que sigue" value={prox ? `${prox.emoji} ${prox.nombre}` : '⬛ ¡Lo lograste!'} sub={prox ? prox.metafora : 'Sanador Libre'} />
+            </>
+          );
+        })()}
+        <MetricCard label="Pasos del camino" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% recorrido`} />
+        <MetricCard label="Racha de diario" value={`${data.racha}`} sub={data.racha > 0 ? '¡Que no se corte! 🔥' : 'Escribe hoy la primera'} />
         <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 
