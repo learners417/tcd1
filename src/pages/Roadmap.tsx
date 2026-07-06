@@ -70,6 +70,7 @@ import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
+import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
 import { otorgarCinturonPorPilar, calcularCinturon } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
@@ -463,6 +464,15 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   // ─── Auto-expand first incomplete pilar on load ─────────────────────────
   useEffect(() => {
+    // G2: deep-link desde el Dashboard (COMENZAR → el pilar de la sesión)
+    try {
+      const flag = localStorage.getItem('tcd_abrir_pilar');
+      if (flag) {
+        localStorage.removeItem('tcd_abrir_pilar');
+        const n = parseInt(flag, 10);
+        if (!Number.isNaN(n) && n > 0) { setPilarAbierto(n); return; }
+      }
+    } catch { /* noop */ }
     if (loading || pilarAbierto !== null) return;
     const firstIncomplete = pilaresConEstado.find(p => p.estado === 'en_progreso');
     if (firstIncomplete) {
@@ -500,6 +510,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
         // Capa 3 · rediseño 4 fases: otorgar el cinturón (DB) y llevarlo al modal.
         void otorgarCinturonPorPilar(pilar.id);
+        // G1 · Los despertares: la campanita celebra
+        if (userId) {
+          void notificarPilarCompletado(userId, pilar.titulo, pilar.numero);
+          const cintG1 = calcularCinturon(pilar.numero);
+          void notificarCinturon(userId, cintG1.emoji, cintG1.nombre, cintG1.metafora);
+        }
         const cinturonGanado = calcularCinturon(pilar.id);
 
         setPilarUnlocked({
