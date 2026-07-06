@@ -64,7 +64,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { id: 'roadmap', icon: RoadmapIcon, label: 'Hoja de Ruta', badge: data.hasPending },
+        { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'adn', icon: Dna, label: 'ADN del Negocio' },
       ]
