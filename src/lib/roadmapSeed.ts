@@ -90,7 +90,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P0.0',
         titulo: 'Bienvenida: de profesional a director',
-        descripcion: 'Mira el video de Javo (5 min): qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Coach te lo cuenta en 5 minutos.',
+        descripcion: 'Mira el video de Javo (5 min): qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Mentor te lo cuenta en 5 minutos.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '5 min',
@@ -153,7 +153,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.1',
         titulo: 'Por qué el dinero se sana primero',
-        descripcion: 'Mira el video de Javo (6 min): ningún sistema de ventas funciona sobre una relación rota con el dinero. La historia del mártir que cobra poco "por vocación" — y por qué ese ya no vas a ser tú. Si el video no está aún, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video de Javo (6 min): ningún sistema de ventas funciona sobre una relación rota con el dinero. La historia del mártir que cobra poco "por vocación" — y por qué ese ya no vas a ser tú. Si el video no está aún, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '6 min',
@@ -166,7 +166,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.2',
         titulo: 'Día 1-2 · Tu radiografía emocional',
-        descripcion: 'Abre el chat con tu Coach y haz el primer trabajo: di tu precio actual en voz alta, registra qué sentís, y rastrea de dónde viene esa incomodidad. Vas a salir con TU creencia raíz identificada en una frase — y una imagen generada por IA de esa "voz heredada", para verla afuera tuyo por primera vez.',
+        descripcion: 'Abre el chat con tu Mentor y haz el primer trabajo: di tu precio actual en voz alta, registra qué sentís, y rastrea de dónde viene esa incomodidad. Vas a salir con TU creencia raíz identificada en una frase — y una imagen generada por IA de esa "voz heredada", para verla afuera tuyo por primera vez.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '25 min',
@@ -174,7 +174,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 2,
         usa_ia: false,
         checklist: [
-          'Abre el chat con el Coach y dile: "vengo a hacer la radiografía del dinero"',
+          'Abre el chat con el Mentor y dile: "vengo a hacer la radiografía del dinero"',
           'Di tu precio actual en voz alta y cuéntale qué sentiste',
           'Completa las 4 frases: "El dinero es…", "La gente rica es…", "Cobrar caro a un paciente es…", "Si gano mucho, mi familia…"',
           'Cierra con tu creencia raíz escrita en UNA frase',
@@ -184,7 +184,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.2b',
         titulo: 'Día 3 · La lealtad invisible',
-        descripcion: 'Con tu Coach: si prosperás de verdad, ¿a quién sentís que traicionás? El ejercicio del linaje — 3 generaciones y su relación con el dinero. La lealtad invisible a la familia, al gremio, al "sanador pobre pero noble". Verla es el 80% de soltarla. Salís con tu frase ancla: "Honro tu historia Y elijo distinto."',
+        descripcion: 'Con tu Mentor: si prosperás de verdad, ¿a quién sentís que traicionás? El ejercicio del linaje — 3 generaciones y su relación con el dinero. La lealtad invisible a la familia, al gremio, al "sanador pobre pero noble". Verla es el 80% de soltarla. Salís con tu frase ancla: "Honro tu historia Y elijo distinto."',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '20 min',
@@ -194,7 +194,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         checklist: [
           'Escribe los nombres de 3 generaciones de tu familia',
           'Al lado de cada uno: su relación con el dinero en una frase',
-          'Encuentra el patrón con el Coach: ¿a quién le eres fiel siendo pobre?',
+          'Encuentra el patrón con el Mentor: ¿a quién le eres fiel siendo pobre?',
           'Escribe tu frase ancla: "Honro tu historia Y elijo distinto"',
         ],
         coach_instruccion: 'Explorá la lealtad invisible con el ejercicio del linaje (presentalo como marco simbólico de las lealtades familiares — no como ciencia; su poder es de sentido, y eso se dice honesto). 3 generaciones, la relación de cada una con el dinero. El patrón salta solo. Preguntá: ¿esa fidelidad es amor, o miedo disfrazado de amor? ¿Esa persona querría que vivas ajustado? Cerrá con la frase ancla escrita: "Honro tu historia Y elijo distinto" — se guarda y vuelve en los momentos de resistencia.',
@@ -214,7 +214,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Léela en voz alta una última vez',
           'Quémala (con cuidado y en lugar seguro)',
           'Saca foto de las cenizas y súbela — queda en tu historia',
-          'Cuéntale al Coach qué sentiste al verla arder',
+          'Cuéntale al Mentor qué sentiste al verla arder',
         ],
         // CAPA 3: completar esta tarea otorga 'blanco_punta_amarilla' vía hitos_cinturon
         coach_instruccion: 'Guiá el ritual de la quema. Presentalo honesto: es un RITUAL — y los rituales funcionan; la neurociencia lo respalda (acto motor + emoción + testigo consolida la reconsolidación de memoria mejor que el pensamiento solo). Que escriba la creencia a mano, la lea en voz alta una última vez, y la queme. Pedile la foto de las cenizas. Validá la emoción sin apurarla. Cerrá: esa creencia era prestada, nunca fue tuya. Celebrá la punta amarilla: la semilla se abre.',
@@ -222,7 +222,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.4',
         titulo: 'Día 5 · El dinero en el cuerpo',
-        descripcion: 'Trabajo somático breve con tu Coach: escaneo corporal guiado, encuentra dónde se aloja la tensión cuando piensas en cobrar, y soltala con respiración 4-7-8. Registrás tu nivel de tensión antes y después (1-10). Para que el precio nuevo no sea solo mental.',
+        descripcion: 'Trabajo somático breve con tu Mentor: escaneo corporal guiado, encuentra dónde se aloja la tensión cuando piensas en cobrar, y soltala con respiración 4-7-8. Registrás tu nivel de tensión antes y después (1-10). Para que el precio nuevo no sea solo mental.',
         tipo: 'COACH',
         es_estrella: false,
         tiempo_estimado: '15 min',
@@ -235,7 +235,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.5',
         titulo: 'Día 6 · EL NÚMERO — tu precio justo',
-        descripcion: 'El momento central de la fase. La calculadora inversa te muestra: $10.000 ÷ 10 pacientes = $1.000 — el número no sale de tu miedo, sale de tu meta. Con tu Coach lo haces TUYO: un número concreto, dicho en voz alta 3 veces sin disculparte (la tercera, grabándote un audio a ti mismo). El Coach no aprueba precios-disculpa.',
+        descripcion: 'El momento central de la fase. La calculadora inversa te muestra: $10.000 ÷ 10 pacientes = $1.000 — el número no sale de tu miedo, sale de tu meta. Con tu Mentor lo haces TUYO: un número concreto, dicho en voz alta 3 veces sin disculparte (la tercera, grabándote un audio a ti mismo). El Mentor no aprueba precios-disculpa.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -244,7 +244,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: false,
         checklist: [
           'Trae tu PHR de la Foto de Partida',
-          'Haz la calculadora inversa con el Coach: de la meta al número',
+          'Haz la calculadora inversa con el Mentor: de la meta al número',
           'Propón TU número (concreto, no un rango)',
           'Dilo en voz alta 3 veces — la tercera, grábate un audio de WhatsApp a ti mismo',
         ],
@@ -289,7 +289,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.1',
         titulo: 'Tu método propio: el activo que te diferencia',
-        descripcion: 'Mira el video (6 min): por qué un método con nombre vale más que mil servicios sueltos, y cómo se poda: UNA transformación, UN protocolo, UN precio. Aplica igual si atiendes pacientes o formas estudiantes. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (6 min): por qué un método con nombre vale más que mil servicios sueltos, y cómo se poda: UNA transformación, UN protocolo, UN precio. Aplica igual si atiendes pacientes o formas estudiantes. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '6 min',
@@ -350,8 +350,8 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       },
       {
         codigo: 'P2.5',
-        titulo: 'Valida el nombre con tu Coach',
-        descripcion: 'Cuéntale a tu Coach el nombre elegido. La prueba de fuego: ¿evoca el RESULTADO que logra tu paciente, o describe tu proceso técnico? El nombre tiene que prometer el destino. Al aprobar: Amarillo punta verde — el primer brote asoma.',
+        titulo: 'Valida el nombre con tu Mentor',
+        descripcion: 'Cuéntale a tu Mentor el nombre elegido. La prueba de fuego: ¿evoca el RESULTADO que logra tu paciente, o describe tu proceso técnico? El nombre tiene que prometer el destino. Al aprobar: Amarillo punta verde — el primer brote asoma.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '10 min',
@@ -386,7 +386,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.1',
         titulo: 'La oferta que se vende sola',
-        descripcion: 'Mira el video (7 min): la ecuación de valor — resultado soñado × probabilidad, dividido demora × esfuerzo. Por qué tu oferta debe prometer transformación, no sesiones. Y la garantía como permiso para confiar. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (7 min): la ecuación de valor — resultado soñado × probabilidad, dividido demora × esfuerzo. Por qué tu oferta debe prometer transformación, no sesiones. Y la garantía como permiso para confiar. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
@@ -414,7 +414,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.3',
         titulo: 'Defendé tu precio (roleplay)',
-        descripcion: 'Practica con tu Coach: te va a decir "es caro", "lo tengo que pensar", "¿hay descuento?" — como un prospecto real. Repite hasta defender tu precio 3 veces seguidas sin disculparte. Vera es tu entrenadora especialista si quieres más práctica.',
+        descripcion: 'Practica con tu Mentor: te va a decir "es caro", "lo tengo que pensar", "¿hay descuento?" — como un prospecto real. Repite hasta defender tu precio 3 veces seguidas sin disculparte. Vera es tu entrenadora especialista si quieres más práctica.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '20 min',
@@ -433,7 +433,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.4',
         titulo: 'Aprobación final de tu oferta',
-        descripcion: 'Preséntale a tu Coach la oferta entera: transformación + qué incluye + precio + garantía. Si los 4 elementos están sólidos, ganas el Cinturón VERDE — la planta crece. Y se abre la Fase 3: salir a captar.',
+        descripcion: 'Preséntale a tu Mentor la oferta entera: transformación + qué incluye + precio + garantía. Si los 4 elementos están sólidos, ganas el Cinturón VERDE — la planta crece. Y se abre la Fase 3: salir a captar.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '15 min',
@@ -469,7 +469,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.1',
         titulo: 'El embudo completo, sin humo',
-        descripcion: 'Mira el video (8 min): el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (8 min): el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '8 min',
@@ -482,7 +482,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.5',
         titulo: 'Monta tu sistema: agente IA + agenda + cobro',
-        descripcion: 'El día grande de infraestructura. Activás tu Meta Business Agent (el empleado digital de tu WhatsApp — gratis, nativo), lo entrenás con el documento que tu Coach te genera con TU oferta y TUS preguntas de filtro, montás tu agenda, tu medio de cobro probado, y tu Sala de Espera. Sofi te acompaña pieza por pieza.',
+        descripcion: 'El día grande de infraestructura. Activás tu Meta Business Agent (el empleado digital de tu WhatsApp — gratis, nativo), lo entrenás con el documento que tu Mentor te genera con TU oferta y TUS preguntas de filtro, montás tu agenda, tu medio de cobro probado, y tu Sala de Espera. Sofi te acompaña pieza por pieza.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '75 min',
@@ -494,7 +494,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         checklist: [
           'Instala WhatsApp Business (o convertí tu número actual — los chats se conservan; si prefieres separar trabajo de vida personal, usa un número nuevo)',
           'Activa tu agente: Herramientas → Meta Business Agent (5 min de configuración)',
-          'Pídele a tu Coach el DOCUMENTO DE ENTRENAMIENTO de tu agente (lo genera con tu oferta, tu avatar y tus 3 preguntas de filtro) — cópialo, guárdalo como PDF (Imprimir → Guardar como PDF) y súbeselo al agente',
+          'Pídele a tu Mentor el DOCUMENTO DE ENTRENAMIENTO de tu agente (lo genera con tu oferta, tu avatar y tus 3 preguntas de filtro) — cópialo, guárdalo como PDF (Imprimir → Guardar como PDF) y súbeselo al agente',
           'Configura el agente: responde SOLO a clientes que llegan de anuncios · tono cálido y profesional · las conversaciones clínicas te las deriva a ti SIEMPRE',
           'Pruébalo: escribile desde el teléfono de alguien cercano como si fueras paciente',
           'Crea tu link de agenda (Calendly gratis o similar) con 3+ horarios esta semana',
@@ -588,7 +588,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P5.1',
         titulo: 'Anatomía de la llamada que cierra',
-        descripcion: 'Mira el video (8 min): la estructura de la llamada — Apertura, Dolor, Cielo, Obstáculos, Cierre (la W). Por qué el que pregunta dirige. Cómo presentar el precio sin que tiemble la voz. Y la regla del decisor: si la decisión la comparte con alguien, ese alguien tiene que estar en la llamada. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (8 min): la estructura de la llamada — Apertura, Dolor, Cielo, Obstáculos, Cierre (la W). Por qué el que pregunta dirige. Cómo presentar el precio sin que tiemble la voz. Y la regla del decisor: si la decisión la comparte con alguien, ese alguien tiene que estar en la llamada. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '8 min',
@@ -616,7 +616,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P5.3',
         titulo: 'Roleplay: practica antes de la real',
-        descripcion: 'Tu Coach hace de prospecto difícil: objeta, duda, compara, y te tira las reales — "es caro", "lo hablo con mi pareja", "lo tengo que pensar". Practica el guion completo hasta que fluya. Nadie entra al ring sin sparring. Lucas, tu entrenador de ventas, está para las rondas extra.',
+        descripcion: 'Tu Mentor hace de prospecto difícil: objeta, duda, compara, y te tira las reales — "es caro", "lo hablo con mi pareja", "lo tengo que pensar". Practica el guion completo hasta que fluya. Nadie entra al ring sin sparring. Lucas, tu entrenador de ventas, está para las rondas extra.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -628,14 +628,14 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Pedí el roleplay completo con tu script en mano',
           'Completa la llamada entera: apertura → dolor → cielo → obstáculos → precio → cierre',
           'Supera las 3 objeciones reales: "es caro" · "lo hablo con mi pareja" · "lo tengo que pensar"',
-          'Recibí las 2 mejoras del Coach, anotalas, y repite una segunda simulación',
+          'Recibí las 2 mejoras del Mentor, anotalas, y repite una segunda simulación',
         ],
         coach_instruccion: 'Roleplay completo con SU script y la estructura W (Apertura-Dolor-Cielo-Obstáculos-Cierre). Hacé de prospecto realista con el banco de objeciones REALES: "es caro" (defensa sin disculpa), "lo hablo con mi pareja" (el decisor — enseñale a invitarlo a una próxima llamada con ambos, no a perseguir), "lo tengo que pensar" (pregunta que destapa la objeción real detrás). Evaluá apertura, manejo del dolor, presentación de precio con silencio posterior, y cierre. Dale 2 mejoras concretas. Repetir hasta una simulación sólida.',
       },
       {
         codigo: 'P5.4',
         titulo: '◆ TU PRIMERA LLAMADA REAL',
-        descripcion: 'Los días previos son de campo: responde cada mensaje en <5 min, confirma agendas — la app no te asigna tarea nueva porque el juego está en tu WhatsApp. Y entonces llega: atiende a tu primer prospecto real del sistema. No importa si no cierra — importa que la hiciste. Sube el screenshot del Meet/Zoom (puedes tapar el nombre) y haz el debrief con tu Coach. Ganás el Cinturón AZUL: alcanzaste el cielo.',
+        descripcion: 'Los días previos son de campo: responde cada mensaje en <5 min, confirma agendas — la app no te asigna tarea nueva porque el juego está en tu WhatsApp. Y entonces llega: atiende a tu primer prospecto real del sistema. No importa si no cierra — importa que la hiciste. Sube el screenshot del Meet/Zoom (puedes tapar el nombre) y haz el debrief con tu Mentor. Ganás el Cinturón AZUL: alcanzaste el cielo.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '60 min',
@@ -649,7 +649,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Ten tu script a mano (impreso o segunda pantalla)',
           'Haz la llamada — presencia, preguntas, calma en el precio',
           'Saca screenshot de la videollamada (tapa el nombre si quieres)',
-          'Sube el screenshot y haz el debrief con tu Coach',
+          'Sube el screenshot y haz el debrief con tu Mentor',
         ],
         coach_instruccion: 'Debrief de la primera llamada real: pedile el screenshot del Meet/Zoom (debe verse la videollamada — puede tapar el nombre por privacidad). Verificá que sea real. El debrief: ¿qué funcionó? ¿dónde se trabó? ¿qué objeción no supo manejar? ¿estaba el decisor si correspondía? Cerrá con 1 ajuste para la próxima. Otorgá el Cinturón Azul: alcanzó el cielo. Anticipале la resistencia que viene: los primeros NO duelen — y son parte de la matemática (cierre 20% = 4 de 5 dicen no Y el sistema funciona).',
       },
@@ -680,7 +680,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P6.1',
         titulo: 'Entregar sin quemarte',
-        descripcion: 'Mira el video (7 min): el protocolo de entrega — qué recibe tu paciente en las primeras 24 hs, cómo se organiza el seguimiento, qué se automatiza y qué se mantiene humano. Acá nace tu MiClínica Digital. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (7 min): el protocolo de entrega — qué recibe tu paciente en las primeras 24 hs, cómo se organiza el seguimiento, qué se automatiza y qué se mantiene humano. Acá nace tu MiClínica Digital. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
@@ -718,7 +718,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Cerraste la venta: envía el link/datos de cobro EN la llamada o apenas termina',
           'Confirma que el dinero se acreditó (no "me dijo que paga")',
           'Saca captura del comprobante (tapa datos sensibles si quieres)',
-          'Súbelo y celebra con tu Coach — este momento es LA transformación',
+          'Súbelo y celebra con tu Mentor — este momento es LA transformación',
         ],
         coach_instruccion: 'Verificación del primer pago: pedile el comprobante (captura de transferencia, recibo, o foto del efectivo — puede tapar datos sensibles). Verificá 3 cosas: monto visible, fecha reciente, coherencia con su precio declarado en el ADN. Si dudás, marcalo para revisión del equipo. Si es válido, otorgá el Cinturón Rojo y celebrá en serio: este momento separa al que lo intentó del que lo hizo. Preguntá cómo se siente cobrar su precio digno — y recordale reinvertir: la pauta ahora puede subir a $8-12/día, se paga sola.',
       },
@@ -748,7 +748,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P7.1',
         titulo: 'La máquina de 10 por mes',
-        descripcion: 'Mira el video (7 min): de la primera venta al sistema recurrente. Qué medir cada semana (interesados, llamadas, cierres), cuándo ajustar el anuncio, cuándo subir el presupuesto, y qué delegar primero. Si el video no está, tu Coach te lo cuenta.',
+        descripcion: 'Mira el video (7 min): de la primera venta al sistema recurrente. Qué medir cada semana (interesados, llamadas, cierres), cuándo ajustar el anuncio, cuándo subir el presupuesto, y qué delegar primero. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
@@ -761,7 +761,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P7.2',
         titulo: 'Tu revisión semanal (recurrente)',
-        descripcion: 'Cada semana, 20 minutos con tu Coach: revisás tus números del embudo, detectás dónde se cae (¿pocos interesados? ¿no agendan? ¿no cierran?) y haces UN ajuste. Repetís del paciente #2 al #10. Tu progreso se ve en el contador: X/10 pacientes.',
+        descripcion: 'Cada semana, 20 minutos con tu Mentor: revisás tus números del embudo, detectás dónde se cae (¿pocos interesados? ¿no agendan? ¿no cierran?) y haces UN ajuste. Repetís del paciente #2 al #10. Tu progreso se ve en el contador: X/10 pacientes.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '20 min/semana',
@@ -772,7 +772,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         entrenador: 'lucas',
         checklist: [
           'Anota tus números de la semana: interesados · llamadas agendadas · llamadas hechas · cierres',
-          'Identifica con el Coach el cuello de botella (dónde se cae la mayoría)',
+          'Identifica con el Mentor el cuello de botella (dónde se cae la mayoría)',
           'Define UN solo ajuste para esta semana (no tres)',
           'Registra cada venta nueva — el contador X/10 avanza contigo',
           'Pide testimonio a cada paciente que termina (video de 60 seg o audio) — tu prueba social vende por ti',
