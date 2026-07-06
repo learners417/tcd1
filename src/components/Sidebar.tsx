@@ -74,7 +74,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'coach', icon: MessageSquare, label: 'Mentor IA' },
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
-        // { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 }, // oculto hasta que la sección esté usable
+        { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 }, // G4: el chat con el equipo, habilitado
         { id: 'biblioteca', icon: Library, label: 'El Método' },
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
         { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
