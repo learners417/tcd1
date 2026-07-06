@@ -613,7 +613,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   // PUV ("Ayudo a [avatar] a [resultado] sin [obstaculo]"). El campo
   // adn_field declarado es solo adn_nicho · pero el documento maestro v7
   // dice que la PUV vive en adn_usp. Antes de este fix · la PUV quedaba
-  // sepultada dentro de adn_nicho y el Coach pensaba que estaba vacia ·
+  // sepultada dentro de adn_nicho y el Mentor pensaba que estaba vacia ·
   // mandando al sanador a rehacer una tarea ya hecha (caso Sol).
   function parseNichoYPuv(texto: string): { adn_nicho: string; adn_usp?: string } {
     // 1) PUV recomendada por la IA (formato "GANADORA RECOMENDADA: ...")
@@ -758,7 +758,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               ) : diasAtraso <= 3 ? (
                 <span className="text-[#F5A623]">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
               ) : (
-                <span className="text-[#EF4444]">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Coach hoy: juntos lo reacomodan.</span>
+                <span className="text-[#EF4444]">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Mentor hoy: juntos lo reacomodan.</span>
               )}
             </p>
             <p className="text-xs text-[#FFFFFF]/40">Nivel {nivel} de 5</p>
