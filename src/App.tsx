@@ -11,7 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
-// import Mensajes from './pages/Mensajes'; // oculto hasta que esté usable
+import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -409,6 +409,7 @@ export default function App() {
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
+            {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
