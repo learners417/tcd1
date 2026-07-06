@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import { calcularCinturon } from '../lib/cinturones';
+import { esDiaDescanso } from '../lib/racha';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
@@ -17,8 +19,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon,
-} from 'lucide-react';
+  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
@@ -61,6 +62,8 @@ interface ClienteConEstado extends Profile {
   racha_diario: number;
   ventas_count: number;
   estado_garantia: 'en_camino' | 'en_riesgo' | 'activada';
+  cinturon: { emoji: string; nombre: string };
+  dias_atraso: number;
   progreso_porcentaje: number;
 }
 
@@ -113,12 +116,11 @@ const PILAR_OPTIONS: { id: PilarId; label: string }[] = SEED_ROADMAP_V3.map(p =>
 }));
 
 const PIPELINE_STAGES: { label: string; sub: string; maxDay: number; fase: number; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[] = [
-  { label: 'Onboarding',              sub: 'Días 1–3',   maxDay: 3,  fase: 0, icon: UserCircle },
-  { label: 'Sprint de Identidad',     sub: 'Días 4–20',  maxDay: 20, fase: 1, icon: Fingerprint },
-  { label: 'Sprint de Mercado',       sub: 'Días 21–38', maxDay: 38, fase: 2, icon: Search },
-  { label: 'Sprint de Oferta',        sub: 'Días 39–45', maxDay: 45, fase: 3, icon: Sparkles },
-  { label: 'Activación y Ventas',     sub: 'Días 46–80', maxDay: 80, fase: 4, icon: Megaphone },
-  { label: 'Análisis y Optimización', sub: 'Días 81–90', maxDay: 91, fase: 5, icon: Trophy },
+  { label: 'Onboarding',                sub: 'Día 1',      maxDay: 1,  fase: 0, icon: UserCircle },
+  { label: 'F1 · Sanar el Dinero',      sub: 'Días 2–9',   maxDay: 9,  fase: 1, icon: Fingerprint },
+  { label: 'F2 · Método y Oferta',      sub: 'Días 10–18', maxDay: 18, fase: 2, icon: Search },
+  { label: 'F3 · Sistema Encendido',    sub: 'Días 19–33', maxDay: 33, fase: 3, icon: Sparkles },
+  { label: 'F4 · Vender y Escalar',     sub: 'Días 34–90', maxDay: 90, fase: 4, icon: Rocket },
 ];
 
 function getFaseFromProgress(tareas_completadas: number): number {
@@ -806,15 +808,33 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         const metricas = metricasRes.data ?? [];
         const ultimaDiario = diarioRes.data?.[0]?.fecha;
 
-        let semaforo: ClienteConEstado['semaforo'] = 'gris';
-        if (metricas.length >= 2) {
-          const cur = metricas[metricas.length - 1];
-          const prev = metricas[metricas.length - 2];
-          const delta = (cur.leads + cur.ventas) - (prev.leads + prev.ventas);
-          semaforo = delta > 0 ? 'verde' : delta === 0 ? 'amarillo' : 'rojo';
-        } else if (tareas.some((t: any) => t.status === 'completada')) {
-          semaforo = 'verde';
+        // Semáforo v2 = RITMO REAL: atraso hábil contra el dia_asignado del Camino
+        const completadasSet = new Set(
+          tareas.filter((t: any) => t.status === 'completada').map((t: any) => `${t.pilar_numero}-${t.meta_codigo}`)
+        );
+        let diaEsperado: number | null = null;
+        outer: for (const pil of SEED_ROADMAP_V2) {
+          for (const mm of pil.metas) {
+            if (!completadasSet.has(`${pil.numero}-${mm.codigo}`)) { diaEsperado = mm.dia_asignado ?? null; break outer; }
+          }
         }
+        let dias_atraso = 0;
+        if (diaEsperado !== null && dia > diaEsperado) {
+          for (let d = diaEsperado + 1; d <= dia; d++) if (!esDiaDescanso(d)) dias_atraso++;
+        }
+        let semaforo: ClienteConEstado['semaforo'] = 'gris';
+        if (tareas.length > 0 || completadasSet.size > 0) {
+          semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
+        }
+        // Cinturón: pilar más alto con TODAS sus metas completas
+        let pilarMasAlto = 0;
+        for (const pil of SEED_ROADMAP_V2) {
+          const todas = pil.metas.every((mm) => completadasSet.has(`${pil.numero}-${mm.codigo}`));
+          if (todas) pilarMasAlto = Math.max(pilarMasAlto, pil.numero);
+          else break;
+        }
+        const cint = calcularCinturon(pilarMasAlto);
+        const cinturon = { emoji: cint.emoji, nombre: cint.nombre };
 
         const entradas = diarioRes.data ?? [];
         let rachaActual = 0;
@@ -859,6 +879,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           dia_programa: dia,
           semana_programa: semana,
           semaforo,
+          cinturon,
+          dias_atraso,
           tareas_completadas: tareasCompletadasFallback,
           tareas_total: tareas.length > 0 ? tareas.length : totalFromSeed,
           tareas_por_pilar: tareasPorPilar,
@@ -1758,7 +1780,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <table className="w-full min-w-[700px]">
                     <thead>
                       <tr className="border-b border-[rgba(245,166,35,0.1)]">
-                        {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Pilar', 'Estado', 'Progreso'].map(h => (
+                        {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Cinturón', 'Pacientes', 'Pilar', 'Estado', 'Progreso'].map(h => (
                           <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">{h}</th>
                         ))}
                         {adminRol === 'owner' && (
@@ -1795,7 +1817,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/20">{c.plan}</span>
                             </td>
                             <td className="px-4 py-3 text-xs text-[#FFFFFF]/50">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/60 font-medium">{c.dia_programa}</td>
+                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/60 font-medium">{c.dia_programa}{c.dias_atraso > 0 && <span className={c.dias_atraso > 3 ? 'text-[#EF4444] ml-1' : 'text-[#F5A623] ml-1'}>(-{c.dias_atraso})</span>}</td>
+                            <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-[#FFFFFF]/50">{c.cinturon.nombre}</span></td>
+                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/60">{c.ventas_count}/10</td>
                             <td className="px-4 py-3 text-xs text-[#F5A623] font-medium">{pilar}</td>
                             <td className="px-4 py-3">
                               <span
@@ -1869,7 +1893,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#FFFFFF] truncate">{c.nombre}</p>
-                          <p className="text-[10px] text-[#FFFFFF]/40">Día {c.dia_programa}/90</p>
+                          <p className="text-[10px] text-[#FFFFFF]/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                         </div>
                       </div>
                     </button>
@@ -1976,6 +2000,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <div className="grid grid-cols-4 gap-3">
                             <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-[#FFFFFF]">{selectedCliente.dia_programa}</p>
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {[{ l: '+30d', d: 30, t: 'Extensión 30 días' }, { l: '+60d', d: 60, t: 'Extensión 60 días' }, { l: '+90d', d: 90, t: 'Extensión 90 días' }, { l: '⏸ 14d', d: 14, t: 'Pausa 14 días' }].map((b) => (
+                                  <button
+                                    key={b.l}
+                                    title={b.t}
+                                    onClick={async () => {
+                                      if (!supabase || !selectedCliente) return;
+                                      if (!window.confirm(`${b.t} para ${selectedCliente.nombre}: el programa se corre ${b.d} días hacia adelante. ¿Confirmar?`)) return;
+                                      const nueva = new Date(selectedCliente.fecha_inicio);
+                                      nueva.setDate(nueva.getDate() + b.d);
+                                      const { error } = await supabase.from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
+                                      if (!error) { alert(`${b.t} aplicada. Recarga la lista para ver el día nuevo.`); }
+                                    }}
+                                    className="px-2 py-1 rounded-md bg-[#F5A623]/10 border border-[#F5A623]/25 text-[10px] font-semibold text-[#F5A623] hover:bg-[#F5A623]/20 transition-colors"
+                                  >{b.l}</button>
+                                ))}
+                              </div>
                               <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mt-1">Día / 90</p>
                             </div>
                             <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4 text-center">
@@ -2700,7 +2741,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                             <div className="w-32 shrink-0">
                               <p className="text-sm font-semibold text-[#FFFFFF] group-hover:text-[#F5A623] transition-colors truncate">{c.nombre}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/40">Día {c.dia_programa}/90</p>
+                              <p className="text-[10px] text-[#FFFFFF]/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-1">
