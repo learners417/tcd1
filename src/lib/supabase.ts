@@ -373,7 +373,13 @@ export type MetaCodigo =
   // P10 · Identidad Visual (sin cambios)
   | 'P10.1' | 'P10.2' | 'P10.3'
   // P11 · Análisis (sin cambios)
-  | 'P11.1' | 'P11.2';
+  | 'P11.1' | 'P11.2'
+  | 'P3.5'
+  | 'P4.3b'
+  | 'P4.3c'
+  | 'P4.3d'
+  | 'P5.5'
+  | 'P6.4';
 
 /** @deprecated Usar MetaCodigo (V3). Mantener para migración de datos existentes. */
 export type MetaCodigoV2 =
