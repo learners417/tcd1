@@ -11,7 +11,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'welcome' | 'guide';
+type Step = 'password' | 'profile' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -24,10 +24,13 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'welcome', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'welcome', 'pacto', 'guide'];
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStep] = useState<Step>('password');
+  // ── El Pacto (F3) ──
+  const [pactoTexto, setPactoTexto] = useState('');
+  const [pactoFirma, setPactoFirma] = useState('');
 
   // Step 1 — password
   const [newPassword, setNewPassword] = useState('');
@@ -354,9 +357,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               <CheckCircle2 className="w-8 h-8 text-[#FFFFFF]" />
             </div>
 
-            <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-3">¡Bienvenido/a, {nombreCorto}!</h1>
-            <p className="text-sm text-[#FFFFFF]/60 leading-relaxed mb-2">
-              Ya estás dentro del programa.
+            <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-3">Bienvenido/a al dojo, {nombreCorto}</h1>
+            <p className="text-sm text-[#FFFFFF]/70 leading-relaxed mb-2">
+              Estás por empezar un camino de 90 días: <strong className="text-[#FFFFFF]/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-[#F5A623]">10 pacientes de $1.000</strong>.
             </p>
             <p className="text-sm text-[#FFFFFF]/80 leading-relaxed mb-6">
               <span className="text-[#F5A623] font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
@@ -364,9 +367,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
             <div className="grid grid-cols-3 gap-3 mb-8">
               {[
-                { icon: Map, label: 'Hoja de Ruta', desc: 'Tu camino paso a paso' },
-                { icon: Bot, label: 'Coach IA', desc: 'Disponible 24/7' },
-                { icon: MessageSquare, label: 'Chat directo', desc: 'Soporte siempre' },
+                { icon: Map, label: 'El Camino', desc: 'Tu sesión de cada día. Todo pasa acá.' },
+                { icon: Bot, label: 'Mentor IA', desc: 'Te acompaña y destraba. No hace tu trabajo.' },
+                { icon: MessageSquare, label: 'Entrenadores', desc: 'Especialistas que aparecen cuando toca' },
               ].map(item => (
                 <div key={item.label} className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4">
                   <div className="mb-2"><item.icon className="w-6 h-6 text-[#F5A623]" /></div>
@@ -377,11 +380,68 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <button
-              onClick={() => setStep('guide')}
+              onClick={() => setStep('pacto')}
               className="w-full py-4 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] text-[#0A0A0A] text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5A623]/20"
             >
-              <ArrowRight className="w-4 h-4" /> Ver cómo empezar
+              <ArrowRight className="w-4 h-4" /> Continuar
             </button>
+          </div>
+        )}
+
+
+        {/* ── STEP: EL PACTO ── */}
+        {step === 'pacto' && (
+          <div className="bg-[#141414] border border-[rgba(245,166,35,0.3)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
+            <div className="text-center mb-6">
+              <p className="text-4xl mb-3">🥋</p>
+              <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El Pacto</h1>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#F5A623] font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
+            </div>
+
+            <div className="rounded-2xl border border-[#FFFFFF]/10 bg-[#0F0F0F] p-5 mb-5">
+              <p className="text-sm text-[#FFFFFF]/80 leading-relaxed">
+                Esto no es un formulario. Es una promesa — y las promesas se hacen con nombre y apellido.
+              </p>
+              <p className="text-sm text-[#FFFFFF]/80 leading-relaxed mt-3">
+                <strong className="text-[#FFFFFF]">A los tuyos:</strong> a quienes te formaron y a quienes dependen de ti.{' '}
+                <strong className="text-[#FFFFFF]">A tus pacientes:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
+                <strong className="text-[#FFFFFF]">Y a ti:</strong> al profesional que hoy decide dejar de sobrevivir.
+              </p>
+              <p className="text-sm text-[#F5A623]/90 leading-relaxed mt-3 font-medium">
+                Mi primer compromiso: llegar al Cinturón Amarillo — sanar mi relación con el dinero — antes del día 10.
+              </p>
+            </div>
+
+            <label className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
+            <textarea
+              value={pactoTexto}
+              onChange={(e) => setPactoTexto(e.target.value)}
+              rows={4}
+              placeholder="Hago este camino porque…"
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-[#0A0A0A] border border-[#FFFFFF]/15 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:outline-none resize-none"
+            />
+            <label className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Tu firma (nombre completo)</label>
+            <input
+              value={pactoFirma}
+              onChange={(e) => setPactoFirma(e.target.value)}
+              placeholder="Nombre y apellido"
+              className="w-full mt-1.5 mb-6 px-4 py-3 rounded-xl bg-[#0A0A0A] border border-[#FFFFFF]/15 text-[#FFFFFF] text-sm italic focus:border-[#F5A623]/50 focus:outline-none"
+              style={{ fontFamily: 'var(--font-display)' }}
+            />
+            <button
+              onClick={() => {
+                if (pactoTexto.trim().length < 20 || pactoFirma.trim().length < 5) return;
+                try {
+                  localStorage.setItem('tcd_pacto', JSON.stringify({ texto: pactoTexto.trim(), firma: pactoFirma.trim(), fecha: new Date().toISOString() }));
+                } catch { /* noop */ }
+                setStep('guide');
+              }}
+              disabled={pactoTexto.trim().length < 20 || pactoFirma.trim().length < 5}
+              className="w-full py-4 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] text-[#0A0A0A] text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-[#F5A623]/20"
+            >
+              FIRMO MI PACTO
+            </button>
+            <p className="text-[10px] text-[#FFFFFF]/30 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
           </div>
         )}
 
@@ -401,8 +461,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 {
                   num: '1',
                   icon: Map,
-                  title: 'Abre tu Hoja de Ruta',
-                  desc: 'Ahí están todos los pilares del programa. Mira en qué pilar empiezas y completa la primera tarea.',
+                  title: 'Abre El Camino',
+                  desc: 'Tu sesión de hoy te espera: el Día 1 completo — tu Foto de Partida. Una sesión por día, todo se hace ahí.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
                     icon: 'bg-[#F5A623]/20',
@@ -416,8 +476,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 {
                   num: '2',
                   icon: MessageSquare,
-                  title: 'Escribinos al Chat',
-                  desc: 'Mandá un mensaje presentándote. Ya tenemos tu información y te vamos a responder lo antes posible.',
+                  title: 'Conoce tu ritmo',
+                  desc: 'Lunes a viernes: tu sesión (45 min a 2 h). Sábado y domingo: descanso — tu racha queda protegida.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
                     icon: 'bg-[#F5A623]/20',
@@ -432,7 +492,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   num: '3',
                   icon: Bot,
                   title: 'Prueba el Mentor IA',
-                  desc: 'Hacele cualquier pregunta sobre tu negocio. Está entrenado para el contexto de profesionales de la salud.',
+                  desc: 'Tu guía del camino. Pregúntale cuando te trabes — te destraba y te devuelve a tu sesión. Él no hace tu trabajo: te acompaña.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
                     icon: 'bg-[#F5A623]/20',
