@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
+import { supabase } from '../../lib/supabase';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import TaskChecklist from './TaskChecklist';
@@ -11,6 +13,30 @@ interface TaskCoachProps {
 }
 
 export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToCoach }: TaskCoachProps) {
+  // ── Evidencia obligatoria (Cirugía Final F2) ──
+  const [evidencias, setEvidencias] = useState<number>(-1);
+  const [subiendo, setSubiendo] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
+  useEffect(() => {
+    if (!meta.evidencia_requerida) return;
+    (async () => {
+      const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+      const userId = data.user?.id ?? null;
+      setUid(userId);
+      if (userId) setEvidencias((await listarEvidencias(userId, meta.codigo)).length);
+      else setEvidencias(0);
+    })();
+  }, [meta.codigo, meta.evidencia_requerida]);
+  const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
+  const evidenciaLista = !requiereEvidencia || evidencias > 0;
+  const handleSubir = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uid || subiendo) return;
+    setSubiendo(true);
+    const ok = await subirEvidencia(uid, meta.codigo, file);
+    if (ok) setEvidencias((n) => Math.max(0, n) + 1);
+    setSubiendo(false);
+  };
   const [checked, setChecked] = useState(isCompleted);
 
   const handleCheck = () => {
@@ -45,6 +71,20 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
               allowFullScreen
               className="absolute inset-0 w-full h-full"
             />
+          </div>
+        )}
+        {meta.evidencia_requerida && (
+          <div className={`card-panel p-4 border ${evidenciaLista ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#F5A623]/30 bg-[#F5A623]/[0.04]'}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#F5A623]">
+              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
+            </p>
+            <p className="text-sm text-[#FFFFFF]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            {!isCompleted && (
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#F5A623] text-black hover:bg-[#FFB94D]'}`}>
+                {subiendo ? 'Subiendo…' : evidencias > 0 ? `✓ ${evidencias} subida${evidencias > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
+                <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
+              </label>
+            )}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
@@ -82,11 +122,14 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         ) : (
           <>
             <p className="text-xs text-[#FFFFFF]/55 text-center mb-3 leading-relaxed">
-              Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.
+              {evidenciaLista
+                ? 'Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.'
+                : '📎 Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
             </p>
             <button
-              onClick={handleCheck}
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#22C55E]/15 border-2 border-[#22C55E]/40 text-[#22C55E] text-base font-semibold hover:bg-[#22C55E]/25 hover:border-[#22C55E]/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)] transition-all"
+              onClick={() => { if (evidenciaLista) handleCheck(); }}
+              disabled={!evidenciaLista}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-[#22C55E]/15 border-2 border-[#22C55E]/40 text-[#22C55E] hover:bg-[#22C55E]/25 hover:border-[#22C55E]/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-[#FFFFFF]/5 border-2 border-[#FFFFFF]/10 text-[#FFFFFF]/30 cursor-not-allowed'}`}
             >
               <CheckCircle2 className="w-5 h-5" />
               Marcar como completado
