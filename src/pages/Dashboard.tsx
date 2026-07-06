@@ -4,9 +4,9 @@ import { supabase, isSupabaseReady } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, esDiaDescanso } from '../lib/racha';
+import ReporteDirector from '../components/ReporteDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
-import TaskDetailModal from '../components/TaskDetailModal';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -55,7 +55,17 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
     diasConectados: 0,
   });
   const [proximoHito, setProximoHito] = useState<ProximoHito | null>(null);
-  const [selectedTask, setSelectedTask] = useState<TareaHoy | null>(null);
+  // G2: las sesiones se abren en El Camino (un solo lugar, con evidencia y checklist)
+  // G3: el valor visible — las ventas del sistema
+  const [ventasTotal, setVentasTotal] = useState<{ suma: number; count: number }>({ suma: 0, count: 0 });
+  const [showReporte, setShowReporte] = useState(false);
+  useEffect(() => {
+    if (!isSupabaseReady() || !supabase || !userId) return;
+    supabase.from('ventas_registradas').select('monto').eq('usuario_id', userId).then(({ data }) => {
+      const montos = (data ?? []).map((v: { monto: number | null }) => Number(v.monto) || 0);
+      setVentasTotal({ suma: montos.reduce((a: number, b: number) => a + b, 0), count: montos.length });
+    });
+  }, [userId]);
 
   useEffect(() => {
     async function loadData() {
@@ -243,6 +253,38 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 
+      {/* ═══ G3 · EL VALOR VISIBLE ═══ */}
+      {ventasTotal.count > 0 && (
+        <div className="rounded-2xl border border-[#22C55E]/30 bg-gradient-to-r from-[#22C55E]/[0.08] to-transparent p-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">Tu sistema, en números</p>
+            <p className="text-2xl font-light text-[#FFFFFF] mt-1">${ventasTotal.suma.toLocaleString()} <span className="text-sm text-[#FFFFFF]/50">facturados · {ventasTotal.count} paciente{ventasTotal.count !== 1 ? 's' : ''}</span></p>
+          </div>
+          <div className="text-right">
+            <button onClick={() => setShowReporte(true)} className="text-[10px] font-bold uppercase tracking-widest text-[#F5A623] hover:text-[#FFB94D] transition-colors mb-1 block ml-auto">📄 Reporte del Director</button>
+            <p className="text-[10px] uppercase tracking-widest text-[#FFFFFF]/40">Tu inversión</p>
+            <p className={`text-lg font-semibold ${ventasTotal.suma >= 2000 ? 'text-[#22C55E]' : 'text-[#F5A623]'}`}>
+              {ventasTotal.suma >= 2000 ? `Recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* G3 · Día 75: Tu clínica sigue */}
+      {(() => {
+        let diaG3 = 1;
+        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) diaG3 = Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ }
+        if (diaG3 < 75) return null;
+        return (
+          <div className="rounded-2xl border border-[#F5A623]/35 bg-gradient-to-br from-[#F5A623]/[0.08] to-transparent p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F5A623] mb-2">🏥 Tu clínica sigue</p>
+            <p className="text-lg text-[#FFFFFF]/90 font-light" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El día 90 termina El Camino — pero tu clínica no se apaga.</p>
+            <p className="text-sm text-[#FFFFFF]/60 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-[#FFFFFF]/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
+            <button onClick={() => setCurrentPage('coach')} className="mt-4 px-5 py-2.5 rounded-xl bg-[#F5A623] text-black text-sm font-bold hover:bg-[#FFB94D] transition-colors">Quiero que mi clínica siga →</button>
+          </div>
+        );
+      })()}
+
       {/* ZONA C — Dos columnas */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Foco de Hoy (60%) */}
@@ -280,7 +322,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
               {/* LA SESIÓN DE HOY — el hero del dojo */}
               {data.tareasHoy[0] && (
                 <button
-                  onClick={() => setSelectedTask(data.tareasHoy[0])}
+                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
                   className="w-full text-left rounded-2xl border-2 border-[#F5A623]/40 bg-gradient-to-br from-[#F5A623]/[0.10] to-transparent p-6 hover:border-[#F5A623]/70 hover:shadow-[0_0_30px_rgba(245,166,35,0.15)] transition-all group"
                 >
                   <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F5A623] mb-2">▶ Tu sesión de hoy</p>
@@ -293,7 +335,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
               <div
                 key={idx}
                 className="group flex items-start gap-4 p-4 rounded-xl bg-[#1C1C1C]/30 border border-[rgba(245,166,35,0.1)] hover:bg-[#1C1C1C]/60 hover:border-[rgba(245,166,35,0.25)] transition-all cursor-pointer"
-                onClick={() => setSelectedTask(t)}
+                onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(t.pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
               >
                 <div className="shrink-0 mt-0.5">
                   <div className="w-5 h-5 rounded-full border border-[#FFFFFF]/20 group-hover:border-[#F5A623] transition-colors flex items-center justify-center">
@@ -418,14 +460,17 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         </div>
       </div>
 
-      {/* Task Detail Modal */}
-      {selectedTask && (
-        <TaskDetailModal
-          tarea={selectedTask}
-          onClose={() => setSelectedTask(null)}
-          onNavigate={(page) => { setSelectedTask(null); setCurrentPage(page); }}
+      {showReporte && (
+        <ReporteDirector
+          nombre={(() => { try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.nombre ?? 'Director'; } catch { return 'Director'; } })()}
+          diaPrograma={(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })()}
+          completadas={(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); return new Set<string>(saved ? JSON.parse(saved) : []); } catch { return new Set<string>(); } })()}
+          ventas={ventasTotal}
+          racha={(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()}
+          onClose={() => setShowReporte(false)}
         />
       )}
+      {/* El modal único vive en El Camino — el Dashboard navega (G2) */}
     </div>
   );
 }
