@@ -58,7 +58,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             <Play className="w-12 h-12 text-[#F5A623]/50 mb-3" />
             <p className="text-sm text-[#FFFFFF]/70">Este contenido llega pronto</p>
             <p className="text-xs text-[#FFFFFF]/45 mt-2 leading-relaxed max-w-sm">
-              Mientras tanto, tu Coach te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
+              Mientras tanto, tu Mentor te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
             </p>
           </div>
         )}
