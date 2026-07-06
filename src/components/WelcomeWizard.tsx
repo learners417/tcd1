@@ -222,7 +222,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
               <h1 className="text-2xl font-semibold text-[#FFFFFF] mb-2">Cuéntanos sobre ti</h1>
               <p className="text-sm text-[#FFFFFF]/60 leading-relaxed">
-                Esta info le sirve a tu acompañante para conocerte mejor desde el día 1 y que el Coach IA te dé respuestas más precisas.
+                Esta info le sirve a tu acompañante para conocerte mejor desde el día 1 y que el Mentor IA te dé respuestas más precisas.
               </p>
             </div>
 
@@ -431,7 +431,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 {
                   num: '3',
                   icon: Bot,
-                  title: 'Prueba el Coach IA',
+                  title: 'Prueba el Mentor IA',
                   desc: 'Hacele cualquier pregunta sobre tu negocio. Está entrenado para el contexto de profesionales de la salud.',
                   styles: {
                     card: 'bg-[#F5A623]/5 border-[#F5A623]/20 hover:bg-[#F5A623]/10',
