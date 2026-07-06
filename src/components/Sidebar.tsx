@@ -65,20 +65,20 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'Hoja de Ruta', badge: data.hasPending },
-        { id: 'metrics', icon: TrendingUp, label: 'Métricas' },
+        // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'adn', icon: Dna, label: 'ADN del Negocio' },
       ]
     },
     {
       title: 'HERRAMIENTAS',
       items: [
-        { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
+        { id: 'coach', icon: MessageSquare, label: 'Mentor IA' },
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
         // { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 }, // oculto hasta que la sección esté usable
         { id: 'biblioteca', icon: Library, label: 'Biblioteca' },
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
-        // { id: 'creador', icon: PenLine, label: 'Creador de Contenido' },   // oculto: compite con la Hoja de Ruta (P4.2-P4.3) — el cliente crea contenido EN el camino
-        // { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos' }, // oculto: ídem — minimalismo del camino único
+        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
+        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },
       ]
     },
     {
@@ -162,18 +162,20 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
             <nav className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive = currentPage === item.id;
+                const locked = typeof (item as { minCinturon?: number }).minCinturon === 'number' && data.cinturon.orden < (item as { minCinturon?: number }).minCinturon!;
                 return (
                   <button
                     key={item.id}
                     onClick={() => {
+                      if (locked) return;
                       if (item.action) item.action();
                       else setCurrentPage(item.id);
                       onMobileClose();
                     }}
-                    title={collapsed ? item.label : undefined}
+                    title={locked ? 'Se desbloquea con el Cinturón Verde (tu oferta aprobada)' : (collapsed ? item.label : undefined)}
                     className={`w-full flex items-center transition-all relative group ${
                       collapsed ? 'justify-center px-0 py-2.5' : 'px-6 py-2.5'
-                    } ${isActive ? 'bg-[#F5A623]/15' : 'bg-transparent hover:bg-[#F5A623]/5'}`}
+                    } ${locked ? 'opacity-40 cursor-not-allowed' : ''} ${isActive ? 'bg-[#F5A623]/15' : 'bg-transparent hover:bg-[#F5A623]/5'}`}
                   >
                     {isActive && (
                       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#F5A623] rounded-r-full shadow-[0_0_10px_rgba(245,166,35,0.5)]" />
