@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
+import { notificarAdminsEvidencia } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
@@ -34,7 +35,10 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
     if (!file || !uid || subiendo) return;
     setSubiendo(true);
     const ok = await subirEvidencia(uid, meta.codigo, file);
-    if (ok) setEvidencias((n) => Math.max(0, n) + 1);
+    if (ok) {
+      setEvidencias((n) => Math.max(0, n) + 1);
+      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+    }
     setSubiendo(false);
   };
   const [checked, setChecked] = useState(isCompleted);
