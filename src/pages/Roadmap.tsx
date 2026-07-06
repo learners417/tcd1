@@ -69,6 +69,7 @@ import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Graduacion from '../components/Graduacion';
+import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
 import { otorgarCinturonPorPilar, calcularCinturon } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
@@ -554,7 +555,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       }
     }
   }
-  const diasAtraso = diaEsperado !== null ? diaPrograma - diaEsperado : 0;
+  const diasAtraso = (() => {
+    if (diaEsperado === null) return 0;
+    let habiles = 0;
+    for (let d = diaEsperado + 1; d <= diaPrograma; d++) if (!esDiaDescanso(d)) habiles++;
+    return habiles;
+  })();
 
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
@@ -698,6 +704,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   // ─── Complete a task (VIDEO, COACH) ───────────────────────────────────
   const handleCompleteTask = useCallback((pilarNum: number, meta: RoadmapMeta) => {
+    registrarSesionCompletada(); // racha de sesiones (F2)
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
