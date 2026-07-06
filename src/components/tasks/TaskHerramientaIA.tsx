@@ -3,6 +3,7 @@
  * Inline herramienta IA component for the roadmap task flow.
  * Shows form fields → generates with AI (or saves directly if usa_ia=false) → user edits → saves to ADN.
  */
+import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
 import React, { useState, useCallback, useRef } from 'react';
 import {
   Loader2, RotateCcw, CheckCircle2, Edit3, Sparkles, Save,
@@ -69,6 +70,29 @@ type Modo = 'form' | 'generando' | 'revision' | 'edicion' | 'guardado';
 export default function TaskHerramientaIA({
   meta, perfil, geminiKey, outputExistente, onSaveADN, isCompleted,
 }: TaskHerramientaIAProps) {
+  // ── Evidencia obligatoria (F2) ──
+  const [evidCount, setEvidCount] = React.useState<number>(-1);
+  const [evidSubiendo, setEvidSubiendo] = React.useState(false);
+  const [evidUid, setEvidUid] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    if (!meta.evidencia_requerida) return;
+    (async () => {
+      const { supabase } = await import('../../lib/supabase');
+      const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+      const userId = data.user?.id ?? null;
+      setEvidUid(userId);
+      setEvidCount(userId ? (await listarEvidencias(userId, meta.codigo)).length : 0);
+    })();
+  }, [meta.codigo, meta.evidencia_requerida]);
+  const evidLista = !meta.evidencia_requerida || isCompleted || evidCount > 0;
+  const handleEvidSubir = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !evidUid || evidSubiendo) return;
+    setEvidSubiendo(true);
+    const ok = await subirEvidencia(evidUid, meta.codigo, file);
+    if (ok) setEvidCount((n) => Math.max(0, n) + 1);
+    setEvidSubiendo(false);
+  };
   const herramienta = meta.herramienta_id ? getHerramienta(meta.herramienta_id) : null;
   const inputs = herramienta?.inputs ?? [];
   // Si hay herramienta registrada, respeta su flag `usa_ia`. Si no hay, cae a
@@ -247,6 +271,20 @@ export default function TaskHerramientaIA({
               allowFullScreen
               className="absolute inset-0 w-full h-full"
             />
+          </div>
+        )}
+        {meta.evidencia_requerida && (
+          <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#F5A623]/30 bg-[#F5A623]/[0.04]'}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#F5A623]">
+              {evidCount > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida para completar'}
+            </p>
+            <p className="text-sm text-[#FFFFFF]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            {!isCompleted && (
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#F5A623] text-black hover:bg-[#FFB94D]'}`}>
+                {evidSubiendo ? 'Subiendo…' : evidCount > 0 ? `✓ ${evidCount} subida${evidCount > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
+                <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleEvidSubir} disabled={evidSubiendo} />
+              </label>
+            )}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
