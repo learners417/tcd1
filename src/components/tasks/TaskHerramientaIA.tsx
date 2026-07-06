@@ -4,6 +4,7 @@
  * Shows form fields → generates with AI (or saves directly if usa_ia=false) → user edits → saves to ADN.
  */
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
+import { notificarAdminsEvidencia } from '../../lib/notifications';
 import React, { useState, useCallback, useRef } from 'react';
 import {
   Loader2, RotateCcw, CheckCircle2, Edit3, Sparkles, Save,
@@ -90,7 +91,10 @@ export default function TaskHerramientaIA({
     if (!file || !evidUid || evidSubiendo) return;
     setEvidSubiendo(true);
     const ok = await subirEvidencia(evidUid, meta.codigo, file);
-    if (ok) setEvidCount((n) => Math.max(0, n) + 1);
+    if (ok) {
+      setEvidCount((n) => Math.max(0, n) + 1);
+      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+    }
     setEvidSubiendo(false);
   };
   const herramienta = meta.herramienta_id ? getHerramienta(meta.herramienta_id) : null;
