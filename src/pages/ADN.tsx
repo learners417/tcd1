@@ -304,15 +304,16 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
       {/* Header */}
       <div className="space-y-3">
         <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
-          Documento maestro v8 · 7 secciones · 65 campos · 5 ofertas
+          Las 7 letras del Método CLINICA · tu negocio, documentado
         </p>
         <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
           ADN del Negocio
         </h1>
         <p className="text-[#FFFFFF]/60 max-w-2xl">
-          Todo lo que construís a lo largo de los 90 días se condensa acá. Cada pilar lo refina un
-          poco más. Al día 45 los campos marcados <span className="text-[#F5A623] font-semibold">D45</span> deben estar
-          completos para pasar a Fase 4.
+          <strong className="text-[#FFFFFF]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
+          tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.
+          Tu Mentor y tus entrenadores lo leen para personalizar TODO lo que te dicen y generan.
+          <span className="block mt-2 text-[#F5A623]/90">No se llena a mano: se completa solo, a medida que haces las tareas de tu Hoja de Ruta. Si ves campos vacíos, el camino los va a llenar.</span>
         </p>
       </div>
 
