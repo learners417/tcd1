@@ -107,14 +107,14 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 px-4 md:px-6 py-3 border-b border-[rgba(255,255,255,0.05)] shrink-0">
         {/* View toggle */}
-        <div className="inline-flex p-1 rounded-xl bg-[#0F0F0F] border border-[rgba(245,166,35,0.15)]">
+        <div className="inline-flex p-1 rounded-xl bg-[#0F0F0F] border border-[rgba(232,150,46,0.10)]">
           <button
             type="button"
             onClick={() => setView('matriz')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               view === 'matriz'
-                ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80'
+                ? 'bg-[#E8962E]/15 text-[#E8962E]'
+                : 'text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -125,8 +125,8 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
             onClick={() => setView('camino')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               view === 'camino'
-                ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80'
+                ? 'bg-[#E8962E]/15 text-[#E8962E]'
+                : 'text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80'
             }`}
           >
             <MapIcon className="w-4 h-4" />
@@ -137,29 +137,29 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
         {view === 'matriz' && (
           <>
             <div className="relative flex-1 min-w-[240px] max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/30" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar cliente..."
-                className="w-full bg-black/30 border border-[rgba(245,166,35,0.2)] rounded-lg py-2.5 pl-10 pr-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all"
+                className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all"
               />
             </div>
 
             {/* Stats */}
             <div className="hidden md:flex items-center gap-5 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#FFFFFF]/40 uppercase tracking-wider font-semibold">Clientes</span>
-                <span className="text-[#FFFFFF] font-bold text-base">{stats.total}</span>
+                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Clientes</span>
+                <span className="text-[#F2EFE9] font-bold text-base">{stats.total}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#FFFFFF]/40 uppercase tracking-wider font-semibold">Listos</span>
+                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Listos</span>
                 <span className="text-[#22C55E] font-bold text-base">{stats.listos}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#FFFFFF]/40 uppercase tracking-wider font-semibold">Avance</span>
-                <span className="text-[#F5A623] font-bold text-base">{stats.avgPct}%</span>
+                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Avance</span>
+                <span className="text-[#E8962E] font-bold text-base">{stats.avgPct}%</span>
               </div>
             </div>
 
@@ -167,7 +167,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
               type="button"
               onClick={refresh}
               disabled={refreshing}
-              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(245,166,35,0.2)] text-sm font-semibold text-[#F5A623] hover:bg-[#F5A623]/10 transition-all disabled:opacity-50"
+              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(232,150,46,0.12)] text-sm font-semibold text-[#E8962E] hover:bg-[#E8962E]/10 transition-all disabled:opacity-50"
               title="Refrescar"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -183,7 +183,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
           <ElCaminoView />
         ) : loading ? (
           <div className="flex justify-center items-center py-16">
-            <Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" />
+            <Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" />
           </div>
         ) : (
           <div className="px-4 md:px-6 py-4">

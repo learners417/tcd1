@@ -23,7 +23,7 @@ interface MatrizGridProps {
 export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridProps) {
   if (clientes.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16 text-[#FFFFFF]/40 text-sm">
+      <div className="flex items-center justify-center py-16 text-[#F2EFE9]/40 text-sm">
         Sin clientes que coincidan
       </div>
     );
@@ -46,7 +46,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               <th
                 key={sec.id}
                 colSpan={sec.items.length}
-                className="sticky top-0 z-30 bg-[#141414] text-[#F5A623] uppercase tracking-widest"
+                className="sticky top-0 z-30 bg-[#111110] text-[#E8962E] uppercase tracking-widest"
                 style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 12,
@@ -54,7 +54,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   letterSpacing: 1.5,
                   padding: '10px 0',
                   textAlign: 'center',
-                  borderBottom: '1px solid rgba(245,166,35,0.15)',
+                  borderBottom: '1px solid rgba(232,150,46,0.10)',
                   borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
                 }}
               >
@@ -62,7 +62,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               </th>
             ))}
             <th
-              className="sticky right-0 top-0 z-40 bg-[#141414] text-[#F5A623]"
+              className="sticky right-0 top-0 z-40 bg-[#111110] text-[#E8962E]"
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: 12,
@@ -70,7 +70,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 letterSpacing: 1.5,
                 padding: '10px 10px',
                 textAlign: 'center',
-                borderBottom: '1px solid rgba(245,166,35,0.15)',
+                borderBottom: '1px solid rgba(232,150,46,0.10)',
                 borderLeft: '2px solid var(--matrix-section-divider)',
                 textTransform: 'uppercase',
               }}
@@ -86,7 +86,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               style={{
                 top: 40,
                 minWidth: 240,
-                borderBottom: '2px solid rgba(245,166,35,0.15)',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
               }}
             />
             {STEPS.map((step, idx) => {
@@ -101,7 +101,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     padding: '10px 8px 12px',
                     fontWeight: 500,
                     verticalAlign: 'bottom',
-                    borderBottom: '2px solid rgba(245,166,35,0.15)',
+                    borderBottom: '2px solid rgba(232,150,46,0.10)',
                     borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
                   }}
                   title={step.title}
@@ -129,7 +129,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               style={{
                 top: 40,
                 padding: '10px 12px 12px',
-                borderBottom: '2px solid rgba(245,166,35,0.15)',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
                 borderLeft: '2px solid var(--matrix-section-divider)',
               }}
             >
@@ -157,7 +157,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               <tr key={cl.id} className="group">
                 {/* Sticky client cell */}
                 <td
-                  className="sticky left-0 z-20 bg-[#0A0A0A] group-hover:bg-[#141414] transition-colors"
+                  className="sticky left-0 z-20 bg-[#080808] group-hover:bg-[#111110] transition-colors"
                   style={{
                     padding: '0 14px',
                     height: 56,
@@ -170,8 +170,8 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                       style={{
                         width: 36,
                         height: 36,
-                        background: 'rgba(245,166,35,0.12)',
-                        color: '#F5A623',
+                        background: 'rgba(232,150,46,0.12)',
+                        color: '#E8962E',
                         fontSize: 14,
                         fontWeight: 700,
                       }}
@@ -209,7 +209,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   return (
                     <td
                       key={step.id}
-                      className="group-hover:bg-[#141414] transition-colors"
+                      className="group-hover:bg-[#111110] transition-colors"
                       style={{
                         padding: 0,
                         textAlign: 'center',
@@ -225,7 +225,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                         type="button"
                         onClick={() => onToggle(cl.id, step.id, !on)}
                         title={`${step.title} — ${on ? 'destildar' : 'tildar'}`}
-                        className="inline-flex items-center justify-center transition-all hover:border-[#F5A623]/60"
+                        className="inline-flex items-center justify-center transition-all hover:border-[#E8962E]/60"
                         style={{
                           width: 30,
                           height: 30,
@@ -235,7 +235,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                           background: on ? '#22C55E' : 'transparent',
                         }}
                       >
-                        {on && <Check className="w-4 h-4" style={{ color: '#0A0A0A', strokeWidth: 3 }} />}
+                        {on && <Check className="w-4 h-4" style={{ color: '#080808', strokeWidth: 3 }} />}
                       </button>
                     </td>
                   );
@@ -243,7 +243,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
 
                 {/* Sticky total */}
                 <td
-                  className="sticky right-0 z-10 bg-[#0A0A0A] group-hover:bg-[#141414] transition-colors"
+                  className="sticky right-0 z-10 bg-[#080808] group-hover:bg-[#111110] transition-colors"
                   style={{
                     padding: '0 12px',
                     height: 56,

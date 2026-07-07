@@ -146,11 +146,11 @@ export default function TaskAttachments({
 
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center gap-2 text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider">
         <Paperclip className="w-3.5 h-3.5" />
         Archivos
         {totalCount > 0 && (
-          <span className="text-[10px] bg-[#F5A623]/15 text-[#F5A623] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+          <span className="text-[10px] bg-[#E8962E]/15 text-[#E8962E] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
             {totalCount}
           </span>
         )}
@@ -164,22 +164,22 @@ export default function TaskAttachments({
             return (
               <div
                 key={`${file.name}-${idx}`}
-                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-[#F5A623]/30 transition-colors"
+                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-[#E8962E]/30 transition-colors"
               >
-                <div className="w-8 h-8 shrink-0 rounded-md bg-[#F5A623]/10 text-[#F5A623] flex items-center justify-center">
+                <div className="w-8 h-8 shrink-0 rounded-md bg-[#E8962E]/10 text-[#E8962E] flex items-center justify-center">
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-[#FFFFFF] truncate">{file.name}</div>
-                  <div className="text-[10px] text-[#FFFFFF]/40 flex items-center gap-2">
+                  <div className="text-xs font-semibold text-[#F2EFE9] truncate">{file.name}</div>
+                  <div className="text-[10px] text-[#F2EFE9]/40 flex items-center gap-2">
                     <span>{formatSize(file.size)}</span>
-                    <span className="text-[#F5A623]/70">· se subirá al crear la tarea</span>
+                    <span className="text-[#E8962E]/70">· se subirá al crear la tarea</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemovePending(idx)}
-                  className="p-1.5 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  className="p-1.5 rounded-md text-[#F2EFE9]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                   title="Quitar"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -192,7 +192,7 @@ export default function TaskAttachments({
 
       {/* Lista existente (modo edición) */}
       {!isPending && (loading ? (
-        <div className="text-xs text-[#FFFFFF]/30 italic px-1">Cargando…</div>
+        <div className="text-xs text-[#F2EFE9]/30 italic px-1">Cargando…</div>
       ) : adjuntos.length > 0 && (
         <div className="space-y-1.5">
           {adjuntos.map(adj => {
@@ -201,14 +201,14 @@ export default function TaskAttachments({
             return (
               <div
                 key={adj.id}
-                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-[#F5A623]/30 transition-colors group"
+                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-[#E8962E]/30 transition-colors group"
               >
-                <div className="w-8 h-8 shrink-0 rounded-md bg-[#F5A623]/10 text-[#F5A623] flex items-center justify-center">
+                <div className="w-8 h-8 shrink-0 rounded-md bg-[#E8962E]/10 text-[#E8962E] flex items-center justify-center">
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-[#FFFFFF] truncate">{adj.file_name}</div>
-                  <div className="text-[10px] text-[#FFFFFF]/40 flex items-center gap-2">
+                  <div className="text-xs font-semibold text-[#F2EFE9] truncate">{adj.file_name}</div>
+                  <div className="text-[10px] text-[#F2EFE9]/40 flex items-center gap-2">
                     <span>{formatSize(adj.size_bytes)}</span>
                     {adj.autor_nombre && <span>· subido por {adj.autor_nombre}</span>}
                   </div>
@@ -216,7 +216,7 @@ export default function TaskAttachments({
                 <button
                   type="button"
                   onClick={() => handleDownload(adj)}
-                  className="p-1.5 rounded-md text-[#FFFFFF]/40 hover:text-[#F5A623] hover:bg-[#F5A623]/10 transition-colors"
+                  className="p-1.5 rounded-md text-[#F2EFE9]/40 hover:text-[#E8962E] hover:bg-[#E8962E]/10 transition-colors"
                   title="Descargar"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -226,7 +226,7 @@ export default function TaskAttachments({
                     type="button"
                     onClick={() => handleDelete(adj)}
                     disabled={deletingId === adj.id}
-                    className="p-1.5 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                    className="p-1.5 rounded-md text-[#F2EFE9]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
                     title="Eliminar"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -249,8 +249,8 @@ export default function TaskAttachments({
         }}
         className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed cursor-pointer text-xs transition-all ${
           dragOver
-            ? 'border-[#F5A623] bg-[#F5A623]/8 text-[#F5A623]'
-            : 'border-[rgba(255,255,255,0.08)] text-[#FFFFFF]/45 hover:border-[#F5A623]/40 hover:text-[#F5A623]'
+            ? 'border-[#E8962E] bg-[#E8962E]/8 text-[#E8962E]'
+            : 'border-[rgba(255,255,255,0.08)] text-[#F2EFE9]/45 hover:border-[#E8962E]/40 hover:text-[#E8962E]'
         }`}
       >
         <input
@@ -263,7 +263,7 @@ export default function TaskAttachments({
         {uploading ? (
           <><Loader2 className="w-3.5 h-3.5 anímate-spin" /> Subiendo…</>
         ) : (
-          <><Upload className="w-3.5 h-3.5" /> Arrastrá archivos o haz clic para subir <span className="text-[#FFFFFF]/25">(máx. 25 MB)</span></>
+          <><Upload className="w-3.5 h-3.5" /> Arrastrá archivos o haz clic para subir <span className="text-[#F2EFE9]/25">(máx. 25 MB)</span></>
         )}
       </label>
     </div>

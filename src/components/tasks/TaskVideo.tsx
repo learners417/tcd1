@@ -28,7 +28,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
       {/* Video Title */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/25 tracking-wider">
+          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/25 tracking-wider">
             VIDEO
           </span>
           {watched && (
@@ -37,14 +37,14 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
       </div>
 
       {/* YouTube Embed */}
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(245,166,35,0.2)] bg-black">
+      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black">
         {videoId ? (
           <iframe
             src={getYoutubeEmbedUrl(videoId)}
@@ -54,10 +54,10 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             className="absolute inset-0 w-full h-full"
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#141414] px-6 text-center">
-            <Play className="w-12 h-12 text-[#F5A623]/50 mb-3" />
-            <p className="text-sm text-[#FFFFFF]/70">Este contenido llega pronto</p>
-            <p className="text-xs text-[#FFFFFF]/45 mt-2 leading-relaxed max-w-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111110] px-6 text-center">
+            <Play className="w-12 h-12 text-[#E8962E]/50 mb-3" />
+            <p className="text-sm text-[#F2EFE9]/70">Este contenido llega pronto</p>
+            <p className="text-xs text-[#F2EFE9]/45 mt-2 leading-relaxed max-w-sm">
               Mientras tanto, tu Mentor te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
             </p>
           </div>
@@ -66,7 +66,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
 
       {/* Mark as watched */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#FFFFFF]/40">
+        <p className="text-xs text-[#F2EFE9]/40">
           {meta.tiempo_estimado || '10–15 min'}
         </p>
 

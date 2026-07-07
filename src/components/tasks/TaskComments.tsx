@@ -139,11 +139,11 @@ export default function TaskComments({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider">
         <MessageSquare className="w-3.5 h-3.5" />
         Conversación
         {totalCount > 0 && (
-          <span className="text-[10px] bg-[#F5A623]/15 text-[#F5A623] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+          <span className="text-[10px] bg-[#E8962E]/15 text-[#E8962E] px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
             {totalCount}
           </span>
         )}
@@ -152,7 +152,7 @@ export default function TaskComments({
       {/* Hilo */}
       {isPending ? (
         pendingList.length === 0 ? (
-          <div className="text-xs text-[#FFFFFF]/30 italic px-1">
+          <div className="text-xs text-[#F2EFE9]/30 italic px-1">
             Aún no hay comentarios. Escribe debajo para iniciar la conversación.
           </div>
         ) : (
@@ -160,19 +160,19 @@ export default function TaskComments({
             {pendingList.map((html, idx) => (
               <div
                 key={idx}
-                className="rounded-xl px-3.5 py-2.5 border bg-[#F5A623]/8 border-[#F5A623]/20"
+                className="rounded-xl px-3.5 py-2.5 border bg-[#E8962E]/8 border-[#E8962E]/20"
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-bold truncate text-[#F5A623]">
+                    <span className="text-xs font-bold truncate text-[#E8962E]">
                       {currentUserNombre}
                     </span>
-                    <span className="text-[10px] text-[#F5A623]/70">se enviará al crear la tarea</span>
+                    <span className="text-[10px] text-[#E8962E]/70">se enviará al crear la tarea</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemovePending(idx)}
-                    className="p-1 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="p-1 rounded-md text-[#F2EFE9]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                     title="Quitar comentario"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -184,9 +184,9 @@ export default function TaskComments({
           </div>
         )
       ) : loading ? (
-        <div className="text-xs text-[#FFFFFF]/30 italic px-1">Cargando…</div>
+        <div className="text-xs text-[#F2EFE9]/30 italic px-1">Cargando…</div>
       ) : comments.length === 0 ? (
-        <div className="text-xs text-[#FFFFFF]/30 italic px-1">
+        <div className="text-xs text-[#F2EFE9]/30 italic px-1">
           Aún no hay comentarios. Escribe debajo para iniciar la conversación.
         </div>
       ) : (
@@ -198,23 +198,23 @@ export default function TaskComments({
                 key={c.id}
                 className={`rounded-xl px-3.5 py-2.5 border ${
                   isMine
-                    ? 'bg-[#F5A623]/8 border-[#F5A623]/20'
+                    ? 'bg-[#E8962E]/8 border-[#E8962E]/20'
                     : 'bg-[#0F0F0F] border-[rgba(255,255,255,0.06)]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`text-xs font-bold truncate ${isMine ? 'text-[#F5A623]' : 'text-[#FFFFFF]/85'}`}>
+                    <span className={`text-xs font-bold truncate ${isMine ? 'text-[#E8962E]' : 'text-[#F2EFE9]/85'}`}>
                       {c.autor_nombre ?? 'Usuario'}
                     </span>
-                    <span className="text-[10px] text-[#FFFFFF]/35">{formatRelative(c.created_at)}</span>
+                    <span className="text-[10px] text-[#F2EFE9]/35">{formatRelative(c.created_at)}</span>
                   </div>
                   {isMine && (
                     <button
                       type="button"
                       onClick={() => handleDelete(c)}
                       disabled={deletingId === c.id}
-                      className="p-1 rounded-md text-[#FFFFFF]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                      className="p-1 rounded-md text-[#F2EFE9]/30 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
                       title="Eliminar comentario"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -229,7 +229,7 @@ export default function TaskComments({
       )}
 
       {/* Composer */}
-      <div className="bg-[#0A0A0A] border border-[rgba(245,166,35,0.2)] rounded-xl px-3 py-2.5 focus-within:border-[#F5A623]/50 transition-colors">
+      <div className="bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 focus-within:border-[#E8962E]/50 transition-colors">
         <RichTextEditor
           value={draft}
           onChange={setDraft}
@@ -241,7 +241,7 @@ export default function TaskComments({
             type="button"
             onClick={handleSend}
             disabled={isEmpty(draft) || sending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold transition-all"
           >
             {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
             Enviar

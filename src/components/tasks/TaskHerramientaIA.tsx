@@ -262,12 +262,12 @@ export default function TaskHerramientaIA({
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(245,166,35,0.2)] bg-black mt-4">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
               title={`Tutorial: ${meta.titulo}`}
@@ -278,13 +278,13 @@ export default function TaskHerramientaIA({
           </div>
         )}
         {meta.evidencia_requerida && (
-          <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#F5A623]/30 bg-[#F5A623]/[0.04]'}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#F5A623]">
+          <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#E8962E]/30 bg-[#E8962E]/[0.04]'}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#E8962E]">
               {evidCount > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida para completar'}
             </p>
-            <p className="text-sm text-[#FFFFFF]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            <p className="text-sm text-[#F2EFE9]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
             {!isCompleted && (
-              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#F5A623] text-black hover:bg-[#FFB94D]'}`}>
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#E8962E] text-black hover:bg-[#F4B65C]'}`}>
                 {evidSubiendo ? 'Subiendo…' : evidCount > 0 ? `✓ ${evidCount} subida${evidCount > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleEvidSubir} disabled={evidSubiendo} />
               </label>
@@ -305,7 +305,7 @@ export default function TaskHerramientaIA({
                 // Simple form — all fields visible
                 inputs.map(campo => (
                   <div key={campo.id}>
-                    <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">
+                    <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
                       {campo.label}
                     </label>
                     {renderField(campo)}
@@ -317,24 +317,24 @@ export default function TaskHerramientaIA({
                   const groupInputs = inputs.slice(groupIdx * 3, (groupIdx + 1) * 3);
                   const isExpanded = expandedSections.has(groupIdx);
                   return (
-                    <div key={groupIdx} className="card-panel border border-[rgba(245,166,35,0.15)]">
+                    <div key={groupIdx} className="card-panel border border-[rgba(232,150,46,0.10)]">
                       <button
                         onClick={() => toggleSection(groupIdx)}
                         className="w-full flex items-center justify-between p-4 text-left"
                       >
-                        <span className="text-sm font-medium text-[#FFFFFF]/80">
+                        <span className="text-sm font-medium text-[#F2EFE9]/80">
                           {groupInputs[0]?.label?.split(' ').slice(0, 3).join(' ')}...
                         </span>
                         {isExpanded
-                          ? <ChevronUp className="w-4 h-4 text-[#FFFFFF]/40" />
-                          : <ChevronDown className="w-4 h-4 text-[#FFFFFF]/40" />
+                          ? <ChevronUp className="w-4 h-4 text-[#F2EFE9]/40" />
+                          : <ChevronDown className="w-4 h-4 text-[#F2EFE9]/40" />
                         }
                       </button>
                       {isExpanded && (
                         <div className="px-4 pb-4 space-y-4">
                           {groupInputs.map(campo => (
                             <div key={campo.id}>
-                              <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">
+                              <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
                                 {campo.label}
                               </label>
                               {renderField(campo)}
@@ -350,7 +350,7 @@ export default function TaskHerramientaIA({
           ) : !herramienta && !usaIA ? (
             // v8 fallback · sin herramienta registrada y sin IA · textarea libre
             <div className="space-y-2">
-              <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">
+              <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
                 Escribe acá tu respuesta
               </label>
               <textarea
@@ -363,12 +363,12 @@ export default function TaskHerramientaIA({
             </div>
           ) : (
             // No inputs — herramienta uses previous ADN data
-            <div className="card-panel p-5 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
-              <p className="text-sm text-[#FFFFFF]/70">
+            <div className="card-panel p-5 border border-[#E8962E]/15 bg-[#E8962E]/[0.03]">
+              <p className="text-sm text-[#F2EFE9]/70">
                 Esta herramienta usa los datos que ya completaste en pasos anteriores para generar el resultado.
               </p>
               {meta.requiere_datos_de && meta.requiere_datos_de.length > 0 && (
-                <p className="text-xs text-[#FFFFFF]/40 mt-2">
+                <p className="text-xs text-[#F2EFE9]/40 mt-2">
                   Datos de: {meta.requiere_datos_de.join(', ')}
                 </p>
               )}
@@ -398,20 +398,20 @@ export default function TaskHerramientaIA({
       {/* ─── GENERATING ────────────────────────────────────────────────────── */}
       {modo === 'generando' && (
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[#F5A623] anímate-spin mb-4" />
-          <p className="text-sm text-[#FFFFFF]/60">Generando con IA...</p>
-          <p className="text-xs text-[#FFFFFF]/30 mt-1">Esto puede tomar unos segundos</p>
+          <Loader2 className="w-8 h-8 text-[#E8962E] anímate-spin mb-4" />
+          <p className="text-sm text-[#F2EFE9]/60">Generando con IA...</p>
+          <p className="text-xs text-[#F2EFE9]/30 mt-1">Esto puede tomar unos segundos</p>
         </div>
       )}
 
       {/* ─── REVIEW MODE ───────────────────────────────────────────────────── */}
       {modo === 'revision' && (
         <div className="space-y-5" ref={outputRef}>
-          <div className="card-panel p-5 border border-[rgba(245,166,35,0.2)]">
-            <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-bold mb-3">
+          <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)]">
+            <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-bold mb-3">
               {usaIA ? 'Resultado generado' : 'Tu contenido'}
             </p>
-            <div className="text-sm text-[#FFFFFF]/90 leading-relaxed prose prose-invert max-w-none prose-a:text-[#F5A623] prose-headings:text-[#F5A623] prose-headings:font-semibold prose-strong:text-[#FFFFFF] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(245,166,35,0.15)]">
+            <div className="text-sm text-[#F2EFE9]/90 leading-relaxed prose prose-invert max-w-none prose-a:text-[#E8962E] prose-headings:text-[#E8962E] prose-headings:font-semibold prose-strong:text-[#F2EFE9] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
               <Markdown>{output}</Markdown>
             </div>
           </div>
@@ -426,7 +426,7 @@ export default function TaskHerramientaIA({
             {usaIA && (
               <button
                 onClick={handleRegenerate}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors"
               >
                 <RotateCcw className="w-4 h-4" /> Rehacer
               </button>
@@ -474,7 +474,7 @@ export default function TaskHerramientaIA({
             <p className="text-[10px] text-[#22C55E] uppercase tracking-widest font-bold mb-3 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" /> Guardado en tu ADN
             </p>
-            <div className="text-sm text-[#FFFFFF]/80 leading-relaxed prose prose-invert max-w-none prose-a:text-[#F5A623] prose-headings:text-[#F5A623] prose-headings:font-semibold prose-strong:text-[#FFFFFF] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(245,166,35,0.15)]">
+            <div className="text-sm text-[#F2EFE9]/80 leading-relaxed prose prose-invert max-w-none prose-a:text-[#E8962E] prose-headings:text-[#E8962E] prose-headings:font-semibold prose-strong:text-[#F2EFE9] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
               <Markdown>{output}</Markdown>
             </div>
           </div>

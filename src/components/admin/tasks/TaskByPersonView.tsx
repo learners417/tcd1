@@ -136,7 +136,7 @@ function PersonColumn({
 
   return (
     <div
-      className={`min-w-0 flex flex-col rounded-2xl transition-all ${isOver ? 'ring-2 ring-offset-2 ring-offset-[#0A0A0A]' : ''}`}
+      className={`min-w-0 flex flex-col rounded-2xl transition-all ${isOver ? 'ring-2 ring-offset-2 ring-offset-[#080808]' : ''}`}
       style={isOver ? { boxShadow: `0 0 0 2px ${color.solid}` } : undefined}
     >
       {/* Column header */}
@@ -152,10 +152,10 @@ function PersonColumn({
             {personId ? getInitials(personName) : <Users className="w-4 h-4" />}
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-bold text-[#FFFFFF] truncate" style={{ color: color.text }}>
+            <div className="text-sm font-bold text-[#F2EFE9] truncate" style={{ color: color.text }}>
               {personName}
             </div>
-            <div className="text-[11px] text-[#FFFFFF]/40">
+            <div className="text-[11px] text-[#F2EFE9]/40">
               {activeCount} activa{activeCount === 1 ? '' : 's'}
               {tareas.length !== activeCount && ` · ${tareas.length - activeCount} compl.`}
             </div>
@@ -169,7 +169,7 @@ function PersonColumn({
         className="flex-1 min-h-[300px] rounded-b-2xl bg-[#0F0F0F]/60 border border-t-0 border-[rgba(255,255,255,0.05)] p-2 space-y-3"
       >
         {tareas.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-[#FFFFFF]/15 text-xs px-3 text-center">
+          <div className="flex items-center justify-center h-32 text-[#F2EFE9]/15 text-xs px-3 text-center">
             Sin tareas asignadas. Arrastrá una acá para reasignar.
           </div>
         ) : (
@@ -180,10 +180,10 @@ function PersonColumn({
             return (
               <div key={bucket} className="space-y-2">
                 <div className="flex items-center justify-between px-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isVencidas ? 'text-red-400' : 'text-[#FFFFFF]/40'}`}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isVencidas ? 'text-red-400' : 'text-[#F2EFE9]/40'}`}>
                     {BUCKET_LABELS[bucket]}
                   </span>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isVencidas ? 'bg-red-500/15 text-red-400' : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/40'}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isVencidas ? 'bg-red-500/15 text-red-400' : 'bg-[#F2EFE9]/5 text-[#F2EFE9]/40'}`}>
                     {items.length}
                   </span>
                 </div>

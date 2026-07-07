@@ -27,43 +27,43 @@ export default function ReporteDirector({ nombre, diaPrograma, completadas, vent
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 print:p-0 print:bg-white" onClick={onClose}>
       <div
-        className="bg-[#0C0C0C] print:bg-white border border-[#F5A623]/30 print:border-0 rounded-2xl print:rounded-none max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-h-none"
+        className="bg-[#0B0B0A] print:bg-white border border-[#E8962E]/30 print:border-0 rounded-2xl print:rounded-none max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-h-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra de acciones (no se imprime) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#FFFFFF]/10 print:hidden">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#F5A623]">El Reporte del Director</p>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F2EFE9]/10 print:hidden">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E]">El Reporte del Director</p>
           <div className="flex gap-2">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F5A623] text-black text-xs font-bold hover:bg-[#FFB94D] transition-colors">
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E8962E] text-black text-xs font-bold hover:bg-[#F4B65C] transition-colors">
               <Printer className="w-3.5 h-3.5" /> Imprimir / Guardar PDF
             </button>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#FFFFFF]/10 text-[#FFFFFF]/60"><X className="w-4 h-4" /></button>
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F2EFE9]/10 text-[#F2EFE9]/60"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
         {/* El reporte */}
         <div className="p-8 print:p-10 text-[#EDEDED] print:text-[#1a1a1a]">
           <div className="text-center mb-8">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#F5A623] font-bold">Tu Clínica Digital · Método CLINICA</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#E8962E] font-bold">Tu Clínica Digital · Método CLINICA</p>
             <h1 className="text-3xl font-light mt-2" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>Reporte del Director</h1>
             <p className="text-sm opacity-60 mt-1">{nombre} · {fecha}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="border border-[#F5A623]/25 print:border-gray-300 rounded-xl p-5 text-center">
+            <div className="border border-[#E8962E]/25 print:border-gray-300 rounded-xl p-5 text-center">
               <p className="text-[10px] uppercase tracking-widest opacity-50">Día del programa</p>
               <p className="text-3xl font-light mt-1">{Math.min(diaPrograma, 90)} <span className="text-sm opacity-40">/ 90</span></p>
             </div>
-            <div className="border border-[#F5A623]/25 print:border-gray-300 rounded-xl p-5 text-center">
+            <div className="border border-[#E8962E]/25 print:border-gray-300 rounded-xl p-5 text-center">
               <p className="text-[10px] uppercase tracking-widest opacity-50">Tu cinturón</p>
               <p className="text-2xl font-light mt-1">{cint.emoji} {cint.nombre}</p>
               <p className="text-[10px] opacity-40">{cint.metafora}</p>
             </div>
-            <div className="border border-[#F5A623]/25 print:border-gray-300 rounded-xl p-5 text-center">
+            <div className="border border-[#E8962E]/25 print:border-gray-300 rounded-xl p-5 text-center">
               <p className="text-[10px] uppercase tracking-widest opacity-50">Sesiones del Camino</p>
               <p className="text-3xl font-light mt-1">{hechas} <span className="text-sm opacity-40">/ {totalSesiones}</span></p>
             </div>
-            <div className="border border-[#F5A623]/25 print:border-gray-300 rounded-xl p-5 text-center">
+            <div className="border border-[#E8962E]/25 print:border-gray-300 rounded-xl p-5 text-center">
               <p className="text-[10px] uppercase tracking-widest opacity-50">Racha de sesiones</p>
               <p className="text-3xl font-light mt-1">{racha} 🔥</p>
             </div>

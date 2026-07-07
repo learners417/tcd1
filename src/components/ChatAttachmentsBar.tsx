@@ -78,7 +78,7 @@ export function AttachButton({
         title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
         className={
           className ??
-          'shrink-0 w-10 h-10 rounded-xl bg-[#F5A623]/10 hover:bg-[#F5A623]/20 border border-[rgba(245,166,35,0.2)] disabled:opacity-40 flex items-center justify-center text-[#F5A623] transition-colors'
+          'shrink-0 w-10 h-10 rounded-xl bg-[#E8962E]/10 hover:bg-[#E8962E]/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-[#E8962E] transition-colors'
         }
       >
         <Paperclip className="w-4 h-4" />
@@ -114,8 +114,8 @@ export function AttachmentsPreviewStrip({
         />
       ))}
       {uploading && (
-        <div className="h-16 px-3 rounded-xl bg-[#F5A623]/5 border border-dashed border-[rgba(245,166,35,0.25)] flex items-center gap-2 text-xs text-white/60">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F5A623]" />
+        <div className="h-16 px-3 rounded-xl bg-[#E8962E]/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/60">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" />
           Procesando...
         </div>
       )}
@@ -131,7 +131,7 @@ interface AttachmentChipProps {
 function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
   if (attachment.kind === 'image' && attachment.previewDataUrl) {
     return (
-      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[rgba(245,166,35,0.3)] group">
+      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[rgba(232,150,46,0.18)] group">
         <img
           src={attachment.previewDataUrl}
           alt={attachment.fileName}
@@ -156,8 +156,8 @@ function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
   }
 
   return (
-    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[rgba(245,166,35,0.3)] bg-[#F5A623]/10 flex items-center gap-2 group">
-      <FileText className="w-4 h-4 text-[#F5A623] shrink-0" />
+    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[rgba(232,150,46,0.18)] bg-[#E8962E]/10 flex items-center gap-2 group">
+      <FileText className="w-4 h-4 text-[#E8962E] shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-xs text-white truncate font-medium">
           {attachment.fileName}

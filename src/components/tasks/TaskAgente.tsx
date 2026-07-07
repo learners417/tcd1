@@ -31,10 +31,10 @@ export default function TaskAgente({ meta, onComplete, isCompleted, onNavigateTo
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
       </div>
 
       {/* Instruction */}
@@ -42,7 +42,7 @@ export default function TaskAgente({ meta, onComplete, isCompleted, onNavigateTo
         <p className="text-[10px] text-purple-400 uppercase tracking-widest font-bold mb-3">
           Instrucción
         </p>
-        <p className="text-sm text-[#FFFFFF]/80 leading-relaxed">
+        <p className="text-sm text-[#F2EFE9]/80 leading-relaxed">
           {meta.descripcion}
         </p>
       </div>
@@ -66,7 +66,7 @@ export default function TaskAgente({ meta, onComplete, isCompleted, onNavigateTo
           </div>
         ) : (
           <>
-            <p className="text-xs text-[#FFFFFF]/55 text-center mb-3 leading-relaxed">
+            <p className="text-xs text-[#F2EFE9]/55 text-center mb-3 leading-relaxed">
               Cuando termines de trabajar con el Agente, hacé clic acá para marcar este paso como completado y desbloquear el siguiente.
             </p>
             <button

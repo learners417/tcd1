@@ -26,8 +26,8 @@ export default function CreditsBadge({ userId, variant = 'expanded' }: CreditsBa
   const color = balance.isEmpty
     ? 'text-[#EF4444] border-[#EF4444]/40 bg-[#EF4444]/10'
     : balance.isLow
-    ? 'text-[#F5A623] border-[#F5A623]/60 bg-[#F5A623]/15'
-    : 'text-[#F5A623] border-[#F5A623]/30 bg-[#F5A623]/10 hover:bg-[#F5A623]/15';
+    ? 'text-[#E8962E] border-[#E8962E]/60 bg-[#E8962E]/15'
+    : 'text-[#E8962E] border-[#E8962E]/30 bg-[#E8962E]/10 hover:bg-[#E8962E]/15';
 
   return (
     <>

@@ -38,8 +38,8 @@ interface ManualDraft {
 
 const PALETA_EJEMPLO: Swatch[] = [
   { hex: '#0F1419', rol: 'fondo profundo' },
-  { hex: '#F5A623', rol: 'acento dorado' },
-  { hex: '#FFFFFF', rol: 'texto principal' },
+  { hex: '#E8962E', rol: 'acento dorado' },
+  { hex: '#F2EFE9', rol: 'texto principal' },
   { hex: '#A8B5C4', rol: 'texto secundario' },
 ];
 
@@ -49,7 +49,7 @@ const TIPOGRAFIA_EJEMPLO =
 const REGLAS_EJEMPLO =
   [
     '- Nunca fondo blanco puro (usar siempre tonos calidos o profundos)',
-    '- El acento dorado #F5A623 debe estar presente en cada pieza',
+    '- El acento dorado #E8962E debe estar presente en cada pieza',
     '- No usar rojo saturado — choca con la identidad aspiracional',
     '- Textos en MAYUSCULAS solo en titulares, jamas en parrafos',
     '- Fotos de personas: miradas reales, no poses de stock',
@@ -220,7 +220,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   const addSwatch = useCallback(() => {
     setDraft((d) => ({
       ...d,
-      swatches: [...d.swatches, { hex: '#F5A623', rol: '' }],
+      swatches: [...d.swatches, { hex: '#E8962E', rol: '' }],
     }));
   }, []);
 
@@ -234,17 +234,17 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   return (
     <div className="space-y-5">
       {/* Intro + acciones rapidas */}
-      <div className="card-panel p-4 border-[rgba(245,166,35,0.2)] flex items-start justify-between gap-4">
-        <p className="text-[13px] text-[#FFFFFF]/70 leading-relaxed flex-1">
+      <div className="card-panel p-4 border-[rgba(232,150,46,0.12)] flex items-start justify-between gap-4">
+        <p className="text-[13px] text-[#F2EFE9]/70 leading-relaxed flex-1">
           Define el codigo visual que{' '}
-          <span className="text-[#F5A623] font-semibold">manda sobre cualquier estilo</span> o
+          <span className="text-[#E8962E] font-semibold">manda sobre cualquier estilo</span> o
           referencia que uses al generar imagenes. La paleta se aplica SIEMPRE, el estilo aporta
           tecnica y tratamiento.
         </p>
         <button
           onClick={cargarEjemplo}
           title="Cargar un ejemplo para probar"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#F5A623] border border-[#F5A623]/30 hover:bg-[#F5A623]/10 transition-all whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#E8962E] border border-[#E8962E]/30 hover:bg-[#E8962E]/10 transition-all whitespace-nowrap"
         >
           <Sparkles className="w-3 h-3" />
           Cargar ejemplo
@@ -254,14 +254,14 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       {/* Progreso */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#FFFFFF]/40">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#F2EFE9]/40">
             Completado
           </span>
-          <span className="text-[11px] font-semibold text-[#FFFFFF]/70">{completos}/3</span>
+          <span className="text-[11px] font-semibold text-[#F2EFE9]/70">{completos}/3</span>
         </div>
-        <div className="flex-1 max-w-xs h-1.5 rounded-full bg-[#FFFFFF]/5 overflow-hidden">
+        <div className="flex-1 max-w-xs h-1.5 rounded-full bg-[#F2EFE9]/5 overflow-hidden">
           <div
-            className="h-full bg-[#F5A623] transition-all"
+            className="h-full bg-[#E8962E] transition-all"
             style={{ width: `${(completos / 3) * 100}%` }}
           />
         </div>
@@ -298,10 +298,10 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       />
 
       {/* Acciones */}
-      <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(245,166,35,0.15)]">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(232,150,46,0.10)]">
         <button
           onClick={syncConAdn}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-[#FFFFFF]/60 border border-[#FFFFFF]/10 hover:border-[#F5A623]/40 hover:text-[#FFFFFF]/90 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-[#F2EFE9]/60 border border-[#F2EFE9]/10 hover:border-[#E8962E]/40 hover:text-[#F2EFE9]/90 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Sincronizar con ADN
@@ -309,7 +309,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={guardar}
           disabled={saving || !dirty || !userId}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/40 hover:bg-[#F5A623]/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/40 hover:bg-[#E8962E]/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? (
             <>
@@ -347,17 +347,17 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Palette className={`w-4 h-4 ${isCompleto ? 'text-[#F5A623]' : 'text-[#FFFFFF]/30'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-[#FFFFFF]/60">
+        <Palette className={`w-4 h-4 ${isCompleto ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-[#F2EFE9]/60">
           Paleta de colores
         </label>
         {isCompleto && (
-          <span className="text-[9px] text-[#F5A623]/70 font-medium">
+          <span className="text-[9px] text-[#E8962E]/70 font-medium">
             · {swatches.length} color{swatches.length === 1 ? '' : 'es'}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-[#FFFFFF]/40 mb-3">
+      <p className="text-[11px] text-[#F2EFE9]/40 mb-3">
         Estos colores se aplican con prioridad sobre el estilo visual y sobre cualquier imagen de
         referencia al generar.
       </p>
@@ -365,7 +365,7 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
       {/* Gradient bar preview */}
       {swatches.length > 0 && (
         <div
-          className="h-8 rounded-lg mb-3 overflow-hidden flex border border-[rgba(245,166,35,0.2)] shadow-inner"
+          className="h-8 rounded-lg mb-3 overflow-hidden flex border border-[rgba(232,150,46,0.12)] shadow-inner"
           style={{ background: 'rgba(0,0,0,0.3)' }}
         >
           {swatches.map((sw, i) => (
@@ -393,7 +393,7 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
         {/* Add button card */}
         <button
           onClick={onAdd}
-          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[rgba(245,166,35,0.3)] text-[#F5A623]/70 hover:bg-[#F5A623]/5 hover:border-[#F5A623]/50 hover:text-[#F5A623] transition-all"
+          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[rgba(232,150,46,0.18)] text-[#E8962E]/70 hover:bg-[#E8962E]/5 hover:border-[#E8962E]/50 hover:text-[#E8962E] transition-all"
         >
           <Plus className="w-4 h-4" />
           <span className="text-[12px] font-medium">Agregar color</span>
@@ -441,17 +441,17 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
   }, [hexLocal, valido]);
 
   return (
-    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[rgba(245,166,35,0.15)] hover:border-[#F5A623]/35 transition-all">
+    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[rgba(232,150,46,0.10)] hover:border-[#E8962E]/35 transition-all">
       {/* Color preview circle (clickable -> opens native picker) */}
       <button
         type="button"
         onClick={() => colorInputRef.current?.click()}
-        className="relative w-12 h-12 rounded-full shrink-0 shadow-lg border-2 border-[#FFFFFF]/10 hover:border-[#FFFFFF]/25 transition-all ring-1 ring-black/40"
+        className="relative w-12 h-12 rounded-full shrink-0 shadow-lg border-2 border-[#F2EFE9]/10 hover:border-[#F2EFE9]/25 transition-all ring-1 ring-black/40"
         style={{ backgroundColor: display }}
         title="Click para cambiar color"
       >
         {!valido && (
-          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-[#FFFFFF]/40">
+          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-[#F2EFE9]/40">
             ?
           </span>
         )}
@@ -459,7 +459,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <input
         ref={colorInputRef}
         type="color"
-        value={valido ? hexLocal : '#F5A623'}
+        value={valido ? hexLocal : '#E8962E'}
         onChange={(e) => {
           const val = e.target.value.toUpperCase();
           setHexLocal(val);
@@ -485,14 +485,14 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
             maxLength={7}
             className={`w-[92px] bg-black/30 border rounded-md px-2 py-1 text-[12px] font-mono tracking-wider transition-all focus:outline-none focus:ring-1 ${
               valido
-                ? 'border-[rgba(245,166,35,0.3)] text-[#FFFFFF]/90 focus:border-[#F5A623]/60 focus:ring-[#F5A623]/30'
+                ? 'border-[rgba(232,150,46,0.18)] text-[#F2EFE9]/90 focus:border-[#E8962E]/60 focus:ring-[#E8962E]/30'
                 : 'border-[#EF4444]/40 text-[#EF4444] focus:border-[#EF4444]/60 focus:ring-[#EF4444]/30'
             }`}
           />
           <button
             type="button"
             onClick={copyHex}
-            className="p-1 rounded text-[#FFFFFF]/30 hover:text-[#F5A623] transition-colors"
+            className="p-1 rounded text-[#F2EFE9]/30 hover:text-[#E8962E] transition-colors"
             title="Copiar hex"
           >
             <CopyIcon className="w-3 h-3" />
@@ -503,7 +503,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
           value={swatch.rol}
           onChange={(e) => onChange({ rol: e.target.value })}
           placeholder="rol (ej: fondo, acento)"
-          className="w-full bg-transparent border-0 border-b border-[#FFFFFF]/10 text-[11px] text-[#FFFFFF]/70 placeholder-[#FFFFFF]/25 focus:outline-none focus:border-[#F5A623]/40 pb-0.5"
+          className="w-full bg-transparent border-0 border-b border-[#F2EFE9]/10 text-[11px] text-[#F2EFE9]/70 placeholder-[#F2EFE9]/25 focus:outline-none focus:border-[#E8962E]/40 pb-0.5"
         />
       </div>
 
@@ -511,7 +511,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <button
         type="button"
         onClick={onRemove}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#FFFFFF]/30 hover:text-[#EF4444] transition-all"
+        className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#F2EFE9]/30 hover:text-[#EF4444] transition-all"
         title="Eliminar color"
       >
         <X className="w-3.5 h-3.5" />
@@ -537,21 +537,21 @@ function Field({ icon: Icon, label, hint, value, onChange, placeholder, rows }: 
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Icon className={`w-4 h-4 ${isCompleto ? 'text-[#F5A623]' : 'text-[#FFFFFF]/30'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-[#FFFFFF]/60">
+        <Icon className={`w-4 h-4 ${isCompleto ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-[#F2EFE9]/60">
           {label}
         </label>
         {isCompleto && (
-          <span className="text-[9px] text-[#F5A623]/70 font-medium">· cargado</span>
+          <span className="text-[9px] text-[#E8962E]/70 font-medium">· cargado</span>
         )}
       </div>
-      <p className="text-[11px] text-[#FFFFFF]/40 mb-2">{hint}</p>
+      <p className="text-[11px] text-[#F2EFE9]/40 mb-2">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className="w-full bg-black/20 border border-[rgba(245,166,35,0.25)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/60 focus:ring-1 focus:ring-[#F5A623]/30 transition-all placeholder-[#FFFFFF]/20 resize-none"
+        className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/60 focus:ring-1 focus:ring-[#E8962E]/30 transition-all placeholder-[#F2EFE9]/20 resize-none"
       />
     </div>
   );

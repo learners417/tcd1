@@ -37,9 +37,9 @@ export default function ConfirmDialog({
   if (!open) return null;
 
   const isDanger = variant === 'danger';
-  const accent = isDanger ? '#EF4444' : '#F5A623';
-  const accentBg = isDanger ? 'rgba(239,68,68,0.15)' : 'rgba(245,166,35,0.15)';
-  const accentBorder = isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(245,166,35,0.3)';
+  const accent = isDanger ? '#EF4444' : '#E8962E';
+  const accentBg = isDanger ? 'rgba(239,68,68,0.15)' : 'rgba(232,150,46,0.10)';
+  const accentBorder = isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)';
 
   return (
     <div
@@ -48,7 +48,7 @@ export default function ConfirmDialog({
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-sm bg-[#141414] rounded-3xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-sm bg-[#111110] rounded-3xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200"
         style={{ border: `1px solid ${accentBorder}` }}
       >
         <div className="absolute top-0 left-0 right-0 h-1" style={{ background: accent }} />
@@ -56,7 +56,7 @@ export default function ConfirmDialog({
         <button
           onClick={onCancel}
           disabled={loading}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#FFFFFF]/5 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#FFFFFF]/10 transition-colors disabled:opacity-40"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F2EFE9]/5 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#F2EFE9]/10 transition-colors disabled:opacity-40"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4" />
@@ -70,14 +70,14 @@ export default function ConfirmDialog({
             <AlertTriangle className="w-6 h-6" style={{ color: accent }} />
           </div>
 
-          <h3 className="text-xl font-semibold text-[#FFFFFF] text-center mb-2">{title}</h3>
-          <p className="text-sm text-[#FFFFFF]/60 text-center leading-relaxed mb-7">{message}</p>
+          <h3 className="text-xl font-semibold text-[#F2EFE9] text-center mb-2">{title}</h3>
+          <p className="text-sm text-[#F2EFE9]/60 text-center leading-relaxed mb-7">{message}</p>
 
           <div className="flex items-center gap-3">
             <button
               onClick={onCancel}
               disabled={loading}
-              className="flex-1 py-3 rounded-xl bg-[#FFFFFF]/5 hover:bg-[#FFFFFF]/10 text-[#FFFFFF]/80 text-sm font-semibold transition-colors disabled:opacity-40"
+              className="flex-1 py-3 rounded-xl bg-[#F2EFE9]/5 hover:bg-[#F2EFE9]/10 text-[#F2EFE9]/80 text-sm font-semibold transition-colors disabled:opacity-40"
             >
               {cancelLabel}
             </button>
@@ -88,9 +88,9 @@ export default function ConfirmDialog({
               style={{
                 background: isDanger
                   ? 'linear-gradient(135deg, #EF4444, #DC2626)'
-                  : 'linear-gradient(135deg, #F5A623, #FFB94D)',
-                color: isDanger ? '#FFFFFF' : '#000000',
-                boxShadow: `0 8px 24px ${isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(245,166,35,0.3)'}`,
+                  : 'linear-gradient(135deg, #E8962E, #F4B65C)',
+                color: isDanger ? '#F2EFE9' : '#000000',
+                boxShadow: `0 8px 24px ${isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)'}`,
               }}
             >
               {loading ? 'Procesando…' : confirmLabel}

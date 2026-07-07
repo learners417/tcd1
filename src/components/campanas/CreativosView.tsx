@@ -293,25 +293,25 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
     <div className="animate-in fade-in duration-500 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#F5A623]/15 flex items-center justify-center">
-          <HeaderIcon className="w-5 h-5 text-[#F5A623]" />
+        <div className="w-10 h-10 rounded-xl bg-[#E8962E]/15 flex items-center justify-center">
+          <HeaderIcon className="w-5 h-5 text-[#E8962E]" />
         </div>
         <div>
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#F5A623] mb-0.5">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#E8962E] mb-0.5">
             {config.eyebrow}
           </p>
-          <h2 className="text-xl font-light text-[#FFFFFF]">
+          <h2 className="text-xl font-light text-[#F2EFE9]">
             Creativos{' '}
-            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#F5A623]">
+            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#E8962E]">
               con IA
             </span>
           </h2>
-          <p className="text-[11px] text-[#FFFFFF]/40 mt-1">{config.descripcion}</p>
+          <p className="text-[11px] text-[#F2EFE9]/40 mt-1">{config.descripcion}</p>
         </div>
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[rgba(245,166,35,0.15)] pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-[rgba(232,150,46,0.10)] pb-3">
         {TABS.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -321,8 +321,8 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
                 isActive
-                  ? 'bg-[#F5A623]/15 text-[#F5A623] border-[#F5A623]/40'
-                  : 'bg-transparent text-[#FFFFFF]/50 border-[#FFFFFF]/8 hover:border-[#F5A623]/25 hover:text-[#FFFFFF]/80'
+                  ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40'
+                  : 'bg-transparent text-[#F2EFE9]/50 border-[#F2EFE9]/8 hover:border-[#E8962E]/25 hover:text-[#F2EFE9]/80'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -346,7 +346,7 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               }}
             />
           ) : loadingHist ? (
-            <div className="flex items-center justify-center py-16 text-[#FFFFFF]/40 gap-2">
+            <div className="flex items-center justify-center py-16 text-[#F2EFE9]/40 gap-2">
               <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
             </div>
           ) : (
@@ -387,11 +387,11 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           {/* Angulo de comunicacion (opcional) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFFFFF]/40" />
-              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#FFFFFF]/50">
+              <Sparkles className="w-3.5 h-3.5 text-[#F2EFE9]/40" />
+              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#F2EFE9]/50">
                 Angulo de comunicacion
               </span>
-              <span className="text-[9px] text-[#FFFFFF]/25">— opcional, orienta el tono visual</span>
+              <span className="text-[9px] text-[#F2EFE9]/25">— opcional, orienta el tono visual</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {ANGULOS.map((a) => {
@@ -402,14 +402,14 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
                     onClick={() => setAngulo(a.id)}
                     className={`p-2 rounded-xl border text-left transition-all ${
                       isActive
-                        ? 'border-[#F5A623]/50 bg-[#F5A623]/10'
-                        : 'border-[#FFFFFF]/5 hover:border-[#F5A623]/25 hover:bg-[#FFFFFF]/[0.02]'
+                        ? 'border-[#E8962E]/50 bg-[#E8962E]/10'
+                        : 'border-[#F2EFE9]/5 hover:border-[#E8962E]/25 hover:bg-[#F2EFE9]/[0.02]'
                     }`}
                   >
-                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-[#F5A623]' : 'text-[#FFFFFF]/80'}`}>
+                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-[#E8962E]' : 'text-[#F2EFE9]/80'}`}>
                       {a.label}
                     </div>
-                    <div className="text-[9px] text-[#FFFFFF]/30 mt-0.5 leading-tight">{a.descripcion}</div>
+                    <div className="text-[9px] text-[#F2EFE9]/30 mt-0.5 leading-tight">{a.descripcion}</div>
                   </button>
                 );
               })}
@@ -432,19 +432,19 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
 
           {/* Estado del auto-guardado */}
           {images.length > 0 && (
-            <div className="flex items-center justify-between rounded-xl bg-[#F5A623]/5 border border-[#F5A623]/20 px-4 py-2.5">
+            <div className="flex items-center justify-between rounded-xl bg-[#E8962E]/5 border border-[#E8962E]/20 px-4 py-2.5">
               <div className="flex items-center gap-2 text-xs">
                 {saving ? (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#F5A623]" /> <span className="text-[#FFFFFF]/60">Guardando en historial…</span></>
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" /> <span className="text-[#F2EFE9]/60">Guardando en historial…</span></>
                 ) : saved ? (
-                  <><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> <span className="text-[#FFFFFF]/70">Guardado automaticamente en historial</span></>
+                  <><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> <span className="text-[#F2EFE9]/70">Guardado automaticamente en historial</span></>
                 ) : (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#F5A623]" /> <span className="text-[#FFFFFF]/60">Preparando…</span></>
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" /> <span className="text-[#F2EFE9]/60">Preparando…</span></>
                 )}
               </div>
               <button
                 onClick={() => setActiveTab('historial')}
-                className="text-[11px] font-semibold text-[#F5A623] hover:underline"
+                className="text-[11px] font-semibold text-[#E8962E] hover:underline"
               >
                 Ver historial →
               </button>

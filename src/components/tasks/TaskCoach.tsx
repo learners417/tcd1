@@ -53,7 +53,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF]/70 border border-[#FFFFFF]/15 tracking-wider">
+          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#F2EFE9]/10 text-[#F2EFE9]/70 border border-[#F2EFE9]/15 tracking-wider">
             COACH
           </span>
           {checked && (
@@ -62,12 +62,12 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#FFFFFF]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(245,166,35,0.2)] bg-black mt-4">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
               title={`Tutorial: ${meta.titulo}`}
@@ -78,13 +78,13 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
           </div>
         )}
         {meta.evidencia_requerida && (
-          <div className={`card-panel p-4 border ${evidenciaLista ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#F5A623]/30 bg-[#F5A623]/[0.04]'}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#F5A623]">
+          <div className={`card-panel p-4 border ${evidenciaLista ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#E8962E]/30 bg-[#E8962E]/[0.04]'}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#E8962E]">
               {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
             </p>
-            <p className="text-sm text-[#FFFFFF]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            <p className="text-sm text-[#F2EFE9]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
             {!isCompleted && (
-              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#F5A623] text-black hover:bg-[#FFB94D]'}`}>
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#E8962E] text-black hover:bg-[#F4B65C]'}`}>
                 {subiendo ? 'Subiendo…' : evidencias > 0 ? `✓ ${evidencias} subida${evidencias > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
               </label>
@@ -98,10 +98,10 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
 
       {/* Coach instruction — interna: NO se muestra; el Mentor la recibe en su prompt */}
       {meta.coach_instruccion && (
-        <div className="card-panel p-4 border border-[#F5A623]/15 bg-[#F5A623]/[0.03]">
-          <p className="text-sm text-[#FFFFFF]/75 leading-relaxed">
+        <div className="card-panel p-4 border border-[#E8962E]/15 bg-[#E8962E]/[0.03]">
+          <p className="text-sm text-[#F2EFE9]/75 leading-relaxed">
             💬 Tu Mentor ya sabe exactamente qué van a trabajar hoy. Abre el chat y dile:{' '}
-            <span className="text-[#F5A623] font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
+            <span className="text-[#E8962E] font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
           </p>
         </div>
       )}
@@ -109,7 +109,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       {/* Open Coach button */}
       <button
         onClick={onNavigateToCoach}
-        className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20 text-[#F5A623] font-medium hover:bg-[#F5A623]/15 transition-colors"
+        className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#E8962E]/10 border border-[#E8962E]/20 text-[#E8962E] font-medium hover:bg-[#E8962E]/15 transition-colors"
       >
         <MessageSquare className="w-5 h-5" />
         Abrir Coach IA
@@ -117,7 +117,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       </button>
 
       {/* Confirmation — prominent completion button */}
-      <div className="border-t border-[rgba(245,166,35,0.15)] pt-5">
+      <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
         {checked ? (
           <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E] text-base font-semibold">
             <CheckCircle2 className="w-5 h-5" />
@@ -125,7 +125,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
           </div>
         ) : (
           <>
-            <p className="text-xs text-[#FFFFFF]/55 text-center mb-3 leading-relaxed">
+            <p className="text-xs text-[#F2EFE9]/55 text-center mb-3 leading-relaxed">
               {evidenciaLista
                 ? 'Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.'
                 : '📎 Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
@@ -133,7 +133,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}
               disabled={!evidenciaLista}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-[#22C55E]/15 border-2 border-[#22C55E]/40 text-[#22C55E] hover:bg-[#22C55E]/25 hover:border-[#22C55E]/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-[#FFFFFF]/5 border-2 border-[#FFFFFF]/10 text-[#FFFFFF]/30 cursor-not-allowed'}`}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-[#22C55E]/15 border-2 border-[#22C55E]/40 text-[#22C55E] hover:bg-[#22C55E]/25 hover:border-[#22C55E]/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-[#F2EFE9]/5 border-2 border-[#F2EFE9]/10 text-[#F2EFE9]/30 cursor-not-allowed'}`}
             >
               <CheckCircle2 className="w-5 h-5" />
               Marcar como completado

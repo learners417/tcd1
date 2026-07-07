@@ -140,32 +140,32 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors">
+          <button onClick={onBack} className="text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-xl font-semibold text-[#FFFFFF]" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
+            <h2 className="text-xl font-semibold text-[#F2EFE9]" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
               Studio de Creativos
             </h2>
-            <p className="text-sm text-[#FFFFFF]/40">{campana.nombre}</p>
+            <p className="text-sm text-[#F2EFE9]/40">{campana.nombre}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F5A623]/5 border border-[#F5A623]/20 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#E8962E]/5 border border-[#E8962E]/20 text-xs">
           {saving ? (
-            <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#F5A623]" /><span className="text-[#FFFFFF]/60">Guardando en historial…</span></>
+            <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" /><span className="text-[#F2EFE9]/60">Guardando en historial…</span></>
           ) : saved ? (
-            <><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /><span className="text-[#FFFFFF]/70">Guardado en historial</span></>
+            <><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /><span className="text-[#F2EFE9]/70">Guardado en historial</span></>
           ) : copies.length === 0 ? (
-            <span className="text-[#FFFFFF]/40">Generá el copy primero</span>
+            <span className="text-[#F2EFE9]/40">Generá el copy primero</span>
           ) : (
-            <span className="text-[#FFFFFF]/40">Se guarda automáticamente al generar la imagen</span>
+            <span className="text-[#F2EFE9]/40">Se guarda automáticamente al generar la imagen</span>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[#141414] p-1 rounded-xl border border-[rgba(245,166,35,0.1)]">
+      <div className="flex gap-1 bg-[#111110] p-1 rounded-xl border border-[rgba(232,150,46,0.1)]">
         {TABS.map((t) => {
           const Icon = t.icon;
           const disabled = t.id === 'preview' && !canPreview;
@@ -176,10 +176,10 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
               disabled={disabled}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 tab === t.id
-                  ? 'bg-[#F5A623]/15 text-[#F5A623]'
+                  ? 'bg-[#E8962E]/15 text-[#E8962E]'
                   : disabled
-                    ? 'text-[#FFFFFF]/15 cursor-not-allowed'
-                    : 'text-[#FFFFFF]/40 hover:text-[#FFFFFF]/60 hover:bg-[#FFFFFF]/5'
+                    ? 'text-[#F2EFE9]/15 cursor-not-allowed'
+                    : 'text-[#F2EFE9]/40 hover:text-[#F2EFE9]/60 hover:bg-[#F2EFE9]/5'
               }`}
             >
               <Icon className="w-4 h-4" /> {t.label}
@@ -189,7 +189,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
       </div>
 
       {/* Content */}
-      <div className="bg-[#1C1C1C] border border-[rgba(245,166,35,0.15)] rounded-2xl p-6">
+      <div className="bg-[#1A1917] border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
         {tab === 'copy' && (
           <CopyGenerator
             perfil={perfil ?? {}}
@@ -230,8 +230,8 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
                     onClick={() => setActiveSlide(idx)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
                       activeSlide === idx
-                        ? 'bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30'
-                        : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/30'
+                        ? 'bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/30'
+                        : 'bg-[#F2EFE9]/5 text-[#F2EFE9]/30'
                     }`}
                   >
                     Slide {idx + 1}

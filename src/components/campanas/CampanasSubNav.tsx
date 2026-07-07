@@ -33,7 +33,7 @@ export default function CampanasSubNav({ currentView, onNavigate }: Props) {
   if (currentView === 'studio' || currentView === 'detail') return null;
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-4 mb-2 border-b border-[rgba(245,166,35,0.1)]">
+    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-4 mb-2 border-b border-[rgba(232,150,46,0.1)]">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = currentView === item.id;
@@ -43,8 +43,8 @@ export default function CampanasSubNav({ currentView, onNavigate }: Props) {
             onClick={() => onNavigate(item.id)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
               isActive
-                ? 'bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30'
-                : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80 hover:bg-[#FFFFFF]/5 border border-transparent'
+                ? 'bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/30'
+                : 'text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80 hover:bg-[#F2EFE9]/5 border border-transparent'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />

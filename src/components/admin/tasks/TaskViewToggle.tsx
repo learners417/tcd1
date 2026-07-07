@@ -20,7 +20,7 @@ const TABS: { id: TaskView; label: string; icon: React.ComponentType<{ className
 
 export default function TaskViewToggle({ value, onChange, myCount }: TaskViewToggleProps) {
   return (
-    <div className="inline-flex items-center bg-[#0F0F0F] border border-[rgba(245,166,35,0.15)] rounded-xl p-1">
+    <div className="inline-flex items-center bg-[#0F0F0F] border border-[rgba(232,150,46,0.10)] rounded-xl p-1">
       {TABS.map(t => {
         const active = value === t.id;
         const Icon = t.icon;
@@ -31,15 +31,15 @@ export default function TaskViewToggle({ value, onChange, myCount }: TaskViewTog
             className={`
               flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all
               ${active
-                ? 'bg-[#F5A623] text-black'
-                : 'text-[#FFFFFF]/55 hover:text-[#FFFFFF] hover:bg-[#FFFFFF]/5'
+                ? 'bg-[#E8962E] text-black'
+                : 'text-[#F2EFE9]/55 hover:text-[#F2EFE9] hover:bg-[#F2EFE9]/5'
               }
             `}
           >
             <Icon className="w-4 h-4" />
             <span>{t.label}</span>
             {t.id === 'mine' && typeof myCount === 'number' && myCount > 0 && (
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-black/20 text-black' : 'bg-[#F5A623]/20 text-[#F5A623]'}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-black/20 text-black' : 'bg-[#E8962E]/20 text-[#E8962E]'}`}>
                 {myCount}
               </span>
             )}
