@@ -29,13 +29,21 @@ export async function listarEvidencias(userId: string, metaCodigo: string): Prom
 }
 
 /** Sube una evidencia. Devuelve la evidencia o null si falla. */
-export async function subirEvidencia(userId: string, metaCodigo: string, file: File): Promise<Evidencia | null> {
-  if (!isSupabaseReady() || !supabase || !userId) return null;
+export async function subirEvidencia(
+  userId: string,
+  metaCodigo: string,
+  file: File,
+): Promise<{ ok: true; evidencia: Evidencia } | { ok: false; motivo: string }> {
+  if (!isSupabaseReady() || !supabase || !userId) return { ok: false, motivo: 'Sin conexión. Recarga la página e intenta de nuevo.' };
+  if (file.size > 50 * 1024 * 1024) return { ok: false, motivo: 'El archivo pesa más de 50 MB. Si es un video largo, sube una captura o un recorte corto.' };
   const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = `${carpeta(userId, metaCodigo)}/${Date.now()}_${safe}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
-  if (error) return null;
-  return { name: safe, path };
+  if (error) {
+    console.error('[evidencia] upload error:', error.message);
+    return { ok: false, motivo: 'No pudimos guardar tu evidencia. Intenta de nuevo — y si sigue, avísanos por Mensajes.' };
+  }
+  return { ok: true, evidencia: { name: safe, path } };
 }
 
 /** URL firmada para ver una evidencia. */
