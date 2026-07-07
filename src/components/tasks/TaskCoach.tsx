@@ -17,6 +17,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
   // ── Evidencia obligatoria (Cirugía Final F2) ──
   const [evidencias, setEvidencias] = useState<number>(-1);
   const [subiendo, setSubiendo] = useState(false);
+  const [errorSubida, setErrorSubida] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   useEffect(() => {
     if (!meta.evidencia_requerida) return;
@@ -34,10 +35,13 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
     const file = e.target.files?.[0];
     if (!file || !uid || subiendo) return;
     setSubiendo(true);
-    const ok = await subirEvidencia(uid, meta.codigo, file);
-    if (ok) {
+    setErrorSubida(null);
+    const res = await subirEvidencia(uid, meta.codigo, file);
+    if (res.ok) {
       setEvidencias((n) => Math.max(0, n) + 1);
       try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+    } else {
+      setErrorSubida((res as { ok: false; motivo: string }).motivo);
     }
     setSubiendo(false);
   };
@@ -89,6 +93,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
               </label>
             )}
+            {errorSubida && <p className="text-xs text-[#EF4444] mt-2">⚠️ {errorSubida}</p>}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
