@@ -18,9 +18,10 @@ interface MatrizGridProps {
   clientes: MatrizClienteRow[];
   checks: ChecksByCliente;
   onToggle: (clienteId: string, stepId: string, on: boolean) => void;
+  caminoDone?: Map<string, Set<string>>;
 }
 
-export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridProps) {
+export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
   if (clientes.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-[#F2EFE9]/40 text-sm">
@@ -205,7 +206,8 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 {STEPS.map((step, idx) => {
                   const isFirstOfSection =
                     idx === 0 || STEPS[idx - 1].sectionId !== step.sectionId;
-                  const on = isChecked(checks, cl.id, step.id);
+                  const autoCamino = Boolean(step.meta && caminoDone?.get(cl.id)?.has(step.meta));
+                  const on = autoCamino || isChecked(checks, cl.id, step.id);
                   return (
                     <td
                       key={step.id}
@@ -223,16 +225,16 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     >
                       <button
                         type="button"
-                        onClick={() => onToggle(cl.id, step.id, !on)}
-                        title={`${step.title} — ${on ? 'destildar' : 'tildar'}`}
+                        onClick={() => { if (!autoCamino) onToggle(cl.id, step.id, !on); }}
+                        title={autoCamino ? `${step.title} — ✓ completado en El Camino (automático)` : `${step.title} — ${on ? 'destildar' : 'tildar'}`}
                         className="inline-flex items-center justify-center transition-all hover:border-[#E8962E]/60"
                         style={{
                           width: 30,
                           height: 30,
-                          border: `2px solid ${on ? '#22C55E' : 'var(--matrix-checkbox-off)'}`,
+                          border: `2px solid ${autoCamino ? '#E8962E' : on ? '#22C55E' : 'var(--matrix-checkbox-off)'}`,
                           borderRadius: 7,
-                          cursor: 'pointer',
-                          background: on ? '#22C55E' : 'transparent',
+                          cursor: autoCamino ? 'default' : 'pointer',
+                          background: autoCamino ? '#E8962E' : on ? '#22C55E' : 'transparent',
                         }}
                       >
                         {on && <Check className="w-4 h-4" style={{ color: '#080808', strokeWidth: 3 }} />}

@@ -347,7 +347,7 @@ export default function Coach({ userId }: { userId?: string }) {
         await persist(finales);
         await intentarRotarSummary(finales);
       } catch {
-        toast.error('Error de conexión con el Mentor IA. Intentá de nuevo.');
+        toast.error('El Mentor no pudo responder. Vuelve a intentarlo en un momento.');
         setMessages((prev) => {
           const next = [...prev];
           next[next.length - 1] = {
@@ -409,11 +409,11 @@ export default function Coach({ userId }: { userId?: string }) {
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden anímate-in fade-in duration-500 border border-[#F5A623]/10">
-      <div className="p-5 border-b border-[rgba(245,166,35,0.15)] bg-[#F5A623]/[0.03] flex items-center justify-between">
+    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden anímate-in fade-in duration-500 border border-[#E8962E]/10">
+      <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-[#E8962E]/[0.03] flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30">
-            <Bot className="w-5 h-5 text-[#F5A623]" />
+          <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
+            <Bot className="w-5 h-5 text-[#E8962E]" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
@@ -427,7 +427,7 @@ export default function Coach({ userId }: { userId?: string }) {
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-[#F5A623]/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+          className="w-8 h-8 rounded-lg hover:bg-[#E8962E]/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -445,7 +445,7 @@ export default function Coach({ userId }: { userId?: string }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
                 msg.role === 'assistant'
-                  ? 'bg-[#F5A623]/20 text-[#F5A623] border-[#F5A623]/30'
+                  ? 'bg-[#E8962E]/20 text-[#E8962E] border-[#E8962E]/30'
                   : 'bg-white/5 text-white/60 border-white/10'
               }`}
             >
@@ -461,8 +461,8 @@ export default function Coach({ userId }: { userId?: string }) {
             <div
               className={`max-w-[85%] rounded-2xl p-5 ${
                 msg.role === 'user'
-                  ? 'bg-[#F5A623] text-[#0A0A0A] rounded-tr-sm shadow-lg'
-                  : 'card-panel bg-[#1C1C1C] text-white/90 rounded-tl-sm border border-[rgba(245,166,35,0.15)]'
+                  ? 'bg-[#E8962E] text-[#080808] rounded-tr-sm shadow-lg'
+                  : 'card-panel bg-[#1A1917] text-white/90 rounded-tl-sm border border-[rgba(232,150,46,0.10)]'
               }`}
             >
               {msg.role === 'user' ? (
@@ -470,21 +470,21 @@ export default function Coach({ userId }: { userId?: string }) {
                   {msg.content}
                 </p>
               ) : (
-                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-[#F5A623]">
+                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-[#E8962E]">
                   {msg.content ? (
                     <Markdown>{msg.content}</Markdown>
                   ) : (
                     <span className="flex gap-1.5 items-center py-1">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </span>
@@ -496,7 +496,7 @@ export default function Coach({ userId }: { userId?: string }) {
         ))}
       </div>
 
-      <div className="p-4 border-t border-[rgba(245,166,35,0.15)] bg-black/20">
+      <div className="p-4 border-t border-[rgba(232,150,46,0.10)] bg-black/20">
         {quickReplies.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {quickReplies.map((qr) => (
@@ -504,7 +504,7 @@ export default function Coach({ userId }: { userId?: string }) {
                 key={qr.id}
                 onClick={() => handleSend(qr.label)}
                 disabled={isTyping}
-                className="px-3 py-1.5 rounded-full border border-[rgba(245,166,35,0.2)] bg-[#F5A623]/5 hover:bg-[#F5A623]/10 text-xs text-white/70 font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-full border border-[rgba(232,150,46,0.12)] bg-[#E8962E]/5 hover:bg-[#E8962E]/10 text-xs text-white/70 font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 <span className="text-[11px]">{qr.icon}</span>
                 {qr.label}
@@ -544,7 +544,7 @@ export default function Coach({ userId }: { userId?: string }) {
                 ? 'Tu coach está conectando ideas...'
                 : 'Mencioná tu duda · bloqueo · pega una captura (Ctrl+V)...'
             }
-            className="flex-1 bg-white/5 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all disabled:opacity-50 shadow-inner"
+            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -554,7 +554,7 @@ export default function Coach({ userId }: { userId?: string }) {
               cargandoEstado ||
               uploadingAttachment
             }
-            className="absolute right-2 w-9 h-9 rounded-lg bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 flex items-center justify-center text-[#0A0A0A] transition-colors"
+            className="absolute right-2 w-9 h-9 rounded-lg bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 flex items-center justify-center text-[#080808] transition-colors"
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

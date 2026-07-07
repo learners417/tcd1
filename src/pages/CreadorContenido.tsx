@@ -274,9 +274,9 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
   if (verificandoUnlock && !desbloqueado) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
-        <div className="card-panel p-8 border border-[#F5A623]/20 bg-[#1C1C1C]/40 text-center space-y-3">
-          <Loader2 className="w-6 h-6 text-[#F5A623] anímate-spin mx-auto" />
-          <p className="text-sm text-[#FFFFFF]/60">Verificando estado del programa…</p>
+        <div className="card-panel p-8 border border-[#E8962E]/20 bg-[#1A1917]/40 text-center space-y-3">
+          <Loader2 className="w-6 h-6 text-[#E8962E] anímate-spin mx-auto" />
+          <p className="text-sm text-[#F2EFE9]/60">Verificando estado del programa…</p>
         </div>
       </div>
     );
@@ -287,28 +287,28 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="space-y-3">
-          <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+          <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
             v8 · Herramienta nueva
           </p>
-          <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
             Creador de Contenido
           </h1>
-          <p className="text-[#FFFFFF]/60 max-w-xl">
+          <p className="text-[#F2EFE9]/60 max-w-xl">
             Genera posts, carruseles y prompts de imagen usando los datos de tu ADN.
             Esta herramienta NO escribe en tu ADN · sólo genera output para que copies
             y publiques manualmente.
           </p>
         </div>
 
-        <div className="card-panel p-8 border border-[#F5A623]/20 bg-[#1C1C1C]/40 text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-full bg-[#F5A623]/15 border border-[#F5A623]/30 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-[#F5A623]" />
+        <div className="card-panel p-8 border border-[#E8962E]/20 bg-[#1A1917]/40 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-[#E8962E]/15 border border-[#E8962E]/30 flex items-center justify-center">
+            <Lock className="w-6 h-6 text-[#E8962E]" />
           </div>
           <div>
-            <p className="text-lg font-medium text-[#FFFFFF]">
+            <p className="text-lg font-medium text-[#F2EFE9]">
               Necesitás completar P6 (Matriz A→B→C) para desbloquear el Creador
             </p>
-            <p className="text-sm text-[#FFFFFF]/60 mt-2 max-w-md mx-auto">
+            <p className="text-sm text-[#F2EFE9]/60 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
               Vuelve a la Hoja de Ruta y cierra P6 antes de venir acá.
             </p>
@@ -331,13 +331,13 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+        <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
-        <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
           Creador de Contenido
         </h1>
-        <p className="text-[#FFFFFF]/60 max-w-2xl">
+        <p className="text-[#F2EFE9]/60 max-w-2xl">
           Genera posts, carruseles o prompts de imagen alineados a tu método propio,
           tu avatar y tu nivel de awareness. Esta herramienta NO escribe en tu ADN —
           el output queda acá para que lo copies y publiques.
@@ -346,7 +346,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold">
           1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -361,23 +361,23 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   onClick={() => setTipo(key)}
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
-                      ? 'bg-[#F5A623]/10 border-[#F5A623]/50'
-                      : 'bg-[#1C1C1C]/40 border-[rgba(245,166,35,0.15)] hover:border-[#F5A623]/30'
+                      ? 'bg-[#E8962E]/10 border-[#E8962E]/50'
+                      : 'bg-[#1A1917]/40 border-[rgba(232,150,46,0.10)] hover:border-[#E8962E]/30'
                   }`}
                 >
                   <Icon
                     className={`w-5 h-5 mb-2 ${
-                      activo ? 'text-[#F5A623]' : 'text-[#FFFFFF]/60'
+                      activo ? 'text-[#E8962E]' : 'text-[#F2EFE9]/60'
                     }`}
                   />
                   <p
                     className={`text-sm font-semibold ${
-                      activo ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]/80'
+                      activo ? 'text-[#F2EFE9]' : 'text-[#F2EFE9]/80'
                     }`}
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+                  <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -389,7 +389,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de nivel */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold">
           2 · ¿Para qué nivel de awareness?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -403,18 +403,18 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   onClick={() => setNivel(key)}
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
-                      ? 'bg-[#F5A623]/10 border-[#F5A623]/50'
-                      : 'bg-[#1C1C1C]/40 border-[rgba(245,166,35,0.15)] hover:border-[#F5A623]/30'
+                      ? 'bg-[#E8962E]/10 border-[#E8962E]/50'
+                      : 'bg-[#1A1917]/40 border-[rgba(232,150,46,0.10)] hover:border-[#E8962E]/30'
                   }`}
                 >
                   <p
                     className={`text-sm font-semibold ${
-                      activo ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]/80'
+                      activo ? 'text-[#F2EFE9]' : 'text-[#F2EFE9]/80'
                     }`}
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+                  <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -426,7 +426,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Tema */}
       <div className="card-panel p-5 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold">
           3 · Tema · ángulo · objeción a abordar
         </p>
         <textarea
@@ -460,9 +460,9 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Output */}
       {output && (
-        <div className="card-panel p-5 border border-[rgba(245,166,35,0.2)] space-y-4">
+        <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+            <p className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
             </p>
             <div className="flex items-center gap-2">
@@ -472,14 +472,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   setEditOutput(output);
                   setEditando(true);
                 }}
-                className="text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(245,166,35,0.15)]"
+                className="text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)]"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={handleGenerar}
-                className="text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(245,166,35,0.15)] flex items-center gap-1"
+                className="text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)] flex items-center gap-1"
               >
                 <RotateCcw className="w-3 h-3" /> Rehacer
               </button>
@@ -530,14 +530,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
               </div>
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/90 leading-relaxed prose-headings:text-[#F5A623] prose-strong:text-[#FFFFFF] prose-strong:font-bold">
+            <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/90 leading-relaxed prose-headings:text-[#E8962E] prose-strong:text-[#F2EFE9] prose-strong:font-bold">
               <Markdown>{output}</Markdown>
             </div>
           )}
         </div>
       )}
 
-      <p className="text-xs text-[#FFFFFF]/30 text-center pt-4 italic">
+      <p className="text-xs text-[#F2EFE9]/30 text-center pt-4 italic">
         Regla v8 · esta herramienta no escribe en tu ADN. Copia lo que te sirva y publicalo
         cuando estés listo.
       </p>

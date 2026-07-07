@@ -1,28 +1,24 @@
 /**
  * CintaCinturon.tsx — EL SIGNATURE de Sanar OS (Dojo Premium · E2)
  * La cinta de tela del cinturón actual del cliente: su rango, vivo en la interfaz.
- * Textura de seda (tejido sutil + brillo que recorre), la punta del próximo color
- * en los cinturones de transición, y el nudo como detalle.
  */
 import React from 'react';
 import type { Cinturon } from '../lib/cinturones';
 
-/** Los colores de tela por orden de cinturón (base + punta para transiciones). */
 const TELAS: Record<number, { base: string; punta?: string; brillo: string }> = {
-  0: { base: '#E9E4D8', brillo: 'rgba(255,255,255,0.5)' },                    // Blanco
-  1: { base: '#E9E4D8', punta: '#D9A62E', brillo: 'rgba(255,255,255,0.5)' },  // Blanco punta amarilla
-  2: { base: '#D9A62E', brillo: 'rgba(255,240,200,0.45)' },                   // Amarillo
-  3: { base: '#D9A62E', punta: '#3E9B57', brillo: 'rgba(255,240,200,0.45)' }, // Amarillo punta verde
-  4: { base: '#3E9B57', brillo: 'rgba(220,255,230,0.35)' },                   // Verde
-  5: { base: '#3E9B57', punta: '#3D7BD9', brillo: 'rgba(220,255,230,0.35)' }, // Verde punta azul
-  6: { base: '#3D7BD9', brillo: 'rgba(210,230,255,0.35)' },                   // Azul
-  7: { base: '#B93A32', brillo: 'rgba(255,215,210,0.30)' },                   // Rojo
-  8: { base: '#151412', brillo: 'rgba(232,150,46,0.35)' },                    // Negro (brillo dorado)
+  0: { base: '#E9E4D8', brillo: 'rgba(255,255,255,0.5)' },
+  1: { base: '#E9E4D8', punta: '#D9A62E', brillo: 'rgba(255,255,255,0.5)' },
+  2: { base: '#D9A62E', brillo: 'rgba(255,240,200,0.45)' },
+  3: { base: '#D9A62E', punta: '#3E9B57', brillo: 'rgba(255,240,200,0.45)' },
+  4: { base: '#3E9B57', brillo: 'rgba(220,255,230,0.35)' },
+  5: { base: '#3E9B57', punta: '#3D7BD9', brillo: 'rgba(220,255,230,0.35)' },
+  6: { base: '#3D7BD9', brillo: 'rgba(210,230,255,0.35)' },
+  7: { base: '#B93A32', brillo: 'rgba(255,215,210,0.30)' },
+  8: { base: '#151412', brillo: 'rgba(232,150,46,0.35)' },
 };
 
 interface CintaCinturonProps {
   cinturon: Cinturon;
-  /** 'hero' = alta y protagónica · 'linea' = fina, para headers */
   variante?: 'hero' | 'linea';
   className?: string;
 }
@@ -39,7 +35,6 @@ export default function CintaCinturon({ cinturon, variante = 'hero', className =
       title={`Cinturón ${cinturon.nombre} — ${cinturon.metafora}`}
       aria-label={`Tu cinturón: ${cinturon.nombre}`}
     >
-      {/* La tela base con tejido */}
       <div
         className="absolute inset-0"
         style={{
@@ -53,43 +48,26 @@ export default function CintaCinturon({ cinturon, variante = 'hero', className =
             : 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.35)',
         }}
       />
-      {/* La punta (cinturones de transición) */}
       {tela.punta && (
         <div
           className="absolute inset-y-0 right-0"
-          style={{
-            width: '16%',
-            background: `linear-gradient(180deg, ${tela.punta} 0%, ${sombra(tela.punta)} 100%)`,
-            boxShadow: 'inset 2px 0 3px rgba(0,0,0,0.25)',
-          }}
+          style={{ width: '16%', background: `linear-gradient(180deg, ${tela.punta} 0%, ${sombra(tela.punta)} 100%)`, boxShadow: 'inset 2px 0 3px rgba(0,0,0,0.25)' }}
         />
       )}
-      {/* El brillo de seda que recorre */}
       <div
         className="absolute inset-0 cinta-brillo"
-        style={{
-          background: `linear-gradient(105deg, transparent 20%, ${tela.brillo} 50%, transparent 80%)`,
-          backgroundSize: '300% 100%',
-        }}
+        style={{ background: `linear-gradient(105deg, transparent 20%, ${tela.brillo} 50%, transparent 80%)`, backgroundSize: '300% 100%' }}
       />
-      {/* El nudo (solo hero) */}
       {variante === 'hero' && (
         <div
           className="absolute inset-y-0"
-          style={{
-            left: '8%',
-            width: alto * 1.6,
-            background: `linear-gradient(180deg, ${sombra(tela.base)} 0%, ${tela.base} 45%, ${sombra(tela.base)} 100%)`,
-            borderLeft: '1px solid rgba(0,0,0,0.3)',
-            borderRight: '1px solid rgba(0,0,0,0.3)',
-          }}
+          style={{ left: '8%', width: alto * 1.6, background: `linear-gradient(180deg, ${sombra(tela.base)} 0%, ${tela.base} 45%, ${sombra(tela.base)} 100%)`, borderLeft: '1px solid rgba(0,0,0,0.3)', borderRight: '1px solid rgba(0,0,0,0.3)' }}
         />
       )}
     </div>
   );
 }
 
-/** Oscurece un hex ~18% para el degradé de la tela. */
 function sombra(hex: string): string {
   const n = parseInt(hex.slice(1), 16);
   const f = (v: number) => Math.max(0, Math.round(v * 0.82));

@@ -190,26 +190,26 @@ function AvatarCard({ data }: { data: AvatarData }) {
       <div className="grid grid-cols-2 gap-3">
         {data.nombre_ficticio && (
           <div>
-            <span className="text-xs text-[#F5A623]">Nombre ficticio</span>
-            <p className="text-sm text-[#FFFFFF]">{data.nombre_ficticio}</p>
+            <span className="text-xs text-[#E8962E]">Nombre ficticio</span>
+            <p className="text-sm text-[#F2EFE9]">{data.nombre_ficticio}</p>
           </div>
         )}
         {data.edad !== undefined && (
           <div>
-            <span className="text-xs text-[#F5A623]">Edad</span>
-            <p className="text-sm text-[#FFFFFF]">{data.edad}</p>
+            <span className="text-xs text-[#E8962E]">Edad</span>
+            <p className="text-sm text-[#F2EFE9]">{data.edad}</p>
           </div>
         )}
         {data.profesion && (
           <div>
-            <span className="text-xs text-[#F5A623]">Profesion</span>
-            <p className="text-sm text-[#FFFFFF]">{data.profesion}</p>
+            <span className="text-xs text-[#E8962E]">Profesion</span>
+            <p className="text-sm text-[#F2EFE9]">{data.profesion}</p>
           </div>
         )}
         {data.situacion && (
           <div className="col-span-2">
-            <span className="text-xs text-[#F5A623]">Situacion</span>
-            <p className="text-sm text-[#FFFFFF]">{data.situacion}</p>
+            <span className="text-xs text-[#E8962E]">Situacion</span>
+            <p className="text-sm text-[#F2EFE9]">{data.situacion}</p>
           </div>
         )}
       </div>
@@ -219,7 +219,7 @@ function AvatarCard({ data }: { data: AvatarData }) {
           <span className="text-xs text-[#EF4444] font-medium">Dolores</span>
           <ul className="mt-1 space-y-1">
             {data.dolores.map((d, i) => (
-              <li key={i} className="text-sm text-[#FFFFFF]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#EF4444]/40">
+              <li key={i} className="text-sm text-[#F2EFE9]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#EF4444]/40">
                 {d}
               </li>
             ))}
@@ -232,7 +232,7 @@ function AvatarCard({ data }: { data: AvatarData }) {
           <span className="text-xs text-[#22C55E] font-medium">Suenos</span>
           <ul className="mt-1 space-y-1">
             {data.suenos.map((s, i) => (
-              <li key={i} className="text-sm text-[#FFFFFF]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#22C55E]/40">
+              <li key={i} className="text-sm text-[#F2EFE9]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#22C55E]/40">
                 {s}
               </li>
             ))}
@@ -242,10 +242,10 @@ function AvatarCard({ data }: { data: AvatarData }) {
 
       {data.objeciones && data.objeciones.length > 0 && (
         <div>
-          <span className="text-xs text-[#F5A623] font-medium">Objeciones</span>
+          <span className="text-xs text-[#E8962E] font-medium">Objeciones</span>
           <ul className="mt-1 space-y-1">
             {data.objeciones.map((o, i) => (
-              <li key={i} className="text-sm text-[#FFFFFF]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#F5A623]/40">
+              <li key={i} className="text-sm text-[#F2EFE9]/80 pl-3 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#E8962E]/40">
                 {o}
               </li>
             ))}
@@ -277,12 +277,12 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
     return (
       <div className="py-4 px-5 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm text-[#FFFFFF]/40">{field.label}</p>
-          <p className="text-xs text-[#FFFFFF]/20 mt-0.5">Pendiente de completar</p>
+          <p className="text-sm text-[#F2EFE9]/40">{field.label}</p>
+          <p className="text-xs text-[#F2EFE9]/20 mt-0.5">Pendiente de completar</p>
         </div>
         <button
           onClick={() => navigateToTask(setCurrentPage, field.key)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#F5A623] hover:text-[#FFB94D] bg-[#F5A623]/10 hover:bg-[#F5A623]/15 border border-[rgba(245,166,35,0.2)] rounded-lg transition-all whitespace-nowrap shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#E8962E] hover:text-[#F4B65C] bg-[#E8962E]/10 hover:bg-[#E8962E]/15 border border-[rgba(232,150,46,0.12)] rounded-lg transition-all whitespace-nowrap shrink-0"
         >
           Completar
           <ArrowRight className="w-3 h-3" />
@@ -295,17 +295,17 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
   return (
     <div className="py-4 px-5">
       <div className="flex items-center justify-between mb-2">
-        <p className={`text-sm font-medium ${field.label.toLowerCase().includes('version') ? 'text-[#F5A623]' : 'text-[#FFFFFF]'}`}>{field.label}</p>
+        <p className={`text-sm font-medium ${field.label.toLowerCase().includes('version') ? 'text-[#E8962E]' : 'text-[#F2EFE9]'}`}>{field.label}</p>
         <button
           onClick={() => navigateToTask(setCurrentPage, field.key)}
-          className="flex items-center gap-1 px-2 py-1 text-xs text-[#F5A623]/60 hover:text-[#F5A623] transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-[#E8962E]/60 hover:text-[#E8962E] transition-colors"
         >
           <Pencil className="w-3 h-3" />
           Editar
         </button>
       </div>
 
-      <div className="pl-3 border-l-2 border-[rgba(245,166,35,0.15)]">
+      <div className="pl-3 border-l-2 border-[rgba(232,150,46,0.10)]">
         {field.type === 'object' && field.key === 'adn_avatar' ? (
           <AvatarCard data={value as AvatarData} />
         ) : field.type === 'array' && Array.isArray(value) ? (
@@ -313,14 +313,14 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
             {(value as string[])
               .filter((item) => !item.trim().startsWith('#'))
               .map((item, i) => (
-                <li key={i} className="text-sm text-[#FFFFFF]/80 flex gap-2">
-                  <span className="text-[#F5A623] font-medium shrink-0">{i + 1}.</span>
+                <li key={i} className="text-sm text-[#F2EFE9]/80 flex gap-2">
+                  <span className="text-[#E8962E] font-medium shrink-0">{i + 1}.</span>
                   <span>{item}</span>
                 </li>
               ))}
           </ol>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none prose-p:text-[#FFFFFF]/80 prose-p:leading-relaxed prose-h1:text-base prose-h1:font-semibold prose-h1:text-[#F5A623] prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:text-sm prose-h2:font-semibold prose-h2:text-[#F5A623] prose-h2:mt-3 prose-h2:mb-1 prose-h3:text-sm prose-h3:font-medium prose-h3:text-[#F5A623]/80 prose-h3:mt-2 prose-h3:mb-1 prose-h4:text-sm prose-h4:font-medium prose-h4:text-[#FFFFFF]/70 prose-strong:text-[#FFFFFF] prose-strong:font-semibold prose-em:text-[#FFFFFF]/70 prose-li:text-[#FFFFFF]/80 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-hr:border-[rgba(245,166,35,0.15)] prose-a:text-[#F5A623] prose-a:underline">
+          <div className="prose prose-invert prose-sm max-w-none prose-p:text-[#F2EFE9]/80 prose-p:leading-relaxed prose-h1:text-base prose-h1:font-semibold prose-h1:text-[#E8962E] prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:text-sm prose-h2:font-semibold prose-h2:text-[#E8962E] prose-h2:mt-3 prose-h2:mb-1 prose-h3:text-sm prose-h3:font-medium prose-h3:text-[#E8962E]/80 prose-h3:mt-2 prose-h3:mb-1 prose-h4:text-sm prose-h4:font-medium prose-h4:text-[#F2EFE9]/70 prose-strong:text-[#F2EFE9] prose-strong:font-semibold prose-em:text-[#F2EFE9]/70 prose-li:text-[#F2EFE9]/80 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-hr:border-[rgba(232,150,46,0.10)] prose-a:text-[#E8962E] prose-a:underline">
             <Markdown>{String(value)}</Markdown>
           </div>
         )}
@@ -345,42 +345,42 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
   const Icon = section.icon;
 
   return (
-    <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#F5A623' }}>
+    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#E8962E' }}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-5 hover:bg-[#FFFFFF]/[0.02] transition-colors"
+        className="w-full flex items-center justify-between p-5 hover:bg-[#F2EFE9]/[0.02] transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0 text-left">
-          <div className="w-9 h-9 rounded-lg bg-[#F5A623]/10 border border-[rgba(245,166,35,0.2)] flex items-center justify-center shrink-0">
-            <Icon className="w-4.5 h-4.5 text-[#F5A623]" />
+          <div className="w-9 h-9 rounded-lg bg-[#E8962E]/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center shrink-0">
+            <Icon className="w-4.5 h-4.5 text-[#E8962E]" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[#F5A623] font-bold text-base" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <span className="text-[#E8962E] font-bold text-base" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 {section.letter}
               </span>
-              <span className="text-[10px] text-[#FFFFFF]/30 font-medium tracking-wider uppercase">
+              <span className="text-[10px] text-[#F2EFE9]/30 font-medium tracking-wider uppercase">
                 {section.pillars}
               </span>
             </div>
-            <p className="text-sm font-medium text-[#FFFFFF] mt-0.5 truncate">
+            <p className="text-sm font-medium text-[#F2EFE9] mt-0.5 truncate">
               {section.name}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 ml-4">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[rgba(245,166,35,0.2)] bg-[#F5A623]/10 text-[#F5A623]">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[rgba(232,150,46,0.12)] bg-[#E8962E]/10 text-[#E8962E]">
             {completed}/{total} completados
           </span>
           {isExpanded
-            ? <ChevronUp className="w-4 h-4 text-[#FFFFFF]/30" />
-            : <ChevronDown className="w-4 h-4 text-[#FFFFFF]/30" />}
+            ? <ChevronUp className="w-4 h-4 text-[#F2EFE9]/30" />
+            : <ChevronDown className="w-4 h-4 text-[#F2EFE9]/30" />}
         </div>
       </button>
 
       {isExpanded && (
-        <div className="border-t border-[rgba(245,166,35,0.1)] divide-y divide-[rgba(245,166,35,0.06)]">
+        <div className="border-t border-[rgba(232,150,46,0.1)] divide-y divide-[rgba(232,150,46,0.06)]">
           {section.fields.map((field) => (
             <FieldItem
               key={field.key}
@@ -510,32 +510,32 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
       {/* Header with overall progress */}
-      <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl p-6">
+      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-6">
         <h1
-          className="text-2xl font-bold text-[#FFFFFF] tracking-tight"
+          className="text-2xl font-bold text-[#F2EFE9] tracking-tight"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
         >
           ADN del Negocio
         </h1>
-        <p className="text-sm text-[#FFFFFF]/40 mt-1">
+        <p className="text-sm text-[#F2EFE9]/40 mt-1">
           Tu estrategia completa documentada con el metodo CLINICA
         </p>
 
         <div className="mt-5">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-[#FFFFFF]/60">
+            <span className="text-sm text-[#F2EFE9]/60">
               ADN completado: {progressPct}%
             </span>
-            <span className="text-xs text-[#F5A623] font-semibold">
+            <span className="text-xs text-[#E8962E] font-semibold">
               {totalCompleted}/{totalFields}
             </span>
           </div>
-          <div className="h-2 bg-[#FFFFFF]/5 rounded-full overflow-hidden">
+          <div className="h-2 bg-[#F2EFE9]/5 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${progressPct}%`,
-                backgroundColor: '#F5A623',
+                backgroundColor: '#E8962E',
               }}
             />
           </div>
@@ -543,10 +543,10 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       </div>
 
       {/* Pais del profesional — afecta el tono del contenido publicable */}
-      <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl p-5">
+      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
         <div className="mb-3 min-w-0">
-          <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
-          <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+          <p className="text-sm font-semibold text-[#F2EFE9]">Pais del profesional</p>
+          <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
             guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia ti no cambia.
           </p>

@@ -184,7 +184,7 @@ export function formatNumber(val: number | null, decimals = 1): string {
 export function nivelColor(nivel: DiagnosticoNivel): string {
   switch (nivel) {
     case 'ok': return 'text-[#22C55E]';
-    case 'alerta': return 'text-[#F5A623]';
+    case 'alerta': return 'text-[#E8962E]';
     case 'critico': return 'text-[#EF4444]';
   }
 }
@@ -192,7 +192,7 @@ export function nivelColor(nivel: DiagnosticoNivel): string {
 export function nivelBgColor(nivel: DiagnosticoNivel): string {
   switch (nivel) {
     case 'ok': return 'bg-[#22C55E]/10 border-[#22C55E]/20';
-    case 'alerta': return 'bg-[#F5A623]/10 border-[#F5A623]/20';
+    case 'alerta': return 'bg-[#E8962E]/10 border-[#E8962E]/20';
     case 'critico': return 'bg-[#EF4444]/10 border-[#EF4444]/20';
   }
 }

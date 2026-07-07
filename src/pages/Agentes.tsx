@@ -446,7 +446,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
       <div className="max-w-4xl mx-auto space-y-8 pb-12 anímate-in fade-in duration-500">
         <div>
           <h1 className="text-2xl font-light text-white flex items-center gap-2">
-            <Bot className="w-6 h-6 text-[#F5A623]" /> Entrenadores IA
+            <Bot className="w-6 h-6 text-[#E8962E]" /> Entrenadores IA
           </h1>
           <p className="text-sm text-white/60 mt-1">
             Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
@@ -460,7 +460,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           return (
             <section key={cat}>
               <header className="mb-3">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-[#F5A623]">
+                <h2 className="text-sm font-medium uppercase tracking-wider text-[#E8962E]">
                   {CATEGORIA_LABEL[cat]}
                 </h2>
                 <p className="text-xs text-white/40 mt-0.5">
@@ -524,18 +524,18 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
   return (
     <div className="w-full flex flex-col h-[calc(100vh-8rem)] anímate-in fade-in duration-300">
       {/* Cabecera */}
-      <div className="card-panel p-4 rounded-2xl mb-4 border border-[#F5A623]/20 bg-[#F5A623]/10">
+      <div className="card-panel p-4 rounded-2xl mb-4 border border-[#E8962E]/20 bg-[#E8962E]/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={volverAlGrid}
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#F5A623]/5 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#E8962E]/5 px-3 py-1.5 rounded-xl transition-colors shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Volver
             </button>
-            {IconActivo && <IconActivo className="w-6 h-6 text-[#F5A623]" />}
+            {IconActivo && <IconActivo className="w-6 h-6 text-[#E8962E]" />}
             <div>
-              <h2 className="text-sm font-medium text-[#F5A623] flex items-center gap-2">
+              <h2 className="text-sm font-medium text-[#E8962E] flex items-center gap-2">
                 {agenteActivo.titulo}
                 {autonomoActivo && (
                   <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
@@ -552,7 +552,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           <div className="flex items-center gap-2">
             <button
               onClick={copiarConversacion}
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#F5A623]/5 px-3 py-1.5 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#E8962E]/5 px-3 py-1.5 rounded-xl transition-colors"
             >
               {copiado ? (
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -563,7 +563,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             </button>
             <button
               onClick={reiniciarConversacion}
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#F5A623]/5 px-3 py-1.5 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-[#E8962E]/5 px-3 py-1.5 rounded-xl transition-colors"
               title="Empezar de nuevo · borra esta conversación"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -591,12 +591,12 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.rol === 'usuario'
-                  ? 'bg-[#F5A623] text-white whitespace-pre-wrap'
+                  ? 'bg-[#E8962E] text-white whitespace-pre-wrap'
                   : 'card-panel text-white/90'
               }`}
             >
               {msg.rol === 'agente' ? (
-                <div className="prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-headings:text-white prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1.5 prose-li:my-0.5 prose-li:text-white/80 prose-strong:text-white prose-strong:font-semibold prose-code:text-[#F5A623] prose-code:bg-[#F5A623]/10 prose-code:px-1 prose-code:rounded prose-hr:border-[rgba(245,166,35,0.2)]">
+                <div className="prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-headings:text-white prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1.5 prose-li:my-0.5 prose-li:text-white/80 prose-strong:text-white prose-strong:font-semibold prose-code:text-[#E8962E] prose-code:bg-[#E8962E]/10 prose-code:px-1 prose-code:rounded prose-hr:border-[rgba(232,150,46,0.12)]">
                   <Markdown>{msg.contenido}</Markdown>
                 </div>
               ) : (
@@ -623,7 +623,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             <button
               key={qr.id}
               onClick={() => onQuickReplyClick(qr)}
-              className="text-left bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] text-white/80 px-3 py-2.5 rounded-xl hover:bg-[#F5A623]/15 hover:border-[rgba(245,166,35,0.4)] hover:text-white transition-colors"
+              className="text-left bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] text-white/80 px-3 py-2.5 rounded-xl hover:bg-[#E8962E]/15 hover:border-[rgba(232,150,46,0.24)] hover:text-white transition-colors"
             >
               <div className="flex items-start gap-2">
                 <span className="text-base shrink-0 mt-0.5">{qr.icon}</span>
@@ -665,7 +665,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           }}
           placeholder="Escribe tu respuesta o pega una captura (Ctrl+V)..."
           rows={2}
-          className="flex-1 bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all"
+          className="flex-1 bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all"
         />
         <button
           onClick={() => enviarMensaje(inputUsuario)}
@@ -674,7 +674,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             uploadingAttachment ||
             (!inputUsuario.trim() && attachments.length === 0)
           }
-          className="shrink-0 w-10 h-10 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-40 flex items-center justify-center transition-colors"
+          className="shrink-0 w-10 h-10 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-40 flex items-center justify-center transition-colors"
         >
           <Send className="w-4 h-4 text-white" />
         </button>
@@ -712,13 +712,13 @@ function AgenteCard({
     'text-left p-5 rounded-2xl border transition-all group cursor-pointer ';
   if (autonomo) {
     className +=
-      'bg-gradient-to-br from-emerald-500/10 to-[#F5A623]/5 border-emerald-500/40 hover:from-emerald-500/15';
+      'bg-gradient-to-br from-emerald-500/10 to-[#E8962E]/5 border-emerald-500/40 hover:from-emerald-500/15';
   } else if (unlocked) {
     className +=
-      'bg-[#F5A623]/10 border-[#F5A623]/20 hover:bg-[#F5A623]/15';
+      'bg-[#E8962E]/10 border-[#E8962E]/20 hover:bg-[#E8962E]/15';
   } else {
     className +=
-      'bg-[#F5A623]/5 border-dashed border-[#F5A623]/15 opacity-60';
+      'bg-[#E8962E]/5 border-dashed border-[#E8962E]/15 opacity-60';
   }
 
   return (
@@ -730,7 +730,7 @@ function AgenteCard({
               autonomo
                 ? 'text-emerald-300'
                 : unlocked
-                  ? 'text-[#F5A623]'
+                  ? 'text-[#E8962E]'
                   : 'text-white/30'
             }`}
           />
@@ -742,7 +742,7 @@ function AgenteCard({
                 autonomo
                   ? 'text-emerald-300'
                   : unlocked
-                    ? 'text-[#F5A623]'
+                    ? 'text-[#E8962E]'
                     : 'text-white/40'
               }`}
             >
@@ -768,7 +768,7 @@ function AgenteCard({
           autonomo
             ? 'text-emerald-300'
             : unlocked
-              ? 'text-[#F5A623] group-hover:underline'
+              ? 'text-[#E8962E] group-hover:underline'
               : 'text-white/40'
         }`}
       >
@@ -791,8 +791,8 @@ function AgenteCard({
               key={lvl}
               className={`h-1 flex-1 rounded-full ${
                 lvl <= snapshot.current_level
-                  ? 'bg-[#F5A623]'
-                  : 'bg-[#F5A623]/15'
+                  ? 'bg-[#E8962E]'
+                  : 'bg-[#E8962E]/15'
               }`}
             />
           ))}
@@ -815,11 +815,11 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
       onClick={onCerrar}
     >
       <div
-        className="card-panel max-w-md w-full mx-4 rounded-2xl border border-[#F5A623]/30 p-6 space-y-4"
+        className="card-panel max-w-md w-full mx-4 rounded-2xl border border-[#E8962E]/30 p-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3">
-          <Lock className="w-5 h-5 text-[#F5A623]" />
+          <Lock className="w-5 h-5 text-[#E8962E]" />
           <h3 className="text-base font-medium text-white">
             {agente.titulo} está bloqueada
           </h3>
@@ -830,13 +830,13 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
         <div className="flex gap-2 pt-2">
           <button
             onClick={onCerrar}
-            className="flex-1 text-xs text-white/60 hover:text-white bg-[#F5A623]/5 px-4 py-2.5 rounded-xl transition-colors"
+            className="flex-1 text-xs text-white/60 hover:text-white bg-[#E8962E]/5 px-4 py-2.5 rounded-xl transition-colors"
           >
             Cerrar
           </button>
           <button
             onClick={onIrAlRoadmap}
-            className="flex-1 text-xs font-medium text-white bg-[#F5A623] hover:bg-[#FFB94D] px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="flex-1 text-xs font-medium text-white bg-[#E8962E] hover:bg-[#F4B65C] px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             Ir a la Hoja de Ruta
             <ArrowRight className="w-3.5 h-3.5" />

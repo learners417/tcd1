@@ -55,7 +55,7 @@ const CHANNELS = [
 // Colores de avatar deterministas por nombre
 function avatarColor(name: string): string {
   const colors = [
-    'bg-[#F5A623]/30 text-[#F5A623]',
+    'bg-[#E8962E]/30 text-[#E8962E]',
     'bg-violet-500/30 text-violet-200',
     'bg-[#22C55E]/30 text-emerald-200',
     'bg-amber-500/30 text-amber-200',
@@ -189,7 +189,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             toast(nombre, {
               description: preview || '📎 Archivo adjunto',
               action: { label: 'Ver →', onClick: () => handleChannelSwitch(ch.id) },
-              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-[#F5A623]' }),
+              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-[#E8962E]' }),
               duration: 6000,
             });
 
@@ -319,23 +319,23 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   return (
     <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden anímate-in fade-in duration-500">
       {/* Sidebar Channels */}
-      <div className="w-72 border-r border-[rgba(245,166,35,0.2)] bg-black/20 flex flex-col shrink-0">
-        <div className="p-4 border-b border-[rgba(245,166,35,0.2)]">
+      <div className="w-72 border-r border-[rgba(232,150,46,0.12)] bg-black/20 flex flex-col shrink-0">
+        <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/40" />
             <input
               type="text"
               value={channelSearch}
               onChange={e => setChannelSearch(e.target.value)}
               placeholder="Buscar canales..."
-              className="w-full bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] rounded-lg py-2 pl-9 pr-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+              className="w-full bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] rounded-lg py-2 pl-9 pr-4 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4">
           <div className="px-4 mb-2">
-            <p className="text-xs font-medium text-[#FFFFFF]/40 uppercase tracking-wider">Canales</p>
+            <p className="text-xs font-medium text-[#F2EFE9]/40 uppercase tracking-wider">Canales</p>
           </div>
           <div className="space-y-1 px-2">
             {CHANNELS.filter(c => c.name.toLowerCase().includes(channelSearch.toLowerCase())).map(channel => (
@@ -343,16 +343,16 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 key={channel.id}
                 onClick={() => handleChannelSwitch(channel.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
-                  activeChannel === channel.id ? 'bg-[#F5A623]/20 text-[#F5A623]' : 'text-[#FFFFFF]/80 hover:bg-[#F5A623]/5'
+                  activeChannel === channel.id ? 'bg-[#E8962E]/20 text-[#E8962E]' : 'text-[#F2EFE9]/80 hover:bg-[#E8962E]/5'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40'}`} />
+                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-[#E8962E]' : 'text-[#F2EFE9]/40'}`} />
                   <span className="text-sm font-medium truncate">{channel.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {(unreadMap[channel.id] ?? 0) > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#F5A623] text-[#FFFFFF] text-[10px] font-bold flex items-center justify-center">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#E8962E] text-[#F2EFE9] text-[10px] font-bold flex items-center justify-center">
                       {unreadMap[channel.id]}
                     </span>
                   )}
@@ -366,7 +366,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         </div>
 
         {/* Current user info */}
-        <div className="p-4 border-t border-[rgba(245,166,35,0.2)]">
+        <div className="p-4 border-t border-[rgba(232,150,46,0.12)]">
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${myAvatarUrl ? '' : avatarColor(userNombre)}`}>
               {myAvatarUrl
@@ -375,7 +375,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
               }
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#FFFFFF] truncate">{userNombre}</p>
+              <p className="text-sm font-medium text-[#F2EFE9] truncate">{userNombre}</p>
               <p className="text-xs text-[#22C55E]">En línea</p>
             </div>
           </div>
@@ -385,17 +385,17 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col bg-black/10 min-w-0">
         {/* Header */}
-        <div className="h-16 border-b border-[rgba(245,166,35,0.2)] flex items-center justify-between px-6 bg-[#F5A623]/5 shrink-0">
+        <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between px-6 bg-[#E8962E]/5 shrink-0">
           <div className="flex items-center gap-3">
-            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-[#FFFFFF]/60" })}
+            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-[#F2EFE9]/60" })}
             <div>
-              <h2 className="text-[#FFFFFF] font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
-              <p className="text-xs text-[#FFFFFF]/40">
+              <h2 className="text-[#F2EFE9] font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
+              <p className="text-xs text-[#F2EFE9]/40">
                 {activeChannel === 'privado' ? 'Solo visible para ti y el equipo' : 'Canal público de la comunidad'}
               </p>
             </div>
           </div>
-          <button className="w-8 h-8 rounded-lg hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 transition-colors">
+          <button className="w-8 h-8 rounded-lg hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 transition-colors">
             <MoreVertical className="w-5 h-5" />
           </button>
         </div>
@@ -404,12 +404,12 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {loadingMsgs ? (
             <div className="flex items-center justify-center py-10">
-              <div className="w-5 h-5 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full anímate-spin" />
+              <div className="w-5 h-5 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full anímate-spin" />
             </div>
           ) : activeMessages.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-[#FFFFFF]/40 text-sm">Sin mensajes en este canal todavía</p>
-              <p className="text-[#FFFFFF]/30 text-xs mt-1">Sé el primero en escribir</p>
+              <p className="text-[#F2EFE9]/40 text-sm">Sin mensajes en este canal todavía</p>
+              <p className="text-[#F2EFE9]/30 text-xs mt-1">Sé el primero en escribir</p>
             </div>
           ) : (
             activeMessages.map((msg) => (
@@ -419,9 +419,9 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                   msg.isMe
                     ? (myAvatarUrl ? 'border-transparent' : `${avatarColor(msg.author)} border-transparent`)
                     : msg.rol === 'admin'
-                    ? 'bg-[#F5A623]/20 border-[#F5A623]/30 text-[#F5A623]'
+                    ? 'bg-[#E8962E]/20 border-[#E8962E]/30 text-[#E8962E]'
                     : msg.rol === 'bot'
-                    ? 'bg-[#F5A623]/30 border-[#F5A623]/30 text-[#FFFFFF]'
+                    ? 'bg-[#E8962E]/30 border-[#E8962E]/30 text-[#F2EFE9]'
                     : `${avatarColor(msg.author)} border-transparent`
                 }`}>
                   {msg.isMe && myAvatarUrl
@@ -435,21 +435,21 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 <div className={`flex flex-col gap-1 ${msg.isMe ? 'items-end' : 'items-start'}`}>
                   {/* Name + badge + time */}
                   <div className={`flex items-baseline gap-2 px-1 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-xs font-medium text-[#FFFFFF]/80">{msg.author}</span>
-                    {msg.rol === 'admin' && <span className="text-[9px] uppercase tracking-wider text-[#F5A623] bg-[#F5A623]/10 px-1.5 py-0.5 rounded">Coach</span>}
-                    {msg.rol === 'bot' && <span className="text-[9px] uppercase tracking-wider text-[#F5A623] bg-[#F5A623]/10 px-1.5 py-0.5 rounded">Sistema</span>}
-                    <span className="text-[10px] text-[#FFFFFF]/30">{msg.time}</span>
+                    <span className="text-xs font-medium text-[#F2EFE9]/80">{msg.author}</span>
+                    {msg.rol === 'admin' && <span className="text-[9px] uppercase tracking-wider text-[#E8962E] bg-[#E8962E]/10 px-1.5 py-0.5 rounded">Coach</span>}
+                    {msg.rol === 'bot' && <span className="text-[9px] uppercase tracking-wider text-[#E8962E] bg-[#E8962E]/10 px-1.5 py-0.5 rounded">Sistema</span>}
+                    <span className="text-[10px] text-[#F2EFE9]/30">{msg.time}</span>
                   </div>
 
                   {/* Bubble */}
                   <div className={`rounded-2xl px-4 py-3 ${
                     msg.isMe
-                      ? 'bg-[#F5A623] text-[#FFFFFF] rounded-tr-sm'
+                      ? 'bg-[#E8962E] text-[#F2EFE9] rounded-tr-sm'
                       : msg.rol === 'bot'
-                      ? 'bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/80 rounded-tl-sm'
+                      ? 'bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] text-[#F2EFE9]/80 rounded-tl-sm'
                       : msg.rol === 'admin'
-                      ? 'bg-[#F5A623]/20 border border-[#F5A623]/20 text-[#F5A623] rounded-tl-sm'
-                      : 'bg-[#F5A623]/10 text-[#FFFFFF] rounded-tl-sm'
+                      ? 'bg-[#E8962E]/20 border border-[#E8962E]/20 text-[#E8962E] rounded-tl-sm'
+                      : 'bg-[#E8962E]/10 text-[#F2EFE9] rounded-tl-sm'
                   }`}>
                     {msg.tipoArchivo === 'imagen' && msg.archivoUrl && (
                       <img
@@ -473,7 +473,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         </div>
 
         {/* Input area */}
-        <div className="p-4 bg-[#F5A623]/5 border-t border-[rgba(245,166,35,0.2)] shrink-0">
+        <div className="p-4 bg-[#E8962E]/5 border-t border-[rgba(232,150,46,0.12)] shrink-0">
           <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
           <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
@@ -482,11 +482,11 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
           <form className="flex items-end gap-2" onSubmit={handleSend}>
             <div className="flex flex-col gap-1 shrink-0">
               <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} title="Subir imagen"
-                className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
+                className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
                 <Image className="w-4 h-4" />
               </button>
               <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading} title="Subir audio"
-                className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
+                className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
                 <Mic className="w-4 h-4" />
               </button>
             </div>
@@ -502,13 +502,13 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
               }}
               placeholder={uploading ? 'Subiendo archivo...' : 'Escribe un mensaje al equipo...'}
               disabled={uploading}
-              className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 px-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
+              className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 px-4 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
               rows={1}
             />
             <button type="submit" disabled={!input.trim() || uploading}
-              className="w-[52px] h-[52px] shrink-0 rounded-xl bg-[#F5A623] hover:bg-[#F5A623] disabled:opacity-50 flex items-center justify-center text-[#FFFFFF] transition-colors shadow-lg shadow-[#F5A623]/20">
+              className="w-[52px] h-[52px] shrink-0 rounded-xl bg-[#E8962E] hover:bg-[#E8962E] disabled:opacity-50 flex items-center justify-center text-[#F2EFE9] transition-colors shadow-lg shadow-[#E8962E]/20">
               {uploading
-                ? <div className="w-4 h-4 border-2 border-[rgba(245,166,35,0.3)] border-t-white rounded-full anímate-spin" />
+                ? <div className="w-4 h-4 border-2 border-[rgba(232,150,46,0.18)] border-t-white rounded-full anímate-spin" />
                 : <Send className="w-5 h-5 ml-1" />
               }
             </button>

@@ -5,6 +5,8 @@
 
 export interface PreactivacionStepDef {
   id: string;
+  /** La sesión equivalente en El Camino (para el tildado automático de clientes-app). */
+  meta?: string;
   /** Label corto multilínea para columna. Usar \n para forzar salto de línea. */
   lbl: string;
   title: string;
@@ -26,237 +28,75 @@ export interface PreactivacionStep extends PreactivacionStepDef {
 
 export const SECTIONS: PreactivacionSection[] = [
   {
+    id: 'base',
+    title: 'Base — Fases 1-2 del Camino',
+    short: 'BASE',
+    items: [
+      { id: 'pacto', lbl: 'Pacto\nfirmado', title: 'El Pacto firmado', detail: 'Su promesa escrita y firmada en el onboarding. <strong>Sin pacto no hay camino.</strong>', meta: 'P0.4' },
+      { id: 'foto_partida', lbl: 'Foto de\nPartida', title: 'Foto de Partida', detail: 'Su autoevaluación inicial completa — el ANTES contra el que se mide todo.', meta: 'P0.2' },
+      { id: 'quema', lbl: 'LA\nQUEMA', title: 'La Quema (con evidencia)', detail: 'La creencia raíz quemada, <strong>con foto de las cenizas subida</strong>.', meta: 'P1.3' },
+      { id: 'numero', lbl: 'EL\nNÚMERO', title: 'El Número (su precio)', detail: 'Su precio digno calculado y <strong>dicho en voz alta (audio subido)</strong>.', meta: 'P1.5' },
+      { id: 'metodo', lbl: 'Método\ncon nombre', title: 'El Método con su nombre', detail: 'Su proceso destilado en 3-5 pasos con nombre propio.', meta: 'P2.4' },
+      { id: 'avatar', lbl: 'Avatar\ndefinido', title: 'El avatar', detail: 'La persona exacta: quién es, qué le duele, qué dice después de sesión.', meta: 'P2.3' },
+      { id: 'oferta', lbl: 'Oferta\n$1.000', title: 'La Oferta Irresistible', detail: 'Promesa, entregables, garantía y precio — la oferta de $1.000 completa.', meta: 'P3.2' },
+      { id: 'pitch', lbl: 'Pitch\ngrabado', title: 'El pitch de 60 segundos', detail: 'Su oferta sonando en el mundo — <strong>audio subido</strong>.', meta: 'P3.4' },
+    ],
+  },
+  {
+    id: 'tecnico',
+    title: 'Técnico — la infraestructura',
+    short: 'TÉCNICO',
+    items: [
+      { id: 'bm', lbl: 'Business\nManager', title: 'Business Manager creado', detail: 'Su BM de Meta activo y verificado.', meta: 'P2.2' },
+      { id: 'pixel', lbl: 'Pixel\ninstalado', title: 'El Pixel de Meta', detail: 'Instalado en su página y <strong>verificado con el Helper de Meta</strong>. Sin pixel, los anuncios vuelan a ciegas.', meta: 'P4.5' },
+      { id: 'wa_business', lbl: 'WhatsApp\nBusiness', title: 'WhatsApp Business activo', detail: 'Su número de negocio conectado.' },
+      { id: 'subcuenta', lbl: 'Subcuenta\nGHL', title: 'Su subcuenta GHL viva', detail: 'Creada desde el snapshot maestro — el motor invisible.' },
+      { id: 'agente', lbl: 'Agente\nrespondiendo', title: 'El agente de WhatsApp', detail: 'Configurado y respondiendo — la Sala de Espera abierta.', meta: 'P4.5' },
+      { id: 'agenda', lbl: 'Agenda\ncon horarios', title: 'La agenda', detail: 'Calendario con sus horarios reales, link funcionando.', meta: 'P4.5' },
+      { id: 'cobro', lbl: 'Cobro\nconfigurado', title: 'El cobro', detail: 'Su forma de cobrar lista (link, transferencia, pasarela).', meta: 'P4.5' },
+      { id: 'landing', lbl: 'Landing\npublicada', title: 'La landing', detail: 'Su página con la oferta, publicada y abriendo.', meta: 'P4.2' },
+      { id: 'dominio', lbl: 'DOMINIO\nconectado', title: 'El dominio (DNS ok)', detail: 'Su dirección digital propia, conectada y propagada.', meta: 'P4.5b' },
+    ],
+  },
+  {
     id: 'contenido',
-    title: 'Contenido Orgánico',
+    title: 'Contenido — las piezas',
     short: 'CONTENIDO',
     items: [
-      {
-        id: 'posts_paleta',
-        lbl: 'Posts\npaleta',
-        title: 'Posts/carruseles publicados con su paleta',
-        detail: 'Feed con piezas consistentes en paleta y tipografía de marca. <strong>Herramienta:</strong> Canva.',
-      },
-      {
-        id: 'post_cta_lm',
-        lbl: 'Post CTA\n→ LM',
-        title: 'Post/carrusel con CTA al lead magnet (comentario keyword)',
-        detail: 'Al menos 1 pieza con CTA "comentá [keyword] y te mando el LM". <strong>Herramienta:</strong> Canva.',
-      },
-      {
-        id: 'reel_editado',
-        lbl: 'Reel\neditado',
-        title: 'Reel editado con subtítulos y música',
-        detail: 'Reel publicado con subtítulos quemados y audio de tendencia o música licenciada. <strong>Herramienta:</strong> CapCut.',
-      },
-      {
-        id: 'programado_7d',
-        lbl: 'Prog.\n7 días',
-        title: 'Contenido programado para los próximos 7 días',
-        detail: 'Mín 4-5 piezas agendadas en cola, no publicación manual día a día. <strong>Herramienta:</strong> Meta Business Suite.',
-      },
-      {
-        id: 'bio_optim',
-        lbl: 'Bio\noptim.',
-        title: 'Bio de Instagram/Facebook optimizada con CTA claro',
-        detail: 'PUV en bio + foto profesional + UN link al lead magnet o agenda. <strong>Herramienta:</strong> Instagram.',
-      },
-      {
-        id: 'destacados',
-        lbl: 'Desta\ncadas',
-        title: 'Portadas de destacados alineadas a la marca',
-        detail: 'Highlights con portadas en la paleta. Sobre Mí · Método · Testimonios · Agendar. <strong>Herramienta:</strong> Canva.',
-      },
-      {
-        id: 'creativos_ads',
-        lbl: 'Creativos\nads',
-        title: 'Creativos específicos para ads (hook 2seg + CTA)',
-        detail: 'Distintos al orgánico. Hook en los primeros 2 segundos + CTA directo. <strong>Herramienta:</strong> Canva / CapCut.',
-      },
+      { id: 'guiones', lbl: 'Guiones\naprobados', title: 'Los guiones', detail: 'Sus 3 guiones de anuncio escritos con Mateo.', meta: 'P4.3' },
+      { id: 'videos', lbl: '3 videos\ngrabados', title: 'El Día de Grabación', detail: 'Las 3 piezas grabadas — <strong>evidencia subida</strong>.', meta: 'P4.3b' },
+      { id: 'edicion', lbl: 'Editados\ny subidos', title: 'Edición y subida', detail: 'Cortados, subtitulados, exportados en vertical.', meta: 'P4.3c' },
+      { id: 'estaticos', lbl: 'Creativos\nestáticos', title: 'Los estáticos (fábrica IA)', detail: '2-3 anuncios de imagen generados con la fábrica.', meta: 'P4.3c' },
     ],
   },
   {
-    id: 'lm',
-    title: 'Lead Magnet',
-    short: 'LM',
+    id: 'campana',
+    title: 'Campaña — el encendido',
+    short: 'CAMPAÑA',
     items: [
-      {
-        id: 'lm_funcional',
-        lbl: 'LM\nfuncional',
-        title: 'Lead magnet creado y funcional (quiz IA / PDF / video)',
-        detail: 'Probado end-to-end por una persona externa. <strong>Herramienta:</strong> HTML + API Claude.',
-      },
-      {
-        id: 'landing_lm',
-        lbl: 'Landing\nLM',
-        title: 'Landing del lead magnet publicada y accesible',
-        detail: 'URL pública, mobile-first, carga rápida. <strong>Herramienta:</strong> HTML.',
-      },
-      {
-        id: 'botones_ok',
-        lbl: 'Botones\nOK',
-        title: 'Botones de la landing funcionan correctamente',
-        detail: 'Cada CTA testeado: redirige, abre o ejecuta lo prometido. <strong>Herramienta:</strong> HTML.',
-      },
-      {
-        id: 'wa_precarg',
-        lbl: 'WA pre\ncarg.',
-        title: 'Botón WhatsApp con mensaje precargado',
-        detail: 'Link wa.me con texto inicial listo para enviar (sin tipear). <strong>Herramienta:</strong> HTML.',
-      },
-      {
-        id: 'entrega_auto',
-        lbl: 'Entrega\nauto',
-        title: 'Lead magnet se entrega automáticamente al completar',
-        detail: 'Sin intervención humana. Email o DM inmediato post-conversión. <strong>Herramienta:</strong> GHL / ManyChat.',
-      },
-      {
-        id: 'captura_email',
-        lbl: 'Captura\nemail',
-        title: 'Captura email del lead al completar',
-        detail: 'Email entra a la base con tag identificable. <strong>Herramienta:</strong> GHL.',
-      },
+      { id: 'validacion', lbl: 'Validación\norgánica', title: 'La validación', detail: 'Publicado orgánico + boost de test corrido.', meta: 'P4.3d' },
+      { id: 'ctwa', lbl: 'CTWA\nENCENDIDA', title: 'La campaña activa', detail: '<strong>En circulación, con captura subida.</strong> El sistema vive.', meta: 'P4.4' },
+      { id: 'presupuesto', lbl: 'Presupuesto\ndiario', title: 'El presupuesto', detail: 'Gasto diario confirmado y sostenible.' },
     ],
   },
   {
-    id: 'vsl_agenda',
-    title: 'VSL y Agenda',
-    short: 'VSL+AGENDA',
+    id: 'venta',
+    title: 'Venta — los cierres',
+    short: 'VENTA',
     items: [
-      {
-        id: 'vsl_subida',
-        lbl: 'VSL\nsubida',
-        title: 'VSL grabada y subida',
-        detail: '8-15 min. Gancho → problema → método → prueba social → oferta → CTA. <strong>Herramienta:</strong> YouTube.',
-      },
-      {
-        id: 'landing_vsl',
-        lbl: 'Landing\nVSL',
-        title: 'Landing VSL con video + CTA a agenda',
-        detail: 'Página con VSL embebida y botón directo al calendario. <strong>Herramienta:</strong> HTML.',
-      },
-      {
-        id: 'calendario_ghl',
-        lbl: 'Cal.\nGHL',
-        title: 'Calendario GHL configurado y funcionando',
-        detail: 'Zona horaria correcta, slots reales disponibles, link Meet/Zoom automático. <strong>Herramienta:</strong> GHL.',
-      },
-      {
-        id: 'preparacion',
-        lbl: 'Página\nprep.',
-        title: 'Página de preparación post-agenda optimizada',
-        detail: 'Después de agendar: video o checklist que prepara al lead para la llamada. <strong>Herramienta:</strong> HTML.',
-      },
-      {
-        id: 'recordatorio_pre',
-        lbl: 'Record.\npre-ses.',
-        title: 'Recordatorio automático pre-sesión (email/WPP)',
-        detail: '24hs antes + 1hr antes. Email + WhatsApp. Reduce no-shows. <strong>Herramienta:</strong> GHL.',
-      },
+      { id: 'script', lbl: 'Script\nLa W', title: 'El script de ventas', detail: 'Su W personal escrita con Lucas.', meta: 'P5.2' },
+      { id: 'roleplay', lbl: 'Roleplay\naprobado', title: 'El roleplay', detail: 'Tres rondas contra el prospecto difícil.', meta: 'P5.3' },
+      { id: 'llamada', lbl: '1ª llamada\nreal', title: 'La primera llamada', detail: 'Realizada y registrada — <strong>el Azul</strong>.', meta: 'P5.4' },
+      { id: 'pago', lbl: 'PRIMER\nPAGO', title: 'El primer pago 💰', detail: '<strong>Comprobante subido — el Rojo.</strong> El momento que cambia todo.', meta: 'P6.3' },
     ],
   },
   {
-    id: 'auto',
-    title: 'Automatizaciones',
-    short: 'AUTO',
+    id: 'entrega',
+    title: 'Entrega — la clínica',
+    short: 'ENTREGA',
     items: [
-      {
-        id: 'manychat_kw',
-        lbl: 'ManyChat\nkeyword',
-        title: 'ManyChat: keyword en comentario IG → DM con link al LM',
-        detail: 'Comentario con palabra clave dispara DM automático con el lead magnet. <strong>Herramienta:</strong> ManyChat.',
-      },
-      {
-        id: 'ghl_kw',
-        lbl: 'GHL\nkeyword',
-        title: 'GHL: automatización keyword comentario IG → respuesta',
-        detail: 'Workflow paralelo o backup en GHL para la misma keyword. <strong>Herramienta:</strong> GHL.',
-      },
-      {
-        id: 'notif_agenda',
-        lbl: 'Notif.\nagenda',
-        title: 'Notificación cuando llega nueva agenda (al equipo)',
-        detail: 'Cada nueva reserva genera ping al equipo. <strong>Herramienta:</strong> GHL → Discord.',
-      },
-      {
-        id: 'emails_post_lm',
-        lbl: 'Emails\npost LM',
-        title: 'Secuencia de 3-5 emails post lead magnet',
-        detail: 'Email 1: entrega. 2-3: valor. 4-5: CTA agendar. <strong>Herramienta:</strong> GHL email.',
-      },
-      {
-        id: 'leads_sheets',
-        lbl: 'Leads →\nSheets',
-        title: 'Leads nuevos → Google Sheets automático',
-        detail: 'Cada lead se replica a Sheets para tracking y respaldo. <strong>Herramienta:</strong> Make / n8n.',
-      },
-      {
-        id: 'email_bienvenida',
-        lbl: 'Email\nbienv.',
-        title: 'Email de bienvenida automático para nuevos leads',
-        detail: 'Inmediato post-captura. Presentación + próximos pasos. <strong>Herramienta:</strong> GHL.',
-      },
-    ],
-  },
-  {
-    id: 'meta',
-    title: 'Meta Ads',
-    short: 'META',
-    items: [
-      {
-        id: 'bm_team',
-        lbl: 'BM +\nequipo',
-        title: 'Business Manager configurado y con acceso del equipo',
-        detail: 'BM verificado con datos reales. Roles asignados al equipo. <strong>Herramienta:</strong> Meta.',
-      },
-      {
-        id: 'pixel_all',
-        lbl: 'Pixel\ntodo',
-        title: 'Pixel Meta instalado en todas las landings',
-        detail: 'PageView + eventos de conversión activos. Verificar con Pixel Helper. <strong>Herramienta:</strong> Meta + HTML.',
-      },
-      {
-        id: 'campana_armada',
-        lbl: 'Camp.\narmada',
-        title: 'Campaña armada (1 campaña / 1 ad set / creativos)',
-        detail: 'Estructura mínima limpia: 1 campaña, 1 ad set, mín 3 creativos. <strong>Herramienta:</strong> Meta Ads.',
-      },
-      {
-        id: 'campana_activa',
-        lbl: 'Camp.\nactiva',
-        title: 'Campaña activa y corriendo con $25/día',
-        detail: 'Budget mínimo de $25 USD/día durante al menos 7 días. <strong>Herramienta:</strong> Meta Ads.',
-      },
-      {
-        id: 'cpl_ok',
-        lbl: 'CPL\nOK',
-        title: 'CPL dentro de rango saludable ($3-8 USD)',
-        detail: 'Costo por lead entre $3 y $8 USD. Si está fuera, frenar y ajustar. <strong>Herramienta:</strong> Meta Ads.',
-      },
-    ],
-  },
-  {
-    id: 'plataformas',
-    title: 'Plataformas',
-    short: 'PLATAF.',
-    items: [
-      {
-        id: 'skool_lm',
-        lbl: 'Skool\n+ LMs',
-        title: 'Skool montado con lead magnets adentro',
-        detail: 'Comunidad creada, bienvenida + LMs como contenido inicial. <strong>Herramienta:</strong> Skool.',
-      },
-      {
-        id: 'dominio_landing',
-        lbl: 'Dominio\nlanding',
-        title: 'Dominio personalizado conectado a la landing',
-        detail: 'No URL genérica de plataforma. DNS configurado y SSL activo. <strong>Herramienta:</strong> DNS / Cloudflare.',
-      },
-      {
-        id: 'discord_org',
-        lbl: 'Discord\norg.',
-        title: 'Canal de Discord organizado',
-        detail: 'Canales por tema, roles, notificaciones del embudo conectadas. <strong>Herramienta:</strong> Discord.',
-      },
+      { id: 'protocolo', lbl: 'Protocolo\ndocumentado', title: 'El protocolo de entrega', detail: 'Su forma de entregar, documentada (lista para MCD).', meta: 'P6.2' },
+      { id: 'testimonio', lbl: 'Testimonio\npedido', title: 'El testimonio', detail: 'Pedido a cada paciente que termina — su prueba social.' },
     ],
   },
 ];

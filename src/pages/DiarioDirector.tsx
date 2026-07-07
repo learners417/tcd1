@@ -151,7 +151,7 @@ function Escala10({
     <div className="flex gap-1">
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
         const activo = n <= valor;
-        const fill = color ? color(valor) : '#F5A623';
+        const fill = color ? color(valor) : '#E8962E';
         return (
           <button
             key={n}
@@ -160,7 +160,7 @@ function Escala10({
             aria-label={`Nivel ${n}`}
             className="flex-1 h-7 rounded-md transition-all"
             style={{
-              background: activo ? fill : 'rgba(245,166,35,0.08)',
+              background: activo ? fill : 'rgba(232,150,46,0.08)',
             }}
           />
         );
@@ -185,15 +185,15 @@ function KpiCard({
   delta?: string;
 }) {
   const valColor =
-    tone === 'green' ? 'text-[#22C55E]' : tone === 'warn' ? 'text-[#E09040]' : 'text-[#FFFFFF]';
+    tone === 'green' ? 'text-[#22C55E]' : tone === 'warn' ? 'text-[#E09040]' : 'text-[#F2EFE9]';
   return (
-    <div className="card-panel p-4 rounded-2xl border border-[rgba(245,166,35,0.12)]">
+    <div className="card-panel p-4 rounded-2xl border border-[rgba(232,150,46,0.12)]">
       <div className="flex items-center gap-1.5 mb-1.5">
-        <Icon className="w-3.5 h-3.5 text-[#F5A623]/60" />
-        <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest font-semibold">{label}</p>
+        <Icon className="w-3.5 h-3.5 text-[#E8962E]/60" />
+        <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-widest font-semibold">{label}</p>
       </div>
       <p className={`text-xl font-medium ${valColor}`}>{value}</p>
-      {delta && <p className="text-[10px] text-[#FFFFFF]/40 mt-0.5">{delta}</p>}
+      {delta && <p className="text-[10px] text-[#F2EFE9]/40 mt-0.5">{delta}</p>}
     </div>
   );
 }
@@ -433,20 +433,20 @@ Devolvé SOLO este JSON:
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-light text-[#FFFFFF] flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#F5A623]" /> Diario del Fundador
+          <h1 className="text-2xl font-light text-[#F2EFE9] flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-[#E8962E]" /> Diario del Fundador
           </h1>
-          <p className="text-sm text-[#FFFFFF]/60 mt-1 flex items-center gap-2">
+          <p className="text-sm text-[#F2EFE9]/60 mt-1 flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5" />
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            <span className="text-[#FFFFFF]/30">· Día {getCurrentDay()}</span>
+            <span className="text-[#F2EFE9]/30">· Día {getCurrentDay()}</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
           {energiaPromedio !== null && (
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
               energiaPromedio >= 7 ? 'text-[#22C55E] bg-emerald-500/10 border-emerald-500/20' :
-              energiaPromedio >= 4 ? 'text-[#F5A623] bg-[#F5A623]/10 border-[#F5A623]/20' :
+              energiaPromedio >= 4 ? 'text-[#E8962E] bg-[#E8962E]/10 border-[#E8962E]/20' :
               'text-[#EF4444] bg-red-500/10 border-red-500/20'
             }`}>
               <Zap className="w-3.5 h-3.5" />
@@ -462,7 +462,7 @@ Devolvé SOLO este JSON:
           )}
           <button
             onClick={() => setVista(vista === 'formulario' ? 'historial' : 'formulario')}
-            className="flex items-center gap-1.5 text-[#FFFFFF]/60 bg-[#F5A623]/5 px-3 py-1.5 rounded-xl border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 transition-colors text-sm"
+            className="flex items-center gap-1.5 text-[#F2EFE9]/60 bg-[#E8962E]/5 px-3 py-1.5 rounded-xl border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 transition-colors text-sm"
           >
             <History className="w-3.5 h-3.5" />
             Historial
@@ -472,7 +472,7 @@ Devolvé SOLO este JSON:
 
       {/* Resumen semanal */}
       {generandoResumen && (
-        <div className="flex items-center gap-2 text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-2xl p-4">
+        <div className="flex items-center gap-2 text-[#E8962E] bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-2xl p-4">
           <Loader2 className="w-4 h-4 anímate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
@@ -487,28 +487,28 @@ Devolvé SOLO este JSON:
                 <h3 className="text-sm font-medium text-violet-300">Resumen del Coach — Semana cerrada</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-[#1C1C1C]/50 rounded-xl p-3">
-                  <p className="text-[#FFFFFF]/40 uppercase tracking-wider text-[10px]">Energía promedio</p>
-                  <p className="text-[#FFFFFF] font-medium mt-0.5">{datos.energia_promedio}/10 — {datos.tendencia_energia}</p>
+                <div className="bg-[#1A1917]/50 rounded-xl p-3">
+                  <p className="text-[#F2EFE9]/40 uppercase tracking-wider text-[10px]">Energía promedio</p>
+                  <p className="text-[#F2EFE9] font-medium mt-0.5">{datos.energia_promedio}/10 — {datos.tendencia_energia}</p>
                 </div>
-                <div className="bg-[#1C1C1C]/50 rounded-xl p-3">
-                  <p className="text-[#FFFFFF]/40 uppercase tracking-wider text-[10px]">Racha del Diario</p>
-                  <p className="text-[#FFFFFF] font-medium mt-0.5">{datos.racha} días consecutivos</p>
+                <div className="bg-[#1A1917]/50 rounded-xl p-3">
+                  <p className="text-[#F2EFE9]/40 uppercase tracking-wider text-[10px]">Racha del Diario</p>
+                  <p className="text-[#F2EFE9] font-medium mt-0.5">{datos.racha} días consecutivos</p>
                 </div>
               </div>
               {datos.bloqueo_recurrente && (
-                <div className="bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-xl p-3">
-                  <p className="text-[10px] text-[#F5A623] uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
+                <div className="bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-xl p-3">
+                  <p className="text-[10px] text-[#E8962E] uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
                   <p className="text-sm text-amber-200">{datos.bloqueo_recurrente}</p>
                 </div>
               )}
               {Array.isArray(datos.acciones_proxima_semana) && (
                 <div>
-                  <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
+                  <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
                   <ul className="space-y-1.5">
                     {datos.acciones_proxima_semana.map((accion: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#FFFFFF]/80">
-                        <span className="text-[#F5A623] font-bold shrink-0">{i + 1}.</span>
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#F2EFE9]/80">
+                        <span className="text-[#E8962E] font-bold shrink-0">{i + 1}.</span>
                         {accion}
                       </li>
                     ))}
@@ -539,11 +539,11 @@ Devolvé SOLO este JSON:
 
                 {/* Score grande */}
                 <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-light text-[#F5A623]" style={{ fontFamily: 'var(--font-display)' }}>
+                  <span className="text-5xl font-light text-[#E8962E]" style={{ fontFamily: 'var(--font-display)' }}>
                     {todayEntry.score}
                   </span>
                   <div>
-                    <p className="text-xs text-[#FFFFFF]/40">de 100 puntos</p>
+                    <p className="text-xs text-[#F2EFE9]/40">de 100 puntos</p>
                     {kpis?.deltaScore !== null && kpis?.deltaScore !== undefined && (
                       <p className={`text-xs font-medium ${kpis.deltaScore >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                         {kpis.deltaScore >= 0 ? '▲' : '▼'} {Math.abs(kpis.deltaScore)} vs ayer
@@ -568,26 +568,26 @@ Devolvé SOLO este JSON:
           ) : (
             <div className="card-panel p-6 rounded-2xl space-y-7">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30">
-                  <BookOpen className="w-5 h-5 text-[#F5A623]" />
+                <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
+                  <BookOpen className="w-5 h-5 text-[#E8962E]" />
                 </div>
                 <div>
-                  <h2 className="text-base font-medium text-[#FFFFFF]">¿Cómo fue hoy?</h2>
-                  <p className="text-xs text-[#FFFFFF]/60">Tu cierre diario · 5 minutos</p>
+                  <h2 className="text-base font-medium text-[#F2EFE9]">¿Cómo fue hoy?</h2>
+                  <p className="text-xs text-[#F2EFE9]/60">Tu cierre diario · 5 minutos</p>
                 </div>
               </div>
 
               {/* Energía general */}
-              <div className="bg-[#1C1C1C]/30 rounded-xl p-4 border border-[rgba(245,166,35,0.1)]">
+              <div className="bg-[#1A1917]/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-xs font-medium text-[#F2EFE9]/80 uppercase tracking-wider flex items-center gap-2">
                     <Zap className="w-4 h-4 text-yellow-400" /> Energía general del día
                   </span>
-                  <span className="text-sm font-bold text-[#F5A623]">{energia} · {etiquetaEnergia(energia)}</span>
+                  <span className="text-sm font-bold text-[#E8962E]">{energia} · {etiquetaEnergia(energia)}</span>
                 </div>
                 <Escala10 valor={energia} onChange={setEnergia} />
                 {ayerEntry && (
-                  <p className="text-[11px] text-[#FFFFFF]/30 mt-2 text-center">
+                  <p className="text-[11px] text-[#F2EFE9]/30 mt-2 text-center">
                     Ayer tuviste <span className="text-[#22C55E]">{ayerEntry.energia}</span>
                     {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
                   </p>
@@ -596,7 +596,7 @@ Devolvé SOLO este JSON:
 
               {/* 3 dimensiones */}
               <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-3 uppercase tracking-wider">
+                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-3 uppercase tracking-wider">
                   Tus 3 dimensiones — ¿cómo estuvieron cuerpo · mente · emociones?
                 </label>
                 <div className="space-y-4">
@@ -606,11 +606,11 @@ Devolvé SOLO este JSON:
                     return (
                       <div key={dim.key} className="flex items-center gap-3">
                         <div className="flex items-center gap-2 w-28 shrink-0">
-                          <dim.icon className="w-4 h-4 text-[#F5A623]" />
-                          <span className="text-xs text-[#FFFFFF]/70">{dim.label}</span>
+                          <dim.icon className="w-4 h-4 text-[#E8962E]" />
+                          <span className="text-xs text-[#F2EFE9]/70">{dim.label}</span>
                         </div>
                         <div className="flex-1"><Escala10 valor={val} onChange={set} color={colorDimension} /></div>
-                        <span className="text-sm font-medium text-[#FFFFFF] w-5 text-right">{val}</span>
+                        <span className="text-sm font-medium text-[#F2EFE9] w-5 text-right">{val}</span>
                       </div>
                     );
                   })}
@@ -619,24 +619,24 @@ Devolvé SOLO este JSON:
 
               {/* Logro */}
               <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#F5A623]" /> Tu logro de hoy — ¿qué avance te enorgullece?
+                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#E8962E]" /> Tu logro de hoy — ¿qué avance te enorgullece?
                 </label>
                 <textarea
                   rows={2}
                   maxLength={LOGRO_MAX_CHARS}
                   placeholder="El avance del que estás orgulloso hoy..."
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 resize-none transition-all placeholder-[#F2EFE9]/30"
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
-                <p className="text-[10px] text-[#FFFFFF]/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+                <p className="text-[10px] text-[#F2EFE9]/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
               </div>
 
               {/* ¿En qué estuviste? */}
               <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                  ¿En qué estuviste hoy? <span className="text-[#FFFFFF]/30 normal-case">(mínimo 1)</span>
+                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider">
+                  ¿En qué estuviste hoy? <span className="text-[#F2EFE9]/30 normal-case">(mínimo 1)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {TAREAS_TAGS.map((tag) => {
@@ -648,8 +648,8 @@ Devolvé SOLO este JSON:
                         onClick={() => setTareas((prev) => toggle(prev, tag.id))}
                         className={`text-xs px-3 py-2 rounded-lg border transition-all ${
                           on
-                            ? 'border-[#F5A623]/40 text-[#FFFFFF] bg-[#F5A623]/10'
-                            : 'border-white/8 text-[#FFFFFF]/40 hover:bg-white/5'
+                            ? 'border-[#E8962E]/40 text-[#F2EFE9] bg-[#E8962E]/10'
+                            : 'border-white/8 text-[#F2EFE9]/40 hover:bg-white/5'
                         }`}
                       >
                         {tag.label}
@@ -661,24 +661,24 @@ Devolvé SOLO este JSON:
 
               {/* Bloqueo */}
               <div>
-                <label className="block text-xs font-medium text-[#FFFFFF]/80 mb-2 uppercase tracking-wider">
-                  Bloqueos <span className="text-[#FFFFFF]/30 normal-case">(opcional)</span>
+                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider">
+                  Bloqueos <span className="text-[#F2EFE9]/30 normal-case">(opcional)</span>
                 </label>
                 <textarea
                   rows={2}
                   maxLength={BLOQUEO_MAX_CHARS}
                   placeholder="¿Algo te frenó hoy? Técnico, emocional, externo. No hay respuesta mala."
-                  className="w-full bg-black/20 border border-dashed border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30"
+                  className="w-full bg-black/20 border border-dashed border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 resize-none transition-all placeholder-[#F2EFE9]/30"
                   value={bloqueo}
                   onChange={(e) => setBloqueo(e.target.value)}
                 />
               </div>
 
               {/* Checkeos rápidos */}
-              <div className="bg-[#1C1C1C]/30 rounded-xl p-4 border border-[rgba(245,166,35,0.1)]">
+              <div className="bg-[#1A1917]/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
                 <div className="flex items-center gap-2 mb-3">
                   <HeartPulse className="w-4 h-4 text-[#22C55E]" />
-                  <span className="text-xs font-medium text-[#FFFFFF]/80 uppercase tracking-wider">Checkeos rápidos</span>
+                  <span className="text-xs font-medium text-[#F2EFE9]/80 uppercase tracking-wider">Checkeos rápidos</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {CHECKEOS_CHIPS.map((chip) => {
@@ -693,7 +693,7 @@ Devolvé SOLO este JSON:
                         type="button"
                         onClick={() => setCheckeos((prev) => toggle(prev, chip.id))}
                         className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all ${
-                          on ? onColor : 'border-white/8 text-[#FFFFFF]/35 hover:bg-white/5'
+                          on ? onColor : 'border-white/8 text-[#F2EFE9]/35 hover:bg-white/5'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5" />
@@ -708,7 +708,7 @@ Devolvé SOLO este JSON:
               <button
                 onClick={handleGuardar}
                 disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
                   <><Loader2 className="w-4 h-4 anímate-spin" /> Guardando...</>
@@ -716,7 +716,7 @@ Devolvé SOLO este JSON:
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
-              <p className="text-[10px] text-[#FFFFFF]/30 text-center -mt-3">
+              <p className="text-[10px] text-[#F2EFE9]/30 text-center -mt-3">
                 El score se calcula y se muestra después de guardar.
               </p>
             </div>
@@ -728,28 +728,28 @@ Devolvé SOLO este JSON:
       {vista === 'historial' && (
         <div className="space-y-4">
           {loading && entries.length === 0 && (
-            <div className="flex items-center gap-2 text-[#FFFFFF]/40 text-sm">
+            <div className="flex items-center gap-2 text-[#F2EFE9]/40 text-sm">
               <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (
-            <p className="text-center text-[#FFFFFF]/40 text-sm py-12">Aún no hay entradas en el Diario.</p>
+            <p className="text-center text-[#F2EFE9]/40 text-sm py-12">Aún no hay entradas en el Diario.</p>
           )}
           {entries.map((entrada) => (
-            <div key={entrada.id} className="card-panel p-5 rounded-2xl border-l-4 border-l-[#F5A623]/50 space-y-3">
+            <div key={entrada.id} className="card-panel p-5 rounded-2xl border-l-4 border-l-[#E8962E]/50 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#F5A623] font-medium">
+                <span className="text-xs text-[#E8962E] font-medium">
                   {new Date(entrada.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
                     weekday: 'long', day: 'numeric', month: 'long',
                   })}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-[#F5A623]/15 text-[#F5A623]">
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-[#E8962E]/15 text-[#E8962E]">
                     {entrada.score}/100
                   </span>
                   <span className={`text-xs font-bold px-2 py-1 rounded-full ${
                     entrada.energia >= 7 ? 'bg-emerald-500/15 text-[#22C55E]' :
-                    entrada.energia >= 4 ? 'bg-[#F5A623]/15 text-[#F5A623]' :
+                    entrada.energia >= 4 ? 'bg-[#E8962E]/15 text-[#E8962E]' :
                     'bg-red-500/15 text-[#EF4444]'
                   }`}>
                     <Zap className="w-3 h-3 inline" /> {entrada.energia}/10
@@ -759,12 +759,12 @@ Devolvé SOLO este JSON:
 
               {entrada.logro && (
                 <div>
-                  <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Logro</span>
-                  <p className="text-[#FFFFFF]/80 mt-0.5 text-sm">{entrada.logro}</p>
+                  <span className="text-[#F2EFE9]/30 uppercase tracking-wider text-[10px]">Logro</span>
+                  <p className="text-[#F2EFE9]/80 mt-0.5 text-sm">{entrada.logro}</p>
                 </div>
               )}
 
-              <div className="flex gap-3 text-[11px] text-[#FFFFFF]/50">
+              <div className="flex gap-3 text-[11px] text-[#F2EFE9]/50">
                 <span>Cuerpo {entrada.cuerpo}</span>
                 <span>Mente {entrada.mente}</span>
                 <span>Emociones {entrada.emociones}</span>
@@ -772,8 +772,8 @@ Devolvé SOLO este JSON:
 
               {entrada.bloqueo && (
                 <div>
-                  <span className="text-[#FFFFFF]/30 uppercase tracking-wider text-[10px]">Bloqueo</span>
-                  <p className="text-[#FFFFFF]/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
+                  <span className="text-[#F2EFE9]/30 uppercase tracking-wider text-[10px]">Bloqueo</span>
+                  <p className="text-[#F2EFE9]/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
                 </div>
               )}
 
@@ -782,7 +782,7 @@ Devolvé SOLO este JSON:
                   {entrada.tareas.map((id) => {
                     const tag = TAREAS_TAGS.find((t) => t.id === id);
                     return tag ? (
-                      <span key={id} className="text-[10px] bg-[#F5A623]/5 px-2 py-1 rounded-full text-[#FFFFFF]/60">
+                      <span key={id} className="text-[10px] bg-[#E8962E]/5 px-2 py-1 rounded-full text-[#F2EFE9]/60">
                         {tag.label}
                       </span>
                     ) : null;

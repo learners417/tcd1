@@ -70,8 +70,9 @@ import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
+import CintaCinturon from '../components/CintaCinturon';
 import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
-import { otorgarCinturonPorPilar, calcularCinturon } from '../lib/cinturones';
+import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
@@ -118,13 +119,13 @@ interface Props {
 function getTypeBadge(tipo: string) {
   switch (tipo) {
     case 'VIDEO':
-      return { icon: Play, label: 'VIDEO', color: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10 border-[#F5A623]/20' };
+      return { icon: Play, label: 'VIDEO', color: 'text-[#E8962E]', bg: 'bg-[#E8962E]/10 border-[#E8962E]/20' };
     case 'HERRAMIENTA':
       return { icon: Wrench, label: 'HERRAMIENTA', color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10 border-[#22C55E]/20' };
     case 'COACH':
-      return { icon: MessageSquare, label: 'COACH', color: 'text-[#FFFFFF]/70', bg: 'bg-[#FFFFFF]/5 border-[#FFFFFF]/15' };
+      return { icon: MessageSquare, label: 'COACH', color: 'text-[#F2EFE9]/70', bg: 'bg-[#F2EFE9]/5 border-[#F2EFE9]/15' };
     default:
-      return { icon: FileText, label: tipo, color: 'text-[#FFFFFF]/50', bg: 'bg-[#FFFFFF]/5 border-[#FFFFFF]/10' };
+      return { icon: FileText, label: tipo, color: 'text-[#F2EFE9]/50', bg: 'bg-[#F2EFE9]/5 border-[#F2EFE9]/10' };
   }
 }
 
@@ -745,7 +746,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#FFFFFF]/40 text-sm">
+      <div className="flex items-center justify-center h-64 text-[#F2EFE9]/40 text-sm">
         Cargando tu Hoja de Ruta...
       </div>
     );
@@ -756,7 +757,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       {/* ── Notificación de celebración ── */}
       {celebracion && (
-        <div className="fixed top-6 right-6 z-50 bg-[#F5A623]/90 backdrop-blur text-[#0A0A0A] text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
+        <div className="fixed top-6 right-6 z-50 bg-[#E8962E]/90 backdrop-blur text-[#080808] text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
           {celebracion}
         </div>
       )}
@@ -765,38 +766,39 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       <div className="card-panel p-6 rounded-2xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl text-[#FFFFFF] flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-              <MapIcon className="w-7 h-7 text-[#F5A623]" /> Hoja de Ruta
+            <h1 className="text-3xl text-[#F2EFE9] flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <MapIcon className="w-7 h-7 text-[#E8962E]" /> Hoja de Ruta
             </h1>
-            <p className="text-base text-[#FFFFFF]/60 mt-1">
+        {(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return <div className="mt-3 max-w-sm"><CintaCinturon cinturon={c} variante="linea" /></div>; } catch { return null; } })()}
+            <p className="text-base text-[#F2EFE9]/60 mt-1">
               Método CLINICA · 90 días · 4 fases · Objetivo: $10.000 USD
             </p>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">Nivel actual</p>
-            <p className="text-sm font-medium text-[#F5A623] mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-[#F5A623]/70">{cinturonActual.metafora}</span></p>
+            <p className="text-xs text-[#F2EFE9]/40 uppercase tracking-wider">Nivel actual</p>
+            <p className="text-sm font-medium text-[#E8962E] mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-[#E8962E]/70">{cinturonActual.metafora}</span></p>
             <p className="text-xs mt-1.5">
               {diasAtraso <= 0 ? (
                 <span className="text-[#22C55E]">Día {diaPrograma} de 90 · vas al día ✓</span>
               ) : diasAtraso <= 3 ? (
-                <span className="text-[#F5A623]">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
+                <span className="text-[#E8962E]">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
               ) : (
                 <span className="text-[#EF4444]">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Mentor hoy: juntos lo reacomodan.</span>
               )}
             </p>
-            <p className="text-xs text-[#FFFFFF]/40">Nivel {nivel} de 5</p>
+            <p className="text-xs text-[#F2EFE9]/40">Nivel {nivel} de 5</p>
           </div>
         </div>
 
         {/* Barra de progreso global */}
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-[#FFFFFF]/60">
+          <div className="flex justify-between text-xs text-[#F2EFE9]/60">
             <span>Progreso global</span>
             <span>{progresoPct}% — {totalCompletadas} de {TOTAL_METAS} metas</span>
           </div>
-          <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden">
+          <div className="h-2 bg-[#E8962E]/5 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#F5A623] to-[#FFB94D] rounded-full transition-all duration-1000"
+              className="h-full bg-gradient-to-r from-[#E8962E] to-[#F4B65C] rounded-full transition-all duration-1000"
               style={{ width: `${progresoPct}%` }}
             />
           </div>
@@ -804,27 +806,27 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
         {/* Indicadores rápidos */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">{perfil?.dia_programa ?? 1}</p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Día de prog.</p>
+          <div className="bg-[#1A1917]/50 rounded-xl p-3 text-center">
+            <p className="text-lg font-light text-[#F2EFE9]">{perfil?.dia_programa ?? 1}</p>
+            <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider">Día de prog.</p>
           </div>
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center relative">
-            <p className="text-lg font-light text-[#FFFFFF]">
-              {ventas.length}<span className="text-[#FFFFFF]/35 text-sm">/10</span>
+          <div className="bg-[#1A1917]/50 rounded-xl p-3 text-center relative">
+            <p className="text-lg font-light text-[#F2EFE9]">
+              {ventas.length}<span className="text-[#F2EFE9]/35 text-sm">/10</span>
             </p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Pacientes</p>
+            <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider">Pacientes</p>
             <button
               onClick={() => setVentaModal(true)}
-              className="mt-1.5 text-[10px] font-semibold text-[#F5A623] hover:text-[#FFB94D] transition-colors"
+              className="mt-1.5 text-[10px] font-semibold text-[#E8962E] hover:text-[#F4B65C] transition-colors"
             >
               🎉 Registrar venta
             </button>
           </div>
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">
+          <div className="bg-[#1A1917]/50 rounded-xl p-3 text-center">
+            <p className="text-lg font-light text-[#F2EFE9]">
               {pilaresConEstado.filter((p) => p.estado === 'completado').length}
             </p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Pilares completados</p>
+            <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider">Pilares completados</p>
           </div>
         </div>
       </div>
@@ -860,21 +862,21 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               {/* Encabezado de fase */}
               <div className="flex items-center gap-3 px-1 mb-1">
                 <div className="flex-1">
-                  <h2 className="text-lg font-bold uppercase tracking-wide text-[#FFFFFF]/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
+                  <h2 className="text-lg font-bold uppercase tracking-wide text-[#F2EFE9]/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
                     {fase.titulo}
                     {fase.metodo_letra && (
-                      <span className="ml-2 text-[#F5A623] text-base">· Método {fase.metodo_letra}</span>
+                      <span className="ml-2 text-[#E8962E] text-base">· Método {fase.metodo_letra}</span>
                     )}
                   </h2>
-                  <p className="text-sm text-[#FFFFFF]/40 mt-0.5">{fase.subtitulo} · {fase.dias}</p>
+                  <p className="text-sm text-[#F2EFE9]/40 mt-0.5">{fase.subtitulo} · {fase.dias}</p>
                 </div>
               </div>
 
               {/* Banner de hito Día 45 (antes de Fase 4) */}
               {fase.fase === 4 && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/25">
-                  <Trophy className="w-4 h-4 text-[#F5A623] shrink-0" />
-                  <p className="text-xs text-[#F5A623] font-medium">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#E8962E]/10 border border-[#E8962E]/25">
+                  <Trophy className="w-4 h-4 text-[#E8962E] shrink-0" />
+                  <p className="text-xs text-[#E8962E] font-medium">
                     Punto de no retorno — Día 45 max. Sin el ADN base completo, los $10,000 USD/mes no son un objetivo realista.
                   </p>
                 </div>
@@ -897,22 +899,22 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       disabled={pilar.estado === 'bloqueado'}
                       className={`relative text-left p-5 rounded-2xl border transition-all duration-300 ${
                         pilar.estado === 'bloqueado'
-                          ? 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.08)] cursor-not-allowed opacity-40'
+                          ? 'bg-[#1A1917]/50 border-[rgba(232,150,46,0.08)] cursor-not-allowed opacity-40'
                           : isSelected
-                          ? 'bg-[#F5A623]/15 border-[#F5A623]/50 shadow-lg shadow-[#F5A623]/15 scale-[1.02]'
+                          ? 'bg-[#E8962E]/15 border-[#E8962E]/50 shadow-lg shadow-[#E8962E]/15 scale-[1.02]'
                           : pilar.estado === 'completado'
                           ? 'bg-[#22C55E]/8 border-[#22C55E]/25 hover:bg-[#22C55E]/12'
-                          : 'bg-[#F5A623]/5 border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 hover:border-[#F5A623]/35'
+                          : 'bg-[#E8962E]/5 border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 hover:border-[#E8962E]/35'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-6 h-6 text-[#F5A623]" /> : null; })()}
+                        {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-6 h-6 text-[#E8962E]" /> : null; })()}
                         <div className="flex items-center gap-1">
                           {pilar.es_hito && (
-                            <Trophy className="w-3 h-3 text-[#F5A623]" />
+                            <Trophy className="w-3 h-3 text-[#E8962E]" />
                           )}
                           {pilar.estado === 'bloqueado' ? (
-                            <Lock className="w-3.5 h-3.5 text-[#FFFFFF]/30" />
+                            <Lock className="w-3.5 h-3.5 text-[#F2EFE9]/30" />
                           ) : pilar.estado === 'completado' ? (
                             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
                           ) : (
@@ -920,18 +922,18 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-[#FFFFFF]/40 font-medium uppercase tracking-wider">
+                      <p className="text-xs text-[#F2EFE9]/40 font-medium uppercase tracking-wider">
                         Pilar {pilar.id.substring(1)}
                       </p>
-                      <p className={`text-sm font-semibold mt-0.5 ${pilar.estado === 'bloqueado' ? 'text-[#FFFFFF]/30' : 'text-[#FFFFFF]'}`}>
+                      <p className={`text-sm font-semibold mt-0.5 ${pilar.estado === 'bloqueado' ? 'text-[#F2EFE9]/30' : 'text-[#F2EFE9]'}`}>
                         {pilar.titulo}
                       </p>
 
                       {/* Mini barra de progreso */}
                       {pilar.estado !== 'bloqueado' && (
-                        <div className="mt-3 h-1.5 bg-[#F5A623]/10 rounded-full overflow-hidden">
+                        <div className="mt-3 h-1.5 bg-[#E8962E]/10 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#F5A623]'}`}
+                            className={`h-full rounded-full transition-all duration-500 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#E8962E]'}`}
                             style={{ width: `${pilar.totalMetas === 0 ? 0 : Math.round((pilar.metasCompletadas / pilar.totalMetas) * 100)}%` }}
                           />
                         </div>
@@ -939,7 +941,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
-                        <p className="text-[9px] text-[#FFFFFF]/30 mt-1.5 leading-tight">
+                        <p className="text-[9px] text-[#F2EFE9]/30 mt-1.5 leading-tight">
                           {pilar.desbloqueo === 'venta_real' && 'Requiere 1 venta real'}
                           {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
                         </p>
@@ -961,21 +963,21 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
         return (
           <div ref={detalleRef} className="card-panel rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300 scroll-mt-4">
             {/* Cabecera del pilar */}
-            <div className="p-6 border-b border-[rgba(245,166,35,0.1)]">
+            <div className="p-6 border-b border-[rgba(232,150,46,0.1)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-[#F5A623]" /> : null; })()}
+                  {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-[#E8962E]" /> : null; })()}
                   <div>
-                    <p className="text-sm text-[#F5A623] uppercase tracking-wider font-bold">
+                    <p className="text-sm text-[#E8962E] uppercase tracking-wider font-bold">
                       Pilar {pilar.id.substring(1)}
                     </p>
-                    <h2 className="text-xl text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{pilar.titulo}</h2>
-                    <p className="text-sm text-[#FFFFFF]/60">{pilar.subtitulo}</p>
+                    <h2 className="text-xl text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{pilar.titulo}</h2>
+                    <p className="text-sm text-[#F2EFE9]/60">{pilar.subtitulo}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setPilarAbierto(null)}
-                  className="text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors p-1"
+                  className="text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors p-1"
                 >
                   <ChevronUp className="w-5 h-5" />
                 </button>
@@ -983,13 +985,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
               {/* Progreso del pilar */}
               <div className="mt-4 space-y-1.5">
-                <div className="flex justify-between text-xs text-[#FFFFFF]/40">
+                <div className="flex justify-between text-xs text-[#F2EFE9]/40">
                   <span>{pilar.metasCompletadas} de {pilar.totalMetas} metas</span>
                   <span className="flex items-center gap-1">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline" /> completadas</span>
                 </div>
-                <div className="h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-[#E8962E]/5 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-700 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#F5A623]'}`}
+                    className={`h-full rounded-full transition-all duration-700 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#E8962E]'}`}
                     style={{ width: `${pilar.totalMetas === 0 ? 0 : Math.round((pilar.metasCompletadas / pilar.totalMetas) * 100)}%` }}
                   />
                 </div>
@@ -997,9 +999,9 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
               {/* Aviso de desbloqueo especial */}
               {(pilar.desbloqueo === 'venta_real' || pilar.desbloqueo === 'qa_verde') && (
-                <div className="mt-3 flex items-start gap-2 bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-xl px-3 py-2">
-                  <AlertCircle className="w-4 h-4 text-[#F5A623] shrink-0 mt-0.5" />
-                  <p className="text-xs text-[#F5A623]">
+                <div className="mt-3 flex items-start gap-2 bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-xl px-3 py-2">
+                  <AlertCircle className="w-4 h-4 text-[#E8962E] shrink-0 mt-0.5" />
+                  <p className="text-xs text-[#E8962E]">
                     {pilar.desbloqueo === 'venta_real'
                       ? 'Este pilar se desbloqueó porque registraste tu primera venta real.'
                       : 'Este pilar se desbloqueó porque completaste el QA del embudo con 24/24 puntos verdes.'}
@@ -1014,13 +1016,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                     ? 'bg-[#EF4444]/10 border border-[#EF4444]/25'
                     : pilar.hito_tipo === 'checkpoint'
                     ? 'bg-[#22C55E]/10 border border-[#22C55E]/25'
-                    : 'bg-[#F5A623]/10 border border-[#F5A623]/25'
+                    : 'bg-[#E8962E]/10 border border-[#E8962E]/25'
                 }`}>
                   <Trophy className={`w-4 h-4 shrink-0 mt-0.5 ${
-                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#F5A623]'
+                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#E8962E]'
                   }`} />
                   <p className={`text-xs font-medium ${
-                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#F5A623]'
+                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#E8962E]'
                   }`}>
                     {pilar.hito_mensaje}
                   </p>
@@ -1052,26 +1054,26 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       }}
                       className={`group flex items-start gap-4 p-4 rounded-xl transition-all border ${
                         !unlocked
-                          ? 'opacity-40 cursor-not-allowed bg-[#1C1C1C]/20 border-[rgba(245,166,35,0.05)]'
+                          ? 'opacity-40 cursor-not-allowed bg-[#1A1917]/20 border-[rgba(232,150,46,0.05)]'
                           : estaCompletada
                           ? 'bg-[#22C55E]/5 border-[#22C55E]/15 cursor-pointer'
                           : isActive
-                          ? 'bg-[#F5A623]/10 border-[#F5A623]/30 cursor-pointer'
-                          : 'bg-[#1C1C1C]/30 border-[rgba(245,166,35,0.1)] hover:bg-[#1C1C1C]/60 hover:border-[rgba(245,166,35,0.2)] cursor-pointer'
+                          ? 'bg-[#E8962E]/10 border-[#E8962E]/30 cursor-pointer'
+                          : 'bg-[#1A1917]/30 border-[rgba(232,150,46,0.1)] hover:bg-[#1A1917]/60 hover:border-[rgba(232,150,46,0.12)] cursor-pointer'
                       }`}
                     >
                       <div className="shrink-0 mt-0.5">
                         {!unlocked ? (
-                          <Lock className="w-5 h-5 text-[#FFFFFF]/20" />
+                          <Lock className="w-5 h-5 text-[#F2EFE9]/20" />
                         ) : estaCompletada ? (
                           <CheckCircle2 className="w-5 h-5 text-[#22C55E]" />
                         ) : (
-                          <Circle className="w-5 h-5 text-[#FFFFFF]/30 group-hover:text-[#FFFFFF]/60 transition-colors" />
+                          <Circle className="w-5 h-5 text-[#F2EFE9]/30 group-hover:text-[#F2EFE9]/60 transition-colors" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="text-[10px] font-mono text-[#FFFFFF]/40 bg-[#F5A623]/5 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-mono text-[#F2EFE9]/40 bg-[#E8962E]/5 px-2 py-0.5 rounded">
                             {meta.codigo}
                           </span>
                           {/* Type badge */}
@@ -1085,16 +1087,16 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             <FileText className="w-3 h-3 text-[#22C55E]" />
                           )}
                         </div>
-                        <p className={`text-base font-medium ${estaCompletada ? 'text-[#FFFFFF]/40 line-through' : 'text-[#FFFFFF]'}`}>
+                        <p className={`text-base font-medium ${estaCompletada ? 'text-[#F2EFE9]/40 line-through' : 'text-[#F2EFE9]'}`}>
                           {meta.titulo}
                         </p>
                         {!isActive && (
-                          <p className="text-sm text-[#FFFFFF]/40 mt-1 leading-relaxed line-clamp-2">
+                          <p className="text-sm text-[#F2EFE9]/40 mt-1 leading-relaxed line-clamp-2">
                             {meta.descripcion}
                           </p>
                         )}
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-[#FFFFFF]/30 font-medium">
+                          <span className="text-xs text-[#F2EFE9]/30 font-medium">
                             {meta.tiempo_estimado}
                           </span>
                           {meta.es_estrella && (
@@ -1103,7 +1105,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             </span>
                           )}
                           {!unlocked && (
-                            <span className="text-xs text-[#FFFFFF]/30 font-medium flex items-center gap-1">
+                            <span className="text-xs text-[#F2EFE9]/30 font-medium flex items-center gap-1">
                               <Lock className="w-3 h-3" />{' '}
                               {bloqueoMsg ?? 'Completa la tarea anterior primero'}
                             </span>
@@ -1114,7 +1116,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
                     {/* ── Inline task panel ── */}
                     {isActive && unlocked && (
-                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(245,166,35,0.2)] animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(232,150,46,0.12)] animate-in fade-in slide-in-from-top-2 duration-300">
                         {meta.tipo === 'VIDEO' && (
                           <TaskVideo
                             meta={meta}
@@ -1180,7 +1182,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                   <div className={`text-xs rounded-xl px-4 py-3 border ${
                     todasCompletas
                       ? 'bg-[#22C55E]/10 border-[#22C55E]/20 text-[#22C55E]'
-                      : 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.08)] text-[#FFFFFF]/40'
+                      : 'bg-[#1A1917]/50 border-[rgba(232,150,46,0.08)] text-[#F2EFE9]/40'
                   }`}>
                     {todasCompletas
                       ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E] inline shrink-0" /> Pilar {siguienteLabel} desbloqueado — todas las metas completadas</span>
@@ -1196,24 +1198,24 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       {/* ── Pilar Completion Popup ── */}
       {ventaModal && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setVentaModal(false)}>
-          <div className="max-w-sm w-full rounded-2xl border border-[#F5A623]/30 bg-[#141414] p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          <div className="max-w-sm w-full rounded-2xl border border-[#E8962E]/30 bg-[#111110] p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-medium text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               🎉 Registrar una venta
             </h3>
-            <p className="text-xs text-[#FFFFFF]/50 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
-            <label className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Monto (USD)</label>
+            <p className="text-xs text-[#F2EFE9]/50 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
+            <label className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold">Monto (USD)</label>
             <input
               type="number"
               value={ventaMonto}
               onChange={(e) => setVentaMonto(e.target.value)}
               placeholder="1000"
               autoFocus
-              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-[#0A0A0A] border border-[#FFFFFF]/15 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:outline-none"
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-[#080808] border border-[#F2EFE9]/15 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:outline-none"
             />
             <button
               onClick={registrarVenta}
               disabled={ventaGuardando || !ventaMonto}
-              className="w-full py-3 rounded-xl bg-[#F5A623] text-black text-sm font-semibold hover:bg-[#FFB94D] transition-colors disabled:opacity-40"
+              className="w-full py-3 rounded-xl bg-[#E8962E] text-black text-sm font-semibold hover:bg-[#F4B65C] transition-colors disabled:opacity-40"
             >
               {ventaGuardando ? 'Guardando…' : 'Registrar'}
             </button>

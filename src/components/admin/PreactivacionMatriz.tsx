@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2, RefreshCw, Search, CheckCircle2, Map as MapIcon, LayoutGrid } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,6 +27,22 @@ interface PreactivacionMatrizProps {
 }
 
 export default function PreactivacionMatriz({ clientes, adminId }: PreactivacionMatrizProps) {
+  // L4 · Doble alimentación: las sesiones completadas del Camino tildan solas
+  const [caminoDone, setCaminoDone] = React.useState<Map<string, Set<string>>>(new Map());
+  React.useEffect(() => {
+    (async () => {
+      const { supabase } = await import('../../lib/supabase');
+      if (!supabase) return;
+      const { data } = await supabase.from('hoja_de_ruta').select('usuario_id, meta_codigo, status');
+      const m = new Map<string, Set<string>>();
+      for (const t of data ?? []) {
+        if (t.status !== 'completada') continue;
+        if (!m.has(t.usuario_id)) m.set(t.usuario_id, new Set());
+        m.get(t.usuario_id)!.add(t.meta_codigo);
+      }
+      setCaminoDone(m);
+    })();
+  }, []);
   const [view, setView] = useState<View>('matriz');
   const [checks, setChecks] = useState<ChecksByCliente>(new Map());
   const [loading, setLoading] = useState(true);
@@ -195,7 +212,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
                 </span>
               </div>
             )}
-            <MatrizGrid clientes={rows} checks={checks} onToggle={handleToggle} />
+            <MatrizGrid clientes={rows} checks={checks} onToggle={handleToggle} caminoDone={caminoDone} />
           </div>
         )}
       </div>

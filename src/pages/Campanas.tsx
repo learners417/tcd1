@@ -107,7 +107,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full anímate-spin" />
+        <div className="w-8 h-8 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full anímate-spin" />
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {(view === 'studio' || view === 'detail') && (
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-sm text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver

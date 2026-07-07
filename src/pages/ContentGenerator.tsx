@@ -133,31 +133,31 @@ export default function ContentGenerator() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Generador de Contenido</h1>
-        <p className="text-[#FFFFFF]/60">Crea contenido estratégico para redes sociales con IA</p>
+        <h1 className="text-3xl font-light tracking-tight text-[#F2EFE9] mb-2">Generador de Contenido</h1>
+        <p className="text-[#F2EFE9]/60">Crea contenido estratégico para redes sociales con IA</p>
       </div>
 
       {/* Config panel */}
       <div className="card-panel p-6 rounded-2xl space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-[#FFFFFF]/60 mb-1">Tu Especialidad</label>
+            <label className="block text-xs text-[#F2EFE9]/60 mb-1">Tu Especialidad</label>
             <input
               type="text"
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
               placeholder="Ej: Nutricionista, Dermatóloga..."
-              className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] text-sm focus:outline-none focus:border-[#F5A623]/50"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] text-sm focus:outline-none focus:border-[#E8962E]/50"
             />
           </div>
           <div>
-            <label className="block text-xs text-[#FFFFFF]/60 mb-1">Audiencia Objetivo</label>
+            <label className="block text-xs text-[#F2EFE9]/60 mb-1">Audiencia Objetivo</label>
             <input
               type="text"
               value={audience}
               onChange={(e) => setAudience(e.target.value)}
               placeholder="Ej: Mujeres 30-50 años con sobrepeso..."
-              className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] text-sm focus:outline-none focus:border-[#F5A623]/50"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] text-sm focus:outline-none focus:border-[#E8962E]/50"
             />
           </div>
         </div>
@@ -171,8 +171,8 @@ export default function ContentGenerator() {
                 onClick={() => setActiveTab(t.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
                   activeTab === t.id
-                    ? 'bg-[#F5A623]/20 text-[#F5A623] border-[#F5A623]/30'
-                    : 'bg-[#F5A623]/5 text-[#FFFFFF]/60 hover:bg-[#F5A623]/10 hover:text-[#FFFFFF]/90 border-transparent'
+                    ? 'bg-[#E8962E]/20 text-[#E8962E] border-[#E8962E]/30'
+                    : 'bg-[#E8962E]/5 text-[#F2EFE9]/60 hover:bg-[#E8962E]/10 hover:text-[#F2EFE9]/90 border-transparent'
                 }`}
               >
                 <t.icon className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function ContentGenerator() {
           <button
             onClick={generateContent}
             disabled={generating}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#FFFFFF] text-sm font-medium transition-all shadow-lg shadow-[#F5A623]/20 sm:ml-auto"
+            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#F2EFE9] text-sm font-medium transition-all shadow-lg shadow-[#E8962E]/20 sm:ml-auto"
           >
             {generating ? (
               <><Loader2 className="w-4 h-4 anímate-spin" /> Generando...</>
@@ -201,19 +201,19 @@ export default function ContentGenerator() {
       {/* Content display */}
       {generating ? (
         <div className="card-panel p-12 rounded-2xl flex flex-col items-center justify-center gap-4">
-          <Loader2 className="w-8 h-8 text-[#F5A623] anímate-spin" />
-          <p className="text-[#FFFFFF]/60 text-sm">Generando contenido con IA...</p>
+          <Loader2 className="w-8 h-8 text-[#E8962E] anímate-spin" />
+          <p className="text-[#F2EFE9]/60 text-sm">Generando contenido con IA...</p>
         </div>
       ) : currentContent ? (
         <div className="card-panel p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-[#FFFFFF]">
+            <h3 className="text-lg font-medium text-[#F2EFE9]">
               {TABS.find((t) => t.id === activeTab)?.label}
             </h3>
             <div className="flex gap-2">
               <button
                 onClick={copyContent}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F5A623]/10 hover:bg-[#F5A623]/20 text-sm text-[#FFFFFF]/80 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E8962E]/10 hover:bg-[#E8962E]/20 text-sm text-[#F2EFE9]/80 transition-colors"
               >
                 {copied ? <Check className="w-4 h-4 text-[#22C55E]" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Copiado' : 'Copiar'}
@@ -221,25 +221,25 @@ export default function ContentGenerator() {
               <button
                 onClick={generateContent}
                 disabled={generating}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F5A623]/20 hover:bg-[#F5A623]/30 text-sm text-[#F5A623] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E8962E]/20 hover:bg-[#E8962E]/30 text-sm text-[#E8962E] transition-colors"
               >
                 <Sparkles className="w-4 h-4" /> Regenerar
               </button>
             </div>
           </div>
-          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-[#FFFFFF]/80 text-sm">
+          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-[#F2EFE9]/80 text-sm">
             <Markdown>{currentContent}</Markdown>
           </div>
         </div>
       ) : (
         <div className="card-panel p-12 rounded-2xl text-center">
-          <Sparkles className="w-10 h-10 text-[#F5A623]/40 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-[#FFFFFF] mb-2">
+          <Sparkles className="w-10 h-10 text-[#E8962E]/40 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-[#F2EFE9] mb-2">
             Genera tu {TABS.find((t) => t.id === activeTab)?.label}
           </h3>
-          <p className="text-sm text-[#FFFFFF]/60">
+          <p className="text-sm text-[#F2EFE9]/60">
             Completa tu especialidad y haz clic en{' '}
-            <span className="text-[#F5A623] font-medium">Generar</span> para crear contenido con IA.
+            <span className="text-[#E8962E] font-medium">Generar</span> para crear contenido con IA.
           </p>
         </div>
       )}

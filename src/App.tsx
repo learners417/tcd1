@@ -267,16 +267,16 @@ export default function App() {
 
   const RecoveryModal = showRecoveryModal ? (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(245,166,35,0.3)] rounded-2xl w-full max-w-sm shadow-2xl">
-        <div className="px-5 py-4 border-b border-[rgba(245,166,35,0.1)]">
-          <h3 className="text-sm font-semibold text-[#FFFFFF]">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-[#FFFFFF]/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
+      <div className="bg-[#111110] border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+          <h3 className="text-sm font-semibold text-[#F2EFE9]">Fijar nueva contraseña</h3>
+          <p className="text-[11px] text-[#F2EFE9]/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/40" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword}
@@ -286,21 +286,21 @@ export default function App() {
                 minLength={8}
                 disabled={recoveryLoading}
                 autoFocus
-                className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setRecoveryShowPwd(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FFFFFF]/40 hover:text-[#FFFFFF]/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F2EFE9]/40 hover:text-[#F2EFE9]/70 transition-colors"
               >
                 {recoveryShowPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/40" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
@@ -308,14 +308,14 @@ export default function App() {
                 placeholder="Repetí la contraseña"
                 required
                 disabled={recoveryLoading}
-                className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors disabled:opacity-50"
               />
             </div>
           </div>
           <button
             type="submit"
             disabled={recoveryLoading || !recoveryPassword || !recoveryPassword2}
-            className="w-full py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
           >
             {recoveryLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : 'Guardar contraseña'}
           </button>
@@ -377,10 +377,10 @@ export default function App() {
 
   // ─── Main app ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen bg-[#0A0A0A] text-[#FFFFFF] overflow-hidden font-sans selection:bg-[#F5A623]/30">
+    <div className="flex h-screen bg-[#080808] text-[#F2EFE9] overflow-hidden font-sans selection:bg-[#E8962E]/30">
       {/* Background Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#F5A623]/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#F5A623]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#E8962E]/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#E8962E]/5 blur-[120px] pointer-events-none" />
 
       {/* Mobile overlay backdrop */}
       {mobileMenuOpen && (
@@ -448,12 +448,12 @@ export default function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#1C1C1C] border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b border-[rgba(245,166,35,0.2)]">
-              <h2 className="text-xl font-medium text-[#FFFFFF]">Ajustes de la Cuenta</h2>
+          <div className="w-full max-w-2xl bg-[#1A1917] border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
+              <h2 className="text-xl font-medium text-[#F2EFE9]">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
-                className="text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors"
+                className="text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -461,7 +461,7 @@ export default function App() {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Settings Sidebar */}
-              <div className="w-1/3 border-r border-[rgba(245,166,35,0.2)] p-4 space-y-2 bg-[#1C1C1C]/50 flex flex-col">
+              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-[#1A1917]/50 flex flex-col">
                 <div className="flex-1 space-y-2">
                   {([
                     { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
@@ -474,8 +474,8 @@ export default function App() {
                       onClick={() => setSettingsTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
                         settingsTab === tab.id
-                          ? 'bg-[#F5A623]/10 text-[#F5A623] font-medium'
-                          : 'text-[#FFFFFF]/60 hover:bg-[#F5A623]/5 hover:text-[#FFFFFF]'
+                          ? 'bg-[#E8962E]/10 text-[#E8962E] font-medium'
+                          : 'text-[#F2EFE9]/60 hover:bg-[#E8962E]/5 hover:text-[#F2EFE9]'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" /> {tab.label}
@@ -500,12 +500,12 @@ export default function App() {
                       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                       <button
                         onClick={() => avatarInputRef.current?.click()}
-                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(245,166,35,0.3)] hover:border-[#F5A623]/50 transition-colors overflow-hidden"
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-[#E8962E]/50 transition-colors overflow-hidden"
                       >
                         {avatarUrl ? (
                           <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-[#F5A623]/10 flex items-center justify-center text-2xl font-bold text-[#F5A623]">
+                          <div className="w-full h-full bg-[#E8962E]/10 flex items-center justify-center text-2xl font-bold text-[#E8962E]">
                             {(profileDraft.nombre || 'P').charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -513,43 +513,43 @@ export default function App() {
                           <Camera className="w-6 h-6 text-white" />
                         </div>
                       </button>
-                      <p className="text-xs text-[#FFFFFF]/40">Clic para cambiar foto de perfil</p>
+                      <p className="text-xs text-[#F2EFE9]/40">Clic para cambiar foto de perfil</p>
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Información Personal</h3>
+                      <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Información Personal</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Nombre Completo</label>
+                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Nombre Completo</label>
                           <input
                             type="text"
                             value={profileDraft.nombre}
                             onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Correo Electrónico</label>
+                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Correo Electrónico</label>
                           <input
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF]/40 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9]/40 cursor-not-allowed"
                           />
-                          <p className="text-xs text-[#FFFFFF]/30 mt-1">El email no se puede cambiar desde aquí</p>
+                          <p className="text-xs text-[#F2EFE9]/30 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Especialidad</label>
+                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Especialidad</label>
                           <input
                             type="text"
                             value={profileDraft.especialidad}
                             onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="pt-6 border-t border-[rgba(245,166,35,0.2)] flex justify-end gap-3">
-                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors">
+                    <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
+                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors">
                         Cancelar
                       </button>
                       <button onClick={saveProfile} className="btn-primary">
@@ -561,11 +561,11 @@ export default function App() {
 
                 {settingsTab === 'notificaciones' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Preferencias de Notificaciones</h3>
+                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Preferencias de Notificaciones</h3>
                     {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
-                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(245,166,35,0.1)]">
-                        <span className="text-sm text-[#FFFFFF]/80">{item}</span>
-                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-[#F5A623]" />
+                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
+                        <span className="text-sm text-[#F2EFE9]/80">{item}</span>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-[#E8962E]" />
                       </label>
                     ))}
                   </div>
@@ -573,22 +573,22 @@ export default function App() {
 
                 {settingsTab === 'seguridad' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Seguridad</h3>
-                    <p className="text-sm text-[#FFFFFF]/60">Para cambiar tu contraseña, pedile a tu coach que te envíe un email de restablecimiento.</p>
+                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Seguridad</h3>
+                    <p className="text-sm text-[#F2EFE9]/60">Para cambiar tu contraseña, pedile a tu coach que te envíe un email de restablecimiento.</p>
                   </div>
                 )}
 
                 {settingsTab === 'facturacion' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Facturación</h3>
-                    <div className="bg-[#1C1C1C]/50 border border-[rgba(245,166,35,0.2)] p-4 rounded-xl">
+                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Facturación</h3>
+                    <div className="bg-[#1A1917]/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-[#FFFFFF]/80">Plan Actual</span>
-                        <span className="px-3 py-1 rounded-full bg-[#F5A623]/20 text-[#F5A623] text-xs font-medium">
+                        <span className="text-sm text-[#F2EFE9]/80">Plan Actual</span>
+                        <span className="px-3 py-1 rounded-full bg-[#E8962E]/20 text-[#E8962E] text-xs font-medium">
                           Tu Clínica Digital — {profile.plan}
                         </span>
                       </div>
-                      <p className="text-xs text-[#FFFFFF]/40">Programa de 90 días</p>
+                      <p className="text-xs text-[#F2EFE9]/40">Programa de 90 días</p>
                     </div>
                   </div>
                 )}

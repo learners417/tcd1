@@ -137,7 +137,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     numero_orden: 1,
     titulo: 'Sanar el Dinero',
     subtitulo: 'El protocolo de 7 días que destraba tu precio',
-    color: '#F5A623',
+    color: '#E8962E',
     numero: 1,
     icon: 'HeartHandshake',
     emoji: '💛',
@@ -516,6 +516,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         video_youtube_id: 'PLACEHOLDER_TUTORIAL_AGENTE',
         entrenador: 'sofi',
         checklist: [
+          'Instala el Pixel de Meta en tu página (el tutorial te muestra dónde pegarlo) y verifícalo con el Helper de Meta — sin pixel, tus anuncios vuelan a ciegas',
           'Instala WhatsApp Business (o convertí tu número actual — los chats se conservan; si prefieres separar trabajo de vida personal, usa un número nuevo)',
           'Activa tu agente: Herramientas → Meta Business Agent (5 min de configuración)',
           'Pídele a tu Mentor el DOCUMENTO DE ENTRENAMIENTO de tu agente (lo genera con tu oferta, tu avatar y tus 3 preguntas de filtro) — cópialo, guárdalo como PDF (Imprimir → Guardar como PDF) y súbeselo al agente',
@@ -969,9 +970,9 @@ export interface Cinturon {
 
 export const CINTURONES: Cinturon[] = [
   { id: 'blanco',                orden: 1, nombre: 'Blanco',                emoji: '⬜',   color: '#F4F4F5',                          metafora: 'La semilla' },
-  { id: 'blanco_punta_amarilla', orden: 2, nombre: 'Blanco punta amarilla', emoji: '⬜🟡', color: '#F4F4F5', color_punta: '#F5A623', metafora: 'La semilla se abre' },
-  { id: 'amarillo',              orden: 3, nombre: 'Amarillo',              emoji: '🟡',   color: '#F5A623',                          metafora: 'La raíz en la tierra' },
-  { id: 'amarillo_punta_verde',  orden: 4, nombre: 'Amarillo punta verde',  emoji: '🟡🟢', color: '#F5A623', color_punta: '#22C55E', metafora: 'El primer brote asoma' },
+  { id: 'blanco_punta_amarilla', orden: 2, nombre: 'Blanco punta amarilla', emoji: '⬜🟡', color: '#F4F4F5', color_punta: '#E8962E', metafora: 'La semilla se abre' },
+  { id: 'amarillo',              orden: 3, nombre: 'Amarillo',              emoji: '🟡',   color: '#E8962E',                          metafora: 'La raíz en la tierra' },
+  { id: 'amarillo_punta_verde',  orden: 4, nombre: 'Amarillo punta verde',  emoji: '🟡🟢', color: '#E8962E', color_punta: '#22C55E', metafora: 'El primer brote asoma' },
   { id: 'verde',                 orden: 5, nombre: 'Verde',                 emoji: '🟢',   color: '#22C55E',                          metafora: 'La planta crece' },
   { id: 'verde_punta_azul',      orden: 6, nombre: 'Verde punta azul',      emoji: '🟢🔵', color: '#22C55E', color_punta: '#3B82F6', metafora: 'Se estira hacia el cielo' },
   { id: 'azul',                  orden: 7, nombre: 'Azul',                  emoji: '🔵',   color: '#3B82F6',                          metafora: 'Alcanza el cielo' },
@@ -1044,11 +1045,11 @@ export function colorEstadoPilar(
 ): string {
   switch (estado) {
     case 'completado':
-      return 'border-l-[3px] border-l-[#22C55E] bg-[#141414] border border-[rgba(245,166,35,0.2)]';
+      return 'border-l-[3px] border-l-[#22C55E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
     case 'en_progreso':
-      return 'border-l-[3px] border-l-[#F5A623] bg-[#141414] border border-[rgba(245,166,35,0.2)]';
+      return 'border-l-[3px] border-l-[#E8962E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
     case 'bloqueado':
-      return 'opacity-40 cursor-not-allowed bg-[#141414] border border-[rgba(245,166,35,0.1)]';
+      return 'opacity-40 cursor-not-allowed bg-[#111110] border border-[rgba(232,150,46,0.1)]';
   }
 }
 

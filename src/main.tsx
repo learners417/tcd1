@@ -19,7 +19,7 @@ function FallbackUI() {
       flexDirection: 'column',
       padding: '2rem',
       textAlign: 'center',
-      backgroundColor: '#0a0a0a',
+      backgroundColor: '#080808',
       color: '#fff',
       fontFamily: 'system-ui, sans-serif',
     }}>

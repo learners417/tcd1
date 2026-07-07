@@ -33,7 +33,7 @@ export const UNASSIGNED_COLOR: TeamColor = {
 // Paleta principal — el primer color (oro) es el accent de la app y queda
 // reservado para el creador (el admin que está logueado mirando la vista).
 export const TEAM_PALETTE: TeamColor[] = [
-  { key: 'gold',    solid: '#F5A623', bg: 'rgba(245,166,35,0.15)',  border: 'rgba(245,166,35,0.45)',  text: '#FFB94D', tagBg: 'rgba(245,166,35,0.12)', tagBorder: 'rgba(245,166,35,0.35)' },
+  { key: 'gold',    solid: '#E8962E', bg: 'rgba(232,150,46,0.10)',  border: 'rgba(232,150,46,0.45)',  text: '#F4B65C', tagBg: 'rgba(232,150,46,0.12)', tagBorder: 'rgba(232,150,46,0.20)' },
   { key: 'blue',    solid: '#4FA3E3', bg: 'rgba(79,163,227,0.15)',  border: 'rgba(79,163,227,0.45)',  text: '#7BBFF0', tagBg: 'rgba(79,163,227,0.12)', tagBorder: 'rgba(79,163,227,0.35)' },
   { key: 'violet',  solid: '#A88BF5', bg: 'rgba(168,139,245,0.15)', border: 'rgba(168,139,245,0.45)', text: '#C4ADFF', tagBg: 'rgba(168,139,245,0.12)', tagBorder: 'rgba(168,139,245,0.35)' },
   { key: 'green',   solid: '#5BC68A', bg: 'rgba(91,198,138,0.15)',  border: 'rgba(91,198,138,0.45)',  text: '#7DDBA6', tagBg: 'rgba(91,198,138,0.12)', tagBorder: 'rgba(91,198,138,0.35)' },
@@ -136,7 +136,7 @@ export const STAGE_COLORS: TeamColor[] = [
   // 0 Onboarding
   { key: 'stage-0', solid: '#9CA3AF', bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.32)', text: '#CBD5E1', tagBg: 'rgba(156,163,175,0.10)', tagBorder: 'rgba(156,163,175,0.25)' },
   // 1 Sprint Identidad
-  { key: 'stage-1', solid: '#F5A623', bg: 'rgba(245,166,35,0.13)', border: 'rgba(245,166,35,0.36)', text: '#FFB94D', tagBg: 'rgba(245,166,35,0.10)', tagBorder: 'rgba(245,166,35,0.25)' },
+  { key: 'stage-1', solid: '#E8962E', bg: 'rgba(232,150,46,0.13)', border: 'rgba(232,150,46,0.36)', text: '#F4B65C', tagBg: 'rgba(232,150,46,0.10)', tagBorder: 'rgba(232,150,46,0.14)' },
   // 2 Sprint Mercado
   { key: 'stage-2', solid: '#4FA3E3', bg: 'rgba(79,163,227,0.13)', border: 'rgba(79,163,227,0.36)', text: '#7BBFF0', tagBg: 'rgba(79,163,227,0.10)', tagBorder: 'rgba(79,163,227,0.25)' },
   // 3 Sprint Oferta
@@ -178,8 +178,8 @@ export const PRIORITY_BG: Record<AdminTareaPrioridad, PriorityBg> = {
     accent: '#F97316',
   },
   media: {
-    image: 'linear-gradient(135deg, rgba(245,166,35,0.10), rgba(245,166,35,0.02) 50%, rgba(245,166,35,0) 80%)',
-    accent: '#F5A623',
+    image: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02) 50%, rgba(232,150,46,0) 80%)',
+    accent: '#E8962E',
   },
   baja: {
     image: 'linear-gradient(135deg, rgba(34,197,94,0.09), rgba(34,197,94,0.02) 50%, rgba(34,197,94,0) 80%)',

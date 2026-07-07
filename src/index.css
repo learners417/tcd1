@@ -10,20 +10,20 @@
 
 /* ─── Design Tokens V4 — Bright Tech Palette ──────────────────── */
 :root {
-  --bg-root: #0A0A0A;
-  --bg-card: #141414;
-  --bg-surface2: #1C1C1C;
-  --accent-gold: #F5A623;
-  --accent-gold-hover: #FFB94D;
+  --bg-root: #080808;
+  --bg-card: #111110;
+  --bg-surface2: #1A1917;
+  --accent-gold: #E8962E;
+  --accent-gold-hover: #F4B65C;
   --accent-blue: #3B82F6;
   --green-success: #22C55E;
   --red-alert: #EF4444;
-  --text-cream: #FFFFFF;
+  --text-cream: #F2EFE9;
   --text-muted: rgba(255, 255, 255, 0.6);
-  --border-gold: rgba(245, 166, 35, 0.25);
-  --border-gold-strong: rgba(245, 166, 35, 0.5);
-  --font-body: 'DM Sans', system-ui, sans-serif;
-  --font-display: 'DM Serif Display', Georgia, serif;
+  --border-gold: rgba(232, 150, 46, 0.14);
+  --border-gold-strong: rgba(232, 150, 46, 0.30);
+  --font-body: 'Sora', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
 
   /* Matrix-specific tokens (preactivacion grid) so the table can
      theme cleanly without hardcoded hex inside inline styles. */
@@ -67,7 +67,7 @@ h1, h2, h3 {
 
   /* Legacy alias — keep for backward compat during migration */
   .glass-panel {
-    @apply bg-[#141414]/80 backdrop-blur-xl border border-[rgba(245,166,35,0.2)] shadow-2xl;
+    @apply bg-[#111110]/80 backdrop-blur-xl border border-[rgba(232,150,46,0.12)] shadow-2xl;
   }
 
   /* New card panel */
@@ -75,23 +75,23 @@ h1, h2, h3 {
     background: var(--bg-card);
     border: 1px solid var(--border-gold);
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(245, 166, 35, 0.03);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(232, 150, 46, 0.03);
   }
 
   /* Primary button */
   .btn-primary {
     background: var(--accent-gold);
-    color: #0A0A0A;
+    color: #080808;
     font-weight: 700;
     font-size: 0.875rem;
     padding: 0.625rem 1.25rem;
     border-radius: 0.75rem;
     transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px rgba(245, 166, 35, 0.4), 0 0 40px rgba(245, 166, 35, 0.1);
+    box-shadow: 0 4px 20px rgba(232, 150, 46, 0.4), 0 0 40px rgba(232, 150, 46, 0.1);
   }
   .btn-primary:hover {
     background: var(--accent-gold-hover);
-    box-shadow: 0 6px 28px rgba(245, 166, 35, 0.5), 0 0 60px rgba(245, 166, 35, 0.15);
+    box-shadow: 0 6px 28px rgba(232, 150, 46, 0.30), 0 0 60px rgba(232, 150, 46, 0.15);
     transform: translateY(-1px);
   }
 
@@ -107,7 +107,7 @@ h1, h2, h3 {
     transition: background 0.2s, border-color 0.2s;
   }
   .btn-secondary:hover {
-    background: rgba(245, 166, 35, 0.1);
+    background: rgba(232, 150, 46, 0.1);
     border-color: var(--border-gold-strong);
   }
 
@@ -124,7 +124,7 @@ h1, h2, h3 {
   }
   .input-field:focus {
     border-color: var(--accent-gold);
-    box-shadow: 0 0 12px rgba(245, 166, 35, 0.15);
+    box-shadow: 0 0 12px rgba(232, 150, 46, 0.15);
   }
   .input-field::placeholder {
     color: var(--text-muted);
@@ -140,7 +140,7 @@ h1, h2, h3 {
 
   /* Tech glow utility */
   .glow-accent {
-    box-shadow: 0 0 20px rgba(245, 166, 35, 0.15), 0 0 60px rgba(245, 166, 35, 0.05);
+    box-shadow: 0 0 20px rgba(232, 150, 46, 0.15), 0 0 60px rgba(232, 150, 46, 0.05);
   }
 
   /* Custom select — override native browser dropdown */
@@ -167,7 +167,7 @@ h1, h2, h3 {
     background-color: rgba(0, 0, 0, 0.5);
   }
   .custom-select option {
-    background: #141414;
+    background: #111110;
     color: var(--text-cream);
     padding: 0.5rem;
   }
@@ -189,8 +189,8 @@ h1, h2, h3 {
 
   /* Badge pulse — el contador rojo "respira" mientras haya unread */
   @keyframes badge-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.6), 0 0 12px rgba(245, 166, 35, 0.8); }
-    50%      { box-shadow: 0 0 0 6px rgba(245, 166, 35, 0),   0 0 16px rgba(245, 166, 35, 1); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 150, 46, 0.6), 0 0 12px rgba(232, 150, 46, 0.8); }
+    50%      { box-shadow: 0 0 0 6px rgba(232, 150, 46, 0),   0 0 16px rgba(232, 150, 46, 1); }
   }
   .badge-pulse {
     animation: badge-pulse 1.8s ease-in-out infinite;
@@ -204,9 +204,9 @@ h1, h2, h3 {
    can flip the palette without rewriting thousands of lines of JSX.
 
    Strategy:
-   - Light palette in the surface scale: #F3F5F8 (root) / #FFFFFF (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
+   - Light palette in the surface scale: #F3F5F8 (root) / #F2EFE9 (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
    - Text scale: #0F172A primary, rgba(15,23,42,X) for opacity variants.
-   - Gold accent stays #F5A623 for fills (gold-on-anything works) but
+   - Gold accent stays #E8962E for fills (gold-on-anything works) but
      gold-as-text drops to #B45309 (amber-700) for AA contrast on white.
    - Borders bump alpha so they read on white.
    - Hover variants (`hover:`, `group-hover:`) get their own selectors
@@ -214,7 +214,7 @@ h1, h2, h3 {
 */
 [data-theme="light"] {
   --bg-root: #E8ECF1;
-  --bg-card: #FFFFFF;
+  --bg-card: #F2EFE9;
   --bg-surface2: #EAEDF2;
   --accent-gold: #D97706;
   --accent-gold-hover: #B45309;
@@ -243,24 +243,24 @@ h1, h2, h3 {
 
 /* ── Surface hierarchy ────────────────────────────────────────────
    Body (root)        → #E8ECF1 (slate-100ish)
-   Sidebar/columns    → #FFFFFF   (sticky, max contrast against body)
+   Sidebar/columns    → #F2EFE9   (sticky, max contrast against body)
    Panel wrappers     → #F8FAFC   (subtle slate-50 — sits between body and cards)
-   Cards/popovers     → #FFFFFF   (pop on panel)
+   Cards/popovers     → #F2EFE9   (pop on panel)
    Surface2 (settings sidebar etc.) → #EEF1F5
 */
-[data-theme="light"] .bg-\[\#0A0A0A\]    { background-color: #E8ECF1 !important; }
-[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #FFFFFF !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#080808\]    { background-color: #E8ECF1 !important; }
+[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #F2EFE9 !important; }
+[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #F2EFE9 !important; }
 [data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
-[data-theme="light"] .bg-\[\#141414\]    { background-color: #F8FAFC !important; }
-[data-theme="light"] .bg-\[\#141414\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
-[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #FFFFFF !important; }
-[data-theme="light"] .bg-\[\#1C1C1C\]    { background-color: #EEF1F5 !important; }
-[data-theme="light"] .bg-\[\#1C1C1C\]\/20 { background-color: rgba(245, 166, 35, 0.06) !important; }
-[data-theme="light"] .bg-\[\#1C1C1C\]\/30 { background-color: rgba(245, 166, 35, 0.09) !important; }
-[data-theme="light"] .bg-\[\#1C1C1C\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
-[data-theme="light"] .bg-\[\#1C1C1C\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
-[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#111110\]    { background-color: #F8FAFC !important; }
+[data-theme="light"] .bg-\[\#111110\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
+[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #F2EFE9 !important; }
+[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1A1917\]\/20 { background-color: rgba(232, 150, 46, 0.06) !important; }
+[data-theme="light"] .bg-\[\#1A1917\]\/30 { background-color: rgba(232, 150, 46, 0.09) !important; }
+[data-theme="light"] .bg-\[\#1A1917\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
+[data-theme="light"] .bg-\[\#1A1917\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
+[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #F2EFE9 !important; }
 [data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #EEF1F5 !important; }
 
 /* ── Surface backgrounds — Tailwind standard `white` token ───────── */
@@ -273,12 +273,12 @@ h1, h2, h3 {
 [data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(15, 23, 42, 0.05) !important; }
 
 /* ── Hover-variant backgrounds — restore feedback in light mode ──── */
-[data-theme="light"] .hover\:bg-\[\#1C1C1C\]:hover        { background-color: #EAEDF2 !important; }
-[data-theme="light"] .hover\:bg-\[\#1C1C1C\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
+[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
 [data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
-[data-theme="light"] .hover\:bg-\[\#FFFFFF\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .hover\:bg-\[\#FFFFFF\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .group:hover .group-hover\:bg-\[\#141414\] { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #EAEDF2 !important; }
 
 /* ── Light scrim overlays inside content (not modal backdrops) ───── */
 [data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.04) !important; }
@@ -288,10 +288,10 @@ h1, h2, h3 {
    keep clear separation from the page underneath. */
 
 /* ── White-on-content overlays → invert to dark overlays ─────────── */
-[data-theme="light"] .bg-\[\#FFFFFF\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-\[\#FFFFFF\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-\[\#FFFFFF\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-\[\#FFFFFF\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .bg-\[\#F2EFE9\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .bg-\[\#F2EFE9\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
+[data-theme="light"] .bg-\[\#F2EFE9\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .bg-\[\#F2EFE9\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
 
 /* ── Text scale ─────────────────────────────────────────────────────
    White-on-dark and slate-on-light are not symmetric perceptually:
@@ -309,37 +309,37 @@ h1, h2, h3 {
 [data-theme="light"] .text-white\/40   { color: rgba(15, 23, 42, 0.55) !important; }
 [data-theme="light"] .text-white\/30   { color: rgba(15, 23, 42, 0.48) !important; }
 
-[data-theme="light"] .text-\[\#FFFFFF\]       { color: #0F172A !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
-[data-theme="light"] .text-\[\#FFFFFF\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]       { color: #0F172A !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
+[data-theme="light"] .text-\[\#F2EFE9\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
 
 /* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-\[\#FFFFFF\]:hover     { color: #0F172A !important; }
+[data-theme="light"] .hover\:text-\[\#F2EFE9\]:hover     { color: #0F172A !important; }
 [data-theme="light"] .hover\:text-white:hover            { color: #0F172A !important; }
-[data-theme="light"] .group:hover .group-hover\:text-\[\#FFFFFF\] { color: #0F172A !important; }
+[data-theme="light"] .group:hover .group-hover\:text-\[\#F2EFE9\] { color: #0F172A !important; }
 
 /* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-\[\#FFFFFF\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-\[\#FFFFFF\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
-[data-theme="light"] .placeholder-\[\#FFFFFF\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
+[data-theme="light"] .placeholder-\[\#F2EFE9\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
+[data-theme="light"] .placeholder-\[\#F2EFE9\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#F2EFE9\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
 [data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
 [data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
 
 /* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
-[data-theme="light"] .text-\[\#F5A623\] { color: #B45309 !important; }
+[data-theme="light"] .text-\[\#E8962E\] { color: #B45309 !important; }
 
 /* ── Gold borders — bump alpha so they remain visible on white ───── */
 [data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
@@ -352,9 +352,9 @@ h1, h2, h3 {
 [data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(217, 119, 6, 0.7) !important; }
 
 /* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-\[\#FFFFFF\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[\#FFFFFF\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[\#FFFFFF\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
+[data-theme="light"] .border-\[\#F2EFE9\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .border-\[\#F2EFE9\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .border-\[\#F2EFE9\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
 [data-theme="light"] .border-white\/5           { border-color: rgba(15, 23, 42, 0.08) !important; }
 [data-theme="light"] .border-white\/10          { border-color: rgba(15, 23, 42, 0.12) !important; }
 [data-theme="light"] .border-white\/20          { border-color: rgba(15, 23, 42, 0.18) !important; }
@@ -365,10 +365,10 @@ h1, h2, h3 {
 [data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(15, 23, 42, 0.22) !important; }
 
 /* ── Inline-style fallback ───────────────────────────────────────────
-   React serializes `color: '#FFFFFF'` to `color: rgb(255, 255, 255)`
+   React serializes `color: '#F2EFE9'` to `color: rgb(255, 255, 255)`
    in the DOM style attribute, so we match both forms.            */
-[data-theme="light"] [style*="color: #FFFFFF"],
-[data-theme="light"] [style*="color:#FFFFFF"],
+[data-theme="light"] [style*="color: #F2EFE9"],
+[data-theme="light"] [style*="color:#F2EFE9"],
 [data-theme="light"] [style*="color: rgb(255, 255, 255)"],
 [data-theme="light"] [style*="color:rgb(255,255,255)"] {
   color: #0F172A !important;
@@ -410,3 +410,11 @@ h1, h2, h3 {
   --tw-prose-invert-th-borders: rgba(15, 23, 42, 0.2);
   --tw-prose-invert-td-borders: rgba(15, 23, 42, 0.1);
 }
+
+
+/* ═══ DOJO PREMIUM (E2): la cinta y el tilde ceremonial ═══ */
+@keyframes cinta-seda { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
+.cinta-brillo { animation: cinta-seda 9s ease-in-out infinite; }
+@keyframes tilde-ceremonial { 0% { transform: scale(0.6); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+.tilde-ceremonial { animation: tilde-ceremonial 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+@media (prefers-reduced-motion: reduce) { .cinta-brillo, .tilde-ceremonial { animation: none; } }
