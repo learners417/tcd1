@@ -74,6 +74,7 @@ export default function TaskHerramientaIA({
   // ── Evidencia obligatoria (F2) ──
   const [evidCount, setEvidCount] = React.useState<number>(-1);
   const [evidSubiendo, setEvidSubiendo] = React.useState(false);
+  const [evidError, setEvidError] = React.useState<string | null>(null);
   const [evidUid, setEvidUid] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (!meta.evidencia_requerida) return;
@@ -90,10 +91,13 @@ export default function TaskHerramientaIA({
     const file = e.target.files?.[0];
     if (!file || !evidUid || evidSubiendo) return;
     setEvidSubiendo(true);
-    const ok = await subirEvidencia(evidUid, meta.codigo, file);
-    if (ok) {
+    setEvidError(null);
+    const res = await subirEvidencia(evidUid, meta.codigo, file);
+    if (res.ok) {
       setEvidCount((n) => Math.max(0, n) + 1);
       try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+    } else {
+      setEvidError((res as { ok: false; motivo: string }).motivo);
     }
     setEvidSubiendo(false);
   };
@@ -289,6 +293,7 @@ export default function TaskHerramientaIA({
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleEvidSubir} disabled={evidSubiendo} />
               </label>
             )}
+            {evidError && <p className="text-xs text-[#EF4444] mt-2">⚠️ {evidError}</p>}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
