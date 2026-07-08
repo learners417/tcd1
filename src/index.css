@@ -418,3 +418,61 @@ h1, h2, h3 {
 @keyframes tilde-ceremonial { 0% { transform: scale(0.6); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .tilde-ceremonial { animation: tilde-ceremonial 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
 @media (prefers-reduced-motion: reduce) { .cinta-brillo, .tilde-ceremonial { animation: none; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOTE H · PULIDO ESTÉTICO iOS — de 6 a 10
+   Profundidad sutil, aire, movimiento con propósito.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Sombras suaves tipo iOS (profundidad sin bordes gruesos) */
+.card-ios {
+  background: var(--surface, #111110);
+  border: 1px solid rgba(232, 150, 46, 0.10);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.20),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1), box-shadow 0.25s ease;
+}
+.card-ios:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.24),
+    0 16px 40px rgba(0, 0, 0, 0.36);
+}
+
+/* Botón primario con profundidad y respuesta táctil */
+.btn-ios-primary {
+  background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
+  color: #080808;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(232, 150, 46, 0.30);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(232, 150, 46, 0.42); }
+.btn-ios-primary:active { transform: scale(0.97); }
+
+/* Números tabulares para métricas (alineación premium) */
+.num-tab { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* Aire: respiración entre secciones (el espacio negativo de iOS) */
+.stack-ios > * + * { margin-top: 1.75rem; }
+
+/* Scrollbar sutil (detalle que se nota) */
+* { scrollbar-width: thin; scrollbar-color: rgba(232,150,46,0.25) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(232,150,46,0.22); border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(232,150,46,0.38); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Entrada suave de las tarjetas al aparecer */
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-rise { animation: fade-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-ios, .btn-ios-primary, .fade-rise { transition: none; animation: none; }
+}

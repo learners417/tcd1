@@ -298,7 +298,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                         activeSlide === idx ? 'border-[#E8962E]' : 'border-transparent opacity-50 hover:opacity-100'
                       }`}
                     >
-                      <img src={displayUrl(asset)} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img loading="lazy" src={displayUrl(asset)} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

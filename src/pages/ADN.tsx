@@ -328,6 +328,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
           ADN del Negocio
         </h1>
+        <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
         <p className="text-[#F2EFE9]/60 max-w-2xl">
           <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
           tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.

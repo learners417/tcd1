@@ -50,6 +50,18 @@ export default defineConfig(({mode}) => {
       // Generar source maps (necesario para que Sentry los pueda subir).
       // Despues del upload, el plugin los borra del bundle (filesToDeleteAfterUpload).
       sourcemap: true,
+      // Optimización: separar las librerías grandes en chunks propios.
+      // Reduce el bundle inicial → la app carga más rápido en la primera visita.
+      chunkSizeWarningLimit: 900,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'charts': ['recharts'],
+            'sentry': ['@sentry/react'],
+          },
+        },
+      },
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

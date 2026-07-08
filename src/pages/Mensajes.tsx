@@ -370,7 +370,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${myAvatarUrl ? '' : avatarColor(userNombre)}`}>
               {myAvatarUrl
-                ? <img src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
+                ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
                 : userNombre.charAt(0).toUpperCase()
               }
             </div>
@@ -425,7 +425,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                     : `${avatarColor(msg.author)} border-transparent`
                 }`}>
                   {msg.isMe && myAvatarUrl
-                    ? <img src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
+                    ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
                     : msg.rol === 'admin'
                     ? <Shield className="w-3.5 h-3.5" />
                     : msg.author.charAt(0).toUpperCase()

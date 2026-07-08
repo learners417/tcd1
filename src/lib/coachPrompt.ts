@@ -9,6 +9,7 @@ import type { ProfileV2, DiarioEntradaV2, MetricaSemana, MetricaSemanaV2, HojaDe
 import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 import { getGuion } from './guionesVideos';
+import { getTutorial } from './tutorialesTecnicos';
 import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funnelCalcs';
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
@@ -39,7 +40,8 @@ REGLAS DE HIERRO DEL MENTOR:
 5. FOCO ABSOLUTO: si la conversación se aleja del programa, respondé en una línea cálida y redirigí a la sesión de hoy. No sos un chat de propósito general.
 6. FRAMING DIARIO: cada día, tu primera interacción abre con propósito: "¿En qué te destrabo hoy?" — UNA conversación con objetivo por día, no un chat infinito. Profundidad sobre cantidad.
 7. TU TONO ES EL DEL DOJO: serio, recto, firme y frontal — jamás agresivo ni hostil. Abierto y sincero. Como el taekwondo: el respeto por el proceso ES el método. Sin diminutivos innecesarios, sin exclamaciones infladas, sin porras vacías. La calidez está en la presencia, no en los signos de admiración.
-8. La Hoja de Ruta ahora se llama EL CAMINO. Las tareas son SESIONES (45 min a 2 h, una por día hábil). Los días 6 y 7 de cada semana son de descanso: el dojo también respira — la racha no se rompe en descanso.`;
+8. La Hoja de Ruta ahora se llama EL CAMINO. Las tareas son SESIONES (45 min a 2 h, una por día hábil). Los días 6 y 7 de cada semana son de descanso: el dojo también respira — la racha no se rompe en descanso.
+9. MAPA DE DERIVACIÓN (cada entrenador tiene SU dominio — si preguntan de otro tema, derivá al correcto): Diego=producto/método · Vera=precio/oferta/PUV · Mateo=contenido/guiones/copy · Caro=grabación/presencia · Sofi=sistemas/embudo/técnica · Bruno=WhatsApp/agente · Lucas=ventas/llamadas/objeciones · Ramiro=métricas/números. Ejemplo: si le preguntan a Diego sobre precios, Diego dice "eso es territorio de Vera". Vos, Mentor, conocés todos y derivás al que corresponde (si está desbloqueado).`;
 }
 
 
@@ -95,7 +97,11 @@ function tarea_estrella_actual(tareas: HojaDeRutaItem[]): string {
   const guionVideo = g
     ? `\nEL VIDEO DE ESTA SESIÓN ENSEÑA (si el sanador no lo ve o pregunta, enseñá VOS esto — jamás digas que no hace falta verlo): ${g.esencia}`
     : '';
-  return `META ${pendiente.meta_codigo}: ${meta.titulo} (Pilar ${pendiente.pilar_numero} — ${pilar?.titulo})${protocolo}${guionVideo}`;
+  const tut = getTutorial(pendiente.meta_codigo);
+  const tutorial = tut
+    ? `\nTUTORIAL TÉCNICO DE ESTA SESIÓN (si se traba, guialo con estos pasos exactos, sin jerga): ${tut.titulo} — ${tut.pasos.join(' | ')} · SI FALLA: ${tut.siFalla}`
+    : '';
+  return `META ${pendiente.meta_codigo}: ${meta.titulo} (Pilar ${pendiente.pilar_numero} — ${pilar?.titulo})${protocolo}${guionVideo}${tutorial}`;
 }
 
 /**
@@ -164,6 +170,12 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
 
   const nivel = perfil.nivel_avatar ?? 1;
   const nombreNivel = NIVEL_NOMBRES[nivel as 1 | 2 | 3 | 4 | 5];
+  // Lote D: el avatar del sanador ajusta el tono del Mentor
+  let avatarSanador = 'A';
+  try { avatarSanador = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ }
+  const contextoAvatar = avatarSanador === 'B'
+    ? '\n\nAVATAR DEL SANADOR — ESTABLECIDO: este sanador YA tiene años de práctica, marca y un método propio (aunque sin nombre). NO le hables como principiante ni le expliques lo básico. Tu trabajo con él es ORDENAR y ponerle nombre a lo que ya hace hace años, no enseñarle desde cero. Reconocé su experiencia. Su dolor es el TECHO (está estancado, no quebrado).'
+    : '\n\nAVATAR DEL SANADOR — EN CONSTRUCCIÓN: este sanador todavía no tiene un método claro ni sistema. Acompañalo a construir desde sus fortalezas, paso a paso, sin abrumar. Su dolor es el PRESENTE (agenda llena, cuenta vacía).';
   const diasSinDiario = ultimaEntradaDiario
     ? Math.floor((Date.now() - new Date(ultimaEntradaDiario.fecha ?? '').getTime()) / 86400000)
     : 999;
@@ -290,7 +302,7 @@ ${alertas.length > 0 ? `ALERTAS: ${alertas.map(d => `${d.etapa}: ${d.mensaje}`).
     ? `\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n${tareasHechas}\nESTAS METAS ESTÁN HECHAS · no las vuelvas a sugerir como próximo paso. Si querés trabajar sobre ese tema, encuadralo como "refinar lo que ya tenés".`
     : '\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n(ninguna registrada todavía — o la Hoja de Ruta no se cargó esta sesión · si el sanador menciona que ya hizo algo, creele y NO le mandes a hacerlo de nuevo)';
 
-  const CONTEXTO_USUARIO = `
+  const CONTEXTO_USUARIO = `${contextoAvatar}
 === DATOS DEL PROFESIONAL ===
 Nombre: ${perfil.nombre ?? 'No especificado'}
 Especialidad: ${perfil.especialidad ?? 'No especificada'}

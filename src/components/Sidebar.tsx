@@ -18,7 +18,7 @@ interface SidebarProps {
 function getSidebarData() {
   let profile = { nombre: 'Profesional', plan: 'Implementación', fecha_inicio: new Date().toISOString() };
   try {
-    const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+    let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
     if (p.nombre) profile.nombre = p.nombre;
     if (p.fecha_inicio) profile.fecha_inicio = p.fecha_inicio;
   } catch { /* noop */ }

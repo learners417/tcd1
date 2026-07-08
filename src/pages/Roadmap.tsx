@@ -71,6 +71,20 @@ import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
 import CintaCinturon from '../components/CintaCinturon';
+
+// Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
+function encuadrarPorAvatar(codigo: string, texto: string): string {
+  let avatar = 'A';
+  try { avatar = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ }
+  if (avatar !== 'B') return texto;
+  // Avatar B (Establecido): las sesiones de método hablan de ORDENAR lo que ya tiene, no crear
+  const ajustes: Record<string, string> = {
+    'P2.1': 'Ya tenés un método — lo usás hace años, aunque nunca lo sacaste de tu cabeza. En esta fase le ponemos nombre, orden y estructura a lo que YA hacés. Es tu activo más valioso, enterrado.',
+    'P2.2': 'Documentá el proceso que ya seguís con tus pacientes — ese orden que tenés intuitivo. Solo hay que ordenarlo y ponerlo por escrito.',
+    'P2.4': 'Vamos a ponerle nombre al método que ya tenés. No inventamos nada: ordenamos y bautizamos tu forma de trabajar de años.',
+  };
+  return ajustes[codigo] ?? texto;
+}
 import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
 import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
@@ -1092,7 +1106,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                         </p>
                         {!isActive && (
                           <p className="text-sm text-[#F2EFE9]/40 mt-1 leading-relaxed line-clamp-2">
-                            {meta.descripcion}
+                            {encuadrarPorAvatar(meta.codigo, meta.descripcion)}
                           </p>
                         )}
                         <div className="flex items-center gap-3 mt-2">

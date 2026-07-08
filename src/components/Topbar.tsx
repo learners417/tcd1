@@ -294,7 +294,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
               const avatarUrl = localStorage.getItem('tcd_avatar');
               const initial = (profile.nombre || 'P').charAt(0).toUpperCase();
               return avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[rgba(232,150,46,0.18)] object-cover" />
+                <img loading="lazy" src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[rgba(232,150,46,0.18)] object-cover" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-[#E8962E]/20 border border-[#E8962E]/30 flex items-center justify-center text-sm font-bold text-[#E8962E]">
                   {initial}

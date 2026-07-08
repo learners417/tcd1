@@ -117,7 +117,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
               {/* Image */}
               <div className="relative aspect-square bg-[#080808]">
                 {firstAsset ? (
-                  <img src={firstAsset.public_url} alt={creativo.nombre ?? 'Creativo'} className="w-full h-full object-cover" />
+                  <img loading="lazy" src={firstAsset.public_url} alt={creativo.nombre ?? 'Creativo'} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <ImageIcon className="w-8 h-8 text-[#F2EFE9]/10" />

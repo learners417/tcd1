@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { safeGet } from '../lib/safeStorage';
 import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
 import { streamText } from '../lib/aiProvider';
 import Markdown from 'react-markdown';
@@ -44,13 +45,13 @@ import { AGENTES, NIVEL_NOMBRE } from '../lib/agents';
 type Message = CoachConversationMessage;
 
 function buildInitialMessage(): Message {
-  const profile = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+  const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
   const dInicio = profile.fecha_inicio ? new Date(profile.fecha_inicio) : new Date();
   const diff = Math.floor((Date.now() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
   const semanaActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
   const nombre = profile.nombre || 'Fundadora';
 
-  const diary = JSON.parse(localStorage.getItem('tcd_diary_weekly') || '[]');
+  const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
   const last = diary.length > 0 ? diary[0].respuestas : null;
 
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
@@ -308,7 +309,7 @@ export default function Coach({ userId }: { userId?: string }) {
 
         const extraCtx = detectarContextoConversacion(text);
         const coachExtra = loadCoachExtraContext();
-        const localPerfil = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+        const localPerfil = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
         const perfil = { ...localPerfil, ...(supabaseProfileRef.current ?? {}) };
 
         // Texto resumido de niveles por entrenador · para el system prompt
@@ -401,7 +402,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const avatarUrl = localStorage.getItem('tcd_avatar') || '';
   const profile = (() => {
     try {
-      return JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+      return safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
     } catch {
       return {};
     }
@@ -452,7 +453,7 @@ export default function Coach({ userId }: { userId?: string }) {
               {msg.role === 'assistant' ? (
                 <Bot className="w-4 h-4" />
               ) : avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img loading="lazy" src={avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-xs font-bold text-white">{userInitial}</span>
               )}

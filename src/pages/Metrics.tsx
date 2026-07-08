@@ -114,7 +114,7 @@ function TabProgreso({ userId }: { userId?: string }) {
   const [progData, setProgData] = useState({ semanaActual: 1, totTareas: TOTAL_METAS, compTareas: 0, diasDiario: 0, hitos: 0 });
 
   useEffect(() => {
-    const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+    let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
     const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
     const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
     const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));

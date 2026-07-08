@@ -12,6 +12,8 @@ interface Pregunta {
   tituloBloque: string;
   question: string;
   placeholder: string;
+  /** Lote D: si tiene opciones, se muestra como selección (no texto libre). */
+  opciones?: { valor: string; label: string; avatar: 'A' | 'B' }[];
 }
 
 const QUESTIONS: Pregunta[] = [
@@ -75,6 +77,17 @@ const QUESTIONS: Pregunta[] = [
     tituloBloque: 'Tu Negocio Hoy',
     question: '¿Cuál considerás que es tu mayor obstáculo actual para escalar tu práctica?',
     placeholder: 'Ej: No sé vender sin sentirme incómoda, no tengo un sistema — todo depende de mí, no sé cómo conseguir pacientes online...',
+  },
+  {
+    id: 9,
+    bloque: 3,
+    tituloBloque: 'Tu Negocio Hoy',
+    question: '¿Ya tenés una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?',
+    placeholder: '',
+    opciones: [
+      { valor: 'establecido', label: 'Sí. Tengo mi manera de hacer las cosas, mi proceso — lo uso hace años.', avatar: 'B' },
+      { valor: 'quemado', label: 'No, o no lo tengo claro. Trabajo caso por caso, sin un sistema definido.', avatar: 'A' },
+    ],
   },
 ];
 
@@ -235,13 +248,30 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
 
         <h2 className="text-xl font-medium text-[#F2EFE9] mb-6">{QUESTIONS[currentStep].question}</h2>
 
-        <textarea
-          value={answers[QUESTIONS[currentStep].id] || ''}
-          onChange={(e) => handleAnswer(e.target.value)}
-          placeholder={QUESTIONS[currentStep].placeholder}
-          className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-[#F2EFE9] text-sm placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all resize-none min-h-[120px]"
-          rows={4}
-        />
+        {QUESTIONS[currentStep].opciones ? (
+          <div className="space-y-3">
+            {QUESTIONS[currentStep].opciones!.map((op) => {
+              const sel = answers[QUESTIONS[currentStep].id] === op.valor;
+              return (
+                <button
+                  key={op.valor}
+                  onClick={() => { handleAnswer(op.valor); try { localStorage.setItem('tcd_avatar', op.avatar); } catch { /* noop */ } }}
+                  className={`w-full text-left px-5 py-4 rounded-xl border text-sm transition-all ${sel ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}
+                >
+                  {op.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <textarea
+            value={answers[QUESTIONS[currentStep].id] || ''}
+            onChange={(e) => handleAnswer(e.target.value)}
+            placeholder={QUESTIONS[currentStep].placeholder}
+            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-[#F2EFE9] text-sm placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all resize-none min-h-[120px]"
+            rows={4}
+          />
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button

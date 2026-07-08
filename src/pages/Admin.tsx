@@ -258,7 +258,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
               <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                 {isMe && adminAvatarUrl ? (
                   <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-[#E8962E]/30">
-                    <img src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
+                    <img loading="lazy" src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border ${
@@ -278,7 +278,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                          : 'bg-[#1A1917]/60 text-[#F2EFE9]/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
                   }`}>
                     {m.tipo_archivo === 'imagen' && m.archivo_url && (
-                      <img src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
+                      <img loading="lazy" src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
                            onClick={() => window.open(m.archivo_url)} />
                     )}
                     {m.tipo_archivo === 'audio' && m.archivo_url && (
@@ -1712,7 +1712,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <div className={`flex items-center gap-3 mb-4 ${sidebarCollapsed ? 'md:justify-center md:gap-0' : ''}`}>
             <div className="w-9 h-9 rounded-full overflow-hidden bg-[#E8962E]/10 flex items-center justify-center text-sm font-bold border border-[rgba(232,150,46,0.18)] shrink-0">
               {adminAvatar
-                ? <img src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
+                ? <img loading="lazy" src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
                 : adminProfile.nombre.charAt(0).toUpperCase()
               }
             </div>
@@ -2573,7 +2573,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               <div key={m.id} className={`flex gap-2.5 items-end max-w-[88%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                                 <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#E8962E]/20 border-[#E8962E]/30 text-[#E8962E]' : 'bg-[#E8962E]/10 border-[rgba(232,150,46,0.12)] text-[#F2EFE9]'}`}>
                                   {isMe
-                                    ? (adminAvatar ? <img src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
+                                    ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
                                     : initial}
                                 </div>
                                 <div className="flex flex-col gap-1">
@@ -2736,7 +2736,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                               <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#E8962E]/20 border-[#E8962E]/30' : 'bg-[#E8962E]/10 border-[rgba(232,150,46,0.12)]'}`}>
                                 {isMe
-                                  ? (adminAvatar ? <img src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-[#E8962E]" />)
+                                  ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-[#E8962E]" />)
                                   : senderName.charAt(0).toUpperCase()
                                 }
                               </div>
@@ -3271,7 +3271,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <div key={v.id} className="flex items-center gap-4 px-5 py-3 bg-[#111110] hover:bg-[#1A1917] transition-colors">
                               <div className="w-16 h-10 rounded-lg overflow-hidden bg-black/40 shrink-0">
                                 {vidId ? (
-                                  <img src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`} alt={v.titulo} className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`} alt={v.titulo} className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center"><Youtube className="w-4 h-4 text-[#EF4444]/40" /></div>
                                 )}
@@ -3592,7 +3592,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-[#E8962E]/50 transition-colors overflow-hidden"
               >
                 {adminAvatar ? (
-                  <img src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-[#E8962E]/10 flex items-center justify-center text-2xl font-bold text-[#E8962E]">
                     {(adminDraft.nombre || 'A').charAt(0).toUpperCase()}

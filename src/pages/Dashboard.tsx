@@ -70,7 +70,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
 
   useEffect(() => {
     async function loadData() {
-      const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+      let p: { fecha_inicio?: string; nombre?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* perfil corrupto: usar vacío */ }
       const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
       const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
       const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
@@ -129,7 +129,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         }
       }
 
-      const diary = JSON.parse(localStorage.getItem('tcd_diario_v2') || '{}');
+      let diary: { entries?: unknown[] } = {}; try { diary = JSON.parse(localStorage.getItem('tcd_diario_v2') || '{}'); } catch { /* diario corrupto */ }
       const rachaLocal = Array.isArray(diary.entries) ? diary.entries.length : 0;
 
       setData({

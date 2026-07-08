@@ -645,7 +645,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               <div className="grid grid-cols-3 gap-1.5">
                 {characterRefs.map((ref, idx) => (
                   <div key={idx} className="relative">
-                    <img src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref personaje ${idx + 1}`} />
+                    <img loading="lazy" src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref personaje ${idx + 1}`} />
                     <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-[8px] font-medium">
                       {formatBytes(base64SizeBytes(ref.base64))}
                     </span>
@@ -678,7 +678,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               <div className="grid grid-cols-3 gap-1.5">
                 {styleRefs.map((ref, idx) => (
                   <div key={idx} className="relative">
-                    <img src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref estilo ${idx + 1}`} />
+                    <img loading="lazy" src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref estilo ${idx + 1}`} />
                     <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-[8px] font-medium">
                       {formatBytes(base64SizeBytes(ref.base64))}
                     </span>
@@ -995,7 +995,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                     onClick={() => setPreviewIdx(idx)}
                     className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${previewIdx === idx ? 'border-[#E8962E]' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
-                    <img src={base64ToDataUrl(img.base64, img.mimeType)} alt={`Pieza ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img loading="lazy" src={base64ToDataUrl(img.base64, img.mimeType)} alt={`Pieza ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                   {slidePrompts[idx] && (
                     <button
@@ -1016,7 +1016,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           )}
 
           <div className="relative rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)] max-w-sm mx-auto">
-            <img src={base64ToDataUrl(images[previewIdx].base64, images[previewIdx].mimeType)} alt="Preview" className="w-full h-auto block" />
+            <img loading="lazy" src={base64ToDataUrl(images[previewIdx].base64, images[previewIdx].mimeType)} alt="Preview" className="w-full h-auto block" />
             {images.length > 1 && slidePrompts[previewIdx] && (
               <button
                 onClick={() => regenerateSingle(previewIdx)}
