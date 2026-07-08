@@ -3,7 +3,7 @@ import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, Mess
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
-import { calcularRacha, esDiaDescanso } from '../lib/racha';
+import { calcularRacha, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
 import CintaCinturon from '../components/CintaCinturon';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
@@ -257,7 +257,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
           );
         })()}
         <MetricCard label="Pasos del camino" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% recorrido`} />
-        <MetricCard label="Racha" value={`${(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()} 🔥`} sub="Sesiones seguidas · el finde no la rompe" />
+        <MetricCard label="Racha" value={`${(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()} 🔥`} sub={(() => { const wd = new Date().getDay(); if (wd === 0 || wd === 6) return "El dojo respira 🌿 · nos vemos el lunes"; return hoyTieneSesion() ? "Días hábiles seguidos · seguí así" : "Hacé tu sesión de hoy para sumar"; })()} />
         <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 

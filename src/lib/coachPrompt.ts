@@ -8,6 +8,7 @@
 import type { ProfileV2, DiarioEntradaV2, MetricaSemana, MetricaSemanaV2, HojaDeRutaItem } from './supabase';
 import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
+import { getGuion } from './guionesVideos';
 import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funnelCalcs';
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
@@ -87,7 +88,14 @@ function tarea_estrella_actual(tareas: HojaDeRutaItem[]): string {
   const protocolo = meta.coach_instruccion
     ? `\nPROTOCOLO DE ESTA TAREA (cuando el sanador venga a trabajarla — vos guiás, él hace; seguí este guion): ${meta.coach_instruccion}`
     : '';
-  return `META ${pendiente.meta_codigo}: ${meta.titulo} (Pilar ${pendiente.pilar_numero} — ${pilar?.titulo})${protocolo}`;
+  // Lote B: si esta sesión tiene un video con guión, el Mentor CONOCE su contenido.
+  // Regla de hierro: si el sanador pregunta por el video o dice que no está,
+  // NUNCA respondas "no necesitás verlo" — enseñá vos el contenido desde acá.
+  const g = getGuion(pendiente.meta_codigo);
+  const guionVideo = g
+    ? `\nEL VIDEO DE ESTA SESIÓN ENSEÑA (si el sanador no lo ve o pregunta, enseñá VOS esto — jamás digas que no hace falta verlo): ${g.esencia}`
+    : '';
+  return `META ${pendiente.meta_codigo}: ${meta.titulo} (Pilar ${pendiente.pilar_numero} — ${pilar?.titulo})${protocolo}${guionVideo}`;
 }
 
 /**

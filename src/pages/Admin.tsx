@@ -1786,7 +1786,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <li>Crear su subcuenta GHL desde el snapshot maestro</li>
                   <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
                   <li>Alta en MiClínica Digital (misma identidad)</li>
-                  <li>Bienvenida por WhatsApp: las 2 llaves + sus accesos</li>
+                  <li>Bienvenida por mail: las 2 llaves + sus accesos (Discord solo DWY/DFY)</li>
                   <li>Día 1: verificar el Pacto firmado y la Foto de Partida</li>
                   <li>Semana 1: la ronda diaria del semáforo (verde = no tocar)</li>
                   <li>Día 22-26: acompañar el montaje técnico (sistema + dominio)</li>
@@ -1894,7 +1894,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E8962E]/10 text-[#E8962E] border border-[#E8962E]/20">{c.plan}</span>
                             </td>
                             <td className="px-4 py-3 text-xs text-[#F2EFE9]/50">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60 font-medium">{c.dia_programa}{c.dias_atraso > 0 && <span className={c.dias_atraso > 3 ? 'text-[#EF4444] ml-1' : 'text-[#E8962E] ml-1'}>(-{c.dias_atraso})</span>}</td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-[#EF4444]' : 'text-[#E8962E]'} ml-1.5 text-[10px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}</td>
                             <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-[#F2EFE9]/50">{c.cinturon.nombre}</span></td>
                             <td className="px-4 py-3 text-xs text-[#F2EFE9]/60">{c.ventas_count}/10</td>
                             <td className="px-4 py-3 text-xs text-[#E8962E] font-medium">{pilar}</td>

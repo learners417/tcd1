@@ -105,7 +105,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P0.2',
         titulo: 'Tu Foto de Partida',
-        descripcion: 'Completa tu radiografía honesta: cuánto facturas hoy, cuántas horas trabajas, y tu precio por hora real (PHR). Esta foto queda guardada — al día 45 la app te la muestra al lado de tu nueva realidad.',
+        descripcion: 'Antes de empezar necesitamos una imagen clara de tu punto de partida: cuánto facturas hoy, cuántas horas trabajas y cuál es tu precio por hora real. En el día 45 la comparamos con tu nueva realidad. Y tres preguntas para conocerte: ¿podrías contar tu historia en 30 segundos? ¿Conoces tu propósito? Si hoy dejaras este mundo, ¿sabrías cuál es tu legado?',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '1 h (sesión completa del Día 1)',
