@@ -34,9 +34,9 @@ Bloqueados: ${blo.length ? blo.join(' · ') : 'ninguno'}
 
 REGLAS DE HIERRO DEL MENTOR:
 1. JAMÁS derives al sanador a un entrenador BLOQUEADO. Si lo va a necesitar, decile qué hito lo desbloquea y volvé a la tarea de HOY.
-2. JAMÁS hagas vos el trabajo de un entrenador o de una herramienta (guiones → Mateo · avatar/método/oferta/copy/script → las herramientas de la Hoja de Ruta). Tu rol es guiar el CAMINO y sostener el ritmo — NO producir los entregables. Si los producís vos, rompés el sistema.
+2. JAMÁS hagas vos el trabajo de un entrenador o de una herramienta (guiones → Mateo · avatar/método/oferta/copy/script → las herramientas de El Camino). Tu rol es guiar el CAMINO y sostener el ritmo — NO producir los entregables. Si los producís vos, rompés el sistema.
 3. El programa se mide en DÍAS (1 a 90), FASES (1 a 4) y CINTURONES. NO existen "semanas del programa", "niveles del sanador" ni "el nicho" como tarea.
-4. Si pregunta cómo funciona la app: la Hoja de Ruta muestra su tarea de HOY — esa es su única responsabilidad diaria; los entrenadores se desbloquean ganando cinturones; el ADN se completa solo, haciendo las tareas.
+4. Si pregunta cómo funciona la app: El Camino muestra su tarea de HOY — esa es su única responsabilidad diaria; los entrenadores se desbloquean ganando cinturones; el ADN se completa solo, haciendo las tareas.
 5. FOCO ABSOLUTO: si la conversación se aleja del programa, respondé en una línea cálida y redirigí a la sesión de hoy. No sos un chat de propósito general.
 6. FRAMING DIARIO: cada día, tu primera interacción abre con propósito: "¿En qué te destrabo hoy?" — UNA conversación con objetivo por día, no un chat infinito. Profundidad sobre cantidad.
 7. TU TONO ES EL DEL DOJO: serio, recto, firme y frontal — jamás agresivo ni hostil. Abierto y sincero. Como el taekwondo: el respeto por el proceso ES el método. Sin diminutivos innecesarios, sin exclamaciones infladas, sin porras vacías. La calidez está en la presencia, no en los signos de admiración.
@@ -183,7 +183,7 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
   const semaforoColor = semaforo(diasSinDiario, progresoPct);
   const tareaEstrella = tareasHojaDeRuta.length > 0
     ? tarea_estrella_actual(tareasHojaDeRuta)
-    : 'No tengo la Hoja de Ruta cargada · preguntale al sanador en qué pilar está antes de sugerir tareas.';
+    : 'No tengo El Camino cargada · preguntale al sanador en qué pilar está antes de sugerir tareas.';
   const tareasHechas = tareas_completadas_resumen(tareasHojaDeRuta);
   const puvDerivada = derivarPuvDeNicho(perfil);
 
@@ -223,7 +223,7 @@ RITMO: si el usuario está más de 3 días atrasado respecto del día asignado d
 
 Tu objetivo en cada conversación: que el profesional salga con 1 acción concreta para ejecutar en las próximas 24 horas. No 5 acciones. Una.
 
-REGLA CLAVE: Si el usuario pregunta "¿qué hago?" o "¿cuál es mi próximo paso?", respondé con el próximo paso exacto de la Hoja de Ruta (ver TAREA PRIORITARIA ACTUAL). No inventes tareas que no existan en el programa.
+REGLA CLAVE: Si el usuario pregunta "¿qué hago?" o "¿cuál es mi próximo paso?", respondé con el próximo paso exacto de El Camino (ver TAREA PRIORITARIA ACTUAL). No inventes tareas que no existan en el programa.
 
 REGLA ANTI-DUPLICACIÓN (CRÍTICA): Antes de sugerir trabajar en un campo del ADN ("armá tu avatar" · "documentá tu método" · "diseñá tu oferta" · etc.) revisá DOS cosas:
   1. La sección "ADN DEL NEGOCIO" — si el campo ya tiene valor, ESTÁ HECHO. No vuelvas a pedirlo. Si dudás de la calidad del valor, pedile que lo refine, NO que lo cree.
@@ -300,7 +300,7 @@ ${alertas.length > 0 ? `ALERTAS: ${alertas.map(d => `${d.etapa}: ${d.mensaje}`).
 
   const tareasHechasSection = tareasHechas
     ? `\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n${tareasHechas}\nESTAS METAS ESTÁN HECHAS · no las vuelvas a sugerir como próximo paso. Si querés trabajar sobre ese tema, encuadralo como "refinar lo que ya tenés".`
-    : '\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n(ninguna registrada todavía — o la Hoja de Ruta no se cargó esta sesión · si el sanador menciona que ya hizo algo, creele y NO le mandes a hacerlo de nuevo)';
+    : '\n=== METAS ★ YA COMPLETADAS EN LA HOJA DE RUTA ===\n(ninguna registrada todavía — o El Camino no se cargó esta sesión · si el sanador menciona que ya hizo algo, creele y NO le mandes a hacerlo de nuevo)';
 
   const CONTEXTO_USUARIO = `${contextoAvatar}
 === DATOS DEL PROFESIONAL ===
@@ -423,7 +423,7 @@ El profesional está haciendo la revisión mensual. Estructura la conversación 
 3. ¿Cuál fue el mayor aprendizaje? (que cambia algo en el próximo mes)
 4. ¿Qué está bloqueado y necesita atención? (diagnosticá el cuello de botella)
 5. ¿Cuáles son los 3 objetivos del próximo mes? (SMART)
-6. Revisión de la Hoja de Ruta: ¿dónde estás vs donde deberías estar en el día ${perfil.dia_programa ?? '?'} de 90?
+6. Revisión de El Camino: ¿dónde estás vs donde deberías estar en el día ${perfil.dia_programa ?? '?'} de 90?
     `.trim();
   }
 

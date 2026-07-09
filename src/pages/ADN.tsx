@@ -358,7 +358,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
           tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.
           Tu Mentor y tus entrenadores lo leen para personalizar TODO lo que te dicen y generan.
-          <span className="block mt-2 text-[#E8962E]/90">No se llena a mano: se completa solo, a medida que haces las tareas de tu Hoja de Ruta. Si ves campos vacíos, el camino los va a llenar.</span>
+          <span className="block mt-2 text-[#E8962E]/90">No se llena a mano: se completa solo, a medida que haces las tareas de El Camino. Si ves campos vacíos, el camino los va a llenar.</span>
         </p>
       </div>
 
@@ -386,7 +386,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           onClick={() => setCurrentPage('roadmap')}
           className="btn-primary text-sm whitespace-nowrap"
         >
-          Ir a la Hoja de Ruta
+          Ir a El Camino
         </button>
       </div>
 
@@ -399,7 +399,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           <p className="text-sm font-semibold text-[#F2EFE9]">Pais del profesional</p>
           <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed max-w-xl">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
-            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia ti no cambia.
+            guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
           </p>
         </div>
         <CustomSelect

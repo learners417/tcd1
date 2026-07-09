@@ -100,7 +100,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const lastSummaryAtRef = useRef<number>(0);
   const nivelesEntrenadoresRef = useRef<Record<string, number>>({});
   const alcanzoNivel4Ref = useRef<boolean>(false);
-  // Estado real de la Hoja de Ruta · alimenta el system prompt para que el
+  // Estado real de El Camino · alimenta el system prompt para que el
   // Coach sepa qué metas ★ están hechas y no las sugiera de nuevo.
   const tareasHojaDeRutaRef = useRef<HojaDeRutaItem[]>([]);
 

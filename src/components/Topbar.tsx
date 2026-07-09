@@ -18,7 +18,7 @@ const searchablePages = [
   { id: 'roadmap', label: 'Hoja de Ruta', icon: Map, desc: 'Tu progreso en los 90 días' },
   { id: 'coach', label: 'Coach IA', icon: MessageSquare, desc: 'Asistente IA con contexto de tu programa' },
   // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
-  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Seguimiento de tu embudo de ventas' },
+  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes' },
   { id: 'diario', label: 'Diario', icon: BookOpen, desc: 'Reflexión diaria' },
   { id: 'biblioteca', label: 'Biblioteca', icon: Library, desc: 'Videos, herramientas, recursos' },
   { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Generar copies e imagenes para Meta Ads' },

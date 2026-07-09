@@ -349,7 +349,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             </p>
             <p className="text-sm text-[#F2EFE9]/60 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
-              Vuelve a la Hoja de Ruta y cierra P6 antes de venir acá.
+              Vuelve a El Camino y cierra P6 antes de venir acá.
             </p>
           </div>
           <button
@@ -357,7 +357,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             onClick={() => setCurrentPage?.('roadmap')}
             className="btn-primary inline-flex items-center gap-2"
           >
-            Ir a la Hoja de Ruta
+            Ir a El Camino
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

@@ -358,7 +358,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
         <h2 className="text-xl font-medium text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          Mi Embudo de Ventas
+          Mi Sistema de Ventas
         </h2>
         <p className="text-sm text-[#F2EFE9]/60">Orgánico + Ads · 12 KPIs automáticos · carga diaria o semanal</p>
       </div>
@@ -561,7 +561,7 @@ export default function Metrics({ userId }: { userId?: string }) {
               : 'bg-[#E8962E]/5 text-[#F2EFE9]/40 border border-transparent hover:bg-[#E8962E]/10 hover:text-[#F2EFE9]/80'
           }`}
         >
-          Mi Embudo
+          Mi Sistema
         </button>
       </div>
 

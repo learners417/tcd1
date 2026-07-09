@@ -137,7 +137,7 @@ function getTypeBadge(tipo: string) {
     case 'HERRAMIENTA':
       return { icon: Wrench, label: 'HERRAMIENTA', color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10 border-[#22C55E]/20' };
     case 'COACH':
-      return { icon: MessageSquare, label: 'COACH', color: 'text-[#F2EFE9]/70', bg: 'bg-[#F2EFE9]/5 border-[#F2EFE9]/15' };
+      return { icon: MessageSquare, label: 'MENTOR', color: 'text-[#F2EFE9]/70', bg: 'bg-[#F2EFE9]/5 border-[#F2EFE9]/15' };
     default:
       return { icon: FileText, label: tipo, color: 'text-[#F2EFE9]/50', bg: 'bg-[#F2EFE9]/5 border-[#F2EFE9]/10' };
   }
@@ -761,7 +761,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64 text-[#F2EFE9]/40 text-sm">
-        Cargando tu Hoja de Ruta...
+        Cargando El Camino...
       </div>
     );
   }

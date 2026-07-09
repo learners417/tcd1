@@ -403,7 +403,7 @@ Devolvé SOLO este JSON:
           );
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
-        toast.success('Resumen de la semana generado por el Coach.');
+        toast.success('Resumen de la semana generado por tu Mentor.');
       } catch {
         /* nice-to-have, silencioso */
       } finally {
@@ -484,7 +484,7 @@ Devolvé SOLO este JSON:
             <div className="card-panel p-5 rounded-2xl border border-violet-500/20 bg-violet-500/5 space-y-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-violet-400" />
-                <h3 className="text-sm font-medium text-violet-300">Resumen del Coach — Semana cerrada</h3>
+                <h3 className="text-sm font-medium text-violet-300">Resumen del Mentor — Semana cerrada</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-[#1A1917]/50 rounded-xl p-3">

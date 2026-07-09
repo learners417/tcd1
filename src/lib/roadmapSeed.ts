@@ -126,7 +126,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 1,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P0_4',
-        coach_instruccion: 'MODO VIDEO-FALLBACK: explicá la app en 5 min — la Hoja de Ruta muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cerrá con el pacto: 1 hora por día. Pedile que lo escriba con sus palabras.',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: explicá la app en 5 min — El Camino muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cerrá con el pacto: 1 hora por día. Pedile que lo escriba con sus palabras.',
       },
     ],
   },

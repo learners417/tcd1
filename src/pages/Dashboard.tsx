@@ -273,17 +273,17 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         <div className="relative z-10">
           <p className="text-2xl font-light text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
           <p className="text-sm text-[#F2EFE9]/60 max-w-lg mb-6 leading-relaxed">
-            Llevas <strong className="text-[#F2EFE9]/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Hoy tienes <strong className="text-[#E8962E]">{data.tareasHoy.length} {data.tareasHoy.length === 1 ? 'paso' : 'pasos'}</strong> para acercarte al siguiente.
+            Llevas <strong className="text-[#F2EFE9]/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-[#E8962E]">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-[#E8962E]">una sesión</strong> para acercarte al siguiente.
           </p>
           {(() => {
             try {
               const saved = localStorage.getItem('tcd_hoja_ruta_v2');
               const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : []));
-              return <div className="mt-5 max-w-md"><CintaCinturon cinturon={c} variante="hero" /></div>;
+              return null
             } catch { return null; }
           })()}
           <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-[#E8962E] hover:text-[#F4B65C] transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-[#E8962E]/10 px-4 py-2 rounded-lg border border-[#E8962E]/20 w-max">
-            Ver hoja de ruta <ChevronRight className="w-3.5 h-3.5" />
+            Ver El Camino <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -344,6 +344,11 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
               );
             })()}
 
+            {/* Tu inversión, recuperándose */}
+            {ventasTotal.suma > 0 && (
+              <p className="mt-3 text-[11px] text-[#F2EFE9]/50">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-[#22C55E]' : 'text-[#F4B65C]'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-[#E8962E]">📄 Reporte del Director</button></p>
+            )}
+
             {/* La barra Sanador Libre */}
             <div className="mt-5">
               <div className="h-1.5 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden">
@@ -355,40 +360,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         );
       })()}
 
-      {/* ZONA B — 4 tarjetas de métricas clave */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {(() => {
-          let cint = CINTURONES[0];
-          try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); cint = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { /* noop */ }
-          const prox = CINTURONES.find((c) => c.orden === cint.orden + 1);
-          return (
-            <>
-              <MetricCard label="Tu cinturón" value={`${cint.emoji} ${cint.nombre}`} sub={cint.metafora} />
-              <MetricCard label="El que sigue" value={prox ? `${prox.emoji} ${prox.nombre}` : '⬛ ¡Lo lograste!'} sub={prox ? prox.metafora : 'Sanador Libre'} />
-            </>
-          );
-        })()}
-        <MetricCard label="Pasos del camino" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% recorrido`} />
-        <MetricCard label="Racha" value={`${rachaDB ?? calcularRacha(null)} 🔥`} sub={(() => { const wd = new Date().getDay(); if (wd === 0 || wd === 6) return "El dojo respira 🌿 · nos vemos el lunes"; return hoyTieneSesion() ? "Días hábiles seguidos · seguí así" : "Hacé tu sesión de hoy para sumar"; })()} />
-        <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
-      </div>
-
-      {/* ═══ G3 · EL VALOR VISIBLE ═══ */}
-      {ventasTotal.count > 0 && (
-        <div className="rounded-2xl border border-[#22C55E]/30 bg-gradient-to-r from-[#22C55E]/[0.08] to-transparent p-5 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#22C55E]">Tu sistema, en números</p>
-            <p className="text-2xl font-light text-[#F2EFE9] mt-1">${ventasTotal.suma.toLocaleString()} <span className="text-sm text-[#F2EFE9]/50">facturados · {ventasTotal.count} paciente{ventasTotal.count !== 1 ? 's' : ''}</span></p>
-          </div>
-          <div className="text-right">
-            <button onClick={() => setShowReporte(true)} className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] hover:text-[#F4B65C] transition-colors mb-1 block ml-auto">📄 Reporte del Director</button>
-            <p className="text-[10px] uppercase tracking-widest text-[#F2EFE9]/40">Tu inversión</p>
-            <p className={`text-lg font-semibold ${ventasTotal.suma >= 2000 ? 'text-[#22C55E]' : 'text-[#E8962E]'}`}>
-              {ventasTotal.suma >= 2000 ? `Recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}
-            </p>
-          </div>
-        </div>
-      )}
+      
 
       {/* G3 · Día 75: Tu clínica sigue */}
       {(() => {
@@ -540,7 +512,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
                 "Tu avatar ideal determina toda tu comunicación. ¿Ya lo tienes claro?",
                 "El seguimiento post-consulta es donde se ganan las recomendaciones.",
                 "Medí tu tasa de cierre: ¿cuántos leads se convierten en pacientes?",
-                "Un embudo simple y funcional vale más que uno complejo sin resultados.",
+                "Un sistema simple y funcional vale más que uno complejo sin resultados.",
                 "Escribe tu historia en 3 formatos: 300, 150 y 50 palabras.",
                 "Tu propósito es tu filtro de decisiones. Todo lo demás es ruido.",
                 "Cada tarea completada es un ladrillo de tu clínica digital.",

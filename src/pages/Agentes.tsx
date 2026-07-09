@@ -450,7 +450,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           </h1>
           <p className="text-sm text-white/60 mt-1">
             Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
-            cuando avanzás en la Hoja de Ruta.
+            cuando avanzás en El Camino.
           </p>
         </div>
 
@@ -838,7 +838,7 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
             onClick={onIrAlRoadmap}
             className="flex-1 text-xs font-medium text-white bg-[#E8962E] hover:bg-[#F4B65C] px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
-            Ir a la Hoja de Ruta
+            Ir a El Camino
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

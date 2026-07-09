@@ -548,7 +548,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
           <p className="text-sm font-semibold text-[#F2EFE9]">Pais del profesional</p>
           <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
-            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia ti no cambia.
+            guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
           </p>
         </div>
         <CustomSelect

@@ -58,7 +58,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#F2EFE9]/10 text-[#F2EFE9]/70 border border-[#F2EFE9]/15 tracking-wider">
-            COACH
+            MENTOR
           </span>
           {checked && (
             <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/25 tracking-wider flex items-center gap-1">
@@ -117,7 +117,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#E8962E]/10 border border-[#E8962E]/20 text-[#E8962E] font-medium hover:bg-[#E8962E]/15 transition-colors"
       >
         <MessageSquare className="w-5 h-5" />
-        Abrir Coach IA
+        Abrir el Mentor
         <ExternalLink className="w-4 h-4 opacity-50" />
       </button>
 
