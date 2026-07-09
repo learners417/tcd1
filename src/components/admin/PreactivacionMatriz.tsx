@@ -33,10 +33,10 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
     (async () => {
       const { supabase } = await import('../../lib/supabase');
       if (!supabase) return;
-      const { data } = await supabase.from('hoja_de_ruta').select('usuario_id, meta_codigo, status');
+      const { data } = await supabase.from('hoja_de_ruta').select('usuario_id, meta_codigo, completada');
       const m = new Map<string, Set<string>>();
       for (const t of data ?? []) {
-        if (t.status !== 'completada') continue;
+        if (!t.completada) continue;
         if (!m.has(t.usuario_id)) m.set(t.usuario_id, new Set());
         m.get(t.usuario_id)!.add(t.meta_codigo);
       }

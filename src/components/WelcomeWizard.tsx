@@ -11,7 +11,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'welcome' | 'pacto' | 'guide';
+type Step = 'password' | 'profile' | 'diagnostico' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -24,10 +24,34 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'welcome', 'pacto', 'guide'];
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStep] = useState<Step>('password');
+  // ── El Diagnóstico (Lote 1 · la semilla del ADN) ──
+  const [dxAvatar, setDxAvatar] = useState<'A' | 'B' | null>(null);
+  const [dxFreno, setDxFreno] = useState('');
+  const [dxNicho, setDxNicho] = useState('');
+  const [dxDinero, setDxDinero] = useState('');
+  const [dxTiempo, setDxTiempo] = useState('');
+  const [dxSaving, setDxSaving] = useState(false);
+
+  const guardarDiagnostico = async () => {
+    if (!dxAvatar) return;
+    setDxSaving(true);
+    try {
+      localStorage.setItem('tcd_avatar', dxAvatar);
+      if (supabase) {
+        await supabase.from('profiles').update({
+          avatar_tipo: dxAvatar,
+          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo },
+          ...(dxNicho.trim() ? { adn_nicho: `${dxNicho.trim()} (hipótesis inicial — se refina en El Camino)` } : {}),
+        }).eq('id', profile.id);
+      }
+    } catch { /* no bloqueamos el flujo */ }
+    setDxSaving(false);
+    setStep('welcome');
+  };
   // ── El Pacto (F3) ──
   const [pactoTexto, setPactoTexto] = useState('');
   const [pactoFirma, setPactoFirma] = useState('');
@@ -101,10 +125,10 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           },
         });
       }
-      setStep('welcome');
+      setStep('diagnostico');
     } catch {
       // No bloqueamos el flujo si algo falla
-      setStep('welcome');
+      setStep('diagnostico');
     } finally {
       setSavingProfile(false);
     }
@@ -351,6 +375,69 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         )}
 
         {/* ── STEP 3: WELCOME ── */}
+        {step === 'diagnostico' && (
+          <div className="space-y-6 fade-rise">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu punto de partida</p>
+              <h2 className="text-2xl font-light text-[#F2EFE9] mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Cinco preguntas — la semilla de tu ADN</h2>
+              <p className="text-sm text-[#F2EFE9]/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">1 · ¿Ya tenés una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?</p>
+              <div className="space-y-2">
+                {([['B','Sí. Tengo mi manera de hacer las cosas — la uso hace años.'],['A','No, o no lo tengo claro. Trabajo caso por caso.']] as const).map(([v, l]) => (
+                  <button key={v} onClick={() => setDxAvatar(v)} className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxAvatar === v ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{l}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">2 · ¿Qué te frena más hoy?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['No sé conseguir pacientes online','Me cuesta cobrar lo que valgo','No tengo tiempo — todo depende de mí','Un poco de todo'].map((o) => (
+                  <button key={o} onClick={() => setDxFreno(o)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFreno === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">3 · ¿A quién ayudás mejor? (tu paciente típico, en una frase)</p>
+              <input value={dxNicho} onChange={(e) => setDxNicho(e.target.value)} placeholder="Ej: mujeres de 40-55 con problemas digestivos crónicos" className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl px-4 py-3 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/25 focus:outline-none focus:border-[#E8962E]/50" />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">4 · Cuando tenés que decir tu precio, ¿qué pasa?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['Lo digo tranquilo','Lo bajo antes de que me lo pidan','Lo justifico con títulos y años','Evito el tema'].map((o) => (
+                  <button key={o} onClick={() => setDxDinero(o)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxDinero === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">5 · ¿Cuánto tiempo real por día tenés para esto?</p>
+              <div className="grid grid-cols-3 gap-2">
+                {['30 min','1 hora','2+ horas'].map((o) => (
+                  <button key={o} onClick={() => setDxTiempo(o)} className={`px-4 py-3 rounded-xl border text-sm transition-all ${dxTiempo === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            {dxAvatar && (
+              <p className="text-xs text-[#F2EFE9]/45 italic">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-[#E8962E] not-italic">10 pacientes a tu precio digno y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
+            )}
+
+            <button
+              onClick={guardarDiagnostico}
+              disabled={!dxAvatar || dxSaving}
+              className="w-full py-3.5 rounded-xl bg-[#E8962E] text-[#080808] font-bold text-sm hover:bg-[#F4B65C] transition-colors disabled:opacity-40"
+            >
+              {dxSaving ? 'Guardando…' : 'Continuar →'}
+            </button>
+          </div>
+        )}
+
         {step === 'welcome' && (
           <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl text-center anímate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="w-16 h-16 rounded-2xl bg-[#22C55E] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">

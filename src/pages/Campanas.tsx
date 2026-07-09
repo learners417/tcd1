@@ -113,9 +113,18 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
   }
 
   return (
-    <div>
+    <div className="fade-rise">
       {/* Invisible anchor for scroll-to-top */}
       <div ref={topRef} />
+
+      {/* El header ceremonial (Lote 5 · la piel) */}
+      {view === 'home' && (
+        <div className="mb-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu máquina de pacientes</p>
+          <h1 className="text-2xl sm:text-3xl font-light text-[#F2EFE9] mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
+          <p className="text-sm text-[#F2EFE9]/50 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
+        </div>
+      )}
 
       {/* Sub-nav */}
       <CampanasSubNav currentView={view} onNavigate={navigateTo} />

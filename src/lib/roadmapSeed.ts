@@ -326,7 +326,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       },
       {
         codigo: 'P2.3',
-        titulo: 'Tu avatar: los 3 mejores que tuviste',
+        titulo: 'Tu paciente ideal: los 3 mejores que tuviste',
         descripcion: 'Elige los 3 mejores pacientes (o estudiantes) que pasaron por ti y completa la herramienta. Extrae el patrón: quién es tu persona ideal, qué le duele, qué compró de verdad. ¿No tienes 3 pacientes todavía? Usa 3 personas cercanas que tengan el problema que resolvés — o tu propia historia: tú fuiste tu primer caso.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
@@ -340,7 +340,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.4',
         titulo: 'Genera tu método: nombre + pasos',
-        descripcion: 'La herramienta usa tu proceso documentado + tu avatar y genera: 5 opciones de nombre propio (elegís una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
+        descripcion: 'La herramienta usa tu proceso documentado + tu paciente ideal y genera: 5 opciones de nombre propio (elegís una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '1.5 h',
@@ -408,7 +408,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         es_estrella: true,
         tiempo_estimado: '2 h',
         orden: 2,
-        dia_asignado: 16,
+        dia_asignado: 15,
         herramienta_id: 'H-P8.3',
         usa_ia: true,
         adn_field: 'adn_oferta_mid',
@@ -423,7 +423,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         es_estrella: true,
         tiempo_estimado: '45 min',
         orden: 3,
-        dia_asignado: 15,
+        dia_asignado: 16,
         usa_ia: false,
         entrenador: 'vera',
         checklist: [
@@ -450,7 +450,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.5',
         titulo: 'Puesta al día — el dojo respira',
-        descripcion: 'Sesión colchón, a propósito. Si algo quedó pendiente de las primeras 3 semanas, hoy se cierra: revisa tu ADN (método, avatar, oferta) y completa lo que falte. Si vas al día: lee tu oferta en voz alta una vez más y descansa — la semana que viene se construye el sistema. Un cinturón no se apura: se gana.',
+        descripcion: 'Sesión colchón, a propósito. Si algo quedó pendiente de las primeras 3 semanas, hoy se cierra: revisa tu ADN (método, paciente ideal, oferta) y completa lo que falte. Si vas al día: lee tu oferta en voz alta una vez más y descansa — la semana que viene se construye el sistema. Un cinturón no se apura: se gana.',
         tipo: 'COACH',
         es_estrella: false,
         tiempo_estimado: '1 h',
@@ -491,7 +491,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     metas: [
       {
         codigo: 'P4.1',
-        titulo: 'El embudo completo, sin humo',
+        titulo: 'El sistema completo, sin humo',
         descripcion: 'Mira el video (8 min): el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
@@ -510,7 +510,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         es_estrella: true,
         tiempo_estimado: '2 h',
         orden: 2,
-        dia_asignado: 22,
+        dia_asignado: 19,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Captura de tu agente respondiendo + tu agenda con horarios visibles. El sistema existe cuando se ve.' },
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_TUTORIAL_AGENTE',
@@ -531,13 +531,13 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       },
       {
         codigo: 'P4.2',
-        titulo: 'El mensaje que atrae a TU avatar',
-        descripcion: 'Genera con la herramienta el copy de tu página y tus anuncios: el mensaje que hace que tu persona ideal se detenga, se reconozca en el dolor y quiera hablar contigo. Usa tu avatar y tu oferta ya definidos.',
+        titulo: 'El mensaje que atrae a TU paciente ideal',
+        descripcion: 'Genera con la herramienta el copy de tu página y tus anuncios: el mensaje que hace que tu persona ideal se detenga, se reconozca en el dolor y quiera hablar contigo. Usa tu paciente ideal y tu oferta ya definidos.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '2 h',
         orden: 3,
-        dia_asignado: 19,
+        dia_asignado: 22,
         herramienta_id: 'H-P9A.2',
         usa_ia: true,
         adn_field: 'adn_landing_copy',
@@ -650,7 +650,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.4',
         titulo: '◆ ESCALA LA GANADORA — tu campaña real',
-        descripcion: 'El momento que cambia todo. Apagás las 2 perdedoras y tu pieza CAMPEONA sube a $5-8/día como campaña a WhatsApp — donde tu agente ya espera para filtrar y agendar. Sube el screenshot de la campaña activa — un Entrenador lo verifica y ganas Verde punta azul: la planta se estira al cielo. Desde hoy, cada persona interesada cae directo en MI CLÍNICA: ahí las ves conversando, agendadas, y convertidas en pacientes. Tu Motor Dinero quedó encendido.',
+        descripcion: 'El momento que cambia todo. Apagás las 2 perdedoras y tu pieza CAMPEONA sube a $5-8/día como campaña a WhatsApp — donde tu agente ya espera para filtrar y agendar. Sube el screenshot de la campaña activa — un Entrenador lo verifica y ganas Verde punta azul: la planta se estira al cielo. Desde hoy, cada persona interesada cae directo en MI CLÍNICA: ahí las ves conversando, agendadas, y convertidas en pacientes. Tu Motor Dinero quedó encendido. Desde hoy, tus interesados caen en Mi Clínica (sección Personas) — tu Motor Dinero acaba de encenderse.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '30 min',

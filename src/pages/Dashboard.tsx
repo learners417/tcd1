@@ -3,7 +3,7 @@ import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, Mess
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
-import { calcularRacha, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
+import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
 import CintaCinturon from '../components/CintaCinturon';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
@@ -59,6 +59,8 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
   // G2: las sesiones se abren en El Camino (un solo lugar, con evidencia y checklist)
   // G3: el valor visible — las ventas del sistema
   const [ventasTotal, setVentasTotal] = useState<{ suma: number; count: number }>({ suma: 0, count: 0 });
+  const [rachaDB, setRachaDB] = useState<number | null>(null);
+  const [setDB, setSetDB] = useState<Set<string> | null>(null);
   const [showReporte, setShowReporte] = useState(false);
   useEffect(() => {
     if (!isSupabaseReady() || !supabase || !userId) return;
@@ -74,6 +76,49 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
       const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
       const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
       const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+
+      // Lote 4 · EL PUENTE MCD: el Rojo automático. Si MCD verificó un cobro
+      // de este email, el Cinturón Rojo llega solo (un cobro allá = el hito acá).
+      try {
+        const email = p?.email ?? (await supabase?.auth.getUser())?.data.user?.email;
+        if (email) {
+          const r = await fetch(`/api/mcd-bridge?email=${encodeURIComponent(String(email))}`);
+          if (r.ok) {
+            const j = await r.json();
+            if (j?.cobro_verificado) {
+              const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+              const set = new Set<string>(saved ? JSON.parse(saved) : []);
+              if (!set.has('6-P6.3')) {
+                set.add('6-P6.3');
+                localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...set]));
+                if (isSupabaseReady() && supabase && userId) {
+                  await supabase.from('hoja_de_ruta').upsert(
+                    { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() },
+                    { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
+                  );
+                }
+              }
+            }
+          }
+        }
+      } catch { /* MCD puede no responder — no bloquea el Dashboard */ }
+
+      // Lote 2 · La racha desde la DB (cross-device, la misma fuente que el admin)
+      if (isSupabaseReady() && supabase && userId) {
+        supabase.from('hoja_de_ruta')
+          .select('pilar_numero, meta_codigo, completada, fecha_completada')
+          .eq('usuario_id', userId)
+          .eq('completada', true)
+          .then(({ data: hr }) => {
+            const rows = hr ?? [];
+            const fechas = rows.filter((r: { fecha_completada?: string | null }) => r.fecha_completada).map((r: { fecha_completada?: string | null }) => String(r.fecha_completada));
+            setRachaDB(calcularRachaDesdeFechas(fechas));
+            // El set real desde la DB: hitos + sesión de hoy correctos en CUALQUIER dispositivo.
+            const keys = rows.map((r: { pilar_numero: number; meta_codigo: string }) => `${r.pilar_numero}-${r.meta_codigo}`);
+            setSetDB(new Set(keys));
+            try { localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(keys)); } catch { /* noop */ }
+          });
+      }
 
       let completadasSet: Set<string>;
       try {
@@ -95,9 +140,9 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         comp += completadasPilar;
         if (completadasPilar >= metasPilar.length && metasPilar.length > 0) pilaresComp++;
 
-        if (tareasHoy.length < 3) {
+        if (tareasHoy.length < 1) {
           for (const meta of metasPilar) {
-            if (!completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 3) {
+            if (!completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 1) {
               tareasHoy.push({ ...meta, pilarNumero: pil.numero, pilarTitulo: pil.titulo });
             }
           }
@@ -243,6 +288,73 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         </div>
       </div>
 
+      {/* ZONA A2 — EL VISUALBOARD · lo que querés lograr, tildándose solo */}
+      {(() => {
+        let set = setDB ?? new Set<string>();
+        if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
+        const hitos = [
+          { emoji: '🧬', label: 'Método con nombre', done: set.has('2-P2.4') },
+          { emoji: '💎', label: 'Oferta lista', done: set.has('3-P3.4') },
+          { emoji: '⚙️', label: 'Sistema instalado', done: set.has('4-P4.5b') },
+          { emoji: '📣', label: 'Campaña encendida', done: set.has('4-P4.4') },
+          { emoji: '💰', label: 'Primer pago', done: set.has('6-P6.3') },
+        ];
+        const pct = data.totalTareas > 0 ? Math.round((data.completadas / data.totalTareas) * 100) : 0;
+        return (
+          <div className="card-ios p-6 sm:p-7">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu norte · 10 pacientes de $1.000 en 90 días</p>
+              <p className="text-[11px] text-[#F2EFE9]/40 num-tab">{pct}% del camino</p>
+            </div>
+            {/* La barra de 10 pacientes */}
+            <div className="flex items-end justify-between mb-2">
+              <div><span className="text-4xl font-light text-[#F2EFE9] num-tab">{ventasTotal.count}</span><span className="text-xl font-light text-[#F2EFE9]/35"> / 10</span><span className="text-xs text-[#F2EFE9]/45 ml-2">pacientes</span></div>
+              <p className="text-sm text-[#F2EFE9]/60 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-[#F2EFE9]/35">de $10.000</span></p>
+            </div>
+            <div className="flex gap-1.5 mb-5">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="flex-1 h-2.5 rounded-full transition-all" style={{ background: i < ventasTotal.count ? 'linear-gradient(180deg, #F4B65C, #E8962E)' : 'rgba(242,239,233,0.08)', boxShadow: i < ventasTotal.count ? '0 0 8px rgba(232,150,46,0.4)' : 'none' }} />
+              ))}
+            </div>
+            {/* Los 5 hitos */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {hitos.map((h) => (
+                <div key={h.label} className={`rounded-xl border px-3 py-2.5 text-center transition-all ${h.done ? 'border-[#E8962E]/40 bg-[#E8962E]/10' : 'border-[rgba(242,239,233,0.07)] bg-black/20 opacity-60'}`}>
+                  <p className="text-lg leading-none mb-1">{h.done ? '✓' : h.emoji}</p>
+                  <p className={`text-[10px] leading-tight ${h.done ? 'text-[#F4B65C] font-semibold' : 'text-[#F2EFE9]/45'}`}>{h.label}</p>
+                </div>
+              ))}
+            </div>
+            {/* El tiempo recuperado — la otra mitad de la promesa */}
+            {(() => {
+              let horas = 0;
+              if (set.has('4-P4.5b')) horas += 4; // el asistente responde solo
+              if (set.has('4-P4.4')) horas += 3;  // la campaña trae interesados sin vos
+              if (set.has('6-P6.2') || set.has('6-P6.3')) horas += 3; // el protocolo entrega sin improvisar
+              return (
+                <div className="mt-4 flex items-center gap-3 rounded-xl border border-[rgba(242,239,233,0.07)] bg-black/20 px-4 py-3">
+                  <span className="text-xl">⏰</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por vos <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
+                    <div className="h-1 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden mt-1.5">
+                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, horas * 10)}%`, background: 'linear-gradient(90deg, #5A9170, #3D6B4F)' }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* La barra Sanador Libre */}
+            <div className="mt-5">
+              <div className="h-1.5 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #E8962E, #F4B65C)' }} />
+              </div>
+              <p className="text-[10px] text-[#F2EFE9]/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ZONA B — 4 tarjetas de métricas clave */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {(() => {
@@ -257,7 +369,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
           );
         })()}
         <MetricCard label="Pasos del camino" value={`${data.completadas}/${data.totalTareas}`} sub={`${pctTareas}% recorrido`} />
-        <MetricCard label="Racha" value={`${(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()} 🔥`} sub={(() => { const wd = new Date().getDay(); if (wd === 0 || wd === 6) return "El dojo respira 🌿 · nos vemos el lunes"; return hoyTieneSesion() ? "Días hábiles seguidos · seguí así" : "Hacé tu sesión de hoy para sumar"; })()} />
+        <MetricCard label="Racha" value={`${rachaDB ?? calcularRacha(null)} 🔥`} sub={(() => { const wd = new Date().getDay(); if (wd === 0 || wd === 6) return "El dojo respira 🌿 · nos vemos el lunes"; return hoyTieneSesion() ? "Días hábiles seguidos · seguí así" : "Hacé tu sesión de hoy para sumar"; })()} />
         <MetricCard label="Días conectados" value={`${data.diasConectados}/7`} sub={data.diasConectados > 0 ? 'Esta semana' : 'Empieza hoy'} />
       </div>
 
@@ -474,7 +586,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
           diaPrograma={(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })()}
           completadas={(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); return new Set<string>(saved ? JSON.parse(saved) : []); } catch { return new Set<string>(); } })()}
           ventas={ventasTotal}
-          racha={(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); return calcularRacha(p?.fecha_inicio ?? null); } catch { return 0; } })()}
+          racha={rachaDB ?? calcularRacha(null)}
           onClose={() => setShowReporte(false)}
         />
       )}

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
-import { calcularCinturon } from '../lib/cinturones';
+import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
-import { esDiaDescanso } from '../lib/racha';
+import { esDiaDescanso, calcularRachaDesdeFechas } from '../lib/racha';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
@@ -375,11 +375,17 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     if (!supabase) return;
     setConvsLoading(true);
     try {
-      const { data } = await supabase
-        .from('agent_conversations')
-        .select('agent_id, messages, last_message_at')
-        .eq('user_id', clienteId)
-        .order('last_message_at', { ascending: false });
+      const [agRes, coRes] = await Promise.all([
+        supabase.from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
+        .order('last_message_at', { ascending: false }),
+        supabase.from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
+      ]);
+      // El Mentor (coach_conversations) + los 8 entrenadores (agent_conversations), juntos.
+      const coachRow = (coRes.data ?? [])[0] as { messages?: unknown; updated_at?: string } | undefined;
+      const data = [
+        ...(coachRow ? [{ agent_id: 'mentor', messages: coachRow.messages ?? [], last_message_at: coachRow.updated_at ?? null }] : []),
+        ...(agRes.data ?? []),
+      ];
       const NOMBRES: Record<string, string> = { coach: 'Mentor IA', diego: 'Diego (método)', sofi: 'Sofi (sistemas)', vera: 'Vera (oferta)', mateo: 'Mateo (contenido)', caro: 'Caro (grabación)', bruno: 'Bruno (WhatsApp)', lucas: 'Lucas (ventas)', ramiro: 'Ramiro (métricas)' };
       setConvsCliente((data ?? []).map((r: { agent_id: string; messages: unknown }) => ({
         agente: NOMBRES[r.agent_id] ?? r.agent_id,
@@ -840,11 +846,12 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         ]);
 
         let tareas = tareasRes.data ?? [];
+        // FIX progreso: el Camino escribe SIEMPRE en hoja_de_ruta (columna `completada`).
+        const { data: hrRows } = await supabase
+          .from('hoja_de_ruta')
+          .select('pilar_numero, meta_codigo, completada, es_estrella, fecha_completada')
+          .eq('usuario_id', p.id);
         if (tareas.length === 0) {
-          const { data: hrRows } = await supabase
-            .from('hoja_de_ruta')
-            .select('pilar_numero, meta_codigo, completada, es_estrella')
-            .eq('usuario_id', p.id);
           if (hrRows && hrRows.length > 0) {
             tareas = hrRows.map((r: any) => ({
               ...r,
@@ -857,8 +864,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         const ultimaDiario = diarioRes.data?.[0]?.fecha;
 
         // Semáforo v2 = RITMO REAL: atraso hábil contra el dia_asignado del Camino
-        const completadasSet = new Set(
-          tareas.filter((t: any) => t.status === 'completada').map((t: any) => `${t.pilar_numero}-${t.meta_codigo}`)
+        const completadasSet = new Set<string>(
+          (hrRows ?? []).filter((r: any) => r.completada === true).map((r: any) => `${r.pilar_numero}-${r.meta_codigo}`)
         );
         let diaEsperado: number | null = null;
         outer: for (const pil of SEED_ROADMAP_V2) {
@@ -875,24 +882,17 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
         }
         // Cinturón: pilar más alto con TODAS sus metas completas
-        let pilarMasAlto = 0;
-        for (const pil of SEED_ROADMAP_V2) {
-          const todas = pil.metas.every((mm) => completadasSet.has(`${pil.numero}-${mm.codigo}`));
-          if (todas) pilarMasAlto = Math.max(pilarMasAlto, pil.numero);
-          else break;
-        }
-        const cint = calcularCinturon(pilarMasAlto);
+        // Cinturón: LA MISMA función que el cliente (una sola fuente de verdad).
+        const cint = cinturonDesdeProgreso(completadasSet);
         const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora };
 
         const entradas = diarioRes.data ?? [];
-        let rachaActual = 0;
-        const hoy = new Date();
-        for (let i = 0; i < 30; i++) {
-          const d = new Date(hoy); d.setDate(hoy.getDate() - i);
-          const dStr = d.toISOString().split('T')[0];
-          if (entradas.some((e: any) => e.fecha === dStr)) rachaActual++;
-          else if (i > 0) break;
-        }
+        // Racha = LA MISMA definición que el cliente (sesiones, lu-vi, gracia),
+        // calculada de fecha_completada (DB).
+        const fechasSesiones = (hrRows ?? [])
+          .filter((r: any) => r.completada === true && r.fecha_completada)
+          .map((r: any) => String(r.fecha_completada));
+        const rachaActual = calcularRachaDesdeFechas(fechasSesiones);
 
         const ventasRes = await supabase.rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
         const ventas_count = (ventasRes.data ?? []).length;

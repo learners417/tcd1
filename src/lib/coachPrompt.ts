@@ -9,7 +9,7 @@ import type { ProfileV2, DiarioEntradaV2, MetricaSemana, MetricaSemanaV2, HojaDe
 import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 import { getGuion } from './guionesVideos';
-import { getTutorial } from './tutorialesTecnicos';
+import { getTutoriales } from './tutorialesTecnicos';
 import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funnelCalcs';
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
@@ -97,9 +97,9 @@ function tarea_estrella_actual(tareas: HojaDeRutaItem[]): string {
   const guionVideo = g
     ? `\nEL VIDEO DE ESTA SESIÓN ENSEÑA (si el sanador no lo ve o pregunta, enseñá VOS esto — jamás digas que no hace falta verlo): ${g.esencia}`
     : '';
-  const tut = getTutorial(pendiente.meta_codigo);
-  const tutorial = tut
-    ? `\nTUTORIAL TÉCNICO DE ESTA SESIÓN (si se traba, guialo con estos pasos exactos, sin jerga): ${tut.titulo} — ${tut.pasos.join(' | ')} · SI FALLA: ${tut.siFalla}`
+  const tuts = getTutoriales(pendiente.meta_codigo);
+  const tutorial = tuts.length > 0
+    ? tuts.map((t) => `\nTUTORIAL TÉCNICO DE ESTA SESIÓN (si se traba, guialo con estos pasos exactos, sin jerga): ${t.titulo} — ${t.pasos.join(' | ')} · SI FALLA: ${t.siFalla}`).join('')
     : '';
   return `META ${pendiente.meta_codigo}: ${meta.titulo} (Pilar ${pendiente.pilar_numero} — ${pilar?.titulo})${protocolo}${guionVideo}${tutorial}`;
 }
@@ -171,8 +171,8 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
   const nivel = perfil.nivel_avatar ?? 1;
   const nombreNivel = NIVEL_NOMBRES[nivel as 1 | 2 | 3 | 4 | 5];
   // Lote D: el avatar del sanador ajusta el tono del Mentor
-  let avatarSanador = 'A';
-  try { avatarSanador = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ }
+  let avatarSanador = (perfil as { avatar_tipo?: string }).avatar_tipo ?? 'A';
+  if (avatarSanador === 'A') { try { avatarSanador = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ } }
   const contextoAvatar = avatarSanador === 'B'
     ? '\n\nAVATAR DEL SANADOR — ESTABLECIDO: este sanador YA tiene años de práctica, marca y un método propio (aunque sin nombre). NO le hables como principiante ni le expliques lo básico. Tu trabajo con él es ORDENAR y ponerle nombre a lo que ya hace hace años, no enseñarle desde cero. Reconocé su experiencia. Su dolor es el TECHO (está estancado, no quebrado).'
     : '\n\nAVATAR DEL SANADOR — EN CONSTRUCCIÓN: este sanador todavía no tiene un método claro ni sistema. Acompañalo a construir desde sus fortalezas, paso a paso, sin abrumar. Su dolor es el PRESENTE (agenda llena, cuenta vacía).';

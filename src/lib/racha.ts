@@ -59,9 +59,17 @@ export function registrarSesionCompletada(): void {
  * El arg fechaInicio se acepta por compatibilidad; ya no se usa (todo es calendario real).
  */
 export function calcularRacha(_fechaInicio?: string | null): number {
-  const d = leer();
-  if (d.fechas.length === 0) return 0;
-  const set = new Set(d.fechas);
+  return calcularRachaDesdeFechas(leer().fechas);
+}
+
+/**
+ * La lógica PURA de la racha — compartida por el cliente (localStorage/DB) y
+ * el Admin (fecha_completada de hoja_de_ruta). UNA definición en toda la app:
+ * días hábiles reales, finde libre, gracia de 1 día hábil.
+ */
+export function calcularRachaDesdeFechas(fechas: string[]): number {
+  if (fechas.length === 0) return 0;
+  const set = new Set(fechas.map((f) => f.slice(0, 10)));
   let racha = 0;
   let graciaUsada = false;
   const cursor = new Date();

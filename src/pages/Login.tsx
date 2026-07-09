@@ -62,11 +62,11 @@ export default function Login({ onLogin }: LoginProps) {
             <Stethoscope className="w-8 h-8 text-[#080808]" />
           </div>
           <h1 className="text-2xl font-light text-[#F2EFE9] tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Clínica Digital</h1>
-          <p className="text-sm text-[#F2EFE9]/40 mt-1">Programa de 90 días</p>
+          <p className="text-sm text-[#F2EFE9]/40 mt-1">El dojo de tu práctica · 90 días</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#1A1917] border border-[rgba(232,150,46,0.12)] rounded-2xl p-8 backdrop-blur-sm">
+        <div className="card-ios p-8 backdrop-blur-sm">
           <h2 className="text-lg font-medium text-[#F2EFE9] mb-6">Iniciar sesión</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">

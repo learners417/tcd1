@@ -89,3 +89,8 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
 export function getTutorial(codigo: string): TutorialTecnico | null {
   return TUTORIALES[codigo] ?? null;
 }
+
+/** Devuelve TODOS los tutoriales de un paso (P4.5 tiene pixel Y agente). */
+export function getTutoriales(codigo: string): TutorialTecnico[] {
+  return Object.values(TUTORIALES).filter((t) => t.codigo === codigo);
+}

@@ -172,6 +172,45 @@ FORMATO DEL PROMPT:
 Devolveme el prompt listo para copiar.`;
 }
 
+
+/** Parsea el output de un carrusel en slides (Slide 1: ... / SLIDE 1 ...). */
+function parseSlides(texto: string): { n: number; contenido: string }[] {
+  const partes = texto.split(/(?:^|\n)\s*(?:\*\*)?(?:Slide|SLIDE)\s*(\d+)\s*(?:\*\*)?\s*[:·—-]?\s*/);
+  const slides: { n: number; contenido: string }[] = [];
+  for (let i = 1; i < partes.length; i += 2) {
+    const n = parseInt(partes[i], 10);
+    const contenido = (partes[i + 1] ?? '').trim().replace(/\*\*/g, '');
+    if (n >= 1 && n <= 12 && contenido) slides.push({ n, contenido });
+  }
+  return slides;
+}
+
+/** Las 10 tarjetas estilo Instagram — el carrusel VISTO, no leído. */
+function CarruselPreview({ texto }: { texto: string }) {
+  const slides = parseSlides(texto);
+  if (slides.length < 3) return null;
+  return (
+    <div className="mb-6">
+      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-3">Así se ve tu carrusel</p>
+      <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
+        {slides.map((s) => (
+          <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
+            <span className="absolute top-3 right-3 text-[10px] font-bold text-[#E8962E]/60 num-tab">{s.n}/{slides.length}</span>
+            <div className="flex-1 flex items-center">
+              <p className={`leading-snug text-[#F2EFE9] ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-[#F2EFE9]/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
+                {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
+              </p>
+            </div>
+            {s.n === slides.length && <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] mt-2">→ Tu llamado a la acción</p>}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-[#F2EFE9]/35 italic mt-1">Deslizá para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+    </div>
+  );
+}
+
 export default function CreadorContenido({ userId, perfil, setCurrentPage }: CreadorContenidoProps) {
   const [tipo, setTipo] = useState<TipoPieza>('post');
   const [nivel, setNivel] = useState<NivelAwareness>('N1');
@@ -530,8 +569,11 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
               </div>
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/90 leading-relaxed prose-headings:text-[#E8962E] prose-strong:text-[#F2EFE9] prose-strong:font-bold">
-              <Markdown>{output}</Markdown>
+            <div>
+              {tipo === 'carrusel' && <CarruselPreview texto={output} />}
+              <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/90 leading-relaxed prose-headings:text-[#E8962E] prose-strong:text-[#F2EFE9] prose-strong:font-bold">
+                <Markdown>{output}</Markdown>
+              </div>
             </div>
           )}
         </div>

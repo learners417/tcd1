@@ -240,14 +240,21 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
         <div className="space-y-3">
           {assets.length > 0 ? (
             <>
-              <div className="relative rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)] bg-black/30 flex items-center justify-center">
+              {/* Lote 5 · EL MOCKUP DE FEED: tu anuncio como lo verá el mundo */}
+              <div className="rounded-2xl border border-[rgba(232,150,46,0.14)] bg-[#0D0C0B] overflow-hidden" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4B65C] to-[#E8962E] flex items-center justify-center text-[#080808] text-xs font-bold">Tú</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-[#F2EFE9] truncate">Tu consulta profesional</p>
+                    <p className="text-[10px] text-[#F2EFE9]/40">Publicidad · Sugerido para ti</p>
+                  </div>
+                  <span className="text-[#F2EFE9]/30 text-lg leading-none">···</span>
+                </div>
                 <img
                   src={displayUrl(assets[activeSlide])}
                   alt={`Slide ${activeSlide + 1}`}
-                  className="w-full h-auto max-h-[80vh] object-contain"
+                  className="w-full h-auto max-h-[60vh] object-contain bg-black/40"
                 />
-
-                {/* Overlay de progreso cuando regeneramos/editamos */}
                 {busy && (
                   <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 text-[#E8962E]">
                     <Loader2 className="w-8 h-8 animate-spin" />

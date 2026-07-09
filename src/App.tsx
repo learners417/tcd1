@@ -17,7 +17,6 @@ import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
 import ManualNegocio from './pages/ManualNegocio';
 import ADN from './pages/ADN';
-import Plan from './pages/Plan';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
@@ -164,6 +163,7 @@ export default function App() {
 
       if (!error && data) {
         setSupabaseProfile(data as SupabaseProfile);
+        try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
         syncProfileToLocalStorage(data as SupabaseProfile);
         const p: Profile = {
           nombre: data.nombre,
@@ -418,7 +418,6 @@ export default function App() {
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-            {currentPage === 'plan' && <Plan perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} />}
             {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
             {currentPage === 'agentes' && (

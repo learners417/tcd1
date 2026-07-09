@@ -771,7 +771,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       {/* ── Notificación de celebración ── */}
       {celebracion && (
-        <div className="fixed top-6 right-6 z-50 bg-[#E8962E]/90 backdrop-blur text-[#080808] text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
+        <div className="fade-rise fixed top-6 right-6 z-50 bg-[#E8962E]/90 backdrop-blur text-[#080808] text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
           {celebracion}
         </div>
       )}
@@ -780,12 +780,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       <div className="card-panel p-6 rounded-2xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl text-[#F2EFE9] flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-              <MapIcon className="w-7 h-7 text-[#E8962E]" /> Hoja de Ruta
+            <h1 className="text-2xl sm:text-3xl text-[#F2EFE9] flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <MapIcon className="w-7 h-7 text-[#E8962E]" /> El Camino
             </h1>
         {(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return <div className="mt-3 max-w-sm"><CintaCinturon cinturon={c} variante="linea" /></div>; } catch { return null; } })()}
             <p className="text-base text-[#F2EFE9]/60 mt-1">
-              Método CLINICA · 90 días · 4 fases · Objetivo: $10.000 USD
+              Método CLINICA · 7 etapas · 90 días · Objetivo: $10.000 USD
             </p>
           </div>
           <div className="shrink-0 text-right">
@@ -803,6 +803,39 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             <p className="text-xs text-[#F2EFE9]/40">Nivel {nivel} de 5</p>
           </div>
         </div>
+
+        {/* ─── TU SESIÓN DE HOY · la tarjeta que grita ─── */}
+        {(() => {
+          try {
+            const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+            const done = new Set<string>(saved ? JSON.parse(saved) : []);
+            let hoy: { pilar: number; codigo: string; titulo: string; tiempo?: string } | null = null;
+            outer: for (const pil of SEED_ROADMAP_V2) {
+              for (const m of pil.metas) {
+                if (!done.has(`${pil.numero}-${m.codigo}`)) { hoy = { pilar: pil.numero, codigo: m.codigo, titulo: m.titulo, tiempo: (m as { tiempo_estimado?: string }).tiempo_estimado }; break outer; }
+              }
+            }
+            if (!hoy) return null;
+            const esFinde = [0, 6].includes(new Date().getDay());
+            return (
+              <div className="card-ios p-5 sm:p-6 mb-6" style={{ borderColor: 'rgba(232,150,46,0.35)', background: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02))' }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima sesión' : 'Tu sesión de hoy'}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl sm:text-2xl font-light text-[#F2EFE9] leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{hoy.titulo}</p>
+                    <p className="text-xs text-[#F2EFE9]/45 mt-1">{hoy.codigo}{hoy.tiempo ? ` · ${hoy.tiempo}` : ''}</p>
+                  </div>
+                  <button
+                    onClick={() => { setPilarAbierto(hoy!.pilar); setActiveMeta(hoy!.codigo); setTimeout(() => document.getElementById(`meta-${hoy!.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); }}
+                    className="btn-ios-primary px-7 py-3.5 text-sm shrink-0 w-full sm:w-auto"
+                  >
+                    COMENZAR →
+                  </button>
+                </div>
+              </div>
+            );
+          } catch { return null; }
+        })()}
 
         {/* Barra de progreso global */}
         <div className="space-y-1.5">
@@ -1057,7 +1090,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                 const BadgeIcon = badge.icon;
 
                 return (
-                  <div key={meta.codigo}>
+                  <div key={meta.codigo} id={`meta-${meta.codigo}`}>
                     <div
                       onClick={() => {
                         if (!unlocked) return;

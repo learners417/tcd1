@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getGuion } from '../../lib/guionesVideos';
 import { Play, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 
@@ -54,13 +55,29 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             className="absolute inset-0 w-full h-full"
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111110] px-6 text-center">
-            <Play className="w-12 h-12 text-[#E8962E]/50 mb-3" />
-            <p className="text-sm text-[#F2EFE9]/70">Este contenido llega pronto</p>
-            <p className="text-xs text-[#F2EFE9]/45 mt-2 leading-relaxed max-w-sm">
-              Mientras tanto, tu Mentor te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
-            </p>
-          </div>
+          (() => {
+            const guion = getGuion(meta.codigo);
+            if (guion?.esencia) {
+              return (
+                <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-[#141311] to-[#0B0A09] p-6 sm:p-8">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-4">La lección de hoy</p>
+                  <p className="text-base sm:text-lg leading-relaxed text-[#F2EFE9]/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                    {guion.esencia}
+                  </p>
+                  <p className="text-[10px] text-[#F2EFE9]/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: preguntale lo que quieras.</p>
+                </div>
+              );
+            }
+            return (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111110] px-6 text-center">
+                <Play className="w-12 h-12 text-[#E8962E]/50 mb-3" />
+                <p className="text-sm text-[#F2EFE9]/70">Este contenido llega pronto</p>
+                <p className="text-xs text-[#F2EFE9]/45 mt-2 leading-relaxed max-w-sm">
+                  Mientras tanto, tu Mentor te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
+                </p>
+              </div>
+            );
+          })()
         )}
       </div>
 

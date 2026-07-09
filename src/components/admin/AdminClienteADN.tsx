@@ -231,7 +231,6 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
       value_path: fieldRef.valuePath,
     };
     // eslint-disable-next-line no-console
-    console.log('[admin_update_adn_field] llamando con', rpcArgs);
     try {
       const { error, data } = await supabase.rpc('admin_update_adn_field', rpcArgs);
       if (error) {
@@ -240,7 +239,6 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
         throw error;
       }
       // eslint-disable-next-line no-console
-      console.log('[admin_update_adn_field] OK:', data);
       toast.success('Campo actualizado');
       onSaved();
       onClose();

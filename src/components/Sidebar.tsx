@@ -65,18 +65,18 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
-        { id: 'plan', icon: Target, label: 'Mi Plan' },
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'adn', icon: Dna, label: 'ADN del Negocio' },
+        { id: 'coach', icon: MessageSquare, label: 'Mentor IA' },
+        { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 },
       ]
     },
     {
       title: 'HERRAMIENTAS',
       items: [
-        { id: 'coach', icon: MessageSquare, label: 'Mentor IA' },
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
-        { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 }, // G4: el chat con el equipo, habilitado
         { id: 'biblioteca', icon: Library, label: 'El Método' },
+        { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
         { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
         { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },

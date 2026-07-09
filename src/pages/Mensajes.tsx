@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Mic, Shield } from 'lucide-react';
+import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Paperclip, Shield } from 'lucide-react';
 import { supabase, isSupabaseReady, type Mensaje } from '../lib/supabase';
 import { notificarAdminsMensaje } from '../lib/notifications';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ interface MsgLocal {
   isMe: boolean;
   channelId: string;
   archivoUrl?: string;
-  tipoArchivo?: 'imagen' | 'audio';
+  tipoArchivo?: 'imagen' | 'audio' | 'archivo';
 }
 
 const MOCK_MESSAGES: MsgLocal[] = [
@@ -68,6 +68,21 @@ function avatarColor(name: string): string {
   return colors[hash % colors.length];
 }
 
+
+/** Convierte las URLs del texto en enlaces clickeables (azul, pestaña nueva). */
+function Linkified({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^https?:\/\//.test(p)
+          ? <a key={i} href={p} target="_blank" rel="noreferrer" className="text-[#60A5FA] underline underline-offset-2 hover:text-[#93C5FD] break-all">{p}</a>
+          : <span key={i}>{p}</span>
+      )}
+    </>
+  );
+}
+
 export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   const myName = (() => { try { return JSON.parse(localStorage.getItem('tcd_profile') || '{}').nombre || 'Yo'; } catch { return 'Yo'; } })();
   const myAvatarUrl = localStorage.getItem('tcd_avatar') || '';
@@ -81,7 +96,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
@@ -266,14 +281,14 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
     }
   };
 
-  const handleUploadFile = async (file: File, tipo: 'imagen' | 'audio') => {
+  const handleUploadFile = async (file: File, tipo: 'imagen' | 'archivo') => {
     if (!isSupabaseReady() || !supabase || !userId) {
       toast.error('Conectá Supabase para subir archivos');
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'mp3');
+      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'file');
       const path = `${userId}/${Date.now()}.${ext}`;
       const { data, error } = await supabase.storage
         .from('mensajes-archivos')
@@ -383,7 +398,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-black/10 min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-black/10 min-w-0">
         {/* Header */}
         <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between px-6 bg-[#E8962E]/5 shrink-0">
           <div className="flex items-center gap-3">
@@ -413,7 +428,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             </div>
           ) : (
             activeMessages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 items-end max-w-[80%] ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
+              <div key={msg.id} className={`flex gap-3 items-end max-w-[88%] sm:max-w-[80%] ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold border overflow-hidden ${
                   msg.isMe
@@ -459,11 +474,13 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                         onClick={() => window.open(msg.archivoUrl)}
                       />
                     )}
-                    {msg.tipoArchivo === 'audio' && msg.archivoUrl && (
-                      <audio controls src={msg.archivoUrl} className="w-full mb-2 rounded-lg" />
+                    {(msg.tipoArchivo === 'archivo' || msg.tipoArchivo === 'audio') && msg.archivoUrl && (
+                      <a href={msg.archivoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-[#E8962E]/8 border border-[rgba(232,150,46,0.14)] hover:bg-[#E8962E]/15 transition-colors text-sm text-[#F2EFE9]/80">
+                        <Paperclip className="w-4 h-4 shrink-0" /> Ver archivo adjunto
+                      </a>
                     )}
                     {msg.content && (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap"><Linkified text={msg.content} /></p>
                     )}
                   </div>
                 </div>
@@ -476,8 +493,8 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         <div className="p-4 bg-[#E8962E]/5 border-t border-[rgba(232,150,46,0.12)] shrink-0">
           <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
-          <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'audio'); e.target.value = ''; }} />
+          <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'archivo'); e.target.value = ''; }} />
 
           <form className="flex items-end gap-2" onSubmit={handleSend}>
             <div className="flex flex-col gap-1 shrink-0">
@@ -485,9 +502,9 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
                 <Image className="w-4 h-4" />
               </button>
-              <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading} title="Subir audio"
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} title="Adjuntar archivo (PDF, imagen, documento)"
                 className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
-                <Mic className="w-4 h-4" />
+                <Paperclip className="w-4 h-4" />
               </button>
             </div>
 

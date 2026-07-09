@@ -56,7 +56,14 @@ const CAMINO: { p: number; c: string; d: number }[] = [
   { p: 7, c: 'P7.3', d: 85 }
 ];
 
-const esDescanso = (dia: number) => dia % 7 === 6 || dia % 7 === 0;
+// El descanso por CALENDARIO REAL: qué día de la semana ES el día N del
+// programa de ESTE cliente (no todos arrancan lunes). Espejo de la racha.
+const esDescansoReal = (fechaInicio: string, diaPrograma: number) => {
+  const f = new Date(fechaInicio);
+  f.setDate(f.getDate() + (diaPrograma - 1));
+  const wd = f.getDay();
+  return wd === 0 || wd === 6;
+};
 
 async function handler(req: any, res: any) {
   const cronSecret = process.env.CRON_SECRET;
@@ -83,10 +90,10 @@ async function handler(req: any, res: any) {
     // 3) las tareas completadas de todos (una query)
     const { data: tareas } = await admin
       .from('hoja_de_ruta')
-      .select('usuario_id, pilar_numero, meta_codigo, status');
+      .select('usuario_id, pilar_numero, meta_codigo, completada');
     const completadasPor = new Map<string, Set<string>>();
     for (const t of tareas ?? []) {
-      if (t.status !== 'completada') continue;
+      if (!t.completada) continue;
       if (!completadasPor.has(t.usuario_id)) completadasPor.set(t.usuario_id, new Set());
       completadasPor.get(t.usuario_id)!.add(t.meta_codigo);
     }
@@ -111,7 +118,7 @@ async function handler(req: any, res: any) {
       if (!proxima || proxima.d >= dia) continue;
       // atraso en días hábiles
       let atraso = 0;
-      for (let d = proxima.d + 1; d <= dia; d++) if (!esDescanso(d)) atraso++;
+      for (let d = proxima.d + 1; d <= dia; d++) if (!esDescansoReal(cli.fecha_inicio, d)) atraso++;
       if (atraso < 3) continue;
       const nombre = cli.nombre ?? 'Cliente';
       if (avisadosHoy.has(nombre)) continue;

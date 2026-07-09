@@ -23,6 +23,7 @@ import {
   Check,
   Circle,
   AlertCircle,
+  Dna,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -57,6 +58,30 @@ const SECCIONES_VIVAS = ADN_SCHEMA_V8
     }),
   }))
   .filter((s) => s.campos.length > 0);
+
+// ═══ Lote 3 · EL CONSOLIDADO POR ESENCIA ═══
+// El ADN se muestra por la esencia del negocio (lo que NO cambia con una
+// tendencia), no por fases internas. 9 bloques, mapeados a los campos vivos.
+const ESENCIA_DEF: { codigo: string; titulo: string; sub: string; codigos: string[] }[] = [
+  { codigo: 'E1', titulo: 'Tu Historia', sub: 'Quién sos — en 30 segundos', codigos: ['ID.historia_corta_50'] },
+  { codigo: 'E2', titulo: 'Tu Propósito', sub: 'Para qué hacés lo que hacés', codigos: ['ID.proposito_frase'] },
+  { codigo: 'E3', titulo: 'Tu Legado', sub: 'Lo que queda cuando no estés', codigos: ['ID.legado_declaracion'] },
+  { codigo: 'E4', titulo: 'Tu Nicho', sub: 'A quién servís mejor', codigos: ['IRR.nicho', 'IRR.micronicho'] },
+  { codigo: 'E5', titulo: 'Tus Avatares', sub: 'Las personas reales de tu nicho', codigos: ['IRR.avatar_demografia', 'IRR.avatar_psicografia', 'IRR.avatar_conexion_historia'] },
+  { codigo: 'E6', titulo: 'La Matriz compartida', sub: 'El infierno, los obstáculos y el cielo que tus avatares comparten', codigos: ['IRR.matriz_a_infierno', 'IRR.matriz_b_obstaculos', 'IRR.matriz_c_cielo'] },
+  { codigo: 'E7', titulo: 'Tu Método único', sub: 'Las siglas — cada letra, un paso', codigos: ['IRR.metodo_nombre', 'IRR.metodo_pasos'] },
+  { codigo: 'E8', titulo: 'Tu Escalera de Ofertas', sub: 'Del imán a lo premium', codigos: ['NEG.lead_magnet', 'NEG.oferta_ultralow', 'NEG.oferta_low', 'NEG.oferta_mid', 'NEG.oferta_high'] },
+  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Cómo te encuentran tus pacientes', codigos: ['INF.landing_copy_completo', 'INF.validacion_organica', 'IRR.puv'] },
+];
+const _todosCampos = ADN_SCHEMA_V8.flatMap((sec) => sec.campos);
+const SECCIONES_ESENCIA = ESENCIA_DEF.map((e) => ({
+  codigo: e.codigo as unknown as ADNSeccionCodigo,
+  titulo: e.titulo,
+  subtitulo: e.sub,
+  pilarRange: e.sub,
+  campos: e.codigos.map((c) => _todosCampos.find((f) => f.codigo === c)).filter(Boolean) as typeof _todosCampos,
+})).filter((sec) => sec.campos.length > 0);
+
 import { PAISES } from '../lib/vozLocalizada';
 import CustomSelect from '../components/CustomSelect';
 import { toast } from 'sonner';
@@ -110,7 +135,7 @@ interface TarjetaSeccionProps {
 }
 
 function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccionProps) {
-  const Icon = ICONOS_SECCION[seccion.codigo];
+  const Icon = ICONOS_SECCION[seccion.codigo] ?? Dna;
   const { completos, total, porcentaje } = calcularCompletitudSeccion(perfil, seccion);
 
   return (
@@ -328,7 +353,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
           ADN del Negocio
         </h1>
-        <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
+        <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Tu ADN no se edita acá — <strong className="text-[#F2EFE9]/75">se construye desde El Camino</strong>, ejercicio a ejercicio. Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
         <p className="text-[#F2EFE9]/60 max-w-2xl">
           <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
           tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.
@@ -388,7 +413,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
 
       {/* Secciones */}
       <div className="space-y-4">
-        {SECCIONES_VIVAS.map((seccion) => (
+        {SECCIONES_ESENCIA.map((seccion) => (
           <TarjetaSeccion
             key={seccion.codigo}
             seccion={seccion}
