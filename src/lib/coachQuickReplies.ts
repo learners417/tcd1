@@ -27,19 +27,19 @@ export interface CoachQuickReplyContext {
 }
 
 const FIJOS: CoachQuickReply[] = [
-  { id: 'continuar', icon: '💬', label: 'Continuar nuestra última conversación' },
-  { id: 'progreso', icon: '📈', label: 'Ver mi progreso global' },
-  { id: 'duda', icon: '❓', label: 'Tengo una duda · te cuento' },
+  { id: 'continuar', icon: '💬', label: 'Seguimos donde quedamos' },
+  { id: 'progreso', icon: '📈', label: '¿Cómo vengo? Mi progreso real' },
+  { id: 'duda', icon: '❓', label: 'Tengo una duda' },
 ];
 
 const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
   P0: [
-    { id: 'p0_objetivo', icon: '🎯', label: 'Ayudame a definir mi objetivo' },
+    { id: 'p0_objetivo', icon: '🎯', label: 'Definamos mi objetivo' },
     { id: 'p0_punto_partida', icon: '📍', label: 'Ver mi punto de partida real' },
     { id: 'p0_app', icon: '🗺', label: '¿Cómo se usa esta app?' },
   ],
   P1: [
-    { id: 'p1_revisar_historia', icon: '✍️', label: 'Revisemos mi historia · ¿suena auténtica?' },
+    { id: 'p1_revisar_historia', icon: '✍️', label: 'Revisa mi historia — sin filtro' },
     { id: 'p1_trabada_historia', icon: '🤔', label: 'Estoy trabada con mi historia' },
     { id: 'p1_historia_contenido', icon: '🎬', label: '¿Cómo uso mi historia en contenido?' },
   ],

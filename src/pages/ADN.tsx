@@ -71,7 +71,7 @@ const ESENCIA_DEF: { codigo: string; titulo: string; sub: string; codigos: strin
   { codigo: 'E6', titulo: 'La Matriz compartida', sub: 'El infierno, los obstáculos y el cielo que tus avatares comparten', codigos: ['IRR.matriz_a_infierno', 'IRR.matriz_b_obstaculos', 'IRR.matriz_c_cielo'] },
   { codigo: 'E7', titulo: 'Tu Método único', sub: 'Las siglas — cada letra, un paso', codigos: ['IRR.metodo_nombre', 'IRR.metodo_pasos'] },
   { codigo: 'E8', titulo: 'Tu Escalera de Ofertas', sub: 'Del imán a lo premium', codigos: ['NEG.lead_magnet', 'NEG.oferta_ultralow', 'NEG.oferta_low', 'NEG.oferta_mid', 'NEG.oferta_high'] },
-  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Cómo te encuentran tus pacientes', codigos: ['INF.landing_copy_completo', 'INF.validacion_organica', 'IRR.puv'] },
+  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Los activos que venden por ti — se afinan, no se reinventan', codigos: ['IRR.puv', 'INF.anuncios_meta_6_creativos', 'INF.vsl_script', 'INF.landing_copy_completo', 'CAP.protocolo_entrega'] },
 ];
 const _todosCampos = ADN_SCHEMA_V8.flatMap((sec) => sec.campos);
 const SECCIONES_ESENCIA = ESENCIA_DEF.map((e) => ({

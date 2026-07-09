@@ -610,8 +610,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
-        setCelebracion(`Meta completada: ${meta.titulo}`);
-        setTimeout(() => setCelebracion(null), 3500);
+        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Podés adelantar.`);
+        setTimeout(() => setCelebracion(null), 5000);
       }
 
       // Sincronizar con Supabase
@@ -680,7 +680,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       localStorage.setItem(`tcd_herramienta_${meta.herramienta_id}`, outputTexto);
     }
     setCelebracion(`Documento guardado: ${meta.titulo}`);
-    setTimeout(() => setCelebracion(null), 3500);
+    setTimeout(() => setCelebracion(null), 5000);
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
       supabase.from('hoja_de_ruta').upsert(
@@ -739,8 +739,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
-      setCelebracion(`Meta completada: ${meta.titulo}`);
-      setTimeout(() => setCelebracion(null), 3500);
+      setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Podés adelantar.`);
+      setTimeout(() => setCelebracion(null), 5000);
     }
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
@@ -819,11 +819,11 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             const esFinde = [0, 6].includes(new Date().getDay());
             return (
               <div className="card-ios p-5 sm:p-6 mb-6" style={{ borderColor: 'rgba(232,150,46,0.35)', background: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02))' }}>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima sesión' : 'Tu sesión de hoy'}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                   <div className="flex-1 min-w-0">
                     <p className="text-xl sm:text-2xl font-light text-[#F2EFE9] leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{hoy.titulo}</p>
-                    <p className="text-xs text-[#F2EFE9]/45 mt-1">{hoy.codigo}{hoy.tiempo ? ` · ${hoy.tiempo}` : ''}</p>
+                    <p className="text-xs text-[#F2EFE9]/45 mt-1">{hoy.codigo} · <span className="text-[#F4B65C]">{hoy.tiempo ?? '~20 min'}</span> · máximo poder en tiempo reducido</p>
                   </div>
                   <button
                     onClick={() => { setPilarAbierto(hoy!.pilar); setActiveMeta(hoy!.codigo); setTimeout(() => document.getElementById(`meta-${hoy!.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); }}
