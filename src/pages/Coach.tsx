@@ -410,7 +410,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden anímate-in fade-in duration-500 border border-[#E8962E]/10">
+    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-[#E8962E]/10">
       <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-[#E8962E]/[0.03] flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
@@ -489,15 +489,15 @@ export default function Coach({ userId }: { userId?: string }) {
                   ) : (
                     <span className="flex gap-1.5 items-center py-1">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] anímate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </span>

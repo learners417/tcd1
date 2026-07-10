@@ -332,7 +332,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   const userNombre = myName;
 
   return (
-    <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden anímate-in fade-in duration-500">
+    <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden animate-in fade-in duration-500">
       {/* Sidebar Channels */}
       <div className="w-72 border-r border-[rgba(232,150,46,0.12)] bg-black/20 flex flex-col shrink-0">
         <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
@@ -419,7 +419,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {loadingMsgs ? (
             <div className="flex items-center justify-center py-10">
-              <div className="w-5 h-5 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full anímate-spin" />
+              <div className="w-5 h-5 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full animate-spin" />
             </div>
           ) : activeMessages.length === 0 ? (
             <div className="text-center py-10">
@@ -525,7 +525,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             <button type="submit" disabled={!input.trim() || uploading}
               className="w-[52px] h-[52px] shrink-0 rounded-xl bg-[#E8962E] hover:bg-[#E8962E] disabled:opacity-50 flex items-center justify-center text-[#F2EFE9] transition-colors shadow-lg shadow-[#E8962E]/20">
               {uploading
-                ? <div className="w-4 h-4 border-2 border-[rgba(232,150,46,0.18)] border-t-white rounded-full anímate-spin" />
+                ? <div className="w-4 h-4 border-2 border-[rgba(232,150,46,0.18)] border-t-white rounded-full animate-spin" />
                 : <Send className="w-5 h-5 ml-1" />
               }
             </button>

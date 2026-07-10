@@ -107,7 +107,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full anímate-spin" />
+        <div className="w-8 h-8 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full animate-spin" />
       </div>
     );
   }

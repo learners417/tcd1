@@ -264,7 +264,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
   const nombreDisplay = data.profile.nombre || 'bienvenida';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
       {/* ZONA A — Header contextual */}
       <div className="relative overflow-hidden card-panel p-8 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">
@@ -334,13 +334,29 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-[rgba(242,239,233,0.07)] bg-black/20 px-4 py-3">
                   <span className="text-xl">⏰</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por tú <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
+                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por ti <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
                     <div className="h-1 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden mt-1.5">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(100, horas * 10)}%`, background: 'linear-gradient(90deg, #5A9170, #3D6B4F)' }} />
                     </div>
                   </div>
                 </div>
               );
+            })()}
+
+            {/* 📔 El cierre del día — el diario es parte del método */}
+            {(() => {
+              try {
+                const hoyStr = new Date().toISOString().slice(0, 10);
+                const raw = localStorage.getItem('tcd_diario_v3');
+                const entradas = raw ? JSON.parse(raw) : [];
+                const hoyHecho = Array.isArray(entradas) && entradas.some((e: { fecha?: string }) => String(e.fecha ?? '').slice(0, 10) === hoyStr);
+                if (hoyHecho) return null;
+                return (
+                  <button onClick={() => setCurrentPage('diario')} className="mt-3 w-full text-left rounded-xl border border-[rgba(232,150,46,0.18)] bg-[#E8962E]/5 hover:bg-[#E8962E]/10 px-4 py-2.5 transition-colors">
+                    <p className="text-[12px] text-[#F2EFE9]/75">📔 <span className="font-medium text-[#F4B65C]">Tu cierre del día</span> · 5 min — todavía pendiente. El diario alimenta a tu Mentor.</p>
+                  </button>
+                );
+              } catch { return null; }
             })()}
 
             {/* Las horas del viaje: el esfuerzo también se ve */}

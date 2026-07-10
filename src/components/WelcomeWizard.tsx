@@ -167,7 +167,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP 1: PASSWORD ── */}
         {step === 'password' && (
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-8">
               <div className="w-12 h-12 rounded-2xl bg-[#E8962E] flex items-center justify-center mb-5 shadow-[0_0_20px_rgba(232,150,46,0.18)]">
                 <LockKeyhole className="w-5 h-5 text-[#080808]" />
@@ -235,14 +235,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               disabled={savingPwd || newPassword.length < 8 || newPassword !== confirmPassword}
               className="w-full mt-6 py-3.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#080808] text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#E8962E]/20"
             >
-              {savingPwd ? <Loader2 className="w-4 h-4 anímate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
+              {savingPwd ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
             </button>
           </div>
         )}
 
         {/* ── STEP 2: PROFILE ── */}
         {step === 'profile' && (
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[#E8962E] flex items-center justify-center mb-5 shadow-[0_0_20px_rgba(232,150,46,0.18)]">
                 <UserCircle className="w-5 h-5 text-[#080808]" />
@@ -368,7 +368,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 disabled={savingProfile}
                 className="flex-1 py-3 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#080808] text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#E8962E]/20"
               >
-                {savingProfile ? <Loader2 className="w-4 h-4 anímate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
+                {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
               </button>
             </div>
           </div>
@@ -439,7 +439,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         )}
 
         {step === 'welcome' && (
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl text-center anímate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl text-center animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="w-16 h-16 rounded-2xl bg-[#22C55E] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
               <CheckCircle2 className="w-8 h-8 text-[#F2EFE9]" />
             </div>
@@ -478,7 +478,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP: EL PACTO ── */}
         {step === 'pacto' && (
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.18)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.18)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="text-center mb-6">
               <p className="text-4xl mb-3">🥋</p>
               <h1 className="text-2xl font-semibold text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El Pacto</h1>
@@ -534,7 +534,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         {/* ── STEP 4: GUIDE ── */}
         {step === 'guide' && (
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl anímate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-6 text-center">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                 <Rocket className="w-5 h-5 text-[#F2EFE9]" />

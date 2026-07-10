@@ -87,7 +87,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'blanco',
     hito_mensaje: '🥋 Cinturón BLANCO — la semilla está plantada. Tu camino de 90 días empezó.',
     hito_tipo: 'milestone',
-    mentor_pregunta: '¿Qué versión de tú se termina hoy?',
+    mentor_pregunta: '¿Qué versión de ti se termina hoy?',
     metas: [
       {
         codigo: 'P0.0',
@@ -99,7 +99,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 1,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P0_0',
+        video_youtube_id: 'v154pbAd3Hw',
         coach_instruccion: 'MODO VIDEO-FALLBACK: si el video no está disponible, contale en 5 min: (1) la promesa — 10 pacientes de tu precio digno en 90 días y el SISTEMA para repetirlo; (2) las 4 fases — Sanar el Dinero, Tu Protocolo, Captación y Ventas, Servicio y Escala; (3) los cinturones — se ganan por hitos REALES verificados, como una planta que crece de semilla a árbol; (4) la regla — una tarea por día, 45-60 min; (5) el requisito — presupuesto de publicidad de ~$400-700 en los 90 días, que se autofinancia desde tu primera venta. Entregale el libro Sanadores Libres.',
       },
       {
@@ -300,7 +300,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 10,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P2_1',
+        video_youtube_id: '3QVjYzWNM7M',
         coach_instruccion: 'MODO VIDEO-FALLBACK: contá en 5 min — el profesional promedio vende horas sueltas (commodity, se compara por precio); el director vende UN método con nombre propio (activo, se compara por resultado). La poda: una transformación, un protocolo de 3-7 pasos, un precio. Su método YA existe en lo que hace — esta semana lo documentamos, lo nombramos y lo empaquetamos.',
       },
       {
@@ -397,7 +397,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 15,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P3_1',
+        video_youtube_id: '_UjQtE4lNtk',
         coach_instruccion: 'MODO VIDEO-FALLBACK: la ecuación de valor de Hormozi en 5 min — valor = (resultado soñado × probabilidad percibida) ÷ (demora × esfuerzo). Su oferta debe subir los dos de arriba (transformación concreta + prueba) y bajar los dos de abajo (resultados visibles rápido + método que acompaña). Nadie compra sesiones: compran el después. Y la garantía no es riesgo — es el permiso que el paciente necesita para confiar.',
       },
       {
@@ -499,7 +499,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 19,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P9A_1',
+        video_youtube_id: 'ck2IVA9ZTzU',
         coach_instruccion: 'MODO VIDEO-FALLBACK: el circuito en 5 min — anuncio en Meta → clic abre WhatsApp → tu agente de IA (Meta Business Agent, nativo y gratis) responde al instante 24/7, hace las preguntas de filtro y agenda SOLO a los calificados → llamada → venta. Los datos: 55% de los leads llegan fuera de horario; 78% compra al primero que responde; responder en <5 min multiplica x21. Por eso el agente no es un lujo: ES el sistema. Los que hoy no califican van a tu Sala de Espera (canal) — nadie se pierde.',
       },
       {
@@ -527,7 +527,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Crea tu canal de WhatsApp "Sala de Espera" — ahí van los que hoy no califican: 1 mensaje semanal de valor, nadie se pierde',
           'PLAN B si el agente todavía no te aparece (Meta lo libera de a poco): mensaje de bienvenida con tus 3 preguntas + revisás 2 veces por día + pedí acceso desde la app de WhatsApp',
         ],
-        coach_instruccion: 'Si te pide el DOCUMENTO DE ENTRENAMIENTO de su agente: generáselo COMPLETO y listo para copiar, con este formato: (1) QUIÉN SOY — nombre, profesión y su línea de posicionamiento; (2) MI OFERTA — la transformación, qué incluye, duración, precio y garantía (de su adn_oferta_mid); (3) A QUIÉN SIRVO — su avatar (dolores y señales de su persona ideal); (4) LAS 3 PREGUNTAS DE CALIFICACIÓN con redacción exacta — dolor ("¿qué te está pasando?"), urgencia ("¿hace cuánto lo venís cargando?"), capacidad ("el programa es una inversión de $[precio] — si vemos que es para tú, ¿estás en condiciones de tomarla?"); (5) QUÉ HACER — a los calificados: ofrecerles el link de agenda; a los no calificados: invitarlos con calidez al canal Sala de Espera; (6) REGLAS — tono cálido y profesional, jamás dar consejos clínicos ni discutir tratamientos: toda conversación clínica se deriva al humano. Después verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el documento (pregúntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
+        coach_instruccion: 'Si te pide el DOCUMENTO DE ENTRENAMIENTO de su agente: generáselo COMPLETO y listo para copiar, con este formato: (1) QUIÉN SOY — nombre, profesión y su línea de posicionamiento; (2) MI OFERTA — la transformación, qué incluye, duración, precio y garantía (de su adn_oferta_mid); (3) A QUIÉN SIRVO — su avatar (dolores y señales de su persona ideal); (4) LAS 3 PREGUNTAS DE CALIFICACIÓN con redacción exacta — dolor ("¿qué te está pasando?"), urgencia ("¿hace cuánto lo venís cargando?"), capacidad ("el programa es una inversión de $[precio] — si vemos que es para ti, ¿estás en condiciones de tomarla?"); (5) QUÉ HACER — a los calificados: ofrecerles el link de agenda; a los no calificados: invitarlos con calidez al canal Sala de Espera; (6) REGLAS — tono cálido y profesional, jamás dar consejos clínicos ni discutir tratamientos: toda conversación clínica se deriva al humano. Después verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el documento (pregúntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
       },
       {
         codigo: 'P4.2',

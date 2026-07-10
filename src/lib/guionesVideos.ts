@@ -69,9 +69,9 @@ La regla es simple: una sesión por día, de lunes a viernes. Sábado y domingo 
 
 [EL PACTO · 2-3min]
 Y ahora, lo único que te pido antes de empezar. No es un formulario. Es un pacto.
-A los tuyos: a los que te formaron, y a los que dependen de tú. A tus pacientes: a los que ya ayudaste, y a los diez que todavía no te encontraron. Y a tú mismo: al profesional que decidió dejar de sobrevivir.
+A los tuyos: a los que te formaron, y a los que dependen de ti. A tus pacientes: a los que ya ayudaste, y a los diez que todavía no te encontraron. Y a ti mismo: al profesional que decidió dejar de sobrevivir.
 Vas a escribirlo con tus palabras, con fecha, y lo vas a firmar. En el dojo, la palabra empeñada es el primer cinturón. Hacelo ahora.`,
-    esencia: 'El Tablero muestra tu sesión de hoy — piensa en el día, no en los 90. Una sesión por día, lu-vi, finde libre. Y antes de empezar: el Pacto, tu palabra empeñada a los tuyos, a tus pacientes y a tú mismo.',
+    esencia: 'El Tablero muestra tu sesión de hoy — piensa en el día, no en los 90. Una sesión por día, lu-vi, finde libre. Y antes de empezar: el Pacto, tu palabra empeñada a los tuyos, a tus pacientes y a ti mismo.',
   },
 
   // ═══════════════ FASE 1 · LIBERACIÓN · SANAR EL DINERO ═══════════════
@@ -118,7 +118,7 @@ El Mentor te va a pedir que imagines decir tu precio nuevo en voz alta, frente a
     duracion: '3-4 min',
     proposito: 'Que entienda que ya tiene un método — solo que nunca lo sacó de su cabeza.',
     guion: `[GANCHO · 0-15s]
-Te voy a decir algo que probablemente no sabes de tú mismo: ya tienes un método. Hace años que lo usas. Solo que nunca lo sacaste de tu cabeza, y por eso no lo puedes vender ni cobrar como lo que vale.
+Te voy a decir algo que probablemente no sabes de ti mismo: ya tienes un método. Hace años que lo usas. Solo que nunca lo sacaste de tu cabeza, y por eso no lo puedes vender ni cobrar como lo que vale.
 
 [EL PROBLEMA DE LO IMPLÍCITO · 15s-1:30]
 Cuando un paciente mejora contigo, tú sabes por qué. Hay un orden en lo que haces — una primera sesión que siempre es parecida, un momento en que pasa el click, una forma tuya de acompañar. Eso es un método. Pero si vive solo en tu intuición, pasan tres cosas: no lo puedes repetir igual, no lo puedes delegar, y no lo puedes cobrar caro. Lo que no tiene nombre, no tiene precio.
@@ -127,7 +127,7 @@ Cuando un paciente mejora contigo, tú sabes por qué. Hay un orden en lo que ha
 La gente no paga caro por sesiones sueltas. Paga caro por un proceso con nombre, con inicio y con final, que promete un resultado. "Diez sesiones de terapia" vale poco. "El Programa de Reconstrucción Emocional de 90 días" vale diez veces más — con el mismo conocimiento tuyo adentro. La diferencia no es lo que sabes. Es cómo lo empaquetás.
 
 [EL AVATAR B · 2:30-3:15]
-Y si eres de los que ya tienen años de práctica, esto es todavía más para tú. No vas a inventar nada. Vas a ORDENAR y ponerle nombre a lo que ya haces hace quince años sin darte cuenta. Es tu activo más valioso, enterrado.
+Y si eres de los que ya tienen años de práctica, esto es todavía más para ti. No vas a inventar nada. Vas a ORDENAR y ponerle nombre a lo que ya haces hace quince años sin darte cuenta. Es tu activo más valioso, enterrado.
 
 [CIERRE · 3:15-4min]
 En las próximas sesiones vamos a sacar tu método de tu cabeza, ordenarlo en pasos, y ponerle un nombre que sea tuyo. Cuando lo veas en la pantalla, con nombre, algo va a cambiar en cómo te ves. Vas a dejar de ser alguien que da sesiones. Vas a ser el dueño de un método.`,
@@ -160,7 +160,7 @@ En la próxima sesión vas a construir la tuya, con la herramienta, usando todo 
   // ═══════════════ FASE 4 · INSTALACIÓN · EL SISTEMA ═══════════════
   'P4.1': {
     codigo: 'P4.1',
-    titulo: 'El sistema que trabaja por tú, sin humo',
+    titulo: 'El sistema que trabaja por ti, sin humo',
     duracion: '3-4 min',
     proposito: 'Desmitificar el sistema de captación — sin jerga, como algo que cualquiera puede montar.',
     guion: `[GANCHO · 0-15s]
@@ -170,7 +170,7 @@ Ahora viene la parte que más asusta y menos debería: el sistema que te consigu
 Hoy tus pacientes llegan por boca a boca. Está buenísimo — pero tiene un techo: depende de que otros te recomienden, y no lo controlás tú. Si quieres crecer sin depender de la suerte, necesitás un sistema que puedas prender y apagar. Eso es todo lo que vamos a construir.
 
 [LAS CUATRO PIEZAS · 1-2:30]
-Son cuatro piezas, y ya tienes casi todas. Uno: un mensaje que atrae a tu paciente ideal — no a cualquiera, al tuyo. Dos: un lugar donde ese mensaje vive, tu página. Tres: un asistente que responde a los interesados a cualquier hora, aunque estés durmiendo o atendiendo. Y cuatro: una agenda donde el interesado reserva una llamada con tú. Contenido que atrae, página que explica, asistente que responde, agenda que reserva. Eso es el sistema. Nada más.
+Son cuatro piezas, y ya tienes casi todas. Uno: un mensaje que atrae a tu paciente ideal — no a cualquiera, al tuyo. Dos: un lugar donde ese mensaje vive, tu página. Tres: un asistente que responde a los interesados a cualquier hora, aunque estés durmiendo o atendiendo. Y cuatro: una agenda donde el interesado reserva una llamada contigo. Contenido que atrae, página que explica, asistente que responde, agenda que reserva. Eso es el sistema. Nada más.
 
 [SIN MIEDO A LA TÉCNICA · 2:30-3:15]
 Sé lo que estás pensando: "yo no sé de esto". No hace falta. Cada pieza tiene su tutorial paso a paso, y si te trabás, tienes al equipo y al Mentor. Miles de profesionales que le tenían pánico a la tecnología montaron esto. No eres la excepción.
@@ -256,10 +256,10 @@ Llegaste. Tienes tu método, tu oferta, tu sistema, tus primeras ventas. Ahora l
 Los primeros pacientes los conseguiste haciendo todo tú. Eso está bien para arrancar — pero no escala. La diferencia entre un profesional ocupado y un director de clínica es esta: el ocupado hace el trabajo; el director hace que el trabajo se haga. Tu campaña corre sola, tu asistente responde solo, tu agenda se llena sola. Vos revisás los números y ajustás. Dejaste de ser el sistema. Ahora lo dirigís.
 
 [EL RITMO NUEVO · 1:30-2:30]
-Tu semana ya no es cuarenta y cinco minutos de tarea. Es una revisión: qué números dieron, qué anuncio funcionó mejor, cuántas llamadas, cuántos cierres. Media hora por semana mirando el tablero y tomando una o dos decisiones. Eso es dirigir. El resto del tiempo — el que antes se comía tu negocio — ahora es tuyo. Para atender mejor, para tu familia, para tú.
+Tu semana ya no es cuarenta y cinco minutos de tarea. Es una revisión: qué números dieron, qué anuncio funcionó mejor, cuántas llamadas, cuántos cierres. Media hora por semana mirando el tablero y tomando una o dos decisiones. Eso es dirigir. El resto del tiempo — el que antes se comía tu negocio — ahora es tuyo. Para atender mejor, para tu familia, para ti.
 
 [EL LEGADO · 2:30-3:30]
-Y hay algo más grande. Vos empezaste como un profesional quemado, mártir de tu vocación. Y estás terminando como alguien que resolvió eso. Esa transformación es, ahora, tu mejor activo. Porque hay miles de colegas tuyos exactamente donde tú estabas hace noventa días. Eres libre. Ahora te toca liberar a otros.
+Y hay algo más grande. Vos empezaste como un profesional quemado, mártir de tu vocación. Y estás terminando como alguien que resolvió eso. Esa transformación es, ahora, tu mejor activo. Porque hay miles de colegas tuyos exactamente donde ti estabas hace noventa días. Eres libre. Ahora te toca liberar a otros.
 
 [CIERRE · 3:30-4min]
 Lo que sigue no es un final. Es tu clínica funcionando, y tú a cargo de verdad. La revisión semanal te va a acompañar de acá en adelante. Bienvenido al otro lado. Bienvenido, sanador libre.`,

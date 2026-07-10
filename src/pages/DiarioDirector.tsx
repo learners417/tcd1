@@ -428,7 +428,7 @@ Devolvé SOLO este JSON:
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
       {/* Header */}
       <div className="flex justify-between items-end">
@@ -439,8 +439,19 @@ Devolvé SOLO este JSON:
           <p className="text-sm text-[#F2EFE9]/60 mt-1 flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5" />
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            <span className="text-[#F2EFE9]/30">· Día {getCurrentDay()}</span>
+            <span className="text-[#E8962E]/80 font-medium">· Día {getCurrentDay()} de 90</span>
+            {(() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                const hoyStr = new Date().toISOString().slice(0, 10);
+                const sesionHoy = localStorage.getItem('tcd_sesion_hoy_' + hoyStr);
+                if (sesionHoy) return <span className="text-[#F2EFE9]/40">· hoy trabajaste: <span className="text-[#F4B65C]">{sesionHoy}</span></span>;
+                void set;
+              } catch { /* noop */ }
+              return null;
+            })()}
           </p>
+          <p className="text-[11px] text-[#F2EFE9]/40 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas. El cierre del día es parte del método.</p>
         </div>
         <div className="flex items-center gap-3">
           {energiaPromedio !== null && (
@@ -473,7 +484,7 @@ Devolvé SOLO este JSON:
       {/* Resumen semanal */}
       {generandoResumen && (
         <div className="flex items-center gap-2 text-[#E8962E] bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-2xl p-4">
-          <Loader2 className="w-4 h-4 anímate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
       )}
@@ -711,7 +722,7 @@ Devolvé SOLO este JSON:
                 className="w-full py-3.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
-                  <><Loader2 className="w-4 h-4 anímate-spin" /> Guardando...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
                 ) : (
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
@@ -729,7 +740,7 @@ Devolvé SOLO este JSON:
         <div className="space-y-4">
           {loading && entries.length === 0 && (
             <div className="flex items-center gap-2 text-[#F2EFE9]/40 text-sm">
-              <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
+              <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (

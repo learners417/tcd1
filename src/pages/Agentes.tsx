@@ -82,7 +82,7 @@ El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
 · Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
 · Fase 4 — Servicio y Escala (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
 El progreso se mide en CINTURONES (taekwondo/planta): Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
-YA NO EXISTEN en el programa: la escalera de 5 ofertas, la Matriz A→B→C, la PUV como tarea, los pilares de Historia/Propósito/Legado, los "niveles del Sanador". NO pidas trabajar nada de eso. Si tu especialidad los mencionaba, adaptá el mismo entrenamiento a lo que SÍ existe: su método con nombre (P2), su oferta única (P3), su avatar (P2.3), su script W (P5.2).
+EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · los anuncios CTWA (P4.3-P4.4) · el anuncio follow-me (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
 TRATO: espejá el voseo o tuteo del usuario.
 === FIN DEL CONTEXTO VIGENTE ===`;
 
@@ -443,7 +443,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
   // ─── Vista principal: 3 categorías con cards ───────────────────────────────
   if (!agenteActivo) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 pb-12 anímate-in fade-in duration-500">
+      <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
         <div>
           <h1 className="text-2xl font-light text-white flex items-center gap-2">
             <Bot className="w-6 h-6 text-[#E8962E]" /> Entrenadores IA
@@ -522,7 +522,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
   const autonomoActivo = snapshotActivo.current_level === 4;
 
   return (
-    <div className="w-full flex flex-col h-[calc(100vh-8rem)] anímate-in fade-in duration-300">
+    <div className="w-full flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-300">
       {/* Cabecera */}
       <div className="card-panel p-4 rounded-2xl mb-4 border border-[#E8962E]/20 bg-[#E8962E]/10">
         <div className="flex items-center justify-between">
@@ -533,7 +533,12 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Volver
             </button>
-            {IconActivo && <IconActivo className="w-6 h-6 text-[#E8962E]" />}
+            {(() => {
+              const ident = identidadDe(agenteActivo.id);
+              return ident ? (
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}>{ident.emoji}</div>
+              ) : (IconActivo && <IconActivo className="w-6 h-6 text-[#E8962E]" />);
+            })()}
             <div>
               <h2 className="text-sm font-medium text-[#E8962E] flex items-center gap-2">
                 {agenteActivo.titulo}
@@ -543,6 +548,9 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                   </span>
                 )}
               </h2>
+              {identidadDe(agenteActivo.id) && (
+                <p className="text-[11px] text-[#F2EFE9]/50 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
+              )}
               <p className="text-xs text-white/50">
                 Nivel {snapshotActivo.current_level} · {NIVEL_NOMBRE[snapshotActivo.current_level]} ·{' '}
                 {snapshotActivo.practice_count} prácticas
@@ -578,7 +586,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         {cargandoConversacion && (
           <div className="flex justify-start">
             <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
-              <Loader2 className="w-4 h-4 anímate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               Cargando conversación previa...
             </div>
           </div>
@@ -588,6 +596,18 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             key={i}
             className={`flex ${msg.rol === 'usuario' ? 'justify-end' : 'justify-start'}`}
           >
+            {msg.rol === 'agente' && !msg.contenido.includes('```') ? (
+              /* Burbujas humanas: el entrenador escribe en bloques, como una persona */
+              <div className="max-w-[85%] flex flex-col gap-2">
+                {msg.contenido.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
+                  <div key={pi} className="card-panel text-white/90 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                    <div className="prose prose-invert prose-sm max-w-none prose-p:my-0 prose-li:my-0.5 prose-strong:text-[#F4B65C] prose-code:text-[#E8962E] prose-code:bg-[#E8962E]/10 prose-code:px-1 prose-code:rounded">
+                      <Markdown>{parte}</Markdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.rol === 'usuario'
@@ -603,12 +623,13 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 msg.contenido
               )}
             </div>
+            )}
           </div>
         ))}
         {cargando && (
           <div className="flex justify-start">
             <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
-              <Loader2 className="w-4 h-4 anímate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               Pensando...
             </div>
           </div>
@@ -694,6 +715,25 @@ interface AgenteCardProps {
   onClick: () => void;
 }
 
+
+// ═══ LAS IDENTIDADES — cada entrenador con su mundo (ZIP humano) ═══
+// Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
+// 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
+const IDENTIDADES: Record<string, { emoji: string; frase: string; anillo: string }> = {
+  sofi:   { emoji: '🌷', frase: 'Te entreno a conversar con pacientes sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(244,114,182,0.35)' },
+  caro:   { emoji: '🎬', frase: 'El miedo a la cámara se entrena jugando. Conmigo grabas sin morir en el intento.', anillo: 'rgba(244,114,182,0.35)' },
+  vera:   { emoji: '✨', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(244,114,182,0.35)' },
+  ramiro: { emoji: '📊', frase: 'Tus números me emocionan. Medimos, ajustamos, escalamos — sin drama.', anillo: 'rgba(96,165,250,0.35)' },
+  lucas:  { emoji: '🔧', frase: 'Lo técnico sin sufrimiento. Paso a paso, clic a clic, hasta que funciona.', anillo: 'rgba(96,165,250,0.35)' },
+  bruno:  { emoji: '🌳', frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.', anillo: 'rgba(96,165,250,0.35)' },
+  diego:  { emoji: '🤝', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(232,150,46,0.40)' },
+  mateo:  { emoji: '✍️', frase: 'Hooks, guiones y contenido que suena a ti — cero humo, cero plantillas.', anillo: 'rgba(232,150,46,0.40)' },
+};
+const identidadDe = (agenteId: string) => {
+  const key = Object.keys(IDENTIDADES).find((k) => agenteId.includes(k));
+  return key ? IDENTIDADES[key] : null;
+};
+
 function AgenteCard({
   agente,
   snapshot,
@@ -724,17 +764,22 @@ function AgenteCard({
   return (
     <button onClick={onClick} className={className}>
       <div className="flex items-start gap-3 mb-3">
-        {IconComp && (
-          <IconComp
-            className={`w-6 h-6 shrink-0 ${
-              autonomo
-                ? 'text-emerald-300'
-                : unlocked
-                  ? 'text-[#E8962E]'
-                  : 'text-white/30'
-            }`}
-          />
-        )}
+        {(() => {
+          const ident = identidadDe(agente.id);
+          if (ident) {
+            return (
+              <div
+                className={`w-11 h-11 rounded-full flex items-center justify-center text-[22px] shrink-0 border-2 bg-black/30 ${unlocked ? '' : 'grayscale opacity-50'}`}
+                style={{ borderColor: unlocked ? ident.anillo : 'rgba(255,255,255,0.10)' }}
+              >
+                {ident.emoji}
+              </div>
+            );
+          }
+          return IconComp ? (
+            <IconComp className={`w-6 h-6 shrink-0 ${autonomo ? 'text-emerald-300' : unlocked ? 'text-[#E8962E]' : 'text-white/30'}`} />
+          ) : null;
+        })()}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3
@@ -760,7 +805,7 @@ function AgenteCard({
       </div>
 
       <p className="text-xs text-white/65 leading-relaxed">
-        {unlocked ? agente.descripcion : reason}
+        {unlocked ? (identidadDe(agente.id)?.frase ?? agente.descripcion) : reason}
       </p>
 
       <div
@@ -811,7 +856,7 @@ interface ModalBloqueadoProps {
 function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm anímate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in"
       onClick={onCerrar}
     >
       <div

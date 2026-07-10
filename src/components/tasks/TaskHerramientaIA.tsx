@@ -253,7 +253,7 @@ export default function TaskHerramientaIA({
   const requiredFieldsFilled = inputs.length === 0 || inputs.some(inp => (formValues[inp.id] || '').trim().length > 0);
 
   return (
-    <div className="space-y-6 anímate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -403,7 +403,7 @@ export default function TaskHerramientaIA({
       {/* ─── GENERATING ────────────────────────────────────────────────────── */}
       {modo === 'generando' && (
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[#E8962E] anímate-spin mb-4" />
+          <Loader2 className="w-8 h-8 text-[#E8962E] animate-spin mb-4" />
           <p className="text-sm text-[#F2EFE9]/60">Generando con IA...</p>
           <p className="text-xs text-[#F2EFE9]/30 mt-1">Esto puede tomar unos segundos</p>
         </div>

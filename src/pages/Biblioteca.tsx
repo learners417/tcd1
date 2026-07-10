@@ -188,6 +188,71 @@ function getVideosFromPilars(pilarIds: readonly PilarId[]): VideoModulo[] {
   return videos;
 }
 
+
+// ═══ LOS RECURSOS ADN — los videos reales del método, por letra (ZIP humano) ═══
+interface RecursoADN {
+  id: string;
+  titulo: string;
+  youtubeId?: string;
+  tab: ClinicaTabId;
+  pasoDesbloqueo: { pilar: number; codigo: string; nombre: string } | null;
+}
+const RECURSOS_ADN: RecursoADN[] = [
+  { id: 'r-bienvenido', titulo: 'Bienvenido al método', youtubeId: 'v154pbAd3Hw', tab: 'O', pasoDesbloqueo: null },
+  { id: 'r-impostor', titulo: 'Cómo superar el síndrome del impostor', youtubeId: '3JPGgF4cjDw', tab: 'O', pasoDesbloqueo: null },
+  { id: 'r-historia', titulo: 'Tu historia', youtubeId: 'ZClgkkUs2QI', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
+  { id: 'r-proposito', titulo: 'Tu propósito', youtubeId: 'A9bWp0nVTQI', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
+  { id: 'r-legado', titulo: 'Tu legado', youtubeId: 'BiZLzUGs2Wo', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
+  { id: 'r-avatar', titulo: 'Tu paciente ideal (avatar)', youtubeId: 'XdjruYVXeOA', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.3', nombre: 'Tu paciente ideal' } },
+  { id: 'r-matriz', titulo: 'Tu Matriz ABC', youtubeId: '6C_Qyk-_GCw', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.3', nombre: 'Tu paciente ideal' } },
+  { id: 'r-metodo', titulo: 'Tu método', youtubeId: '3QVjYzWNM7M', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.4', nombre: 'Genera tu método' } },
+  { id: 'r-ofertas', titulo: 'Tus ofertas', youtubeId: '_UjQtE4lNtk', tab: 'N', pasoDesbloqueo: { pilar: 3, codigo: 'P3.2', nombre: 'Diseña tu oferta' } },
+  { id: 'r-puv', titulo: 'Tu PUV', youtubeId: 'nTWKGyvBbvY', tab: 'N', pasoDesbloqueo: { pilar: 4, codigo: 'P4.2', nombre: 'El mensaje que atrae' } },
+  { id: 'r-infra', titulo: 'Tu infraestructura (sistema de captación)', youtubeId: 'ck2IVA9ZTzU', tab: 'I2', pasoDesbloqueo: { pilar: 4, codigo: 'P4.5', nombre: 'Monta tu sistema' } },
+  { id: 'r-dinero', titulo: 'Por qué el dinero se sana primero', tab: 'C1', pasoDesbloqueo: { pilar: 1, codigo: 'P1.1', nombre: 'Sanar el Dinero' } },
+  { id: 'r-cuerpo', titulo: 'El dinero en el cuerpo', tab: 'L', pasoDesbloqueo: { pilar: 1, codigo: 'P1.4', nombre: 'El dinero en el cuerpo' } },
+  { id: 'r-dominio', titulo: 'Tu dirección digital — el dominio', tab: 'I2', pasoDesbloqueo: { pilar: 4, codigo: 'P4.5b', nombre: 'Tu dominio' } },
+  { id: 'r-llamada', titulo: 'Anatomía de la llamada que cierra', tab: 'C2', pasoDesbloqueo: { pilar: 5, codigo: 'P5.1', nombre: 'La llamada' } },
+  { id: 'r-entrega', titulo: 'Entregar sin quemarte', tab: 'C2', pasoDesbloqueo: { pilar: 6, codigo: 'P6.1', nombre: 'La entrega' } },
+  { id: 'r-maquina', titulo: 'La máquina de 10 por mes', tab: 'A', pasoDesbloqueo: { pilar: 7, codigo: 'P7.1', nombre: 'Autonomía' } },
+];
+function pasoAlcanzado(pilarNum: number, completadas: Set<string>): boolean {
+  if (pilarNum === 0) return true;
+  for (const p of SEED_ROADMAP_V3) {
+    if (p.numero >= pilarNum) break;
+    if (!p.metas.every((m) => completadas.has(`${p.numero}-${m.codigo}`))) return false;
+  }
+  return true;
+}
+function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<string> }) {
+  const desbloqueado = !r.pasoDesbloqueo || pasoAlcanzado(r.pasoDesbloqueo.pilar, completadas);
+  if (!r.youtubeId) {
+    return (
+      <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F2EFE9]/35 mb-1">🎬 Próximamente</p>
+        <p className="text-sm text-[#F2EFE9]/60">{r.titulo}</p>
+      </div>
+    );
+  }
+  if (!desbloqueado) {
+    return (
+      <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
+        <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E]/60 mb-1">🔒 Guardado para ti</p>
+        <p className="text-sm text-[#F2EFE9]/70">{r.titulo}</p>
+        <p className="text-[11px] text-[#F2EFE9]/45 mt-1.5">Se desbloquea con <span className="text-[#F4B65C]">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
+      </div>
+    );
+  }
+  return (
+    <a href={`https://youtu.be/${r.youtubeId}`} target="_blank" rel="noreferrer" className="block rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-[#E8962E]/8 to-transparent p-4 hover:border-[#E8962E]/45 transition-all fade-rise">
+      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1">▶ Video del método</p>
+      <p className="text-sm text-[#F2EFE9]/90 font-medium">{r.titulo}</p>
+      <p className="text-[11px] text-[#F2EFE9]/40 mt-1">Toca para ver en YouTube</p>
+    </a>
+  );
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 interface BibliotecaProps {
@@ -219,6 +284,11 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
     () => getHerramientasForPilars(activeTab.pilarIds),
     [activeTab.pilarIds]
   );
+  const completadasSet = useMemo(() => {
+    try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); return new Set<string>(saved ? JSON.parse(saved) : []); } catch { return new Set<string>(); }
+  }, [activeTabId]);
+  const recursosTab = useMemo(() => RECURSOS_ADN.filter((r) => r.tab === activeTabId), [activeTabId]);
+
   const seedVideos = useMemo(
     () => getVideosFromPilars(activeTab.pilarIds),
     [activeTab.pilarIds]
@@ -415,6 +485,13 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         </p>
       </div>
 
+      {/* Los recursos del método — SIEMPRE visibles, independientes de los videos del seed */}
+      {recursosTab.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {recursosTab.map((r) => <RecursoCard key={r.id} r={r} completadas={completadasSet} />)}
+        </div>
+      )}
+
       {/* Videos section */}
       {tabVideos.length > 0 && (
         <div className="space-y-4">
@@ -565,7 +642,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       )}
 
       {/* Empty state when both lists are empty */}
-      {herramientas.length === 0 && tabVideos.length === 0 && (
+      {herramientas.length === 0 && tabVideos.length === 0 && recursosTab.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-[#1A1917]/30 border border-[rgba(232,150,46,0.1)] border-dashed rounded-2xl">
           <Sparkles className="w-12 h-12 text-[#E8962E]/30 mb-4" />
           <p className="text-[#F2EFE9]/60 text-sm font-medium mb-2">

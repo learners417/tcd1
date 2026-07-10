@@ -650,6 +650,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
+        try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
         setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
         setTimeout(() => setCelebracion(null), 5000);
       }
@@ -779,7 +780,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
-      setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
+      try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
+        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
       setTimeout(() => setCelebracion(null), 5000);
     }
     // Sync to Supabase

@@ -314,7 +314,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="card-panel p-8 border border-[#E8962E]/20 bg-[#1A1917]/40 text-center space-y-3">
-          <Loader2 className="w-6 h-6 text-[#E8962E] anímate-spin mx-auto" />
+          <Loader2 className="w-6 h-6 text-[#E8962E] animate-spin mx-auto" />
           <p className="text-sm text-[#F2EFE9]/60">Verificando estado del programa…</p>
         </div>
       </div>
@@ -486,7 +486,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       >
         {generando ? (
           <>
-            <Loader2 className="w-4 h-4 anímate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
             Generando…
           </>
         ) : (
