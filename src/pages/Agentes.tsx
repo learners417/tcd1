@@ -600,7 +600,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               /* Burbujas humanas: el entrenador escribe en bloques, como una persona */
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.contenido.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
-                  <div key={pi} className="card-panel text-white/90 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                  <div key={pi} className="bg-[#1A1917] text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 text-sm leading-relaxed fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
                     <div className="prose prose-invert prose-sm max-w-none prose-p:my-0 prose-li:my-0.5 prose-strong:text-[#F4B65C] prose-code:text-[#E8962E] prose-code:bg-[#E8962E]/10 prose-code:px-1 prose-code:rounded">
                       <Markdown>{parte}</Markdown>
                     </div>

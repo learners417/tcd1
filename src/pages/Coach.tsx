@@ -446,7 +446,7 @@ export default function Coach({ userId }: { userId?: string }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
                 msg.role === 'assistant'
-                  ? 'bg-[#E8962E]/20 text-[#E8962E] border-[#E8962E]/30'
+                  ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40 ring-2 ring-[#E8962E]/10'
                   : 'bg-white/5 text-white/60 border-white/10'
               }`}
             >
@@ -463,7 +463,7 @@ export default function Coach({ userId }: { userId?: string }) {
               /* El Mentor humano: burbujas separadas por párrafo — conversación, no documento */
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
-                  <div key={pi} className="card-panel bg-[#1A1917] text-white/90 rounded-2xl rounded-tl-sm border border-[rgba(232,150,46,0.10)] px-4 py-3 fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                  <div key={pi} className="bg-[#1A1917] text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
                     <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-[#F4B65C] prose-li:my-0.5">
                       <Markdown>{parte}</Markdown>
                     </div>
@@ -512,7 +512,7 @@ export default function Coach({ userId }: { userId?: string }) {
 
       <div className="p-4 border-t border-[rgba(232,150,46,0.10)] bg-black/20">
         {quickReplies.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             {quickReplies.map((qr) => (
               <button
                 key={qr.id}

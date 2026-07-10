@@ -28,6 +28,10 @@
   /* Matrix-specific tokens (preactivacion grid) so the table can
      theme cleanly without hardcoded hex inside inline styles. */
   --matrix-section-divider: #252830;
+  /* Sereno Pro: la profundidad iOS — sombras en capas, no un solo blur */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.50);
+  --shadow-gold: 0 8px 24px rgba(232, 150, 46, 0.22);
   --matrix-cell-divider: rgba(26, 28, 34, 0.35);
   --matrix-row-divider: rgba(255, 255, 255, 0.05);
   --matrix-header-text: rgba(255, 255, 255, 0.78);
@@ -74,8 +78,8 @@ h1, h2, h3 {
   .card-panel {
     background: var(--bg-card);
     border: 1px solid var(--border-gold);
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(232, 150, 46, 0.03);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
   }
 
   /* Primary button */
@@ -88,7 +92,11 @@ h1, h2, h3 {
     border-radius: 0.75rem;
     transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
     box-shadow: 0 4px 20px rgba(232, 150, 46, 0.4), 0 0 40px rgba(232, 150, 46, 0.1);
+      background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
+    box-shadow: var(--shadow-gold);
+    border-radius: 14px;
   }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
     background: var(--accent-gold-hover);
     box-shadow: 0 6px 28px rgba(232, 150, 46, 0.30), 0 0 60px rgba(232, 150, 46, 0.15);

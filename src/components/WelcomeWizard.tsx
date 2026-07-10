@@ -45,7 +45,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         await supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
           diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo },
-          ...(dxNicho.trim() ? { adn_nicho: `${dxNicho.trim()} (hipótesis inicial — se refina en El Camino)` } : {}),
+          ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
+          ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
         }).eq('id', profile.id);
       }
     } catch { /* no bloqueamos el flujo */ }

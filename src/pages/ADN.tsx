@@ -195,7 +195,10 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
               >
                 <div className="flex items-center justify-between gap-3 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    {completo ? (
+                    {completo && estadoDeCampo(true, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN()) === 'preliminar' && (
+                  <p className="text-[10px] text-[#E8962E]/60 pl-5 italic mt-0.5">Preliminar — se ajusta con «{nombreDePaso(campo.pilarOrigen)}» en El Camino.</p>
+                )}
+                {completo ? (
                       <Check className="w-3.5 h-3.5 text-[#E8962E] flex-shrink-0" />
                     ) : campo.pending ? (
                       <AlertCircle className="w-3.5 h-3.5 text-[#F2EFE9]/30 flex-shrink-0" />
@@ -210,7 +213,16 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                         D45
                       </span>
                     )}
-                    <span className="text-[10px] text-[#F2EFE9]/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>
+                    {(() => {
+                      const est = estadoDeCampo(completo, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN());
+                      if (est === 'vacio') return <span className="text-[10px] text-[#F2EFE9]/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>;
+                      const b = BADGE_ESTADO[est];
+                      return (
+                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${b.cls}`} title={est === 'preliminar' ? `Se ajusta con «${nombreDePaso(campo.pilarOrigen)}»` : est === 'confirmado' ? 'Confirmado en El Camino' : 'Validado por ventas reales'}>
+                          {b.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 {completo ? (
@@ -248,6 +260,30 @@ const NOMBRE_PASO: Record<string, string> = (() => {
   return map;
 })();
 const nombreDePaso = (codigo: string) => NOMBRE_PASO[codigo] ?? 'El Camino';
+
+// ═══ El sistema de estados: PRELIMINAR → CONFIRMADO → VALIDADO ═══
+type EstadoCampo = 'vacio' | 'preliminar' | 'confirmado' | 'validado';
+const getCompletadasADN = (): Set<string> => {
+  try { return new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]')); } catch { return new Set<string>(); }
+};
+const getHayVentasADN = (): boolean => {
+  try { const v = JSON.parse(localStorage.getItem('tcd_ventas') ?? '[]'); return Array.isArray(v) && v.length > 0; } catch { return false; }
+};
+function estadoDeCampo(tieneValor: boolean, pilarOrigen: string, completadas: Set<string>, hayVentas: boolean): EstadoCampo {
+  if (!tieneValor) return 'vacio';
+  const m = pilarOrigen.match(/^P(\d+)/);
+  const pilarNum = m ? parseInt(m[1], 10) : -1;
+  const pasoHecho = pilarNum >= 0 && completadas.has(`${pilarNum}-${pilarOrigen}`);
+  if (pasoHecho && hayVentas) return 'validado';
+  if (pasoHecho) return 'confirmado';
+  return 'preliminar';
+}
+const BADGE_ESTADO: Record<Exclude<EstadoCampo, 'vacio'>, { label: string; cls: string }> = {
+  preliminar: { label: 'Preliminar', cls: 'bg-[#E8962E]/10 text-[#E8962E]/80 border-[#E8962E]/25' },
+  confirmado: { label: 'Confirmado', cls: 'bg-[#F4B65C]/15 text-[#F4B65C] border-[#F4B65C]/40' },
+  validado:   { label: '✓ Validado', cls: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40' },
+};
+
 
 export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
@@ -385,12 +421,32 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
               ({totalStats.completos} de {totalStats.total} campos)
             </span>
           </p>
-          <div className="h-2 bg-[#E8962E]/5 rounded-full overflow-hidden mt-3">
-            <div
-              className="h-full bg-[#E8962E] rounded-full transition-all duration-700"
-              style={{ width: `${totalStats.porcentaje}%` }}
-            />
-          </div>
+          {(() => {
+            const comps = getCompletadasADN();
+            const ventas = getHayVentasADN();
+            let val = 0, conf = 0, prel = 0, vac = 0;
+            for (const sec of ADN_SCHEMA_V8) for (const c of sec.campos) {
+              const tiene = Boolean((mergedPerfil as Record<string, unknown>)[c.profileKey]);
+              const est = estadoDeCampo(tiene, c.pilarOrigen, comps, ventas);
+              if (est === 'validado') val++; else if (est === 'confirmado') conf++; else if (est === 'preliminar') prel++; else vac++;
+            }
+            const total = val + conf + prel + vac || 1;
+            return (
+              <div className="mt-3">
+                <div className="h-2.5 rounded-full overflow-hidden flex bg-black/30">
+                  <div style={{ width: `${(val / total) * 100}%`, background: '#22C55E' }} />
+                  <div style={{ width: `${(conf / total) * 100}%`, background: '#F4B65C' }} />
+                  <div style={{ width: `${(prel / total) * 100}%`, background: 'rgba(232,150,46,0.45)' }} />
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px]">
+                  <span className="text-[#22C55E]">⬤ {val} validados</span>
+                  <span className="text-[#F4B65C]">⬤ {conf} confirmados</span>
+                  <span className="text-[#E8962E]/70">⬤ {prel} preliminares</span>
+                  <span className="text-[#F2EFE9]/35">○ {vac} por construir</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <button
           type="button"

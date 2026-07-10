@@ -208,9 +208,9 @@ export default function DiarioDirector({
   geminiKey?: string;
 }) {
   const [entries, setEntries] = useState<EntradaDiario[]>([]);
-  // El cronómetro señuelo: demuestra que el cierre se hace en 3 minutos (no envía solo)
   const [cronoSegundos, setCronoSegundos] = useState(180);
   const [cronoActivo, setCronoActivo] = useState(false);
+  const [masDetalle, setMasDetalle] = useState(false);
   useEffect(() => {
     if (!cronoActivo || cronoSegundos <= 0) return;
     const t = setInterval(() => setCronoSegundos((v) => Math.max(0, v - 1)), 1000);
@@ -231,7 +231,9 @@ export default function DiarioDirector({
   const [cuerpo, setCuerpo] = useState(5);
   const [mente, setMente] = useState(5);
   const [emociones, setEmociones] = useState(5);
-  const [logro, setLogro] = useState('');
+  const [logro, setLogro] = useState(() => {
+    try { const ses = localStorage.getItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10)); return ses ? `Completé: ${ses}` : ''; } catch { return ''; }
+  });
   const [tareas, setTareas] = useState<string[]>([]);
   const [checkeos, setCheckeos] = useState<string[]>([]);
   const [bloqueo, setBloqueo] = useState('');
@@ -383,7 +385,7 @@ export default function DiarioDirector({
 
       setGenerandoResumen(true);
       try {
-        const prompt = `Eres el Coach de "Tu Clínica Digital". Eres master coach especialista en PNL, neurociencia y emprendimiento. Analiza las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
+        const prompt = `Eres el Mentor de "Tu Clínica Digital": master coach especialista en PNL, neurociencia y emprendimiento. Analiza las entradas del Diario del Fundador de esta semana y devuelve un resumen en JSON. Busca: la evolución (energía), los miedos recurrentes (bloqueos), los deseos que asoman (logros), y UN reencuadre de PNL accionable.
 
 ENTRADAS:
 ${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
@@ -411,7 +413,7 @@ Devolvé SOLO este JSON:
           );
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
-        toast.success('Resumen de la semana generado por tu Mentor.');
+        toast.success('Resumen de la semana generado por el Coach.');
       } catch {
         /* nice-to-have, silencioso */
       } finally {
@@ -436,7 +438,7 @@ Devolvé SOLO este JSON:
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
 
       {/* Header */}
       <div className="flex justify-between items-end">
@@ -448,25 +450,13 @@ Devolvé SOLO este JSON:
             <Calendar className="w-3.5 h-3.5" />
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
             <span className="text-[#E8962E]/80 font-medium">· Día {getCurrentDay()} de 90</span>
-            {(() => {
-              try {
-                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                const hoyStr = new Date().toISOString().slice(0, 10);
-                const sesionHoy = localStorage.getItem('tcd_sesion_hoy_' + hoyStr);
-                if (sesionHoy) return <span className="text-[#F2EFE9]/40">· hoy trabajaste: <span className="text-[#F4B65C]">{sesionHoy}</span></span>;
-                void set;
-              } catch { /* noop */ }
-              return null;
-            })()}
           </p>
-          <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5" onClick={() => setCronoActivo(true)}>
+          <p className="text-[11px] text-[#F2EFE9]/40 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
+          <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
             <span className="text-[13px]">⏱</span>
-            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-[#22C55E]' : cronoActivo ? 'text-[#F4B65C]' : 'text-[#F2EFE9]/60'}`}>
-              {Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}
-            </span>
-            <span className="text-[10px] text-[#F2EFE9]/40">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos — se puede' : 'toca para arrancar · 3 min y listo'}</span>
-          </div>
-          <p className="text-[11px] text-[#F2EFE9]/40 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas. El cierre del día es parte del método.</p>
+            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-[#22C55E]' : cronoActivo ? 'text-[#F4B65C]' : 'text-[#F2EFE9]/60'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
+            <span className="text-[10px] text-[#F2EFE9]/40">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca y arranca · 3 min y listo'}</span>
+          </button>
         </div>
         <div className="flex items-center gap-3">
           {energiaPromedio !== null && (
@@ -499,7 +489,7 @@ Devolvé SOLO este JSON:
       {/* Resumen semanal */}
       {generandoResumen && (
         <div className="flex items-center gap-2 text-[#E8962E] bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-2xl p-4">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 anímate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
       )}
@@ -510,7 +500,7 @@ Devolvé SOLO este JSON:
             <div className="card-panel p-5 rounded-2xl border border-violet-500/20 bg-violet-500/5 space-y-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-violet-400" />
-                <h3 className="text-sm font-medium text-violet-300">Resumen del Mentor — Semana cerrada</h3>
+                <h3 className="text-sm font-medium text-violet-300">Resumen del Coach — Semana cerrada</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-[#1A1917]/50 rounded-xl p-3">
@@ -594,7 +584,33 @@ Devolvé SOLO este JSON:
           ) : (
             <div className="card-panel p-6 rounded-2xl space-y-7">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
+                {/* La tira de 14 días — tu evolución de un vistazo */}
+            {(() => {
+              try {
+                const raw = JSON.parse(localStorage.getItem('tcd_diario_v3') ?? '[]') as Array<{ fecha?: string; energia?: number }>;
+                if (!Array.isArray(raw) || raw.length === 0) return null;
+                const porFecha = new Map(raw.map((e) => [String(e.fecha ?? '').slice(0, 10), Number(e.energia ?? 0)]));
+                const dias: Array<{ d: string; e: number }> = [];
+                for (let k = 13; k >= 0; k--) {
+                  const f = new Date(); f.setDate(f.getDate() - k);
+                  const key = f.toISOString().slice(0, 10);
+                  dias.push({ d: key.slice(8), e: porFecha.get(key) ?? 0 });
+                }
+                return (
+                  <div className="mb-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F2EFE9]/40 mb-2">Tus últimos 14 días</p>
+                    <div className="flex items-end gap-1.5 h-12">
+                      {dias.map((x, i2) => (
+                        <div key={i2} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#F4B65C' : '#E8962E', opacity: x.e === 0 ? 1 : 0.9 }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              } catch { return null; }
+            })()}
+            <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
                   <BookOpen className="w-5 h-5 text-[#E8962E]" />
                 </div>
                 <div>
@@ -620,7 +636,30 @@ Devolvé SOLO este JSON:
                 )}
               </div>
 
-              {/* 3 dimensiones */}
+              {/* Logro */}
+              <div>
+                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#E8962E]" /> Tu logro de hoy — ¿qué avance te enorgullece?
+                </label>
+                <textarea
+                  rows={2}
+                  maxLength={LOGRO_MAX_CHARS}
+                  placeholder="El avance del que estás orgulloso hoy..."
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 resize-none transition-all placeholder-[#F2EFE9]/30"
+                  value={logro}
+                  onChange={(e) => setLogro(e.target.value)}
+                />
+                <p className="text-[10px] text-[#F2EFE9]/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+              </div>
+
+              {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
+              <div>
+                <button type="button" onClick={() => setMasDetalle((v) => !v)} className="text-[12px] text-[#E8962E]/70 hover:text-[#E8962E] transition-colors">
+                  {masDetalle ? '− menos detalle' : '+ más detalle (opcional): dimensiones · actividades · checkeos'}
+                </button>
+                {masDetalle && (
+                  <div className="mt-4 space-y-6">
+{/* 3 dimensiones */}
               <div>
                 <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-3 uppercase tracking-wider">
                   Tus 3 dimensiones — ¿cómo estuvieron cuerpo · mente · emociones?
@@ -643,26 +682,10 @@ Devolvé SOLO este JSON:
                 </div>
               </div>
 
-              {/* Logro */}
-              <div>
-                <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#E8962E]" /> Tu logro de hoy — ¿qué avance te enorgullece?
-                </label>
-                <textarea
-                  rows={2}
-                  maxLength={LOGRO_MAX_CHARS}
-                  placeholder="El avance del que estás orgulloso hoy..."
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 resize-none transition-all placeholder-[#F2EFE9]/30"
-                  value={logro}
-                  onChange={(e) => setLogro(e.target.value)}
-                />
-                <p className="text-[10px] text-[#F2EFE9]/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
-              </div>
-
               {/* ¿En qué estuviste? */}
               <div>
                 <label className="block text-xs font-medium text-[#F2EFE9]/80 mb-2 uppercase tracking-wider">
-                  ¿En qué estuviste hoy? <span className="text-[#F2EFE9]/30 normal-case">(mínimo 1)</span>
+                  ¿En qué estuviste hoy?
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {TAREAS_TAGS.map((tag) => {
@@ -730,6 +753,10 @@ Devolvé SOLO este JSON:
                 </div>
               </div>
 
+                                </div>
+                )}
+              </div>
+
               {/* Guardar */}
               <button
                 onClick={handleGuardar}
@@ -737,7 +764,7 @@ Devolvé SOLO este JSON:
                 className="w-full py-3.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+                  <><Loader2 className="w-4 h-4 anímate-spin" /> Guardando...</>
                 ) : (
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
@@ -755,7 +782,7 @@ Devolvé SOLO este JSON:
         <div className="space-y-4">
           {loading && entries.length === 0 && (
             <div className="flex items-center gap-2 text-[#F2EFE9]/40 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
+              <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (
