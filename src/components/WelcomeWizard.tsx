@@ -334,7 +334,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#F2EFE9]/60 uppercase tracking-wider mb-2">Ingresos mensuales (USD)</label>
+                  <label className="block text-xs font-semibold text-[#F2EFE9]/60 uppercase tracking-wider mb-2">Ingreeres mensuales (USD)</label>
                   <input
                     type="number"
                     value={ingresosMensuales}
@@ -384,7 +384,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">1 · ¿Ya tenés una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?</p>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">1 · ¿Ya tienes una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?</p>
               <div className="space-y-2">
                 {([['B','Sí. Tengo mi manera de hacer las cosas — la uso hace años.'],['A','No, o no lo tengo claro. Trabajo caso por caso.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxAvatar(v)} className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxAvatar === v ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{l}</button>
@@ -402,12 +402,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">3 · ¿A quién ayudás mejor? (tu paciente típico, en una frase)</p>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">3 · ¿A quién ayudas mejor? (tu paciente típico, en una frase)</p>
               <input value={dxNicho} onChange={(e) => setDxNicho(e.target.value)} placeholder="Ej: mujeres de 40-55 con problemas digestivos crónicos" className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl px-4 py-3 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/25 focus:outline-none focus:border-[#E8962E]/50" />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">4 · Cuando tenés que decir tu precio, ¿qué pasa?</p>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">4 · Cuando tienes que decir tu precio, ¿qué pasa?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {['Lo digo tranquilo','Lo bajo antes de que me lo pidan','Lo justifico con títulos y años','Evito el tema'].map((o) => (
                   <button key={o} onClick={() => setDxDinero(o)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxDinero === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>
@@ -416,7 +416,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">5 · ¿Cuánto tiempo real por día tenés para esto?</p>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">5 · ¿Cuánto tiempo real por día tienes para esto?</p>
               <div className="grid grid-cols-3 gap-2">
                 {['30 min','1 hora','2+ horas'].map((o) => (
                   <button key={o} onClick={() => setDxTiempo(o)} className={`px-4 py-3 rounded-xl border text-sm transition-all ${dxTiempo === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>

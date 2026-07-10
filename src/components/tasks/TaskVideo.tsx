@@ -64,7 +64,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
                   <p className="text-base sm:text-lg leading-relaxed text-[#F2EFE9]/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     {guion.esencia}
                   </p>
-                  <p className="text-[10px] text-[#F2EFE9]/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: preguntale lo que quieras.</p>
+                  <p className="text-[10px] text-[#F2EFE9]/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
                 </div>
               );
             }

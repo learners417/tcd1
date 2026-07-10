@@ -398,8 +398,8 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
 
               {!canRegenerate && (
                 <p className="text-[10px] text-[#F2EFE9]/30">
-                  Este creativo no tiene prompt guardado (creado antes del auto-save). Podés editarlo con IA,
-                  pero para regenerarlo volvé a generarlo desde el panel.
+                  Este creativo no tiene prompt guardado (creado antes del auto-save). Puedes editarlo con IA,
+                  pero para regenerarlo vuelve a generarlo desde el panel.
                 </p>
               )}
             </>

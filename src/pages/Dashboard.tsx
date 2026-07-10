@@ -5,7 +5,6 @@ import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
-import CintaCinturon from '../components/CintaCinturon';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 
@@ -288,7 +287,7 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
         </div>
       </div>
 
-      {/* ZONA A2 — EL VISUALBOARD · lo que querés lograr, tildándose solo */}
+      {/* ZONA A2 — EL VISUALBOARD · lo que quieres lograr, tildándose solo */}
       {(() => {
         let set = setDB ?? new Set<string>();
         if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
@@ -335,12 +334,22 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-[rgba(242,239,233,0.07)] bg-black/20 px-4 py-3">
                   <span className="text-xl">⏰</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por vos <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
+                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por tú <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
                     <div className="h-1 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden mt-1.5">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(100, horas * 10)}%`, background: 'linear-gradient(90deg, #5A9170, #3D6B4F)' }} />
                     </div>
                   </div>
                 </div>
+              );
+            })()}
+
+            {/* Las horas del viaje: el esfuerzo también se ve */}
+            {(() => {
+              const parseMin = (t?: string) => { if (!t) return 20; const h = t.match(/([\d.]+)\s*h/); if (h) return Math.round(parseFloat(h[1]) * 60); const m2 = t.match(/(\d+)\s*min/); return m2 ? parseInt(m2[1], 10) : 20; };
+              let hechas = 0, totales = 0;
+              for (const pil of SEED_ROADMAP_V2) for (const m of pil.metas) { const mins = parseMin((m as { tiempo_estimado?: string }).tiempo_estimado); totales += mins; if (set.has(`${pil.numero}-${m.codigo}`)) hechas += mins; }
+              return (
+                <p className="mt-3 text-[11px] text-[#F2EFE9]/45">⚒ Llevas <span className="text-[#F4B65C] font-semibold num-tab">{(hechas / 60).toFixed(1)}h</span> de ~{Math.round(totales / 60)}h de construcción total — cada micro-sesión suma.</p>
               );
             })()}
 
@@ -474,36 +483,16 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
 
             {(() => {
               const QUOTES = [
-                { text: "El éxito no se mide por lo que lográs, sino por los obstáculos que superás.", author: "Booker T. Washington" },
-                { text: "La mejor manera de predecir el futuro es creándolo.", author: "Peter Drucker" },
-                { text: "No esperes las condiciones perfectas. Empieza con lo que tienes.", author: "Arthur Ashe" },
-                { text: "Tu consultorio es tu empresa. Tratalo como tal y los resultados van a cambiar.", author: "Método CLÍNICA" },
-                { text: "El profesional que domina su negocio, libera tiempo para su vocación.", author: "Método CLÍNICA" },
-                { text: "Cada paciente que llega es el resultado de un sistema, no de la suerte.", author: "Método CLÍNICA" },
-                { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" },
-                { text: "No se trata de trabajar más horas, sino de construir mejores sistemas.", author: "Método CLÍNICA" },
-                { text: "Lo que no se mide, no se mejora. Lo que no se mejora, se deteriora.", author: "William Thomson" },
-                { text: "El precio es lo que pagás. El valor es lo que recibís.", author: "Warren Buffett" },
-                { text: "Un sistema sin ventas es un hobby. Un profesional sin sistema está atrapado.", author: "Método CLÍNICA" },
-                { text: "El liderazgo es la capacidad de traducir visión en realidad.", author: "Warren Bennis" },
-                { text: "Automatizar lo repetitivo te libera para lo que realmente importa: tus pacientes.", author: "Método CLÍNICA" },
-                { text: "La clave no es priorizar tu agenda, sino agendar tus prioridades.", author: "Stephen Covey" },
-                { text: "Tu historia personal es tu mayor activo de marketing. Contala.", author: "Método CLÍNICA" },
-                { text: "Haz lo que tienes que hacer hasta que puedas hacer lo que quieres hacer.", author: "Oprah Winfrey" },
-                { text: "El emprendedor siempre busca el cambio, responde a él y lo explota como una oportunidad.", author: "Peter Drucker" },
-                { text: "Si tu oferta no es irresistible, el problema no es el mercado. Es la oferta.", author: "Método CLÍNICA" },
-                { text: "La simplicidad es la máxima sofisticación.", author: "Leonardo da Vinci" },
-                { text: "Tu legado profesional se construye una decisión a la vez.", author: "Método CLÍNICA" },
-                { text: "Primero te ignoran, después se ríen de ti, después pelean contigo, y entonces ganas.", author: "Mahatma Gandhi" },
-                { text: "La confianza en uno mismo es el primer secreto del éxito.", author: "Ralph Waldo Emerson" },
-                { text: "Un paciente bien atendido es la mejor estrategia de captación.", author: "Método CLÍNICA" },
-                { text: "La innovación distingue al líder del seguidor.", author: "Steve Jobs" },
-                { text: "No necesitas más pacientes. Necesitás un mejor sistema para los que ya tienes.", author: "Método CLÍNICA" },
-                { text: "Invertir en ti mismo es la mejor inversión que jamás harás.", author: "Warren Buffett" },
-                { text: "El secreto de avanzar es empezar.", author: "Mark Twain" },
-                { text: "Cada día que construís tu sistema es un día menos de depender de la suerte.", author: "Método CLÍNICA" },
-                { text: "El que tiene un porqué para vivir puede soportar casi cualquier cómo.", author: "Friedrich Nietzsche" },
-                { text: "Tu clínica digital no es un gasto. Es la infraestructura de tu libertad.", author: "Método CLÍNICA" },
+                { text: "Puedes tener todo lo que quieras en la vida si ayudas a suficientes personas a conseguir lo que ellas quieren.", author: "Zig Ziglar" },
+                { text: "La gente olvidará lo que dijiste y lo que hiciste, pero nunca olvidará cómo la hiciste sentir.", author: "Maya Angelou" },
+                { text: "El precio es lo que pagas. El valor es lo que recibes.", author: "Warren Buffett" },
+                { text: "Si cambias la forma en que miras las cosas, las cosas que miras cambian.", author: "Wayne Dyer" },
+                { text: "Nadie se ha hecho pobre por dar.", author: "Ana Frank" },
+                { text: "Ganamos con lo que recibimos, pero hacemos una vida con lo que damos.", author: "Winston Churchill" },
+                { text: "El dinero es un excelente sirviente, pero un pésimo amo.", author: "Francis Bacon" },
+                { text: "Quien tiene un porqué puede soportar casi cualquier cómo.", author: "Viktor Frankl" },
+                { text: "El mejor modo de encontrarte a ti mismo es perderte en el servicio a los demás.", author: "Gandhi" },
+                { text: "Cobrar bien no es quitarle a tu paciente: es poder seguir estando para el próximo.", author: "Método CLINICA" },
               ];
               const TIPS = [
                 "Completa tu diario hoy — 5 minutos que transforman tu semana.",

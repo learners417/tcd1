@@ -241,6 +241,8 @@ export interface ProfileV2 extends Profile {
   adn_proceso_actual?: string;         // P7.2 — proceso documentado
   adn_landing_copy?: string;           // P9A.2
   adn_anuncios?: string;               // P9A.3 — 3 versiones de anuncios
+  adn_perfil_ig?: string | null;
+  adn_anuncio_followme?: string | null;
   adn_protocolo_servicio?: string;     // P9C.2
   adn_identidad_sistema?: string;      // P10.2 — sistema completo de identidad
   // ── ADN v7 — Campos nuevos del documento maestro (migración pendiente) ───
@@ -355,7 +357,7 @@ export type MetaCodigo =
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
-  | 'P4.1' | 'P4.2' | 'P4.3' | 'P4.4' | 'P4.5'
+  | 'P4.1' | 'P4.2' | 'P4.2b' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)

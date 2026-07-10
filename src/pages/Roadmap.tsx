@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { listarEvidencias, subirEvidencia } from '../lib/evidencia';
 import {
   CheckCircle2,
   Circle,
@@ -79,9 +80,9 @@ function encuadrarPorAvatar(codigo: string, texto: string): string {
   if (avatar !== 'B') return texto;
   // Avatar B (Establecido): las sesiones de método hablan de ORDENAR lo que ya tiene, no crear
   const ajustes: Record<string, string> = {
-    'P2.1': 'Ya tenés un método — lo usás hace años, aunque nunca lo sacaste de tu cabeza. En esta fase le ponemos nombre, orden y estructura a lo que YA hacés. Es tu activo más valioso, enterrado.',
-    'P2.2': 'Documentá el proceso que ya seguís con tus pacientes — ese orden que tenés intuitivo. Solo hay que ordenarlo y ponerlo por escrito.',
-    'P2.4': 'Vamos a ponerle nombre al método que ya tenés. No inventamos nada: ordenamos y bautizamos tu forma de trabajar de años.',
+    'P2.1': 'Ya tienes un método — lo usas hace años, aunque nunca lo sacaste de tu cabeza. En esta fase le ponemos nombre, orden y estructura a lo que YA haces. Es tu activo más valioso, enterrado.',
+    'P2.2': 'Documenta el proceso que ya sigues con tus pacientes — ese orden que tienes intuitivo. Solo hay que ordenarlo y ponerlo por escrito.',
+    'P2.4': 'Vamos a ponerle nombre al método que ya tienes. No inventamos nada: ordenamos y bautizamos tu forma de trabajar de años.',
   };
   return ajustes[codigo] ?? texto;
 }
@@ -147,7 +148,7 @@ function getTypeBadge(tipo: string) {
  * Cuenta cuántas piezas válidas tiene el usuario en `adn_validacion_organica`.
  * v8 · P9A.4 guarda JSONB que viene de DB · puede ser undefined, null, string
  * malformado, número, array vacío, o el objeto esperado `{ piezas: [...] }`.
- * Esta función es defensiva contra todos esos casos y devuelve siempre un int ≥0.
+ * Esta función es defensiva contra todos eeres caeres y devuelve siempre un int ≥0.
  */
 function contarPiezasValidacionOrganica(perfil?: { adn_validacion_organica?: unknown }): number {
   const val = perfil?.adn_validacion_organica;
@@ -197,6 +198,45 @@ function motivoBloqueo(
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
+
+
+/** 📎 Documenta tu trabajo — la evidencia universal (Punto 7 · el archivo del viaje) */
+function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodigo: string }) {
+  const [items, setItems] = useState<{ id: string; url?: string; nombre?: string }[]>([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!userId) return;
+    listarEvidencias(userId, metaCodigo).then((evs) => setItems((evs ?? []).map((e: { id?: string; path?: string; nombre?: string }) => ({ id: String(e.id ?? e.path ?? Math.random()), nombre: e.nombre })))).catch(() => {});
+  }, [userId, metaCodigo]);
+  if (!userId) return null;
+  return (
+    <div className="mt-4 pt-4 border-t border-[rgba(232,150,46,0.08)]">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F2EFE9]/40">📎 Documenta tu trabajo</p>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={subiendo}
+          className="text-[11px] px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.2)] text-[#E8962E] hover:bg-[#E8962E]/10 transition-colors disabled:opacity-50"
+        >
+          {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
+        </button>
+      </div>
+      {items.length > 0 && <p className="text-[11px] text-[#22C55E] mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
+      <input ref={inputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt" className="hidden" onChange={async (e) => {
+        const f = e.target.files?.[0];
+        if (!f || !userId) return;
+        setSubiendo(true);
+        try {
+          await subirEvidencia(userId, metaCodigo, f);
+          setItems((prev) => [...prev, { id: String(Date.now()), nombre: f.name }]);
+        } catch { /* el toast global lo maneja */ }
+        setSubiendo(false);
+        if (inputRef.current) inputRef.current.value = '';
+      }} />
+    </div>
+  );
+}
 
 export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfileFieldUpdate }: Props) {
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
@@ -610,7 +650,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
-        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Podés adelantar.`);
+        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
         setTimeout(() => setCelebracion(null), 5000);
       }
 
@@ -739,7 +779,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
-      setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Podés adelantar.`);
+      setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
       setTimeout(() => setCelebracion(null), 5000);
     }
     // Sync to Supabase
@@ -803,6 +843,28 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             <p className="text-xs text-[#F2EFE9]/40">Nivel {nivel} de 5</p>
           </div>
         </div>
+
+        {/* ─── LA FASE AUTONOMÍA (D50+): la semana tipo, nunca vacía ─── */}
+        {(() => {
+          try {
+            const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+            if (!p?.fecha_inicio) return null;
+            const dia = Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1;
+            if (dia < 50) return null;
+            return (
+              <div className="card-ios p-5 mb-6" style={{ borderColor: 'rgba(90,145,112,0.35)', background: 'linear-gradient(135deg, rgba(61,107,79,0.12), transparent)' }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#5A9170] mb-2">Fase Autonomía · tu semana tipo</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-[#F2EFE9]/70">
+                  <div className="rounded-lg bg-black/20 px-3 py-2">📞 Llamadas con interesados</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">🩺 Entrega con tu protocolo</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">📊 Métricas y ajuste de campaña</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">🗓 Tu revisión semanal (20 min)</div>
+                </div>
+                <p className="text-[10px] text-[#F2EFE9]/40 mt-2 italic">La máquina ya está construida — ahora se opera. Cada paciente nuevo se enciende en tu tablero.</p>
+              </div>
+            );
+          } catch { return null; }
+        })()}
 
         {/* ─── TU SESIÓN DE HOY · la tarjeta que grita ─── */}
         {(() => {
@@ -1212,6 +1274,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             onNavigateToCoach={() => onNavigate?.('coach')}
                           />
                         )}
+                      
+                        <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
                       </div>
                     )}
                   </div>

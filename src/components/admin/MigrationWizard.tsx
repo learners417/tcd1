@@ -65,6 +65,7 @@ const LABEL_CLASS = 'block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tra
 
 export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: MigrationWizardProps) {
   const [step, setStep] = useState(0);
+  const [migAvatar, setMigAvatar] = useState<'A' | 'B' | ''>('');
   const [resyncMode, setResyncMode] = useState(false);
   const pilarOptions = useMemo(() => getPilarOptions(), []);
 
@@ -185,6 +186,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         fecha_inicio: form.fecha_inicio,
         status: 'ACTIVE',
         onboarding_completed: true,
+        ...(migAvatar ? { avatar_tipo: migAvatar } : {}),
         pilar_actual: pilarNumeroForProfile,
         migration_source: resyncMode ? 'admin_resync' : 'admin_migration',
         migrated_at: new Date().toISOString(),
@@ -312,6 +314,14 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                       La cuenta ya existe. Ingresá el email del cliente para buscarla y actualizar su perfil ADN con la nueva información.
                     </p>
                   </div>
+          <div className="mb-3">
+            <label className="block text-xs text-[#F2EFE9]/60 mb-1">Avatar del sanador (para el Mentor)</label>
+            <select value={migAvatar} onChange={(e) => setMigAvatar(e.target.value as 'A' | 'B' | '')} className="w-full bg-black/30 border border-[rgba(232,150,46,0.15)] rounded-lg px-3 py-2 text-sm text-[#F2EFE9]">
+              <option value="">— Sin definir —</option>
+              <option value="B">B · Ya tiene método propio (poda y empaqueta)</option>
+              <option value="A">A · Construye de cero</option>
+            </select>
+          </div>
                   <div>
                     <label className={LABEL_CLASS}>Email del cliente *</label>
                     <input type="email" value={form.email} onChange={e => setFormField('email', e.target.value)}

@@ -299,7 +299,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         .from('mensajes-archivos')
         .getPublicUrl(data.path);
 
-      // Optimistic insert para archivos también
+      // Optimistic insert para architú también
       const optimistic: MsgLocal = {
         id: `opt-${Date.now()}`,
         authorId: userId,

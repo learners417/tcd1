@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, TrendingUp, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine , Target } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine  } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 

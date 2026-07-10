@@ -63,15 +63,15 @@ const SECCIONES_VIVAS = ADN_SCHEMA_V8
 // El ADN se muestra por la esencia del negocio (lo que NO cambia con una
 // tendencia), no por fases internas. 9 bloques, mapeados a los campos vivos.
 const ESENCIA_DEF: { codigo: string; titulo: string; sub: string; codigos: string[] }[] = [
-  { codigo: 'E1', titulo: 'Tu Historia', sub: 'Quién sos — en 30 segundos', codigos: ['ID.historia_corta_50'] },
-  { codigo: 'E2', titulo: 'Tu Propósito', sub: 'Para qué hacés lo que hacés', codigos: ['ID.proposito_frase'] },
+  { codigo: 'E1', titulo: 'Tu Historia', sub: 'Quién eres — en 30 segundos', codigos: ['ID.historia_corta_50'] },
+  { codigo: 'E2', titulo: 'Tu Propósito', sub: 'Para qué haces lo que haces', codigos: ['ID.proposito_frase'] },
   { codigo: 'E3', titulo: 'Tu Legado', sub: 'Lo que queda cuando no estés', codigos: ['ID.legado_declaracion'] },
   { codigo: 'E4', titulo: 'Tu Nicho', sub: 'A quién servís mejor', codigos: ['IRR.nicho', 'IRR.micronicho'] },
   { codigo: 'E5', titulo: 'Tus Avatares', sub: 'Las personas reales de tu nicho', codigos: ['IRR.avatar_demografia', 'IRR.avatar_psicografia', 'IRR.avatar_conexion_historia'] },
   { codigo: 'E6', titulo: 'La Matriz compartida', sub: 'El infierno, los obstáculos y el cielo que tus avatares comparten', codigos: ['IRR.matriz_a_infierno', 'IRR.matriz_b_obstaculos', 'IRR.matriz_c_cielo'] },
   { codigo: 'E7', titulo: 'Tu Método único', sub: 'Las siglas — cada letra, un paso', codigos: ['IRR.metodo_nombre', 'IRR.metodo_pasos'] },
   { codigo: 'E8', titulo: 'Tu Escalera de Ofertas', sub: 'Del imán a lo premium', codigos: ['NEG.lead_magnet', 'NEG.oferta_ultralow', 'NEG.oferta_low', 'NEG.oferta_mid', 'NEG.oferta_high'] },
-  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Los activos que venden por ti — se afinan, no se reinventan', codigos: ['IRR.puv', 'INF.anuncios_meta_6_creativos', 'INF.vsl_script', 'INF.landing_copy_completo', 'CAP.protocolo_entrega'] },
+  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Los 8 activos que venden por ti — se afinan, no se reinventan', codigos: ['IRR.puv', 'INF.perfil_ig_optimizado', 'NEG.lead_magnet', 'INF.anuncios_meta_6_creativos', 'INF.anuncio_followme', 'INF.landing_copy_completo', 'INF.vsl_script', 'CAP.protocolo_entrega'] },
 ];
 const _todosCampos = ADN_SCHEMA_V8.flatMap((sec) => sec.campos);
 const SECCIONES_ESENCIA = ESENCIA_DEF.map((e) => ({

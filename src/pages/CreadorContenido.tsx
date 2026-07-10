@@ -206,7 +206,7 @@ function CarruselPreview({ texto }: { texto: string }) {
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-[#F2EFE9]/35 italic mt-1">Deslizá para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+      <p className="text-[10px] text-[#F2EFE9]/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
     </div>
   );
 }

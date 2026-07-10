@@ -87,7 +87,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'blanco',
     hito_mensaje: '🥋 Cinturón BLANCO — la semilla está plantada. Tu camino de 90 días empezó.',
     hito_tipo: 'milestone',
-    mentor_pregunta: '¿Qué versión de vos se termina hoy?',
+    mentor_pregunta: '¿Qué versión de tú se termina hoy?',
     metas: [
       {
         codigo: 'P0.0',
@@ -150,7 +150,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'amarillo',
     hito_mensaje: '🥋 Cinturón AMARILLO — la raíz está en la tierra. Sanaste tu relación con el dinero y tienes TU número.',
     hito_tipo: 'milestone',
-    mentor_pregunta: 'Si tu hijo hiciera tu trabajo, ¿le dejarías cobrar lo que vos cobrabas?',
+    mentor_pregunta: 'Si tu hijo hiciera tu trabajo, ¿le dejarías cobrar lo que tú cobrabas?',
     metas: [
       {
         codigo: 'P1.1',
@@ -181,7 +181,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Completa las 4 frases: "El dinero es…", "La gente rica es…", "Cobrar caro a un paciente es…", "Si gano mucho, mi familia…"',
           'Cierra con tu creencia raíz escrita en UNA frase',
         ],
-        coach_instruccion: 'Guiá la radiografía del dinero con los money scripts de Klontz (nombrá la ciencia: esto es psicología financiera, no autoayuda). Pedile que diga su precio actual en voz alta y describa qué siente en el cuerpo. Aplicá el test de las 4 frases (el dinero es… / la gente rica es… / cobrar caro es… / si gano mucho, mi familia…). Sus respuestas SON sus scripts: devolvéselos nombrados. Cerrá identificando LA creencia raíz en una frase textual. Ofrecé generar la imagen de esa "voz heredada" con la herramienta de imágenes.',
+        coach_instruccion: 'Guiá la radiografía del dinero con los money scripts de Klontz (nombrá la ciencia: esto es psicología financiera, no autoayuda). Pedile que diga su precio actual en voz alta y describa qué siente en el cuerpo. Aplicá el test de las 4 frases (el dinero es… / la gente rica es… / cobrar caro es… / si gano mucho, mi familia…). Sus respuestas SON sus scripts: devuelveselos nombrados. Cerrá identificando LA creencia raíz en una frase textual. Ofrecé generar la imagen de esa "voz heredada" con la herramienta de imágenes.',
       },
       {
         codigo: 'P1.2b',
@@ -238,7 +238,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.5',
         titulo: 'EL NÚMERO — tu precio digno',
-        descripcion: 'El momento central de la fase. La calculadora inversa te muestra: $10.000 ÷ 10 pacientes = $1.000 — el número no sale de tu miedo, sale de tu meta. Con tu Mentor lo haces TUYO: un número concreto, dicho en voz alta 3 veces sin disculparte (la tercera, grabándote un audio a ti mismo). El Mentor no aprueba precios-disculpa.',
+        descripcion: 'El momento central de la fase. La calculadora inversa te muestra: $10.000 ÷ 10 pacientes = $1.000 — el número no sale de tu miedo, sale de tu meta. Con tu Mentor lo haces TUYO: un número concreto, dicho en voz alta 3 veces sin disculparte (la tercera, grabandote un audio a ti mismo). El Mentor no aprueba precios-disculpa.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '1.5 h',
@@ -252,7 +252,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Propón TU número (concreto, no un rango)',
           'Dilo en voz alta 3 veces — la tercera, grábate un audio de WhatsApp a ti mismo',
         ],
-        coach_instruccion: 'Ayudale a definir SU NÚMERO. La calculadora inversa primero: $10.000 ÷ 10 = $1.000 — el ancla viene de la meta, no del miedo (Kahneman: anclaje). Partí de su PHR y el valor de la transformación. Exigí un número concreto. Si propone un precio-disculpa, devolvelo: ¿ese precio refleja el valor o el miedo? Recordale su frase ancla del Día 3. El ejercicio de las 3 veces en voz alta (la tercera grabada en audio). Cierre filosófico (declarado como filosofía): el dinero es neutro — el significado se lo pusiste vos, y hoy elegís el significado. No apruebes hasta que lo diga sin disculparse.',
+        coach_instruccion: 'Ayudale a definir SU NÚMERO. La calculadora inversa primero: $10.000 ÷ 10 = $1.000 — el ancla viene de la meta, no del miedo (Kahneman: anclaje). Partí de su PHR y el valor de la transformación. Exigí un número concreto. Si propone un precio-disculpa, devolvelo: ¿ese precio refleja el valor o el miedo? Recordale su frase ancla del Día 3. El ejercicio de las 3 veces en voz alta (la tercera grabada en audio). Cierre filosófico (declarado como filosofía): el dinero es neutro — el significado se lo pusiste tú, y hoy eliges el significado. No apruebes hasta que lo diga sin disculparse.',
       },
       {
         codigo: 'P1.6',
@@ -340,7 +340,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.4',
         titulo: 'Genera tu método: nombre + pasos',
-        descripcion: 'La herramienta usa tu proceso documentado + tu paciente ideal y genera: 5 opciones de nombre propio (elegís una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
+        descripcion: 'La herramienta usa tu proceso documentado + tu paciente ideal y genera: 5 opciones de nombre propio (eliges una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '1.5 h',
@@ -417,7 +417,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       },
       {
         codigo: 'P3.3',
-        titulo: 'Defendé tu precio (roleplay)',
+        titulo: 'Defiende tu precio (roleplay)',
         descripcion: 'Practica con tu Mentor: te va a decir "es caro", "lo tengo que pensar", "¿hay descuento?" — como un prospecto real. Repite hasta defender tu precio 3 veces seguidas sin disculparte. Vera es tu entrenadora especialista si quieres más práctica.',
         tipo: 'COACH',
         es_estrella: true,
@@ -487,7 +487,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'verde_punta_azul',
     hito_mensaje: '🥋 Verde punta AZUL — la planta se estira al cielo. Tu campaña está ENCENDIDA y tu agente responde solo: empiezan a entrar interesados.',
     hito_tipo: 'urgent',
-    mentor_pregunta: 'La campaña ya corre sin vos. ¿Qué vas a hacer con el tiempo que antes usabas para perseguir pacientes?',
+    mentor_pregunta: 'La campaña ya corre sin tú. ¿Qué vas a hacer con el tiempo que antes usabas para perseguir pacientes?',
     metas: [
       {
         codigo: 'P4.1',
@@ -527,7 +527,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Crea tu canal de WhatsApp "Sala de Espera" — ahí van los que hoy no califican: 1 mensaje semanal de valor, nadie se pierde',
           'PLAN B si el agente todavía no te aparece (Meta lo libera de a poco): mensaje de bienvenida con tus 3 preguntas + revisás 2 veces por día + pedí acceso desde la app de WhatsApp',
         ],
-        coach_instruccion: 'Si te pide el DOCUMENTO DE ENTRENAMIENTO de su agente: generáselo COMPLETO y listo para copiar, con este formato: (1) QUIÉN SOY — nombre, profesión y su línea de posicionamiento; (2) MI OFERTA — la transformación, qué incluye, duración, precio y garantía (de su adn_oferta_mid); (3) A QUIÉN SIRVO — su avatar (dolores y señales de su persona ideal); (4) LAS 3 PREGUNTAS DE CALIFICACIÓN con redacción exacta — dolor ("¿qué te está pasando?"), urgencia ("¿hace cuánto lo venís cargando?"), capacidad ("el programa es una inversión de $[precio] — si vemos que es para vos, ¿estás en condiciones de tomarla?"); (5) QUÉ HACER — a los calificados: ofrecerles el link de agenda; a los no calificados: invitarlos con calidez al canal Sala de Espera; (6) REGLAS — tono cálido y profesional, jamás dar consejos clínicos ni discutir tratamientos: toda conversación clínica se deriva al humano. Después verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el documento (preguntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
+        coach_instruccion: 'Si te pide el DOCUMENTO DE ENTRENAMIENTO de su agente: generáselo COMPLETO y listo para copiar, con este formato: (1) QUIÉN SOY — nombre, profesión y su línea de posicionamiento; (2) MI OFERTA — la transformación, qué incluye, duración, precio y garantía (de su adn_oferta_mid); (3) A QUIÉN SIRVO — su avatar (dolores y señales de su persona ideal); (4) LAS 3 PREGUNTAS DE CALIFICACIÓN con redacción exacta — dolor ("¿qué te está pasando?"), urgencia ("¿hace cuánto lo venís cargando?"), capacidad ("el programa es una inversión de $[precio] — si vemos que es para tú, ¿estás en condiciones de tomarla?"); (5) QUÉ HACER — a los calificados: ofrecerles el link de agenda; a los no calificados: invitarlos con calidez al canal Sala de Espera; (6) REGLAS — tono cálido y profesional, jamás dar consejos clínicos ni discutir tratamientos: toda conversación clínica se deriva al humano. Después verificá el sistema pieza por pieza: (1) Meta Business Agent activo Y entrenado con el documento (pregúntale qué respondió el agente en la prueba); (2) regla de privacidad configurada — el agente filtra y agenda, las conversaciones clínicas las deriva al humano SIEMPRE (son profesionales de salud: esto no es negociable); (3) agenda con 3+ horarios; (4) prueba de cobro de $1 acreditada; (5) canal Sala de Espera creado. Si el agente no le aparece aún (rollout gradual), activá el Plan B sin drama: bienvenida con las 3 preguntas + 2 revisiones diarias. No apruebes hasta que las piezas estén operativas.',
       },
       {
         codigo: 'P4.2',
@@ -545,9 +545,22 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         entrenador: 'mateo',
       },
       {
+        codigo: 'P4.2b',
+        titulo: 'Tu perfil que convierte',
+        descripcion: 'Antes de que un solo anuncio corra, tu perfil de IG tiene que estar listo para recibir: foto profesional clara, bio con tu PUV en la primera línea (a quién ayudas y qué transformas), 3 destacadas mínimas (quién eres · cómo trabajas · resultados) y el link correcto. El que ve tu anuncio te googlea — que encuentre a un profesional. Sube captura de tu perfil terminado.',
+        tipo: 'COACH',
+        es_estrella: false,
+        tiempo_estimado: '45 min',
+        orden: 3.5,
+        dia_asignado: 22,
+        usa_ia: true,
+        adn_field: 'adn_perfil_ig',
+        entrenador: 'mateo',
+      },
+      {
         codigo: 'P4.3',
-        titulo: 'Graba 3 piezas y validalas con datos REALES',
-        descripcion: 'Regla de Javo: "No corro publicidad sin validar. Perdí $150.000 por esto." Pero con una cuenta chica, el orgánico solo no alcanza como señal — así que validamos con datos pagados y baratos: publicás las 3 piezas orgánico (gratis, construye tu perfil) Y las corrés como 3 anuncios de $2/día durante 5 días. El algoritmo de Meta te dice cuál GANA con números reales, no con corazonadas. Mateo te arma los guiones; Caro te enseña a grabar.',
+        titulo: 'Graba 3 piezas y valídalas con datos REALES',
+        descripcion: 'Regla de Javo: "No corro publicidad sin validar. Perdí $150.000 por esto." Pero con una cuenta chica, el orgánico solo no alcanza como señal — así que validamos con datos pagados y baratos: publicas las 3 piezas orgánico (gratis, construye tu perfil) Y las corrés como 3 anuncios de $2/día durante 5 días. El algoritmo de Meta te dice cuál GANA con números reales, no con corazonadas. Mateo te arma los guiones; Caro te enseña a grabar.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '5 días (en paralelo)',
@@ -560,7 +573,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         entrenador: 'mateo',
         checklist: [
           'Pídele a Mateo 3 guiones cortos basados en tu copy (dolor · autoridad · resultado)',
-          'Antes de grabar, 10 min con Caro: encuadre, luz y presencia (si te da vergüenza: primero audio, después cámara sin publicar, después publicás — 3 escalones)',
+          'Antes de grabar, 10 min con Caro: encuadre, luz y presencia (si te da vergüenza: primero audio, después cámara sin publicar, después publicas — 3 escalones)',
           'Graba las 3 piezas (cortas: 30-60 segundos cada una)',
           'Publícalas orgánico en tu red principal (gratis, suma siempre)',
           'Con Sofi: sube las 3 como anuncios — $2/día cada uno, 5 días (~$30 total)',
@@ -648,8 +661,21 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         ],
       },
       {
+        codigo: 'P4.6',
+        titulo: 'El anuncio follow-me',
+        descripcion: 'Además de la campaña CTWA que trae interesados a tu WhatsApp, corre en paralelo un anuncio pequeño ($1-2/día) cuyo único objetivo es que la gente correcta SIGA tu perfil. Usa tu mejor pieza ya validada. Cada seguidor correcto es un futuro paciente calentándose solo. Sube captura del anuncio configurado.',
+        tipo: 'COACH',
+        es_estrella: false,
+        tiempo_estimado: '30 min',
+        orden: 7.5,
+        dia_asignado: 28,
+        usa_ia: true,
+        adn_field: 'adn_anuncio_followme',
+        entrenador: 'ramiro',
+      },
+      {
         codigo: 'P4.4',
-        titulo: '◆ ESCALA LA GANADORA — tu campaña real',
+        titulo: '◆ ESCALA LA GANADORA — tu campaña CTWA real',
         descripcion: 'El momento que cambia todo. Apagás las 2 perdedoras y tu pieza CAMPEONA sube a $5-8/día como campaña a WhatsApp — donde tu agente ya espera para filtrar y agendar. Sube el screenshot de la campaña activa — un Entrenador lo verifica y ganas Verde punta azul: la planta se estira al cielo. Desde hoy, cada persona interesada cae directo en MI CLÍNICA: ahí las ves conversando, agendadas, y convertidas en pacientes. Tu Motor Dinero quedó encendido. Desde hoy, tus interesados caen en Mi Clínica (sección Personas) — tu Motor Dinero acaba de encenderse.',
         tipo: 'COACH',
         es_estrella: true,
@@ -802,7 +828,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'rojo',
     hito_mensaje: '🥋 Cinturón ROJO — el fruto maduró. Cobraste tu primer paciente por el sistema. El mártir quedó atrás.',
     hito_tipo: 'milestone',
-    mentor_pregunta: '¿Quién sos ahora que ya no podés decir que no se puede?',
+    mentor_pregunta: '¿Quién eres ahora que ya no puedes decir que no se puede?',
     metas: [
       {
         codigo: 'P6.1',

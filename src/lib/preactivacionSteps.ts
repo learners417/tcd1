@@ -34,7 +34,7 @@ export const SECTIONS: PreactivacionSection[] = [
     items: [
       { id: 'pacto', lbl: 'Pacto\nfirmado', title: 'El Pacto firmado', detail: 'Su promesa escrita y firmada en el onboarding. <strong>Sin pacto no hay camino.</strong>', meta: 'P0.4' },
       { id: 'foto_partida', lbl: 'Foto de\nPartida', title: 'Foto de Partida', detail: 'Su autoevaluación inicial completa — el ANTES contra el que se mide todo.', meta: 'P0.2' },
-      { id: 'quema', lbl: 'LA\nQUEMA', title: 'La Quema (con evidencia)', detail: 'La creencia raíz quemada, <strong>con foto de las cenizas subida</strong>.', meta: 'P1.3' },
+      { id: 'quema', lbl: 'LA\nQUEMA', title: 'LA QUEMA 🔥 (D4 · foto) (con evidencia)', detail: 'La creencia raíz quemada, <strong>con foto de las cenizas subida</strong>.', meta: 'P1.3' },
       { id: 'numero', lbl: 'EL\nNÚMERO', title: 'El Número (su precio)', detail: 'Su precio digno calculado y <strong>dicho en voz alta (audio subido)</strong>.', meta: 'P1.5' },
       { id: 'metodo', lbl: 'Método\ncon nombre', title: 'El Método con su nombre', detail: 'Su proceso destilado en 3-5 pasos con nombre propio.', meta: 'P2.4' },
       { id: 'avatar', lbl: 'Avatar\ndefinido', title: 'El avatar', detail: 'La persona exacta: quién es, qué le duele, qué dice después de sesión.', meta: 'P2.3' },
@@ -55,6 +55,8 @@ export const SECTIONS: PreactivacionSection[] = [
       { id: 'agenda', lbl: 'Agenda\ncon horarios', title: 'La agenda', detail: 'Calendario con sus horarios reales, link funcionando.', meta: 'P4.5' },
       { id: 'cobro', lbl: 'Cobro\nconfigurado', title: 'El cobro', detail: 'Su forma de cobrar lista (link, transferencia, pasarela).', meta: 'P4.5' },
       { id: 'landing', lbl: 'Landing\npublicada', title: 'La landing', detail: 'Su página con la oferta, publicada y abriendo.', meta: 'P4.2' },
+  { id: 'perfil_ig', label: 'Perfil IG optimizado (D22)', meta: 'P4.2b', fase: 'sistema' } as never,
+  { id: 'followme', label: 'Anuncio follow-me corriendo (D28)', meta: 'P4.6', fase: 'sistema' } as never,
       { id: 'dominio', lbl: 'DOMINIO\nconectado', title: 'El dominio (DNS ok)', detail: 'Su dirección digital propia, conectada y propagada.', meta: 'P4.5b' },
     ],
   },
