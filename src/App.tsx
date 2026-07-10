@@ -20,6 +20,7 @@ import ADN from './pages/ADN';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
+import { cinturonDesdeProgreso } from './lib/cinturones';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -66,6 +67,17 @@ function loadCurrentPage(): string {
 }
 
 type AuthState = 'loading' | 'logged_out' | 'logged_in';
+
+
+function PaginaBloqueada({ nombre }: { nombre: string }) {
+  return (
+    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
+      <p className="text-4xl mb-4">🔒</p>
+      <h2 className="text-lg text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
+      <p className="text-sm text-[#F2EFE9]/55">Se desbloquea con el <span className="text-[#F4B65C]">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
+    </div>
+  );
+}
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>(loadCurrentPage);
@@ -428,14 +440,26 @@ export default function App() {
                 setCurrentPage={setCurrentPage}
               />
             )}
-            {currentPage === 'campanas' && (
+            {currentPage === 'campanas' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="Campañas & Creativos" />;
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'campanas' && (
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
                 geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
               />
             )}
-            {currentPage === 'creador' && (
+            {currentPage === 'creador' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="El Creador de Contenido" />;
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'creador' && (
               <CreadorContenido
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
@@ -575,7 +599,21 @@ export default function App() {
                 {settingsTab === 'seguridad' && (
                   <div className="space-y-6">
                     <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Seguridad</h3>
-                    <p className="text-sm text-[#F2EFE9]/60">Para cambiar tu contraseña, pedile a tu coach que te envíe un email de restablecimiento.</p>
+                    <div>
+                      <p className="text-sm text-[#F2EFE9]/60 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
+                      <button
+                        onClick={async () => {
+                          const email = supabaseProfile?.email;
+                          if (!email || !supabase) return;
+                          const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+                          if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
+                          else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
+                        }}
+                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-[#E8962E] text-sm hover:bg-[#E8962E]/10 transition-colors"
+                      >
+                        Enviarme el email de restablecimiento
+                      </button>
+                    </div>
                   </div>
                 )}
 

@@ -536,7 +536,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             {(() => {
               const ident = identidadDe(agenteActivo.id);
               return ident ? (
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}>{ident.emoji}</div>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}><span className="text-[18px] font-bold text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span></div>
               ) : (IconActivo && <IconActivo className="w-6 h-6 text-[#E8962E]" />);
             })()}
             <div>
@@ -719,15 +719,15 @@ interface AgenteCardProps {
 // ═══ LAS IDENTIDADES — cada entrenador con su mundo (ZIP humano) ═══
 // Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
 // 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
-const IDENTIDADES: Record<string, { emoji: string; frase: string; anillo: string }> = {
-  sofi:   { emoji: '🌷', frase: 'Te entreno a conversar con pacientes sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(244,114,182,0.35)' },
-  caro:   { emoji: '🎬', frase: 'El miedo a la cámara se entrena jugando. Conmigo grabas sin morir en el intento.', anillo: 'rgba(244,114,182,0.35)' },
-  vera:   { emoji: '✨', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(244,114,182,0.35)' },
-  ramiro: { emoji: '📊', frase: 'Tus números me emocionan. Medimos, ajustamos, escalamos — sin drama.', anillo: 'rgba(96,165,250,0.35)' },
-  lucas:  { emoji: '🔧', frase: 'Lo técnico sin sufrimiento. Paso a paso, clic a clic, hasta que funciona.', anillo: 'rgba(96,165,250,0.35)' },
-  bruno:  { emoji: '🌳', frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.', anillo: 'rgba(96,165,250,0.35)' },
-  diego:  { emoji: '🤝', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(232,150,46,0.40)' },
-  mateo:  { emoji: '✍️', frase: 'Hooks, guiones y contenido que suena a ti — cero humo, cero plantillas.', anillo: 'rgba(232,150,46,0.40)' },
+const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: string }> = {
+  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con pacientes sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
+  caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'rgba(232,150,46,0.45)' },
+  vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(232,150,46,0.45)' },
+  ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, escalamos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },
+  lucas:  { inicial: 'L', frase: 'Lo técnico sin sufrimiento. Paso a paso, hasta que funciona.', anillo: 'rgba(96,165,250,0.40)' },
+  bruno:  { inicial: 'B', frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.', anillo: 'rgba(96,165,250,0.40)' },
+  diego:  { inicial: 'D', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(244,182,92,0.50)' },
+  mateo:  { inicial: 'M', frase: 'Guiones y contenido que suenan a ti — cero humo, cero plantillas.', anillo: 'rgba(244,182,92,0.50)' },
 };
 const identidadDe = (agenteId: string) => {
   const key = Object.keys(IDENTIDADES).find((k) => agenteId.includes(k));
@@ -769,10 +769,10 @@ function AgenteCard({
           if (ident) {
             return (
               <div
-                className={`w-11 h-11 rounded-full flex items-center justify-center text-[22px] shrink-0 border-2 bg-black/30 ${unlocked ? '' : 'grayscale opacity-50'}`}
+                className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30 ${unlocked ? '' : 'opacity-40'}`}
                 style={{ borderColor: unlocked ? ident.anillo : 'rgba(255,255,255,0.10)' }}
               >
-                {ident.emoji}
+                <span className={`text-[19px] font-bold ${unlocked ? 'text-[#F2EFE9]' : 'text-white/40'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
               </div>
             );
           }

@@ -71,9 +71,9 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             return (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111110] px-6 text-center">
                 <Play className="w-12 h-12 text-[#E8962E]/50 mb-3" />
-                <p className="text-sm text-[#F2EFE9]/70">Este contenido llega pronto</p>
+                <p className="text-sm text-[#F2EFE9]/80">🎬 El video de esta sesión está en producción</p>
                 <p className="text-xs text-[#F2EFE9]/45 mt-2 leading-relaxed max-w-sm">
-                  Mientras tanto, tu Mentor te lo cuenta en 5 minutos: abre el chat y dile que vienes por esta tarea.
+                  No te frena nada: la instrucción completa está aquí abajo, y tu Mentor conoce esta lección entera — pregúntale lo que necesites.
                 </p>
               </div>
             );

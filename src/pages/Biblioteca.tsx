@@ -244,12 +244,32 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
       </div>
     );
   }
+  return <RecursoVideoInApp r={r} />;
+}
+
+
+/** El video del método, SIEMPRE dentro de la app (nunca te saca a YouTube). */
+function RecursoVideoInApp({ r }: { r: RecursoADN }) {
+  const [abierto, setAbierto] = useState(false);
   return (
-    <a href={`https://youtu.be/${r.youtubeId}`} target="_blank" rel="noreferrer" className="block rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-[#E8962E]/8 to-transparent p-4 hover:border-[#E8962E]/45 transition-all fade-rise">
-      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1">▶ Video del método</p>
-      <p className="text-sm text-[#F2EFE9]/90 font-medium">{r.titulo}</p>
-      <p className="text-[11px] text-[#F2EFE9]/40 mt-1">Toca para ver en YouTube</p>
-    </a>
+    <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-[#E8962E]/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
+      <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-[#E8962E]/5 transition-colors">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1">▶ Video del método</p>
+        <p className="text-sm text-[#F2EFE9]/90 font-medium">{r.titulo}</p>
+        <p className="text-[11px] text-[#F2EFE9]/40 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
+      </button>
+      {abierto && (
+        <div className="aspect-video w-full bg-black">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${r.youtubeId}?rel=0&modestbranding=1`}
+            title={r.titulo}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -9,6 +9,7 @@
  * (mapeados vía `adn_field` en roadmapSeed.ts).
  */
 
+import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ChevronDown,
@@ -209,7 +210,7 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                         D45
                       </span>
                     )}
-                    <span className="text-[10px] text-[#F2EFE9]/30 font-mono">{campo.pilarOrigen}</span>
+                    <span className="text-[10px] text-[#F2EFE9]/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>
                   </div>
                 </div>
                 {completo ? (
@@ -224,7 +225,7 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                   <p className="text-xs text-[#F2EFE9]/30 pl-5 italic">
                     {campo.pending
                       ? 'Campo nuevo · se llenará cuando completes el pilar correspondiente.'
-                      : `Se completa en ${campo.pilarOrigen}.`}
+                      : `Se completa con «${nombreDePaso(campo.pilarOrigen)}» en El Camino.`}
                   </p>
                 )}
               </div>
@@ -238,6 +239,15 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+
+
+// El nombre humano de cada paso (el cliente jamás ve "P2.3")
+const NOMBRE_PASO: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const p of SEED_ROADMAP_V3) for (const m of p.metas) map[m.codigo] = m.titulo;
+  return map;
+})();
+const nombreDePaso = (codigo: string) => NOMBRE_PASO[codigo] ?? 'El Camino';
 
 export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
@@ -353,6 +363,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
           ADN del Negocio
         </h1>
+          <p className="text-sm text-[#F2EFE9]/55 mt-1">El producto de tus 90 días: <span className="text-[#F4B65C]">tu ADN validado</span> — la data que te permite generar 10 pacientes de $1.000 todos los meses. Se construye solo, desde El Camino: cada respuesta que das lo pule. Aquí no se edita — aquí se contempla lo que ya es tuyo.</p>
         <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Tu ADN no se edita acá — <strong className="text-[#F2EFE9]/75">se construye desde El Camino</strong>, ejercicio a ejercicio. Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
         <p className="text-[#F2EFE9]/60 max-w-2xl">
           <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,

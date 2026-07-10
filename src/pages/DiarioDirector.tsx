@@ -208,6 +208,14 @@ export default function DiarioDirector({
   geminiKey?: string;
 }) {
   const [entries, setEntries] = useState<EntradaDiario[]>([]);
+  // El cronómetro señuelo: demuestra que el cierre se hace en 3 minutos (no envía solo)
+  const [cronoSegundos, setCronoSegundos] = useState(180);
+  const [cronoActivo, setCronoActivo] = useState(false);
+  useEffect(() => {
+    if (!cronoActivo || cronoSegundos <= 0) return;
+    const t = setInterval(() => setCronoSegundos((v) => Math.max(0, v - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cronoActivo, cronoSegundos]);
   const [resumen, setResumen] = useState<ResumenSemana | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -375,7 +383,7 @@ export default function DiarioDirector({
 
       setGenerandoResumen(true);
       try {
-        const prompt = `Eres el Coach de "Tu Clínica Digital". Analizá las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
+        const prompt = `Eres el Coach de "Tu Clínica Digital". Eres master coach especialista en PNL, neurociencia y emprendimiento. Analiza las entradas del Diario del Fundador de esta semana y devolvé un resumen de patrones en JSON.
 
 ENTRADAS:
 ${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
@@ -451,6 +459,13 @@ Devolvé SOLO este JSON:
               return null;
             })()}
           </p>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5" onClick={() => setCronoActivo(true)}>
+            <span className="text-[13px]">⏱</span>
+            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-[#22C55E]' : cronoActivo ? 'text-[#F4B65C]' : 'text-[#F2EFE9]/60'}`}>
+              {Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}
+            </span>
+            <span className="text-[10px] text-[#F2EFE9]/40">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos — se puede' : 'toca para arrancar · 3 min y listo'}</span>
+          </div>
           <p className="text-[11px] text-[#F2EFE9]/40 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas. El cierre del día es parte del método.</p>
         </div>
         <div className="flex items-center gap-3">
