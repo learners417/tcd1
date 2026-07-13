@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
+import AdnPrint from '../components/AdnPrint';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V8 } from '../lib/roadmapSeed';
@@ -287,6 +288,9 @@ const BADGE_ESTADO: Record<Exclude<EstadoCampo, 'vacio'>, { label: string; cls: 
 
 export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
+  const [propSec, setPropSec] = useState<string>('');
+  const [propTxt, setPropTxt] = useState('');
+  const [propSending, setPropSending] = useState(false);
   const [seccionesExpandidas, setSeccionesExpandidas] = usePersistedState<Set<ADNSeccionCodigo>>(
     'tcd_adn_secciones',
     () => new Set(['IRR']),
@@ -489,6 +493,73 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
             onToggle={() => toggleSeccion(seccion.codigo)}
           />
         ))}
+      </div>
+
+      {/* ── Descargar como PDF ── */}
+      <div className="flex justify-center pt-2">
+        <AdnPrint
+          nombreCliente={(mergedPerfil.nombre as string) ?? 'Tu clínica'}
+          especialidad={(mergedPerfil.especialidad as string) ?? undefined}
+          version="v8"
+          secciones={SECCIONES_VIVAS.map((s) => ({
+            titulo: s.titulo,
+            subtitulo: s.codigo,
+            campos: s.campos
+              .map((c) => ({ label: c.label, valor: formatearValor(getADNValor(mergedPerfil, c)) }))
+              .filter((c) => c.valor && c.valor.trim() && c.valor.trim() !== '—'),
+          })).filter((s) => s.campos.length > 0)}
+        />
+      </div>
+
+      {/* ── Proponer un ajuste (el ADN se trabaja junto al mentor) ── */}
+      <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 mt-4">
+        <h3 className="text-sm font-semibold text-[#F2EFE9] mb-1">¿Ves algo para ajustar?</h3>
+        <p className="text-xs text-[#F2EFE9]/40 mb-4">
+          Tu ADN se trabaja junto a tu mentor. Contanos qué cambiarías y lo revisan juntos en tu próxima sesión.
+        </p>
+        <div className="space-y-3">
+          <CustomSelect
+            value={propSec}
+            onChange={setPropSec}
+            placeholder="¿Sobre qué sección?"
+            options={SECCIONES_VIVAS.map((s) => ({ value: s.codigo, label: s.titulo }))}
+            className="w-full"
+          />
+          <textarea
+            value={propTxt}
+            onChange={(e) => setPropTxt(e.target.value)}
+            placeholder="¿Qué cambiarías y por qué?"
+            rows={3}
+            className="w-full bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/20 focus:outline-none focus:border-[#E8962E]/50 resize-none"
+          />
+          <button
+            onClick={async () => {
+              if (!propTxt.trim() || !propSec) { toast.error('Elegí la sección y contanos el ajuste'); return; }
+              if (!supabase || !userId) { toast.error('Sesión no disponible'); return; }
+              setPropSending(true);
+              try {
+                const secTitulo = SECCIONES_VIVAS.find((s) => s.codigo === propSec)?.titulo ?? propSec;
+                const { error } = await supabase.from('mensajes').insert({
+                  canal: 'privado',
+                  emisor_id: userId,
+                  receptor_id: null,
+                  contenido: `📝 PROPUESTA DE AJUSTE AL ADN · [${secTitulo}]\n${propTxt.trim()}`,
+                });
+                if (error) throw error;
+                toast.success('Propuesta enviada a tu mentor 🙌');
+                setPropTxt(''); setPropSec('');
+              } catch (e: unknown) {
+                toast.error(e instanceof Error ? e.message : 'No se pudo enviar');
+              } finally {
+                setPropSending(false);
+              }
+            }}
+            disabled={propSending}
+            className="w-full py-2.5 rounded-xl bg-[#E8962E]/15 border border-[#E8962E]/30 hover:bg-[#E8962E]/25 disabled:opacity-50 text-[#E8962E] text-sm font-bold transition-all"
+          >
+            {propSending ? 'Enviando...' : 'Enviar propuesta a mi mentor'}
+          </button>
+        </div>
       </div>
 
       <p className="text-xs text-[#F2EFE9]/30 text-center pt-4">

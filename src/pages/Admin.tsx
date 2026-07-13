@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
@@ -2074,6 +2075,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          <AdnPermisosControl
+                            clienteId={selectedCliente.id}
+                            agentesActuales={selectedCliente.agentes_activos ?? []}
+                            modulosActuales={selectedCliente.modulos_activos ?? []}
+                            onSaved={() => { void cargarClientes(); }}
+                          />
                           <div className="grid grid-cols-4 gap-3">
                             <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-[#F2EFE9]">{selectedCliente.dia_programa}</p>

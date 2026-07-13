@@ -29,6 +29,8 @@ export interface Profile {
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
+  agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
+  modulos_activos?: string[];   // override admin: 'campanas', 'creativos'
   /**
    * Código ISO-like del país del profesional (ver src/lib/vozLocalizada.ts).
    * Se usa para que la IA adapte el dialecto (voseo/tuteo) del contenido

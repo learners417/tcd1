@@ -169,7 +169,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
             <nav className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive = currentPage === item.id;
-                const locked = typeof (item as { minCinturon?: number }).minCinturon === 'number' && data.cinturon.orden < (item as { minCinturon?: number }).minCinturon!;
+                const modulosOverride = ((data.profile as { modulos_activos?: string[] })?.modulos_activos) ?? [];
+                const moduloKey = item.id === 'creador' ? 'creativos' : item.id;
+                const lockedPorCinturon = typeof (item as { minCinturon?: number }).minCinturon === 'number' && data.cinturon.orden < (item as { minCinturon?: number }).minCinturon!;
+                const locked = lockedPorCinturon && !modulosOverride.includes(moduloKey);
                 return (
                   <button
                     key={item.id}

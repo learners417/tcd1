@@ -83,6 +83,11 @@ export function checkAgentUnlock(
 ): UnlockResult {
   if (perfil.full_agent_access === true) return { unlocked: true };
 
+  // Activación granular por el admin (chips en la ficha del cliente)
+  const activos = perfil.agentes_activos ?? [];
+  if (activos.includes('todos')) return { unlocked: true };
+  if (activos.some((a) => a.length >= 3 && agente.id.includes(a))) return { unlocked: true };
+
   const todosCompletos = pilaresDesbloqueo(agente).every((p) =>
     isPilarCompletado(p, completadas),
   );
