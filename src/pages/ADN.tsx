@@ -25,6 +25,7 @@ import {
   Circle,
   AlertCircle,
   Dna,
+  Pencil,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -32,7 +33,7 @@ import AdnPrint from '../components/AdnPrint';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V8 } from '../lib/roadmapSeed';
-import {
+import { type ADNCampo,
   ADN_SCHEMA_V8,
   calcularCompletitudSeccion,
   calcularCompletitudTotal,
@@ -136,8 +137,32 @@ interface TarjetaSeccionProps {
   onToggle: () => void;
 }
 
-function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccionProps) {
+function TarjetaSeccion({ seccion, perfil, expandida, onToggle, onFieldSaved }: TarjetaSeccionProps & { onFieldSaved?: (fields: Record<string, unknown>) => void }) {
   const Icon = ICONOS_SECCION[seccion.codigo] ?? Dna;
+  const permisosADN = (perfil.adn_edit_secciones as string[] | undefined) ?? [];
+  const puedeEditar = permisosADN.includes('todas') || permisosADN.includes(seccion.codigo);
+  const [editCodigo, setEditCodigo] = useState<string | null>(null);
+  const [editVal, setEditVal] = useState('');
+  const [guardandoCampo, setGuardandoCampo] = useState(false);
+
+  async function guardarCampo(campo: ADNCampo) {
+    if (!supabase || !campo.profileKey) return;
+    setGuardandoCampo(true);
+    try {
+      const { error } = await supabase.rpc('user_update_adn', {
+        seccion: seccion.codigo,
+        updates: { [campo.profileKey]: editVal },
+      });
+      if (error) throw error;
+      toast.success('Campo actualizado ✓');
+      onFieldSaved?.({ [campo.profileKey]: editVal });
+      setEditCodigo(null);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'No se pudo guardar');
+    } finally {
+      setGuardandoCampo(false);
+    }
+  }
   const { completos, total, porcentaje } = calcularCompletitudSeccion(perfil, seccion);
 
   return (
@@ -209,6 +234,15 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                     <p className="text-sm text-[#F2EFE9]/90 font-medium truncate">{campo.label}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {puedeEditar && campo.profileKey && !campo.pending && (valor == null || typeof valor === 'string') && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditCodigo(campo.codigo); setEditVal(typeof valor === 'string' ? valor : ''); }}
+                        className="p-1 rounded-md text-[#E8962E]/50 hover:text-[#E8962E] hover:bg-[#E8962E]/10 transition-all"
+                        title="Editar este campo"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    )}
                     {campo.criticoDia45 && (
                       <span className="text-[9px] uppercase tracking-widest text-[#E8962E] font-semibold">
                         D45
@@ -226,7 +260,26 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                     })()}
                   </div>
                 </div>
-                {completo ? (
+                {editCodigo === campo.codigo ? (
+                  <div className="mt-2 pl-5 space-y-2">
+                    <textarea
+                      value={editVal}
+                      onChange={(e) => setEditVal(e.target.value)}
+                      rows={5}
+                      className="w-full bg-[#080808] border border-[#E8962E]/30 rounded-xl px-3 py-2 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/60 resize-y"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={() => guardarCampo(campo)} disabled={guardandoCampo}
+                        className="px-4 py-1.5 rounded-lg bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-black text-xs font-bold transition-all">
+                        {guardandoCampo ? 'Guardando…' : 'Guardar'}
+                      </button>
+                      <button onClick={() => setEditCodigo(null)}
+                        className="px-4 py-1.5 rounded-lg text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : completo ? (
                   <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/60 text-sm mt-1 pl-5">
                     {typeof valor === 'string' && valor.length > 400 ? (
                       <Markdown>{valor}</Markdown>
@@ -489,6 +542,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
             key={seccion.codigo}
             seccion={seccion}
             perfil={mergedPerfil}
+            onFieldSaved={(fields) => onProfileFieldUpdate?.(fields)}
             expandida={seccionesExpandidas.has(seccion.codigo)}
             onToggle={() => toggleSeccion(seccion.codigo)}
           />

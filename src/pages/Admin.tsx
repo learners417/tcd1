@@ -2079,6 +2079,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             clienteId={selectedCliente.id}
                             agentesActuales={selectedCliente.agentes_activos ?? []}
                             modulosActuales={selectedCliente.modulos_activos ?? []}
+                            adnActuales={selectedCliente.adn_edit_secciones ?? []}
                             onSaved={() => { void cargarClientes(); }}
                           />
                           <div className="grid grid-cols-4 gap-3">
