@@ -1,18 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Lock, Unlock, Bot, FileText } from 'lucide-react';
+import { Lock, Unlock, Bot, LayoutGrid } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-
-// SECCIONES_ADN: referencia para el PDF y el 'Proponer ajuste' (ya no hay chips de edición)
-const SECCIONES_ADN = [
-  { id: 'P1-P3',  label: 'C·L — Conciencia y Liberación' },
-  { id: 'P4-P5',  label: 'I — Identidad' },
-  { id: 'P6-P7',  label: 'N — Narrativa' },
-  { id: 'P8-P9',  label: 'I — Instalación' },
-  { id: 'P10',    label: 'C — Cobro' },
-  { id: 'P11',    label: 'A — Autonomía' },
-  { id: 'marca',  label: 'Identidad de marca' },
-];
 
 const AGENTES = [
   { id: 'mentor', label: 'Mentor' },  { id: 'diego', label: 'Diego · método' },
@@ -22,21 +11,27 @@ const AGENTES = [
   { id: 'ramiro', label: 'Ramiro · métricas' },
 ];
 
+const MODULOS = [
+  { id: 'campanas',  label: 'Campañas' },
+  { id: 'creativos', label: 'Creativos' },
+];
+
 interface Props {
   clienteId: string;
-  agentesActuales: string[];     // profiles.agentes_activos
+  agentesActuales?: string[];   // profiles.agentes_activos
+  modulosActuales?: string[];   // profiles.modulos_activos
   onSaved?: () => void;
 }
 
 function ChipGroup({ titulo, icon, items, activos, master, onToggle }: {
   titulo: string; icon: React.ReactNode;
   items: { id: string; label: string }[];
-  activos: string[]; master: string;
+  activos: string[]; master?: string;
   onToggle: (next: string[]) => void;
 }) {
-  const allOn = activos.includes(master);
+  const allOn = master ? activos.includes(master) : false;
   const toggle = (id: string) => {
-    if (id === master) return onToggle(allOn ? [] : [master]);
+    if (master && id === master) return onToggle(allOn ? [] : [master]);
     const base = activos.filter(a => a !== master);
     onToggle(base.includes(id) ? base.filter(a => a !== id) : [...base, id]);
   };
@@ -48,13 +43,15 @@ function ChipGroup({ titulo, icon, items, activos, master, onToggle }: {
         {icon}{titulo}
       </p>
       <div className="flex flex-wrap gap-1.5">
-        <button onClick={() => toggle(master)}
-          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all ${
-            allOn ? 'bg-[#E8962E] text-black border-[#E8962E]'
-                  : 'border-[rgba(232,150,46,0.25)] text-[#E8962E]/70 hover:text-[#E8962E]'}`}>
-          {allOn ? <Unlock className="w-3 h-3 inline mr-1" /> : <Lock className="w-3 h-3 inline mr-1" />}
-          {master === 'todas' ? 'Todas las secciones' : 'Todos los agentes'}
-        </button>
+        {master && (
+          <button onClick={() => toggle(master)}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all ${
+              allOn ? 'bg-[#E8962E] text-black border-[#E8962E]'
+                    : 'border-[rgba(232,150,46,0.25)] text-[#E8962E]/70 hover:text-[#E8962E]'}`}>
+            {allOn ? <Unlock className="w-3 h-3 inline mr-1" /> : <Lock className="w-3 h-3 inline mr-1" />}
+            Todos
+          </button>
+        )}
         {items.map(it => (
           <button key={it.id} onClick={() => toggle(it.id)} disabled={allOn}
             className={`px-3 py-1.5 rounded-full text-[11px] border transition-all disabled:opacity-50 ${
@@ -68,8 +65,9 @@ function ChipGroup({ titulo, icon, items, activos, master, onToggle }: {
   );
 }
 
-export default function AdnPermisosControl({ clienteId, agentesActuales, onSaved }: Props) {
+export default function AdnPermisosControl({ clienteId, agentesActuales, modulosActuales, onSaved }: Props) {
   const [agentes, setAgentes] = useState<string[]>(agentesActuales ?? []);
+  const [modulos, setModulos] = useState<string[]>(modulosActuales ?? []);
   const [saving, setSaving] = useState(false);
 
   async function guardar() {
@@ -77,7 +75,7 @@ export default function AdnPermisosControl({ clienteId, agentesActuales, onSaved
     try {
       const { error } = await supabase.rpc('admin_migrate_profile', {
         target_user_id: clienteId,
-        updates: { agentes_activos: agentes },
+        updates: { agentes_activos: agentes, modulos_activos: modulos },
       });
       if (error) throw error;
       toast.success('Permisos actualizados');
@@ -91,12 +89,14 @@ export default function AdnPermisosControl({ clienteId, agentesActuales, onSaved
 
   return (
     <div className="bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
-      <h3 className="text-sm font-semibold text-[#F2EFE9] mb-4">Permisos del cliente</h3>
+      <h3 className="text-sm font-semibold text-[#F2EFE9] mb-4">Accesos del cliente</h3>
       <ChipGroup titulo="Agentes activos" icon={<Bot className="w-3 h-3" />}
         items={AGENTES} activos={agentes} master="todos" onToggle={setAgentes} />
+      <ChipGroup titulo="Módulos habilitados" icon={<LayoutGrid className="w-3 h-3" />}
+        items={MODULOS} activos={modulos} onToggle={setModulos} />
       <button onClick={guardar} disabled={saving}
         className="w-full mt-2 py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-black text-sm font-bold transition-all">
-        {saving ? 'Guardando...' : 'Guardar permisos'}
+        {saving ? 'Guardando...' : 'Guardar accesos'}
       </button>
     </div>
   );
