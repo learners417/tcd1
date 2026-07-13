@@ -29,6 +29,8 @@ export interface Profile {
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
+  agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
+  modulos_activos?: string[];   // override admin: 'campanas', 'creativos'
   /**
    * Código ISO-like del país del profesional (ver src/lib/vozLocalizada.ts).
    * Se usa para que la IA adapte el dialecto (voseo/tuteo) del contenido
@@ -241,6 +243,8 @@ export interface ProfileV2 extends Profile {
   adn_proceso_actual?: string;         // P7.2 — proceso documentado
   adn_landing_copy?: string;           // P9A.2
   adn_anuncios?: string;               // P9A.3 — 3 versiones de anuncios
+  adn_perfil_ig?: string | null;
+  adn_anuncio_followme?: string | null;
   adn_protocolo_servicio?: string;     // P9C.2
   adn_identidad_sistema?: string;      // P10.2 — sistema completo de identidad
   // ── ADN v7 — Campos nuevos del documento maestro (migración pendiente) ───
@@ -348,14 +352,14 @@ export type TipoTarea = 'VIDEO' | 'HERRAMIENTA' | 'COACH';
 export type MetaCodigo =
   // P0 · Onboarding (v8 · 5 tareas)
   | 'P0.0' | 'P0.1' | 'P0.2' | 'P0.3' | 'P0.4'
-  // P1 · Historia (v8 · 5 tareas, agrega P1.2b)
-  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4'
+  // P1 · Sanar el Dinero (rediseño 4 fases · protocolo de 7 días)
+  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4' | 'P1.5' | 'P1.6'
   // P2 · Propósito (v8 · 6 tareas, agrega P2.4/P2.5, COACH a P2.6)
   | 'P2.1' | 'P2.2' | 'P2.3' | 'P2.4' | 'P2.5' | 'P2.6'
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
-  | 'P4.1' | 'P4.2' | 'P4.3' | 'P4.4' | 'P4.5'
+  | 'P4.1' | 'P4.2' | 'P4.2b' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)
@@ -373,7 +377,14 @@ export type MetaCodigo =
   // P10 · Identidad Visual (sin cambios)
   | 'P10.1' | 'P10.2' | 'P10.3'
   // P11 · Análisis (sin cambios)
-  | 'P11.1' | 'P11.2';
+  | 'P11.1' | 'P11.2'
+  | 'P3.5'
+  | 'P4.3b'
+  | 'P4.3c'
+  | 'P4.3d'
+  | 'P4.5b'
+  | 'P5.5'
+  | 'P6.4';
 
 /** @deprecated Usar MetaCodigo (V3). Mantener para migración de datos existentes. */
 export type MetaCodigoV2 =

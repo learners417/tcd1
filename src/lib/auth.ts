@@ -89,5 +89,7 @@ export function syncProfileToLocalStorage(profile: Profile): void {
     especialidad: profile.especialidad ?? '',
     fecha_inicio: profile.fecha_inicio,
     plan: profile.plan,
+    modulos_activos: profile.modulos_activos ?? [],
+    agentes_activos: profile.agentes_activos ?? [],
   }));
 }

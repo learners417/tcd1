@@ -42,6 +42,32 @@ export interface UnlockResult {
 }
 
 /**
+ * REDISEÑO 4 FASES (jul 2026) — remapeo centralizado de desbloqueos.
+ * Los unlockPilares de cada config apuntan a pilares del modelo viejo
+ * (P8, P9A/B/C) que ya no existen en el seed nuevo. Este mapa los
+ * reemplaza según el plan validado 0-90:
+ *   Diego+Sofi → Amarillo (P1) · Vera → punta verde (P2) ·
+ *   Mateo+Caro → Verde (P3) · Bruno+Lucas → punta azul (P4) ·
+ *   Ramiro → Azul (P5). El Coach no pasa por acá (siempre activo).
+ */
+const NUEVO_UNLOCK: Array<{ match: string; pilares: PilarId[] }> = [
+  { match: 'diego',  pilares: ['P1'] },
+  { match: 'sofi',   pilares: ['P1'] },
+  { match: 'vera',   pilares: ['P2'] },
+  { match: 'mateo',  pilares: ['P3'] },
+  { match: 'caro',   pilares: ['P3'] },
+  { match: 'bruno',  pilares: ['P4'] },
+  { match: 'lucas',  pilares: ['P4'] },
+  { match: 'ramiro', pilares: ['P5'] },
+];
+
+/** Pilares de desbloqueo efectivos: el remapeo nuevo si existe, si no la config. */
+function pilaresDesbloqueo(agente: ConfigAgente): PilarId[] {
+  const regla = NUEVO_UNLOCK.find((r) => agente.id.includes(r.match));
+  return regla ? regla.pilares : agente.unlockPilares;
+}
+
+/**
  * Verifica si un entrenador está desbloqueado para el sanador.
  *
  * Reglas:
@@ -57,7 +83,12 @@ export function checkAgentUnlock(
 ): UnlockResult {
   if (perfil.full_agent_access === true) return { unlocked: true };
 
-  const todosCompletos = agente.unlockPilares.every((p) =>
+  // Activación granular por el admin (chips en la ficha del cliente)
+  const activos = perfil.agentes_activos ?? [];
+  if (activos.includes('todos')) return { unlocked: true };
+  if (activos.some((a) => a.length >= 3 && agente.id.includes(a))) return { unlocked: true };
+
+  const todosCompletos = pilaresDesbloqueo(agente).every((p) =>
     isPilarCompletado(p, completadas),
   );
   if (!todosCompletos) return { unlocked: false, reason: agente.unlockReason };

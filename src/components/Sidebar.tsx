@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Map as RoadmapIcon, MessageSquare, TrendingUp, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine  } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
+import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
 interface SidebarProps {
   currentPage: string;
@@ -17,13 +18,14 @@ interface SidebarProps {
 function getSidebarData() {
   let profile = { nombre: 'Profesional', plan: 'Implementación', fecha_inicio: new Date().toISOString() };
   try {
-    const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+    let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
     if (p.nombre) profile.nombre = p.nombre;
     if (p.fecha_inicio) profile.fecha_inicio = p.fecha_inicio;
   } catch { /* noop */ }
 
   let progress = 0;
   let hasPending = false;
+  let cinturon: Cinturon = CINTURONES[0];
   try {
     const saved = localStorage.getItem('tcd_hoja_ruta_v2');
     const completadasSet = new Set<string>(saved ? JSON.parse(saved) : []);
@@ -37,12 +39,14 @@ function getSidebarData() {
       }
     }
     progress = total === 0 ? 0 : Math.round((comp / total) * 100);
+    cinturon = cinturonDesdeProgreso(completadasSet);
   } catch { /* noop */ }
 
   const diff = Math.floor((new Date().getTime() - new Date(profile.fecha_inicio).getTime()) / (1000 * 60 * 60 * 24));
   const semana = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+  const diaPrograma = Math.max(1, Math.min(90, diff + 1));
 
-  return { profile, progress, hasPending, semana };
+  return { profile, progress, hasPending, semana, diaPrograma, cinturon };
 }
 
 export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, onSignOut, messageBadge = 0, collapsed, onToggleCollapse, mobileOpen, onMobileClose }: SidebarProps) {
@@ -60,21 +64,22 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       title: 'PRINCIPAL',
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { id: 'roadmap', icon: RoadmapIcon, label: 'Hoja de Ruta', badge: data.hasPending },
-        { id: 'metrics', icon: TrendingUp, label: 'Métricas' },
+        { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
+        // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'adn', icon: Dna, label: 'ADN del Negocio' },
+        { id: 'coach', icon: Sparkles, label: 'Mentor IA' },
+        { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 },
       ]
     },
     {
       title: 'HERRAMIENTAS',
       items: [
-        { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
-        // { id: 'mensajes', icon: Users, label: 'Mensajes', badge: messageBadge > 0 }, // oculto hasta que la sección esté usable
-        { id: 'biblioteca', icon: Library, label: 'Biblioteca' },
+        { id: 'biblioteca', icon: Library, label: 'El Método' },
+        { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido' },
-        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos' },
+        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
+        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },
       ]
     },
     {
@@ -82,7 +87,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'ajustes', icon: Settings, label: 'Ajustes', action: onOpenSettings },
         { id: 'salir', icon: LogOut, label: 'Salir', action: () => {
-          if (window.confirm('¿Estás seguro de que querés salir?')) {
+          if (window.confirm('¿Estás seguro de que quieres salir?')) {
             onSignOut();
           }
         }},
@@ -94,15 +99,21 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 w-64 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${collapsed ? 'md:w-16' : 'md:w-64'} h-full flex flex-col py-6 transition-all duration-300 shrink-0 overflow-x-hidden border-r border-[rgba(245,166,35,0.15)] bg-[#0A0A0A]/90 backdrop-blur-xl`}
+      className={`fixed inset-y-0 left-0 z-50 w-64 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${collapsed ? 'md:w-16' : 'md:w-64'} h-full flex flex-col py-6 transition-all duration-300 shrink-0 overflow-x-hidden border-r border-[rgba(232,150,46,0.10)] bg-[#080808]/90 backdrop-blur-xl`}
     >
       {/* Logo */}
       <div className={`flex items-center mb-8 ${collapsed ? 'justify-center px-0' : 'px-6'}`}>
-        <div className="w-8 h-8 rounded-lg bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30 shrink-0">
-          <Hexagon className="w-4 h-4 text-[#F5A623] fill-[#F5A623]/20" />
+        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2" style={{ borderColor: 'rgba(232,150,46,0.45)', background: 'radial-gradient(circle at 30% 25%, rgba(244,182,92,0.22), rgba(232,150,46,0.06) 70%)' }}>
+          {/* El brote: la semilla del método que crece — de Blanco a Negro */}
+          <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none">
+            <path d="M12 20V11" stroke="#E8962E" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M12 12C12 8.5 9.5 6.5 6 6.5C6 10 8.5 12 12 12Z" fill="#E8962E" fillOpacity="0.85" />
+            <path d="M12 10C12 7 14.2 5 17.5 5C17.5 8.2 15.2 10.2 12 10Z" fill="#F4B65C" fillOpacity="0.9" />
+            <path d="M8 20h8" stroke="#E8962E" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.5" />
+          </svg>
         </div>
         {!collapsed && (
-          <span className="ml-3 font-semibold text-sm tracking-wide text-[#FFFFFF] truncate">
+          <span className="ml-3 font-semibold text-sm tracking-wide text-[#F2EFE9] truncate">
             Tu Clínica Digital
           </span>
         )}
@@ -112,24 +123,24 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       {!collapsed && (
         <div className="px-5 mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 border border-[#F5A623]/30 flex items-center justify-center shrink-0 text-xs font-bold text-[#F5A623]">
+            <div className="w-8 h-8 rounded-full bg-[#E8962E]/20 border border-[#E8962E]/30 flex items-center justify-center shrink-0 text-xs font-bold text-[#E8962E]">
               {initial}
             </div>
             <div className="min-w-0">
-              <p className="text-[#FFFFFF] text-sm font-medium truncate">{data.profile.nombre}</p>
-              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider truncate">Prog: {data.profile.plan}</p>
+              <p className="text-[#F2EFE9] text-sm font-medium truncate">{data.profile.nombre}</p>
+              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider truncate">Prog: {data.profile.plan}</p>
             </div>
           </div>
 
-          <div className="bg-[#1C1C1C]/60 border border-[rgba(245,166,35,0.15)] rounded-xl p-3 relative group">
+          <div className="bg-[#1A1917]/60 border border-[rgba(232,150,46,0.10)] rounded-xl p-3 relative group">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] text-[#FFFFFF]/50 font-medium tracking-wide">Semana {data.semana} de 13</span>
-              <span className="text-[10px] text-[#FFFFFF] font-medium">{data.progress}%</span>
+              <span className="text-[10px] text-[#F2EFE9]/50 font-medium tracking-wide">{data.cinturon.emoji} {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
+              <span className="text-[10px] text-[#F2EFE9] font-medium">{data.progress}%</span>
             </div>
-            <div className="h-1 bg-[#FFFFFF]/10 rounded-full overflow-hidden">
-              <div className="h-full bg-[#F5A623] rounded-full transition-all duration-1000" style={{ width: `${data.progress}%` }} />
+            <div className="h-1 bg-[#F2EFE9]/10 rounded-full overflow-hidden">
+              <div className="h-full bg-[#E8962E] rounded-full transition-all duration-1000" style={{ width: `${data.progress}%` }} />
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-full left-0 mt-2 w-full bg-[#1C1C1C] border border-[rgba(245,166,35,0.2)] text-[10px] text-[#FFFFFF]/70 p-2 rounded-lg shadow-xl pointer-events-none z-50">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-full left-0 mt-2 w-full bg-[#1A1917] border border-[rgba(232,150,46,0.12)] text-[10px] text-[#F2EFE9]/70 p-2 rounded-lg shadow-xl pointer-events-none z-50">
               ADN del Negocio: {data.progress}% completado
             </div>
           </div>
@@ -139,7 +150,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       {/* Collapsed avatar */}
       {collapsed && (
         <div className="flex justify-center mb-6">
-          <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 border border-[#F5A623]/30 flex items-center justify-center text-xs font-bold text-[#F5A623]">
+          <div className="w-8 h-8 rounded-full bg-[#E8962E]/20 border border-[#E8962E]/30 flex items-center justify-center text-xs font-bold text-[#E8962E]">
             {initial}
           </div>
         </div>
@@ -150,48 +161,53 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         {sections.map((section, sidx) => (
           <div key={sidx} className="w-full">
             {!collapsed && (
-              <h3 className="px-6 text-[9px] font-bold text-[#FFFFFF]/25 uppercase tracking-[0.1em] mb-2">
+              <h3 className="px-6 text-[9px] font-bold text-[#F2EFE9]/25 uppercase tracking-[0.1em] mb-2">
                 {section.title}
               </h3>
             )}
-            {collapsed && sidx > 0 && <div className="mx-3 border-t border-[rgba(245,166,35,0.1)] mb-2" />}
+            {collapsed && sidx > 0 && <div className="mx-3 border-t border-[rgba(232,150,46,0.1)] mb-2" />}
             <nav className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive = currentPage === item.id;
+                const modulosOverride = ((data.profile as { modulos_activos?: string[] })?.modulos_activos) ?? [];
+                const moduloKey = item.id === 'creador' ? 'creativos' : item.id;
+                const lockedPorCinturon = typeof (item as { minCinturon?: number }).minCinturon === 'number' && data.cinturon.orden < (item as { minCinturon?: number }).minCinturon!;
+                const locked = lockedPorCinturon && !modulosOverride.includes(moduloKey);
                 return (
                   <button
                     key={item.id}
                     onClick={() => {
+                      if (locked) return;
                       if (item.action) item.action();
                       else setCurrentPage(item.id);
                       onMobileClose();
                     }}
-                    title={collapsed ? item.label : undefined}
+                    title={locked ? 'Se desbloquea con el Cinturón Verde (tu oferta aprobada)' : (collapsed ? item.label : undefined)}
                     className={`w-full flex items-center transition-all relative group ${
                       collapsed ? 'justify-center px-0 py-2.5' : 'px-6 py-2.5'
-                    } ${isActive ? 'bg-[#F5A623]/15' : 'bg-transparent hover:bg-[#F5A623]/5'}`}
+                    } ${locked ? 'opacity-40 cursor-not-allowed' : ''} ${isActive ? 'bg-[#E8962E]/15' : 'bg-transparent hover:bg-[#E8962E]/5'}`}
                   >
                     {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#F5A623] rounded-r-full shadow-[0_0_10px_rgba(245,166,35,0.5)]" />
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#E8962E] rounded-r-full shadow-[0_0_10px_rgba(232,150,46,0.5)]" />
                     )}
                     <div className="relative">
                       <item.icon className={`w-[18px] h-[18px] transition-colors ${
-                        isActive ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40 group-hover:text-[#FFFFFF]/60'
+                        isActive ? 'text-[#E8962E]' : 'text-[#F2EFE9]/40 group-hover:text-[#F2EFE9]/60'
                       }`} />
                       {item.badge && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#EF4444] rounded-full shadow-[0_0_8px_rgba(232,85,85,0.8)] border border-[#0A0A0A]" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#EF4444] rounded-full shadow-[0_0_8px_rgba(232,85,85,0.8)] border border-[#080808]" />
                       )}
                     </div>
                     {!collapsed && (
                       <span className={`ml-3 text-[13px] tracking-wide ${
-                        isActive ? 'text-[#FFFFFF] font-semibold' : 'text-[#FFFFFF]/60 font-medium group-hover:text-[#FFFFFF]/80'
+                        isActive ? 'text-[#F2EFE9] font-semibold' : 'text-[#F2EFE9]/60 font-medium group-hover:text-[#F2EFE9]/80'
                       }`}>
                         {item.label}
                       </span>
                     )}
                     {/* Tooltip on collapse */}
                     {collapsed && (
-                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#1C1C1C] border border-[rgba(245,166,35,0.2)] text-xs text-[#FFFFFF] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#1A1917] border border-[rgba(232,150,46,0.12)] text-xs text-[#F2EFE9] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                         {item.label}
                       </div>
                     )}
@@ -206,7 +222,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       {/* Toggle collapse button */}
       <button
         onClick={onToggleCollapse}
-        className={`mt-6 flex items-center justify-center gap-2 text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors py-2 ${collapsed ? 'px-0' : 'px-6'}`}
+        className={`mt-6 flex items-center justify-center gap-2 text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors py-2 ${collapsed ? 'px-0' : 'px-6'}`}
         title={collapsed ? 'Expandir menú' : 'Contraer menú'}
       >
         {collapsed

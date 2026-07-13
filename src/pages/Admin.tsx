@@ -1,7 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import AdnPermisosControl from '../components/admin/AdnPermisosControl';
+import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
+import { notificarMensajeAdmin } from '../lib/notifications';
+import CintaCinturon from '../components/CintaCinturon';
+import { esDiaDescanso, calcularRachaDesdeFechas } from '../lib/racha';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
@@ -17,8 +22,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon,
-} from 'lucide-react';
+  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
@@ -42,7 +46,7 @@ import Markdown from 'react-markdown';
 
 type AdminRol = 'owner' | 'manager' | 'staff';
 type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas';
-type DetalleTab = 'resumen' | 'diario' | 'metricas' | 'mensajes' | 'notas' | 'adn';
+type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
 interface AdminProps {
@@ -61,6 +65,8 @@ interface ClienteConEstado extends Profile {
   racha_diario: number;
   ventas_count: number;
   estado_garantia: 'en_camino' | 'en_riesgo' | 'activada';
+  cinturon: { emoji: string; nombre: string; orden: number; metafora: string };
+  dias_atraso: number;
   progreso_porcentaje: number;
 }
 
@@ -84,16 +90,16 @@ interface AdminChecklistItem {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  ONBOARDING: { label: 'Onboarding', color: 'text-[#FFFFFF]/50',  bg: 'bg-[#FFFFFF]/5',  border: 'border-[#FFFFFF]/10' },
+  ONBOARDING: { label: 'Onboarding', color: 'text-[#F2EFE9]/50',  bg: 'bg-[#F2EFE9]/5',  border: 'border-[#F2EFE9]/10' },
   ACTIVE:     { label: 'Activo',     color: 'text-[#22C55E]',      bg: 'bg-[#22C55E]/10', border: 'border-[#22C55E]/20' },
-  PAUSED:     { label: 'Pausado',    color: 'text-[#F5A623]',      bg: 'bg-[#F5A623]/10', border: 'border-[#F5A623]/20' },
+  PAUSED:     { label: 'Pausado',    color: 'text-[#E8962E]',      bg: 'bg-[#E8962E]/10', border: 'border-[#E8962E]/20' },
   COMPLETED:  { label: 'Completado', color: 'text-[#22C55E]',      bg: 'bg-[#22C55E]/10', border: 'border-[#22C55E]/20' },
   CHURNED:    { label: 'Inactivo',   color: 'text-[#EF4444]',      bg: 'bg-[#EF4444]/10', border: 'border-[#EF4444]/20' },
 };
 
 const STATUS_BADGE_COLOR: Record<string, string> = {
   ACTIVE:     '#22C55E',
-  PAUSED:     '#F5A623',
+  PAUSED:     '#E8962E',
   ONBOARDING: 'rgba(255,255,255,0.5)',
   CHURNED:    '#EF4444',
   COMPLETED:  '#22C55E',
@@ -101,9 +107,9 @@ const STATUS_BADGE_COLOR: Record<string, string> = {
 
 const SEMAFORO_CONFIG = {
   verde:    { class: 'bg-[#22C55E] shadow-[0_0_8px_rgba(16,185,129,0.4)]', label: 'En ritmo',        text: 'text-[#22C55E]' },
-  amarillo: { class: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]', label: 'Atención',   text: 'text-[#F5A623]' },
+  amarillo: { class: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]', label: 'Atención',   text: 'text-[#E8962E]' },
   rojo:     { class: 'bg-[#EF4444] shadow-[0_0_8px_rgba(239,68,68,0.4)]',  label: 'Necesita ayuda',  text: 'text-[#EF4444]' },
-  gris:     { class: 'bg-gray-600',                                         label: 'Sin datos',       text: 'text-[#FFFFFF]/60' },
+  gris:     { class: 'bg-gray-600',                                         label: 'Sin datos',       text: 'text-[#F2EFE9]/60' },
 };
 
 // Build pilar options from SEED_ROADMAP_V3
@@ -113,12 +119,11 @@ const PILAR_OPTIONS: { id: PilarId; label: string }[] = SEED_ROADMAP_V3.map(p =>
 }));
 
 const PIPELINE_STAGES: { label: string; sub: string; maxDay: number; fase: number; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[] = [
-  { label: 'Onboarding',              sub: 'Días 1–3',   maxDay: 3,  fase: 0, icon: UserCircle },
-  { label: 'Sprint de Identidad',     sub: 'Días 4–20',  maxDay: 20, fase: 1, icon: Fingerprint },
-  { label: 'Sprint de Mercado',       sub: 'Días 21–38', maxDay: 38, fase: 2, icon: Search },
-  { label: 'Sprint de Oferta',        sub: 'Días 39–45', maxDay: 45, fase: 3, icon: Sparkles },
-  { label: 'Activación y Ventas',     sub: 'Días 46–80', maxDay: 80, fase: 4, icon: Megaphone },
-  { label: 'Análisis y Optimización', sub: 'Días 81–90', maxDay: 91, fase: 5, icon: Trophy },
+  { label: 'Onboarding',                sub: 'Día 1',      maxDay: 1,  fase: 0, icon: UserCircle },
+  { label: 'F1 · Sanar el Dinero',      sub: 'Días 2–9',   maxDay: 9,  fase: 1, icon: Fingerprint },
+  { label: 'F2 · Método y Oferta',      sub: 'Días 10–18', maxDay: 18, fase: 2, icon: Search },
+  { label: 'F3 · Sistema Encendido',    sub: 'Días 19–33', maxDay: 33, fase: 3, icon: Sparkles },
+  { label: 'F4 · Vender y Escalar',     sub: 'Días 34–90', maxDay: 90, fase: 4, icon: Rocket },
 ];
 
 function getFaseFromProgress(tareas_completadas: number): number {
@@ -229,7 +234,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-[#1C1C1C]/30 border border-[rgba(245,166,35,0.12)] rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 bg-[#1A1917]/30 border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
       {/* Hidden file inputs */}
       <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
         onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
@@ -238,11 +243,11 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
       <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
+          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare className="w-12 h-12 text-gray-800 mb-4" />
-            <p className="text-[#FFFFFF]/40">Este canal aún está vacío.</p>
+            <p className="text-[#F2EFE9]/40">Este canal está en silencio. Rompelo vos.</p>
           </div>
         ) : (
           messages.map((m) => {
@@ -253,28 +258,28 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
             return (
               <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                 {isMe && adminAvatarUrl ? (
-                  <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-[#F5A623]/30">
-                    <img src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
+                  <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-[#E8962E]/30">
+                    <img loading="lazy" src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border ${
-                    isAdmin ? 'bg-[#F5A623]/20 border-[#F5A623]/30 text-[#F5A623]'
-                             : 'bg-[#F5A623]/10 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]'
+                    isAdmin ? 'bg-[#E8962E]/20 border-[#E8962E]/30 text-[#E8962E]'
+                             : 'bg-[#E8962E]/10 border-[rgba(232,150,46,0.12)] text-[#F2EFE9]'
                   }`}>
                     {isAdmin ? <Shield className="w-3.5 h-3.5" /> : initial}
                   </div>
                 )}
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] font-semibold px-1 ${isAdmin ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40'} ${isMe ? 'text-right' : ''}`}>
+                  <span className={`text-[10px] font-semibold px-1 ${isAdmin ? 'text-[#E8962E]' : 'text-[#F2EFE9]/40'} ${isMe ? 'text-right' : ''}`}>
                     {senderName}{isAdmin ? ' · Coach' : ''}
                   </span>
                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    isMe ? 'bg-[#F5A623]/25 text-[#FFFFFF] border border-[#F5A623]/20 rounded-tr-sm'
-                         : isAdmin ? 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/20 rounded-tl-sm'
-                         : 'bg-[#1C1C1C]/60 text-[#FFFFFF]/90 border border-[rgba(245,166,35,0.12)] rounded-tl-sm'
+                    isMe ? 'bg-[#E8962E]/25 text-[#F2EFE9] border border-[#E8962E]/20 rounded-tr-sm'
+                         : isAdmin ? 'bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/20 rounded-tl-sm'
+                         : 'bg-[#1A1917]/60 text-[#F2EFE9]/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
                   }`}>
                     {m.tipo_archivo === 'imagen' && m.archivo_url && (
-                      <img src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
+                      <img loading="lazy" src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
                            onClick={() => window.open(m.archivo_url)} />
                     )}
                     {m.tipo_archivo === 'audio' && m.archivo_url && (
@@ -293,17 +298,17 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-[rgba(245,166,35,0.12)] shrink-0 bg-[#1C1C1C]/20">
+      <div className="p-4 border-t border-[rgba(232,150,46,0.12)] shrink-0 bg-[#1A1917]/20">
         <div className="flex gap-2 items-end">
           <div className="flex flex-col gap-1 shrink-0">
             <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading}
               title="Subir imagen"
-              className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
+              className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
               <Image className="w-4 h-4" />
             </button>
             <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading}
               title="Subir audio"
-              className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
+              className="w-10 h-10 rounded-xl bg-[#E8962E]/5 border border-[rgba(232,150,46,0.12)] hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50">
               <Mic className="w-4 h-4" />
             </button>
           </div>
@@ -314,7 +319,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
             placeholder={uploading ? 'Subiendo archivo...' : 'Enviar mensaje al canal...'}
             disabled={enviando || uploading}
-            className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg py-3 px-5 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all disabled:opacity-50"
+            className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all disabled:opacity-50"
           />
           <button
             onClick={send}
@@ -356,7 +361,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
-  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'metricas', 'mensajes', 'notas', 'adn'];
+  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'mentor', 'metricas', 'mensajes', 'notas', 'adn'];
   const [detalleTab, setDetalleTab] = usePersistedState<DetalleTab>(
     'tcd_admin_detalle_tab',
     'resumen',
@@ -364,6 +369,58 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   );
   const [showNuevoCliente, setShowNuevoCliente] = useState(false);
   const [showMigrationWizard, setShowMigrationWizard] = useState(false);
+  // ── Evidencias del cliente (F-Admin: el visor) ──
+  const [convsCliente, setConvsCliente] = useState<{ agente: string; mensajes: { role: string; content: string; timestamp?: string }[] }[]>([]);
+  const [convsLoading, setConvsLoading] = useState(false);
+  const cargarConversaciones = useCallback(async (clienteId: string) => {
+    if (!supabase) return;
+    setConvsLoading(true);
+    try {
+      const [agRes, coRes] = await Promise.all([
+        supabase.from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
+        .order('last_message_at', { ascending: false }),
+        supabase.from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
+      ]);
+      // El Mentor (coach_conversations) + los 8 entrenadores (agent_conversations), juntos.
+      const coachRow = (coRes.data ?? [])[0] as { messages?: unknown; updated_at?: string } | undefined;
+      const data = [
+        ...(coachRow ? [{ agent_id: 'mentor', messages: coachRow.messages ?? [], last_message_at: coachRow.updated_at ?? null }] : []),
+        ...(agRes.data ?? []),
+      ];
+      const NOMBRES: Record<string, string> = { coach: 'Mentor IA', diego: 'Diego (método)', sofi: 'Sofi (sistemas)', vera: 'Vera (oferta)', mateo: 'Mateo (contenido)', caro: 'Caro (grabación)', bruno: 'Bruno (WhatsApp)', lucas: 'Lucas (ventas)', ramiro: 'Ramiro (métricas)' };
+      setConvsCliente((data ?? []).map((r: { agent_id: string; messages: unknown }) => ({
+        agente: NOMBRES[r.agent_id] ?? r.agent_id,
+        mensajes: ((r.messages ?? []) as { role: string; content: string; timestamp?: string }[]).filter((m) => m.role !== 'system'),
+      })));
+    } finally {
+      setConvsLoading(false);
+    }
+  }, []);
+  const [evidenciasCliente, setEvidenciasCliente] = useState<{ meta: string; archivos: { name: string; path: string }[] }[]>([]);
+  const [evidenciasLoading, setEvidenciasLoading] = useState(false);
+  const cargarEvidenciasCliente = useCallback(async (clienteId: string) => {
+    if (!supabase) return;
+    setEvidenciasLoading(true);
+    try {
+      const base = `evidencias/${clienteId}`;
+      const { data: carpetas } = await supabase.storage.from('task-attachments').list(base, { limit: 60 });
+      const resultado: { meta: string; archivos: { name: string; path: string }[] }[] = [];
+      for (const c of carpetas ?? []) {
+        if (!c.name || c.name.startsWith('.')) continue;
+        const { data: archivos } = await supabase.storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
+        const files = (archivos ?? []).filter((f) => f.name && !f.name.startsWith('.')).map((f) => ({ name: f.name, path: `${base}/${c.name}/${f.name}` }));
+        if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
+      }
+      setEvidenciasCliente(resultado);
+    } finally {
+      setEvidenciasLoading(false);
+    }
+  }, []);
+  const abrirEvidencia = async (path: string) => {
+    if (!supabase) return;
+    const { data } = await supabase.storage.from('task-attachments').createSignedUrl(path, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
   const [clientSearch, setClientSearch] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
 
@@ -511,7 +568,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   // Channel notifications
   useEffect(() => {
     if (!supabase) return;
-    const chatChannels = ['comunidad', 'victorias', 'consultas'] as const;
+    const chatChannels = [] as const; // L2: comunidad v1 sin muro — solo Privados
     const ICONS = { comunidad: Users, victorias: Trophy, consultas: Hash } as const;
 
     const subs = chatChannels.map(ch =>
@@ -532,7 +589,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
             toast(nombre, {
               description: preview || 'Archivo adjunto',
               action: { label: 'Ver', onClick: () => { setMainTab('mensajes'); setMensajesChannel(ch); } },
-              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-[#F5A623]' }),
+              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-[#E8962E]' }),
               duration: 6000,
             });
 
@@ -790,11 +847,12 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         ]);
 
         let tareas = tareasRes.data ?? [];
+        // FIX progreso: el Camino escribe SIEMPRE en hoja_de_ruta (columna `completada`).
+        const { data: hrRows } = await supabase
+          .from('hoja_de_ruta')
+          .select('pilar_numero, meta_codigo, completada, es_estrella, fecha_completada')
+          .eq('usuario_id', p.id);
         if (tareas.length === 0) {
-          const { data: hrRows } = await supabase
-            .from('hoja_de_ruta')
-            .select('pilar_numero, meta_codigo, completada, es_estrella')
-            .eq('usuario_id', p.id);
           if (hrRows && hrRows.length > 0) {
             tareas = hrRows.map((r: any) => ({
               ...r,
@@ -806,25 +864,36 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         const metricas = metricasRes.data ?? [];
         const ultimaDiario = diarioRes.data?.[0]?.fecha;
 
-        let semaforo: ClienteConEstado['semaforo'] = 'gris';
-        if (metricas.length >= 2) {
-          const cur = metricas[metricas.length - 1];
-          const prev = metricas[metricas.length - 2];
-          const delta = (cur.leads + cur.ventas) - (prev.leads + prev.ventas);
-          semaforo = delta > 0 ? 'verde' : delta === 0 ? 'amarillo' : 'rojo';
-        } else if (tareas.some((t: any) => t.status === 'completada')) {
-          semaforo = 'verde';
+        // Semáforo v2 = RITMO REAL: atraso hábil contra el dia_asignado del Camino
+        const completadasSet = new Set<string>(
+          (hrRows ?? []).filter((r: any) => r.completada === true).map((r: any) => `${r.pilar_numero}-${r.meta_codigo}`)
+        );
+        let diaEsperado: number | null = null;
+        outer: for (const pil of SEED_ROADMAP_V2) {
+          for (const mm of pil.metas) {
+            if (!completadasSet.has(`${pil.numero}-${mm.codigo}`)) { diaEsperado = mm.dia_asignado ?? null; break outer; }
+          }
         }
+        let dias_atraso = 0;
+        if (diaEsperado !== null && dia > diaEsperado) {
+          for (let d = diaEsperado + 1; d <= dia; d++) if (!esDiaDescanso(d)) dias_atraso++;
+        }
+        let semaforo: ClienteConEstado['semaforo'] = 'gris';
+        if (tareas.length > 0 || completadasSet.size > 0) {
+          semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
+        }
+        // Cinturón: pilar más alto con TODAS sus metas completas
+        // Cinturón: LA MISMA función que el cliente (una sola fuente de verdad).
+        const cint = cinturonDesdeProgreso(completadasSet);
+        const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora };
 
         const entradas = diarioRes.data ?? [];
-        let rachaActual = 0;
-        const hoy = new Date();
-        for (let i = 0; i < 30; i++) {
-          const d = new Date(hoy); d.setDate(hoy.getDate() - i);
-          const dStr = d.toISOString().split('T')[0];
-          if (entradas.some((e: any) => e.fecha === dStr)) rachaActual++;
-          else if (i > 0) break;
-        }
+        // Racha = LA MISMA definición que el cliente (sesiones, lu-vi, gracia),
+        // calculada de fecha_completada (DB).
+        const fechasSesiones = (hrRows ?? [])
+          .filter((r: any) => r.completada === true && r.fecha_completada)
+          .map((r: any) => String(r.fecha_completada));
+        const rachaActual = calcularRachaDesdeFechas(fechasSesiones);
 
         const ventasRes = await supabase.rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
         const ventas_count = (ventasRes.data ?? []).length;
@@ -859,6 +928,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           dia_programa: dia,
           semana_programa: semana,
           semaforo,
+          cinturon,
+          dias_atraso,
           tareas_completadas: tareasCompletadasFallback,
           tareas_total: tareas.length > 0 ? tareas.length : totalFromSeed,
           tareas_por_pilar: tareasPorPilar,
@@ -904,6 +975,10 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         setDetalleTareas(tareasDetalle);
         setDetalleDiario((d.data ?? []).slice(0, 3));
         setDetalleMetricas(m.data ?? []);
+      } else if (detalleTab === 'mentor') {
+        if (selectedCliente) cargarConversaciones(selectedCliente.id);
+      } else if (detalleTab === 'evidencias') {
+        if (selectedCliente) cargarEvidenciasCliente(selectedCliente.id);
       } else if (detalleTab === 'diario') {
         const { data } = await supabase.rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
@@ -994,6 +1069,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: selectedCliente.id, contenido: texto
       });
       if (error) throw error;
+      void notificarMensajeAdmin(selectedCliente.id, adminProfile.nombre ?? 'El equipo');
     } catch {
       setDetalleMensajes(prev => prev.filter(m => m.id !== tempId));
       setMensajeInput(texto);
@@ -1035,6 +1111,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto
       });
       if (error) throw error;
+      void notificarMensajeAdmin(chatCliente.id, adminProfile.nombre ?? 'El equipo');
     } catch {
       setChatMessages(prev => prev.filter(m => m.id !== tempId));
       setChatInput(texto);
@@ -1504,6 +1581,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
   const detailTabs: { id: DetalleTab; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: 'Resumen', icon: TrendingUp },
+    { id: 'evidencias', label: 'Evidencias', icon: ClipboardCheck },
+    { id: 'mentor', label: 'Mentor', icon: MessageSquare },
     { id: 'diario', label: 'Diario', icon: Calendar },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
     { id: 'adn', label: 'ADN', icon: Fingerprint },
@@ -1517,6 +1596,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     const matchStatus = filtroStatus === 'ALL' || c.status === filtroStatus || (!c.status && filtroStatus === 'ACTIVE');
     return matchSearch && matchStatus;
   });
+  // La ronda de la mañana de Lupe: rojos primero, después amarillos — dentro de cada grupo, mayor atraso arriba
+  const SEMAFORO_PESO: Record<string, number> = { rojo: 0, amarillo: 1, verde: 2, gris: 3 };
+  const clientesOrdenados = [...filteredClientes].sort(
+    (a, b) => (SEMAFORO_PESO[a.semaforo] - SEMAFORO_PESO[b.semaforo]) || (b.dias_atraso - a.dias_atraso)
+  );
 
   // ─── SIDEBAR NAV CONFIG ───────────────────────────────────────────────────────
 
@@ -1547,8 +1631,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   // ─── RENDER ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-screen bg-[#0A0A0A] text-[#FFFFFF] font-sans overflow-hidden selection:bg-[#F5A623]/30">
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#F5A623]/10 rounded-full blur-[150px] pointer-events-none" />
+    <div className="flex h-screen bg-[#080808] text-[#F2EFE9] font-sans overflow-hidden selection:bg-[#E8962E]/30">
+      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#E8962E]/10 rounded-full blur-[150px] pointer-events-none" />
 
       {/* Mobile overlay backdrop */}
       {mobileMenuOpen && (
@@ -1559,22 +1643,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       )}
 
       {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-[rgba(245,166,35,0.1)] bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-[rgba(232,150,46,0.1)] bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
         <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
-            <div className="w-10 h-10 rounded-xl bg-[#F5A623] flex items-center justify-center shadow-[0_0_20px_rgba(245,166,35,0.3)] shrink-0">
-              <Stethoscope className="w-5 h-5 text-[#FFFFFF]" />
+            <div className="w-10 h-10 rounded-xl bg-[#E8962E] flex items-center justify-center shadow-[0_0_20px_rgba(232,150,46,0.18)] shrink-0">
+              <Stethoscope className="w-5 h-5 text-[#F2EFE9]" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
-              <h1 className="text-sm font-semibold text-[#FFFFFF] tracking-wide truncate">Tu Clinica Digital</h1>
-              <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-bold">Admin</p>
+              <h1 className="text-sm font-semibold text-[#F2EFE9] tracking-wide truncate">Tu Clinica Digital</h1>
+              <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-bold">Admin</p>
             </div>
           </div>
 
           {/* Toggle expand/collapse — solo desktop */}
           <button
             onClick={() => setSidebarCollapsed(v => !v)}
-            className={`hidden md:flex items-center justify-center w-full mb-3 py-1.5 rounded-lg text-[#FFFFFF]/40 hover:text-[#F5A623] hover:bg-[#F5A623]/10 transition-colors`}
+            className={`hidden md:flex items-center justify-center w-full mb-3 py-1.5 rounded-lg text-[#F2EFE9]/40 hover:text-[#E8962E] hover:bg-[#E8962E]/10 transition-colors`}
             title={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
           >
             <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} />
@@ -1600,22 +1684,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     title={sidebarCollapsed ? item.label : undefined}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative ${sidebarCollapsed ? 'md:justify-center md:px-0 md:gap-0' : ''} ${
                       mainTab === item.id
-                        ? 'bg-[#F5A623]/10 text-[#F5A623]'
-                        : 'text-[#FFFFFF]/60 hover:bg-[#F5A623]/10 hover:text-[#FFFFFF]'
+                        ? 'bg-[#E8962E]/10 text-[#E8962E]'
+                        : 'text-[#F2EFE9]/60 hover:bg-[#E8962E]/10 hover:text-[#F2EFE9]'
                     }`}
                   >
                     {mainTab === item.id && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#F5A623] rounded-r-full" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#E8962E] rounded-r-full" />
                     )}
                     <span className="relative shrink-0">
                       <item.icon className="w-4 h-4" />
                       {sidebarCollapsed && totalUnread > 0 && (
-                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#F5A623] shadow-[0_0_6px_rgba(245,166,35,0.6)]" />
+                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#E8962E] shadow-[0_0_6px_rgba(232,150,46,0.6)]" />
                       )}
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
                     {totalUnread > 0 && (
-                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-[#F5A623] text-[#FFFFFF] text-[10px] font-bold flex items-center justify-center`}>
+                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-[#E8962E] text-[#F2EFE9] text-[10px] font-bold flex items-center justify-center`}>
                         {totalUnread}
                       </span>
                     )}
@@ -1625,21 +1709,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           </nav>
         </div>
 
-        <div className={`mt-auto p-5 ${sidebarCollapsed ? 'md:p-3' : ''} border-t border-[rgba(245,166,35,0.1)] transition-all duration-300`}>
+        <div className={`mt-auto p-5 ${sidebarCollapsed ? 'md:p-3' : ''} border-t border-[rgba(232,150,46,0.1)] transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-4 ${sidebarCollapsed ? 'md:justify-center md:gap-0' : ''}`}>
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#F5A623]/10 flex items-center justify-center text-sm font-bold border border-[rgba(245,166,35,0.3)] shrink-0">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#E8962E]/10 flex items-center justify-center text-sm font-bold border border-[rgba(232,150,46,0.18)] shrink-0">
               {adminAvatar
-                ? <img src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
+                ? <img loading="lazy" src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
                 : adminProfile.nombre.charAt(0).toUpperCase()
               }
             </div>
             <div className={`flex-1 min-w-0 ${sidebarCollapsed ? 'md:hidden' : ''}`}>
-              <p className="text-sm font-medium text-[#FFFFFF] truncate">{adminProfile.nombre}</p>
-              <p className="text-[10px] text-[#FFFFFF]/40 truncate">{adminProfile.especialidad || 'Director'}</p>
+              <p className="text-sm font-medium text-[#F2EFE9] truncate">{adminProfile.nombre}</p>
+              <p className="text-[10px] text-[#F2EFE9]/40 truncate">{adminProfile.especialidad || 'Director'}</p>
             </div>
             <button
               onClick={() => { setAdminDraft({ nombre: adminProfile.nombre, cargo: adminProfile.especialidad || 'Director' }); setShowAdminSettings(true); }}
-              className={`${sidebarCollapsed ? 'md:hidden' : ''} w-7 h-7 rounded-lg bg-[#F5A623]/5 hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors shrink-0`}
+              className={`${sidebarCollapsed ? 'md:hidden' : ''} w-7 h-7 rounded-lg bg-[#E8962E]/5 hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors shrink-0`}
               title="Ajustes de perfil"
             >
               <Settings className="w-3.5 h-3.5" />
@@ -1648,7 +1732,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <button
             onClick={onSignOut}
             title={sidebarCollapsed ? 'Salir del sistema' : undefined}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-[#FFFFFF]/60 hover:bg-[#F5A623]/5 hover:text-[#FFFFFF] transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-[#F2EFE9]/60 hover:bg-[#E8962E]/5 hover:text-[#F2EFE9] transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>Salir del sistema</span>
@@ -1658,15 +1742,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
       {/* ─── MAIN CONTENT ──────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <header className="h-16 border-b border-[rgba(245,166,35,0.1)] flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
+        <header className="h-16 border-b border-[rgba(232,150,46,0.1)] flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/10 transition-colors"
             aria-label="Abrir menú"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h2 className="text-lg font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#FFFFFF' }}>
+          <h2 className="text-lg font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F2EFE9' }}>
             {headerTitles[mainTab]}
           </h2>
           <div className="ml-auto flex items-center gap-2">
@@ -1695,8 +1779,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               TAB: ACTIVACIÓN (Checklist Pre-Activación por cliente)
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'pipeline' && (
-            <PreactivacionMatriz clientes={clientes} adminId={adminProfile.id} />
-          )}
+            <>
+              {/* G4 · El proceso de activación — la guía operativa de Lupe */}
+              <div className="rounded-2xl border border-[#E8962E]/25 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent p-5 mb-4 mx-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
+                <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-[#F2EFE9]/70 list-decimal list-inside">
+                  <li>Crear su subcuenta GHL desde el snapshot maestro</li>
+                  <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
+                  <li>Alta en MiClínica Digital (misma identidad)</li>
+                  <li>Bienvenida por mail: las 2 llaves + sus accesos (Discord solo DWY/DFY)</li>
+                  <li>Día 1: verificar el Pacto firmado y la Foto de Partida</li>
+                  <li>Semana 1: la ronda diaria del semáforo (verde = no tocar)</li>
+                  <li>Día 22-26: acompañar el montaje técnico (sistema + dominio)</li>
+                  <li>Día 29: verificar la campaña ENCENDIDA (evidencia en su ficha)</li>
+                </ol>
+              </div>
+              <PreactivacionMatriz clientes={clientes} adminId={adminProfile.id} />
+          </>
+            )}
 
           {/* ═══════════════════════════════════════════════════════════════════════
               TAB: CLIENTES
@@ -1707,13 +1807,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/30" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/30" />
                     <input
                       type="text"
                       value={clientSearch}
                       onChange={e => setClientSearch(e.target.value)}
                       placeholder="Buscar por nombre..."
-                      className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg py-2.5 pl-10 pr-4 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all"
+                      className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-4 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all"
                     />
                   </div>
                   <CustomSelect
@@ -1732,42 +1832,42 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 </div>
                 <button
                   onClick={() => setShowMigrationWizard(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[rgba(245,166,35,0.3)] text-sm font-semibold text-[#F5A623] hover:bg-[#F5A623]/10 transition-all"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[rgba(232,150,46,0.18)] text-sm font-semibold text-[#E8962E] hover:bg-[#E8962E]/10 transition-all"
                 >
                   <Sparkles className="w-4 h-4" /> Migrar cliente
                 </button>
                 <button
                   onClick={() => setShowNuevoCliente(true)}
-                  className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-[#F5A623]/20"
+                  className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-[#E8962E]/20"
                 >
                   <Plus className="w-4 h-4" /> Nuevo Cliente
                 </button>
               </div>
 
               {/* Client table */}
-              <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
+              <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
                 {loading ? (
-                  <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
-                ) : filteredClientes.length === 0 ? (
+                  <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
+                ) : clientesOrdenados.length === 0 ? (
                   <div className="text-center py-16">
                     <Users className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-[#FFFFFF]/40 text-sm">Sin clientes que coincidan</p>
+                    <p className="text-[#F2EFE9]/40 text-sm">Sin clientes que coincidan</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                   <table className="w-full min-w-[700px]">
                     <thead>
-                      <tr className="border-b border-[rgba(245,166,35,0.1)]">
-                        {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Pilar', 'Estado', 'Progreso'].map(h => (
-                          <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">{h}</th>
+                      <tr className="border-b border-[rgba(232,150,46,0.1)]">
+                        {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Cinturón', 'Pacientes', 'Pilar', 'Estado', 'Progreso'].map(h => (
+                          <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40">{h}</th>
                         ))}
                         {adminRol === 'owner' && (
-                          <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">Acciones</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40">Acciones</th>
                         )}
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredClientes.map(c => {
+                      {clientesOrdenados.map(c => {
                         const pct = c.tareas_total > 0
                           ? Math.round((c.tareas_completadas / c.tareas_total) * 100)
                           : (c.progreso_porcentaje ?? 0);
@@ -1780,30 +1880,32 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <tr
                             key={c.id}
                             onClick={() => { setSelectedCliente(c); setDetalleTab('resumen'); setIaRecomendacion(''); }}
-                            className="bg-[#141414] hover:bg-[#1C1C1C] border-b border-[rgba(245,166,35,0.1)] cursor-pointer transition-colors group"
+                            className="bg-[#111110] hover:bg-[#1A1917] border-b border-[rgba(232,150,46,0.1)] cursor-pointer transition-colors group"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#F5A623]/10 border border-[rgba(245,166,35,0.2)] flex items-center justify-center text-xs font-bold text-[#FFFFFF] shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-[#E8962E]/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-xs font-bold text-[#F2EFE9] shrink-0">
                                   {c.nombre.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-sm font-medium text-[#FFFFFF] group-hover:text-[#F5A623] transition-colors truncate max-w-[140px]">{c.nombre}</span>
+                                <span className="text-sm font-medium text-[#F2EFE9] group-hover:text-[#E8962E] transition-colors truncate max-w-[140px]">{c.nombre}</span>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/50 truncate max-w-[160px]">{c.email}</td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/50 truncate max-w-[160px]">{c.email}</td>
                             <td className="px-4 py-3">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/20">{c.plan}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E8962E]/10 text-[#E8962E] border border-[#E8962E]/20">{c.plan}</span>
                             </td>
-                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/50">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-[#FFFFFF]/60 font-medium">{c.dia_programa}</td>
-                            <td className="px-4 py-3 text-xs text-[#F5A623] font-medium">{pilar}</td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/50">{c.fecha_inicio}</td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-[#EF4444]' : 'text-[#E8962E]'} ml-1.5 text-[10px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}</td>
+                            <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-[#F2EFE9]/50">{c.cinturon.nombre}</span></td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60">{c.ventas_count}/10</td>
+                            <td className="px-4 py-3 text-xs text-[#E8962E] font-medium">{pilar}</td>
                             <td className="px-4 py-3">
                               <span
                                 className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider"
                                 style={{
-                                  color: STATUS_BADGE_COLOR[st] ?? '#FFFFFF',
-                                  backgroundColor: `${STATUS_BADGE_COLOR[st] ?? '#FFFFFF'}15`,
-                                  border: `1px solid ${STATUS_BADGE_COLOR[st] ?? '#FFFFFF'}30`,
+                                  color: STATUS_BADGE_COLOR[st] ?? '#F2EFE9',
+                                  backgroundColor: `${STATUS_BADGE_COLOR[st] ?? '#F2EFE9'}15`,
+                                  border: `1px solid ${STATUS_BADGE_COLOR[st] ?? '#F2EFE9'}30`,
                                 }}
                               >
                                 {stCfg?.label ?? st}
@@ -1811,13 +1913,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2">
-                                <div className="flex-1 h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden w-20">
+                                <div className="flex-1 h-1.5 bg-[#E8962E]/5 rounded-full overflow-hidden w-20">
                                   <div
-                                    className="h-full rounded-full bg-[#F5A623]"
+                                    className="h-full rounded-full bg-[#E8962E]"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="text-[10px] text-[#FFFFFF]/50 w-8 text-right">{pct}%</span>
+                                <span className="text-[10px] text-[#F2EFE9]/50 w-8 text-right">{pct}%</span>
                               </div>
                             </td>
                             {adminRol === 'owner' && (
@@ -1826,7 +1928,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   type="button"
                                   onClick={(e) => { e.stopPropagation(); setClienteAEliminar(c); }}
                                   title="Eliminar cliente"
-                                  className="p-2 rounded-lg text-[#FFFFFF]/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+                                  className="p-2 rounded-lg text-[#F2EFE9]/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -1850,7 +1952,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="w-[240px] shrink-0 flex flex-col">
                 <button
                   onClick={() => setSelectedCliente(null)}
-                  className="flex items-center gap-2 text-xs text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors mb-3"
+                  className="flex items-center gap-2 text-xs text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors mb-3"
                 >
                   <ChevronRight className="w-3 h-3 rotate-180" /> Volver a la tabla
                 </button>
@@ -1861,15 +1963,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       onClick={() => { setSelectedCliente(c); setDetalleTab('resumen'); setIaRecomendacion(''); }}
                       className={`w-full text-left p-3 rounded-xl border transition-all ${
                         selectedCliente?.id === c.id
-                          ? 'bg-[#F5A623]/10 border-[#F5A623]/30'
-                          : 'bg-[#141414] border-[rgba(245,166,35,0.1)] hover:bg-[#F5A623]/5'
+                          ? 'bg-[#E8962E]/10 border-[#E8962E]/30'
+                          : 'bg-[#111110] border-[rgba(232,150,46,0.1)] hover:bg-[#E8962E]/5'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#FFFFFF] truncate">{c.nombre}</p>
-                          <p className="text-[10px] text-[#FFFFFF]/40">Día {c.dia_programa}/90</p>
+                          <p className="text-sm font-medium text-[#F2EFE9] truncate">{c.nombre}</p>
+                          <p className="text-[10px] text-[#F2EFE9]/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                         </div>
                       </div>
                     </button>
@@ -1878,22 +1980,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
 
               {/* Right: detail panel */}
-              <div className="flex-1 card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative">
+              <div className="flex-1 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative">
                 {/* Header */}
                 <div className="absolute top-0 right-0 p-4 z-10">
-                  <button onClick={() => setSelectedCliente(null)} className="p-2 rounded-full bg-black/40 text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors backdrop-blur-md">
+                  <button onClick={() => setSelectedCliente(null)} className="p-2 rounded-full bg-black/40 text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/10 transition-colors backdrop-blur-md">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="p-8 border-b border-[rgba(245,166,35,0.1)] flex items-center gap-5 shrink-0 bg-[#1C1C1C]/30">
-                  <div className="w-16 h-16 rounded-2xl bg-[#F5A623]/20 border border-[#F5A623]/30 flex items-center justify-center text-xl font-bold text-[#F5A623] shadow-inner">
+                <div className="p-8 border-b border-[rgba(232,150,46,0.1)] flex items-center gap-5 shrink-0 bg-[#1A1917]/30">
+                  <div className="w-16 h-16 rounded-2xl bg-[#E8962E]/20 border border-[#E8962E]/30 flex items-center justify-center text-xl font-bold text-[#E8962E] shadow-inner">
                     {selectedCliente.nombre.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                      <h3 className="text-2xl font-light text-[#FFFFFF] tracking-tight">{selectedCliente.nombre}</h3>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30' : 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/30'}`}>
+                      <h3 className="text-2xl font-light text-[#F2EFE9] tracking-tight">{selectedCliente.nombre}</h3>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30' : 'bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/30'}`}>
                         {selectedCliente.plan}
                       </span>
                       {/* Status badge + quick change */}
@@ -1904,7 +2006,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           options={Object.entries(STATUS_CONFIG).map(([val, cfg]) => ({ value: val, label: cfg.label }))}
                           className="min-w-[120px]"
                         />
-                        {statusCambiando && <Loader2 className="w-3 h-3 text-[#F5A623] animate-spin" />}
+                        {statusCambiando && <Loader2 className="w-3 h-3 text-[#E8962E] animate-spin" />}
                       </div>
                       {/* Toggle acceso completo agentes */}
                       <button
@@ -1912,7 +2014,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                           selectedCliente.full_agent_access
                             ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30 hover:bg-[#22C55E]/25'
-                            : 'bg-[#F5A623]/10 text-[#F5A623] border-[#F5A623]/30 hover:bg-[#F5A623]/20'
+                            : 'bg-[#E8962E]/10 text-[#E8962E] border-[#E8962E]/30 hover:bg-[#E8962E]/20'
                         }`}
                       >
                         <Bot className="w-4 h-4" />
@@ -1921,7 +2023,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* Cambiar email */}
                       <button
                         onClick={() => { setNewEmailInput(''); setShowChangeEmailModal(true); }}
-                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-[#F5A623]/10 text-[#F5A623] border-[#F5A623]/30 hover:bg-[#F5A623]/20"
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-[#E8962E]/10 text-[#E8962E] border-[#E8962E]/30 hover:bg-[#E8962E]/20"
                       >
                         <Mail className="w-4 h-4" />
                         Cambiar email
@@ -1930,35 +2032,35 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <button
                         onClick={handleSendReset}
                         disabled={sendingReset}
-                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-[#FFFFFF]/5 text-[#FFFFFF]/70 border-[#FFFFFF]/10 hover:bg-[#FFFFFF]/10 disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-[#F2EFE9]/5 text-[#F2EFE9]/70 border-[#F2EFE9]/10 hover:bg-[#F2EFE9]/10 disabled:opacity-50"
                       >
                         {sendingReset ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Enviar reset
                       </button>
                     </div>
-                    <p className="text-xs text-[#FFFFFF]/60 flex items-center gap-2">
-                      <Lock className="w-3 h-3 text-[#FFFFFF]/30" /> {selectedCliente.email}
+                    <p className="text-xs text-[#F2EFE9]/60 flex items-center gap-2">
+                      <Lock className="w-3 h-3 text-[#F2EFE9]/30" /> {selectedCliente.email}
                       {selectedCliente.especialidad && <><span>·</span> {selectedCliente.especialidad}</>}
                     </p>
                   </div>
                 </div>
 
                 {/* Tabs nav */}
-                <div className="flex border-b border-[rgba(245,166,35,0.1)] px-6 shrink-0 bg-black/20">
+                <div className="flex border-b border-[rgba(232,150,46,0.1)] px-6 shrink-0 bg-black/20">
                   {detailTabs.map(tab => (
                     <button
                       key={tab.id}
                       onClick={() => setDetalleTab(tab.id)}
                       className={`flex items-center gap-2 px-4 py-4 text-xs font-semibold uppercase tracking-wider transition-all relative ${
                         detalleTab === tab.id
-                          ? 'text-[#F5A623]'
-                          : 'text-[#FFFFFF]/40 hover:text-[#FFFFFF]/80'
+                          ? 'text-[#E8962E]'
+                          : 'text-[#F2EFE9]/40 hover:text-[#F2EFE9]/80'
                       }`}
                     >
                       <tab.icon className="w-3.5 h-3.5" />
                       {tab.label}
                       {detalleTab === tab.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F5A623] rounded-t-full shadow-[0_0_10px_rgba(245,166,35,0.5)]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8962E] rounded-t-full shadow-[0_0_10px_rgba(232,150,46,0.5)]" />
                       )}
                     </button>
                   ))}
@@ -1967,37 +2069,61 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6 scrollbar-hide bg-black/10">
                   {detalleLoading ? (
-                    <div className="flex items-center justify-center h-full"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
+                    <div className="flex items-center justify-center h-full"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
                   ) : (
                     <>
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          <AdnPermisosControl
+                            clienteId={selectedCliente.id}
+                            agentesActuales={selectedCliente.agentes_activos ?? []}
+                            modulosActuales={selectedCliente.modulos_activos ?? []}
+                            onSaved={() => { void cargarClientes(); }}
+                          />
                           <div className="grid grid-cols-4 gap-3">
-                            <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4 text-center">
-                              <p className="text-2xl font-light text-[#FFFFFF]">{selectedCliente.dia_programa}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mt-1">Día / 90</p>
+                            <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
+                              <p className="text-2xl font-light text-[#F2EFE9]">{selectedCliente.dia_programa}</p>
+                              <div className="mt-3"><CintaCinturon cinturon={{ ...selectedCliente.cinturon, id: 'c', hito: '' } as never} variante="linea" /></div>
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {[{ l: '+30d', d: 30, t: 'Extensión 30 días' }, { l: '+60d', d: 60, t: 'Extensión 60 días' }, { l: '+90d', d: 90, t: 'Extensión 90 días' }, { l: '⏸ 14d', d: 14, t: 'Pausa 14 días' }].map((b) => (
+                                  <button
+                                    key={b.l}
+                                    title={b.t}
+                                    onClick={async () => {
+                                      if (!supabase || !selectedCliente) return;
+                                      if (!window.confirm(`${b.t} para ${selectedCliente.nombre}: el programa se corre ${b.d} días hacia adelante. ¿Confirmar?`)) return;
+                                      const nueva = new Date(selectedCliente.fecha_inicio);
+                                      nueva.setDate(nueva.getDate() + b.d);
+                                      const { error } = await supabase.from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
+                                      if (!error) { alert(`${b.t} aplicada. Recarga la lista para ver el día nuevo.`); }
+                                    }}
+                                    className="px-2 py-1 rounded-md bg-[#E8962E]/10 border border-[#E8962E]/25 text-[10px] font-semibold text-[#E8962E] hover:bg-[#E8962E]/20 transition-colors"
+                                  >{b.l}</button>
+                                ))}
+                              </div>
+                              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider mt-1">Día / 90</p>
                             </div>
-                            <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4 text-center">
-                              <p className="text-2xl font-light text-[#F5A623] flex items-center justify-center gap-1"><Flame className="w-5 h-5" /> {selectedCliente.racha_diario}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mt-1">Racha diario</p>
+                            <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
+                              <p className="text-2xl font-light text-[#E8962E] flex items-center justify-center gap-1"><Flame className="w-5 h-5" /> {selectedCliente.racha_diario}</p>
+                              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider mt-1">Racha diario</p>
                             </div>
-                            <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-4 text-center">
+                            <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-[#22C55E]">{selectedCliente.ventas_count}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider mt-1">Ventas reales</p>
+                              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider mt-1">Ventas reales</p>
                             </div>
                             <div className={`rounded-2xl p-4 text-center border ${
                               selectedCliente.estado_garantia === 'activada' ? 'bg-[#EF4444]/10 border-[#EF4444]/30' :
-                              selectedCliente.estado_garantia === 'en_riesgo' ? 'bg-[#F5A623]/10 border-[#F5A623]/30' :
-                              'bg-[#141414] border-[rgba(245,166,35,0.1)]'
+                              selectedCliente.estado_garantia === 'en_riesgo' ? 'bg-[#E8962E]/10 border-[#E8962E]/30' :
+                              'bg-[#111110] border-[rgba(232,150,46,0.1)]'
                             }`}>
                               <Shield className={`w-6 h-6 mx-auto mb-1 ${
                                 selectedCliente.estado_garantia === 'activada' ? 'text-[#EF4444]' :
-                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-[#F5A623]' : 'text-[#FFFFFF]/30'
+                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'
                               }`} />
                               <p className={`text-[10px] uppercase tracking-wider font-bold ${
                                 selectedCliente.estado_garantia === 'activada' ? 'text-[#EF4444]' :
-                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40'
+                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-[#E8962E]' : 'text-[#F2EFE9]/40'
                               }`}>{selectedCliente.estado_garantia === 'activada' ? 'Garantía' : selectedCliente.estado_garantia === 'en_riesgo' ? 'En riesgo' : 'En camino'}</p>
                             </div>
                           </div>
@@ -2008,8 +2134,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const rawIdx = PIPELINE_STAGES.findIndex(s => s.fase === clienteFase);
                             const activeIdx = rawIdx === -1 ? 0 : rawIdx;
                             return (
-                              <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-5">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40 mb-5">Pipeline del Programa</p>
+                              <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40 mb-5">Pipeline del Programa</p>
                                 <div className="flex items-start">
                                   {PIPELINE_STAGES.map((stage, i) => {
                                     const isActive = i === activeIdx;
@@ -2019,28 +2145,28 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         <div className="flex flex-col items-center gap-2 flex-1">
                                           <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 shrink-0 transition-all ${
                                             isActive
-                                              ? 'bg-[#F5A623] border-[#F5A623] shadow-[0_0_14px_rgba(245,166,35,0.45)]'
+                                              ? 'bg-[#E8962E] border-[#E8962E] shadow-[0_0_14px_rgba(232,150,46,0.45)]'
                                               : isDone
                                               ? 'bg-[#22C55E]/15 border-[#22C55E]/60'
-                                              : 'bg-[#0A0A0A] border-[rgba(245,166,35,0.15)]'
+                                              : 'bg-[#080808] border-[rgba(232,150,46,0.10)]'
                                           }`}>
                                             {isDone
                                               ? <Check className="w-3.5 h-3.5 text-[#22C55E]" />
                                               : isActive
-                                              ? <span className="w-2.5 h-2.5 bg-[#0A0A0A] rounded-full block" />
-                                              : <span className={`text-[10px] font-bold ${isActive ? 'text-[#0A0A0A]' : 'text-[#FFFFFF]/20'}`}>{i + 1}</span>
+                                              ? <span className="w-2.5 h-2.5 bg-[#080808] rounded-full block" />
+                                              : <span className={`text-[10px] font-bold ${isActive ? 'text-[#080808]' : 'text-[#F2EFE9]/20'}`}>{i + 1}</span>
                                             }
                                           </div>
                                           <div className="text-center px-1">
                                             <p className={`text-[11px] font-semibold leading-tight ${
-                                              isActive ? 'text-[#F5A623]' : isDone ? 'text-[#22C55E]/70' : 'text-[#FFFFFF]/25'
+                                              isActive ? 'text-[#E8962E]' : isDone ? 'text-[#22C55E]/70' : 'text-[#F2EFE9]/25'
                                             }`}>{stage.label}</p>
-                                            <p className={`text-[9px] mt-0.5 ${isActive ? 'text-[#F5A623]/60' : 'text-[#FFFFFF]/15'}`}>{stage.sub}</p>
+                                            <p className={`text-[9px] mt-0.5 ${isActive ? 'text-[#E8962E]/60' : 'text-[#F2EFE9]/15'}`}>{stage.sub}</p>
                                           </div>
                                         </div>
                                         {i < PIPELINE_STAGES.length - 1 && (
                                           <div className={`h-[2px] flex-1 mt-4 rounded-full mx-0.5 ${
-                                            i < activeIdx ? 'bg-[#22C55E]/30' : 'bg-[rgba(245,166,35,0.08)]'
+                                            i < activeIdx ? 'bg-[#22C55E]/30' : 'bg-[rgba(232,150,46,0.08)]'
                                           }`} />
                                         )}
                                       </React.Fragment>
@@ -2052,18 +2178,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           })()}
 
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-5">
-                              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
+                            <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
+                              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
                               <div className="flex items-end gap-2 mb-3">
-                                <p className="text-3xl font-light text-[#FFFFFF]">{selectedCliente.tareas_completadas}</p>
-                                <p className="text-sm text-[#FFFFFF]/40 mb-1">/ {selectedCliente.tareas_total}</p>
+                                <p className="text-3xl font-light text-[#F2EFE9]">{selectedCliente.tareas_completadas}</p>
+                                <p className="text-sm text-[#F2EFE9]/40 mb-1">/ {selectedCliente.tareas_total}</p>
                               </div>
-                              <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#F5A623] rounded-full" style={{ width: `${selectedCliente.tareas_total > 0 ? Math.round((selectedCliente.tareas_completadas / selectedCliente.tareas_total) * 100) : 0}%` }} />
+                              <div className="h-2 bg-[#E8962E]/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-[#E8962E] rounded-full" style={{ width: `${selectedCliente.tareas_total > 0 ? Math.round((selectedCliente.tareas_completadas / selectedCliente.tareas_total) * 100) : 0}%` }} />
                               </div>
                             </div>
-                            <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-5">
-                              <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
+                            <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
+                              <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
                               {detalleDiario[0] ? (() => {
                                 const d0 = detalleDiario[0];
                                 const energia = d0.energia_nivel ?? d0.respuestas?.q3;
@@ -2072,63 +2198,63 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 return (
                                   <>
                                     <div className="flex items-center justify-between mb-2">
-                                      <p className="text-xs text-[#FFFFFF]/40">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                      <p className="text-xs text-[#F2EFE9]/40">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                                       {d0.diario_score != null && (
-                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623]">{d0.diario_score}/100</span>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8962E]/15 text-[#E8962E]">{d0.diario_score}/100</span>
                                       )}
                                     </div>
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5 mb-2">
-                                        <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
+                                        <span className="text-[10px] text-[#F2EFE9]/40 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, i) => (
-                                            <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(energia) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
+                                            <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(energia) ? 'bg-[#E8962E]' : 'bg-[#E8962E]/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[10px] text-[#F5A623] font-bold">{energia}/10</span>
+                                        <span className="text-[10px] text-[#E8962E] font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                     {(d0.diario_cuerpo != null) && (
-                                      <p className="text-[11px] text-[#FFFFFF]/50 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
+                                      <p className="text-[11px] text-[#F2EFE9]/50 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
                                     )}
                                     {logro && (
-                                      <p className="text-xs text-[#FFFFFF]/80 line-clamp-2"><span className="text-[#22C55E] font-bold">Logro: </span>{logro}</p>
+                                      <p className="text-xs text-[#F2EFE9]/80 line-clamp-2"><span className="text-[#22C55E] font-bold">Logro: </span>{logro}</p>
                                     )}
                                     {freno && (
-                                      <p className="text-xs text-[#FFFFFF]/60 mt-1 line-clamp-1"><span className="text-[#F5A623] font-bold">Freno: </span>{freno}</p>
+                                      <p className="text-xs text-[#F2EFE9]/60 mt-1 line-clamp-1"><span className="text-[#E8962E] font-bold">Freno: </span>{freno}</p>
                                     )}
                                   </>
                                 );
-                              })() : <p className="text-xs text-[#FFFFFF]/30">Sin entradas de diario aún</p>}
+                              })() : <p className="text-xs text-[#F2EFE9]/30">Sin entradas de diario aún</p>}
                             </div>
                           </div>
 
-                          <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-2xl p-6 relative overflow-hidden">
-                            <Bot className="absolute -right-6 -bottom-6 w-32 h-32 text-[#FFFFFF]/5" />
+                          <div className="bg-[#E8962E]/5 border border-[#E8962E]/20 rounded-2xl p-6 relative overflow-hidden">
+                            <Bot className="absolute -right-6 -bottom-6 w-32 h-32 text-[#F2EFE9]/5" />
                             <div className="relative z-10">
                               <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-[#F5A623]/20 flex items-center justify-center">
-                                    <Bot className="w-4 h-4 text-[#F5A623]" />
+                                  <div className="w-8 h-8 rounded-lg bg-[#E8962E]/20 flex items-center justify-center">
+                                    <Bot className="w-4 h-4 text-[#E8962E]" />
                                   </div>
-                                  <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623]">Coach AI Assistant</p>
+                                  <p className="text-xs font-bold uppercase tracking-widest text-[#E8962E]">Coach AI Assistant</p>
                                 </div>
                                 <button
                                   onClick={generarRecomendacion} disabled={iaLoading}
-                                  className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-lg shadow-[#F5A623]/20"
+                                  className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-lg shadow-[#E8962E]/20"
                                 >
                                   {iaLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                                   Analizar y Sugerir
                                 </button>
                               </div>
                               {iaRecomendacion ? (
-                                <div className="bg-black/20 rounded-xl p-4 border border-[#F5A623]/20">
-                                  <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-headings:text-[#FFFFFF] prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1 prose-strong:text-[#F5A623] prose-strong:font-semibold prose-li:text-[#FFFFFF]/85 prose-li:my-0.5 prose-p:text-[#FFFFFF]/90">
+                                <div className="bg-black/20 rounded-xl p-4 border border-[#E8962E]/20">
+                                  <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-headings:text-[#F2EFE9] prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1 prose-strong:text-[#E8962E] prose-strong:font-semibold prose-li:text-[#F2EFE9]/85 prose-li:my-0.5 prose-p:text-[#F2EFE9]/90">
                                     <Markdown>{iaRecomendacion}</Markdown>
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-xs text-[#FFFFFF]/40">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
+                                <p className="text-xs text-[#F2EFE9]/40">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
                               )}
                             </div>
                           </div>
@@ -2136,10 +2262,65 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       )}
 
                       {/* ── DIARIO ── */}
-                      {detalleTab === 'diario' && (
+                      {detalleTab === 'mentor' && (
+                <div className="space-y-5">
+                  <p className="text-xs text-[#F2EFE9]/50">Todo lo que este cliente habló con el Mentor y sus entrenadores — sus respuestas, sus trabas, sus miedos. <strong className="text-[#E8962E]">Acá ves dónde intervenir.</strong></p>
+                  {convsLoading ? (
+                    <p className="text-sm text-[#F2EFE9]/40">Trayendo sus conversaciones…</p>
+                  ) : convsCliente.length === 0 ? (
+                    <div className="py-8 text-center border border-dashed border-[rgba(232,150,46,0.12)] rounded-xl">
+                      <p className="text-sm text-[#F2EFE9]/50">Todavía no habló con el Mentor.</p>
+                      <p className="text-xs text-[#F2EFE9]/30 mt-1">La primera conversación llega con la Sesión 1.</p>
+                    </div>
+                  ) : (
+                    convsCliente.map((c) => (
+                      <details key={c.agente} className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-[#111110] overflow-hidden">
+                        <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-[#F2EFE9]/85 hover:bg-[#E8962E]/5 transition-colors">
+                          💬 {c.agente} <span className="text-[10px] text-[#F2EFE9]/35 ml-2">{c.mensajes.length} mensajes</span>
+                        </summary>
+                        <div className="max-h-96 overflow-y-auto px-4 pb-4 space-y-2">
+                          {c.mensajes.map((msg, i) => (
+                            <div key={i} className={`text-xs leading-relaxed p-2.5 rounded-lg ${msg.role === 'user' ? 'bg-[#E8962E]/8 text-[#F2EFE9]/90 ml-6' : 'bg-[#F2EFE9]/4 text-[#F2EFE9]/60 mr-6'}`}>
+                              <span className="text-[9px] font-bold uppercase tracking-wider opacity-50 block mb-0.5">{msg.role === 'user' ? 'Cliente' : c.agente}</span>
+                              {msg.content}
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    ))
+                  )}
+                </div>
+              )}
+              {detalleTab === 'evidencias' && (
+                <div className="space-y-4">
+                  <p className="text-xs text-[#F2EFE9]/50">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-[#E8962E]">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
+                  {evidenciasLoading ? (
+                    <p className="text-sm text-[#F2EFE9]/40">Buscando las evidencias del camino…</p>
+                  ) : evidenciasCliente.length === 0 ? (
+                    <div className="py-8 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl">
+                      <p className="text-sm text-[#F2EFE9]/50">Todavía no subió evidencias.</p>
+                      <p className="text-xs text-[#F2EFE9]/30 mt-1">La primera llega con LA QUEMA (día 4).</p>
+                    </div>
+                  ) : (
+                    evidenciasCliente.map((g) => (
+                      <div key={g.meta} className="rounded-xl border border-[rgba(232,150,46,0.10)] bg-[#111110] p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] mb-2">Sesión {g.meta}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {g.archivos.map((f) => (
+                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-[#E8962E]/10 border border-[#E8962E]/25 text-xs text-[#E8962E] hover:bg-[#E8962E]/20 transition-colors">
+                              📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              {detalleTab === 'diario' && (
                         <div className="space-y-4">
                           {detalleDiario.length === 0 ? (
-                            <p className="text-[#FFFFFF]/40 text-sm text-center py-12">Sin entradas de diario</p>
+                            <p className="text-[#F2EFE9]/40 text-sm text-center py-12">Sin entradas de diario</p>
                           ) : detalleDiario.map((entrada: any, i: number) => {
                             const r = entrada.respuestas ?? {};
                             const energia = entrada.energia_nivel ?? r.q3;
@@ -2148,24 +2329,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               ? entrada.diario_tareas.map((id: string) => TAREAS_TAGS.find((t) => t.id === id)?.label ?? id)
                               : [];
                             return (
-                              <div key={i} className="p-6 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)]">
+                              <div key={i} className="p-6 rounded-2xl bg-[#111110] border border-[rgba(232,150,46,0.1)]">
                                 <div className="flex items-center justify-between mb-4">
-                                  <p className="text-sm font-semibold text-[#FFFFFF] tracking-wide">
+                                  <p className="text-sm font-semibold text-[#F2EFE9] tracking-wide">
                                     {new Date(entrada.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                   </p>
                                   <div className="flex items-center gap-2">
                                     {entrada.diario_score != null && (
-                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623]">{entrada.diario_score}/100</span>
+                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8962E]/15 text-[#E8962E]">{entrada.diario_score}/100</span>
                                     )}
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] text-[#FFFFFF]/40 uppercase font-bold">Energía</span>
+                                        <span className="text-[10px] text-[#F2EFE9]/40 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, idx) => (
-                                            <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(energia) ? 'bg-[#F5A623]' : 'bg-[#F5A623]/10'}`} />
+                                            <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(energia) ? 'bg-[#E8962E]' : 'bg-[#E8962E]/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[10px] text-[#F5A623] font-bold">{energia}/10</span>
+                                        <span className="text-[10px] text-[#E8962E] font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                   </div>
@@ -2174,29 +2355,29 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   <div className="space-y-3">
                                     {entrada.diario_cuerpo != null && (
                                       <div className="flex gap-6 text-xs">
-                                        <span className="text-[#FFFFFF]/60">Cuerpo <b className="text-[#FFFFFF]">{entrada.diario_cuerpo}</b></span>
-                                        <span className="text-[#FFFFFF]/60">Mente <b className="text-[#FFFFFF]">{entrada.diario_mente}</b></span>
-                                        <span className="text-[#FFFFFF]/60">Emociones <b className="text-[#FFFFFF]">{entrada.diario_emociones}</b></span>
+                                        <span className="text-[#F2EFE9]/60">Cuerpo <b className="text-[#F2EFE9]">{entrada.diario_cuerpo}</b></span>
+                                        <span className="text-[#F2EFE9]/60">Mente <b className="text-[#F2EFE9]">{entrada.diario_mente}</b></span>
+                                        <span className="text-[#F2EFE9]/60">Emociones <b className="text-[#F2EFE9]">{entrada.diario_emociones}</b></span>
                                       </div>
                                     )}
-                                    {entrada.diario_logro && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Logro</p><p className="text-xs text-[#FFFFFF]/80">{entrada.diario_logro}</p></div>}
-                                    {entrada.diario_bloqueo && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Bloqueo</p><p className="text-xs text-[#FFFFFF]/80">{entrada.diario_bloqueo}</p></div>}
+                                    {entrada.diario_logro && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Logro</p><p className="text-xs text-[#F2EFE9]/80">{entrada.diario_logro}</p></div>}
+                                    {entrada.diario_bloqueo && <div><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Bloqueo</p><p className="text-xs text-[#F2EFE9]/80">{entrada.diario_bloqueo}</p></div>}
                                     {tagLabels.length > 0 && (
                                       <div className="flex flex-wrap gap-1.5">
                                         {tagLabels.map((l: string, idx: number) => (
-                                          <span key={idx} className="text-[10px] bg-[#F5A623]/5 px-2 py-1 rounded-full text-[#FFFFFF]/60">{l}</span>
+                                          <span key={idx} className="text-[10px] bg-[#E8962E]/5 px-2 py-1 rounded-full text-[#F2EFE9]/60">{l}</span>
                                         ))}
                                       </div>
                                     )}
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 gap-4">
-                                    {r.q1 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Cómo se sintió</p><p className="text-xs text-[#FFFFFF]/80">{r.q1}</p></div>}
-                                    {r.q4 && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Acción tomada</p><p className="text-xs text-[#FFFFFF]/80">{r.q4}</p></div>}
-                                    {r.q5 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Pensamiento dominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q5}</p></div>}
-                                    {r.q2 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Lo que lo frenó</p><p className="text-xs text-[#FFFFFF]/80">{r.q2}</p></div>}
-                                    {r.q6 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Emoción predominante</p><p className="text-xs text-[#FFFFFF]/80">{r.q6}</p></div>}
-                                    {r.q7 && <div><p className="text-[10px] uppercase font-bold text-[#F5A623]/70 mb-1">Plan para mañana</p><p className="text-xs text-[#FFFFFF]/80">{r.q7}</p></div>}
+                                    {r.q1 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Cómo se sintió</p><p className="text-xs text-[#F2EFE9]/80">{r.q1}</p></div>}
+                                    {r.q4 && <div><p className="text-[10px] uppercase font-bold text-[#22C55E]/70 mb-1">Acción tomada</p><p className="text-xs text-[#F2EFE9]/80">{r.q4}</p></div>}
+                                    {r.q5 && <div><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Pensamiento dominante</p><p className="text-xs text-[#F2EFE9]/80">{r.q5}</p></div>}
+                                    {r.q2 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Lo que lo frenó</p><p className="text-xs text-[#F2EFE9]/80">{r.q2}</p></div>}
+                                    {r.q6 && <div><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Emoción predominante</p><p className="text-xs text-[#F2EFE9]/80">{r.q6}</p></div>}
+                                    {r.q7 && <div><p className="text-[10px] uppercase font-bold text-[#E8962E]/70 mb-1">Plan para mañana</p><p className="text-xs text-[#F2EFE9]/80">{r.q7}</p></div>}
                                   </div>
                                 )}
                               </div>
@@ -2208,14 +2389,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── METRICAS ── */}
                       {detalleTab === 'metricas' && (
                         <div className="space-y-5">
-                          <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
+                          <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
                             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                              <h3 className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60 flex items-center gap-2">
-                                <BarChart2 className="w-3.5 h-3.5 text-[#F5A623]" /> Progreso por Pilar
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60 flex items-center gap-2">
+                                <BarChart2 className="w-3.5 h-3.5 text-[#E8962E]" /> Progreso por Pilar
                               </h3>
-                              {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-[#F5A623] animate-spin" />}
+                              {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-[#E8962E] animate-spin" />}
                             </div>
-                            <div className="divide-y divide-[rgba(245,166,35,0.1)]">
+                            <div className="divide-y divide-[rgba(232,150,46,0.1)]">
                               {SEED_ROADMAP_V2.map(pilar => {
                                 const metasPilar = pilar.metas.length;
                                 const completadasReales = selectedCliente.tareas_por_pilar?.[pilar.numero] ?? 0;
@@ -2227,22 +2408,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     <button
                                       type="button"
                                       onClick={() => completadasReales > 0 && setPilarExpandido(prev => ({ ...prev, [pilar.numero]: !expandido }))}
-                                      className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left bg-[#141414] ${
-                                        completadasReales > 0 ? 'hover:bg-[#1C1C1C] cursor-pointer' : 'cursor-default'
+                                      className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left bg-[#111110] ${
+                                        completadasReales > 0 ? 'hover:bg-[#1A1917] cursor-pointer' : 'cursor-default'
                                       }`}
                                     >
-                                      {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-[#F5A623] shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
-                                      <span className="text-xs text-[#FFFFFF]/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
-                                      <div className="flex-1 h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-[#F5A623] transition-all duration-500" style={{ width: `${pctPilar}%` }} />
+                                      {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-[#E8962E] shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
+                                      <span className="text-xs text-[#F2EFE9]/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
+                                      <div className="flex-1 h-1.5 bg-[#E8962E]/5 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full bg-[#E8962E] transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                       </div>
-                                      <span className="text-xs text-[#FFFFFF]/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                      <span className="text-xs text-[#F2EFE9]/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                       {completadasReales > 0 && (
-                                        <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-[#F5A623] ${expandido ? 'rotate-180' : ''}`} />
+                                        <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-[#E8962E] ${expandido ? 'rotate-180' : ''}`} />
                                       )}
                                     </button>
                                     {expandido && (
-                                      <div className="px-5 pb-4 space-y-2 bg-[#F5A623]/5">
+                                      <div className="px-5 pb-4 space-y-2 bg-[#E8962E]/5">
                                         {pilar.metas.map(meta => {
                                           const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                           if (!tareaData) return null;
@@ -2256,34 +2437,34 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               key={meta.codigo}
                                               type="button"
                                               onClick={() => abrirTareaModal(meta, tareaData, rawOutput, selectedCliente.nombre)}
-                                              className="w-full text-left bg-black/20 border border-[rgba(245,166,35,0.12)] rounded-xl overflow-hidden hover:border-[rgba(245,166,35,0.3)] hover:bg-[#1C1C1C]/50 transition-all group"
+                                              className="w-full text-left bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] hover:bg-[#1A1917]/50 transition-all group"
                                             >
                                               <div className="flex items-center gap-3 p-3.5">
-                                                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#F5A623]" />
+                                                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#E8962E]" />
                                                 <div className="flex-1 min-w-0">
                                                   <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F5A623]/10 text-[#F5A623]">{meta.codigo}</span>
-                                                    {meta.es_estrella && <Star className="w-3 h-3 text-[#F5A623] fill-[#F5A623]" />}
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#E8962E]/10 text-[#E8962E]">{meta.codigo}</span>
+                                                    {meta.es_estrella && <Star className="w-3 h-3 text-[#E8962E] fill-[#E8962E]" />}
                                                     {tareaData.fecha_completada && (
-                                                      <span className="text-[10px] text-[#FFFFFF]/30">
+                                                      <span className="text-[10px] text-[#F2EFE9]/30">
                                                         {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                       </span>
                                                     )}
                                                   </div>
-                                                  <p className="text-sm font-semibold text-[#FFFFFF] mt-0.5 truncate">{meta.titulo}</p>
+                                                  <p className="text-sm font-semibold text-[#F2EFE9] mt-0.5 truncate">{meta.titulo}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
                                                   {hasOutput && (
-                                                    <span className="text-[10px] text-[#F5A623] bg-[#F5A623]/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                    <span className="text-[10px] text-[#E8962E] bg-[#E8962E]/10 px-2 py-0.5 rounded-full">Con output</span>
                                                   )}
-                                                  <ChevronRight className="w-3.5 h-3.5 text-[#FFFFFF]/30 group-hover:text-[#FFFFFF]/60 transition-colors" />
+                                                  <ChevronRight className="w-3.5 h-3.5 text-[#F2EFE9]/30 group-hover:text-[#F2EFE9]/60 transition-colors" />
                                                 </div>
                                               </div>
                                             </button>
                                           );
                                         })}
                                         {tareasCompletadasPilar.length === 0 && (
-                                          <p className="text-xs text-[#FFFFFF]/30 py-2">Sin datos detallados disponibles aún.</p>
+                                          <p className="text-xs text-[#F2EFE9]/30 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                         )}
                                       </div>
                                     )}
@@ -2293,10 +2474,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/60 mb-3">Métricas de Negocio Semanales</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/60 mb-3">Métricas de Negocio Semanales</h3>
                             {detalleMetricas.length === 0 ? (
-                              <div className="bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-2xl p-6 text-center">
-                                <p className="text-sm text-[#FFFFFF]/40">El cliente aún no cargó métricas semanales.</p>
+                              <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-6 text-center">
+                                <p className="text-sm text-[#F2EFE9]/40">El cliente aún no cargó métricas semanales.</p>
                               </div>
                             ) : detalleMetricas.slice().reverse().map((m: any, i: number) => {
                               const esV3 = m.met_fecha_inicio != null || m.met_roas != null || m.met_ads_plataforma != null;
@@ -2309,23 +2490,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       : `${new Date(m.met_fecha_inicio + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}–${m.met_fecha_fin ? new Date(m.met_fecha_fin + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : ''}`)
                                   : m.semana;
                                 return (
-                                  <div key={i} className="p-5 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)] flex items-center justify-between mb-3">
-                                    <span className="text-xs font-semibold text-[#FFFFFF]/60 bg-[#F5A623]/5 px-2.5 py-1 rounded-lg">{periodo}</span>
+                                  <div key={i} className="p-5 rounded-2xl bg-[#111110] border border-[rgba(232,150,46,0.1)] flex items-center justify-between mb-3">
+                                    <span className="text-xs font-semibold text-[#F2EFE9]/60 bg-[#E8962E]/5 px-2.5 py-1 rounded-lg">{periodo}</span>
                                     <div className="flex gap-7">
-                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">ROAS</p></div>
-                                      <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{postsTotales(m)}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">posts</p></div>
+                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[10px] text-[#F2EFE9]/40 font-bold uppercase">ROAS</p></div>
+                                      <div className="text-center"><p className="text-[#F2EFE9] text-lg font-light">{postsTotales(m)}</p><p className="text-[10px] text-[#F2EFE9]/40 font-bold uppercase">posts</p></div>
                                       <div className="text-center"><p className="text-[#22C55E] text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-[#22C55E]/50 font-bold uppercase">ventas</p></div>
-                                      <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">ingresos</p></div>
+                                      <div className="text-center"><p className="text-[#F2EFE9] text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[10px] text-[#F2EFE9]/40 font-bold uppercase">ingresos</p></div>
                                     </div>
                                   </div>
                                 );
                               }
                               return (
-                                <div key={i} className="p-5 rounded-2xl bg-[#141414] border border-[rgba(245,166,35,0.1)] flex items-center justify-between mb-3">
-                                  <span className="text-xs font-semibold text-[#FFFFFF]/60 bg-[#F5A623]/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
+                                <div key={i} className="p-5 rounded-2xl bg-[#111110] border border-[rgba(232,150,46,0.1)] flex items-center justify-between mb-3">
+                                  <span className="text-xs font-semibold text-[#F2EFE9]/60 bg-[#E8962E]/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
                                   <div className="flex gap-8">
-                                    <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">leads</p></div>
-                                    <div className="text-center"><p className="text-[#FFFFFF] text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[10px] text-[#FFFFFF]/40 font-bold uppercase">llamadas</p></div>
+                                    <div className="text-center"><p className="text-[#F2EFE9] text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[10px] text-[#F2EFE9]/40 font-bold uppercase">leads</p></div>
+                                    <div className="text-center"><p className="text-[#F2EFE9] text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[10px] text-[#F2EFE9]/40 font-bold uppercase">llamadas</p></div>
                                     <div className="text-center"><p className="text-[#22C55E] text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-[#22C55E]/50 font-bold uppercase">ventas</p></div>
                                   </div>
                                 </div>
@@ -2347,7 +2528,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── NOTAS INTERNAS ── */}
                       {detalleTab === 'notas' && (
                         <div className="space-y-4">
-                          <p className="text-[10px] text-[#FFFFFF]/30 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
+                          <p className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
                           <div className="flex gap-2">
                             <textarea
                               value={notaInput}
@@ -2355,27 +2536,27 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) agregarNota(); }}
                               placeholder="Escribí una nota interna... (Ctrl+Enter para guardar)"
                               rows={3}
-                              className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg py-3 px-4 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all resize-none"
+                              className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-4 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all resize-none"
                             />
                             <button
                               onClick={agregarNota}
                               disabled={!notaInput.trim()}
-                              className="btn-primary w-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 shadow-lg shadow-[#F5A623]/20 shrink-0"
+                              className="btn-primary w-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 shadow-lg shadow-[#E8962E]/20 shrink-0"
                             >
                               <Send className="w-4 h-4" />
                             </button>
                           </div>
                           {notaLoading ? (
-                            <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-[#F5A623] animate-spin" /></div>
+                            <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-[#E8962E] animate-spin" /></div>
                           ) : detalleNotas.length === 0 ? (
                             <div className="text-center py-12">
                               <BookOpen className="w-8 h-8 text-gray-800 mx-auto mb-3" />
-                              <p className="text-[#FFFFFF]/40 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
+                              <p className="text-[#F2EFE9]/40 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
                             </div>
                           ) : detalleNotas.map(nota => (
-                            <div key={nota.id} className="bg-[#141414] border border-[rgba(245,166,35,0.12)] rounded-xl p-4">
-                              <p className="text-sm text-[#FFFFFF]/90 leading-relaxed whitespace-pre-wrap">{nota.content}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/30 mt-2">
+                            <div key={nota.id} className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-xl p-4">
+                              <p className="text-sm text-[#F2EFE9]/90 leading-relaxed whitespace-pre-wrap">{nota.content}</p>
+                              <p className="text-[10px] text-[#F2EFE9]/30 mt-2">
                                 {new Date(nota.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
@@ -2389,7 +2570,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           {detalleMensajes.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
                               <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                              <p className="text-[#FFFFFF]/40 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
+                              <p className="text-[#F2EFE9]/40 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
                             </div>
                           ) : detalleMensajes.map(m => {
                             const isMe = m.emisor_id === adminProfile.id;
@@ -2397,16 +2578,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const initial = senderName.charAt(0).toUpperCase();
                             return (
                               <div key={m.id} className={`flex gap-2.5 items-end max-w-[88%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#F5A623]/20 border-[#F5A623]/30 text-[#F5A623]' : 'bg-[#F5A623]/10 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]'}`}>
+                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#E8962E]/20 border-[#E8962E]/30 text-[#E8962E]' : 'bg-[#E8962E]/10 border-[rgba(232,150,46,0.12)] text-[#F2EFE9]'}`}>
                                   {isMe
-                                    ? (adminAvatar ? <img src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
+                                    ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
                                     : initial}
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <span className={`text-[10px] font-semibold text-[#FFFFFF]/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                  <span className={`text-[10px] font-semibold text-[#F2EFE9]/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                                    isMe ? 'bg-[#F5A623]/25 text-[#FFFFFF] border border-[#F5A623]/20 rounded-tr-sm'
-                                         : 'bg-[#1C1C1C]/60 text-[#FFFFFF]/90 border border-[rgba(245,166,35,0.12)] rounded-tl-sm'
+                                    isMe ? 'bg-[#E8962E]/25 text-[#F2EFE9] border border-[#E8962E]/20 rounded-tr-sm'
+                                         : 'bg-[#1A1917]/60 text-[#F2EFE9]/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
                                   }`}>
                                     {m.contenido && <p>{m.contenido}</p>}
                                     <p className={`text-[10px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
@@ -2426,7 +2607,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                 {/* Chat input for private messages */}
                 {detalleTab === 'mensajes' && (
-                  <div className="p-4 border-t border-[rgba(245,166,35,0.1)] shrink-0 bg-[#1C1C1C]/20">
+                  <div className="p-4 border-t border-[rgba(232,150,46,0.1)] shrink-0 bg-[#1A1917]/20">
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -2435,12 +2616,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensajePrivado()}
                         placeholder="Escribe un mensaje privado..."
                         disabled={enviando}
-                        className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg py-3 px-5 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all"
+                        className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all"
                       />
                       <button
                         onClick={enviarMensajePrivado}
                         disabled={!mensajeInput.trim() || enviando}
-                        className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 shadow-lg shadow-[#F5A623]/20"
+                        className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 shadow-lg shadow-[#E8962E]/20"
                       >
                         {enviando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                       </button>
@@ -2468,31 +2649,29 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {mainTab === 'mensajes' && (
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Channel tabs */}
-              <div className="flex border-b border-[rgba(245,166,35,0.1)] px-6 shrink-0 bg-black/20">
+              <div className="flex border-b border-[rgba(232,150,46,0.1)] px-6 shrink-0 bg-black/20">
                 {([
                   { id: 'privados' as MensajesChannel, label: 'Privados', icon: MessageSquare },
-                  { id: 'comunidad' as MensajesChannel, label: 'Comunidad', icon: Users },
-                  { id: 'victorias' as MensajesChannel, label: 'Victorias', icon: Trophy },
-                  { id: 'consultas' as MensajesChannel, label: 'Consultas', icon: Hash },
+                  // L2 · recorte: comunidad/victorias/consultas van al Canal de WhatsApp (v1 sin muro)
                 ]).map(ch => (
                   <button
                     key={ch.id}
                     onClick={() => { setMensajesChannel(ch.id); setChatCliente(null); }}
                     className={`flex items-center gap-2 px-5 py-4 text-sm font-medium transition-all relative ${
                       mensajesChannel === ch.id
-                        ? 'text-[#F5A623]'
-                        : 'text-[#FFFFFF]/40 hover:text-[#FFFFFF]/80'
+                        ? 'text-[#E8962E]'
+                        : 'text-[#F2EFE9]/40 hover:text-[#F2EFE9]/80'
                     }`}
                   >
                     <ch.icon className="w-4 h-4" />
                     {ch.label}
                     {(channelUnread[ch.id] ?? 0) > 0 && (
-                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-[#F5A623] text-[#FFFFFF] text-[9px] font-bold flex items-center justify-center">
+                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-[#E8962E] text-[#F2EFE9] text-[9px] font-bold flex items-center justify-center">
                         {channelUnread[ch.id]}
                       </span>
                     )}
                     {mensajesChannel === ch.id && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F5A623] rounded-t-full" />
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8962E] rounded-t-full" />
                     )}
                   </button>
                 ))}
@@ -2507,29 +2686,29 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 /* Privados: WhatsApp-style */
                 <div className="flex flex-1 min-h-0 overflow-hidden">
                   {/* Left: client list */}
-                  <div className="w-[280px] shrink-0 border-r border-[rgba(245,166,35,0.12)] flex flex-col bg-black/20">
-                    <div className="p-4 border-b border-[rgba(245,166,35,0.12)]">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">Conversaciones ({clientes.length})</p>
+                  <div className="w-[280px] shrink-0 border-r border-[rgba(232,150,46,0.12)] flex flex-col bg-black/20">
+                    <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-[#F2EFE9]/40">Conversaciones ({clientes.length})</p>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-hide">
                       {loading ? (
-                        <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 text-[#F5A623] animate-spin" /></div>
+                        <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 text-[#E8962E] animate-spin" /></div>
                       ) : clientes.map(c => (
                         <button
                           key={c.id}
                           onClick={() => { setChatCliente(c); cargarChatMessages(c.id); }}
-                          className={`w-full text-left px-4 py-3.5 border-b border-[rgba(245,166,35,0.08)] transition-all flex items-center gap-3 ${
-                            chatCliente?.id === c.id ? 'bg-[#F5A623]/10' : 'hover:bg-[#1C1C1C]/50'
+                          className={`w-full text-left px-4 py-3.5 border-b border-[rgba(232,150,46,0.08)] transition-all flex items-center gap-3 ${
+                            chatCliente?.id === c.id ? 'bg-[#E8962E]/10' : 'hover:bg-[#1A1917]/50'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-sm font-bold border ${
-                            chatCliente?.id === c.id ? 'bg-[#F5A623]/20 border-[#F5A623]/30 text-[#F5A623]' : 'bg-[#F5A623]/5 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]'
+                            chatCliente?.id === c.id ? 'bg-[#E8962E]/20 border-[#E8962E]/30 text-[#E8962E]' : 'bg-[#E8962E]/5 border-[rgba(232,150,46,0.12)] text-[#F2EFE9]'
                           }`}>
                             {c.nombre.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[#FFFFFF] truncate">{c.nombre}</p>
-                            <p className="text-[10px] text-[#FFFFFF]/40 truncate">{c.especialidad || 'Sin especialidad'}</p>
+                            <p className="text-sm font-medium text-[#F2EFE9] truncate">{c.nombre}</p>
+                            <p className="text-[10px] text-[#F2EFE9]/40 truncate">{c.especialidad || 'Sin especialidad'}</p>
                           </div>
                           <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         </button>
@@ -2539,40 +2718,40 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                   {/* Right: conversation */}
                   {chatCliente ? (
-                    <div className="flex-1 flex flex-col min-w-0 bg-[#0A0A0A]">
-                      <div className="h-16 border-b border-[rgba(245,166,35,0.12)] flex items-center gap-3 px-6 shrink-0 bg-black/20">
-                        <div className="w-9 h-9 rounded-full bg-[#F5A623]/20 border border-[#F5A623]/30 flex items-center justify-center text-sm font-bold text-[#F5A623]">
+                    <div className="flex-1 flex flex-col min-w-0 bg-[#080808]">
+                      <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center gap-3 px-6 shrink-0 bg-black/20">
+                        <div className="w-9 h-9 rounded-full bg-[#E8962E]/20 border border-[#E8962E]/30 flex items-center justify-center text-sm font-bold text-[#E8962E]">
                           {chatCliente.nombre.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-[#FFFFFF]">{chatCliente.nombre}</p>
-                          <p className="text-[10px] text-[#FFFFFF]/40">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
+                          <p className="text-sm font-semibold text-[#F2EFE9]">{chatCliente.nombre}</p>
+                          <p className="text-[10px] text-[#F2EFE9]/40">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto p-5 scrollbar-hide space-y-3">
                         {chatLoading ? (
-                          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
+                          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
                         ) : chatMessages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center">
                             <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                            <p className="text-[#FFFFFF]/40 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
+                            <p className="text-[#F2EFE9]/40 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
                           </div>
                         ) : chatMessages.map(m => {
                           const isMe = m.emisor_id === adminProfile.id;
                           const senderName = isMe ? adminProfile.nombre : chatCliente.nombre;
                           return (
                             <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#F5A623]/20 border-[#F5A623]/30' : 'bg-[#F5A623]/10 border-[rgba(245,166,35,0.2)]'}`}>
+                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-[#E8962E]/20 border-[#E8962E]/30' : 'bg-[#E8962E]/10 border-[rgba(232,150,46,0.12)]'}`}>
                                 {isMe
-                                  ? (adminAvatar ? <img src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-[#F5A623]" />)
+                                  ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-[#E8962E]" />)
                                   : senderName.charAt(0).toUpperCase()
                                 }
                               </div>
                               <div className="flex flex-col gap-1">
-                                <span className={`text-[10px] font-semibold text-[#FFFFFF]/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                <span className={`text-[10px] font-semibold text-[#F2EFE9]/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                 <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                                  isMe ? 'bg-[#F5A623]/25 text-[#FFFFFF] border border-[#F5A623]/20 rounded-tr-sm'
-                                       : 'bg-[#1C1C1C]/60 text-[#FFFFFF]/90 border border-[rgba(245,166,35,0.12)] rounded-tl-sm'
+                                  isMe ? 'bg-[#E8962E]/25 text-[#F2EFE9] border border-[#E8962E]/20 rounded-tr-sm'
+                                       : 'bg-[#1A1917]/60 text-[#F2EFE9]/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
                                 }`}>
                                   <p>{m.contenido}</p>
                                   <p className={`text-[10px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
@@ -2585,7 +2764,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         })}
                         <div ref={chatEndRef} />
                       </div>
-                      <div className="p-4 border-t border-[rgba(245,166,35,0.12)] shrink-0 bg-[#1C1C1C]/20">
+                      <div className="p-4 border-t border-[rgba(232,150,46,0.12)] shrink-0 bg-[#1A1917]/20">
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -2594,12 +2773,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarChatMsg()}
                             placeholder={`Mensaje a ${chatCliente.nombre}...`}
                             disabled={chatEnviando}
-                            className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg py-3 px-5 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-all"
+                            className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all"
                           />
                           <button
                             onClick={enviarChatMsg}
                             disabled={!chatInput.trim() || chatEnviando}
-                            className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center disabled:opacity-50 transition-colors shadow-lg shadow-[#F5A623]/20"
+                            className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center disabled:opacity-50 transition-colors shadow-lg shadow-[#E8962E]/20"
                           >
                             {chatEnviando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                           </button>
@@ -2610,7 +2789,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <div className="flex-1 flex items-center justify-center text-center">
                       <div>
                         <MessageSquare className="w-12 h-12 text-gray-800 mx-auto mb-4" />
-                        <p className="text-[#FFFFFF]/40 text-sm">Seleccioná un cliente para chatear</p>
+                        <p className="text-[#F2EFE9]/40 text-sm">Seleccioná un cliente para chatear</p>
                       </div>
                     </div>
                   )}
@@ -2630,8 +2809,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   onClick={() => setFiltroMetricasId(null)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                     filtroMetricasId === null
-                      ? 'bg-[#F5A623]/20 border-[#F5A623]/50 text-[#F5A623]'
-                      : 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.14)] text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/6'
+                      ? 'bg-[#E8962E]/20 border-[#E8962E]/50 text-[#E8962E]'
+                      : 'bg-[#1A1917]/50 border-[rgba(232,150,46,0.14)] text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/6'
                   }`}
                 >
                   <Globe className="w-4 h-4 inline" /> Global ({clientes.length})
@@ -2642,8 +2821,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onClick={() => setFiltroMetricasId(c.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                       filtroMetricasId === c.id
-                        ? 'bg-[#F5A623]/20 border-[#F5A623]/50 text-[#F5A623]'
-                        : 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.14)] text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/6'
+                        ? 'bg-[#E8962E]/20 border-[#E8962E]/50 text-[#E8962E]'
+                        : 'bg-[#1A1917]/50 border-[rgba(232,150,46,0.14)] text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/6'
                     }`}
                   >
                     <span className={`w-2 h-2 rounded-full ${SEMAFORO_CONFIG[c.semaforo].class}`} />
@@ -2652,7 +2831,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ))}
                 <button
                   onClick={() => { setMetricasGlobales(null); cargarMetricasGlobales(); cargarSatisfaccionGlobal(); cargarRatingsPorPilar(); cargarClientes(); }}
-                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1C1C1C]/50 border border-[rgba(245,166,35,0.14)] text-xs text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors"
+                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1A1917]/50 border border-[rgba(232,150,46,0.14)] text-xs text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors"
                 >
                   <Loader2 className="w-3.5 h-3.5" /> Actualizar
                 </button>
@@ -2663,30 +2842,30 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   {/* KPIs */}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {[
-                      { label: 'Profesionales activos', value: clientes.length, icon: Users, color: 'text-[#F5A623]', border: 'border-[#F5A623]/20', bg: 'bg-[#F5A623]/5' },
+                      { label: 'Profesionales activos', value: clientes.length, icon: Users, color: 'text-[#E8962E]', border: 'border-[#E8962E]/20', bg: 'bg-[#E8962E]/5' },
                       { label: 'En ritmo', value: clientes.filter(c => c.semaforo === 'verde').length, icon: CheckCheck, color: 'text-[#22C55E]', border: 'border-[#22C55E]/20', bg: 'bg-[#22C55E]/5' },
-                      { label: 'Necesitan atención', value: clientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-[#F5A623]', border: 'border-[#F5A623]/20', bg: 'bg-[#F5A623]/5' },
-                      { label: 'Progreso promedio', value: clientes.length ? `${Math.round(clientes.reduce((a, c) => a + (c.tareas_total > 0 ? (c.tareas_completadas / c.tareas_total) * 100 : (c.progreso_porcentaje ?? 0)), 0) / clientes.length)}%` : '—', icon: TrendingUp, color: 'text-[#F5A623]', border: 'border-[#F5A623]/20', bg: 'bg-[#F5A623]/5' },
-                      { label: 'Satisfacción promedio', value: satisfaccionGlobal !== null ? `${satisfaccionGlobal.toFixed(1)} / 5` : '—', icon: Star, color: 'text-[#F5A623]', border: 'border-[#F5A623]/20', bg: 'bg-[#F5A623]/5' },
+                      { label: 'Necesitan atención', value: clientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-[#E8962E]', border: 'border-[#E8962E]/20', bg: 'bg-[#E8962E]/5' },
+                      { label: 'Progreso promedio', value: clientes.length ? `${Math.round(clientes.reduce((a, c) => a + (c.tareas_total > 0 ? (c.tareas_completadas / c.tareas_total) * 100 : (c.progreso_porcentaje ?? 0)), 0) / clientes.length)}%` : '—', icon: TrendingUp, color: 'text-[#E8962E]', border: 'border-[#E8962E]/20', bg: 'bg-[#E8962E]/5' },
+                      { label: 'Satisfacción promedio', value: satisfaccionGlobal !== null ? `${satisfaccionGlobal.toFixed(1)} / 5` : '—', icon: Star, color: 'text-[#E8962E]', border: 'border-[#E8962E]/20', bg: 'bg-[#E8962E]/5' },
                     ].map((s, i) => (
                       <div key={i} className={`${s.bg} border ${s.border} rounded-2xl p-5`}>
                         <s.icon className={`w-5 h-5 ${s.color} mb-3`} />
                         <p className={`text-3xl font-light ${s.color} mb-1`}>{s.value}</p>
-                        <p className="text-xs text-[#FFFFFF]/40 font-semibold uppercase tracking-wider">{s.label}</p>
+                        <p className="text-xs text-[#F2EFE9]/40 font-semibold uppercase tracking-wider">{s.label}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Progress table */}
-                  <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-[rgba(245,166,35,0.1)] flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60 flex items-center gap-2">
-                        <BarChart2 className="w-3.5 h-3.5 text-[#F5A623]" /> Progreso individual
+                  <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-[rgba(232,150,46,0.1)] flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60 flex items-center gap-2">
+                        <BarChart2 className="w-3.5 h-3.5 text-[#E8962E]" /> Progreso individual
                       </h3>
                     </div>
-                    <div className="divide-y divide-[rgba(245,166,35,0.1)]">
+                    <div className="divide-y divide-[rgba(232,150,46,0.1)]">
                       {clientes.length === 0 ? (
-                        <p className="text-[#FFFFFF]/30 text-sm text-center py-10">Sin datos de clientes</p>
+                        <p className="text-[#F2EFE9]/30 text-sm text-center py-10">El tablero espera a tu primer cliente</p>
                       ) : clientes.map(c => {
                         const pct = c.tareas_total > 0
                           ? Math.round((c.tareas_completadas / c.tareas_total) * 100)
@@ -2695,26 +2874,26 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <button
                             key={c.id}
                             onClick={() => setFiltroMetricasId(c.id)}
-                            className="w-full flex items-center gap-4 px-6 py-4 bg-[#141414] hover:bg-[#1C1C1C] transition-colors text-left group"
+                            className="w-full flex items-center gap-4 px-6 py-4 bg-[#111110] hover:bg-[#1A1917] transition-colors text-left group"
                           >
                             <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                             <div className="w-32 shrink-0">
-                              <p className="text-sm font-semibold text-[#FFFFFF] group-hover:text-[#F5A623] transition-colors truncate">{c.nombre}</p>
-                              <p className="text-[10px] text-[#FFFFFF]/40">Día {c.dia_programa}/90</p>
+                              <p className="text-sm font-semibold text-[#F2EFE9] group-hover:text-[#E8962E] transition-colors truncate">{c.nombre}</p>
+                              <p className="text-[10px] text-[#F2EFE9]/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] text-[#FFFFFF]/40">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
-                                <span className="text-xs font-bold text-[#FFFFFF]">{pct}%</span>
+                                <span className="text-[10px] text-[#F2EFE9]/40">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
+                                <span className="text-xs font-bold text-[#F2EFE9]">{pct}%</span>
                               </div>
-                              <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full bg-[#F5A623] transition-all" style={{ width: `${pct}%` }} />
+                              <div className="h-2 bg-[#E8962E]/5 rounded-full overflow-hidden">
+                                <div className="h-full rounded-full bg-[#E8962E] transition-all" style={{ width: `${pct}%` }} />
                               </div>
                             </div>
                             <div className="flex items-center gap-5 shrink-0">
-                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-[#F5A623] flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-[9px] text-[#FFFFFF]/30 uppercase">Racha</p></div>}
-                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-[#22C55E]' : 'text-[#FFFFFF]/30'}`}>{c.ventas_count}</p><p className="text-[9px] text-[#FFFFFF]/30 uppercase">Ventas</p></div>
-                              <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#F5A623] transition-colors" />
+                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-[#E8962E] flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-[9px] text-[#F2EFE9]/30 uppercase">Racha</p></div>}
+                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-[#22C55E]' : 'text-[#F2EFE9]/30'}`}>{c.ventas_count}</p><p className="text-[9px] text-[#F2EFE9]/30 uppercase">Ventas</p></div>
+                              <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#E8962E] transition-colors" />
                             </div>
                           </button>
                         );
@@ -2723,19 +2902,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   </div>
 
                   {/* Valoraciones por pilar (agregado global) */}
-                  <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-[rgba(245,166,35,0.1)] flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60 flex items-center gap-2">
-                        <Star className="w-3.5 h-3.5 text-[#F5A623]" /> Valoraciones por pilar
+                  <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-[rgba(232,150,46,0.1)] flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60 flex items-center gap-2">
+                        <Star className="w-3.5 h-3.5 text-[#E8962E]" /> Valoraciones por pilar
                       </h3>
-                      <span className="text-[10px] text-[#FFFFFF]/40">
+                      <span className="text-[10px] text-[#F2EFE9]/40">
                         {ratingsPorPilar.reduce((a, p) => a + p.count, 0)} reseñas totales · {ratingsPorPilar.length} pilares con datos
                       </span>
                     </div>
                     {ratingsPorPilar.length === 0 ? (
-                      <p className="text-[#FFFFFF]/30 text-sm text-center py-10">Aún no hay valoraciones registradas por los clientes.</p>
+                      <p className="text-[#F2EFE9]/30 text-sm text-center py-10">Aún no hay valoraciones registradas por los clientes.</p>
                     ) : (
-                      <div className="divide-y divide-[rgba(245,166,35,0.1)]">
+                      <div className="divide-y divide-[rgba(232,150,46,0.1)]">
                         {ratingsPorPilar.map((p) => {
                           const pilarSeed = SEED_ROADMAP_V2.find(s => s.numero === p.pilar_numero);
                           const titulo = p.pilar_titulo || pilarSeed?.titulo || `Pilar ${p.pilar_numero}`;
@@ -2743,18 +2922,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           const conComentarios = p.ratings.filter(r => r.comentario && r.comentario.trim().length > 0);
                           const maxDist = Math.max(1, ...Object.values(p.distribucion));
                           return (
-                            <div key={p.pilar_numero} className="bg-[#141414]">
+                            <div key={p.pilar_numero} className="bg-[#111110]">
                               <button
                                 type="button"
                                 onClick={() => setPilarRatingExpandido(prev => ({ ...prev, [p.pilar_numero]: !expandido }))}
-                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-[#1C1C1C] transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-[#1A1917] transition-colors text-left"
                               >
-                                <div className="w-7 h-7 rounded-lg bg-[#F5A623]/10 border border-[#F5A623]/20 flex items-center justify-center text-xs font-bold text-[#F5A623] shrink-0">
+                                <div className="w-7 h-7 rounded-lg bg-[#E8962E]/10 border border-[#E8962E]/20 flex items-center justify-center text-xs font-bold text-[#E8962E] shrink-0">
                                   {p.pilar_numero}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-[#FFFFFF] truncate">{titulo}</p>
-                                  <p className="text-[10px] text-[#FFFFFF]/40 mt-0.5">
+                                  <p className="text-sm font-semibold text-[#F2EFE9] truncate">{titulo}</p>
+                                  <p className="text-[10px] text-[#F2EFE9]/40 mt-0.5">
                                     {p.count} valoración{p.count === 1 ? '' : 'es'} · {conComentarios.length} con reseña
                                   </p>
                                 </div>
@@ -2762,45 +2941,45 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   {[1, 2, 3, 4, 5].map(s => (
                                     <Star
                                       key={s}
-                                      className={`w-3.5 h-3.5 ${s <= Math.round(p.avg) ? 'text-[#F5A623] fill-[#F5A623]' : 'text-[#FFFFFF]/15'}`}
+                                      className={`w-3.5 h-3.5 ${s <= Math.round(p.avg) ? 'text-[#E8962E] fill-[#E8962E]' : 'text-[#F2EFE9]/15'}`}
                                     />
                                   ))}
-                                  <span className="text-sm font-bold text-[#F5A623] ml-2 w-10 text-right">{p.avg.toFixed(1)}</span>
+                                  <span className="text-sm font-bold text-[#E8962E] ml-2 w-10 text-right">{p.avg.toFixed(1)}</span>
                                 </div>
                                 <ChevronDown
-                                  className={`w-4 h-4 text-[#FFFFFF]/40 shrink-0 transition-transform ${expandido ? 'rotate-180' : ''}`}
+                                  className={`w-4 h-4 text-[#F2EFE9]/40 shrink-0 transition-transform ${expandido ? 'rotate-180' : ''}`}
                                 />
                               </button>
                               {expandido && (
-                                <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-[rgba(245,166,35,0.05)]">
+                                <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-[rgba(232,150,46,0.05)]">
                                   {/* Distribución 5→1 */}
                                   <div className="space-y-1.5">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40 mb-2">Distribución</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40 mb-2">Distribución</p>
                                     {([5, 4, 3, 2, 1] as const).map(level => {
                                       const cnt = p.distribucion[level];
                                       const pct = (cnt / maxDist) * 100;
                                       return (
                                         <div key={level} className="flex items-center gap-3">
-                                          <span className="text-[10px] text-[#FFFFFF]/50 w-3">{level}</span>
-                                          <Star className="w-3 h-3 text-[#F5A623] fill-[#F5A623] shrink-0" />
-                                          <div className="flex-1 h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden">
+                                          <span className="text-[10px] text-[#F2EFE9]/50 w-3">{level}</span>
+                                          <Star className="w-3 h-3 text-[#E8962E] fill-[#E8962E] shrink-0" />
+                                          <div className="flex-1 h-1.5 bg-[#E8962E]/5 rounded-full overflow-hidden">
                                             <div
-                                              className="h-full rounded-full bg-[#F5A623] transition-all duration-500"
+                                              className="h-full rounded-full bg-[#E8962E] transition-all duration-500"
                                               style={{ width: `${pct}%` }}
                                             />
                                           </div>
-                                          <span className="text-[10px] text-[#FFFFFF]/40 w-8 text-right">{cnt}</span>
+                                          <span className="text-[10px] text-[#F2EFE9]/40 w-8 text-right">{cnt}</span>
                                         </div>
                                       );
                                     })}
                                   </div>
                                   {/* Reseñas con comentario */}
                                   <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40 mb-2">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40 mb-2">
                                       Reseñas {conComentarios.length > 0 ? `(${conComentarios.length})` : ''}
                                     </p>
                                     {conComentarios.length === 0 ? (
-                                      <p className="text-xs text-[#FFFFFF]/30 italic">Sin comentarios escritos en este pilar.</p>
+                                      <p className="text-xs text-[#F2EFE9]/30 italic">Sin comentarios escritos en este pilar.</p>
                                     ) : (
                                       <div className="space-y-2">
                                         {conComentarios.map((r, idx) => {
@@ -2812,29 +2991,29 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                           return (
                                             <div
                                               key={`${r.usuario_id}-${idx}`}
-                                              className="bg-[#141414] border border-[rgba(255,255,255,0.05)] rounded-xl px-4 py-3"
+                                              className="bg-[#111110] border border-[rgba(255,255,255,0.05)] rounded-xl px-4 py-3"
                                             >
                                               <div className="flex items-center justify-between mb-1.5">
                                                 <div className="flex items-center gap-2 min-w-0">
                                                   <button
                                                     type="button"
                                                     onClick={() => setFiltroMetricasId(r.usuario_id)}
-                                                    className="text-xs font-semibold text-[#FFFFFF] hover:text-[#F5A623] transition-colors truncate"
+                                                    className="text-xs font-semibold text-[#F2EFE9] hover:text-[#E8962E] transition-colors truncate"
                                                   >
                                                     {nombre}
                                                   </button>
-                                                  {fecha && <span className="text-[10px] text-[#FFFFFF]/30">· {fecha}</span>}
+                                                  {fecha && <span className="text-[10px] text-[#F2EFE9]/30">· {fecha}</span>}
                                                 </div>
                                                 <div className="flex items-center gap-0.5 shrink-0">
                                                   {[1, 2, 3, 4, 5].map(s => (
                                                     <Star
                                                       key={s}
-                                                      className={`w-3 h-3 ${s <= r.rating ? 'text-[#F5A623] fill-[#F5A623]' : 'text-[#FFFFFF]/15'}`}
+                                                      className={`w-3 h-3 ${s <= r.rating ? 'text-[#E8962E] fill-[#E8962E]' : 'text-[#F2EFE9]/15'}`}
                                                     />
                                                   ))}
                                                 </div>
                                               </div>
-                                              <p className="text-xs text-[#FFFFFF]/65 italic leading-relaxed">"{r.comentario}"</p>
+                                              <p className="text-xs text-[#F2EFE9]/65 italic leading-relaxed">"{r.comentario}"</p>
                                             </div>
                                           );
                                         })}
@@ -2854,14 +3033,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <div className="grid grid-cols-3 gap-4">
                     {[
                       { label: 'En camino al resultado', IconComp: CheckCircle2, count: clientes.filter(c => c.estado_garantia === 'en_camino').length, color: 'text-[#22C55E]', border: 'border-[#22C55E]/20', bg: 'bg-[#22C55E]/5' },
-                      { label: 'En riesgo de garantía', IconComp: AlertTriangle, count: clientes.filter(c => c.estado_garantia === 'en_riesgo').length, color: 'text-[#F5A623]', border: 'border-[#F5A623]/20', bg: 'bg-[#F5A623]/5' },
+                      { label: 'En riesgo de garantía', IconComp: AlertTriangle, count: clientes.filter(c => c.estado_garantia === 'en_riesgo').length, color: 'text-[#E8962E]', border: 'border-[#E8962E]/20', bg: 'bg-[#E8962E]/5' },
                       { label: 'Garantía activada', IconComp: Shield, count: clientes.filter(c => c.estado_garantia === 'activada').length, color: 'text-[#EF4444]', border: 'border-[#EF4444]/20', bg: 'bg-[#EF4444]/5' },
                     ].map((s, i) => (
                       <div key={i} className={`${s.bg} border ${s.border} rounded-2xl p-5 flex items-center gap-4`}>
                         <s.IconComp className={`w-8 h-8 ${s.color}`} />
                         <div>
                           <p className={`text-3xl font-light ${s.color} mb-0.5`}>{s.count}</p>
-                          <p className="text-xs text-[#FFFFFF]/60 font-medium">{s.label}</p>
+                          <p className="text-xs text-[#F2EFE9]/60 font-medium">{s.label}</p>
                         </div>
                       </div>
                     ))}
@@ -2877,13 +3056,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     : (c.progreso_porcentaje ?? 0);
                   return (
                     <div className="space-y-5">
-                      <div className="flex items-center gap-4 bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-2xl p-5">
-                        <div className="w-14 h-14 rounded-2xl bg-[#F5A623]/30 border border-[#F5A623]/30 flex items-center justify-center text-xl font-bold text-[#FFFFFF]">
+                      <div className="flex items-center gap-4 bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-2xl p-5">
+                        <div className="w-14 h-14 rounded-2xl bg-[#E8962E]/30 border border-[#E8962E]/30 flex items-center justify-center text-xl font-bold text-[#F2EFE9]">
                           {c.nombre.charAt(0)}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-[#FFFFFF]">{c.nombre}</h3>
-                          <p className="text-sm text-[#FFFFFF]/60">{c.especialidad || 'Profesional de la salud'} · {c.email}</p>
+                          <h3 className="text-xl font-semibold text-[#F2EFE9]">{c.nombre}</h3>
+                          <p className="text-sm text-[#F2EFE9]/60">{c.especialidad || 'Profesional de la salud'} · {c.email}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className={`w-2.5 h-2.5 rounded-full ${SEMAFORO_CONFIG[c.semaforo].class}`} />
@@ -2893,55 +3072,55 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
-                          { label: 'Día del programa', value: `${c.dia_programa}/90`, color: 'text-[#F5A623]' },
-                          { label: 'Tareas completadas', value: `${c.tareas_completadas}/${c.tareas_total}`, color: 'text-[#F5A623]' },
-                          { label: 'Racha diario', value: c.racha_diario > 0 ? `${c.racha_diario} días` : '—', color: 'text-[#F5A623]' },
+                          { label: 'Día del programa', value: `${c.dia_programa}/90`, color: 'text-[#E8962E]' },
+                          { label: 'Tareas completadas', value: `${c.tareas_completadas}/${c.tareas_total}`, color: 'text-[#E8962E]' },
+                          { label: 'Racha diario', value: c.racha_diario > 0 ? `${c.racha_diario} días` : '—', color: 'text-[#E8962E]' },
                           { label: 'Ventas registradas', value: c.ventas_count, color: 'text-[#22C55E]' },
                         ].map((s, i) => (
-                          <div key={i} className="bg-[#141414] border border-[rgba(245,166,35,0.14)] rounded-2xl p-4">
+                          <div key={i} className="bg-[#111110] border border-[rgba(232,150,46,0.14)] rounded-2xl p-4">
                             <p className={`text-2xl font-light ${s.color} mb-1`}>{s.value}</p>
-                            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider font-semibold">{s.label}</p>
+                            <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">{s.label}</p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="bg-[#141414] border border-[rgba(245,166,35,0.12)] rounded-2xl p-5">
+                      <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60">Progreso en el programa</p>
-                          <p className="text-2xl font-light text-[#FFFFFF]">{pct}%</p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60">Progreso en el programa</p>
+                          <p className="text-2xl font-light text-[#F2EFE9]">{pct}%</p>
                         </div>
-                        <div className="h-3 bg-[#F5A623]/5 rounded-full overflow-hidden mb-2">
-                          <div className="h-full rounded-full bg-[#F5A623] transition-all duration-700" style={{ width: `${pct}%` }} />
+                        <div className="h-3 bg-[#E8962E]/5 rounded-full overflow-hidden mb-2">
+                          <div className="h-full rounded-full bg-[#E8962E] transition-all duration-700" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
 
                       {/* Satisfaction ratings per pilar */}
-                      <div className="bg-[#141414] border border-[rgba(245,166,35,0.12)] rounded-2xl p-5">
-                        <p className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60 mb-3 flex items-center gap-2">
-                          <Star className="w-3.5 h-3.5 text-[#F5A623]" /> Valoraciones por pilar
+                      <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
+                        <p className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60 mb-3 flex items-center gap-2">
+                          <Star className="w-3.5 h-3.5 text-[#E8962E]" /> Valoraciones por pilar
                         </p>
                         {clienteRatings.length === 0 ? (
-                          <p className="text-xs text-[#FFFFFF]/30">Sin valoraciones registradas aún.</p>
+                          <p className="text-xs text-[#F2EFE9]/30">Sin valoraciones registradas aún.</p>
                         ) : (
                           <div className="space-y-3">
                             {clienteRatings.map((r) => (
                               <div key={r.pilar_numero} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 pb-3 last:pb-0">
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm text-[#FFFFFF]/70">
+                                  <span className="text-sm text-[#F2EFE9]/70">
                                     Pilar {r.pilar_numero}{r.pilar_titulo ? ` — ${r.pilar_titulo}` : ''}
                                   </span>
                                   <div className="flex items-center gap-1">
                                     {[1, 2, 3, 4, 5].map((s) => (
                                       <Star
                                         key={s}
-                                        className={`w-3.5 h-3.5 ${s <= r.rating ? 'text-[#F5A623] fill-[#F5A623]' : 'text-[#FFFFFF]/15'}`}
+                                        className={`w-3.5 h-3.5 ${s <= r.rating ? 'text-[#E8962E] fill-[#E8962E]' : 'text-[#F2EFE9]/15'}`}
                                       />
                                     ))}
-                                    <span className="text-xs text-[#FFFFFF]/40 ml-1">{r.rating}/5</span>
+                                    <span className="text-xs text-[#F2EFE9]/40 ml-1">{r.rating}/5</span>
                                   </div>
                                 </div>
                                 {r.comentario && (
-                                  <p className="text-xs text-[#FFFFFF]/45 italic bg-[#FFFFFF]/3 rounded-lg px-3 py-2 border border-[rgba(255,255,255,0.05)]">
+                                  <p className="text-xs text-[#F2EFE9]/45 italic bg-[#F2EFE9]/3 rounded-lg px-3 py-2 border border-[rgba(255,255,255,0.05)]">
                                     "{r.comentario}"
                                   </p>
                                 )}
@@ -2952,14 +3131,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       </div>
 
                       {/* Pilar accordion */}
-                      <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
+                      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
                         <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-[#FFFFFF]/60 flex items-center gap-2">
-                            <BarChart2 className="w-3.5 h-3.5 text-[#F5A623]" /> Estimación por pilar
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-[#F2EFE9]/60 flex items-center gap-2">
+                            <BarChart2 className="w-3.5 h-3.5 text-[#E8962E]" /> Estimación por pilar
                           </h3>
-                          {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-[#F5A623] animate-spin" />}
+                          {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-[#E8962E] animate-spin" />}
                         </div>
-                        <div className="divide-y divide-[rgba(245,166,35,0.1)]">
+                        <div className="divide-y divide-[rgba(232,150,46,0.1)]">
                           {SEED_ROADMAP_V2.map(pilar => {
                             const metasPilar = pilar.metas.length;
                             const completadasReales = (c as any).tareas_por_pilar
@@ -2973,23 +3152,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 <button
                                   type="button"
                                   onClick={() => completadasReales > 0 && setPilarExpandido(prev => ({ ...prev, [pilar.numero]: !expandido }))}
-                                  className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left bg-[#141414] ${
-                                    completadasReales > 0 ? 'hover:bg-[#1C1C1C] cursor-pointer' : 'cursor-default'
+                                  className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left bg-[#111110] ${
+                                    completadasReales > 0 ? 'hover:bg-[#1A1917] cursor-pointer' : 'cursor-default'
                                   }`}
                                 >
-                                  {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-[#F5A623] shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
-                                  <span className="text-xs text-[#FFFFFF]/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
-                                  <div className="flex-1 h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full bg-[#F5A623] transition-all duration-500" style={{ width: `${pctPilar}%` }} />
+                                  {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-[#E8962E] shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
+                                  <span className="text-xs text-[#F2EFE9]/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
+                                  <div className="flex-1 h-1.5 bg-[#E8962E]/5 rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full bg-[#E8962E] transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                   </div>
-                                  <span className="text-xs text-[#FFFFFF]/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                  <span className="text-xs text-[#F2EFE9]/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                   {completadasReales > 0 && (
-                                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-[#F5A623] ${expandido ? 'rotate-180' : ''}`} />
+                                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-[#E8962E] ${expandido ? 'rotate-180' : ''}`} />
                                   )}
                                 </button>
 
                                 {expandido && (
-                                  <div className="px-5 pb-4 space-y-2 bg-[#F5A623]/5">
+                                  <div className="px-5 pb-4 space-y-2 bg-[#E8962E]/5">
                                     {pilar.metas.map(meta => {
                                       const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                       if (!tareaData) return null;
@@ -3003,34 +3182,34 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                           key={meta.codigo}
                                           type="button"
                                           onClick={() => abrirTareaModal(meta, tareaData, rawOutput, c.nombre)}
-                                          className="w-full text-left bg-black/20 border border-[rgba(245,166,35,0.12)] rounded-xl overflow-hidden hover:border-[rgba(245,166,35,0.3)] hover:bg-[#1C1C1C]/50 transition-all group"
+                                          className="w-full text-left bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] hover:bg-[#1A1917]/50 transition-all group"
                                         >
                                           <div className="flex items-center gap-3 p-3.5">
-                                            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#F5A623]" />
+                                            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#E8962E]" />
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F5A623]/10 text-[#F5A623]">{meta.codigo}</span>
-                                                {meta.es_estrella && <Star className="w-3 h-3 text-[#F5A623] fill-[#F5A623]" />}
+                                                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#E8962E]/10 text-[#E8962E]">{meta.codigo}</span>
+                                                {meta.es_estrella && <Star className="w-3 h-3 text-[#E8962E] fill-[#E8962E]" />}
                                                 {tareaData.fecha_completada && (
-                                                  <span className="text-[10px] text-[#FFFFFF]/30">
+                                                  <span className="text-[10px] text-[#F2EFE9]/30">
                                                     {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                   </span>
                                                 )}
                                               </div>
-                                              <p className="text-sm font-semibold text-[#FFFFFF] mt-0.5 truncate">{meta.titulo}</p>
+                                              <p className="text-sm font-semibold text-[#F2EFE9] mt-0.5 truncate">{meta.titulo}</p>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
                                               {hasOutput && (
-                                                <span className="text-[10px] text-[#F5A623] bg-[#F5A623]/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                <span className="text-[10px] text-[#E8962E] bg-[#E8962E]/10 px-2 py-0.5 rounded-full">Con output</span>
                                               )}
-                                              <ChevronRight className="w-3.5 h-3.5 text-[#FFFFFF]/30 group-hover:text-[#FFFFFF]/60 transition-colors" />
+                                              <ChevronRight className="w-3.5 h-3.5 text-[#F2EFE9]/30 group-hover:text-[#F2EFE9]/60 transition-colors" />
                                             </div>
                                           </div>
                                         </button>
                                       );
                                     })}
                                     {tareasCompletadasPilar.length === 0 && (
-                                      <p className="text-xs text-[#FFFFFF]/30 py-2">Sin datos detallados disponibles aún.</p>
+                                      <p className="text-xs text-[#F2EFE9]/30 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                     )}
                                   </div>
                                 )}
@@ -3042,7 +3221,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                       <button
                         onClick={() => { setSelectedCliente(c); setMainTab('clientes'); setDetalleTab('resumen'); }}
-                        className="w-full py-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20 text-[#F5A623] text-sm font-semibold hover:bg-[#F5A623]/20 transition-colors"
+                        className="w-full py-3 rounded-xl bg-[#E8962E]/10 border border-[#E8962E]/20 text-[#E8962E] text-sm font-semibold hover:bg-[#E8962E]/20 transition-colors"
                       >
                         Ver perfil completo con diario, métricas y mensajes
                       </button>
@@ -3060,12 +3239,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-light text-[#FFFFFF] tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>
-                  <p className="text-sm text-[#FFFFFF]/40 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
+                  <h2 className="text-2xl font-light text-[#F2EFE9] tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>
+                  <p className="text-sm text-[#F2EFE9]/40 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
                 </div>
                 <button
                   onClick={() => { setVideoForm({ pilar_id: '', titulo: '', descripcion: '', youtubeUrl: '', duracion: '' }); setShowAddVideo(true); }}
-                  className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-[#F5A623]/20"
+                  className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-[#E8962E]/20"
                 >
                   <Plus className="w-4 h-4" /> Agregar Video
                 </button>
@@ -3078,38 +3257,38 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 // Also find VIDEO tasks in the roadmap for this pilar
                 const videoTask = pilar.metas.find(m => m.tipo === 'VIDEO');
                 return (
-                  <div key={pilar.id} className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
-                    <div className="px-5 py-3 border-b border-[rgba(245,166,35,0.12)] flex items-center justify-between">
+                  <div key={pilar.id} className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-4 h-4 text-[#F5A623]" /> : null; })()}
-                        <p className="text-sm font-semibold text-[#FFFFFF]">{pilar.id} — {pilar.titulo}</p>
-                        {videoTask && <span className="text-[10px] text-[#FFFFFF]/30 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
+                        {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-4 h-4 text-[#E8962E]" /> : null; })()}
+                        <p className="text-sm font-semibold text-[#F2EFE9]">{pilar.id} — {pilar.titulo}</p>
+                        {videoTask && <span className="text-[10px] text-[#F2EFE9]/30 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
                       </div>
-                      <span className="text-[10px] bg-[#F5A623]/5 px-2 py-0.5 rounded-full text-[#FFFFFF]/40">{vids.length} videos</span>
+                      <span className="text-[10px] bg-[#E8962E]/5 px-2 py-0.5 rounded-full text-[#F2EFE9]/40">{vids.length} videos</span>
                     </div>
                     {videosLoading ? (
-                      <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
+                      <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
                     ) : vids.length === 0 ? (
-                      <div className="px-5 py-4 text-sm text-[#FFFFFF]/30">Sin videos en este pilar todavía.</div>
+                      <div className="px-5 py-4 text-sm text-[#F2EFE9]/30">Sin videos en este pilar todavía.</div>
                     ) : (
-                      <div className="divide-y divide-[rgba(245,166,35,0.1)]">
+                      <div className="divide-y divide-[rgba(232,150,46,0.1)]">
                         {vids.map(v => {
                           const vidId = getYoutubeId(v.youtubeUrl);
                           return (
-                            <div key={v.id} className="flex items-center gap-4 px-5 py-3 bg-[#141414] hover:bg-[#1C1C1C] transition-colors">
+                            <div key={v.id} className="flex items-center gap-4 px-5 py-3 bg-[#111110] hover:bg-[#1A1917] transition-colors">
                               <div className="w-16 h-10 rounded-lg overflow-hidden bg-black/40 shrink-0">
                                 {vidId ? (
-                                  <img src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`} alt={v.titulo} className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`} alt={v.titulo} className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center"><Youtube className="w-4 h-4 text-[#EF4444]/40" /></div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[#FFFFFF] truncate">{v.titulo}</p>
-                                <p className="text-xs text-[#FFFFFF]/40 truncate">{v.descripcion}</p>
+                                <p className="text-sm font-medium text-[#F2EFE9] truncate">{v.titulo}</p>
+                                <p className="text-xs text-[#F2EFE9]/40 truncate">{v.descripcion}</p>
                               </div>
-                              <span className="text-[10px] text-[#F5A623] font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
-                              {v.duracion && <span className="text-[10px] text-[#FFFFFF]/40 shrink-0">{v.duracion}</span>}
+                              <span className="text-[10px] text-[#E8962E] font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
+                              {v.duracion && <span className="text-[10px] text-[#F2EFE9]/40 shrink-0">{v.duracion}</span>}
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => {
@@ -3123,7 +3302,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     });
                                     setShowAddVideo(true);
                                   }}
-                                  className="w-7 h-7 rounded-lg bg-[#F5A623]/5 hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors shrink-0"
+                                  className="w-7 h-7 rounded-lg bg-[#E8962E]/5 hover:bg-[#E8962E]/10 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors shrink-0"
                                   title="Editar video"
                                 >
                                   <Settings className="w-3.5 h-3.5" />
@@ -3162,43 +3341,43 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 </button>
               </div>
 
-              <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-visible">
+              <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-visible">
                 {teamLoading ? (
-                  <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" /></div>
+                  <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" /></div>
                 ) : teamMembers.length === 0 ? (
                   <div className="text-center py-16">
                     <UsersRound className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-[#FFFFFF]/40 text-sm">No hay miembros del equipo</p>
+                    <p className="text-[#F2EFE9]/40 text-sm">El equipo se arma acá — agregá al primero.</p>
                   </div>
                 ) : (
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-[rgba(245,166,35,0.1)]">
+                      <tr className="border-b border-[rgba(232,150,46,0.1)]">
                         {['Nombre', 'Rol', 'Estado'].map(h => (
-                          <th key={h} className="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">{h}</th>
+                          <th key={h} className="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40">{h}</th>
                         ))}
-                        <th className="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-[#FFFFFF]/40">Acciones</th>
+                        <th className="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {teamMembers.map(member => {
                         const memberRol: AdminRol = member.admin_rol ?? 'owner';
                         return (
-                          <tr key={member.id} className="bg-[#141414] hover:bg-[#1C1C1C] border-b border-[rgba(245,166,35,0.1)] transition-colors">
+                          <tr key={member.id} className="bg-[#111110] hover:bg-[#1A1917] border-b border-[rgba(232,150,46,0.1)] transition-colors">
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-[#F5A623]/10 border border-[rgba(245,166,35,0.2)] flex items-center justify-center text-sm font-bold text-[#FFFFFF]">
+                                <div className="w-9 h-9 rounded-full bg-[#E8962E]/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-sm font-bold text-[#F2EFE9]">
                                   {member.nombre?.charAt(0)?.toUpperCase() ?? '?'}
                                 </div>
                                 <div>
-                                  <p className="text-sm font-medium text-[#FFFFFF]">{member.nombre}</p>
-                                  <p className="text-[10px] text-[#FFFFFF]/40">{member.email}</p>
+                                  <p className="text-sm font-medium text-[#F2EFE9]">{member.nombre}</p>
+                                  <p className="text-[10px] text-[#F2EFE9]/40">{member.email}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="px-5 py-4">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/30">
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/30">
                                   {memberRol}
                                 </span>
                               ) : (
@@ -3221,13 +3400,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </td>
                             <td className="px-5 py-4 text-right">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[10px] text-[#FFFFFF]/30 italic">Vos</span>
+                                <span className="text-[10px] text-[#F2EFE9]/30 italic">Vos</span>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => setMiembroAEliminar({ id: member.id, nombre: member.nombre ?? 'Miembro', email: member.email ?? '' })}
                                   title="Eliminar miembro"
-                                  className="p-2 rounded-lg text-[#FFFFFF]/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+                                  className="p-2 rounded-lg text-[#F2EFE9]/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -3243,25 +3422,25 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
               {showAddTeamMember && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-                  <div className="w-full max-w-md max-h-[90vh] bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl relative overflow-y-auto scrollbar-hide">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5A623]" />
+                  <div className="w-full max-w-md max-h-[90vh] bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-y-auto scrollbar-hide">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#E8962E]" />
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-semibold text-white tracking-tight">Agregar Miembro</h3>
                         <p className="text-xs text-white/40 mt-1">Creá una cuenta para un nuevo miembro del equipo</p>
                       </div>
-                      <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-[#F5A623]/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-[#F5A623]/10 transition-colors">
+                      <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-[#E8962E]/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-[#E8962E]/10 transition-colors">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-2">Nombre completo *</label>
-                        <input type="text" value={teamForm.nombre} onChange={e => setTeamForm({ ...teamForm, nombre: e.target.value })} placeholder="Ej: María García" className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                        <input type="text" value={teamForm.nombre} onChange={e => setTeamForm({ ...teamForm, nombre: e.target.value })} placeholder="Ej: María García" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-2">Email *</label>
-                        <input type="email" value={teamForm.email} onChange={e => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="nombre@ejemplo.com" className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                        <input type="email" value={teamForm.email} onChange={e => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="nombre@ejemplo.com" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold uppercase tracking-wider text-[#22C55E]/80 mb-2">Contraseña inicial *</label>
@@ -3291,7 +3470,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF]/40 mb-2">
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3303,8 +3482,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-[#FFFFFF]/40">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Cargando perfil completo...
+                  <div className="flex items-center gap-2 mt-2 text-xs text-[#F2EFE9]/40">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
                 {campanasClientePerfil && !campanasPerfilLoading && (
@@ -3326,8 +3505,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
-                  <Megaphone className="w-10 h-10 text-[#FFFFFF]/15 mx-auto mb-3" />
-                  <p className="text-sm text-[#FFFFFF]/40">
+                  <Megaphone className="w-10 h-10 text-[#F2EFE9]/15 mx-auto mb-3" />
+                  <p className="text-sm text-[#F2EFE9]/40">
                     Selecciona un cliente para comenzar a crear campanas con su ADN de negocio.
                   </p>
                 </div>
@@ -3342,7 +3521,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente (reusa el state de campanas) */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF]/40 mb-2">
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3354,8 +3533,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-[#FFFFFF]/40">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Cargando perfil completo...
+                  <div className="flex items-center gap-2 mt-2 text-xs text-[#F2EFE9]/40">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
                 {campanasClientePerfil && !campanasPerfilLoading && (
@@ -3375,8 +3554,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
-                  <Image className="w-10 h-10 text-[#FFFFFF]/15 mx-auto mb-3" />
-                  <p className="text-sm text-[#FFFFFF]/40">
+                  <Image className="w-10 h-10 text-[#F2EFE9]/15 mx-auto mb-3" />
+                  <p className="text-sm text-[#F2EFE9]/40">
                     Selecciona un cliente para generar creativos con su ADN de negocio.
                   </p>
                 </div>
@@ -3404,11 +3583,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL AJUSTES ADMIN ────────────────────────────────────────────────── */}
       {showAdminSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5A623]" />
+          <div className="w-full max-w-md bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#E8962E]" />
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-[#FFFFFF]">Ajustes de Perfil Admin</h3>
-              <button onClick={() => setShowAdminSettings(false)} className="w-8 h-8 rounded-full bg-[#F5A623]/5 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors">
+              <h3 className="text-xl font-semibold text-[#F2EFE9]">Ajustes de Perfil Admin</h3>
+              <button onClick={() => setShowAdminSettings(false)} className="w-8 h-8 rounded-full bg-[#E8962E]/5 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -3417,44 +3596,44 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <input ref={adminAvatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAdminAvatarUpload} />
               <button
                 onClick={() => adminAvatarInputRef.current?.click()}
-                className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(245,166,35,0.3)] hover:border-[#F5A623]/50 transition-colors overflow-hidden"
+                className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-[#E8962E]/50 transition-colors overflow-hidden"
               >
                 {adminAvatar ? (
-                  <img src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-[#F5A623]/10 flex items-center justify-center text-2xl font-bold text-[#F5A623]">
+                  <div className="w-full h-full bg-[#E8962E]/10 flex items-center justify-center text-2xl font-bold text-[#E8962E]">
                     {(adminDraft.nombre || 'A').charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Camera className="w-6 h-6 text-[#FFFFFF]" />
+                  <Camera className="w-6 h-6 text-[#F2EFE9]" />
                 </div>
               </button>
-              <p className="text-xs text-[#FFFFFF]/40">Clic para cambiar foto</p>
+              <p className="text-xs text-[#F2EFE9]/40">Clic para cambiar foto</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Nombre completo</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Nombre completo</label>
                 <input
                   type="text"
                   value={adminDraft.nombre}
                   onChange={e => setAdminDraft({ ...adminDraft, nombre: e.target.value })}
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Cargo / Título</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Cargo / Título</label>
                 <input
                   type="text"
                   value={adminDraft.cargo}
                   onChange={e => setAdminDraft({ ...adminDraft, cargo: e.target.value })}
                   placeholder="Ej: Coach Principal, Soporte Técnico..."
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Apariencia</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Apariencia</label>
                 <div role="radiogroup" aria-label="Tema visual" className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -3463,8 +3642,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onClick={() => setTheme('dark')}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
                       theme === 'dark'
-                        ? 'bg-[#F5A623]/15 border-[rgba(245,166,35,0.5)] text-[#F5A623]'
-                        : 'bg-black/20 border-[rgba(245,166,35,0.15)] text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:border-[rgba(245,166,35,0.3)]'
+                        ? 'bg-[#E8962E]/15 border-[rgba(232,150,46,0.5)] text-[#E8962E]'
+                        : 'bg-black/20 border-[rgba(232,150,46,0.10)] text-[#F2EFE9]/70 hover:text-[#F2EFE9] hover:border-[rgba(232,150,46,0.18)]'
                     }`}
                   >
                     <Moon className="w-4 h-4" />
@@ -3477,15 +3656,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onClick={() => setTheme('light')}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
                       theme === 'light'
-                        ? 'bg-[#F5A623]/15 border-[rgba(245,166,35,0.5)] text-[#F5A623]'
-                        : 'bg-black/20 border-[rgba(245,166,35,0.15)] text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:border-[rgba(245,166,35,0.3)]'
+                        ? 'bg-[#E8962E]/15 border-[rgba(232,150,46,0.5)] text-[#E8962E]'
+                        : 'bg-black/20 border-[rgba(232,150,46,0.10)] text-[#F2EFE9]/70 hover:text-[#F2EFE9] hover:border-[rgba(232,150,46,0.18)]'
                     }`}
                   >
                     <Sun className="w-4 h-4" />
                     Claro
                   </button>
                 </div>
-                <p className="text-[11px] text-[#FFFFFF]/40 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
+                <p className="text-[11px] text-[#F2EFE9]/40 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
               </div>
             </div>
 
@@ -3517,26 +3696,26 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL CAMBIAR EMAIL DEL CLIENTE ────────────────────────────────────── */}
       {showChangeEmailModal && selectedCliente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-2xl w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(245,166,35,0.1)]">
+          <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
               <div>
-                <h3 className="text-sm font-semibold text-[#FFFFFF]">Cambiar email</h3>
-                <p className="text-[11px] text-[#FFFFFF]/50 mt-0.5">{selectedCliente.nombre}</p>
+                <h3 className="text-sm font-semibold text-[#F2EFE9]">Cambiar email</h3>
+                <p className="text-[11px] text-[#F2EFE9]/50 mt-0.5">{selectedCliente.nombre}</p>
               </div>
               <button
                 onClick={() => setShowChangeEmailModal(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#FFFFFF]/40 hover:text-[#FFFFFF] hover:bg-[#FFFFFF]/5 transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#F2EFE9]/40 hover:text-[#F2EFE9] hover:bg-[#F2EFE9]/5 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Email actual</label>
-                <p className="text-sm text-[#FFFFFF]/60 px-3 py-2 bg-black/20 rounded-lg border border-[rgba(245,166,35,0.1)]">{selectedCliente.email ?? '—'}</p>
+                <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Email actual</label>
+                <p className="text-sm text-[#F2EFE9]/60 px-3 py-2 bg-black/20 rounded-lg border border-[rgba(232,150,46,0.1)]">{selectedCliente.email ?? '—'}</p>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Nuevo email *</label>
+                <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Nuevo email *</label>
                 <input
                   type="email"
                   value={newEmailInput}
@@ -3544,11 +3723,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   placeholder="cliente@ejemplo.com"
                   autoFocus
                   disabled={changingEmail}
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-2.5 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors disabled:opacity-50"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors disabled:opacity-50"
                 />
               </div>
-              <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-xl px-3 py-2">
-                <p className="text-[11px] text-[#F5A623]/80">
+              <div className="bg-[#E8962E]/5 border border-[#E8962E]/20 rounded-xl px-3 py-2">
+                <p className="text-[11px] text-[#E8962E]/80">
                   El cliente usará este email para hacer login. La contraseña actual se mantiene — si querés que la cambie, mandá "Enviar reset" después.
                 </p>
               </div>
@@ -3556,14 +3735,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <button
                   onClick={() => setShowChangeEmailModal(false)}
                   disabled={changingEmail}
-                  className="flex-1 py-2.5 rounded-xl border border-[#FFFFFF]/10 text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl border border-[#F2EFE9]/10 text-sm text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleChangeEmail}
                   disabled={changingEmail || !newEmailInput.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
                 >
                   {changingEmail ? <><Loader2 className="w-4 h-4 animate-spin" /> Cambiando...</> : 'Confirmar cambio'}
                 </button>
@@ -3576,38 +3755,38 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL NUEVO CLIENTE ────────────────────────────────────────────────── */}
       {showNuevoCliente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5A623]" />
+          <div className="w-full max-w-md bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#E8962E]" />
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-xl font-semibold text-[#FFFFFF] tracking-tight">Nuevo Estudiante</h3>
-                <p className="text-xs text-[#FFFFFF]/40 mt-1">Ingresa sus datos para la academia</p>
+                <h3 className="text-xl font-semibold text-[#F2EFE9] tracking-tight">Nuevo Estudiante</h3>
+                <p className="text-xs text-[#F2EFE9]/40 mt-1">Ingresa sus datos para la academia</p>
               </div>
-              <button onClick={() => setShowNuevoCliente(false)} className="w-8 h-8 rounded-full bg-[#F5A623]/5 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors">
+              <button onClick={() => setShowNuevoCliente(false)} className="w-8 h-8 rounded-full bg-[#E8962E]/5 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Nombre completo *</label>
-                <input type="text" value={nuevoForm.nombre} onChange={e => setNuevoForm({ ...nuevoForm, nombre: e.target.value })} placeholder="Ej: Dra. María González" className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Nombre completo *</label>
+                <input type="text" value={nuevoForm.nombre} onChange={e => setNuevoForm({ ...nuevoForm, nombre: e.target.value })} placeholder="Ej: Dra. María González" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Email *</label>
-                <input type="email" value={nuevoForm.email} onChange={e => setNuevoForm({ ...nuevoForm, email: e.target.value })} placeholder="maria@ejemplo.com" className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Email *</label>
+                <input type="email" value={nuevoForm.email} onChange={e => setNuevoForm({ ...nuevoForm, email: e.target.value })} placeholder="maria@ejemplo.com" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[#22C55E]/80 mb-2">Contraseña inicial *</label>
                 <input type="text" value={nuevoForm.password} onChange={e => setNuevoForm({ ...nuevoForm, password: e.target.value })} placeholder="Ej: Maria123!" className="w-full bg-[#22C55E]/5 border border-[#22C55E]/20 rounded-lg px-4 py-3 text-sm text-[#22C55E] placeholder-[#22C55E]/30 focus:outline-none focus:border-[#22C55E]/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Especialidad</label>
-                <input type="text" value={nuevoForm.especialidad} onChange={e => setNuevoForm({ ...nuevoForm, especialidad: e.target.value })} placeholder="Ej: Nutricionista" className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Especialidad</label>
+                <input type="text" value={nuevoForm.especialidad} onChange={e => setNuevoForm({ ...nuevoForm, especialidad: e.target.value })} placeholder="Ej: Nutricionista" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Plan</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Plan</label>
                   <CustomSelect
                     value={nuevoForm.plan}
                     onChange={(val) => setNuevoForm({ ...nuevoForm, plan: val as 'DWY' | 'DFY' | 'IMPLEMENTACION' })}
@@ -3619,12 +3798,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Inicio</label>
-                  <input type="date" value={nuevoForm.fecha_inicio} onChange={e => setNuevoForm({ ...nuevoForm, fecha_inicio: e.target.value })} className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Inicio</label>
+                  <input type="date" value={nuevoForm.fecha_inicio} onChange={e => setNuevoForm({ ...nuevoForm, fecha_inicio: e.target.value })} className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors" />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Estado inicial</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Estado inicial</label>
                 <CustomSelect
                   value={nuevoForm.status}
                   onChange={(val) => setNuevoForm({ ...nuevoForm, status: val as UserStatus })}
@@ -3638,7 +3817,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={crearClienteLocal} disabled={creando || !nuevoForm.email || !nuevoForm.nombre || !nuevoForm.password} className="btn-primary flex-1 py-3.5 rounded-xl text-sm font-bold shadow-xl shadow-[#F5A623]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+              <button onClick={crearClienteLocal} disabled={creando || !nuevoForm.email || !nuevoForm.nombre || !nuevoForm.password} className="btn-primary flex-1 py-3.5 rounded-xl text-sm font-bold shadow-xl shadow-[#E8962E]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                 {creando ? <><Loader2 className="w-4 h-4 animate-spin" /> Creando cuenta...</> : 'Crear Cuenta Activa'}
               </button>
             </div>
@@ -3649,23 +3828,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL ADD/EDIT VIDEO ──────────────────────────────────────────────── */}
       {showAddVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5A623]" />
+          <div className="w-full max-w-md bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#E8962E]" />
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-[#FFFFFF]">{videoForm.id ? 'Editar Video' : 'Nuevo Video'}</h3>
-              <button onClick={() => setShowAddVideo(false)} className="w-8 h-8 rounded-full bg-[#F5A623]/5 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors">
+              <h3 className="text-xl font-semibold text-[#F2EFE9]">{videoForm.id ? 'Editar Video' : 'Nuevo Video'}</h3>
+              <button onClick={() => setShowAddVideo(false)} className="w-8 h-8 rounded-full bg-[#E8962E]/5 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#E8962E]/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">URL de YouTube *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">URL de YouTube *</label>
                 <input
                   type="text"
                   value={videoForm.youtubeUrl}
                   onChange={e => setVideoForm({ ...videoForm, youtubeUrl: e.target.value })}
                   placeholder="https://youtu.be/... o https://youtube.com/watch?v=..."
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
                 {videoForm.youtubeUrl && getYoutubeId(videoForm.youtubeUrl) && (
                   <img
@@ -3676,7 +3855,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 )}
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Pilar *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Pilar *</label>
                 <CustomSelect
                   value={videoForm.pilar_id}
                   onChange={(val) => setVideoForm({ ...videoForm, pilar_id: val as PilarId | '' })}
@@ -3687,33 +3866,33 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Título *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Título *</label>
                 <input
                   type="text"
                   value={videoForm.titulo}
                   onChange={e => setVideoForm({ ...videoForm, titulo: e.target.value })}
                   placeholder="Ej: Módulo 1 — Identidad del Fundador"
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Descripción</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Descripción</label>
                 <input
                   type="text"
                   value={videoForm.descripcion}
                   onChange={e => setVideoForm({ ...videoForm, descripcion: e.target.value })}
                   placeholder="Breve descripción del contenido"
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/60 mb-2">Duración (opcional)</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/60 mb-2">Duración (opcional)</label>
                 <input
                   type="text"
                   value={videoForm.duracion}
                   onChange={e => setVideoForm({ ...videoForm, duracion: e.target.value })}
                   placeholder="Ej: 15:30"
-                  className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-colors"
                 />
               </div>
             </div>
@@ -3752,48 +3931,48 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           onClick={() => setTareaModal(null)}
         >
           <div
-            className="w-full max-w-2xl max-h-[90vh] bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-2xl max-h-[90vh] bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-3xl shadow-2xl flex flex-col overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-start gap-4 p-6 border-b border-[rgba(245,166,35,0.12)]">
+            <div className="flex items-start gap-4 p-6 border-b border-[rgba(232,150,46,0.12)]">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/20">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/20">
                     {tareaModal.meta.codigo}
                   </span>
-                  {tareaModal.meta.es_estrella && <span className="text-[#F5A623] text-sm flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-[#F5A623]" /> Tarea estrella</span>}
+                  {tareaModal.meta.es_estrella && <span className="text-[#E8962E] text-sm flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-[#E8962E]" /> Tarea estrella</span>}
                   {tareaModal.tareaData?.fecha_completada && (
-                    <span className="text-[11px] text-[#FFFFFF]/40">
+                    <span className="text-[11px] text-[#F2EFE9]/40">
                       Completada el {new Date(tareaModal.tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                   )}
                 </div>
-                <h2 className="text-lg font-semibold text-[#FFFFFF]">{tareaModal.meta.titulo}</h2>
-                <p className="text-xs text-[#FFFFFF]/40 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
+                <h2 className="text-lg font-semibold text-[#F2EFE9]">{tareaModal.meta.titulo}</h2>
+                <p className="text-xs text-[#F2EFE9]/40 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
               </div>
               <button
                 onClick={() => setTareaModal(null)}
-                className="p-2 rounded-xl hover:bg-[#F5A623]/10 text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors shrink-0"
+                className="p-2 rounded-xl hover:bg-[#E8962E]/10 text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-4">
-              <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-2xl p-4">
+              <div className="bg-[#E8962E]/5 border border-[#E8962E]/20 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Bot className="w-4 h-4 text-[#F5A623]" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#F5A623]">Resumen para el equipo</span>
+                  <Bot className="w-4 h-4 text-[#E8962E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E8962E]">Resumen para el equipo</span>
                 </div>
                 {tareaResumenLoading ? (
                   <div className="flex items-center gap-2 py-2">
-                    <Loader2 className="w-4 h-4 text-[#F5A623] animate-spin" />
-                    <span className="text-sm text-[#FFFFFF]/60">Analizando el output de {tareaModal.clienteNombre}...</span>
+                    <Loader2 className="w-4 h-4 text-[#E8962E] animate-spin" />
+                    <span className="text-sm text-[#F2EFE9]/60">Analizando el output de {tareaModal.clienteNombre}...</span>
                   </div>
                 ) : tareaResumen ? (
-                  <p className="text-sm text-[#FFFFFF]/90 leading-relaxed">{tareaResumen}</p>
+                  <p className="text-sm text-[#F2EFE9]/90 leading-relaxed">{tareaResumen}</p>
                 ) : (
-                  <p className="text-sm text-[#FFFFFF]/40 italic">
+                  <p className="text-sm text-[#F2EFE9]/40 italic">
                     {tareaModal.output ? 'No se pudo generar el resumen automático.' : 'Esta tarea no tiene output guardado — fue marcada como completada manualmente.'}
                   </p>
                 )}
@@ -3802,11 +3981,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               {tareaModal.output ? (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <FileText className="w-3.5 h-3.5 text-[#FFFFFF]/40" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF]/40">Output generado por el cliente</span>
+                    <FileText className="w-3.5 h-3.5 text-[#F2EFE9]/40" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#F2EFE9]/40">Output generado por el cliente</span>
                   </div>
-                  <div className="bg-black/30 border border-[rgba(245,166,35,0.12)] rounded-2xl p-5">
-                    <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-headings:text-[#FFFFFF] prose-headings:font-semibold prose-strong:text-[#F5A623] prose-li:text-[#FFFFFF]/80">
+                  <div className="bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
+                    <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-headings:text-[#F2EFE9] prose-headings:font-semibold prose-strong:text-[#E8962E] prose-li:text-[#F2EFE9]/80">
                       <Markdown>{tareaModal.output}</Markdown>
                     </div>
                   </div>
@@ -3814,7 +3993,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Circle className="w-8 h-8 text-gray-700 mb-3" />
-                  <p className="text-sm text-[#FFFFFF]/40">Sin output guardado</p>
+                  <p className="text-sm text-[#F2EFE9]/40">Sin output guardado</p>
                   <p className="text-xs text-gray-700 mt-1">El cliente completó esta tarea pero no hay contenido generado por IA asociado.</p>
                 </div>
               )}
@@ -3828,7 +4007,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           ═══════════════════════════════════════════════════════════════ */}
       {clienteAEliminar && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-          <div className="w-full max-w-md bg-[#141414] border border-[#EF4444]/30 rounded-3xl p-8 shadow-2xl relative">
+          <div className="w-full max-w-md bg-[#111110] border border-[#EF4444]/30 rounded-3xl p-8 shadow-2xl relative">
             <div className="absolute top-0 left-0 right-0 h-1 bg-[#EF4444] rounded-t-3xl" />
             <div className="flex items-start gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[#EF4444]/15 border border-[#EF4444]/30 flex items-center justify-center shrink-0">
@@ -3875,7 +4054,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           ═══════════════════════════════════════════════════════════════ */}
       {miembroAEliminar && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-          <div className="w-full max-w-md bg-[#141414] border border-[#EF4444]/30 rounded-3xl p-8 shadow-2xl relative">
+          <div className="w-full max-w-md bg-[#111110] border border-[#EF4444]/30 rounded-3xl p-8 shadow-2xl relative">
             <div className="absolute top-0 left-0 right-0 h-1 bg-[#EF4444] rounded-t-3xl" />
             <div className="flex items-start gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[#EF4444]/15 border border-[#EF4444]/30 flex items-center justify-center shrink-0">
@@ -3941,46 +4120,46 @@ function ManagerChecklist({
   const completadasDiarias = diarias.filter(i => i.completada).length;
 
   return (
-    <div className="card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl p-5 space-y-4">
+    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <ClipboardList className="w-4 h-4 text-[#F5A623]" />
-        <h3 className="text-xs font-bold uppercase tracking-widest text-[#F5A623]">Checklist</h3>
+        <ClipboardList className="w-4 h-4 text-[#E8962E]" />
+        <h3 className="text-xs font-bold uppercase tracking-widest text-[#E8962E]">Checklist</h3>
       </div>
       {diarias.length > 0 && (
-        <p className="text-[10px] text-[#FFFFFF]/40 font-medium">
+        <p className="text-[10px] text-[#F2EFE9]/40 font-medium">
           {completadasDiarias}/{diarias.length} tareas del día
         </p>
       )}
 
       {loading ? (
-        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-[#F5A623] animate-spin" /></div>
+        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-[#E8962E] animate-spin" /></div>
       ) : items.length === 0 ? (
-        <p className="text-xs text-[#FFFFFF]/30">Sin tareas asignadas</p>
+        <p className="text-xs text-[#F2EFE9]/30">Sin tareas asignadas</p>
       ) : (
         categorias.map(cat => {
           const catItems = items.filter(i => i.categoria === cat.key);
           if (catItems.length === 0) return null;
           return (
             <div key={cat.key}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFFFFF]/40 mb-2">{cat.label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#F2EFE9]/40 mb-2">{cat.label}</p>
               <div className="space-y-1.5">
                 {catItems.map(item => (
                   <label
                     key={item.id}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[#F5A623]/5 cursor-pointer transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[#E8962E]/5 cursor-pointer transition-colors"
                   >
                     <button
                       type="button"
                       onClick={() => onToggle(item.id, !item.completada)}
                       className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                         item.completada
-                          ? 'bg-[#22C55E] border-[#22C55E] text-[#FFFFFF]'
-                          : 'border-[rgba(245,166,35,0.3)] text-transparent hover:border-[#F5A623]/50'
+                          ? 'bg-[#22C55E] border-[#22C55E] text-[#F2EFE9]'
+                          : 'border-[rgba(232,150,46,0.18)] text-transparent hover:border-[#E8962E]/50'
                       }`}
                     >
                       <Check className="w-3 h-3" />
                     </button>
-                    <span className={`text-xs ${item.completada ? 'text-[#FFFFFF]/30 line-through' : 'text-[#FFFFFF]/80'}`}>
+                    <span className={`text-xs ${item.completada ? 'text-[#F2EFE9]/30 line-through' : 'text-[#F2EFE9]/80'}`}>
                       {item.titulo}
                     </span>
                   </label>

@@ -9,6 +9,7 @@
  * (mapeados vía `adn_field` en roadmapSeed.ts).
  */
 
+import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ChevronDown,
@@ -23,9 +24,11 @@ import {
   Check,
   Circle,
   AlertCircle,
+  Dna,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
+import AdnPrint from '../components/AdnPrint';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V8 } from '../lib/roadmapSeed';
@@ -39,6 +42,48 @@ import {
   type ADNSeccionCodigo,
 } from '../lib/adnSchema';
 import { usePersistedState, setSerializers } from '../lib/usePersistedState';
+
+// L3 · ADN SIMPLE: solo lo que las herramientas y agentes usan de verdad — el resto llega caminando
+const CAMPOS_VIVOS = new Set([
+  'adn_autoevaluacion_dia1', 'adn_avatar', 'adn_avatar_journey', 'adn_emails_nurture',
+  'adn_escenarios_roas', 'adn_landing_copy', 'adn_micronicho', 'adn_nicho',
+  'adn_oferta_mid', 'adn_oferta_ultralow', 'adn_pacientes_reales', 'adn_proceso_actual',
+  'adn_protocolo_entrega', 'adn_script_ventas', 'adn_transformaciones', 'adn_triage_audios',
+  'adn_usp', 'adn_validacion_organica',
+]);
+const SECCIONES_VIVAS = ADN_SCHEMA_V8
+  .map((s) => ({
+    ...s,
+    campos: s.campos.filter((c) => {
+      const raiz = (c.profilePath ?? String(c.profileKey ?? '')).split('.')[0];
+      return CAMPOS_VIVOS.has(raiz);
+    }),
+  }))
+  .filter((s) => s.campos.length > 0);
+
+// ═══ Lote 3 · EL CONSOLIDADO POR ESENCIA ═══
+// El ADN se muestra por la esencia del negocio (lo que NO cambia con una
+// tendencia), no por fases internas. 9 bloques, mapeados a los campos vivos.
+const ESENCIA_DEF: { codigo: string; titulo: string; sub: string; codigos: string[] }[] = [
+  { codigo: 'E1', titulo: 'Tu Historia', sub: 'Quién eres — en 30 segundos', codigos: ['ID.historia_corta_50'] },
+  { codigo: 'E2', titulo: 'Tu Propósito', sub: 'Para qué haces lo que haces', codigos: ['ID.proposito_frase'] },
+  { codigo: 'E3', titulo: 'Tu Legado', sub: 'Lo que queda cuando no estés', codigos: ['ID.legado_declaracion'] },
+  { codigo: 'E4', titulo: 'Tu Nicho', sub: 'A quién servís mejor', codigos: ['IRR.nicho', 'IRR.micronicho'] },
+  { codigo: 'E5', titulo: 'Tus Avatares', sub: 'Las personas reales de tu nicho', codigos: ['IRR.avatar_demografia', 'IRR.avatar_psicografia', 'IRR.avatar_conexion_historia'] },
+  { codigo: 'E6', titulo: 'La Matriz compartida', sub: 'El infierno, los obstáculos y el cielo que tus avatares comparten', codigos: ['IRR.matriz_a_infierno', 'IRR.matriz_b_obstaculos', 'IRR.matriz_c_cielo'] },
+  { codigo: 'E7', titulo: 'Tu Método único', sub: 'Las siglas — cada letra, un paso', codigos: ['IRR.metodo_nombre', 'IRR.metodo_pasos'] },
+  { codigo: 'E8', titulo: 'Tu Escalera de Ofertas', sub: 'Del imán a lo premium', codigos: ['NEG.lead_magnet', 'NEG.oferta_ultralow', 'NEG.oferta_low', 'NEG.oferta_mid', 'NEG.oferta_high'] },
+  { codigo: 'E9', titulo: 'Tu Sistema de Captación', sub: 'Los 8 activos que venden por ti — se afinan, no se reinventan', codigos: ['IRR.puv', 'INF.perfil_ig_optimizado', 'NEG.lead_magnet', 'INF.anuncios_meta_6_creativos', 'INF.anuncio_followme', 'INF.landing_copy_completo', 'INF.vsl_script', 'CAP.protocolo_entrega'] },
+];
+const _todosCampos = ADN_SCHEMA_V8.flatMap((sec) => sec.campos);
+const SECCIONES_ESENCIA = ESENCIA_DEF.map((e) => ({
+  codigo: e.codigo as unknown as ADNSeccionCodigo,
+  titulo: e.titulo,
+  subtitulo: e.sub,
+  pilarRange: e.sub,
+  campos: e.codigos.map((c) => _todosCampos.find((f) => f.codigo === c)).filter(Boolean) as typeof _todosCampos,
+})).filter((sec) => sec.campos.length > 0);
+
 import { PAISES } from '../lib/vozLocalizada';
 import CustomSelect from '../components/CustomSelect';
 import { toast } from 'sonner';
@@ -92,7 +137,7 @@ interface TarjetaSeccionProps {
 }
 
 function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccionProps) {
-  const Icon = ICONOS_SECCION[seccion.codigo];
+  const Icon = ICONOS_SECCION[seccion.codigo] ?? Dna;
   const { completos, total, porcentaje } = calcularCompletitudSeccion(perfil, seccion);
 
   return (
@@ -100,39 +145,39 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-5 flex items-center gap-4 hover:bg-[#F5A623]/5 transition-colors text-left"
+        className="w-full p-5 flex items-center gap-4 hover:bg-[#E8962E]/5 transition-colors text-left"
       >
-        <div className="w-11 h-11 rounded-xl bg-[#F5A623]/15 border border-[#F5A623]/30 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-[#F5A623]" />
+        <div className="w-11 h-11 rounded-xl bg-[#E8962E]/15 border border-[#E8962E]/30 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-[#E8962E]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <h3 className="text-lg font-medium text-[#FFFFFF] tracking-tight">{seccion.titulo}</h3>
-            <span className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+            <h3 className="text-lg font-medium text-[#F2EFE9] tracking-tight">{seccion.titulo}</h3>
+            <span className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
               {seccion.codigo} · {seccion.pilarRange}
             </span>
           </div>
-          <p className="text-sm text-[#FFFFFF]/50 mt-0.5">{seccion.subtitulo}</p>
+          <p className="text-sm text-[#F2EFE9]/50 mt-0.5">{seccion.subtitulo}</p>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           <div className="text-right">
-            <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">
+            <p className="text-xs text-[#F2EFE9]/40 uppercase tracking-wider">
               {completos} / {total}
             </p>
-            <p className="text-base font-medium text-[#F5A623]">{porcentaje}%</p>
+            <p className="text-base font-medium text-[#E8962E]">{porcentaje}%</p>
           </div>
           {expandida ? (
-            <ChevronUp className="w-5 h-5 text-[#FFFFFF]/40" />
+            <ChevronUp className="w-5 h-5 text-[#F2EFE9]/40" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-[#FFFFFF]/40" />
+            <ChevronDown className="w-5 h-5 text-[#F2EFE9]/40" />
           )}
         </div>
       </button>
 
       {/* Barra de progreso */}
-      <div className="h-1 bg-[#F5A623]/5">
+      <div className="h-1 bg-[#E8962E]/5">
         <div
-          className="h-full bg-[#F5A623] transition-all duration-500"
+          className="h-full bg-[#E8962E] transition-all duration-500"
           style={{ width: `${porcentaje}%` }}
         />
       </div>
@@ -147,30 +192,42 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
               <div
                 key={campo.codigo}
                 className="border-l-2 pl-4 py-2"
-                style={{ borderColor: completo ? '#F5A623' : 'rgba(255,255,255,0.1)' }}
+                style={{ borderColor: completo ? '#E8962E' : 'rgba(255,255,255,0.1)' }}
               >
                 <div className="flex items-center justify-between gap-3 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    {completo ? (
-                      <Check className="w-3.5 h-3.5 text-[#F5A623] flex-shrink-0" />
+                    {completo && estadoDeCampo(true, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN()) === 'preliminar' && (
+                  <p className="text-[10px] text-[#E8962E]/60 pl-5 italic mt-0.5">Preliminar — se ajusta con «{nombreDePaso(campo.pilarOrigen)}» en El Camino.</p>
+                )}
+                {completo ? (
+                      <Check className="w-3.5 h-3.5 text-[#E8962E] flex-shrink-0" />
                     ) : campo.pending ? (
-                      <AlertCircle className="w-3.5 h-3.5 text-[#FFFFFF]/30 flex-shrink-0" />
+                      <AlertCircle className="w-3.5 h-3.5 text-[#F2EFE9]/30 flex-shrink-0" />
                     ) : (
-                      <Circle className="w-3.5 h-3.5 text-[#FFFFFF]/20 flex-shrink-0" />
+                      <Circle className="w-3.5 h-3.5 text-[#F2EFE9]/20 flex-shrink-0" />
                     )}
-                    <p className="text-sm text-[#FFFFFF]/90 font-medium truncate">{campo.label}</p>
+                    <p className="text-sm text-[#F2EFE9]/90 font-medium truncate">{campo.label}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {campo.criticoDia45 && (
-                      <span className="text-[9px] uppercase tracking-widest text-[#F5A623] font-semibold">
+                      <span className="text-[9px] uppercase tracking-widest text-[#E8962E] font-semibold">
                         D45
                       </span>
                     )}
-                    <span className="text-[10px] text-[#FFFFFF]/30 font-mono">{campo.pilarOrigen}</span>
+                    {(() => {
+                      const est = estadoDeCampo(completo, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN());
+                      if (est === 'vacio') return <span className="text-[10px] text-[#F2EFE9]/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>;
+                      const b = BADGE_ESTADO[est];
+                      return (
+                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${b.cls}`} title={est === 'preliminar' ? `Se ajusta con «${nombreDePaso(campo.pilarOrigen)}»` : est === 'confirmado' ? 'Confirmado en El Camino' : 'Validado por ventas reales'}>
+                          {b.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 {completo ? (
-                  <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/60 text-sm mt-1 pl-5">
+                  <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/60 text-sm mt-1 pl-5">
                     {typeof valor === 'string' && valor.length > 400 ? (
                       <Markdown>{valor}</Markdown>
                     ) : (
@@ -178,10 +235,10 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-[#FFFFFF]/30 pl-5 italic">
+                  <p className="text-xs text-[#F2EFE9]/30 pl-5 italic">
                     {campo.pending
                       ? 'Campo nuevo · se llenará cuando completes el pilar correspondiente.'
-                      : `Se completa en ${campo.pilarOrigen}.`}
+                      : `Se completa con «${nombreDePaso(campo.pilarOrigen)}» en El Camino.`}
                   </p>
                 )}
               </div>
@@ -195,8 +252,45 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+
+
+// El nombre humano de cada paso (el cliente jamás ve "P2.3")
+const NOMBRE_PASO: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const p of SEED_ROADMAP_V3) for (const m of p.metas) map[m.codigo] = m.titulo;
+  return map;
+})();
+const nombreDePaso = (codigo: string) => NOMBRE_PASO[codigo] ?? 'El Camino';
+
+// ═══ El sistema de estados: PRELIMINAR → CONFIRMADO → VALIDADO ═══
+type EstadoCampo = 'vacio' | 'preliminar' | 'confirmado' | 'validado';
+const getCompletadasADN = (): Set<string> => {
+  try { return new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]')); } catch { return new Set<string>(); }
+};
+const getHayVentasADN = (): boolean => {
+  try { const v = JSON.parse(localStorage.getItem('tcd_ventas') ?? '[]'); return Array.isArray(v) && v.length > 0; } catch { return false; }
+};
+function estadoDeCampo(tieneValor: boolean, pilarOrigen: string, completadas: Set<string>, hayVentas: boolean): EstadoCampo {
+  if (!tieneValor) return 'vacio';
+  const m = pilarOrigen.match(/^P(\d+)/);
+  const pilarNum = m ? parseInt(m[1], 10) : -1;
+  const pasoHecho = pilarNum >= 0 && completadas.has(`${pilarNum}-${pilarOrigen}`);
+  if (pasoHecho && hayVentas) return 'validado';
+  if (pasoHecho) return 'confirmado';
+  return 'preliminar';
+}
+const BADGE_ESTADO: Record<Exclude<EstadoCampo, 'vacio'>, { label: string; cls: string }> = {
+  preliminar: { label: 'Preliminar', cls: 'bg-[#E8962E]/10 text-[#E8962E]/80 border-[#E8962E]/25' },
+  confirmado: { label: 'Confirmado', cls: 'bg-[#F4B65C]/15 text-[#F4B65C] border-[#F4B65C]/40' },
+  validado:   { label: '✓ Validado', cls: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40' },
+};
+
+
 export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
   const [hojaOutputs, setHojaOutputs] = useState<Record<string, string>>({});
+  const [propSec, setPropSec] = useState<string>('');
+  const [propTxt, setPropTxt] = useState('');
+  const [propSending, setPropSending] = useState(false);
   const [seccionesExpandidas, setSeccionesExpandidas] = usePersistedState<Set<ADNSeccionCodigo>>(
     'tcd_adn_secciones',
     () => new Set(['IRR']),
@@ -303,57 +397,80 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
-          Documento maestro v8 · 7 secciones · 65 campos · 5 ofertas
+        <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
+          Las 7 letras del Método CLINICA · tu negocio, documentado
         </p>
-        <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
           ADN del Negocio
         </h1>
-        <p className="text-[#FFFFFF]/60 max-w-2xl">
-          Todo lo que construís a lo largo de los 90 días se condensa acá. Cada pilar lo refina un
-          poco más. Al día 45 los campos marcados <span className="text-[#F5A623] font-semibold">D45</span> deben estar
-          completos para pasar a Fase 4.
+          <p className="text-sm text-[#F2EFE9]/55 mt-1">El producto de tus 90 días: <span className="text-[#F4B65C]">tu ADN validado</span> — la data que te permite generar 10 pacientes de $1.000 todos los meses. Se construye solo, desde El Camino: cada respuesta que das lo pule. Aquí no se edita — aquí se contempla lo que ya es tuyo.</p>
+        <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Tu ADN no se edita acá — <strong className="text-[#F2EFE9]/75">se construye desde El Camino</strong>, ejercicio a ejercicio. Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
+        <p className="text-[#F2EFE9]/60 max-w-2xl">
+          <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
+          tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.
+          Tu Mentor y tus entrenadores lo leen para personalizar TODO lo que te dicen y generan.
+          <span className="block mt-2 text-[#E8962E]/90">No se llena a mano: se completa solo, a medida que haces las tareas de El Camino. Si ves campos vacíos, el camino los va a llenar.</span>
         </p>
       </div>
 
       {/* Resumen global */}
       <div className="card-panel p-6 flex items-center gap-6">
         <div className="flex-1">
-          <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-widest mb-1 font-semibold">
+          <p className="text-xs text-[#F2EFE9]/40 uppercase tracking-widest mb-1 font-semibold">
             Progreso del ADN
           </p>
-          <p className="text-3xl font-light text-[#FFFFFF] tracking-tight">
+          <p className="text-3xl font-light text-[#F2EFE9] tracking-tight">
             {totalStats.porcentaje}%
-            <span className="text-sm text-[#FFFFFF]/40 ml-2">
+            <span className="text-sm text-[#F2EFE9]/40 ml-2">
               ({totalStats.completos} de {totalStats.total} campos)
             </span>
           </p>
-          <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden mt-3">
-            <div
-              className="h-full bg-[#F5A623] rounded-full transition-all duration-700"
-              style={{ width: `${totalStats.porcentaje}%` }}
-            />
-          </div>
+          {(() => {
+            const comps = getCompletadasADN();
+            const ventas = getHayVentasADN();
+            let val = 0, conf = 0, prel = 0, vac = 0;
+            for (const sec of ADN_SCHEMA_V8) for (const c of sec.campos) {
+              const tiene = Boolean((mergedPerfil as Record<string, unknown>)[c.profileKey]);
+              const est = estadoDeCampo(tiene, c.pilarOrigen, comps, ventas);
+              if (est === 'validado') val++; else if (est === 'confirmado') conf++; else if (est === 'preliminar') prel++; else vac++;
+            }
+            const total = val + conf + prel + vac || 1;
+            return (
+              <div className="mt-3">
+                <div className="h-2.5 rounded-full overflow-hidden flex bg-black/30">
+                  <div style={{ width: `${(val / total) * 100}%`, background: '#22C55E' }} />
+                  <div style={{ width: `${(conf / total) * 100}%`, background: '#F4B65C' }} />
+                  <div style={{ width: `${(prel / total) * 100}%`, background: 'rgba(232,150,46,0.45)' }} />
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px]">
+                  <span className="text-[#22C55E]">⬤ {val} validados</span>
+                  <span className="text-[#F4B65C]">⬤ {conf} confirmados</span>
+                  <span className="text-[#E8962E]/70">⬤ {prel} preliminares</span>
+                  <span className="text-[#F2EFE9]/35">○ {vac} por construir</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <button
           type="button"
           onClick={() => setCurrentPage('roadmap')}
           className="btn-primary text-sm whitespace-nowrap"
         >
-          Ir a la Hoja de Ruta
+          Ir a El Camino
         </button>
       </div>
 
       {/* Pais del profesional — afecta el tono del contenido publicable */}
       <div className="card-panel p-6 space-y-3">
         <div className="min-w-0">
-          <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold mb-1">
+          <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold mb-1">
             Localizacion
           </p>
-          <p className="text-sm font-semibold text-[#FFFFFF]">Pais del profesional</p>
-          <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed max-w-xl">
+          <p className="text-sm font-semibold text-[#F2EFE9]">Pais del profesional</p>
+          <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed max-w-xl">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
-            guiones) a la forma de hablar de tu pais. La voz del Coach IA hacia vos no cambia.
+            guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
           </p>
         </div>
         <CustomSelect
@@ -367,7 +484,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
 
       {/* Secciones */}
       <div className="space-y-4">
-        {ADN_SCHEMA_V8.map((seccion) => (
+        {SECCIONES_ESENCIA.map((seccion) => (
           <TarjetaSeccion
             key={seccion.codigo}
             seccion={seccion}
@@ -378,7 +495,74 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         ))}
       </div>
 
-      <p className="text-xs text-[#FFFFFF]/30 text-center pt-4">
+      {/* ── Descargar como PDF ── */}
+      <div className="flex justify-center pt-2">
+        <AdnPrint
+          nombreCliente={(mergedPerfil.nombre as string) ?? 'Tu clínica'}
+          especialidad={(mergedPerfil.especialidad as string) ?? undefined}
+          version="v8"
+          secciones={SECCIONES_VIVAS.map((s) => ({
+            titulo: s.titulo,
+            subtitulo: s.codigo,
+            campos: s.campos
+              .map((c) => ({ label: c.label, valor: formatearValor(getADNValor(mergedPerfil, c)) }))
+              .filter((c) => c.valor && c.valor.trim() && c.valor.trim() !== '—'),
+          })).filter((s) => s.campos.length > 0)}
+        />
+      </div>
+
+      {/* ── Proponer un ajuste (el ADN se trabaja junto al mentor) ── */}
+      <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 mt-4">
+        <h3 className="text-sm font-semibold text-[#F2EFE9] mb-1">¿Ves algo para ajustar?</h3>
+        <p className="text-xs text-[#F2EFE9]/40 mb-4">
+          Tu ADN se trabaja junto a tu mentor. Contanos qué cambiarías y lo revisan juntos en tu próxima sesión.
+        </p>
+        <div className="space-y-3">
+          <CustomSelect
+            value={propSec}
+            onChange={setPropSec}
+            placeholder="¿Sobre qué sección?"
+            options={SECCIONES_VIVAS.map((s) => ({ value: s.codigo, label: s.titulo }))}
+            className="w-full"
+          />
+          <textarea
+            value={propTxt}
+            onChange={(e) => setPropTxt(e.target.value)}
+            placeholder="¿Qué cambiarías y por qué?"
+            rows={3}
+            className="w-full bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/20 focus:outline-none focus:border-[#E8962E]/50 resize-none"
+          />
+          <button
+            onClick={async () => {
+              if (!propTxt.trim() || !propSec) { toast.error('Elegí la sección y contanos el ajuste'); return; }
+              if (!supabase || !userId) { toast.error('Sesión no disponible'); return; }
+              setPropSending(true);
+              try {
+                const secTitulo = SECCIONES_VIVAS.find((s) => s.codigo === propSec)?.titulo ?? propSec;
+                const { error } = await supabase.from('mensajes').insert({
+                  canal: 'privado',
+                  emisor_id: userId,
+                  receptor_id: null,
+                  contenido: `📝 PROPUESTA DE AJUSTE AL ADN · [${secTitulo}]\n${propTxt.trim()}`,
+                });
+                if (error) throw error;
+                toast.success('Propuesta enviada a tu mentor 🙌');
+                setPropTxt(''); setPropSec('');
+              } catch (e: unknown) {
+                toast.error(e instanceof Error ? e.message : 'No se pudo enviar');
+              } finally {
+                setPropSending(false);
+              }
+            }}
+            disabled={propSending}
+            className="w-full py-2.5 rounded-xl bg-[#E8962E]/15 border border-[#E8962E]/30 hover:bg-[#E8962E]/25 disabled:opacity-50 text-[#E8962E] text-sm font-bold transition-all"
+          >
+            {propSending ? 'Enviando...' : 'Enviar propuesta a mi mentor'}
+          </button>
+        </div>
+      </div>
+
+      <p className="text-xs text-[#F2EFE9]/30 text-center pt-4">
         Versión alineada con el documento maestro v8 · método CLÍNICA
       </p>
     </div>
