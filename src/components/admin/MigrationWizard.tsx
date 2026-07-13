@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, RefreshCw, UserPlus, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../lib/supabase';
 import type { ExtractedProfile, MigrationStep1Data } from '../../lib/migrationTypes';
@@ -143,29 +142,26 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         if (!form.nombre.trim() || !form.email.trim() || !form.password.trim()) {
           throw new Error('Completá todos los campos requeridos');
         }
-        const url = import.meta.env.VITE_SUPABASE_URL;
-        const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-        const tempClient = createClient(url, key, {
-          auth: {
-            persistSession: false,
-            storageKey: 'temp_auth_migration',
-            storage: { getItem: () => null, setItem: () => null, removeItem: () => null },
+        // Credencial vía API admin (sin emails de confirmación → sin rate limit).
+        // El usuario queda confirmado al instante; el RPC v2 crea el profile si no existe.
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch('/api/migrar-cliente', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token ?? ''}`,
           },
+          body: JSON.stringify({
+            email: form.email.trim(),
+            nombre: form.nombre.trim(),
+            password: form.password.trim(),
+          }),
         });
+        const out = await resp.json().catch(() => null);
+        if (!resp.ok) throw new Error(out?.error || 'No se pudo crear el usuario');
+        if (!out?.user_id) throw new Error('No se pudo crear el usuario');
 
-        const { data: signUpData, error: signUpError } = await tempClient.auth.signUp({
-          email: form.email.trim(),
-          password: form.password.trim(),
-          options: { data: { nombre: form.nombre.trim() } },
-        });
-        if (signUpError) throw signUpError;
-        if (!signUpData.user) throw new Error('No se pudo crear el usuario');
-
-        profileId = signUpData.user.id;
-        // Pequeña pausa para que Auth propague el user_id antes del RPC.
-        // El RPC v2 crea el profile si no existe, sin depender del trigger.
-        await new Promise(r => setTimeout(r, 1000));
+        profileId = out.user_id as string;
       }
 
       const adnFields = Object.fromEntries(
@@ -331,9 +327,9 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                     <div>
                       <label className={LABEL_CLASS}>Plan</label>
                       <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
-                        <option value="DWY">DWY</option>
-                        <option value="DFY">DFY</option>
-                        <option value="IMPLEMENTACION">Implementación</option>
+                        <option value="DYS">DYS · Solo app</option>
+                        <option value="DWY">DWY · Mentoría</option>
+                        <option value="DFY">DFY · Implementación</option>
                       </select>
                     </div>
                     <div>
@@ -379,9 +375,9 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                   <div>
                     <label className={LABEL_CLASS}>Plan</label>
                     <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
-                      <option value="DWY">DWY</option>
-                      <option value="DFY">DFY</option>
-                      <option value="IMPLEMENTACION">Implementación</option>
+                      <option value="DYS">DYS · Solo app</option>
+                      <option value="DWY">DWY · Mentoría</option>
+                      <option value="DFY">DFY · Implementación</option>
                     </select>
                   </div>
                   <div>
