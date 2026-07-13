@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { Lock, Unlock, Bot, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-// ⚠️ Ajustar los IDs de sección a los reales de tu ADN v7 (los del encabezado de cada sección)
+// SECCIONES_ADN: referencia para el PDF y el 'Proponer ajuste' (ya no hay chips de edición)
 const SECCIONES_ADN = [
   { id: 'P1-P3',  label: 'C·L — Conciencia y Liberación' },
   { id: 'P4-P5',  label: 'I — Identidad' },
@@ -24,7 +24,6 @@ const AGENTES = [
 
 interface Props {
   clienteId: string;
-  seccionesActuales: string[];   // profiles.adn_edit_secciones
   agentesActuales: string[];     // profiles.agentes_activos
   onSaved?: () => void;
 }
@@ -69,8 +68,7 @@ function ChipGroup({ titulo, icon, items, activos, master, onToggle }: {
   );
 }
 
-export default function AdnPermisosControl({ clienteId, seccionesActuales, agentesActuales, onSaved }: Props) {
-  const [secciones, setSecciones] = useState<string[]>(seccionesActuales ?? []);
+export default function AdnPermisosControl({ clienteId, agentesActuales, onSaved }: Props) {
   const [agentes, setAgentes] = useState<string[]>(agentesActuales ?? []);
   const [saving, setSaving] = useState(false);
 
@@ -79,7 +77,7 @@ export default function AdnPermisosControl({ clienteId, seccionesActuales, agent
     try {
       const { error } = await supabase.rpc('admin_migrate_profile', {
         target_user_id: clienteId,
-        updates: { adn_edit_secciones: secciones, agentes_activos: agentes },
+        updates: { agentes_activos: agentes },
       });
       if (error) throw error;
       toast.success('Permisos actualizados');
@@ -94,8 +92,6 @@ export default function AdnPermisosControl({ clienteId, seccionesActuales, agent
   return (
     <div className="bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
       <h3 className="text-sm font-semibold text-[#F2EFE9] mb-4">Permisos del cliente</h3>
-      <ChipGroup titulo="Puede editar su ADN" icon={<FileText className="w-3 h-3" />}
-        items={SECCIONES_ADN} activos={secciones} master="todas" onToggle={setSecciones} />
       <ChipGroup titulo="Agentes activos" icon={<Bot className="w-3 h-3" />}
         items={AGENTES} activos={agentes} master="todos" onToggle={setAgentes} />
       <button onClick={guardar} disabled={saving}
