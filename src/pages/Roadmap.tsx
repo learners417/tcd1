@@ -69,6 +69,7 @@ import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
+import { planDe, planPermitePilar, NOMBRE_PLAN, waLink } from '../lib/planes';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
 import CintaCinturon from '../components/CintaCinturon';
@@ -112,7 +113,7 @@ const CAMPOS_JSONB_ARRAY = new Set<string>([
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
-type EstadoPilar = 'completado' | 'en_progreso' | 'bloqueado';
+type EstadoPilar = 'completado' | 'en_progreso' | 'bloqueado' | 'plan_bloqueado';
 
 interface PilarConEstado extends RoadmapPilar {
   estado: EstadoPilar;
@@ -508,6 +509,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     if (validacionDia45.debeBloquearFase4 && pilar.fase === 4 && estado !== 'completado') {
       estado = 'bloqueado';
     }
+    // ═══ El candado comercial (manda sobre todo): el pilar pertenece a un plan superior ═══
+    if (!planPermitePilar(planDe(perfil), pilar.numero)) estado = 'plan_bloqueado';
     const metasCompletadas = pilar.metas.filter((m) =>
       completadas.has(`${pilar.numero}-${m.codigo}`),
     ).length;
@@ -575,7 +578,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
         setPilarUnlocked({
           completado: pilar.titulo,
-          desbloqueado: nextPilar && nextPilar.estado !== 'bloqueado' ? nextPilar.titulo : undefined,
+          desbloqueado: nextPilar && nextPilar.estado !== 'bloqueado' && nextPilar.estado !== 'plan_bloqueado' ? nextPilar.titulo : undefined,
           numero: pilar.numero,
           nivelAlcanzado,
           cinturon: {
@@ -636,7 +639,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
     async (pilarNum: number, meta: RoadmapMeta, pilarEstado: EstadoPilar) => {
-      if (pilarEstado === 'bloqueado') return;
+      if (pilarEstado === 'bloqueado' || pilarEstado === 'plan_bloqueado') return;
 
       const key = `${pilarNum}-${meta.codigo}`;
       const ahoraCompletada = !completadas.has(key);
@@ -1001,6 +1004,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                     <button
                       key={pilar.numero}
                       onClick={() => {
+                        if (pilar.estado === 'plan_bloqueado') { window.open(waLink(`Hola · Quiero subir mi plan para desbloquear «${pilar.titulo}»`), '_blank'); return; }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
                         setPilarAbierto(siguiente);
                         if (siguiente !== null) {
@@ -1011,6 +1015,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       className={`relative text-left p-5 rounded-2xl border transition-all duration-300 ${
                         pilar.estado === 'bloqueado'
                           ? 'bg-[#1A1917]/50 border-[rgba(232,150,46,0.08)] cursor-not-allowed opacity-40'
+                          : pilar.estado === 'plan_bloqueado'
+                          ? 'bg-[#1A1917]/60 border-[rgba(232,150,46,0.18)] opacity-70 hover:opacity-90 hover:border-[#E8962E]/40'
                           : isSelected
                           ? 'bg-[#E8962E]/15 border-[#E8962E]/50 shadow-lg shadow-[#E8962E]/15 scale-[1.02]'
                           : pilar.estado === 'completado'
@@ -1024,7 +1030,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           {pilar.es_hito && (
                             <Trophy className="w-3 h-3 text-[#E8962E]" />
                           )}
-                          {pilar.estado === 'bloqueado' ? (
+                          {(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? (
                             <Lock className="w-3.5 h-3.5 text-[#F2EFE9]/30" />
                           ) : pilar.estado === 'completado' ? (
                             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
@@ -1036,12 +1042,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       <p className="text-xs text-[#F2EFE9]/40 font-medium uppercase tracking-wider">
                         Pilar {pilar.id.substring(1)}
                       </p>
-                      <p className={`text-sm font-semibold mt-0.5 ${pilar.estado === 'bloqueado' ? 'text-[#F2EFE9]/30' : 'text-[#F2EFE9]'}`}>
+                      <p className={`text-sm font-semibold mt-0.5 ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-[#F2EFE9]/30' : 'text-[#F2EFE9]'}`}>
                         {pilar.titulo}
                       </p>
 
                       {/* Mini barra de progreso */}
-                      {pilar.estado !== 'bloqueado' && (
+                      {pilar.estado !== 'bloqueado' && pilar.estado !== 'plan_bloqueado' && (
                         <div className="mt-3 h-1.5 bg-[#E8962E]/10 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#E8962E]'}`}
@@ -1057,6 +1063,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
                         </p>
                       )}
+                      {pilar.estado === 'plan_bloqueado' && (
+                        <span className="block text-[9px] text-[#E8962E]/80 mt-1.5 leading-tight">
+                          {planDe(perfil) === 'blanco'
+                            ? 'Te espera del otro lado de tu Semana Blanca →'
+                            : 'Pertenece a un plan superior · Subir (pagas solo la diferencia) →'}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -1069,7 +1082,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       {/* ── Detalle del pilar seleccionado ── */}
       {pilarAbierto !== null && (() => {
         const pilar = pilaresConEstado.find((p) => p.numero === pilarAbierto);
-        if (!pilar || pilar.estado === 'bloqueado') return null;
+        if (!pilar || pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') return null;
 
         return (
           <div ref={detalleRef} className="card-panel rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300 scroll-mt-4">
@@ -1357,7 +1370,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           onContinuar={() => {
             // Open the next pilar
             const nextPilar = pilaresConEstado.find(p => p.numero === pilarUnlocked.numero + 1);
-            if (nextPilar && nextPilar.estado !== 'bloqueado') {
+            if (nextPilar && nextPilar.estado !== 'bloqueado' && nextPilar.estado !== 'plan_bloqueado') {
               setPilarAbierto(nextPilar.numero);
               setTimeout(() => detalleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
             }

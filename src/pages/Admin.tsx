@@ -837,6 +837,17 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     try {
       const { data: profiles, error } = await supabase.rpc('get_all_profiles');
       if (error || !profiles) { setLoading(false); return; }
+      // ═══ Blindaje: el RPC puede no traer las columnas del plan — las mergeamos directo ═══
+      try {
+        const { data: planes } = await supabase.from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
+        if (planes) {
+          const porId = new Map(planes.map((x) => [x.id, x]));
+          for (const p of profiles as Array<{ id: string; plan_comercial?: string; plan_reservado?: string | null; acceso_hasta?: string | null }>) {
+            const extra = porId.get(p.id);
+            if (extra) { p.plan_comercial = extra.plan_comercial; p.plan_reservado = extra.plan_reservado; p.acceso_hasta = extra.acceso_hasta; }
+          }
+        }
+      } catch { /* sin las columnas todavía: el SQL no corrió — la UI degrada a 'completo' sin romper */ }
 
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
@@ -1895,7 +1906,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E8962E]/10 text-[#E8962E] border border-[#E8962E]/20">{c.plan}</span>
                             </td>
                             <td className="px-4 py-3 text-xs text-[#F2EFE9]/50">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-[#EF4444]' : 'text-[#E8962E]'} ml-1.5 text-[10px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}</td>
+                            <td className="px-4 py-3 text-xs text-[#F2EFE9]/60 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-[#EF4444]' : 'text-[#E8962E]'} ml-1.5 text-[10px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
+                    {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
+                      const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
+                      const [l, col] = map[p] ?? [p, '#F2EFE9'];
+                      return <span className="ml-2 text-[9px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}</td>
                             <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-[#F2EFE9]/50">{c.cinturon.nombre}</span></td>
                             <td className="px-4 py-3 text-xs text-[#F2EFE9]/60">{c.ventas_count}/10</td>
                             <td className="px-4 py-3 text-xs text-[#E8962E] font-medium">{pilar}</td>
@@ -2075,6 +2090,27 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          {/* ═══ El plan comercial: activar el pago con un click ═══ */}
+                          <div className="bg-[#111110] border border-[rgba(232,150,46,0.15)] rounded-2xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">Plan comercial · la escalera</p>
+                            <div className="flex flex-wrap gap-2">
+                              {([['blanco','🥋 Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
+                                <button key={p}
+                                  onClick={async () => {
+                                    if (!supabase) return;
+                                    const dias = p === 'blanco' ? 7 : p === 'amarillo' ? 45 : (p === 'verde' || p === 'negro') ? 90 : null;
+                                    const hasta = dias ? new Date(Date.now() + dias * 86400000).toISOString() : null;
+                                    const { error } = await supabase.from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
+                                    if (error) toast.error('No se pudo cambiar el plan');
+                                    else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
+                                  }}
+                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-[#E8962E] text-[#F4B65C] bg-[#E8962E]/10' : 'border-[rgba(242,239,233,0.15)] text-[#F2EFE9]/60 hover:border-[#E8962E]/40'}`}>
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-[10px] text-[#F2EFE9]/35 mt-2">Al confirmar un comprobante: un click en el plan pagado y el acceso se extiende solo.</p>
+                          </div>
                           <AdnPermisosControl
                             clienteId={selectedCliente.id}
                             agentesActuales={selectedCliente.agentes_activos ?? []}

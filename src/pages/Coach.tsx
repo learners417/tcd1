@@ -1,3 +1,4 @@
+import { planDe, TOPE_MENTOR_BLANCO } from '../lib/planes';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { safeGet } from '../lib/safeStorage';
 import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
@@ -84,7 +85,7 @@ function daysSince(iso: string | null | undefined): number {
   return Math.floor((Date.now() - t) / 86400000);
 }
 
-export default function Coach({ userId }: { userId?: string }) {
+export default function Coach({ userId, perfil }: { userId?: string; perfil?: Partial<import('../lib/supabase').Profile> }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -269,6 +270,20 @@ export default function Coach({ userId }: { userId?: string }) {
       const hasAttachments = attachments.length > 0;
       if ((!text.trim() && !hasAttachments) || isTyping) return;
 
+      // ═══ El tope de la Semana Blanca: 30 mensajes, cierre elegante ═══
+      if (planDe(perfil) === 'blanco') {
+        let usados = 0;
+        try { usados = parseInt(localStorage.getItem('tcd_mentor_blanco_msgs') ?? '0', 10) || 0; } catch { /* noop */ }
+        if (usados >= TOPE_MENTOR_BLANCO) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant' as const,
+            content: 'Llegamos al límite de conversaciones de tu Semana Blanca. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
+          }]);
+          return;
+        }
+        try { localStorage.setItem('tcd_mentor_blanco_msgs', String(usados + 1)); } catch { /* noop */ }
+      }
+
       const sentAttachments = attachments;
       setAttachments([]);
       setInput('');
@@ -361,7 +376,7 @@ export default function Coach({ userId }: { userId?: string }) {
         setIsTyping(false);
       }
     },
-    [attachments, isTyping, messages, persist, intentarRotarSummary],
+    [attachments, isTyping, messages, persist, intentarRotarSummary, perfil],
   );
 
   const handlePaste = useCallback(

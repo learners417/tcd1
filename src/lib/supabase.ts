@@ -29,6 +29,9 @@ export interface Profile {
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
+  plan_comercial?: 'blanco' | 'amarillo' | 'verde' | 'negro' | 'completo'; // la escalera de venta
+  plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
+  acceso_hasta?: string | null;    // fin de la Semana Blanca (o del acceso del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
   modulos_activos?: string[];   // override admin: 'campanas', 'creativos'
   adn_edit_secciones?: string[]; // secciones del ADN que el cliente puede editar ('todas' o ID/META/IRR/NEG/INF/CAP/MET)

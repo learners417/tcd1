@@ -1,3 +1,5 @@
+import type { Profile } from '../lib/supabase';
+import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -43,7 +45,7 @@ interface ProximoHito {
   diaPrograma: number;
 }
 
-export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: (page: string) => void, userId?: string }) {
+export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurrentPage: (page: string) => void, userId?: string, perfil?: Partial<Profile> }) {
   const [data, setData] = useState({
     profile: { nombre: '', fecha_inicio: new Date().toISOString() },
     semanaActual: 1,
@@ -265,6 +267,34 @@ export default function Dashboard({ setCurrentPage, userId }: { setCurrentPage: 
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+
+      {/* ═══ La Semana Blanca: el plan reservado + la cuenta regresiva ═══ */}
+      {planDe(perfil) === 'blanco' && (() => {
+        const d = diasRestantes(perfil);
+        const reservado = (perfil?.plan_reservado ?? '') as string;
+        const nombreRes = reservado && NOMBRE_PLAN[reservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[reservado as keyof typeof NOMBRE_PLAN] : null;
+        const precioRes = reservado && PRECIO_FUNDADOR[reservado] ? PRECIO_FUNDADOR[reservado] : null;
+        const urgente = d !== null && d <= 3;
+        return (
+          <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1.5">Tu Semana Blanca</p>
+            {d !== null && d > 0 ? (
+              <p className="text-sm text-[#F2EFE9]/85">
+                {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
+                {nombreRes ? <> · tu plan <span className="text-[#F4B65C] font-semibold">{nombreRes}</span> te espera{precioRes && <> ({precioRes} de fundador · 50% off de por vida)</>}</> : null}
+              </p>
+            ) : (
+              <p className="text-sm text-[#F2EFE9]/85">Tu semana está completa. Lo que construiste queda guardado — y tu lugar de fundador sigue reservado.</p>
+            )}
+            {(urgente || (d !== null && d <= 0)) && (
+              <a href={waLink(('Hola · Quiero continuar mi camino con el plan ' + (nombreRes ?? '')).trim())} target="_blank" rel="noreferrer"
+                 className="inline-block mt-3 btn-primary text-[#1a1206] text-sm font-bold px-5 py-2.5 rounded-xl">
+                Continuar mi camino →
+              </a>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ZONA A — Header contextual */}
       <div className="relative overflow-hidden card-panel p-8 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">

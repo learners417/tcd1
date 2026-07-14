@@ -21,6 +21,7 @@ import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
 import { cinturonDesdeProgreso } from './lib/cinturones';
+import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from './lib/planes';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -68,6 +69,40 @@ function loadCurrentPage(): string {
 
 type AuthState = 'loading' | 'logged_out' | 'logged_in';
 
+
+
+/** La Semana Blanca terminó: modo lectura digno — su trabajo preservado, la puerta abierta. */
+function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReservado?: string | null }) {
+  let quemas = 0; let racha = 0;
+  try {
+    const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+    quemas = set.has('1-P1.3') ? 1 : 0;
+    racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
+  } catch { /* noop */ }
+  const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
+  const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
+  return (
+    <div className="min-h-screen bg-[#080808] flex items-center justify-center p-6">
+      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-3">Tu Semana Blanca está completa</p>
+        <h1 className="text-2xl text-[#F2EFE9] mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
+        </h1>
+        <p className="text-sm text-[#F2EFE9]/60 mb-5 leading-relaxed">
+          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
+        </p>
+        {nombreRes && (
+          <p className="text-sm text-[#F2EFE9]/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-[#F4B65C] font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+        )}
+        <a href={waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+           className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
+          Retomar mi camino →
+        </a>
+        <p className="text-[11px] text-[#F2EFE9]/35">Un mensaje y seguís exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+      </div>
+    </div>
+  );
+}
 
 function PaginaBloqueada({ nombre }: { nombre: string }) {
   return (
@@ -389,6 +424,11 @@ export default function App() {
   }
 
   // ─── Main app ────────────────────────────────────────────────────────────────
+  // ═══ La Semana Blanca vencida: modo lectura digno (nada se borra) ═══
+  if (supabaseProfile && accesoVencido(supabaseProfile)) {
+    return <SemanaCompleta nombre={supabaseProfile.nombre ?? undefined} planReservado={supabaseProfile.plan_reservado} />;
+  }
+
   return (
     <div className="flex h-screen bg-[#080808] text-[#F2EFE9] overflow-hidden font-sans selection:bg-[#E8962E]/30">
       {/* Background Glow */}
@@ -418,9 +458,10 @@ export default function App() {
         <Topbar setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
           <div className="p-6">
-            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />}
+            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} />}
+            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
             {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
