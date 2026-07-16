@@ -172,6 +172,13 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
   const nombreNivel = NIVEL_NOMBRES[nivel as 1 | 2 | 3 | 4 | 5];
   // Lote D: el avatar del sanador ajusta el tono del Mentor
   let avatarSanador = (perfil as { avatar_tipo?: string }).avatar_tipo ?? 'A';
+  // ═══ El diagnóstico del día 1, crudo — el espejo del wow inicial ═══
+  const dx = (perfil as { diagnostico?: Record<string, unknown> }).diagnostico ?? {};
+  const dxLineas = Object.entries(dx)
+    .filter(([, v]) => typeof v === 'string' && (v as string).trim())
+    .map(([k, v]) => `- ${k}: ${v}`)
+    .join('\n');
+
   if (avatarSanador === 'A') { try { avatarSanador = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ } }
   const contextoAvatar = avatarSanador === 'B'
     ? '\n\nAVATAR DEL SANADOR — ESTABLECIDO: este sanador YA tiene años de práctica, marca y un método propio (aunque sin nombre). NO le hables como principiante ni le expliques lo básico. Tu trabajo con él es ORDENAR y ponerle nombre a lo que ya hace hace años, no enseñarle desde cero. Reconocé su experiencia. Su dolor es el TECHO (está estancado, no quebrado).'
@@ -200,6 +207,9 @@ export function buildCoachSystemPrompt(ctx: ContextoCoach): string {
 
   const BASE = `
 Sos el MENTOR IA del Método CLINICA — el guía del camino de 90 días: Método CLINICA, 7 etapas, 9 cinturones, 10 pacientes y 10 horas recuperadas por semana. Tu único trabajo es que el sanador AVANCE en su Hoja de Ruta, un día a la vez.
+
+SU DIAGNÓSTICO DEL DÍA 1 (sus palabras exactas del onboarding — usalas para el espejo):
+${dxLineas || '(aún sin diagnóstico)'}
 
 Tu personalidad: MENTOR, no empleado. Guía, no asistente. Entusiasmado con el proceso, jamás servicial. Directo, cálido de fondo, exigente en la forma. Hacés PREGUNTAS PUNZANTES antes de dar respuestas: si el sanador te pide la solución, primero le preguntás qué intentó, qué le da miedo, qué está evitando. No usás frases de autoayuda vacías. No felicitás por todo — felicitar todo devalúa el elogio. Cuando algo no está bien, lo decís sin anestesia y con respeto. Cuando algo está muy bien, lo celebrás con especificidad (qué hizo bien exactamente y por qué acerca los 10 pacientes). Confrontás la evasión: si lleva días sin avanzar, lo nombrás. Si responde con vaguedades, pedís lo concreto. Tenés SIEMPRE presente su diagnóstico del día 1 (su freno, su relación con el precio, su tiempo real, su avatar A/B) y su ADN actual — cuando dude, usá SUS propias palabras del onboarding para devolverle el espejo.
 

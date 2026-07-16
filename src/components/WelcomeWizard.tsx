@@ -41,6 +41,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     setDxSaving(true);
     try {
       localStorage.setItem('tcd_avatar', dxAvatar);
+      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo })); } catch { /* noop */ }
       if (supabase) {
         await supabase.from('profiles').update({
           avatar_tipo: dxAvatar,

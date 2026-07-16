@@ -55,6 +55,15 @@ function buildInitialMessage(): Message {
   const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
   const last = diary.length > 0 ? diary[0].respuestas : null;
 
+  // El wow del día 1: si es su primera semana y hay diagnóstico, el espejo va primero
+  const dxRaw = safeGet<Record<string, string>>('tcd_diagnostico', {});
+  const freno = dxRaw.freno || '';
+  if (semanaActual === 1 && freno) {
+    return {
+      role: 'assistant',
+      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empezá hoy — el impulso del día 1 vale oro. 🥋`,
+    } as Message;
+  }
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
   if (last && last.cuello) {
     msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, pero estás frenada por: _"${last.cuello}"_.\n\n`;
@@ -234,16 +243,21 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
     }
   }, [userId]);
 
+  const [guardadoOk, setGuardadoOk] = useState(false);
   const persist = useCallback(
     async (msgs: Message[]) => {
       if (userId) {
         try {
           await saveCoachMessages(userId, msgs);
+          setGuardadoOk(true);
+          setTimeout(() => setGuardadoOk(false), 2500);
         } catch {
           /* silencioso */
         }
       } else {
         localStorage.setItem('tcd_coach_messages_v2', JSON.stringify(msgs));
+        setGuardadoOk(true);
+        setTimeout(() => setGuardadoOk(false), 2500);
       }
     },
     [userId],
@@ -437,6 +451,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             </h2>
             <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-[#22C55E]" /> Tu guía del camino · conoce tu ADN completo
+              {guardadoOk && <span className="text-[#22C55E] normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
             </p>
           </div>
         </div>

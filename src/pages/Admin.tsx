@@ -68,6 +68,7 @@ interface ClienteConEstado extends Profile {
   cinturon: { emoji: string; nombre: string; orden: number; metafora: string };
   dias_atraso: number;
   progreso_porcentaje: number;
+  quema_hecha: boolean;
 }
 
 interface AdminVideo {
@@ -423,6 +424,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   };
   const [clientSearch, setClientSearch] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
+  const [filtroPlan, setFiltroPlan] = useState<string>('ALL');
 
   // Campanas — cliente seleccionado
   const [campanasClienteId, setCampanasClienteId] = usePersistedState<string | null>(
@@ -949,6 +951,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           ventas_count,
           estado_garantia,
           progreso_porcentaje: (p as any).progreso_porcentaje ?? 0,
+          quema_hecha: completadasSet.has('1-P1.3'),
         } as ClienteConEstado;
       }));
       setClientes(clientesConEstado);
@@ -1605,7 +1608,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   const filteredClientes = clientes.filter(c => {
     const matchSearch = !clientSearch || c.nombre.toLowerCase().includes(clientSearch.toLowerCase());
     const matchStatus = filtroStatus === 'ALL' || c.status === filtroStatus || (!c.status && filtroStatus === 'ACTIVE');
-    return matchSearch && matchStatus;
+    const matchPlan = filtroPlan === 'ALL' || ((c as { plan_comercial?: string }).plan_comercial ?? 'completo') === filtroPlan;
+    return matchSearch && matchStatus && matchPlan;
   });
   // La ronda de la mañana de Lupe: rojos primero, después amarillos — dentro de cada grupo, mayor atraso arriba
   const SEMAFORO_PESO: Record<string, number> = { rojo: 0, amarillo: 1, verde: 2, gris: 3 };
@@ -1828,6 +1832,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     />
                   </div>
                   <CustomSelect
+                    value={filtroPlan}
+                    onChange={(val) => setFiltroPlan(val)}
+                    options={[
+                      { value: 'ALL', label: 'Todos los planes' },
+                      { value: 'blanco', label: '🥋 Semana Blanca' },
+                      { value: 'amarillo', label: '🟡 Tu Base' },
+                      { value: 'verde', label: '🟢 Tu Sistema' },
+                      { value: 'negro', label: '⬛ Completo' },
+                      { value: 'completo', label: 'Clásicos' },
+                    ]}
+                    className="w-44"
+                  />
+                  <CustomSelect
                     value={filtroStatus}
                     onChange={(val) => setFiltroStatus(val as UserStatus | 'ALL')}
                     options={[
@@ -1910,7 +1927,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
                       const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
                       const [l, col] = map[p] ?? [p, '#F2EFE9'];
-                      return <span className="ml-2 text-[9px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}</td>
+                      return <span className="ml-2 text-[9px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
+                    {(c as { plan_comercial?: string }).plan_comercial === 'blanco' && (
+                      <span className={`ml-1.5 text-[9px] font-semibold px-2 py-0.5 rounded-full border ${c.quema_hecha ? 'text-[#E8962E] border-[#E8962E]/40 bg-[#E8962E]/10' : 'text-[#F2EFE9]/30 border-[rgba(242,239,233,0.1)]'}`} title={c.quema_hecha ? 'LA QUEMA completada — lead calificado' : 'Aún sin LA QUEMA'}>
+                        {c.quema_hecha ? '🔥 QUEMA' : '· sin QUEMA'}
+                      </span>
+                    )}</td>
                             <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-[#F2EFE9]/50">{c.cinturon.nombre}</span></td>
                             <td className="px-4 py-3 text-xs text-[#F2EFE9]/60">{c.ventas_count}/10</td>
                             <td className="px-4 py-3 text-xs text-[#E8962E] font-medium">{pilar}</td>
@@ -2105,6 +2127,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
                                   }}
                                   className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-[#E8962E] text-[#F4B65C] bg-[#E8962E]/10' : 'border-[rgba(242,239,233,0.15)] text-[#F2EFE9]/60 hover:border-[#E8962E]/40'}`}>
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
+                            <div className="flex flex-wrap gap-2">
+                              {([['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['','Sin reserva']] as const).map(([p, label]) => (
+                                <button key={p || 'ninguno'}
+                                  onClick={async () => {
+                                    if (!supabase) return;
+                                    const { error } = await supabase.from('profiles').update({ plan_reservado: p || null }).eq('id', selectedCliente.id);
+                                    if (error) toast.error('No se pudo guardar la reserva');
+                                    else { toast.success(p ? `Reserva: ${label}` : 'Reserva quitada'); void cargarClientes(); }
+                                  }}
+                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${(((selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '') === p) ? 'border-[#E8962E] text-[#F4B65C] bg-[#E8962E]/10' : 'border-[rgba(242,239,233,0.15)] text-[#F2EFE9]/60 hover:border-[#E8962E]/40'}`}>
                                   {label}
                                 </button>
                               ))}
