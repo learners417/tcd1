@@ -94,6 +94,18 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
         {nombreRes && (
           <p className="text-sm text-[#F2EFE9]/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-[#F4B65C] font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
         )}
+        <div className="text-left mb-5 space-y-2">
+          {([
+            ['🟡', 'Tu Base', '$147', 'La Fase 1 completa: tu relación con el dinero sanada + tu Mentor sin límite.'],
+            ['🟢', 'Tu Sistema', '$497', 'Hasta la Fase 3: tu oferta construida, tu método con nombre y tus primeros entrenadores.'],
+            ['⬛', 'Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
+          ] as const).map(([e, n, p, d]) => (
+            <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
+              <p className="text-xs font-bold text-[#F2EFE9]">{e} {n} · <span className="text-[#F4B65C]">{p}</span> <span className="text-[#F2EFE9]/35 font-normal">(precio fundador, de por vida)</span></p>
+              <p className="text-[11px] text-[#F2EFE9]/55 mt-0.5">{d}</p>
+            </div>
+          ))}
+        </div>
         <a href={waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →

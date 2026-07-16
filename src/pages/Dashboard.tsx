@@ -1,4 +1,5 @@
 import type { Profile } from '../lib/supabase';
+import ModoHueco from '../components/ModoHueco';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
@@ -267,6 +268,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+
+      {/* ═══ Modo Hueco: 10-15 minutos, una acción completable (T12) ═══ */}
+      <ModoHueco onNavigate={setCurrentPage} />
 
       {/* ═══ La Semana Blanca: el plan reservado + la cuenta regresiva ═══ */}
       {planDe(perfil) === 'blanco' && (() => {

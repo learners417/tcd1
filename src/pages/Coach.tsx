@@ -445,6 +445,12 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
           <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
             <Bot className="w-5 h-5 text-[#E8962E]" />
           </div>
+          <img
+            src="/javo.jpg"
+            alt="Javo"
+            className="w-9 h-9 rounded-full object-cover border border-[#E8962E]/40 shrink-0"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
           <div>
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
               Mentor IA

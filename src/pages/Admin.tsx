@@ -22,7 +22,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket } from 'lucide-react';
+  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
@@ -46,7 +46,7 @@ import Markdown from 'react-markdown';
 
 type AdminRol = 'owner' | 'manager' | 'staff';
 type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas';
-type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'metricas' | 'mensajes' | 'notas' | 'adn';
+type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
 interface AdminProps {
@@ -69,6 +69,8 @@ interface ClienteConEstado extends Profile {
   dias_atraso: number;
   progreso_porcentaje: number;
   quema_hecha: boolean;
+  traba_sesion: { titulo: string; dias: number } | null;
+  dias_sin_sesion: number | null;
 }
 
 interface AdminVideo {
@@ -362,7 +364,9 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
-  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'mentor', 'metricas', 'mensajes', 'notas', 'adn'];
+  const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'mentor', 'sesiones', 'metricas', 'mensajes', 'notas', 'adn'];
+  const [empujonListo, setEmpujonListo] = useState<string | null>(null);
+  const [detalleSesiones, setDetalleSesiones] = useState<Array<Record<string, unknown>>>([]);
   const [detalleTab, setDetalleTab] = usePersistedState<DetalleTab>(
     'tcd_admin_detalle_tab',
     'resumen',
@@ -851,6 +855,26 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         }
       } catch { /* sin las columnas todavía: el SQL no corrió — la UI degrada a 'completo' sin romper */ }
 
+      // ═══ T10 · el semáforo de trabas: sesiones abiertas y última sesión por cliente ═══
+      let trabasPorUser = new Map<string, { titulo: string; horas: number }>();
+      let ultimaSesionPorUser = new Map<string, number>();
+      try {
+        const { data: logs } = await supabase
+          .from('session_logs')
+          .select('user_id, meta_titulo, completada, created_at')
+          .order('created_at', { ascending: false })
+          .limit(800);
+        if (logs) {
+          for (const l of logs as Array<{ user_id: string; meta_titulo: string; completada: boolean; created_at: string }>) {
+            const ts = new Date(l.created_at).getTime();
+            if (!ultimaSesionPorUser.has(l.user_id)) ultimaSesionPorUser.set(l.user_id, ts);
+            if (!l.completada && !trabasPorUser.has(l.user_id)) {
+              trabasPorUser.set(l.user_id, { titulo: l.meta_titulo, horas: (Date.now() - ts) / 3600000 });
+            }
+          }
+        }
+      } catch { /* la tabla puede no existir aún: degrada sin romper */ }
+
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
         const [tareasRes, metricasRes, diarioRes] = await Promise.all([
@@ -952,6 +976,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           estado_garantia,
           progreso_porcentaje: (p as any).progreso_porcentaje ?? 0,
           quema_hecha: completadasSet.has('1-P1.3'),
+          traba_sesion: (() => { const t = trabasPorUser.get(p.id); return t && t.horas >= 48 ? { titulo: t.titulo, dias: Math.floor(t.horas / 24) } : null; })(),
+          dias_sin_sesion: (() => { const u = ultimaSesionPorUser.get(p.id); return u !== undefined ? Math.floor((Date.now() - u) / 86400000) : null; })(),
         } as ClienteConEstado;
       }));
       setClientes(clientesConEstado);
@@ -991,6 +1017,14 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         setDetalleMetricas(m.data ?? []);
       } else if (detalleTab === 'mentor') {
         if (selectedCliente) cargarConversaciones(selectedCliente.id);
+      } else if (detalleTab === 'sesiones') {
+        const { data } = await supabase
+          .from('session_logs')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(60);
+        setDetalleSesiones((data ?? []) as Array<Record<string, unknown>>);
       } else if (detalleTab === 'evidencias') {
         if (selectedCliente) cargarEvidenciasCliente(selectedCliente.id);
       } else if (detalleTab === 'diario') {
@@ -1597,6 +1631,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     { id: 'resumen', label: 'Resumen', icon: TrendingUp },
     { id: 'evidencias', label: 'Evidencias', icon: ClipboardCheck },
     { id: 'mentor', label: 'Mentor', icon: MessageSquare },
+    { id: 'sesiones', label: 'Sesiones', icon: Timer },
     { id: 'diario', label: 'Diario', icon: Calendar },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
     { id: 'adn', label: 'ADN', icon: Fingerprint },
@@ -2009,6 +2044,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#F2EFE9] truncate">{c.nombre}</p>
                           <p className="text-[10px] text-[#F2EFE9]/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
+                          {c.traba_sesion && (
+                            <p className="text-[10px] text-[#E8962E] mt-0.5">🟡 trabado en: {c.traba_sesion.titulo.slice(0, 34)} (hace {c.traba_sesion.dias}d)</p>
+                          )}
+                          {!c.traba_sesion && c.dias_sin_sesion !== null && c.dias_sin_sesion >= 4 && (
+                            <p className="text-[10px] text-red-400 mt-0.5">🔴 sin sesiones hace {c.dias_sin_sesion}d</p>
+                          )}
                         </div>
                       </div>
                     </button>
@@ -2032,6 +2073,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <div>
                     <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                       <h3 className="text-2xl font-light text-[#F2EFE9] tracking-tight">{selectedCliente.nombre}</h3>
+                      {(selectedCliente.traba_sesion || (selectedCliente.dias_sin_sesion !== null && selectedCliente.dias_sin_sesion >= 4)) && (
+                        <button
+                          onClick={() => {
+                            const nombre = selectedCliente.nombre.split(' ')[0];
+                            const msj = selectedCliente.traba_sesion
+                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Contame y lo destrabamos juntos. De frente, no de costado. 🥋`
+                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escribime y retomamos hoy, aunque sea 20 minutos. 🥋`;
+                            try { navigator.clipboard?.writeText(msj); } catch { /* noop */ }
+                            setDetalleTab('mensajes');
+                            setEmpujonListo(msj);
+                          }}
+                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/30 hover:bg-[#E8962E]/25 transition-colors"
+                          title="Copia el mensaje de empujón (en la voz de Javo) y abre el chat"
+                        >⚡ Empujón</button>
+                      )}
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30' : 'bg-[#E8962E]/20 text-[#E8962E] border border-[#E8962E]/30'}`}>
                         {selectedCliente.plan}
                       </span>
@@ -2365,6 +2421,45 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   )}
                 </div>
               )}
+              {detalleTab === 'sesiones' && (
+                <div className="space-y-3">
+                  {detalleSesiones.length === 0 && (
+                    <p className="text-sm text-white/40 py-8 text-center">Todavía no hay sesiones registradas. Cuando el cliente abra su primera Sesión Viva, acá vas a ver su viaje completo: emoción de entrada y salida, duración real, compromisos y pausas.</p>
+                  )}
+                  {detalleSesiones.map((sl) => {
+                    const emo: Record<string, string> = { enfocado: '🎯', con_dudas: '🤔', cansado: '😮‍💨', con_miedo: '😰', encendido: '🔥', en_paz: '🌿', orgulloso: '🏆' };
+                    const compromisos = Array.isArray(sl.compromisos) ? (sl.compromisos as string[]) : [];
+                    const dur = Number(sl.duracion_seg ?? 0);
+                    const durTxt = dur >= 3600 ? `${Math.floor(dur / 3600)}h ${Math.floor((dur % 3600) / 60)}m` : `${Math.floor(dur / 60)}m`;
+                    const fecha = sl.created_at ? new Date(String(sl.created_at)).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : '';
+                    const abierta = !sl.completada;
+                    const pausas = Number(sl.pausas ?? 0);
+                    return (
+                      <div key={String(sl.id)} className={`rounded-xl border p-4 ${abierta ? 'border-[#E8962E]/30 bg-[#E8962E]/5' : 'border-white/10 bg-white/[0.03]'}`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-white truncate">{String(sl.meta_titulo ?? sl.meta_codigo)}</p>
+                            <p className="text-[11px] text-white/40 mt-0.5">
+                              {fecha} · {durTxt} de trabajo{pausas > 0 ? ` · ${pausas} pausa${pausas === 1 ? '' : 's'}` : ''}{abierta ? ' · 🟡 EN CURSO / PAUSADA' : ''}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-lg" title={`${String(sl.checkin_emocion ?? '')} → ${String(sl.checkout_emocion ?? '')}`}>
+                            {emo[String(sl.checkin_emocion)] ?? '·'} <span className="text-white/30 text-xs">→</span> {emo[String(sl.checkout_emocion)] ?? '·'}
+                          </div>
+                        </div>
+                        {sl.checkin_objetivo ? <p className="text-xs text-white/55 mt-2">Objetivo: {String(sl.checkin_objetivo)}</p> : null}
+                        {compromisos.length > 0 && (
+                          <div className="mt-2 space-y-0.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">Compromisos</p>
+                            {compromisos.map((c, i) => <p key={i} className="text-xs text-white/70">• {c}</p>)}
+                          </div>
+                        )}
+                        {sl.resumen_consolidado ? <p className="text-xs text-white/50 mt-2 italic line-clamp-3">{String(sl.resumen_consolidado)}</p> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {detalleTab === 'evidencias' && (
                 <div className="space-y-4">
                   <p className="text-xs text-[#F2EFE9]/50">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-[#E8962E]">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
@@ -2640,6 +2735,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                       {/* ── MENSAJES ── */}
                       {detalleTab === 'mensajes' && (
+                <>
+                {empujonListo && (
+                  <div className="mb-3 rounded-xl border border-[#E8962E]/30 bg-[#E8962E]/8 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#E8962E] mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si querés</p>
+                    <p className="text-xs text-white/70 italic">{empujonListo}</p>
+                  </div>
+                )}
+                </>
+              )}
+              {detalleTab === 'mensajes' && (
                         <div className="space-y-3">
                           {detalleMensajes.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">

@@ -369,7 +369,7 @@ export type MetaCodigo =
   // P6 · Matriz ABC (sin cambios)
   | 'P6.1' | 'P6.2' | 'P6.3' | 'P6.4'
   // P7 · Método (v8 · 5 tareas, agrega P7.4 mapeo, COACH a P7.5)
-  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.4' | 'P7.5'
+  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.C1' | 'P7.C2' | 'P7.C3' | 'P7.C4' | 'P7.C5' | 'P7.4' | 'P7.5'
   // P8 · Escalera Ofertas (v8 · 9 tareas, agrega Ultra Low + Mamuska + separa ofertas)
   | 'P8.1' | 'P8.2' | 'P8.3' | 'P8.4' | 'P8.5' | 'P8.6' | 'P8.7' | 'P8.8' | 'P8.9'
   // P9A · Infraestructura (v8 · 6 tareas, agrega Validación orgánica + Meta Config)

@@ -64,6 +64,7 @@ import { NIVEL_NOMBRES, NIVEL_METADATA } from '../lib/supabase';
 import TaskVideo from '../components/tasks/TaskVideo';
 import TaskHerramientaIA from '../components/tasks/TaskHerramientaIA';
 import TaskCoach from '../components/tasks/TaskCoach';
+import SesionViva from '../components/sesion/SesionViva';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
 import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
@@ -1248,6 +1249,16 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
+                        {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
+                          <SesionViva
+                            metaKey={key}
+                            metaCodigo={meta.codigo}
+                            metaTitulo={meta.titulo}
+                            descripcion={meta.descripcion}
+                            tiempoEstimado={meta.tiempo_estimado}
+                            isCompleted={estaCompletada}
+                            userId={userId}
+                          >
                         {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P0.2' && (
                           <TaskFotoPartida
                             meta={meta}
@@ -1288,6 +1299,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                             onNavigateToCoach={() => onNavigate?.('coach')}
                           />
+                        )}
+                          </SesionViva>
                         )}
                       
                         <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />

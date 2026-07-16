@@ -34,6 +34,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [dxNicho, setDxNicho] = useState('');
   const [dxDinero, setDxDinero] = useState('');
   const [dxTiempo, setDxTiempo] = useState('');
+  const [dxEstilo, setDxEstilo] = useState<'hueso' | 'guantes' | ''>('');
+  const [dxFe, setDxFe] = useState<'si' | 'no' | ''>('');
   const [dxSaving, setDxSaving] = useState(false);
 
   const guardarDiagnostico = async () => {
@@ -41,11 +43,13 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     setDxSaving(true);
     try {
       localStorage.setItem('tcd_avatar', dxAvatar);
-      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo })); } catch { /* noop */ }
+      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo }));
+      localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
+      localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
       if (supabase) {
         await supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
-          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo },
+          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe },
           ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
         }).eq('id', profile.id);
@@ -381,7 +385,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu punto de partida</p>
-              <h2 className="text-2xl font-light text-[#F2EFE9] mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Cinco preguntas — la semilla de tu ADN</h2>
+              <h2 className="text-2xl font-light text-[#F2EFE9] mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Siete preguntas — la semilla de tu ADN</h2>
               <p className="text-sm text-[#F2EFE9]/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
             </div>
 
@@ -422,6 +426,24 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               <div className="grid grid-cols-3 gap-2">
                 {['30 min','1 hora','2+ horas'].map((o) => (
                   <button key={o} onClick={() => setDxTiempo(o)} className={`px-4 py-3 rounded-xl border text-sm transition-all ${dxTiempo === o ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">6 · ¿Cómo quieres que te hable tu Mentor?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {([['hueso', 'Directo al hueso. Sin vueltas, aunque incomode.'], ['guantes', 'Con guantes. Firme, pero más suave.']] as const).map(([v, l]) => (
+                  <button key={v} onClick={() => setDxEstilo(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxEstilo === v ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{l}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#F2EFE9]/85 mb-2">7 · ¿El trabajo espiritual es parte de tu vida?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {([['si', 'Sí — la fe, la oración o la gratitud son parte de mi camino.'], ['no', 'No — prefiero un lenguaje neutro.']] as const).map(([v, l]) => (
+                  <button key={v} onClick={() => setDxFe(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFe === v ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}>{l}</button>
                 ))}
               </div>
             </div>
