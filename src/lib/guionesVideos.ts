@@ -42,7 +42,7 @@ Estos 90 días tienen un objetivo concreto: que consigas 10 pacientes a tu preci
 
 [CÓMO FUNCIONA · 2-3min]
 Tienes dos llaves. Esta app, El Camino, es donde te construyes: una sesión por día, cuarenta y cinco minutos. Y Mi Clínica, tu otra app, es donde tu práctica ya empieza a ordenarse desde hoy.
-El camino tiene siete etapas — se llaman CLINICA. No son pasos de marketing: son cambios en cómo te ves a ti mismo. Vas a ganar cinturones, como en el dojo, pero no por leer: por hacer cosas reales en el mundo. Cada cinturón es una identidad nueva.
+El camino tiene siete etapas — se llaman CLINICA. No son pasos de un método de ventas: son cambios en cómo te ves a ti mismo. Vas a ganar cinturones, como en el dojo, pero no por leer: por hacer cosas reales en el mundo. Cada cinturón es una identidad nueva.
 
 [LA PRIMERA PARADA · 3-4min]
 Y hay una primera parada que casi nadie se anima a dar: sanar tu relación con el dinero. Antes de vender nada, antes de un solo anuncio. Porque de nada sirve el mejor sistema si algo adentro tuyo te frena a cobrar lo que vales. Ahí empezamos.
@@ -81,14 +81,14 @@ Vas a escribirlo con tus palabras, con fecha, y lo vas a firmar. En el dojo, la 
     duracion: '3-4 min',
     proposito: 'Instalar la idea central: la relación rota con el dinero es la raíz, no la técnica.',
     guion: `[GANCHO · 0-15s]
-Te voy a decir por qué la mayoría de los cureres de negocios fracasan con profesionales como tú. Porque arrancan por la táctica — el embudo, los anuncios, el precio. Y se saltean la raíz.
+Te voy a decir por qué la mayoría de los asesores de negocios fracasan con profesionales como tú. Porque arrancan por la táctica — el sistema, los anuncios, el precio. Y se saltean la raíz.
 
 [LA RAÍZ · 15s-1:30]
-Vos ya sabes que vales más. Lo sabes hace años. Entonces, ¿por qué no lo cobras? No es porque no sepas de marketing. Es porque algo adentro tuyo se activa cada vez que tienes que decir un número. Una incomodidad. Una culpa. Las manos que sudan.
+Tú ya sabes que vales más. Lo sabes hace años. Entonces, ¿por qué no lo cobras? No es porque te falte técnica. Es porque algo adentro tuyo se activa cada vez que tienes que decir un número. Una incomodidad. Una culpa. Las manos que sudan.
 Eso no es un problema técnico. Es una relación rota con el dinero. Y la mayoría la arrastra desde mucho antes de tener un consultorio.
 
 [DE DÓNDE VIENE · 1:30-2:30]
-En tu casa, ¿cómo se hablaba del dinero? ¿Era escaso, sucio, motivo de pelea? ¿Te enseñaron que la gente buena no piensa en plata, que cobrar mucho es de aprovechadores? Si te dedicás a ayudar, probablemente sí. Y esa creencia hoy te cuesta plata real, todos los meses.
+En tu casa, ¿cómo se hablaba del dinero? ¿Era escaso, sucio, motivo de pelea? ¿Te enseñaron que la gente buena no piensa en dinero, que cobrar mucho es de aprovechadores? Si te dedicas a ayudar, probablemente sí. Y esa creencia hoy te cuesta dinero real, todos los meses.
 
 [LOS TRES SABOTAJES · 2:30-3:30]
 Se manifiesta de tres formas. El que baja el precio antes de que el paciente lo pida — a veces antes de terminar de decirlo. El que justifica su precio con títulos y años, como si tuviera que ganarse el permiso de cobrar. Y el que trabaja de más, regala horas, para compensar la culpa de cobrar. ¿Te reconoces en alguno?
@@ -150,7 +150,7 @@ El error es vender lo que HACÉS: "sesiones de nutrición", "consultas de kinesi
 Una oferta irresistible tiene cuatro partes. Primero, el resultado concreto — específico, medible, con tiempo. Segundo, el proceso — tu método con nombre, que le muestra CÓMO va a llegar. Tercero, la garantía — que le saca el miedo de encima; tú te la bancás porque confiás en tu trabajo. Y cuarto, los bonos — cosas que aumentan el valor sin aumentar tu costo. Cuando los cuatro están, el precio deja de ser el tema.
 
 [EL PRECIO · 2:45-3:30]
-Y sí, va a costar mil dólares o más. No porque seas caro, sino porque un resultado real vale eso. El que compara tu programa con una sesión suelta no entendió que no son lo mismo. Uno cambia tu tiempo por plata. El otro cambia la vida del paciente. Tu trabajo es que se entienda la diferencia.
+Y sí, va a costar mil dólares o más. No porque seas caro, sino porque un resultado real vale eso. El que compara tu programa con una sesión suelta no entendió que no son lo mismo. Uno cambia tu tiempo por dinero. El otro cambia la vida del paciente. Tu trabajo es que se entienda la diferencia.
 
 [CIERRE · 3:30-4min]
 En la próxima sesión vas a construir la tuya, con la herramienta, usando todo lo que ya cargaste: tu avatar, tu método, tus transformaciones. Va a salir una oferta que tú mismo comprarías. Y esa es la prueba de que está bien hecha.`,
@@ -210,7 +210,7 @@ Cuando termine, vas a tener un link con tu nombre que puedes compartir con orgul
 La llamada de venta que funciona no se parece en nada a lo que imaginás. No hay que convencer a nadie. Al contrario: cuanto menos empujás, más venden. Te explico por qué.
 
 [EL CAMBIO DE MARCO · 15s-1:15]
-Vos ya sabes hacer esto — porque es exactamente lo que haces con un paciente. No lo convencés de que está enfermo: le haces preguntas hasta que ÉL entiende su problema y te pide ayuda. La venta es igual. No es un pitch. Es un diagnóstico. El que pregunta bien, cierra.
+Tú ya sabes hacer esto — porque es exactamente lo que haces con un paciente. No lo convencés de que está enfermo: le haces preguntas hasta que ÉL entiende su problema y te pide ayuda. La venta es igual. No es un pitch. Es un diagnóstico. El que pregunta bien, cierra.
 
 [LAS CINCO ETAPAS · 1:15-2:45]
 La llamada tiene cinco momentos. Apertura: bajás la guardia, esto es una conversación, no un interrogatorio. Dolor: preguntás hasta que la persona pone en palabras lo que le duele — con SUS palabras, no las tuyas. Cielo: le haces imaginar cómo sería su vida resuelto el problema. Obstáculos: qué lo frenó hasta ahora. Y recién ahí, cierre: presentás tu programa como el puente entre su dolor y su cielo. Si hiciste bien las primeras cuatro, el cierre casi se dice solo.
@@ -253,13 +253,13 @@ En la próxima sesión vas a documentar tu protocolo, paso a paso. Es lo mismo q
 Llegaste. Tienes tu método, tu oferta, tu sistema, tus primeras ventas. Ahora la pregunta cambia: ya no es "cómo consigo un paciente", es "cómo convierto esto en algo que funciona todos los meses sin mí encima".
 
 [DE EJECUTAR A DIRIGIR · 15s-1:30]
-Los primeros pacientes los conseguiste haciendo todo tú. Eso está bien para arrancar — pero no escala. La diferencia entre un profesional ocupado y un director de clínica es esta: el ocupado hace el trabajo; el director hace que el trabajo se haga. Tu campaña corre sola, tu asistente responde solo, tu agenda se llena sola. Vos revisás los números y ajustás. Dejaste de ser el sistema. Ahora lo dirigís.
+Los primeros pacientes los conseguiste haciendo todo tú. Eso está bien para arrancar — pero no escala. La diferencia entre un profesional ocupado y un director de clínica es esta: el ocupado hace el trabajo; el director hace que el trabajo se haga. Tu campaña corre sola, tu asistente responde solo, tu agenda se llena sola. Tú revisás los números y ajustás. Dejaste de ser el sistema. Ahora lo dirigís.
 
 [EL RITMO NUEVO · 1:30-2:30]
 Tu semana ya no es cuarenta y cinco minutos de tarea. Es una revisión: qué números dieron, qué anuncio funcionó mejor, cuántas llamadas, cuántos cierres. Media hora por semana mirando el tablero y tomando una o dos decisiones. Eso es dirigir. El resto del tiempo — el que antes se comía tu negocio — ahora es tuyo. Para atender mejor, para tu familia, para ti.
 
 [EL LEGADO · 2:30-3:30]
-Y hay algo más grande. Vos empezaste como un profesional quemado, mártir de tu vocación. Y estás terminando como alguien que resolvió eso. Esa transformación es, ahora, tu mejor activo. Porque hay miles de colegas tuyos exactamente donde ti estabas hace noventa días. Eres libre. Ahora te toca liberar a otros.
+Y hay algo más grande. Tú empezaste como un profesional quemado, mártir de tu vocación. Y estás terminando como alguien que resolvió eso. Esa transformación es, ahora, tu mejor activo. Porque hay miles de colegas tuyos exactamente donde ti estabas hace noventa días. Eres libre. Ahora te toca liberar a otros.
 
 [CIERRE · 3:30-4min]
 Lo que sigue no es un final. Es tu clínica funcionando, y tú a cargo de verdad. La revisión semanal te va a acompañar de acá en adelante. Bienvenido al otro lado. Bienvenido, sanador libre.`,
