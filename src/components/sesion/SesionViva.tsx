@@ -73,14 +73,14 @@ export default function SesionViva({
   } | null>(null);
   const [cerrando, setCerrando] = useState(false);
 
-  const segundosObjetivo = parseTiempoEstimado(tiempoEstimado);
+  const segundosObjetivo = sesion?.modoCorto ? 900 : parseTiempoEstimado(tiempoEstimado);
 
   // Al completarse la meta durante la sesión → pasar al check-out.
   useEffect(() => {
     if (isCompleted && fase === 'trabajo') setFase('checkout');
   }, [isCompleted, fase]);
 
-  const abrirSesion = async (checkin: { emocion: EmocionSesion; objetivo: string }) => {
+  const abrirSesion = async (checkin: { emocion: EmocionSesion; objetivo: string; modoCorto?: boolean }) => {
     const nueva: SesionEnCurso = {
       metaKey, metaCodigo, metaTitulo,
       checkinEmocion: checkin.emocion,
@@ -89,6 +89,7 @@ export default function SesionViva({
       corriendoDesde: Date.now(),
       pausas: 0,
       iniciadaEn: new Date().toISOString(),
+      modoCorto: checkin.modoCorto,
     };
     setSesionEnCurso(nueva);
     setSesion(nueva);
@@ -103,7 +104,7 @@ export default function SesionViva({
     }
   };
 
-  const cerrarSesion = async (checkout: { emocion: EmocionSesion; compromisos: string[] }) => {
+  const cerrarSesion = async (checkout: { emocion: EmocionSesion; compromisos: string[]; diario?: string }) => {
     if (!sesion) return;
     setCerrando(true);
     const duracion = segundosDeSesion(sesion);
@@ -149,7 +150,9 @@ export default function SesionViva({
   if (fase === 'trabajo' && sesion) {
     return (
       <div className="space-y-4">
-        <CronometroSesion sesion={sesion} segundosObjetivo={segundosObjetivo} onSesionChange={setSesion} />
+        <div className="sticky top-0 z-20 -mx-1 px-1 pb-1 bg-[#0D0C0B]/92 backdrop-blur-sm">
+          <CronometroSesion sesion={sesion} segundosObjetivo={segundosObjetivo} onSesionChange={setSesion} />
+        </div>
         {children}
       </div>
     );

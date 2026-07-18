@@ -10,12 +10,13 @@ interface Props {
   metaTitulo: string;
   objetivoSugerido: string;
   tiempoEstimado?: string | null;
-  onAbrir: (checkin: { emocion: EmocionSesion; objetivo: string }) => void;
+  onAbrir: (checkin: { emocion: EmocionSesion; objetivo: string; modoCorto?: boolean }) => void;
 }
 
 export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstimado, onAbrir }: Props) {
   const [emocion, setEmocion] = useState<EmocionSesion | null>(null);
   const [objetivo, setObjetivo] = useState(objetivoSugerido);
+  const [modoCorto, setModoCorto] = useState(false);
   const segundosObjetivo = parseTiempoEstimado(tiempoEstimado);
 
   return (
@@ -60,14 +61,24 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
           onChange={(ev) => setObjetivo(ev.target.value)}
           rows={2}
           className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/60 focus:outline-none resize-none"
-          placeholder="¿Qué querés lograr sí o sí hoy?"
+          placeholder="¿Qué quieres lograr sí o sí hoy?"
         />
       </div>
 
       <button
         type="button"
+        onClick={() => setModoCorto(!modoCorto)}
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs transition-all ${modoCorto ? 'border-[#E8962E]/50 bg-[#E8962E]/10 text-[#E8962E]' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20'}`}
+      >
+        <span>🕐 Hoy tengo poco tiempo — modo 15 minutos</span>
+        <span className="font-bold">{modoCorto ? 'ON' : 'OFF'}</span>
+      </button>
+      <p className="text-[10px] text-white/30 -mt-2">{modoCorto ? 'Haces solo el paso esencial de hoy. Mantiene tu racha y tu avance — mejor un día corto que un día cero.' : ''}</p>
+
+      <button
+        type="button"
         disabled={!emocion || !objetivo.trim()}
-        onClick={() => emocion && onAbrir({ emocion, objetivo: objetivo.trim() })}
+        onClick={() => emocion && onAbrir({ emocion, objetivo: objetivo.trim(), modoCorto })}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#E8962E] text-black hover:bg-[#f0a94d]"
       >
         <Play className="w-4 h-4" /> Abrir la sesión

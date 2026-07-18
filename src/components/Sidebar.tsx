@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine  } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users  } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
@@ -63,21 +63,23 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
     {
       title: 'PRINCIPAL',
       items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
-        { id: 'adn', icon: Dna, label: 'ADN del Negocio' },
+        { id: 'adn', icon: Dna, label: 'ADN del Negocio', minCinturon: 1 },
         { id: 'coach', icon: Sparkles, label: 'Mentor IA' },
         { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 },
+        { id: 'liga', icon: Trophy, label: 'La Liga' },
+        { id: 'red', icon: Users, label: 'La Red' },
       ]
     },
     {
       title: 'HERRAMIENTAS',
       items: [
-        { id: 'diario', icon: BookOpen, label: 'Diario del Fundador' },
-        { id: 'biblioteca', icon: Library, label: 'El Método' },
+        { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
+        { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2 },
         { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
-        { id: 'agentes', icon: Bot, label: 'Entrenadores IA' },
+        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minCinturon: 4 },
         { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
         { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },
       ]

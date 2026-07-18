@@ -4,17 +4,31 @@
  * El clímax emocional del programa + las dos puertas: MCD y el Nivel 2.
  */
 import React, { useEffect, useState } from 'react';
-import { Trophy, ArrowRight, MessageSquare } from 'lucide-react';
+import { Trophy, ArrowRight, MessageSquare, Camera, Award, Film } from 'lucide-react';
+import type { ProfileV2 } from '../lib/supabase';
+import type { ComparacionDia45 as Comparacion } from '../lib/diaValidator';
+import FotoDia90 from './FotoDia90';
+import CertificadoModal from './CertificadoModal';
+import GraduacionComprobantes from './GraduacionComprobantes';
+import MensajeFuturoPlayer from './MensajeFuturoPlayer';
 
 interface GraduacionProps {
   nombre?: string;
   ventas: number;
   onClose: () => void;
   onIrAlChat?: () => void;
+  userId?: string;
+  perfil?: Partial<ProfileV2>;
+  comparacion?: Comparacion;
 }
 
-export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: GraduacionProps) {
+/** Slot: pegá acá la URL de tu video de graduación (VOZ MAESTRO). */
+const GRADUACION_VIDEO_URL = '';
+
+export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId, perfil, comparacion }: GraduacionProps) {
   const [visible, setVisible] = useState(false);
+  const [verFoto, setVerFoto] = useState(false);
+  const [verCert, setVerCert] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60);
@@ -22,6 +36,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: Grad
   }, []);
 
   return (
+    <>
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 overflow-y-auto">
       <div
         className={`max-w-lg w-full my-8 rounded-2xl border border-[#E8962E]/30 bg-gradient-to-b from-[#111110] to-[#080808] p-8 text-center transition-all duration-700 ${
@@ -52,6 +67,62 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: Grad
             </span>
           </p>
         </div>
+
+        {/* T11 · La Foto del Día 90 (antes/después) */}
+        {comparacion?.tieneFotoPartida && (
+          <button
+            onClick={() => setVerFoto(true)}
+            className="w-full rounded-xl border border-[#E8962E]/25 bg-[#E8962E]/[0.05] p-4 mb-4 text-left hover:border-[#E8962E]/45 transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[#E8962E]" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E]">
+                  Tu Foto del Día 90
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#F2EFE9]/60">
+                {comparacion.promedioDia1.toFixed(1)} →{' '}
+                <span className="text-[#E8962E] font-bold">{comparacion.promedioDia45.toFixed(1)}</span>
+              </span>
+            </div>
+            <p className="text-xs text-[#F2EFE9]/55 mt-1">
+              Mirá y compartí el antes y el después de estos 90 días.
+            </p>
+          </button>
+        )}
+
+        {/* T11 · Los comprobantes de los 10 */}
+        <div className="mb-4">
+          <GraduacionComprobantes userId={userId} />
+        </div>
+
+        {/* T11 · Tu video de graduación */}
+        {GRADUACION_VIDEO_URL ? (
+          <div className="mb-4 rounded-xl overflow-hidden border border-[#E8962E]/20 aspect-video bg-black">
+            <video src={GRADUACION_VIDEO_URL} controls className="w-full h-full" />
+          </div>
+        ) : (
+          <div className="mb-4 rounded-xl border border-[#F2EFE9]/10 bg-[#0F0F0F] p-4 flex items-center gap-2 text-left">
+            <Film className="w-4 h-4 text-[#E8962E]/70 shrink-0" />
+            <p className="text-[11px] text-[#F2EFE9]/45">
+              Tu video de graduación (la palabra de Javo para este momento) aparece acá.
+            </p>
+          </div>
+        )}
+
+        {/* T11 · El Mensaje al Futuro */}
+        <div className="mb-4">
+          <MensajeFuturoPlayer userId={userId} />
+        </div>
+
+        {/* T11 · El Certificado que trabaja */}
+        <button
+          onClick={() => setVerCert(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-[#E8962E]/30 text-[#E8962E] text-xs font-bold uppercase tracking-wider hover:bg-[#E8962E]/10 transition-colors mb-6"
+        >
+          <Award className="w-4 h-4" /> Ver mi certificado de Cinturón Negro
+        </button>
 
         {/* Las dos puertas */}
         <div className="space-y-3 mb-6 text-left">
@@ -101,5 +172,8 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat }: Grad
         </div>
       </div>
     </div>
+    <FotoDia90 open={verFoto} onClose={() => setVerFoto(false)} comparacion={comparacion} nombre={nombre} dia={90} />
+    <CertificadoModal open={verCert} onClose={() => setVerCert(false)} nombre={nombre} metodoNombre={perfil?.metodo_nombre} ventas={ventas} />
+    </>
   );
 }
