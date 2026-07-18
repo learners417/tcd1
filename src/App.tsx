@@ -6,12 +6,17 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
+import CeremoniaCinturon from './components/CeremoniaCinturon';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
 import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
+import Liga from './pages/Liga'; // T10: EL JUEGO
+import Red from './pages/Red'; // T12: LA RED
+import { capturarInviteDeURL, redimirInvitacionPendiente } from './lib/red';
+import { sincronizarArtefactos } from './lib/puenteMCD'; // T13: EL PUENTE MCD
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -53,7 +58,7 @@ function loadProfile(): Profile {
 
 // Páginas válidas — fuente de verdad para validar lo guardado en localStorage
 const VALID_PAGES = [
-  'dashboard', 'roadmap', 'coach', 'metrics',
+  'dashboard', 'roadmap', 'coach', 'metrics', 'liga', 'red',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
   'campanas',
 ] as const;
@@ -139,6 +144,16 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  // T12 · LA RED — captura ?invite= al entrar y lo redime cuando hay sesión.
+  // T13 · EL PUENTE MCD — los artefactos del Camino se instalan solos en Mi Clínica.
+  useEffect(() => {
+    capturarInviteDeURL();
+    if (supabaseProfile?.id) {
+      void redimirInvitacionPendiente();
+      void sincronizarArtefactos(supabaseProfile.id, supabaseProfile);
+    }
+  }, [supabaseProfile?.id]);
   const mainRef = useRef<HTMLElement>(null);
 
   // Password recovery (post-click en mail de reset)
@@ -455,6 +470,7 @@ export default function App() {
         />
       )}
 
+      <CeremoniaCinturon />
       <Sidebar
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -474,6 +490,8 @@ export default function App() {
                 perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'liga' && <Liga userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'red' && <Red userId={supabaseProfile?.id} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
             {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (

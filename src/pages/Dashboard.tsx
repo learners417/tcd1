@@ -8,6 +8,7 @@ import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
+import TableroDirector from '../components/TableroDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 
@@ -300,26 +301,109 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         );
       })()}
 
-      {/* ZONA A — Header contextual */}
-      <div className="relative overflow-hidden card-panel p-8 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8962E]/10 blur-[100px] rounded-full" />
-        <div className="relative z-10">
-          <p className="text-2xl font-light text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-          <p className="text-sm text-[#F2EFE9]/60 max-w-lg mb-6 leading-relaxed">
-            Llevas <strong className="text-[#F2EFE9]/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-[#E8962E]">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-[#E8962E]">una sesión</strong> para acercarte al siguiente.
-          </p>
-          {(() => {
-            try {
-              const saved = localStorage.getItem('tcd_hoja_ruta_v2');
-              const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : []));
-              return null
-            } catch { return null; }
-          })()}
-          <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-[#E8962E] hover:text-[#F4B65C] transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-[#E8962E]/10 px-4 py-2 rounded-lg border border-[#E8962E]/20 w-max">
-            Ver El Camino <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+      {/* ═══ T8 · El tablero del director (desde D29): ROAS vivo + Semáforo D45 ═══ */}
+      {(() => {
+        let fi: string | null = null; let comp = 0; let esperadas = 0;
+        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); fi = p?.fecha_inicio ?? null; } catch { /* noop */ }
+        const dia = fi ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(fi).getTime()) / 86400000) + 1)) : 1;
+        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); comp = saved ? (JSON.parse(saved) as string[]).length : 0; } catch { /* noop */ }
+        for (const pil of SEED_ROADMAP_V2) for (const m of pil.metas ?? []) if ((m.dia_asignado ?? 99) <= dia) esperadas++;
+        return <TableroDirector diaPrograma={dia} completadasCount={comp} metasEsperadas={esperadas} />;
+      })()}
+
+      {/* ═══ EL HERO "HOY" — día honesto · episodio único · un solo botón (T1) ═══ */}
+      {(() => {
+        // ── El día del programa y el atraso (la misma lógica honesta de El Camino) ──
+        let fechaInicio: string | null = null;
+        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); fechaInicio = p?.fecha_inicio ?? null; } catch { /* noop */ }
+        const diaPrograma = fechaInicio
+          ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(fechaInicio).getTime()) / 86400000) + 1))
+          : 1;
+        let completadasSet = new Set<string>();
+        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); if (saved) completadasSet = new Set(JSON.parse(saved)); } catch { /* noop */ }
+        let diaEsperado: number | null = null;
+        let proxima: { pilar: number; meta: RoadmapMeta } | null = null;
+        outer: for (const pil of SEED_ROADMAP_V2) {
+          for (const m of pil.metas ?? []) {
+            if (!completadasSet.has(`${pil.numero}-${m.codigo}`)) {
+              diaEsperado = m.dia_asignado ?? null;
+              proxima = { pilar: pil.numero, meta: m };
+              break outer;
+            }
+          }
+        }
+        let diasAtraso = 0;
+        if (diaEsperado !== null) {
+          for (let d = diaEsperado + 1; d <= diaPrograma; d++) if (!esDiaDescanso(d)) diasAtraso++;
+        }
+        const adelanto = diaEsperado !== null && diaEsperado > diaPrograma ? diaEsperado - diaPrograma : 0;
+        const cinturon = (() => { try { return cinturonDesdeProgreso(completadasSet); } catch { return null; } })();
+        const esHito = !!(proxima?.meta as { estrella?: boolean } | undefined)?.estrella || (proxima?.meta?.titulo ?? '').includes('⭐');
+        const descansoHoy = esDiaDescanso(diaPrograma) && !!proxima;
+        return (
+          <div className="relative overflow-hidden card-panel p-8 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8962E]/10 blur-[100px] rounded-full" />
+            <div className="relative z-10">
+              {/* Saludo + dónde estoy */}
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                <div>
+                  <p className="text-2xl font-light text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
+                  <p className="text-sm mt-1.5">
+                    {diasAtraso <= 0 && adelanto > 0 ? (
+                      <span className="text-[#22C55E] font-medium">Día {diaPrograma} de 90 · vas {adelanto} día{adelanto > 1 ? 's' : ''} adelante 🏆</span>
+                    ) : diasAtraso <= 0 ? (
+                      <span className="text-[#22C55E] font-medium">Día {diaPrograma} de 90 · vas al día ✓</span>
+                    ) : diasAtraso <= 3 ? (
+                      <span className="text-[#E8962E] font-medium">Día {diaPrograma} de 90 · a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo — hoy se recupera</span>
+                    ) : (
+                      <span className="text-[#EF4444] font-medium">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás — hoy lo reacomodamos</span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  {(() => { let mn: string | undefined; try { mn = (JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as Record<string, unknown>)?.metodo_nombre as string | undefined; } catch { mn = undefined; } return mn ? <p className="text-[11px] text-[#E8962E]/90 font-bold uppercase tracking-wider mb-1">Método {mn}™</p> : null; })()}
+                  <p className="text-sm text-[#F2EFE9]/80">{cinturon ? `${cinturon.emoji} Cinturón ${cinturon.nombre}` : '⬜ Cinturón Blanco'}</p>
+                  <p className="text-xs text-[#E8962E] mt-1">Racha: {rachaDB ?? calcularRacha(null)} 🔥</p>
+                </div>
+              </div>
+
+              {/* LA TARJETA ÚNICA — el episodio de hoy */}
+              {descansoHoy ? (
+                <div className="py-10 text-center border border-[#22C55E]/20 rounded-2xl bg-gradient-to-b from-[#22C55E]/[0.06] to-transparent">
+                  <p className="text-4xl mb-3">🌿</p>
+                  <p className="text-base text-[#F2EFE9]/85 font-medium">Día de descanso — el dojo también respira</p>
+                  <p className="text-xs text-[#F2EFE9]/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, tu próxima sesión te espera abajo.</p>
+                  <button onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(proxima?.pilar ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }} className="mt-4 text-[11px] font-bold text-[#E8962E]/70 hover:text-[#E8962E] uppercase tracking-widest transition-colors">Adelantar igual →</button>
+                </div>
+              ) : proxima ? (
+                <button
+                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(proxima!.pilar)); } catch { /* noop */ } setCurrentPage('roadmap'); }}
+                  className="w-full text-left rounded-2xl border-2 border-[#E8962E]/40 bg-gradient-to-br from-[#E8962E]/[0.10] to-transparent p-6 hover:border-[#E8962E]/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">▶ Tu episodio de hoy{esHito ? ' · ⭐ SESIÓN-HITO' : ''}</p>
+                  <p className="text-2xl font-medium text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{proxima.meta.titulo.replace('⭐', '').trim()}</p>
+                  <p className="text-xs text-[#F2EFE9]/50 mb-5">{proxima.meta.tiempo_estimado ?? '30–45 min'}{esHito ? ' · pide más tiempo — vale por diez' : ''}</p>
+                  <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E8962E] text-black text-sm font-bold group-hover:bg-[#F4B65C] transition-colors">ENTRAR →</span>
+                </button>
+              ) : (
+                <div className="py-10 text-center border border-[#22C55E]/25 rounded-2xl bg-gradient-to-b from-[#22C55E]/[0.06] to-transparent">
+                  <p className="text-4xl mb-3">⬛</p>
+                  <p className="text-base text-[#F2EFE9]/90 font-medium">El Camino está completo.</p>
+                  <p className="text-xs text-[#F2EFE9]/50 mt-2">Tu clínica sigue en Mi Clínica — tu casa permanente.</p>
+                </div>
+              )}
+
+              {/* La línea de hitos del camino (la expectativa honesta) */}
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-[#F2EFE9]/45">
+                <span className={diaPrograma >= 29 ? 'text-[#22C55E]/80' : ''}>🚀 Campaña: día 29</span>
+                <span className={diaPrograma >= 42 ? 'text-[#22C55E]/80' : ''}>💰 Primera venta: ~día 42</span>
+                <span>🏆 Los 10 pacientes: día 90</span>
+                <button onClick={() => setCurrentPage('roadmap')} className="ml-auto text-[#F2EFE9]/35 hover:text-[#E8962E] uppercase font-bold tracking-wider transition-colors">Ver el mapa completo →</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ZONA A2 — EL VISUALBOARD · lo que quieres lograr, tildándose solo */}
       {(() => {
@@ -441,27 +525,13 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         {/* Foco de Hoy (60%) */}
         <div className="lg:col-span-7 card-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase">Tu sesión de hoy</h2>
+            <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase">También hoy</h2>
             <button onClick={() => setCurrentPage('roadmap')} className="text-[10px] text-[#F2EFE9]/40 hover:text-[#E8962E] uppercase font-bold tracking-wider transition-colors">
               Ir a tareas →
             </button>
           </div>
 
           <div className="space-y-3">
-            {(() => {
-              // Día de descanso del programa: el dojo respira
-              const diaProg = (() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })();
-              if (esDiaDescanso(diaProg) && data.tareasHoy.length > 0) {
-                return (
-                  <div className="py-12 text-center border border-[#22C55E]/20 rounded-2xl bg-gradient-to-b from-[#22C55E]/[0.06] to-transparent">
-                    <p className="text-4xl mb-3">🌿</p>
-                    <p className="text-base text-[#F2EFE9]/85 font-medium">Día de descanso — el dojo también respira</p>
-                    <p className="text-xs text-[#F2EFE9]/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
-                  </div>
-                );
-              }
-              return null;
-            })()}
             {data.tareasHoy.length === 0 ? (
               <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-[#1A1917]/30">
                 <CheckCircle2 className="w-8 h-8 text-[#22C55E]/50 mx-auto mb-3" />
@@ -470,18 +540,6 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               </div>
             ) : (
               <>
-              {/* LA SESIÓN DE HOY — el hero del dojo */}
-              {data.tareasHoy[0] && (
-                <button
-                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
-                  className="w-full text-left rounded-2xl border-2 border-[#E8962E]/40 bg-gradient-to-br from-[#E8962E]/[0.10] to-transparent p-6 hover:border-[#E8962E]/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">▶ Tu sesión de hoy</p>
-                  <p className="text-xl font-medium text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
-                  <p className="text-xs text-[#F2EFE9]/50 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
-                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E8962E] text-black text-sm font-bold group-hover:bg-[#F4B65C] transition-colors">COMENZAR →</span>
-                </button>
-              )}
               {data.tareasHoy.slice(1).map((t, idx) => (
               <div
                 key={idx}

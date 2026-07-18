@@ -65,6 +65,9 @@ import TaskVideo from '../components/tasks/TaskVideo';
 import TaskHerramientaIA from '../components/tasks/TaskHerramientaIA';
 import TaskCoach from '../components/tasks/TaskCoach';
 import SesionViva from '../components/sesion/SesionViva';
+import EpisodioOverlay from '../components/sesion/EpisodioOverlay';
+import SesionPasos from '../components/sesion/SesionPasos';
+import { sesionGuiadaDe } from '../lib/sesionesGuiadas';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
 import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
@@ -529,7 +532,18 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       if (flag) {
         localStorage.removeItem('tcd_abrir_pilar');
         const n = parseInt(flag, 10);
-        if (!Number.isNaN(n) && n > 0) { setPilarAbierto(n); return; }
+        if (!Number.isNaN(n) && n > 0) {
+          setPilarAbierto(n);
+          // T2: ENTRAR desde Hoy abre el episodio directamente
+          try {
+            const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+            const comp = new Set<string>(saved ? JSON.parse(saved) : []);
+            const pil = pilaresConEstado.find(p => p.numero === n);
+            const m = (pil?.metas ?? []).find(mm => !comp.has(`${n}-${mm.codigo}`));
+            if (m && (m.tipo === 'HERRAMIENTA' || m.tipo === 'COACH')) setActiveMeta(m.codigo);
+          } catch { /* noop */ }
+          return;
+        }
       }
     } catch { /* noop */ }
     if (loading || pilarAbierto !== null) return;
@@ -1249,7 +1263,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
+                        {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (() => {
+                          const nucleo = (
                           <SesionViva
                             metaKey={key}
                             metaCodigo={meta.codigo}
@@ -1282,7 +1297,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {meta.tipo === 'HERRAMIENTA' && meta.codigo !== 'P0.2' && meta.codigo !== 'P8.8' && (
+                        {meta.tipo === 'HERRAMIENTA' && meta.codigo !== 'P0.2' && meta.codigo !== 'P8.8' && !sesionGuiadaDe(meta.codigo) && (
                           <TaskHerramientaIA
                             meta={meta}
                             perfil={perfil}
@@ -1292,16 +1307,52 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {meta.tipo === 'COACH' && (
+                        {(meta.tipo === 'COACH' || (meta.tipo === 'HERRAMIENTA' && sesionGuiadaDe(meta.codigo))) && (() => {
+                          // T3-T5 · El conversor: sesiones guiadas paso a paso (IA propone, él firma).
+                          const guiada = sesionGuiadaDe(meta.codigo);
+                          if (guiada) {
+                            return (
+                              <SesionPasos
+                                sesion={guiada}
+                                perfil={perfil}
+                                userId={userId}
+                                isCompleted={estaCompletada}
+                                onFirmar={(tituloArt, texto) => handleSaveADN(pilar.numero, meta, `## ${tituloArt}\n\n${texto}`)}
+                                onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                              />
+                            );
+                          }
+                          return (
                           <TaskCoach
                             meta={meta}
                             onComplete={() => handleCompleteTask(pilar.numero, meta)}
                             isCompleted={estaCompletada}
                             onNavigateToCoach={() => onNavigate?.('coach')}
                           />
-                        )}
+                          );
+                        })()}
                           </SesionViva>
-                        )}
+                          );
+                          // T2 · El Episodio: pantalla completa para el trabajo real.
+                          // Metas ya completadas se revisan inline, sin ritual.
+                          if (estaCompletada) return nucleo;
+                          return (
+                            <EpisodioOverlay
+                              metaKey={key}
+                              metaCodigo={meta.codigo}
+                              metaTitulo={meta.titulo}
+                              descripcion={meta.descripcion}
+                              tiempoEstimado={meta.tiempo_estimado}
+                              diaAsignado={meta.dia_asignado}
+                              esHito={!!meta.es_estrella}
+                              isCompleted={estaCompletada}
+                              completadas={completadas}
+                              onClose={() => setActiveMeta(null)}
+                            >
+                              {nucleo}
+                            </EpisodioOverlay>
+                          );
+                        })()}
                       
                         <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
                       </div>
@@ -1368,6 +1419,9 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           ventas={ventas.length}
           onClose={() => setGraduacionVisible(false)}
           onIrAlChat={() => onNavigate?.('coach')}
+          userId={userId}
+          perfil={perfil}
+          comparacion={comparacionDia45}
         />
       )}
 

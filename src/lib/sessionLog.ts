@@ -67,6 +67,8 @@ export interface SesionEnCurso {
   iniciadaEn: string; // ISO
   /** id del session_log en Supabase si ya se creó el borrador. */
   logId?: string;
+  /** Modo 15 minutos: el día corto que mantiene la racha (T2 · idea #7). */
+  modoCorto?: boolean;
 }
 
 // ── Parser del tiempo estimado ("1 h" · "45 min" · "1.5 h" · "5 días…") ──

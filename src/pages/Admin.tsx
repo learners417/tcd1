@@ -339,6 +339,8 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 // ─── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────────
 
+// T9
+import DetectorHumo from '../components/DetectorHumo';
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
   const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas'];
@@ -1701,6 +1703,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
               <h1 className="text-sm font-semibold text-[#F2EFE9] tracking-wide truncate">Tu Clinica Digital</h1>
+        <DetectorHumo />
               <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-bold">Admin</p>
             </div>
           </div>
