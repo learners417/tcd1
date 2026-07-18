@@ -58,7 +58,7 @@ export default async function handler(req: any, res: any) {
   if (error) {
     if (error.message.toLowerCase().includes('already')) {
       const { data: list } = await admin.auth.admin.listUsers()
-      const existente = list?.users.find(u => u.email === email)
+      const existente = (list?.users as Array<{ id: string; email?: string }> | undefined)?.find(u => u.email === email)
       if (existente) return res.json({ user_id: existente.id, password: '(ya existía)', existia: true })
     }
     return res.status(400).json({ error: error.message })
