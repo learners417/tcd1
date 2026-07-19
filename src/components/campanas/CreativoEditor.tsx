@@ -205,8 +205,8 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Move className="w-4 h-4 text-cream/30" />
-          <span className="text-xs text-cream/40">Arrastra los elementos para moverlos</span>
+          <Move className="w-4 h-4 text-cream/45" />
+          <span className="text-xs text-cream/55">Arrastra los elementos para moverlos</span>
         </div>
         <button
           onClick={handleExport}
@@ -232,7 +232,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
         {/* Properties panel */}
         <div className="space-y-4">
           <div className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-4 space-y-4">
-            <h4 className="text-xs font-medium text-cream/60 uppercase tracking-wider">Elementos</h4>
+            <h4 className="text-xs font-medium text-cream/75 uppercase tracking-wider">Elementos</h4>
             {elements.map((el) => (
               <button
                 key={el.id}
@@ -240,7 +240,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                   selectedId === el.id
                     ? 'bg-gold/10 text-gold border border-gold/30'
-                    : 'text-cream/50 hover:bg-cream/5'
+                    : 'text-cream/65 hover:bg-cream/5'
                 }`}
               >
                 <Type className="w-3 h-3 inline mr-2" />
@@ -251,10 +251,10 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
 
           {selected && (
             <div className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-4 space-y-3">
-              <h4 className="text-xs font-medium text-cream/60 uppercase tracking-wider">Propiedades</h4>
+              <h4 className="text-xs font-medium text-cream/75 uppercase tracking-wider">Propiedades</h4>
 
               <div>
-                <label className="text-[10px] text-cream/30 mb-1 block">Texto</label>
+                <label className="text-[11px] text-cream/45 mb-1 block">Texto</label>
                 <textarea
                   value={selected.text}
                   onChange={(e) => updateElement(selected.id, { text: e.target.value })}
@@ -264,7 +264,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
               </div>
 
               <div>
-                <label className="text-[10px] text-cream/30 mb-1 block">Tamano</label>
+                <label className="text-[11px] text-cream/45 mb-1 block">Tamano</label>
                 <input
                   type="range"
                   min={16}
@@ -273,11 +273,11 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
                   onChange={(e) => updateElement(selected.id, { fontSize: Number(e.target.value) })}
                   className="w-full accent-gold"
                 />
-                <span className="text-[10px] text-cream/30">{selected.fontSize}px</span>
+                <span className="text-[11px] text-cream/45">{selected.fontSize}px</span>
               </div>
 
               <div>
-                <label className="text-[10px] text-cream/30 mb-1 block">Color</label>
+                <label className="text-[11px] text-cream/45 mb-1 block">Color</label>
                 <div className="flex gap-1.5">
                   {COLORS.map((c) => (
                     <button
@@ -292,7 +292,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-xs text-cream/50 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-cream/65 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selected.shadow}
@@ -303,7 +303,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
               </label>
 
               <div>
-                <label className="text-[10px] text-cream/30 mb-1 block">Peso</label>
+                <label className="text-[11px] text-cream/45 mb-1 block">Peso</label>
                 <div className="flex gap-1.5">
                   {['normal', 'bold'].map((w) => (
                     <button
@@ -312,7 +312,7 @@ export default function CreativoEditor({ image, copy, slideIndex, onExport }: Pr
                       className={`px-3 py-1 rounded text-xs transition-all ${
                         selected.fontWeight === w
                           ? 'bg-gold/15 text-gold'
-                          : 'bg-cream/5 text-cream/30'
+                          : 'bg-cream/5 text-cream/45'
                       }`}
                       style={{ fontWeight: w }}
                     >

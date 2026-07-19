@@ -7,7 +7,7 @@ export default function ElCaminoView() {
         <h2 className="text-2xl md:text-3xl mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Lo mínimo indispensable <span style={{ color: '#E8962E' }}>para activar</span>
         </h2>
-        <p className="text-sm text-cream/60 max-w-2xl leading-relaxed">
+        <p className="text-sm text-cream/75 max-w-2xl leading-relaxed">
           Sin cada uno de estos pasos resueltos, prender Meta Ads es quemar plata. No hay extras
           acá — solo lo que tiene que existir y funcionar.
         </p>

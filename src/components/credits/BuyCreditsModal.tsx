@@ -198,14 +198,14 @@ export default function BuyCreditsModal({
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Comprar créditos</h2>
-              <p className="text-xs text-white/50 mt-0.5">
+              <p className="text-xs text-white/65 mt-0.5">
                 1 crédito = 1 imagen generada
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+            className="rounded-lg p-2 text-white/55 hover:bg-white/5 hover:text-white transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -224,7 +224,7 @@ export default function BuyCreditsModal({
               </span>
             </div>
             {credits && (
-              <div className="mt-3 flex items-center justify-between text-xs text-white/50">
+              <div className="mt-3 flex items-center justify-between text-xs text-white/65">
                 <span>
                   {currentBalance.monthlyRemaining} del plan mensual
                   {' '}
@@ -275,17 +275,17 @@ export default function BuyCreditsModal({
                             <Check className="h-3 w-3 text-black" strokeWidth={3} />
                           </div>
                         )}
-                        <div className="text-xs uppercase tracking-wider text-white/40 font-medium mb-2">
+                        <div className="text-xs uppercase tracking-wider text-white/55 font-medium mb-2">
                           {pack.label}
                         </div>
                         <div className="text-3xl font-bold text-white mb-1">
                           {pack.credits}
-                          <span className="text-sm font-normal text-white/50 ml-1">créditos</span>
+                          <span className="text-sm font-normal text-white/65 ml-1">créditos</span>
                         </div>
                         <div className="text-xl font-bold text-gold">
                           ${pack.price_usd.toFixed(2)}
                         </div>
-                        <div className="text-[11px] text-white/40 mt-1">
+                        <div className="text-[11px] text-white/55 mt-1">
                           ${pricePerCredit.toFixed(3)} / crédito
                         </div>
                       </button>
@@ -309,7 +309,7 @@ export default function BuyCreditsModal({
                   )}
 
                   {paypalLoading && (
-                    <div className="flex items-center gap-2 text-sm text-white/50 py-3">
+                    <div className="flex items-center gap-2 text-sm text-white/65 py-3">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Cargando PayPal...
                     </div>
@@ -325,7 +325,7 @@ export default function BuyCreditsModal({
                   <div ref={paypalContainerRef} className={processing ? 'opacity-50 pointer-events-none' : ''} />
 
                   {PAYPAL_ENV === 'sandbox' && (
-                    <div className="mt-3 text-[11px] text-white/40 text-center">
+                    <div className="mt-3 text-[11px] text-white/55 text-center">
                       Modo sandbox · usá una cuenta de prueba de PayPal Developer
                     </div>
                   )}

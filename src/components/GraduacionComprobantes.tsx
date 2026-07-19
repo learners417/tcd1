@@ -30,7 +30,7 @@ export default function GraduacionComprobantes({ userId }: { userId?: string }) 
     <div className="rounded-xl border border-cream/10 bg-[#0F0F0F] p-4 text-left">
       <div className="flex items-center gap-2 mb-3">
         <Receipt className="w-4 h-4 text-gold" />
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gold">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
           Tus comprobantes{items.length > 0 ? ` · ${items.length}` : ''}
         </p>
       </div>
@@ -53,7 +53,7 @@ export default function GraduacionComprobantes({ userId }: { userId?: string }) 
                 href={c.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center aspect-square rounded-lg border border-gold/20 bg-gold/[0.06] text-[9px] text-gold/70 text-center px-1"
+                className="flex items-center justify-center aspect-square rounded-lg border border-gold/20 bg-gold/[0.06] text-[11px] text-gold/70 text-center px-1"
               >
                 comprobante
               </a>
@@ -61,7 +61,7 @@ export default function GraduacionComprobantes({ userId }: { userId?: string }) 
           )}
         </div>
       ) : (
-        <p className="text-xs text-cream/50 leading-relaxed">
+        <p className="text-xs text-cream/65 leading-relaxed">
           {cargando
             ? 'Buscando tus comprobantes…'
             : 'Acá se juntan los comprobantes de los 10 que cargaste en el Camino. Cada pago que registraste, en un solo lugar.'}

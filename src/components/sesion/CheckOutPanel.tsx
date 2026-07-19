@@ -42,9 +42,9 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
-        <p className="text-xs text-white/40 mt-1">
+        <p className="text-xs text-white/55 mt-1">
           Trabajaste {formatoCrono(duracionSeg)}{entrada ? <> · llegaste {entrada.emoji} {entrada.label.toLowerCase()}</> : null}.
           {' '}Lo que se abre, se cierra.
         </p>
@@ -73,7 +73,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
 
       <div>
         <p className="text-sm font-semibold text-white mb-1">Compromisos para la próxima</p>
-        <p className="text-xs text-white/40 mb-2">Concretos y chiquitos. Lo que prometés acá, tu mentor lo recuerda.</p>
+        <p className="text-xs text-white/55 mb-2">Concretos y chiquitos. Lo que prometés acá, tu mentor lo recuerda.</p>
         <div className="space-y-2">
           {compromisos.map((c, i) => (
             <div key={i} className="flex gap-2">
@@ -91,7 +91,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
                 <button
                   type="button"
                   onClick={() => setCompromisos(compromisos.filter((_, j) => j !== i))}
-                  className="px-2 text-white/40 hover:text-white/80"
+                  className="px-2 text-white/55 hover:text-white/80"
                   aria-label="Quitar compromiso"
                 >
                   <X className="w-4 h-4" />
@@ -103,7 +103,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
             <button
               type="button"
               onClick={() => setCompromisos([...compromisos, ''])}
-              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80"
+              className="flex items-center gap-1.5 text-xs text-white/65 hover:text-white/80"
             >
               <Plus className="w-3.5 h-3.5" /> Agregar otro
             </button>
@@ -113,7 +113,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
 
       {esViernes && (
         <div className="mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🪞 El Espejo del viernes</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🪞 El Espejo del viernes</p>
           <p className="text-xs text-white/45 mb-2">Una línea para tu Diario del Fundador — la semana en una frase:</p>
           <textarea value={diario} onChange={(e) => setDiario(e.target.value)} rows={2}
             placeholder="Esta semana yo…"

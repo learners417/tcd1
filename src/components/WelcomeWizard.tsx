@@ -179,14 +179,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <LockKeyhole className="w-5 h-5 text-ink" />
               </div>
               <h1 className="text-2xl font-semibold text-cream mb-2">Hola, {nombreCorto}</h1>
-              <p className="text-sm text-cream/60 leading-relaxed">
+              <p className="text-sm text-cream/75 leading-relaxed">
                 Para empezar, elige una contraseña personal. La contraseña temporal que te enviamos ya no va a funcionar después de esto.
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">Nueva contraseña</label>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Nueva contraseña</label>
                 <div className="relative">
                   <input
                     type={showPwd ? 'text' : 'password'}
@@ -198,14 +198,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   <button
                     type="button"
                     onClick={() => setShowPwd(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/80 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/80 transition-colors"
                   >
                     {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">Confirmar contraseña</label>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Confirmar contraseña</label>
                 <input
                   type={showPwd ? 'text' : 'password'}
                   value={confirmPassword}
@@ -230,7 +230,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                     <div key={i} className={`h-1 w-8 rounded-full transition-colors ${newPassword.length >= i * 4 ? 'bg-success' : 'bg-gold/10'}`} />
                   ))}
                 </div>
-                <span className="text-[10px] text-cream/40">
+                <span className="text-[11px] text-cream/55">
                   {newPassword.length < 4 ? 'Muy corta' : newPassword.length < 8 ? 'Casi...' : <span className="flex items-center gap-0.5">Lista <CheckCircle2 className="w-3 h-3 text-success inline" /></span>}
                 </span>
               </div>
@@ -254,14 +254,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <UserCircle className="w-5 h-5 text-ink" />
               </div>
               <h1 className="text-2xl font-semibold text-cream mb-2">Cuéntanos sobre ti</h1>
-              <p className="text-sm text-cream/60 leading-relaxed">
+              <p className="text-sm text-cream/75 leading-relaxed">
                 Esta info le sirve a tu acompañante para conocerte mejor desde el día 1 y que el Mentor IA te dé respuestas más precisas.
               </p>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">¿Cuál es tu profesión?</label>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">¿Cuál es tu profesión?</label>
                 <div className="flex flex-wrap gap-2">
                   {ESPECIALIDADES.map(esp => (
                     <button
@@ -271,7 +271,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                         especialidad === esp
                           ? 'bg-gold/20 text-gold border border-gold/40'
-                          : 'bg-panel text-cream/60 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)] hover:text-cream/90'
+                          : 'bg-panel text-cream/75 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)] hover:text-cream/90'
                       }`}
                     >
                       {esp}
@@ -291,8 +291,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">
-                  ¿Desde qué país trabajas? <span className="text-cream/30 normal-case font-normal">(la IA adapta el tono de las respuestas y de tu contenido)</span>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">
+                  ¿Desde qué país trabajas? <span className="text-cream/45 normal-case font-normal">(la IA adapta el tono de las respuestas y de tu contenido)</span>
                 </label>
                 <CustomSelect
                   value={pais}
@@ -303,8 +303,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">
-                  ¿Cómo está tu energía hoy? <span className="text-cream/30 normal-case font-normal">(1 = agotado/a · 10 = con todo)</span>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">
+                  ¿Cómo está tu energía hoy? <span className="text-cream/45 normal-case font-normal">(1 = agotado/a · 10 = con todo)</span>
                 </label>
                 <div className="flex items-center gap-1.5">
                   {[1,2,3,4,5,6,7,8,9,10].map(n => (
@@ -315,7 +315,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
                         n <= energia
                           ? 'bg-amber-500 text-ink shadow-sm shadow-amber-500/30'
-                          : 'bg-panel text-cream/30 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'
+                          : 'bg-panel text-cream/45 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'
                       }`}
                     >
                       {n}
@@ -325,8 +325,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">
-                  ¿Cuál es tu mayor frustración hoy en tu práctica? <span className="text-cream/30 normal-case font-normal">(opcional)</span>
+                <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">
+                  ¿Cuál es tu mayor frustración hoy en tu práctica? <span className="text-cream/45 normal-case font-normal">(opcional)</span>
                 </label>
                 <textarea
                   value={frustracion}
@@ -335,12 +335,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   rows={3}
                   className="w-full bg-black/40 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
-                <p className="text-[10px] text-cream/30 mt-1.5">Tu coach va a leer esto para entenderte desde el inicio.</p>
+                <p className="text-[11px] text-cream/45 mt-1.5">Tu coach va a leer esto para entenderte desde el inicio.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">Ingreeres mensuales (USD)</label>
+                  <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Ingreeres mensuales (USD)</label>
                   <input
                     type="number"
                     value={ingresosMensuales}
@@ -350,7 +350,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-cream/60 uppercase tracking-wider mb-2">Horas/semana</label>
+                  <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Horas/semana</label>
                   <input
                     type="number"
                     value={horasSemana}
@@ -365,7 +365,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setStep('welcome')}
-                className="px-5 py-3 rounded-xl text-sm text-cream/40 hover:text-cream/80 transition-colors"
+                className="px-5 py-3 rounded-xl text-sm text-cream/55 hover:text-cream/80 transition-colors"
               >
                 Saltar
               </button>
@@ -384,7 +384,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'diagnostico' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Siete preguntas — la semilla de tu ADN</h2>
               <p className="text-sm text-cream/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
             </div>
@@ -485,7 +485,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div key={item.label} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4">
                   <div className="mb-2"><item.icon className="w-6 h-6 text-gold" /></div>
                   <p className="text-xs font-semibold text-cream mb-1">{item.label}</p>
-                  <p className="text-[10px] text-cream/40">{item.desc}</p>
+                  <p className="text-[11px] text-cream/55">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -506,7 +506,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div className="text-center mb-6">
               <p className="text-4xl mb-3">🥋</p>
               <h1 className="text-2xl font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El Pacto</h1>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
+              <p className="text-[11px] uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
             </div>
 
             <div className="rounded-2xl border border-cream/10 bg-[#0F0F0F] p-5 mb-5">
@@ -523,7 +523,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </p>
             </div>
 
-            <label className="text-[10px] uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
+            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
             <textarea
               value={pactoTexto}
               onChange={(e) => setPactoTexto(e.target.value)}
@@ -531,7 +531,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               placeholder="Hago este camino porque…"
               className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none resize-none"
             />
-            <label className="text-[10px] uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
+            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
             <input
               value={pactoFirma}
               onChange={(e) => setPactoFirma(e.target.value)}
@@ -552,7 +552,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             >
               FIRMO MI PACTO
             </button>
-            <p className="text-[10px] text-cream/30 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
+            <p className="text-[11px] text-cream/45 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
           </div>
         )}
 
@@ -564,7 +564,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <Rocket className="w-5 h-5 text-cream" />
               </div>
               <h1 className="text-xl font-semibold text-cream mb-2">¿Por dónde empezar?</h1>
-              <p className="text-sm text-cream/60">Estos son tus primeros 3 pasos concretos:</p>
+              <p className="text-sm text-cream/75">Estos son tus primeros 3 pasos concretos:</p>
             </div>
 
             <div className="space-y-3 mb-8">
@@ -625,9 +625,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       <item.icon className={`w-4 h-4 ${item.styles.iconColor}`} />
                     </div>
                     <div className="flex-1">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
+                      <span className={`text-[11px] font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
                       <p className={`text-sm font-semibold mb-0.5 mt-0.5 ${item.styles.title}`}>{item.title}</p>
-                      <p className="text-xs text-cream/40 leading-relaxed">{item.desc}</p>
+                      <p className="text-xs text-cream/55 leading-relaxed">{item.desc}</p>
                     </div>
                     <ArrowRight className={`w-4 h-4 transition-colors shrink-0 mt-2 ${item.styles.arrow}`} />
                   </div>
@@ -637,7 +637,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
             <button
               onClick={() => handleComplete('dashboard')}
-              className="w-full py-3 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 text-cream/60 hover:text-cream text-sm font-medium transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 text-cream/75 hover:text-cream text-sm font-medium transition-all flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4" /> Ir al dashboard primero
             </button>

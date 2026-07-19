@@ -93,10 +93,10 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
               )}
               <div>
                 <p className="text-xs font-bold text-cream uppercase tracking-wider">{tecnica ? 'Asistente Técnico' : 'Tu Mentor'}</p>
-                <p className="text-[10px] text-white/35 truncate max-w-[230px]">{tecnica ? 'Paso a paso, sin drama' : 'Te destraba — no te lo hace'}</p>
+                <p className="text-[11px] text-white/35 truncate max-w-[230px]">{tecnica ? 'Paso a paso, sin drama' : 'Te destraba — no te lo hace'}</p>
               </div>
             </div>
-            <button type="button" onClick={() => setAbierto(false)} className="text-white/40 hover:text-white/80 transition-colors"><X className="w-5 h-5" /></button>
+            <button type="button" onClick={() => setAbierto(false)} className="text-white/55 hover:text-white/80 transition-colors"><X className="w-5 h-5" /></button>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
@@ -115,13 +115,13 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
                 {m.content}
               </div>
             ))}
-            {cargando && <div className="flex items-center gap-2 text-white/40 text-xs px-2"><Loader2 className="w-3.5 h-3.5 animate-spin" /> escribiendo…</div>}
+            {cargando && <div className="flex items-center gap-2 text-white/55 text-xs px-2"><Loader2 className="w-3.5 h-3.5 animate-spin" /> escribiendo…</div>}
             <div ref={endRef} />
           </div>
 
           <div className="p-3 border-t border-white/[0.06] shrink-0">
             {msgs.filter((m) => m.role === 'user').length >= MAX_TURNOS ? (
-              <p className="text-[11px] text-white/40 text-center py-1.5">Para seguir en profundidad, tu Mentor completo te espera en su sala — este panel es para destrabar y volver a la sesión. 🥋</p>
+              <p className="text-[11px] text-white/55 text-center py-1.5">Para seguir en profundidad, tu Mentor completo te espera en su sala — este panel es para destrabar y volver a la sesión. 🥋</p>
             ) : (
               <div className="flex gap-2">
                 <input

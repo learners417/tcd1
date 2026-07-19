@@ -53,7 +53,7 @@ export default function WizardStepGuia({ form, perfil, geminiKey, userId, guia, 
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-cream mb-1">Guia de Configuracion</h3>
-        <p className="text-sm text-cream/50">
+        <p className="text-sm text-cream/65">
           La IA genera un paso a paso detallado para configurar tu campana en Meta Ads Manager
         </p>
       </div>
@@ -63,7 +63,7 @@ export default function WizardStepGuia({ form, perfil, geminiKey, userId, guia, 
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
             <Sparkles className="w-8 h-8 text-gold" />
           </div>
-          <p className="text-cream/60 mb-6 text-sm">
+          <p className="text-cream/75 mb-6 text-sm">
             Genera la guia personalizada basada en tu campana y perfil
           </p>
           <button onClick={generateGuia} className="btn-primary inline-flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function WizardStepGuia({ form, perfil, geminiKey, userId, guia, 
       {generating && !guia && (
         <div className="text-center py-12">
           <Loader2 className="w-8 h-8 text-gold animate-spin mx-auto mb-4" />
-          <p className="text-cream/60 text-sm">Generando guia personalizada...</p>
+          <p className="text-cream/75 text-sm">Generando guia personalizada...</p>
         </div>
       )}
 
@@ -84,13 +84,13 @@ export default function WizardStepGuia({ form, perfil, geminiKey, userId, guia, 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {generating && <Loader2 className="w-4 h-4 text-gold animate-spin" />}
-              <span className="text-xs text-cream/40">{generating ? 'Generando...' : 'Guia generada'}</span>
+              <span className="text-xs text-cream/55">{generating ? 'Generando...' : 'Guia generada'}</span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleCopy}
                 disabled={generating}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-cream/60 hover:text-cream bg-cream/5 hover:bg-cream/10 transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-cream/75 hover:text-cream bg-cream/5 hover:bg-cream/10 transition-colors disabled:opacity-40"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? 'Copiado' : 'Copiar'}

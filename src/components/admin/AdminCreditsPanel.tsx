@@ -100,7 +100,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs uppercase tracking-wider text-white/40 mb-1">
+          <div className="text-xs uppercase tracking-wider text-white/55 mb-1">
             Gestión de créditos
           </div>
           <div className="text-lg font-semibold text-white">
@@ -109,7 +109,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
         </div>
         <button
           onClick={refresh}
-          className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+          className="rounded-lg p-2 text-white/55 hover:bg-white/5 hover:text-white transition-colors"
           title="Refrescar"
         >
           <RefreshCw className="h-4 w-4" />
@@ -120,25 +120,25 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
       <div className="rounded-xl border border-gold/20 bg-gold/5 p-5">
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs text-white/50 mb-1">
+            <div className="flex items-center gap-2 text-xs text-white/65 mb-1">
               <Coins className="h-3 w-3" /> Total
             </div>
             <div className="text-2xl font-bold text-gold">{balance.total}</div>
           </div>
           <div>
-            <div className="text-xs text-white/50 mb-1">Plan mensual</div>
+            <div className="text-xs text-white/65 mb-1">Plan mensual</div>
             <div className="text-2xl font-bold text-white">
               {balance.monthlyRemaining}
-              <span className="text-sm text-white/40 font-normal"> / {credits?.monthly_quota ?? 0}</span>
+              <span className="text-sm text-white/55 font-normal"> / {credits?.monthly_quota ?? 0}</span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-white/50 mb-1">Comprados</div>
+            <div className="text-xs text-white/65 mb-1">Comprados</div>
             <div className="text-2xl font-bold text-white">{balance.topup}</div>
           </div>
         </div>
         {credits && (
-          <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-white/40">
+          <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-white/55">
             Período: {new Date(credits.quota_period_start).toLocaleDateString('es-AR')}
             {' → '}
             {new Date(credits.quota_period_end).toLocaleDateString('es-AR')}
@@ -196,7 +196,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
         <div className="text-sm font-semibold text-white">
           Quota mensual del plan
         </div>
-        <div className="text-xs text-white/50">
+        <div className="text-xs text-white/65">
           Por defecto 150. Subila para clientes VIP. Bajarla afecta el período actual.
         </div>
         <div className="flex gap-2">

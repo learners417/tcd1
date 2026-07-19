@@ -44,20 +44,20 @@ function Fila({ titulo, icon, items, activos, master, onToggle }: {
 
   return (
     <div className="flex items-start gap-3 py-2 border-b border-[rgba(232,150,46,0.06)] last:border-0">
-      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[10px] font-bold text-cream/40 uppercase tracking-wider">
+      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
         {icon}{titulo}
       </div>
       <div className="flex flex-wrap gap-1">
         {master && (
           <button onClick={() => toggle(master)}
-            className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all ${
+            className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
               allOn ? 'bg-gold text-black border-gold' : 'border-[rgba(232,150,46,0.25)] text-gold/60 hover:text-gold'}`}>
             {master === 'todas' ? 'Todas' : 'Todos'}
           </button>
         )}
         {items.map((it) => (
           <button key={it.id} onClick={() => toggle(it.id)} disabled={allOn}
-            className={`px-2 py-0.5 rounded-md text-[10px] border transition-all disabled:opacity-40 ${
+            className={`px-2 py-0.5 rounded-md text-[11px] border transition-all disabled:opacity-40 ${
               isOn(it.id) ? 'bg-gold/15 text-gold border-gold/30' : 'border-cream/10 text-cream/35 hover:text-cream/70'}`}>
             {it.label}
           </button>
@@ -98,10 +98,10 @@ export default function AdnPermisosControl({ clienteId, agentesActuales, modulos
   return (
     <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl px-4 py-3">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] font-bold text-cream/40 uppercase tracking-wider">Accesos del cliente</p>
+        <p className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">Accesos del cliente</p>
         <button onClick={guardar} disabled={saving || !dirty}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${
-            dirty ? 'bg-gold text-black hover:bg-goldhi' : 'bg-cream/5 text-cream/30'} disabled:opacity-60`}>
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+            dirty ? 'bg-gold text-black hover:bg-goldhi' : 'bg-cream/5 text-cream/45'} disabled:opacity-60`}>
           {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
           {saving ? 'Guardando' : dirty ? 'Guardar' : 'Guardado'}
         </button>

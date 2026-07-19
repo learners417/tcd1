@@ -22,11 +22,11 @@ export default function TaskAgente({ meta, onComplete, isCompleted, onNavigateTo
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/25 tracking-wider">
+          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/25 tracking-wider">
             AGENTE
           </span>
           {checked && (
-            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Completado
             </span>
           )}
@@ -34,12 +34,12 @@ export default function TaskAgente({ meta, onComplete, isCompleted, onNavigateTo
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
       </div>
 
       {/* Instruction */}
       <div className="card-panel p-5 border border-purple-500/15 bg-purple-500/[0.03]">
-        <p className="text-[10px] text-purple-400 uppercase tracking-widest font-bold mb-3">
+        <p className="text-[11px] text-purple-400 uppercase tracking-widest font-bold mb-3">
           Instrucción
         </p>
         <p className="text-sm text-cream/80 leading-relaxed">

@@ -174,7 +174,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
   };
 
   if (isCompleted) {
-    return <p className="text-sm text-white/50 text-center py-6">Sesión completada ✓ — tu artefacto vive en tu ADN del Negocio.</p>;
+    return <p className="text-sm text-white/65 text-center py-6">Sesión completada ✓ — tu artefacto vive en tu ADN del Negocio.</p>;
   }
   if (!paso) return null;
 
@@ -184,7 +184,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
       {pasos.map((_, i) => (
         <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < idx ? 'bg-success' : i === idx ? 'bg-gold' : 'bg-white/10'}`} />
       ))}
-      {modoCorto && <span className="text-[9px] text-gold font-bold uppercase ml-2 shrink-0">🕐 modo 15</span>}
+      {modoCorto && <span className="text-[11px] text-gold font-bold uppercase ml-2 shrink-0">🕐 modo 15</span>}
     </div>
   );
 
@@ -196,7 +196,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
       {paso.tipo === 'intro' && (
         <div className="text-center py-4">
           <h3 className="text-2xl font-light text-cream mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{paso.titulo}</h3>
-          <p className="text-sm text-white/60 leading-relaxed mb-3 text-left">{paso.texto}</p>
+          <p className="text-sm text-white/75 leading-relaxed mb-3 text-left">{paso.texto}</p>
           {paso.nota && <p className="text-xs text-gold/80 bg-gold/10 border border-gold/20 rounded-xl px-4 py-2.5 mb-6 text-left">💡 {paso.nota}</p>}
           <BotonPrimario onClick={avanzar}>Empezar <ArrowRight className="w-4 h-4" /></BotonPrimario>
         </div>
@@ -287,13 +287,13 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
         const r = radarPara((perfil as Record<string, unknown> | null | undefined)?.especialidad as string | undefined);
         return (
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">📡 El radar de tu mercado</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">📡 El radar de tu mercado</p>
             <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.07] to-transparent p-5 mb-4">
-              <p className="text-sm text-white/60 mb-1">{r.familia} · mercado hispano</p>
+              <p className="text-sm text-white/75 mb-1">{r.familia} · mercado hispano</p>
               <p className="text-3xl font-light text-cream mb-3" style={{ fontFamily: 'var(--font-display)' }}>{r.rango}</p>
               <p className="text-xs text-white/45 leading-relaxed">{r.ejemplos}</p>
             </div>
-            <p className="text-sm text-white/60 leading-relaxed mb-6">Esto ya se cobra en tu campo. La gente tiene dinero — mira cuántos teléfonos de $1.000 se venden por día en cualquier centro comercial. Tu $1.000 no es un invento personal: es una posición de mercado. Y de las moderadas.</p>
+            <p className="text-sm text-white/75 leading-relaxed mb-6">Esto ya se cobra en tu campo. La gente tiene dinero — mira cuántos teléfonos de $1.000 se venden por día en cualquier centro comercial. Tu $1.000 no es un invento personal: es una posición de mercado. Y de las moderadas.</p>
             <BotonPrimario onClick={avanzar}>Entendido — sigamos <ArrowRight className="w-4 h-4" /></BotonPrimario>
           </div>
         );
@@ -321,13 +321,13 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
             <>
               <p className="text-3xl mb-3">🕰️</p>
               <h3 className="text-lg font-medium text-cream mb-3">El Mensaje al Futuro</h3>
-              <p className="text-sm text-white/60 leading-relaxed mb-1 text-left">Graba un audio de 60 segundos con la app de notas de voz de tu teléfono — para la persona que vas a ser el día 90. Cómo estás hoy. Qué miedo tienes. Qué esperas de esta persona.</p>
+              <p className="text-sm text-white/75 leading-relaxed mb-1 text-left">Graba un audio de 60 segundos con la app de notas de voz de tu teléfono — para la persona que vas a ser el día 90. Cómo estás hoy. Qué miedo tienes. Qué esperas de esta persona.</p>
               <p className="text-xs text-gold/80 mb-5 text-left">Se sella hasta tu graduación. Nadie lo escucha antes — ni tú.</p>
             </>
           ) : (
             <>
               <h3 className="text-lg font-medium text-cream mb-3">{paso.titulo}</h3>
-              <p className="text-sm text-white/60 leading-relaxed mb-5 text-left">{paso.texto}</p>
+              <p className="text-sm text-white/75 leading-relaxed mb-5 text-left">{paso.texto}</p>
             </>
           )}
           <label className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold cursor-pointer transition-all ${evidenciaOk[paso.id] ? 'bg-success/15 border border-success/40 text-success' : 'bg-gold text-black hover:bg-goldhi'}`}>
@@ -344,7 +344,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
 
       {paso.tipo === 'artefacto' && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">✦ {paso.tituloArtefacto}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">✦ {paso.tituloArtefacto}</p>
           {!artefacto ? (
             <div className="text-center py-6">
               <p className="text-xs text-white/45 mb-5">Con todo lo que trabajaste hoy, redacto tu artefacto. Tú lo revisas, lo ajustas… y lo firmas.</p>
@@ -381,7 +381,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
       )}
 
       {idx > 0 && paso.tipo !== 'artefacto' && (
-        <button type="button" onClick={() => setIdx(idx - 1)} className="mt-4 mx-auto flex items-center gap-1 text-[11px] text-white/30 hover:text-white/60 transition-colors uppercase font-bold tracking-wider">
+        <button type="button" onClick={() => setIdx(idx - 1)} className="mt-4 mx-auto flex items-center gap-1 text-[11px] text-white/45 hover:text-white/75 transition-colors uppercase font-bold tracking-wider">
           <ArrowLeft className="w-3 h-3" /> Paso anterior
         </button>
       )}
@@ -399,7 +399,7 @@ function AbiertaConMic({ paso, valor, onChange, onContinuar, valido }: {
   return (
     <div>
       <p className="text-base text-cream font-medium mb-2 leading-snug">{paso.pregunta}</p>
-      {paso.ayuda && <p className="text-xs text-white/40 mb-4 leading-relaxed">{paso.ayuda}</p>}
+      {paso.ayuda && <p className="text-xs text-white/55 mb-4 leading-relaxed">{paso.ayuda}</p>}
       <div className="relative mb-2">
         <textarea value={valor} onChange={(e) => onChange(e.target.value)} rows={6} placeholder={paso.placeholder}
           className="w-full bg-white/[0.04] border border-white/12 rounded-2xl px-4 py-3.5 pr-14 text-sm text-white/90 leading-relaxed placeholder-white/25 focus:outline-none focus:border-gold/50 resize-none" />
@@ -410,7 +410,7 @@ function AbiertaConMic({ paso, valor, onChange, onContinuar, valido }: {
           </button>
         )}
       </div>
-      <p className="text-[10px] text-white/30 mb-4">{grabando ? '🔴 Escuchando… habla tranquilo, se escribe solo.' : faltan > 0 ? `Un poco más de profundidad — faltan ~${faltan} caracteres.` : 'Listo ✓'}</p>
+      <p className="text-[11px] text-white/45 mb-4">{grabando ? '🔴 Escuchando… habla tranquilo, se escribe solo.' : faltan > 0 ? `Un poco más de profundidad — faltan ~${faltan} caracteres.` : 'Listo ✓'}</p>
       <BotonPrimario onClick={onContinuar} disabled={!valido}>Continuar <ArrowRight className="w-4 h-4" /></BotonPrimario>
     </div>
   );

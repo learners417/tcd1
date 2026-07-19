@@ -64,7 +64,7 @@ export default function TaskDetailModal({
         <div className="flex items-start justify-between p-6 border-b border-[rgba(232,150,46,0.1)]">
           <div className="flex-1 pr-4">
             {tarea.pilarTitulo && (
-              <p className="text-[10px] text-gold uppercase tracking-widest font-bold mb-2">
+              <p className="text-[11px] text-gold uppercase tracking-widest font-bold mb-2">
                 Pilar {tarea.pilarNumero} — {tarea.pilarTitulo}
               </p>
             )}
@@ -77,7 +77,7 @@ export default function TaskDetailModal({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-cream/40 hover:text-cream hover:bg-gold/10 transition-colors">
+          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-cream/55 hover:text-cream hover:bg-gold/10 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -89,10 +89,10 @@ export default function TaskDetailModal({
           {/* Preview del output guardado */}
           {tieneOutputGuardado && (
             <div className="bg-success/5 border border-success/20 rounded-xl p-4">
-              <p className="text-[10px] text-success uppercase tracking-widest font-bold mb-2 flex items-center gap-1.5">
+              <p className="text-[11px] text-success uppercase tracking-widest font-bold mb-2 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Documento guardado
               </p>
-              <p className="text-xs text-cream/50 line-clamp-3 leading-relaxed whitespace-pre-wrap font-mono">
+              <p className="text-xs text-cream/65 line-clamp-3 leading-relaxed whitespace-pre-wrap font-mono">
                 {outputExistente}
               </p>
             </div>
@@ -100,7 +100,7 @@ export default function TaskDetailModal({
 
           {/* Chips de info */}
           <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 text-[11px] text-cream/50 bg-gold/5 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-1.5 text-[11px] text-cream/65 bg-gold/5 rounded-lg px-3 py-1.5">
               <Clock className="w-3.5 h-3.5" />
               <span>{tarea.tiempo_estimado || '15–30 min'}</span>
             </div>
@@ -121,7 +121,7 @@ export default function TaskDetailModal({
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-[rgba(232,150,46,0.1)] gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-cream/50 hover:text-cream transition-colors">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-cream/65 hover:text-cream transition-colors">
             Cerrar
           </button>
 

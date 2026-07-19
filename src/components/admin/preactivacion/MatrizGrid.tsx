@@ -24,7 +24,7 @@ interface MatrizGridProps {
 export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
   if (clientes.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16 text-cream/40 text-sm">
+      <div className="flex items-center justify-center py-16 text-cream/55 text-sm">
         Sin clientes que coincidan
       </div>
     );

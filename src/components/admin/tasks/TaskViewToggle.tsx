@@ -39,7 +39,7 @@ export default function TaskViewToggle({ value, onChange, myCount }: TaskViewTog
             <Icon className="w-4 h-4" />
             <span>{t.label}</span>
             {t.id === 'mine' && typeof myCount === 'number' && myCount > 0 && (
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-black/20 text-black' : 'bg-gold/20 text-gold'}`}>
+              <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-black/20 text-black' : 'bg-gold/20 text-gold'}`}>
                 {myCount}
               </span>
             )}

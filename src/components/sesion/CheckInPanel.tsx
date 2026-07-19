@@ -22,14 +22,14 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         {segundosObjetivo ? (
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-white/55 mt-1">
             Tiempo de trabajo: {formatoCrono(segundosObjetivo)} · podés pausar cuando quieras, la app guarda todo.
           </p>
         ) : (
-          <p className="text-xs text-white/40 mt-1">Misión sin cronómetro — se trabaja a tu ritmo.</p>
+          <p className="text-xs text-white/55 mt-1">Misión sin cronómetro — se trabaja a tu ritmo.</p>
         )}
       </div>
 
@@ -68,12 +68,12 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       <button
         type="button"
         onClick={() => setModoCorto(!modoCorto)}
-        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs transition-all ${modoCorto ? 'border-gold/50 bg-gold/10 text-gold' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20'}`}
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs transition-all ${modoCorto ? 'border-gold/50 bg-gold/10 text-gold' : 'border-white/10 bg-white/[0.03] text-white/65 hover:border-white/20'}`}
       >
         <span>🕐 Hoy tengo poco tiempo — modo 15 minutos</span>
         <span className="font-bold">{modoCorto ? 'ON' : 'OFF'}</span>
       </button>
-      <p className="text-[10px] text-white/30 -mt-2">{modoCorto ? 'Haces solo el paso esencial de hoy. Mantiene tu racha y tu avance — mejor un día corto que un día cero.' : ''}</p>
+      <p className="text-[11px] text-white/45 -mt-2">{modoCorto ? 'Haces solo el paso esencial de hoy. Mantiene tu racha y tu avance — mejor un día corto que un día cero.' : ''}</p>
 
       <button
         type="button"

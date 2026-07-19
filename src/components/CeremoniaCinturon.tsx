@@ -64,7 +64,7 @@ export default function CeremoniaCinturon() {
   return (
     <div className="fixed inset-0 z-[95] bg-[#0D0C0B] overflow-y-auto animate-in fade-in duration-700">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gold/12 blur-[140px] rounded-full pointer-events-none" />
-      <button onClick={cerrar} className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors z-10"><X className="w-6 h-6" /></button>
+      <button onClick={cerrar} className="absolute top-4 right-4 text-white/45 hover:text-white/70 transition-colors z-10"><X className="w-6 h-6" /></button>
       <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-14 max-w-lg mx-auto">
         <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-gold mb-8 animate-in slide-in-from-top-4 duration-700">Ceremonia de cinturón</p>
         <p className="text-[90px] leading-none mb-6 animate-in zoom-in-50 duration-700">{cinturon.emoji}</p>
@@ -74,7 +74,7 @@ export default function CeremoniaCinturon() {
         <p className="text-sm text-gold italic mb-8">{cinturon.metafora}</p>
         {CARTAS[cinturon.orden] && (
           <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent p-6 mb-6 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-3">Una carta para ti</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-3">Una carta para ti</p>
             <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">{CARTAS[cinturon.orden]}</p>
             <p className="text-xs text-gold/80 mt-4 text-right" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>— Javo</p>
           </div>

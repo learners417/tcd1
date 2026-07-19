@@ -140,26 +140,26 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="text-cream/40 hover:text-cream transition-colors">
+          <button onClick={onBack} className="text-cream/55 hover:text-cream transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <h2 className="text-xl font-semibold text-cream" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
               Studio de Creativos
             </h2>
-            <p className="text-sm text-cream/40">{campana.nombre}</p>
+            <p className="text-sm text-cream/55">{campana.nombre}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-xs">
           {saving ? (
-            <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /><span className="text-cream/60">Guardando en historial…</span></>
+            <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /><span className="text-cream/75">Guardando en historial…</span></>
           ) : saved ? (
             <><CheckCircle2 className="w-3.5 h-3.5 text-success" /><span className="text-cream/70">Guardado en historial</span></>
           ) : copies.length === 0 ? (
-            <span className="text-cream/40">Generá el copy primero</span>
+            <span className="text-cream/55">Generá el copy primero</span>
           ) : (
-            <span className="text-cream/40">Se guarda automáticamente al generar la imagen</span>
+            <span className="text-cream/55">Se guarda automáticamente al generar la imagen</span>
           )}
         </div>
       </div>
@@ -179,7 +179,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
                   ? 'bg-gold/15 text-gold'
                   : disabled
                     ? 'text-cream/15 cursor-not-allowed'
-                    : 'text-cream/40 hover:text-cream/60 hover:bg-cream/5'
+                    : 'text-cream/55 hover:text-cream/75 hover:bg-cream/5'
               }`}
             >
               <Icon className="w-4 h-4" /> {t.label}
@@ -231,7 +231,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
                       activeSlide === idx
                         ? 'bg-gold/15 text-gold border border-gold/30'
-                        : 'bg-cream/5 text-cream/30'
+                        : 'bg-cream/5 text-cream/45'
                     }`}
                   >
                     Slide {idx + 1}

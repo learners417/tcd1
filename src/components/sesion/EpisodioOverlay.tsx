@@ -68,13 +68,13 @@ export default function EpisodioOverlay({
       {/* Header del episodio */}
       <div className="sticky top-0 z-30 bg-[#0D0C0B]/95 backdrop-blur border-b border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold truncate">
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold truncate">
             {fase === 'cliffhanger' ? 'Episodio completado' : `Episodio${diaAsignado ? ` · Día ${diaAsignado}` : ''}`}
             {esHito && fase !== 'cliffhanger' && <span className="ml-2 text-yellow-500">⭐ Sesión-hito</span>}
           </p>
           <button
             onClick={onClose}
-            className="shrink-0 flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors uppercase font-bold tracking-wider"
+            className="shrink-0 flex items-center gap-1.5 text-[11px] text-white/55 hover:text-white/80 transition-colors uppercase font-bold tracking-wider"
             title="Tu avance queda guardado — retomas donde dejaste"
           >
             {fase === 'sesion' && !isCompleted ? 'Pausar y salir' : 'Salir'} <X className="w-4 h-4" />
@@ -139,13 +139,13 @@ export default function EpisodioOverlay({
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-success mb-6">Sesión de hoy: completada ✓</p>
             {teaser ? (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">
                   {teaser.esHito ? '⭐ Se viene algo grande' : 'Próximo episodio'}
                 </p>
                 <h2 className="text-2xl md:text-3xl font-light text-cream mb-4 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                   {teaser.titulo}
                 </h2>
-                <p className="text-sm text-white/60 max-w-md leading-relaxed mb-10">{teaser.frase}</p>
+                <p className="text-sm text-white/75 max-w-md leading-relaxed mb-10">{teaser.frase}</p>
               </>
             ) : (
               <h2 className="text-2xl font-light text-cream mb-10 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>

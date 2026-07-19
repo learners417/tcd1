@@ -44,7 +44,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         }`}
       >
         <div className="text-6xl mb-4">⬛</div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
           Cinturón Negro
         </p>
         <h2
@@ -53,7 +53,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         >
           {nombre ? `${nombre}, eres` : 'Eres'} un Sanador Libre
         </h2>
-        <p className="text-sm italic text-cream/50 mb-6">
+        <p className="text-sm italic text-cream/65 mb-6">
           El árbol que da semillas
         </p>
 
@@ -62,7 +62,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
             <span className="text-gold font-semibold">{ventas} pacientes</span> cobrados
             con tu precio digno, por un sistema que construiste tú. Hace 90 días eras el
             profesional que perseguía pacientes. Hoy eres el director de tu clínica digital.
-            <span className="block mt-2 text-cream/60">
+            <span className="block mt-2 text-cream/75">
               El mártir quedó atrás. Y esto recién empieza.
             </span>
           </p>
@@ -77,11 +77,11 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-gold" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
                   Tu Foto del Día 90
                 </p>
               </div>
-              <span className="text-xs font-mono text-cream/60">
+              <span className="text-xs font-mono text-cream/75">
                 {comparacion.promedioDia1.toFixed(1)} →{' '}
                 <span className="text-gold font-bold">{comparacion.promedioDia45.toFixed(1)}</span>
               </span>
@@ -127,7 +127,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         {/* Las dos puertas */}
         <div className="space-y-3 mb-6 text-left">
           <div className="rounded-xl border border-gold/25 bg-gold/[0.05] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-1">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">
               Puerta 1 · Tu clínica sigue operando
             </p>
             <p className="text-xs text-cream/70 leading-relaxed">
@@ -136,7 +136,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
             </p>
           </div>
           <div className="rounded-xl border border-cream/15 bg-[#0F0F0F] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-cream/50 mb-1">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-cream/65 mb-1">
               Puerta 2 · El Nivel 2 existe
             </p>
             <p className="text-xs text-cream/70 leading-relaxed">
@@ -159,14 +159,14 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         </button>
         <button
           onClick={onClose}
-          className="text-xs text-cream/40 hover:text-cream/70 transition-colors"
+          className="text-xs text-cream/55 hover:text-cream/70 transition-colors"
         >
           Quedarme un rato más acá, mirando lo que logré
         </button>
 
         <div className="flex items-center justify-center gap-1.5 mt-6 opacity-60">
           <Trophy className="w-3.5 h-3.5 text-gold" />
-          <span className="text-[10px] uppercase tracking-widest text-cream/40">
+          <span className="text-[11px] uppercase tracking-widest text-cream/55">
             Tu Clínica Digital · Sanadores Libres
           </span>
         </div>

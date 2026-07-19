@@ -152,14 +152,14 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
 
       {/* Hero */}
       <div>
-        <p className="text-[10px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
+        <p className="text-[11px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
           Tu Máquina de Pacientes
         </p>
         <h1 className="text-3xl font-medium text-cream tracking-tight">
           Hola, {nombre}.
         </h1>
         <p className="text-xl text-gold mt-1">¿Qué quieres lograr con tus anuncios?</p>
-        <p className="text-sm text-cream/40 mt-2">
+        <p className="text-sm text-cream/55 mt-2">
           Elige una puerta y te llevamos paso a paso: qué decir, qué mostrar y dónde hacer clic. Nada más.
         </p>
       </div>
@@ -192,11 +192,11 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   <p className={`text-xs mt-1 leading-relaxed ${bloqueada ? 'text-cream/25' : 'text-cream/55'}`}>
                     {p.promesa}
                   </p>
-                  <p className={`text-[10px] uppercase tracking-wider mt-3 font-semibold ${bloqueada ? 'text-cream/20' : 'text-gold/70'}`}>
+                  <p className={`text-[11px] uppercase tracking-wider mt-3 font-semibold ${bloqueada ? 'text-cream/20' : 'text-gold/70'}`}>
                     {p.detalle}
                   </p>
                   {bloqueada && (
-                    <p className="text-[10px] text-gold/50 mt-2 italic leading-relaxed">
+                    <p className="text-[11px] text-gold/50 mt-2 italic leading-relaxed">
                       Se desbloquea cuando Vera apruebe tu oferta — anunciar sin oferta lista quema dinero.
                     </p>
                   )}
@@ -222,7 +222,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
         <div className="space-y-5">
           <button
             onClick={() => { setModo('puertas'); setResp({}); }}
-            className="flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream transition-colors"
+            className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" /> Volver a las puertas
           </button>
@@ -240,7 +240,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                     className={`px-3.5 py-1.5 rounded-full text-xs border transition-all ${
                       resp[p.id] === o.v
                         ? 'bg-gold text-black border-gold font-semibold'
-                        : 'border-cream/15 text-cream/50 hover:text-cream hover:border-cream/30'
+                        : 'border-cream/15 text-cream/65 hover:text-cream hover:border-cream/30'
                     }`}
                   >
                     {o.l}
@@ -254,13 +254,13 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
             const p = PUERTAS.find((x) => x.id === recomendada)!;
             return (
               <div className="bg-[#161310] border border-gold/30 rounded-2xl p-6 animate-in fade-in duration-300">
-                <p className="text-[10px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
+                <p className="text-[11px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
                   Tu campaña es
                 </p>
                 <h3 className="text-2xl font-medium text-cream">
                   {p.emoji} {p.titulo}
                 </h3>
-                <p className="text-sm text-cream/60 mt-2 leading-relaxed">{razonRecomendada}</p>
+                <p className="text-sm text-cream/75 mt-2 leading-relaxed">{razonRecomendada}</p>
                 {resp.experiencia === 'fallo' && (
                   <p className="text-xs text-gold/70 mt-2 italic">
                     Y algo importante: casi nunca es Meta — es la oferta o la puntería. Esta vez vamos paso a paso.
@@ -275,7 +275,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   </button>
                   <button
                     onClick={() => { setModo('puertas'); }}
-                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-cream/60 hover:text-cream transition-colors"
+                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-cream/75 hover:text-cream transition-colors"
                   >
                     Prefiero elegir yo
                   </button>
@@ -290,19 +290,19 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
       <div className="flex flex-wrap gap-3 pt-2 border-t border-[rgba(232,150,46,0.08)]">
         <button
           onClick={() => onNavigate('historial')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/50 hover:text-cream hover:border-cream/25 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:text-cream hover:border-cream/25 transition-all"
         >
           <FolderOpen className="w-3.5 h-3.5" />
           Mis campañas
           {campanas.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-bold">
+            <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-gold text-[11px] font-bold">
               {campanas.length}
             </span>
           )}
         </button>
         <button
           onClick={() => onNavigate('ganadores')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/50 hover:text-cream hover:border-cream/25 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:text-cream hover:border-cream/25 transition-all"
         >
           <Trophy className="w-3.5 h-3.5" />
           Ganadores

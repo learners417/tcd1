@@ -103,12 +103,12 @@ export default function TaskFotoPartida({
     <div className="space-y-6">
       <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-[10px] font-mono text-gold uppercase tracking-widest font-bold">
+          <span className="text-[11px] font-mono text-gold uppercase tracking-widest font-bold">
             <Camera className="w-3 h-3 inline mr-1" />
             {meta.codigo} · Foto de Partida
           </span>
           {saved && (
-            <span className="text-[10px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
+            <span className="text-[11px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Guardado
             </span>
           )}
@@ -119,7 +119,7 @@ export default function TaskFotoPartida({
         >
           {meta.titulo}
         </h3>
-        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
       </div>
 
       <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
@@ -157,7 +157,7 @@ export default function TaskFotoPartida({
                     className={`py-2.5 rounded-lg border text-sm font-semibold transition-all ${
                       score === n
                         ? 'bg-gold border-gold text-ink'
-                        : 'bg-surface/40 border-[rgba(232,150,46,0.10)] text-cream/50 hover:bg-gold/10 hover:text-cream/80 hover:border-gold/30'
+                        : 'bg-surface/40 border-[rgba(232,150,46,0.10)] text-cream/65 hover:bg-gold/10 hover:text-cream/80 hover:border-gold/30'
                     }`}
                     aria-label={`Puntaje ${n} en ${dim.label}`}
                   >
@@ -166,7 +166,7 @@ export default function TaskFotoPartida({
                 ))}
               </div>
 
-              <p className="text-xs text-cream/40 mt-2 italic">
+              <p className="text-xs text-cream/55 mt-2 italic">
                 {SCORE_LABELS[score as 1 | 2 | 3 | 4 | 5] ?? ''}
               </p>
             </div>
@@ -176,12 +176,12 @@ export default function TaskFotoPartida({
 
       <div className="card-panel p-4 border border-[rgba(232,150,46,0.12)] bg-surface/30 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-cream/50 font-semibold">
+          <p className="text-xs uppercase tracking-widest text-cream/65 font-semibold">
             Promedio actual
           </p>
           <p className="text-3xl font-bold text-gold mt-1 leading-none">
             {promedio.toFixed(1)}
-            <span className="text-base text-cream/40 font-normal ml-1">/ 5</span>
+            <span className="text-base text-cream/55 font-normal ml-1">/ 5</span>
           </p>
         </div>
         <button

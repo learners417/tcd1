@@ -57,11 +57,11 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
+          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
             MENTOR
           </span>
           {checked && (
-            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Completado
             </span>
           )}
@@ -69,7 +69,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
@@ -83,7 +83,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         )}
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-gold">
+            <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
               {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
             </p>
             <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
@@ -138,7 +138,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}
               disabled={!evidenciaLista}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/30 cursor-not-allowed'}`}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
             >
               <CheckCircle2 className="w-5 h-5" />
               Marcar como completado
