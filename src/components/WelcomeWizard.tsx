@@ -517,6 +517,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 Esto no es un formulario. Es una promesa — y las promesas se hacen con nombre y apellido.
               </p>
               <p className="text-sm text-cream/80 leading-relaxed mt-3">
+                Y no la haces solo. Al firmar te sumas a los <strong className="text-gold">Sanadores Libres</strong> — profesionales que se negaron a elegir entre su vocación y vivir dignamente de ella. Contra la vieja idea de que el que sana tiene que ser pobre, acá caminamos juntos.
+              </p>
+              <p className="text-sm text-cream/80 leading-relaxed mt-3">
                 <strong className="text-cream">A los tuyos:</strong> a quienes te formaron y a quienes dependen de ti.{' '}
                 <strong className="text-cream">A tus pacientes:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
                 <strong className="text-cream">Y a ti:</strong> al profesional que hoy decide dejar de sobrevivir.

@@ -67,6 +67,8 @@ export interface SesionEnCurso {
   iniciadaEn: string; // ISO
   /** id del session_log en Supabase si ya se creó el borrador. */
   logId?: string;
+  /** true si la sesión se abrió en modo corto (15 min). */
+  modoCorto?: boolean;
 }
 
 // ── Parser del tiempo estimado ("1 h" · "45 min" · "1.5 h" · "5 días…") ──
