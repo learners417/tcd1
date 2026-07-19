@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
+import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
 import { notificarAdminsEvidencia } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
@@ -18,6 +19,8 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
   const [evidencias, setEvidencias] = useState<number>(-1);
   const [subiendo, setSubiendo] = useState(false);
   const [errorSubida, setErrorSubida] = useState<string | null>(null);
+  const [veredicto, setVeredicto] = useState<VeredictoVision | null>(null);
+  const [verificando, setVerificando] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
   useEffect(() => {
     if (!meta.evidencia_requerida) return;
@@ -40,6 +43,14 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
     if (res.ok) {
       setEvidencias((n) => Math.max(0, n) + 1);
       try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+      // CP9 · Visión IA (asistente, nunca bloquea): verifica la imagen en segundo plano.
+      if (meta.evidencia_requerida?.descripcion) {
+        setVeredicto(null);
+        setVerificando(true);
+        verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion)
+          .then(setVeredicto)
+          .finally(() => setVerificando(false));
+      }
     } else {
       setErrorSubida((res as { ok: false; motivo: string }).motivo);
     }
@@ -94,6 +105,11 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
               </label>
             )}
             {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
+            {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
+            {veredicto && !verificando && (veredicto.ok
+              ? <p className="text-xs text-success mt-2">✓ Se ve bien — coincide con lo pedido.</p>
+              : <p className="text-xs text-gold mt-2">⚠️ {veredicto.motivo || 'Revisa que la foto muestre lo pedido'} — si estás seguro, puedes seguir igual.</p>
+            )}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
