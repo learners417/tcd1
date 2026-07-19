@@ -124,7 +124,7 @@ export default function TaskFotoPartida({
 
       <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
         <p className="text-sm text-cream/70 leading-relaxed">
-          Para cada dimensión, marca del 1 al 5 cuánto sentís que la tienes HOY.
+          Para cada dimensión, marca del 1 al 5 cuánto sientes que la tienes HOY.
           No hay respuesta correcta — es una foto del punto de partida.
           Al día 45 la vamos a comparar con tu ADN real.
         </p>

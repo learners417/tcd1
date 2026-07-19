@@ -1,6 +1,6 @@
 /**
  * CHECK-IN — la apertura ritual de la Sesión Viva (liturgia de Javo):
- * "Emoción en la que llegás y objetivo principal de la sesión."
+ * "Emoción en la que llegas y objetivo principal de la sesión."
  */
 import React, { useState } from 'react';
 import { Play } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         {segundosObjetivo ? (
           <p className="text-xs text-white/55 mt-1">
-            Tiempo de trabajo: {formatoCrono(segundosObjetivo)} · podés pausar cuando quieras, la app guarda todo.
+            Tiempo de trabajo: {formatoCrono(segundosObjetivo)} · puedes pausar cuando quieras, la app guarda todo.
           </p>
         ) : (
           <p className="text-xs text-white/55 mt-1">Misión sin cronómetro — se trabaja a tu ritmo.</p>
@@ -43,7 +43,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-white mb-2">¿Con qué emoción llegás?</p>
+        <p className="text-sm font-semibold text-white mb-2">¿Con qué emoción llegas?</p>
         <div className="flex flex-wrap gap-2">
           {EMOCIONES_ENTRADA.map((e) => (
             <button

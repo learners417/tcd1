@@ -67,7 +67,7 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
         <p className="mt-1.5 text-[11px] text-white/55">Sesión pausada — el dojo te espera. Todo quedó guardado.</p>
       )}
       {cumplido && !pausada && (
-        <p className="mt-1.5 text-[11px] text-success">El tiempo de hoy se cumplió. Lo que abriste, cerralo: consolidá la sesión. 🥋</p>
+        <p className="mt-1.5 text-[11px] text-success">El tiempo de hoy se cumplió. Lo que abriste, ciérralo: consolidá la sesión. 🥋</p>
       )}
     </div>
   );

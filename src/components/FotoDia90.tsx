@@ -92,7 +92,7 @@ export default function FotoDia90({
           ) : (
             <div className="px-6 pb-6">
               <p className="text-sm text-cream/75 text-center leading-relaxed">
-                Tu Foto del Día 90 se completa cuando tenés cargada tu Foto de Partida del Día 1. Es
+                Tu Foto del Día 90 se completa cuando tienes cargada tu Foto de Partida del Día 1. Es
                 el antes y el después de tu transformación.
               </p>
             </div>

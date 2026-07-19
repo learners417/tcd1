@@ -439,32 +439,32 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-gold/10">
-      <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-gold/[0.03] flex items-center justify-between">
+    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-[#E8962E]/10">
+      <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-[#E8962E]/[0.03] flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center border border-gold/30">
-            <Bot className="w-5 h-5 text-gold" />
+          <div className="w-10 h-10 rounded-xl bg-[#E8962E]/20 flex items-center justify-center border border-[#E8962E]/30">
+            <Bot className="w-5 h-5 text-[#E8962E]" />
           </div>
           <img
             src="/javo.jpg"
             alt="Javo"
-            className="w-9 h-9 rounded-full object-cover border border-gold/40 shrink-0"
+            className="w-9 h-9 rounded-full object-cover border border-[#E8962E]/40 shrink-0"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
           <div>
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
               Mentor IA
             </h2>
-            <p className="text-[11px] text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-success" /> Tu guía del camino · conoce tu ADN completo
-              {guardadoOk && <span className="text-success normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-[#22C55E]" /> Tu guía del camino · conoce tu ADN completo
+              {guardadoOk && <span className="text-[#22C55E] normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
             </p>
           </div>
         </div>
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
+          className="w-8 h-8 rounded-lg hover:bg-[#E8962E]/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -482,8 +482,8 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
                 msg.role === 'assistant'
-                  ? 'bg-gold/15 text-gold border-gold/40 ring-2 ring-gold/10'
-                  : 'bg-white/5 text-white/75 border-white/10'
+                  ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40 ring-2 ring-[#E8962E]/10'
+                  : 'bg-white/5 text-white/60 border-white/10'
               }`}
             >
               {msg.role === 'assistant' ? (
@@ -499,8 +499,8 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               /* El Mentor humano: burbujas separadas por párrafo — conversación, no documento */
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
-                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
-                    <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
+                  <div key={pi} className="bg-[#1A1917] text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                    <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-[#F4B65C] prose-li:my-0.5">
                       <Markdown>{parte}</Markdown>
                     </div>
                   </div>
@@ -510,8 +510,8 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             <div
               className={`max-w-[85%] rounded-2xl p-5 ${
                 msg.role === 'user'
-                  ? 'bg-gold text-ink rounded-tr-sm shadow-lg'
-                  : 'card-panel bg-surface text-white/90 rounded-tl-sm border border-[rgba(232,150,46,0.10)]'
+                  ? 'bg-[#E8962E] text-[#080808] rounded-tr-sm shadow-lg'
+                  : 'card-panel bg-[#1A1917] text-white/90 rounded-tl-sm border border-[rgba(232,150,46,0.10)]'
               }`}
             >
               {msg.role === 'user' ? (
@@ -519,21 +519,21 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                   {msg.content}
                 </p>
               ) : (
-                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
+                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-[#E8962E]">
                   {msg.content ? (
                     <Markdown>{msg.content}</Markdown>
                   ) : (
                     <span className="flex gap-1.5 items-center py-1">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </span>
@@ -554,7 +554,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 key={qr.id}
                 onClick={() => handleSend(qr.label)}
                 disabled={isTyping}
-                className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-gold/10 to-transparent hover:from-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
+                className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-[#E8962E]/10 to-transparent hover:from-[#E8962E]/20 hover:border-[#E8962E]/40 text-xs text-[#F2EFE9]/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
                 <span className="text-[11px]">{qr.icon}</span>
                 {qr.label}
@@ -594,7 +594,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 ? 'Tu coach está conectando ideas...'
                 : 'Mencioná tu duda · bloqueo · pega una captura (Ctrl+V)...'
             }
-            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
+            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -604,7 +604,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               cargandoEstado ||
               uploadingAttachment
             }
-            className="absolute right-2 w-9 h-9 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-50 flex items-center justify-center text-ink transition-colors"
+            className="absolute right-2 w-9 h-9 rounded-lg bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 flex items-center justify-center text-[#080808] transition-colors"
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

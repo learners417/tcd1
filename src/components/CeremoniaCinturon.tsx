@@ -19,7 +19,7 @@ const CARTAS: Record<number, string> = {
   5: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',
   6: 'Azul. La campaña está ENCENDIDA — tu clínica le habla al mundo mientras dormís. Ahora empieza la caza: tres números por semana, paciencia de cazador, y el precio se dice UNA vez. El que pregunta, dirige.',
   7: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarcá este día.',
-  8: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Tu clínica sigue el día 91, y vos ya no sos la Foto de Partida. Gracias por la confianza. Nos vemos del otro lado. 🥋',
+  8: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Tu clínica sigue el día 91, y tú ya no eres la Foto de Partida. Gracias por la confianza. Nos vemos del otro lado. 🥋',
 };
 
 const DESBLOQUEOS: Record<number, string> = {

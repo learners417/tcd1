@@ -804,7 +804,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                 <Pencil className={`w-3.5 h-3.5 ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream/55'}`} />
                 <span className={`text-xs font-semibold ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream'}`}>Solo fondo</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Sin texto — lo agregas vos despues</p>
+              <p className="text-[11px] text-cream/45 leading-tight">Sin texto — lo agregas tú despues</p>
             </button>
           </div>
           {isCarousel && genMode === 'texto_personalizado' && (

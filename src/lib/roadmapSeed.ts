@@ -332,8 +332,8 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         entrenador: 'sofi',
         checklist: [
           'Completa la herramienta: tu proceso paso a paso (primer contacto → sesiones → cierre → resultado)',
-          'Crea tu página de Facebook profesional (10 min, si no tienes — el Asistente te guía si te trabas)',
-          'Crea tu Business Manager en business.facebook.com y vincula la página',
+          'Con Sofi: crea tu página de Facebook profesional (10 min, si no tienes)',
+          'Con Sofi: crea tu Business Manager en business.facebook.com y vincula la página',
           'Opcional pero recomendado: impulsa una publicación tuya a $1/día — tu cuenta empieza a ganar historial HOY',
         ],
       },
@@ -590,7 +590,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Antes de grabar, 10 min con Caro: encuadre, luz y presencia (si te da vergüenza: primero audio, después cámara sin publicar, después publicas — 3 escalones)',
           'Graba las 3 piezas (cortas: 30-60 segundos cada una)',
           'Publícalas orgánico en tu red principal (gratis, suma siempre)',
-          'Sube las 3 como anuncios — $2/día cada uno, 5 días (~$30 total)',
+          'Con Sofi: sube las 3 como anuncios — $2/día cada uno, 5 días (~$30 total)',
           'Al día 5: la de menor costo por conversación GANA — esa es tu campeona',
         ],
       },
@@ -686,31 +686,6 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: true,
         adn_field: 'adn_anuncio_followme',
         entrenador: 'ramiro',
-      },
-      {
-        codigo: 'P4.7',
-        titulo: 'Tu Plan de Inversión — el pacto del dinero',
-        descripcion: 'Antes de encender un solo anuncio, firmas tu plan: inviertes un ticket ($1.000) para ganar diez. Cuánto por día, desde cuándo, qué esperar cada semana, y el pacto de reinversión: la primera venta no es para festejar en el bolsillo — es combustible. Sin plan firmado, la campaña no se enciende.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '30 min',
-        orden: 7.6,
-        dia_asignado: 28,
-        usa_ia: true,
-        adn_field: 'adn_plan_inversion',
-        entrenador: 'ramiro',
-      },
-      {
-        codigo: 'P4.8',
-        titulo: '🔥 La Prueba de Fuego — el circuito completo, probado',
-        descripcion: 'Un lead de prueba (tu pareja, un colega, tú desde otro teléfono) recorre TODO el circuito antes de gastar un peso: toca el anuncio de prueba → cae a tu WhatsApp → tu agente lo filtra → agenda → paga una prueba. Si una pieza falla, se arregla HOY. Encender mañana sin esta prueba es apostar — y en tu clínica no se apuesta: se verifica.',
-        tipo: 'COACH',
-        es_estrella: true,
-        tiempo_estimado: '45 min',
-        orden: 7.7,
-        dia_asignado: 28,
-        usa_ia: false,
-        entrenador: 'diego',
       },
       {
         codigo: 'P4.4',
@@ -1176,11 +1151,11 @@ export function colorEstadoPilar(
 ): string {
   switch (estado) {
     case 'completado':
-      return 'border-l-[3px] border-l-success bg-panel border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-[#22C55E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
     case 'en_progreso':
-      return 'border-l-[3px] border-l-gold bg-panel border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-[#E8962E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
     case 'bloqueado':
-      return 'opacity-40 cursor-not-allowed bg-panel border border-[rgba(232,150,46,0.1)]';
+      return 'opacity-40 cursor-not-allowed bg-[#111110] border border-[rgba(232,150,46,0.1)]';
   }
 }
 

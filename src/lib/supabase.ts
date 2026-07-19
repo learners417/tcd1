@@ -364,8 +364,6 @@ export type MetaCodigo =
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
   | 'P4.1' | 'P4.2' | 'P4.2b' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
-  | 'P4.7'
-  | 'P4.8'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)

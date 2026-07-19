@@ -335,12 +335,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   rows={3}
                   className="w-full bg-black/40 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
-                <p className="text-[11px] text-cream/45 mt-1.5">Tu coach va a leer esto para entenderte desde el inicio.</p>
+                <p className="text-[11px] text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Ingreeres mensuales (USD)</label>
+                  <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Ingresos mensuales (USD)</label>
                   <input
                     type="number"
                     value={ingresosMensuales}
@@ -469,8 +469,11 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <h1 className="text-2xl font-semibold text-cream mb-3">Bienvenido/a al dojo, {nombreCorto}</h1>
+            <p className="text-sm text-gold/90 leading-relaxed mb-3 font-medium">
+              Ya diste el primer paso más difícil: decidir que tu trabajo vale lo suficiente como para invertir en él. Eso mismo — cobrar con dignidad — es lo que vas a aprender a hacer con cada paciente.
+            </p>
             <p className="text-sm text-cream/70 leading-relaxed mb-2">
-              Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
+              Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
             </p>
             <p className="text-sm text-cream/80 leading-relaxed mb-6">
               <span className="text-gold font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
