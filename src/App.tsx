@@ -89,11 +89,11 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
-        <p className="text-sm text-cream/60 mb-5 leading-relaxed">
+        <p className="text-sm text-cream/75 mb-5 leading-relaxed">
           {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
         </p>
         {nombreRes && (
@@ -345,13 +345,13 @@ export default function App() {
       <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
         <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-cream/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
+          <p className="text-[11px] text-cream/65 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword}
@@ -366,16 +366,16 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setRecoveryShowPwd(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/70 transition-colors"
               >
                 {recoveryShowPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
@@ -549,7 +549,7 @@ export default function App() {
               <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
-                className="text-cream/60 hover:text-cream transition-colors"
+                className="text-cream/75 hover:text-cream transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -571,7 +571,7 @@ export default function App() {
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
                         settingsTab === tab.id
                           ? 'bg-gold/10 text-gold font-medium'
-                          : 'text-cream/60 hover:bg-gold/5 hover:text-cream'
+                          : 'text-cream/75 hover:bg-gold/5 hover:text-cream'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" /> {tab.label}
@@ -609,13 +609,13 @@ export default function App() {
                           <Camera className="w-6 h-6 text-white" />
                         </div>
                       </button>
-                      <p className="text-xs text-cream/40">Clic para cambiar foto de perfil</p>
+                      <p className="text-xs text-cream/55">Clic para cambiar foto de perfil</p>
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-cream mb-4">Información Personal</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs text-cream/60 mb-1">Nombre Completo</label>
+                          <label className="block text-xs text-cream/75 mb-1">Nombre Completo</label>
                           <input
                             type="text"
                             value={profileDraft.nombre}
@@ -624,17 +624,17 @@ export default function App() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-cream/60 mb-1">Correo Electrónico</label>
+                          <label className="block text-xs text-cream/75 mb-1">Correo Electrónico</label>
                           <input
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/40 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
                           />
-                          <p className="text-xs text-cream/30 mt-1">El email no se puede cambiar desde aquí</p>
+                          <p className="text-xs text-cream/45 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
                         <div>
-                          <label className="block text-xs text-cream/60 mb-1">Especialidad</label>
+                          <label className="block text-xs text-cream/75 mb-1">Especialidad</label>
                           <input
                             type="text"
                             value={profileDraft.especialidad}
@@ -645,7 +645,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
-                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/60 hover:text-cream transition-colors">
+                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors">
                         Cancelar
                       </button>
                       <button onClick={saveProfile} className="btn-primary">
@@ -671,7 +671,7 @@ export default function App() {
                   <div className="space-y-6">
                     <h3 className="text-lg font-medium text-cream mb-4">Seguridad</h3>
                     <div>
-                      <p className="text-sm text-cream/60 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
+                      <p className="text-sm text-cream/75 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
                       <button
                         onClick={async () => {
                           const email = supabaseProfile?.email;
@@ -698,7 +698,7 @@ export default function App() {
                           Tu Clínica Digital — {profile.plan}
                         </span>
                       </div>
-                      <p className="text-xs text-cream/40">Programa de 90 días</p>
+                      <p className="text-xs text-cream/55">Programa de 90 días</p>
                     </div>
                   </div>
                 )}

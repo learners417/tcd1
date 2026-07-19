@@ -92,7 +92,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
     <div className="max-w-5xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Calculadora PHR</h1>
-        <p className="text-cream/60">Descubrí cuánto vale realmente tu hora de trabajo</p>
+        <p className="text-cream/75">Descubrí cuánto vale realmente tu hora de trabajo</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -103,7 +103,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
           </h3>
 
           <div>
-            <label className="block text-xs text-cream/60 mb-1">Especialidad</label>
+            <label className="block text-xs text-cream/75 mb-1">Especialidad</label>
             <input
               type="text"
               value={data.especialidad}
@@ -115,7 +115,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-cream/60 mb-1">Tarifa por Consulta ($)</label>
+              <label className="block text-xs text-cream/75 mb-1">Tarifa por Consulta ($)</label>
               <input
                 type="number"
                 value={data.tarifaConsulta}
@@ -125,7 +125,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
               />
             </div>
             <div>
-              <label className="block text-xs text-cream/60 mb-1">Consultas por Semana</label>
+              <label className="block text-xs text-cream/75 mb-1">Consultas por Semana</label>
               <input
                 type="number"
                 value={data.consultasSemana}
@@ -137,7 +137,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
           </div>
 
           <div>
-            <label className="block text-xs text-cream/60 mb-1">Horas de Trabajo por Semana</label>
+            <label className="block text-xs text-cream/75 mb-1">Horas de Trabajo por Semana</label>
             <input
               type="number"
               value={data.horasTrabajoSemana}
@@ -149,7 +149,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-cream/60 mb-1">Gastos Fijos Mensuales ($)</label>
+              <label className="block text-xs text-cream/75 mb-1">Gastos Fijos Mensuales ($)</label>
               <input
                 type="number"
                 value={data.gastosFijos}
@@ -159,7 +159,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
               />
             </div>
             <div>
-              <label className="block text-xs text-cream/60 mb-1">Gastos Variables Mensuales ($)</label>
+              <label className="block text-xs text-cream/75 mb-1">Gastos Variables Mensuales ($)</label>
               <input
                 type="number"
                 value={data.gastosVariables}
@@ -186,7 +186,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
         {/* Results */}
         <div className="space-y-4">
           <div className="card-panel p-6 rounded-2xl">
-            <h3 className="text-sm text-cream/60 uppercase tracking-wider mb-4">Resultados en Tiempo Real</h3>
+            <h3 className="text-sm text-cream/75 uppercase tracking-wider mb-4">Resultados en Tiempo Real</h3>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-xl bg-black/20 border border-[rgba(232,150,46,0.1)]">
@@ -194,7 +194,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
                   <DollarSign className="w-5 h-5 text-success" />
                   <span className="text-sm text-cream/80">PHR (Precio Hora Real)</span>
                 </div>
-                <span className={`text-2xl font-light ${phr > 0 ? 'text-success' : 'text-cream/40'}`}>
+                <span className={`text-2xl font-light ${phr > 0 ? 'text-success' : 'text-cream/55'}`}>
                   ${phr.toFixed(2)}
                 </span>
               </div>

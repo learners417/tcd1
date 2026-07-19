@@ -11,6 +11,9 @@
   --color-success: #22C55E;
   --color-danger: #EF4444;
   --color-cream: #F2EFE9;
+  /* CP2 · escala tipográfica mobile-first (gentle +1px) */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
 }
 @plugin "@tailwindcss/typography";
 

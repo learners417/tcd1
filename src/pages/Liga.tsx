@@ -96,12 +96,12 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
         <h1 className="text-2xl font-light text-cream tracking-tight flex items-center gap-2">
           <Trophy className="w-6 h-6 text-gold" /> La Liga
         </h1>
-        <p className="text-sm text-cream/50 mt-1">
+        <p className="text-sm text-cream/65 mt-1">
           El dojo se mide por constancia, jamás por ventas. Se corre contra vos mismo — y en buena
           compañía.
         </p>
         {cinturon ? (
-          <p className="text-[11px] text-cream/50 mt-2">
+          <p className="text-[11px] text-cream/65 mt-2">
             {cinturon.emoji} Tu cinturón actual: <span className="text-gold font-medium">{cinturon.nombre}</span>
           </p>
         ) : null}
@@ -111,7 +111,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {tarjetas.map(([label, value]) => (
           <div key={label} className="card-panel p-4">
-            <p className="text-[9px] text-cream/40 uppercase tracking-widest mb-1 font-semibold">
+            <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1 font-semibold">
               {label}
             </p>
             <p className="text-2xl font-light text-cream">{value}</p>
@@ -129,7 +129,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
             <Trophy className="w-4 h-4 text-gold" /> Liga de Constancia · esta semana
           </h2>
           {miPos > 0 ? (
-            <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
+            <span className="text-[11px] text-gold font-bold uppercase tracking-wider">
               Vas #{miPos}
             </span>
           ) : null}
@@ -145,7 +145,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
               >
                 <span
                   className={`w-6 text-center text-sm font-bold ${
-                    i === 0 ? 'text-gold' : 'text-cream/40'
+                    i === 0 ? 'text-gold' : 'text-cream/55'
                   }`}
                 >
                   {i + 1}
@@ -154,7 +154,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
                   <p className={`text-sm truncate ${e.es_tu ? 'text-gold font-bold' : 'text-cream'}`}>
                     {e.es_tu ? 'Vos' : e.alias}
                   </p>
-                  <p className="text-[10px] text-cream/40">
+                  <p className="text-[11px] text-cream/55">
                     {e.dias_activos} días · {e.sesiones} sesiones
                   </p>
                 </div>
@@ -167,13 +167,13 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
             <p className="text-sm text-cream/70 mb-1">
               Tu esfuerzo de la semana: <span className="text-gold font-bold">{mi.puntos} puntos</span>
             </p>
-            <p className="text-[11px] text-cream/40">
+            <p className="text-[11px] text-cream/55">
               La tabla de la cohorte se enciende cuando tus compañeros empiecen a sumar. Vos ya estás
               corriendo.
             </p>
           </div>
         )}
-        <p className="text-[10px] text-cream/30 mt-3">
+        <p className="text-[11px] text-cream/45 mt-3">
           Puntos = días activos + sesiones. Nunca ventas: acá se premia aparecer, no facturar.
         </p>
       </div>
@@ -197,7 +197,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
                   </span>{' '}
                   {h.label}
                 </p>
-                <span className="text-[10px] text-cream/35 shrink-0">{tiempoRelativo(h.cuando)}</span>
+                <span className="text-[11px] text-cream/35 shrink-0">{tiempoRelativo(h.cuando)}</span>
               </div>
             ))}
           </div>
@@ -217,12 +217,12 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
             ))}
           </div>
         ) : (
-          <p className="text-sm text-cream/50">
+          <p className="text-sm text-cream/65">
             Todavía no hay hitos. El primero está cerca: tu Foto de Partida. Cada quiebre del camino
             aparece acá.
           </p>
         )}
-        <p className="text-[10px] text-cream/30 mt-3">
+        <p className="text-[11px] text-cream/45 mt-3">
           Los hitos de la cohorte son anónimos. Se celebra el logro, no el nombre.
         </p>
       </div>
@@ -241,7 +241,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
             </p>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-cream/30" />
+        <ChevronRight className="w-5 h-5 text-cream/45" />
       </button>
 
       <BunkerModal open={bunker} onClose={() => setBunker(false)} perfil={perfil} />
