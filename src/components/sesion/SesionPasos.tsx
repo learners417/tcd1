@@ -196,7 +196,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
       {paso.tipo === 'intro' && (
         <div className="text-center py-4">
           <h3 className="text-2xl font-light text-cream mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{paso.titulo}</h3>
-          <p className="text-sm text-white/75 leading-relaxed mb-3 text-left">{paso.texto}</p>
+          <p className="text-base text-white/80 leading-relaxed mb-3 text-left">{paso.texto}</p>
           {paso.nota && <p className="text-xs text-gold/80 bg-gold/10 border border-gold/20 rounded-xl px-4 py-2.5 mb-6 text-left">💡 {paso.nota}</p>}
           <BotonPrimario onClick={avanzar}>Empezar <ArrowRight className="w-4 h-4" /></BotonPrimario>
         </div>
@@ -293,7 +293,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
               <p className="text-3xl font-light text-cream mb-3" style={{ fontFamily: 'var(--font-display)' }}>{r.rango}</p>
               <p className="text-xs text-white/45 leading-relaxed">{r.ejemplos}</p>
             </div>
-            <p className="text-sm text-white/75 leading-relaxed mb-6">Esto ya se cobra en tu campo. La gente tiene dinero — mira cuántos teléfonos de $1.000 se venden por día en cualquier centro comercial. Tu $1.000 no es un invento personal: es una posición de mercado. Y de las moderadas.</p>
+            <p className="text-base text-white/80 leading-relaxed mb-6">Esto ya se cobra en tu campo. La gente tiene dinero — mira cuántos teléfonos de $1.000 se venden por día en cualquier centro comercial. Tu $1.000 no es un invento personal: es una posición de mercado. Y de las moderadas.</p>
             <BotonPrimario onClick={avanzar}>Entendido — sigamos <ArrowRight className="w-4 h-4" /></BotonPrimario>
           </div>
         );
@@ -321,13 +321,13 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
             <>
               <p className="text-3xl mb-3">🕰️</p>
               <h3 className="text-lg font-medium text-cream mb-3">El Mensaje al Futuro</h3>
-              <p className="text-sm text-white/75 leading-relaxed mb-1 text-left">Graba un audio de 60 segundos con la app de notas de voz de tu teléfono — para la persona que vas a ser el día 90. Cómo estás hoy. Qué miedo tienes. Qué esperas de esta persona.</p>
+              <p className="text-base text-white/80 leading-relaxed mb-1 text-left">Graba un audio de 60 segundos con la app de notas de voz de tu teléfono — para la persona que vas a ser el día 90. Cómo estás hoy. Qué miedo tienes. Qué esperas de esta persona.</p>
               <p className="text-xs text-gold/80 mb-5 text-left">Se sella hasta tu graduación. Nadie lo escucha antes — ni tú.</p>
             </>
           ) : (
             <>
               <h3 className="text-lg font-medium text-cream mb-3">{paso.titulo}</h3>
-              <p className="text-sm text-white/75 leading-relaxed mb-5 text-left">{paso.texto}</p>
+              <p className="text-base text-white/80 leading-relaxed mb-5 text-left">{paso.texto}</p>
             </>
           )}
           <label className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold cursor-pointer transition-all ${evidenciaOk[paso.id] ? 'bg-success/15 border border-success/40 text-success' : 'bg-gold text-black hover:bg-goldhi'}`}>

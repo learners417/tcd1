@@ -31,8 +31,8 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
   return (
     <div className={`rounded-xl border px-3 py-2 ${cumplido ? 'border-success/40 bg-success/5' : 'border-white/10 bg-white/5'}`}>
       <div className="flex items-center gap-3">
-        <Timer className={`w-4 h-4 ${cumplido ? 'text-success' : 'text-gold'}`} />
-        <span className="font-mono text-sm text-white tabular-nums">{formatoCrono(ahora)}</span>
+        <Timer className={`w-5 h-5 ${cumplido ? 'text-success' : 'text-gold'}`} />
+        <span className="font-mono text-2xl text-white tabular-nums tracking-tight">{formatoCrono(ahora)}</span>
         {segundosObjetivo !== null && (
           <span className="text-[11px] text-white/55">/ {formatoCrono(segundosObjetivo)}</span>
         )}

@@ -21,6 +21,15 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
 
   return (
     <div className="space-y-5">
+      {/* CP6 · Cómo funciona una sesión — el ritual en 3 pasos */}
+      <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-cream/55 rounded-xl border border-gold/10 bg-gold/[0.04] px-3 py-2">
+        <span className="font-semibold text-gold/80">Así funciona:</span>
+        <span>1 · entras con tu objetivo</span>
+        <span className="text-cream/30">→</span>
+        <span>2 · trabajas con el reloj</span>
+        <span className="text-cream/30">→</span>
+        <span>3 · cierras lo hecho</span>
+      </div>
       <div>
         <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
@@ -81,7 +90,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         onClick={() => emocion && onAbrir({ emocion, objetivo: objetivo.trim(), modoCorto })}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gold text-black hover:bg-[#f0a94d]"
       >
-        <Play className="w-4 h-4" /> Abrir la sesión
+        <Play className="w-4 h-4" /> {segundosObjetivo ? 'Empezar — arranca el reloj' : 'Empezar la sesión'}
       </button>
     </div>
   );
