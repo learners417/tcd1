@@ -7,7 +7,7 @@ export default function ElCaminoView() {
         <h2 className="text-2xl md:text-3xl mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Lo mínimo indispensable <span style={{ color: '#E8962E' }}>para activar</span>
         </h2>
-        <p className="text-sm text-[#F2EFE9]/60 max-w-2xl leading-relaxed">
+        <p className="text-sm text-cream/60 max-w-2xl leading-relaxed">
           Sin cada uno de estos pasos resueltos, prender Meta Ads es quemar plata. No hay extras
           acá — solo lo que tiene que existir y funcionar.
         </p>
@@ -19,7 +19,7 @@ export default function ElCaminoView() {
             key={sec.id}
             className="rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)]"
           >
-            <div className="flex items-center gap-3.5 px-5 py-3.5 bg-[#111110] border-b border-[rgba(232,150,46,0.1)]">
+            <div className="flex items-center gap-3.5 px-5 py-3.5 bg-panel border-b border-[rgba(232,150,46,0.1)]">
               <div
                 className="flex items-center justify-center rounded-lg shrink-0"
                 style={{
@@ -67,11 +67,11 @@ export default function ElCaminoView() {
                     {sectionIdx + 1}.{itemIdx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-base font-semibold text-[#F2EFE9] mb-1.5">
+                    <div className="text-base font-semibold text-cream mb-1.5">
                       {item.title}
                     </div>
                     <div
-                      className="text-[14px] leading-relaxed text-[#F2EFE9]/65"
+                      className="text-[14px] leading-relaxed text-cream/65"
                       dangerouslySetInnerHTML={{ __html: item.detail }}
                     />
                   </div>

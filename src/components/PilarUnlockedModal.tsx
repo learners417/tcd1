@@ -168,7 +168,7 @@ export default function PilarUnlockedModal({
               </div>
 
               <h2
-                className="text-2xl font-medium text-[#F2EFE9] mb-2"
+                className="text-2xl font-medium text-cream mb-2"
                 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
               >
                 Pilar {pilarNumero} completado
@@ -185,20 +185,20 @@ export default function PilarUnlockedModal({
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
                     Cinturón ganado
                   </p>
-                  <p className="text-xl font-semibold text-[#F2EFE9] mb-1">{cinturon.nombre}</p>
-                  <p className="text-xs italic text-[#F2EFE9]/60">{cinturon.metafora}</p>
+                  <p className="text-xl font-semibold text-cream mb-1">{cinturon.nombre}</p>
+                  <p className="text-xs italic text-cream/60">{cinturon.metafora}</p>
                 </div>
               )}
 
               {mentorPregunta && (
-                <div className="mb-5 rounded-xl border border-[#F2EFE9]/15 bg-[#080808] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#F2EFE9]/40 mb-2">
+                <div className="mb-5 rounded-xl border border-cream/15 bg-ink p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-cream/40 mb-2">
                     El Mentor te espera con una pregunta
                   </p>
-                  <p className="text-sm text-[#F2EFE9]/90 leading-relaxed italic">
+                  <p className="text-sm text-cream/90 leading-relaxed italic">
                     «{mentorPregunta}»
                   </p>
-                  <p className="text-[10px] text-[#F2EFE9]/35 mt-2">
+                  <p className="text-[10px] text-cream/35 mt-2">
                     No la respondas rápido. Llévala contigo hoy.
                   </p>
                 </div>
@@ -212,8 +212,8 @@ export default function PilarUnlockedModal({
                       Nivel {nivelAlcanzado.numero} alcanzado
                     </span>
                   </div>
-                  <p className="text-lg font-medium text-[#F2EFE9] mb-1">{nivelAlcanzado.nombre}</p>
-                  <p className="text-xs text-[#F2EFE9]/60 leading-relaxed">
+                  <p className="text-lg font-medium text-cream mb-1">{nivelAlcanzado.nombre}</p>
+                  <p className="text-xs text-cream/60 leading-relaxed">
                     {nivelAlcanzado.descripcion}
                   </p>
                 </div>
@@ -221,8 +221,8 @@ export default function PilarUnlockedModal({
 
               {pilarDesbloqueado ? (
                 <div className="mb-6">
-                  <p className="text-sm text-[#F2EFE9]/60 mb-1">Nuevo pilar desbloqueado:</p>
-                  <p className="text-lg font-medium text-[#F2EFE9]">{pilarDesbloqueado}</p>
+                  <p className="text-sm text-cream/60 mb-1">Nuevo pilar desbloqueado:</p>
+                  <p className="text-lg font-medium text-cream">{pilarDesbloqueado}</p>
                 </div>
               ) : (
                 <div className="mb-6">
@@ -257,12 +257,12 @@ export default function PilarUnlockedModal({
               </div>
 
               <h2
-                className="text-2xl font-medium text-[#F2EFE9] mb-2"
+                className="text-2xl font-medium text-cream mb-2"
                 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
               >
                 ¿Cómo te pareció este pilar?
               </h2>
-              <p className="text-sm text-[#F2EFE9]/50 mb-5">
+              <p className="text-sm text-cream/50 mb-5">
                 Tu valoración nos ayuda a mejorar el programa
               </p>
 
@@ -280,8 +280,8 @@ export default function PilarUnlockedModal({
                     <Star
                       className={`w-10 h-10 transition-colors duration-150 ${
                         star <= activeRating
-                          ? 'text-[#E8962E] fill-[#E8962E]'
-                          : 'text-[#F2EFE9]/20'
+                          ? 'text-gold fill-gold'
+                          : 'text-cream/20'
                       }`}
                     />
                   </button>
@@ -291,8 +291,8 @@ export default function PilarUnlockedModal({
               {/* Dynamic message based on rating */}
               {ratingConfig && (
                 <div className="text-left mb-4 transition-all duration-300">
-                  <p className="text-sm font-semibold text-[#F2EFE9] mb-1">{ratingConfig.titulo}</p>
-                  <p className="text-sm text-[#F2EFE9]/60 leading-relaxed mb-3">
+                  <p className="text-sm font-semibold text-cream mb-1">{ratingConfig.titulo}</p>
+                  <p className="text-sm text-cream/60 leading-relaxed mb-3">
                     {ratingConfig.mensaje}
                   </p>
                   {selectedRating < 5 && (
@@ -302,7 +302,7 @@ export default function PilarUnlockedModal({
                       placeholder={ratingConfig.placeholder}
                       maxLength={500}
                       rows={3}
-                      className="w-full bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/25 focus:outline-none focus:border-[#E8962E]/50 resize-none"
+                      className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50 resize-none"
                     />
                   )}
                 </div>

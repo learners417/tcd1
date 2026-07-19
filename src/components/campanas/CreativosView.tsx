@@ -293,20 +293,20 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
     <div className="animate-in fade-in duration-500 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#E8962E]/15 flex items-center justify-center">
-          <HeaderIcon className="w-5 h-5 text-[#E8962E]" />
+        <div className="w-10 h-10 rounded-xl bg-gold/15 flex items-center justify-center">
+          <HeaderIcon className="w-5 h-5 text-gold" />
         </div>
         <div>
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#E8962E] mb-0.5">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-0.5">
             {config.eyebrow}
           </p>
-          <h2 className="text-xl font-light text-[#F2EFE9]">
+          <h2 className="text-xl font-light text-cream">
             Creativos{' '}
-            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#E8962E]">
+            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
               con IA
             </span>
           </h2>
-          <p className="text-[11px] text-[#F2EFE9]/40 mt-1">{config.descripcion}</p>
+          <p className="text-[11px] text-cream/40 mt-1">{config.descripcion}</p>
         </div>
       </div>
 
@@ -321,8 +321,8 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
                 isActive
-                  ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40'
-                  : 'bg-transparent text-[#F2EFE9]/50 border-[#F2EFE9]/8 hover:border-[#E8962E]/25 hover:text-[#F2EFE9]/80'
+                  ? 'bg-gold/15 text-gold border-gold/40'
+                  : 'bg-transparent text-cream/50 border-cream/8 hover:border-gold/25 hover:text-cream/80'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -346,7 +346,7 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               }}
             />
           ) : loadingHist ? (
-            <div className="flex items-center justify-center py-16 text-[#F2EFE9]/40 gap-2">
+            <div className="flex items-center justify-center py-16 text-cream/40 gap-2">
               <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
             </div>
           ) : (
@@ -387,11 +387,11 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           {/* Angulo de comunicacion (opcional) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#F2EFE9]/40" />
-              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#F2EFE9]/50">
+              <Sparkles className="w-3.5 h-3.5 text-cream/40" />
+              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-cream/50">
                 Angulo de comunicacion
               </span>
-              <span className="text-[9px] text-[#F2EFE9]/25">— opcional, orienta el tono visual</span>
+              <span className="text-[9px] text-cream/25">— opcional, orienta el tono visual</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {ANGULOS.map((a) => {
@@ -402,14 +402,14 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
                     onClick={() => setAngulo(a.id)}
                     className={`p-2 rounded-xl border text-left transition-all ${
                       isActive
-                        ? 'border-[#E8962E]/50 bg-[#E8962E]/10'
-                        : 'border-[#F2EFE9]/5 hover:border-[#E8962E]/25 hover:bg-[#F2EFE9]/[0.02]'
+                        ? 'border-gold/50 bg-gold/10'
+                        : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'
                     }`}
                   >
-                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-[#E8962E]' : 'text-[#F2EFE9]/80'}`}>
+                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/80'}`}>
                       {a.label}
                     </div>
-                    <div className="text-[9px] text-[#F2EFE9]/30 mt-0.5 leading-tight">{a.descripcion}</div>
+                    <div className="text-[9px] text-cream/30 mt-0.5 leading-tight">{a.descripcion}</div>
                   </button>
                 );
               })}
@@ -432,19 +432,19 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
 
           {/* Estado del auto-guardado */}
           {images.length > 0 && (
-            <div className="flex items-center justify-between rounded-xl bg-[#E8962E]/5 border border-[#E8962E]/20 px-4 py-2.5">
+            <div className="flex items-center justify-between rounded-xl bg-gold/5 border border-gold/20 px-4 py-2.5">
               <div className="flex items-center gap-2 text-xs">
                 {saving ? (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" /> <span className="text-[#F2EFE9]/60">Guardando en historial…</span></>
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/60">Guardando en historial…</span></>
                 ) : saved ? (
-                  <><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> <span className="text-[#F2EFE9]/70">Guardado automaticamente en historial</span></>
+                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automaticamente en historial</span></>
                 ) : (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8962E]" /> <span className="text-[#F2EFE9]/60">Preparando…</span></>
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/60">Preparando…</span></>
                 )}
               </div>
               <button
                 onClick={() => setActiveTab('historial')}
-                className="text-[11px] font-semibold text-[#E8962E] hover:underline"
+                className="text-[11px] font-semibold text-gold hover:underline"
               >
                 Ver historial →
               </button>

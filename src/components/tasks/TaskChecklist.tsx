@@ -43,18 +43,18 @@ export default function TaskChecklist({ codigo, items }: TaskChecklistProps) {
   const done = checked.filter(Boolean).length;
 
   return (
-    <div className="mt-4 rounded-xl border border-[#E8962E]/20 bg-[#0F0F0F] p-4">
+    <div className="mt-4 rounded-xl border border-gold/20 bg-[#0F0F0F] p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E]">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gold">
           Paso a paso
         </span>
-        <span className="text-[10px] text-[#F2EFE9]/40 font-medium">
+        <span className="text-[10px] text-cream/40 font-medium">
           {done}/{items.length}
         </span>
       </div>
-      <div className="h-1 rounded-full bg-[#F2EFE9]/10 mb-4 overflow-hidden">
+      <div className="h-1 rounded-full bg-cream/10 mb-4 overflow-hidden">
         <div
-          className="h-full bg-[#E8962E] rounded-full transition-all duration-500"
+          className="h-full bg-gold rounded-full transition-all duration-500"
           style={{ width: `${items.length === 0 ? 0 : Math.round((done / items.length) * 100)}%` }}
         />
       </div>
@@ -67,13 +67,13 @@ export default function TaskChecklist({ codigo, items }: TaskChecklistProps) {
               className="flex items-start gap-2.5 text-left w-full group"
             >
               {checked[i] ? (
-                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#22C55E]" />
+                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-success" />
               ) : (
-                <Circle className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#F2EFE9]/25 group-hover:text-[#E8962E]/60 transition-colors" />
+                <Circle className="w-4 h-4 mt-0.5 flex-shrink-0 text-cream/25 group-hover:text-gold/60 transition-colors" />
               )}
               <span
                 className={`text-xs leading-relaxed transition-colors ${
-                  checked[i] ? 'text-[#F2EFE9]/35 line-through' : 'text-[#F2EFE9]/75'
+                  checked[i] ? 'text-cream/35 line-through' : 'text-cream/75'
                 }`}
               >
                 {item}

@@ -24,7 +24,7 @@ interface MatrizGridProps {
 export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
   if (clientes.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16 text-[#F2EFE9]/40 text-sm">
+      <div className="flex items-center justify-center py-16 text-cream/40 text-sm">
         Sin clientes que coincidan
       </div>
     );
@@ -47,7 +47,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
               <th
                 key={sec.id}
                 colSpan={sec.items.length}
-                className="sticky top-0 z-30 bg-[#111110] text-[#E8962E] uppercase tracking-widest"
+                className="sticky top-0 z-30 bg-panel text-gold uppercase tracking-widest"
                 style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 12,
@@ -63,7 +63,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
               </th>
             ))}
             <th
-              className="sticky right-0 top-0 z-40 bg-[#111110] text-[#E8962E]"
+              className="sticky right-0 top-0 z-40 bg-panel text-gold"
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: 12,
@@ -158,7 +158,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
               <tr key={cl.id} className="group">
                 {/* Sticky client cell */}
                 <td
-                  className="sticky left-0 z-20 bg-[#080808] group-hover:bg-[#111110] transition-colors"
+                  className="sticky left-0 z-20 bg-ink group-hover:bg-panel transition-colors"
                   style={{
                     padding: '0 14px',
                     height: 56,
@@ -211,7 +211,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                   return (
                     <td
                       key={step.id}
-                      className="group-hover:bg-[#111110] transition-colors"
+                      className="group-hover:bg-panel transition-colors"
                       style={{
                         padding: 0,
                         textAlign: 'center',
@@ -227,7 +227,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                         type="button"
                         onClick={() => { if (!autoCamino) onToggle(cl.id, step.id, !on); }}
                         title={autoCamino ? `${step.title} — ✓ completado en El Camino (automático)` : `${step.title} — ${on ? 'destildar' : 'tildar'}`}
-                        className="inline-flex items-center justify-center transition-all hover:border-[#E8962E]/60"
+                        className="inline-flex items-center justify-center transition-all hover:border-gold/60"
                         style={{
                           width: 30,
                           height: 30,
@@ -245,7 +245,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
 
                 {/* Sticky total */}
                 <td
-                  className="sticky right-0 z-10 bg-[#080808] group-hover:bg-[#111110] transition-colors"
+                  className="sticky right-0 z-10 bg-ink group-hover:bg-panel transition-colors"
                   style={{
                     padding: '0 12px',
                     height: 56,

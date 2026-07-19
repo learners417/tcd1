@@ -29,19 +29,19 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
       {/* Video Title */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/25 tracking-wider">
+          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 tracking-wider">
             VIDEO
           </span>
           {watched && (
-            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/25 tracking-wider flex items-center gap-1">
+            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Visto
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
       </div>
 
       {/* YouTube Embed */}
@@ -60,19 +60,19 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             if (guion?.esencia) {
               return (
                 <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-[#141311] to-[#0B0A09] p-6 sm:p-8">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-4">La lección de hoy</p>
-                  <p className="text-base sm:text-lg leading-relaxed text-[#F2EFE9]/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-4">La lección de hoy</p>
+                  <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     {guion.esencia}
                   </p>
-                  <p className="text-[10px] text-[#F2EFE9]/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
+                  <p className="text-[10px] text-cream/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
                 </div>
               );
             }
             return (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111110] px-6 text-center">
-                <Play className="w-12 h-12 text-[#E8962E]/50 mb-3" />
-                <p className="text-sm text-[#F2EFE9]/80">🎬 El video de esta sesión está en producción</p>
-                <p className="text-xs text-[#F2EFE9]/45 mt-2 leading-relaxed max-w-sm">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-panel px-6 text-center">
+                <Play className="w-12 h-12 text-gold/50 mb-3" />
+                <p className="text-sm text-cream/80">🎬 El video de esta sesión está en producción</p>
+                <p className="text-xs text-cream/45 mt-2 leading-relaxed max-w-sm">
                   No te frena nada: la instrucción completa está aquí abajo, y tu Mentor conoce esta lección entera — pregúntale lo que necesites.
                 </p>
               </div>
@@ -83,12 +83,12 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
 
       {/* Mark as watched */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#F2EFE9]/40">
+        <p className="text-xs text-cream/40">
           {meta.tiempo_estimado || '10–15 min'}
         </p>
 
         {watched ? (
-          <div className="flex items-center gap-2 text-[#22C55E] text-sm font-medium">
+          <div className="flex items-center gap-2 text-success text-sm font-medium">
             <CheckCircle2 className="w-5 h-5" />
             Video completado
           </div>

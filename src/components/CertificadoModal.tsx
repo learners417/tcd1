@@ -90,42 +90,42 @@ export default function CertificadoModal({
     >
       <div className="w-full max-w-lg my-8" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors">
+          <button onClick={onClose} className="text-cream/50 hover:text-cream transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Certificado en pantalla */}
         <div
-          className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#141210] to-[#080808] p-8 text-center"
+          className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#141210] to-ink p-8 text-center"
           style={{ border: '2px solid rgba(232,150,46,0.5)' }}
         >
-          <div className="absolute inset-3 border border-[#E8962E]/20 rounded-xl pointer-events-none" />
-          <Award className="w-10 h-10 text-[#E8962E] mx-auto mb-3" />
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-4">
+          <div className="absolute inset-3 border border-gold/20 rounded-xl pointer-events-none" />
+          <Award className="w-10 h-10 text-gold mx-auto mb-3" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-4">
             Tu Clínica Digital · Sanadores Libres
           </p>
-          <p className="text-xs uppercase tracking-widest text-[#F2EFE9]/50 mb-2">Certifica que</p>
+          <p className="text-xs uppercase tracking-widest text-cream/50 mb-2">Certifica que</p>
           <h2
-            className="text-3xl text-[#E8962E] mb-3"
+            className="text-3xl text-gold mb-3"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             {quien}
           </h2>
-          <p className="text-sm text-[#F2EFE9]/80 leading-relaxed mb-2">
+          <p className="text-sm text-cream/80 leading-relaxed mb-2">
             {metodoNombre ? (
               <>
-                alcanzó el <span className="text-[#F2EFE9] font-medium">Cinturón Negro</span> instalando{' '}
-                <span className="text-[#F2EFE9] font-medium">{metodoNombre}</span>
+                alcanzó el <span className="text-cream font-medium">Cinturón Negro</span> instalando{' '}
+                <span className="text-cream font-medium">{metodoNombre}</span>
               </>
             ) : (
               <>
-                alcanzó el <span className="text-[#F2EFE9] font-medium">Cinturón Negro</span> — Sanador
+                alcanzó el <span className="text-cream font-medium">Cinturón Negro</span> — Sanador
                 Libre
               </>
             )}
           </p>
-          <p className="text-[11px] text-[#F2EFE9]/45">
+          <p className="text-[11px] text-cream/45">
             Clínica digital instalada · {pacientes} pacientes con precio digno · {fecha}
           </p>
         </div>
@@ -134,7 +134,7 @@ export default function CertificadoModal({
           <button
             onClick={descargar}
             disabled={generando}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#E8962E] text-black text-sm font-bold uppercase tracking-wider hover:bg-[#F4B65C] transition-colors disabled:opacity-60"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gold text-black text-sm font-bold uppercase tracking-wider hover:bg-goldhi transition-colors disabled:opacity-60"
           >
             <Download className="w-4 h-4" /> {generando ? 'Generando…' : 'Descargar PDF'}
           </button>
@@ -142,7 +142,7 @@ export default function CertificadoModal({
             href={TCD_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#E8962E]/30 text-[#E8962E] text-sm font-bold uppercase tracking-wider hover:bg-[#E8962E]/10 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gold/30 text-gold text-sm font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
           >
             <ExternalLink className="w-4 h-4" /> TCD
           </a>

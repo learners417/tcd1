@@ -235,16 +235,16 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
     <div className="space-y-5">
       {/* Intro + acciones rapidas */}
       <div className="card-panel p-4 border-[rgba(232,150,46,0.12)] flex items-start justify-between gap-4">
-        <p className="text-[13px] text-[#F2EFE9]/70 leading-relaxed flex-1">
+        <p className="text-[13px] text-cream/70 leading-relaxed flex-1">
           Define el codigo visual que{' '}
-          <span className="text-[#E8962E] font-semibold">manda sobre cualquier estilo</span> o
+          <span className="text-gold font-semibold">manda sobre cualquier estilo</span> o
           referencia que uses al generar imagenes. La paleta se aplica SIEMPRE, el estilo aporta
           tecnica y tratamiento.
         </p>
         <button
           onClick={cargarEjemplo}
           title="Cargar un ejemplo para probar"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[#E8962E] border border-[#E8962E]/30 hover:bg-[#E8962E]/10 transition-all whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-gold border border-gold/30 hover:bg-gold/10 transition-all whitespace-nowrap"
         >
           <Sparkles className="w-3 h-3" />
           Cargar ejemplo
@@ -254,14 +254,14 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       {/* Progreso */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#F2EFE9]/40">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-cream/40">
             Completado
           </span>
-          <span className="text-[11px] font-semibold text-[#F2EFE9]/70">{completos}/3</span>
+          <span className="text-[11px] font-semibold text-cream/70">{completos}/3</span>
         </div>
-        <div className="flex-1 max-w-xs h-1.5 rounded-full bg-[#F2EFE9]/5 overflow-hidden">
+        <div className="flex-1 max-w-xs h-1.5 rounded-full bg-cream/5 overflow-hidden">
           <div
-            className="h-full bg-[#E8962E] transition-all"
+            className="h-full bg-gold transition-all"
             style={{ width: `${(completos / 3) * 100}%` }}
           />
         </div>
@@ -301,7 +301,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(232,150,46,0.10)]">
         <button
           onClick={syncConAdn}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-[#F2EFE9]/60 border border-[#F2EFE9]/10 hover:border-[#E8962E]/40 hover:text-[#F2EFE9]/90 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-cream/60 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Sincronizar con ADN
@@ -309,7 +309,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={guardar}
           disabled={saving || !dirty || !userId}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/40 hover:bg-[#E8962E]/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? (
             <>
@@ -347,17 +347,17 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Palette className={`w-4 h-4 ${isCompleto ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-[#F2EFE9]/60">
+        <Palette className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/60">
           Paleta de colores
         </label>
         {isCompleto && (
-          <span className="text-[9px] text-[#E8962E]/70 font-medium">
+          <span className="text-[9px] text-gold/70 font-medium">
             · {swatches.length} color{swatches.length === 1 ? '' : 'es'}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-[#F2EFE9]/40 mb-3">
+      <p className="text-[11px] text-cream/40 mb-3">
         Estos colores se aplican con prioridad sobre el estilo visual y sobre cualquier imagen de
         referencia al generar.
       </p>
@@ -393,7 +393,7 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
         {/* Add button card */}
         <button
           onClick={onAdd}
-          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[rgba(232,150,46,0.18)] text-[#E8962E]/70 hover:bg-[#E8962E]/5 hover:border-[#E8962E]/50 hover:text-[#E8962E] transition-all"
+          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[rgba(232,150,46,0.18)] text-gold/70 hover:bg-gold/5 hover:border-gold/50 hover:text-gold transition-all"
         >
           <Plus className="w-4 h-4" />
           <span className="text-[12px] font-medium">Agregar color</span>
@@ -441,17 +441,17 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
   }, [hexLocal, valido]);
 
   return (
-    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[rgba(232,150,46,0.10)] hover:border-[#E8962E]/35 transition-all">
+    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[rgba(232,150,46,0.10)] hover:border-gold/35 transition-all">
       {/* Color preview circle (clickable -> opens native picker) */}
       <button
         type="button"
         onClick={() => colorInputRef.current?.click()}
-        className="relative w-12 h-12 rounded-full shrink-0 shadow-lg border-2 border-[#F2EFE9]/10 hover:border-[#F2EFE9]/25 transition-all ring-1 ring-black/40"
+        className="relative w-12 h-12 rounded-full shrink-0 shadow-lg border-2 border-cream/10 hover:border-cream/25 transition-all ring-1 ring-black/40"
         style={{ backgroundColor: display }}
         title="Click para cambiar color"
       >
         {!valido && (
-          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-[#F2EFE9]/40">
+          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-cream/40">
             ?
           </span>
         )}
@@ -485,14 +485,14 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
             maxLength={7}
             className={`w-[92px] bg-black/30 border rounded-md px-2 py-1 text-[12px] font-mono tracking-wider transition-all focus:outline-none focus:ring-1 ${
               valido
-                ? 'border-[rgba(232,150,46,0.18)] text-[#F2EFE9]/90 focus:border-[#E8962E]/60 focus:ring-[#E8962E]/30'
-                : 'border-[#EF4444]/40 text-[#EF4444] focus:border-[#EF4444]/60 focus:ring-[#EF4444]/30'
+                ? 'border-[rgba(232,150,46,0.18)] text-cream/90 focus:border-gold/60 focus:ring-gold/30'
+                : 'border-danger/40 text-danger focus:border-danger/60 focus:ring-danger/30'
             }`}
           />
           <button
             type="button"
             onClick={copyHex}
-            className="p-1 rounded text-[#F2EFE9]/30 hover:text-[#E8962E] transition-colors"
+            className="p-1 rounded text-cream/30 hover:text-gold transition-colors"
             title="Copiar hex"
           >
             <CopyIcon className="w-3 h-3" />
@@ -503,7 +503,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
           value={swatch.rol}
           onChange={(e) => onChange({ rol: e.target.value })}
           placeholder="rol (ej: fondo, acento)"
-          className="w-full bg-transparent border-0 border-b border-[#F2EFE9]/10 text-[11px] text-[#F2EFE9]/70 placeholder-[#F2EFE9]/25 focus:outline-none focus:border-[#E8962E]/40 pb-0.5"
+          className="w-full bg-transparent border-0 border-b border-cream/10 text-[11px] text-cream/70 placeholder-cream/25 focus:outline-none focus:border-gold/40 pb-0.5"
         />
       </div>
 
@@ -511,7 +511,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <button
         type="button"
         onClick={onRemove}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#F2EFE9]/30 hover:text-[#EF4444] transition-all"
+        className="opacity-0 group-hover:opacity-100 p-1 rounded text-cream/30 hover:text-danger transition-all"
         title="Eliminar color"
       >
         <X className="w-3.5 h-3.5" />
@@ -537,21 +537,21 @@ function Field({ icon: Icon, label, hint, value, onChange, placeholder, rows }: 
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Icon className={`w-4 h-4 ${isCompleto ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-[#F2EFE9]/60">
+        <Icon className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/60">
           {label}
         </label>
         {isCompleto && (
-          <span className="text-[9px] text-[#E8962E]/70 font-medium">· cargado</span>
+          <span className="text-[9px] text-gold/70 font-medium">· cargado</span>
         )}
       </div>
-      <p className="text-[11px] text-[#F2EFE9]/40 mb-2">{hint}</p>
+      <p className="text-[11px] text-cream/40 mb-2">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/60 focus:ring-1 focus:ring-[#E8962E]/30 transition-all placeholder-[#F2EFE9]/20 resize-none"
+        className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
       />
     </div>
   );

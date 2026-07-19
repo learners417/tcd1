@@ -196,17 +196,17 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors">
+          <button onClick={onBack} className="text-cream/40 hover:text-cream transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-lg font-semibold text-[#F2EFE9]">{creativo.nombre ?? creativo.titulo}</h2>
+            <h2 className="text-lg font-semibold text-cream">{creativo.nombre ?? creativo.titulo}</h2>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#E8962E]/10 text-[#E8962E]">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-gold/10 text-gold">
                 {ANGULO_LABELS[creativo.angulo].titulo}
               </span>
-              <span className="text-xs text-[#F2EFE9]/30">{TIPO_LABELS[creativo.tipo]}</span>
-              <span className="text-xs text-[#F2EFE9]/20">
+              <span className="text-xs text-cream/30">{TIPO_LABELS[creativo.tipo]}</span>
+              <span className="text-xs text-cream/20">
                 {new Date(creativo.created_at).toLocaleDateString('es')}
               </span>
             </div>
@@ -216,19 +216,19 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleStatusChange('aprobado')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#22C55E] bg-[#22C55E]/10 hover:bg-[#22C55E]/15 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-success bg-success/10 hover:bg-success/15 transition-colors"
           >
             <CheckCircle className="w-3.5 h-3.5" /> Aprobar
           </button>
           <button
             onClick={() => handleStatusChange('descartado')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/15 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-danger bg-danger/10 hover:bg-danger/15 transition-colors"
           >
             <XCircle className="w-3.5 h-3.5" /> Descartar
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#EF4444] bg-[#EF4444]/5 hover:bg-[#EF4444]/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-danger bg-danger/5 hover:bg-danger/10 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" /> Eliminar
           </button>
@@ -243,12 +243,12 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
               {/* Lote 5 · EL MOCKUP DE FEED: tu anuncio como lo verá el mundo */}
               <div className="rounded-2xl border border-[rgba(232,150,46,0.14)] bg-[#0D0C0B] overflow-hidden" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4B65C] to-[#E8962E] flex items-center justify-center text-[#080808] text-xs font-bold">Tú</div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-goldhi to-gold flex items-center justify-center text-ink text-xs font-bold">Tú</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#F2EFE9] truncate">Tu consulta profesional</p>
-                    <p className="text-[10px] text-[#F2EFE9]/40">Publicidad · Sugerido para ti</p>
+                    <p className="text-xs font-semibold text-cream truncate">Tu consulta profesional</p>
+                    <p className="text-[10px] text-cream/40">Publicidad · Sugerido para ti</p>
                   </div>
-                  <span className="text-[#F2EFE9]/30 text-lg leading-none">···</span>
+                  <span className="text-cream/30 text-lg leading-none">···</span>
                 </div>
                 <img
                   src={displayUrl(assets[activeSlide])}
@@ -256,7 +256,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                   className="w-full h-auto max-h-[60vh] object-contain bg-black/40"
                 />
                 {busy && (
-                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 text-[#E8962E]">
+                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 text-gold">
                     <Loader2 className="w-8 h-8 animate-spin" />
                     <p className="text-xs font-medium">
                       {regenerating ? 'Regenerando imagen…' : 'Aplicando edición con IA…'}
@@ -268,13 +268,13 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                   <>
                     <button
                       onClick={prev}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-[#F2EFE9] hover:bg-black/80 transition-colors"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-cream hover:bg-black/80 transition-colors"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                       onClick={next}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-[#F2EFE9] hover:bg-black/80 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-cream hover:bg-black/80 transition-colors"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -284,7 +284,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                           key={idx}
                           onClick={() => setActiveSlide(idx)}
                           className={`w-2 h-2 rounded-full transition-all ${
-                            activeSlide === idx ? 'bg-[#E8962E] w-4' : 'bg-[#F2EFE9]/40'
+                            activeSlide === idx ? 'bg-gold w-4' : 'bg-cream/40'
                           }`}
                         />
                       ))}
@@ -302,7 +302,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                       onClick={() => setActiveSlide(idx)}
                       disabled={busy}
                       className={`w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0 transition-all disabled:opacity-40 ${
-                        activeSlide === idx ? 'border-[#E8962E]' : 'border-transparent opacity-50 hover:opacity-100'
+                        activeSlide === idx ? 'border-gold' : 'border-transparent opacity-50 hover:opacity-100'
                       }`}
                     >
                       <img loading="lazy" src={displayUrl(asset)} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
@@ -316,7 +316,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                 <button
                   onClick={handleDownload}
                   disabled={busy}
-                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#E8962E] bg-[#E8962E]/10 hover:bg-[#E8962E]/15 transition-colors border border-[#E8962E]/20 disabled:opacity-40"
+                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors border border-gold/20 disabled:opacity-40"
                 >
                   <Download className="w-4 h-4" />
                   {isCarousel ? `Descargar slide ${activeSlide + 1}` : 'Descargar'}
@@ -325,7 +325,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                   <button
                     onClick={handleDownloadAll}
                     disabled={busy}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#F2EFE9]/60 bg-[#F2EFE9]/5 hover:bg-[#F2EFE9]/10 transition-colors disabled:opacity-40"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-cream/60 bg-cream/5 hover:bg-cream/10 transition-colors disabled:opacity-40"
                   >
                     <Download className="w-4 h-4" /> Todas ({assets.length})
                   </button>
@@ -334,7 +334,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                   onClick={handleRegenerate}
                   disabled={busy || !canRegenerate}
                   title={canRegenerate ? 'Regenera la imagen con el mismo prompt' : 'Sin prompt guardado — no se puede regenerar'}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#E8962E] bg-[#E8962E]/10 hover:bg-[#E8962E]/15 transition-colors border border-[#E8962E]/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors border border-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {regenerating
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Regenerando…</>
@@ -346,8 +346,8 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                   disabled={busy}
                   className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border disabled:opacity-40 ${
                     editMode
-                      ? 'text-[#E8962E] bg-[#E8962E]/20 border-[#E8962E]/50'
-                      : 'text-[#E8962E] bg-[#E8962E]/10 hover:bg-[#E8962E]/15 border-[#E8962E]/20'
+                      ? 'text-gold bg-gold/20 border-gold/50'
+                      : 'text-gold bg-gold/10 hover:bg-gold/15 border-gold/20'
                   }`}
                 >
                   <Wand2 className="w-4 h-4" /> Editar con IA
@@ -356,13 +356,13 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
 
               {/* Panel de edicion con IA */}
               {editMode && (
-                <div className="p-4 rounded-xl bg-[#111110] border border-[rgba(232,150,46,0.12)] space-y-2">
+                <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.12)] space-y-2">
                   <div className="flex items-center gap-2">
-                    <Wand2 className="w-3.5 h-3.5 text-[#E8962E]" />
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-[#E8962E]">
+                    <Wand2 className="w-3.5 h-3.5 text-gold" />
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-gold">
                       Editar con IA {isCarousel ? `· slide ${activeSlide + 1}` : ''}
                     </span>
-                    <span className="text-[9px] text-[#F2EFE9]/30 normal-case font-normal">
+                    <span className="text-[9px] text-cream/30 normal-case font-normal">
                       — retoque sutil, mantiene composicion
                     </span>
                   </div>
@@ -371,21 +371,21 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                     onChange={(e) => setEditPrompt(e.target.value)}
                     rows={2}
                     placeholder="Ej: quita el logo de la esquina; cambia el color del boton a dorado; borra el icono del costado"
-                    className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-xl p-2.5 text-[#F2EFE9] text-xs focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 placeholder-[#F2EFE9]/20 resize-none"
+                    className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-xl p-2.5 text-cream text-xs focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20 resize-none"
                     disabled={editing}
                   />
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => { setEditMode(false); setEditPrompt(''); }}
                       disabled={editing}
-                      className="px-3 py-1.5 rounded-lg text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80 transition-colors disabled:opacity-40"
+                      className="px-3 py-1.5 rounded-lg text-xs text-cream/50 hover:text-cream/80 transition-colors disabled:opacity-40"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleApplyEdit}
                       disabled={editing || !editPrompt.trim()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/40 text-xs font-semibold hover:bg-[#E8962E]/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold/15 text-gold border border-gold/40 text-xs font-semibold hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {editing
                         ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Aplicando…</>
@@ -397,27 +397,27 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
               )}
 
               {!canRegenerate && (
-                <p className="text-[10px] text-[#F2EFE9]/30">
+                <p className="text-[10px] text-cream/30">
                   Este creativo no tiene prompt guardado (creado antes del auto-save). Puedes editarlo con IA,
                   pero para regenerarlo vuelve a generarlo desde el panel.
                 </p>
               )}
             </>
           ) : (
-            <div className="aspect-square bg-[#111110] rounded-xl border border-[rgba(232,150,46,0.1)] flex items-center justify-center">
-              <p className="text-sm text-[#F2EFE9]/20">Sin imagenes</p>
+            <div className="aspect-square bg-panel rounded-xl border border-[rgba(232,150,46,0.1)] flex items-center justify-center">
+              <p className="text-sm text-cream/20">Sin imagenes</p>
             </div>
           )}
         </div>
 
         {/* Copy details */}
         <div className="space-y-4">
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-4">
+          <div className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-[#F2EFE9]">Copy del Anuncio</h3>
+              <h3 className="text-sm font-medium text-cream">Copy del Anuncio</h3>
               <button
                 onClick={handleCopyCopy}
-                className="flex items-center gap-1 text-xs text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors"
+                className="flex items-center gap-1 text-xs text-cream/40 hover:text-cream transition-colors"
               >
                 {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                 {copied ? 'Copiado' : 'Copiar todo'}
@@ -425,53 +425,53 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
             </div>
 
             <div>
-              <label className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider">Texto Principal</label>
-              <p className="text-sm text-[#F2EFE9]/80 mt-1 whitespace-pre-line leading-relaxed">
+              <label className="text-[10px] text-cream/30 uppercase tracking-wider">Texto Principal</label>
+              <p className="text-sm text-cream/80 mt-1 whitespace-pre-line leading-relaxed">
                 {creativo.texto_principal}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider">Titulo</label>
-                <p className="text-sm font-medium text-[#F2EFE9] mt-1">{creativo.titulo}</p>
+                <label className="text-[10px] text-cream/30 uppercase tracking-wider">Titulo</label>
+                <p className="text-sm font-medium text-cream mt-1">{creativo.titulo}</p>
               </div>
               <div>
-                <label className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider">CTA</label>
-                <p className="text-sm font-medium text-[#E8962E] mt-1">{creativo.cta_texto}</p>
+                <label className="text-[10px] text-cream/30 uppercase tracking-wider">CTA</label>
+                <p className="text-sm font-medium text-gold mt-1">{creativo.cta_texto}</p>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider">Descripcion</label>
-              <p className="text-sm text-[#F2EFE9]/60 mt-1">{creativo.descripcion}</p>
+              <label className="text-[10px] text-cream/30 uppercase tracking-wider">Descripcion</label>
+              <p className="text-sm text-cream/60 mt-1">{creativo.descripcion}</p>
             </div>
           </div>
 
           {/* Metadata */}
-          <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-xl p-4">
-            <h3 className="text-xs font-medium text-[#F2EFE9]/40 mb-3">Metadata</h3>
+          <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-xl p-4">
+            <h3 className="text-xs font-medium text-cream/40 mb-3">Metadata</h3>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#F2EFE9]/30">Angulo</span>
-                <span className="text-[#F2EFE9]/60">{ANGULO_LABELS[creativo.angulo].titulo}</span>
+                <span className="text-cream/30">Angulo</span>
+                <span className="text-cream/60">{ANGULO_LABELS[creativo.angulo].titulo}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#F2EFE9]/30">Tipo</span>
-                <span className="text-[#F2EFE9]/60">{TIPO_LABELS[creativo.tipo]}</span>
+                <span className="text-cream/30">Tipo</span>
+                <span className="text-cream/60">{TIPO_LABELS[creativo.tipo]}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#F2EFE9]/30">Estado</span>
+                <span className="text-cream/30">Estado</span>
                 <span className={`font-medium ${
-                  creativo.estado === 'aprobado' ? 'text-[#22C55E]' :
-                  creativo.estado === 'descartado' ? 'text-[#EF4444]' : 'text-[#E8962E]'
+                  creativo.estado === 'aprobado' ? 'text-success' :
+                  creativo.estado === 'descartado' ? 'text-danger' : 'text-gold'
                 }`}>
                   {creativo.estado.charAt(0).toUpperCase() + creativo.estado.slice(1)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#F2EFE9]/30">Creado</span>
-                <span className="text-[#F2EFE9]/60">
+                <span className="text-cream/30">Creado</span>
+                <span className="text-cream/60">
                   {new Date(creativo.created_at).toLocaleString('es')}
                 </span>
               </div>

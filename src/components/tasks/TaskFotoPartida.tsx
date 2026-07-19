@@ -103,27 +103,27 @@ export default function TaskFotoPartida({
     <div className="space-y-6">
       <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-[10px] font-mono text-[#E8962E] uppercase tracking-widest font-bold">
+          <span className="text-[10px] font-mono text-gold uppercase tracking-widest font-bold">
             <Camera className="w-3 h-3 inline mr-1" />
             {meta.codigo} · Foto de Partida
           </span>
           {saved && (
-            <span className="text-[10px] text-[#22C55E] uppercase tracking-widest font-bold flex items-center gap-1">
+            <span className="text-[10px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Guardado
             </span>
           )}
         </div>
         <h3
-          className="text-lg font-medium text-[#F2EFE9]"
+          className="text-lg font-medium text-cream"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
         >
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
       </div>
 
-      <div className="card-panel p-5 border border-[#E8962E]/15 bg-[#E8962E]/[0.03]">
-        <p className="text-sm text-[#F2EFE9]/70 leading-relaxed">
+      <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
+        <p className="text-sm text-cream/70 leading-relaxed">
           Para cada dimensión, marca del 1 al 5 cuánto sentís que la tienes HOY.
           No hay respuesta correcta — es una foto del punto de partida.
           Al día 45 la vamos a comparar con tu ADN real.
@@ -139,10 +139,10 @@ export default function TaskFotoPartida({
               className="card-panel p-4 border border-[rgba(232,150,46,0.1)]"
             >
               <div className="flex items-start justify-between gap-3 mb-3">
-                <label className="text-sm font-medium text-[#F2EFE9] flex-1">
+                <label className="text-sm font-medium text-cream flex-1">
                   {dim.label}
                 </label>
-                <span className="text-2xl font-mono text-[#E8962E] font-bold leading-none">
+                <span className="text-2xl font-mono text-gold font-bold leading-none">
                   {score}
                 </span>
               </div>
@@ -156,8 +156,8 @@ export default function TaskFotoPartida({
                     onClick={() => handleScoreChange(index, n)}
                     className={`py-2.5 rounded-lg border text-sm font-semibold transition-all ${
                       score === n
-                        ? 'bg-[#E8962E] border-[#E8962E] text-[#080808]'
-                        : 'bg-[#1A1917]/40 border-[rgba(232,150,46,0.10)] text-[#F2EFE9]/50 hover:bg-[#E8962E]/10 hover:text-[#F2EFE9]/80 hover:border-[#E8962E]/30'
+                        ? 'bg-gold border-gold text-ink'
+                        : 'bg-surface/40 border-[rgba(232,150,46,0.10)] text-cream/50 hover:bg-gold/10 hover:text-cream/80 hover:border-gold/30'
                     }`}
                     aria-label={`Puntaje ${n} en ${dim.label}`}
                   >
@@ -166,7 +166,7 @@ export default function TaskFotoPartida({
                 ))}
               </div>
 
-              <p className="text-xs text-[#F2EFE9]/40 mt-2 italic">
+              <p className="text-xs text-cream/40 mt-2 italic">
                 {SCORE_LABELS[score as 1 | 2 | 3 | 4 | 5] ?? ''}
               </p>
             </div>
@@ -174,14 +174,14 @@ export default function TaskFotoPartida({
         })}
       </div>
 
-      <div className="card-panel p-4 border border-[rgba(232,150,46,0.12)] bg-[#1A1917]/30 flex items-center justify-between">
+      <div className="card-panel p-4 border border-[rgba(232,150,46,0.12)] bg-surface/30 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-[#F2EFE9]/50 font-semibold">
+          <p className="text-xs uppercase tracking-widest text-cream/50 font-semibold">
             Promedio actual
           </p>
-          <p className="text-3xl font-bold text-[#E8962E] mt-1 leading-none">
+          <p className="text-3xl font-bold text-gold mt-1 leading-none">
             {promedio.toFixed(1)}
-            <span className="text-base text-[#F2EFE9]/40 font-normal ml-1">/ 5</span>
+            <span className="text-base text-cream/40 font-normal ml-1">/ 5</span>
           </p>
         </div>
         <button

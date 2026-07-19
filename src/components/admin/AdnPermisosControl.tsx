@@ -44,21 +44,21 @@ function Fila({ titulo, icon, items, activos, master, onToggle }: {
 
   return (
     <div className="flex items-start gap-3 py-2 border-b border-[rgba(232,150,46,0.06)] last:border-0">
-      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider">
+      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[10px] font-bold text-cream/40 uppercase tracking-wider">
         {icon}{titulo}
       </div>
       <div className="flex flex-wrap gap-1">
         {master && (
           <button onClick={() => toggle(master)}
             className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all ${
-              allOn ? 'bg-[#E8962E] text-black border-[#E8962E]' : 'border-[rgba(232,150,46,0.25)] text-[#E8962E]/60 hover:text-[#E8962E]'}`}>
+              allOn ? 'bg-gold text-black border-gold' : 'border-[rgba(232,150,46,0.25)] text-gold/60 hover:text-gold'}`}>
             {master === 'todas' ? 'Todas' : 'Todos'}
           </button>
         )}
         {items.map((it) => (
           <button key={it.id} onClick={() => toggle(it.id)} disabled={allOn}
             className={`px-2 py-0.5 rounded-md text-[10px] border transition-all disabled:opacity-40 ${
-              isOn(it.id) ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/30' : 'border-[#F2EFE9]/10 text-[#F2EFE9]/35 hover:text-[#F2EFE9]/70'}`}>
+              isOn(it.id) ? 'bg-gold/15 text-gold border-gold/30' : 'border-cream/10 text-cream/35 hover:text-cream/70'}`}>
             {it.label}
           </button>
         ))}
@@ -96,12 +96,12 @@ export default function AdnPermisosControl({ clienteId, agentesActuales, modulos
   }
 
   return (
-    <div className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl px-4 py-3">
+    <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl px-4 py-3">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider">Accesos del cliente</p>
+        <p className="text-[10px] font-bold text-cream/40 uppercase tracking-wider">Accesos del cliente</p>
         <button onClick={guardar} disabled={saving || !dirty}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${
-            dirty ? 'bg-[#E8962E] text-black hover:bg-[#F4B65C]' : 'bg-[#F2EFE9]/5 text-[#F2EFE9]/30'} disabled:opacity-60`}>
+            dirty ? 'bg-gold text-black hover:bg-goldhi' : 'bg-cream/5 text-cream/30'} disabled:opacity-60`}>
           {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
           {saving ? 'Guardando' : dirty ? 'Guardar' : 'Guardado'}
         </button>

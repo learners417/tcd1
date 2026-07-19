@@ -88,7 +88,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-[#E8962E]" />
+        <Loader2 className="h-6 w-6 animate-spin text-gold" />
       </div>
     );
   }
@@ -117,13 +117,13 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
       </div>
 
       {/* Balance card */}
-      <div className="rounded-xl border border-[#E8962E]/20 bg-[#E8962E]/5 p-5">
+      <div className="rounded-xl border border-gold/20 bg-gold/5 p-5">
         <div className="grid grid-cols-3 gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs text-white/50 mb-1">
               <Coins className="h-3 w-3" /> Total
             </div>
-            <div className="text-2xl font-bold text-[#E8962E]">{balance.total}</div>
+            <div className="text-2xl font-bold text-gold">{balance.total}</div>
           </div>
           <div>
             <div className="text-xs text-white/50 mb-1">Plan mensual</div>
@@ -153,7 +153,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
       {/* Ajuste manual */}
       <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-4 space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Settings2 className="h-4 w-4 text-[#E8962E]" />
+          <Settings2 className="h-4 w-4 text-gold" />
           Ajuste manual de créditos
         </div>
         <div className="grid grid-cols-[1fr_2fr] gap-3">
@@ -163,14 +163,14 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
             placeholder="Cantidad"
             value={adjustValue}
             onChange={(e) => setAdjustValue(e.target.value)}
-            className="rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/50 focus:outline-none"
+            className="rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-gold/50 focus:outline-none"
           />
           <input
             type="text"
             placeholder="Razón (obligatoria · queda en log)"
             value={adjustReason}
             onChange={(e) => setAdjustReason(e.target.value)}
-            className="rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/50 focus:outline-none"
+            className="rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-gold/50 focus:outline-none"
           />
         </div>
         <div className="flex gap-2">
@@ -184,7 +184,7 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
           <button
             onClick={() => handleAdjust(-1)}
             disabled={saving}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-[#EF4444]/15 border border-[#EF4444]/30 text-[#EF4444] hover:bg-[#EF4444]/25 px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-danger/15 border border-danger/30 text-danger hover:bg-danger/25 px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50"
           >
             <Minus className="h-4 w-4" /> Restar
           </button>
@@ -206,12 +206,12 @@ export default function AdminCreditsPanel({ clienteId, clienteNombre }: AdminCre
             placeholder={`Actual: ${credits?.monthly_quota ?? 150}`}
             value={newQuota}
             onChange={(e) => setNewQuota(e.target.value)}
-            className="flex-1 rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/50 focus:outline-none"
+            className="flex-1 rounded-lg bg-[#0F0F0F] border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-gold/50 focus:outline-none"
           />
           <button
             onClick={handleSetQuota}
             disabled={saving || !newQuota}
-            className="rounded-lg bg-[#E8962E]/15 border border-[#E8962E]/30 text-[#E8962E] hover:bg-[#E8962E]/25 px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+            className="rounded-lg bg-gold/15 border border-gold/30 text-gold hover:bg-gold/25 px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
           >
             Aplicar
           </button>

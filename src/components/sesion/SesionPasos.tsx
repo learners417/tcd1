@@ -58,7 +58,7 @@ function useMicrofono(onTexto: (t: string) => void) {
 function BotonPrimario({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
   return (
     <button type="button" onClick={onClick} disabled={disabled}
-      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#E8962E] text-black text-sm font-bold hover:bg-[#F4B65C] transition-all disabled:opacity-35 disabled:cursor-not-allowed">
+      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-all disabled:opacity-35 disabled:cursor-not-allowed">
       {children}
     </button>
   );
@@ -182,29 +182,29 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
   const progreso = (
     <div className="flex items-center gap-1.5 mb-6">
       {pasos.map((_, i) => (
-        <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < idx ? 'bg-[#22C55E]' : i === idx ? 'bg-[#E8962E]' : 'bg-white/10'}`} />
+        <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < idx ? 'bg-success' : i === idx ? 'bg-gold' : 'bg-white/10'}`} />
       ))}
-      {modoCorto && <span className="text-[9px] text-[#E8962E] font-bold uppercase ml-2 shrink-0">🕐 modo 15</span>}
+      {modoCorto && <span className="text-[9px] text-gold font-bold uppercase ml-2 shrink-0">🕐 modo 15</span>}
     </div>
   );
 
   return (
     <div className="max-w-xl mx-auto animate-in fade-in duration-300" key={idx}>
       {progreso}
-      {errorMsg && <p className="text-xs text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg px-3 py-2 mb-4">{errorMsg}</p>}
+      {errorMsg && <p className="text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 mb-4">{errorMsg}</p>}
 
       {paso.tipo === 'intro' && (
         <div className="text-center py-4">
-          <h3 className="text-2xl font-light text-[#F2EFE9] mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{paso.titulo}</h3>
+          <h3 className="text-2xl font-light text-cream mb-4" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{paso.titulo}</h3>
           <p className="text-sm text-white/60 leading-relaxed mb-3 text-left">{paso.texto}</p>
-          {paso.nota && <p className="text-xs text-[#E8962E]/80 bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-xl px-4 py-2.5 mb-6 text-left">💡 {paso.nota}</p>}
+          {paso.nota && <p className="text-xs text-gold/80 bg-gold/10 border border-gold/20 rounded-xl px-4 py-2.5 mb-6 text-left">💡 {paso.nota}</p>}
           <BotonPrimario onClick={avanzar}>Empezar <ArrowRight className="w-4 h-4" /></BotonPrimario>
         </div>
       )}
 
       {paso.tipo === 'opciones' && (
         <div>
-          <p className="text-base text-[#F2EFE9] font-medium mb-4 leading-snug">{paso.pregunta}</p>
+          <p className="text-base text-cream font-medium mb-4 leading-snug">{paso.pregunta}</p>
           <div className="space-y-2 mb-4">
             {paso.opciones.map((op) => {
               const cur = resp[paso.id];
@@ -220,15 +220,15 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
                       return { ...prev, [paso.id]: op };
                     });
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${activa ? 'border-[#E8962E] bg-[#E8962E]/12 text-[#F2EFE9]' : 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/25'}`}>
-                  <span className={`inline-block w-4 mr-2 ${activa ? 'text-[#E8962E]' : 'text-white/20'}`}>{activa ? '✓' : '○'}</span>{op}
+                  className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${activa ? 'border-gold bg-gold/12 text-cream' : 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/25'}`}>
+                  <span className={`inline-block w-4 mr-2 ${activa ? 'text-gold' : 'text-white/20'}`}>{activa ? '✓' : '○'}</span>{op}
                 </button>
               );
             })}
             {paso.permiteOtra && (
               <div className="flex gap-2">
                 <input value={otraTexto} onChange={(e) => setOtraTexto(e.target.value)} placeholder="Otra cosa…"
-                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:border-[#E8962E]/50 focus:outline-none" />
+                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:border-gold/50 focus:outline-none" />
                 <button type="button" disabled={!otraTexto.trim()}
                   onClick={() => {
                     const v = otraTexto.trim(); setOtraTexto('');
@@ -252,7 +252,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
 
       {paso.tipo === 'ia_propone' && (
         <div>
-          <p className="text-base text-[#F2EFE9] font-medium mb-4 leading-snug">{paso.pregunta}</p>
+          <p className="text-base text-cream font-medium mb-4 leading-snug">{paso.pregunta}</p>
           {!opcionesIA[paso.id] ? (
             <div className="text-center py-6">
               <p className="text-xs text-white/45 mb-5">Por lo que sé de ti, tengo propuestas. Tú decides — o escribes la tuya.</p>
@@ -265,14 +265,14 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
               <div className="space-y-2 mb-3">
                 {opcionesIA[paso.id].map((op) => (
                   <button key={op} type="button" onClick={() => setResp((prev) => ({ ...prev, [paso.id]: op }))}
-                    className={`w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-all ${resp[paso.id] === op ? 'border-[#E8962E] bg-[#E8962E]/12 text-[#F2EFE9]' : 'border-white/10 bg-white/[0.03] text-white/75 hover:border-white/25'}`}>
-                    <Sparkles className="w-3.5 h-3.5 inline mr-2 text-[#E8962E]/70" />{op}
+                    className={`w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-all ${resp[paso.id] === op ? 'border-gold bg-gold/12 text-cream' : 'border-white/10 bg-white/[0.03] text-white/75 hover:border-white/25'}`}>
+                    <Sparkles className="w-3.5 h-3.5 inline mr-2 text-gold/70" />{op}
                   </button>
                 ))}
               </div>
               <div className="flex gap-2 mb-4">
                 <input value={otraTexto} onChange={(e) => setOtraTexto(e.target.value)} placeholder="✏️ O escribe la tuya…"
-                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:border-[#E8962E]/50 focus:outline-none" />
+                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:border-gold/50 focus:outline-none" />
                 <button type="button" disabled={!otraTexto.trim()}
                   onClick={() => { setResp((prev) => ({ ...prev, [paso.id]: otraTexto.trim() })); setOtraTexto(''); }}
                   className="px-4 rounded-xl bg-white/10 text-white/70 text-sm font-bold disabled:opacity-30">Usar</button>
@@ -287,10 +287,10 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
         const r = radarPara((perfil as Record<string, unknown> | null | undefined)?.especialidad as string | undefined);
         return (
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-3">📡 El radar de tu mercado</p>
-            <div className="rounded-2xl border border-[#E8962E]/25 bg-gradient-to-br from-[#E8962E]/[0.07] to-transparent p-5 mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">📡 El radar de tu mercado</p>
+            <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.07] to-transparent p-5 mb-4">
               <p className="text-sm text-white/60 mb-1">{r.familia} · mercado hispano</p>
-              <p className="text-3xl font-light text-[#F2EFE9] mb-3" style={{ fontFamily: 'var(--font-display)' }}>{r.rango}</p>
+              <p className="text-3xl font-light text-cream mb-3" style={{ fontFamily: 'var(--font-display)' }}>{r.rango}</p>
               <p className="text-xs text-white/45 leading-relaxed">{r.ejemplos}</p>
             </div>
             <p className="text-sm text-white/60 leading-relaxed mb-6">Esto ya se cobra en tu campo. La gente tiene dinero — mira cuántos teléfonos de $1.000 se venden por día en cualquier centro comercial. Tu $1.000 no es un invento personal: es una posición de mercado. Y de las moderadas.</p>
@@ -301,16 +301,16 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
 
       {paso.tipo === 'ritual' && (
         <div>
-          <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">{paso.titulo}</h3>
+          <h3 className="text-lg font-medium text-cream mb-4">{paso.titulo}</h3>
           <ol className="space-y-3 mb-4">
             {paso.instrucciones.map((ins, i) => (
               <li key={i} className="flex gap-3 text-sm text-white/70 leading-relaxed">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-[#E8962E]/15 border border-[#E8962E]/30 text-[#E8962E] text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                <span className="shrink-0 w-6 h-6 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs font-bold flex items-center justify-center">{i + 1}</span>
                 {ins}
               </li>
             ))}
           </ol>
-          {paso.nota && <p className="text-xs text-[#E8962E]/80 bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-xl px-4 py-2.5 mb-6">📸 {paso.nota}</p>}
+          {paso.nota && <p className="text-xs text-gold/80 bg-gold/10 border border-gold/20 rounded-xl px-4 py-2.5 mb-6">📸 {paso.nota}</p>}
           <BotonPrimario onClick={avanzar}>Hecho — hice el ritual <ArrowRight className="w-4 h-4" /></BotonPrimario>
         </div>
       )}
@@ -320,17 +320,17 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
           {paso.tipo === 'audio_futuro' ? (
             <>
               <p className="text-3xl mb-3">🕰️</p>
-              <h3 className="text-lg font-medium text-[#F2EFE9] mb-3">El Mensaje al Futuro</h3>
+              <h3 className="text-lg font-medium text-cream mb-3">El Mensaje al Futuro</h3>
               <p className="text-sm text-white/60 leading-relaxed mb-1 text-left">Graba un audio de 60 segundos con la app de notas de voz de tu teléfono — para la persona que vas a ser el día 90. Cómo estás hoy. Qué miedo tienes. Qué esperas de esta persona.</p>
-              <p className="text-xs text-[#E8962E]/80 mb-5 text-left">Se sella hasta tu graduación. Nadie lo escucha antes — ni tú.</p>
+              <p className="text-xs text-gold/80 mb-5 text-left">Se sella hasta tu graduación. Nadie lo escucha antes — ni tú.</p>
             </>
           ) : (
             <>
-              <h3 className="text-lg font-medium text-[#F2EFE9] mb-3">{paso.titulo}</h3>
+              <h3 className="text-lg font-medium text-cream mb-3">{paso.titulo}</h3>
               <p className="text-sm text-white/60 leading-relaxed mb-5 text-left">{paso.texto}</p>
             </>
           )}
-          <label className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold cursor-pointer transition-all ${evidenciaOk[paso.id] ? 'bg-[#22C55E]/15 border border-[#22C55E]/40 text-[#22C55E]' : 'bg-[#E8962E] text-black hover:bg-[#F4B65C]'}`}>
+          <label className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold cursor-pointer transition-all ${evidenciaOk[paso.id] ? 'bg-success/15 border border-success/40 text-success' : 'bg-gold text-black hover:bg-goldhi'}`}>
             {subiendo ? <Loader2 className="w-4 h-4 animate-spin" /> : evidenciaOk[paso.id] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
             {evidenciaOk[paso.id] ? 'Recibido ✓' : subiendo ? 'Subiendo…' : paso.tipo === 'audio_futuro' ? 'Subir mi audio' : 'Subir'}
             <input type="file" accept={paso.tipo === 'audio_futuro' ? 'audio/*' : paso.accept} className="hidden" disabled={subiendo}
@@ -344,7 +344,7 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
 
       {paso.tipo === 'artefacto' && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-3">✦ {paso.tituloArtefacto}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">✦ {paso.tituloArtefacto}</p>
           {!artefacto ? (
             <div className="text-center py-6">
               <p className="text-xs text-white/45 mb-5">Con todo lo que trabajaste hoy, redacto tu artefacto. Tú lo revisas, lo ajustas… y lo firmas.</p>
@@ -356,9 +356,9 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
             <>
               {editandoArtefacto ? (
                 <textarea value={artefacto} onChange={(e) => setArtefacto(e.target.value)} rows={9}
-                  className="w-full bg-white/[0.04] border border-[#E8962E]/30 rounded-2xl px-4 py-3.5 text-sm text-white/90 leading-relaxed focus:outline-none focus:border-[#E8962E]/60 mb-3" />
+                  className="w-full bg-white/[0.04] border border-gold/30 rounded-2xl px-4 py-3.5 text-sm text-white/90 leading-relaxed focus:outline-none focus:border-gold/60 mb-3" />
               ) : (
-                <div className="rounded-2xl border border-[#E8962E]/25 bg-gradient-to-br from-[#E8962E]/[0.06] to-transparent p-5 mb-3">
+                <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.06] to-transparent p-5 mb-3">
                   <p className="text-sm text-white/85 leading-relaxed whitespace-pre-line">{artefacto}</p>
                 </div>
               )}
@@ -398,14 +398,14 @@ function AbiertaConMic({ paso, valor, onChange, onContinuar, valido }: {
   const faltan = Math.max(0, paso.minChars - valor.trim().length);
   return (
     <div>
-      <p className="text-base text-[#F2EFE9] font-medium mb-2 leading-snug">{paso.pregunta}</p>
+      <p className="text-base text-cream font-medium mb-2 leading-snug">{paso.pregunta}</p>
       {paso.ayuda && <p className="text-xs text-white/40 mb-4 leading-relaxed">{paso.ayuda}</p>}
       <div className="relative mb-2">
         <textarea value={valor} onChange={(e) => onChange(e.target.value)} rows={6} placeholder={paso.placeholder}
-          className="w-full bg-white/[0.04] border border-white/12 rounded-2xl px-4 py-3.5 pr-14 text-sm text-white/90 leading-relaxed placeholder-white/25 focus:outline-none focus:border-[#E8962E]/50 resize-none" />
+          className="w-full bg-white/[0.04] border border-white/12 rounded-2xl px-4 py-3.5 pr-14 text-sm text-white/90 leading-relaxed placeholder-white/25 focus:outline-none focus:border-gold/50 resize-none" />
         {soportado && (
           <button type="button" onClick={toggle} title={grabando ? 'Detener' : 'Responder hablando'}
-            className={`absolute right-3 top-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${grabando ? 'bg-[#EF4444] text-white animate-pulse' : 'bg-[#E8962E]/15 border border-[#E8962E]/35 text-[#E8962E] hover:bg-[#E8962E]/25'}`}>
+            className={`absolute right-3 top-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${grabando ? 'bg-danger text-white animate-pulse' : 'bg-gold/15 border border-gold/35 text-gold hover:bg-gold/25'}`}>
             {grabando ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
           </button>
         )}

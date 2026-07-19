@@ -22,7 +22,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] mb-1">Sesión de hoy</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         {segundosObjetivo ? (
           <p className="text-xs text-white/40 mt-1">
@@ -43,7 +43,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
               onClick={() => setEmocion(e.id)}
               className={`px-3 py-2 rounded-xl border text-sm transition-all ${
                 emocion === e.id
-                  ? 'border-[#E8962E] bg-[#E8962E]/15 text-white'
+                  ? 'border-gold bg-gold/15 text-white'
                   : 'border-white/10 bg-white/5 text-white/70 hover:border-white/25'
               }`}
             >
@@ -60,7 +60,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
           value={objetivo}
           onChange={(ev) => setObjetivo(ev.target.value)}
           rows={2}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/60 focus:outline-none resize-none"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-gold/60 focus:outline-none resize-none"
           placeholder="¿Qué quieres lograr sí o sí hoy?"
         />
       </div>
@@ -68,7 +68,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       <button
         type="button"
         onClick={() => setModoCorto(!modoCorto)}
-        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs transition-all ${modoCorto ? 'border-[#E8962E]/50 bg-[#E8962E]/10 text-[#E8962E]' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20'}`}
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs transition-all ${modoCorto ? 'border-gold/50 bg-gold/10 text-gold' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20'}`}
       >
         <span>🕐 Hoy tengo poco tiempo — modo 15 minutos</span>
         <span className="font-bold">{modoCorto ? 'ON' : 'OFF'}</span>
@@ -79,7 +79,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         type="button"
         disabled={!emocion || !objetivo.trim()}
         onClick={() => emocion && onAbrir({ emocion, objetivo: objetivo.trim(), modoCorto })}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#E8962E] text-black hover:bg-[#f0a94d]"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gold text-black hover:bg-[#f0a94d]"
       >
         <Play className="w-4 h-4" /> Abrir la sesión
       </button>

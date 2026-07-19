@@ -87,17 +87,17 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
   const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
   return (
-    <div className="min-h-screen bg-[#080808] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E] mb-3">Tu Semana Blanca está completa</p>
-        <h1 className="text-2xl text-[#F2EFE9] mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
+        <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
-        <p className="text-sm text-[#F2EFE9]/60 mb-5 leading-relaxed">
+        <p className="text-sm text-cream/60 mb-5 leading-relaxed">
           {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
         </p>
         {nombreRes && (
-          <p className="text-sm text-[#F2EFE9]/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-[#F4B65C] font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+          <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
         )}
         <div className="text-left mb-5 space-y-2">
           {([
@@ -106,8 +106,8 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
             ['⬛', 'Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
           ] as const).map(([e, n, p, d]) => (
             <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
-              <p className="text-xs font-bold text-[#F2EFE9]">{e} {n} · <span className="text-[#F4B65C]">{p}</span> <span className="text-[#F2EFE9]/35 font-normal">(precio fundador, de por vida)</span></p>
-              <p className="text-[11px] text-[#F2EFE9]/55 mt-0.5">{d}</p>
+              <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
+              <p className="text-[11px] text-cream/55 mt-0.5">{d}</p>
             </div>
           ))}
         </div>
@@ -115,7 +115,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
-        <p className="text-[11px] text-[#F2EFE9]/35">Un mensaje y seguís exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+        <p className="text-[11px] text-cream/35">Un mensaje y seguís exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
       </div>
     </div>
   );
@@ -125,8 +125,8 @@ function PaginaBloqueada({ nombre }: { nombre: string }) {
   return (
     <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
       <p className="text-4xl mb-4">🔒</p>
-      <h2 className="text-lg text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
-      <p className="text-sm text-[#F2EFE9]/55">Se desbloquea con el <span className="text-[#F4B65C]">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
+      <h2 className="text-lg text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
+      <p className="text-sm text-cream/55">Se desbloquea con el <span className="text-goldhi">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
     </div>
   );
 }
@@ -342,16 +342,16 @@ export default function App() {
 
   const RecoveryModal = showRecoveryModal ? (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#111110] border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
+      <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
         <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
-          <h3 className="text-sm font-semibold text-[#F2EFE9]">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-[#F2EFE9]/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
+          <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
+          <p className="text-[11px] text-cream/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword}
@@ -361,21 +361,21 @@ export default function App() {
                 minLength={8}
                 disabled={recoveryLoading}
                 autoFocus
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setRecoveryShowPwd(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F2EFE9]/40 hover:text-[#F2EFE9]/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/70 transition-colors"
               >
                 {recoveryShowPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-[#F2EFE9]/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
@@ -383,14 +383,14 @@ export default function App() {
                 placeholder="Repetí la contraseña"
                 required
                 disabled={recoveryLoading}
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
             </div>
           </div>
           <button
             type="submit"
             disabled={recoveryLoading || !recoveryPassword || !recoveryPassword2}
-            className="w-full py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
           >
             {recoveryLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : 'Guardar contraseña'}
           </button>
@@ -457,10 +457,10 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-[#080808] text-[#F2EFE9] overflow-hidden font-sans selection:bg-[#E8962E]/30">
+    <div className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
       {/* Background Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#E8962E]/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#E8962E]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
 
       {/* Mobile overlay backdrop */}
       {mobileMenuOpen && (
@@ -544,12 +544,12 @@ export default function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#1A1917] border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="w-full max-w-2xl bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
-              <h2 className="text-xl font-medium text-[#F2EFE9]">Ajustes de la Cuenta</h2>
+              <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
-                className="text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+                className="text-cream/60 hover:text-cream transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -557,7 +557,7 @@ export default function App() {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Settings Sidebar */}
-              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-[#1A1917]/50 flex flex-col">
+              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-surface/50 flex flex-col">
                 <div className="flex-1 space-y-2">
                   {([
                     { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
@@ -570,8 +570,8 @@ export default function App() {
                       onClick={() => setSettingsTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
                         settingsTab === tab.id
-                          ? 'bg-[#E8962E]/10 text-[#E8962E] font-medium'
-                          : 'text-[#F2EFE9]/60 hover:bg-[#E8962E]/5 hover:text-[#F2EFE9]'
+                          ? 'bg-gold/10 text-gold font-medium'
+                          : 'text-cream/60 hover:bg-gold/5 hover:text-cream'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" /> {tab.label}
@@ -581,7 +581,7 @@ export default function App() {
                 {/* Sign out */}
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors mt-auto"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors mt-auto"
                 >
                   <LogOut className="w-4 h-4" /> Cerrar sesión
                 </button>
@@ -596,12 +596,12 @@ export default function App() {
                       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                       <button
                         onClick={() => avatarInputRef.current?.click()}
-                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-[#E8962E]/50 transition-colors overflow-hidden"
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
                       >
                         {avatarUrl ? (
                           <img loading="lazy" src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-[#E8962E]/10 flex items-center justify-center text-2xl font-bold text-[#E8962E]">
+                          <div className="w-full h-full bg-gold/10 flex items-center justify-center text-2xl font-bold text-gold">
                             {(profileDraft.nombre || 'P').charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -609,43 +609,43 @@ export default function App() {
                           <Camera className="w-6 h-6 text-white" />
                         </div>
                       </button>
-                      <p className="text-xs text-[#F2EFE9]/40">Clic para cambiar foto de perfil</p>
+                      <p className="text-xs text-cream/40">Clic para cambiar foto de perfil</p>
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Información Personal</h3>
+                      <h3 className="text-lg font-medium text-cream mb-4">Información Personal</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Nombre Completo</label>
+                          <label className="block text-xs text-cream/60 mb-1">Nombre Completo</label>
                           <input
                             type="text"
                             value={profileDraft.nombre}
                             onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Correo Electrónico</label>
+                          <label className="block text-xs text-cream/60 mb-1">Correo Electrónico</label>
                           <input
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9]/40 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/40 cursor-not-allowed"
                           />
-                          <p className="text-xs text-[#F2EFE9]/30 mt-1">El email no se puede cambiar desde aquí</p>
+                          <p className="text-xs text-cream/30 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
                         <div>
-                          <label className="block text-xs text-[#F2EFE9]/60 mb-1">Especialidad</label>
+                          <label className="block text-xs text-cream/60 mb-1">Especialidad</label>
                           <input
                             type="text"
                             value={profileDraft.especialidad}
                             onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                       </div>
                     </div>
                     <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
-                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors">
+                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/60 hover:text-cream transition-colors">
                         Cancelar
                       </button>
                       <button onClick={saveProfile} className="btn-primary">
@@ -657,11 +657,11 @@ export default function App() {
 
                 {settingsTab === 'notificaciones' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Preferencias de Notificaciones</h3>
+                    <h3 className="text-lg font-medium text-cream mb-4">Preferencias de Notificaciones</h3>
                     {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
                       <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
-                        <span className="text-sm text-[#F2EFE9]/80">{item}</span>
-                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-[#E8962E]" />
+                        <span className="text-sm text-cream/80">{item}</span>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-gold" />
                       </label>
                     ))}
                   </div>
@@ -669,9 +669,9 @@ export default function App() {
 
                 {settingsTab === 'seguridad' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Seguridad</h3>
+                    <h3 className="text-lg font-medium text-cream mb-4">Seguridad</h3>
                     <div>
-                      <p className="text-sm text-[#F2EFE9]/60 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
+                      <p className="text-sm text-cream/60 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
                       <button
                         onClick={async () => {
                           const email = supabaseProfile?.email;
@@ -680,7 +680,7 @@ export default function App() {
                           if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
                           else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
                         }}
-                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-[#E8962E] text-sm hover:bg-[#E8962E]/10 transition-colors"
+                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-gold text-sm hover:bg-gold/10 transition-colors"
                       >
                         Enviarme el email de restablecimiento
                       </button>
@@ -690,15 +690,15 @@ export default function App() {
 
                 {settingsTab === 'facturacion' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#F2EFE9] mb-4">Facturación</h3>
-                    <div className="bg-[#1A1917]/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
+                    <h3 className="text-lg font-medium text-cream mb-4">Facturación</h3>
+                    <div className="bg-surface/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-[#F2EFE9]/80">Plan Actual</span>
-                        <span className="px-3 py-1 rounded-full bg-[#E8962E]/20 text-[#E8962E] text-xs font-medium">
+                        <span className="text-sm text-cream/80">Plan Actual</span>
+                        <span className="px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-medium">
                           Tu Clínica Digital — {profile.plan}
                         </span>
                       </div>
-                      <p className="text-xs text-[#F2EFE9]/40">Programa de 90 días</p>
+                      <p className="text-xs text-cream/40">Programa de 90 días</p>
                     </div>
                   </div>
                 )}

@@ -42,30 +42,30 @@ const PRIORIDADES: AdminTareaPrioridad[] = ['urgente', 'alta', 'media', 'baja'];
 const PRIORIDAD_CHIP_COLORS: Record<AdminTareaPrioridad, { active: string; idle: string; dot: string }> = {
   urgente: {
     active: 'bg-red-500/15 text-red-400 border-red-500/40',
-    idle: 'border-transparent text-[#F2EFE9]/55 hover:text-red-400 hover:bg-red-500/5',
+    idle: 'border-transparent text-cream/55 hover:text-red-400 hover:bg-red-500/5',
     dot: 'bg-red-500',
   },
   alta: {
     active: 'bg-orange-500/20 text-orange-400 border-orange-500/45',
-    idle: 'border-transparent text-[#F2EFE9]/55 hover:text-orange-400 hover:bg-orange-500/8',
+    idle: 'border-transparent text-cream/55 hover:text-orange-400 hover:bg-orange-500/8',
     dot: 'bg-orange-500',
   },
   media: {
-    active: 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40',
-    idle: 'border-transparent text-[#F2EFE9]/55 hover:text-[#E8962E] hover:bg-[#E8962E]/5',
-    dot: 'bg-[#E8962E]',
+    active: 'bg-gold/15 text-gold border-gold/40',
+    idle: 'border-transparent text-cream/55 hover:text-gold hover:bg-gold/5',
+    dot: 'bg-gold',
   },
   baja: {
-    active: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40',
-    idle: 'border-transparent text-[#F2EFE9]/55 hover:text-[#22C55E] hover:bg-[#22C55E]/5',
-    dot: 'bg-[#22C55E]',
+    active: 'bg-success/15 text-success border-success/40',
+    idle: 'border-transparent text-cream/55 hover:text-success hover:bg-success/5',
+    dot: 'bg-success',
   },
 };
 
 const CHIP_BASE = 'h-7 inline-flex items-center gap-1.5 px-2.5 rounded-md text-xs font-semibold border transition-all whitespace-nowrap';
 
 function Divider() {
-  return <span className="w-px h-5 bg-[#F2EFE9]/10 mx-0.5" aria-hidden />;
+  return <span className="w-px h-5 bg-cream/10 mx-0.5" aria-hidden />;
 }
 
 function ScopeChip({
@@ -80,8 +80,8 @@ function ScopeChip({
     <button
       onClick={onClick}
       className={`${CHIP_BASE} ${active
-        ? 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/40'
-        : 'border-transparent text-[#F2EFE9]/55 hover:text-[#F2EFE9] hover:bg-[#F2EFE9]/5'
+        ? 'bg-gold/15 text-gold border-gold/40'
+        : 'border-transparent text-cream/55 hover:text-cream hover:bg-cream/5'
       }`}
     >
       <Icon className="w-3.5 h-3.5" />
@@ -132,10 +132,10 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
     <div className="bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-2.5 py-2">
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Filter indicator */}
-        <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-[#F2EFE9]/40">
+        <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/40">
           <Filter className="w-3.5 h-3.5" />
           {activeCount > 0 && (
-            <span className="text-[10px] font-bold bg-[#E8962E]/20 text-[#E8962E] px-1.5 py-0.5 rounded-full leading-none">
+            <span className="text-[10px] font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
               {activeCount}
             </span>
           )}
@@ -208,7 +208,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
               }
               className={`${CHIP_BASE} ${active
                 ? ''
-                : 'text-[#F2EFE9]/55 hover:bg-[#F2EFE9]/5 hover:text-[#F2EFE9]'
+                : 'text-cream/55 hover:bg-cream/5 hover:text-cream'
               }`}
             >
               <span
@@ -229,7 +229,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
         {activeCount > 0 && (
           <button
             onClick={reset}
-            className="ml-auto h-7 inline-flex items-center gap-1 px-2 text-xs text-[#F2EFE9]/40 hover:text-[#E8962E] transition-colors"
+            className="ml-auto h-7 inline-flex items-center gap-1 px-2 text-xs text-cream/40 hover:text-gold transition-colors"
           >
             <X className="w-3.5 h-3.5" />
             Limpiar

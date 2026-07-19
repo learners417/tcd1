@@ -145,7 +145,7 @@ export default function RichTextEditor({
       Link.configure({
         openOnClick: false,
         autolink: true,
-        HTMLAttributes: { class: 'text-[#E8962E] underline underline-offset-2 hover:text-[#F4B65C]' },
+        HTMLAttributes: { class: 'text-gold underline underline-offset-2 hover:text-goldhi' },
       }),
       Placeholder.configure({ placeholder }),
     ],
@@ -156,7 +156,7 @@ export default function RichTextEditor({
         class: [
           'prose prose-invert prose-sm max-w-none',
           'focus:outline-none',
-          'text-[#F2EFE9]/85',
+          'text-cream/85',
           'leading-relaxed',
           fillParent ? 'flex-1 overflow-y-auto px-1' : 'px-1',
         ].join(' '),
@@ -254,7 +254,7 @@ export default function RichTextEditor({
   if (!editor) {
     return (
       <div
-        className="text-xs text-[#F2EFE9]/30 px-1"
+        className="text-xs text-cream/30 px-1"
         style={{ minHeight }}
       >
         Cargando editor…
@@ -290,15 +290,15 @@ export default function RichTextEditor({
                 onMouseDown={(e) => { e.preventDefault(); applyOption(opt); }}
                 onMouseEnter={() => setSlash(s => ({ ...s, selected: i }))}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
-                  active ? 'bg-[#E8962E]/12' : 'hover:bg-[#F2EFE9]/5'
+                  active ? 'bg-gold/12' : 'hover:bg-cream/5'
                 }`}
               >
-                <div className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center ${active ? 'bg-[#E8962E]/20 text-[#E8962E]' : 'bg-[#F2EFE9]/5 text-[#F2EFE9]/55'}`}>
+                <div className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center ${active ? 'bg-gold/20 text-gold' : 'bg-cream/5 text-cream/55'}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-[#F2EFE9]">{opt.label}</div>
-                  <div className="text-[10px] text-[#F2EFE9]/40 truncate">{opt.description}</div>
+                  <div className="text-xs font-semibold text-cream">{opt.label}</div>
+                  <div className="text-[10px] text-cream/40 truncate">{opt.description}</div>
                 </div>
               </button>
             );
@@ -315,8 +315,8 @@ function Toolbar({ editor }: { editor: Editor }) {
   const btn = (active: boolean) =>
     `w-7 h-7 rounded-md flex items-center justify-center text-xs transition-colors ${
       active
-        ? 'bg-[#E8962E]/20 text-[#E8962E]'
-        : 'text-[#F2EFE9]/55 hover:text-[#F2EFE9] hover:bg-[#F2EFE9]/5'
+        ? 'bg-gold/20 text-gold'
+        : 'text-cream/55 hover:text-cream hover:bg-cream/5'
     }`;
 
   function setLink() {
@@ -335,18 +335,18 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive('bold'))} title="Negrita (Ctrl+B)"><Bold className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={btn(editor.isActive('italic'))} title="Itálica (Ctrl+I)"><Italic className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} className={btn(editor.isActive('strike'))} title="Tachado"><Strikethrough className="w-3.5 h-3.5" /></button>
-      <span className="w-px h-4 bg-[#F2EFE9]/8 mx-1" />
+      <span className="w-px h-4 bg-cream/8 mx-1" />
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={btn(editor.isActive('heading', { level: 1 }))} title="Título 1"><Heading1 className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive('heading', { level: 2 }))} title="Título 2"><Heading2 className="w-3.5 h-3.5" /></button>
-      <span className="w-px h-4 bg-[#F2EFE9]/8 mx-1" />
+      <span className="w-px h-4 bg-cream/8 mx-1" />
       <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btn(editor.isActive('bulletList'))} title="Lista"><List className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={btn(editor.isActive('orderedList'))} title="Lista numerada"><ListOrdered className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleTaskList().run()} className={btn(editor.isActive('taskList'))} title="Checklist"><CheckSquare className="w-3.5 h-3.5" /></button>
-      <span className="w-px h-4 bg-[#F2EFE9]/8 mx-1" />
+      <span className="w-px h-4 bg-cream/8 mx-1" />
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive('blockquote'))} title="Cita"><Quote className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={btn(editor.isActive('code'))} title="Código en línea"><Code className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={setLink} className={btn(editor.isActive('link'))} title="Enlace"><Link2 className="w-3.5 h-3.5" /></button>
-      <span className="ml-auto text-[10px] text-[#F2EFE9]/30 hidden sm:inline">Tip: tipeá "/" para más opciones</span>
+      <span className="ml-auto text-[10px] text-cream/30 hidden sm:inline">Tip: tipeá "/" para más opciones</span>
     </div>
   );
 }

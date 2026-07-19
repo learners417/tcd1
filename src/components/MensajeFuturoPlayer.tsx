@@ -40,28 +40,28 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
   };
 
   return (
-    <div className="rounded-xl border border-[#E8962E]/20 bg-[#E8962E]/[0.05] p-4 text-left">
+    <div className="rounded-xl border border-gold/20 bg-gold/[0.05] p-4 text-left">
       <div className="flex items-center gap-2 mb-2">
-        <Mail className="w-4 h-4 text-[#E8962E]" />
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E]">
+        <Mail className="w-4 h-4 text-gold" />
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gold">
           Tu Mensaje al Futuro
         </p>
       </div>
       {url && audio ? (
         <>
-          <p className="text-xs text-[#F2EFE9]/70 leading-relaxed mb-3">
+          <p className="text-xs text-cream/70 leading-relaxed mb-3">
             Lo grabaste el Día 1, sin saber quién ibas a ser hoy. Es el momento de escucharlo.
           </p>
           <button
             onClick={toggle}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E8962E] text-black text-xs font-bold uppercase tracking-wider hover:bg-[#F4B65C] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gold text-black text-xs font-bold uppercase tracking-wider hover:bg-goldhi transition-colors"
           >
             {sonando ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             {sonando ? 'Pausar' : 'Abrir el sobre'}
           </button>
         </>
       ) : (
-        <div className="flex items-center gap-2 text-[11px] text-[#F2EFE9]/45">
+        <div className="flex items-center gap-2 text-[11px] text-cream/45">
           <Lock className="w-3.5 h-3.5" /> Tu mensaje del Día 1 se reproduce acá cuando lo grabes en el
           Camino.
         </div>

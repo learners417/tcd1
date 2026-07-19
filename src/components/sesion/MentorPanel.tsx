@@ -74,9 +74,9 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
         <button
           type="button"
           onClick={() => setAbierto(true)}
-          className="fixed bottom-24 right-4 z-[80] flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-[#1A1917] border border-[#E8962E]/40 text-[#F2EFE9] text-xs font-bold shadow-[0_4px_24px_rgba(0,0,0,0.5)] hover:border-[#E8962E]/80 hover:shadow-[0_0_24px_rgba(232,150,46,0.15)] transition-all"
+          className="fixed bottom-24 right-4 z-[80] flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-surface border border-gold/40 text-cream text-xs font-bold shadow-[0_4px_24px_rgba(0,0,0,0.5)] hover:border-gold/80 hover:shadow-[0_0_24px_rgba(232,150,46,0.15)] transition-all"
         >
-          {tecnica ? <Wrench className="w-4 h-4 text-[#E8962E]" /> : <MessageCircle className="w-4 h-4 text-[#E8962E]" />}
+          {tecnica ? <Wrench className="w-4 h-4 text-gold" /> : <MessageCircle className="w-4 h-4 text-gold" />}
           ¿Trabado?
         </button>
       )}
@@ -87,12 +87,12 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.06] shrink-0">
             <div className="flex items-center gap-2.5">
               {tecnica ? (
-                <div className="w-8 h-8 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center"><Wrench className="w-4 h-4 text-[#3B82F6]" /></div>
+                <div className="w-8 h-8 rounded-full bg-azure/15 border border-azure/30 flex items-center justify-center"><Wrench className="w-4 h-4 text-azure" /></div>
               ) : (
-                <img src="/javo.jpg" alt="" className="w-8 h-8 rounded-full object-cover border border-[#E8962E]/40" onError={(e) => { (e.target as HTMLImageElement).outerHTML = '<div class="w-8 h-8 rounded-full bg-[#E8962E]/15 border border-[#E8962E]/30 flex items-center justify-center">🥋</div>'; }} />
+                <img src="/javo.jpg" alt="" className="w-8 h-8 rounded-full object-cover border border-gold/40" onError={(e) => { (e.target as HTMLImageElement).outerHTML = '<div class="w-8 h-8 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center">🥋</div>'; }} />
               )}
               <div>
-                <p className="text-xs font-bold text-[#F2EFE9] uppercase tracking-wider">{tecnica ? 'Asistente Técnico' : 'Tu Mentor'}</p>
+                <p className="text-xs font-bold text-cream uppercase tracking-wider">{tecnica ? 'Asistente Técnico' : 'Tu Mentor'}</p>
                 <p className="text-[10px] text-white/35 truncate max-w-[230px]">{tecnica ? 'Paso a paso, sin drama' : 'Te destraba — no te lo hace'}</p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {msgs.length === 0 && (
               <div className="text-center py-8">
-                <Sparkles className="w-6 h-6 text-[#E8962E]/50 mx-auto mb-3" />
+                <Sparkles className="w-6 h-6 text-gold/50 mx-auto mb-3" />
                 <p className="text-sm text-white/55 leading-relaxed px-2">
                   {tecnica
                     ? 'Cuéntame dónde te trabaste — y dime qué ves en tu pantalla ahora. Vamos paso a paso.'
@@ -111,7 +111,7 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
               </div>
             )}
             {msgs.map((m, i) => (
-              <div key={i} className={`max-w-[88%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${m.role === 'user' ? 'ml-auto bg-[#E8962E]/15 border border-[#E8962E]/25 text-[#F2EFE9]' : 'bg-white/[0.05] border border-white/[0.08] text-white/85'}`}>
+              <div key={i} className={`max-w-[88%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${m.role === 'user' ? 'ml-auto bg-gold/15 border border-gold/25 text-cream' : 'bg-white/[0.05] border border-white/[0.08] text-white/85'}`}>
                 {m.content}
               </div>
             ))}
@@ -129,10 +129,10 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void enviar(); } }}
                   placeholder={tecnica ? '¿Qué ves en tu pantalla?' : '¿Qué te frena?'}
-                  className="flex-1 bg-white/[0.04] border border-white/12 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#E8962E]/50"
+                  className="flex-1 bg-white/[0.04] border border-white/12 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-gold/50"
                 />
                 <button type="button" onClick={() => void enviar()} disabled={!input.trim() || cargando}
-                  className="px-3.5 rounded-xl bg-[#E8962E] text-black disabled:opacity-30 hover:bg-[#F4B65C] transition-colors">
+                  className="px-3.5 rounded-xl bg-gold text-black disabled:opacity-30 hover:bg-goldhi transition-colors">
                   <Send className="w-4 h-4" />
                 </button>
               </div>

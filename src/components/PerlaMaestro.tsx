@@ -26,25 +26,25 @@ export default function PerlaMaestro({ perla }: { perla: Perla }) {
   };
 
   return (
-    <div className="card-panel p-5 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.06] to-transparent">
+    <div className="card-panel p-5 border border-gold/20 bg-gradient-to-br from-gold/[0.06] to-transparent">
       <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="w-4 h-4 text-[#E8962E]" />
-        <span className="text-[10px] font-bold text-[#E8962E] uppercase tracking-widest">
+        <Sparkles className="w-4 h-4 text-gold" />
+        <span className="text-[10px] font-bold text-gold uppercase tracking-widest">
           Perla del Maestro
         </span>
       </div>
-      <p className="text-sm text-[#F2EFE9] font-medium mb-1">{perla.titulo}</p>
-      <p className="text-xs text-[#F2EFE9]/55 leading-relaxed mb-3">{perla.texto}</p>
+      <p className="text-sm text-cream font-medium mb-1">{perla.titulo}</p>
+      <p className="text-xs text-cream/55 leading-relaxed mb-3">{perla.texto}</p>
       {disponible ? (
         <button
           onClick={toggle}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E8962E]/15 border border-[#E8962E]/30 text-[#E8962E] text-xs font-bold uppercase tracking-wider hover:bg-[#E8962E]/25 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/15 border border-gold/30 text-gold text-xs font-bold uppercase tracking-wider hover:bg-gold/25 transition-colors"
         >
           {sonando ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           {sonando ? 'Pausar' : 'Escuchar a Javo'}
         </button>
       ) : (
-        <div className="flex items-center gap-2 text-[10px] text-[#F2EFE9]/35 uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-[10px] text-cream/35 uppercase tracking-wider">
           <Lock className="w-3.5 h-3.5" /> Perla en camino — Javo la graba pronto
         </div>
       )}

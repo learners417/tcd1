@@ -60,21 +60,21 @@ export default function EspejoIdentidadModal({
       aria-labelledby="espejo-titulo"
     >
       <div
-        className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E8962E]/30 bg-[#080808] p-8 shadow-2xl transition-transform duration-300 ${
+        className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/30 bg-ink p-8 shadow-2xl transition-transform duration-300 ${
           visible ? 'scale-100' : 'scale-95'
         }`}
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto rounded-full bg-[#E8962E]/15 border border-[#E8962E]/30 flex items-center justify-center mb-4">
-            <Sparkles className="w-6 h-6 text-[#E8962E]" />
+          <div className="w-14 h-14 mx-auto rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center mb-4">
+            <Sparkles className="w-6 h-6 text-gold" />
           </div>
-          <p className="text-[10px] uppercase tracking-widest text-[#E8962E] font-bold mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-gold font-bold mb-2">
             Cierre de Fase 1 · Identidad
           </p>
           <h2
             id="espejo-titulo"
-            className="text-2xl md:text-3xl font-light text-[#F2EFE9] tracking-tight leading-tight"
+            className="text-2xl md:text-3xl font-light text-cream tracking-tight leading-tight"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             Espejo de Identidad
@@ -88,8 +88,8 @@ export default function EspejoIdentidadModal({
           <Pieza titulo="Tu legado" valor={legadoDeclaracion} fallback="Vuelve a P3.3 para escribir tu declaración de legado." />
 
           {/* 5 NOs · lista */}
-          <div className="card-panel p-5 border border-[#E8962E]/15 bg-[#E8962E]/[0.03]">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#E8962E] mb-3">
+          <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-gold mb-3">
               Tus 5 NO
             </p>
             {nos.length > 0 ? (
@@ -97,9 +97,9 @@ export default function EspejoIdentidadModal({
                 {nos.map((no, idx) => (
                   <li
                     key={idx}
-                    className="text-sm text-[#F2EFE9]/90 leading-relaxed flex gap-3"
+                    className="text-sm text-cream/90 leading-relaxed flex gap-3"
                   >
-                    <span className="text-[#E8962E] font-mono text-xs mt-0.5">
+                    <span className="text-gold font-mono text-xs mt-0.5">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <span className="flex-1">{no}</span>
@@ -107,7 +107,7 @@ export default function EspejoIdentidadModal({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-[#F2EFE9]/40 italic">
+              <p className="text-sm text-cream/40 italic">
                 Vuelve a P2.5 para definir tus 5 NO.
               </p>
             )}
@@ -115,9 +115,9 @@ export default function EspejoIdentidadModal({
         </div>
 
         {/* Cita central */}
-        <div className="my-8 py-6 border-y border-[#E8962E]/15 text-center">
+        <div className="my-8 py-6 border-y border-gold/15 text-center">
           <p
-            className="text-lg md:text-xl text-[#F2EFE9]/90 leading-relaxed"
+            className="text-lg md:text-xl text-cream/90 leading-relaxed"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             Esto es lo que eres. Esto es lo que viniste a hacer.
@@ -125,7 +125,7 @@ export default function EspejoIdentidadModal({
             Esto es lo que va a quedar.
           </p>
           <p
-            className="text-2xl md:text-3xl text-[#E8962E] mt-4 font-light tracking-tight"
+            className="text-2xl md:text-3xl text-gold mt-4 font-light tracking-tight"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             ¿Te reconocés?
@@ -166,15 +166,15 @@ function Pieza({ titulo, valor, fallback }: PiezaProps) {
   const tieneValor = typeof valor === 'string' && valor.trim().length > 0;
   return (
     <div className="card-panel p-5 border border-[rgba(232,150,46,0.1)]">
-      <p className="text-[10px] uppercase tracking-widest font-bold text-[#E8962E] mb-2">
+      <p className="text-[10px] uppercase tracking-widest font-bold text-gold mb-2">
         {titulo}
       </p>
       {tieneValor ? (
-        <p className="text-base text-[#F2EFE9]/90 leading-relaxed whitespace-pre-wrap break-words">
+        <p className="text-base text-cream/90 leading-relaxed whitespace-pre-wrap break-words">
           {valor}
         </p>
       ) : (
-        <p className="text-sm text-[#F2EFE9]/40 italic">{fallback}</p>
+        <p className="text-sm text-cream/40 italic">{fallback}</p>
       )}
     </div>
   );

@@ -189,12 +189,12 @@ export default function BuyCreditsModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E8962E]/20 bg-[#0F0F0F] shadow-2xl">
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-[#0F0F0F] shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8962E]/10 bg-[#0F0F0F]/95 backdrop-blur p-5">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold/10 bg-[#0F0F0F]/95 backdrop-blur p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#E8962E]/15 p-2 border border-[#E8962E]/30">
-              <ShoppingBag className="h-5 w-5 text-[#E8962E]" />
+            <div className="rounded-xl bg-gold/15 p-2 border border-gold/30">
+              <ShoppingBag className="h-5 w-5 text-gold" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Comprar créditos</h2>
@@ -213,13 +213,13 @@ export default function BuyCreditsModal({
 
         <div className="p-6 space-y-6">
           {/* Balance actual */}
-          <div className="rounded-xl border border-[#E8962E]/20 bg-[#E8962E]/5 p-4">
+          <div className="rounded-xl border border-gold/20 bg-gold/5 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Coins className="h-5 w-5 text-[#E8962E]" />
+                <Coins className="h-5 w-5 text-gold" />
                 <span className="text-sm text-white/70">Saldo actual</span>
               </div>
-              <span className="text-2xl font-bold text-[#E8962E]">
+              <span className="text-2xl font-bold text-gold">
                 {currentBalance.total}
               </span>
             </div>
@@ -240,11 +240,11 @@ export default function BuyCreditsModal({
           {/* Packs */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-[#E8962E]" />
+              <Loader2 className="h-6 w-6 animate-spin text-gold" />
             </div>
           ) : packs.length === 0 ? (
-            <div className="rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/10 p-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-[#EF4444] shrink-0 mt-0.5" />
+            <div className="rounded-xl border border-danger/30 bg-danger/10 p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
               <div className="text-sm text-white/80">
                 No hay packs disponibles en este momento. Contactá al equipo.
               </div>
@@ -266,12 +266,12 @@ export default function BuyCreditsModal({
                         onClick={() => setSelectedPack(pack)}
                         className={`relative rounded-xl border p-4 text-left transition-all ${
                           isSelected
-                            ? 'border-[#E8962E] bg-[#E8962E]/10 shadow-[0_0_20px_rgba(232,150,46,0.12)]'
-                            : 'border-white/10 bg-[#1A1A1A] hover:border-[#E8962E]/40 hover:bg-[#E8962E]/5'
+                            ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(232,150,46,0.12)]'
+                            : 'border-white/10 bg-[#1A1A1A] hover:border-gold/40 hover:bg-gold/5'
                         }`}
                       >
                         {isSelected && (
-                          <div className="absolute -top-2 -right-2 rounded-full bg-[#E8962E] p-1">
+                          <div className="absolute -top-2 -right-2 rounded-full bg-gold p-1">
                             <Check className="h-3 w-3 text-black" strokeWidth={3} />
                           </div>
                         )}
@@ -282,7 +282,7 @@ export default function BuyCreditsModal({
                           {pack.credits}
                           <span className="text-sm font-normal text-white/50 ml-1">créditos</span>
                         </div>
-                        <div className="text-xl font-bold text-[#E8962E]">
+                        <div className="text-xl font-bold text-gold">
                           ${pack.price_usd.toFixed(2)}
                         </div>
                         <div className="text-[11px] text-white/40 mt-1">
@@ -299,11 +299,11 @@ export default function BuyCreditsModal({
                 <div className="border-t border-white/10 pt-5">
                   <div className="text-sm text-white/70 mb-3">
                     Pagás <span className="text-white font-semibold">${selectedPack.price_usd.toFixed(2)} USD</span>
-                    {' '}por <span className="text-[#E8962E] font-semibold">{selectedPack.credits} créditos</span>
+                    {' '}por <span className="text-gold font-semibold">{selectedPack.credits} créditos</span>
                   </div>
 
                   {!PAYPAL_CLIENT_ID && (
-                    <div className="rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/10 p-3 text-sm text-white/80 mb-3">
+                    <div className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-white/80 mb-3">
                       ⚠️ VITE_PAYPAL_CLIENT_ID no configurada — el botón de PayPal no se va a renderizar.
                     </div>
                   )}
@@ -316,7 +316,7 @@ export default function BuyCreditsModal({
                   )}
 
                   {processing && (
-                    <div className="flex items-center gap-2 text-sm text-[#E8962E] py-3">
+                    <div className="flex items-center gap-2 text-sm text-gold py-3">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Procesando pago, no cierres esta ventana...
                     </div>

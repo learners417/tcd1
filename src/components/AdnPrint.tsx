@@ -58,7 +58,7 @@ ${secciones.map(s => `
 
   return (
     <button onClick={imprimir}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.3)] text-sm font-semibold text-[#E8962E] hover:bg-[#E8962E]/10 transition-all">
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.3)] text-sm font-semibold text-gold hover:bg-gold/10 transition-all">
       <Printer className="w-4 h-4" />
       Descargar mi ADN como PDF
     </button>

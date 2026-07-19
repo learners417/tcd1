@@ -257,19 +257,19 @@ export default function TaskHerramientaIA({
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/25 tracking-wider">
+          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider">
             HERRAMIENTA {usaIA ? 'IA' : ''}
           </span>
           {modo === 'guardado' && (
-            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/25 tracking-wider flex items-center gap-1">
+            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Guardado en ADN
             </span>
           )}
         </div>
-        <h3 className="text-lg font-medium text-[#F2EFE9]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-[#F2EFE9]/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
@@ -282,18 +282,18 @@ export default function TaskHerramientaIA({
           </div>
         )}
         {meta.evidencia_requerida && (
-          <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-[#22C55E]/30 bg-[#22C55E]/[0.04]' : 'border-[#E8962E]/30 bg-[#E8962E]/[0.04]'}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-[#E8962E]">
+          <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-gold">
               {evidCount > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida para completar'}
             </p>
-            <p className="text-sm text-[#F2EFE9]/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
             {!isCompleted && (
-              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/25' : 'bg-[#E8962E] text-black hover:bg-[#F4B65C]'}`}>
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-gold text-black hover:bg-goldhi'}`}>
                 {evidSubiendo ? 'Subiendo…' : evidCount > 0 ? `✓ ${evidCount} subida${evidCount > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleEvidSubir} disabled={evidSubiendo} />
               </label>
             )}
-            {evidError && <p className="text-xs text-[#EF4444] mt-2">⚠️ {evidError}</p>}
+            {evidError && <p className="text-xs text-danger mt-2">⚠️ {evidError}</p>}
           </div>
         )}
         {meta.checklist && meta.checklist.length > 0 && (
@@ -310,7 +310,7 @@ export default function TaskHerramientaIA({
                 // Simple form — all fields visible
                 inputs.map(campo => (
                   <div key={campo.id}>
-                    <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
+                    <label className="block text-xs text-cream/60 mb-1.5 font-medium">
                       {campo.label}
                     </label>
                     {renderField(campo)}
@@ -327,19 +327,19 @@ export default function TaskHerramientaIA({
                         onClick={() => toggleSection(groupIdx)}
                         className="w-full flex items-center justify-between p-4 text-left"
                       >
-                        <span className="text-sm font-medium text-[#F2EFE9]/80">
+                        <span className="text-sm font-medium text-cream/80">
                           {groupInputs[0]?.label?.split(' ').slice(0, 3).join(' ')}...
                         </span>
                         {isExpanded
-                          ? <ChevronUp className="w-4 h-4 text-[#F2EFE9]/40" />
-                          : <ChevronDown className="w-4 h-4 text-[#F2EFE9]/40" />
+                          ? <ChevronUp className="w-4 h-4 text-cream/40" />
+                          : <ChevronDown className="w-4 h-4 text-cream/40" />
                         }
                       </button>
                       {isExpanded && (
                         <div className="px-4 pb-4 space-y-4">
                           {groupInputs.map(campo => (
                             <div key={campo.id}>
-                              <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
+                              <label className="block text-xs text-cream/60 mb-1.5 font-medium">
                                 {campo.label}
                               </label>
                               {renderField(campo)}
@@ -355,7 +355,7 @@ export default function TaskHerramientaIA({
           ) : !herramienta && !usaIA ? (
             // v8 fallback · sin herramienta registrada y sin IA · textarea libre
             <div className="space-y-2">
-              <label className="block text-xs text-[#F2EFE9]/60 mb-1.5 font-medium">
+              <label className="block text-xs text-cream/60 mb-1.5 font-medium">
                 Escribe acá tu respuesta
               </label>
               <textarea
@@ -368,12 +368,12 @@ export default function TaskHerramientaIA({
             </div>
           ) : (
             // No inputs — herramienta uses previous ADN data
-            <div className="card-panel p-5 border border-[#E8962E]/15 bg-[#E8962E]/[0.03]">
-              <p className="text-sm text-[#F2EFE9]/70">
+            <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
+              <p className="text-sm text-cream/70">
                 Esta herramienta usa los datos que ya completaste en pasos anteriores para generar el resultado.
               </p>
               {meta.requiere_datos_de && meta.requiere_datos_de.length > 0 && (
-                <p className="text-xs text-[#F2EFE9]/40 mt-2">
+                <p className="text-xs text-cream/40 mt-2">
                   Datos de: {meta.requiere_datos_de.join(', ')}
                 </p>
               )}
@@ -403,9 +403,9 @@ export default function TaskHerramientaIA({
       {/* ─── GENERATING ────────────────────────────────────────────────────── */}
       {modo === 'generando' && (
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[#E8962E] animate-spin mb-4" />
-          <p className="text-sm text-[#F2EFE9]/60">Generando con IA...</p>
-          <p className="text-xs text-[#F2EFE9]/30 mt-1">Esto puede tomar unos segundos</p>
+          <Loader2 className="w-8 h-8 text-gold animate-spin mb-4" />
+          <p className="text-sm text-cream/60">Generando con IA...</p>
+          <p className="text-xs text-cream/30 mt-1">Esto puede tomar unos segundos</p>
         </div>
       )}
 
@@ -413,10 +413,10 @@ export default function TaskHerramientaIA({
       {modo === 'revision' && (
         <div className="space-y-5" ref={outputRef}>
           <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)]">
-            <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-bold mb-3">
+            <p className="text-[10px] text-gold uppercase tracking-widest font-bold mb-3">
               {usaIA ? 'Resultado generado' : 'Tu contenido'}
             </p>
-            <div className="text-sm text-[#F2EFE9]/90 leading-relaxed prose prose-invert max-w-none prose-a:text-[#E8962E] prose-headings:text-[#E8962E] prose-headings:font-semibold prose-strong:text-[#F2EFE9] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
+            <div className="text-sm text-cream/90 leading-relaxed prose prose-invert max-w-none prose-a:text-gold prose-headings:text-gold prose-headings:font-semibold prose-strong:text-cream prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
               <Markdown>{output}</Markdown>
             </div>
           </div>
@@ -431,7 +431,7 @@ export default function TaskHerramientaIA({
             {usaIA && (
               <button
                 onClick={handleRegenerate}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-cream/50 hover:text-cream transition-colors"
               >
                 <RotateCcw className="w-4 h-4" /> Rehacer
               </button>
@@ -475,11 +475,11 @@ export default function TaskHerramientaIA({
       {/* ─── SAVED MODE ────────────────────────────────────────────────────── */}
       {modo === 'guardado' && (
         <div className="space-y-5">
-          <div className="card-panel p-5 border border-[#22C55E]/20 bg-[#22C55E]/[0.03]">
-            <p className="text-[10px] text-[#22C55E] uppercase tracking-widest font-bold mb-3 flex items-center gap-1.5">
+          <div className="card-panel p-5 border border-success/20 bg-success/[0.03]">
+            <p className="text-[10px] text-success uppercase tracking-widest font-bold mb-3 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" /> Guardado en tu ADN
             </p>
-            <div className="text-sm text-[#F2EFE9]/80 leading-relaxed prose prose-invert max-w-none prose-a:text-[#E8962E] prose-headings:text-[#E8962E] prose-headings:font-semibold prose-strong:text-[#F2EFE9] prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
+            <div className="text-sm text-cream/80 leading-relaxed prose prose-invert max-w-none prose-a:text-gold prose-headings:text-gold prose-headings:font-semibold prose-strong:text-cream prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
               <Markdown>{output}</Markdown>
             </div>
           </div>

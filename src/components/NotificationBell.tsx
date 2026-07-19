@@ -22,11 +22,11 @@ const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
 };
 
 const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-[#E8962E]', bg: 'bg-[#E8962E]/10' },
-  tarea: { text: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10' },
-  mensaje: { text: 'text-[#E8962E]', bg: 'bg-[#E8962E]/10' },
-  sistema: { text: 'text-[#E8962E]', bg: 'bg-[#E8962E]/10' },
-  admin: { text: 'text-[#E8962E]', bg: 'bg-[#E8962E]/10' },
+  hito: { text: 'text-gold', bg: 'bg-gold/10' },
+  tarea: { text: 'text-success', bg: 'bg-success/10' },
+  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
+  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
+  admin: { text: 'text-gold', bg: 'bg-gold/10' },
 };
 
 function tiempoRelativo(fechaISO: string): string {
@@ -166,10 +166,10 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
         onClick={() => setOpen(o => !o)}
         className={`${buttonSize} rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
           open
-            ? 'text-[#F2EFE9] bg-[#1A1917] shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-[#E8962E]/40'
+            ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
             : hasUnread
-              ? 'text-[#E8962E] shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-[#E8962E]/30 hover:text-[#F4B65C]'
-              : 'text-[#F2EFE9]/60 hover:text-[#F2EFE9]'
+              ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
+              : 'text-cream/60 hover:text-cream'
         }`}
         title="Notificaciones"
         aria-label={hasUnread ? `Notificaciones (${unread} sin leer)` : 'Notificaciones'}
@@ -179,7 +179,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
           fill={hasUnread ? 'currentColor' : 'none'}
         />
         {hasUnread && (
-          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-[#E8962E] text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-[#080808]">
+          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -198,10 +198,10 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
             className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
             style={{ top: pos.top, right: pos.right, zIndex: 9999 }}
           >
-            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-[#1A1917]/50">
-              <h3 className="font-medium text-[#F2EFE9]">Notificaciones</h3>
+            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
+              <h3 className="font-medium text-cream">Notificaciones</h3>
               {unread > 0 && (
-                <button onClick={handleMarkAll} className="text-xs text-[#E8962E] hover:text-[#F4B65C] transition-colors">
+                <button onClick={handleMarkAll} className="text-xs text-gold hover:text-goldhi transition-colors">
                   Marcar todas como leídas
                 </button>
               )}
@@ -209,8 +209,8 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
             <div className="max-h-[400px] overflow-y-auto">
               {items.length === 0 && (
                 <div className="py-12 text-center">
-                  <Bell className="w-8 h-8 text-[#F2EFE9]/20 mx-auto mb-3" />
-                  <p className="text-sm text-[#F2EFE9]/40">Sin notificaciones</p>
+                  <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
+                  <p className="text-sm text-cream/40">Sin notificaciones</p>
                 </div>
               )}
               {items.map(notif => {
@@ -220,29 +220,29 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                   <div
                     key={notif.id}
                     onClick={() => handleClickNotif(notif)}
-                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-[#1A1917]/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
+                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
                       <Icon className={`w-4 h-4 ${colors.text}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2">
-                        <p className="text-sm font-medium text-[#F2EFE9]/90 mb-0.5">{notif.titulo}</p>
+                        <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
                         {!notif.leida && (
-                          <span className="w-2 h-2 rounded-full bg-[#EF4444] shrink-0 mt-1.5" />
+                          <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
                         )}
                       </div>
                       {notif.descripcion && (
-                        <p className="text-xs text-[#F2EFE9]/50 line-clamp-2">{notif.descripcion}</p>
+                        <p className="text-xs text-cream/50 line-clamp-2">{notif.descripcion}</p>
                       )}
-                      <p className="text-[10px] text-[#F2EFE9]/30 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                      <p className="text-[10px] text-cream/30 mt-2">{tiempoRelativo(notif.created_at)}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-[#1A1917]/50">
-              <button onClick={() => setOpen(false)} className="text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors">
+            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
+              <button onClick={() => setOpen(false)} className="text-xs text-cream/50 hover:text-cream transition-colors">
                 Cerrar
               </button>
             </div>

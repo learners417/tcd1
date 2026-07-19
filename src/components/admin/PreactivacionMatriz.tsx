@@ -130,8 +130,8 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
             onClick={() => setView('matriz')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               view === 'matriz'
-                ? 'bg-[#E8962E]/15 text-[#E8962E]'
-                : 'text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80'
+                ? 'bg-gold/15 text-gold'
+                : 'text-cream/50 hover:text-cream/80'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -142,8 +142,8 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
             onClick={() => setView('camino')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               view === 'camino'
-                ? 'bg-[#E8962E]/15 text-[#E8962E]'
-                : 'text-[#F2EFE9]/50 hover:text-[#F2EFE9]/80'
+                ? 'bg-gold/15 text-gold'
+                : 'text-cream/50 hover:text-cream/80'
             }`}
           >
             <MapIcon className="w-4 h-4" />
@@ -154,29 +154,29 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
         {view === 'matriz' && (
           <>
             <div className="relative flex-1 min-w-[240px] max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F2EFE9]/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/30" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar cliente..."
-                className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-3 text-sm text-[#F2EFE9] focus:outline-none focus:border-[#E8962E]/50 transition-all"
+                className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
               />
             </div>
 
             {/* Stats */}
             <div className="hidden md:flex items-center gap-5 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Clientes</span>
-                <span className="text-[#F2EFE9] font-bold text-base">{stats.total}</span>
+                <span className="text-[11px] text-cream/40 uppercase tracking-wider font-semibold">Clientes</span>
+                <span className="text-cream font-bold text-base">{stats.total}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Listos</span>
-                <span className="text-[#22C55E] font-bold text-base">{stats.listos}</span>
+                <span className="text-[11px] text-cream/40 uppercase tracking-wider font-semibold">Listos</span>
+                <span className="text-success font-bold text-base">{stats.listos}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#F2EFE9]/40 uppercase tracking-wider font-semibold">Avance</span>
-                <span className="text-[#E8962E] font-bold text-base">{stats.avgPct}%</span>
+                <span className="text-[11px] text-cream/40 uppercase tracking-wider font-semibold">Avance</span>
+                <span className="text-gold font-bold text-base">{stats.avgPct}%</span>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
               type="button"
               onClick={refresh}
               disabled={refreshing}
-              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(232,150,46,0.12)] text-sm font-semibold text-[#E8962E] hover:bg-[#E8962E]/10 transition-all disabled:opacity-50"
+              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(232,150,46,0.12)] text-sm font-semibold text-gold hover:bg-gold/10 transition-all disabled:opacity-50"
               title="Refrescar"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -200,12 +200,12 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
           <ElCaminoView />
         ) : loading ? (
           <div className="flex justify-center items-center py-16">
-            <Loader2 className="w-6 h-6 text-[#E8962E] animate-spin" />
+            <Loader2 className="w-6 h-6 text-gold animate-spin" />
           </div>
         ) : (
           <div className="px-4 md:px-6 py-4">
             {stats.listos > 0 && (
-              <div className="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-[#22C55E]/8 border border-[#22C55E]/20 text-sm font-semibold text-[#22C55E] w-fit">
+              <div className="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-success/8 border border-success/20 text-sm font-semibold text-success w-fit">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>
                   {stats.listos} {stats.listos === 1 ? 'cliente listo' : 'clientes listos'} para activar

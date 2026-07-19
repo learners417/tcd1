@@ -181,16 +181,16 @@ REGLAS:
     <div className="animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#E8962E] mb-1">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Modulo directo
         </p>
-        <h2 className="text-xl font-light text-[#F2EFE9]">
+        <h2 className="text-xl font-light text-cream">
           Generar{' '}
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#E8962E]">
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
             copies
           </span>
         </h2>
-        <p className="text-xs text-[#F2EFE9]/40 mt-1">
+        <p className="text-xs text-cream/40 mt-1">
           Sin pasar por el flujo completo. Completas los datos y los copies salen listos.
         </p>
       </div>
@@ -199,11 +199,11 @@ REGLAS:
         {/* Form izquierdo */}
         <div className="lg:w-[380px] lg:min-w-[380px] card-panel p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Rubro / especialidad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all placeholder-[#F2EFE9]/20"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Psicologa especializada en burnout"
               value={rubro}
               onChange={(e) => setRubro(e.target.value)}
@@ -211,11 +211,11 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Pais / ciudad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all placeholder-[#F2EFE9]/20"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Buenos Aires, Argentina"
               value={pais}
               onChange={(e) => setPais(e.target.value)}
@@ -223,11 +223,11 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Que se ofrece?
             </label>
             <textarea
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all resize-none placeholder-[#F2EFE9]/20"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
               rows={3}
               placeholder="Ej: Auditoria gratuita de 45 min. Sin costo. 5 cupos por semana."
               value={producto}
@@ -237,7 +237,7 @@ REGLAS:
 
           {/* Tipo chips */}
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Tipo de anuncio
             </label>
             <div className="flex flex-wrap gap-2">
@@ -247,8 +247,8 @@ REGLAS:
                   onClick={() => setTipo(t.value)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     tipo === t.value
-                      ? 'bg-[#E8962E]/15 border-[#E8962E]/40 text-[#E8962E]'
-                      : 'border-[#F2EFE9]/10 text-[#F2EFE9]/40 hover:border-[#F2EFE9]/25 hover:text-[#F2EFE9]/60'
+                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                   }`}
                 >
                   {t.label}
@@ -259,7 +259,7 @@ REGLAS:
 
           {/* Tono chips */}
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Tono
             </label>
             <div className="flex flex-wrap gap-2">
@@ -269,8 +269,8 @@ REGLAS:
                   onClick={() => setTono(t.value)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     tono === t.value
-                      ? 'bg-[#E8962E]/15 border-[#E8962E]/40 text-[#E8962E]'
-                      : 'border-[#F2EFE9]/10 text-[#F2EFE9]/40 hover:border-[#F2EFE9]/25 hover:text-[#F2EFE9]/60'
+                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                   }`}
                 >
                   {t.label}
@@ -282,7 +282,7 @@ REGLAS:
           {/* Variantes chips — solo para imagen unica */}
           {tipo === 'imagen_single' ? (
             <div>
-              <label className="block text-[10px] font-bold tracking-wider uppercase text-[#F2EFE9]/40 mb-1.5">
+              <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
                 Variantes
               </label>
               <div className="flex flex-wrap gap-2">
@@ -292,8 +292,8 @@ REGLAS:
                     onClick={() => setVariantes(v)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                       variantes === v
-                        ? 'bg-[#E8962E]/15 border-[#E8962E]/40 text-[#E8962E]'
-                        : 'border-[#F2EFE9]/10 text-[#F2EFE9]/40 hover:border-[#F2EFE9]/25 hover:text-[#F2EFE9]/60'
+                        ? 'bg-gold/15 border-gold/40 text-gold'
+                        : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                     }`}
                   >
                     {v}
@@ -302,11 +302,11 @@ REGLAS:
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-[#E8962E]/5 p-3">
-              <p className="text-[10px] font-bold tracking-wider uppercase text-[#E8962E] mb-1">
+            <div className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-gold/5 p-3">
+              <p className="text-[10px] font-bold tracking-wider uppercase text-gold mb-1">
                 Carrusel unico
               </p>
-              <p className="text-xs text-[#F2EFE9]/60 leading-relaxed">
+              <p className="text-xs text-cream/60 leading-relaxed">
                 Generamos un solo carrusel bien trabajado (hasta 10 slides). El ultimo slide
                 incluye una palabra clave para activar la automatizacion en ManyChat.
               </p>
@@ -330,17 +330,17 @@ REGLAS:
         <div className="flex-1 card-panel flex flex-col min-h-[200px]">
           <div className="flex items-center justify-between p-4 border-b border-[rgba(232,150,46,0.1)]">
             <div className="flex items-center gap-2">
-              {generando && <div className="w-2 h-2 rounded-full bg-[#E8962E] animate-pulse" />}
-              <span className="text-xs font-bold tracking-wider uppercase text-[#E8962E]">
+              {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
+              <span className="text-xs font-bold tracking-wider uppercase text-gold">
                 {generando ? 'Generando...' : 'Copies'}
               </span>
             </div>
             {output && (
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] bg-[#F2EFE9]/5 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 text-xs text-cream/50 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
               >
-                {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiado ? 'Copiado' : 'Copiar todo'}
               </button>
             )}
@@ -348,18 +348,18 @@ REGLAS:
 
           <div className="flex-1 p-4">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-[#F2EFE9] [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : !generando ? (
-              <div className="flex flex-col items-center justify-center h-full text-[#F2EFE9]/20 gap-3">
+              <div className="flex flex-col items-center justify-center h-full text-cream/20 gap-3">
                 <PenTool className="w-10 h-10" />
                 <p className="text-sm text-center">
                   Completa el formulario y<br />genera los copies.
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-[#F2EFE9]/40">
+              <div className="flex items-center gap-2 text-sm text-cream/40">
                 <Loader2 className="w-4 h-4 animate-spin" /> Generando copies...
               </div>
             )}

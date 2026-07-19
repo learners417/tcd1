@@ -152,14 +152,14 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
 
       {/* Hero */}
       <div>
-        <p className="text-[10px] font-bold text-[#E8962E]/70 uppercase tracking-[0.2em] mb-2">
+        <p className="text-[10px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
           Tu Máquina de Pacientes
         </p>
-        <h1 className="text-3xl font-medium text-[#F2EFE9] tracking-tight">
+        <h1 className="text-3xl font-medium text-cream tracking-tight">
           Hola, {nombre}.
         </h1>
-        <p className="text-xl text-[#E8962E] mt-1">¿Qué quieres lograr con tus anuncios?</p>
-        <p className="text-sm text-[#F2EFE9]/40 mt-2">
+        <p className="text-xl text-gold mt-1">¿Qué quieres lograr con tus anuncios?</p>
+        <p className="text-sm text-cream/40 mt-2">
           Elige una puerta y te llevamos paso a paso: qué decir, qué mostrar y dónde hacer clic. Nada más.
         </p>
       </div>
@@ -178,25 +178,25 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   disabled={bloqueada}
                   className={`text-left rounded-2xl border p-5 transition-all group ${
                     bloqueada
-                      ? 'bg-[#0d0d0c] border-[#F2EFE9]/8 cursor-not-allowed'
-                      : 'bg-[#111110] border-[rgba(232,150,46,0.15)] hover:border-[#E8962E]/50 hover:bg-[#161512]'
+                      ? 'bg-[#0d0d0c] border-cream/8 cursor-not-allowed'
+                      : 'bg-panel border-[rgba(232,150,46,0.15)] hover:border-gold/50 hover:bg-[#161512]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className={`text-2xl ${bloqueada ? 'opacity-30 grayscale' : ''}`}>{p.emoji}</span>
-                    <Icon className={`w-4 h-4 ${bloqueada ? 'text-[#F2EFE9]/25' : 'text-[#E8962E]/60 group-hover:text-[#E8962E]'} transition-colors`} />
+                    <Icon className={`w-4 h-4 ${bloqueada ? 'text-cream/25' : 'text-gold/60 group-hover:text-gold'} transition-colors`} />
                   </div>
-                  <h3 className={`text-base font-semibold ${bloqueada ? 'text-[#F2EFE9]/35' : 'text-[#F2EFE9]'}`}>
+                  <h3 className={`text-base font-semibold ${bloqueada ? 'text-cream/35' : 'text-cream'}`}>
                     {p.titulo}
                   </h3>
-                  <p className={`text-xs mt-1 leading-relaxed ${bloqueada ? 'text-[#F2EFE9]/25' : 'text-[#F2EFE9]/55'}`}>
+                  <p className={`text-xs mt-1 leading-relaxed ${bloqueada ? 'text-cream/25' : 'text-cream/55'}`}>
                     {p.promesa}
                   </p>
-                  <p className={`text-[10px] uppercase tracking-wider mt-3 font-semibold ${bloqueada ? 'text-[#F2EFE9]/20' : 'text-[#E8962E]/70'}`}>
+                  <p className={`text-[10px] uppercase tracking-wider mt-3 font-semibold ${bloqueada ? 'text-cream/20' : 'text-gold/70'}`}>
                     {p.detalle}
                   </p>
                   {bloqueada && (
-                    <p className="text-[10px] text-[#E8962E]/50 mt-2 italic leading-relaxed">
+                    <p className="text-[10px] text-gold/50 mt-2 italic leading-relaxed">
                       Se desbloquea cuando Vera apruebe tu oferta — anunciar sin oferta lista quema dinero.
                     </p>
                   )}
@@ -209,7 +209,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
           <div className="flex justify-center">
             <button
               onClick={() => setModo('diagnostico')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.25)] text-sm text-[#E8962E] hover:bg-[#E8962E]/10 transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.25)] text-sm text-gold hover:bg-gold/10 transition-all"
             >
               <Sparkles className="w-4 h-4" />
               ¿No sabes cuál te toca? Hacer mi diagnóstico (2 min)
@@ -222,15 +222,15 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
         <div className="space-y-5">
           <button
             onClick={() => { setModo('puertas'); setResp({}); }}
-            className="flex items-center gap-1.5 text-xs text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors"
+            className="flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" /> Volver a las puertas
           </button>
 
           {PREGUNTAS.map((p, i) => (
-            <div key={p.id} className="bg-[#111110] border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
-              <p className="text-sm text-[#F2EFE9]/80 font-medium mb-3">
-                <span className="text-[#E8962E]/60 mr-2">{i + 1}.</span>{p.q}
+            <div key={p.id} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
+              <p className="text-sm text-cream/80 font-medium mb-3">
+                <span className="text-gold/60 mr-2">{i + 1}.</span>{p.q}
               </p>
               <div className="flex flex-wrap gap-2">
                 {p.opts.map((o) => (
@@ -239,8 +239,8 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                     onClick={() => setResp((prev) => ({ ...prev, [p.id]: o.v }))}
                     className={`px-3.5 py-1.5 rounded-full text-xs border transition-all ${
                       resp[p.id] === o.v
-                        ? 'bg-[#E8962E] text-black border-[#E8962E] font-semibold'
-                        : 'border-[#F2EFE9]/15 text-[#F2EFE9]/50 hover:text-[#F2EFE9] hover:border-[#F2EFE9]/30'
+                        ? 'bg-gold text-black border-gold font-semibold'
+                        : 'border-cream/15 text-cream/50 hover:text-cream hover:border-cream/30'
                     }`}
                   >
                     {o.l}
@@ -253,29 +253,29 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
           {respondidas && (() => {
             const p = PUERTAS.find((x) => x.id === recomendada)!;
             return (
-              <div className="bg-[#161310] border border-[#E8962E]/30 rounded-2xl p-6 animate-in fade-in duration-300">
-                <p className="text-[10px] font-bold text-[#E8962E]/70 uppercase tracking-[0.2em] mb-2">
+              <div className="bg-[#161310] border border-gold/30 rounded-2xl p-6 animate-in fade-in duration-300">
+                <p className="text-[10px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
                   Tu campaña es
                 </p>
-                <h3 className="text-2xl font-medium text-[#F2EFE9]">
+                <h3 className="text-2xl font-medium text-cream">
                   {p.emoji} {p.titulo}
                 </h3>
-                <p className="text-sm text-[#F2EFE9]/60 mt-2 leading-relaxed">{razonRecomendada}</p>
+                <p className="text-sm text-cream/60 mt-2 leading-relaxed">{razonRecomendada}</p>
                 {resp.experiencia === 'fallo' && (
-                  <p className="text-xs text-[#E8962E]/70 mt-2 italic">
+                  <p className="text-xs text-gold/70 mt-2 italic">
                     Y algo importante: casi nunca es Meta — es la oferta o la puntería. Esta vez vamos paso a paso.
                   </p>
                 )}
                 <div className="flex gap-3 mt-5">
                   <button
                     onClick={() => elegir(recomendada)}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] text-black text-sm font-bold transition-all"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-black text-sm font-bold transition-all"
                   >
                     Empezar <ArrowRight className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => { setModo('puertas'); }}
-                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-cream/60 hover:text-cream transition-colors"
                   >
                     Prefiero elegir yo
                   </button>
@@ -290,19 +290,19 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
       <div className="flex flex-wrap gap-3 pt-2 border-t border-[rgba(232,150,46,0.08)]">
         <button
           onClick={() => onNavigate('historial')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#F2EFE9]/10 text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] hover:border-[#F2EFE9]/25 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/50 hover:text-cream hover:border-cream/25 transition-all"
         >
           <FolderOpen className="w-3.5 h-3.5" />
           Mis campañas
           {campanas.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-[#E8962E]/15 text-[#E8962E] text-[10px] font-bold">
+            <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-bold">
               {campanas.length}
             </span>
           )}
         </button>
         <button
           onClick={() => onNavigate('ganadores')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#F2EFE9]/10 text-xs text-[#F2EFE9]/50 hover:text-[#F2EFE9] hover:border-[#F2EFE9]/25 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/50 hover:text-cream hover:border-cream/25 transition-all"
         >
           <Trophy className="w-3.5 h-3.5" />
           Ganadores

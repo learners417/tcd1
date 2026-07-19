@@ -134,12 +134,12 @@ INSTRUCCIONES:
   return (
     <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
       <div className="mb-5">
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#E8962E] mb-1">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Configuracion guiada
         </p>
-        <h2 className="text-xl font-light text-[#F2EFE9]">
+        <h2 className="text-xl font-light text-cream">
           Montaje{' '}
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#E8962E]">
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
             paso a paso
           </span>
         </h2>
@@ -149,7 +149,7 @@ INSTRUCCIONES:
         {/* Checklist izquierda */}
         <div className="lg:w-[300px] lg:min-w-[300px] card-panel p-4">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#F2EFE9]/30">
+            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-cream/30">
               Pasos
             </span>
             <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
@@ -160,14 +160,14 @@ INSTRUCCIONES:
               <div
                 key={step.id}
                 className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-                  step.status === 'active' ? 'bg-[#E8962E]/10 border border-[#E8962E]/20' :
-                  step.status === 'done' ? 'bg-[#22C55E]/5' : 'opacity-40'
+                  step.status === 'active' ? 'bg-gold/10 border border-gold/20' :
+                  step.status === 'done' ? 'bg-success/5' : 'opacity-40'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                  step.status === 'done' ? 'bg-[#22C55E]/20 text-[#22C55E]' :
-                  step.status === 'active' ? 'bg-[#E8962E]/20 text-[#E8962E]' :
-                  'bg-[#F2EFE9]/5 text-[#F2EFE9]/20'
+                  step.status === 'done' ? 'bg-success/20 text-success' :
+                  step.status === 'active' ? 'bg-gold/20 text-gold' :
+                  'bg-cream/5 text-cream/20'
                 }`}>
                   {step.status === 'done' ? <CheckCircle2 className="w-3.5 h-3.5" /> :
                    step.status === 'active' ? <span className="text-[10px] font-bold">{step.id}</span> :
@@ -175,12 +175,12 @@ INSTRUCCIONES:
                 </div>
                 <div>
                   <div className={`text-xs font-semibold ${
-                    step.status === 'done' ? 'text-[#22C55E]' :
-                    step.status === 'active' ? 'text-[#E8962E]' : 'text-[#F2EFE9]/30'
+                    step.status === 'done' ? 'text-success' :
+                    step.status === 'active' ? 'text-gold' : 'text-cream/30'
                   }`}>
                     {step.label}
                   </div>
-                  <div className="text-[10px] text-[#F2EFE9]/25 mt-0.5 leading-relaxed">
+                  <div className="text-[10px] text-cream/25 mt-0.5 leading-relaxed">
                     {step.description}
                   </div>
                 </div>
@@ -188,9 +188,9 @@ INSTRUCCIONES:
             ))}
           </div>
 
-          <div className="mt-4 p-3 rounded-xl bg-[#E8962E]/5 border border-dashed border-[#E8962E]/15">
-            <div className="text-[10px] font-bold text-[#E8962E] mb-1">Tip</div>
-            <div className="text-[10px] text-[#F2EFE9]/30 leading-relaxed">
+          <div className="mt-4 p-3 rounded-xl bg-gold/5 border border-dashed border-gold/15">
+            <div className="text-[10px] font-bold text-gold mb-1">Tip</div>
+            <div className="text-[10px] text-cream/30 leading-relaxed">
               No tocar nada en las primeras 48-72h despues de publicar. La fase de aprendizaje necesita tiempo.
             </div>
           </div>
@@ -203,23 +203,23 @@ INSTRUCCIONES:
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#E8962E] to-[#F4B65C] flex items-center justify-center text-xs font-bold text-[#080808] shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
                     K
                   </div>
                 )}
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-br-sm'
-                    : 'bg-[#1A1917] border border-[#F2EFE9]/5 rounded-bl-sm'
+                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
+                    : 'bg-surface border border-cream/5 rounded-bl-sm'
                 }`}>
                   {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-[#F2EFE9] [&_p]:my-1.5">
+                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5">
                       <Markdown>{msg.content}</Markdown>
                     </div>
                   ) : (
                     <div className="flex gap-1">
                       {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#E8962E] animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
                       ))}
                     </div>
                   )}
@@ -232,7 +232,7 @@ INSTRUCCIONES:
           <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all placeholder-[#F2EFE9]/20"
+                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
                 placeholder="Escribi tu respuesta..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

@@ -41,16 +41,16 @@ export default function ModoHueco({ onNavigate }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#E8962E]/20 bg-[#E8962E]/[0.04] p-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-[#E8962E] flex items-center gap-1.5 mb-1.5">
+    <div className="rounded-2xl border border-gold/20 bg-gold/[0.04] p-4">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gold flex items-center gap-1.5 mb-1.5">
         <Zap className="w-3.5 h-3.5" /> ¿Tenés solo 10-15 minutos?
       </p>
-      <p className="text-sm font-semibold text-[#F2EFE9]">{titulo}</p>
-      <p className="text-xs text-[#F2EFE9]/55 mt-1 leading-relaxed">{detalle}</p>
+      <p className="text-sm font-semibold text-cream">{titulo}</p>
+      <p className="text-xs text-cream/55 mt-1 leading-relaxed">{detalle}</p>
       <button
         type="button"
         onClick={() => onNavigate(destino)}
-        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#E8962E] hover:text-[#F4B65C] transition-colors"
+        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-gold hover:text-goldhi transition-colors"
       >
         {cta} <ArrowRight className="w-3.5 h-3.5" />
       </button>

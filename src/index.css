@@ -1,4 +1,17 @@
 @import "tailwindcss";
+
+/* @theme · Tokens de marca como utilidades Tailwind (CP1). Mismos valores que la paleta original. */
+@theme {
+  --color-ink: #080808;
+  --color-panel: #111110;
+  --color-surface: #1A1917;
+  --color-gold: #E8962E;
+  --color-goldhi: #F4B65C;
+  --color-azure: #3B82F6;
+  --color-success: #22C55E;
+  --color-danger: #EF4444;
+  --color-cream: #F2EFE9;
+}
 @plugin "@tailwindcss/typography";
 
 /* Safelist: dynamic pilar color classes used in Roadmap.tsx */
@@ -71,7 +84,7 @@ h1, h2, h3 {
 
   /* Legacy alias — keep for backward compat during migration */
   .glass-panel {
-    @apply bg-[#111110]/80 backdrop-blur-xl border border-[rgba(232,150,46,0.12)] shadow-2xl;
+    @apply bg-panel/80 backdrop-blur-xl border border-[rgba(232,150,46,0.12)] shadow-2xl;
   }
 
   /* New card panel */

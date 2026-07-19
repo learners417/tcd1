@@ -32,11 +32,11 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
             Día {diaActual} · punto de no retorno {diasDespues >= 0 ? `+${diasDespues}` : diasDespues}
           </p>
-          <h3 className="text-lg font-medium text-[#F2EFE9] tracking-tight mb-1">
+          <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
             Tu ADN está incompleto para activar Fase 4
           </h3>
-          <p className="text-sm text-[#F2EFE9]/60">
-            Faltan <span className="text-[#F2EFE9] font-semibold">{validacion.camposFaltantes.length}</span>{' '}
+          <p className="text-sm text-cream/60">
+            Faltan <span className="text-cream font-semibold">{validacion.camposFaltantes.length}</span>{' '}
             campos críticos ({validacion.porcentajeCompleto}% completo). Gastar en ads con ADN incompleto
             es quemar plata. Vuelve a los pilares de abajo antes de seguir.
           </p>
@@ -58,17 +58,17 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
             key={pilar}
             type="button"
             onClick={() => onIrAPilar?.(pilar)}
-            className="w-full text-left rounded-xl border border-[#ff5e5e]/20 bg-[#1A1917]/40 hover:bg-[#ff5e5e]/5 hover:border-[#ff5e5e]/40 transition-colors p-3 flex items-center gap-3 group"
+            className="w-full text-left rounded-xl border border-[#ff5e5e]/20 bg-surface/40 hover:bg-[#ff5e5e]/5 hover:border-[#ff5e5e]/40 transition-colors p-3 flex items-center gap-3 group"
           >
             <span className="text-xs font-mono text-[#ff5e5e] font-semibold flex-shrink-0">
               {pilar}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#F2EFE9]/80">
+              <p className="text-sm text-cream/80">
                 {campos.map((c) => c.label).join(' · ')}
               </p>
             </div>
-            <ArrowRight className="w-4 h-4 text-[#F2EFE9]/40 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
+            <ArrowRight className="w-4 h-4 text-cream/40 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
           </button>
         ))}
       </div>

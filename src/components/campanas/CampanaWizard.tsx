@@ -83,16 +83,16 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-[#F2EFE9]" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
+          <h2 className="text-xl font-semibold text-cream" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
             Nueva Campana
           </h2>
-          <p className="text-sm text-[#F2EFE9]/40 mt-0.5">
+          <p className="text-sm text-cream/40 mt-0.5">
             {OBJETIVO_LABELS[form.objetivo].titulo}
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-[#F2EFE9]/40 hover:text-[#F2EFE9] transition-colors"
+          className="text-sm text-cream/40 hover:text-cream transition-colors"
         >
           Cancelar
         </button>
@@ -106,28 +106,28 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
               onClick={() => idx < step && setStep(idx)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 idx === step
-                  ? 'bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/30'
+                  ? 'bg-gold/15 text-gold border border-gold/30'
                   : idx < step
-                    ? 'bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 cursor-pointer hover:bg-[#22C55E]/15'
-                    : 'bg-[#F2EFE9]/5 text-[#F2EFE9]/30 border border-[#F2EFE9]/10'
+                    ? 'bg-success/10 text-success border border-success/20 cursor-pointer hover:bg-success/15'
+                    : 'bg-cream/5 text-cream/30 border border-cream/10'
               }`}
             >
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                idx < step ? 'bg-[#22C55E]/20' : idx === step ? 'bg-[#E8962E]/20' : 'bg-[#F2EFE9]/10'
+                idx < step ? 'bg-success/20' : idx === step ? 'bg-gold/20' : 'bg-cream/10'
               }`}>
                 {idx < step ? <Check className="w-3 h-3" /> : idx + 1}
               </span>
               {label}
             </button>
             {idx < STEPS.length - 1 && (
-              <div className={`flex-1 h-px ${idx < step ? 'bg-[#22C55E]/30' : 'bg-[#F2EFE9]/10'}`} />
+              <div className={`flex-1 h-px ${idx < step ? 'bg-success/30' : 'bg-cream/10'}`} />
             )}
           </React.Fragment>
         ))}
       </div>
 
       {/* Content */}
-      <div className="bg-[#1A1917] border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
+      <div className="bg-surface border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
         {step === 0 && (
           <WizardStepObjetivo value={form.objetivo} onChange={(objetivo) => setForm({ ...form, objetivo })} />
         )}
@@ -150,7 +150,7 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
       <div className="flex items-center justify-between">
         <button
           onClick={() => step > 0 ? setStep(step - 1) : onCancel()}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-cream/60 hover:text-cream transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> {step > 0 ? 'Anterior' : 'Cancelar'}
         </button>

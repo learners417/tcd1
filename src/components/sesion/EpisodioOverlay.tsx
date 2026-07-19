@@ -68,7 +68,7 @@ export default function EpisodioOverlay({
       {/* Header del episodio */}
       <div className="sticky top-0 z-30 bg-[#0D0C0B]/95 backdrop-blur border-b border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] truncate">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold truncate">
             {fase === 'cliffhanger' ? 'Episodio completado' : `Episodio${diaAsignado ? ` · Día ${diaAsignado}` : ''}`}
             {esHito && fase !== 'cliffhanger' && <span className="ml-2 text-yellow-500">⭐ Sesión-hito</span>}
           </p>
@@ -89,9 +89,9 @@ export default function EpisodioOverlay({
             {esHito ? (
               <Star className="w-10 h-10 text-yellow-500 fill-yellow-500/30 mb-6" />
             ) : (
-              <img src="/javo.jpg" alt="" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8962E]/40 mb-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <img src="/javo.jpg" alt="" className="w-16 h-16 rounded-full object-cover border-2 border-gold/40 mb-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             )}
-            <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] mb-4 max-w-xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+            <h1 className="text-3xl md:text-4xl font-light text-cream mb-4 max-w-xl" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               {tituloLimpio}
             </h1>
             {descripcion && (
@@ -102,7 +102,7 @@ export default function EpisodioOverlay({
             </p>
             <button
               onClick={() => setFase('sesion')}
-              className="flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-[#E8962E] text-black text-base font-bold hover:bg-[#F4B65C] hover:shadow-[0_0_40px_rgba(232,150,46,0.25)] transition-all"
+              className="flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gold text-black text-base font-bold hover:bg-goldhi hover:shadow-[0_0_40px_rgba(232,150,46,0.25)] transition-all"
             >
               <Play className="w-5 h-5" /> COMENZAR
             </button>
@@ -124,7 +124,7 @@ export default function EpisodioOverlay({
             <div className="max-w-3xl mx-auto px-4">
               <button
                 onClick={() => setFase('cliffhanger')}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#E8962E] text-black text-sm font-bold hover:bg-[#F4B65C] transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors"
               >
                 Cerrar el día <ArrowRight className="w-4 h-4" />
               </button>
@@ -136,19 +136,19 @@ export default function EpisodioOverlay({
         {fase === 'cliffhanger' && (
           <div className="min-h-[70vh] flex flex-col items-center justify-center text-center animate-in fade-in duration-500">
             <p className="text-4xl mb-5">🥋</p>
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#22C55E] mb-6">Sesión de hoy: completada ✓</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-success mb-6">Sesión de hoy: completada ✓</p>
             {teaser ? (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-3">
                   {teaser.esHito ? '⭐ Se viene algo grande' : 'Próximo episodio'}
                 </p>
-                <h2 className="text-2xl md:text-3xl font-light text-[#F2EFE9] mb-4 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                <h2 className="text-2xl md:text-3xl font-light text-cream mb-4 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                   {teaser.titulo}
                 </h2>
                 <p className="text-sm text-white/60 max-w-md leading-relaxed mb-10">{teaser.frase}</p>
               </>
             ) : (
-              <h2 className="text-2xl font-light text-[#F2EFE9] mb-10 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <h2 className="text-2xl font-light text-cream mb-10 max-w-lg" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 No queda camino por delante. Directora. Director. ⬛
               </h2>
             )}

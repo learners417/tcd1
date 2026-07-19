@@ -42,7 +42,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#22C55E] mb-1">Cierre de sesión</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         <p className="text-xs text-white/40 mt-1">
           Trabajaste {formatoCrono(duracionSeg)}{entrada ? <> · llegaste {entrada.emoji} {entrada.label.toLowerCase()}</> : null}.
@@ -60,7 +60,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
               onClick={() => setEmocion(e.id)}
               className={`px-3 py-2 rounded-xl border text-sm transition-all ${
                 emocion === e.id
-                  ? 'border-[#22C55E] bg-[#22C55E]/15 text-white'
+                  ? 'border-success bg-success/15 text-white'
                   : 'border-white/10 bg-white/5 text-white/70 hover:border-white/25'
               }`}
             >
@@ -85,7 +85,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
                   setCompromisos(nuevos);
                 }}
                 placeholder={i === 0 ? 'Ej: terminar la carta al dinero antes del jueves' : 'Otro compromiso…'}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/25 focus:border-[#22C55E]/60 focus:outline-none"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/25 focus:border-success/60 focus:outline-none"
               />
               {compromisos.length > 1 && (
                 <button
@@ -113,25 +113,25 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
 
       {esViernes && (
         <div className="mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">🪞 El Espejo del viernes</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🪞 El Espejo del viernes</p>
           <p className="text-xs text-white/45 mb-2">Una línea para tu Diario del Fundador — la semana en una frase:</p>
           <textarea value={diario} onChange={(e) => setDiario(e.target.value)} rows={2}
             placeholder="Esta semana yo…"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-[#E8962E]/60 focus:outline-none resize-none" />
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-gold/60 focus:outline-none resize-none" />
         </div>
       )}
       <button
         type="button"
         disabled={!emocion || cerrando}
         onClick={() => emocion && onCerrar({ emocion, compromisos: compromisosLimpios , diario: esViernes && diario.trim() ? diario.trim() : undefined })}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#22C55E] text-black hover:bg-[#3ddb70]"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-success text-black hover:bg-[#3ddb70]"
       >
         <CheckCircle2 className="w-4 h-4" /> {cerrando ? 'Consolidando…' : 'Cerrar y consolidar la sesión'}
       </button>
       <button
         type="button"
         onClick={descargarPapel}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E8962E]/25 text-[#E8962E] text-xs font-bold uppercase tracking-wider hover:bg-[#E8962E]/10 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gold/25 text-gold text-xs font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
       >
         <FileText className="w-4 h-4" /> Sesión de Papel · para el cuaderno
       </button>

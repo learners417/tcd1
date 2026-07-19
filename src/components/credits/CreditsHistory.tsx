@@ -39,7 +39,7 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-5 w-5 animate-spin text-[#E8962E]" />
+        <Loader2 className="h-5 w-5 animate-spin text-gold" />
       </div>
     );
   }
@@ -69,13 +69,13 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
             <div className="flex items-center gap-3 min-w-0">
               <div
                 className={`rounded-lg p-1.5 shrink-0 ${
-                  isPositive ? 'bg-[#10B981]/15' : isZero ? 'bg-white/5' : 'bg-[#EF4444]/15'
+                  isPositive ? 'bg-[#10B981]/15' : isZero ? 'bg-white/5' : 'bg-danger/15'
                 }`}
               >
                 {isPositive ? (
                   <TrendingUp className="h-3.5 w-3.5 text-[#10B981]" />
                 ) : (
-                  <TrendingDown className="h-3.5 w-3.5 text-[#EF4444]" />
+                  <TrendingDown className="h-3.5 w-3.5 text-danger" />
                 )}
               </div>
               <div className="min-w-0">
@@ -92,7 +92,7 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
             <div className="flex items-center gap-3 shrink-0 ml-3">
               <span
                 className={`text-sm font-bold ${
-                  isPositive ? 'text-[#10B981]' : isZero ? 'text-white/40' : 'text-[#EF4444]'
+                  isPositive ? 'text-[#10B981]' : isZero ? 'text-white/40' : 'text-danger'
                 }`}
               >
                 {isPositive ? '+' : ''}{tx.delta}

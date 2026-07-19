@@ -29,9 +29,9 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
   const progreso = segundosObjetivo ? Math.min(100, (ahora / segundosObjetivo) * 100) : 0;
 
   return (
-    <div className={`rounded-xl border px-3 py-2 ${cumplido ? 'border-[#22C55E]/40 bg-[#22C55E]/5' : 'border-white/10 bg-white/5'}`}>
+    <div className={`rounded-xl border px-3 py-2 ${cumplido ? 'border-success/40 bg-success/5' : 'border-white/10 bg-white/5'}`}>
       <div className="flex items-center gap-3">
-        <Timer className={`w-4 h-4 ${cumplido ? 'text-[#22C55E]' : 'text-[#E8962E]'}`} />
+        <Timer className={`w-4 h-4 ${cumplido ? 'text-success' : 'text-gold'}`} />
         <span className="font-mono text-sm text-white tabular-nums">{formatoCrono(ahora)}</span>
         {segundosObjetivo !== null && (
           <span className="text-[11px] text-white/40">/ {formatoCrono(segundosObjetivo)}</span>
@@ -41,7 +41,7 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
           <button
             type="button"
             onClick={() => onSesionChange(reanudarSesion(sesion))}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#E8962E] hover:text-[#f0a94d]"
+            className="flex items-center gap-1.5 text-xs font-semibold text-gold hover:text-[#f0a94d]"
           >
             <Play className="w-3.5 h-3.5" /> Retomar
           </button>
@@ -58,7 +58,7 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
       {segundosObjetivo !== null && (
         <div className="mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
           <div
-            className={`h-full transition-all ${cumplido ? 'bg-[#22C55E]' : 'bg-[#E8962E]'}`}
+            className={`h-full transition-all ${cumplido ? 'bg-success' : 'bg-gold'}`}
             style={{ width: `${progreso}%` }}
           />
         </div>
@@ -67,7 +67,7 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
         <p className="mt-1.5 text-[11px] text-white/40">Sesión pausada — el dojo te espera. Todo quedó guardado.</p>
       )}
       {cumplido && !pausada && (
-        <p className="mt-1.5 text-[11px] text-[#22C55E]">El tiempo de hoy se cumplió. Lo que abriste, cerralo: consolidá la sesión. 🥋</p>
+        <p className="mt-1.5 text-[11px] text-success">El tiempo de hoy se cumplió. Lo que abriste, cerralo: consolidá la sesión. 🥋</p>
       )}
     </div>
   );

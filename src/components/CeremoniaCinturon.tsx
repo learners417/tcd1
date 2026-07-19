@@ -63,30 +63,30 @@ export default function CeremoniaCinturon() {
 
   return (
     <div className="fixed inset-0 z-[95] bg-[#0D0C0B] overflow-y-auto animate-in fade-in duration-700">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#E8962E]/12 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gold/12 blur-[140px] rounded-full pointer-events-none" />
       <button onClick={cerrar} className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors z-10"><X className="w-6 h-6" /></button>
       <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-14 max-w-lg mx-auto">
-        <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#E8962E] mb-8 animate-in slide-in-from-top-4 duration-700">Ceremonia de cinturón</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-gold mb-8 animate-in slide-in-from-top-4 duration-700">Ceremonia de cinturón</p>
         <p className="text-[90px] leading-none mb-6 animate-in zoom-in-50 duration-700">{cinturon.emoji}</p>
-        <h1 className="text-4xl font-light text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h1 className="text-4xl font-light text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Cinturón {cinturon.nombre}
         </h1>
-        <p className="text-sm text-[#E8962E] italic mb-8">{cinturon.metafora}</p>
+        <p className="text-sm text-gold italic mb-8">{cinturon.metafora}</p>
         {CARTAS[cinturon.orden] && (
-          <div className="rounded-2xl border border-[#E8962E]/25 bg-gradient-to-b from-[#E8962E]/[0.06] to-transparent p-6 mb-6 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E]/70 mb-3">Una carta para ti</p>
+          <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent p-6 mb-6 text-left">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-3">Una carta para ti</p>
             <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">{CARTAS[cinturon.orden]}</p>
-            <p className="text-xs text-[#E8962E]/80 mt-4 text-right" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>— Javo</p>
+            <p className="text-xs text-gold/80 mt-4 text-right" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>— Javo</p>
           </div>
         )}
         {DESBLOQUEOS[cinturon.orden] && (
-          <p className="text-sm text-[#22C55E] font-medium mb-8 animate-pulse">{DESBLOQUEOS[cinturon.orden]}</p>
+          <p className="text-sm text-success font-medium mb-8 animate-pulse">{DESBLOQUEOS[cinturon.orden]}</p>
         )}
         <div className="flex gap-3 w-full">
           <button onClick={compartir} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.06] border border-white/15 text-white/75 text-sm font-bold hover:bg-white/10 transition-colors">
-            {copiado ? <Check className="w-4 h-4 text-[#22C55E]" /> : <Copy className="w-4 h-4" />} {copiado ? 'Copiado' : 'Compartirlo'}
+            {copiado ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />} {copiado ? 'Copiado' : 'Compartirlo'}
           </button>
-          <button onClick={cerrar} className="flex-1 py-3 rounded-2xl bg-[#E8962E] text-black text-sm font-bold hover:bg-[#F4B65C] transition-colors">
+          <button onClick={cerrar} className="flex-1 py-3 rounded-2xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors">
             Seguir el camino →
           </button>
         </div>

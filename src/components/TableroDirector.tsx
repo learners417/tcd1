@@ -33,8 +33,8 @@ export default function TableroDirector({ diaPrograma, completadasCount, metasEs
   return (
     <div className="card-panel p-6 border border-white/[0.06]">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase">El tablero del director</h2>
-        <button onClick={() => setEditando(!editando)} className="text-[10px] text-[#E8962E]/70 hover:text-[#E8962E] uppercase font-bold tracking-wider">{editando ? 'Listo ✓' : 'Actualizar números'}</button>
+        <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">El tablero del director</h2>
+        <button onClick={() => setEditando(!editando)} className="text-[10px] text-gold/70 hover:text-gold uppercase font-bold tracking-wider">{editando ? 'Listo ✓' : 'Actualizar números'}</button>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {([['invertido', '💸 Invertido (USD)'], ['facturado', '💰 Facturado (USD)'], ['conversaciones', '💬 Conversaciones'], ['llamadas', '📞 Llamadas']] as const).map(([k, label]) => (
@@ -42,9 +42,9 @@ export default function TableroDirector({ diaPrograma, completadasCount, metasEs
             <p className="text-[9px] text-white/40 uppercase font-bold tracking-wider mb-1">{label}</p>
             {editando ? (
               <input type="number" value={d[k]} onChange={(e) => guardar({ ...d, [k]: Math.max(0, Number(e.target.value) || 0) })}
-                className="w-full bg-transparent text-lg text-[#F2EFE9] focus:outline-none border-b border-[#E8962E]/40" />
+                className="w-full bg-transparent text-lg text-cream focus:outline-none border-b border-gold/40" />
             ) : (
-              <p className="text-lg text-[#F2EFE9]">{k === 'invertido' || k === 'facturado' ? `$${d[k].toLocaleString()}` : d[k]}</p>
+              <p className="text-lg text-cream">{k === 'invertido' || k === 'facturado' ? `$${d[k].toLocaleString()}` : d[k]}</p>
             )}
           </div>
         ))}
@@ -55,8 +55,8 @@ export default function TableroDirector({ diaPrograma, completadasCount, metasEs
         <p className="text-[11px]" style={{ color: zona.c }}>{zona.t}</p>
       </div>
       {/* Semáforo de la Revisión D45 */}
-      <div className={`rounded-xl px-4 py-3 border ${verde ? 'bg-[#22C55E]/[0.07] border-[#22C55E]/25' : 'bg-[#E8962E]/[0.07] border-[#E8962E]/25'}`}>
-        <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${verde ? 'text-[#22C55E]' : 'text-[#E8962E]'}`}>
+      <div className={`rounded-xl px-4 py-3 border ${verde ? 'bg-success/[0.07] border-success/25' : 'bg-gold/[0.07] border-gold/25'}`}>
+        <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${verde ? 'text-success' : 'text-gold'}`}>
           {verde ? '🟢 Tu Revisión de Sistema: EN VERDE' : '🟡 Tu Revisión de Sistema: en pausa'}
         </p>
         <p className="text-[11px] text-white/55 leading-relaxed">

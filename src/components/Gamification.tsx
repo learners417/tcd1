@@ -111,31 +111,31 @@ export function TarjetaNivel({
     <div className={`bg-${cfg.color}-500/10 border border-${cfg.color}-500/25 rounded-2xl p-5 space-y-3`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <cfg.icon className="w-8 h-8 text-[#E8962E]" />
+          <cfg.icon className="w-8 h-8 text-gold" />
           <div>
-            <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-wider">Nivel {nivelActual} de 5</p>
+            <p className="text-[10px] text-cream/40 uppercase tracking-wider">Nivel {nivelActual} de 5</p>
             <h3 className={`text-base font-medium text-${cfg.color}-300`}>{cfg.nombre}</h3>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-[#F2EFE9]/40">Día</p>
-          <p className="text-lg font-light text-[#F2EFE9]">{diasEnPrograma}</p>
-          <p className="text-[10px] text-[#F2EFE9]/30">de 90</p>
+          <p className="text-xs text-cream/40">Día</p>
+          <p className="text-lg font-light text-cream">{diasEnPrograma}</p>
+          <p className="text-[10px] text-cream/30">de 90</p>
         </div>
       </div>
-      <p className="text-xs text-[#F2EFE9]/60">{cfg.descripcion}</p>
+      <p className="text-xs text-cream/60">{cfg.descripcion}</p>
       {siguiente && (
         <div className="flex items-center gap-2 pt-1">
-          <Lock className="w-3 h-3 text-[#F2EFE9]/30" />
-          <p className="text-[10px] text-[#F2EFE9]/40">
-            Próximo: <span className="text-[#F2EFE9]/60">{siguiente.nombre}</span>
+          <Lock className="w-3 h-3 text-cream/30" />
+          <p className="text-[10px] text-cream/40">
+            Próximo: <span className="text-cream/60">{siguiente.nombre}</span>
           </p>
         </div>
       )}
       {nivelActual === 5 && (
-        <div className="flex items-center gap-2 bg-[#E8962E]/10 border border-[#E8962E]/20 rounded-xl px-3 py-2">
-          <Trophy className="w-4 h-4 text-[#E8962E]" />
-          <p className="text-xs text-[#E8962E] font-medium">¡Completaste el Método CLÍNICA!</p>
+        <div className="flex items-center gap-2 bg-gold/10 border border-gold/20 rounded-xl px-3 py-2">
+          <Trophy className="w-4 h-4 text-gold" />
+          <p className="text-xs text-gold font-medium">¡Completaste el Método CLÍNICA!</p>
         </div>
       )}
     </div>
@@ -174,25 +174,25 @@ export function GridBadgesPilares({
             badge.completado
               ? `bg-${badge.color}-500/20 border-${badge.color}-500/40`
               : badge.desbloqueado
-              ? 'bg-[#E8962E]/5 border-[rgba(232,150,46,0.12)]'
-              : 'bg-[#E8962E]/2 border-[rgba(232,150,46,0.1)] opacity-40'
+              ? 'bg-gold/5 border-[rgba(232,150,46,0.12)]'
+              : 'bg-gold/2 border-[rgba(232,150,46,0.1)] opacity-40'
           }`}
         >
           {/* Badge de completado */}
           {badge.completado && (
             <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-${badge.color}-500 flex items-center justify-center`}>
-              <Star className="w-3 h-3 text-[#F2EFE9] fill-white" />
+              <Star className="w-3 h-3 text-cream fill-white" />
             </div>
           )}
 
-          {(() => { const IconComp = PILAR_ICON_MAP[badge.icon]; return IconComp ? <IconComp className="w-5 h-5 text-[#E8962E]" /> : null; })()}
-          <p className="text-[10px] text-[#F2EFE9]/60 text-center leading-tight font-medium">
+          {(() => { const IconComp = PILAR_ICON_MAP[badge.icon]; return IconComp ? <IconComp className="w-5 h-5 text-gold" /> : null; })()}
+          <p className="text-[10px] text-cream/60 text-center leading-tight font-medium">
             {badge.titulo}
           </p>
 
           {/* Mini barra */}
           {badge.desbloqueado && (
-            <div className="w-full h-1 bg-[#E8962E]/10 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-gold/10 rounded-full overflow-hidden">
               <div
                 className={`h-full bg-${badge.color}-500 rounded-full transition-all`}
                 style={{ width: `${badge.pct}%` }}
@@ -200,7 +200,7 @@ export function GridBadgesPilares({
             </div>
           )}
           {!badge.desbloqueado && (
-            <Lock className="w-3 h-3 text-[#F2EFE9]/30" />
+            <Lock className="w-3 h-3 text-cream/30" />
           )}
         </div>
       ))}
@@ -258,8 +258,8 @@ export function ToastCelebracion({
     <div
       className={`fixed top-6 right-6 z-50 max-w-sm rounded-2xl shadow-2xl p-4 animate-in slide-in-from-right duration-300 ${
         isVenta
-          ? 'bg-[#E8962E]/20 border border-[#E8962E]/40 backdrop-blur-xl'
-          : 'bg-[#E8962E]/20 border border-[#E8962E]/30 backdrop-blur-xl'
+          ? 'bg-gold/20 border border-gold/40 backdrop-blur-xl'
+          : 'bg-gold/20 border border-gold/30 backdrop-blur-xl'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -267,11 +267,11 @@ export function ToastCelebracion({
           {payload.tipo === 'primera_venta' ? '🎉' : payload.tipo === 'nivel' ? '⚡' : '✅'}
         </span>
         <div>
-          <p className={`text-sm font-medium ${isVenta ? 'text-[#E8962E]' : 'text-[#F2EFE9]'}`}>
+          <p className={`text-sm font-medium ${isVenta ? 'text-gold' : 'text-cream'}`}>
             {mensaje}
           </p>
         </div>
-        <button onClick={onClose} className="shrink-0 text-[#F2EFE9]/60 hover:text-[#F2EFE9] text-lg leading-none ml-1">
+        <button onClick={onClose} className="shrink-0 text-cream/60 hover:text-cream text-lg leading-none ml-1">
           ×
         </button>
       </div>
@@ -293,18 +293,18 @@ export function PanelGamificacion({ progreso }: { progreso: ProgresoGamificacion
       <TarjetaNivel nivelActual={nivel} diasEnPrograma={progreso.diasEnPrograma} />
 
       <div className="card-panel p-5 rounded-2xl space-y-4">
-        <h3 className="text-xs font-medium text-[#F2EFE9]/60 uppercase tracking-wider flex items-center gap-2">
-          <Zap className="w-3.5 h-3.5 text-[#E8962E]" />
+        <h3 className="text-xs font-medium text-cream/60 uppercase tracking-wider flex items-center gap-2">
+          <Zap className="w-3.5 h-3.5 text-gold" />
           Progreso global
         </h3>
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-[#F2EFE9]/40">
+          <div className="flex justify-between text-xs text-cream/40">
             <span>{progreso.metasCompletadasTotal} de {progreso.metasTotalPrograma} metas</span>
-            <span className="font-medium text-[#F2EFE9]">{progreso.progresoPorcentaje}%</span>
+            <span className="font-medium text-cream">{progreso.progresoPorcentaje}%</span>
           </div>
-          <div className="h-2 bg-[#E8962E]/5 rounded-full overflow-hidden">
+          <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#E8962E] rounded-full transition-all duration-1000"
+              className="h-full bg-gold rounded-full transition-all duration-1000"
               style={{ width: `${progreso.progresoPorcentaje}%` }}
             />
           </div>
