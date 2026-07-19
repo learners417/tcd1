@@ -27,6 +27,31 @@ export const PRECIO_FUNDADOR: Record<string, string> = {
   amarillo: '$147', verde: '$497', negro: '$997',
 };
 
+/**
+ * URLs de checkout self-serve (order forms de GHL, con PayPal). AC1.
+ * Se configuran en Vercel (sin tocar código): VITE_CHECKOUT_AMARILLO,
+ * VITE_CHECKOUT_VERDE, VITE_CHECKOUT_NEGRO → pegás el link del order form y
+ * redeploy. Con la URL vacía, el candado cae al WhatsApp de siempre
+ * (degradación elegante) hasta que la configures.
+ */
+export const CHECKOUT_URL: Record<'amarillo' | 'verde' | 'negro', string> = {
+  amarillo: import.meta.env.VITE_CHECKOUT_AMARILLO || '', // Tu Base $147
+  verde: import.meta.env.VITE_CHECKOUT_VERDE || '',       // Tu Sistema $497
+  negro: import.meta.env.VITE_CHECKOUT_NEGRO || '',       // El Completo $997
+};
+
+/** El plan mínimo (comprable) que desbloquea ese pilar. */
+export function planParaPilar(pilarNum: number): 'amarillo' | 'verde' | 'negro' {
+  if (pilarNum <= PILAR_MAX.amarillo) return 'amarillo';
+  if (pilarNum <= PILAR_MAX.verde) return 'verde';
+  return 'negro';
+}
+
+/** La URL de checkout de un plan (vacía si todavía no la configuraste). */
+export function checkoutUrl(plan: 'amarillo' | 'verde' | 'negro'): string {
+  return CHECKOUT_URL[plan] || '';
+}
+
 /** Tope de mensajes del Mentor durante la Semana Blanca. */
 export const TOPE_MENTOR_BLANCO = 30;
 

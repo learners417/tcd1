@@ -73,7 +73,7 @@ import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
-import { planDe, planPermitePilar, NOMBRE_PLAN, waLink } from '../lib/planes';
+import { planDe, planPermitePilar, NOMBRE_PLAN, waLink, planParaPilar, checkoutUrl } from '../lib/planes';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
 import CintaCinturon from '../components/CintaCinturon';
@@ -1019,7 +1019,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                     <button
                       key={pilar.numero}
                       onClick={() => {
-                        if (pilar.estado === 'plan_bloqueado') { window.open(waLink(`Hola · Quiero subir mi plan para desbloquear «${pilar.titulo}»`), '_blank'); return; }
+                        if (pilar.estado === 'plan_bloqueado') { const planNec = planParaPilar(pilar.numero); const url = checkoutUrl(planNec); if (url) { window.open(url, '_blank'); } else { window.open(waLink(`Hola · Quiero subir a ${NOMBRE_PLAN[planNec]} para desbloquear «${pilar.titulo}»`), '_blank'); } return; }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
                         setPilarAbierto(siguiente);
                         if (siguiente !== null) {
