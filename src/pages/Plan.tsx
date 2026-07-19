@@ -53,29 +53,29 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Encabezado ceremonial */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu norte</p>
-        <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte</p>
+        <h1 className="text-3xl md:text-4xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `El plan de ${nombre}` : 'Tu Plan'}
         </h1>
-        <p className="text-sm text-[#F2EFE9]/55 mt-2 leading-relaxed max-w-xl">
+        <p className="text-sm text-cream/55 mt-2 leading-relaxed max-w-xl">
           10 pacientes a tu precio digno en 90 días — y el sistema para repetirlo. Cada sesión de El Camino te acerca a este número.
         </p>
         <div className="mt-4 max-w-md"><CintaCinturon cinturon={cint} variante="hero" /></div>
       </div>
 
       {/* La meta grande — la barra de pacientes */}
-      <div className="rounded-3xl border border-[rgba(232,150,46,0.14)] bg-gradient-to-br from-[#E8962E]/[0.06] to-transparent p-7">
+      <div className="rounded-3xl border border-[rgba(232,150,46,0.14)] bg-gradient-to-br from-gold/[0.06] to-transparent p-7">
         <div className="flex items-center gap-3 mb-5">
-          <Target className="w-5 h-5 text-[#E8962E]" />
-          <p className="text-sm font-semibold text-[#F2EFE9]/90 uppercase tracking-wider">La meta</p>
+          <Target className="w-5 h-5 text-gold" />
+          <p className="text-sm font-semibold text-cream/90 uppercase tracking-wider">La meta</p>
         </div>
 
         <div className="flex items-end justify-between mb-3">
           <div>
-            <span className="text-5xl font-light text-[#F2EFE9]" style={{ fontVariantNumeric: 'tabular-nums' }}>{ventas.count}</span>
-            <span className="text-2xl font-light text-[#F2EFE9]/40"> / {META_PACIENTES}</span>
+            <span className="text-5xl font-light text-cream" style={{ fontVariantNumeric: 'tabular-nums' }}>{ventas.count}</span>
+            <span className="text-2xl font-light text-cream/40"> / {META_PACIENTES}</span>
           </div>
-          <p className="text-sm text-[#F2EFE9]/50">pacientes</p>
+          <p className="text-sm text-cream/50">pacientes</p>
         </div>
 
         {/* Barra segmentada en 10 */}
@@ -88,7 +88,7 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
           ))}
         </div>
 
-        <p className="text-sm text-[#F2EFE9]/60">
+        <p className="text-sm text-cream/60">
           {ventas.count === 0 && '¡Empieza! Tu primer paciente está del otro lado del sistema que estás construyendo.'}
           {ventas.count > 0 && ventas.count < META_PACIENTES && `Te faltan ${pacientesRestantes} para ser Sanador Libre. Vas a llegar.`}
           {ventas.count >= META_PACIENTES && '🎉 ¡Lo lograste! 10 pacientes. Sos Sanador Libre.'}
@@ -97,41 +97,41 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
 
       {/* Las 3 métricas del plan */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-[#111110] p-5">
-          <TrendingUp className="w-4 h-4 text-[#E8962E] mb-2" />
-          <p className="text-2xl font-light text-[#F2EFE9]" style={{ fontVariantNumeric: 'tabular-nums' }}>${ventas.suma.toLocaleString()}</p>
-          <p className="text-[11px] text-[#F2EFE9]/45 mt-1">de ${facturacionMeta.toLocaleString()} objetivo</p>
+        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-panel p-5">
+          <TrendingUp className="w-4 h-4 text-gold mb-2" />
+          <p className="text-2xl font-light text-cream" style={{ fontVariantNumeric: 'tabular-nums' }}>${ventas.suma.toLocaleString()}</p>
+          <p className="text-[11px] text-cream/45 mt-1">de ${facturacionMeta.toLocaleString()} objetivo</p>
         </div>
-        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-[#111110] p-5">
-          <Flag className="w-4 h-4 text-[#E8962E] mb-2" />
-          <p className="text-2xl font-light text-[#F2EFE9]" style={{ fontVariantNumeric: 'tabular-nums' }}>Día {diaPrograma}</p>
-          <p className="text-[11px] text-[#F2EFE9]/45 mt-1">{diasRestantes} días para tu meta</p>
+        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-panel p-5">
+          <Flag className="w-4 h-4 text-gold mb-2" />
+          <p className="text-2xl font-light text-cream" style={{ fontVariantNumeric: 'tabular-nums' }}>Día {diaPrograma}</p>
+          <p className="text-[11px] text-cream/45 mt-1">{diasRestantes} días para tu meta</p>
         </div>
-        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-[#111110] p-5">
-          <Target className="w-4 h-4 text-[#E8962E] mb-2" />
-          <p className="text-2xl font-light text-[#F2EFE9]" style={{ fontVariantNumeric: 'tabular-nums' }}>{Math.round(pctPacientes)}%</p>
-          <p className="text-[11px] text-[#F2EFE9]/45 mt-1">del camino recorrido</p>
+        <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-panel p-5">
+          <Target className="w-4 h-4 text-gold mb-2" />
+          <p className="text-2xl font-light text-cream" style={{ fontVariantNumeric: 'tabular-nums' }}>{Math.round(pctPacientes)}%</p>
+          <p className="text-[11px] text-cream/45 mt-1">del camino recorrido</p>
         </div>
       </div>
 
       {/* Cómo cada fase te acerca */}
-      <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-[#111110] p-6">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#E8962E] mb-4">Cómo llegás</p>
-        <div className="space-y-3 text-sm text-[#F2EFE9]/70 leading-relaxed">
-          <p><strong className="text-[#F2EFE9]/90">Sanás tu relación con el dinero</strong> — para poder cobrar tu precio digno sin culpa.</p>
-          <p><strong className="text-[#F2EFE9]/90">Nombrás tu método y armás tu oferta</strong> — {nicho ? `para ${nicho}` : 'para tu paciente ideal'}, a $1.000.</p>
-          <p><strong className="text-[#F2EFE9]/90">Instalás el sistema</strong> — que atrae y agenda pacientes sin vos encima.</p>
-          <p><strong className="text-[#F2EFE9]/90">Vendés y entregás</strong> — con tu guión y tu protocolo, sin quemarte.</p>
+      <div className="rounded-2xl border border-[rgba(232,150,46,0.1)] bg-panel p-6">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-4">Cómo llegás</p>
+        <div className="space-y-3 text-sm text-cream/70 leading-relaxed">
+          <p><strong className="text-cream/90">Sanás tu relación con el dinero</strong> — para poder cobrar tu precio digno sin culpa.</p>
+          <p><strong className="text-cream/90">Nombrás tu método y armás tu oferta</strong> — {nicho ? `para ${nicho}` : 'para tu paciente ideal'}, a $1.000.</p>
+          <p><strong className="text-cream/90">Instalás el sistema</strong> — que atrae y agenda pacientes sin vos encima.</p>
+          <p><strong className="text-cream/90">Vendés y entregás</strong> — con tu guión y tu protocolo, sin quemarte.</p>
         </div>
         <button
           onClick={() => setCurrentPage('roadmap')}
-          className="mt-5 px-5 py-2.5 rounded-xl bg-[#E8962E] text-[#080808] text-sm font-bold hover:bg-[#F4B65C] transition-colors"
+          className="mt-5 px-5 py-2.5 rounded-xl bg-gold text-ink text-sm font-bold hover:bg-goldhi transition-colors"
         >
           Ir a mi sesión de hoy →
         </button>
       </div>
 
-      <p className="text-[11px] text-[#F2EFE9]/25 text-center italic">
+      <p className="text-[11px] text-cream/25 text-center italic">
         El Camino ejecuta el Plan. Una sesión por día. Los imparables se construyen de días comunes.
       </p>
     </div>

@@ -192,25 +192,25 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
       <div className="max-w-4xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-light tracking-tight text-[#F2EFE9] mb-2">Tu ADN Prototipo Beta</h1>
-            <p className="text-[#F2EFE9]/60">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
+            <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Tu ADN Prototipo Beta</h1>
+            <p className="text-cream/60">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
           </div>
-          <button onClick={resetOnboarding} className="px-4 py-2 rounded-xl bg-[#E8962E]/10 hover:bg-[#E8962E]/20 text-sm text-[#F2EFE9]/80 transition-colors">
+          <button onClick={resetOnboarding} className="px-4 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-sm text-cream/80 transition-colors">
             Reiniciar Diagnóstico
           </button>
         </div>
 
         <div className="card-panel p-8 rounded-2xl border-l-4 border-l-purple-500">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#E8962E] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#F2EFE9]" />
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-cream" />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-[#F2EFE9]">Análisis IA de tu Perfil</h2>
-              <p className="text-xs text-[#E8962E]">Generado por Sanare Coach</p>
+              <h2 className="text-lg font-medium text-cream">Análisis IA de tu Perfil</h2>
+              <p className="text-xs text-gold">Generado por Sanare Coach</p>
             </div>
           </div>
-          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-[#F2EFE9]/80 text-sm">
+          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-cream/80 text-sm">
             <Markdown>{profile}</Markdown>
           </div>
         </div>
@@ -221,32 +221,32 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-light tracking-tight text-[#F2EFE9] mb-2">Onboarding — Fase 0</h1>
-        <p className="text-[#F2EFE9]/60">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
+        <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Onboarding — Fase 0</h1>
+        <p className="text-cream/60">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
       </div>
 
       {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1 bg-[#E8962E]/10 rounded-full overflow-hidden">
+        <div className="flex-1 h-1 bg-gold/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#E8962E] transition-all duration-500"
+            className="h-full bg-gold transition-all duration-500"
             style={{ width: `${(Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length / QUESTIONS.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-[#F2EFE9]/40">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
+        <span className="text-xs text-cream/40">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
       </div>
 
       {/* Question card */}
       <div className="card-panel p-8 rounded-2xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="w-8 h-8 rounded-full bg-[#E8962E]/20 text-[#E8962E] text-sm font-bold flex items-center justify-center">
+          <span className="w-8 h-8 rounded-full bg-gold/20 text-gold text-sm font-bold flex items-center justify-center">
             {currentStep + 1}
           </span>
-          <span className="text-xs text-[#F2EFE9]/40 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
+          <span className="text-xs text-cream/40 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
         </div>
-        <p className="text-[10px] text-[#F2EFE9]/30 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
+        <p className="text-[10px] text-cream/30 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
 
-        <h2 className="text-xl font-medium text-[#F2EFE9] mb-6">{QUESTIONS[currentStep].question}</h2>
+        <h2 className="text-xl font-medium text-cream mb-6">{QUESTIONS[currentStep].question}</h2>
 
         {QUESTIONS[currentStep].opciones ? (
           <div className="space-y-3">
@@ -256,7 +256,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
                 <button
                   key={op.valor}
                   onClick={() => { handleAnswer(op.valor); try { localStorage.setItem('tcd_avatar', op.avatar); } catch { /* noop */ } }}
-                  className={`w-full text-left px-5 py-4 rounded-xl border text-sm transition-all ${sel ? 'border-[#E8962E] bg-[#E8962E]/10 text-[#F2EFE9]' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-[#F2EFE9]/70 hover:border-[#E8962E]/40'}`}
+                  className={`w-full text-left px-5 py-4 rounded-xl border text-sm transition-all ${sel ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}
                 >
                   {op.label}
                 </button>
@@ -268,7 +268,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
             value={answers[QUESTIONS[currentStep].id] || ''}
             onChange={(e) => handleAnswer(e.target.value)}
             placeholder={QUESTIONS[currentStep].placeholder}
-            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-[#F2EFE9] text-sm placeholder-[#F2EFE9]/30 focus:outline-none focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/50 transition-all resize-none min-h-[120px]"
+            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-cream text-sm placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none min-h-[120px]"
             rows={4}
           />
         )}
@@ -277,7 +277,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#F2EFE9]/60 hover:text-[#F2EFE9] disabled:opacity-30 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-cream/60 hover:text-cream disabled:opacity-30 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Anterior
           </button>
@@ -286,7 +286,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
             <button
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canAdvance}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#E8962E] disabled:opacity-50 text-[#F2EFE9] text-sm font-medium transition-colors shadow-lg shadow-[#E8962E]/20"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-gold disabled:opacity-50 text-cream text-sm font-medium transition-colors shadow-lg shadow-gold/20"
             >
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -294,7 +294,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
             <button
               onClick={generateProfile}
               disabled={!allAnswered || generating}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#F2EFE9] text-sm font-medium transition-all shadow-lg shadow-[#E8962E]/20"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-cream text-sm font-medium transition-all shadow-lg shadow-gold/20"
             >
               {generating ? (
                 <><Loader2 className="w-4 h-4 anímate-spin" /> Analizando...</>
@@ -313,8 +313,8 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
             key={q.id}
             onClick={() => setCurrentStep(i)}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === currentStep ? 'bg-[#E8962E] scale-125' :
-              answers[q.id]?.trim() ? 'bg-[#22C55E]/60' : 'bg-[#E8962E]/10'
+              i === currentStep ? 'bg-gold scale-125' :
+              answers[q.id]?.trim() ? 'bg-success/60' : 'bg-gold/10'
             }`}
           />
         ))}

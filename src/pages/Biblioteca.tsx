@@ -229,8 +229,8 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
   if (!r.youtubeId) {
     return (
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F2EFE9]/35 mb-1">🎬 Próximamente</p>
-        <p className="text-sm text-[#F2EFE9]/60">{r.titulo}</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
+        <p className="text-sm text-cream/60">{r.titulo}</p>
       </div>
     );
   }
@@ -238,9 +238,9 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
     return (
       <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
         <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E]/60 mb-1">🔒 Guardado para ti</p>
-        <p className="text-sm text-[#F2EFE9]/70">{r.titulo}</p>
-        <p className="text-[11px] text-[#F2EFE9]/45 mt-1.5">Se desbloquea con <span className="text-[#F4B65C]">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
+        <p className="text-sm text-cream/70">{r.titulo}</p>
+        <p className="text-[11px] text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
       </div>
     );
   }
@@ -252,11 +252,11 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
 function RecursoVideoInApp({ r }: { r: RecursoADN }) {
   const [abierto, setAbierto] = useState(false);
   return (
-    <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-[#E8962E]/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
-      <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-[#E8962E]/5 transition-colors">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1">▶ Video del método</p>
-        <p className="text-sm text-[#F2EFE9]/90 font-medium">{r.titulo}</p>
-        <p className="text-[11px] text-[#F2EFE9]/40 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
+    <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-gold/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
+      <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-gold/5 transition-colors">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
+        <p className="text-sm text-cream/90 font-medium">{r.titulo}</p>
+        <p className="text-[11px] text-cream/40 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
       </button>
       {abierto && (
         <div className="aspect-video w-full bg-black">
@@ -398,7 +398,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300 pb-12">
         <button
           onClick={() => setHerramientaActivaId(null)}
-          className="flex items-center gap-2 text-sm text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors uppercase tracking-wider font-bold mb-4 bg-[#E8962E]/5 hover:bg-[#E8962E]/10 px-4 py-2 rounded-xl w-max"
+          className="flex items-center gap-2 text-sm text-cream/60 hover:text-cream transition-colors uppercase tracking-wider font-bold mb-4 bg-gold/5 hover:bg-gold/10 px-4 py-2 rounded-xl w-max"
         >
           <ArrowLeft className="w-4 h-4" /> Volver a El Método
         </button>
@@ -418,10 +418,10 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
     <div className="max-w-5xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-light tracking-tight text-[#F2EFE9] mb-2">
+        <h1 className="text-3xl font-light tracking-tight text-cream mb-2">
           El Método
         </h1>
-        <p className="text-[#F2EFE9]/60 text-sm">
+        <p className="text-cream/60 text-sm">
           Videos y herramientas IA del Método C·L·I·N·I·C·A.
         </p>
       </div>
@@ -431,7 +431,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         {canScrollLeft && (
           <button
             onClick={() => scrollTabs('left')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-[#E8962E]/5 hover:bg-[#E8962E]/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/60 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -450,14 +450,14 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                 disabled={!unlocked}
                 className={`flex flex-col items-center px-5 py-3 rounded-xl transition-all border min-w-[80px] ${
                   !unlocked
-                    ? 'bg-[#1A1917]/40 border-[rgba(232,150,46,0.05)] text-[#F2EFE9]/20 cursor-not-allowed'
+                    ? 'bg-surface/40 border-[rgba(232,150,46,0.05)] text-cream/20 cursor-not-allowed'
                     : isActive
-                    ? 'bg-[#E8962E]/15 border-[#E8962E]/50 text-[#E8962E]'
-                    : 'bg-[#1A1917]/30 border-[rgba(232,150,46,0.1)] text-[#F2EFE9]/60 hover:text-[#F2EFE9] hover:bg-[#1A1917]/50'
+                    ? 'bg-gold/15 border-gold/50 text-gold'
+                    : 'bg-surface/30 border-[rgba(232,150,46,0.1)] text-cream/60 hover:text-cream hover:bg-surface/50'
                 }`}
               >
                 {!unlocked ? (
-                  <Lock className="w-5 h-5 mb-1 text-[#F2EFE9]/15" />
+                  <Lock className="w-5 h-5 mb-1 text-cream/15" />
                 ) : (
                   <span
                     className="text-xl font-bold leading-none mb-1"
@@ -476,7 +476,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         {canScrollRight && (
           <button
             onClick={() => scrollTabs('right')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-[#E8962E]/5 hover:bg-[#E8962E]/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/60 hover:text-cream transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -484,15 +484,15 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       </div>
 
       {/* Tab description */}
-      <div className="bg-[#E8962E]/5 border border-[#E8962E]/20 rounded-2xl px-5 py-4">
-        <p className="text-sm text-[#F2EFE9]/80">
+      <div className="bg-gold/5 border border-gold/20 rounded-2xl px-5 py-4">
+        <p className="text-sm text-cream/80">
           <span
             className="font-bold text-lg mr-2"
             style={{ color: activeTab.color }}
           >
             {activeTab.letter}
           </span>
-          <span className="font-semibold text-[#F2EFE9]">
+          <span className="font-semibold text-cream">
             {activeTab.label}
           </span>
           {' — '}
@@ -515,13 +515,13 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       {/* Videos section */}
       {tabVideos.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-[#F2EFE9]/40 flex items-center gap-2">
-            <Youtube className="w-4 h-4 text-[#EF4444]" /> Videos
+          <h2 className="text-sm font-bold uppercase tracking-widest text-cream/40 flex items-center gap-2">
+            <Youtube className="w-4 h-4 text-danger" /> Videos
           </h2>
           {videosLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Loader2 className="w-8 h-8 text-[#E8962E] animate-spin mb-3" />
-              <p className="text-[#F2EFE9]/60 text-sm">Cargando videos...</p>
+              <Loader2 className="w-8 h-8 text-gold animate-spin mb-3" />
+              <p className="text-cream/60 text-sm">Cargando videos...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -551,19 +551,19 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[#1A1917]/30">
-                          <Youtube className="w-10 h-10 text-[#E8962E]/30" />
+                        <div className="w-full h-full flex items-center justify-center bg-surface/30">
+                          <Youtube className="w-10 h-10 text-gold/30" />
                         </div>
                       )}
                       {!isPlaceholder && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="w-14 h-14 rounded-full bg-[#E8962E] flex items-center justify-center shadow-2xl">
-                            <Play className="w-6 h-6 text-[#F2EFE9] fill-white ml-0.5" />
+                          <div className="w-14 h-14 rounded-full bg-gold flex items-center justify-center shadow-2xl">
+                            <Play className="w-6 h-6 text-cream fill-white ml-0.5" />
                           </div>
                         </div>
                       )}
                       {v.duracion && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-[#F2EFE9] text-[10px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-[10px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5" />
                           {v.duracion}
                         </div>
@@ -572,20 +572,20 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
 
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/20">
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                           {v.pilar_id ?? v.id}
                         </span>
                       </div>
-                      <h3 className="text-sm font-semibold text-[#F2EFE9] mb-1">
+                      <h3 className="text-sm font-semibold text-cream mb-1">
                         {v.titulo}
                       </h3>
-                      <p className="text-xs text-[#F2EFE9]/60 leading-relaxed flex-1">
+                      <p className="text-xs text-cream/60 leading-relaxed flex-1">
                         {v.descripcion}
                       </p>
                       {!isPlaceholder && (
                         <button
                           onClick={() => setVideoActivo(v)}
-                          className="mt-3 w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-[#E8962E]/80 hover:bg-[#E8962E] text-[#F2EFE9] transition-all flex items-center justify-center gap-2"
+                          className="mt-3 w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-gold/80 hover:bg-gold text-cream transition-all flex items-center justify-center gap-2"
                         >
                           <Play className="w-3.5 h-3.5 fill-white" /> Ver Video
                         </button>
@@ -602,13 +602,13 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
       {/* L2 · recorte: El Método es SOLO la escuela — las herramientas viven en las sesiones del Camino */}
       {false && herramientas.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-[#F2EFE9]/40 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#E8962E]" /> Herramientas IA
+          <h2 className="text-sm font-bold uppercase tracking-widest text-cream/40 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-gold" /> Herramientas IA
           </h2>
 
           {!geminiKey && (
             <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4">
-              <Lock className="w-4 h-4 text-[#E8962E] shrink-0" />
+              <Lock className="w-4 h-4 text-gold shrink-0" />
               <p className="text-sm text-amber-300">
                 Configura la variable{' '}
                 <code className="bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-mono text-xs">
@@ -623,23 +623,23 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             {herramientas.map((h) => (
               <div
                 key={h.id}
-                className="card-panel rounded-2xl p-5 border border-[rgba(232,150,46,0.1)] hover:border-[rgba(232,150,46,0.12)] hover:bg-[#1A1917]/50 transition-all group flex flex-col"
+                className="card-panel rounded-2xl p-5 border border-[rgba(232,150,46,0.1)] hover:border-[rgba(232,150,46,0.12)] hover:bg-surface/50 transition-all group flex flex-col"
               >
                 <div className="flex items-start gap-3 mb-3">
-                  {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-[#E8962E] shrink-0" /> : <Sparkles className="w-6 h-6 text-[#E8962E] shrink-0" />; })()}
+                  {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-gold shrink-0" /> : <Sparkles className="w-6 h-6 text-gold shrink-0" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-[#E8962E]/15 text-[#E8962E] border border-[#E8962E]/20">
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                         {h.id}
                       </span>
                     </div>
-                    <h3 className="text-sm font-semibold text-[#F2EFE9] leading-snug">
+                    <h3 className="text-sm font-semibold text-cream leading-snug">
                       {h.titulo}
                     </h3>
                   </div>
                 </div>
 
-                <p className="text-xs text-[#F2EFE9]/60 leading-relaxed mb-4 flex-1">
+                <p className="text-xs text-cream/60 leading-relaxed mb-4 flex-1">
                   {h.descripcion}
                 </p>
 
@@ -648,8 +648,8 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                   disabled={!geminiKey}
                   className={`w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
                     geminiKey
-                      ? 'bg-[#E8962E] hover:bg-[#F4B65C] text-[#F2EFE9] shadow-lg shadow-[#E8962E]/20'
-                      : 'bg-[#E8962E]/5 text-[#F2EFE9]/30 cursor-not-allowed border border-[rgba(232,150,46,0.1)]'
+                      ? 'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
+                      : 'bg-gold/5 text-cream/30 cursor-not-allowed border border-[rgba(232,150,46,0.1)]'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -663,14 +663,14 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
 
       {/* Empty state when both lists are empty */}
       {herramientas.length === 0 && tabVideos.length === 0 && recursosTab.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-[#1A1917]/30 border border-[rgba(232,150,46,0.1)] border-dashed rounded-2xl">
-          <Sparkles className="w-12 h-12 text-[#E8962E]/30 mb-4" />
-          <p className="text-[#F2EFE9]/60 text-sm font-medium mb-2">
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-surface/30 border border-[rgba(232,150,46,0.1)] border-dashed rounded-2xl">
+          <Sparkles className="w-12 h-12 text-gold/30 mb-4" />
+          <p className="text-cream/60 text-sm font-medium mb-2">
             Este modulo esta en desarrollo
           </p>
-          <p className="text-[#F2EFE9]/30 text-xs max-w-sm leading-relaxed">
+          <p className="text-cream/30 text-xs max-w-sm leading-relaxed">
             Pronto se habilitaran videos y herramientas para{' '}
-            <strong className="text-[#F2EFE9]/60">{activeTab.label}</strong>.
+            <strong className="text-cream/60">{activeTab.label}</strong>.
           </p>
         </div>
       )}
@@ -686,12 +686,12 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <h3 className="text-[#F2EFE9] font-medium text-sm truncate flex-1">
+              <h3 className="text-cream font-medium text-sm truncate flex-1">
                 {videoActivo.titulo}
               </h3>
               <button
                 onClick={() => setVideoActivo(null)}
-                className="w-8 h-8 rounded-full bg-[#E8962E]/10 hover:bg-[#E8962E]/20 flex items-center justify-center text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors shrink-0 ml-3"
+                className="w-8 h-8 rounded-full bg-gold/10 hover:bg-gold/20 flex items-center justify-center text-cream/60 hover:text-cream transition-colors shrink-0 ml-3"
               >
                 <X className="w-4 h-4" />
               </button>

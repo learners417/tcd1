@@ -60,7 +60,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
   if (!herramienta) {
     return (
-      <div className="text-[#F2EFE9]/60 text-sm p-6">
+      <div className="text-cream/60 text-sm p-6">
         Herramienta no encontrada: {herramientaId}
       </div>
     );
@@ -144,7 +144,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       {/* Breadcrumb */}
       <button
         onClick={onVolver}
-        className="flex items-center gap-2 text-sm text-[#F2EFE9]/60 hover:text-[#F2EFE9] transition-colors"
+        className="flex items-center gap-2 text-sm text-cream/60 hover:text-cream transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver a la Biblioteca
@@ -153,22 +153,22 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       {/* Cabecera */}
       <div className="card-panel p-5 rounded-2xl">
         <div className="flex items-start gap-3">
-          {(() => { const iconName = EMOJI_TO_ICON[herramienta.emoji]; const IC = iconName ? HERRAMIENTA_ICON_MAP[iconName] : null; return IC ? <IC className="w-8 h-8 text-[#E8962E]" /> : null; })()}
+          {(() => { const iconName = EMOJI_TO_ICON[herramienta.emoji]; const IC = iconName ? HERRAMIENTA_ICON_MAP[iconName] : null; return IC ? <IC className="w-8 h-8 text-gold" /> : null; })()}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] bg-[#E8962E]/10 text-[#F2EFE9]/60 px-2 py-0.5 rounded font-mono">
+              <span className="text-[10px] bg-gold/10 text-cream/60 px-2 py-0.5 rounded font-mono">
                 {herramienta.id}
               </span>
-              <span className="text-[10px] text-[#F2EFE9]/40">Grupo {herramienta.grupo}</span>
+              <span className="text-[10px] text-cream/40">Grupo {herramienta.grupo}</span>
             </div>
-            <h1 className="text-lg font-light text-[#F2EFE9] mt-0.5">{herramienta.titulo}</h1>
-            <p className="text-sm text-[#F2EFE9]/60">{herramienta.descripcion}</p>
+            <h1 className="text-lg font-light text-cream mt-0.5">{herramienta.titulo}</h1>
+            <p className="text-sm text-cream/60">{herramienta.descripcion}</p>
           </div>
         </div>
 
         {/* Indicador de datos precargados */}
         {herramienta.inputs.some((c) => c.precargar && perfil?.[c.precargar as keyof ProfileV2]) && (
-          <div className="mt-3 flex items-center gap-2 text-xs text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 rounded-xl px-3 py-2">
+          <div className="mt-3 flex items-center gap-2 text-xs text-success bg-success/10 border border-success/20 rounded-xl px-3 py-2">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Campos pre-completados con tu perfil — revisa y ajustá si es necesario
           </div>
@@ -177,15 +177,15 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
       {/* Formulario de inputs */}
       <div className="card-panel p-5 rounded-2xl space-y-5">
-        <h2 className="text-sm font-medium text-[#F2EFE9]/80">Inputs</h2>
+        <h2 className="text-sm font-medium text-cream/80">Inputs</h2>
 
         {herramienta.inputs.map((campo: CampoInput) => (
           <div key={campo.id}>
-            <label className="block text-xs font-medium text-[#F2EFE9]/60 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-medium text-cream/60 mb-1.5 uppercase tracking-wider">
               {campo.label}
               {campo.required && <span className="text-red-400 ml-1">*</span>}
               {campo.precargar && inputs[campo.id] && (
-                <span className="ml-2 text-[10px] text-[#22C55E] normal-case tracking-normal">
+                <span className="ml-2 text-[10px] text-success normal-case tracking-normal">
                   (precargado de tu perfil)
                 </span>
               )}
@@ -194,7 +194,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
             {campo.tipo === 'textarea' ? (
               <textarea
                 rows={3}
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 resize-none transition-all placeholder-[#F2EFE9]/30"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 resize-none transition-all placeholder-cream/30"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -208,7 +208,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
             ) : campo.tipo === 'number' ? (
               <input
                 type="number"
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -216,7 +216,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
             ) : (
               <input
                 type="text"
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-[#F2EFE9] text-sm focus:border-[#E8962E]/50 focus:ring-1 focus:ring-[#E8962E]/30 transition-all"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -228,7 +228,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
         <button
           onClick={handleGenerar}
           disabled={generando || !camposCompletos}
-          className="w-full py-3.5 rounded-xl bg-[#E8962E] hover:bg-[#F4B65C] disabled:opacity-50 text-[#080808] font-medium transition-all flex justify-center items-center gap-2"
+          className="w-full py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink font-medium transition-all flex justify-center items-center gap-2"
         >
           {generando ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
@@ -242,15 +242,15 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       {(output || generando) && (
         <div className="card-panel p-5 rounded-2xl space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-[#F2EFE9]/80">{herramienta.outputLabel}</h2>
+            <h2 className="text-sm font-medium text-cream/80">{herramienta.outputLabel}</h2>
             <div className="flex items-center gap-2">
               {output && (
                 <>
                   <button
                     onClick={handleCopiar}
-                    className="flex items-center gap-1.5 text-xs text-[#F2EFE9]/60 hover:text-[#F2EFE9] bg-[#E8962E]/5 px-3 py-1.5 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-cream/60 hover:text-cream bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
                   >
-                    {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiado ? 'Copiado' : 'Copiar'}
                   </button>
                   <button
@@ -258,8 +258,8 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                     disabled={guardando || outputGuardado}
                     className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl transition-colors ${
                       outputGuardado
-                        ? 'text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20'
-                        : 'text-[#F2EFE9]/60 hover:text-[#F2EFE9] bg-[#E8962E]/5'
+                        ? 'text-success bg-success/10 border border-success/20'
+                        : 'text-cream/60 hover:text-cream bg-gold/5'
                     }`}
                   >
                     {guardando ? (
@@ -273,7 +273,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                   </button>
                   <button
                     onClick={() => { setOutput(''); setOutputGuardado(false); }}
-                    className="flex items-center gap-1.5 text-xs text-[#F2EFE9]/40 hover:text-[#F2EFE9] bg-[#E8962E]/3 px-3 py-1.5 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream bg-gold/3 px-3 py-1.5 rounded-xl transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     Regenerar
@@ -285,11 +285,11 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
           <div className="bg-black/20 rounded-xl p-4 min-h-24">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-[#F2EFE9] [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : (
-              <span className="text-[#F2EFE9]/40 flex items-center gap-2 text-sm">
+              <span className="text-cream/40 flex items-center gap-2 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" /> Generando...
               </span>
             )}

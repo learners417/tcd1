@@ -1176,11 +1176,11 @@ export function colorEstadoPilar(
 ): string {
   switch (estado) {
     case 'completado':
-      return 'border-l-[3px] border-l-[#22C55E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-success bg-panel border border-[rgba(232,150,46,0.12)]';
     case 'en_progreso':
-      return 'border-l-[3px] border-l-[#E8962E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-gold bg-panel border border-[rgba(232,150,46,0.12)]';
     case 'bloqueado':
-      return 'opacity-40 cursor-not-allowed bg-[#111110] border border-[rgba(232,150,46,0.1)]';
+      return 'opacity-40 cursor-not-allowed bg-panel border border-[rgba(232,150,46,0.1)]';
   }
 }
 

@@ -107,7 +107,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#E8962E]/30 border-t-[#E8962E] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
       </div>
     );
   }
@@ -120,9 +120,9 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {/* El header ceremonial (Lote 5 · la piel) */}
       {view === 'home' && (
         <div className="mb-6">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu máquina de pacientes</p>
-          <h1 className="text-2xl sm:text-3xl font-light text-[#F2EFE9] mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
-          <p className="text-sm text-[#F2EFE9]/50 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
+          <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
+          <p className="text-sm text-cream/50 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
         </div>
       )}
 
@@ -133,7 +133,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {(view === 'studio' || view === 'detail') && (
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-sm text-[#F2EFE9]/50 hover:text-[#F2EFE9] transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-cream/50 hover:text-cream transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver

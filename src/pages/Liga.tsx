@@ -93,16 +93,16 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-light text-[#F2EFE9] tracking-tight flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-[#E8962E]" /> La Liga
+        <h1 className="text-2xl font-light text-cream tracking-tight flex items-center gap-2">
+          <Trophy className="w-6 h-6 text-gold" /> La Liga
         </h1>
-        <p className="text-sm text-[#F2EFE9]/50 mt-1">
+        <p className="text-sm text-cream/50 mt-1">
           El dojo se mide por constancia, jamás por ventas. Se corre contra vos mismo — y en buena
           compañía.
         </p>
         {cinturon ? (
-          <p className="text-[11px] text-[#F2EFE9]/50 mt-2">
-            {cinturon.emoji} Tu cinturón actual: <span className="text-[#E8962E] font-medium">{cinturon.nombre}</span>
+          <p className="text-[11px] text-cream/50 mt-2">
+            {cinturon.emoji} Tu cinturón actual: <span className="text-gold font-medium">{cinturon.nombre}</span>
           </p>
         ) : null}
       </div>
@@ -111,10 +111,10 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {tarjetas.map(([label, value]) => (
           <div key={label} className="card-panel p-4">
-            <p className="text-[9px] text-[#F2EFE9]/40 uppercase tracking-widest mb-1 font-semibold">
+            <p className="text-[9px] text-cream/40 uppercase tracking-widest mb-1 font-semibold">
               {label}
             </p>
-            <p className="text-2xl font-light text-[#F2EFE9]">{value}</p>
+            <p className="text-2xl font-light text-cream">{value}</p>
           </div>
         ))}
       </div>
@@ -125,11 +125,11 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
       {/* La Liga de Constancia */}
       <div className="card-panel p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-[#E8962E]" /> Liga de Constancia · esta semana
+          <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-gold" /> Liga de Constancia · esta semana
           </h2>
           {miPos > 0 ? (
-            <span className="text-[10px] text-[#E8962E] font-bold uppercase tracking-wider">
+            <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
               Vas #{miPos}
             </span>
           ) : null}
@@ -140,48 +140,48 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
               <div
                 key={i}
                 className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 border ${
-                  e.es_tu ? 'bg-[#E8962E]/[0.10] border-[#E8962E]/30' : 'bg-white/[0.03] border-white/[0.06]'
+                  e.es_tu ? 'bg-gold/[0.10] border-gold/30' : 'bg-white/[0.03] border-white/[0.06]'
                 }`}
               >
                 <span
                   className={`w-6 text-center text-sm font-bold ${
-                    i === 0 ? 'text-[#E8962E]' : 'text-[#F2EFE9]/40'
+                    i === 0 ? 'text-gold' : 'text-cream/40'
                   }`}
                 >
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm truncate ${e.es_tu ? 'text-[#E8962E] font-bold' : 'text-[#F2EFE9]'}`}>
+                  <p className={`text-sm truncate ${e.es_tu ? 'text-gold font-bold' : 'text-cream'}`}>
                     {e.es_tu ? 'Vos' : e.alias}
                   </p>
-                  <p className="text-[10px] text-[#F2EFE9]/40">
+                  <p className="text-[10px] text-cream/40">
                     {e.dias_activos} días · {e.sesiones} sesiones
                   </p>
                 </div>
-                <span className="text-sm font-bold text-[#F2EFE9]">{e.puntos}</span>
+                <span className="text-sm font-bold text-cream">{e.puntos}</span>
               </div>
             ))}
           </div>
         ) : (
           <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4 text-center">
-            <p className="text-sm text-[#F2EFE9]/70 mb-1">
-              Tu esfuerzo de la semana: <span className="text-[#E8962E] font-bold">{mi.puntos} puntos</span>
+            <p className="text-sm text-cream/70 mb-1">
+              Tu esfuerzo de la semana: <span className="text-gold font-bold">{mi.puntos} puntos</span>
             </p>
-            <p className="text-[11px] text-[#F2EFE9]/40">
+            <p className="text-[11px] text-cream/40">
               La tabla de la cohorte se enciende cuando tus compañeros empiecen a sumar. Vos ya estás
               corriendo.
             </p>
           </div>
         )}
-        <p className="text-[10px] text-[#F2EFE9]/30 mt-3">
+        <p className="text-[10px] text-cream/30 mt-3">
           Puntos = días activos + sesiones. Nunca ventas: acá se premia aparecer, no facturar.
         </p>
       </div>
 
       {/* El Muro de Hitos */}
       <div className="card-panel p-6">
-        <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase flex items-center gap-2 mb-4">
-          <Target className="w-4 h-4 text-[#E8962E]" /> El Muro de Hitos
+        <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase flex items-center gap-2 mb-4">
+          <Target className="w-4 h-4 text-gold" /> El Muro de Hitos
         </h2>
         {muro && muro.length > 0 ? (
           <div className="space-y-2">
@@ -191,38 +191,38 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
                 className="flex items-center gap-3 rounded-xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5"
               >
                 <span className="text-lg">{h.emoji}</span>
-                <p className="flex-1 text-sm text-[#F2EFE9]/85">
-                  <span className={h.es_tu ? 'text-[#E8962E] font-bold' : 'font-medium'}>
+                <p className="flex-1 text-sm text-cream/85">
+                  <span className={h.es_tu ? 'text-gold font-bold' : 'font-medium'}>
                     {h.es_tu ? 'Vos' : h.alias}
                   </span>{' '}
                   {h.label}
                 </p>
-                <span className="text-[10px] text-[#F2EFE9]/35 shrink-0">{tiempoRelativo(h.cuando)}</span>
+                <span className="text-[10px] text-cream/35 shrink-0">{tiempoRelativo(h.cuando)}</span>
               </div>
             ))}
           </div>
         ) : mios.length > 0 ? (
           <div className="space-y-2">
-            <p className="text-[11px] text-[#F2EFE9]/45 mb-2">Tus hitos alcanzados:</p>
+            <p className="text-[11px] text-cream/45 mb-2">Tus hitos alcanzados:</p>
             {mios.map((h, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 rounded-xl bg-[#E8962E]/[0.06] border border-[#E8962E]/15 px-3.5 py-2.5"
+                className="flex items-center gap-3 rounded-xl bg-gold/[0.06] border border-gold/15 px-3.5 py-2.5"
               >
                 <span className="text-lg">{h.emoji}</span>
-                <p className="flex-1 text-sm text-[#F2EFE9]/85">
-                  <span className="text-[#E8962E] font-bold">Vos</span> {h.label}
+                <p className="flex-1 text-sm text-cream/85">
+                  <span className="text-gold font-bold">Vos</span> {h.label}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-[#F2EFE9]/50">
+          <p className="text-sm text-cream/50">
             Todavía no hay hitos. El primero está cerca: tu Foto de Partida. Cada quiebre del camino
             aparece acá.
           </p>
         )}
-        <p className="text-[10px] text-[#F2EFE9]/30 mt-3">
+        <p className="text-[10px] text-cream/30 mt-3">
           Los hitos de la cohorte son anónimos. Se celebra el logro, no el nombre.
         </p>
       </div>
@@ -230,18 +230,18 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
       {/* Botón del Búnker */}
       <button
         onClick={() => setBunker(true)}
-        className="w-full flex items-center justify-between gap-3 card-panel p-5 border border-[#E8962E]/20 hover:border-[#E8962E]/40 transition-colors text-left"
+        className="w-full flex items-center justify-between gap-3 card-panel p-5 border border-gold/20 hover:border-gold/40 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <Shield className="w-5 h-5 text-[#E8962E]" />
+          <Shield className="w-5 h-5 text-gold" />
           <div>
-            <p className="text-sm text-[#F2EFE9] font-medium">¿Día difícil? Entrá al Búnker</p>
-            <p className="text-[11px] text-[#F2EFE9]/45">
+            <p className="text-sm text-cream font-medium">¿Día difícil? Entrá al Búnker</p>
+            <p className="text-[11px] text-cream/45">
               La voz de Javo, tu por qué y los compromisos que firmaste. Para los días que pesan.
             </p>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-[#F2EFE9]/30" />
+        <ChevronRight className="w-5 h-5 text-cream/30" />
       </button>
 
       <BunkerModal open={bunker} onClose={() => setBunker(false)} perfil={perfil} />
