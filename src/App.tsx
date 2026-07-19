@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
+import BottomTabBar from './components/BottomTabBar';
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -132,7 +133,20 @@ function PaginaBloqueada({ nombre }: { nombre: string }) {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<string>(loadCurrentPage);
+  const [currentPage, setCurrentPageRaw] = useState<string>(loadCurrentPage);
+  const pageHistoryRef = useRef<string[]>([]);
+  const setCurrentPage = useCallback((page: string) => {
+    setCurrentPageRaw((prev) => {
+      if (page !== prev) pageHistoryRef.current.push(prev);
+      return page;
+    });
+  }, []);
+  const goBack = useCallback(() => {
+    setCurrentPageRaw((prev) => {
+      const target = pageHistoryRef.current.pop() ?? 'dashboard';
+      return target === prev ? 'dashboard' : target;
+    });
+  }, []);
   const [showSettings, setShowSettings] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
   const [profile, setProfile] = useState<Profile>(loadProfile);
@@ -483,9 +497,10 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <Topbar setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          <div className="p-6">
+          <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6">
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}

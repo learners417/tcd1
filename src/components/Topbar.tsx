@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -8,10 +8,19 @@ import CreditsBadge from './credits/CreditsBadge';
 import { CREDITS_ENABLED } from '../lib/featureFlags';
 
 interface TopbarProps {
+  currentPage?: string;
+  onBack?: () => void;
   setCurrentPage: (page: string) => void;
   userId?: string;
   onMobileMenuToggle: () => void;
 }
+
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Mentor IA', liga: 'La Liga',
+  red: 'La Red', mensajes: 'Mensajes', adn: 'ADN del Negocio', diario: 'Diario del Fundador',
+  biblioteca: 'El Método', agentes: 'Entrenadores', creador: 'Creador de Contenido',
+  campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
+};
 
 const searchablePages = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Panel principal del programa' },
@@ -68,7 +77,7 @@ function tiempoRelativo(fechaISO: string): string {
   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
+export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,14 +198,21 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
   return (
     <>
       <header className="h-14 md:h-20 px-4 md:px-8 flex items-center justify-between z-20 relative">
-        {/* Hamburger — mobile only */}
-        <button
-          onClick={onMobileMenuToggle}
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
-          aria-label="Abrir menú"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        {/* Back (sub-páginas) o menú (home) + título de pantalla — mobile */}
+        <div className="md:hidden flex items-center gap-1.5 min-w-0">
+          {currentPage && currentPage !== 'dashboard' && onBack ? (
+            <button onClick={onBack} className="btn-icon -ml-2 shrink-0" aria-label="Volver">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          ) : (
+            <button onClick={onMobileMenuToggle} className="btn-icon -ml-2 shrink-0" aria-label="Abrir menú">
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-base font-semibold text-cream truncate not-italic" style={{ fontFamily: 'var(--font-body)' }}>
+            {(currentPage && PAGE_TITLES[currentPage]) || ''}
+          </h1>
+        </div>
 
         <div
           onClick={() => setShowSearch(true)}
