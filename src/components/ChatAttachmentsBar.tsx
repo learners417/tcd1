@@ -114,7 +114,7 @@ export function AttachmentsPreviewStrip({
         />
       ))}
       {uploading && (
-        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/75">
+        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/60">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
           Procesando...
         </div>
@@ -146,7 +146,7 @@ function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
           <X className="w-3 h-3" />
         </button>
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 py-0.5">
-          <div className="flex items-center gap-1 text-[11px] text-white/80 truncate">
+          <div className="flex items-center gap-1 text-[9px] text-white/80 truncate">
             <ImageIcon className="w-2.5 h-2.5 shrink-0" />
             <span className="truncate">{attachment.fileName}</span>
           </div>
@@ -162,7 +162,7 @@ function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
         <div className="text-xs text-white truncate font-medium">
           {attachment.fileName}
         </div>
-        <div className="text-[11px] text-white/65 uppercase tracking-wider">
+        <div className="text-[10px] text-white/50 uppercase tracking-wider">
           {formatBytes(attachment.sizeBytes)}
           {attachment.kind === 'other' ? ' · formato no leible' : ''}
         </div>

@@ -40,7 +40,7 @@ export default function CampanasDashboard({
           >
             Campañas & Creativos
           </h1>
-          <p className="text-sm text-cream/55 mt-1">
+          <p className="text-sm text-cream/40 mt-1">
             Crea campañas de Meta Ads y genera creativos con IA
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function CampanasDashboard({
 
       {/* Campanas grid */}
       <div>
-        <h2 className="text-sm font-medium text-cream/75 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-medium text-cream/60 uppercase tracking-wider mb-4">
           Mis Campanas ({campanas.length})
         </h2>
 
@@ -60,8 +60,8 @@ export default function CampanasDashboard({
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
               <Megaphone className="w-8 h-8 text-gold" />
             </div>
-            <p className="text-cream/75 mb-2">Todavia no tenes campanas</p>
-            <p className="text-sm text-cream/45 mb-6">
+            <p className="text-cream/60 mb-2">Todavia no tenes campanas</p>
+            <p className="text-sm text-cream/30 mb-6">
               Crea tu primera campana para empezar a generar creativos con IA
             </p>
             <button onClick={onNewCampana} className="btn-primary inline-flex items-center gap-2">
@@ -85,7 +85,7 @@ export default function CampanasDashboard({
                       <Icon className="w-5 h-5 text-gold" />
                     </div>
                     <span
-                      className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
                         backgroundColor: `${ESTADO_COLORS[campana.estado]}15`,
                         color: ESTADO_COLORS[campana.estado],
@@ -98,11 +98,11 @@ export default function CampanasDashboard({
                   <h3 className="text-sm font-medium text-cream mb-1 group-hover:text-gold transition-colors truncate">
                     {campana.nombre}
                   </h3>
-                  <p className="text-xs text-cream/55 mb-3">
+                  <p className="text-xs text-cream/40 mb-3">
                     {OBJETIVO_LABELS[campana.objetivo].titulo}
                   </p>
 
-                  <div className="flex items-center justify-between text-xs text-cream/45">
+                  <div className="flex items-center justify-between text-xs text-cream/30">
                     <div className="flex items-center gap-1">
                       <ImageIcon className="w-3 h-3" />
                       <span>{creativoCount} creativos</span>
@@ -121,7 +121,7 @@ export default function CampanasDashboard({
               className="flex flex-col items-center justify-center p-5 rounded-xl border-2 border-dashed border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)] transition-all min-h-[160px]"
             >
               <Plus className="w-6 h-6 text-cream/20 mb-2" />
-              <span className="text-sm text-cream/45">Nueva Campaña</span>
+              <span className="text-sm text-cream/30">Nueva Campaña</span>
             </button>
           </div>
         )}
@@ -130,7 +130,7 @@ export default function CampanasDashboard({
       {/* Creativos recientes */}
       {creativos.length > 0 && (
         <div>
-          <h2 className="text-sm font-medium text-cream/75 uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-medium text-cream/60 uppercase tracking-wider mb-4">
             Creativos Recientes
           </h2>
           <CreativoGallery

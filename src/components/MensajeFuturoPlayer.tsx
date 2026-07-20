@@ -43,7 +43,7 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
     <div className="rounded-xl border border-gold/20 bg-gold/[0.05] p-4 text-left">
       <div className="flex items-center gap-2 mb-2">
         <Mail className="w-4 h-4 text-gold" />
-        <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gold">
           Tu Mensaje al Futuro
         </p>
       </div>

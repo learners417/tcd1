@@ -51,17 +51,17 @@ export default function DetectorHumo() {
         {frios.map((f) => (
           <div key={f.email} className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5">
             <div className="min-w-0">
-              <p className="text-sm text-cream truncate">{f.nombre} <span className={`ml-2 text-[11px] font-bold ${f.horas >= 96 ? 'text-danger' : 'text-gold'}`}>{f.horas >= 999 ? 'sin sesiones' : `${Math.floor(f.horas / 24)}d frío`}</span></p>
-              <p className="text-[11px] text-white/35">última sesión: {f.ultima}</p>
+              <p className="text-sm text-cream truncate">{f.nombre} <span className={`ml-2 text-[10px] font-bold ${f.horas >= 96 ? 'text-danger' : 'text-gold'}`}>{f.horas >= 999 ? 'sin sesiones' : `${Math.floor(f.horas / 24)}d frío`}</span></p>
+              <p className="text-[10px] text-white/35">última sesión: {f.ultima}</p>
             </div>
             <button onClick={() => { try { void navigator.clipboard.writeText(msg(f.nombre)); setCopiado(f.email); setTimeout(() => setCopiado(null), 1800); } catch { /* noop */ } }}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold/12 border border-gold/30 text-gold text-[11px] font-bold uppercase tracking-wider hover:bg-gold/20 transition-colors">
+              className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold/12 border border-gold/30 text-gold text-[10px] font-bold uppercase tracking-wider hover:bg-gold/20 transition-colors">
               {copiado === f.email ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />} rescate
             </button>
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-white/45 mt-3">El mensaje se manda A MANO por WhatsApp — el rescate humano con contexto salva; el automático espanta.</p>
+      <p className="text-[10px] text-white/30 mt-3">El mensaje se manda A MANO por WhatsApp — el rescate humano con contexto salva; el automático espanta.</p>
     </div>
   );
 }

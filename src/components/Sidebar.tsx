@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users  } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users, TrendingUp  } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
@@ -67,6 +67,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'adn', icon: Dna, label: 'ADN del Negocio', minCinturon: 1 },
+        { id: 'numero', icon: TrendingUp, label: 'Mi Número' },
         { id: 'coach', icon: Sparkles, label: 'Mentor IA' },
         { id: 'mensajes', icon: MessageSquare, label: 'Mensajes', badge: messageBadge > 0 },
         { id: 'liga', icon: Trophy, label: 'La Liga' },

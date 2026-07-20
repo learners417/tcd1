@@ -58,14 +58,14 @@ export default function BunkerModal({
             <ShieldAlert className="w-5 h-5 text-gold" />
             <h2 className="text-sm font-bold text-cream uppercase tracking-widest">El Búnker</h2>
           </div>
-          <button onClick={onClose} className="text-cream/55 hover:text-cream transition-colors">
+          <button onClick={onClose} className="text-cream/40 hover:text-cream transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* VOZ MAESTRO */}
         <div className="rounded-2xl bg-gold/[0.06] border border-gold/20 p-4 mb-4">
-          <p className="text-[11px] font-bold text-gold uppercase tracking-widest mb-2">
+          <p className="text-[9px] font-bold text-gold uppercase tracking-widest mb-2">
             Javo, en persona
           </p>
           <p className="text-[15px] text-cream leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
@@ -87,7 +87,7 @@ export default function BunkerModal({
         {/* Por qué empezaste */}
         {porque ? (
           <div className="mb-3">
-            <p className="text-[11px] font-bold text-cream/55 uppercase tracking-widest mb-1">
+            <p className="text-[9px] font-bold text-cream/40 uppercase tracking-widest mb-1">
               Por qué empezaste
             </p>
             <p className="text-sm text-cream/80 leading-relaxed">{porque}</p>
@@ -97,7 +97,7 @@ export default function BunkerModal({
         {/* Los NO que firmaste */}
         {compromisos.length > 0 ? (
           <div className="mb-3">
-            <p className="text-[11px] font-bold text-cream/55 uppercase tracking-widest mb-2">
+            <p className="text-[9px] font-bold text-cream/40 uppercase tracking-widest mb-2">
               Los NO que firmaste
             </p>
             <ul className="space-y-1.5">
@@ -114,7 +114,7 @@ export default function BunkerModal({
         {/* Tu carta al futuro */}
         {carta ? (
           <div className="mb-4 rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
-            <p className="text-[11px] font-bold text-cream/55 uppercase tracking-widest mb-1">
+            <p className="text-[9px] font-bold text-cream/40 uppercase tracking-widest mb-1">
               Tu carta al futuro
             </p>
             <p className="text-sm text-cream/70 leading-relaxed italic">{carta}</p>

@@ -134,7 +134,7 @@ INSTRUCCIONES:
   return (
     <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
       <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Configuracion guiada
         </p>
         <h2 className="text-xl font-light text-cream">
@@ -149,7 +149,7 @@ INSTRUCCIONES:
         {/* Checklist izquierda */}
         <div className="lg:w-[300px] lg:min-w-[300px] card-panel p-4">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45">
+            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-cream/30">
               Pasos
             </span>
             <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
@@ -170,17 +170,17 @@ INSTRUCCIONES:
                   'bg-cream/5 text-cream/20'
                 }`}>
                   {step.status === 'done' ? <CheckCircle2 className="w-3.5 h-3.5" /> :
-                   step.status === 'active' ? <span className="text-[11px] font-bold">{step.id}</span> :
+                   step.status === 'active' ? <span className="text-[10px] font-bold">{step.id}</span> :
                    <Lock className="w-3 h-3" />}
                 </div>
                 <div>
                   <div className={`text-xs font-semibold ${
                     step.status === 'done' ? 'text-success' :
-                    step.status === 'active' ? 'text-gold' : 'text-cream/45'
+                    step.status === 'active' ? 'text-gold' : 'text-cream/30'
                   }`}>
                     {step.label}
                   </div>
-                  <div className="text-[11px] text-cream/25 mt-0.5 leading-relaxed">
+                  <div className="text-[10px] text-cream/25 mt-0.5 leading-relaxed">
                     {step.description}
                   </div>
                 </div>
@@ -189,8 +189,8 @@ INSTRUCCIONES:
           </div>
 
           <div className="mt-4 p-3 rounded-xl bg-gold/5 border border-dashed border-gold/15">
-            <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
-            <div className="text-[11px] text-cream/45 leading-relaxed">
+            <div className="text-[10px] font-bold text-gold mb-1">Tip</div>
+            <div className="text-[10px] text-cream/30 leading-relaxed">
               No tocar nada en las primeras 48-72h despues de publicar. La fase de aprendizaje necesita tiempo.
             </div>
           </div>

@@ -254,7 +254,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       {/* Progreso */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-cream/55">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-cream/40">
             Completado
           </span>
           <span className="text-[11px] font-semibold text-cream/70">{completos}/3</span>
@@ -301,7 +301,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(232,150,46,0.10)]">
         <button
           onClick={syncConAdn}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-cream/75 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-cream/60 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Sincronizar con ADN
@@ -347,17 +347,17 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Palette className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <Palette className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/60">
           Paleta de colores
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">
+          <span className="text-[9px] text-gold/70 font-medium">
             · {swatches.length} color{swatches.length === 1 ? '' : 'es'}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-3">
+      <p className="text-[11px] text-cream/40 mb-3">
         Estos colores se aplican con prioridad sobre el estilo visual y sobre cualquier imagen de
         referencia al generar.
       </p>
@@ -451,7 +451,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
         title="Click para cambiar color"
       >
         {!valido && (
-          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-cream/55">
+          <span className="absolute inset-0 flex items-center justify-center text-[18px] text-cream/40">
             ?
           </span>
         )}
@@ -492,7 +492,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
           <button
             type="button"
             onClick={copyHex}
-            className="p-1 rounded text-cream/45 hover:text-gold transition-colors"
+            className="p-1 rounded text-cream/30 hover:text-gold transition-colors"
             title="Copiar hex"
           >
             <CopyIcon className="w-3 h-3" />
@@ -511,7 +511,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <button
         type="button"
         onClick={onRemove}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded text-cream/45 hover:text-danger transition-all"
+        className="opacity-0 group-hover:opacity-100 p-1 rounded text-cream/30 hover:text-danger transition-all"
         title="Eliminar color"
       >
         <X className="w-3.5 h-3.5" />
@@ -537,15 +537,15 @@ function Field({ icon: Icon, label, hint, value, onChange, placeholder, rows }: 
   return (
     <div>
       <div className="flex items-center gap-2 mb-1.5">
-        <Icon className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <Icon className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/30'}`} />
+        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/60">
           {label}
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">· cargado</span>
+          <span className="text-[9px] text-gold/70 font-medium">· cargado</span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-2">{hint}</p>
+      <p className="text-[11px] text-cream/40 mb-2">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

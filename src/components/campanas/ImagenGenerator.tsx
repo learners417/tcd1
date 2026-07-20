@@ -587,7 +587,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
     <div className="space-y-3">
       {/* ─── Tema / contexto del contenido (input principal) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+        <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
           Tema o contexto del contenido <span className="text-cream/25 normal-case font-normal tracking-normal">— opcional, no se usa como descripcion literal</span>
         </label>
         <textarea
@@ -601,7 +601,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Reference Images (multi, up to 5 each) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+        <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
           Imagenes de referencia (opcional — hasta {MAX_REFS} por tipo)
           <span className="text-cream/25 normal-case font-normal tracking-normal"> — se comprimen automaticamente al subirlas</span>
         </label>
@@ -615,7 +615,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           const warn = !danger && pct >= 75;
           const color = danger ? '#EF4444' : warn ? '#E8962E' : '#22C55E';
           return (
-            <div className="mb-2 flex items-center gap-2 text-[11px]">
+            <div className="mb-2 flex items-center gap-2 text-[10px]">
               <span style={{ color }} className="font-semibold">
                 {formatBytes(totalBytes)} / {formatBytes(MAX_REQUEST_PAYLOAD_BYTES)}
               </span>
@@ -636,10 +636,10 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           <div className="card-panel p-2.5 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-cream/55" />
-                <span className="text-[11px] font-semibold text-cream/70">Personaje</span>
+                <User className="w-3.5 h-3.5 text-cream/40" />
+                <span className="text-[10px] font-semibold text-cream/70">Personaje</span>
               </div>
-              <span className="text-[11px] text-cream/45">{characterRefs.length}/{MAX_REFS}</span>
+              <span className="text-[9px] text-cream/30">{characterRefs.length}/{MAX_REFS}</span>
             </div>
             {characterRefs.length > 0 && (
               <div className="grid grid-cols-3 gap-1.5">
@@ -659,7 +659,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {characterRefs.length < MAX_REFS && (
               <label className="flex items-center justify-center gap-2 p-2.5 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 transition-colors">
                 <Upload className="w-4 h-4 text-cream/20" />
-                <span className="text-[11px] text-cream/45">Subir foto</span>
+                <span className="text-[10px] text-cream/30">Subir foto</span>
                 <input type="file" multiple accept={ACCEPT_ATTR} className="hidden" onChange={(e) => handleRefUpload(e, characterRefs, setCharacterRefs)} />
               </label>
             )}
@@ -669,10 +669,10 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           <div className="card-panel p-2.5 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <PaletteIcon className="w-3.5 h-3.5 text-cream/55" />
-                <span className="text-[11px] font-semibold text-cream/70">Estilo de diseño</span>
+                <PaletteIcon className="w-3.5 h-3.5 text-cream/40" />
+                <span className="text-[10px] font-semibold text-cream/70">Estilo de diseño</span>
               </div>
-              <span className="text-[11px] text-cream/45">{styleRefs.length}/{MAX_REFS}</span>
+              <span className="text-[9px] text-cream/30">{styleRefs.length}/{MAX_REFS}</span>
             </div>
             {styleRefs.length > 0 && (
               <div className="grid grid-cols-3 gap-1.5">
@@ -692,7 +692,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {styleRefs.length < MAX_REFS && (
               <label className="flex items-center justify-center gap-2 p-2.5 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 transition-colors">
                 <Upload className="w-4 h-4 text-cream/20" />
-                <span className="text-[11px] text-cream/45">Subir diseño</span>
+                <span className="text-[10px] text-cream/30">Subir diseño</span>
                 <input type="file" multiple accept={ACCEPT_ATTR} className="hidden" onChange={(e) => handleRefUpload(e, styleRefs, setStyleRefs)} />
               </label>
             )}
@@ -703,26 +703,26 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {/* ─── Format selector ─── */}
       {!lockFormat && (
         <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+          <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
             Formato
           </label>
           <div className="flex flex-wrap gap-1.5">
             {(Object.entries(IMAGE_FORMAT_OPTIONS) as [ImageFormat, typeof IMAGE_FORMAT_OPTIONS[ImageFormat]][]).map(([key, opt]) => {
               const isActive = format === key;
               return (
-                <button key={key} onClick={() => setFormat(key)} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${isActive ? 'bg-gold/15 border-gold/40 text-gold' : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'}`}>
+                <button key={key} onClick={() => setFormat(key)} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${isActive ? 'bg-gold/15 border-gold/40 text-gold' : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'}`}>
                   {opt.label}
                 </button>
               );
             })}
           </div>
-          <p className="text-[11px] text-cream/25 mt-1">{IMAGE_FORMAT_OPTIONS[format].descripcion} — {IMAGE_FORMAT_OPTIONS[format].width}x{IMAGE_FORMAT_OPTIONS[format].height}px</p>
+          <p className="text-[9px] text-cream/25 mt-1">{IMAGE_FORMAT_OPTIONS[format].descripcion} — {IMAGE_FORMAT_OPTIONS[format].width}x{IMAGE_FORMAT_OPTIONS[format].height}px</p>
         </div>
       )}
 
       {/* ─── Calidad de generacion (OpenAI gpt-image-2) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+        <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
           Calidad de generacion
           <span className="text-cream/25 normal-case font-normal tracking-normal"> — impacta costo y velocidad</span>
         </label>
@@ -736,7 +736,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                   isActive
                     ? 'bg-gold/15 border-gold/40 text-gold'
-                    : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
+                    : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                 }`}
               >
                 {opt.label}
@@ -744,7 +744,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             );
           })}
         </div>
-        <p className="text-[11px] text-cream/25 mt-1">
+        <p className="text-[9px] text-cream/25 mt-1">
           {IMAGE_QUALITY_OPTIONS[quality].descripcion} — {IMAGE_QUALITY_OPTIONS[quality].costoAprox}
         </p>
       </div>
@@ -752,7 +752,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {/* ─── Cantidad de imagenes (single vs carrusel) ─── */}
       {copyList.length <= 1 && (
         <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+          <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
             Cantidad de imagenes
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -765,7 +765,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                   className={`w-9 h-9 rounded-lg text-xs font-semibold border transition-all ${
                     isActive
                       ? 'bg-gold/15 border-gold/40 text-gold'
-                      : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
+                      : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                   }`}
                 >
                   {n}
@@ -773,7 +773,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               );
             })}
           </div>
-          <p className="text-[11px] text-cream/25 mt-1">
+          <p className="text-[9px] text-cream/25 mt-1">
             {slideCount === 1 ? 'Una imagen' : `Carrusel de ${slideCount} slides — consistencia visual entre slides`}
           </p>
         </div>
@@ -781,34 +781,34 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Unified mode selector (IA Completa / Texto personalizado / Solo fondo) ─── */}
       <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+          <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
             Modo de generacion
           </label>
           <div className="grid grid-cols-3 gap-2">
             <button onClick={() => setGenMode('ia_completa')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'ia_completa' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Sparkles className={`w-3.5 h-3.5 ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream/55'}`} />
+                <Sparkles className={`w-3.5 h-3.5 ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream/40'}`} />
                 <span className={`text-xs font-semibold ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream'}`}>IA Completa</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">La IA elige el texto segun tu prompt y angulo</p>
+              <p className="text-[9px] text-cream/30 leading-tight">La IA elige el texto segun tu prompt y angulo</p>
             </button>
             <button onClick={() => setGenMode('texto_personalizado')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'texto_personalizado' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Type className={`w-3.5 h-3.5 ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream/55'}`} />
+                <Type className={`w-3.5 h-3.5 ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream/40'}`} />
                 <span className={`text-xs font-semibold ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream'}`}>Texto personalizado</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Vos escribis el texto que va en la imagen</p>
+              <p className="text-[9px] text-cream/30 leading-tight">Vos escribis el texto que va en la imagen</p>
             </button>
             <button onClick={() => setGenMode('solo_fondo')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'solo_fondo' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Pencil className={`w-3.5 h-3.5 ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream/55'}`} />
+                <Pencil className={`w-3.5 h-3.5 ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream/40'}`} />
                 <span className={`text-xs font-semibold ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream'}`}>Solo fondo</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Sin texto — lo agregas tú despues</p>
+              <p className="text-[9px] text-cream/30 leading-tight">Sin texto — lo agregas vos despues</p>
             </button>
           </div>
           {isCarousel && genMode === 'texto_personalizado' && (
-            <p className="text-[11px] text-cream/55 mt-1.5">
+            <p className="text-[9px] text-cream/40 mt-1.5">
               Configura el texto de cada slide abajo en "Control por slide"
             </p>
           )}
@@ -816,8 +816,8 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Style gallery (disabled when style refs uploaded) ─── */}
       <div className={styleGridDisabled ? 'opacity-40' : ''}>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
-          Estilo visual {styleGridDisabled && <span className="text-[11px] font-normal normal-case tracking-normal text-cream/45">— desactivado (hay referencia de estilo cargada)</span>}
+        <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
+          Estilo visual {styleGridDisabled && <span className="text-[9px] font-normal normal-case tracking-normal text-cream/30">— desactivado (hay referencia de estilo cargada)</span>}
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {(Object.entries(ESTILO_VISUAL_OPTIONS) as [EstiloVisual, typeof ESTILO_VISUAL_OPTIONS[EstiloVisual]][]).map(([key, opt]) => {
@@ -825,8 +825,8 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             const isActive = estilo === key && !styleGridDisabled;
             return (
               <button key={key} onClick={() => setEstilo(key)} disabled={styleGridDisabled} className={`p-2 rounded-xl border text-left transition-all disabled:cursor-not-allowed ${isActive ? 'border-gold/50 bg-gold/10' : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'}`}>
-                <Icon className={`w-3.5 h-3.5 mb-0.5 ${isActive ? 'text-gold' : 'text-cream/45'}`} />
-                <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/70'}`}>{opt.titulo}</div>
+                <Icon className={`w-3.5 h-3.5 mb-0.5 ${isActive ? 'text-gold' : 'text-cream/30'}`} />
+                <div className={`text-[10px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/70'}`}>{opt.titulo}</div>
               </button>
             );
           })}
@@ -837,19 +837,19 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {!isCarousel && genMode === 'texto_personalizado' && (
         <div className="space-y-2.5 p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
           <div>
-            <label className="text-[11px] font-bold text-gold uppercase tracking-wider">H1 — Titulo *</label>
+            <label className="text-[10px] font-bold text-gold uppercase tracking-wider">H1 — Titulo *</label>
             <input type="text" value={customText.h1} onChange={(e) => setCustomText(prev => ({ ...prev, h1: e.target.value }))} placeholder="Tu titulo principal..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-cream/65 uppercase tracking-wider">H2 — Subtitulo (opcional)</label>
+            <label className="text-[10px] font-bold text-cream/50 uppercase tracking-wider">H2 — Subtitulo (opcional)</label>
             <input type="text" value={customText.h2} onChange={(e) => setCustomText(prev => ({ ...prev, h2: e.target.value }))} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-cream/45 uppercase tracking-wider">H3 — Terciario (opcional)</label>
+            <label className="text-[10px] font-bold text-cream/30 uppercase tracking-wider">H3 — Terciario (opcional)</label>
             <input type="text" value={customText.h3 ?? ''} onChange={(e) => setCustomText(prev => ({ ...prev, h3: e.target.value || undefined }))} placeholder="Texto adicional..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.10)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-gold uppercase tracking-wider">CTA — Boton (opcional)</label>
+            <label className="text-[10px] font-bold text-gold uppercase tracking-wider">CTA — Boton (opcional)</label>
             <input type="text" value={customText.cta} onChange={(e) => setCustomText(prev => ({ ...prev, cta: e.target.value }))} placeholder="Ej: Reserva tu lugar" className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2.5 text-gold text-sm font-semibold focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-gold/20" />
           </div>
         </div>
@@ -859,13 +859,13 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {isCarousel && slideConfigs.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-[11px] font-bold tracking-wider uppercase text-cream/55">Control por slide</label>
+            <label className="text-[10px] font-bold tracking-wider uppercase text-cream/40">Control por slide</label>
             <button
               onClick={() => {
                 const current = slideConfigs[activeConfigSlide];
                 if (current) { setSlideConfigs(slideConfigs.map(() => ({ ...current }))); toast.success('Aplicado a todos los slides'); }
               }}
-              className="text-[11px] text-gold/60 hover:text-gold transition-colors"
+              className="text-[10px] text-gold/60 hover:text-gold transition-colors"
             >
               Aplicar a todos
             </button>
@@ -873,7 +873,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
           <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
             {Array.from({ length: totalSlides }).map((_, idx) => (
-              <button key={idx} onClick={() => setActiveConfigSlide(idx)} className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${activeConfigSlide === idx ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 hover:text-cream/65 border border-transparent'}`}>
+              <button key={idx} onClick={() => setActiveConfigSlide(idx)} className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${activeConfigSlide === idx ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/30 hover:text-cream/50 border border-transparent'}`}>
                 Slide {idx + 1}
               </button>
             ))}
@@ -881,10 +881,10 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
           <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)] space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'ia' })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'ia' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
+              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'ia' })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'ia' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/30 border border-transparent'}`}>
                 Texto de IA
               </button>
-              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'personalizado', customText: slideConfigs[activeConfigSlide]?.customText ?? { h1: '', h2: '', cta: '' } })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'personalizado' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
+              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'personalizado', customText: slideConfigs[activeConfigSlide]?.customText ?? { h1: '', h2: '', cta: '' } })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'personalizado' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/30 border border-transparent'}`}>
                 Texto personalizado
               </button>
             </div>
@@ -892,26 +892,26 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {slideConfigs[activeConfigSlide]?.textSource === 'personalizado' && (
               <div className="space-y-2">
                 <div>
-                  <label className="text-[11px] font-bold text-gold uppercase tracking-wider">H1 *</label>
+                  <label className="text-[10px] font-bold text-gold uppercase tracking-wider">H1 *</label>
                   <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h1 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h1', e.target.value)} placeholder="Titulo del slide..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-cream/65 uppercase tracking-wider">H2 (opcional)</label>
+                  <label className="text-[10px] font-bold text-cream/50 uppercase tracking-wider">H2 (opcional)</label>
                   <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h2 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h2', e.target.value)} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-cream/45 uppercase tracking-wider">H3</label>
+                  <label className="text-[10px] font-bold text-cream/30 uppercase tracking-wider">H3</label>
                   <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h3 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h3', e.target.value)} placeholder="Opcional..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.10)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-gold uppercase tracking-wider">CTA (opcional)</label>
+                  <label className="text-[10px] font-bold text-gold uppercase tracking-wider">CTA (opcional)</label>
                   <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.cta ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'cta', e.target.value)} placeholder="Boton de accion..." className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2 text-gold text-xs font-semibold focus:border-gold/50 placeholder-gold/20" />
                 </div>
               </div>
             )}
 
             {slideConfigs[activeConfigSlide]?.textSource === 'ia' && copyList[activeConfigSlide] && (
-              <div className="text-xs text-cream/55 space-y-1">
+              <div className="text-xs text-cream/40 space-y-1">
                 <p><span className="text-cream/20">Titulo:</span> {copyList[activeConfigSlide].titulo}</p>
                 <p><span className="text-cream/20">CTA:</span> {copyList[activeConfigSlide].cta_texto}</p>
               </div>
@@ -922,7 +922,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Custom instructions ─── */}
       <div>
-        <button onClick={() => setShowInstrucciones(!showInstrucciones)} className="flex items-center gap-2 text-[11px] font-bold tracking-wider uppercase text-cream/55 hover:text-cream/75 transition-colors">
+        <button onClick={() => setShowInstrucciones(!showInstrucciones)} className="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase text-cream/40 hover:text-cream/60 transition-colors">
           {showInstrucciones ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           Instrucciones adicionales (opcional)
         </button>
@@ -964,8 +964,8 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {generating && progress && (
         <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-cream/75">Modelo: <span className="text-gold">{progress.modelName}</span></span>
-            <span className="text-xs text-cream/55">Intento {progress.attempt}/{progress.total}</span>
+            <span className="text-xs text-cream/60">Modelo: <span className="text-gold">{progress.modelName}</span></span>
+            <span className="text-xs text-cream/40">Intento {progress.attempt}/{progress.total}</span>
           </div>
           <div className="h-1.5 bg-cream/10 rounded-full overflow-hidden">
             <div className="h-full bg-gold rounded-full transition-all duration-500" style={{ width: `${(progress.attempt / progress.total) * 100}%` }} />
@@ -978,7 +978,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {images.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-cream/55">
+            <span className="text-xs text-cream/40">
               {images.length === 1 ? 'Imagen generada' : `${images.length} imagenes generadas`}
               {mode === 'fondo' && ' (solo fondo)'}
             </span>
@@ -1030,16 +1030,16 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               </button>
             )}
           </div>
-          <p className="text-[11px] text-cream/45 text-center">Modelo: {images[previewIdx].modelUsed}</p>
+          <p className="text-[10px] text-cream/30 text-center">Modelo: {images[previewIdx].modelUsed}</p>
 
           {/* ─── Edicion sutil con IA (Nano Banana edit mode) ─── */}
           <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)] space-y-2">
             <div className="flex items-center gap-2">
               <Wand2 className="w-3.5 h-3.5 text-gold" />
-              <span className="text-[11px] font-bold tracking-wider uppercase text-gold">
+              <span className="text-[10px] font-bold tracking-wider uppercase text-gold">
                 Editar con IA {images.length > 1 ? `(pieza ${previewIdx + 1})` : ''}
               </span>
-              <span className="text-[11px] text-cream/45 normal-case font-normal">— retoque sutil, mantiene composicion</span>
+              <span className="text-[9px] text-cream/30 normal-case font-normal">— retoque sutil, mantiene composicion</span>
             </div>
             <textarea
               value={editPrompt}

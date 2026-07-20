@@ -182,23 +182,23 @@ export default function PilarUnlockedModal({
               {cinturon && (
                 <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-gradient-to-b from-[var(--accent-gold)]/10 to-transparent p-5">
                   <div className="text-4xl mb-2">{cinturon.emoji}</div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
                     Cinturón ganado
                   </p>
                   <p className="text-xl font-semibold text-cream mb-1">{cinturon.nombre}</p>
-                  <p className="text-xs italic text-cream/75">{cinturon.metafora}</p>
+                  <p className="text-xs italic text-cream/60">{cinturon.metafora}</p>
                 </div>
               )}
 
               {mentorPregunta && (
                 <div className="mb-5 rounded-xl border border-cream/15 bg-ink p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-cream/40 mb-2">
                     El Mentor te espera con una pregunta
                   </p>
                   <p className="text-sm text-cream/90 leading-relaxed italic">
                     «{mentorPregunta}»
                   </p>
-                  <p className="text-[11px] text-cream/35 mt-2">
+                  <p className="text-[10px] text-cream/35 mt-2">
                     No la respondas rápido. Llévala contigo hoy.
                   </p>
                 </div>
@@ -208,12 +208,12 @@ export default function PilarUnlockedModal({
                 <div className="mb-5 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 p-4">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Award className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)]">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-gold)]">
                       Nivel {nivelAlcanzado.numero} alcanzado
                     </span>
                   </div>
                   <p className="text-lg font-medium text-cream mb-1">{nivelAlcanzado.nombre}</p>
-                  <p className="text-xs text-cream/75 leading-relaxed">
+                  <p className="text-xs text-cream/60 leading-relaxed">
                     {nivelAlcanzado.descripcion}
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export default function PilarUnlockedModal({
 
               {pilarDesbloqueado ? (
                 <div className="mb-6">
-                  <p className="text-sm text-cream/75 mb-1">Nuevo pilar desbloqueado:</p>
+                  <p className="text-sm text-cream/60 mb-1">Nuevo pilar desbloqueado:</p>
                   <p className="text-lg font-medium text-cream">{pilarDesbloqueado}</p>
                 </div>
               ) : (
@@ -262,7 +262,7 @@ export default function PilarUnlockedModal({
               >
                 ¿Cómo te pareció este pilar?
               </h2>
-              <p className="text-sm text-cream/65 mb-5">
+              <p className="text-sm text-cream/50 mb-5">
                 Tu valoración nos ayuda a mejorar el programa
               </p>
 
@@ -292,7 +292,7 @@ export default function PilarUnlockedModal({
               {ratingConfig && (
                 <div className="text-left mb-4 transition-all duration-300">
                   <p className="text-sm font-semibold text-cream mb-1">{ratingConfig.titulo}</p>
-                  <p className="text-sm text-cream/75 leading-relaxed mb-3">
+                  <p className="text-sm text-cream/60 leading-relaxed mb-3">
                     {ratingConfig.mensaje}
                   </p>
                   {selectedRating < 5 && (

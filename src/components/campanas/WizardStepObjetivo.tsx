@@ -21,7 +21,7 @@ export default function WizardStepObjetivo({ value, onChange }: Props) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-cream mb-1">Objetivo de la Campaña</h3>
-        <p className="text-sm text-cream/65">Selecciona el tipo de campaña que queres crear</p>
+        <p className="text-sm text-cream/50">Selecciona el tipo de campaña que queres crear</p>
       </div>
 
       <div className="grid gap-4">
@@ -44,13 +44,13 @@ export default function WizardStepObjetivo({ value, onChange }: Props) {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                   isSelected ? 'bg-gold/20' : 'bg-cream/5'
                 }`}>
-                  <Icon className={`w-5 h-5 ${isSelected ? 'text-gold' : 'text-cream/55'}`} />
+                  <Icon className={`w-5 h-5 ${isSelected ? 'text-gold' : 'text-cream/40'}`} />
                 </div>
                 <div>
                   <p className={`font-medium text-[15px] mb-1 ${isSelected ? 'text-gold' : 'text-cream'}`}>
                     {titulo}
                   </p>
-                  <p className="text-sm text-cream/65 leading-relaxed">{descripcion}</p>
+                  <p className="text-sm text-cream/50 leading-relaxed">{descripcion}</p>
                 </div>
                 <div className={`w-5 h-5 rounded-full border-2 shrink-0 ml-auto mt-1 flex items-center justify-center ${
                   isSelected ? 'border-gold' : 'border-cream/20'

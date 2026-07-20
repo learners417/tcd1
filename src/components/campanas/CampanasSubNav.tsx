@@ -44,13 +44,13 @@ export default function CampanasSubNav({ currentView, onNavigate }: Props) {
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
               isActive
                 ? 'bg-gold/15 text-gold border border-gold/30'
-                : 'text-cream/65 hover:text-cream/80 hover:bg-cream/5 border border-transparent'
+                : 'text-cream/50 hover:text-cream/80 hover:bg-cream/5 border border-transparent'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
             {item.label}
             {item.badge && (
-              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-azure/15 text-azure border border-azure/25">
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-azure/15 text-azure border border-azure/25">
                 {item.badge}
               </span>
             )}

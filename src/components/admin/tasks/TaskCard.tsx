@@ -182,7 +182,7 @@ export default function TaskCard({
           {isArchivada && (
             <span
               title="Tarea archivada"
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cream/8 text-cream/45 border border-cream/10 flex items-center gap-1 shrink-0"
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cream/8 text-cream/45 border border-cream/10 flex items-center gap-1 shrink-0"
             >
               <Archive className="w-3 h-3" /> Archivada
             </span>
@@ -193,7 +193,7 @@ export default function TaskCard({
           {yoSoyCreadorYNoAsignado && !isArchivada && (
             <span
               title="Vos creaste esta tarea"
-              className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full"
+              className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full"
             >
               <UserPlus className="w-3 h-3" /> Creada por mí
             </span>
@@ -204,7 +204,7 @@ export default function TaskCard({
             <button
               onClick={(e) => { e.stopPropagation(); onArchive(tarea.id); }}
               title="Archivar tarea"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/45 hover:text-gold hover:bg-gold/10 transition-all opacity-0 group-hover:opacity-100"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/30 hover:text-gold hover:bg-gold/10 transition-all opacity-0 group-hover:opacity-100"
             >
               <Archive className="w-4 h-4" />
             </button>
@@ -213,7 +213,7 @@ export default function TaskCard({
             <button
               onClick={(e) => { e.stopPropagation(); onUnarchive(tarea.id); }}
               title="Desarchivar tarea"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/45 hover:text-gold hover:bg-gold/10 transition-all"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/30 hover:text-gold hover:bg-gold/10 transition-all"
             >
               <ArchiveRestore className="w-4 h-4" />
             </button>
@@ -222,7 +222,7 @@ export default function TaskCard({
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(tarea.id); }}
             title="Eliminar tarea"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/30 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -231,7 +231,7 @@ export default function TaskCard({
             <button
               ref={triggerRef}
               onClick={(e) => { e.stopPropagation(); setShowMenu(v => !v); }}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/45 hover:text-cream/70 hover:bg-cream/5 transition-all"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/30 hover:text-cream/70 hover:bg-cream/5 transition-all"
             >
               <MoreVertical className="w-4 h-4" />
             </button>
@@ -240,10 +240,10 @@ export default function TaskCard({
               <div
                 ref={menuRef}
                 style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, width: 200 }}
-                className="z-50 bg-[#1E1E1E] border border-gold/12 rounded-xl shadow-xl py-1"
+                className="z-50 bg-[#1E1E1E] border border-[rgba(232,150,46,0.12)] rounded-xl shadow-xl py-1"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="px-3 py-1.5 text-[11px] font-bold text-cream/45 uppercase tracking-wider">
+                <div className="px-3 py-1.5 text-[10px] font-bold text-cream/30 uppercase tracking-wider">
                   Mover a
                 </div>
                 {ADMIN_TAREA_STATUSES.filter(s => s !== tarea.status).map(s => (
@@ -255,7 +255,7 @@ export default function TaskCard({
                     {ADMIN_TAREA_STATUS_LABELS[s]}
                   </button>
                 ))}
-                <div className="border-t border-gold/10 my-1" />
+                <div className="border-t border-[rgba(232,150,46,0.1)] my-1" />
                 <button
                   onClick={() => { onEdit(tarea); setShowMenu(false); }}
                   className="w-full text-left px-3 py-2 text-sm text-cream/70 hover:bg-cream/5 transition-colors"
@@ -292,7 +292,7 @@ export default function TaskCard({
       </div>
 
       {/* Título */}
-      <p className={`text-base font-semibold leading-snug mb-1.5 ${isCompletada ? 'text-cream/65 line-through' : 'text-cream'}`}>
+      <p className={`text-base font-semibold leading-snug mb-1.5 ${isCompletada ? 'text-cream/50 line-through' : 'text-cream'}`}>
         {tarea.titulo}
       </p>
 
@@ -330,7 +330,7 @@ export default function TaskCard({
             <div
               title={`Creada por ${tarea.creador_nombre}`}
               style={{ backgroundColor: creadorColor.bg, borderColor: creadorColor.border, color: creadorColor.text }}
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold border"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border"
             >
               {getInitials(tarea.creador_nombre)}
             </div>

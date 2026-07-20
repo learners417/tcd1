@@ -29,11 +29,11 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
       {/* Video Title */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 tracking-wider">
+          <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 tracking-wider">
             VIDEO
           </span>
           {watched && (
-            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+            <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Visto
             </span>
           )}
@@ -41,7 +41,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {meta.titulo}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
       </div>
 
       {/* YouTube Embed */}
@@ -60,11 +60,11 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             if (guion?.esencia) {
               return (
                 <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-[#141311] to-[#0B0A09] p-6 sm:p-8">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4">La lección de hoy</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-4">La lección de hoy</p>
                   <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     {guion.esencia}
                   </p>
-                  <p className="text-[11px] text-cream/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
+                  <p className="text-[10px] text-cream/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
                 </div>
               );
             }
@@ -83,7 +83,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
 
       {/* Mark as watched */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-cream/55">
+        <p className="text-xs text-cream/40">
           {meta.tiempo_estimado || '10–15 min'}
         </p>
 

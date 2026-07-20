@@ -42,7 +42,7 @@ export default function ModoHueco({ onNavigate }: Props) {
 
   return (
     <div className="rounded-2xl border border-gold/20 bg-gold/[0.04] p-4">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-gold flex items-center gap-1.5 mb-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gold flex items-center gap-1.5 mb-1.5">
         <Zap className="w-3.5 h-3.5" /> ¿Tenés solo 10-15 minutos?
       </p>
       <p className="text-sm font-semibold text-cream">{titulo}</p>

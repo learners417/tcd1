@@ -45,10 +45,10 @@ export default function TaskChecklist({ codigo, items }: TaskChecklistProps) {
   return (
     <div className="mt-4 rounded-xl border border-gold/20 bg-[#0F0F0F] p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-gold">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gold">
           Paso a paso
         </span>
-        <span className="text-[11px] text-cream/55 font-medium">
+        <span className="text-[10px] text-cream/40 font-medium">
           {done}/{items.length}
         </span>
       </div>

@@ -1,6 +1,6 @@
 /**
  * CHECK-IN — la apertura ritual de la Sesión Viva (liturgia de Javo):
- * "Emoción en la que llegas y objetivo principal de la sesión."
+ * "Emoción en la que llegás y objetivo principal de la sesión."
  */
 import React, { useState } from 'react';
 import { Play } from 'lucide-react';
@@ -25,9 +25,9 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-cream/55 rounded-xl border border-gold/10 bg-gold/[0.04] px-3 py-2">
         <span className="font-semibold text-gold/80">Así funciona:</span>
         <span>1 · entras con tu objetivo</span>
-        <span className="text-cream/45">→</span>
+        <span className="text-cream/30">→</span>
         <span>2 · trabajas con el reloj</span>
-        <span className="text-cream/45">→</span>
+        <span className="text-cream/30">→</span>
         <span>3 · cierras lo hecho</span>
       </div>
       <div>
@@ -35,7 +35,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         {segundosObjetivo ? (
           <p className="text-xs text-white/55 mt-1">
-            Tiempo de trabajo: {formatoCrono(segundosObjetivo)} · puedes pausar cuando quieras, la app guarda todo.
+            Tiempo de trabajo: {formatoCrono(segundosObjetivo)} · podés pausar cuando quieras, la app guarda todo.
           </p>
         ) : (
           <p className="text-xs text-white/55 mt-1">Misión sin cronómetro — se trabaja a tu ritmo.</p>
@@ -43,7 +43,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-white mb-2">¿Con qué emoción llegas?</p>
+        <p className="text-sm font-semibold text-white mb-2">¿Con qué emoción llegás?</p>
         <div className="flex flex-wrap gap-2">
           {EMOCIONES_ENTRADA.map((e) => (
             <button

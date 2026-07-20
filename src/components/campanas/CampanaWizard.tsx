@@ -86,13 +86,13 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
           <h2 className="text-xl font-semibold text-cream" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
             Nueva Campana
           </h2>
-          <p className="text-sm text-cream/55 mt-0.5">
+          <p className="text-sm text-cream/40 mt-0.5">
             {OBJETIVO_LABELS[form.objetivo].titulo}
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="text-sm text-cream/55 hover:text-cream transition-colors"
+          className="text-sm text-cream/40 hover:text-cream transition-colors"
         >
           Cancelar
         </button>
@@ -109,10 +109,10 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
                   ? 'bg-gold/15 text-gold border border-gold/30'
                   : idx < step
                     ? 'bg-success/10 text-success border border-success/20 cursor-pointer hover:bg-success/15'
-                    : 'bg-cream/5 text-cream/45 border border-cream/10'
+                    : 'bg-cream/5 text-cream/30 border border-cream/10'
               }`}
             >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                 idx < step ? 'bg-success/20' : idx === step ? 'bg-gold/20' : 'bg-cream/10'
               }`}>
                 {idx < step ? <Check className="w-3 h-3" /> : idx + 1}
@@ -150,7 +150,7 @@ export default function CampanaWizard({ userId, perfil, geminiKey, onComplete, o
       <div className="flex items-center justify-between">
         <button
           onClick={() => step > 0 ? setStep(step - 1) : onCancel()}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-cream/60 hover:text-cream transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> {step > 0 ? 'Anterior' : 'Cancelar'}
         </button>

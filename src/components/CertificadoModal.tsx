@@ -90,7 +90,7 @@ export default function CertificadoModal({
     >
       <div className="w-full max-w-lg my-8" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-cream/65 hover:text-cream transition-colors">
+          <button onClick={onClose} className="text-cream/50 hover:text-cream transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -102,10 +102,10 @@ export default function CertificadoModal({
         >
           <div className="absolute inset-3 border border-gold/20 rounded-xl pointer-events-none" />
           <Award className="w-10 h-10 text-gold mx-auto mb-3" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-4">
             Tu Clínica Digital · Sanadores Libres
           </p>
-          <p className="text-xs uppercase tracking-widest text-cream/65 mb-2">Certifica que</p>
+          <p className="text-xs uppercase tracking-widest text-cream/50 mb-2">Certifica que</p>
           <h2
             className="text-3xl text-gold mb-3"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}

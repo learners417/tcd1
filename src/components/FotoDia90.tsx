@@ -33,7 +33,7 @@ export default function FotoDia90({
     >
       <div className="w-full max-w-md my-8" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-cream/65 hover:text-cream transition-colors">
+          <button onClick={onClose} className="text-cream/50 hover:text-cream transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -42,7 +42,7 @@ export default function FotoDia90({
         <div className="rounded-3xl overflow-hidden border border-gold/40 bg-gradient-to-b from-[#141210] to-ink">
           <div className="p-6 text-center">
             <div className="text-4xl mb-2">⬛</div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-1">
               Día {dia ?? 90} · Sanador Libre
             </p>
             <h2
@@ -58,17 +58,17 @@ export default function FotoDia90({
               {/* Promedios Día 1 → hoy */}
               <div className="flex items-center justify-center gap-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-cream/65 font-mono">
+                  <p className="text-3xl font-bold text-cream/50 font-mono">
                     {comparacion.promedioDia1.toFixed(1)}
                   </p>
-                  <p className="text-[11px] uppercase tracking-widest text-cream/55 mt-1">Día 1</p>
+                  <p className="text-[9px] uppercase tracking-widest text-cream/40 mt-1">Día 1</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gold" />
                 <div className="text-center">
                   <p className="text-3xl font-bold text-gold font-mono">
                     {comparacion.promedioDia45.toFixed(1)}
                   </p>
-                  <p className="text-[11px] uppercase tracking-widest text-cream/55 mt-1">Hoy</p>
+                  <p className="text-[9px] uppercase tracking-widest text-cream/40 mt-1">Hoy</p>
                 </div>
               </div>
 
@@ -91,8 +91,8 @@ export default function FotoDia90({
             </div>
           ) : (
             <div className="px-6 pb-6">
-              <p className="text-sm text-cream/75 text-center leading-relaxed">
-                Tu Foto del Día 90 se completa cuando tienes cargada tu Foto de Partida del Día 1. Es
+              <p className="text-sm text-cream/60 text-center leading-relaxed">
+                Tu Foto del Día 90 se completa cuando tenés cargada tu Foto de Partida del Día 1. Es
                 el antes y el después de tu transformación.
               </p>
             </div>
@@ -100,13 +100,13 @@ export default function FotoDia90({
 
           <div className="border-t border-gold/15 px-6 py-3 flex items-center justify-center gap-1.5">
             <Camera className="w-3.5 h-3.5 text-gold/70" />
-            <span className="text-[11px] uppercase tracking-widest text-cream/55">
+            <span className="text-[9px] uppercase tracking-widest text-cream/40">
               Tu Clínica Digital · Sanadores Libres
             </span>
           </div>
         </div>
 
-        <p className="text-center text-[11px] text-cream/55 mt-3">
+        <p className="text-center text-[10px] text-cream/40 mt-3">
           Sacá una captura de esta tarjeta para compartir tu logro.
         </p>
       </div>

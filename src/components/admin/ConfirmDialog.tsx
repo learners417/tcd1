@@ -56,7 +56,7 @@ export default function ConfirmDialog({
         <button
           onClick={onCancel}
           disabled={loading}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-cream/5 flex items-center justify-center text-cream/75 hover:text-cream hover:bg-cream/10 transition-colors disabled:opacity-40"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-cream/5 flex items-center justify-center text-cream/60 hover:text-cream hover:bg-cream/10 transition-colors disabled:opacity-40"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4" />
@@ -71,7 +71,7 @@ export default function ConfirmDialog({
           </div>
 
           <h3 className="text-xl font-semibold text-cream text-center mb-2">{title}</h3>
-          <p className="text-sm text-cream/75 text-center leading-relaxed mb-7">{message}</p>
+          <p className="text-sm text-cream/60 text-center leading-relaxed mb-7">{message}</p>
 
           <div className="flex items-center gap-3">
             <button

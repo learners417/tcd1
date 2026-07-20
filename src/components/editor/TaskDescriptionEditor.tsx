@@ -45,13 +45,13 @@ export default function TaskDescriptionEditor({
     <>
       <div className="relative">
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+          <label className="text-[10px] font-bold text-cream/40 uppercase tracking-wider">
             Descripción
           </label>
           <button
             type="button"
             onClick={() => setFullscreen(true)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-cream/45 hover:text-gold transition-colors"
+            className="flex items-center gap-1.5 text-[10px] font-semibold text-cream/45 hover:text-gold transition-colors"
             title="Abrir en pantalla completa"
           >
             <Maximize2 className="w-3 h-3" />
@@ -76,13 +76,13 @@ export default function TaskDescriptionEditor({
               <button
                 type="button"
                 onClick={() => setFullscreen(false)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-cream/75 hover:text-cream hover:bg-cream/5 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-cream/60 hover:text-cream hover:bg-cream/5 transition-colors"
                 title="Cerrar pantalla completa (Esc)"
               >
                 <Minimize2 className="w-3.5 h-3.5" />
                 Cerrar
               </button>
-              <span className="text-[11px] text-cream/45 uppercase tracking-widest font-bold">Editando tarea</span>
+              <span className="text-[10px] text-cream/30 uppercase tracking-widest font-bold">Editando tarea</span>
             </div>
             <button
               type="button"
@@ -119,7 +119,7 @@ export default function TaskDescriptionEditor({
                 />
               </div>
 
-              <p className="text-[11px] text-cream/45 mt-4 text-center">
+              <p className="text-[11px] text-cream/30 mt-4 text-center">
                 Tipeá <span className="font-mono text-gold/70">/</span> para insertar títulos, listas, checklists y más. Los cambios se guardan al hacer clic en "Listo" y luego "Guardar cambios".
               </p>
             </div>

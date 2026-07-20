@@ -139,11 +139,11 @@ export default function TaskComments({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-cream/40 uppercase tracking-wider">
         <MessageSquare className="w-3.5 h-3.5" />
         Conversación
         {totalCount > 0 && (
-          <span className="text-[11px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+          <span className="text-[10px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
             {totalCount}
           </span>
         )}
@@ -152,7 +152,7 @@ export default function TaskComments({
       {/* Hilo */}
       {isPending ? (
         pendingList.length === 0 ? (
-          <div className="text-xs text-cream/45 italic px-1">
+          <div className="text-xs text-cream/30 italic px-1">
             Aún no hay comentarios. Escribe debajo para iniciar la conversación.
           </div>
         ) : (
@@ -167,12 +167,12 @@ export default function TaskComments({
                     <span className="text-xs font-bold truncate text-gold">
                       {currentUserNombre}
                     </span>
-                    <span className="text-[11px] text-gold/70">se enviará al crear la tarea</span>
+                    <span className="text-[10px] text-gold/70">se enviará al crear la tarea</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemovePending(idx)}
-                    className="p-1 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="p-1 rounded-md text-cream/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                     title="Quitar comentario"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -184,9 +184,9 @@ export default function TaskComments({
           </div>
         )
       ) : loading ? (
-        <div className="text-xs text-cream/45 italic px-1">Cargando…</div>
+        <div className="text-xs text-cream/30 italic px-1">Cargando…</div>
       ) : comments.length === 0 ? (
-        <div className="text-xs text-cream/45 italic px-1">
+        <div className="text-xs text-cream/30 italic px-1">
           Aún no hay comentarios. Escribe debajo para iniciar la conversación.
         </div>
       ) : (
@@ -207,14 +207,14 @@ export default function TaskComments({
                     <span className={`text-xs font-bold truncate ${isMine ? 'text-gold' : 'text-cream/85'}`}>
                       {c.autor_nombre ?? 'Usuario'}
                     </span>
-                    <span className="text-[11px] text-cream/35">{formatRelative(c.created_at)}</span>
+                    <span className="text-[10px] text-cream/35">{formatRelative(c.created_at)}</span>
                   </div>
                   {isMine && (
                     <button
                       type="button"
                       onClick={() => handleDelete(c)}
                       disabled={deletingId === c.id}
-                      className="p-1 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                      className="p-1 rounded-md text-cream/30 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
                       title="Eliminar comentario"
                     >
                       <Trash2 className="w-3 h-3" />

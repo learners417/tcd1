@@ -169,7 +169,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
             ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
             : hasUnread
               ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
-              : 'text-cream/75 hover:text-cream'
+              : 'text-cream/60 hover:text-cream'
         }`}
         title="Notificaciones"
         aria-label={hasUnread ? `Notificaciones (${unread} sin leer)` : 'Notificaciones'}
@@ -210,7 +210,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
               {items.length === 0 && (
                 <div className="py-12 text-center">
                   <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
-                  <p className="text-sm text-cream/55">Sin notificaciones</p>
+                  <p className="text-sm text-cream/40">Sin notificaciones</p>
                 </div>
               )}
               {items.map(notif => {
@@ -233,16 +233,16 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                         )}
                       </div>
                       {notif.descripcion && (
-                        <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
+                        <p className="text-xs text-cream/50 line-clamp-2">{notif.descripcion}</p>
                       )}
-                      <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                      <p className="text-[10px] text-cream/30 mt-2">{tiempoRelativo(notif.created_at)}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
             <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
-              <button onClick={() => setOpen(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
+              <button onClick={() => setOpen(false)} className="text-xs text-cream/50 hover:text-cream transition-colors">
                 Cerrar
               </button>
             </div>

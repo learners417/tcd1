@@ -181,7 +181,7 @@ REGLAS:
     <div className="animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Modulo directo
         </p>
         <h2 className="text-xl font-light text-cream">
@@ -190,7 +190,7 @@ REGLAS:
             copies
           </span>
         </h2>
-        <p className="text-xs text-cream/55 mt-1">
+        <p className="text-xs text-cream/40 mt-1">
           Sin pasar por el flujo completo. Completas los datos y los copies salen listos.
         </p>
       </div>
@@ -199,7 +199,7 @@ REGLAS:
         {/* Form izquierdo */}
         <div className="lg:w-[380px] lg:min-w-[380px] card-panel p-5 space-y-4">
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Rubro / especialidad
             </label>
             <input
@@ -211,7 +211,7 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Pais / ciudad
             </label>
             <input
@@ -223,7 +223,7 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Que se ofrece?
             </label>
             <textarea
@@ -237,7 +237,7 @@ REGLAS:
 
           {/* Tipo chips */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Tipo de anuncio
             </label>
             <div className="flex flex-wrap gap-2">
@@ -248,7 +248,7 @@ REGLAS:
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     tipo === t.value
                       ? 'bg-gold/15 border-gold/40 text-gold'
-                      : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
+                      : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                   }`}
                 >
                   {t.label}
@@ -259,7 +259,7 @@ REGLAS:
 
           {/* Tono chips */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
               Tono
             </label>
             <div className="flex flex-wrap gap-2">
@@ -270,7 +270,7 @@ REGLAS:
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     tono === t.value
                       ? 'bg-gold/15 border-gold/40 text-gold'
-                      : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
+                      : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                   }`}
                 >
                   {t.label}
@@ -282,7 +282,7 @@ REGLAS:
           {/* Variantes chips — solo para imagen unica */}
           {tipo === 'imagen_single' ? (
             <div>
-              <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+              <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-1.5">
                 Variantes
               </label>
               <div className="flex flex-wrap gap-2">
@@ -293,7 +293,7 @@ REGLAS:
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                       variantes === v
                         ? 'bg-gold/15 border-gold/40 text-gold'
-                        : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
+                        : 'border-cream/10 text-cream/40 hover:border-cream/25 hover:text-cream/60'
                     }`}
                   >
                     {v}
@@ -303,10 +303,10 @@ REGLAS:
             </div>
           ) : (
             <div className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-gold/5 p-3">
-              <p className="text-[11px] font-bold tracking-wider uppercase text-gold mb-1">
+              <p className="text-[10px] font-bold tracking-wider uppercase text-gold mb-1">
                 Carrusel unico
               </p>
-              <p className="text-xs text-cream/75 leading-relaxed">
+              <p className="text-xs text-cream/60 leading-relaxed">
                 Generamos un solo carrusel bien trabajado (hasta 10 slides). El ultimo slide
                 incluye una palabra clave para activar la automatizacion en ManyChat.
               </p>
@@ -338,7 +338,7 @@ REGLAS:
             {output && (
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 text-xs text-cream/50 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
               >
                 {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiado ? 'Copiado' : 'Copiar todo'}
@@ -359,7 +359,7 @@ REGLAS:
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-cream/55">
+              <div className="flex items-center gap-2 text-sm text-cream/40">
                 <Loader2 className="w-4 h-4 animate-spin" /> Generando copies...
               </div>
             )}

@@ -123,10 +123,10 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
             <button
               key={l.id}
               onClick={() => setLayout(l.id)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${
                 layout === l.id
                   ? 'bg-gold/15 text-gold'
-                  : 'bg-cream/5 text-cream/45 hover:text-cream/65'
+                  : 'bg-cream/5 text-cream/30 hover:text-cream/50'
               }`}
             >
               {l.label}

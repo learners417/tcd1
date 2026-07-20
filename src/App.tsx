@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
+import NumeroPanel from './components/numero/NumeroPanel';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
@@ -498,6 +499,7 @@ export default function App() {
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'numero' && <NumeroPanel userId={supabaseProfile?.id} />}
             {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
             {currentPage === 'agentes' && (

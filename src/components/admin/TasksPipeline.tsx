@@ -300,14 +300,14 @@ export default function TasksPipeline({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-semibold text-cream">Tareas</h2>
-          <p className="text-xs text-cream/55 mt-1">Gestión interna del equipo</p>
+          <p className="text-xs text-cream/40 mt-1">Gestión interna del equipo</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <TaskViewToggle value={view} onChange={setView} myCount={myCount} />
           <button
             onClick={cargar}
             title="Refrescar"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/40 hover:text-cream hover:bg-cream/5 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -335,7 +335,7 @@ export default function TasksPipeline({
           {verArchivadas ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           {verArchivadas ? 'Ocultar archivadas' : 'Ver archivadas'}
           {verArchivadas && archivadasCount > 0 && (
-            <span className="text-[11px] bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
               {archivadasCount}
             </span>
           )}
@@ -349,7 +349,7 @@ export default function TasksPipeline({
           >
             <Archive className="w-3.5 h-3.5" />
             Archivar completadas
-            <span className="text-[11px] bg-cream/8 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] bg-cream/8 px-1.5 py-0.5 rounded-full">
               {completadasNoArchivadasCount}
             </span>
           </button>
@@ -358,7 +358,7 @@ export default function TasksPipeline({
 
       {/* Vista Hoy (banner colapsable) */}
       {tareasHoy.length > 0 && (
-        <div className="bg-panel border border-gold/12 rounded-2xl overflow-hidden">
+        <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
           <button
             onClick={() => setShowHoy(v => !v)}
             className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-cream/5 transition-colors"
@@ -372,11 +372,11 @@ export default function TasksPipeline({
                 {tareasHoy.length}
               </span>
             </div>
-            {showHoy ? <ChevronUp className="w-4 h-4 text-cream/55" /> : <ChevronDown className="w-4 h-4 text-cream/55" />}
+            {showHoy ? <ChevronUp className="w-4 h-4 text-cream/40" /> : <ChevronDown className="w-4 h-4 text-cream/40" />}
           </button>
 
           {showHoy && (
-            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-gold/10" style={{ paddingTop: '16px' }}>
+            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-[rgba(232,150,46,0.1)]" style={{ paddingTop: '16px' }}>
               {tareasHoy.map(t => (
                 <TaskCard
                   key={t.id}
@@ -404,7 +404,7 @@ export default function TasksPipeline({
 
       {/* Body — vista activa */}
       {loading ? (
-        <div className="flex items-center justify-center h-48 text-cream/45 text-sm">
+        <div className="flex items-center justify-center h-48 text-cream/30 text-sm">
           Cargando tareas...
         </div>
       ) : view === 'list' ? (
