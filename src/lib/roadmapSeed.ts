@@ -416,7 +416,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.2',
         titulo: 'Diseña tu oferta principal',
-        descripcion: 'La herramienta arma tu oferta completa sobre tu método: qué transformación promete, qué incluye, cuánto dura, tu precio (el número del Día 6) y tu garantía. Todo en una página lista para presentar. Vera, tu entrenadora de precio, te ayuda si dudas.',
+        descripcion: 'La herramienta arma tu oferta completa sobre tu método: qué transformación promete, qué incluye, cuánto dura, tu precio (el número del Día 6), y tres piezas que la vuelven irresistible — un stack de bonos (cada uno derriba una objeción concreta), tu garantía (eliges el tipo: incondicional, condicional, o anti-garantía), y la opción de cuotas (por ejemplo 3× para bajar la barrera de entrada sin tocar el precio). Todo en una página lista para presentar. Vera, tu entrenadora de precio, te ayuda si dudas.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '2 h',
@@ -1151,11 +1151,11 @@ export function colorEstadoPilar(
 ): string {
   switch (estado) {
     case 'completado':
-      return 'border-l-[3px] border-l-[#22C55E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-success bg-panel border border-[rgba(232,150,46,0.12)]';
     case 'en_progreso':
-      return 'border-l-[3px] border-l-[#E8962E] bg-[#111110] border border-[rgba(232,150,46,0.12)]';
+      return 'border-l-[3px] border-l-gold bg-panel border border-[rgba(232,150,46,0.12)]';
     case 'bloqueado':
-      return 'opacity-40 cursor-not-allowed bg-[#111110] border border-[rgba(232,150,46,0.1)]';
+      return 'opacity-40 cursor-not-allowed bg-panel border border-[rgba(232,150,46,0.1)]';
   }
 }
 

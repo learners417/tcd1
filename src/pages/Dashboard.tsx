@@ -13,19 +13,19 @@ import type { RoadmapMeta } from '../lib/roadmapSeed';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
-    case 'VIDEO': return 'bg-[#E8962E]/15 text-[#E8962E] border-[#E8962E]/25';
-    case 'HERRAMIENTA': return 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/25';
-    case 'COACH': return 'bg-[#F2EFE9]/10 text-[#F2EFE9]/70 border-[#F2EFE9]/15';
-    default: return 'bg-[#F2EFE9]/5 text-[#F2EFE9]/50 border-[#F2EFE9]/10';
+    case 'VIDEO': return 'bg-gold/15 text-gold border-gold/25';
+    case 'HERRAMIENTA': return 'bg-success/15 text-success border-success/25';
+    case 'COACH': return 'bg-cream/10 text-cream/70 border-cream/15';
+    default: return 'bg-cream/5 text-cream/65 border-cream/10';
   }
 }
 
 function MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="card-panel p-5">
-      <p className="text-[10px] text-[#F2EFE9]/40 uppercase tracking-widest mb-2 font-semibold">{label}</p>
-      <p className="text-2xl font-light text-[#F2EFE9] tracking-tight">{value}</p>
-      <p className="text-xs text-[#F2EFE9]/50 mt-1">{sub}</p>
+      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
+      <p className="text-2xl font-light text-cream tracking-tight">{value}</p>
+      <p className="text-xs text-cream/65 mt-1">{sub}</p>
     </div>
   );
 }
@@ -281,14 +281,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const urgente = d !== null && d <= 3;
         return (
           <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-1.5">Tu Semana Blanca</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tu Semana Blanca</p>
             {d !== null && d > 0 ? (
-              <p className="text-sm text-[#F2EFE9]/85">
+              <p className="text-sm text-cream/85">
                 {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
-                {nombreRes ? <> · tu plan <span className="text-[#F4B65C] font-semibold">{nombreRes}</span> te espera{precioRes && <> ({precioRes} de fundador · 50% off de por vida)</>}</> : null}
+                {nombreRes ? <> · tu plan <span className="text-goldhi font-semibold">{nombreRes}</span> te espera{precioRes && <> ({precioRes} de fundador · 50% off de por vida)</>}</> : null}
               </p>
             ) : (
-              <p className="text-sm text-[#F2EFE9]/85">Tu semana está completa. Lo que construiste queda guardado — y tu lugar de fundador sigue reservado.</p>
+              <p className="text-sm text-cream/85">Tu semana está completa. Lo que construiste queda guardado — y tu lugar de fundador sigue reservado.</p>
             )}
             {(urgente || (d !== null && d <= 0)) && (
               <a href={waLink(('Hola · Quiero continuar mi camino con el plan ' + (nombreRes ?? '')).trim())} target="_blank" rel="noreferrer"
@@ -301,12 +301,12 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       })()}
 
       {/* ZONA A — Header contextual */}
-      <div className="relative overflow-hidden card-panel p-8 border border-[#E8962E]/20 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8962E]/10 blur-[100px] rounded-full" />
+      <div className="relative overflow-hidden card-panel p-8 border border-gold/20 bg-gradient-to-br from-gold/[0.05] to-transparent">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
         <div className="relative z-10">
-          <p className="text-2xl font-light text-[#F2EFE9] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-          <p className="text-sm text-[#F2EFE9]/60 max-w-lg mb-6 leading-relaxed">
-            Llevas <strong className="text-[#F2EFE9]/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-[#E8962E]">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-[#E8962E]">una sesión</strong> para acercarte al siguiente.
+          <p className="text-2xl font-light text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
+          <p className="text-sm text-cream/75 max-w-lg mb-6 leading-relaxed">
+            Llevas <strong className="text-cream/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-gold">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-gold">una sesión</strong> para acercarte al siguiente.
           </p>
           {(() => {
             try {
@@ -315,7 +315,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               return null
             } catch { return null; }
           })()}
-          <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-[#E8962E] hover:text-[#F4B65C] transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-[#E8962E]/10 px-4 py-2 rounded-lg border border-[#E8962E]/20 w-max">
+          <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-gold hover:text-goldhi transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-gold/10 px-4 py-2 rounded-lg border border-gold/20 w-max">
             Ver El Camino <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -336,13 +336,13 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         return (
           <div className="card-ios p-6 sm:p-7">
             <div className="flex items-center justify-between mb-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E8962E]">Tu norte · 10 pacientes de $1.000 en 90 días</p>
-              <p className="text-[11px] text-[#F2EFE9]/40 num-tab">{pct}% del camino</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte · 10 pacientes de $1.000 en 90 días</p>
+              <p className="text-[11px] text-cream/55 num-tab">{pct}% del camino</p>
             </div>
             {/* La barra de 10 pacientes */}
             <div className="flex items-end justify-between mb-2">
-              <div><span className="text-4xl font-light text-[#F2EFE9] num-tab">{ventasTotal.count}</span><span className="text-xl font-light text-[#F2EFE9]/35"> / 10</span><span className="text-xs text-[#F2EFE9]/45 ml-2">pacientes</span></div>
-              <p className="text-sm text-[#F2EFE9]/60 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-[#F2EFE9]/35">de $10.000</span></p>
+              <div><span className="text-4xl font-light text-cream num-tab">{ventasTotal.count}</span><span className="text-xl font-light text-cream/35"> / 10</span><span className="text-xs text-cream/45 ml-2">pacientes</span></div>
+              <p className="text-sm text-cream/75 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-cream/35">de $10.000</span></p>
             </div>
             <div className="flex gap-1.5 mb-5">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -352,9 +352,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             {/* Los 5 hitos */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {hitos.map((h) => (
-                <div key={h.label} className={`rounded-xl border px-3 py-2.5 text-center transition-all ${h.done ? 'border-[#E8962E]/40 bg-[#E8962E]/10' : 'border-[rgba(242,239,233,0.07)] bg-black/20 opacity-60'}`}>
+                <div key={h.label} className={`rounded-xl border px-3 py-2.5 text-center transition-all ${h.done ? 'border-gold/40 bg-gold/10' : 'border-[rgba(242,239,233,0.07)] bg-black/20 opacity-60'}`}>
                   <p className="text-lg leading-none mb-1">{h.done ? '✓' : h.emoji}</p>
-                  <p className={`text-[10px] leading-tight ${h.done ? 'text-[#F4B65C] font-semibold' : 'text-[#F2EFE9]/45'}`}>{h.label}</p>
+                  <p className={`text-[11px] leading-tight ${h.done ? 'text-goldhi font-semibold' : 'text-cream/45'}`}>{h.label}</p>
                 </div>
               ))}
             </div>
@@ -368,7 +368,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-[rgba(242,239,233,0.07)] bg-black/20 px-4 py-3">
                   <span className="text-xl">⏰</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F2EFE9]/80"><span className="font-semibold text-[#F4B65C] num-tab">{horas}h</span> por semana que tu sistema ya trabaja por ti <span className="text-[#F2EFE9]/35">· meta: 10h</span></p>
+                    <p className="text-sm text-cream/80"><span className="font-semibold text-goldhi num-tab">{horas}h</span> por semana que tu sistema ya trabaja por ti <span className="text-cream/35">· meta: 10h</span></p>
                     <div className="h-1 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden mt-1.5">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(100, horas * 10)}%`, background: 'linear-gradient(90deg, #5A9170, #3D6B4F)' }} />
                     </div>
@@ -386,8 +386,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 const hoyHecho = Array.isArray(entradas) && entradas.some((e: { fecha?: string }) => String(e.fecha ?? '').slice(0, 10) === hoyStr);
                 if (hoyHecho) return null;
                 return (
-                  <button onClick={() => setCurrentPage('diario')} className="mt-3 w-full text-left rounded-xl border border-[rgba(232,150,46,0.18)] bg-[#E8962E]/5 hover:bg-[#E8962E]/10 px-4 py-2.5 transition-colors">
-                    <p className="text-[12px] text-[#F2EFE9]/75">📔 <span className="font-medium text-[#F4B65C]">Tu cierre del día</span> · 5 min — todavía pendiente. El diario alimenta a tu Mentor.</p>
+                  <button onClick={() => setCurrentPage('diario')} className="mt-3 w-full text-left rounded-xl border border-[rgba(232,150,46,0.18)] bg-gold/5 hover:bg-gold/10 px-4 py-2.5 transition-colors">
+                    <p className="text-[12px] text-cream/75">📔 <span className="font-medium text-goldhi">Tu cierre del día</span> · 5 min — todavía pendiente. El diario alimenta a tu Mentor.</p>
                   </button>
                 );
               } catch { return null; }
@@ -399,13 +399,13 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               let hechas = 0, totales = 0;
               for (const pil of SEED_ROADMAP_V2) for (const m of pil.metas) { const mins = parseMin((m as { tiempo_estimado?: string }).tiempo_estimado); totales += mins; if (set.has(`${pil.numero}-${m.codigo}`)) hechas += mins; }
               return (
-                <p className="mt-3 text-[11px] text-[#F2EFE9]/45">⚒ Llevas <span className="text-[#F4B65C] font-semibold num-tab">{(hechas / 60).toFixed(1)}h</span> de ~{Math.round(totales / 60)}h de construcción total — cada micro-sesión suma.</p>
+                <p className="mt-3 text-[11px] text-cream/45">⚒ Llevas <span className="text-goldhi font-semibold num-tab">{(hechas / 60).toFixed(1)}h</span> de ~{Math.round(totales / 60)}h de construcción total — cada micro-sesión suma.</p>
               );
             })()}
 
             {/* Tu inversión, recuperándose */}
             {ventasTotal.suma > 0 && (
-              <p className="mt-3 text-[11px] text-[#F2EFE9]/50">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-[#22C55E]' : 'text-[#F4B65C]'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-[#E8962E]">📄 Reporte del Director</button></p>
+              <p className="mt-3 text-[11px] text-cream/65">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-success' : 'text-goldhi'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-gold">📄 Reporte del Director</button></p>
             )}
 
             {/* La barra Sanador Libre */}
@@ -413,7 +413,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               <div className="h-1.5 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #E8962E, #F4B65C)' }} />
               </div>
-              <p className="text-[10px] text-[#F2EFE9]/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
+              <p className="text-[11px] text-cream/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
             </div>
           </div>
         );
@@ -427,11 +427,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) diaG3 = Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ }
         if (diaG3 < 75) return null;
         return (
-          <div className="rounded-2xl border border-[#E8962E]/35 bg-gradient-to-br from-[#E8962E]/[0.08] to-transparent p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">🏥 Tu clínica sigue</p>
-            <p className="text-lg text-[#F2EFE9]/90 font-light" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El día 90 termina El Camino — pero tu clínica no se apaga.</p>
-            <p className="text-sm text-[#F2EFE9]/60 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-[#F2EFE9]/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
-            <button onClick={() => setCurrentPage('coach')} className="mt-4 px-5 py-2.5 rounded-xl bg-[#E8962E] text-black text-sm font-bold hover:bg-[#F4B65C] transition-colors">Quiero que mi clínica siga →</button>
+          <div className="rounded-2xl border border-gold/35 bg-gradient-to-br from-gold/[0.08] to-transparent p-6">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🏥 Tu clínica sigue</p>
+            <p className="text-lg text-cream/90 font-light" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El día 90 termina El Camino — pero tu clínica no se apaga.</p>
+            <p className="text-sm text-cream/75 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-cream/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
+            <button onClick={() => setCurrentPage('coach')} className="mt-4 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors">Quiero que mi clínica siga →</button>
           </div>
         );
       })()}
@@ -441,8 +441,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         {/* Foco de Hoy (60%) */}
         <div className="lg:col-span-7 card-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[11px] font-bold text-[#F2EFE9] tracking-widest uppercase">Tu sesión de hoy</h2>
-            <button onClick={() => setCurrentPage('roadmap')} className="text-[10px] text-[#F2EFE9]/40 hover:text-[#E8962E] uppercase font-bold tracking-wider transition-colors">
+            <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
+            <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
               Ir a tareas →
             </button>
           </div>
@@ -453,20 +453,20 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               const diaProg = (() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })();
               if (esDiaDescanso(diaProg) && data.tareasHoy.length > 0) {
                 return (
-                  <div className="py-12 text-center border border-[#22C55E]/20 rounded-2xl bg-gradient-to-b from-[#22C55E]/[0.06] to-transparent">
+                  <div className="py-12 text-center border border-success/20 rounded-2xl bg-gradient-to-b from-success/[0.06] to-transparent">
                     <p className="text-4xl mb-3">🌿</p>
-                    <p className="text-base text-[#F2EFE9]/85 font-medium">Día de descanso — el dojo también respira</p>
-                    <p className="text-xs text-[#F2EFE9]/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
+                    <p className="text-base text-cream/85 font-medium">Día de descanso — el dojo también respira</p>
+                    <p className="text-xs text-cream/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
                   </div>
                 );
               }
               return null;
             })()}
             {data.tareasHoy.length === 0 ? (
-              <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-[#1A1917]/30">
-                <CheckCircle2 className="w-8 h-8 text-[#22C55E]/50 mx-auto mb-3" />
-                <p className="text-sm text-[#F2EFE9]/60">Todo al día. Estás libre.</p>
-                <p className="text-xs text-[#F2EFE9]/30 mt-1">Mira El Camino para ver lo que sigue.</p>
+              <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
+                <CheckCircle2 className="w-8 h-8 text-success/50 mx-auto mb-3" />
+                <p className="text-sm text-cream/75">Todo al día. Estás libre.</p>
+                <p className="text-xs text-cream/45 mt-1">Mira El Camino para ver lo que sigue.</p>
               </div>
             ) : (
               <>
@@ -474,37 +474,37 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               {data.tareasHoy[0] && (
                 <button
                   onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
-                  className="w-full text-left rounded-2xl border-2 border-[#E8962E]/40 bg-gradient-to-br from-[#E8962E]/[0.10] to-transparent p-6 hover:border-[#E8962E]/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
+                  className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E8962E] mb-2">▶ Tu sesión de hoy</p>
-                  <p className="text-xl font-medium text-[#F2EFE9] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
-                  <p className="text-xs text-[#F2EFE9]/50 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
-                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E8962E] text-black text-sm font-bold group-hover:bg-[#F4B65C] transition-colors">COMENZAR →</span>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
+                  <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
+                  <p className="text-xs text-cream/65 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
+                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">COMENZAR →</span>
                 </button>
               )}
               {data.tareasHoy.slice(1).map((t, idx) => (
               <div
                 key={idx}
-                className="group flex items-start gap-4 p-4 rounded-xl bg-[#1A1917]/30 border border-[rgba(232,150,46,0.1)] hover:bg-[#1A1917]/60 hover:border-[rgba(232,150,46,0.14)] transition-all cursor-pointer"
+                className="group flex items-start gap-4 p-4 rounded-xl bg-surface/30 border border-[rgba(232,150,46,0.1)] hover:bg-surface/60 hover:border-[rgba(232,150,46,0.14)] transition-all cursor-pointer"
                 onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(t.pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
               >
                 <div className="shrink-0 mt-0.5">
-                  <div className="w-5 h-5 rounded-full border border-[#F2EFE9]/20 group-hover:border-[#E8962E] transition-colors flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-transparent group-hover:bg-[#E8962E] rounded-full" />
+                  <div className="w-5 h-5 rounded-full border border-cream/20 group-hover:border-gold transition-colors flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-transparent group-hover:bg-gold rounded-full" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#F2EFE9]/90">{t.titulo}</p>
-                  <p className="text-[10px] text-[#F2EFE9]/40 mt-1">{t.pilarTitulo}</p>
+                  <p className="text-sm font-medium text-cream/90">{t.titulo}</p>
+                  <p className="text-[11px] text-cream/55 mt-1">{t.pilarTitulo}</p>
                   <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
+                    <span className={`text-[11px] uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
                       {t.tipo || `Pilar ${t.pilarNumero}`}
                     </span>
-                    <span className="text-[10px] text-[#F2EFE9]/40 flex items-center gap-1 font-medium">
+                    <span className="text-[11px] text-cream/55 flex items-center gap-1 font-medium">
                       <Clock className="w-3 h-3" /> {t.tiempo_estimado || '15–30 min'}
                     </span>
                     {t.herramienta_id && (
-                      <span className="text-[9px] text-[#E8962E] font-bold uppercase tracking-wider">Ver herramienta →</span>
+                      <span className="text-[11px] text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
                     )}
                   </div>
                 </div>
@@ -516,18 +516,18 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         </div>
 
         {/* Inspiración del Día */}
-        <div className="lg:col-span-5 card-panel p-6 relative overflow-hidden flex flex-col justify-between border-[#E8962E]/15 bg-gradient-to-br from-[#E8962E]/[0.05] to-transparent">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#E8962E]/10 blur-[50px] rounded-full" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#22C55E]/5 blur-[40px] rounded-full" />
+        <div className="lg:col-span-5 card-panel p-6 relative overflow-hidden flex flex-col justify-between border-gold/15 bg-gradient-to-br from-gold/[0.05] to-transparent">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-gold/10 blur-[50px] rounded-full" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-success/5 blur-[40px] rounded-full" />
 
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[11px] font-bold text-[#E8962E] tracking-widest uppercase flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E8962E] ring-4 ring-[#E8962E]/20" /> Inspiración del día
+              <h2 className="text-[11px] font-bold text-gold tracking-widest uppercase flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold ring-4 ring-gold/20" /> Inspiración del día
               </h2>
-              <div className="flex items-center gap-1.5 bg-[#E8962E]/10 px-3 py-1 rounded-full border border-[#E8962E]/20">
-                <Sparkles className="w-3 h-3 text-[#E8962E]" />
-                <span className="text-[10px] font-bold text-[#E8962E]">Día {proximoHito?.diaPrograma ?? 1}/90</span>
+              <div className="flex items-center gap-1.5 bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
+                <Sparkles className="w-3 h-3 text-gold" />
+                <span className="text-[11px] font-bold text-gold">Día {proximoHito?.diaPrograma ?? 1}/90</span>
               </div>
             </div>
 
@@ -562,15 +562,15 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               return (
                 <>
                   <div className="mb-6">
-                    <div className="text-4xl text-[#E8962E]/20 mb-2 leading-none" style={{ fontFamily: 'Georgia, serif' }}>"</div>
+                    <div className="text-4xl text-gold/20 mb-2 leading-none" style={{ fontFamily: 'Georgia, serif' }}>"</div>
                     <p className="text-[15px] text-white/90 leading-relaxed italic mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                       {quote.text}
                     </p>
-                    <p className="text-xs text-white/40 font-medium">— {quote.author}</p>
+                    <p className="text-xs text-white/55 font-medium">— {quote.author}</p>
                   </div>
 
-                  <div className="px-3 py-3 rounded-xl bg-[#22C55E]/[0.06] border border-[#22C55E]/15">
-                    <p className="text-[10px] text-[#22C55E] font-bold uppercase tracking-widest mb-1">Tip del día</p>
+                  <div className="px-3 py-3 rounded-xl bg-success/[0.06] border border-success/15">
+                    <p className="text-[11px] text-success font-bold uppercase tracking-widest mb-1">Tip del día</p>
                     <p className="text-[12px] text-white/70 leading-relaxed">{tip}</p>
                   </div>
                 </>
@@ -581,11 +581,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           {/* Day progress mini-bar */}
           <div className="relative z-10 mt-5">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Progreso general</span>
-              <span className="text-[10px] text-white bg-white/10 px-2 py-0.5 rounded-full">{pctTareas}%</span>
+              <span className="text-[11px] text-white/55 font-bold uppercase tracking-wider">Progreso general</span>
+              <span className="text-[11px] text-white bg-white/10 px-2 py-0.5 rounded-full">{pctTareas}%</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#E8962E] to-[#F4B65C] rounded-full transition-all duration-500" style={{ width: `${pctTareas}%` }} />
+              <div className="h-full bg-gradient-to-r from-gold to-goldhi rounded-full transition-all duration-500" style={{ width: `${pctTareas}%` }} />
             </div>
           </div>
         </div>
