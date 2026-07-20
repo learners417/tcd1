@@ -111,7 +111,7 @@ function buildPrompt(
   const nivelExplicacion = NIVEL_META[nivel].descripcion;
 
   if (tipo === 'post') {
-    return `Generá un post para feed de Instagram de un profesional de la salud.
+    return `Genera un post para feed de Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -132,7 +132,7 @@ NO escribas hashtags al final. NO uses promesas exageradas.`;
   }
 
   if (tipo === 'carrusel') {
-    return `Generá un carrusel de 10 slides para Instagram de un profesional de la salud.
+    return `Genera un carrusel de 10 slides para Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -155,7 +155,7 @@ Para cada slide: 30-50 palabras máximo. Tono empático, voz propia.`;
   }
 
   // imagen
-  return `Generá un prompt detallado para Midjourney/DALL-E/Sora que acompañe contenido de Instagram de un profesional de la salud.
+  return `Genera un prompt detallado para Midjourney/DALL-E/Sora que acompañe contenido de Instagram de un profesional de la salud.
 
 CONTEXTO DEL PROFESIONAL:
 ${contexto}
@@ -170,6 +170,45 @@ FORMATO DEL PROMPT:
 - Tono profesional pero humano (no stock photo genérico)
 
 Devolveme el prompt listo para copiar.`;
+}
+
+
+/** Parsea el output de un carrusel en slides (Slide 1: ... / SLIDE 1 ...). */
+function parseSlides(texto: string): { n: number; contenido: string }[] {
+  const partes = texto.split(/(?:^|\n)\s*(?:\*\*)?(?:Slide|SLIDE)\s*(\d+)\s*(?:\*\*)?\s*[:·—-]?\s*/);
+  const slides: { n: number; contenido: string }[] = [];
+  for (let i = 1; i < partes.length; i += 2) {
+    const n = parseInt(partes[i], 10);
+    const contenido = (partes[i + 1] ?? '').trim().replace(/\*\*/g, '');
+    if (n >= 1 && n <= 12 && contenido) slides.push({ n, contenido });
+  }
+  return slides;
+}
+
+/** Las 10 tarjetas estilo Instagram — el carrusel VISTO, no leído. */
+function CarruselPreview({ texto }: { texto: string }) {
+  const slides = parseSlides(texto);
+  if (slides.length < 3) return null;
+  return (
+    <div className="mb-6">
+      <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
+      <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
+        {slides.map((s) => (
+          <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
+            <span className="absolute top-3 right-3 text-[11px] font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
+            <div className="flex-1 flex items-center">
+              <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
+                {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
+              </p>
+            </div>
+            {s.n === slides.length && <p className="text-[11px] font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+    </div>
+  );
 }
 
 export default function CreadorContenido({ userId, perfil, setCurrentPage }: CreadorContenidoProps) {
@@ -239,7 +278,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
   const handleGenerar = async () => {
     if (!tema.trim()) {
-      toast.error('Escribí un tema o ángulo concreto');
+      toast.error('Escribe un tema o ángulo concreto');
       return;
     }
     setGenerando(true);
@@ -249,7 +288,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       const result = await generateText({
         prompt,
         systemInstruction:
-          'Sos un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
+          'Eres un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
       });
       setOutput(result);
     } catch (err) {
@@ -274,9 +313,9 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
   if (verificandoUnlock && !desbloqueado) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
-        <div className="card-panel p-8 border border-[#F5A623]/20 bg-[#1C1C1C]/40 text-center space-y-3">
-          <Loader2 className="w-6 h-6 text-[#F5A623] animate-spin mx-auto" />
-          <p className="text-sm text-[#FFFFFF]/60">Verificando estado del programa…</p>
+        <div className="card-panel p-8 border border-gold/20 bg-surface/40 text-center space-y-3">
+          <Loader2 className="w-6 h-6 text-gold animate-spin mx-auto" />
+          <p className="text-sm text-cream/75">Verificando estado del programa…</p>
         </div>
       </div>
     );
@@ -287,30 +326,30 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="space-y-3">
-          <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
             v8 · Herramienta nueva
           </p>
-          <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
             Creador de Contenido
           </h1>
-          <p className="text-[#FFFFFF]/60 max-w-xl">
-            Generá posts, carruseles y prompts de imagen usando los datos de tu ADN.
+          <p className="text-cream/75 max-w-xl">
+            Genera posts, carruseles y prompts de imagen usando los datos de tu ADN.
             Esta herramienta NO escribe en tu ADN · sólo genera output para que copies
             y publiques manualmente.
           </p>
         </div>
 
-        <div className="card-panel p-8 border border-[#F5A623]/20 bg-[#1C1C1C]/40 text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-full bg-[#F5A623]/15 border border-[#F5A623]/30 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-[#F5A623]" />
+        <div className="card-panel p-8 border border-gold/20 bg-surface/40 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center">
+            <Lock className="w-6 h-6 text-gold" />
           </div>
           <div>
-            <p className="text-lg font-medium text-[#FFFFFF]">
+            <p className="text-lg font-medium text-cream">
               Necesitás completar P6 (Matriz A→B→C) para desbloquear el Creador
             </p>
-            <p className="text-sm text-[#FFFFFF]/60 mt-2 max-w-md mx-auto">
+            <p className="text-sm text-cream/75 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
-              Volvé a la Hoja de Ruta y cerrá P6 antes de venir acá.
+              Vuelve a El Camino y cierra P6 antes de venir acá.
             </p>
           </div>
           <button
@@ -318,7 +357,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             onClick={() => setCurrentPage?.('roadmap')}
             className="btn-primary inline-flex items-center gap-2"
           >
-            Ir a la Hoja de Ruta
+            Ir a El Camino
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -331,14 +370,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+        <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
-        <h1 className="text-3xl md:text-4xl font-light text-[#FFFFFF] tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
           Creador de Contenido
         </h1>
-        <p className="text-[#FFFFFF]/60 max-w-2xl">
-          Generá posts, carruseles o prompts de imagen alineados a tu método propio,
+        <p className="text-cream/75 max-w-2xl">
+          Genera posts, carruseles o prompts de imagen alineados a tu método propio,
           tu avatar y tu nivel de awareness. Esta herramienta NO escribe en tu ADN —
           el output queda acá para que lo copies y publiques.
         </p>
@@ -346,8 +385,8 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
-          1 · ¿Qué querés generar?
+        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+          1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {(Object.entries(TIPO_META) as [TipoPieza, typeof TIPO_META.post][]).map(
@@ -361,23 +400,23 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   onClick={() => setTipo(key)}
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
-                      ? 'bg-[#F5A623]/10 border-[#F5A623]/50'
-                      : 'bg-[#1C1C1C]/40 border-[rgba(245,166,35,0.15)] hover:border-[#F5A623]/30'
+                      ? 'bg-gold/10 border-gold/50'
+                      : 'bg-surface/40 border-[rgba(232,150,46,0.10)] hover:border-gold/30'
                   }`}
                 >
                   <Icon
                     className={`w-5 h-5 mb-2 ${
-                      activo ? 'text-[#F5A623]' : 'text-[#FFFFFF]/60'
+                      activo ? 'text-gold' : 'text-cream/75'
                     }`}
                   />
                   <p
                     className={`text-sm font-semibold ${
-                      activo ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]/80'
+                      activo ? 'text-cream' : 'text-cream/80'
                     }`}
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+                  <p className="text-xs text-cream/65 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -389,7 +428,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de nivel */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
           2 · ¿Para qué nivel de awareness?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -403,18 +442,18 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   onClick={() => setNivel(key)}
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
-                      ? 'bg-[#F5A623]/10 border-[#F5A623]/50'
-                      : 'bg-[#1C1C1C]/40 border-[rgba(245,166,35,0.15)] hover:border-[#F5A623]/30'
+                      ? 'bg-gold/10 border-gold/50'
+                      : 'bg-surface/40 border-[rgba(232,150,46,0.10)] hover:border-gold/30'
                   }`}
                 >
                   <p
                     className={`text-sm font-semibold ${
-                      activo ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]/80'
+                      activo ? 'text-cream' : 'text-cream/80'
                     }`}
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-[#FFFFFF]/50 mt-1 leading-relaxed">
+                  <p className="text-xs text-cream/65 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -426,7 +465,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Tema */}
       <div className="card-panel p-5 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
           3 · Tema · ángulo · objeción a abordar
         </p>
         <textarea
@@ -460,9 +499,9 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Output */}
       {output && (
-        <div className="card-panel p-5 border border-[rgba(245,166,35,0.2)] space-y-4">
+        <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">
+            <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
             </p>
             <div className="flex items-center gap-2">
@@ -472,14 +511,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   setEditOutput(output);
                   setEditando(true);
                 }}
-                className="text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(245,166,35,0.15)]"
+                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)]"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={handleGenerar}
-                className="text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(245,166,35,0.15)] flex items-center gap-1"
+                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)] flex items-center gap-1"
               >
                 <RotateCcw className="w-3 h-3" /> Rehacer
               </button>
@@ -530,15 +569,18 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
               </div>
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/90 leading-relaxed prose-headings:text-[#F5A623] prose-strong:text-[#FFFFFF] prose-strong:font-bold">
-              <Markdown>{output}</Markdown>
+            <div>
+              {tipo === 'carrusel' && <CarruselPreview texto={output} />}
+              <div className="prose prose-invert prose-sm max-w-none text-cream/90 leading-relaxed prose-headings:text-gold prose-strong:text-cream prose-strong:font-bold">
+                <Markdown>{output}</Markdown>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      <p className="text-xs text-[#FFFFFF]/30 text-center pt-4 italic">
-        Regla v8 · esta herramienta no escribe en tu ADN. Copiá lo que te sirva y publicalo
+      <p className="text-xs text-cream/45 text-center pt-4 italic">
+        Regla v8 · esta herramienta no escribe en tu ADN. Copia lo que te sirva y publicalo
         cuando estés listo.
       </p>
     </div>

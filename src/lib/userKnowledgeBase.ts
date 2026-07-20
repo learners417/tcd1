@@ -1,7 +1,7 @@
 /**
  * userKnowledgeBase.ts
  * Construye la base de conocimiento del usuario a partir de los outputs
- * aprobados en cada tarea de la Hoja de Ruta.
+ * aprobados en cada tarea de El Camino.
  *
  * No requiere RAG — el total de texto cabe en el context window de Gemini (1M tokens).
  * Inyección directa al system prompt del Coach y los Agentes.

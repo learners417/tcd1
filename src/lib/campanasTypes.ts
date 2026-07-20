@@ -78,7 +78,7 @@ export const OBJETIVO_LABELS: Record<ObjetivoCampana, { titulo: string; descripc
 };
 
 export const ESTADO_COLORS: Record<EstadoCampana, string> = {
-  borrador: '#F5A623',
+  borrador: '#E8962E',
   configurada: '#3B82F6',
   activa: '#22C55E',
   pausada: '#EAB308',
@@ -242,7 +242,7 @@ export const ESTILO_VISUAL_OPTIONS: Record<EstiloVisual, { titulo: string; descr
   twitter: {
     titulo: 'Estilo Twitter/X',
     descripcion: 'Screenshot organico de un post real en X — texto a tamano normal, no titular gigante',
-    prompt: 'AUTHENTIC X (Twitter) post screenshot — must look like a real screenshot taken from the X mobile or desktop app. Pixel-perfect replica of the platform UI: profile avatar circle (40-48px), display name in bold sans-serif at NORMAL size (~15-17px equivalent), verified blue checkmark next to name, gray @handle and timestamp on the same row, post body text rendered at 15-16px equivalent (NORMAL reading size — NOT giant headline-size text, NOT poster typography, NOT bold display). The post body uses regular weight sans-serif (system font: Segoe UI / SF Pro / Helvetica), left-aligned, with normal line-height. Below the text: small action row (reply, retweet, like, view counts) in muted gray. Dark mode (#15202B background, #FFFFFF text) or light mode (white background, #0F1419 text). The post should occupy a card with subtle border. ABSOLUTE RULES: text in the body must be the same size as a real tweet — small enough that you could fit 280 characters. No oversized typography, no poster design, no decorative effects, no gradients, no extra graphics. Just a clean, organic, believable Twitter/X post screenshot.',
+    prompt: 'AUTHENTIC X (Twitter) post screenshot — must look like a real screenshot taken from the X mobile or desktop app. Pixel-perfect replica of the platform UI: profile avatar circle (40-48px), display name in bold sans-serif at NORMAL size (~15-17px equivalent), verified blue checkmark next to name, gray @handle and timestamp on the same row, post body text rendered at 15-16px equivalent (NORMAL reading size — NOT giant headline-size text, NOT poster typography, NOT bold display). The post body uses regular weight sans-serif (system font: Segoe UI / SF Pro / Helvetica), left-aligned, with normal line-height. Below the text: small action row (reply, retweet, like, view counts) in muted gray. Dark mode (#15202B background, #F2EFE9 text) or light mode (white background, #0F1419 text). The post should occupy a card with subtle border. ABSOLUTE RULES: text in the body must be the same size as a real tweet — small enough that you could fit 280 characters. No oversized typography, no poster design, no decorative effects, no gradients, no extra graphics. Just a clean, organic, believable Twitter/X post screenshot.',
   },
 };
 

@@ -126,7 +126,47 @@ export function buildAdnContext(
   // El bloque de dialecto SOLO aplica al contenido publicable (reels · stories ·
   // carruseles · copies que el sanador publicará). La voz interna del entrenador
   // hablando con el sanador queda regida por voz-javo.ts (voseo universal).
-  return `${paisLinea}\n${camposLista}\n\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican SOLO al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.\n- Tu voz como entrenador hablándole AL sanador queda en voseo (la voz Javo) — no cambies eso.\n- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
+  const cadena = buildCadenaCustodia(perfil);
+  return `${paisLinea}\n${camposLista}\n${cadena}\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.
+- Tu voz como entrenador hablándole AL sanador SE ADAPTA a la persona: usá el trato de su país por defecto (Argentina/Uruguay/Paraguay/Nicaragua → vos; el resto → tú), y si el sanador te escribe con el otro trato, espejalo — el individuo manda sobre el país. Con moderación (máximo una cada varios mensajes, jamás forzada) podés usar expresiones naturales de su país para que la conversación se sienta de casa.
+- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
+}
+
+/**
+ * LA CADENA DE CUSTODIA (T8) — cada entrenador abre sabiendo qué construyó
+ * el sanador antes de llegar a él. El precio grabado alimenta la oferta ·
+ * la oferta alimenta el guion · el guion alimenta la página. El trabajo
+ * anterior se cita y se respeta · jamás se pide de nuevo ni se reescribe.
+ */
+export function buildCadenaCustodia(perfil: Partial<ProfileV2>): string {
+  const piezas: string[] = [];
+  const p = perfil as Record<string, unknown>;
+  const texto = (v: unknown): string | null => {
+    if (typeof v === 'string' && v.trim()) return v.trim().slice(0, 220);
+    return null;
+  };
+  const precio = texto(p['adn_precio_alto'] ?? p['adn_precio']);
+  if (precio) piezas.push(`- SU NÚMERO (el precio que pronunció en voz alta en la semana 1): ${precio}`);
+  const oferta = texto(p['adn_oferta_high'] ?? p['oferta_mid'] ?? p['adn_oferta']);
+  if (oferta) piezas.push(`- SU OFERTA construida: ${oferta}`);
+  const puv = texto(p['adn_usp'] ?? p['posicionamiento']);
+  if (puv) piezas.push(`- SU PUV: ${puv}`);
+  const metodo = texto(p['adn_metodo_nombre'] ?? p['adn_metodo']);
+  if (metodo) piezas.push(`- SU MÉTODO con nombre: ${metodo}`);
+  const estandarte = texto(p['adn_creencia_nueva'] ?? p['adn_estandarte']);
+  if (estandarte) piezas.push(`- SU CREENCIA NUEVA (el Estandarte de la semana 1): ${estandarte}`);
+  // los compromisos de la última Sesión Viva
+  try {
+    const raw = localStorage.getItem('tcd_ultima_sesion_v1');
+    if (raw) {
+      const ult = JSON.parse(raw) as { metaTitulo?: string; compromisos?: string[] };
+      if (ult?.compromisos?.length) {
+        piezas.push(`- SUS COMPROMISOS de la última sesión ("${ult.metaTitulo ?? ''}"): ${ult.compromisos.join(' · ')}`);
+      }
+    }
+  } catch { /* noop */ }
+  if (piezas.length === 0) return '';
+  return `\nLA CADENA DE CUSTODIA — lo que este sanador YA construyó antes de llegar a vos (citalo al abrir · construí SOBRE esto · jamás lo pidas de nuevo ni lo reescribas sin su permiso):\n${piezas.join('\n')}\nSi tu trabajo depende de una de estas piezas · abrí la conversación nombrándola ("Escuché tu número: … · tu oferta la construimos sobre eso").\n`;
 }
 
 export function getNombreSanador(perfil: Partial<ProfileV2>): string {

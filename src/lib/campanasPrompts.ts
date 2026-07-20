@@ -319,13 +319,13 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   tratamiento: string;
 }> = {
   foto_real: {
-    paleta: '"#0F1419 fondo, #F5A623 acento, #FFFFFF texto"',
+    paleta: '"#0F1419 fondo, #E8962E acento, #F2EFE9 texto"',
     escena: '"primer plano editorial de mujer 35-45 con fondo warm desenfocado"',
     tipografia: '"sans-serif bold blanco con outline fino, alineacion izquierda"',
     tratamiento: '"fotografia editorial DSLR, luz natural, shallow depth of field, tono warm cinematografico"',
   },
   bold: {
-    paleta: '"#000000 fondo, #F5A623 acento saturado, #FFFFFF texto"',
+    paleta: '"#000000 fondo, #E8962E acento saturado, #F2EFE9 texto"',
     escena: '"composicion grafica con formas planas y tipografia oversized como protagonista, sin foto"',
     tipografia: '"sans-serif display ultra-bold, tamanos masivos, asimetrica"',
     tratamiento: '"diseño grafico flat vector, alto contraste, poster editorial Behance, sin fotografia"',
@@ -361,7 +361,7 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
     tratamiento: '"screenshot tipo medio viral de Instagram (El Kilombo / Infobae viral / FilterNews), foto real candid + overlay editorial bold, NO presentador en estudio, NO chyron de TV"',
   },
   twitter: {
-    paleta: '"dark mode #15202B fondo, texto #FFFFFF, handle/timestamp gris #71767B, azul verificado #1D9BF0"',
+    paleta: '"dark mode #15202B fondo, texto #F2EFE9, handle/timestamp gris #71767B, azul verificado #1D9BF0"',
     escena: '"screenshot organico de un post real en la app de X/Twitter, card unica del tweet visible"',
     tipografia: '"system font (Segoe UI / SF Pro) tamanos REALES de la app — display name ~16px bold, post body ~15-16px regular, handle ~14px gris. JAMAS texto display gigante"',
     tratamiento: '"replica pixel-perfect de un screenshot autentico de X/Twitter, texto a tamano de lectura normal (no de poster), sin efectos, sin gradientes, sin tipografia decorativa — debe parecer captura real"',
@@ -397,7 +397,7 @@ Ejemplos concretos para el estilo "${estiloInfo!.titulo}" (usa este vocabulario,
     : `
 
 Ejemplos genericos:
-- paleta: "#0F1419 fondo, #F5A623 acento, #FFFFFF texto"
+- paleta: "#0F1419 fondo, #E8962E acento, #F2EFE9 texto"
 - escena: "primer plano de mujer 35-45 con fondo neutro warm desenfocado"
 - tipografia: "sans-serif bold blanco con fino outline negro, alineacion izquierda"
 - tratamiento: "filtro warm cinematografico, blur de fondo, alto contraste, vineteado sutil"`;
@@ -554,7 +554,7 @@ export function buildImagePrompt(
             : [
                 '- El texto principal es lo primero que el ojo ve — tamano dominante, bold, maximo contraste',
                 ...(h2Trim ? ['- El texto secundario complementa al principal — menor tamano, puede ser lighter'] : []),
-                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #F5A623 dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
+                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #E8962E dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
                 '- La jerarquia visual debe ser INMEDIATAMENTE clara en 1 segundo',
               ];
 

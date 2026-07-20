@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { listarEvidencias, subirEvidencia } from '../lib/evidencia';
 import {
   CheckCircle2,
   Circle,
@@ -63,11 +64,32 @@ import { NIVEL_NOMBRES, NIVEL_METADATA } from '../lib/supabase';
 import TaskVideo from '../components/tasks/TaskVideo';
 import TaskHerramientaIA from '../components/tasks/TaskHerramientaIA';
 import TaskCoach from '../components/tasks/TaskCoach';
+import SesionViva from '../components/sesion/SesionViva';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
 import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
+import { planDe, planPermitePilar, NOMBRE_PLAN, waLink } from '../lib/planes';
+import Graduacion from '../components/Graduacion';
+import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
+import CintaCinturon from '../components/CintaCinturon';
+
+// Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
+function encuadrarPorAvatar(codigo: string, texto: string): string {
+  let avatar = 'A';
+  try { avatar = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ }
+  if (avatar !== 'B') return texto;
+  // Avatar B (Establecido): las sesiones de método hablan de ORDENAR lo que ya tiene, no crear
+  const ajustes: Record<string, string> = {
+    'P2.1': 'Ya tienes un método — lo usas hace años, aunque nunca lo sacaste de tu cabeza. En esta fase le ponemos nombre, orden y estructura a lo que YA haces. Es tu activo más valioso, enterrado.',
+    'P2.2': 'Documenta el proceso que ya sigues con tus pacientes — ese orden que tienes intuitivo. Solo hay que ordenarlo y ponerlo por escrito.',
+    'P2.4': 'Vamos a ponerle nombre al método que ya tienes. No inventamos nada: ordenamos y bautizamos tu forma de trabajar de años.',
+  };
+  return ajustes[codigo] ?? texto;
+}
+import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
+import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
@@ -92,7 +114,7 @@ const CAMPOS_JSONB_ARRAY = new Set<string>([
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
-type EstadoPilar = 'completado' | 'en_progreso' | 'bloqueado';
+type EstadoPilar = 'completado' | 'en_progreso' | 'bloqueado' | 'plan_bloqueado';
 
 interface PilarConEstado extends RoadmapPilar {
   estado: EstadoPilar;
@@ -114,13 +136,13 @@ interface Props {
 function getTypeBadge(tipo: string) {
   switch (tipo) {
     case 'VIDEO':
-      return { icon: Play, label: 'VIDEO', color: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10 border-[#F5A623]/20' };
+      return { icon: Play, label: 'VIDEO', color: 'text-gold', bg: 'bg-gold/10 border-gold/20' };
     case 'HERRAMIENTA':
-      return { icon: Wrench, label: 'HERRAMIENTA', color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10 border-[#22C55E]/20' };
+      return { icon: Wrench, label: 'HERRAMIENTA', color: 'text-success', bg: 'bg-success/10 border-success/20' };
     case 'COACH':
-      return { icon: MessageSquare, label: 'COACH', color: 'text-[#FFFFFF]/70', bg: 'bg-[#FFFFFF]/5 border-[#FFFFFF]/15' };
+      return { icon: MessageSquare, label: 'MENTOR', color: 'text-cream/70', bg: 'bg-cream/5 border-cream/15' };
     default:
-      return { icon: FileText, label: tipo, color: 'text-[#FFFFFF]/50', bg: 'bg-[#FFFFFF]/5 border-[#FFFFFF]/10' };
+      return { icon: FileText, label: tipo, color: 'text-cream/65', bg: 'bg-cream/5 border-cream/10' };
   }
 }
 
@@ -128,7 +150,7 @@ function getTypeBadge(tipo: string) {
  * Cuenta cuántas piezas válidas tiene el usuario en `adn_validacion_organica`.
  * v8 · P9A.4 guarda JSONB que viene de DB · puede ser undefined, null, string
  * malformado, número, array vacío, o el objeto esperado `{ piezas: [...] }`.
- * Esta función es defensiva contra todos esos casos y devuelve siempre un int ≥0.
+ * Esta función es defensiva contra todos eeres caeres y devuelve siempre un int ≥0.
  */
 function contarPiezasValidacionOrganica(perfil?: { adn_validacion_organica?: unknown }): number {
   const val = perfil?.adn_validacion_organica;
@@ -171,7 +193,7 @@ function motivoBloqueo(
   if (meta.codigo === 'P9A.5') {
     const count = contarPiezasValidacionOrganica(perfil);
     if (count < 3) {
-      return `Regla Video 9: no se corre publicidad a contenido no validado. Completá P9A.4 con ≥3 piezas (tenés ${count}).`;
+      return `Regla Video 9: no se corre publicidad a contenido no validado. Completa P9A.4 con ≥3 piezas (tienes ${count}).`;
     }
   }
   return null;
@@ -179,9 +201,85 @@ function motivoBloqueo(
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
+
+/** 📎 Documenta tu trabajo — la evidencia universal (Punto 7 · el archivo del viaje) */
+function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodigo: string }) {
+  const [items, setItems] = useState<{ id: string; url?: string; nombre?: string }[]>([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!userId) return;
+    listarEvidencias(userId, metaCodigo).then((evs) => setItems((evs ?? []).map((e: { id?: string; path?: string; nombre?: string }) => ({ id: String(e.id ?? e.path ?? Math.random()), nombre: e.nombre })))).catch(() => {});
+  }, [userId, metaCodigo]);
+  if (!userId) return null;
+  return (
+    <div className="mt-4 pt-4 border-t border-[rgba(232,150,46,0.08)]">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/55">📎 Documenta tu trabajo</p>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={subiendo}
+          className="text-[11px] px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.2)] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+        >
+          {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
+        </button>
+      </div>
+      {items.length > 0 && <p className="text-[11px] text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
+      <input ref={inputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt" className="hidden" onChange={async (e) => {
+        const f = e.target.files?.[0];
+        if (!f || !userId) return;
+        setSubiendo(true);
+        try {
+          await subirEvidencia(userId, metaCodigo, f);
+          setItems((prev) => [...prev, { id: String(Date.now()), nombre: f.name }]);
+        } catch { /* el toast global lo maneja */ }
+        setSubiendo(false);
+        if (inputRef.current) inputRef.current.value = '';
+      }} />
+    </div>
+  );
+}
+
 export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfileFieldUpdate }: Props) {
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
+  // T2/T3 · registrar venta + graduación (rediseño 4 fases)
+  const [ventaModal, setVentaModal] = useState(false);
+  const [ventaMonto, setVentaMonto] = useState('');
+  const [ventaGuardando, setVentaGuardando] = useState(false);
+  const [graduacionVisible, setGraduacionVisible] = useState(false);
+
+  const registrarVenta = async () => {
+    if (!supabase || ventaGuardando) return;
+    const monto = parseFloat(ventaMonto);
+    if (!monto || monto <= 0) return;
+    setVentaGuardando(true);
+    try {
+      const { data, error } = await supabase
+        .from('ventas_registradas')
+        .insert({
+          usuario_id: userId,
+          fecha: new Date().toISOString().slice(0, 10),
+          monto,
+          canal: 'llamada',
+        })
+        .select()
+        .single();
+      if (!error && data) {
+        const nuevas = [...ventas, data as VentaRegistrada];
+        setVentas(nuevas);
+        setVentaModal(false);
+        setVentaMonto('');
+        // La GRADUACIÓN: al llegar a 10, una sola vez.
+        if (nuevas.length >= 10 && !localStorage.getItem('tcd_graduacion_vista')) {
+          localStorage.setItem('tcd_graduacion_vista', '1');
+          setGraduacionVisible(true);
+        }
+      }
+    } finally {
+      setVentaGuardando(false);
+    }
+  };
   const [qaVerde, setQaVerde] = useState(false);
   const [pilarAbierto, setPilarAbierto] = usePersistedState<number | null>(
     'tcd_roadmap_pilar',
@@ -197,6 +295,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     desbloqueado?: string;
     numero: number;
     nivelAlcanzado?: { numero: 1 | 2 | 3 | 4 | 5; nombre: string; descripcion: string };
+    cinturon?: { nombre: string; emoji: string; metafora: string };
+    mentorPregunta?: string;
   } | null>(null);
   // v8 · Espejo de Identidad — modal de cierre de F1 al completar P3.
   // Se muestra UNA SOLA VEZ por usuario (persistencia en localStorage para
@@ -253,6 +353,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           .filter((r) => r.completada)
           .map((r) => `${r.pilar_numero}-${r.meta_codigo}`);
         setCompletadas(new Set(keys));
+        // Capa 4 · D8: la DB es la fuente de verdad — sincroniza el caché local
+        try { localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(keys)); } catch { /* noop */ }
 
         // QA verde check — legacy, ya no se usa en V3
         // pero mantenemos para no romper el estado
@@ -408,6 +510,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     if (validacionDia45.debeBloquearFase4 && pilar.fase === 4 && estado !== 'completado') {
       estado = 'bloqueado';
     }
+    // ═══ El candado comercial (manda sobre todo): el pilar pertenece a un plan superior ═══
+    if (!planPermitePilar(planDe(perfil), pilar.numero)) estado = 'plan_bloqueado';
     const metasCompletadas = pilar.metas.filter((m) =>
       completadas.has(`${pilar.numero}-${m.codigo}`),
     ).length;
@@ -419,6 +523,15 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   // ─── Auto-expand first incomplete pilar on load ─────────────────────────
   useEffect(() => {
+    // G2: deep-link desde el Dashboard (COMENZAR → el pilar de la sesión)
+    try {
+      const flag = localStorage.getItem('tcd_abrir_pilar');
+      if (flag) {
+        localStorage.removeItem('tcd_abrir_pilar');
+        const n = parseInt(flag, 10);
+        if (!Number.isNaN(n) && n > 0) { setPilarAbierto(n); return; }
+      }
+    } catch { /* noop */ }
     if (loading || pilarAbierto !== null) return;
     const firstIncomplete = pilaresConEstado.find(p => p.estado === 'en_progreso');
     if (firstIncomplete) {
@@ -454,15 +567,31 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             }
           : undefined;
 
+        // Capa 3 · rediseño 4 fases: otorgar el cinturón (DB) y llevarlo al modal.
+        void otorgarCinturonPorPilar(pilar.id);
+        // G1 · Los despertares: la campanita celebra
+        if (userId) {
+          void notificarPilarCompletado(userId, pilar.titulo, pilar.numero);
+          const cintG1 = calcularCinturon(pilar.numero);
+          void notificarCinturon(userId, cintG1.emoji, cintG1.nombre, cintG1.metafora);
+        }
+        const cinturonGanado = calcularCinturon(pilar.id);
+
         setPilarUnlocked({
           completado: pilar.titulo,
-          desbloqueado: nextPilar && nextPilar.estado !== 'bloqueado' ? nextPilar.titulo : undefined,
+          desbloqueado: nextPilar && nextPilar.estado !== 'bloqueado' && nextPilar.estado !== 'plan_bloqueado' ? nextPilar.titulo : undefined,
           numero: pilar.numero,
           nivelAlcanzado,
+          cinturon: {
+            nombre: cinturonGanado.nombre,
+            emoji: cinturonGanado.emoji,
+            metafora: cinturonGanado.metafora,
+          },
+          mentorPregunta: pilar.mentor_pregunta,
         });
         // v8 · Cierre F1 · al completar P3 mostramos el Espejo de Identidad
         // una sola vez por usuario (no re-disparar en reloads ni en re-renders).
-        if (pilar.id === 'P3' && !espejoYaMostradoRef.current) {
+        if (pilar.id === 'P1' && !espejoYaMostradoRef.current) {
           espejoYaMostradoRef.current = true;
           try {
             localStorage.setItem('tcd_espejo_identidad_mostrado', '1');
@@ -486,11 +615,32 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     .reduce((max, p) => Math.max(max, p.numero), -1);
   const nivel = calcularNivel(pilarMasAltoCompletado);
   const nombreNivel = NIVEL_NOMBRES[nivel];
+  const cinturonActual = calcularCinturon(pilarMasAltoCompletado);
+
+  // Banner de ritmo: día real del programa vs el día asignado de la próxima tarea pendiente
+  const diaPrograma = perfil?.fecha_inicio
+    ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(perfil.fecha_inicio).getTime()) / 86400000) + 1))
+    : 1;
+  let diaEsperado: number | null = null;
+  outer: for (const pil of pilaresConEstado) {
+    for (const m of pil.metas ?? []) {
+      if (!completadas.has(`${pil.numero}-${m.codigo}`)) {
+        diaEsperado = m.dia_asignado ?? null;
+        break outer;
+      }
+    }
+  }
+  const diasAtraso = (() => {
+    if (diaEsperado === null) return 0;
+    let habiles = 0;
+    for (let d = diaEsperado + 1; d <= diaPrograma; d++) if (!esDiaDescanso(d)) habiles++;
+    return habiles;
+  })();
 
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
     async (pilarNum: number, meta: RoadmapMeta, pilarEstado: EstadoPilar) => {
-      if (pilarEstado === 'bloqueado') return;
+      if (pilarEstado === 'bloqueado' || pilarEstado === 'plan_bloqueado') return;
 
       const key = `${pilarNum}-${meta.codigo}`;
       const ahoraCompletada = !completadas.has(key);
@@ -504,8 +654,9 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
-        setCelebracion(`Meta completada: ${meta.titulo}`);
-        setTimeout(() => setCelebracion(null), 3500);
+        try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
+        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
+        setTimeout(() => setCelebracion(null), 5000);
       }
 
       // Sincronizar con Supabase
@@ -544,7 +695,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   // PUV ("Ayudo a [avatar] a [resultado] sin [obstaculo]"). El campo
   // adn_field declarado es solo adn_nicho · pero el documento maestro v7
   // dice que la PUV vive en adn_usp. Antes de este fix · la PUV quedaba
-  // sepultada dentro de adn_nicho y el Coach pensaba que estaba vacia ·
+  // sepultada dentro de adn_nicho y el Mentor pensaba que estaba vacia ·
   // mandando al sanador a rehacer una tarea ya hecha (caso Sol).
   function parseNichoYPuv(texto: string): { adn_nicho: string; adn_usp?: string } {
     // 1) PUV recomendada por la IA (formato "GANADORA RECOMENDADA: ...")
@@ -574,7 +725,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       localStorage.setItem(`tcd_herramienta_${meta.herramienta_id}`, outputTexto);
     }
     setCelebracion(`Documento guardado: ${meta.titulo}`);
-    setTimeout(() => setCelebracion(null), 3500);
+    setTimeout(() => setCelebracion(null), 5000);
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
       supabase.from('hoja_de_ruta').upsert(
@@ -629,11 +780,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   // ─── Complete a task (VIDEO, COACH) ───────────────────────────────────
   const handleCompleteTask = useCallback((pilarNum: number, meta: RoadmapMeta) => {
+    registrarSesionCompletada(); // racha de sesiones (F2)
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
-      setCelebracion(`Meta completada: ${meta.titulo}`);
-      setTimeout(() => setCelebracion(null), 3500);
+      try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
+        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
+      setTimeout(() => setCelebracion(null), 5000);
     }
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
@@ -653,8 +806,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#FFFFFF]/40 text-sm">
-        Cargando tu Hoja de Ruta...
+      <div className="flex items-center justify-center h-64 text-cream/55 text-sm">
+        Cargando El Camino...
       </div>
     );
   }
@@ -664,7 +817,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       {/* ── Notificación de celebración ── */}
       {celebracion && (
-        <div className="fixed top-6 right-6 z-50 bg-[#F5A623]/90 backdrop-blur text-[#0A0A0A] text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
+        <div className="fade-rise fixed top-6 right-6 z-50 bg-gold/90 backdrop-blur text-ink text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
           {celebracion}
         </div>
       )}
@@ -673,29 +826,94 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       <div className="card-panel p-6 rounded-2xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl text-[#FFFFFF] flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-              <MapIcon className="w-7 h-7 text-[#F5A623]" /> Hoja de Ruta
+            <h1 className="text-2xl sm:text-3xl text-cream flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              <MapIcon className="w-7 h-7 text-gold" /> El Camino
             </h1>
-            <p className="text-base text-[#FFFFFF]/60 mt-1">
-              Método CLÍNICA · 90 días · 14 pilares · Objetivo: $10,000 USD/mes
+        {(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return <div className="mt-3 max-w-sm"><CintaCinturon cinturon={c} variante="linea" /></div>; } catch { return null; } })()}
+            <p className="text-base text-cream/75 mt-1">
+              Método CLINICA · 7 etapas · 90 días · Objetivo: $10.000 USD
             </p>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">Nivel actual</p>
-            <p className="text-sm font-medium text-[#F5A623] mt-0.5">{nombreNivel}</p>
-            <p className="text-xs text-[#FFFFFF]/40">Nivel {nivel} de 5</p>
+            <p className="text-xs text-cream/55 uppercase tracking-wider">Nivel actual</p>
+            <p className="text-sm font-medium text-gold mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-gold/70">{cinturonActual.metafora}</span></p>
+            <p className="text-xs mt-1.5">
+              {diasAtraso <= 0 ? (
+                <span className="text-success">Día {diaPrograma} de 90 · vas al día ✓</span>
+              ) : diasAtraso <= 3 ? (
+                <span className="text-gold">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
+              ) : (
+                <span className="text-danger">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Mentor hoy: juntos lo reacomodan.</span>
+              )}
+            </p>
+            <p className="text-xs text-cream/55">Nivel {nivel} de 5</p>
           </div>
         </div>
 
+        {/* ─── LA FASE AUTONOMÍA (D50+): la semana tipo, nunca vacía ─── */}
+        {(() => {
+          try {
+            const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+            if (!p?.fecha_inicio) return null;
+            const dia = Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1;
+            if (dia < 50) return null;
+            return (
+              <div className="card-ios p-5 mb-6" style={{ borderColor: 'rgba(90,145,112,0.35)', background: 'linear-gradient(135deg, rgba(61,107,79,0.12), transparent)' }}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#5A9170] mb-2">Fase Autonomía · tu semana tipo</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-cream/70">
+                  <div className="rounded-lg bg-black/20 px-3 py-2">📞 Llamadas con interesados</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">🩺 Entrega con tu protocolo</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">📊 Métricas y ajuste de campaña</div>
+                  <div className="rounded-lg bg-black/20 px-3 py-2">🗓 Tu revisión semanal (20 min)</div>
+                </div>
+                <p className="text-[11px] text-cream/55 mt-2 italic">La máquina ya está construida — ahora se opera. Cada paciente nuevo se enciende en tu tablero.</p>
+              </div>
+            );
+          } catch { return null; }
+        })()}
+
+        {/* ─── TU SESIÓN DE HOY · la tarjeta que grita ─── */}
+        {(() => {
+          try {
+            const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+            const done = new Set<string>(saved ? JSON.parse(saved) : []);
+            let hoy: { pilar: number; codigo: string; titulo: string; tiempo?: string } | null = null;
+            outer: for (const pil of SEED_ROADMAP_V2) {
+              for (const m of pil.metas) {
+                if (!done.has(`${pil.numero}-${m.codigo}`)) { hoy = { pilar: pil.numero, codigo: m.codigo, titulo: m.titulo, tiempo: (m as { tiempo_estimado?: string }).tiempo_estimado }; break outer; }
+              }
+            }
+            if (!hoy) return null;
+            const esFinde = [0, 6].includes(new Date().getDay());
+            return (
+              <div className="card-ios p-5 sm:p-6 mb-6" style={{ borderColor: 'rgba(232,150,46,0.35)', background: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02))' }}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl sm:text-2xl font-light text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{hoy.titulo}</p>
+                    <p className="text-xs text-cream/45 mt-1">{hoy.codigo} · <span className="text-goldhi">{hoy.tiempo ?? '~20 min'}</span> · máximo poder en tiempo reducido</p>
+                  </div>
+                  <button
+                    onClick={() => { setPilarAbierto(hoy!.pilar); setActiveMeta(hoy!.codigo); setTimeout(() => document.getElementById(`meta-${hoy!.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); }}
+                    className="btn-ios-primary px-7 py-3.5 text-sm shrink-0 w-full sm:w-auto"
+                  >
+                    COMENZAR →
+                  </button>
+                </div>
+              </div>
+            );
+          } catch { return null; }
+        })()}
+
         {/* Barra de progreso global */}
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-[#FFFFFF]/60">
+          <div className="flex justify-between text-xs text-cream/75">
             <span>Progreso global</span>
             <span>{progresoPct}% — {totalCompletadas} de {TOTAL_METAS} metas</span>
           </div>
-          <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden">
+          <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#F5A623] to-[#FFB94D] rounded-full transition-all duration-1000"
+              className="h-full bg-gradient-to-r from-gold to-goldhi rounded-full transition-all duration-1000"
               style={{ width: `${progresoPct}%` }}
             />
           </div>
@@ -703,19 +921,27 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
         {/* Indicadores rápidos */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">{perfil?.dia_programa ?? 1}</p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Día de prog.</p>
+          <div className="bg-surface/50 rounded-xl p-3 text-center">
+            <p className="text-lg font-light text-cream">{perfil?.dia_programa ?? 1}</p>
+            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Día de prog.</p>
           </div>
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">{ventas.length}</p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Ventas registradas</p>
+          <div className="bg-surface/50 rounded-xl p-3 text-center relative">
+            <p className="text-lg font-light text-cream">
+              {ventas.length}<span className="text-cream/35 text-sm">/10</span>
+            </p>
+            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Pacientes</p>
+            <button
+              onClick={() => setVentaModal(true)}
+              className="mt-1.5 text-[11px] font-semibold text-gold hover:text-goldhi transition-colors"
+            >
+              🎉 Registrar venta
+            </button>
           </div>
-          <div className="bg-[#1C1C1C]/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-[#FFFFFF]">
+          <div className="bg-surface/50 rounded-xl p-3 text-center">
+            <p className="text-lg font-light text-cream">
               {pilaresConEstado.filter((p) => p.estado === 'completado').length}
             </p>
-            <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-wider">Pilares completados</p>
+            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Pilares completados</p>
           </div>
         </div>
       </div>
@@ -751,21 +977,21 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               {/* Encabezado de fase */}
               <div className="flex items-center gap-3 px-1 mb-1">
                 <div className="flex-1">
-                  <h2 className="text-lg font-bold uppercase tracking-wide text-[#FFFFFF]/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
+                  <h2 className="text-lg font-bold uppercase tracking-wide text-cream/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
                     {fase.titulo}
                     {fase.metodo_letra && (
-                      <span className="ml-2 text-[#F5A623] text-base">· Método {fase.metodo_letra}</span>
+                      <span className="ml-2 text-gold text-base">· Método {fase.metodo_letra}</span>
                     )}
                   </h2>
-                  <p className="text-sm text-[#FFFFFF]/40 mt-0.5">{fase.subtitulo} · {fase.dias}</p>
+                  <p className="text-sm text-cream/55 mt-0.5">{fase.subtitulo} · {fase.dias}</p>
                 </div>
               </div>
 
               {/* Banner de hito Día 45 (antes de Fase 4) */}
               {fase.fase === 4 && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/25">
-                  <Trophy className="w-4 h-4 text-[#F5A623] shrink-0" />
-                  <p className="text-xs text-[#F5A623] font-medium">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gold/10 border border-gold/25">
+                  <Trophy className="w-4 h-4 text-gold shrink-0" />
+                  <p className="text-xs text-gold font-medium">
                     Punto de no retorno — Día 45 max. Sin el ADN base completo, los $10,000 USD/mes no son un objetivo realista.
                   </p>
                 </div>
@@ -779,6 +1005,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                     <button
                       key={pilar.numero}
                       onClick={() => {
+                        if (pilar.estado === 'plan_bloqueado') { window.open(waLink(`Hola · Quiero subir mi plan para desbloquear «${pilar.titulo}»`), '_blank'); return; }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
                         setPilarAbierto(siguiente);
                         if (siguiente !== null) {
@@ -788,22 +1015,24 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       disabled={pilar.estado === 'bloqueado'}
                       className={`relative text-left p-5 rounded-2xl border transition-all duration-300 ${
                         pilar.estado === 'bloqueado'
-                          ? 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.08)] cursor-not-allowed opacity-40'
+                          ? 'bg-surface/50 border-[rgba(232,150,46,0.08)] cursor-not-allowed opacity-40'
+                          : pilar.estado === 'plan_bloqueado'
+                          ? 'bg-surface/60 border-[rgba(232,150,46,0.18)] opacity-70 hover:opacity-90 hover:border-gold/40'
                           : isSelected
-                          ? 'bg-[#F5A623]/15 border-[#F5A623]/50 shadow-lg shadow-[#F5A623]/15 scale-[1.02]'
+                          ? 'bg-gold/15 border-gold/50 shadow-lg shadow-gold/15 scale-[1.02]'
                           : pilar.estado === 'completado'
-                          ? 'bg-[#22C55E]/8 border-[#22C55E]/25 hover:bg-[#22C55E]/12'
-                          : 'bg-[#F5A623]/5 border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 hover:border-[#F5A623]/35'
+                          ? 'bg-success/8 border-success/25 hover:bg-success/12'
+                          : 'bg-gold/5 border-[rgba(232,150,46,0.12)] hover:bg-gold/10 hover:border-gold/35'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-6 h-6 text-[#F5A623]" /> : null; })()}
+                        {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-6 h-6 text-gold" /> : null; })()}
                         <div className="flex items-center gap-1">
                           {pilar.es_hito && (
-                            <Trophy className="w-3 h-3 text-[#F5A623]" />
+                            <Trophy className="w-3 h-3 text-gold" />
                           )}
-                          {pilar.estado === 'bloqueado' ? (
-                            <Lock className="w-3.5 h-3.5 text-[#FFFFFF]/30" />
+                          {(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? (
+                            <Lock className="w-3.5 h-3.5 text-cream/45" />
                           ) : pilar.estado === 'completado' ? (
                             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
                           ) : (
@@ -811,18 +1040,18 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-[#FFFFFF]/40 font-medium uppercase tracking-wider">
+                      <p className="text-xs text-cream/55 font-medium uppercase tracking-wider">
                         Pilar {pilar.id.substring(1)}
                       </p>
-                      <p className={`text-sm font-semibold mt-0.5 ${pilar.estado === 'bloqueado' ? 'text-[#FFFFFF]/30' : 'text-[#FFFFFF]'}`}>
+                      <p className={`text-sm font-semibold mt-0.5 ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/45' : 'text-cream'}`}>
                         {pilar.titulo}
                       </p>
 
                       {/* Mini barra de progreso */}
-                      {pilar.estado !== 'bloqueado' && (
-                        <div className="mt-3 h-1.5 bg-[#F5A623]/10 rounded-full overflow-hidden">
+                      {pilar.estado !== 'bloqueado' && pilar.estado !== 'plan_bloqueado' && (
+                        <div className="mt-3 h-1.5 bg-gold/10 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#F5A623]'}`}
+                            className={`h-full rounded-full transition-all duration-500 ${pilar.estado === 'completado' ? 'bg-success' : 'bg-gold'}`}
                             style={{ width: `${pilar.totalMetas === 0 ? 0 : Math.round((pilar.metasCompletadas / pilar.totalMetas) * 100)}%` }}
                           />
                         </div>
@@ -830,10 +1059,17 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
-                        <p className="text-[9px] text-[#FFFFFF]/30 mt-1.5 leading-tight">
+                        <p className="text-[11px] text-cream/45 mt-1.5 leading-tight">
                           {pilar.desbloqueo === 'venta_real' && 'Requiere 1 venta real'}
                           {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
                         </p>
+                      )}
+                      {pilar.estado === 'plan_bloqueado' && (
+                        <span className="block text-[11px] text-gold/80 mt-1.5 leading-tight">
+                          {planDe(perfil) === 'blanco'
+                            ? 'Te espera del otro lado de tu Semana Blanca →'
+                            : 'Pertenece a un plan superior · Subir (pagas solo la diferencia) →'}
+                        </span>
                       )}
                     </button>
                   );
@@ -847,26 +1083,26 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       {/* ── Detalle del pilar seleccionado ── */}
       {pilarAbierto !== null && (() => {
         const pilar = pilaresConEstado.find((p) => p.numero === pilarAbierto);
-        if (!pilar || pilar.estado === 'bloqueado') return null;
+        if (!pilar || pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') return null;
 
         return (
           <div ref={detalleRef} className="card-panel rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300 scroll-mt-4">
             {/* Cabecera del pilar */}
-            <div className="p-6 border-b border-[rgba(245,166,35,0.1)]">
+            <div className="p-6 border-b border-[rgba(232,150,46,0.1)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-[#F5A623]" /> : null; })()}
+                  {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-gold" /> : null; })()}
                   <div>
-                    <p className="text-sm text-[#F5A623] uppercase tracking-wider font-bold">
+                    <p className="text-sm text-gold uppercase tracking-wider font-bold">
                       Pilar {pilar.id.substring(1)}
                     </p>
-                    <h2 className="text-xl text-[#FFFFFF]" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{pilar.titulo}</h2>
-                    <p className="text-sm text-[#FFFFFF]/60">{pilar.subtitulo}</p>
+                    <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{pilar.titulo}</h2>
+                    <p className="text-sm text-cream/75">{pilar.subtitulo}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setPilarAbierto(null)}
-                  className="text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors p-1"
+                  className="text-cream/55 hover:text-cream transition-colors p-1"
                 >
                   <ChevronUp className="w-5 h-5" />
                 </button>
@@ -874,13 +1110,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
               {/* Progreso del pilar */}
               <div className="mt-4 space-y-1.5">
-                <div className="flex justify-between text-xs text-[#FFFFFF]/40">
+                <div className="flex justify-between text-xs text-cream/55">
                   <span>{pilar.metasCompletadas} de {pilar.totalMetas} metas</span>
                   <span className="flex items-center gap-1">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline" /> completadas</span>
                 </div>
-                <div className="h-1.5 bg-[#F5A623]/5 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gold/5 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-700 ${pilar.estado === 'completado' ? 'bg-[#22C55E]' : 'bg-[#F5A623]'}`}
+                    className={`h-full rounded-full transition-all duration-700 ${pilar.estado === 'completado' ? 'bg-success' : 'bg-gold'}`}
                     style={{ width: `${pilar.totalMetas === 0 ? 0 : Math.round((pilar.metasCompletadas / pilar.totalMetas) * 100)}%` }}
                   />
                 </div>
@@ -888,9 +1124,9 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
               {/* Aviso de desbloqueo especial */}
               {(pilar.desbloqueo === 'venta_real' || pilar.desbloqueo === 'qa_verde') && (
-                <div className="mt-3 flex items-start gap-2 bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-xl px-3 py-2">
-                  <AlertCircle className="w-4 h-4 text-[#F5A623] shrink-0 mt-0.5" />
-                  <p className="text-xs text-[#F5A623]">
+                <div className="mt-3 flex items-start gap-2 bg-gold/10 border border-gold/20 rounded-xl px-3 py-2">
+                  <AlertCircle className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                  <p className="text-xs text-gold">
                     {pilar.desbloqueo === 'venta_real'
                       ? 'Este pilar se desbloqueó porque registraste tu primera venta real.'
                       : 'Este pilar se desbloqueó porque completaste el QA del embudo con 24/24 puntos verdes.'}
@@ -902,16 +1138,16 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
               {pilar.hito_mensaje && pilar.estado === 'completado' && (
                 <div className={`mt-3 flex items-start gap-2 rounded-xl px-3 py-2 ${
                   pilar.hito_tipo === 'urgent'
-                    ? 'bg-[#EF4444]/10 border border-[#EF4444]/25'
+                    ? 'bg-danger/10 border border-danger/25'
                     : pilar.hito_tipo === 'checkpoint'
-                    ? 'bg-[#22C55E]/10 border border-[#22C55E]/25'
-                    : 'bg-[#F5A623]/10 border border-[#F5A623]/25'
+                    ? 'bg-success/10 border border-success/25'
+                    : 'bg-gold/10 border border-gold/25'
                 }`}>
                   <Trophy className={`w-4 h-4 shrink-0 mt-0.5 ${
-                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#F5A623]'
+                    pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`} />
                   <p className={`text-xs font-medium ${
-                    pilar.hito_tipo === 'urgent' ? 'text-[#EF4444]' : pilar.hito_tipo === 'checkpoint' ? 'text-[#22C55E]' : 'text-[#F5A623]'
+                    pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`}>
                     {pilar.hito_mensaje}
                   </p>
@@ -932,7 +1168,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                 const BadgeIcon = badge.icon;
 
                 return (
-                  <div key={meta.codigo}>
+                  <div key={meta.codigo} id={`meta-${meta.codigo}`}>
                     <div
                       onClick={() => {
                         if (!unlocked) return;
@@ -943,49 +1179,49 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       }}
                       className={`group flex items-start gap-4 p-4 rounded-xl transition-all border ${
                         !unlocked
-                          ? 'opacity-40 cursor-not-allowed bg-[#1C1C1C]/20 border-[rgba(245,166,35,0.05)]'
+                          ? 'opacity-40 cursor-not-allowed bg-surface/20 border-[rgba(232,150,46,0.05)]'
                           : estaCompletada
-                          ? 'bg-[#22C55E]/5 border-[#22C55E]/15 cursor-pointer'
+                          ? 'bg-success/5 border-success/15 cursor-pointer'
                           : isActive
-                          ? 'bg-[#F5A623]/10 border-[#F5A623]/30 cursor-pointer'
-                          : 'bg-[#1C1C1C]/30 border-[rgba(245,166,35,0.1)] hover:bg-[#1C1C1C]/60 hover:border-[rgba(245,166,35,0.2)] cursor-pointer'
+                          ? 'bg-gold/10 border-gold/30 cursor-pointer'
+                          : 'bg-surface/30 border-[rgba(232,150,46,0.1)] hover:bg-surface/60 hover:border-[rgba(232,150,46,0.12)] cursor-pointer'
                       }`}
                     >
                       <div className="shrink-0 mt-0.5">
                         {!unlocked ? (
-                          <Lock className="w-5 h-5 text-[#FFFFFF]/20" />
+                          <Lock className="w-5 h-5 text-cream/20" />
                         ) : estaCompletada ? (
-                          <CheckCircle2 className="w-5 h-5 text-[#22C55E]" />
+                          <CheckCircle2 className="w-5 h-5 text-success" />
                         ) : (
-                          <Circle className="w-5 h-5 text-[#FFFFFF]/30 group-hover:text-[#FFFFFF]/60 transition-colors" />
+                          <Circle className="w-5 h-5 text-cream/45 group-hover:text-cream/75 transition-colors" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="text-[10px] font-mono text-[#FFFFFF]/40 bg-[#F5A623]/5 px-2 py-0.5 rounded">
+                          <span className="text-[11px] font-mono text-cream/55 bg-gold/5 px-2 py-0.5 rounded">
                             {meta.codigo}
                           </span>
                           {/* Type badge */}
-                          <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full border ${badge.bg} ${badge.color} flex items-center gap-1`}>
+                          <span className={`text-[11px] uppercase font-bold px-1.5 py-0.5 rounded-full border ${badge.bg} ${badge.color} flex items-center gap-1`}>
                             <BadgeIcon className="w-3 h-3" /> {badge.label}
                           </span>
                           {meta.es_estrella && (
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                           )}
                           {tieneOutput && (
-                            <FileText className="w-3 h-3 text-[#22C55E]" />
+                            <FileText className="w-3 h-3 text-success" />
                           )}
                         </div>
-                        <p className={`text-base font-medium ${estaCompletada ? 'text-[#FFFFFF]/40 line-through' : 'text-[#FFFFFF]'}`}>
+                        <p className={`text-base font-medium ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
                           {meta.titulo}
                         </p>
                         {!isActive && (
-                          <p className="text-sm text-[#FFFFFF]/40 mt-1 leading-relaxed line-clamp-2">
-                            {meta.descripcion}
+                          <p className="text-sm text-cream/55 mt-1 leading-relaxed line-clamp-2">
+                            {encuadrarPorAvatar(meta.codigo, meta.descripcion)}
                           </p>
                         )}
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-[#FFFFFF]/30 font-medium">
+                          <span className="text-xs text-cream/45 font-medium">
                             {meta.tiempo_estimado}
                           </span>
                           {meta.es_estrella && (
@@ -994,9 +1230,9 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             </span>
                           )}
                           {!unlocked && (
-                            <span className="text-xs text-[#FFFFFF]/30 font-medium flex items-center gap-1">
+                            <span className="text-xs text-cream/45 font-medium flex items-center gap-1">
                               <Lock className="w-3 h-3" />{' '}
-                              {bloqueoMsg ?? 'Completá la tarea anterior primero'}
+                              {bloqueoMsg ?? 'Completa la tarea anterior primero'}
                             </span>
                           )}
                         </div>
@@ -1005,7 +1241,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
                     {/* ── Inline task panel ── */}
                     {isActive && unlocked && (
-                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(245,166,35,0.2)] animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(232,150,46,0.12)] animate-in fade-in slide-in-from-top-2 duration-300">
                         {meta.tipo === 'VIDEO' && (
                           <TaskVideo
                             meta={meta}
@@ -1013,6 +1249,16 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             isCompleted={estaCompletada}
                           />
                         )}
+                        {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
+                          <SesionViva
+                            metaKey={key}
+                            metaCodigo={meta.codigo}
+                            metaTitulo={meta.titulo}
+                            descripcion={meta.descripcion}
+                            tiempoEstimado={meta.tiempo_estimado}
+                            isCompleted={estaCompletada}
+                            userId={userId}
+                          >
                         {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P0.2' && (
                           <TaskFotoPartida
                             meta={meta}
@@ -1054,6 +1300,10 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             onNavigateToCoach={() => onNavigate?.('coach')}
                           />
                         )}
+                          </SesionViva>
+                        )}
+                      
+                        <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
                       </div>
                     )}
                   </div>
@@ -1070,11 +1320,11 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                 <div className="px-4 pb-4">
                   <div className={`text-xs rounded-xl px-4 py-3 border ${
                     todasCompletas
-                      ? 'bg-[#22C55E]/10 border-[#22C55E]/20 text-[#22C55E]'
-                      : 'bg-[#1C1C1C]/50 border-[rgba(245,166,35,0.08)] text-[#FFFFFF]/40'
+                      ? 'bg-success/10 border-success/20 text-success'
+                      : 'bg-surface/50 border-[rgba(232,150,46,0.08)] text-cream/55'
                   }`}>
                     {todasCompletas
-                      ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E] inline shrink-0" /> Pilar {siguienteLabel} desbloqueado — todas las metas completadas</span>
+                      ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success inline shrink-0" /> Pilar {siguienteLabel} desbloqueado — todas las metas completadas</span>
                       : <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline shrink-0" /> Completa {pilar.metas.filter((m) => m.es_estrella).length - pilar.estrellas_completadas} metas más para desbloquear el Pilar {siguienteLabel}</span>}
                   </div>
                 </div>
@@ -1085,17 +1335,55 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
       })()}
 
       {/* ── Pilar Completion Popup ── */}
+      {ventaModal && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setVentaModal(false)}>
+          <div className="max-w-sm w-full rounded-2xl border border-gold/30 bg-panel p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              🎉 Registrar una venta
+            </h3>
+            <p className="text-xs text-cream/65 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
+            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
+            <input
+              type="number"
+              value={ventaMonto}
+              onChange={(e) => setVentaMonto(e.target.value)}
+              placeholder="1000"
+              autoFocus
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none"
+            />
+            <button
+              onClick={registrarVenta}
+              disabled={ventaGuardando || !ventaMonto}
+              className="w-full py-3 rounded-xl bg-gold text-black text-sm font-semibold hover:bg-goldhi transition-colors disabled:opacity-40"
+            >
+              {ventaGuardando ? 'Guardando…' : 'Registrar'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {graduacionVisible && (
+        <Graduacion
+          nombre={perfil?.nombre ?? undefined}
+          ventas={ventas.length}
+          onClose={() => setGraduacionVisible(false)}
+          onIrAlChat={() => onNavigate?.('coach')}
+        />
+      )}
+
       {pilarUnlocked && (
         <PilarUnlockedModal
           pilarCompletado={pilarUnlocked.completado}
           pilarDesbloqueado={pilarUnlocked.desbloqueado}
           pilarNumero={pilarUnlocked.numero}
           nivelAlcanzado={pilarUnlocked.nivelAlcanzado}
+          cinturon={pilarUnlocked.cinturon}
+          mentorPregunta={pilarUnlocked.mentorPregunta}
           onClose={() => setPilarUnlocked(null)}
           onContinuar={() => {
             // Open the next pilar
             const nextPilar = pilaresConEstado.find(p => p.numero === pilarUnlocked.numero + 1);
-            if (nextPilar && nextPilar.estado !== 'bloqueado') {
+            if (nextPilar && nextPilar.estado !== 'bloqueado' && nextPilar.estado !== 'plan_bloqueado') {
               setPilarAbierto(nextPilar.numero);
               setTimeout(() => detalleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
             }

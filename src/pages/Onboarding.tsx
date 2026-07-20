@@ -12,6 +12,8 @@ interface Pregunta {
   tituloBloque: string;
   question: string;
   placeholder: string;
+  /** Lote D: si tiene opciones, se muestra como selección (no texto libre). */
+  opciones?: { valor: string; label: string; avatar: 'A' | 'B' }[];
 }
 
 const QUESTIONS: Pregunta[] = [
@@ -20,7 +22,7 @@ const QUESTIONS: Pregunta[] = [
     id: 1,
     bloque: 1,
     tituloBloque: 'Tus Referentes',
-    question: '¿A qué 3-5 profesionales del sector salud o del coaching admiras? ¿Qué tienen que vos quisieras tener?',
+    question: '¿A qué 3-5 profesionales del sector salud o del coaching admiras? ¿Qué tienen que tú quisieras tener?',
     placeholder: 'Ej: Admiro a X porque tiene autoridad en redes sin sonar arrogante, a Y porque cobra bien y tiene lista de espera...',
   },
   {
@@ -59,14 +61,14 @@ const QUESTIONS: Pregunta[] = [
     id: 6,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Cuántos años llevás en tu profesión? ¿Cómo trabajás actualmente? (presencial / online / mixto)',
+    question: '¿Cuántos años llevás en tu profesión? ¿Cómo trabajas actualmente? (presencial / online / mixto)',
     placeholder: 'Ej: 8 años como nutricionista, trabajo de forma mixta: 60% presencial en consultorio y 40% online con pacientes del interior...',
   },
   {
     id: 7,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Cuántos pacientes pagantes tenés hoy? ¿Cuál es el principal problema que les resolvés?',
+    question: '¿Cuántos pacientes pagantes tienes hoy? ¿Cuál es el principal problema que les resolvés?',
     placeholder: 'Ej: Tengo 25 pacientes activos. Principalmente resuelvo el problema de la relación con la comida en mujeres que llevaron toda la vida haciendo dieta sin resultados sostenibles...',
   },
   {
@@ -75,6 +77,17 @@ const QUESTIONS: Pregunta[] = [
     tituloBloque: 'Tu Negocio Hoy',
     question: '¿Cuál considerás que es tu mayor obstáculo actual para escalar tu práctica?',
     placeholder: 'Ej: No sé vender sin sentirme incómoda, no tengo un sistema — todo depende de mí, no sé cómo conseguir pacientes online...',
+  },
+  {
+    id: 9,
+    bloque: 3,
+    tituloBloque: 'Tu Negocio Hoy',
+    question: '¿Ya tenés una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?',
+    placeholder: '',
+    opciones: [
+      { valor: 'establecido', label: 'Sí. Tengo mi manera de hacer las cosas, mi proceso — lo uso hace años.', avatar: 'B' },
+      { valor: 'quemado', label: 'No, o no lo tengo claro. Trabajo caso por caso, sin un sistema definido.', avatar: 'A' },
+    ],
   },
 ];
 
@@ -120,11 +133,11 @@ export default function Onboarding() {
 
       const text = await generateText({
         prompt: answersText,
-        systemInstruction: `Eres el Coach IA de "tu.clínica.digital", experto en el Método CLÍNICA para sanadores. Tu objetivo es generar el ADN prototipo beta del sanador a partir de las respuestas del onboarding de Fase 0.
+        systemInstruction: `Eres el Mentor IA de "tu.clínica.digital", experto en el Método CLÍNICA para sanadores. Tu objetivo es generar el ADN prototipo beta del sanador a partir de las respuestas del onboarding de Fase 0.
 
 Este prototipo es el punto de partida — NO es el ADN definitivo. Es una primera versión que los 10 pilares del programa irán refinando con trabajo real y datos reales.
 
-Analizá las respuestas y generá el ADN prototipo beta con este formato en markdown:
+Analizá las respuestas y genera el ADN prototipo beta con este formato en markdown:
 
 ## Tu ADN Prototipo Beta
 
@@ -132,7 +145,7 @@ Analizá las respuestas y generá el ADN prototipo beta con este formato en mark
 
 ---
 
-### Quién Sos (borrador inicial)
+### Quién Eres (borrador inicial)
 Párrafo breve sobre su identidad como sanador basado en sus referentes y lo que admira en ellos. Qué dice sobre sus valores el hecho de que admire a esas personas.
 
 ### A Quién Servís (hipótesis)
@@ -144,14 +157,14 @@ Basado en sus miedos, deseos y obstáculos: ¿qué sugieren sobre su motivación
 ### Objetivo Económico
 - **Meta:** $10,000 USD/mes extra
 - **Camino más probable:** 5 pacientes x $2,000 (Oferta Mid) — o la combinación que más se ajuste a su contexto
-- **Primer bloqueo a trabajar:** [identificá el mayor obstáculo mencionado]
+- **Primer bloqueo a trabajar:** [identifica el mayor obstáculo mencionado]
 
 ### Próximo Paso
-Desbloqueaste el **Pilar 1: Historia**. Ahora vas a construir tu narrativa real — no tu currículum, sino la historia que conecta tu origen con lo que hacés hoy. Eso es lo que crea conexión antes del primer contacto.
+Desbloqueaste la **Fase 1: Sanar el Dinero**. Antes de tocar marketing, vas a sanar tu relación con el dinero en 7 días — porque ningún sistema de ventas funciona sobre una creencia rota. De ahí sales con TU precio digno definido, y recién entonces construimos tu método, tu oferta y tu sistema de captación.
 
 ---
 
-Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No seas genérico — conectá con lo específico que dijeron. Máximo 400 palabras en total.`,
+Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el usuario escribe en voseo, espejalo. No seas genérico — conectá con lo específico que dijeron. Máximo 400 palabras en total.`,
       });
       setProfile(text);
       setCurrentStep(QUESTIONS.length);
@@ -165,7 +178,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   };
 
   const resetOnboarding = () => {
-    if (window.confirm('¿Querés reiniciar el diagnóstico? Se borrarán todas las respuestas.')) {
+    if (window.confirm('¿Quieres reiniciar el diagnóstico? Se borrarán todas las respuestas.')) {
       setAnswers({});
       setProfile(null);
       setCurrentStep(0);
@@ -176,28 +189,28 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   // Show profile result
   if (profile) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
+      <div className="max-w-4xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Tu ADN Prototipo Beta</h1>
-            <p className="text-[#FFFFFF]/60">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
+            <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Tu ADN Prototipo Beta</h1>
+            <p className="text-cream/75">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
           </div>
-          <button onClick={resetOnboarding} className="px-4 py-2 rounded-xl bg-[#F5A623]/10 hover:bg-[#F5A623]/20 text-sm text-[#FFFFFF]/80 transition-colors">
+          <button onClick={resetOnboarding} className="px-4 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-sm text-cream/80 transition-colors">
             Reiniciar Diagnóstico
           </button>
         </div>
 
         <div className="card-panel p-8 rounded-2xl border-l-4 border-l-purple-500">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#F5A623] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#FFFFFF]" />
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-cream" />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-[#FFFFFF]">Análisis IA de tu Perfil</h2>
-              <p className="text-xs text-[#F5A623]">Generado por Sanare Coach</p>
+              <h2 className="text-lg font-medium text-cream">Análisis IA de tu Perfil</h2>
+              <p className="text-xs text-gold">Generado por Sanare Coach</p>
             </div>
           </div>
-          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-[#FFFFFF]/80 text-sm">
+          <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:text-gray-100 prose-li:text-cream/80 text-sm">
             <Markdown>{profile}</Markdown>
           </div>
         </div>
@@ -206,48 +219,65 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
+    <div className="max-w-2xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-light tracking-tight text-[#FFFFFF] mb-2">Onboarding — Fase 0</h1>
-        <p className="text-[#FFFFFF]/60">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
+        <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Onboarding — Fase 0</h1>
+        <p className="text-cream/75">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
       </div>
 
       {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1 bg-[#F5A623]/10 rounded-full overflow-hidden">
+        <div className="flex-1 h-1 bg-gold/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#F5A623] transition-all duration-500"
+            className="h-full bg-gold transition-all duration-500"
             style={{ width: `${(Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length / QUESTIONS.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-[#FFFFFF]/40">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
+        <span className="text-xs text-cream/55">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
       </div>
 
       {/* Question card */}
       <div className="card-panel p-8 rounded-2xl">
         <div className="flex items-center gap-2 mb-2">
-          <span className="w-8 h-8 rounded-full bg-[#F5A623]/20 text-[#F5A623] text-sm font-bold flex items-center justify-center">
+          <span className="w-8 h-8 rounded-full bg-gold/20 text-gold text-sm font-bold flex items-center justify-center">
             {currentStep + 1}
           </span>
-          <span className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
+          <span className="text-xs text-cream/55 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
         </div>
-        <p className="text-[10px] text-[#FFFFFF]/30 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
+        <p className="text-[11px] text-cream/45 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
 
-        <h2 className="text-xl font-medium text-[#FFFFFF] mb-6">{QUESTIONS[currentStep].question}</h2>
+        <h2 className="text-xl font-medium text-cream mb-6">{QUESTIONS[currentStep].question}</h2>
 
-        <textarea
-          value={answers[QUESTIONS[currentStep].id] || ''}
-          onChange={(e) => handleAnswer(e.target.value)}
-          placeholder={QUESTIONS[currentStep].placeholder}
-          className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-3 text-[#FFFFFF] text-sm placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all resize-none min-h-[120px]"
-          rows={4}
-        />
+        {QUESTIONS[currentStep].opciones ? (
+          <div className="space-y-3">
+            {QUESTIONS[currentStep].opciones!.map((op) => {
+              const sel = answers[QUESTIONS[currentStep].id] === op.valor;
+              return (
+                <button
+                  key={op.valor}
+                  onClick={() => { handleAnswer(op.valor); try { localStorage.setItem('tcd_avatar', op.avatar); } catch { /* noop */ } }}
+                  className={`w-full text-left px-5 py-4 rounded-xl border text-sm transition-all ${sel ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}
+                >
+                  {op.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <textarea
+            value={answers[QUESTIONS[currentStep].id] || ''}
+            onChange={(e) => handleAnswer(e.target.value)}
+            placeholder={QUESTIONS[currentStep].placeholder}
+            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-cream text-sm placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none min-h-[120px]"
+            rows={4}
+          />
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] disabled:opacity-30 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-cream/75 hover:text-cream disabled:opacity-30 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Anterior
           </button>
@@ -256,7 +286,7 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
             <button
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canAdvance}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#F5A623] disabled:opacity-50 text-[#FFFFFF] text-sm font-medium transition-colors shadow-lg shadow-[#F5A623]/20"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-gold disabled:opacity-50 text-cream text-sm font-medium transition-colors shadow-lg shadow-gold/20"
             >
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -264,10 +294,10 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
             <button
               onClick={generateProfile}
               disabled={!allAnswered || generating}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#FFFFFF] text-sm font-medium transition-all shadow-lg shadow-[#F5A623]/20"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-cream text-sm font-medium transition-all shadow-lg shadow-gold/20"
             >
               {generating ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Analizando...</>
+                <><Loader2 className="w-4 h-4 anímate-spin" /> Analizando...</>
               ) : (
                 <><Sparkles className="w-4 h-4" /> Generar Perfil con IA</>
               )}
@@ -283,8 +313,8 @@ Sé directo, honesto y estratégico. Usá segunda persona informal (vos/tu). No 
             key={q.id}
             onClick={() => setCurrentStep(i)}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === currentStep ? 'bg-[#F5A623] scale-125' :
-              answers[q.id]?.trim() ? 'bg-[#22C55E]/60' : 'bg-[#F5A623]/10'
+              i === currentStep ? 'bg-gold scale-125' :
+              answers[q.id]?.trim() ? 'bg-success/60' : 'bg-gold/10'
             }`}
           />
         ))}

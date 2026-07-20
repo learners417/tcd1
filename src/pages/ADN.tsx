@@ -25,6 +25,7 @@ import {
   Circle,
   AlertCircle,
   Dna,
+  Pencil,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -32,7 +33,7 @@ import AdnPrint from '../components/AdnPrint';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { SEED_ROADMAP_V8 } from '../lib/roadmapSeed';
-import {
+import { type ADNCampo,
   ADN_SCHEMA_V8,
   calcularCompletitudSeccion,
   calcularCompletitudTotal,
@@ -136,8 +137,32 @@ interface TarjetaSeccionProps {
   onToggle: () => void;
 }
 
-function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccionProps) {
+function TarjetaSeccion({ seccion, perfil, expandida, onToggle, onFieldSaved }: TarjetaSeccionProps & { onFieldSaved?: (fields: Record<string, unknown>) => void }) {
   const Icon = ICONOS_SECCION[seccion.codigo] ?? Dna;
+  const permisosADN = (perfil.adn_edit_secciones as string[] | undefined) ?? [];
+  const puedeEditar = permisosADN.includes('todas') || permisosADN.includes(seccion.codigo);
+  const [editCodigo, setEditCodigo] = useState<string | null>(null);
+  const [editVal, setEditVal] = useState('');
+  const [guardandoCampo, setGuardandoCampo] = useState(false);
+
+  async function guardarCampo(campo: ADNCampo) {
+    if (!supabase || !campo.profileKey) return;
+    setGuardandoCampo(true);
+    try {
+      const { error } = await supabase.rpc('user_update_adn', {
+        seccion: seccion.codigo,
+        updates: { [campo.profileKey]: editVal },
+      });
+      if (error) throw error;
+      toast.success('Campo actualizado ✓');
+      onFieldSaved?.({ [campo.profileKey]: editVal });
+      setEditCodigo(null);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'No se pudo guardar');
+    } finally {
+      setGuardandoCampo(false);
+    }
+  }
   const { completos, total, porcentaje } = calcularCompletitudSeccion(perfil, seccion);
 
   return (
@@ -145,39 +170,39 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-5 flex items-center gap-4 hover:bg-[#E8962E]/5 transition-colors text-left"
+        className="w-full p-5 flex items-center gap-4 hover:bg-gold/5 transition-colors text-left"
       >
-        <div className="w-11 h-11 rounded-xl bg-[#E8962E]/15 border border-[#E8962E]/30 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-[#E8962E]" />
+        <div className="w-11 h-11 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <h3 className="text-lg font-medium text-[#F2EFE9] tracking-tight">{seccion.titulo}</h3>
-            <span className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
+            <h3 className="text-lg font-medium text-cream tracking-tight">{seccion.titulo}</h3>
+            <span className="text-[11px] text-gold uppercase tracking-widest font-semibold">
               {seccion.codigo} · {seccion.pilarRange}
             </span>
           </div>
-          <p className="text-sm text-[#F2EFE9]/50 mt-0.5">{seccion.subtitulo}</p>
+          <p className="text-sm text-cream/65 mt-0.5">{seccion.subtitulo}</p>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           <div className="text-right">
-            <p className="text-xs text-[#F2EFE9]/40 uppercase tracking-wider">
+            <p className="text-xs text-cream/55 uppercase tracking-wider">
               {completos} / {total}
             </p>
-            <p className="text-base font-medium text-[#E8962E]">{porcentaje}%</p>
+            <p className="text-base font-medium text-gold">{porcentaje}%</p>
           </div>
           {expandida ? (
-            <ChevronUp className="w-5 h-5 text-[#F2EFE9]/40" />
+            <ChevronUp className="w-5 h-5 text-cream/55" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-[#F2EFE9]/40" />
+            <ChevronDown className="w-5 h-5 text-cream/55" />
           )}
         </div>
       </button>
 
       {/* Barra de progreso */}
-      <div className="h-1 bg-[#E8962E]/5">
+      <div className="h-1 bg-gold/5">
         <div
-          className="h-full bg-[#E8962E] transition-all duration-500"
+          className="h-full bg-gold transition-all duration-500"
           style={{ width: `${porcentaje}%` }}
         />
       </div>
@@ -197,37 +222,65 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                 <div className="flex items-center justify-between gap-3 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
                     {completo && estadoDeCampo(true, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN()) === 'preliminar' && (
-                  <p className="text-[10px] text-[#E8962E]/60 pl-5 italic mt-0.5">Preliminar — se ajusta con «{nombreDePaso(campo.pilarOrigen)}» en El Camino.</p>
+                  <p className="text-[11px] text-gold/60 pl-5 italic mt-0.5">Preliminar — se ajusta con «{nombreDePaso(campo.pilarOrigen)}» en El Camino.</p>
                 )}
                 {completo ? (
-                      <Check className="w-3.5 h-3.5 text-[#E8962E] flex-shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" />
                     ) : campo.pending ? (
-                      <AlertCircle className="w-3.5 h-3.5 text-[#F2EFE9]/30 flex-shrink-0" />
+                      <AlertCircle className="w-3.5 h-3.5 text-cream/45 flex-shrink-0" />
                     ) : (
-                      <Circle className="w-3.5 h-3.5 text-[#F2EFE9]/20 flex-shrink-0" />
+                      <Circle className="w-3.5 h-3.5 text-cream/20 flex-shrink-0" />
                     )}
-                    <p className="text-sm text-[#F2EFE9]/90 font-medium truncate">{campo.label}</p>
+                    <p className="text-sm text-cream/90 font-medium truncate">{campo.label}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {puedeEditar && campo.profileKey && !campo.pending && (valor == null || typeof valor === 'string') && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditCodigo(campo.codigo); setEditVal(typeof valor === 'string' ? valor : ''); }}
+                        className="p-1 rounded-md text-gold/50 hover:text-gold hover:bg-gold/10 transition-all"
+                        title="Editar este campo"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    )}
                     {campo.criticoDia45 && (
-                      <span className="text-[9px] uppercase tracking-widest text-[#E8962E] font-semibold">
+                      <span className="text-[11px] uppercase tracking-widest text-gold font-semibold">
                         D45
                       </span>
                     )}
                     {(() => {
                       const est = estadoDeCampo(completo, campo.pilarOrigen, getCompletadasADN(), getHayVentasADN());
-                      if (est === 'vacio') return <span className="text-[10px] text-[#F2EFE9]/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>;
+                      if (est === 'vacio') return <span className="text-[11px] text-cream/35 italic">{nombreDePaso(campo.pilarOrigen)}</span>;
                       const b = BADGE_ESTADO[est];
                       return (
-                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${b.cls}`} title={est === 'preliminar' ? `Se ajusta con «${nombreDePaso(campo.pilarOrigen)}»` : est === 'confirmado' ? 'Confirmado en El Camino' : 'Validado por ventas reales'}>
+                        <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${b.cls}`} title={est === 'preliminar' ? `Se ajusta con «${nombreDePaso(campo.pilarOrigen)}»` : est === 'confirmado' ? 'Confirmado en El Camino' : 'Validado por ventas reales'}>
                           {b.label}
                         </span>
                       );
                     })()}
                   </div>
                 </div>
-                {completo ? (
-                  <div className="prose prose-invert prose-sm max-w-none text-[#F2EFE9]/60 text-sm mt-1 pl-5">
+                {editCodigo === campo.codigo ? (
+                  <div className="mt-2 pl-5 space-y-2">
+                    <textarea
+                      value={editVal}
+                      onChange={(e) => setEditVal(e.target.value)}
+                      rows={5}
+                      className="w-full bg-ink border border-gold/30 rounded-xl px-3 py-2 text-sm text-cream focus:outline-none focus:border-gold/60 resize-y"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={() => guardarCampo(campo)} disabled={guardandoCampo}
+                        className="px-4 py-1.5 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-xs font-bold transition-all">
+                        {guardandoCampo ? 'Guardando…' : 'Guardar'}
+                      </button>
+                      <button onClick={() => setEditCodigo(null)}
+                        className="px-4 py-1.5 rounded-lg text-xs text-cream/65 hover:text-cream transition-colors">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : completo ? (
+                  <div className="prose prose-invert prose-sm max-w-none text-cream/75 text-sm mt-1 pl-5">
                     {typeof valor === 'string' && valor.length > 400 ? (
                       <Markdown>{valor}</Markdown>
                     ) : (
@@ -235,7 +288,7 @@ function TarjetaSeccion({ seccion, perfil, expandida, onToggle }: TarjetaSeccion
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-[#F2EFE9]/30 pl-5 italic">
+                  <p className="text-xs text-cream/45 pl-5 italic">
                     {campo.pending
                       ? 'Campo nuevo · se llenará cuando completes el pilar correspondiente.'
                       : `Se completa con «${nombreDePaso(campo.pilarOrigen)}» en El Camino.`}
@@ -280,9 +333,9 @@ function estadoDeCampo(tieneValor: boolean, pilarOrigen: string, completadas: Se
   return 'preliminar';
 }
 const BADGE_ESTADO: Record<Exclude<EstadoCampo, 'vacio'>, { label: string; cls: string }> = {
-  preliminar: { label: 'Preliminar', cls: 'bg-[#E8962E]/10 text-[#E8962E]/80 border-[#E8962E]/25' },
-  confirmado: { label: 'Confirmado', cls: 'bg-[#F4B65C]/15 text-[#F4B65C] border-[#F4B65C]/40' },
-  validado:   { label: '✓ Validado', cls: 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40' },
+  preliminar: { label: 'Preliminar', cls: 'bg-gold/10 text-gold/80 border-gold/25' },
+  confirmado: { label: 'Confirmado', cls: 'bg-goldhi/15 text-goldhi border-goldhi/40' },
+  validado:   { label: '✓ Validado', cls: 'bg-success/15 text-success border-success/40' },
 };
 
 
@@ -397,31 +450,31 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold">
+        <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
           Las 7 letras del Método CLINICA · tu negocio, documentado
         </p>
-        <h1 className="text-3xl md:text-4xl font-light text-[#F2EFE9] tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
           ADN del Negocio
         </h1>
-          <p className="text-sm text-[#F2EFE9]/55 mt-1">El producto de tus 90 días: <span className="text-[#F4B65C]">tu ADN validado</span> — la data que te permite generar 10 pacientes de $1.000 todos los meses. Se construye solo, desde El Camino: cada respuesta que das lo pule. Aquí no se edita — aquí se contempla lo que ya es tuyo.</p>
-        <p className="text-sm text-[#F2EFE9]/50 mt-2 max-w-xl leading-relaxed">Tu ADN no se edita acá — <strong className="text-[#F2EFE9]/75">se construye desde El Camino</strong>, ejercicio a ejercicio. Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-[#E8962E]">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
-        <p className="text-[#F2EFE9]/60 max-w-2xl">
-          <strong className="text-[#F2EFE9]/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
+          <p className="text-sm text-cream/55 mt-1">El producto de tus 90 días: <span className="text-goldhi">tu ADN validado</span> — la data que te permite generar 10 pacientes de $1.000 todos los meses. Se construye solo, desde El Camino: cada respuesta que das lo pule. Aquí no se edita — aquí se contempla lo que ya es tuyo.</p>
+        <p className="text-sm text-cream/65 mt-2 max-w-xl leading-relaxed">Tu ADN no se edita acá — <strong className="text-cream/75">se construye desde El Camino</strong>, ejercicio a ejercicio. Este es el genoma de tu negocio — se llena solo a medida que avanzás en El Camino. Tu <strong className="text-gold">PUV</strong> (la frase que responde "¿por qué a mí?") es su corazón: de ahí nace tu oferta, tu página y tus anuncios.</p>
+        <p className="text-cream/75 max-w-2xl">
+          <strong className="text-cream/85">¿Qué es tu ADN?</strong> Es la identidad completa de tu negocio: tu método, tu avatar,
           tu oferta, tu script — todo lo que construyes en los 90 días queda guardado aquí, organizado por las 7 letras de CLINICA.
           Tu Mentor y tus entrenadores lo leen para personalizar TODO lo que te dicen y generan.
-          <span className="block mt-2 text-[#E8962E]/90">No se llena a mano: se completa solo, a medida que haces las tareas de El Camino. Si ves campos vacíos, el camino los va a llenar.</span>
+          <span className="block mt-2 text-gold/90">No se llena a mano: se completa solo, a medida que haces las tareas de El Camino. Si ves campos vacíos, el camino los va a llenar.</span>
         </p>
       </div>
 
       {/* Resumen global */}
       <div className="card-panel p-6 flex items-center gap-6">
         <div className="flex-1">
-          <p className="text-xs text-[#F2EFE9]/40 uppercase tracking-widest mb-1 font-semibold">
+          <p className="text-xs text-cream/55 uppercase tracking-widest mb-1 font-semibold">
             Progreso del ADN
           </p>
-          <p className="text-3xl font-light text-[#F2EFE9] tracking-tight">
+          <p className="text-3xl font-light text-cream tracking-tight">
             {totalStats.porcentaje}%
-            <span className="text-sm text-[#F2EFE9]/40 ml-2">
+            <span className="text-sm text-cream/55 ml-2">
               ({totalStats.completos} de {totalStats.total} campos)
             </span>
           </p>
@@ -443,10 +496,10 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
                   <div style={{ width: `${(prel / total) * 100}%`, background: 'rgba(232,150,46,0.45)' }} />
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px]">
-                  <span className="text-[#22C55E]">⬤ {val} validados</span>
-                  <span className="text-[#F4B65C]">⬤ {conf} confirmados</span>
-                  <span className="text-[#E8962E]/70">⬤ {prel} preliminares</span>
-                  <span className="text-[#F2EFE9]/35">○ {vac} por construir</span>
+                  <span className="text-success">⬤ {val} validados</span>
+                  <span className="text-goldhi">⬤ {conf} confirmados</span>
+                  <span className="text-gold/70">⬤ {prel} preliminares</span>
+                  <span className="text-cream/35">○ {vac} por construir</span>
                 </div>
               </div>
             );
@@ -464,11 +517,11 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
       {/* Pais del profesional — afecta el tono del contenido publicable */}
       <div className="card-panel p-6 space-y-3">
         <div className="min-w-0">
-          <p className="text-[10px] text-[#E8962E] uppercase tracking-widest font-semibold mb-1">
+          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold mb-1">
             Localizacion
           </p>
-          <p className="text-sm font-semibold text-[#F2EFE9]">Pais del profesional</p>
-          <p className="text-xs text-[#F2EFE9]/50 mt-1 leading-relaxed max-w-xl">
+          <p className="text-sm font-semibold text-cream">Pais del profesional</p>
+          <p className="text-xs text-cream/65 mt-1 leading-relaxed max-w-xl">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
             guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
           </p>
@@ -489,6 +542,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
             key={seccion.codigo}
             seccion={seccion}
             perfil={mergedPerfil}
+            onFieldSaved={(fields) => onProfileFieldUpdate?.(fields)}
             expandida={seccionesExpandidas.has(seccion.codigo)}
             onToggle={() => toggleSeccion(seccion.codigo)}
           />
@@ -512,9 +566,9 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
       </div>
 
       {/* ── Proponer un ajuste (el ADN se trabaja junto al mentor) ── */}
-      <div className="bg-[#111110] border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 mt-4">
-        <h3 className="text-sm font-semibold text-[#F2EFE9] mb-1">¿Ves algo para ajustar?</h3>
-        <p className="text-xs text-[#F2EFE9]/40 mb-4">
+      <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 mt-4">
+        <h3 className="text-sm font-semibold text-cream mb-1">¿Ves algo para ajustar?</h3>
+        <p className="text-xs text-cream/55 mb-4">
           Tu ADN se trabaja junto a tu mentor. Contanos qué cambiarías y lo revisan juntos en tu próxima sesión.
         </p>
         <div className="space-y-3">
@@ -530,7 +584,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
             onChange={(e) => setPropTxt(e.target.value)}
             placeholder="¿Qué cambiarías y por qué?"
             rows={3}
-            className="w-full bg-[#080808] border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-[#F2EFE9] placeholder-[#F2EFE9]/20 focus:outline-none focus:border-[#E8962E]/50 resize-none"
+            className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 resize-none"
           />
           <button
             onClick={async () => {
@@ -555,14 +609,14 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
               }
             }}
             disabled={propSending}
-            className="w-full py-2.5 rounded-xl bg-[#E8962E]/15 border border-[#E8962E]/30 hover:bg-[#E8962E]/25 disabled:opacity-50 text-[#E8962E] text-sm font-bold transition-all"
+            className="w-full py-2.5 rounded-xl bg-gold/15 border border-gold/30 hover:bg-gold/25 disabled:opacity-50 text-gold text-sm font-bold transition-all"
           >
             {propSending ? 'Enviando...' : 'Enviar propuesta a mi mentor'}
           </button>
         </div>
       </div>
 
-      <p className="text-xs text-[#F2EFE9]/30 text-center pt-4">
+      <p className="text-xs text-cream/45 text-center pt-4">
         Versión alineada con el documento maestro v8 · método CLÍNICA
       </p>
     </div>

@@ -6,12 +6,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
+import BottomTabBar from './components/BottomTabBar';
+import NumeroPanel from './components/numero/NumeroPanel';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
-// import Mensajes from './pages/Mensajes'; // oculto hasta que esté usable
+import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -20,6 +22,8 @@ import ADN from './pages/ADN';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
+import { cinturonDesdeProgreso } from './lib/cinturones';
+import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from './lib/planes';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -67,8 +71,78 @@ function loadCurrentPage(): string {
 
 type AuthState = 'loading' | 'logged_out' | 'logged_in';
 
+
+
+/** La Semana Blanca terminó: modo lectura digno — su trabajo preservado, la puerta abierta. */
+function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReservado?: string | null }) {
+  let quemas = 0; let racha = 0;
+  try {
+    const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+    quemas = set.has('1-P1.3') ? 1 : 0;
+    racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
+  } catch { /* noop */ }
+  const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
+  const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
+  return (
+    <div className="min-h-screen bg-ink flex items-center justify-center p-6">
+      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
+        <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
+        </h1>
+        <p className="text-sm text-cream/75 mb-5 leading-relaxed">
+          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
+        </p>
+        {nombreRes && (
+          <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+        )}
+        <div className="text-left mb-5 space-y-2">
+          {([
+            ['🟡', 'Tu Base', '$147', 'La Fase 1 completa: tu relación con el dinero sanada + tu Mentor sin límite.'],
+            ['🟢', 'Tu Sistema', '$497', 'Hasta la Fase 3: tu oferta construida, tu método con nombre y tus primeros entrenadores.'],
+            ['⬛', 'Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
+          ] as const).map(([e, n, p, d]) => (
+            <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
+              <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
+              <p className="text-[11px] text-cream/55 mt-0.5">{d}</p>
+            </div>
+          ))}
+        </div>
+        <a href={waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+           className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
+          Retomar mi camino →
+        </a>
+        <p className="text-[11px] text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+      </div>
+    </div>
+  );
+}
+
+function PaginaBloqueada({ nombre }: { nombre: string }) {
+  return (
+    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
+      <p className="text-4xl mb-4">🔒</p>
+      <h2 className="text-lg text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
+      <p className="text-sm text-cream/55">Se desbloquea con el <span className="text-goldhi">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
+    </div>
+  );
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<string>(loadCurrentPage);
+  const [currentPage, setCurrentPageRaw] = useState<string>(loadCurrentPage);
+  const pageHistoryRef = useRef<string[]>([]);
+  const setCurrentPage = useCallback((page: string) => {
+    setCurrentPageRaw((prev) => {
+      if (page !== prev) pageHistoryRef.current.push(prev);
+      return page;
+    });
+  }, []);
+  const goBack = useCallback(() => {
+    setCurrentPageRaw((prev) => {
+      const target = pageHistoryRef.current.pop() ?? 'dashboard';
+      return target === prev ? 'dashboard' : target;
+    });
+  }, []);
   const [showSettings, setShowSettings] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
   const [profile, setProfile] = useState<Profile>(loadProfile);
@@ -163,6 +237,7 @@ export default function App() {
 
       if (!error && data) {
         setSupabaseProfile(data as SupabaseProfile);
+        try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
         syncProfileToLocalStorage(data as SupabaseProfile);
         const p: Profile = {
           nombre: data.nombre,
@@ -259,7 +334,7 @@ export default function App() {
       toast.error(`Error: ${error}`);
       return;
     }
-    toast.success('Contraseña actualizada. Ya podés usar la app.');
+    toast.success('Contraseña actualizada. Ya puedes usar la app.');
     setShowRecoveryModal(false);
     setRecoveryPassword('');
     setRecoveryPassword2('');
@@ -267,16 +342,16 @@ export default function App() {
 
   const RecoveryModal = showRecoveryModal ? (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(245,166,35,0.3)] rounded-2xl w-full max-w-sm shadow-2xl">
-        <div className="px-5 py-4 border-b border-[rgba(245,166,35,0.1)]">
-          <h3 className="text-sm font-semibold text-[#FFFFFF]">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-[#FFFFFF]/50 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
+      <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+          <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
+          <p className="text-[11px] text-cream/65 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword}
@@ -286,21 +361,21 @@ export default function App() {
                 minLength={8}
                 disabled={recoveryLoading}
                 autoFocus
-                className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setRecoveryShowPwd(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FFFFFF]/40 hover:text-[#FFFFFF]/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/70 transition-colors"
               >
                 {recoveryShowPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
@@ -308,14 +383,14 @@ export default function App() {
                 placeholder="Repetí la contraseña"
                 required
                 disabled={recoveryLoading}
-                className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
             </div>
           </div>
           <button
             type="submit"
             disabled={recoveryLoading || !recoveryPassword || !recoveryPassword2}
-            className="w-full py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
           >
             {recoveryLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : 'Guardar contraseña'}
           </button>
@@ -376,11 +451,16 @@ export default function App() {
   }
 
   // ─── Main app ────────────────────────────────────────────────────────────────
+  // ═══ La Semana Blanca vencida: modo lectura digno (nada se borra) ═══
+  if (supabaseProfile && accesoVencido(supabaseProfile)) {
+    return <SemanaCompleta nombre={supabaseProfile.nombre ?? undefined} planReservado={supabaseProfile.plan_reservado} />;
+  }
+
   return (
-    <div className="flex h-screen bg-[#0A0A0A] text-[#FFFFFF] overflow-hidden font-sans selection:bg-[#F5A623]/30">
+    <div className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
       {/* Background Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#F5A623]/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#F5A623]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
 
       {/* Mobile overlay backdrop */}
       {mobileMenuOpen && (
@@ -402,13 +482,16 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <Topbar setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          <div className="p-6">
-            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />}
+          <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} />}
+            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
+            {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
@@ -416,6 +499,7 @@ export default function App() {
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'numero' && <NumeroPanel userId={supabaseProfile?.id} />}
             {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
             {currentPage === 'agentes' && (
@@ -426,14 +510,26 @@ export default function App() {
                 setCurrentPage={setCurrentPage}
               />
             )}
-            {currentPage === 'campanas' && (
+            {currentPage === 'campanas' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="Campañas & Creativos" />;
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'campanas' && (
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
                 geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
               />
             )}
-            {currentPage === 'creador' && (
+            {currentPage === 'creador' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="El Creador de Contenido" />;
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'creador' && (
               <CreadorContenido
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
@@ -447,12 +543,12 @@ export default function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#1C1C1C] border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b border-[rgba(245,166,35,0.2)]">
-              <h2 className="text-xl font-medium text-[#FFFFFF]">Ajustes de la Cuenta</h2>
+          <div className="w-full max-w-2xl bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
+              <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
-                className="text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors"
+                className="text-cream/75 hover:text-cream transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -460,7 +556,7 @@ export default function App() {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Settings Sidebar */}
-              <div className="w-1/3 border-r border-[rgba(245,166,35,0.2)] p-4 space-y-2 bg-[#1C1C1C]/50 flex flex-col">
+              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-surface/50 flex flex-col">
                 <div className="flex-1 space-y-2">
                   {([
                     { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
@@ -473,8 +569,8 @@ export default function App() {
                       onClick={() => setSettingsTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
                         settingsTab === tab.id
-                          ? 'bg-[#F5A623]/10 text-[#F5A623] font-medium'
-                          : 'text-[#FFFFFF]/60 hover:bg-[#F5A623]/5 hover:text-[#FFFFFF]'
+                          ? 'bg-gold/10 text-gold font-medium'
+                          : 'text-cream/75 hover:bg-gold/5 hover:text-cream'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" /> {tab.label}
@@ -484,7 +580,7 @@ export default function App() {
                 {/* Sign out */}
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors mt-auto"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors mt-auto"
                 >
                   <LogOut className="w-4 h-4" /> Cerrar sesión
                 </button>
@@ -499,12 +595,12 @@ export default function App() {
                       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                       <button
                         onClick={() => avatarInputRef.current?.click()}
-                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(245,166,35,0.3)] hover:border-[#F5A623]/50 transition-colors overflow-hidden"
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
                       >
                         {avatarUrl ? (
-                          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-[#F5A623]/10 flex items-center justify-center text-2xl font-bold text-[#F5A623]">
+                          <div className="w-full h-full bg-gold/10 flex items-center justify-center text-2xl font-bold text-gold">
                             {(profileDraft.nombre || 'P').charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -512,43 +608,43 @@ export default function App() {
                           <Camera className="w-6 h-6 text-white" />
                         </div>
                       </button>
-                      <p className="text-xs text-[#FFFFFF]/40">Clic para cambiar foto de perfil</p>
+                      <p className="text-xs text-cream/55">Clic para cambiar foto de perfil</p>
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Información Personal</h3>
+                      <h3 className="text-lg font-medium text-cream mb-4">Información Personal</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Nombre Completo</label>
+                          <label className="block text-xs text-cream/75 mb-1">Nombre Completo</label>
                           <input
                             type="text"
                             value={profileDraft.nombre}
                             onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Correo Electrónico</label>
+                          <label className="block text-xs text-cream/75 mb-1">Correo Electrónico</label>
                           <input
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF]/40 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
                           />
-                          <p className="text-xs text-[#FFFFFF]/30 mt-1">El email no se puede cambiar desde aquí</p>
+                          <p className="text-xs text-cream/45 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
                         <div>
-                          <label className="block text-xs text-[#FFFFFF]/60 mb-1">Especialidad</label>
+                          <label className="block text-xs text-cream/75 mb-1">Especialidad</label>
                           <input
                             type="text"
                             value={profileDraft.especialidad}
                             onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-lg px-4 py-2.5 text-[#FFFFFF] focus:outline-none focus:border-[#F5A623]/50"
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="pt-6 border-t border-[rgba(245,166,35,0.2)] flex justify-end gap-3">
-                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors">
+                    <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
+                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors">
                         Cancelar
                       </button>
                       <button onClick={saveProfile} className="btn-primary">
@@ -560,11 +656,11 @@ export default function App() {
 
                 {settingsTab === 'notificaciones' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Preferencias de Notificaciones</h3>
+                    <h3 className="text-lg font-medium text-cream mb-4">Preferencias de Notificaciones</h3>
                     {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
-                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(245,166,35,0.1)]">
-                        <span className="text-sm text-[#FFFFFF]/80">{item}</span>
-                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-[#F5A623]" />
+                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
+                        <span className="text-sm text-cream/80">{item}</span>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-gold" />
                       </label>
                     ))}
                   </div>
@@ -572,22 +668,36 @@ export default function App() {
 
                 {settingsTab === 'seguridad' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Seguridad</h3>
-                    <p className="text-sm text-[#FFFFFF]/60">Para cambiar tu contraseña, pedile a tu coach que te envíe un email de restablecimiento.</p>
+                    <h3 className="text-lg font-medium text-cream mb-4">Seguridad</h3>
+                    <div>
+                      <p className="text-sm text-cream/75 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
+                      <button
+                        onClick={async () => {
+                          const email = supabaseProfile?.email;
+                          if (!email || !supabase) return;
+                          const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+                          if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
+                          else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
+                        }}
+                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-gold text-sm hover:bg-gold/10 transition-colors"
+                      >
+                        Enviarme el email de restablecimiento
+                      </button>
+                    </div>
                   </div>
                 )}
 
                 {settingsTab === 'facturacion' && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-[#FFFFFF] mb-4">Facturación</h3>
-                    <div className="bg-[#1C1C1C]/50 border border-[rgba(245,166,35,0.2)] p-4 rounded-xl">
+                    <h3 className="text-lg font-medium text-cream mb-4">Facturación</h3>
+                    <div className="bg-surface/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-[#FFFFFF]/80">Plan Actual</span>
-                        <span className="px-3 py-1 rounded-full bg-[#F5A623]/20 text-[#F5A623] text-xs font-medium">
+                        <span className="text-sm text-cream/80">Plan Actual</span>
+                        <span className="px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-medium">
                           Tu Clínica Digital — {profile.plan}
                         </span>
                       </div>
-                      <p className="text-xs text-[#FFFFFF]/40">Programa de 90 días</p>
+                      <p className="text-xs text-cream/55">Programa de 90 días</p>
                     </div>
                   </div>
                 )}

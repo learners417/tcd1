@@ -107,15 +107,24 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="fade-rise">
       {/* Invisible anchor for scroll-to-top */}
       <div ref={topRef} />
+
+      {/* El header ceremonial (Lote 5 · la piel) */}
+      {view === 'home' && (
+        <div className="mb-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
+          <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
+          <p className="text-sm text-cream/65 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
+        </div>
+      )}
 
       {/* Sub-nav */}
       <CampanasSubNav currentView={view} onNavigate={navigateTo} />
@@ -124,7 +133,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {(view === 'studio' || view === 'detail') && (
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-sm text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-cream/65 hover:text-cream transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver

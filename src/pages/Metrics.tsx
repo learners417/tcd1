@@ -5,7 +5,7 @@ import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
-import { SEED_ROADMAP_V2 as SEED_ROADMAP } from '../lib/roadmapSeed';
+import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_METAS } from '../lib/roadmapSeed';
 import {
   calcularEmbudoV3KPIs,
   formatPct,
@@ -69,10 +69,10 @@ function saveMetricsLocal(data: MetricaSemanaV2[]) {
 
 function KPICard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
-    <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-[#F5A623]/30' : 'border-[rgba(245,166,35,0.1)]'}`}>
-      <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
-      <p className={`text-2xl font-light tracking-tight ${highlight ? 'text-[#F5A623]' : 'text-[#FFFFFF]'}`}>{value}</p>
-      {sub && <p className="text-xs text-[#FFFFFF]/40 mt-1">{sub}</p>}
+    <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-gold/30' : 'border-[rgba(232,150,46,0.1)]'}`}>
+      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className={`text-2xl font-light tracking-tight ${highlight ? 'text-gold' : 'text-cream'}`}>{value}</p>
+      {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -80,10 +80,10 @@ function KPICard({ label, value, sub, highlight }: { label: string; value: strin
 /** KPI con color según umbral (ok/alerta/critico). */
 function KPICardTone({ label, value, tone, sub }: { label: string; value: string; tone: DiagnosticoNivel; sub?: string }) {
   return (
-    <div className="card-panel p-4 rounded-2xl border-[rgba(245,166,35,0.1)]">
-      <p className="text-[10px] text-[#FFFFFF]/40 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+    <div className="card-panel p-4 rounded-2xl border-[rgba(232,150,46,0.1)]">
+      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
       <p className={`text-2xl font-light tracking-tight ${nivelColor(tone)}`}>{value}</p>
-      {sub && <p className="text-xs text-[#FFFFFF]/40 mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -95,9 +95,9 @@ function NumField({
 }: { label: string; value: string; onChange: (v: string) => void; prefix?: string }) {
   return (
     <div>
-      <label className="block text-xs text-[#FFFFFF]/60 mb-1.5 font-medium">{label}</label>
+      <label className="block text-xs text-cream/75 mb-1.5 font-medium">{label}</label>
       <div className="relative">
-        {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FFFFFF]/30 text-sm">{prefix}</span>}
+        {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/45 text-sm">{prefix}</span>}
         <input
           type="number" step="any" min="0" value={value}
           onChange={(e) => onChange(e.target.value)} placeholder="0"
@@ -111,10 +111,10 @@ function NumField({
 // ─── Tab: Mi Progreso (sin cambios) ────────────────────────────────────────────
 
 function TabProgreso({ userId }: { userId?: string }) {
-  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: 90, compTareas: 0, diasDiario: 0, hitos: 0 });
+  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: TOTAL_METAS, compTareas: 0, diasDiario: 0, hitos: 0 });
 
   useEffect(() => {
-    const p = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+    let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
     const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
     const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
     const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
@@ -147,31 +147,31 @@ function TabProgreso({ userId }: { userId?: string }) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="card-panel p-6 rounded-2xl bg-[#F5A623]/[0.03] border-[#F5A623]/10">
-        <h2 className="text-xl font-medium text-[#FFFFFF] mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+      <div className="card-panel p-6 rounded-2xl bg-gold/[0.03] border-gold/10">
+        <h2 className="text-xl font-medium text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Tu progreso en el Programa
         </h2>
-        <p className="text-sm text-[#FFFFFF]/60">Semana {progData.semanaActual} de 13 · 90 días · ADN del Negocio</p>
+        <p className="text-sm text-cream/75">Semana {progData.semanaActual} de 13 · 90 días · ADN del Negocio</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label="Tareas completadas" value={progData.compTareas.toString()} sub={`${progData.compTareas}/${progData.totTareas} del total`} />
         <KPICard label="Días con diario" value={progData.diasDiario.toString()} sub={`${progData.diasDiario}/90 totales`} />
-        <KPICard label="Pilares completados" value={progData.hitos.toString()} sub={`${progData.hitos}/14 pilares`} />
+        <KPICard label="Pilares completados" value={progData.hitos.toString()} sub={`${progData.hitos}/${SEED_ROADMAP.length} pilares`} />
         <KPICard label="Semana actual" value={progData.semanaActual.toString()} sub="de 13 semanas" highlight />
       </div>
 
       <div className="card-panel p-6 rounded-2xl">
-        <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase mb-6">Velocidad de Avance (Tareas)</h3>
+        <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase mb-6">Velocidad de Avance (Tareas)</h3>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
-              <XAxis dataKey="semana" stroke="rgba(245,166,35,0.2)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
-              <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
-              <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '12px' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
+              <XAxis dataKey="semana" stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
+              <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
+              <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '12px' }} />
               <Line type="monotone" dataKey="esperado" stroke="#6B7280" strokeDasharray="5 5" strokeWidth={2} dot={false} name="Ritmo Esperado" />
-              <Line type="monotone" dataKey="real" stroke="#F5A623" strokeWidth={3} dot={{ r: 4, fill: '#F5A623', strokeWidth: 0 }} name="Progreso Real" />
+              <Line type="monotone" dataKey="real" stroke="#E8962E" strokeWidth={3} dot={{ r: 4, fill: '#E8962E', strokeWidth: 0 }} name="Progreso Real" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -357,24 +357,24 @@ function TabEmbudo({ userId }: { userId?: string }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-xl font-medium text-[#FFFFFF] mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          Mi Embudo de Ventas
+        <h2 className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          Mi Sistema de Ventas
         </h2>
-        <p className="text-sm text-[#FFFFFF]/60">Orgánico + Ads · 12 KPIs automáticos · carga diaria o semanal</p>
+        <p className="text-sm text-cream/75">Orgánico + Ads · 12 KPIs automáticos · carga diaria o semanal</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Período */}
         <div className="card-panel p-5 rounded-2xl">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-[#F5A623] mb-3">¿Qué período cargás?</p>
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-gold mb-3">¿Qué período cargás?</p>
           <div className="flex gap-2 mb-3">
             {(['dia', 'semana'] as const).map((t) => (
               <button
                 key={t} type="button" onClick={() => setPeriodoTipo(t)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all border ${
                   periodoTipo === t
-                    ? 'bg-[#F5A623] border-[#F5A623] text-[#0A0806] font-semibold'
-                    : 'bg-black/20 border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/50 hover:bg-[#F5A623]/10'
+                    ? 'bg-gold border-gold text-[#0A0806] font-semibold'
+                    : 'bg-black/20 border-[rgba(232,150,46,0.12)] text-cream/65 hover:bg-gold/10'
                 }`}
               >
                 {t === 'dia' ? 'Día' : 'Semana'}
@@ -386,17 +386,17 @@ function TabEmbudo({ userId }: { userId?: string }) {
               type="date" value={fechaRef} onChange={(e) => setFechaRef(e.target.value)}
               className="input-field max-w-[180px]"
             />
-            <span className="text-sm text-[#F5A623]/80">{periodoLabel}</span>
+            <span className="text-sm text-gold/80">{periodoLabel}</span>
           </div>
         </div>
 
         {/* Bloque A — Orgánico */}
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
-            <Sprout className="w-4 h-4 text-[#22C55E]" />
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-[#22C55E]">A — Contenido orgánico</p>
+            <Sprout className="w-4 h-4 text-success" />
+            <p className="text-[11px] font-semibold tracking-widest uppercase text-success">A — Contenido orgánico</p>
           </div>
-          <p className="text-xs text-[#FFFFFF]/40 mb-3">Posts publicados por plataforma</p>
+          <p className="text-xs text-cream/55 mb-3">Posts publicados por plataforma</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
             {POSTS_PLATAFORMAS.map((p) => (
               <NumField key={p.key} label={p.label} value={vals[p.key] || ''} onChange={(v) => setVal(p.key as string, v)} />
@@ -411,19 +411,19 @@ function TabEmbudo({ userId }: { userId?: string }) {
         {/* Bloque B — Ads */}
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
-            <Megaphone className="w-4 h-4 text-[#F5A623]" />
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-[#F5A623]">B — Publicidad (Ads)</p>
+            <Megaphone className="w-4 h-4 text-gold" />
+            <p className="text-[11px] font-semibold tracking-widest uppercase text-gold">B — Publicidad (Ads)</p>
           </div>
 
-          <p className="text-xs text-[#FFFFFF]/40 mb-2">Plataforma activa este período</p>
+          <p className="text-xs text-cream/55 mb-2">Plataforma activa este período</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {ADS_PLATAFORMAS.map((p) => (
               <button
                 key={p} type="button" onClick={() => setAdsPlataforma(p)}
                 className={`text-xs px-3 py-2 rounded-lg border transition-all ${
                   adsPlataforma === p
-                    ? 'bg-[#F5A623]/10 border-[#F5A623]/40 text-[#FFFFFF]'
-                    : 'border-[rgba(245,166,35,0.18)] text-[#FFFFFF]/40 hover:bg-white/5'
+                    ? 'bg-gold/10 border-gold/40 text-cream'
+                    : 'border-[rgba(232,150,46,0.18)] text-cream/55 hover:bg-white/5'
                 }`}
               >
                 {p}
@@ -450,7 +450,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
         {/* KPIs en vivo */}
         <div>
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-[#22C55E] mb-3">KPIs calculados</p>
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-success mb-3">KPIs calculados</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KPICardTone label="ROAS" value={kpis.roas !== null ? `${kpis.roas.toFixed(1)}×` : '—'} tone={roasTone(kpis.roas)} />
             <KPICardTone label="Tasa de cierre" value={formatPct(kpis.tasa_cierre)} tone={cierreTone(kpis.tasa_cierre)} />
@@ -476,18 +476,18 @@ function TabEmbudo({ userId }: { userId?: string }) {
       {chartData.some((d) => d.posts > 0) && (
         <div className="card-panel p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase">Contenido orgánico publicado</h3>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#FFFFFF]/60">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" /> Posts totales
+            <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase">Contenido orgánico publicado</h3>
+            <div className="flex items-center gap-2 text-xs font-medium text-cream/75">
+              <div className="w-2.5 h-2.5 rounded-full bg-success" /> Posts totales
             </div>
           </div>
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} allowDecimals={false} />
-                <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '8px', color: '#FFFFFF' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} allowDecimals={false} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
                 <Bar dataKey="posts" fill="#22C55E" radius={[4, 4, 0, 0]} name="Posts" />
               </BarChart>
             </ResponsiveContainer>
@@ -499,32 +499,32 @@ function TabEmbudo({ userId }: { userId?: string }) {
       {chartData.length > 1 ? (
         <div className="card-panel p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xs font-bold text-[#FFFFFF]/60 tracking-widest uppercase">Evolución de ingresos</h3>
-            <div className="flex gap-4 text-xs font-medium text-[#FFFFFF]/60">
-              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#F5A623]" /> Ingresos</div>
-              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" /> Ventas</div>
+            <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase">Evolución de ingresos</h3>
+            <div className="flex gap-4 text-xs font-medium text-cream/75">
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold" /> Ingresos</div>
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-success" /> Ventas</div>
             </div>
           </div>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F5A623" stopOpacity={0.3} /><stop offset="95%" stopColor="#F5A623" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#E8962E" stopOpacity={0.3} /><stop offset="95%" stopColor="#E8962E" stopOpacity={0} /></linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(245,166,35,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                <YAxis stroke="rgba(245,166,35,0.2)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                <RechartsTooltip contentStyle={{ backgroundColor: '#1C1C1C', borderColor: 'rgba(245,166,35,0.2)', borderRadius: '8px', color: '#FFFFFF' }} />
-                <Area type="monotone" dataKey="ingresos" stroke="#F5A623" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
+                <Area type="monotone" dataKey="ingresos" stroke="#E8962E" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
                 <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={0} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       ) : (
-        <div className="card-panel p-8 rounded-2xl border border-dashed border-[rgba(245,166,35,0.2)] text-center">
-          <TrendingUp className="w-10 h-10 text-[#F5A623]/30 mx-auto mb-3" />
-          <p className="text-sm text-[#FFFFFF]/60">Cargá al menos 2 períodos para ver la evolución de tus ingresos.</p>
+        <div className="card-panel p-8 rounded-2xl border border-dashed border-[rgba(232,150,46,0.12)] text-center">
+          <TrendingUp className="w-10 h-10 text-gold/30 mx-auto mb-3" />
+          <p className="text-sm text-cream/75">Carga al menos 2 períodos para ver la evolución de tus ingresos.</p>
         </div>
       )}
     </div>
@@ -547,8 +547,8 @@ export default function Metrics({ userId }: { userId?: string }) {
           onClick={() => setTab('progreso')}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
             tab === 'progreso'
-              ? 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/30'
-              : 'bg-[#F5A623]/5 text-[#FFFFFF]/40 border border-transparent hover:bg-[#F5A623]/10 hover:text-[#FFFFFF]/80'
+              ? 'bg-gold/20 text-gold border border-gold/30'
+              : 'bg-gold/5 text-cream/55 border border-transparent hover:bg-gold/10 hover:text-cream/80'
           }`}
         >
           Mi Progreso
@@ -557,11 +557,11 @@ export default function Metrics({ userId }: { userId?: string }) {
           onClick={() => setTab('embudo')}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
             tab === 'embudo'
-              ? 'bg-[#F5A623]/20 text-[#F5A623] border border-[#F5A623]/30'
-              : 'bg-[#F5A623]/5 text-[#FFFFFF]/40 border border-transparent hover:bg-[#F5A623]/10 hover:text-[#FFFFFF]/80'
+              ? 'bg-gold/20 text-gold border border-gold/30'
+              : 'bg-gold/5 text-cream/55 border border-transparent hover:bg-gold/10 hover:text-cream/80'
           }`}
         >
-          Mi Embudo
+          Mi Sistema
         </button>
       </div>
 

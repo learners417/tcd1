@@ -85,7 +85,7 @@ const GRUPO_A: Herramienta[] = [
       },
       {
         id: 'nicho_inicial',
-        label: '¿A quién querés ayudar específicamente?',
+        label: '¿A quién quieres ayudar específicamente?',
         tipo: 'textarea',
         placeholder: 'ej: Mujeres de 30-45 con ansiedad crónica, profesionales con sobrepeso por estrés laboral...',
         required: true,
@@ -108,19 +108,19 @@ const GRUPO_A: Herramienta[] = [
         id: 'situacion_actual',
         label: '¿Cómo está tu práctica hoy? Sé honesto/a',
         tipo: 'textarea',
-        placeholder: 'Cuántos clientes tenés, cómo conseguís pacientes, qué te frustra, qué funciona...',
+        placeholder: 'Cuántos clientes tienes, cómo conseguís pacientes, qué te frustra, qué funciona...',
         required: true,
       },
       {
         id: 'legado',
-        label: '¿Qué querés haber construido en 3 años?',
+        label: '¿Qué quieres haber construido en 3 años?',
         tipo: 'textarea',
-        placeholder: 'El impacto que imaginás, los ingresos, la libertad de tiempo, el reconocimiento...',
+        placeholder: 'El impacto que imaginas, los ingresos, la libertad de tiempo, el reconocimiento...',
         required: true,
       },
       {
         id: 'diferencial',
-        label: '¿Qué tenés vos que ningún otro profesional de tu especialidad tiene?',
+        label: '¿Qué tienes tú que ningún otro profesional de tu especialidad tiene?',
         tipo: 'textarea',
         placeholder: 'Tu perspectiva única, tu método, una experiencia personal, una combinación de saberes...',
       },
@@ -181,14 +181,14 @@ Escribí en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, 
         id: 'situacion_actual',
         label: '¿Cómo es tu vida y tu práctica hoy, en el Día 1?',
         tipo: 'textarea',
-        placeholder: 'Cuántos clientes tenés, cuánto ganás, cómo te sentís, qué te preocupa, cuál es tu mayor tensión...',
+        placeholder: 'Cuántos clientes tienes, cuánto ganas, cómo te sentís, qué te preocupa, cuál es tu mayor tensión...',
         required: true,
       },
       {
         id: 'miedo_principal',
         label: '¿Cuál es tu miedo más grande al iniciar este camino?',
         tipo: 'textarea',
-        placeholder: 'Sé completamente honesto/a — esto solo lo leés vos...',
+        placeholder: 'Sé completamente honesto/a — esto solo lo leés tú...',
         required: true,
       },
       {
@@ -200,13 +200,13 @@ Escribí en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, 
       },
       {
         id: 'para_quien',
-        label: '¿Por quién o para qué hacés este esfuerzo más allá de vos?',
+        label: '¿Por quién o para qué haces este esfuerzo más allá de tú?',
         tipo: 'textarea',
-        placeholder: 'Tu familia, una deuda que querés saldar, la libertad que querés vivir, el ejemplo que querés dar...',
+        placeholder: 'Tu familia, una deuda que quieres saldar, la libertad que quieres vivir, el ejemplo que quieres dar...',
       },
       {
         id: 'como_te_ves_dia91',
-        label: '¿Cómo te imaginás el Día 91? ¿Qué cambió?',
+        label: '¿Cómo te imaginas el Día 91? ¿Qué cambió?',
         tipo: 'textarea',
         placeholder: 'Sé específico/a — no solo los números, también cómo te sentís, cómo arrancás el día...',
         required: true,
@@ -266,14 +266,14 @@ Extensión: 350-450 palabras. Sin títulos ni bullets — solo carta corrida.
         id: 'cielo',
         label: 'El "cielo" — ¿A dónde llegaste? ¿Cuál es tu situación hoy?',
         tipo: 'textarea',
-        placeholder: 'Dónde estás ahora, qué lograste, qué podés hacer hoy que antes no podías...',
+        placeholder: 'Dónde estás ahora, qué lograste, qué puedes hacer hoy que antes no podías...',
         required: true,
       },
       {
         id: 'conexion_cliente',
         label: '¿Cómo conecta tu historia con el problema de tus clientes?',
         tipo: 'textarea',
-        placeholder: 'Por qué tu historia hace que tu cliente sienta que vos entendés su situación mejor que nadie...',
+        placeholder: 'Por qué tu historia hace que tu cliente sienta que tú entendés su situación mejor que nadie...',
         required: true,
       },
       {
@@ -285,7 +285,7 @@ Extensión: 350-450 palabras. Sin títulos ni bullets — solo carta corrida.
       },
       {
         id: 'tono',
-        label: '¿Cómo querés sonar?',
+        label: '¿Cómo quieres sonar?',
         tipo: 'select',
         opciones: ['Cálido y cercano', 'Profesional y directo', 'Vulnerable y auténtico', 'Inspirador y motivador'],
         required: true,
@@ -397,12 +397,12 @@ Tono: directo, específico para el sector salud, sin clichés. Que cada reformul
     grupo: 'A',
     titulo: 'Visión Financiera Clara',
     descripcion:
-      'Define tu meta financiera real a 90 días, calcula exactamente cuántos protocolos necesitás vender y diseña los 3 hitos del camino.',
+      'Define tu meta financiera real a 90 días, calcula exactamente cuántos protocolos necesitas vender y diseña los 3 hitos del camino.',
     emoji: '💰',
     inputs: [
       {
         id: 'ingreso_meta',
-        label: 'Ingreso mensual que querés tener en 90 días (USD)',
+        label: 'Ingreso mensual que quieres tener en 90 días (USD)',
         tipo: 'number',
         placeholder: '3000',
         required: true,
@@ -429,16 +429,16 @@ Tono: directo, específico para el sector salud, sin clichés. Que cada reformul
       },
       {
         id: 'horas_disponibles',
-        label: '¿Cuántas horas por semana podés dedicar al crecimiento del negocio (no a atender pacientes)?',
+        label: '¿Cuántas horas por semana puedes dedicar al crecimiento del negocio (no a atender pacientes)?',
         tipo: 'number',
         placeholder: '10',
         required: true,
       },
       {
         id: 'que_significa',
-        label: '¿Qué significa para vos llegar a esa meta? ¿Qué cambia en tu vida?',
+        label: '¿Qué significa para tú llegar a esa meta? ¿Qué cambia en tu vida?',
         tipo: 'textarea',
-        placeholder: 'No solo el número — qué podés hacer con ese dinero, qué presión se va, qué se abre...',
+        placeholder: 'No solo el número — qué puedes hacer con ese dinero, qué presión se va, qué se abre...',
         required: true,
       },
       {
@@ -465,7 +465,7 @@ DATOS:
 Calculá y presentá:
 1. INGRESO NETO OBJETIVO (meta - gastos) y cuántos protocolos representa
 2. PROTOCOLOS NECESARIOS POR MES y por semana
-3. EMBUDO REQUERIDO (cuántas llamadas y leads necesitás asumiendo 30% cierre en llamada y 20% conversión lead→llamada)
+3. EMBUDO REQUERIDO (cuántas llamadas y leads necesitas asumiendo 30% cierre en llamada y 20% conversión lead→llamada)
 4. BRECHA Y TIEMPO (cuánto falta, cuánto puede crecer por mes si es constante)
 5. DIAGNÓSTICO DE VIABILIDAD (¿es realista en 90 días con las horas disponibles? ¿Qué tiene que pasar sí o sí?)
 6. LOS 3 HITOS (qué lograr en el día 30, 60 y 90 — con números específicos)
@@ -498,7 +498,7 @@ const GRUPO_B: Herramienta[] = [
       },
       {
         id: 'problema_que_resuelves',
-        label: '¿Qué problema específico resolvés?',
+        label: '¿Qué problema específico resuelves?',
         tipo: 'textarea',
         placeholder: 'No el síntoma superficial — el problema real que cambia la vida del cliente. Ej: no "bajo de peso" sino "dejó de ser prisionero de la comida"...',
         required: true,
@@ -519,7 +519,7 @@ const GRUPO_B: Herramienta[] = [
       },
       {
         id: 'por_que_te_eligen',
-        label: '¿Por qué te elegiría alguien de ese perfil a vos y no a otro profesional?',
+        label: '¿Por qué te elegiría alguien de ese perfil a tú y no a otro profesional?',
         tipo: 'textarea',
         placeholder: 'Tu experiencia personal, tu método diferente, tu historia, tu forma de trabajar...',
       },
@@ -572,9 +572,9 @@ Luego:
       },
       {
         id: 'cliente_real',
-        label: 'Describí a tu mejor cliente actual (o al ideal que imaginás)',
+        label: 'Describí a tu mejor cliente actual (o al ideal que imaginas)',
         tipo: 'textarea',
-        placeholder: 'Nombre de pila, edad, qué hace, cómo vive, cómo llegó a vos, qué cambió en su vida...',
+        placeholder: 'Nombre de pila, edad, qué hace, cómo vive, cómo llegó a tú, qué cambió en su vida...',
         required: true,
       },
       {
@@ -769,7 +769,7 @@ CÓMO TESTEARLA: [cómo saber si funciona en las primeras 2 semanas]
       },
       {
         id: 'proceso_trabajo',
-        label: 'Describí paso a paso cómo trabajás con un cliente desde el día 1',
+        label: 'Describí paso a paso cómo trabajas con un cliente desde el día 1',
         tipo: 'textarea',
         placeholder: 'Primera sesión diagnóstica, evaluación inicial, qué pasa semana a semana, cómo terminan...',
         required: true,
@@ -792,7 +792,7 @@ Generá:
 1. NOMBRE DEFINITIVO DEL PROTOCOLO (el que ya tiene + 2 alternativas si puede mejorarse)
 2. DESCRIPCIÓN PARA LA LANDING (párrafo de 80-100 palabras — para quien llega sin saber nada)
 3. FASES DEL PROTOCOLO (3-4 fases con nombre atractivo, descripción de qué pasa y qué resultado parcial se logra)
-4. LO QUE INCLUYE (bullet list para la página de ventas — con formato "accés a / recibís / tenés")
+4. LO QUE INCLUYE (bullet list para la página de ventas — con formato "accés a / recibís / tienes")
 5. RESULTADOS VERIFICABLES (qué puede decir el cliente al finalizar cada fase)
 6. PARA QUIÉN ES Y PARA QUIÉN NO ES (criterio de calificación)
 7. PROMESA PRINCIPAL (1 oración de resultado — la que va arriba del precio)
@@ -818,7 +818,7 @@ Generá:
       },
       {
         id: 'precio_actual_cobras',
-        label: '¿Cuánto cobrás actualmente por consulta o tu servicio equivalente? (USD)',
+        label: '¿Cuánto cobras actualmente por consulta o tu servicio equivalente? (USD)',
         tipo: 'number',
         placeholder: '80',
       },
@@ -944,7 +944,7 @@ TIPO 1 — VALOR (educan y dan perspectiva nueva sin vender):
 7 ideas de stories que enseñan algo útil. El avatar debe pensar "esto es exactamente lo que necesitaba saber".
 Formato para cada idea: TIPO DE STORY | PRIMER TEXTO LITERAL | CTA sugerido
 
-TIPO 2 — PROCESO (muestran cómo trabajás, generan confianza):
+TIPO 2 — PROCESO (muestran cómo trabajas, generan confianza):
 7 ideas que muestran el detrás de escena, la metodología, el día a día. Humanización + autoridad.
 Formato para cada idea: TIPO DE STORY | PRIMER TEXTO LITERAL | CTA sugerido
 
@@ -967,7 +967,7 @@ Al final: 3 ERRORES COMUNES al hacer stories en este nicho que el profesional de
     inputs: [
       {
         id: 'angulo',
-        label: '¿Desde qué ángulo querés atacar?',
+        label: '¿Desde qué ángulo quieres atacar?',
         tipo: 'select',
         opciones: [
           'El error más común del avatar',
@@ -985,7 +985,7 @@ Al final: 3 ERRORES COMUNES al hacer stories en este nicho que el profesional de
         id: 'tema',
         label: '¿De qué trata el Reel? (sé específico)',
         tipo: 'textarea',
-        placeholder: 'El tema concreto que querés abordar, la idea central...',
+        placeholder: 'El tema concreto que quieres abordar, la idea central...',
         required: true,
       },
       {
@@ -1093,7 +1093,7 @@ Reglas: el hook no puede empezar con "Hola" ni presentación. Debe provocar curi
       },
       {
         id: 'energia_disponible',
-        label: '¿Cuánto tiempo/energía tenés para crear contenido esta semana?',
+        label: '¿Cuánto tiempo/energía tienes para crear contenido esta semana?',
         tipo: 'select',
         opciones: [
           'Poco (1-2 horas máximo)',
@@ -1179,7 +1179,7 @@ const GRUPO_D: Herramienta[] = [
       },
       {
         id: 'tono',
-        label: '¿Cómo querés sonar?',
+        label: '¿Cómo quieres sonar?',
         tipo: 'select',
         opciones: ['Empático y cálido', 'Directo y sin rodeos', 'Científico y confiable', 'Cercano y divertido'],
         required: true,
@@ -1245,7 +1245,7 @@ Luego:
       },
       {
         id: 'proximo_paso',
-        label: '¿Cuál es el próximo paso que querés que dé el lead?',
+        label: '¿Cuál es el próximo paso que quieres que dé el lead?',
         tipo: 'select',
         opciones: [
           'Agendar una llamada de diagnóstico',
@@ -1260,7 +1260,7 @@ Luego:
         id: 'historia_breve',
         label: '¿Querés incluir una mini historia personal? (una línea)',
         tipo: 'text',
-        placeholder: 'ej: "Yo estuve exactamente donde estás vos hace 3 años..."',
+        placeholder: 'ej: "Yo estuve exactamente donde estás tú hace 3 años..."',
       },
       {
         id: 'objecion_anticipa',
@@ -1335,7 +1335,7 @@ Extensión: 180-280 palabras. Tono: profesional pero como si te escribiera un co
       },
       {
         id: 'proximo_paso',
-        label: '¿Cuál es el próximo paso que querés que dé el lead?',
+        label: '¿Cuál es el próximo paso que quieres que dé el lead?',
         tipo: 'select',
         opciones: [
           'Agendar una llamada',
@@ -1478,7 +1478,7 @@ const GRUPO_E: Herramienta[] = [
     inputs: [
       {
         id: 'nombre_protocolo',
-        label: 'Nombre del protocolo que ofrecés',
+        label: 'Nombre del protocolo que ofreces',
         tipo: 'text',
         required: true,
       },
@@ -1497,7 +1497,7 @@ const GRUPO_E: Herramienta[] = [
       },
       {
         id: 'perfil_tipico_lead',
-        label: '¿Cómo llega el lead típico a la llamada? ¿Qué sabe de vos?',
+        label: '¿Cómo llega el lead típico a la llamada? ¿Qué sabe de tú?',
         tipo: 'textarea',
         placeholder: 'Por Instagram, ya vio el precio, todavía no sabe el precio, completó un formulario...',
         required: true,
@@ -1594,7 +1594,7 @@ El guión debe tener los textos EXACTOS (no temas, sino lo que el profesional di
       },
       {
         id: 'contexto_precio',
-        label: '¿Qué cobran otros profesionales similares a vos en tu mercado?',
+        label: '¿Qué cobran otros profesionales similares a tú en tu mercado?',
         tipo: 'text',
         placeholder: 'ej: consultas de $50-80 USD, programas similares de $500-800 USD...',
       },
@@ -1621,7 +1621,7 @@ Las 7 objeciones universales a incluir (además de las 3 reportadas):
 - "Necesito consultarlo con mi pareja/familia"
 - "No tengo tiempo ahora"
 - "Ya probé varias cosas y no funcionaron"
-- "¿Me podés dar algo más económico?"
+- "¿Me puedes dar algo más económico?"
 - "Dame más información antes de decidir"
 
 Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
@@ -1681,7 +1681,7 @@ Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
       },
       {
         id: 'objetivo_proximo_mes',
-        label: '¿Cuántas ventas querés cerrar el próximo mes?',
+        label: '¿Cuántas ventas quieres cerrar el próximo mes?',
         tipo: 'number',
         required: true,
       },
@@ -1810,14 +1810,14 @@ export const HERRAMIENTAS_V3: HerramientaV3[] = [
     adn_field: 'adn_formulario_bienvenida',
     outputLabel: 'ADN Prototipo Beta',
     inputs: [
-      { id: 'admiracion', label: '¿A qué profesionales del mundo admirás?', tipo: 'textarea', required: true },
-      { id: 'que_tienen', label: '¿Qué tienen ellos que vos querés tener?', tipo: 'textarea', required: true },
+      { id: 'admiracion', label: '¿A qué profesionales del mundo admiras?', tipo: 'textarea', required: true },
+      { id: 'que_tienen', label: '¿Qué tienen ellos que tú quieres tener?', tipo: 'textarea', required: true },
       { id: 'impedimento', label: '¿Qué te impidió hasta ahora cobrar lo que vale tu trabajo?', tipo: 'textarea', required: true },
-      { id: 'vida_10k', label: '¿Cómo te imaginás tu vida con $10K/mes extra?', tipo: 'textarea', required: true },
+      { id: 'vida_10k', label: '¿Cómo te imaginas tu vida con $10K/mes extra?', tipo: 'textarea', required: true },
       { id: 'anios_profesion', label: '¿Cuántos años ejercés tu profesión?', tipo: 'number', required: true },
       { id: 'modalidad', label: '¿Presencial, online o mixto?', tipo: 'select', opciones: ['Presencial', 'Online', 'Mixto'], required: true },
       { id: 'pacientes_mes', label: '¿Cuántos pacientes pagando por mes?', tipo: 'number', required: true },
-      { id: 'problema_principal', label: '¿Qué problema principal resolvés?', tipo: 'textarea', required: true },
+      { id: 'problema_principal', label: '¿Qué problema principal resuelves?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
 Sos un consultor de negocios para profesionales de salud. Con las respuestas del formulario de bienvenida, generá un párrafo de presentación profesional (ADN prototipo beta). Debe ser personal, cálido y en primera persona.
@@ -1893,9 +1893,9 @@ Usá tono rioplatense, directo, sin jerga de marketing. La historia tiene que so
     adn_field: 'adn_cinco_por_que',
     outputLabel: 'Respuestas de los 5 por qué',
     inputs: [
-      { id: 'pq1', label: '¿Por qué hacés lo que hacés?', tipo: 'textarea', required: true },
+      { id: 'pq1', label: '¿Por qué haces lo que haces?', tipo: 'textarea', required: true },
       { id: 'pq2', label: '¿Y eso por qué importa?', tipo: 'textarea', required: true },
-      { id: 'pq3', label: '¿Y por qué eso importa para vos específicamente?', tipo: 'textarea', required: true },
+      { id: 'pq3', label: '¿Y por qué eso importa para tú específicamente?', tipo: 'textarea', required: true },
       { id: 'pq4', label: '¿Qué cambiaría si más personas tuvieran esto?', tipo: 'textarea', required: true },
       { id: 'pq5', label: '¿Para qué estás realmente acá?', tipo: 'textarea', required: true },
     ],
@@ -2032,10 +2032,10 @@ El avatar tiene que ser una persona real con una vida real, no "profesional de 3
     adn_field: 'adn_nicho',
     outputLabel: 'Nicho y PUV',
     inputs: [
-      { id: 'no_atender', label: '¿A quién específicamente NO querés atender?', tipo: 'textarea', required: true },
+      { id: 'no_atender', label: '¿A quién específicamente NO quieres atender?', tipo: 'textarea', required: true },
       { id: 'mejor_que', label: '¿En qué problema sos claramente mejor que el promedio de tu especialidad?', tipo: 'textarea', required: true },
-      { id: 'diferencial', label: '¿Qué tenés vos que ningún colega tiene?', tipo: 'textarea', required: true },
-      { id: 'quien_busca', label: '¿Qué grupo de personas te busca a vos y no a otro?', tipo: 'textarea', required: true },
+      { id: 'diferencial', label: '¿Qué tienes tú que ningún colega tiene?', tipo: 'textarea', required: true },
+      { id: 'quien_busca', label: '¿Qué grupo de personas te busca a tú y no a otro?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
 Sos un estratega de posicionamiento para profesionales de salud. Con las respuestas y el ADN del profesional, generá:
@@ -2117,7 +2117,7 @@ El Estado B tiene que ser tan específico que si el paciente lo lee, diga "eso s
     id: 'H-P7.2',
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Documentador del proceso actual',
-    descripcion: 'Documentá cómo trabajás con pacientes de principio a fin.',
+    descripcion: 'Documentá cómo trabajas con pacientes de principio a fin.',
     emoji: '⚙️',
     usa_ia: false,
     adn_field: 'adn_proceso_actual',
@@ -2125,9 +2125,9 @@ El Estado B tiene que ser tan específico que si el paciente lo lee, diga "eso s
     inputs: [
       { id: 'primer_contacto', label: '¿Qué pasa en el primer contacto con el paciente?', tipo: 'textarea', required: true },
       { id: 'primera_sesion', label: '¿Cómo es la primera sesión?', tipo: 'textarea', required: true },
-      { id: 'sesiones_siguientes', label: '¿Qué hacés en las sesiones siguientes, paso a paso?', tipo: 'textarea', required: true },
-      { id: 'como_termina', label: '¿Cómo sabés que el proceso terminó?', tipo: 'textarea', required: true },
-      { id: 'como_mide', label: '¿Cómo medís el resultado?', tipo: 'textarea', required: true },
+      { id: 'sesiones_siguientes', label: '¿Qué haces en las sesiones siguientes, paso a paso?', tipo: 'textarea', required: true },
+      { id: 'como_termina', label: '¿Cómo sabes que el proceso terminó?', tipo: 'textarea', required: true },
+      { id: 'como_mide', label: '¿Cómo mides el resultado?', tipo: 'textarea', required: true },
       { id: 'duracion', label: '¿Cuánto tiempo dura el proceso completo?', tipo: 'text', required: true },
     ],
     promptTemplate: (inputs) => Object.entries(inputs).map(([k, v]) => `${k}: ${v}`).join('\n'),
@@ -2178,7 +2178,7 @@ Paso 1: [nombre] — [qué es y por qué existe]
       { id: 'sesiones', label: '¿Cuántas sesiones incluye?', tipo: 'number', required: true },
       { id: 'resultado_garantizado', label: '¿Qué resultado concreto y medible garantizás?', tipo: 'textarea', required: true },
       { id: 'soporte_adicional', label: '¿Qué soporte adicional incluye?', tipo: 'textarea', required: true },
-      { id: 'precio_mente', label: '¿Qué precio tenés en mente?', tipo: 'text', required: true },
+      { id: 'precio_mente', label: '¿Qué precio tienes en mente?', tipo: 'text', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
 Sos un diseñador de ofertas para profesionales de salud. Diseñá la Oferta Mid usando el Método y la Matriz A→B→C del ADN.
@@ -2334,7 +2334,7 @@ Secciones del script:
 5. Manejo de las 5 objeciones más comunes del avatar (5 min)
 6. Cierre con precio (5 min)
 
-El tono es de evaluación, no de venta. Estás diagnosticando si podés ayudar, no convenciendo.`.trim(),
+El tono es de evaluación, no de venta. Estás diagnosticando si puedes ayudar, no convenciendo.`.trim(),
   },
 
   // ─── P9C.2: Protocolo de Entrega ────────────────────────────────────────────

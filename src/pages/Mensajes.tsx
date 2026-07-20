@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Mic, Shield } from 'lucide-react';
+import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Paperclip, Shield } from 'lucide-react';
 import { supabase, isSupabaseReady, type Mensaje } from '../lib/supabase';
+import { notificarAdminsMensaje } from '../lib/notifications';
 import { toast } from 'sonner';
 
 interface MensajesProps {
@@ -18,11 +19,11 @@ interface MsgLocal {
   isMe: boolean;
   channelId: string;
   archivoUrl?: string;
-  tipoArchivo?: 'imagen' | 'audio';
+  tipoArchivo?: 'imagen' | 'audio' | 'archivo';
 }
 
 const MOCK_MESSAGES: MsgLocal[] = [
-  { id: 1, author: 'Tu Clínica Digital', rol: 'bot', content: '¡Bienvenida a tu programa de 90 días! Tu canal privado está listo. Podés escribirle al equipo aquí.', time: 'Lun 09:00', isMe: false, channelId: 'privado' },
+  { id: 1, author: 'Tu Clínica Digital', rol: 'bot', content: '¡Bienvenida a tu programa de 90 días! Tu canal privado está listo. Puedes escribirle al equipo aquí.', time: 'Lun 09:00', isMe: false, channelId: 'privado' },
 ];
 
 function supabaseMsgToLocal(m: Mensaje, myUserId: string, myName?: string): MsgLocal {
@@ -54,9 +55,9 @@ const CHANNELS = [
 // Colores de avatar deterministas por nombre
 function avatarColor(name: string): string {
   const colors = [
-    'bg-[#F5A623]/30 text-[#F5A623]',
+    'bg-gold/30 text-gold',
     'bg-violet-500/30 text-violet-200',
-    'bg-[#22C55E]/30 text-emerald-200',
+    'bg-success/30 text-emerald-200',
     'bg-amber-500/30 text-amber-200',
     'bg-pink-500/30 text-pink-200',
     'bg-cyan-500/30 text-cyan-200',
@@ -65,6 +66,21 @@ function avatarColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
   return colors[hash % colors.length];
+}
+
+
+/** Convierte las URLs del texto en enlaces clickeables (azul, pestaña nueva). */
+function Linkified({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^https?:\/\//.test(p)
+          ? <a key={i} href={p} target="_blank" rel="noreferrer" className="text-[#60A5FA] underline underline-offset-2 hover:text-[#93C5FD] break-all">{p}</a>
+          : <span key={i}>{p}</span>
+      )}
+    </>
+  );
 }
 
 export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
@@ -80,7 +96,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
@@ -188,7 +204,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             toast(nombre, {
               description: preview || '📎 Archivo adjunto',
               action: { label: 'Ver →', onClick: () => handleChannelSwitch(ch.id) },
-              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-[#F5A623]' }),
+              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-gold' }),
               duration: 6000,
             });
 
@@ -236,6 +252,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         receptor_id: null,
         contenido: text,
       });
+      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsMensaje(p?.nombre ?? 'Un cliente'); } catch { /* noop */ }
     } else {
       const newMessage: MsgLocal = {
         id: Date.now(),
@@ -264,14 +281,14 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
     }
   };
 
-  const handleUploadFile = async (file: File, tipo: 'imagen' | 'audio') => {
+  const handleUploadFile = async (file: File, tipo: 'imagen' | 'archivo') => {
     if (!isSupabaseReady() || !supabase || !userId) {
       toast.error('Conectá Supabase para subir archivos');
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'mp3');
+      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'file');
       const path = `${userId}/${Date.now()}.${ext}`;
       const { data, error } = await supabase.storage
         .from('mensajes-archivos')
@@ -282,7 +299,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         .from('mensajes-archivos')
         .getPublicUrl(data.path);
 
-      // Optimistic insert para archivos también
+      // Optimistic insert para architú también
       const optimistic: MsgLocal = {
         id: `opt-${Date.now()}`,
         authorId: userId,
@@ -306,7 +323,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         archivo_url: publicUrl,
       });
     } catch {
-      toast.error('Error subiendo archivo. Verificá que el bucket exista en Supabase.');
+      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
     } finally {
       setUploading(false);
     }
@@ -317,23 +334,23 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
   return (
     <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden animate-in fade-in duration-500">
       {/* Sidebar Channels */}
-      <div className="w-72 border-r border-[rgba(245,166,35,0.2)] bg-black/20 flex flex-col shrink-0">
-        <div className="p-4 border-b border-[rgba(245,166,35,0.2)]">
+      <div className="w-72 border-r border-[rgba(232,150,46,0.12)] bg-black/20 flex flex-col shrink-0">
+        <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
             <input
               type="text"
               value={channelSearch}
               onChange={e => setChannelSearch(e.target.value)}
               placeholder="Buscar canales..."
-              className="w-full bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] rounded-lg py-2 pl-9 pr-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 transition-colors"
+              className="w-full bg-gold/5 border border-[rgba(232,150,46,0.12)] rounded-lg py-2 pl-9 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4">
           <div className="px-4 mb-2">
-            <p className="text-xs font-medium text-[#FFFFFF]/40 uppercase tracking-wider">Canales</p>
+            <p className="text-xs font-medium text-cream/55 uppercase tracking-wider">Canales</p>
           </div>
           <div className="space-y-1 px-2">
             {CHANNELS.filter(c => c.name.toLowerCase().includes(channelSearch.toLowerCase())).map(channel => (
@@ -341,21 +358,21 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 key={channel.id}
                 onClick={() => handleChannelSwitch(channel.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
-                  activeChannel === channel.id ? 'bg-[#F5A623]/20 text-[#F5A623]' : 'text-[#FFFFFF]/80 hover:bg-[#F5A623]/5'
+                  activeChannel === channel.id ? 'bg-gold/20 text-gold' : 'text-cream/80 hover:bg-gold/5'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40'}`} />
+                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-gold' : 'text-cream/55'}`} />
                   <span className="text-sm font-medium truncate">{channel.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {(unreadMap[channel.id] ?? 0) > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#F5A623] text-[#FFFFFF] text-[10px] font-bold flex items-center justify-center">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center">
                       {unreadMap[channel.id]}
                     </span>
                   )}
                   {isSupabaseReady() && (unreadMap[channel.id] ?? 0) === 0 && (
-                    <span className="w-2 h-2 rounded-full bg-[#22C55E]" title="Realtime activo" />
+                    <span className="w-2 h-2 rounded-full bg-success" title="Realtime activo" />
                   )}
                 </div>
               </button>
@@ -364,36 +381,36 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         </div>
 
         {/* Current user info */}
-        <div className="p-4 border-t border-[rgba(245,166,35,0.2)]">
+        <div className="p-4 border-t border-[rgba(232,150,46,0.12)]">
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${myAvatarUrl ? '' : avatarColor(userNombre)}`}>
               {myAvatarUrl
-                ? <img src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
+                ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
                 : userNombre.charAt(0).toUpperCase()
               }
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#FFFFFF] truncate">{userNombre}</p>
-              <p className="text-xs text-[#22C55E]">En línea</p>
+              <p className="text-sm font-medium text-cream truncate">{userNombre}</p>
+              <p className="text-xs text-success">En línea</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-black/10 min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-black/10 min-w-0">
         {/* Header */}
-        <div className="h-16 border-b border-[rgba(245,166,35,0.2)] flex items-center justify-between px-6 bg-[#F5A623]/5 shrink-0">
+        <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between px-6 bg-gold/5 shrink-0">
           <div className="flex items-center gap-3">
-            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-[#FFFFFF]/60" })}
+            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-cream/75" })}
             <div>
-              <h2 className="text-[#FFFFFF] font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
-              <p className="text-xs text-[#FFFFFF]/40">
-                {activeChannel === 'privado' ? 'Solo visible para vos y el equipo' : 'Canal público de la comunidad'}
+              <h2 className="text-cream font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
+              <p className="text-xs text-cream/55">
+                {activeChannel === 'privado' ? 'Solo visible para ti y el equipo' : 'Canal público de la comunidad'}
               </p>
             </div>
           </div>
-          <button className="w-8 h-8 rounded-lg hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 transition-colors">
+          <button className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-cream/75 transition-colors">
             <MoreVertical className="w-5 h-5" />
           </button>
         </div>
@@ -402,28 +419,28 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {loadingMsgs ? (
             <div className="flex items-center justify-center py-10">
-              <div className="w-5 h-5 border-2 border-[#F5A623]/30 border-t-[#F5A623] rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
             </div>
           ) : activeMessages.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-[#FFFFFF]/40 text-sm">Sin mensajes en este canal todavía</p>
-              <p className="text-[#FFFFFF]/30 text-xs mt-1">Sé el primero en escribir</p>
+              <p className="text-cream/55 text-sm">Sin mensajes en este canal todavía</p>
+              <p className="text-cream/45 text-xs mt-1">Sé el primero en escribir</p>
             </div>
           ) : (
             activeMessages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 items-end max-w-[80%] ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
+              <div key={msg.id} className={`flex gap-3 items-end max-w-[88%] sm:max-w-[80%] ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold border overflow-hidden ${
                   msg.isMe
                     ? (myAvatarUrl ? 'border-transparent' : `${avatarColor(msg.author)} border-transparent`)
                     : msg.rol === 'admin'
-                    ? 'bg-[#F5A623]/20 border-[#F5A623]/30 text-[#F5A623]'
+                    ? 'bg-gold/20 border-gold/30 text-gold'
                     : msg.rol === 'bot'
-                    ? 'bg-[#F5A623]/30 border-[#F5A623]/30 text-[#FFFFFF]'
+                    ? 'bg-gold/30 border-gold/30 text-cream'
                     : `${avatarColor(msg.author)} border-transparent`
                 }`}>
                   {msg.isMe && myAvatarUrl
-                    ? <img src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
+                    ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
                     : msg.rol === 'admin'
                     ? <Shield className="w-3.5 h-3.5" />
                     : msg.author.charAt(0).toUpperCase()
@@ -433,21 +450,21 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 <div className={`flex flex-col gap-1 ${msg.isMe ? 'items-end' : 'items-start'}`}>
                   {/* Name + badge + time */}
                   <div className={`flex items-baseline gap-2 px-1 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-xs font-medium text-[#FFFFFF]/80">{msg.author}</span>
-                    {msg.rol === 'admin' && <span className="text-[9px] uppercase tracking-wider text-[#F5A623] bg-[#F5A623]/10 px-1.5 py-0.5 rounded">Coach</span>}
-                    {msg.rol === 'bot' && <span className="text-[9px] uppercase tracking-wider text-[#F5A623] bg-[#F5A623]/10 px-1.5 py-0.5 rounded">Sistema</span>}
-                    <span className="text-[10px] text-[#FFFFFF]/30">{msg.time}</span>
+                    <span className="text-xs font-medium text-cream/80">{msg.author}</span>
+                    {msg.rol === 'admin' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Coach</span>}
+                    {msg.rol === 'bot' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Sistema</span>}
+                    <span className="text-[11px] text-cream/45">{msg.time}</span>
                   </div>
 
                   {/* Bubble */}
                   <div className={`rounded-2xl px-4 py-3 ${
                     msg.isMe
-                      ? 'bg-[#F5A623] text-[#FFFFFF] rounded-tr-sm'
+                      ? 'bg-gold text-cream rounded-tr-sm'
                       : msg.rol === 'bot'
-                      ? 'bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] text-[#FFFFFF]/80 rounded-tl-sm'
+                      ? 'bg-gold/5 border border-[rgba(232,150,46,0.12)] text-cream/80 rounded-tl-sm'
                       : msg.rol === 'admin'
-                      ? 'bg-[#F5A623]/20 border border-[#F5A623]/20 text-[#F5A623] rounded-tl-sm'
-                      : 'bg-[#F5A623]/10 text-[#FFFFFF] rounded-tl-sm'
+                      ? 'bg-gold/20 border border-gold/20 text-gold rounded-tl-sm'
+                      : 'bg-gold/10 text-cream rounded-tl-sm'
                   }`}>
                     {msg.tipoArchivo === 'imagen' && msg.archivoUrl && (
                       <img
@@ -457,11 +474,13 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                         onClick={() => window.open(msg.archivoUrl)}
                       />
                     )}
-                    {msg.tipoArchivo === 'audio' && msg.archivoUrl && (
-                      <audio controls src={msg.archivoUrl} className="w-full mb-2 rounded-lg" />
+                    {(msg.tipoArchivo === 'archivo' || msg.tipoArchivo === 'audio') && msg.archivoUrl && (
+                      <a href={msg.archivoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-gold/8 border border-[rgba(232,150,46,0.14)] hover:bg-gold/15 transition-colors text-sm text-cream/80">
+                        <Paperclip className="w-4 h-4 shrink-0" /> Ver archivo adjunto
+                      </a>
                     )}
                     {msg.content && (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap"><Linkified text={msg.content} /></p>
                     )}
                   </div>
                 </div>
@@ -471,21 +490,21 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         </div>
 
         {/* Input area */}
-        <div className="p-4 bg-[#F5A623]/5 border-t border-[rgba(245,166,35,0.2)] shrink-0">
+        <div className="p-4 bg-gold/5 border-t border-[rgba(232,150,46,0.12)] shrink-0">
           <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
-          <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'audio'); e.target.value = ''; }} />
+          <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'archivo'); e.target.value = ''; }} />
 
           <form className="flex items-end gap-2" onSubmit={handleSend}>
             <div className="flex flex-col gap-1 shrink-0">
               <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} title="Subir imagen"
-                className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
+                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
                 <Image className="w-4 h-4" />
               </button>
-              <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading} title="Subir audio"
-                className="w-10 h-10 rounded-xl bg-[#F5A623]/5 border border-[rgba(245,166,35,0.2)] hover:bg-[#F5A623]/10 flex items-center justify-center text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors disabled:opacity-50">
-                <Mic className="w-4 h-4" />
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} title="Adjuntar archivo (PDF, imagen, documento)"
+                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
+                <Paperclip className="w-4 h-4" />
               </button>
             </div>
 
@@ -498,15 +517,15 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                   handleSend(e as unknown as React.FormEvent);
                 }
               }}
-              placeholder={uploading ? 'Subiendo archivo...' : 'Escribí un mensaje al equipo...'}
+              placeholder={uploading ? 'Subiendo archivo...' : 'Escribe un mensaje al equipo...'}
               disabled={uploading}
-              className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 px-4 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
+              className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 px-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
               rows={1}
             />
             <button type="submit" disabled={!input.trim() || uploading}
-              className="w-[52px] h-[52px] shrink-0 rounded-xl bg-[#F5A623] hover:bg-[#F5A623] disabled:opacity-50 flex items-center justify-center text-[#FFFFFF] transition-colors shadow-lg shadow-[#F5A623]/20">
+              className="w-[52px] h-[52px] shrink-0 rounded-xl bg-gold hover:bg-gold disabled:opacity-50 flex items-center justify-center text-cream transition-colors shadow-lg shadow-gold/20">
               {uploading
-                ? <div className="w-4 h-4 border-2 border-[rgba(245,166,35,0.3)] border-t-white rounded-full animate-spin" />
+                ? <div className="w-4 h-4 border-2 border-[rgba(232,150,46,0.18)] border-t-white rounded-full animate-spin" />
                 : <Send className="w-5 h-5 ml-1" />
               }
             </button>

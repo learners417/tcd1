@@ -1,4 +1,6 @@
+import { planDe, TOPE_MENTOR_BLANCO } from '../lib/planes';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { safeGet } from '../lib/safeStorage';
 import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
 import { streamText } from '../lib/aiProvider';
 import Markdown from 'react-markdown';
@@ -44,15 +46,24 @@ import { AGENTES, NIVEL_NOMBRE } from '../lib/agents';
 type Message = CoachConversationMessage;
 
 function buildInitialMessage(): Message {
-  const profile = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+  const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
   const dInicio = profile.fecha_inicio ? new Date(profile.fecha_inicio) : new Date();
   const diff = Math.floor((Date.now() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
   const semanaActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
   const nombre = profile.nombre || 'Fundadora';
 
-  const diary = JSON.parse(localStorage.getItem('tcd_diary_weekly') || '[]');
+  const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
   const last = diary.length > 0 ? diary[0].respuestas : null;
 
+  // El wow del día 1: si es su primera semana y hay diagnóstico, el espejo va primero
+  const dxRaw = safeGet<Record<string, string>>('tcd_diagnostico', {});
+  const freno = dxRaw.freno || '';
+  if (semanaActual === 1 && freno) {
+    return {
+      role: 'assistant',
+      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empezá hoy — el impulso del día 1 vale oro. 🥋`,
+    } as Message;
+  }
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
   if (last && last.cuello) {
     msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, pero estás frenada por: _"${last.cuello}"_.\n\n`;
@@ -83,7 +94,7 @@ function daysSince(iso: string | null | undefined): number {
   return Math.floor((Date.now() - t) / 86400000);
 }
 
-export default function Coach({ userId }: { userId?: string }) {
+export default function Coach({ userId, perfil }: { userId?: string; perfil?: Partial<import('../lib/supabase').Profile> }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -99,7 +110,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const lastSummaryAtRef = useRef<number>(0);
   const nivelesEntrenadoresRef = useRef<Record<string, number>>({});
   const alcanzoNivel4Ref = useRef<boolean>(false);
-  // Estado real de la Hoja de Ruta · alimenta el system prompt para que el
+  // Estado real de El Camino · alimenta el system prompt para que el
   // Coach sepa qué metas ★ están hechas y no las sugiera de nuevo.
   const tareasHojaDeRutaRef = useRef<HojaDeRutaItem[]>([]);
 
@@ -232,16 +243,21 @@ export default function Coach({ userId }: { userId?: string }) {
     }
   }, [userId]);
 
+  const [guardadoOk, setGuardadoOk] = useState(false);
   const persist = useCallback(
     async (msgs: Message[]) => {
       if (userId) {
         try {
           await saveCoachMessages(userId, msgs);
+          setGuardadoOk(true);
+          setTimeout(() => setGuardadoOk(false), 2500);
         } catch {
           /* silencioso */
         }
       } else {
         localStorage.setItem('tcd_coach_messages_v2', JSON.stringify(msgs));
+        setGuardadoOk(true);
+        setTimeout(() => setGuardadoOk(false), 2500);
       }
     },
     [userId],
@@ -267,6 +283,20 @@ export default function Coach({ userId }: { userId?: string }) {
     async (text: string) => {
       const hasAttachments = attachments.length > 0;
       if ((!text.trim() && !hasAttachments) || isTyping) return;
+
+      // ═══ El tope de la Semana Blanca: 30 mensajes, cierre elegante ═══
+      if (planDe(perfil) === 'blanco') {
+        let usados = 0;
+        try { usados = parseInt(localStorage.getItem('tcd_mentor_blanco_msgs') ?? '0', 10) || 0; } catch { /* noop */ }
+        if (usados >= TOPE_MENTOR_BLANCO) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant' as const,
+            content: 'Llegamos al límite de conversaciones de tu Semana Blanca. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
+          }]);
+          return;
+        }
+        try { localStorage.setItem('tcd_mentor_blanco_msgs', String(usados + 1)); } catch { /* noop */ }
+      }
 
       const sentAttachments = attachments;
       setAttachments([]);
@@ -308,7 +338,7 @@ export default function Coach({ userId }: { userId?: string }) {
 
         const extraCtx = detectarContextoConversacion(text);
         const coachExtra = loadCoachExtraContext();
-        const localPerfil = JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+        const localPerfil = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
         const perfil = { ...localPerfil, ...(supabaseProfileRef.current ?? {}) };
 
         // Texto resumido de niveles por entrenador · para el system prompt
@@ -347,7 +377,7 @@ export default function Coach({ userId }: { userId?: string }) {
         await persist(finales);
         await intentarRotarSummary(finales);
       } catch {
-        toast.error('Error de conexión con el Coach IA. Intentá de nuevo.');
+        toast.error('El Mentor no pudo responder. Vuelve a intentarlo en un momento.');
         setMessages((prev) => {
           const next = [...prev];
           next[next.length - 1] = {
@@ -360,7 +390,7 @@ export default function Coach({ userId }: { userId?: string }) {
         setIsTyping(false);
       }
     },
-    [attachments, isTyping, messages, persist, intentarRotarSummary],
+    [attachments, isTyping, messages, persist, intentarRotarSummary, perfil],
   );
 
   const handlePaste = useCallback(
@@ -401,7 +431,7 @@ export default function Coach({ userId }: { userId?: string }) {
   const avatarUrl = localStorage.getItem('tcd_avatar') || '';
   const profile = (() => {
     try {
-      return JSON.parse(localStorage.getItem('tcd_profile') || '{}');
+      return safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
     } catch {
       return {};
     }
@@ -409,25 +439,32 @@ export default function Coach({ userId }: { userId?: string }) {
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-[#F5A623]/10">
-      <div className="p-5 border-b border-[rgba(245,166,35,0.15)] bg-[#F5A623]/[0.03] flex items-center justify-between">
+    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-gold/10">
+      <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-gold/[0.03] flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#F5A623]/20 flex items-center justify-center border border-[#F5A623]/30">
-            <Bot className="w-5 h-5 text-[#F5A623]" />
+          <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center border border-gold/30">
+            <Bot className="w-5 h-5 text-gold" />
           </div>
+          <img
+            src="/javo.jpg"
+            alt="Javo"
+            className="w-9 h-9 rounded-full object-cover border border-gold/40 shrink-0"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
           <div>
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
-              Coach IA
+              Mentor IA
             </h2>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-[#22C55E]" /> Clon de Javo · conoce todo tu ADN
+            <p className="text-[11px] text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-success" /> Tu guía del camino · conoce tu ADN completo
+              {guardadoOk && <span className="text-success normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
             </p>
           </div>
         </div>
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-[#F5A623]/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -445,24 +482,36 @@ export default function Coach({ userId }: { userId?: string }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
                 msg.role === 'assistant'
-                  ? 'bg-[#F5A623]/20 text-[#F5A623] border-[#F5A623]/30'
-                  : 'bg-white/5 text-white/60 border-white/10'
+                  ? 'bg-gold/15 text-gold border-gold/40 ring-2 ring-gold/10'
+                  : 'bg-white/5 text-white/75 border-white/10'
               }`}
             >
               {msg.role === 'assistant' ? (
-                <Bot className="w-4 h-4" />
+                <span className="text-[13px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
               ) : avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img loading="lazy" src={avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-xs font-bold text-white">{userInitial}</span>
               )}
             </div>
 
+            {msg.role === 'assistant' && !msg.content.includes('```') ? (
+              /* El Mentor humano: burbujas separadas por párrafo — conversación, no documento */
+              <div className="max-w-[85%] flex flex-col gap-2">
+                {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
+                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                    <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
+                      <Markdown>{parte}</Markdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <div
               className={`max-w-[85%] rounded-2xl p-5 ${
                 msg.role === 'user'
-                  ? 'bg-[#F5A623] text-[#0A0A0A] rounded-tr-sm shadow-lg'
-                  : 'card-panel bg-[#1C1C1C] text-white/90 rounded-tl-sm border border-[rgba(245,166,35,0.15)]'
+                  ? 'bg-gold text-ink rounded-tr-sm shadow-lg'
+                  : 'card-panel bg-surface text-white/90 rounded-tl-sm border border-[rgba(232,150,46,0.10)]'
               }`}
             >
               {msg.role === 'user' ? (
@@ -470,21 +519,21 @@ export default function Coach({ userId }: { userId?: string }) {
                   {msg.content}
                 </p>
               ) : (
-                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-[#F5A623]">
+                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
                   {msg.content ? (
                     <Markdown>{msg.content}</Markdown>
                   ) : (
                     <span className="flex gap-1.5 items-center py-1">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-gold animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </span>
@@ -492,19 +541,20 @@ export default function Coach({ userId }: { userId?: string }) {
                 </div>
               )}
             </div>
+            )}
           </div>
         ))}
       </div>
 
-      <div className="p-4 border-t border-[rgba(245,166,35,0.15)] bg-black/20">
+      <div className="p-4 border-t border-[rgba(232,150,46,0.10)] bg-black/20">
         {quickReplies.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             {quickReplies.map((qr) => (
               <button
                 key={qr.id}
                 onClick={() => handleSend(qr.label)}
                 disabled={isTyping}
-                className="px-3 py-1.5 rounded-full border border-[rgba(245,166,35,0.2)] bg-[#F5A623]/5 hover:bg-[#F5A623]/10 text-xs text-white/70 font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-gold/10 to-transparent hover:from-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
                 <span className="text-[11px]">{qr.icon}</span>
                 {qr.label}
@@ -542,9 +592,9 @@ export default function Coach({ userId }: { userId?: string }) {
             placeholder={
               isTyping
                 ? 'Tu coach está conectando ideas...'
-                : 'Mencioná tu duda · bloqueo · pegá una captura (Ctrl+V)...'
+                : 'Mencioná tu duda · bloqueo · pega una captura (Ctrl+V)...'
             }
-            className="flex-1 bg-white/5 border border-[rgba(245,166,35,0.2)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all disabled:opacity-50 shadow-inner"
+            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -554,7 +604,7 @@ export default function Coach({ userId }: { userId?: string }) {
               cargandoEstado ||
               uploadingAttachment
             }
-            className="absolute right-2 w-9 h-9 rounded-lg bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 flex items-center justify-center text-[#0A0A0A] transition-colors"
+            className="absolute right-2 w-9 h-9 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-50 flex items-center justify-center text-ink transition-colors"
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

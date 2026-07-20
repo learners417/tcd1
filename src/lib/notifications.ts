@@ -273,6 +273,42 @@ export async function notificarMensajeCliente(
   });
 }
 
+/** Notifica a TODOS los admins (helper del G1). */
+async function idsAdmins(): Promise<string[]> {
+  if (!isSupabaseReady() || !supabase) return [];
+  const { data } = await supabase.from('profiles').select('id').eq('rol', 'admin');
+  return (data ?? []).map((r: { id: string }) => r.id);
+}
+
+/** El cliente subió una evidencia → aviso a todo el equipo. */
+export async function notificarAdminsEvidencia(clienteNombre: string, sesion: string): Promise<void> {
+  const admins = await idsAdmins();
+  await Promise.all(admins.map((adminId) => crearNotificacion({
+    usuario_id: adminId,
+    tipo: 'admin',
+    titulo: `📎 Evidencia de ${clienteNombre}`,
+    descripcion: `${clienteNombre} subió su evidencia de la sesión ${sesion}. Revísala en su ficha.`,
+    accion_url: '/admin/clientes',
+  })));
+}
+
+/** El cliente ganó un cinturón → celebración en su campanita. */
+export async function notificarCinturon(userId: string, emoji: string, nombre: string, metafora: string): Promise<void> {
+  await crearNotificacion({
+    usuario_id: userId,
+    tipo: 'hito',
+    titulo: `${emoji} ¡Cinturón ${nombre}!`,
+    descripcion: `${metafora}. Tu Mentor te espera con una pregunta.`,
+    accion_url: '/hoja-de-ruta',
+  });
+}
+
+/** El cliente le escribió al equipo → aviso a todos los admins. */
+export async function notificarAdminsMensaje(clienteNombre: string): Promise<void> {
+  const admins = await idsAdmins();
+  await Promise.all(admins.map((adminId) => notificarMensajeCliente(adminId, clienteNombre)));
+}
+
 // ─── Consultas ──────────────────────────────────────────────────────────────────
 
 export async function obtenerNotificaciones(
