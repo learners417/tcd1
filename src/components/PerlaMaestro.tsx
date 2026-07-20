@@ -29,7 +29,7 @@ export default function PerlaMaestro({ perla }: { perla: Perla }) {
     <div className="card-panel p-5 border border-gold/20 bg-gradient-to-br from-gold/[0.06] to-transparent">
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="w-4 h-4 text-gold" />
-        <span className="text-[10px] font-bold text-gold uppercase tracking-widest">
+        <span className="text-[11px] font-bold text-gold uppercase tracking-widest">
           Perla del Maestro
         </span>
       </div>
@@ -44,7 +44,7 @@ export default function PerlaMaestro({ perla }: { perla: Perla }) {
           {sonando ? 'Pausar' : 'Escuchar a Javo'}
         </button>
       ) : (
-        <div className="flex items-center gap-2 text-[10px] text-cream/35 uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-[11px] text-cream/35 uppercase tracking-wider">
           <Lock className="w-3.5 h-3.5" /> Perla en camino — Javo la graba pronto
         </div>
       )}

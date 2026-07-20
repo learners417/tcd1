@@ -233,7 +233,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
         <h3 className="text-sm font-semibold text-cream">
           Edicion de imagen
         </h3>
-        <p className="text-xs text-cream/40 mt-1">
+        <p className="text-xs text-cream/55 mt-1">
           Sumi una imagen existente, escribi los cambios y opcionalmente una referencia de personaje. La salida mantiene el tamano original.
         </p>
       </div>
@@ -245,15 +245,15 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <ImageIcon className="w-3.5 h-3.5 text-gold" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cream/70">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-cream/70">
                 Imagen a editar
               </span>
-              <span className="text-[9px] text-danger/70 normal-case font-normal tracking-normal">obligatorio</span>
+              <span className="text-[11px] text-danger/70 normal-case font-normal tracking-normal">obligatorio</span>
             </div>
             {baseImage && (
               <button
                 onClick={() => setBaseImage(null)}
-                className="text-cream/30 hover:text-danger transition-colors"
+                className="text-cream/45 hover:text-danger transition-colors"
                 aria-label="Quitar imagen"
               >
                 <X className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
                   className="w-full h-40 object-contain bg-black/30"
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[10px] text-cream/40">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-cream/55">
                 <span>{baseImage.width} × {baseImage.height}px</span>
                 {formatLabel && (
                   <>
@@ -284,9 +284,9 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center gap-2 p-6 border border-dashed border-gold/30 rounded-lg cursor-pointer hover:border-gold/60 hover:bg-gold/5 transition-colors min-h-[160px]">
-              <Upload className="w-5 h-5 text-cream/30" />
-              <span className="text-xs text-cream/50">Subir imagen</span>
-              <span className="text-[10px] text-cream/25">JPG / PNG / WebP — max 10MB</span>
+              <Upload className="w-5 h-5 text-cream/45" />
+              <span className="text-xs text-cream/65">Subir imagen</span>
+              <span className="text-[11px] text-cream/25">JPG / PNG / WebP — max 10MB</span>
               <input
                 ref={baseInputRef}
                 type="file"
@@ -302,16 +302,16 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
         <div className="card-panel p-3 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-cream/40" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cream/70">
+              <User className="w-3.5 h-3.5 text-cream/55" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-cream/70">
                 Personaje de referencia
               </span>
-              <span className="text-[9px] text-cream/30 normal-case font-normal tracking-normal">opcional</span>
+              <span className="text-[11px] text-cream/45 normal-case font-normal tracking-normal">opcional</span>
             </div>
             {characterRef && (
               <button
                 onClick={() => setCharacterRef(null)}
-                className="text-cream/30 hover:text-danger transition-colors"
+                className="text-cream/45 hover:text-danger transition-colors"
                 aria-label="Quitar referencia"
               >
                 <X className="w-3.5 h-3.5" />
@@ -328,13 +328,13 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
                   className="w-full h-40 object-contain bg-black/30"
                 />
               </div>
-              <p className="text-[10px] text-cream/40 truncate">{characterRef.fileName}</p>
+              <p className="text-[11px] text-cream/55 truncate">{characterRef.fileName}</p>
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center gap-2 p-6 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 hover:bg-cream/[0.02] transition-colors min-h-[160px]">
               <Upload className="w-5 h-5 text-cream/20" />
-              <span className="text-xs text-cream/40">Subir referencia</span>
-              <span className="text-[10px] text-cream/25">para reemplazar al personaje del slide</span>
+              <span className="text-xs text-cream/55">Subir referencia</span>
+              <span className="text-[11px] text-cream/25">para reemplazar al personaje del slide</span>
               <input
                 ref={charInputRef}
                 type="file"
@@ -349,7 +349,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
 
       {/* Instrucciones */}
       <div>
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-cream/40 mb-2">
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">
           Indicaciones de cambio
         </label>
         <textarea
@@ -362,7 +362,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
           disabled={editing}
         />
         {characterRef && (
-          <p className="text-[10px] text-gold/70 mt-1.5">
+          <p className="text-[11px] text-gold/70 mt-1.5">
             La referencia de personaje se usara para reemplazar al personaje del slide manteniendo pose, iluminacion y composicion.
           </p>
         )}
@@ -382,7 +382,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
         {(baseImage || characterRef || result) && !editing && (
           <button
             onClick={reset}
-            className="px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/50 hover:border-cream/25 hover:text-cream/80 transition-all"
+            className="px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:border-cream/25 hover:text-cream/80 transition-all"
           >
             Limpiar
           </button>
@@ -393,10 +393,10 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
       {editing && progress && (
         <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-cream/60">
+            <span className="text-xs text-cream/75">
               Modelo: <span className="text-gold">{progress.modelName}</span>
             </span>
-            <span className="text-xs text-cream/40">Intento {progress.attempt}/{progress.total}</span>
+            <span className="text-xs text-cream/55">Intento {progress.attempt}/{progress.total}</span>
           </div>
           <div className="h-1.5 bg-cream/10 rounded-full overflow-hidden">
             <div
@@ -413,12 +413,12 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
       {/* Resultado */}
       {result && baseImage && (
         <div className="space-y-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-cream/40">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-cream/55">
             Resultado
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <p className="text-[10px] text-cream/40 uppercase tracking-wider">Original</p>
+              <p className="text-[11px] text-cream/55 uppercase tracking-wider">Original</p>
               <div className="rounded-xl overflow-hidden border border-cream/10">
                 <img
                   src={base64ToDataUrl(baseImage.base64, baseImage.mimeType)}
@@ -428,7 +428,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
               </div>
             </div>
             <div className="space-y-1.5">
-              <p className="text-[10px] text-gold uppercase tracking-wider">Editada</p>
+              <p className="text-[11px] text-gold uppercase tracking-wider">Editada</p>
               <div className="rounded-xl overflow-hidden border border-gold/30">
                 <img
                   src={base64ToDataUrl(result.base64, result.mimeType)}
@@ -436,7 +436,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
                   className="w-full h-auto block"
                 />
               </div>
-              <p className="text-[9px] text-cream/30">Modelo: {result.modelUsed}</p>
+              <p className="text-[11px] text-cream/45">Modelo: {result.modelUsed}</p>
             </div>
           </div>
 
@@ -460,7 +460,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
             </button>
             <button
               onClick={continueEditing}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-cream/10 text-xs text-cream/50 hover:border-cream/25 hover:text-cream/80 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-cream/10 text-xs text-cream/65 hover:border-cream/25 hover:text-cream/80 transition-all"
             >
               <RotateCcw className="w-3.5 h-3.5" /> Editar de nuevo
             </button>

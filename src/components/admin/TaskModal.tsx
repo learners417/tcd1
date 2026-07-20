@@ -95,13 +95,13 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="bg-panel border border-gold/12 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[rgba(232,150,46,0.1)] shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-gold/10 shrink-0">
           <h2 className="text-base font-semibold text-cream">
             {isEditing ? 'Editar tarea' : 'Nueva tarea'}
           </h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/40 hover:text-cream hover:bg-cream/5 transition-all">
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -119,13 +119,13 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
           {/* Título */}
           <div>
-            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Título *</label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Título *</label>
             <input
               type="text"
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
               placeholder="¿Qué hay que hacer?"
-              className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 transition-colors"
+              className="w-full bg-ink border border-gold/12 rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
           <div className="grid grid-cols-2 gap-3">
             {/* Asignado a */}
             <div>
-              <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Asignar a</label>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Asignar a</label>
               <CustomSelect
                 value={asignadoA}
                 onChange={setAsignadoA}
@@ -155,7 +155,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
             {/* Prioridad */}
             <div>
-              <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Prioridad</label>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Prioridad</label>
               <CustomSelect
                 value={prioridad}
                 onChange={v => setPrioridad(v as AdminTareaPrioridad)}
@@ -167,7 +167,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
           <div className="grid grid-cols-2 gap-3">
             {/* Estado */}
             <div>
-              <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Estado</label>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Estado</label>
               <CustomSelect
                 value={status}
                 onChange={v => setStatus(v as AdminTareaStatus)}
@@ -177,19 +177,19 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
             {/* Fecha vencimiento */}
             <div>
-              <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Vence el</label>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Vence el</label>
               <input
                 type="date"
                 value={fechaVencimiento}
                 onChange={e => setFechaVencimiento(e.target.value)}
-                className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                className="w-full bg-ink border border-gold/12 rounded-xl px-3 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
               />
             </div>
           </div>
 
           {/* Cliente (opcional) */}
           <div>
-            <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Cliente relacionado <span className="normal-case font-normal">(opcional)</span></label>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Cliente relacionado <span className="normal-case font-normal">(opcional)</span></label>
             <CustomSelect
               value={clienteId}
               onChange={setClienteId}
@@ -233,8 +233,8 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-5 border-t border-[rgba(232,150,46,0.1)] shrink-0">
-          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm text-cream/40 hover:text-cream transition-colors">
+        <div className="flex justify-end gap-3 p-5 border-t border-gold/10 shrink-0">
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm text-cream/55 hover:text-cream transition-colors">
             Cancelar
           </button>
           <button

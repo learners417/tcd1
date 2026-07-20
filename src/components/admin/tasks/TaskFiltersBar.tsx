@@ -132,10 +132,10 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
     <div className="bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-2.5 py-2">
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Filter indicator */}
-        <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/40">
+        <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/55">
           <Filter className="w-3.5 h-3.5" />
           {activeCount > 0 && (
-            <span className="text-[10px] font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
+            <span className="text-[11px] font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
               {activeCount}
             </span>
           )}
@@ -216,7 +216,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
                   ? { backgroundColor: color.solid, color: '#080808' }
                   : { backgroundColor: color.bg, color: color.text }
                 }
-                className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold leading-none"
+                className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold leading-none"
               >
                 {getInitials(m.nombre)}
               </span>
@@ -229,7 +229,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
         {activeCount > 0 && (
           <button
             onClick={reset}
-            className="ml-auto h-7 inline-flex items-center gap-1 px-2 text-xs text-cream/40 hover:text-gold transition-colors"
+            className="ml-auto h-7 inline-flex items-center gap-1 px-2 text-xs text-cream/55 hover:text-gold transition-colors"
           >
             <X className="w-3.5 h-3.5" />
             Limpiar

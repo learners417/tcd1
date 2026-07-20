@@ -32,12 +32,12 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-cream mb-1">Segmentacion y Audiencia</h3>
-        <p className="text-sm text-cream/50">Configura a quien va dirigida tu campaña</p>
+        <p className="text-sm text-cream/65">Configura a quien va dirigida tu campaña</p>
       </div>
 
       {/* Nombre */}
       <div>
-        <label className="block text-xs text-cream/60 mb-1.5 font-medium">Nombre de la Campaña</label>
+        <label className="block text-xs text-cream/75 mb-1.5 font-medium">Nombre de la Campaña</label>
         <input
           type="text"
           value={form.nombre}
@@ -49,7 +49,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
 
       {/* Nicho */}
       <div>
-        <label className="block text-xs text-cream/60 mb-1.5 font-medium">Nicho Objetivo</label>
+        <label className="block text-xs text-cream/75 mb-1.5 font-medium">Nicho Objetivo</label>
         <input
           type="text"
           value={form.nicho}
@@ -61,7 +61,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
 
       {/* Ubicacion */}
       <div>
-        <label className="block text-xs text-cream/60 mb-1.5 font-medium">Ubicacion (paises/ciudades)</label>
+        <label className="block text-xs text-cream/75 mb-1.5 font-medium">Ubicacion (paises/ciudades)</label>
         <input
           type="text"
           value={form.ubicacion}
@@ -74,7 +74,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
       {/* Edad */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-cream/60 mb-1.5 font-medium">Edad Minima</label>
+          <label className="block text-xs text-cream/75 mb-1.5 font-medium">Edad Minima</label>
           <input
             type="number"
             min={18}
@@ -85,7 +85,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
           />
         </div>
         <div>
-          <label className="block text-xs text-cream/60 mb-1.5 font-medium">Edad Maxima</label>
+          <label className="block text-xs text-cream/75 mb-1.5 font-medium">Edad Maxima</label>
           <input
             type="number"
             min={18}
@@ -99,7 +99,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
 
       {/* Genero */}
       <div>
-        <label className="block text-xs text-cream/60 mb-1.5 font-medium">Genero</label>
+        <label className="block text-xs text-cream/75 mb-1.5 font-medium">Genero</label>
         <div className="flex gap-2">
           {(['todos', 'mujeres', 'hombres'] as const).map((g) => (
             <button
@@ -108,7 +108,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 form.genero === g
                   ? 'bg-gold/20 text-gold border border-gold/40'
-                  : 'bg-panel text-cream/50 border border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)]'
+                  : 'bg-panel text-cream/65 border border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)]'
               }`}
             >
               {g.charAt(0).toUpperCase() + g.slice(1)}
@@ -119,7 +119,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
 
       {/* Intereses */}
       <div>
-        <label className="block text-xs text-cream/60 mb-1.5 font-medium">Intereses</label>
+        <label className="block text-xs text-cream/75 mb-1.5 font-medium">Intereses</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -156,7 +156,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
       {/* Presupuesto */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-cream/60 mb-1.5 font-medium">Presupuesto Diario (USD)</label>
+          <label className="block text-xs text-cream/75 mb-1.5 font-medium">Presupuesto Diario (USD)</label>
           <input
             type="text"
             value={form.presupuesto_diario}
@@ -166,7 +166,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
           />
         </div>
         <div>
-          <label className="block text-xs text-cream/60 mb-1.5 font-medium">Duracion (dias)</label>
+          <label className="block text-xs text-cream/75 mb-1.5 font-medium">Duracion (dias)</label>
           <input
             type="number"
             min={1}
@@ -183,7 +183,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
         <div className="space-y-4 p-4 rounded-xl border border-azure/30 bg-azure/5">
           <p className="text-sm font-medium text-azure">Configuracion Lead Gen</p>
           <div>
-            <label className="block text-xs text-cream/60 mb-1.5 font-medium">URL Landing Page</label>
+            <label className="block text-xs text-cream/75 mb-1.5 font-medium">URL Landing Page</label>
             <input
               type="url"
               value={form.url_landing}
@@ -193,7 +193,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
             />
           </div>
           <div>
-            <label className="block text-xs text-cream/60 mb-1.5 font-medium">URL del VSL</label>
+            <label className="block text-xs text-cream/75 mb-1.5 font-medium">URL del VSL</label>
             <input
               type="url"
               value={form.url_vsl}
@@ -203,7 +203,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
             />
           </div>
           <div>
-            <label className="block text-xs text-cream/60 mb-1.5 font-medium">
+            <label className="block text-xs text-cream/75 mb-1.5 font-medium">
               Monto Minimo de Inversion para Filtro (USD)
             </label>
             <input
@@ -213,7 +213,7 @@ export default function WizardStepAudiencia({ form, onChange }: Props) {
               placeholder="500"
               className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream placeholder:text-cream/25 focus:outline-none focus:border-gold/50"
             />
-            <p className="text-xs text-cream/30 mt-1">
+            <p className="text-xs text-cream/45 mt-1">
               Si el lead responde menos de este monto, NO se envia el evento de conversion a Meta.
               Asi la API aprende a buscar leads cada vez mejores.
             </p>

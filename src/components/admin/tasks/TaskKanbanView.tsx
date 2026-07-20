@@ -97,7 +97,7 @@ function DroppableColumn({
             <div className="text-sm font-bold truncate" style={{ color: color.text }}>
               {ADMIN_TAREA_STATUS_LABELS[status]}
             </div>
-            <div className="text-[11px] text-cream/40">
+            <div className="text-[11px] text-cream/55">
               {tareas.length} {tareas.length === 1 ? 'tarea' : 'tareas'}
             </div>
           </div>

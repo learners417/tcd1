@@ -73,14 +73,14 @@ export default function SesionViva({
   } | null>(null);
   const [cerrando, setCerrando] = useState(false);
 
-  const segundosObjetivo = sesion?.modoCorto ? 900 : parseTiempoEstimado(tiempoEstimado);
+  const segundosObjetivo = parseTiempoEstimado(tiempoEstimado);
 
   // Al completarse la meta durante la sesión → pasar al check-out.
   useEffect(() => {
     if (isCompleted && fase === 'trabajo') setFase('checkout');
   }, [isCompleted, fase]);
 
-  const abrirSesion = async (checkin: { emocion: EmocionSesion; objetivo: string; modoCorto?: boolean }) => {
+  const abrirSesion = async (checkin: { emocion: EmocionSesion; objetivo: string }) => {
     const nueva: SesionEnCurso = {
       metaKey, metaCodigo, metaTitulo,
       checkinEmocion: checkin.emocion,
@@ -89,7 +89,6 @@ export default function SesionViva({
       corriendoDesde: Date.now(),
       pausas: 0,
       iniciadaEn: new Date().toISOString(),
-      modoCorto: checkin.modoCorto,
     };
     setSesionEnCurso(nueva);
     setSesion(nueva);
@@ -104,7 +103,7 @@ export default function SesionViva({
     }
   };
 
-  const cerrarSesion = async (checkout: { emocion: EmocionSesion; compromisos: string[]; diario?: string }) => {
+  const cerrarSesion = async (checkout: { emocion: EmocionSesion; compromisos: string[] }) => {
     if (!sesion) return;
     setCerrando(true);
     const duracion = segundosDeSesion(sesion);
@@ -150,9 +149,7 @@ export default function SesionViva({
   if (fase === 'trabajo' && sesion) {
     return (
       <div className="space-y-4">
-        <div className="sticky top-0 z-20 -mx-1 px-1 pb-1 bg-[#0D0C0B]/92 backdrop-blur-sm">
-          <CronometroSesion sesion={sesion} segundosObjetivo={segundosObjetivo} onSesionChange={setSesion} />
-        </div>
+        <CronometroSesion sesion={sesion} segundosObjetivo={segundosObjetivo} onSesionChange={setSesion} />
         {children}
       </div>
     );
@@ -176,7 +173,7 @@ export default function SesionViva({
     const outE = EMOCIONES_SALIDA.find((e) => e.id === cierre.emocionOut);
     return (
       <div className="rounded-2xl border border-success/25 bg-success/5 p-5 space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" /> Sesión consolidada
         </p>
         <h4 className="text-white font-bold">Hoy produjiste esto</h4>
@@ -184,13 +181,13 @@ export default function SesionViva({
           <p>✅ <span className="text-white">{metaTitulo}</span> — {formatoCrono(cierre.duracion)} de trabajo real.</p>
           {inE && outE && (
             <p>
-              {inE.emoji} Llegaste {inE.label.toLowerCase()} <ArrowRight className="w-3 h-3 inline mx-1 text-white/40" />
+              {inE.emoji} Llegaste {inE.label.toLowerCase()} <ArrowRight className="w-3 h-3 inline mx-1 text-white/55" />
               {outE.emoji} te vas {outE.label.toLowerCase()}.
             </p>
           )}
           {cierre.compromisos.length > 0 && (
             <div>
-              <p className="text-white/50 text-xs mt-2 mb-1">Tus compromisos (tu mentor los recuerda):</p>
+              <p className="text-white/65 text-xs mt-2 mb-1">Tus compromisos (tu mentor los recuerda):</p>
               <ul className="space-y-0.5">
                 {cierre.compromisos.map((c, i) => (
                   <li key={i} className="text-white/80">• {c}</li>
@@ -199,7 +196,7 @@ export default function SesionViva({
             </div>
           )}
         </div>
-        <p className="text-[11px] text-white/40">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
+        <p className="text-[11px] text-white/55">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
       </div>
     );
   }

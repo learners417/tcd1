@@ -169,12 +169,12 @@ export default function TaskMapaMamuska({
     <div className="space-y-6">
       <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-[10px] font-mono text-gold uppercase tracking-widest font-bold">
+          <span className="text-[11px] font-mono text-gold uppercase tracking-widest font-bold">
             <Grid3X3 className="w-3 h-3 inline mr-1" />
             {meta.codigo} · Mapa Mamuska
           </span>
           {saved && (
-            <span className="text-[10px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
+            <span className="text-[11px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Guardado
             </span>
           )}
@@ -185,7 +185,7 @@ export default function TaskMapaMamuska({
         >
           {meta.titulo}
         </h3>
-        <p className="text-sm text-cream/60 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
       </div>
 
       {gaps.length > 0 && (
@@ -222,13 +222,13 @@ export default function TaskMapaMamuska({
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono text-cream/40 uppercase tracking-widest">
+                <span className="text-xs font-mono text-cream/55 uppercase tracking-widest">
                   Fila {idx + 1}
                 </span>
                 <button
                   type="button"
                   onClick={() => borrarFila(fila._id)}
-                  className="text-cream/30 hover:text-[#ff5e5e] transition-colors p-1"
+                  className="text-cream/45 hover:text-[#ff5e5e] transition-colors p-1"
                   aria-label={`Borrar fila ${idx + 1}`}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export default function TaskMapaMamuska({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-cream/50 mb-1 font-semibold">
+                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
                     Obstáculo (Matriz B)
                   </label>
                   <textarea
@@ -249,7 +249,7 @@ export default function TaskMapaMamuska({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-cream/50 mb-1 font-semibold">
+                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
                     Paso del Método que lo resuelve
                   </label>
                   <textarea
@@ -261,7 +261,7 @@ export default function TaskMapaMamuska({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-cream/50 mb-1 font-semibold">
+                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
                     En qué oferta lo resuelve
                   </label>
                   <select
@@ -279,7 +279,7 @@ export default function TaskMapaMamuska({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-cream/50 mb-1 font-semibold">
+                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
                     Nivel de conciencia del avatar
                   </label>
                   <select

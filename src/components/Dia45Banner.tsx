@@ -29,13 +29,13 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
           <AlertTriangle className="w-5 h-5 text-[#ff5e5e]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
             Día {diaActual} · punto de no retorno {diasDespues >= 0 ? `+${diasDespues}` : diasDespues}
           </p>
           <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
             Tu ADN está incompleto para activar Fase 4
           </h3>
-          <p className="text-sm text-cream/60">
+          <p className="text-sm text-cream/75">
             Faltan <span className="text-cream font-semibold">{validacion.camposFaltantes.length}</span>{' '}
             campos críticos ({validacion.porcentajeCompleto}% completo). Gastar en ads con ADN incompleto
             es quemar plata. Vuelve a los pilares de abajo antes de seguir.
@@ -68,7 +68,7 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
                 {campos.map((c) => c.label).join(' · ')}
               </p>
             </div>
-            <ArrowRight className="w-4 h-4 text-cream/40 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
+            <ArrowRight className="w-4 h-4 text-cream/55 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
           </button>
         ))}
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -8,10 +8,19 @@ import CreditsBadge from './credits/CreditsBadge';
 import { CREDITS_ENABLED } from '../lib/featureFlags';
 
 interface TopbarProps {
+  currentPage?: string;
+  onBack?: () => void;
   setCurrentPage: (page: string) => void;
   userId?: string;
   onMobileMenuToggle: () => void;
 }
+
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Mentor IA', liga: 'La Liga',
+  red: 'La Red', mensajes: 'Mensajes', adn: 'ADN del Negocio', diario: 'Diario del Fundador',
+  biblioteca: 'El Método', agentes: 'Entrenadores', creador: 'Creador de Contenido',
+  campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
+};
 
 const searchablePages = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Panel principal del programa' },
@@ -68,7 +77,7 @@ function tiempoRelativo(fechaISO: string): string {
   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
+export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,22 +198,29 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
   return (
     <>
       <header className="h-14 md:h-20 px-4 md:px-8 flex items-center justify-between z-20 relative">
-        {/* Hamburger — mobile only */}
-        <button
-          onClick={onMobileMenuToggle}
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors"
-          aria-label="Abrir menú"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        {/* Back (sub-páginas) o menú (home) + título de pantalla — mobile */}
+        <div className="md:hidden flex items-center gap-1.5 min-w-0">
+          {currentPage && currentPage !== 'dashboard' && onBack ? (
+            <button onClick={onBack} className="btn-icon -ml-2 shrink-0" aria-label="Volver">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          ) : (
+            <button onClick={onMobileMenuToggle} className="btn-icon -ml-2 shrink-0" aria-label="Abrir menú">
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-base font-semibold text-cream truncate not-italic" style={{ fontFamily: 'var(--font-body)' }}>
+            {(currentPage && PAGE_TITLES[currentPage]) || ''}
+          </h1>
+        </div>
 
         <div
           onClick={() => setShowSearch(true)}
           className="hidden md:flex items-center w-96 card-panel px-4 py-2 cursor-pointer hover:bg-surface transition-colors"
         >
-          <Search className="w-4 h-4 text-cream/40" />
-          <span className="bg-transparent text-sm text-cream/40 ml-3">Buscar secciones, tareas...</span>
-          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-[10px] text-cream/50 font-mono ml-auto">
+          <Search className="w-4 h-4 text-cream/55" />
+          <span className="bg-transparent text-sm text-cream/55 ml-3">Buscar secciones, tareas...</span>
+          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-[11px] text-cream/65 font-mono ml-auto">
             ⌘K
           </div>
         </div>
@@ -221,7 +237,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                   ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
                   : unreadCount > 0
                     ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
-                    : 'text-cream/60 hover:text-cream'
+                    : 'text-cream/75 hover:text-cream'
               }`}
               aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'}
             >
@@ -248,7 +264,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                   {notifications.length === 0 && (
                     <div className="py-12 text-center">
                       <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
-                      <p className="text-sm text-cream/40">Sin notificaciones</p>
+                      <p className="text-sm text-cream/55">Sin notificaciones</p>
                     </div>
                   )}
                   {notifications.map(notif => {
@@ -272,16 +288,16 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                             )}
                           </div>
                           {notif.descripcion && (
-                            <p className="text-xs text-cream/50 line-clamp-2">{notif.descripcion}</p>
+                            <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
                           )}
-                          <p className="text-[10px] text-cream/30 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                          <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
                 <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
-                  <button onClick={() => setShowNotifications(false)} className="text-xs text-cream/50 hover:text-cream transition-colors">
+                  <button onClick={() => setShowNotifications(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
                     Cerrar
                   </button>
                 </div>
@@ -310,7 +326,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm animate-in fade-in duration-150" onClick={() => setShowSearch(false)}>
           <div className="w-full max-w-lg bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 p-4 border-b border-[rgba(232,150,46,0.10)]">
-              <Search className="w-5 h-5 text-cream/40" />
+              <Search className="w-5 h-5 text-cream/55" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -319,7 +335,7 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                 placeholder="¿A dónde quieres ir?"
                 className="bg-transparent border-none outline-none text-cream text-sm w-full placeholder-cream/40"
               />
-              <button onClick={() => setShowSearch(false)} className="text-cream/40 hover:text-cream">
+              <button onClick={() => setShowSearch(false)} className="text-cream/55 hover:text-cream">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -333,18 +349,18 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-gold/10 transition-colors"
                 >
-                  <page.icon className="w-5 h-5 text-cream/40" />
+                  <page.icon className="w-5 h-5 text-cream/55" />
                   <div>
                     <p className="text-sm font-medium text-cream/90">{page.label}</p>
-                    <p className="text-xs text-cream/40">{page.desc}</p>
+                    <p className="text-xs text-cream/55">{page.desc}</p>
                   </div>
                 </button>
               ))}
               {filteredPages.length === 0 && (
-                <p className="text-sm text-cream/40 text-center py-8">No se encontraron resultados</p>
+                <p className="text-sm text-cream/55 text-center py-8">No se encontraron resultados</p>
               )}
             </div>
-            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-[10px] text-cream/40">
+            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-[11px] text-cream/55">
               <span>↑↓ Navegar</span>
               <span>↵ Abrir</span>
               <span>esc Cerrar</span>
