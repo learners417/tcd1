@@ -104,7 +104,7 @@ export default function Red({ userId }: { userId?: string }) {
         <h1 className="text-2xl font-light text-cream tracking-tight flex items-center gap-2">
           <Users className="w-6 h-6 text-gold" /> La Red
         </h1>
-        <p className="text-sm text-cream/65 mt-1">
+        <p className="text-sm text-cream/50 mt-1">
           Nadie sana solo. Regalá la Semana Blanca a quien lo necesita, y dejale a la cohorte lo que
           aprendiste en el campo.
         </p>
@@ -148,7 +148,7 @@ export default function Red({ userId }: { userId?: string }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-mono text-cream truncate">{inv.codigo}</p>
                   <p
-                    className={`text-[11px] uppercase tracking-wider font-bold ${
+                    className={`text-[10px] uppercase tracking-wider font-bold ${
                       inv.estado === 'redimida' ? 'text-success' : 'text-cream/35'
                     }`}
                   >
@@ -158,7 +158,7 @@ export default function Red({ userId }: { userId?: string }) {
                 {inv.estado !== 'redimida' ? (
                   <button
                     onClick={() => copiar(inv.codigo)}
-                    className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold/12 border border-gold/30 text-gold text-[11px] font-bold uppercase tracking-wider hover:bg-gold/20 transition-colors"
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold/12 border border-gold/30 text-gold text-[10px] font-bold uppercase tracking-wider hover:bg-gold/20 transition-colors"
                   >
                     {copiado === inv.codigo ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiado === inv.codigo ? 'Copiado' : 'Copiar link'}
@@ -204,7 +204,7 @@ export default function Red({ userId }: { userId?: string }) {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
                   tipo === t
                     ? 'bg-gold/15 border-gold/40 text-gold'
-                    : 'bg-transparent border-white/10 text-cream/65 hover:border-white/25'
+                    : 'bg-transparent border-white/10 text-cream/50 hover:border-white/25'
                 }`}
               >
                 {t === 'objecion' ? 'Una objeción' : 'Un hook'}
@@ -243,7 +243,7 @@ export default function Red({ userId }: { userId?: string }) {
               <div key={h.id ?? i} className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
+                    className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
                       h.tipo === 'hook'
                         ? 'bg-success/15 text-success'
                         : 'bg-gold/15 text-gold'
@@ -251,7 +251,7 @@ export default function Red({ userId }: { userId?: string }) {
                   >
                     {h.tipo === 'hook' ? 'Hook' : 'Objeción'}
                   </span>
-                  <span className="text-[11px] text-cream/35">
+                  <span className="text-[10px] text-cream/35">
                     {h.es_tu ? 'Vos' : h.alias} · {tiempoRel(h.created_at)}
                   </span>
                 </div>
@@ -266,12 +266,12 @@ export default function Red({ userId }: { userId?: string }) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-cream/65">
+          <p className="text-sm text-cream/50">
             Todavía no hay aportes. Sé el primero en dejarle algo a la cohorte — lo que a vos te costó,
             a otro le ahorra semanas.
           </p>
         )}
-        <p className="text-[11px] text-cream/45 mt-3">
+        <p className="text-[10px] text-cream/30 mt-3">
           Los aportes son anónimos. Se comparte la experiencia, no el nombre.
         </p>
       </div>

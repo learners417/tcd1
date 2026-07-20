@@ -448,7 +448,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           <h1 className="text-2xl font-light text-white flex items-center gap-2">
             <Bot className="w-6 h-6 text-gold" /> Entrenadores IA
           </h1>
-          <p className="text-sm text-white/75 mt-1">
+          <p className="text-sm text-white/60 mt-1">
             Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
             cuando avanzás en El Camino.
           </p>
@@ -463,7 +463,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 <h2 className="text-sm font-medium uppercase tracking-wider text-gold">
                   {CATEGORIA_LABEL[cat]}
                 </h2>
-                <p className="text-xs text-white/55 mt-0.5">
+                <p className="text-xs text-white/40 mt-0.5">
                   {CATEGORIA_SUBTITULO[cat]}
                 </p>
               </header>
@@ -529,7 +529,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           <div className="flex items-center gap-3">
             <button
               onClick={volverAlGrid}
-              className="flex items-center gap-1.5 text-xs text-white/75 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Volver
             </button>
@@ -543,15 +543,15 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               <h2 className="text-sm font-medium text-gold flex items-center gap-2">
                 {agenteActivo.titulo}
                 {autonomoActivo && (
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
                     <Trophy className="w-3 h-3" /> Autónoma
                   </span>
                 )}
               </h2>
               {identidadDe(agenteActivo.id) && (
-                <p className="text-[11px] text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
+                <p className="text-[11px] text-cream/50 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
               )}
-              <p className="text-xs text-white/65">
+              <p className="text-xs text-white/50">
                 Nivel {snapshotActivo.current_level} · {NIVEL_NOMBRE[snapshotActivo.current_level]} ·{' '}
                 {snapshotActivo.practice_count} prácticas
               </p>
@@ -560,7 +560,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           <div className="flex items-center gap-2">
             <button
               onClick={copiarConversacion}
-              className="flex items-center gap-1.5 text-xs text-white/75 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
             >
               {copiado ? (
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -571,7 +571,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             </button>
             <button
               onClick={reiniciarConversacion}
-              className="flex items-center gap-1.5 text-xs text-white/75 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
               title="Empezar de nuevo · borra esta conversación"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -585,7 +585,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
       <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-4">
         {cargandoConversacion && (
           <div className="flex justify-start">
-            <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/75 text-sm">
+            <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
               <Loader2 className="w-4 h-4 animate-spin" />
               Cargando conversación previa...
             </div>
@@ -628,7 +628,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         ))}
         {cargando && (
           <div className="flex justify-start">
-            <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/75 text-sm">
+            <div className="card-panel rounded-2xl px-4 py-3 flex items-center gap-2 text-white/60 text-sm">
               <Loader2 className="w-4 h-4 animate-spin" />
               Pensando...
             </div>
@@ -650,7 +650,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 <span className="text-base shrink-0 mt-0.5">{qr.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium">{qr.label}</div>
-                  <div className="text-[11px] text-white/55 mt-0.5 leading-snug">
+                  <div className="text-[11px] text-white/40 mt-0.5 leading-snug">
                     {qr.subtitle}
                   </div>
                 </div>
@@ -772,12 +772,12 @@ function AgenteCard({
                 className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30 ${unlocked ? '' : 'opacity-40'}`}
                 style={{ borderColor: unlocked ? ident.anillo : 'rgba(255,255,255,0.10)' }}
               >
-                <span className={`text-[19px] font-bold ${unlocked ? 'text-cream' : 'text-white/55'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
+                <span className={`text-[19px] font-bold ${unlocked ? 'text-cream' : 'text-white/40'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
               </div>
             );
           }
           return IconComp ? (
-            <IconComp className={`w-6 h-6 shrink-0 ${autonomo ? 'text-emerald-300' : unlocked ? 'text-gold' : 'text-white/45'}`} />
+            <IconComp className={`w-6 h-6 shrink-0 ${autonomo ? 'text-emerald-300' : unlocked ? 'text-gold' : 'text-white/30'}`} />
           ) : null;
         })()}
         <div className="flex-1 min-w-0">
@@ -788,19 +788,19 @@ function AgenteCard({
                   ? 'text-emerald-300'
                   : unlocked
                     ? 'text-gold'
-                    : 'text-white/55'
+                    : 'text-white/40'
               }`}
             >
               {agente.titulo}
             </h3>
-            {!unlocked && <Lock className="w-3.5 h-3.5 text-white/55" />}
+            {!unlocked && <Lock className="w-3.5 h-3.5 text-white/40" />}
             {autonomo && (
-              <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 Autónoma
               </span>
             )}
           </div>
-          <p className="text-xs text-white/65 mt-0.5">{agente.subtitulo}</p>
+          <p className="text-xs text-white/50 mt-0.5">{agente.subtitulo}</p>
         </div>
       </div>
 
@@ -809,12 +809,12 @@ function AgenteCard({
       </p>
 
       <div
-        className={`mt-3 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider ${
+        className={`mt-3 flex items-center justify-between text-[10px] font-medium uppercase tracking-wider ${
           autonomo
             ? 'text-emerald-300'
             : unlocked
               ? 'text-gold group-hover:underline'
-              : 'text-white/55'
+              : 'text-white/40'
         }`}
       >
         <span>
@@ -875,7 +875,7 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
         <div className="flex gap-2 pt-2">
           <button
             onClick={onCerrar}
-            className="flex-1 text-xs text-white/75 hover:text-white bg-gold/5 px-4 py-2.5 rounded-xl transition-colors"
+            className="flex-1 text-xs text-white/60 hover:text-white bg-gold/5 px-4 py-2.5 rounded-xl transition-colors"
           >
             Cerrar
           </button>

@@ -99,7 +99,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 1,
         usa_ia: false,
-        video_youtube_id: 'v154pbAd3Hw',
+        video_youtube_id: '6PG6nsJhnxA',
         coach_instruccion: 'MODO VIDEO-FALLBACK: si el video no está disponible, contale en 5 min: (1) la promesa — 10 pacientes de tu precio digno en 90 días y el SISTEMA para repetirlo; (2) las 4 fases — Sanar el Dinero, Tu Protocolo, Captación y Ventas, Servicio y Escala; (3) los cinturones — se ganan por hitos REALES verificados, como una planta que crece de semilla a árbol; (4) la regla — una tarea por día, 45-60 min; (5) el requisito — presupuesto de publicidad de ~$400-700 en los 90 días, que se autofinancia desde tu primera venta. Entregale el libro Sanadores Libres.',
       },
       {
@@ -138,7 +138,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 4,
         dia_asignado: 1,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P0_4',
+        video_youtube_id: 'lVglslFMDeA',
         coach_instruccion: 'MODO VIDEO-FALLBACK: explicá la app en 5 min — El Camino muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cerrá con el pacto: 1 hora por día. Pedile que lo escriba con sus palabras.',
       },
     ],
@@ -175,7 +175,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 2,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P1_1',
+        video_youtube_id: 'AAk1P3ZrZOY',
         coach_instruccion: 'MODO VIDEO-FALLBACK: contá la tesis en 5 min — el mártir del libro Sanadores Libres: el profesional brillante que cobra poco "por vocación" y termina fundido, sin tiempo y resentido. La ciencia: los money scripts (Klontz) se heredan y operan solos; el cuerpo los guarda (van der Kolk). Por eso esta semana trabajamos el dinero ANTES que el marketing: un sistema perfecto sobre una creencia rota produce autosabotaje. Los próximos días: radiografía, lealtad, LA QUEMA (la ceremonia completa), EL NÚMERO con Óptica y Código — y para el que sigue: el cuerpo y la creencia nueva.',
       },
       {
@@ -313,7 +313,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 10,
         usa_ia: false,
-        video_youtube_id: '3QVjYzWNM7M',
+        video_youtube_id: 'UwiDGcMFfJQ',
         coach_instruccion: 'MODO VIDEO-FALLBACK: contá en 5 min — el profesional promedio vende horas sueltas (commodity, se compara por precio); el director vende UN método con nombre propio (activo, se compara por resultado). La poda: una transformación, un protocolo de 3-7 pasos, un precio. Su método YA existe en lo que hace — esta semana lo documentamos, lo nombramos y lo empaquetamos.',
       },
       {
@@ -512,7 +512,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 19,
         usa_ia: false,
-        video_youtube_id: 'ck2IVA9ZTzU',
+        video_youtube_id: 'FKrmQYR4CKA',
         coach_instruccion: 'MODO VIDEO-FALLBACK: el circuito en 5 min — anuncio en Meta → clic abre WhatsApp → tu agente de IA (Meta Business Agent, nativo y gratis) responde al instante 24/7, hace las preguntas de filtro y agenda SOLO a los calificados → llamada → venta. Los datos: 55% de los leads llegan fuera de horario; 78% compra al primero que responde; responder en <5 min multiplica x21. Por eso el agente no es un lujo: ES el sistema. Los que hoy no califican van a tu Sala de Espera (canal) — nadie se pierde.',
       },
       {
@@ -742,7 +742,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 30,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P9B_1',
+        video_youtube_id: 'xzrQXG7iaJc',
         coach_instruccion: 'MODO VIDEO-FALLBACK: la W en 5 min — (1) Apertura: preguntas, el que pregunta dirige; (2) Dolor: profundizar hasta lo que le cuesta de verdad; (3) Cielo: que él mismo describa su después; (4) Obstáculos: sacarlos ANTES del precio — y el más letal es el decisor ausente ("lo hablo con mi pareja" = llamada perdida; el decisor se invita ANTES); (5) Cierre: el precio con calma, silencio, y la pregunta de decisión. Vender es ayudar a decidir, no convencer.',
       },
       {
@@ -854,7 +854,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 1,
         dia_asignado: 38,
         usa_ia: false,
-        video_youtube_id: 'PLACEHOLDER_P9C_1',
+        video_youtube_id: 'CQXN4Vt_nng',
         coach_instruccion: 'MODO VIDEO-FALLBACK: en 5 min — el error clásico es vender bien y entregar caótico (el paciente paga $1.000 y recibe silencio 3 días). El protocolo: (1) primeras 24 hs — bienvenida + primer paso concreto; (2) la primera sesión agendada YA en el momento del pago; (3) recordatorios y seguimiento con estructura (qué es automático, qué es humano); (4) el cierre del protocolo con medición del resultado. Todo esto después vive en MiClínica Digital — tu app operativa. Hoy lo documenta para tenerlo listo.',
       },
       {

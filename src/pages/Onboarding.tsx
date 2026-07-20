@@ -193,7 +193,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
         <div className="flex items-end justify-between">
           <div>
             <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Tu ADN Prototipo Beta</h1>
-            <p className="text-cream/75">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
+            <p className="text-cream/60">Fase 0 completada — ahora comienza el trabajo real con los 10 pilares</p>
           </div>
           <button onClick={resetOnboarding} className="px-4 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-sm text-cream/80 transition-colors">
             Reiniciar Diagnóstico
@@ -222,7 +222,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
     <div className="max-w-2xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Onboarding — Fase 0</h1>
-        <p className="text-cream/75">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
+        <p className="text-cream/60">3 bloques · {QUESTIONS.length} preguntas · La IA genera tu ADN prototipo beta para arrancar el programa</p>
       </div>
 
       {/* Progress bar */}
@@ -233,7 +233,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
             style={{ width: `${(Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length / QUESTIONS.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-cream/55">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
+        <span className="text-xs text-cream/40">{Object.keys(answers).filter(k => answers[parseInt(k)]?.trim()).length}/{QUESTIONS.length}</span>
       </div>
 
       {/* Question card */}
@@ -242,9 +242,9 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
           <span className="w-8 h-8 rounded-full bg-gold/20 text-gold text-sm font-bold flex items-center justify-center">
             {currentStep + 1}
           </span>
-          <span className="text-xs text-cream/55 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
+          <span className="text-xs text-cream/40 uppercase tracking-wider">Bloque {QUESTIONS[currentStep].bloque} — {QUESTIONS[currentStep].tituloBloque}</span>
         </div>
-        <p className="text-[11px] text-cream/45 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
+        <p className="text-[10px] text-cream/30 uppercase tracking-wider mb-6">Pregunta {currentStep + 1} de {QUESTIONS.length}</p>
 
         <h2 className="text-xl font-medium text-cream mb-6">{QUESTIONS[currentStep].question}</h2>
 
@@ -277,7 +277,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-cream/75 hover:text-cream disabled:opacity-30 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-cream/60 hover:text-cream disabled:opacity-30 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Anterior
           </button>

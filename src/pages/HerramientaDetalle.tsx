@@ -60,7 +60,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
   if (!herramienta) {
     return (
-      <div className="text-cream/75 text-sm p-6">
+      <div className="text-cream/60 text-sm p-6">
         Herramienta no encontrada: {herramientaId}
       </div>
     );
@@ -144,7 +144,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       {/* Breadcrumb */}
       <button
         onClick={onVolver}
-        className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors"
+        className="flex items-center gap-2 text-sm text-cream/60 hover:text-cream transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver a la Biblioteca
@@ -156,13 +156,13 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
           {(() => { const iconName = EMOJI_TO_ICON[herramienta.emoji]; const IC = iconName ? HERRAMIENTA_ICON_MAP[iconName] : null; return IC ? <IC className="w-8 h-8 text-gold" /> : null; })()}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] bg-gold/10 text-cream/75 px-2 py-0.5 rounded font-mono">
+              <span className="text-[10px] bg-gold/10 text-cream/60 px-2 py-0.5 rounded font-mono">
                 {herramienta.id}
               </span>
-              <span className="text-[11px] text-cream/55">Grupo {herramienta.grupo}</span>
+              <span className="text-[10px] text-cream/40">Grupo {herramienta.grupo}</span>
             </div>
             <h1 className="text-lg font-light text-cream mt-0.5">{herramienta.titulo}</h1>
-            <p className="text-sm text-cream/75">{herramienta.descripcion}</p>
+            <p className="text-sm text-cream/60">{herramienta.descripcion}</p>
           </div>
         </div>
 
@@ -181,11 +181,11 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
         {herramienta.inputs.map((campo: CampoInput) => (
           <div key={campo.id}>
-            <label className="block text-xs font-medium text-cream/75 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-medium text-cream/60 mb-1.5 uppercase tracking-wider">
               {campo.label}
               {campo.required && <span className="text-red-400 ml-1">*</span>}
               {campo.precargar && inputs[campo.id] && (
-                <span className="ml-2 text-[11px] text-success normal-case tracking-normal">
+                <span className="ml-2 text-[10px] text-success normal-case tracking-normal">
                   (precargado de tu perfil)
                 </span>
               )}
@@ -248,7 +248,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                 <>
                   <button
                     onClick={handleCopiar}
-                    className="flex items-center gap-1.5 text-xs text-cream/75 hover:text-cream bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-cream/60 hover:text-cream bg-gold/5 px-3 py-1.5 rounded-xl transition-colors"
                   >
                     {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiado ? 'Copiado' : 'Copiar'}
@@ -259,7 +259,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                     className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl transition-colors ${
                       outputGuardado
                         ? 'text-success bg-success/10 border border-success/20'
-                        : 'text-cream/75 hover:text-cream bg-gold/5'
+                        : 'text-cream/60 hover:text-cream bg-gold/5'
                     }`}
                   >
                     {guardando ? (
@@ -273,7 +273,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                   </button>
                   <button
                     onClick={() => { setOutput(''); setOutputGuardado(false); }}
-                    className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream bg-gold/3 px-3 py-1.5 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream bg-gold/3 px-3 py-1.5 rounded-xl transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     Regenerar
@@ -289,7 +289,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
                 <Markdown>{output}</Markdown>
               </div>
             ) : (
-              <span className="text-cream/55 flex items-center gap-2 text-sm">
+              <span className="text-cream/40 flex items-center gap-2 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" /> Generando...
               </span>
             )}

@@ -182,7 +182,7 @@ export default function Oferta() {
                   </motion.h3>
                 </AnimatePresence>
               </div>
-              <p className="text-sm text-cream/75 mt-4">La Inteligencia Artificial está trabajando. Esto puede tomar unos segundos.</p>
+              <p className="text-sm text-cream/60 mt-4">La Inteligencia Artificial está trabajando. Esto puede tomar unos segundos.</p>
             </div>
           </motion.div>
         )}
@@ -190,7 +190,7 @@ export default function Oferta() {
 
       <div>
         <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Generador de Oferta Premium</h1>
-        <p className="text-cream/75">Diseñá tu programa high-ticket con Inteligencia Artificial</p>
+        <p className="text-cream/60">Diseñá tu programa high-ticket con Inteligencia Artificial</p>
       </div>
 
       {step === 'input' && (
@@ -201,7 +201,7 @@ export default function Oferta() {
             </div>
             <div>
               <h2 className="text-xl font-medium text-cream">Describí qué quieres ofrecer</h2>
-              <p className="text-sm text-cream/75">Cuanto más específico, mejor será la oferta generada.</p>
+              <p className="text-sm text-cream/60">Cuanto más específico, mejor será la oferta generada.</p>
             </div>
           </div>
 
@@ -217,8 +217,8 @@ export default function Oferta() {
                 className="w-full h-40 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-4 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none"
               />
               <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-cream/55">Mínimo 50 caracteres</span>
-                <span className={`text-xs ${description.length >= 50 ? 'text-success' : 'text-cream/55'}`}>
+                <span className="text-xs text-cream/40">Mínimo 50 caracteres</span>
+                <span className={`text-xs ${description.length >= 50 ? 'text-success' : 'text-cream/40'}`}>
                   {description.length} caracteres
                 </span>
               </div>
@@ -241,7 +241,7 @@ export default function Oferta() {
           <div className="flex items-center justify-between">
             <button 
               onClick={() => setStep('input')}
-              className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors"
+              className="flex items-center gap-2 text-sm text-cream/60 hover:text-cream transition-colors"
             >
               <ChevronLeft className="w-4 h-4" /> Volver a editar
             </button>
@@ -270,22 +270,22 @@ export default function Oferta() {
                     {variant.id === 'conservadora' ? 'Opción Conservadora' : variant.id === 'media' ? 'Opción Media' : 'Opción Ambiciosa'}
                   </span>
                   <h3 className="text-xl font-medium text-cream mt-4 mb-1">{variant.name}</h3>
-                  <p className="text-sm text-cream/75 h-10">{variant.subtitle}</p>
+                  <p className="text-sm text-cream/60 h-10">{variant.subtitle}</p>
                 </div>
 
                 <div className="mb-6 pb-6 border-b border-[rgba(232,150,46,0.12)]">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-light text-cream">${variant.price}</span>
-                    <span className="text-sm text-cream/55">USD</span>
+                    <span className="text-sm text-cream/40">USD</span>
                   </div>
-                  <p className="text-xs text-cream/55 mt-1">{variant.duration} semanas de duración</p>
+                  <p className="text-xs text-cream/40 mt-1">{variant.duration} semanas de duración</p>
                 </div>
 
                 <div className="space-y-3 mb-8 flex-1">
                   <p className="text-xs font-medium text-cream/80 uppercase tracking-wider">Incluye:</p>
                   <ul className="space-y-2">
                     {variant.includes.map((item: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-cream/75">
+                      <li key={i} className="flex items-start gap-2 text-sm text-cream/60">
                         <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                         <span>{item}</span>
                       </li>
@@ -295,7 +295,7 @@ export default function Oferta() {
 
                 <div className="mt-auto">
                   <div className="flex items-center justify-between pt-4 border-t border-[rgba(232,150,46,0.12)] mb-4">
-                    <span className="text-xs text-cream/55">Viabilidad de mercado</span>
+                    <span className="text-xs text-cream/40">Viabilidad de mercado</span>
                     <span className={`text-sm font-medium ${variant.score > 80 ? 'text-success' : 'text-gold'}`}>
                       {variant.score}/100
                     </span>
@@ -327,7 +327,7 @@ export default function Oferta() {
           <div className="flex items-center justify-between mb-6">
             <button 
               onClick={() => setStep('variants')}
-              className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors"
+              className="flex items-center gap-2 text-sm text-cream/60 hover:text-cream transition-colors"
             >
               <ChevronLeft className="w-4 h-4" /> Volver a variantes
             </button>
@@ -356,7 +356,7 @@ export default function Oferta() {
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-success/80" />
               </div>
-              <div className="mx-auto px-24 py-1 rounded-md bg-gold/5 text-xs text-cream/75 font-mono flex items-center gap-2">
+              <div className="mx-auto px-24 py-1 rounded-md bg-gold/5 text-xs text-cream/60 font-mono flex items-center gap-2">
                 <Lock className="w-3 h-3" /> tu-clinica-digital.sanare.os
               </div>
             </div>

@@ -53,7 +53,7 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Encabezado ceremonial */}
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte</p>
         <h1 className="text-3xl md:text-4xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `El plan de ${nombre}` : 'Tu Plan'}
         </h1>
@@ -73,9 +73,9 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
         <div className="flex items-end justify-between mb-3">
           <div>
             <span className="text-5xl font-light text-cream" style={{ fontVariantNumeric: 'tabular-nums' }}>{ventas.count}</span>
-            <span className="text-2xl font-light text-cream/55"> / {META_PACIENTES}</span>
+            <span className="text-2xl font-light text-cream/40"> / {META_PACIENTES}</span>
           </div>
-          <p className="text-sm text-cream/65">pacientes</p>
+          <p className="text-sm text-cream/50">pacientes</p>
         </div>
 
         {/* Barra segmentada en 10 */}
@@ -88,7 +88,7 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
           ))}
         </div>
 
-        <p className="text-sm text-cream/75">
+        <p className="text-sm text-cream/60">
           {ventas.count === 0 && '¡Empieza! Tu primer paciente está del otro lado del sistema que estás construyendo.'}
           {ventas.count > 0 && ventas.count < META_PACIENTES && `Te faltan ${pacientesRestantes} para ser Sanador Libre. Vas a llegar.`}
           {ventas.count >= META_PACIENTES && '🎉 ¡Lo lograste! 10 pacientes. Sos Sanador Libre.'}

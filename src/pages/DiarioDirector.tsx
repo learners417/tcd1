@@ -190,10 +190,10 @@ function KpiCard({
     <div className="card-panel p-4 rounded-2xl border border-[rgba(232,150,46,0.12)]">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-gold/60" />
-        <p className="text-[11px] text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
+        <p className="text-[10px] text-cream/40 uppercase tracking-widest font-semibold">{label}</p>
       </div>
       <p className={`text-xl font-medium ${valColor}`}>{value}</p>
-      {delta && <p className="text-[11px] text-cream/55 mt-0.5">{delta}</p>}
+      {delta && <p className="text-[10px] text-cream/40 mt-0.5">{delta}</p>}
     </div>
   );
 }
@@ -446,16 +446,16 @@ Devolvé SOLO este JSON:
           <h1 className="text-2xl font-light text-cream flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-gold" /> Diario del Fundador
           </h1>
-          <p className="text-sm text-cream/75 mt-1 flex items-center gap-2">
+          <p className="text-sm text-cream/60 mt-1 flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5" />
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
             <span className="text-gold/80 font-medium">· Día {getCurrentDay()} de 90</span>
           </p>
-          <p className="text-[11px] text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
+          <p className="text-[11px] text-cream/40 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
           <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
             <span className="text-[13px]">⏱</span>
-            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
-            <span className="text-[11px] text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca y arranca · 3 min y listo'}</span>
+            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/60'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
+            <span className="text-[10px] text-cream/40">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca y arranca · 3 min y listo'}</span>
           </button>
         </div>
         <div className="flex items-center gap-3">
@@ -467,7 +467,7 @@ Devolvé SOLO este JSON:
             }`}>
               <Zap className="w-3.5 h-3.5" />
               <span className="text-sm font-bold">{energiaPromedio}</span>
-              <span className="text-[11px] opacity-60">7d</span>
+              <span className="text-[10px] opacity-60">7d</span>
             </div>
           )}
           {racha > 0 && (
@@ -478,7 +478,7 @@ Devolvé SOLO este JSON:
           )}
           <button
             onClick={() => setVista(vista === 'formulario' ? 'historial' : 'formulario')}
-            className="flex items-center gap-1.5 text-cream/75 bg-gold/5 px-3 py-1.5 rounded-xl border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 transition-colors text-sm"
+            className="flex items-center gap-1.5 text-cream/60 bg-gold/5 px-3 py-1.5 rounded-xl border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 transition-colors text-sm"
           >
             <History className="w-3.5 h-3.5" />
             Historial
@@ -504,23 +504,23 @@ Devolvé SOLO este JSON:
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Energía promedio</p>
+                  <p className="text-cream/40 uppercase tracking-wider text-[10px]">Energía promedio</p>
                   <p className="text-cream font-medium mt-0.5">{datos.energia_promedio}/10 — {datos.tendencia_energia}</p>
                 </div>
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Racha del Diario</p>
+                  <p className="text-cream/40 uppercase tracking-wider text-[10px]">Racha del Diario</p>
                   <p className="text-cream font-medium mt-0.5">{datos.racha} días consecutivos</p>
                 </div>
               </div>
               {datos.bloqueo_recurrente && (
                 <div className="bg-gold/10 border border-gold/20 rounded-xl p-3">
-                  <p className="text-[11px] text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
+                  <p className="text-[10px] text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
                   <p className="text-sm text-amber-200">{datos.bloqueo_recurrente}</p>
                 </div>
               )}
               {Array.isArray(datos.acciones_proxima_semana) && (
                 <div>
-                  <p className="text-[11px] text-cream/55 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
+                  <p className="text-[10px] text-cream/40 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
                   <ul className="space-y-1.5">
                     {datos.acciones_proxima_semana.map((accion: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-cream/80">
@@ -559,7 +559,7 @@ Devolvé SOLO este JSON:
                     {todayEntry.score}
                   </span>
                   <div>
-                    <p className="text-xs text-cream/55">de 100 puntos</p>
+                    <p className="text-xs text-cream/40">de 100 puntos</p>
                     {kpis?.deltaScore !== null && kpis?.deltaScore !== undefined && (
                       <p className={`text-xs font-medium ${kpis.deltaScore >= 0 ? 'text-success' : 'text-danger'}`}>
                         {kpis.deltaScore >= 0 ? '▲' : '▼'} {Math.abs(kpis.deltaScore)} vs ayer
@@ -598,7 +598,7 @@ Devolvé SOLO este JSON:
                 }
                 return (
                   <div className="mb-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/55 mb-2">Tus últimos 14 días</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-cream/40 mb-2">Tus últimos 14 días</p>
                     <div className="flex items-end gap-1.5 h-12">
                       {dias.map((x, i2) => (
                         <div key={i2} className="flex-1 flex flex-col items-center gap-1">
@@ -615,7 +615,7 @@ Devolvé SOLO este JSON:
                 </div>
                 <div>
                   <h2 className="text-base font-medium text-cream">¿Cómo fue hoy?</h2>
-                  <p className="text-xs text-cream/75">Tu cierre diario · 5 minutos</p>
+                  <p className="text-xs text-cream/60">Tu cierre diario · 5 minutos</p>
                 </div>
               </div>
 
@@ -629,7 +629,7 @@ Devolvé SOLO este JSON:
                 </div>
                 <Escala10 valor={energia} onChange={setEnergia} />
                 {ayerEntry && (
-                  <p className="text-[11px] text-cream/45 mt-2 text-center">
+                  <p className="text-[11px] text-cream/30 mt-2 text-center">
                     Ayer tuviste <span className="text-success">{ayerEntry.energia}</span>
                     {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
                   </p>
@@ -649,7 +649,7 @@ Devolvé SOLO este JSON:
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
-                <p className="text-[11px] text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+                <p className="text-[10px] text-cream/30 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
               </div>
 
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
@@ -698,7 +698,7 @@ Devolvé SOLO este JSON:
                         className={`text-xs px-3 py-2 rounded-lg border transition-all ${
                           on
                             ? 'border-gold/40 text-cream bg-gold/10'
-                            : 'border-white/8 text-cream/55 hover:bg-white/5'
+                            : 'border-white/8 text-cream/40 hover:bg-white/5'
                         }`}
                       >
                         {tag.label}
@@ -711,7 +711,7 @@ Devolvé SOLO este JSON:
               {/* Bloqueo */}
               <div>
                 <label className="block text-xs font-medium text-cream/80 mb-2 uppercase tracking-wider">
-                  Bloqueos <span className="text-cream/45 normal-case">(opcional)</span>
+                  Bloqueos <span className="text-cream/30 normal-case">(opcional)</span>
                 </label>
                 <textarea
                   rows={2}
@@ -769,7 +769,7 @@ Devolvé SOLO este JSON:
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
-              <p className="text-[11px] text-cream/45 text-center -mt-3">
+              <p className="text-[10px] text-cream/30 text-center -mt-3">
                 El score se calcula y se muestra después de guardar.
               </p>
             </div>
@@ -781,12 +781,12 @@ Devolvé SOLO este JSON:
       {vista === 'historial' && (
         <div className="space-y-4">
           {loading && entries.length === 0 && (
-            <div className="flex items-center gap-2 text-cream/55 text-sm">
+            <div className="flex items-center gap-2 text-cream/40 text-sm">
               <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (
-            <p className="text-center text-cream/55 text-sm py-12">Aún no hay entradas en el Diario.</p>
+            <p className="text-center text-cream/40 text-sm py-12">Aún no hay entradas en el Diario.</p>
           )}
           {entries.map((entrada) => (
             <div key={entrada.id} className="card-panel p-5 rounded-2xl border-l-4 border-l-gold/50 space-y-3">
@@ -812,12 +812,12 @@ Devolvé SOLO este JSON:
 
               {entrada.logro && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Logro</span>
+                  <span className="text-cream/30 uppercase tracking-wider text-[10px]">Logro</span>
                   <p className="text-cream/80 mt-0.5 text-sm">{entrada.logro}</p>
                 </div>
               )}
 
-              <div className="flex gap-3 text-[11px] text-cream/65">
+              <div className="flex gap-3 text-[11px] text-cream/50">
                 <span>Cuerpo {entrada.cuerpo}</span>
                 <span>Mente {entrada.mente}</span>
                 <span>Emociones {entrada.emociones}</span>
@@ -825,7 +825,7 @@ Devolvé SOLO este JSON:
 
               {entrada.bloqueo && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Bloqueo</span>
+                  <span className="text-cream/30 uppercase tracking-wider text-[10px]">Bloqueo</span>
                   <p className="text-cream/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
                 </div>
               )}
@@ -835,7 +835,7 @@ Devolvé SOLO este JSON:
                   {entrada.tareas.map((id) => {
                     const tag = TAREAS_TAGS.find((t) => t.id === id);
                     return tag ? (
-                      <span key={id} className="text-[11px] bg-gold/5 px-2 py-1 rounded-full text-cream/75">
+                      <span key={id} className="text-[10px] bg-gold/5 px-2 py-1 rounded-full text-cream/60">
                         {tag.label}
                       </span>
                     ) : null;

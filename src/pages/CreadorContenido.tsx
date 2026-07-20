@@ -191,22 +191,22 @@ function CarruselPreview({ texto }: { texto: string }) {
   if (slides.length < 3) return null;
   return (
     <div className="mb-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
       <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
         {slides.map((s) => (
           <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
-            <span className="absolute top-3 right-3 text-[11px] font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
+            <span className="absolute top-3 right-3 text-[10px] font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
             <div className="flex-1 flex items-center">
               <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
                 {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
               </p>
             </div>
-            {s.n === slides.length && <p className="text-[11px] font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
+            {s.n === slides.length && <p className="text-[10px] font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
             <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+      <p className="text-[10px] text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
     </div>
   );
 }
@@ -315,7 +315,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="card-panel p-8 border border-gold/20 bg-surface/40 text-center space-y-3">
           <Loader2 className="w-6 h-6 text-gold animate-spin mx-auto" />
-          <p className="text-sm text-cream/75">Verificando estado del programa…</p>
+          <p className="text-sm text-cream/60">Verificando estado del programa…</p>
         </div>
       </div>
     );
@@ -326,13 +326,13 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="space-y-3">
-          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+          <p className="text-[10px] text-gold uppercase tracking-widest font-semibold">
             v8 · Herramienta nueva
           </p>
           <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
             Creador de Contenido
           </h1>
-          <p className="text-cream/75 max-w-xl">
+          <p className="text-cream/60 max-w-xl">
             Genera posts, carruseles y prompts de imagen usando los datos de tu ADN.
             Esta herramienta NO escribe en tu ADN · sólo genera output para que copies
             y publiques manualmente.
@@ -347,7 +347,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
             <p className="text-lg font-medium text-cream">
               Necesitás completar P6 (Matriz A→B→C) para desbloquear el Creador
             </p>
-            <p className="text-sm text-cream/75 mt-2 max-w-md mx-auto">
+            <p className="text-sm text-cream/60 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
               Vuelve a El Camino y cierra P6 antes de venir acá.
             </p>
@@ -370,13 +370,13 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+        <p className="text-[10px] text-gold uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
         <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
           Creador de Contenido
         </h1>
-        <p className="text-cream/75 max-w-2xl">
+        <p className="text-cream/60 max-w-2xl">
           Genera posts, carruseles o prompts de imagen alineados a tu método propio,
           tu avatar y tu nivel de awareness. Esta herramienta NO escribe en tu ADN —
           el output queda acá para que lo copies y publiques.
@@ -385,7 +385,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-gold font-bold">
           1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -406,7 +406,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                 >
                   <Icon
                     className={`w-5 h-5 mb-2 ${
-                      activo ? 'text-gold' : 'text-cream/75'
+                      activo ? 'text-gold' : 'text-cream/60'
                     }`}
                   />
                   <p
@@ -416,7 +416,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-cream/65 mt-1 leading-relaxed">
+                  <p className="text-xs text-cream/50 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -428,7 +428,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de nivel */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-gold font-bold">
           2 · ¿Para qué nivel de awareness?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -453,7 +453,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   >
                     {meta.label}
                   </p>
-                  <p className="text-xs text-cream/65 mt-1 leading-relaxed">
+                  <p className="text-xs text-cream/50 mt-1 leading-relaxed">
                     {meta.descripcion}
                   </p>
                 </button>
@@ -465,7 +465,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Tema */}
       <div className="card-panel p-5 space-y-3">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-gold font-bold">
           3 · Tema · ángulo · objeción a abordar
         </p>
         <textarea
@@ -501,7 +501,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       {output && (
         <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+            <p className="text-[10px] uppercase tracking-widest text-gold font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
             </p>
             <div className="flex items-center gap-2">
@@ -511,14 +511,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   setEditOutput(output);
                   setEditando(true);
                 }}
-                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)]"
+                className="text-xs text-cream/50 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)]"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={handleGenerar}
-                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)] flex items-center gap-1"
+                className="text-xs text-cream/50 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)] flex items-center gap-1"
               >
                 <RotateCcw className="w-3 h-3" /> Rehacer
               </button>
@@ -579,7 +579,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
         </div>
       )}
 
-      <p className="text-xs text-cream/45 text-center pt-4 italic">
+      <p className="text-xs text-cream/30 text-center pt-4 italic">
         Regla v8 · esta herramienta no escribe en tu ADN. Copia lo que te sirva y publicalo
         cuando estés listo.
       </p>

@@ -120,9 +120,9 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {/* El header ceremonial (Lote 5 · la piel) */}
       {view === 'home' && (
         <div className="mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
           <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
-          <p className="text-sm text-cream/65 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
+          <p className="text-sm text-cream/50 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
         </div>
       )}
 
@@ -133,7 +133,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       {(view === 'studio' || view === 'detail') && (
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-sm text-cream/65 hover:text-cream transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-cream/50 hover:text-cream transition-colors mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver

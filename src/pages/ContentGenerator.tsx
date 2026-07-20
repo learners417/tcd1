@@ -134,14 +134,14 @@ export default function ContentGenerator() {
     <div className="max-w-5xl mx-auto space-y-6 pb-6 anímate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Generador de Contenido</h1>
-        <p className="text-cream/75">Crea contenido estratégico para redes sociales con IA</p>
+        <p className="text-cream/60">Crea contenido estratégico para redes sociales con IA</p>
       </div>
 
       {/* Config panel */}
       <div className="card-panel p-6 rounded-2xl space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-cream/75 mb-1">Tu Especialidad</label>
+            <label className="block text-xs text-cream/60 mb-1">Tu Especialidad</label>
             <input
               type="text"
               value={specialty}
@@ -151,7 +151,7 @@ export default function ContentGenerator() {
             />
           </div>
           <div>
-            <label className="block text-xs text-cream/75 mb-1">Audiencia Objetivo</label>
+            <label className="block text-xs text-cream/60 mb-1">Audiencia Objetivo</label>
             <input
               type="text"
               value={audience}
@@ -172,7 +172,7 @@ export default function ContentGenerator() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
                   activeTab === t.id
                     ? 'bg-gold/20 text-gold border-gold/30'
-                    : 'bg-gold/5 text-cream/75 hover:bg-gold/10 hover:text-cream/90 border-transparent'
+                    : 'bg-gold/5 text-cream/60 hover:bg-gold/10 hover:text-cream/90 border-transparent'
                 }`}
               >
                 <t.icon className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function ContentGenerator() {
       {generating ? (
         <div className="card-panel p-12 rounded-2xl flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-8 h-8 text-gold anímate-spin" />
-          <p className="text-cream/75 text-sm">Generando contenido con IA...</p>
+          <p className="text-cream/60 text-sm">Generando contenido con IA...</p>
         </div>
       ) : currentContent ? (
         <div className="card-panel p-6 rounded-2xl">
@@ -237,7 +237,7 @@ export default function ContentGenerator() {
           <h3 className="text-lg font-medium text-cream mb-2">
             Genera tu {TABS.find((t) => t.id === activeTab)?.label}
           </h3>
-          <p className="text-sm text-cream/75">
+          <p className="text-sm text-cream/60">
             Completa tu especialidad y haz clic en{' '}
             <span className="text-gold font-medium">Generar</span> para crear contenido con IA.
           </p>

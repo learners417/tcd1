@@ -198,22 +198,22 @@ interface RecursoADN {
   pasoDesbloqueo: { pilar: number; codigo: string; nombre: string } | null;
 }
 const RECURSOS_ADN: RecursoADN[] = [
-  { id: 'r-bienvenido', titulo: 'Bienvenido al método', youtubeId: 'v154pbAd3Hw', tab: 'O', pasoDesbloqueo: null },
+  { id: 'r-bienvenido', titulo: 'Bienvenido al método', youtubeId: '6PG6nsJhnxA', tab: 'O', pasoDesbloqueo: null },
   { id: 'r-impostor', titulo: 'Cómo superar el síndrome del impostor', youtubeId: '3JPGgF4cjDw', tab: 'O', pasoDesbloqueo: null },
   { id: 'r-historia', titulo: 'Tu historia', youtubeId: 'ZClgkkUs2QI', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
   { id: 'r-proposito', titulo: 'Tu propósito', youtubeId: 'A9bWp0nVTQI', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
   { id: 'r-legado', titulo: 'Tu legado', youtubeId: 'BiZLzUGs2Wo', tab: 'I1', pasoDesbloqueo: { pilar: 0, codigo: 'P0.2', nombre: 'Tu Foto de Partida' } },
   { id: 'r-avatar', titulo: 'Tu paciente ideal (avatar)', youtubeId: 'XdjruYVXeOA', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.3', nombre: 'Tu paciente ideal' } },
   { id: 'r-matriz', titulo: 'Tu Matriz ABC', youtubeId: '6C_Qyk-_GCw', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.3', nombre: 'Tu paciente ideal' } },
-  { id: 'r-metodo', titulo: 'Tu método', youtubeId: '3QVjYzWNM7M', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.4', nombre: 'Genera tu método' } },
+  { id: 'r-metodo', titulo: 'Tu método', youtubeId: 'UwiDGcMFfJQ', tab: 'I1', pasoDesbloqueo: { pilar: 2, codigo: 'P2.4', nombre: 'Genera tu método' } },
   { id: 'r-ofertas', titulo: 'Tus ofertas', youtubeId: '_UjQtE4lNtk', tab: 'N', pasoDesbloqueo: { pilar: 3, codigo: 'P3.2', nombre: 'Diseña tu oferta' } },
   { id: 'r-puv', titulo: 'Tu PUV', youtubeId: 'nTWKGyvBbvY', tab: 'N', pasoDesbloqueo: { pilar: 4, codigo: 'P4.2', nombre: 'El mensaje que atrae' } },
-  { id: 'r-infra', titulo: 'Tu infraestructura (sistema de captación)', youtubeId: 'ck2IVA9ZTzU', tab: 'I2', pasoDesbloqueo: { pilar: 4, codigo: 'P4.5', nombre: 'Monta tu sistema' } },
-  { id: 'r-dinero', titulo: 'Por qué el dinero se sana primero', tab: 'C1', pasoDesbloqueo: { pilar: 1, codigo: 'P1.1', nombre: 'Sanar el Dinero' } },
+  { id: 'r-infra', titulo: 'Tu infraestructura (sistema de captación)', youtubeId: 'FKrmQYR4CKA', tab: 'I2', pasoDesbloqueo: { pilar: 4, codigo: 'P4.5', nombre: 'Monta tu sistema' } },
+  { id: 'r-dinero', titulo: 'Por qué el dinero se sana primero', youtubeId: 'AAk1P3ZrZOY', tab: 'C1', pasoDesbloqueo: { pilar: 1, codigo: 'P1.1', nombre: 'Sanar el Dinero' } },
   { id: 'r-cuerpo', titulo: 'El dinero en el cuerpo', tab: 'L', pasoDesbloqueo: { pilar: 1, codigo: 'P1.4', nombre: 'El dinero en el cuerpo' } },
   { id: 'r-dominio', titulo: 'Tu dirección digital — el dominio', tab: 'I2', pasoDesbloqueo: { pilar: 4, codigo: 'P4.5b', nombre: 'Tu dominio' } },
-  { id: 'r-llamada', titulo: 'Anatomía de la llamada que cierra', tab: 'C2', pasoDesbloqueo: { pilar: 5, codigo: 'P5.1', nombre: 'La llamada' } },
-  { id: 'r-entrega', titulo: 'Entregar sin quemarte', tab: 'C2', pasoDesbloqueo: { pilar: 6, codigo: 'P6.1', nombre: 'La entrega' } },
+  { id: 'r-llamada', titulo: 'Anatomía de la llamada que cierra', youtubeId: 'xzrQXG7iaJc', tab: 'C2', pasoDesbloqueo: { pilar: 5, codigo: 'P5.1', nombre: 'La llamada' } },
+  { id: 'r-entrega', titulo: 'Entregar sin quemarte', youtubeId: 'CQXN4Vt_nng', tab: 'C2', pasoDesbloqueo: { pilar: 6, codigo: 'P6.1', nombre: 'La entrega' } },
   { id: 'r-maquina', titulo: 'La máquina de 10 por mes', tab: 'A', pasoDesbloqueo: { pilar: 7, codigo: 'P7.1', nombre: 'Autonomía' } },
 ];
 function pasoAlcanzado(pilarNum: number, completadas: Set<string>): boolean {
