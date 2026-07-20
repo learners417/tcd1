@@ -25,9 +25,9 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-cream/55 rounded-xl border border-gold/10 bg-gold/[0.04] px-3 py-2">
         <span className="font-semibold text-gold/80">Así funciona:</span>
         <span>1 · entras con tu objetivo</span>
-        <span className="text-cream/30">→</span>
+        <span className="text-cream/45">→</span>
         <span>2 · trabajas con el reloj</span>
-        <span className="text-cream/30">→</span>
+        <span className="text-cream/45">→</span>
         <span>3 · cierras lo hecho</span>
       </div>
       <div>

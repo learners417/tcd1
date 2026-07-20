@@ -24,9 +24,9 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#22C55E] mb-1">Cierre de sesión</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
-        <p className="text-xs text-white/40 mt-1">
+        <p className="text-xs text-white/55 mt-1">
           Trabajaste {formatoCrono(duracionSeg)}{entrada ? <> · llegaste {entrada.emoji} {entrada.label.toLowerCase()}</> : null}.
           {' '}Lo que se abre, se cierra.
         </p>
@@ -42,7 +42,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
               onClick={() => setEmocion(e.id)}
               className={`px-3 py-2 rounded-xl border text-sm transition-all ${
                 emocion === e.id
-                  ? 'border-[#22C55E] bg-[#22C55E]/15 text-white'
+                  ? 'border-success bg-success/15 text-white'
                   : 'border-white/10 bg-white/5 text-white/70 hover:border-white/25'
               }`}
             >
@@ -55,7 +55,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
 
       <div>
         <p className="text-sm font-semibold text-white mb-1">Compromisos para la próxima</p>
-        <p className="text-xs text-white/40 mb-2">Concretos y chiquitos. Lo que prometés acá, tu mentor lo recuerda.</p>
+        <p className="text-xs text-white/55 mb-2">Concretos y chiquitos. Lo que prometés acá, tu mentor lo recuerda.</p>
         <div className="space-y-2">
           {compromisos.map((c, i) => (
             <div key={i} className="flex gap-2">
@@ -67,13 +67,13 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
                   setCompromisos(nuevos);
                 }}
                 placeholder={i === 0 ? 'Ej: terminar la carta al dinero antes del jueves' : 'Otro compromiso…'}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/25 focus:border-[#22C55E]/60 focus:outline-none"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/25 focus:border-success/60 focus:outline-none"
               />
               {compromisos.length > 1 && (
                 <button
                   type="button"
                   onClick={() => setCompromisos(compromisos.filter((_, j) => j !== i))}
-                  className="px-2 text-white/40 hover:text-white/80"
+                  className="px-2 text-white/55 hover:text-white/80"
                   aria-label="Quitar compromiso"
                 >
                   <X className="w-4 h-4" />
@@ -85,7 +85,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
             <button
               type="button"
               onClick={() => setCompromisos([...compromisos, ''])}
-              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80"
+              className="flex items-center gap-1.5 text-xs text-white/65 hover:text-white/80"
             >
               <Plus className="w-3.5 h-3.5" /> Agregar otro
             </button>
@@ -97,7 +97,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
         type="button"
         disabled={!emocion || cerrando}
         onClick={() => emocion && onCerrar({ emocion, compromisos: compromisosLimpios })}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#22C55E] text-black hover:bg-[#3ddb70]"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-success text-black hover:bg-[#3ddb70]"
       >
         <CheckCircle2 className="w-4 h-4" /> {cerrando ? 'Consolidando…' : 'Cerrar y consolidar la sesión'}
       </button>

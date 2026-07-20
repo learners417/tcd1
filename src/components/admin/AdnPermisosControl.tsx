@@ -43,7 +43,7 @@ function Fila({ titulo, icon, items, activos, master, onToggle }: {
   const isOn = (id: string) => allOn || activos.includes(id);
 
   return (
-    <div className="flex items-start gap-3 py-2 border-b border-[rgba(232,150,46,0.06)] last:border-0">
+    <div className="flex items-start gap-3 py-2 border-b border-gold/6 last:border-0">
       <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
         {icon}{titulo}
       </div>
@@ -51,7 +51,7 @@ function Fila({ titulo, icon, items, activos, master, onToggle }: {
         {master && (
           <button onClick={() => toggle(master)}
             className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
-              allOn ? 'bg-gold text-black border-gold' : 'border-[rgba(232,150,46,0.25)] text-gold/60 hover:text-gold'}`}>
+              allOn ? 'bg-gold text-black border-gold' : 'border-gold/25 text-gold/60 hover:text-gold'}`}>
             {master === 'todas' ? 'Todas' : 'Todos'}
           </button>
         )}
@@ -96,7 +96,7 @@ export default function AdnPermisosControl({ clienteId, agentesActuales, modulos
   }
 
   return (
-    <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl px-4 py-3">
+    <div className="bg-panel border border-gold/10 rounded-2xl px-4 py-3">
       <div className="flex items-center justify-between mb-1">
         <p className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">Accesos del cliente</p>
         <button onClick={guardar} disabled={saving || !dirty}

@@ -240,7 +240,7 @@ export default function TaskCard({
               <div
                 ref={menuRef}
                 style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, width: 200 }}
-                className="z-50 bg-[#1E1E1E] border border-[rgba(232,150,46,0.12)] rounded-xl shadow-xl py-1"
+                className="z-50 bg-[#1E1E1E] border border-gold/12 rounded-xl shadow-xl py-1"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="px-3 py-1.5 text-[11px] font-bold text-cream/45 uppercase tracking-wider">
@@ -255,7 +255,7 @@ export default function TaskCard({
                     {ADMIN_TAREA_STATUS_LABELS[s]}
                   </button>
                 ))}
-                <div className="border-t border-[rgba(232,150,46,0.1)] my-1" />
+                <div className="border-t border-gold/10 my-1" />
                 <button
                   onClick={() => { onEdit(tarea); setShowMenu(false); }}
                   className="w-full text-left px-3 py-2 text-sm text-cream/70 hover:bg-cream/5 transition-colors"

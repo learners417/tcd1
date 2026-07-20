@@ -42,7 +42,7 @@ export default function BottomTabBar({ currentPage, setCurrentPage, onMore }: Pr
               onClick={() => setCurrentPage(tab.id)}
               aria-current={active ? 'page' : undefined}
               className={`flex flex-col items-center justify-center gap-1 flex-1 min-h-[3.5rem] pt-2 pb-1.5 transition-colors ${
-                active ? 'text-gold' : 'text-cream/50 hover:text-cream/80'
+                active ? 'text-gold' : 'text-cream/65 hover:text-cream/80'
               }`}
             >
               <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 2} />
@@ -53,7 +53,7 @@ export default function BottomTabBar({ currentPage, setCurrentPage, onMore }: Pr
         <button
           type="button"
           onClick={onMore}
-          className="flex flex-col items-center justify-center gap-1 flex-1 min-h-[3.5rem] pt-2 pb-1.5 text-cream/50 hover:text-cream/80 transition-colors"
+          className="flex flex-col items-center justify-center gap-1 flex-1 min-h-[3.5rem] pt-2 pb-1.5 text-cream/65 hover:text-cream/80 transition-colors"
         >
           <Menu className="w-[22px] h-[22px]" strokeWidth={2} />
           <span className="text-[11px] font-medium leading-none">Más</span>

@@ -172,8 +172,8 @@ export default function SesionViva({
     const inE = EMOCIONES_ENTRADA.find((e) => e.id === cierre.emocionIn);
     const outE = EMOCIONES_SALIDA.find((e) => e.id === cierre.emocionOut);
     return (
-      <div className="rounded-2xl border border-[#22C55E]/25 bg-[#22C55E]/5 p-5 space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#22C55E] flex items-center gap-1.5">
+      <div className="rounded-2xl border border-success/25 bg-success/5 p-5 space-y-3">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" /> Sesión consolidada
         </p>
         <h4 className="text-white font-bold">Hoy produjiste esto</h4>
@@ -181,13 +181,13 @@ export default function SesionViva({
           <p>✅ <span className="text-white">{metaTitulo}</span> — {formatoCrono(cierre.duracion)} de trabajo real.</p>
           {inE && outE && (
             <p>
-              {inE.emoji} Llegaste {inE.label.toLowerCase()} <ArrowRight className="w-3 h-3 inline mx-1 text-white/40" />
+              {inE.emoji} Llegaste {inE.label.toLowerCase()} <ArrowRight className="w-3 h-3 inline mx-1 text-white/55" />
               {outE.emoji} te vas {outE.label.toLowerCase()}.
             </p>
           )}
           {cierre.compromisos.length > 0 && (
             <div>
-              <p className="text-white/50 text-xs mt-2 mb-1">Tus compromisos (tu mentor los recuerda):</p>
+              <p className="text-white/65 text-xs mt-2 mb-1">Tus compromisos (tu mentor los recuerda):</p>
               <ul className="space-y-0.5">
                 {cierre.compromisos.map((c, i) => (
                   <li key={i} className="text-white/80">• {c}</li>
@@ -196,7 +196,7 @@ export default function SesionViva({
             </div>
           )}
         </div>
-        <p className="text-[11px] text-white/40">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
+        <p className="text-[11px] text-white/55">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
       </div>
     );
   }

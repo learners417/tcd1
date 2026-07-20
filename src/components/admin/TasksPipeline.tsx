@@ -358,7 +358,7 @@ export default function TasksPipeline({
 
       {/* Vista Hoy (banner colapsable) */}
       {tareasHoy.length > 0 && (
-        <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+        <div className="bg-panel border border-gold/12 rounded-2xl overflow-hidden">
           <button
             onClick={() => setShowHoy(v => !v)}
             className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-cream/5 transition-colors"
@@ -376,7 +376,7 @@ export default function TasksPipeline({
           </button>
 
           {showHoy && (
-            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-[rgba(232,150,46,0.1)]" style={{ paddingTop: '16px' }}>
+            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-gold/10" style={{ paddingTop: '16px' }}>
               {tareasHoy.map(t => (
                 <TaskCard
                   key={t.id}

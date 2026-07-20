@@ -124,7 +124,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 px-4 md:px-6 py-3 border-b border-[rgba(255,255,255,0.05)] shrink-0">
         {/* View toggle */}
-        <div className="inline-flex p-1 rounded-xl bg-[#0F0F0F] border border-[rgba(232,150,46,0.10)]">
+        <div className="inline-flex p-1 rounded-xl bg-[#0F0F0F] border border-gold/10">
           <button
             type="button"
             onClick={() => setView('matriz')}
@@ -160,7 +160,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar cliente..."
-                className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                className="w-full bg-black/30 border border-gold/12 rounded-lg py-2.5 pl-10 pr-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
               />
             </div>
 
@@ -184,7 +184,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
               type="button"
               onClick={refresh}
               disabled={refreshing}
-              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(232,150,46,0.12)] text-sm font-semibold text-gold hover:bg-gold/10 transition-all disabled:opacity-50"
+              className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg border border-gold/12 text-sm font-semibold text-gold hover:bg-gold/10 transition-all disabled:opacity-50"
               title="Refrescar"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -197,7 +197,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
       {/* Body */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         {view === 'camino' ? (
-          <ElCaminoView />
+          <ElCaminoView clientes={rows} checks={checks} onToggle={handleToggle} caminoDone={caminoDone} />
         ) : loading ? (
           <div className="flex justify-center items-center py-16">
             <Loader2 className="w-6 h-6 text-gold animate-spin" />

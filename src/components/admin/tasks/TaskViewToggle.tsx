@@ -20,7 +20,7 @@ const TABS: { id: TaskView; label: string; icon: React.ComponentType<{ className
 
 export default function TaskViewToggle({ value, onChange, myCount }: TaskViewToggleProps) {
   return (
-    <div className="inline-flex items-center bg-[#0F0F0F] border border-[rgba(232,150,46,0.10)] rounded-xl p-1">
+    <div className="inline-flex items-center bg-[#0F0F0F] border border-gold/10 rounded-xl p-1">
       {TABS.map(t => {
         const active = value === t.id;
         const Icon = t.icon;

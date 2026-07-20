@@ -172,7 +172,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                         width: 36,
                         height: 36,
                         background: 'rgba(232,150,46,0.12)',
-                        color: '#E8962E',
+                        color: 'var(--color-gold)',
                         fontSize: 14,
                         fontWeight: 700,
                       }}
@@ -231,13 +231,13 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                         style={{
                           width: 30,
                           height: 30,
-                          border: `2px solid ${autoCamino ? '#E8962E' : on ? '#22C55E' : 'var(--matrix-checkbox-off)'}`,
+                          border: `2px solid ${autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'var(--matrix-checkbox-off)'}`,
                           borderRadius: 7,
                           cursor: autoCamino ? 'default' : 'pointer',
-                          background: autoCamino ? '#E8962E' : on ? '#22C55E' : 'transparent',
+                          background: autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'transparent',
                         }}
                       >
-                        {on && <Check className="w-4 h-4" style={{ color: '#080808', strokeWidth: 3 }} />}
+                        {on && <Check className="w-4 h-4" style={{ color: 'var(--color-ink)', strokeWidth: 3 }} />}
                       </button>
                     </td>
                   );
@@ -254,7 +254,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                     textAlign: 'center',
                     fontSize: 14,
                     minWidth: 84,
-                    color: isComplete ? '#22C55E' : 'var(--matrix-pct-text)',
+                    color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
                     fontWeight: isComplete ? 700 : 500,
                   }}
                   title={`${done}/${TOTAL_STEPS} pasos`}
