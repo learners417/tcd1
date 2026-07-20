@@ -11,6 +11,9 @@
   --color-success: #22C55E;
   --color-danger: #EF4444;
   --color-cream: #F2EFE9;
+  /* CP2 · escala tipográfica mobile-first (gentle +1px) */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
 }
 @plugin "@tailwindcss/typography";
 
@@ -496,4 +499,33 @@ h1, h2, h3 {
 
 @media (prefers-reduced-motion: reduce) {
   .card-ios, .btn-ios-primary, .fade-rise { transition: none; animation: none; }
+}
+
+/* ═══════════ CP3 · Primitivos e interacción de nivel app ═══════════ */
+@layer base {
+  button, a, input, textarea, select, label, [role="button"], summary {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Foco visible SOLO por teclado — accesibilidad sin molestar al mouse */
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) { outline: none; }
+}
+@layer utilities {
+  /* Área táctil mínima (44px) + estado disabled en los primitivos de clase */
+  .btn-primary, .btn-secondary { min-height: 2.75rem; }
+  .btn-primary:disabled, .btn-secondary:disabled {
+    opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none;
+  }
+  .input-field { min-height: 2.75rem; }
+  /* Botón de ícono (para CP4 y adopción gradual) */
+  .btn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 2.75rem; min-height: 2.75rem; border-radius: 0.75rem;
+    color: var(--color-cream); transition: background .2s, color .2s;
+  }
+  .btn-icon:hover { background: color-mix(in oklab, var(--color-gold) 12%, transparent); }
 }

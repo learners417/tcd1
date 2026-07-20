@@ -93,7 +93,7 @@ interface AdminChecklistItem {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  ONBOARDING: { label: 'Onboarding', color: 'text-cream/50',  bg: 'bg-cream/5',  border: 'border-cream/10' },
+  ONBOARDING: { label: 'Onboarding', color: 'text-cream/65',  bg: 'bg-cream/5',  border: 'border-cream/10' },
   ACTIVE:     { label: 'Activo',     color: 'text-success',      bg: 'bg-success/10', border: 'border-success/20' },
   PAUSED:     { label: 'Pausado',    color: 'text-gold',      bg: 'bg-gold/10', border: 'border-gold/20' },
   COMPLETED:  { label: 'Completado', color: 'text-success',      bg: 'bg-success/10', border: 'border-success/20' },
@@ -112,7 +112,7 @@ const SEMAFORO_CONFIG = {
   verde:    { class: 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.4)]', label: 'En ritmo',        text: 'text-success' },
   amarillo: { class: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]', label: 'Atención',   text: 'text-gold' },
   rojo:     { class: 'bg-danger shadow-[0_0_8px_rgba(239,68,68,0.4)]',  label: 'Necesita ayuda',  text: 'text-danger' },
-  gris:     { class: 'bg-gray-600',                                         label: 'Sin datos',       text: 'text-cream/60' },
+  gris:     { class: 'bg-gray-600',                                         label: 'Sin datos',       text: 'text-cream/75' },
 };
 
 // Build pilar options from SEED_ROADMAP_V3
@@ -237,7 +237,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-surface/30 border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 bg-surface/30 border border-gold/12 rounded-2xl overflow-hidden">
       {/* Hidden file inputs */}
       <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
         onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
@@ -250,7 +250,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare className="w-12 h-12 text-gray-800 mb-4" />
-            <p className="text-cream/40">Este canal está en silencio. Rompelo vos.</p>
+            <p className="text-cream/55">Este canal está en silencio. Rompelo vos.</p>
           </div>
         ) : (
           messages.map((m) => {
@@ -267,19 +267,19 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                 ) : (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border ${
                     isAdmin ? 'bg-gold/20 border-gold/30 text-gold'
-                             : 'bg-gold/10 border-[rgba(232,150,46,0.12)] text-cream'
+                             : 'bg-gold/10 border-gold/12 text-cream'
                   }`}>
                     {isAdmin ? <Shield className="w-3.5 h-3.5" /> : initial}
                   </div>
                 )}
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] font-semibold px-1 ${isAdmin ? 'text-gold' : 'text-cream/40'} ${isMe ? 'text-right' : ''}`}>
+                  <span className={`text-[11px] font-semibold px-1 ${isAdmin ? 'text-gold' : 'text-cream/55'} ${isMe ? 'text-right' : ''}`}>
                     {senderName}{isAdmin ? ' · Coach' : ''}
                   </span>
                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                     isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
                          : isAdmin ? 'bg-gold/20 text-gold border border-gold/20 rounded-tl-sm'
-                         : 'bg-surface/60 text-cream/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
+                         : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                   }`}>
                     {m.tipo_archivo === 'imagen' && m.archivo_url && (
                       <img loading="lazy" src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
@@ -289,7 +289,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                       <audio controls src={m.archivo_url} className="w-full mb-2 rounded-lg" />
                     )}
                     {m.contenido && <p>{m.contenido}</p>}
-                    <p className={`text-[10px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                    <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                       {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -301,17 +301,17 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-[rgba(232,150,46,0.12)] shrink-0 bg-surface/20">
+      <div className="p-4 border-t border-gold/12 shrink-0 bg-surface/20">
         <div className="flex gap-2 items-end">
           <div className="flex flex-col gap-1 shrink-0">
             <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading}
               title="Subir imagen"
-              className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/60 hover:text-cream transition-colors disabled:opacity-50">
+              className="w-10 h-10 rounded-xl bg-gold/5 border border-gold/12 hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
               <Image className="w-4 h-4" />
             </button>
             <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading}
               title="Subir audio"
-              className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/60 hover:text-cream transition-colors disabled:opacity-50">
+              className="w-10 h-10 rounded-xl bg-gold/5 border border-gold/12 hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
               <Mic className="w-4 h-4" />
             </button>
           </div>
@@ -322,7 +322,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
             placeholder={uploading ? 'Subiendo archivo...' : 'Enviar mensaje al canal...'}
             disabled={enviando || uploading}
-            className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all disabled:opacity-50"
+            className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all disabled:opacity-50"
           />
           <button
             onClick={send}
@@ -339,8 +339,6 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 // ─── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────────
 
-// T9
-import DetectorHumo from '../components/DetectorHumo';
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
   const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas'];
@@ -1695,7 +1693,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       )}
 
       {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-[rgba(232,150,46,0.1)] bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-gold/10 bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
         <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
             <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-[0_0_20px_rgba(232,150,46,0.18)] shrink-0">
@@ -1703,15 +1701,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
               <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clinica Digital</h1>
-        <DetectorHumo />
-              <p className="text-[10px] text-gold uppercase tracking-widest font-bold">Admin</p>
+              <p className="text-[11px] text-gold uppercase tracking-widest font-bold">Admin</p>
             </div>
           </div>
 
           {/* Toggle expand/collapse — solo desktop */}
           <button
             onClick={() => setSidebarCollapsed(v => !v)}
-            className={`hidden md:flex items-center justify-center w-full mb-3 py-1.5 rounded-lg text-cream/40 hover:text-gold hover:bg-gold/10 transition-colors`}
+            className={`hidden md:flex items-center justify-center w-full mb-3 py-1.5 rounded-lg text-cream/55 hover:text-gold hover:bg-gold/10 transition-colors`}
             title={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
           >
             <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} />
@@ -1738,7 +1735,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative ${sidebarCollapsed ? 'md:justify-center md:px-0 md:gap-0' : ''} ${
                       mainTab === item.id
                         ? 'bg-gold/10 text-gold'
-                        : 'text-cream/60 hover:bg-gold/10 hover:text-cream'
+                        : 'text-cream/75 hover:bg-gold/10 hover:text-cream'
                     }`}
                   >
                     {mainTab === item.id && (
@@ -1752,7 +1749,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
                     {totalUnread > 0 && (
-                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[10px] font-bold flex items-center justify-center`}>
+                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center`}>
                         {totalUnread}
                       </span>
                     )}
@@ -1762,9 +1759,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           </nav>
         </div>
 
-        <div className={`mt-auto p-5 ${sidebarCollapsed ? 'md:p-3' : ''} border-t border-[rgba(232,150,46,0.1)] transition-all duration-300`}>
+        <div className={`mt-auto p-5 ${sidebarCollapsed ? 'md:p-3' : ''} border-t border-gold/10 transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-4 ${sidebarCollapsed ? 'md:justify-center md:gap-0' : ''}`}>
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center text-sm font-bold border border-[rgba(232,150,46,0.18)] shrink-0">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center text-sm font-bold border border-gold/18 shrink-0">
               {adminAvatar
                 ? <img loading="lazy" src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
                 : adminProfile.nombre.charAt(0).toUpperCase()
@@ -1772,11 +1769,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className={`flex-1 min-w-0 ${sidebarCollapsed ? 'md:hidden' : ''}`}>
               <p className="text-sm font-medium text-cream truncate">{adminProfile.nombre}</p>
-              <p className="text-[10px] text-cream/40 truncate">{adminProfile.especialidad || 'Director'}</p>
+              <p className="text-[11px] text-cream/55 truncate">{adminProfile.especialidad || 'Director'}</p>
             </div>
             <button
               onClick={() => { setAdminDraft({ nombre: adminProfile.nombre, cargo: adminProfile.especialidad || 'Director' }); setShowAdminSettings(true); }}
-              className={`${sidebarCollapsed ? 'md:hidden' : ''} w-7 h-7 rounded-lg bg-gold/5 hover:bg-gold/10 flex items-center justify-center text-cream/40 hover:text-cream transition-colors shrink-0`}
+              className={`${sidebarCollapsed ? 'md:hidden' : ''} w-7 h-7 rounded-lg bg-gold/5 hover:bg-gold/10 flex items-center justify-center text-cream/55 hover:text-cream transition-colors shrink-0`}
               title="Ajustes de perfil"
             >
               <Settings className="w-3.5 h-3.5" />
@@ -1785,7 +1782,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <button
             onClick={onSignOut}
             title={sidebarCollapsed ? 'Salir del sistema' : undefined}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-cream/60 hover:bg-gold/5 hover:text-cream transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-cream/75 hover:bg-gold/5 hover:text-cream transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>Salir del sistema</span>
@@ -1795,10 +1792,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
       {/* ─── MAIN CONTENT ──────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <header className="h-16 border-b border-[rgba(232,150,46,0.1)] flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
+        <header className="h-16 border-b border-gold/10 flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
             aria-label="Abrir menú"
           >
             <Menu className="w-5 h-5" />
@@ -1835,7 +1832,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <>
               {/* G4 · El proceso de activación — la guía operativa de Lupe */}
               <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.05] to-transparent p-5 mb-4 mx-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
                 <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-cream/70 list-decimal list-inside">
                   <li>Crear su subcuenta GHL desde el snapshot maestro</li>
                   <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
@@ -1860,13 +1857,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/30" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/45" />
                     <input
                       type="text"
                       value={clientSearch}
                       onChange={e => setClientSearch(e.target.value)}
                       placeholder="Buscar por nombre..."
-                      className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-2.5 pl-10 pr-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                      className="w-full bg-black/20 border border-gold/12 rounded-lg py-2.5 pl-10 pr-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                     />
                   </div>
                   <CustomSelect
@@ -1898,7 +1895,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 </div>
                 <button
                   onClick={() => setShowMigrationWizard(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[rgba(232,150,46,0.18)] text-sm font-semibold text-gold hover:bg-gold/10 transition-all"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gold/18 text-sm font-semibold text-gold hover:bg-gold/10 transition-all"
                 >
                   <Sparkles className="w-4 h-4" /> Migrar cliente
                 </button>
@@ -1911,24 +1908,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
 
               {/* Client table */}
-              <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+              <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                 {loading ? (
                   <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
                 ) : clientesOrdenados.length === 0 ? (
                   <div className="text-center py-16">
                     <Users className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-cream/40 text-sm">Sin clientes que coincidan</p>
+                    <p className="text-cream/55 text-sm">Sin clientes que coincidan</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                   <table className="w-full min-w-[700px]">
                     <thead>
-                      <tr className="border-b border-[rgba(232,150,46,0.1)]">
+                      <tr className="border-b border-gold/10">
                         {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Cinturón', 'Pacientes', 'Pilar', 'Estado', 'Progreso'].map(h => (
-                          <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-cream/40">{h}</th>
+                          <th key={h} className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">{h}</th>
                         ))}
                         {adminRol === 'owner' && (
-                          <th className="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-cream/40">Acciones</th>
+                          <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">Acciones</th>
                         )}
                       </tr>
                     </thead>
@@ -1946,37 +1943,37 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <tr
                             key={c.id}
                             onClick={() => { setSelectedCliente(c); setDetalleTab('resumen'); setIaRecomendacion(''); }}
-                            className="bg-panel hover:bg-surface border-b border-[rgba(232,150,46,0.1)] cursor-pointer transition-colors group"
+                            className="bg-panel hover:bg-surface border-b border-gold/10 cursor-pointer transition-colors group"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-xs font-bold text-cream shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-gold/10 border border-gold/12 flex items-center justify-center text-xs font-bold text-cream shrink-0">
                                   {c.nombre.charAt(0).toUpperCase()}
                                 </div>
                                 <span className="text-sm font-medium text-cream group-hover:text-gold transition-colors truncate max-w-[140px]">{c.nombre}</span>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-xs text-cream/50 truncate max-w-[160px]">{c.email}</td>
+                            <td className="px-4 py-3 text-xs text-cream/65 truncate max-w-[160px]">{c.email}</td>
                             <td className="px-4 py-3">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">{c.plan}</span>
+                              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">{c.plan}</span>
                             </td>
-                            <td className="px-4 py-3 text-xs text-cream/50">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-cream/60 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-[10px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
+                            <td className="px-4 py-3 text-xs text-cream/65">{c.fecha_inicio}</td>
+                            <td className="px-4 py-3 text-xs text-cream/75 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-[11px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
                     {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
                       const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
                       const [l, col] = map[p] ?? [p, '#F2EFE9'];
-                      return <span className="ml-2 text-[9px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
+                      return <span className="ml-2 text-[11px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
                     {(c as { plan_comercial?: string }).plan_comercial === 'blanco' && (
-                      <span className={`ml-1.5 text-[9px] font-semibold px-2 py-0.5 rounded-full border ${c.quema_hecha ? 'text-gold border-gold/40 bg-gold/10' : 'text-cream/30 border-[rgba(242,239,233,0.1)]'}`} title={c.quema_hecha ? 'LA QUEMA completada — lead calificado' : 'Aún sin LA QUEMA'}>
+                      <span className={`ml-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${c.quema_hecha ? 'text-gold border-gold/40 bg-gold/10' : 'text-cream/45 border-[rgba(242,239,233,0.1)]'}`} title={c.quema_hecha ? 'LA QUEMA completada — lead calificado' : 'Aún sin LA QUEMA'}>
                         {c.quema_hecha ? '🔥 QUEMA' : '· sin QUEMA'}
                       </span>
                     )}</td>
-                            <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-cream/50">{c.cinturon.nombre}</span></td>
-                            <td className="px-4 py-3 text-xs text-cream/60">{c.ventas_count}/10</td>
+                            <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-cream/65">{c.cinturon.nombre}</span></td>
+                            <td className="px-4 py-3 text-xs text-cream/75">{c.ventas_count}/10</td>
                             <td className="px-4 py-3 text-xs text-gold font-medium">{pilar}</td>
                             <td className="px-4 py-3">
                               <span
-                                className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider"
+                                className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider"
                                 style={{
                                   color: STATUS_BADGE_COLOR[st] ?? '#F2EFE9',
                                   backgroundColor: `${STATUS_BADGE_COLOR[st] ?? '#F2EFE9'}15`,
@@ -1994,7 +1991,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="text-[10px] text-cream/50 w-8 text-right">{pct}%</span>
+                                <span className="text-[11px] text-cream/65 w-8 text-right">{pct}%</span>
                               </div>
                             </td>
                             {adminRol === 'owner' && (
@@ -2003,7 +2000,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   type="button"
                                   onClick={(e) => { e.stopPropagation(); setClienteAEliminar(c); }}
                                   title="Eliminar cliente"
-                                  className="p-2 rounded-lg text-cream/40 hover:text-danger hover:bg-danger/10 transition-colors"
+                                  className="p-2 rounded-lg text-cream/55 hover:text-danger hover:bg-danger/10 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -2027,7 +2024,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="w-[240px] shrink-0 flex flex-col">
                 <button
                   onClick={() => setSelectedCliente(null)}
-                  className="flex items-center gap-2 text-xs text-cream/40 hover:text-cream transition-colors mb-3"
+                  className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-3"
                 >
                   <ChevronRight className="w-3 h-3 rotate-180" /> Volver a la tabla
                 </button>
@@ -2039,19 +2036,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       className={`w-full text-left p-3 rounded-xl border transition-all ${
                         selectedCliente?.id === c.id
                           ? 'bg-gold/10 border-gold/30'
-                          : 'bg-panel border-[rgba(232,150,46,0.1)] hover:bg-gold/5'
+                          : 'bg-panel border-gold/10 hover:bg-gold/5'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-cream truncate">{c.nombre}</p>
-                          <p className="text-[10px] text-cream/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
+                          <p className="text-[11px] text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                           {c.traba_sesion && (
-                            <p className="text-[10px] text-gold mt-0.5">🟡 trabado en: {c.traba_sesion.titulo.slice(0, 34)} (hace {c.traba_sesion.dias}d)</p>
+                            <p className="text-[11px] text-gold mt-0.5">🟡 trabado en: {c.traba_sesion.titulo.slice(0, 34)} (hace {c.traba_sesion.dias}d)</p>
                           )}
                           {!c.traba_sesion && c.dias_sin_sesion !== null && c.dias_sin_sesion >= 4 && (
-                            <p className="text-[10px] text-red-400 mt-0.5">🔴 sin sesiones hace {c.dias_sin_sesion}d</p>
+                            <p className="text-[11px] text-red-400 mt-0.5">🔴 sin sesiones hace {c.dias_sin_sesion}d</p>
                           )}
                         </div>
                       </div>
@@ -2061,15 +2058,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
 
               {/* Right: detail panel */}
-              <div className="flex-1 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative">
+              <div className="flex-1 card-panel border border-gold/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl relative">
                 {/* Header */}
                 <div className="absolute top-0 right-0 p-4 z-10">
-                  <button onClick={() => setSelectedCliente(null)} className="p-2 rounded-full bg-black/40 text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors backdrop-blur-md">
+                  <button onClick={() => setSelectedCliente(null)} className="p-2 rounded-full bg-black/40 text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors backdrop-blur-md">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="p-8 border-b border-[rgba(232,150,46,0.1)] flex items-center gap-5 shrink-0 bg-surface/30">
+                <div className="p-8 border-b border-gold/10 flex items-center gap-5 shrink-0 bg-surface/30">
                   <div className="w-16 h-16 rounded-2xl bg-gold/20 border border-gold/30 flex items-center justify-center text-xl font-bold text-gold shadow-inner">
                     {selectedCliente.nombre.charAt(0).toUpperCase()}
                   </div>
@@ -2087,11 +2084,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             setDetalleTab('mensajes');
                             setEmpujonListo(msj);
                           }}
-                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition-colors"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition-colors"
                           title="Copia el mensaje de empujón (en la voz de Javo) y abre el chat"
                         >⚡ Empujón</button>
                       )}
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-gold/20 text-gold border border-gold/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-success/20 text-success border border-success/30' : 'bg-gold/20 text-gold border border-gold/30'}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-gold/20 text-gold border border-gold/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-success/20 text-success border border-success/30' : 'bg-gold/20 text-gold border border-gold/30'}`}>
                         {selectedCliente.plan}
                       </span>
                       {/* Status badge + quick change */}
@@ -2134,15 +2131,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         Enviar reset
                       </button>
                     </div>
-                    <p className="text-xs text-cream/60 flex items-center gap-2">
-                      <Lock className="w-3 h-3 text-cream/30" /> {selectedCliente.email}
+                    <p className="text-xs text-cream/75 flex items-center gap-2">
+                      <Lock className="w-3 h-3 text-cream/45" /> {selectedCliente.email}
                       {selectedCliente.especialidad && <><span>·</span> {selectedCliente.especialidad}</>}
                     </p>
                   </div>
                 </div>
 
                 {/* Tabs nav */}
-                <div className="flex border-b border-[rgba(232,150,46,0.1)] px-6 shrink-0 bg-black/20">
+                <div className="flex border-b border-gold/10 px-6 shrink-0 bg-black/20">
                   {detailTabs.map(tab => (
                     <button
                       key={tab.id}
@@ -2150,7 +2147,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       className={`flex items-center gap-2 px-4 py-4 text-xs font-semibold uppercase tracking-wider transition-all relative ${
                         detalleTab === tab.id
                           ? 'text-gold'
-                          : 'text-cream/40 hover:text-cream/80'
+                          : 'text-cream/55 hover:text-cream/80'
                       }`}
                     >
                       <tab.icon className="w-3.5 h-3.5" />
@@ -2172,8 +2169,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
                           {/* ═══ El plan comercial: activar el pago con un click ═══ */}
-                          <div className="bg-panel border border-[rgba(232,150,46,0.15)] rounded-2xl p-4">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
+                          <div className="bg-panel border border-gold/15 rounded-2xl p-4">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
                             <div className="flex flex-wrap gap-2">
                               {([['blanco','🥋 Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
@@ -2185,12 +2182,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     if (error) toast.error('No se pudo cambiar el plan');
                                     else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
                                   }}
-                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/60 hover:border-gold/40'}`}>
+                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
                                   {label}
                                 </button>
                               ))}
                             </div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
                             <div className="flex flex-wrap gap-2">
                               {([['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['','Sin reserva']] as const).map(([p, label]) => (
                                 <button key={p || 'ninguno'}
@@ -2200,12 +2197,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     if (error) toast.error('No se pudo guardar la reserva');
                                     else { toast.success(p ? `Reserva: ${label}` : 'Reserva quitada'); void cargarClientes(); }
                                   }}
-                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${(((selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '') === p) ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/60 hover:border-gold/40'}`}>
+                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${(((selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '') === p) ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
                                   {label}
                                 </button>
                               ))}
                             </div>
-                            <p className="text-[10px] text-cream/35 mt-2">Al confirmar un comprobante: un click en el plan pagado y el acceso se extiende solo.</p>
+                            <p className="text-[11px] text-cream/35 mt-2">Al confirmar un comprobante: un click en el plan pagado y el acceso se extiende solo.</p>
                           </div>
                           <AdnPermisosControl
                             clienteId={selectedCliente.id}
@@ -2215,7 +2212,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             onSaved={() => { void cargarClientes(); }}
                           />
                           <div className="grid grid-cols-4 gap-3">
-                            <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
+                            <div className="bg-panel border border-gold/10 rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-cream">{selectedCliente.dia_programa}</p>
                               <div className="mt-3"><CintaCinturon cinturon={{ ...selectedCliente.cinturon, id: 'c', hito: '' } as never} variante="linea" /></div>
                               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -2231,32 +2228,32 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       const { error } = await supabase.from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
                                       if (!error) { alert(`${b.t} aplicada. Recarga la lista para ver el día nuevo.`); }
                                     }}
-                                    className="px-2 py-1 rounded-md bg-gold/10 border border-gold/25 text-[10px] font-semibold text-gold hover:bg-gold/20 transition-colors"
+                                    className="px-2 py-1 rounded-md bg-gold/10 border border-gold/25 text-[11px] font-semibold text-gold hover:bg-gold/20 transition-colors"
                                   >{b.l}</button>
                                 ))}
                               </div>
-                              <p className="text-[10px] text-cream/40 uppercase tracking-wider mt-1">Día / 90</p>
+                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Día / 90</p>
                             </div>
-                            <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
+                            <div className="bg-panel border border-gold/10 rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-gold flex items-center justify-center gap-1"><Flame className="w-5 h-5" /> {selectedCliente.racha_diario}</p>
-                              <p className="text-[10px] text-cream/40 uppercase tracking-wider mt-1">Racha diario</p>
+                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Racha diario</p>
                             </div>
-                            <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4 text-center">
+                            <div className="bg-panel border border-gold/10 rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-success">{selectedCliente.ventas_count}</p>
-                              <p className="text-[10px] text-cream/40 uppercase tracking-wider mt-1">Ventas reales</p>
+                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Ventas reales</p>
                             </div>
                             <div className={`rounded-2xl p-4 text-center border ${
                               selectedCliente.estado_garantia === 'activada' ? 'bg-danger/10 border-danger/30' :
                               selectedCliente.estado_garantia === 'en_riesgo' ? 'bg-gold/10 border-gold/30' :
-                              'bg-panel border-[rgba(232,150,46,0.1)]'
+                              'bg-panel border-gold/10'
                             }`}>
                               <Shield className={`w-6 h-6 mx-auto mb-1 ${
                                 selectedCliente.estado_garantia === 'activada' ? 'text-danger' :
-                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/30'
+                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/45'
                               }`} />
-                              <p className={`text-[10px] uppercase tracking-wider font-bold ${
+                              <p className={`text-[11px] uppercase tracking-wider font-bold ${
                                 selectedCliente.estado_garantia === 'activada' ? 'text-danger' :
-                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/40'
+                                selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/55'
                               }`}>{selectedCliente.estado_garantia === 'activada' ? 'Garantía' : selectedCliente.estado_garantia === 'en_riesgo' ? 'En riesgo' : 'En camino'}</p>
                             </div>
                           </div>
@@ -2267,8 +2264,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const rawIdx = PIPELINE_STAGES.findIndex(s => s.fase === clienteFase);
                             const activeIdx = rawIdx === -1 ? 0 : rawIdx;
                             return (
-                              <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-cream/40 mb-5">Pipeline del Programa</p>
+                              <div className="bg-panel border border-gold/10 rounded-2xl p-5">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-5">Pipeline del Programa</p>
                                 <div className="flex items-start">
                                   {PIPELINE_STAGES.map((stage, i) => {
                                     const isActive = i === activeIdx;
@@ -2281,25 +2278,25 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               ? 'bg-gold border-gold shadow-[0_0_14px_rgba(232,150,46,0.45)]'
                                               : isDone
                                               ? 'bg-success/15 border-success/60'
-                                              : 'bg-ink border-[rgba(232,150,46,0.10)]'
+                                              : 'bg-ink border-gold/10'
                                           }`}>
                                             {isDone
                                               ? <Check className="w-3.5 h-3.5 text-success" />
                                               : isActive
                                               ? <span className="w-2.5 h-2.5 bg-ink rounded-full block" />
-                                              : <span className={`text-[10px] font-bold ${isActive ? 'text-ink' : 'text-cream/20'}`}>{i + 1}</span>
+                                              : <span className={`text-[11px] font-bold ${isActive ? 'text-ink' : 'text-cream/20'}`}>{i + 1}</span>
                                             }
                                           </div>
                                           <div className="text-center px-1">
                                             <p className={`text-[11px] font-semibold leading-tight ${
                                               isActive ? 'text-gold' : isDone ? 'text-success/70' : 'text-cream/25'
                                             }`}>{stage.label}</p>
-                                            <p className={`text-[9px] mt-0.5 ${isActive ? 'text-gold/60' : 'text-cream/15'}`}>{stage.sub}</p>
+                                            <p className={`text-[11px] mt-0.5 ${isActive ? 'text-gold/60' : 'text-cream/15'}`}>{stage.sub}</p>
                                           </div>
                                         </div>
                                         {i < PIPELINE_STAGES.length - 1 && (
                                           <div className={`h-[2px] flex-1 mt-4 rounded-full mx-0.5 ${
-                                            i < activeIdx ? 'bg-success/30' : 'bg-[rgba(232,150,46,0.08)]'
+                                            i < activeIdx ? 'bg-success/30' : 'bg-gold/8'
                                           }`} />
                                         )}
                                       </React.Fragment>
@@ -2311,18 +2308,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           })()}
 
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
-                              <p className="text-[10px] text-cream/40 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
+                            <div className="bg-panel border border-gold/10 rounded-2xl p-5">
+                              <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
                               <div className="flex items-end gap-2 mb-3">
                                 <p className="text-3xl font-light text-cream">{selectedCliente.tareas_completadas}</p>
-                                <p className="text-sm text-cream/40 mb-1">/ {selectedCliente.tareas_total}</p>
+                                <p className="text-sm text-cream/55 mb-1">/ {selectedCliente.tareas_total}</p>
                               </div>
                               <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
                                 <div className="h-full bg-gold rounded-full" style={{ width: `${selectedCliente.tareas_total > 0 ? Math.round((selectedCliente.tareas_completadas / selectedCliente.tareas_total) * 100) : 0}%` }} />
                               </div>
                             </div>
-                            <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
-                              <p className="text-[10px] text-cream/40 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
+                            <div className="bg-panel border border-gold/10 rounded-2xl p-5">
+                              <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
                               {detalleDiario[0] ? (() => {
                                 const d0 = detalleDiario[0];
                                 const energia = d0.energia_nivel ?? d0.respuestas?.q3;
@@ -2331,34 +2328,34 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 return (
                                   <>
                                     <div className="flex items-center justify-between mb-2">
-                                      <p className="text-xs text-cream/40">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                      <p className="text-xs text-cream/55">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                                       {d0.diario_score != null && (
-                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{d0.diario_score}/100</span>
+                                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{d0.diario_score}/100</span>
                                       )}
                                     </div>
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5 mb-2">
-                                        <span className="text-[10px] text-cream/40 uppercase font-bold">Energía</span>
+                                        <span className="text-[11px] text-cream/55 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, i) => (
                                             <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(energia) ? 'bg-gold' : 'bg-gold/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[10px] text-gold font-bold">{energia}/10</span>
+                                        <span className="text-[11px] text-gold font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                     {(d0.diario_cuerpo != null) && (
-                                      <p className="text-[11px] text-cream/50 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
+                                      <p className="text-[11px] text-cream/65 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
                                     )}
                                     {logro && (
                                       <p className="text-xs text-cream/80 line-clamp-2"><span className="text-success font-bold">Logro: </span>{logro}</p>
                                     )}
                                     {freno && (
-                                      <p className="text-xs text-cream/60 mt-1 line-clamp-1"><span className="text-gold font-bold">Freno: </span>{freno}</p>
+                                      <p className="text-xs text-cream/75 mt-1 line-clamp-1"><span className="text-gold font-bold">Freno: </span>{freno}</p>
                                     )}
                                   </>
                                 );
-                              })() : <p className="text-xs text-cream/30">Sin entradas de diario aún</p>}
+                              })() : <p className="text-xs text-cream/45">Sin entradas de diario aún</p>}
                             </div>
                           </div>
 
@@ -2387,7 +2384,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-xs text-cream/40">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
+                                <p className="text-xs text-cream/55">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
                               )}
                             </div>
                           </div>
@@ -2397,24 +2394,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── DIARIO ── */}
                       {detalleTab === 'mentor' && (
                 <div className="space-y-5">
-                  <p className="text-xs text-cream/50">Todo lo que este cliente habló con el Mentor y sus entrenadores — sus respuestas, sus trabas, sus miedos. <strong className="text-gold">Acá ves dónde intervenir.</strong></p>
+                  <p className="text-xs text-cream/65">Todo lo que este cliente habló con el Mentor y sus entrenadores — sus respuestas, sus trabas, sus miedos. <strong className="text-gold">Acá ves dónde intervenir.</strong></p>
                   {convsLoading ? (
-                    <p className="text-sm text-cream/40">Trayendo sus conversaciones…</p>
+                    <p className="text-sm text-cream/55">Trayendo sus conversaciones…</p>
                   ) : convsCliente.length === 0 ? (
-                    <div className="py-8 text-center border border-dashed border-[rgba(232,150,46,0.12)] rounded-xl">
-                      <p className="text-sm text-cream/50">Todavía no habló con el Mentor.</p>
-                      <p className="text-xs text-cream/30 mt-1">La primera conversación llega con la Sesión 1.</p>
+                    <div className="py-8 text-center border border-dashed border-gold/12 rounded-xl">
+                      <p className="text-sm text-cream/65">Todavía no habló con el Mentor.</p>
+                      <p className="text-xs text-cream/45 mt-1">La primera conversación llega con la Sesión 1.</p>
                     </div>
                   ) : (
                     convsCliente.map((c) => (
-                      <details key={c.agente} className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-panel overflow-hidden">
+                      <details key={c.agente} className="rounded-xl border border-gold/12 bg-panel overflow-hidden">
                         <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-cream/85 hover:bg-gold/5 transition-colors">
-                          💬 {c.agente} <span className="text-[10px] text-cream/35 ml-2">{c.mensajes.length} mensajes</span>
+                          💬 {c.agente} <span className="text-[11px] text-cream/35 ml-2">{c.mensajes.length} mensajes</span>
                         </summary>
                         <div className="max-h-96 overflow-y-auto px-4 pb-4 space-y-2">
                           {c.mensajes.map((msg, i) => (
-                            <div key={i} className={`text-xs leading-relaxed p-2.5 rounded-lg ${msg.role === 'user' ? 'bg-gold/8 text-cream/90 ml-6' : 'bg-cream/4 text-cream/60 mr-6'}`}>
-                              <span className="text-[9px] font-bold uppercase tracking-wider opacity-50 block mb-0.5">{msg.role === 'user' ? 'Cliente' : c.agente}</span>
+                            <div key={i} className={`text-xs leading-relaxed p-2.5 rounded-lg ${msg.role === 'user' ? 'bg-gold/8 text-cream/90 ml-6' : 'bg-cream/4 text-cream/75 mr-6'}`}>
+                              <span className="text-[11px] font-bold uppercase tracking-wider opacity-50 block mb-0.5">{msg.role === 'user' ? 'Cliente' : c.agente}</span>
                               {msg.content}
                             </div>
                           ))}
@@ -2427,7 +2424,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               {detalleTab === 'sesiones' && (
                 <div className="space-y-3">
                   {detalleSesiones.length === 0 && (
-                    <p className="text-sm text-white/40 py-8 text-center">Todavía no hay sesiones registradas. Cuando el cliente abra su primera Sesión Viva, acá vas a ver su viaje completo: emoción de entrada y salida, duración real, compromisos y pausas.</p>
+                    <p className="text-sm text-white/55 py-8 text-center">Todavía no hay sesiones registradas. Cuando el cliente abra su primera Sesión Viva, acá vas a ver su viaje completo: emoción de entrada y salida, duración real, compromisos y pausas.</p>
                   )}
                   {detalleSesiones.map((sl) => {
                     const emo: Record<string, string> = { enfocado: '🎯', con_dudas: '🤔', cansado: '😮‍💨', con_miedo: '😰', encendido: '🔥', en_paz: '🌿', orgulloso: '🏆' };
@@ -2442,22 +2439,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-white truncate">{String(sl.meta_titulo ?? sl.meta_codigo)}</p>
-                            <p className="text-[11px] text-white/40 mt-0.5">
+                            <p className="text-[11px] text-white/55 mt-0.5">
                               {fecha} · {durTxt} de trabajo{pausas > 0 ? ` · ${pausas} pausa${pausas === 1 ? '' : 's'}` : ''}{abierta ? ' · 🟡 EN CURSO / PAUSADA' : ''}
                             </p>
                           </div>
                           <div className="shrink-0 text-lg" title={`${String(sl.checkin_emocion ?? '')} → ${String(sl.checkout_emocion ?? '')}`}>
-                            {emo[String(sl.checkin_emocion)] ?? '·'} <span className="text-white/30 text-xs">→</span> {emo[String(sl.checkout_emocion)] ?? '·'}
+                            {emo[String(sl.checkin_emocion)] ?? '·'} <span className="text-white/45 text-xs">→</span> {emo[String(sl.checkout_emocion)] ?? '·'}
                           </div>
                         </div>
                         {sl.checkin_objetivo ? <p className="text-xs text-white/55 mt-2">Objetivo: {String(sl.checkin_objetivo)}</p> : null}
                         {compromisos.length > 0 && (
                           <div className="mt-2 space-y-0.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-success">Compromisos</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-success">Compromisos</p>
                             {compromisos.map((c, i) => <p key={i} className="text-xs text-white/70">• {c}</p>)}
                           </div>
                         )}
-                        {sl.resumen_consolidado ? <p className="text-xs text-white/50 mt-2 italic line-clamp-3">{String(sl.resumen_consolidado)}</p> : null}
+                        {sl.resumen_consolidado ? <p className="text-xs text-white/65 mt-2 italic line-clamp-3">{String(sl.resumen_consolidado)}</p> : null}
                       </div>
                     );
                   })}
@@ -2465,18 +2462,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               )}
               {detalleTab === 'evidencias' && (
                 <div className="space-y-4">
-                  <p className="text-xs text-cream/50">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-gold">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
+                  <p className="text-xs text-cream/65">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-gold">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
                   {evidenciasLoading ? (
-                    <p className="text-sm text-cream/40">Buscando las evidencias del camino…</p>
+                    <p className="text-sm text-cream/55">Buscando las evidencias del camino…</p>
                   ) : evidenciasCliente.length === 0 ? (
-                    <div className="py-8 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl">
-                      <p className="text-sm text-cream/50">Todavía no subió evidencias.</p>
-                      <p className="text-xs text-cream/30 mt-1">La primera llega con LA QUEMA (día 4).</p>
+                    <div className="py-8 text-center border border-dashed border-gold/10 rounded-xl">
+                      <p className="text-sm text-cream/65">Todavía no subió evidencias.</p>
+                      <p className="text-xs text-cream/45 mt-1">La primera llega con LA QUEMA (día 4).</p>
                     </div>
                   ) : (
                     evidenciasCliente.map((g) => (
-                      <div key={g.meta} className="rounded-xl border border-[rgba(232,150,46,0.10)] bg-panel p-4">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
+                      <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
                         <div className="flex flex-wrap gap-2">
                           {g.archivos.map((f) => (
                             <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-xs text-gold hover:bg-gold/20 transition-colors">
@@ -2492,7 +2489,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               {detalleTab === 'diario' && (
                         <div className="space-y-4">
                           {detalleDiario.length === 0 ? (
-                            <p className="text-cream/40 text-sm text-center py-12">Sin entradas de diario</p>
+                            <p className="text-cream/55 text-sm text-center py-12">Sin entradas de diario</p>
                           ) : detalleDiario.map((entrada: any, i: number) => {
                             const r = entrada.respuestas ?? {};
                             const energia = entrada.energia_nivel ?? r.q3;
@@ -2501,24 +2498,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               ? entrada.diario_tareas.map((id: string) => TAREAS_TAGS.find((t) => t.id === id)?.label ?? id)
                               : [];
                             return (
-                              <div key={i} className="p-6 rounded-2xl bg-panel border border-[rgba(232,150,46,0.1)]">
+                              <div key={i} className="p-6 rounded-2xl bg-panel border border-gold/10">
                                 <div className="flex items-center justify-between mb-4">
                                   <p className="text-sm font-semibold text-cream tracking-wide">
                                     {new Date(entrada.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                   </p>
                                   <div className="flex items-center gap-2">
                                     {entrada.diario_score != null && (
-                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{entrada.diario_score}/100</span>
+                                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{entrada.diario_score}/100</span>
                                     )}
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] text-cream/40 uppercase font-bold">Energía</span>
+                                        <span className="text-[11px] text-cream/55 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, idx) => (
                                             <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(energia) ? 'bg-gold' : 'bg-gold/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[10px] text-gold font-bold">{energia}/10</span>
+                                        <span className="text-[11px] text-gold font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                   </div>
@@ -2527,29 +2524,29 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   <div className="space-y-3">
                                     {entrada.diario_cuerpo != null && (
                                       <div className="flex gap-6 text-xs">
-                                        <span className="text-cream/60">Cuerpo <b className="text-cream">{entrada.diario_cuerpo}</b></span>
-                                        <span className="text-cream/60">Mente <b className="text-cream">{entrada.diario_mente}</b></span>
-                                        <span className="text-cream/60">Emociones <b className="text-cream">{entrada.diario_emociones}</b></span>
+                                        <span className="text-cream/75">Cuerpo <b className="text-cream">{entrada.diario_cuerpo}</b></span>
+                                        <span className="text-cream/75">Mente <b className="text-cream">{entrada.diario_mente}</b></span>
+                                        <span className="text-cream/75">Emociones <b className="text-cream">{entrada.diario_emociones}</b></span>
                                       </div>
                                     )}
-                                    {entrada.diario_logro && <div><p className="text-[10px] uppercase font-bold text-success/70 mb-1">Logro</p><p className="text-xs text-cream/80">{entrada.diario_logro}</p></div>}
-                                    {entrada.diario_bloqueo && <div><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Bloqueo</p><p className="text-xs text-cream/80">{entrada.diario_bloqueo}</p></div>}
+                                    {entrada.diario_logro && <div><p className="text-[11px] uppercase font-bold text-success/70 mb-1">Logro</p><p className="text-xs text-cream/80">{entrada.diario_logro}</p></div>}
+                                    {entrada.diario_bloqueo && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Bloqueo</p><p className="text-xs text-cream/80">{entrada.diario_bloqueo}</p></div>}
                                     {tagLabels.length > 0 && (
                                       <div className="flex flex-wrap gap-1.5">
                                         {tagLabels.map((l: string, idx: number) => (
-                                          <span key={idx} className="text-[10px] bg-gold/5 px-2 py-1 rounded-full text-cream/60">{l}</span>
+                                          <span key={idx} className="text-[11px] bg-gold/5 px-2 py-1 rounded-full text-cream/75">{l}</span>
                                         ))}
                                       </div>
                                     )}
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 gap-4">
-                                    {r.q1 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Cómo se sintió</p><p className="text-xs text-cream/80">{r.q1}</p></div>}
-                                    {r.q4 && <div><p className="text-[10px] uppercase font-bold text-success/70 mb-1">Acción tomada</p><p className="text-xs text-cream/80">{r.q4}</p></div>}
-                                    {r.q5 && <div><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Pensamiento dominante</p><p className="text-xs text-cream/80">{r.q5}</p></div>}
-                                    {r.q2 && <div className="col-span-2"><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Lo que lo frenó</p><p className="text-xs text-cream/80">{r.q2}</p></div>}
-                                    {r.q6 && <div><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Emoción predominante</p><p className="text-xs text-cream/80">{r.q6}</p></div>}
-                                    {r.q7 && <div><p className="text-[10px] uppercase font-bold text-gold/70 mb-1">Plan para mañana</p><p className="text-xs text-cream/80">{r.q7}</p></div>}
+                                    {r.q1 && <div className="col-span-2"><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Cómo se sintió</p><p className="text-xs text-cream/80">{r.q1}</p></div>}
+                                    {r.q4 && <div><p className="text-[11px] uppercase font-bold text-success/70 mb-1">Acción tomada</p><p className="text-xs text-cream/80">{r.q4}</p></div>}
+                                    {r.q5 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Pensamiento dominante</p><p className="text-xs text-cream/80">{r.q5}</p></div>}
+                                    {r.q2 && <div className="col-span-2"><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Lo que lo frenó</p><p className="text-xs text-cream/80">{r.q2}</p></div>}
+                                    {r.q6 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Emoción predominante</p><p className="text-xs text-cream/80">{r.q6}</p></div>}
+                                    {r.q7 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Plan para mañana</p><p className="text-xs text-cream/80">{r.q7}</p></div>}
                                   </div>
                                 )}
                               </div>
@@ -2561,14 +2558,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── METRICAS ── */}
                       {detalleTab === 'metricas' && (
                         <div className="space-y-5">
-                          <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+                          <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                              <h3 className="text-xs font-bold uppercase tracking-widest text-cream/60 flex items-center gap-2">
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                                 <BarChart2 className="w-3.5 h-3.5 text-gold" /> Progreso por Pilar
                               </h3>
                               {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-gold animate-spin" />}
                             </div>
-                            <div className="divide-y divide-[rgba(232,150,46,0.1)]">
+                            <div className="divide-y divide-gold/10">
                               {SEED_ROADMAP_V2.map(pilar => {
                                 const metasPilar = pilar.metas.length;
                                 const completadasReales = selectedCliente.tareas_por_pilar?.[pilar.numero] ?? 0;
@@ -2589,7 +2586,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                       </div>
-                                      <span className="text-xs text-cream/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                      <span className="text-xs text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                       {completadasReales > 0 && (
                                         <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-gold ${expandido ? 'rotate-180' : ''}`} />
                                       )}
@@ -2609,16 +2606,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               key={meta.codigo}
                                               type="button"
                                               onClick={() => abrirTareaModal(meta, tareaData, rawOutput, selectedCliente.nombre)}
-                                              className="w-full text-left bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] hover:bg-surface/50 transition-all group"
+                                              className="w-full text-left bg-black/20 border border-gold/12 rounded-xl overflow-hidden hover:border-gold/18 hover:bg-surface/50 transition-all group"
                                             >
                                               <div className="flex items-center gap-3 p-3.5">
                                                 <CheckCircle2 className="w-4 h-4 shrink-0 text-gold" />
                                                 <div className="flex-1 min-w-0">
                                                   <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
+                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
                                                     {meta.es_estrella && <Star className="w-3 h-3 text-gold fill-gold" />}
                                                     {tareaData.fecha_completada && (
-                                                      <span className="text-[10px] text-cream/30">
+                                                      <span className="text-[11px] text-cream/45">
                                                         {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                       </span>
                                                     )}
@@ -2627,16 +2624,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
                                                   {hasOutput && (
-                                                    <span className="text-[10px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                    <span className="text-[11px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
                                                   )}
-                                                  <ChevronRight className="w-3.5 h-3.5 text-cream/30 group-hover:text-cream/60 transition-colors" />
+                                                  <ChevronRight className="w-3.5 h-3.5 text-cream/45 group-hover:text-cream/75 transition-colors" />
                                                 </div>
                                               </div>
                                             </button>
                                           );
                                         })}
                                         {tareasCompletadasPilar.length === 0 && (
-                                          <p className="text-xs text-cream/30 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
+                                          <p className="text-xs text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                         )}
                                       </div>
                                     )}
@@ -2646,10 +2643,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-cream/60 mb-3">Métricas de Negocio Semanales</h3>
+                            <h3 className="text-[11px] font-bold uppercase tracking-widest text-cream/75 mb-3">Métricas de Negocio Semanales</h3>
                             {detalleMetricas.length === 0 ? (
-                              <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-6 text-center">
-                                <p className="text-sm text-cream/40">El cliente aún no cargó métricas semanales.</p>
+                              <div className="bg-panel border border-gold/10 rounded-2xl p-6 text-center">
+                                <p className="text-sm text-cream/55">El cliente aún no cargó métricas semanales.</p>
                               </div>
                             ) : detalleMetricas.slice().reverse().map((m: any, i: number) => {
                               const esV3 = m.met_fecha_inicio != null || m.met_roas != null || m.met_ads_plataforma != null;
@@ -2662,24 +2659,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       : `${new Date(m.met_fecha_inicio + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}–${m.met_fecha_fin ? new Date(m.met_fecha_fin + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : ''}`)
                                   : m.semana;
                                 return (
-                                  <div key={i} className="p-5 rounded-2xl bg-panel border border-[rgba(232,150,46,0.1)] flex items-center justify-between mb-3">
-                                    <span className="text-xs font-semibold text-cream/60 bg-gold/5 px-2.5 py-1 rounded-lg">{periodo}</span>
+                                  <div key={i} className="p-5 rounded-2xl bg-panel border border-gold/10 flex items-center justify-between mb-3">
+                                    <span className="text-xs font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{periodo}</span>
                                     <div className="flex gap-7">
-                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-success' : 'text-danger'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[10px] text-cream/40 font-bold uppercase">ROAS</p></div>
-                                      <div className="text-center"><p className="text-cream text-lg font-light">{postsTotales(m)}</p><p className="text-[10px] text-cream/40 font-bold uppercase">posts</p></div>
-                                      <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-success/50 font-bold uppercase">ventas</p></div>
-                                      <div className="text-center"><p className="text-cream text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[10px] text-cream/40 font-bold uppercase">ingresos</p></div>
+                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-success' : 'text-danger'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[11px] text-cream/55 font-bold uppercase">ROAS</p></div>
+                                      <div className="text-center"><p className="text-cream text-lg font-light">{postsTotales(m)}</p><p className="text-[11px] text-cream/55 font-bold uppercase">posts</p></div>
+                                      <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-[11px] text-success/50 font-bold uppercase">ventas</p></div>
+                                      <div className="text-center"><p className="text-cream text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[11px] text-cream/55 font-bold uppercase">ingresos</p></div>
                                     </div>
                                   </div>
                                 );
                               }
                               return (
-                                <div key={i} className="p-5 rounded-2xl bg-panel border border-[rgba(232,150,46,0.1)] flex items-center justify-between mb-3">
-                                  <span className="text-xs font-semibold text-cream/60 bg-gold/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
+                                <div key={i} className="p-5 rounded-2xl bg-panel border border-gold/10 flex items-center justify-between mb-3">
+                                  <span className="text-xs font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
                                   <div className="flex gap-8">
-                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[10px] text-cream/40 font-bold uppercase">leads</p></div>
-                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[10px] text-cream/40 font-bold uppercase">llamadas</p></div>
-                                    <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-[10px] text-success/50 font-bold uppercase">ventas</p></div>
+                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[11px] text-cream/55 font-bold uppercase">leads</p></div>
+                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[11px] text-cream/55 font-bold uppercase">llamadas</p></div>
+                                    <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-[11px] text-success/50 font-bold uppercase">ventas</p></div>
                                   </div>
                                 </div>
                               );
@@ -2700,7 +2697,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── NOTAS INTERNAS ── */}
                       {detalleTab === 'notas' && (
                         <div className="space-y-4">
-                          <p className="text-[10px] text-cream/30 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
+                          <p className="text-[11px] text-cream/45 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
                           <div className="flex gap-2">
                             <textarea
                               value={notaInput}
@@ -2708,7 +2705,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) agregarNota(); }}
                               placeholder="Escribí una nota interna... (Ctrl+Enter para guardar)"
                               rows={3}
-                              className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
+                              className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
                             />
                             <button
                               onClick={agregarNota}
@@ -2723,12 +2720,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           ) : detalleNotas.length === 0 ? (
                             <div className="text-center py-12">
                               <BookOpen className="w-8 h-8 text-gray-800 mx-auto mb-3" />
-                              <p className="text-cream/40 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
+                              <p className="text-cream/55 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
                             </div>
                           ) : detalleNotas.map(nota => (
-                            <div key={nota.id} className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-xl p-4">
+                            <div key={nota.id} className="bg-panel border border-gold/12 rounded-xl p-4">
                               <p className="text-sm text-cream/90 leading-relaxed whitespace-pre-wrap">{nota.content}</p>
-                              <p className="text-[10px] text-cream/30 mt-2">
+                              <p className="text-[11px] text-cream/45 mt-2">
                                 {new Date(nota.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
@@ -2741,7 +2738,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <>
                 {empujonListo && (
                   <div className="mb-3 rounded-xl border border-gold/30 bg-gold/8 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si querés</p>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si querés</p>
                     <p className="text-xs text-white/70 italic">{empujonListo}</p>
                   </div>
                 )}
@@ -2752,7 +2749,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           {detalleMensajes.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
                               <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                              <p className="text-cream/40 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
+                              <p className="text-cream/55 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
                             </div>
                           ) : detalleMensajes.map(m => {
                             const isMe = m.emisor_id === adminProfile.id;
@@ -2760,19 +2757,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const initial = senderName.charAt(0).toUpperCase();
                             return (
                               <div key={m.id} className={`flex gap-2.5 items-end max-w-[88%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/10 border-[rgba(232,150,46,0.12)] text-cream'}`}>
+                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/10 border-gold/12 text-cream'}`}>
                                   {isMe
                                     ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
                                     : initial}
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <span className={`text-[10px] font-semibold text-cream/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                  <span className={`text-[11px] font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                     isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
-                                         : 'bg-surface/60 text-cream/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
+                                         : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                                   }`}>
                                     {m.contenido && <p>{m.contenido}</p>}
-                                    <p className={`text-[10px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                                    <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                                       {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                   </div>
@@ -2789,7 +2786,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                 {/* Chat input for private messages */}
                 {detalleTab === 'mensajes' && (
-                  <div className="p-4 border-t border-[rgba(232,150,46,0.1)] shrink-0 bg-surface/20">
+                  <div className="p-4 border-t border-gold/10 shrink-0 bg-surface/20">
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -2798,7 +2795,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensajePrivado()}
                         placeholder="Escribe un mensaje privado..."
                         disabled={enviando}
-                        className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                        className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                       />
                       <button
                         onClick={enviarMensajePrivado}
@@ -2831,7 +2828,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {mainTab === 'mensajes' && (
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Channel tabs */}
-              <div className="flex border-b border-[rgba(232,150,46,0.1)] px-6 shrink-0 bg-black/20">
+              <div className="flex border-b border-gold/10 px-6 shrink-0 bg-black/20">
                 {([
                   { id: 'privados' as MensajesChannel, label: 'Privados', icon: MessageSquare },
                   // L2 · recorte: comunidad/victorias/consultas van al Canal de WhatsApp (v1 sin muro)
@@ -2842,13 +2839,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     className={`flex items-center gap-2 px-5 py-4 text-sm font-medium transition-all relative ${
                       mensajesChannel === ch.id
                         ? 'text-gold'
-                        : 'text-cream/40 hover:text-cream/80'
+                        : 'text-cream/55 hover:text-cream/80'
                     }`}
                   >
                     <ch.icon className="w-4 h-4" />
                     {ch.label}
                     {(channelUnread[ch.id] ?? 0) > 0 && (
-                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-gold text-cream text-[9px] font-bold flex items-center justify-center">
+                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center">
                         {channelUnread[ch.id]}
                       </span>
                     )}
@@ -2868,9 +2865,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 /* Privados: WhatsApp-style */
                 <div className="flex flex-1 min-h-0 overflow-hidden">
                   {/* Left: client list */}
-                  <div className="w-[280px] shrink-0 border-r border-[rgba(232,150,46,0.12)] flex flex-col bg-black/20">
-                    <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-cream/40">Conversaciones ({clientes.length})</p>
+                  <div className="w-[280px] shrink-0 border-r border-gold/12 flex flex-col bg-black/20">
+                    <div className="p-4 border-b border-gold/12">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55">Conversaciones ({clientes.length})</p>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-hide">
                       {loading ? (
@@ -2879,18 +2876,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <button
                           key={c.id}
                           onClick={() => { setChatCliente(c); cargarChatMessages(c.id); }}
-                          className={`w-full text-left px-4 py-3.5 border-b border-[rgba(232,150,46,0.08)] transition-all flex items-center gap-3 ${
+                          className={`w-full text-left px-4 py-3.5 border-b border-gold/8 transition-all flex items-center gap-3 ${
                             chatCliente?.id === c.id ? 'bg-gold/10' : 'hover:bg-surface/50'
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-sm font-bold border ${
-                            chatCliente?.id === c.id ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/5 border-[rgba(232,150,46,0.12)] text-cream'
+                            chatCliente?.id === c.id ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/5 border-gold/12 text-cream'
                           }`}>
                             {c.nombre.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-cream truncate">{c.nombre}</p>
-                            <p className="text-[10px] text-cream/40 truncate">{c.especialidad || 'Sin especialidad'}</p>
+                            <p className="text-[11px] text-cream/55 truncate">{c.especialidad || 'Sin especialidad'}</p>
                           </div>
                           <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         </button>
@@ -2901,13 +2898,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   {/* Right: conversation */}
                   {chatCliente ? (
                     <div className="flex-1 flex flex-col min-w-0 bg-ink">
-                      <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center gap-3 px-6 shrink-0 bg-black/20">
+                      <div className="h-16 border-b border-gold/12 flex items-center gap-3 px-6 shrink-0 bg-black/20">
                         <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-bold text-gold">
                           {chatCliente.nombre.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-cream">{chatCliente.nombre}</p>
-                          <p className="text-[10px] text-cream/40">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
+                          <p className="text-[11px] text-cream/55">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto p-5 scrollbar-hide space-y-3">
@@ -2916,27 +2913,27 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         ) : chatMessages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center">
                             <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                            <p className="text-cream/40 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
+                            <p className="text-cream/55 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
                           </div>
                         ) : chatMessages.map(m => {
                           const isMe = m.emisor_id === adminProfile.id;
                           const senderName = isMe ? adminProfile.nombre : chatCliente.nombre;
                           return (
                             <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30' : 'bg-gold/10 border-[rgba(232,150,46,0.12)]'}`}>
+                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30' : 'bg-gold/10 border-gold/12'}`}>
                                 {isMe
                                   ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-gold" />)
                                   : senderName.charAt(0).toUpperCase()
                                 }
                               </div>
                               <div className="flex flex-col gap-1">
-                                <span className={`text-[10px] font-semibold text-cream/40 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                <span className={`text-[11px] font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                 <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                   isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
-                                       : 'bg-surface/60 text-cream/90 border border-[rgba(232,150,46,0.12)] rounded-tl-sm'
+                                       : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                                 }`}>
                                   <p>{m.contenido}</p>
-                                  <p className={`text-[10px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                                  <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                                     {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 </div>
@@ -2946,7 +2943,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         })}
                         <div ref={chatEndRef} />
                       </div>
-                      <div className="p-4 border-t border-[rgba(232,150,46,0.12)] shrink-0 bg-surface/20">
+                      <div className="p-4 border-t border-gold/12 shrink-0 bg-surface/20">
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -2955,7 +2952,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarChatMsg()}
                             placeholder={`Mensaje a ${chatCliente.nombre}...`}
                             disabled={chatEnviando}
-                            className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                            className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                           />
                           <button
                             onClick={enviarChatMsg}
@@ -2971,7 +2968,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <div className="flex-1 flex items-center justify-center text-center">
                       <div>
                         <MessageSquare className="w-12 h-12 text-gray-800 mx-auto mb-4" />
-                        <p className="text-cream/40 text-sm">Seleccioná un cliente para chatear</p>
+                        <p className="text-cream/55 text-sm">Seleccioná un cliente para chatear</p>
                       </div>
                     </div>
                   )}
@@ -2992,7 +2989,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                     filtroMetricasId === null
                       ? 'bg-gold/20 border-gold/50 text-gold'
-                      : 'bg-surface/50 border-[rgba(232,150,46,0.14)] text-cream/60 hover:text-cream hover:bg-gold/6'
+                      : 'bg-surface/50 border-gold/14 text-cream/75 hover:text-cream hover:bg-gold/6'
                   }`}
                 >
                   <Globe className="w-4 h-4 inline" /> Global ({clientes.length})
@@ -3004,7 +3001,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                       filtroMetricasId === c.id
                         ? 'bg-gold/20 border-gold/50 text-gold'
-                        : 'bg-surface/50 border-[rgba(232,150,46,0.14)] text-cream/60 hover:text-cream hover:bg-gold/6'
+                        : 'bg-surface/50 border-gold/14 text-cream/75 hover:text-cream hover:bg-gold/6'
                     }`}
                   >
                     <span className={`w-2 h-2 rounded-full ${SEMAFORO_CONFIG[c.semaforo].class}`} />
@@ -3013,7 +3010,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ))}
                 <button
                   onClick={() => { setMetricasGlobales(null); cargarMetricasGlobales(); cargarSatisfaccionGlobal(); cargarRatingsPorPilar(); cargarClientes(); }}
-                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface/50 border border-[rgba(232,150,46,0.14)] text-xs text-cream/40 hover:text-cream transition-colors"
+                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface/50 border border-gold/14 text-xs text-cream/55 hover:text-cream transition-colors"
                 >
                   <Loader2 className="w-3.5 h-3.5" /> Actualizar
                 </button>
@@ -3033,21 +3030,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <div key={i} className={`${s.bg} border ${s.border} rounded-2xl p-5`}>
                         <s.icon className={`w-5 h-5 ${s.color} mb-3`} />
                         <p className={`text-3xl font-light ${s.color} mb-1`}>{s.value}</p>
-                        <p className="text-xs text-cream/40 font-semibold uppercase tracking-wider">{s.label}</p>
+                        <p className="text-xs text-cream/55 font-semibold uppercase tracking-wider">{s.label}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Progress table */}
-                  <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-[rgba(232,150,46,0.1)] flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/60 flex items-center gap-2">
+                  <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gold/10 flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                         <BarChart2 className="w-3.5 h-3.5 text-gold" /> Progreso individual
                       </h3>
                     </div>
-                    <div className="divide-y divide-[rgba(232,150,46,0.1)]">
+                    <div className="divide-y divide-gold/10">
                       {clientes.length === 0 ? (
-                        <p className="text-cream/30 text-sm text-center py-10">El tablero espera a tu primer cliente</p>
+                        <p className="text-cream/45 text-sm text-center py-10">El tablero espera a tu primer cliente</p>
                       ) : clientes.map(c => {
                         const pct = c.tareas_total > 0
                           ? Math.round((c.tareas_completadas / c.tareas_total) * 100)
@@ -3061,11 +3058,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                             <div className="w-32 shrink-0">
                               <p className="text-sm font-semibold text-cream group-hover:text-gold transition-colors truncate">{c.nombre}</p>
-                              <p className="text-[10px] text-cream/40">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
+                              <p className="text-[11px] text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] text-cream/40">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
+                                <span className="text-[11px] text-cream/55">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
                                 <span className="text-xs font-bold text-cream">{pct}%</span>
                               </div>
                               <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
@@ -3073,8 +3070,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               </div>
                             </div>
                             <div className="flex items-center gap-5 shrink-0">
-                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-gold flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-[9px] text-cream/30 uppercase">Racha</p></div>}
-                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-success' : 'text-cream/30'}`}>{c.ventas_count}</p><p className="text-[9px] text-cream/30 uppercase">Ventas</p></div>
+                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-gold flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-[11px] text-cream/45 uppercase">Racha</p></div>}
+                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-success' : 'text-cream/45'}`}>{c.ventas_count}</p><p className="text-[11px] text-cream/45 uppercase">Ventas</p></div>
                               <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-gold transition-colors" />
                             </div>
                           </button>
@@ -3084,19 +3081,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   </div>
 
                   {/* Valoraciones por pilar (agregado global) */}
-                  <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-[rgba(232,150,46,0.1)] flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/60 flex items-center gap-2">
+                  <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gold/10 flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                         <Star className="w-3.5 h-3.5 text-gold" /> Valoraciones por pilar
                       </h3>
-                      <span className="text-[10px] text-cream/40">
+                      <span className="text-[11px] text-cream/55">
                         {ratingsPorPilar.reduce((a, p) => a + p.count, 0)} reseñas totales · {ratingsPorPilar.length} pilares con datos
                       </span>
                     </div>
                     {ratingsPorPilar.length === 0 ? (
-                      <p className="text-cream/30 text-sm text-center py-10">Aún no hay valoraciones registradas por los clientes.</p>
+                      <p className="text-cream/45 text-sm text-center py-10">Aún no hay valoraciones registradas por los clientes.</p>
                     ) : (
-                      <div className="divide-y divide-[rgba(232,150,46,0.1)]">
+                      <div className="divide-y divide-gold/10">
                         {ratingsPorPilar.map((p) => {
                           const pilarSeed = SEED_ROADMAP_V2.find(s => s.numero === p.pilar_numero);
                           const titulo = p.pilar_titulo || pilarSeed?.titulo || `Pilar ${p.pilar_numero}`;
@@ -3115,7 +3112,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-semibold text-cream truncate">{titulo}</p>
-                                  <p className="text-[10px] text-cream/40 mt-0.5">
+                                  <p className="text-[11px] text-cream/55 mt-0.5">
                                     {p.count} valoración{p.count === 1 ? '' : 'es'} · {conComentarios.length} con reseña
                                   </p>
                                 </div>
@@ -3129,20 +3126,20 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   <span className="text-sm font-bold text-gold ml-2 w-10 text-right">{p.avg.toFixed(1)}</span>
                                 </div>
                                 <ChevronDown
-                                  className={`w-4 h-4 text-cream/40 shrink-0 transition-transform ${expandido ? 'rotate-180' : ''}`}
+                                  className={`w-4 h-4 text-cream/55 shrink-0 transition-transform ${expandido ? 'rotate-180' : ''}`}
                                 />
                               </button>
                               {expandido && (
-                                <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-[rgba(232,150,46,0.05)]">
+                                <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-gold/5">
                                   {/* Distribución 5→1 */}
                                   <div className="space-y-1.5">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-cream/40 mb-2">Distribución</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">Distribución</p>
                                     {([5, 4, 3, 2, 1] as const).map(level => {
                                       const cnt = p.distribucion[level];
                                       const pct = (cnt / maxDist) * 100;
                                       return (
                                         <div key={level} className="flex items-center gap-3">
-                                          <span className="text-[10px] text-cream/50 w-3">{level}</span>
+                                          <span className="text-[11px] text-cream/65 w-3">{level}</span>
                                           <Star className="w-3 h-3 text-gold fill-gold shrink-0" />
                                           <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                             <div
@@ -3150,18 +3147,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               style={{ width: `${pct}%` }}
                                             />
                                           </div>
-                                          <span className="text-[10px] text-cream/40 w-8 text-right">{cnt}</span>
+                                          <span className="text-[11px] text-cream/55 w-8 text-right">{cnt}</span>
                                         </div>
                                       );
                                     })}
                                   </div>
                                   {/* Reseñas con comentario */}
                                   <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-cream/40 mb-2">
+                                    <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">
                                       Reseñas {conComentarios.length > 0 ? `(${conComentarios.length})` : ''}
                                     </p>
                                     {conComentarios.length === 0 ? (
-                                      <p className="text-xs text-cream/30 italic">Sin comentarios escritos en este pilar.</p>
+                                      <p className="text-xs text-cream/45 italic">Sin comentarios escritos en este pilar.</p>
                                     ) : (
                                       <div className="space-y-2">
                                         {conComentarios.map((r, idx) => {
@@ -3184,7 +3181,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                   >
                                                     {nombre}
                                                   </button>
-                                                  {fecha && <span className="text-[10px] text-cream/30">· {fecha}</span>}
+                                                  {fecha && <span className="text-[11px] text-cream/45">· {fecha}</span>}
                                                 </div>
                                                 <div className="flex items-center gap-0.5 shrink-0">
                                                   {[1, 2, 3, 4, 5].map(s => (
@@ -3222,7 +3219,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <s.IconComp className={`w-8 h-8 ${s.color}`} />
                         <div>
                           <p className={`text-3xl font-light ${s.color} mb-0.5`}>{s.count}</p>
-                          <p className="text-xs text-cream/60 font-medium">{s.label}</p>
+                          <p className="text-xs text-cream/75 font-medium">{s.label}</p>
                         </div>
                       </div>
                     ))}
@@ -3244,7 +3241,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold text-cream">{c.nombre}</h3>
-                          <p className="text-sm text-cream/60">{c.especialidad || 'Profesional de la salud'} · {c.email}</p>
+                          <p className="text-sm text-cream/75">{c.especialidad || 'Profesional de la salud'} · {c.email}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className={`w-2.5 h-2.5 rounded-full ${SEMAFORO_CONFIG[c.semaforo].class}`} />
@@ -3259,16 +3256,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           { label: 'Racha diario', value: c.racha_diario > 0 ? `${c.racha_diario} días` : '—', color: 'text-gold' },
                           { label: 'Ventas registradas', value: c.ventas_count, color: 'text-success' },
                         ].map((s, i) => (
-                          <div key={i} className="bg-panel border border-[rgba(232,150,46,0.14)] rounded-2xl p-4">
+                          <div key={i} className="bg-panel border border-gold/14 rounded-2xl p-4">
                             <p className={`text-2xl font-light ${s.color} mb-1`}>{s.value}</p>
-                            <p className="text-[10px] text-cream/40 uppercase tracking-wider font-semibold">{s.label}</p>
+                            <p className="text-[11px] text-cream/55 uppercase tracking-wider font-semibold">{s.label}</p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
+                      <div className="bg-panel border border-gold/12 rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <p className="text-xs font-bold uppercase tracking-widest text-cream/60">Progreso en el programa</p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-cream/75">Progreso en el programa</p>
                           <p className="text-2xl font-light text-cream">{pct}%</p>
                         </div>
                         <div className="h-3 bg-gold/5 rounded-full overflow-hidden mb-2">
@@ -3277,12 +3274,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       </div>
 
                       {/* Satisfaction ratings per pilar */}
-                      <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
-                        <p className="text-xs font-bold uppercase tracking-widest text-cream/60 mb-3 flex items-center gap-2">
+                      <div className="bg-panel border border-gold/12 rounded-2xl p-5">
+                        <p className="text-xs font-bold uppercase tracking-widest text-cream/75 mb-3 flex items-center gap-2">
                           <Star className="w-3.5 h-3.5 text-gold" /> Valoraciones por pilar
                         </p>
                         {clienteRatings.length === 0 ? (
-                          <p className="text-xs text-cream/30">Sin valoraciones registradas aún.</p>
+                          <p className="text-xs text-cream/45">Sin valoraciones registradas aún.</p>
                         ) : (
                           <div className="space-y-3">
                             {clienteRatings.map((r) => (
@@ -3298,7 +3295,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         className={`w-3.5 h-3.5 ${s <= r.rating ? 'text-gold fill-gold' : 'text-cream/15'}`}
                                       />
                                     ))}
-                                    <span className="text-xs text-cream/40 ml-1">{r.rating}/5</span>
+                                    <span className="text-xs text-cream/55 ml-1">{r.rating}/5</span>
                                   </div>
                                 </div>
                                 {r.comentario && (
@@ -3313,14 +3310,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       </div>
 
                       {/* Pilar accordion */}
-                      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
+                      <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                         <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-cream/60 flex items-center gap-2">
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                             <BarChart2 className="w-3.5 h-3.5 text-gold" /> Estimación por pilar
                           </h3>
                           {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-gold animate-spin" />}
                         </div>
-                        <div className="divide-y divide-[rgba(232,150,46,0.1)]">
+                        <div className="divide-y divide-gold/10">
                           {SEED_ROADMAP_V2.map(pilar => {
                             const metasPilar = pilar.metas.length;
                             const completadasReales = (c as any).tareas_por_pilar
@@ -3343,7 +3340,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                   </div>
-                                  <span className="text-xs text-cream/40 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                  <span className="text-xs text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                   {completadasReales > 0 && (
                                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-gold ${expandido ? 'rotate-180' : ''}`} />
                                   )}
@@ -3364,16 +3361,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                           key={meta.codigo}
                                           type="button"
                                           onClick={() => abrirTareaModal(meta, tareaData, rawOutput, c.nombre)}
-                                          className="w-full text-left bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] hover:bg-surface/50 transition-all group"
+                                          className="w-full text-left bg-black/20 border border-gold/12 rounded-xl overflow-hidden hover:border-gold/18 hover:bg-surface/50 transition-all group"
                                         >
                                           <div className="flex items-center gap-3 p-3.5">
                                             <CheckCircle2 className="w-4 h-4 shrink-0 text-gold" />
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
+                                                <span className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
                                                 {meta.es_estrella && <Star className="w-3 h-3 text-gold fill-gold" />}
                                                 {tareaData.fecha_completada && (
-                                                  <span className="text-[10px] text-cream/30">
+                                                  <span className="text-[11px] text-cream/45">
                                                     {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                   </span>
                                                 )}
@@ -3382,16 +3379,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
                                               {hasOutput && (
-                                                <span className="text-[10px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                <span className="text-[11px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
                                               )}
-                                              <ChevronRight className="w-3.5 h-3.5 text-cream/30 group-hover:text-cream/60 transition-colors" />
+                                              <ChevronRight className="w-3.5 h-3.5 text-cream/45 group-hover:text-cream/75 transition-colors" />
                                             </div>
                                           </div>
                                         </button>
                                       );
                                     })}
                                     {tareasCompletadasPilar.length === 0 && (
-                                      <p className="text-xs text-cream/30 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
+                                      <p className="text-xs text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                     )}
                                   </div>
                                 )}
@@ -3422,7 +3419,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>
-                  <p className="text-sm text-cream/40 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
+                  <p className="text-sm text-cream/55 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
                 </div>
                 <button
                   onClick={() => { setVideoForm({ pilar_id: '', titulo: '', descripcion: '', youtubeUrl: '', duracion: '' }); setShowAddVideo(true); }}
@@ -3439,21 +3436,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 // Also find VIDEO tasks in the roadmap for this pilar
                 const videoTask = pilar.metas.find(m => m.tipo === 'VIDEO');
                 return (
-                  <div key={pilar.id} className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden">
-                    <div className="px-5 py-3 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between">
+                  <div key={pilar.id} className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-gold/12 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-4 h-4 text-gold" /> : null; })()}
                         <p className="text-sm font-semibold text-cream">{pilar.id} — {pilar.titulo}</p>
-                        {videoTask && <span className="text-[10px] text-cream/30 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
+                        {videoTask && <span className="text-[11px] text-cream/45 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
                       </div>
-                      <span className="text-[10px] bg-gold/5 px-2 py-0.5 rounded-full text-cream/40">{vids.length} videos</span>
+                      <span className="text-[11px] bg-gold/5 px-2 py-0.5 rounded-full text-cream/55">{vids.length} videos</span>
                     </div>
                     {videosLoading ? (
                       <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
                     ) : vids.length === 0 ? (
-                      <div className="px-5 py-4 text-sm text-cream/30">Sin videos en este pilar todavía.</div>
+                      <div className="px-5 py-4 text-sm text-cream/45">Sin videos en este pilar todavía.</div>
                     ) : (
-                      <div className="divide-y divide-[rgba(232,150,46,0.1)]">
+                      <div className="divide-y divide-gold/10">
                         {vids.map(v => {
                           const vidId = getYoutubeId(v.youtubeUrl);
                           return (
@@ -3467,10 +3464,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-cream truncate">{v.titulo}</p>
-                                <p className="text-xs text-cream/40 truncate">{v.descripcion}</p>
+                                <p className="text-xs text-cream/55 truncate">{v.descripcion}</p>
                               </div>
-                              <span className="text-[10px] text-gold font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
-                              {v.duracion && <span className="text-[10px] text-cream/40 shrink-0">{v.duracion}</span>}
+                              <span className="text-[11px] text-gold font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
+                              {v.duracion && <span className="text-[11px] text-cream/55 shrink-0">{v.duracion}</span>}
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => {
@@ -3484,7 +3481,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     });
                                     setShowAddVideo(true);
                                   }}
-                                  className="w-7 h-7 rounded-lg bg-gold/5 hover:bg-gold/10 flex items-center justify-center text-cream/60 hover:text-cream transition-colors shrink-0"
+                                  className="w-7 h-7 rounded-lg bg-gold/5 hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors shrink-0"
                                   title="Editar video"
                                 >
                                   <Settings className="w-3.5 h-3.5" />
@@ -3516,50 +3513,50 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-white tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Gestión de Equipo</h2>
-                  <p className="text-sm text-white/40 mt-1">Administrá roles y permisos de los miembros del equipo.</p>
+                  <p className="text-sm text-white/55 mt-1">Administrá roles y permisos de los miembros del equipo.</p>
                 </div>
                 <button onClick={() => setShowAddTeamMember(true)} className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold">
                   <Plus className="w-4 h-4" /> Agregar Miembro
                 </button>
               </div>
 
-              <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-visible">
+              <div className="card-panel border border-gold/12 rounded-2xl overflow-visible">
                 {teamLoading ? (
                   <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
                 ) : teamMembers.length === 0 ? (
                   <div className="text-center py-16">
                     <UsersRound className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-cream/40 text-sm">El equipo se arma acá — agregá al primero.</p>
+                    <p className="text-cream/55 text-sm">El equipo se arma acá — agregá al primero.</p>
                   </div>
                 ) : (
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-[rgba(232,150,46,0.1)]">
+                      <tr className="border-b border-gold/10">
                         {['Nombre', 'Rol', 'Estado'].map(h => (
-                          <th key={h} className="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-cream/40">{h}</th>
+                          <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">{h}</th>
                         ))}
-                        <th className="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-cream/40">Acciones</th>
+                        <th className="text-right px-5 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {teamMembers.map(member => {
                         const memberRol: AdminRol = member.admin_rol ?? 'owner';
                         return (
-                          <tr key={member.id} className="bg-panel hover:bg-surface border-b border-[rgba(232,150,46,0.1)] transition-colors">
+                          <tr key={member.id} className="bg-panel hover:bg-surface border-b border-gold/10 transition-colors">
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-sm font-bold text-cream">
+                                <div className="w-9 h-9 rounded-full bg-gold/10 border border-gold/12 flex items-center justify-center text-sm font-bold text-cream">
                                   {member.nombre?.charAt(0)?.toUpperCase() ?? '?'}
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-cream">{member.nombre}</p>
-                                  <p className="text-[10px] text-cream/40">{member.email}</p>
+                                  <p className="text-[11px] text-cream/55">{member.email}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="px-5 py-4">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-gold/20 text-gold border border-gold/30">
+                                <span className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-gold/20 text-gold border border-gold/30">
                                   {memberRol}
                                 </span>
                               ) : (
@@ -3576,19 +3573,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               )}
                             </td>
                             <td className="px-5 py-4">
-                              <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-success/10 text-success border border-success/20">
+                              <span className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-success/10 text-success border border-success/20">
                                 Activo
                               </span>
                             </td>
                             <td className="px-5 py-4 text-right">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[10px] text-cream/30 italic">Vos</span>
+                                <span className="text-[11px] text-cream/45 italic">Vos</span>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => setMiembroAEliminar({ id: member.id, nombre: member.nombre ?? 'Miembro', email: member.email ?? '' })}
                                   title="Eliminar miembro"
-                                  className="p-2 rounded-lg text-cream/40 hover:text-danger hover:bg-danger/10 transition-colors"
+                                  className="p-2 rounded-lg text-cream/55 hover:text-danger hover:bg-danger/10 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -3604,32 +3601,32 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
               {showAddTeamMember && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-                  <div className="w-full max-w-md max-h-[90vh] bg-panel border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-y-auto scrollbar-hide">
+                  <div className="w-full max-w-md max-h-[90vh] bg-panel border border-gold/12 rounded-3xl p-8 shadow-2xl relative overflow-y-auto scrollbar-hide">
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gold" />
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-semibold text-white tracking-tight">Agregar Miembro</h3>
-                        <p className="text-xs text-white/40 mt-1">Creá una cuenta para un nuevo miembro del equipo</p>
+                        <p className="text-xs text-white/55 mt-1">Creá una cuenta para un nuevo miembro del equipo</p>
                       </div>
-                      <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-gold/10 transition-colors">
+                      <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-white/75 hover:text-white hover:bg-gold/10 transition-colors">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-2">Nombre completo *</label>
-                        <input type="text" value={teamForm.nombre} onChange={e => setTeamForm({ ...teamForm, nombre: e.target.value })} placeholder="Ej: María García" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Nombre completo *</label>
+                        <input type="text" value={teamForm.nombre} onChange={e => setTeamForm({ ...teamForm, nombre: e.target.value })} placeholder="Ej: María García" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-2">Email *</label>
-                        <input type="email" value={teamForm.email} onChange={e => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="nombre@ejemplo.com" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Email *</label>
+                        <input type="email" value={teamForm.email} onChange={e => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="nombre@ejemplo.com" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
                         <input type="text" value={teamForm.password} onChange={e => setTeamForm({ ...teamForm, password: e.target.value })} placeholder="Ej: Equipo123!" className="w-full bg-success/5 border border-success/20 rounded-lg px-4 py-3 text-sm text-success placeholder-success/30 focus:outline-none focus:border-success/50 transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/60 mb-2">Rol en el equipo *</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Rol en el equipo *</label>
                         <CustomSelect value={teamForm.admin_rol} onChange={(val) => setTeamForm({ ...teamForm, admin_rol: val as AdminRol })} options={[{ value: 'owner', label: 'Owner — Acceso total' }, { value: 'manager', label: 'Manager — Gestión de clientes' }, { value: 'staff', label: 'Staff — Acceso limitado' }]} className="w-full" />
                       </div>
                     </div>
@@ -3652,7 +3649,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
+                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3664,7 +3661,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/40">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/55">
                     <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
@@ -3688,7 +3685,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
                   <Megaphone className="w-10 h-10 text-cream/15 mx-auto mb-3" />
-                  <p className="text-sm text-cream/40">
+                  <p className="text-sm text-cream/55">
                     Selecciona un cliente para comenzar a crear campanas con su ADN de negocio.
                   </p>
                 </div>
@@ -3703,7 +3700,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente (reusa el state de campanas) */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[10px] font-bold tracking-wider uppercase text-cream/40 mb-2">
+                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3715,7 +3712,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/40">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/55">
                     <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
@@ -3737,7 +3734,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
                   <Image className="w-10 h-10 text-cream/15 mx-auto mb-3" />
-                  <p className="text-sm text-cream/40">
+                  <p className="text-sm text-cream/55">
                     Selecciona un cliente para generar creativos con su ADN de negocio.
                   </p>
                 </div>
@@ -3765,11 +3762,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL AJUSTES ADMIN ────────────────────────────────────────────────── */}
       {showAdminSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-panel border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-md bg-panel border border-gold/12 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gold" />
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-cream">Ajustes de Perfil Admin</h3>
-              <button onClick={() => setShowAdminSettings(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors">
+              <button onClick={() => setShowAdminSettings(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -3778,7 +3775,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <input ref={adminAvatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAdminAvatarUpload} />
               <button
                 onClick={() => adminAvatarInputRef.current?.click()}
-                className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
+                className="relative group w-20 h-20 rounded-full border-2 border-dashed border-gold/18 hover:border-gold/50 transition-colors overflow-hidden"
               >
                 {adminAvatar ? (
                   <img loading="lazy" src={adminAvatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -3791,31 +3788,31 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <Camera className="w-6 h-6 text-cream" />
                 </div>
               </button>
-              <p className="text-xs text-cream/40">Clic para cambiar foto</p>
+              <p className="text-xs text-cream/55">Clic para cambiar foto</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Nombre completo</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo</label>
                 <input
                   type="text"
                   value={adminDraft.nombre}
                   onChange={e => setAdminDraft({ ...adminDraft, nombre: e.target.value })}
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Cargo / Título</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Cargo / Título</label>
                 <input
                   type="text"
                   value={adminDraft.cargo}
                   onChange={e => setAdminDraft({ ...adminDraft, cargo: e.target.value })}
                   placeholder="Ej: Coach Principal, Soporte Técnico..."
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Apariencia</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Apariencia</label>
                 <div role="radiogroup" aria-label="Tema visual" className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -3824,8 +3821,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onClick={() => setTheme('dark')}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
                       theme === 'dark'
-                        ? 'bg-gold/15 border-[rgba(232,150,46,0.5)] text-gold'
-                        : 'bg-black/20 border-[rgba(232,150,46,0.10)] text-cream/70 hover:text-cream hover:border-[rgba(232,150,46,0.18)]'
+                        ? 'bg-gold/15 border-gold/50 text-gold'
+                        : 'bg-black/20 border-gold/10 text-cream/70 hover:text-cream hover:border-gold/18'
                     }`}
                   >
                     <Moon className="w-4 h-4" />
@@ -3838,15 +3835,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onClick={() => setTheme('light')}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
                       theme === 'light'
-                        ? 'bg-gold/15 border-[rgba(232,150,46,0.5)] text-gold'
-                        : 'bg-black/20 border-[rgba(232,150,46,0.10)] text-cream/70 hover:text-cream hover:border-[rgba(232,150,46,0.18)]'
+                        ? 'bg-gold/15 border-gold/50 text-gold'
+                        : 'bg-black/20 border-gold/10 text-cream/70 hover:text-cream hover:border-gold/18'
                     }`}
                   >
                     <Sun className="w-4 h-4" />
                     Claro
                   </button>
                 </div>
-                <p className="text-[11px] text-cream/40 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
+                <p className="text-[11px] text-cream/55 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
               </div>
             </div>
 
@@ -3878,26 +3875,26 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL CAMBIAR EMAIL DEL CLIENTE ────────────────────────────────────── */}
       {showChangeEmailModal && selectedCliente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+          <div className="bg-panel border border-gold/12 rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gold/10">
               <div>
                 <h3 className="text-sm font-semibold text-cream">Cambiar email</h3>
-                <p className="text-[11px] text-cream/50 mt-0.5">{selectedCliente.nombre}</p>
+                <p className="text-[11px] text-cream/65 mt-0.5">{selectedCliente.nombre}</p>
               </div>
               <button
                 onClick={() => setShowChangeEmailModal(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/40 hover:text-cream hover:bg-cream/5 transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Email actual</label>
-                <p className="text-sm text-cream/60 px-3 py-2 bg-black/20 rounded-lg border border-[rgba(232,150,46,0.1)]">{selectedCliente.email ?? '—'}</p>
+                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email actual</label>
+                <p className="text-sm text-cream/75 px-3 py-2 bg-black/20 rounded-lg border border-gold/10">{selectedCliente.email ?? '—'}</p>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Nuevo email *</label>
+                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nuevo email *</label>
                 <input
                   type="email"
                   value={newEmailInput}
@@ -3905,7 +3902,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   placeholder="cliente@ejemplo.com"
                   autoFocus
                   disabled={changingEmail}
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                  className="w-full bg-black/20 border border-gold/12 rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
                 />
               </div>
               <div className="bg-gold/5 border border-gold/20 rounded-xl px-3 py-2">
@@ -3917,7 +3914,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <button
                   onClick={() => setShowChangeEmailModal(false)}
                   disabled={changingEmail}
-                  className="flex-1 py-2.5 rounded-xl border border-cream/10 text-sm text-cream/60 hover:text-cream transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl border border-cream/10 text-sm text-cream/75 hover:text-cream transition-colors disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -3937,38 +3934,38 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL NUEVO CLIENTE ────────────────────────────────────────────────── */}
       {showNuevoCliente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-panel border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-md bg-panel border border-gold/12 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gold" />
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-xl font-semibold text-cream tracking-tight">Nuevo Estudiante</h3>
-                <p className="text-xs text-cream/40 mt-1">Ingresa sus datos para la academia</p>
+                <p className="text-xs text-cream/55 mt-1">Ingresa sus datos para la academia</p>
               </div>
-              <button onClick={() => setShowNuevoCliente(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors">
+              <button onClick={() => setShowNuevoCliente(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Nombre completo *</label>
-                <input type="text" value={nuevoForm.nombre} onChange={e => setNuevoForm({ ...nuevoForm, nombre: e.target.value })} placeholder="Ej: Dra. María González" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo *</label>
+                <input type="text" value={nuevoForm.nombre} onChange={e => setNuevoForm({ ...nuevoForm, nombre: e.target.value })} placeholder="Ej: Dra. María González" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Email *</label>
-                <input type="email" value={nuevoForm.email} onChange={e => setNuevoForm({ ...nuevoForm, email: e.target.value })} placeholder="maria@ejemplo.com" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Email *</label>
+                <input type="email" value={nuevoForm.email} onChange={e => setNuevoForm({ ...nuevoForm, email: e.target.value })} placeholder="maria@ejemplo.com" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
                 <input type="text" value={nuevoForm.password} onChange={e => setNuevoForm({ ...nuevoForm, password: e.target.value })} placeholder="Ej: Maria123!" className="w-full bg-success/5 border border-success/20 rounded-lg px-4 py-3 text-sm text-success placeholder-success/30 focus:outline-none focus:border-success/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Especialidad</label>
-                <input type="text" value={nuevoForm.especialidad} onChange={e => setNuevoForm({ ...nuevoForm, especialidad: e.target.value })} placeholder="Ej: Nutricionista" className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Especialidad</label>
+                <input type="text" value={nuevoForm.especialidad} onChange={e => setNuevoForm({ ...nuevoForm, especialidad: e.target.value })} placeholder="Ej: Nutricionista" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Plan</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Plan</label>
                   <CustomSelect
                     value={nuevoForm.plan}
                     onChange={(val) => setNuevoForm({ ...nuevoForm, plan: val as 'DWY' | 'DFY' | 'IMPLEMENTACION' })}
@@ -3980,12 +3977,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Inicio</label>
-                  <input type="date" value={nuevoForm.fecha_inicio} onChange={e => setNuevoForm({ ...nuevoForm, fecha_inicio: e.target.value })} className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Inicio</label>
+                  <input type="date" value={nuevoForm.fecha_inicio} onChange={e => setNuevoForm({ ...nuevoForm, fecha_inicio: e.target.value })} className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Estado inicial</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Estado inicial</label>
                 <CustomSelect
                   value={nuevoForm.status}
                   onChange={(val) => setNuevoForm({ ...nuevoForm, status: val as UserStatus })}
@@ -4010,23 +4007,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       {/* ─── MODAL ADD/EDIT VIDEO ──────────────────────────────────────────────── */}
       {showAddVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-panel border border-[rgba(232,150,46,0.12)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-md bg-panel border border-gold/12 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gold" />
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-cream">{videoForm.id ? 'Editar Video' : 'Nuevo Video'}</h3>
-              <button onClick={() => setShowAddVideo(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/60 hover:text-cream hover:bg-gold/10 transition-colors">
+              <button onClick={() => setShowAddVideo(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">URL de YouTube *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">URL de YouTube *</label>
                 <input
                   type="text"
                   value={videoForm.youtubeUrl}
                   onChange={e => setVideoForm({ ...videoForm, youtubeUrl: e.target.value })}
                   placeholder="https://youtu.be/... o https://youtube.com/watch?v=..."
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
                 {videoForm.youtubeUrl && getYoutubeId(videoForm.youtubeUrl) && (
                   <img
@@ -4037,7 +4034,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 )}
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Pilar *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Pilar *</label>
                 <CustomSelect
                   value={videoForm.pilar_id}
                   onChange={(val) => setVideoForm({ ...videoForm, pilar_id: val as PilarId | '' })}
@@ -4048,33 +4045,33 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Título *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Título *</label>
                 <input
                   type="text"
                   value={videoForm.titulo}
                   onChange={e => setVideoForm({ ...videoForm, titulo: e.target.value })}
                   placeholder="Ej: Módulo 1 — Identidad del Fundador"
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Descripción</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Descripción</label>
                 <input
                   type="text"
                   value={videoForm.descripcion}
                   onChange={e => setVideoForm({ ...videoForm, descripcion: e.target.value })}
                   placeholder="Breve descripción del contenido"
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/60 mb-2">Duración (opcional)</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Duración (opcional)</label>
                 <input
                   type="text"
                   value={videoForm.duracion}
                   onChange={e => setVideoForm({ ...videoForm, duracion: e.target.value })}
                   placeholder="Ej: 15:30"
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
             </div>
@@ -4113,28 +4110,28 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           onClick={() => setTareaModal(null)}
         >
           <div
-            className="w-full max-w-2xl max-h-[90vh] bg-panel border border-[rgba(232,150,46,0.12)] rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-2xl max-h-[90vh] bg-panel border border-gold/12 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-start gap-4 p-6 border-b border-[rgba(232,150,46,0.12)]">
+            <div className="flex items-start gap-4 p-6 border-b border-gold/12">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                     {tareaModal.meta.codigo}
                   </span>
                   {tareaModal.meta.es_estrella && <span className="text-gold text-sm flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-gold" /> Tarea estrella</span>}
                   {tareaModal.tareaData?.fecha_completada && (
-                    <span className="text-[11px] text-cream/40">
+                    <span className="text-[11px] text-cream/55">
                       Completada el {new Date(tareaModal.tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                   )}
                 </div>
                 <h2 className="text-lg font-semibold text-cream">{tareaModal.meta.titulo}</h2>
-                <p className="text-xs text-cream/40 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
+                <p className="text-xs text-cream/55 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
               </div>
               <button
                 onClick={() => setTareaModal(null)}
-                className="p-2 rounded-xl hover:bg-gold/10 text-cream/40 hover:text-cream transition-colors shrink-0"
+                className="p-2 rounded-xl hover:bg-gold/10 text-cream/55 hover:text-cream transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -4149,12 +4146,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 {tareaResumenLoading ? (
                   <div className="flex items-center gap-2 py-2">
                     <Loader2 className="w-4 h-4 text-gold animate-spin" />
-                    <span className="text-sm text-cream/60">Analizando el output de {tareaModal.clienteNombre}...</span>
+                    <span className="text-sm text-cream/75">Analizando el output de {tareaModal.clienteNombre}...</span>
                   </div>
                 ) : tareaResumen ? (
                   <p className="text-sm text-cream/90 leading-relaxed">{tareaResumen}</p>
                 ) : (
-                  <p className="text-sm text-cream/40 italic">
+                  <p className="text-sm text-cream/55 italic">
                     {tareaModal.output ? 'No se pudo generar el resumen automático.' : 'Esta tarea no tiene output guardado — fue marcada como completada manualmente.'}
                   </p>
                 )}
@@ -4163,10 +4160,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               {tareaModal.output ? (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <FileText className="w-3.5 h-3.5 text-cream/40" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-cream/40">Output generado por el cliente</span>
+                    <FileText className="w-3.5 h-3.5 text-cream/55" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-cream/55">Output generado por el cliente</span>
                   </div>
-                  <div className="bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
+                  <div className="bg-black/30 border border-gold/12 rounded-2xl p-5">
                     <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-headings:text-cream prose-headings:font-semibold prose-strong:text-gold prose-li:text-cream/80">
                       <Markdown>{tareaModal.output}</Markdown>
                     </div>
@@ -4175,7 +4172,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Circle className="w-8 h-8 text-gray-700 mb-3" />
-                  <p className="text-sm text-cream/40">Sin output guardado</p>
+                  <p className="text-sm text-cream/55">Sin output guardado</p>
                   <p className="text-xs text-gray-700 mt-1">El cliente completó esta tarea pero no hay contenido generado por IA asociado.</p>
                 </div>
               )}
@@ -4197,16 +4194,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-white tracking-tight">Eliminar cliente</h3>
-                <p className="text-sm text-white/60 mt-1">Esta acción no se puede deshacer.</p>
+                <p className="text-sm text-white/75 mt-1">Esta acción no se puede deshacer.</p>
               </div>
             </div>
             <div className="bg-black/30 border border-danger/20 rounded-xl p-4 mb-6 space-y-1">
               <p className="text-sm text-white">
-                <span className="text-white/50">Cliente:</span> <span className="font-semibold">{clienteAEliminar.nombre}</span>
+                <span className="text-white/65">Cliente:</span> <span className="font-semibold">{clienteAEliminar.nombre}</span>
               </p>
-              <p className="text-xs text-white/50 truncate">{clienteAEliminar.email}</p>
+              <p className="text-xs text-white/65 truncate">{clienteAEliminar.email}</p>
             </div>
-            <p className="text-xs text-white/50 mb-6 leading-relaxed">
+            <p className="text-xs text-white/65 mb-6 leading-relaxed">
               Se eliminará la cuenta, el profile, diario, métricas, tareas, mensajes, notas, ratings, campañas y creativos asociados. El email quedará libre para reutilizarse.
             </p>
             <div className="flex gap-3">
@@ -4244,16 +4241,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-white tracking-tight">Eliminar miembro</h3>
-                <p className="text-sm text-white/60 mt-1">Esta acción no se puede deshacer.</p>
+                <p className="text-sm text-white/75 mt-1">Esta acción no se puede deshacer.</p>
               </div>
             </div>
             <div className="bg-black/30 border border-danger/20 rounded-xl p-4 mb-6 space-y-1">
               <p className="text-sm text-white">
-                <span className="text-white/50">Miembro:</span> <span className="font-semibold">{miembroAEliminar.nombre}</span>
+                <span className="text-white/65">Miembro:</span> <span className="font-semibold">{miembroAEliminar.nombre}</span>
               </p>
-              {miembroAEliminar.email && <p className="text-xs text-white/50 truncate">{miembroAEliminar.email}</p>}
+              {miembroAEliminar.email && <p className="text-xs text-white/65 truncate">{miembroAEliminar.email}</p>}
             </div>
-            <p className="text-xs text-white/50 mb-6 leading-relaxed">
+            <p className="text-xs text-white/65 mb-6 leading-relaxed">
               Se revocará el acceso y se eliminará la cuenta del equipo. Las tareas que tuviera asignadas quedarán sin responsable.
             </p>
             <div className="flex gap-3">
@@ -4302,13 +4299,13 @@ function ManagerChecklist({
   const completadasDiarias = diarias.filter(i => i.completada).length;
 
   return (
-    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5 space-y-4">
+    <div className="card-panel border border-gold/12 rounded-2xl p-5 space-y-4">
       <div className="flex items-center gap-2">
         <ClipboardList className="w-4 h-4 text-gold" />
         <h3 className="text-xs font-bold uppercase tracking-widest text-gold">Checklist</h3>
       </div>
       {diarias.length > 0 && (
-        <p className="text-[10px] text-cream/40 font-medium">
+        <p className="text-[11px] text-cream/55 font-medium">
           {completadasDiarias}/{diarias.length} tareas del día
         </p>
       )}
@@ -4316,14 +4313,14 @@ function ManagerChecklist({
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-gold animate-spin" /></div>
       ) : items.length === 0 ? (
-        <p className="text-xs text-cream/30">Sin tareas asignadas</p>
+        <p className="text-xs text-cream/45">Sin tareas asignadas</p>
       ) : (
         categorias.map(cat => {
           const catItems = items.filter(i => i.categoria === cat.key);
           if (catItems.length === 0) return null;
           return (
             <div key={cat.key}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-cream/40 mb-2">{cat.label}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">{cat.label}</p>
               <div className="space-y-1.5">
                 {catItems.map(item => (
                   <label
@@ -4336,12 +4333,12 @@ function ManagerChecklist({
                       className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                         item.completada
                           ? 'bg-success border-success text-cream'
-                          : 'border-[rgba(232,150,46,0.18)] text-transparent hover:border-gold/50'
+                          : 'border-gold/18 text-transparent hover:border-gold/50'
                       }`}
                     >
                       <Check className="w-3 h-3" />
                     </button>
-                    <span className={`text-xs ${item.completada ? 'text-cream/30 line-through' : 'text-cream/80'}`}>
+                    <span className={`text-xs ${item.completada ? 'text-cream/45 line-through' : 'text-cream/80'}`}>
                       {item.titulo}
                     </span>
                   </label>

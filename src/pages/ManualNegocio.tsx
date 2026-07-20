@@ -277,7 +277,7 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
     return (
       <div className="py-4 px-5 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm text-cream/40">{field.label}</p>
+          <p className="text-sm text-cream/55">{field.label}</p>
           <p className="text-xs text-cream/20 mt-0.5">Pendiente de completar</p>
         </div>
         <button
@@ -359,7 +359,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
               <span className="text-gold font-bold text-base" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 {section.letter}
               </span>
-              <span className="text-[10px] text-cream/30 font-medium tracking-wider uppercase">
+              <span className="text-[11px] text-cream/45 font-medium tracking-wider uppercase">
                 {section.pillars}
               </span>
             </div>
@@ -370,12 +370,12 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
         </div>
 
         <div className="flex items-center gap-3 shrink-0 ml-4">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[rgba(232,150,46,0.12)] bg-gold/10 text-gold">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[rgba(232,150,46,0.12)] bg-gold/10 text-gold">
             {completed}/{total} completados
           </span>
           {isExpanded
-            ? <ChevronUp className="w-4 h-4 text-cream/30" />
-            : <ChevronDown className="w-4 h-4 text-cream/30" />}
+            ? <ChevronUp className="w-4 h-4 text-cream/45" />
+            : <ChevronDown className="w-4 h-4 text-cream/45" />}
         </div>
       </button>
 
@@ -517,13 +517,13 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
         >
           ADN del Negocio
         </h1>
-        <p className="text-sm text-cream/40 mt-1">
+        <p className="text-sm text-cream/55 mt-1">
           Tu estrategia completa documentada con el metodo CLINICA
         </p>
 
         <div className="mt-5">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-cream/60">
+            <span className="text-sm text-cream/75">
               ADN completado: {progressPct}%
             </span>
             <span className="text-xs text-gold font-semibold">
@@ -546,7 +546,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
         <div className="mb-3 min-w-0">
           <p className="text-sm font-semibold text-cream">Pais del profesional</p>
-          <p className="text-xs text-cream/50 mt-1 leading-relaxed">
+          <p className="text-xs text-cream/65 mt-1 leading-relaxed">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
             guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
           </p>

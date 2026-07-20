@@ -337,7 +337,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
       <div className="w-72 border-r border-[rgba(232,150,46,0.12)] bg-black/20 flex flex-col shrink-0">
         <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
             <input
               type="text"
               value={channelSearch}
@@ -350,7 +350,7 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
 
         <div className="flex-1 overflow-y-auto py-4">
           <div className="px-4 mb-2">
-            <p className="text-xs font-medium text-cream/40 uppercase tracking-wider">Canales</p>
+            <p className="text-xs font-medium text-cream/55 uppercase tracking-wider">Canales</p>
           </div>
           <div className="space-y-1 px-2">
             {CHANNELS.filter(c => c.name.toLowerCase().includes(channelSearch.toLowerCase())).map(channel => (
@@ -362,12 +362,12 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-gold' : 'text-cream/40'}`} />
+                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-gold' : 'text-cream/55'}`} />
                   <span className="text-sm font-medium truncate">{channel.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {(unreadMap[channel.id] ?? 0) > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[10px] font-bold flex items-center justify-center">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center">
                       {unreadMap[channel.id]}
                     </span>
                   )}
@@ -402,15 +402,15 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
         {/* Header */}
         <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between px-6 bg-gold/5 shrink-0">
           <div className="flex items-center gap-3">
-            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-cream/60" })}
+            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-cream/75" })}
             <div>
               <h2 className="text-cream font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
-              <p className="text-xs text-cream/40">
+              <p className="text-xs text-cream/55">
                 {activeChannel === 'privado' ? 'Solo visible para ti y el equipo' : 'Canal público de la comunidad'}
               </p>
             </div>
           </div>
-          <button className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-cream/60 transition-colors">
+          <button className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-cream/75 transition-colors">
             <MoreVertical className="w-5 h-5" />
           </button>
         </div>
@@ -423,8 +423,8 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
             </div>
           ) : activeMessages.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-cream/40 text-sm">Sin mensajes en este canal todavía</p>
-              <p className="text-cream/30 text-xs mt-1">Sé el primero en escribir</p>
+              <p className="text-cream/55 text-sm">Sin mensajes en este canal todavía</p>
+              <p className="text-cream/45 text-xs mt-1">Sé el primero en escribir</p>
             </div>
           ) : (
             activeMessages.map((msg) => (
@@ -451,9 +451,9 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
                   {/* Name + badge + time */}
                   <div className={`flex items-baseline gap-2 px-1 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
                     <span className="text-xs font-medium text-cream/80">{msg.author}</span>
-                    {msg.rol === 'admin' && <span className="text-[9px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Coach</span>}
-                    {msg.rol === 'bot' && <span className="text-[9px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Sistema</span>}
-                    <span className="text-[10px] text-cream/30">{msg.time}</span>
+                    {msg.rol === 'admin' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Coach</span>}
+                    {msg.rol === 'bot' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Sistema</span>}
+                    <span className="text-[11px] text-cream/45">{msg.time}</span>
                   </div>
 
                   {/* Bubble */}
@@ -499,11 +499,11 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
           <form className="flex items-end gap-2" onSubmit={handleSend}>
             <div className="flex flex-col gap-1 shrink-0">
               <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} title="Subir imagen"
-                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/60 hover:text-cream transition-colors disabled:opacity-50">
+                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
                 <Image className="w-4 h-4" />
               </button>
               <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} title="Adjuntar archivo (PDF, imagen, documento)"
-                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/60 hover:text-cream transition-colors disabled:opacity-50">
+                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
                 <Paperclip className="w-4 h-4" />
               </button>
             </div>

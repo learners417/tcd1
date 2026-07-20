@@ -62,7 +62,7 @@ export default function Login({ onLogin }: LoginProps) {
             <Stethoscope className="w-8 h-8 text-ink" />
           </div>
           <h1 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Clínica Digital</h1>
-          <p className="text-sm text-cream/40 mt-1">El dojo de tu práctica · 90 días</p>
+          <p className="text-sm text-cream/55 mt-1">El dojo de tu práctica · 90 días</p>
         </div>
 
         {/* Card */}
@@ -72,9 +72,9 @@ export default function Login({ onLogin }: LoginProps) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs text-cream/60 font-medium">Email</label>
+              <label className="text-xs text-cream/75 font-medium">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
                 <input
                   type="email"
                   value={email}
@@ -89,9 +89,9 @@ export default function Login({ onLogin }: LoginProps) {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs text-cream/60 font-medium">Contraseña</label>
+              <label className="text-xs text-cream/75 font-medium">Contraseña</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -104,7 +104,7 @@ export default function Login({ onLogin }: LoginProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/70 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/70 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -136,7 +136,7 @@ export default function Login({ onLogin }: LoginProps) {
             ¿Olvidaste tu contraseña?
           </button>
 
-          <p className="text-center text-xs text-cream/30 mt-6">
+          <p className="text-center text-xs text-cream/45 mt-6">
             ¿Otros problemas? Contactá a tu coach por WhatsApp.
           </p>
         </div>
@@ -149,17 +149,17 @@ export default function Login({ onLogin }: LoginProps) {
               <h3 className="text-sm font-semibold text-cream">Recuperar contraseña</h3>
               <button
                 onClick={() => setShowResetModal(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/40 hover:text-cream hover:bg-cream/5 transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <form onSubmit={handleResetRequest} className="p-5 space-y-4">
-              <p className="text-xs text-cream/60">
+              <p className="text-xs text-cream/75">
                 Te enviaremos un mail con un link para que puedas fijar una nueva contraseña.
               </p>
               <div>
-                <label className="block text-[10px] font-bold text-cream/40 uppercase tracking-wider mb-1.5">Email</label>
+                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email</label>
                 <input
                   type="email"
                   value={resetEmail}

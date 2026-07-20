@@ -8,7 +8,6 @@ import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
-import TableroDirector from '../components/TableroDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 
@@ -17,16 +16,16 @@ function getTypeBadge(tipo?: string) {
     case 'VIDEO': return 'bg-gold/15 text-gold border-gold/25';
     case 'HERRAMIENTA': return 'bg-success/15 text-success border-success/25';
     case 'COACH': return 'bg-cream/10 text-cream/70 border-cream/15';
-    default: return 'bg-cream/5 text-cream/50 border-cream/10';
+    default: return 'bg-cream/5 text-cream/65 border-cream/10';
   }
 }
 
 function MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="card-panel p-5">
-      <p className="text-[10px] text-cream/40 uppercase tracking-widest mb-2 font-semibold">{label}</p>
+      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
       <p className="text-2xl font-light text-cream tracking-tight">{value}</p>
-      <p className="text-xs text-cream/50 mt-1">{sub}</p>
+      <p className="text-xs text-cream/65 mt-1">{sub}</p>
     </div>
   );
 }
@@ -282,7 +281,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const urgente = d !== null && d <= 3;
         return (
           <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tu Semana Blanca</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tu Semana Blanca</p>
             {d !== null && d > 0 ? (
               <p className="text-sm text-cream/85">
                 {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
@@ -301,109 +300,26 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         );
       })()}
 
-      {/* ═══ T8 · El tablero del director (desde D29): ROAS vivo + Semáforo D45 ═══ */}
-      {(() => {
-        let fi: string | null = null; let comp = 0; let esperadas = 0;
-        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); fi = p?.fecha_inicio ?? null; } catch { /* noop */ }
-        const dia = fi ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(fi).getTime()) / 86400000) + 1)) : 1;
-        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); comp = saved ? (JSON.parse(saved) as string[]).length : 0; } catch { /* noop */ }
-        for (const pil of SEED_ROADMAP_V2) for (const m of pil.metas ?? []) if ((m.dia_asignado ?? 99) <= dia) esperadas++;
-        return <TableroDirector diaPrograma={dia} completadasCount={comp} metasEsperadas={esperadas} />;
-      })()}
-
-      {/* ═══ EL HERO "HOY" — día honesto · episodio único · un solo botón (T1) ═══ */}
-      {(() => {
-        // ── El día del programa y el atraso (la misma lógica honesta de El Camino) ──
-        let fechaInicio: string | null = null;
-        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); fechaInicio = p?.fecha_inicio ?? null; } catch { /* noop */ }
-        const diaPrograma = fechaInicio
-          ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(fechaInicio).getTime()) / 86400000) + 1))
-          : 1;
-        let completadasSet = new Set<string>();
-        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); if (saved) completadasSet = new Set(JSON.parse(saved)); } catch { /* noop */ }
-        let diaEsperado: number | null = null;
-        let proxima: { pilar: number; meta: RoadmapMeta } | null = null;
-        outer: for (const pil of SEED_ROADMAP_V2) {
-          for (const m of pil.metas ?? []) {
-            if (!completadasSet.has(`${pil.numero}-${m.codigo}`)) {
-              diaEsperado = m.dia_asignado ?? null;
-              proxima = { pilar: pil.numero, meta: m };
-              break outer;
-            }
-          }
-        }
-        let diasAtraso = 0;
-        if (diaEsperado !== null) {
-          for (let d = diaEsperado + 1; d <= diaPrograma; d++) if (!esDiaDescanso(d)) diasAtraso++;
-        }
-        const adelanto = diaEsperado !== null && diaEsperado > diaPrograma ? diaEsperado - diaPrograma : 0;
-        const cinturon = (() => { try { return cinturonDesdeProgreso(completadasSet); } catch { return null; } })();
-        const esHito = !!(proxima?.meta as { estrella?: boolean } | undefined)?.estrella || (proxima?.meta?.titulo ?? '').includes('⭐');
-        const descansoHoy = esDiaDescanso(diaPrograma) && !!proxima;
-        return (
-          <div className="relative overflow-hidden card-panel p-8 border border-gold/20 bg-gradient-to-br from-gold/[0.05] to-transparent">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
-            <div className="relative z-10">
-              {/* Saludo + dónde estoy */}
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-                <div>
-                  <p className="text-2xl font-light text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-                  <p className="text-sm mt-1.5">
-                    {diasAtraso <= 0 && adelanto > 0 ? (
-                      <span className="text-success font-medium">Día {diaPrograma} de 90 · vas {adelanto} día{adelanto > 1 ? 's' : ''} adelante 🏆</span>
-                    ) : diasAtraso <= 0 ? (
-                      <span className="text-success font-medium">Día {diaPrograma} de 90 · vas al día ✓</span>
-                    ) : diasAtraso <= 3 ? (
-                      <span className="text-gold font-medium">Día {diaPrograma} de 90 · a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo — hoy se recupera</span>
-                    ) : (
-                      <span className="text-danger font-medium">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás — hoy lo reacomodamos</span>
-                    )}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  {(() => { let mn: string | undefined; try { mn = (JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as Record<string, unknown>)?.metodo_nombre as string | undefined; } catch { mn = undefined; } return mn ? <p className="text-[11px] text-gold/90 font-bold uppercase tracking-wider mb-1">Método {mn}™</p> : null; })()}
-                  <p className="text-sm text-cream/80">{cinturon ? `${cinturon.emoji} Cinturón ${cinturon.nombre}` : '⬜ Cinturón Blanco'}</p>
-                  <p className="text-xs text-gold mt-1">Racha: {rachaDB ?? calcularRacha(null)} 🔥</p>
-                </div>
-              </div>
-
-              {/* LA TARJETA ÚNICA — el episodio de hoy */}
-              {descansoHoy ? (
-                <div className="py-10 text-center border border-success/20 rounded-2xl bg-gradient-to-b from-success/[0.06] to-transparent">
-                  <p className="text-4xl mb-3">🌿</p>
-                  <p className="text-base text-cream/85 font-medium">Día de descanso — el dojo también respira</p>
-                  <p className="text-xs text-cream/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, tu próxima sesión te espera abajo.</p>
-                  <button onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(proxima?.pilar ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }} className="mt-4 text-[11px] font-bold text-gold/70 hover:text-gold uppercase tracking-widest transition-colors">Adelantar igual →</button>
-                </div>
-              ) : proxima ? (
-                <button
-                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(proxima!.pilar)); } catch { /* noop */ } setCurrentPage('roadmap'); }}
-                  className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu episodio de hoy{esHito ? ' · ⭐ SESIÓN-HITO' : ''}</p>
-                  <p className="text-2xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{proxima.meta.titulo.replace('⭐', '').trim()}</p>
-                  <p className="text-xs text-cream/50 mb-5">{proxima.meta.tiempo_estimado ?? '30–45 min'}{esHito ? ' · pide más tiempo — vale por diez' : ''}</p>
-                  <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">ENTRAR →</span>
-                </button>
-              ) : (
-                <div className="py-10 text-center border border-success/25 rounded-2xl bg-gradient-to-b from-success/[0.06] to-transparent">
-                  <p className="text-4xl mb-3">⬛</p>
-                  <p className="text-base text-cream/90 font-medium">El Camino está completo.</p>
-                  <p className="text-xs text-cream/50 mt-2">Tu clínica sigue en Mi Clínica — tu casa permanente.</p>
-                </div>
-              )}
-
-              {/* La línea de hitos del camino (la expectativa honesta) */}
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-cream/45">
-                <span className={diaPrograma >= 29 ? 'text-success/80' : ''}>🚀 Campaña: día 29</span>
-                <span className={diaPrograma >= 42 ? 'text-success/80' : ''}>💰 Primera venta: ~día 42</span>
-                <span>🏆 Los 10 pacientes: día 90</span>
-                <button onClick={() => setCurrentPage('roadmap')} className="ml-auto text-cream/35 hover:text-gold uppercase font-bold tracking-wider transition-colors">Ver el mapa completo →</button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* ZONA A — Header contextual */}
+      <div className="relative overflow-hidden card-panel p-8 border border-gold/20 bg-gradient-to-br from-gold/[0.05] to-transparent">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
+        <div className="relative z-10">
+          <p className="text-2xl font-light text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
+          <p className="text-sm text-cream/75 max-w-lg mb-6 leading-relaxed">
+            Llevas <strong className="text-cream/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-gold">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-gold">una sesión</strong> para acercarte al siguiente.
+          </p>
+          {(() => {
+            try {
+              const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+              const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : []));
+              return null
+            } catch { return null; }
+          })()}
+          <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-gold hover:text-goldhi transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-gold/10 px-4 py-2 rounded-lg border border-gold/20 w-max">
+            Ver El Camino <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
 
       {/* ZONA A2 — EL VISUALBOARD · lo que quieres lograr, tildándose solo */}
       {(() => {
@@ -420,13 +336,13 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         return (
           <div className="card-ios p-6 sm:p-7">
             <div className="flex items-center justify-between mb-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte · 10 pacientes de $1.000 en 90 días</p>
-              <p className="text-[11px] text-cream/40 num-tab">{pct}% del camino</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte · 10 pacientes de $1.000 en 90 días</p>
+              <p className="text-[11px] text-cream/55 num-tab">{pct}% del camino</p>
             </div>
             {/* La barra de 10 pacientes */}
             <div className="flex items-end justify-between mb-2">
               <div><span className="text-4xl font-light text-cream num-tab">{ventasTotal.count}</span><span className="text-xl font-light text-cream/35"> / 10</span><span className="text-xs text-cream/45 ml-2">pacientes</span></div>
-              <p className="text-sm text-cream/60 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-cream/35">de $10.000</span></p>
+              <p className="text-sm text-cream/75 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-cream/35">de $10.000</span></p>
             </div>
             <div className="flex gap-1.5 mb-5">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -438,7 +354,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               {hitos.map((h) => (
                 <div key={h.label} className={`rounded-xl border px-3 py-2.5 text-center transition-all ${h.done ? 'border-gold/40 bg-gold/10' : 'border-[rgba(242,239,233,0.07)] bg-black/20 opacity-60'}`}>
                   <p className="text-lg leading-none mb-1">{h.done ? '✓' : h.emoji}</p>
-                  <p className={`text-[10px] leading-tight ${h.done ? 'text-goldhi font-semibold' : 'text-cream/45'}`}>{h.label}</p>
+                  <p className={`text-[11px] leading-tight ${h.done ? 'text-goldhi font-semibold' : 'text-cream/45'}`}>{h.label}</p>
                 </div>
               ))}
             </div>
@@ -489,7 +405,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
             {/* Tu inversión, recuperándose */}
             {ventasTotal.suma > 0 && (
-              <p className="mt-3 text-[11px] text-cream/50">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-success' : 'text-goldhi'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-gold">📄 Reporte del Director</button></p>
+              <p className="mt-3 text-[11px] text-cream/65">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-success' : 'text-goldhi'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-gold">📄 Reporte del Director</button></p>
             )}
 
             {/* La barra Sanador Libre */}
@@ -497,7 +413,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               <div className="h-1.5 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #E8962E, #F4B65C)' }} />
               </div>
-              <p className="text-[10px] text-cream/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
+              <p className="text-[11px] text-cream/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
             </div>
           </div>
         );
@@ -512,9 +428,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         if (diaG3 < 75) return null;
         return (
           <div className="rounded-2xl border border-gold/35 bg-gradient-to-br from-gold/[0.08] to-transparent p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🏥 Tu clínica sigue</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🏥 Tu clínica sigue</p>
             <p className="text-lg text-cream/90 font-light" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El día 90 termina El Camino — pero tu clínica no se apaga.</p>
-            <p className="text-sm text-cream/60 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-cream/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
+            <p className="text-sm text-cream/75 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-cream/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
             <button onClick={() => setCurrentPage('coach')} className="mt-4 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors">Quiero que mi clínica siga →</button>
           </div>
         );
@@ -525,21 +441,47 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         {/* Foco de Hoy (60%) */}
         <div className="lg:col-span-7 card-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">También hoy</h2>
-            <button onClick={() => setCurrentPage('roadmap')} className="text-[10px] text-cream/40 hover:text-gold uppercase font-bold tracking-wider transition-colors">
+            <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
+            <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
               Ir a tareas →
             </button>
           </div>
 
           <div className="space-y-3">
+            {(() => {
+              // Día de descanso del programa: el dojo respira
+              const diaProg = (() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })();
+              if (esDiaDescanso(diaProg) && data.tareasHoy.length > 0) {
+                return (
+                  <div className="py-12 text-center border border-success/20 rounded-2xl bg-gradient-to-b from-success/[0.06] to-transparent">
+                    <p className="text-4xl mb-3">🌿</p>
+                    <p className="text-base text-cream/85 font-medium">Día de descanso — el dojo también respira</p>
+                    <p className="text-xs text-cream/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
             {data.tareasHoy.length === 0 ? (
               <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
                 <CheckCircle2 className="w-8 h-8 text-success/50 mx-auto mb-3" />
-                <p className="text-sm text-cream/60">Todo al día. Estás libre.</p>
-                <p className="text-xs text-cream/30 mt-1">Mira El Camino para ver lo que sigue.</p>
+                <p className="text-sm text-cream/75">Todo al día. Estás libre.</p>
+                <p className="text-xs text-cream/45 mt-1">Mira El Camino para ver lo que sigue.</p>
               </div>
             ) : (
               <>
+              {/* LA SESIÓN DE HOY — el hero del dojo */}
+              {data.tareasHoy[0] && (
+                <button
+                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
+                  className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
+                  <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
+                  <p className="text-xs text-cream/65 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
+                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">COMENZAR →</span>
+                </button>
+              )}
               {data.tareasHoy.slice(1).map((t, idx) => (
               <div
                 key={idx}
@@ -553,16 +495,16 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-cream/90">{t.titulo}</p>
-                  <p className="text-[10px] text-cream/40 mt-1">{t.pilarTitulo}</p>
+                  <p className="text-[11px] text-cream/55 mt-1">{t.pilarTitulo}</p>
                   <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
+                    <span className={`text-[11px] uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
                       {t.tipo || `Pilar ${t.pilarNumero}`}
                     </span>
-                    <span className="text-[10px] text-cream/40 flex items-center gap-1 font-medium">
+                    <span className="text-[11px] text-cream/55 flex items-center gap-1 font-medium">
                       <Clock className="w-3 h-3" /> {t.tiempo_estimado || '15–30 min'}
                     </span>
                     {t.herramienta_id && (
-                      <span className="text-[9px] text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
+                      <span className="text-[11px] text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
                     )}
                   </div>
                 </div>
@@ -585,7 +527,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               </h2>
               <div className="flex items-center gap-1.5 bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
                 <Sparkles className="w-3 h-3 text-gold" />
-                <span className="text-[10px] font-bold text-gold">Día {proximoHito?.diaPrograma ?? 1}/90</span>
+                <span className="text-[11px] font-bold text-gold">Día {proximoHito?.diaPrograma ?? 1}/90</span>
               </div>
             </div>
 
@@ -624,11 +566,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                     <p className="text-[15px] text-white/90 leading-relaxed italic mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                       {quote.text}
                     </p>
-                    <p className="text-xs text-white/40 font-medium">— {quote.author}</p>
+                    <p className="text-xs text-white/55 font-medium">— {quote.author}</p>
                   </div>
 
                   <div className="px-3 py-3 rounded-xl bg-success/[0.06] border border-success/15">
-                    <p className="text-[10px] text-success font-bold uppercase tracking-widest mb-1">Tip del día</p>
+                    <p className="text-[11px] text-success font-bold uppercase tracking-widest mb-1">Tip del día</p>
                     <p className="text-[12px] text-white/70 leading-relaxed">{tip}</p>
                   </div>
                 </>
@@ -639,8 +581,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           {/* Day progress mini-bar */}
           <div className="relative z-10 mt-5">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Progreso general</span>
-              <span className="text-[10px] text-white bg-white/10 px-2 py-0.5 rounded-full">{pctTareas}%</span>
+              <span className="text-[11px] text-white/55 font-bold uppercase tracking-wider">Progreso general</span>
+              <span className="text-[11px] text-white bg-white/10 px-2 py-0.5 rounded-full">{pctTareas}%</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-gold to-goldhi rounded-full transition-all duration-500" style={{ width: `${pctTareas}%` }} />

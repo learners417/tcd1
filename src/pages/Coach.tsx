@@ -455,7 +455,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
               Mentor IA
             </h2>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <p className="text-[11px] text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-success" /> Tu guía del camino · conoce tu ADN completo
               {guardadoOk && <span className="text-success normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
             </p>
@@ -464,7 +464,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -483,7 +483,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border overflow-hidden ${
                 msg.role === 'assistant'
                   ? 'bg-gold/15 text-gold border-gold/40 ring-2 ring-gold/10'
-                  : 'bg-white/5 text-white/60 border-white/10'
+                  : 'bg-white/5 text-white/75 border-white/10'
               }`}
             >
               {msg.role === 'assistant' ? (
