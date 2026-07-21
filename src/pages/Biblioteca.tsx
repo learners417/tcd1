@@ -584,8 +584,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       )}
                       {v.duracion && (
                         <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-[11px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {v.duracion}
+                          
                         </div>
                       )}
                     </div>

@@ -1,536 +1,180 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Hash, Lock, Send, Trophy, Users, Search, MoreVertical, Image, Paperclip, Shield } from 'lucide-react';
-import { supabase, isSupabaseReady, type Mensaje } from '../lib/supabase';
-import { notificarAdminsMensaje } from '../lib/notifications';
-import { toast } from 'sonner';
+/**
+ * SOPORTE — dos puertas, cero laberinto (ajuste fino jul 2026).
+ *   🤖 SOPORTE IA: pregunta y te responde al instante (con límite semanal — la escasez que enseña).
+ *   👤 SOPORTE HUMANO: le escribes al equipo; llega SÍ O SÍ al Admin (canal Consultas Generales).
+ * Reemplaza a la vieja página de Mensajes multicanal.
+ */
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Bot, Users, Send, Loader2 } from 'lucide-react';
+import Markdown from 'react-markdown';
+import { supabase, isSupabaseReady } from '../lib/supabase';
+import { generateText } from '../lib/aiProvider';
+import { usosSemana, consumirUso } from '../lib/planes';
 
-interface MensajesProps {
-  userId?: string;
-  onUnreadChange?: (n: number) => void;
-}
+const TOPE_SOPORTE_SEMANAL = 10;
+const CANAL_HUMANO = 'Consultas Generales'; // el canal que el Admin ya lee — llegada garantizada
 
-interface MsgLocal {
-  id: string | number;
-  author: string;
-  authorId?: string;
-  rol: 'bot' | 'admin' | 'user';
-  content: string;
-  time: string;
-  isMe: boolean;
-  channelId: string;
-  archivoUrl?: string;
-  tipoArchivo?: 'imagen' | 'audio' | 'archivo';
-}
+const PROMPT_SOPORTE = `Eres el Soporte de Tu Clínica Digital (así se llama la app — jamás la llames de otra forma). Ayudas al fundador a usar la app: dónde está cada cosa, cómo se hace cada acción, qué hacer si algo no carga.
 
-const MOCK_MESSAGES: MsgLocal[] = [
-  { id: 1, author: 'Tu Clínica Digital', rol: 'bot', content: '¡Bienvenida a tu programa de 90 días! Tu canal privado está listo. Puedes escribirle al equipo aquí.', time: 'Lun 09:00', isMe: false, channelId: 'privado' },
-];
+EL MAPA REAL DEL MENÚ (usa estos nombres exactos): Hoy · El Camino · Mi Clínica · El Método · Diario del Fundador · Mentor IA · Entrenadores IA · Creador de Contenido · Campañas & Creativos · Ajustes · Soporte.
 
-function supabaseMsgToLocal(m: Mensaje, myUserId: string, myName?: string): MsgLocal {
-  const isMe = m.emisor_id === myUserId;
-  const profile = m.emisor as { nombre?: string; rol?: string } | undefined;
-  const rol: MsgLocal['rol'] = profile?.rol === 'admin' ? 'admin' : isMe ? 'user' : 'bot';
-  const fallbackMyName = myName ?? (() => { try { return JSON.parse(localStorage.getItem('tcd_profile') || '{}').nombre || 'Yo'; } catch { return 'Yo'; } })();
-  return {
-    id: m.id,
-    authorId: m.emisor_id,
-    author: isMe ? fallbackMyName : (profile?.nombre ?? 'Equipo'),
-    rol,
-    content: m.contenido,
-    time: new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-    isMe,
-    channelId: m.canal,
-    archivoUrl: m.archivo_url,
-    tipoArchivo: m.tipo_archivo,
-  };
-}
+REGLAS DE HIERRO:
+1. NUNCA ofreces "links" ni "enlaces" (no puedes generarlos). Das el camino de clics exacto: "Menú → El Camino → toca la sesión".
+2. NUNCA prometes acciones fuera de este chat (avisar a alguien, desbloquear, reembolsar).
+3. Si el problema es de cuenta, pagos, o algo que no puedes resolver por chat: dile con calidez que le escriba al equipo en la pestaña "Soporte Humano", aquí mismo al lado — un toque.
+4. Respuestas CORTAS (2-6 líneas), castellano neutro (tú/tienes), pasos numerados si es técnico. Calma siempre: "no rompiste nada".
+5. No inventes funciones que no conoces. Si no sabes, dilo y deriva al equipo.`;
 
-const CHANNELS = [
-  { id: 'privado',   name: 'Mi Canal Privado',      icon: Lock,   type: 'private' },
-  { id: 'victorias', name: 'Victorias de la Semana', icon: Trophy, type: 'public'  },
-  { id: 'comunidad', name: 'Comunidad TCD',           icon: Users,  type: 'public'  },
-  { id: 'consultas', name: 'Consultas Generales',     icon: Hash,   type: 'public'  },
-] as const;
+interface MensajesProps { userId?: string; onUnreadChange?: (n: number) => void; }
+interface MsgIA { role: 'user' | 'assistant'; content: string }
+interface MsgHumano { id: string; emisor_id: string | null; contenido: string; created_at: string }
 
-// Colores de avatar deterministas por nombre
-function avatarColor(name: string): string {
-  const colors = [
-    'bg-gold/30 text-gold',
-    'bg-violet-500/30 text-violet-200',
-    'bg-success/30 text-emerald-200',
-    'bg-amber-500/30 text-amber-200',
-    'bg-pink-500/30 text-pink-200',
-    'bg-cyan-500/30 text-cyan-200',
-    'bg-orange-500/30 text-orange-200',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
-  return colors[hash % colors.length];
-}
+export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
+  const [tab, setTab] = useState<'ia' | 'humano'>('ia');
+  useEffect(() => { onUnreadChange?.(0); }, [onUnreadChange]);
 
-
-/** Convierte las URLs del texto en enlaces clickeables (azul, pestaña nueva). */
-function Linkified({ text }: { text: string }) {
-  const parts = text.split(/(https?:\/\/[^\s]+)/g);
   return (
-    <>
-      {parts.map((p, i) =>
-        /^https?:\/\//.test(p)
-          ? <a key={i} href={p} target="_blank" rel="noreferrer" className="text-[#60A5FA] underline underline-offset-2 hover:text-[#93C5FD] break-all">{p}</a>
-          : <span key={i}>{p}</span>
-      )}
-    </>
+    <div className="max-w-2xl mx-auto pb-12 animate-in fade-in duration-300">
+      <p className="text-2xl font-light text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Soporte</p>
+      <p className="text-sm text-cream/55 mb-5">Dos puertas: la respuesta al instante, o el equipo humano.</p>
+
+      <div className="grid grid-cols-2 gap-2 mb-5">
+        <button onClick={() => setTab('ia')}
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'ia' ? 'border-gold/50 bg-gold/10 text-gold' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
+          <Bot className="w-4 h-4" /> Soporte IA
+        </button>
+        <button onClick={() => setTab('humano')}
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'humano' ? 'border-gold/50 bg-gold/10 text-gold' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
+          <Users className="w-4 h-4" /> Soporte Humano
+        </button>
+      </div>
+
+      {tab === 'ia' ? <SoporteIA /> : <SoporteHumano userId={userId} />}
+    </div>
   );
 }
 
-export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
-  const myName = (() => { try { return JSON.parse(localStorage.getItem('tcd_profile') || '{}').nombre || 'Yo'; } catch { return 'Yo'; } })();
-  const myAvatarUrl = localStorage.getItem('tcd_avatar') || '';
-
-  const [activeChannel, setActiveChannel] = useState('privado');
+/* ═══════════ 🤖 SOPORTE IA — respuesta al instante, con límite ═══════════ */
+function SoporteIA() {
+  const [msgs, setMsgs] = useState<MsgIA[]>(() => {
+    try { return JSON.parse(localStorage.getItem('tcd_soporte_ia_v1') ?? '[]'); } catch { return []; }
+  });
   const [input, setInput] = useState('');
-  const [channelSearch, setChannelSearch] = useState('');
-  const [messages, setMessages] = useState<MsgLocal[]>(MOCK_MESSAGES);
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cargando, setCargando] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const usados = usosSemana('soporte');
+  const restantes = Math.max(0, TOPE_SOPORTE_SEMANAL - usados);
 
-  useEffect(() => {
-    const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
-    onUnreadChange?.(total);
-  }, [unreadMap, onUnreadChange]);
+  useEffect(() => { scrollRef.current?.scrollTo({ top: 99999 }); }, [msgs, cargando]);
+  useEffect(() => { try { localStorage.setItem('tcd_soporte_ia_v1', JSON.stringify(msgs.slice(-40))); } catch { /* noop */ } }, [msgs]);
 
-  const handleChannelSwitch = useCallback((ch: string) => {
-    setActiveChannel(ch);
-    setUnreadMap(prev => ({ ...prev, [ch]: 0 }));
-  }, []);
-
-  // ─── Cargar mensajes desde Supabase ─────────────────────────────────────────
-  useEffect(() => {
-    if (!isSupabaseReady() || !supabase || !userId) return;
-
-    setLoadingMsgs(true);
-    supabase
-      .from('mensajes')
-      .select('*, emisor:profiles!emisor_id(nombre, rol)')
-      .or(
-        activeChannel === 'privado'
-          ? `emisor_id.eq.${userId},receptor_id.eq.${userId}`
-          : `canal.eq.${activeChannel}`
-      )
-      .eq('canal', activeChannel)
-      .order('created_at')
-      .then(({ data }) => {
-        if (data) {
-          setMessages((data as Mensaje[]).map(m => supabaseMsgToLocal(m, userId, myName)));
-        }
-        setLoadingMsgs(false);
-      });
-  }, [userId, activeChannel]);
-
-  // ─── Supabase Realtime — canal activo ────────────────────────────────────────
-  // Para canales públicos: el insert propio lo manejamos con optimistic, NO escuchar propio
-  // Para canal privado: escuchar solo mensajes RECIBIDOS (del admin), el propio es optimistic
-  useEffect(() => {
-    if (!isSupabaseReady() || !supabase || !userId) return;
-
-    const channel = supabase
-      .channel(`mensajes-${activeChannel}-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'mensajes',
-          filter: activeChannel === 'privado'
-            ? `receptor_id=eq.${userId}`
-            : `canal=eq.${activeChannel}`,
-        },
-        async (payload) => {
-          // Para canales públicos: ignorar propios mensajes (ya están por optimistic)
-          if (activeChannel !== 'privado' && payload.new.emisor_id === userId) return;
-
-          if (!supabase) return;
-          const { data } = await supabase
-            .from('mensajes')
-            .select('*, emisor:profiles!emisor_id(nombre, rol)')
-            .eq('id', payload.new.id)
-            .single();
-
-          if (data) {
-            setMessages(prev => [...prev, supabaseMsgToLocal(data as Mensaje, userId, myName)]);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [userId, activeChannel]);
-
-  // ─── Notificaciones de otros canales ─────────────────────────────────────────
-  useEffect(() => {
-    if (!isSupabaseReady() || !supabase || !userId) return;
-
-    const subs = CHANNELS.map(ch =>
-      supabase!
-        .channel(`notif-${ch.id}-${userId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'mensajes',
-            filter: ch.id === 'privado'
-              ? `receptor_id=eq.${userId}`
-              : `canal=eq.${ch.id}`,
-          },
-          async (payload) => {
-            if (ch.id === activeChannel) return;
-            if (payload.new.emisor_id === userId) return;
-
-            const { data: m } = await supabase!
-              .from('mensajes')
-              .select('*, emisor:profiles!emisor_id(nombre, rol)')
-              .eq('id', payload.new.id)
-              .single();
-
-            const nombre = (m?.emisor as { nombre?: string } | undefined)?.nombre ?? 'Alguien';
-            const preview = (payload.new.contenido ?? '').slice(0, 60);
-            const ChIcon = ch.icon;
-
-            toast(nombre, {
-              description: preview || '📎 Archivo adjunto',
-              action: { label: 'Ver →', onClick: () => handleChannelSwitch(ch.id) },
-              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-gold' }),
-              duration: 6000,
-            });
-
-            setUnreadMap(prev => ({ ...prev, [ch.id]: (prev[ch.id] ?? 0) + 1 }));
-          }
-        )
-        .subscribe()
-    );
-
-    return () => { subs.forEach(s => supabase!.removeChannel(s)); };
-  }, [userId, activeChannel, handleChannelSwitch]);
-
-  // ─── Auto-scroll ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const activeMessages = messages.filter(m => m.channelId === activeChannel);
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    const text = input.trim();
-    setInput('');
-
-    if (isSupabaseReady() && supabase && userId) {
-      // Optimistic insert inmediato
-      const optimistic: MsgLocal = {
-        id: `opt-${Date.now()}`,
-        authorId: userId,
-        author: myName,
-        rol: 'user',
-        content: text,
-        time: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-        isMe: true,
-        channelId: activeChannel,
-      };
-      setMessages(prev => [...prev, optimistic]);
-
-      await supabase.from('mensajes').insert({
-        canal: activeChannel,
-        emisor_id: userId,
-        receptor_id: null,
-        contenido: text,
-      });
-      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsMensaje(p?.nombre ?? 'Un cliente'); } catch { /* noop */ }
-    } else {
-      const newMessage: MsgLocal = {
-        id: Date.now(),
-        author: myName,
-        rol: 'user',
-        content: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isMe: true,
-        channelId: activeChannel,
-      };
-      setMessages(prev => [...prev, newMessage]);
-
-      if (activeChannel === 'privado') {
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            id: Date.now() + 1,
-            author: 'Equipo',
-            rol: 'admin',
-            content: '¡Recibido! Lo reviso y te comento en breve.',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isMe: false,
-            channelId: 'privado',
-          }]);
-        }, 1500);
-      }
-    }
-  };
-
-  const handleUploadFile = async (file: File, tipo: 'imagen' | 'archivo') => {
-    if (!isSupabaseReady() || !supabase || !userId) {
-      toast.error('Conectá Supabase para subir archivos');
+  const enviar = useCallback(async () => {
+    const texto = input.trim();
+    if (!texto || cargando) return;
+    if (usosSemana('soporte') >= TOPE_SOPORTE_SEMANAL) {
+      setMsgs((p) => [...p, { role: 'user', content: texto }, { role: 'assistant', content: 'Usaste tus ' + TOPE_SOPORTE_SEMANAL + ' consultas de soporte de esta semana — el lunes se renuevan. Si es urgente, escríbele al equipo en la pestaña Soporte Humano: te leen sí o sí.' }]);
+      setInput('');
       return;
     }
-    setUploading(true);
+    consumirUso('soporte');
+    setInput('');
+    const nuevos: MsgIA[] = [...msgs, { role: 'user', content: texto }];
+    setMsgs(nuevos);
+    setCargando(true);
     try {
-      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'file');
-      const path = `${userId}/${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage
-        .from('mensajes-archivos')
-        .upload(path, file);
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('mensajes-archivos')
-        .getPublicUrl(data.path);
-
-      // Optimistic insert para architú también
-      const optimistic: MsgLocal = {
-        id: `opt-${Date.now()}`,
-        authorId: userId,
-        author: myName,
-        rol: 'user',
-        content: '',
-        time: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-        isMe: true,
-        channelId: activeChannel,
-        archivoUrl: publicUrl,
-        tipoArchivo: tipo,
-      };
-      setMessages(prev => [...prev, optimistic]);
-
-      await supabase.from('mensajes').insert({
-        canal: activeChannel,
-        emisor_id: userId,
-        receptor_id: null,
-        contenido: '',
-        tipo_archivo: tipo,
-        archivo_url: publicUrl,
+      const out = await generateText({
+        systemInstruction: PROMPT_SOPORTE,
+        messages: nuevos.slice(-8).map((m) => ({ role: m.role, content: m.content })),
       });
+      setMsgs((p) => [...p, { role: 'assistant', content: out || 'No pude responder ahora. Intenta de nuevo, o escríbele al equipo en Soporte Humano.' }]);
     } catch {
-      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
-    } finally {
-      setUploading(false);
+      setMsgs((p) => [...p, { role: 'assistant', content: 'No pude responder ahora. Intenta de nuevo, o escríbele al equipo en Soporte Humano.' }]);
     }
-  };
-
-  const userNombre = myName;
+    setCargando(false);
+  }, [input, cargando, msgs]);
 
   return (
-    <div className="h-[calc(100vh-5rem)] flex card-panel overflow-hidden animate-in fade-in duration-500">
-      {/* Sidebar Channels */}
-      <div className="w-72 border-r border-[rgba(232,150,46,0.12)] bg-black/20 flex flex-col shrink-0">
-        <div className="p-4 border-b border-[rgba(232,150,46,0.12)]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
-            <input
-              type="text"
-              value={channelSearch}
-              onChange={e => setChannelSearch(e.target.value)}
-              placeholder="Buscar canales..."
-              className="w-full bg-gold/5 border border-[rgba(232,150,46,0.12)] rounded-lg py-2 pl-9 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors"
-            />
+    <div className="card-panel p-4 sm:p-5">
+      <div ref={scrollRef} className="h-[46vh] overflow-y-auto space-y-3 mb-4 pr-1">
+        {msgs.length === 0 && (
+          <div className="text-center py-10">
+            <Bot className="w-8 h-8 text-gold/50 mx-auto mb-3" />
+            <p className="text-sm text-cream/70">Pregunta lo que necesites de la app.</p>
+            <p className="text-xs text-cream/45 mt-1">"¿Dónde subo mi comprobante?" · "¿Cómo retomo mi sesión?" · "No me carga un video"</p>
           </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto py-4">
-          <div className="px-4 mb-2">
-            <p className="text-xs font-medium text-cream/55 uppercase tracking-wider">Canales</p>
+        )}
+        {msgs.map((m, i) => (
+          <div key={i} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
+            {m.role === 'assistant' ? <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-li:my-0"><Markdown>{m.content}</Markdown></div> : m.content}
           </div>
-          <div className="space-y-1 px-2">
-            {CHANNELS.filter(c => c.name.toLowerCase().includes(channelSearch.toLowerCase())).map(channel => (
-              <button
-                key={channel.id}
-                onClick={() => handleChannelSwitch(channel.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
-                  activeChannel === channel.id ? 'bg-gold/20 text-gold' : 'text-cream/80 hover:bg-gold/5'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <channel.icon className={`w-4 h-4 ${activeChannel === channel.id ? 'text-gold' : 'text-cream/55'}`} />
-                  <span className="text-sm font-medium truncate">{channel.name}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {(unreadMap[channel.id] ?? 0) > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center">
-                      {unreadMap[channel.id]}
-                    </span>
-                  )}
-                  {isSupabaseReady() && (unreadMap[channel.id] ?? 0) === 0 && (
-                    <span className="w-2 h-2 rounded-full bg-success" title="Realtime activo" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Current user info */}
-        <div className="p-4 border-t border-[rgba(232,150,46,0.12)]">
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden ${myAvatarUrl ? '' : avatarColor(userNombre)}`}>
-              {myAvatarUrl
-                ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
-                : userNombre.charAt(0).toUpperCase()
-              }
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-cream truncate">{userNombre}</p>
-              <p className="text-xs text-success">En línea</p>
-            </div>
-          </div>
-        </div>
+        ))}
+        {cargando && <div className="flex items-center gap-2 text-cream/50 text-xs"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Respondiendo…</div>}
       </div>
+      <div className="flex gap-2">
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar()}
+          placeholder="Escribe tu pregunta…"
+          className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+        <button onClick={enviar} disabled={!input.trim() || cargando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]"><Send className="w-4 h-4" /></button>
+      </div>
+      <p className="text-[11px] text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
+    </div>
+  );
+}
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-black/10 min-w-0">
-        {/* Header */}
-        <div className="h-16 border-b border-[rgba(232,150,46,0.12)] flex items-center justify-between px-6 bg-gold/5 shrink-0">
-          <div className="flex items-center gap-3">
-            {CHANNELS.find(c => c.id === activeChannel) && React.createElement(CHANNELS.find(c => c.id === activeChannel)!.icon, { className: "w-5 h-5 text-cream/75" })}
-            <div>
-              <h2 className="text-cream font-medium">{CHANNELS.find(c => c.id === activeChannel)?.name}</h2>
-              <p className="text-xs text-cream/55">
-                {activeChannel === 'privado' ? 'Solo visible para ti y el equipo' : 'Canal público de la comunidad'}
-              </p>
-            </div>
+/* ═══════════ 👤 SOPORTE HUMANO — llega sí o sí al equipo ═══════════ */
+function SoporteHumano({ userId }: { userId?: string }) {
+  const [msgs, setMsgs] = useState<MsgHumano[]>([]);
+  const [input, setInput] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const cargar = useCallback(async () => {
+    if (!isSupabaseReady() || !supabase) return;
+    const { data } = await supabase.from('mensajes').select('id, emisor_id, contenido, created_at')
+      .eq('canal', CANAL_HUMANO).order('created_at', { ascending: true }).limit(80);
+    if (data) setMsgs(data as MsgHumano[]);
+  }, []);
+
+  useEffect(() => {
+    void cargar();
+    if (!supabase) return;
+    const ch = supabase.channel('soporte-humano')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes', filter: `canal=eq.${CANAL_HUMANO}` },
+        (payload) => setMsgs((p) => [...p, payload.new as MsgHumano]))
+      .subscribe();
+    return () => { void supabase?.removeChannel(ch); };
+  }, [cargar]);
+
+  useEffect(() => { scrollRef.current?.scrollTo({ top: 99999 }); }, [msgs]);
+
+  const enviar = useCallback(async () => {
+    const texto = input.trim();
+    if (!texto || enviando || !userId || !supabase) return;
+    setEnviando(true);
+    const { error } = await supabase.from('mensajes').insert({ canal: CANAL_HUMANO, emisor_id: userId, receptor_id: null, contenido: texto });
+    if (!error) setInput('');
+    setEnviando(false);
+  }, [input, enviando, userId]);
+
+  return (
+    <div className="card-panel p-4 sm:p-5">
+      <p className="text-xs text-cream/55 mb-3">Le escribes al equipo de Tu Clínica Digital. <strong className="text-cream/75">Tu mensaje llega directo</strong> — te respondemos aquí mismo.</p>
+      <div ref={scrollRef} className="h-[42vh] overflow-y-auto space-y-3 mb-4 pr-1">
+        {msgs.length === 0 && <p className="text-sm text-cream/45 text-center py-10">Todavía no hay mensajes. Escribe el primero.</p>}
+        {msgs.map((m) => (
+          <div key={m.id} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.emisor_id === userId ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
+            {m.contenido}
+            <p className="text-[10px] text-cream/35 mt-1">{new Date(m.created_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
           </div>
-          <button className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-cream/75 transition-colors">
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
-          {loadingMsgs ? (
-            <div className="flex items-center justify-center py-10">
-              <div className="w-5 h-5 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
-            </div>
-          ) : activeMessages.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-cream/55 text-sm">Sin mensajes en este canal todavía</p>
-              <p className="text-cream/45 text-xs mt-1">Sé el primero en escribir</p>
-            </div>
-          ) : (
-            activeMessages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 items-end max-w-[88%] sm:max-w-[80%] ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                {/* Avatar */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold border overflow-hidden ${
-                  msg.isMe
-                    ? (myAvatarUrl ? 'border-transparent' : `${avatarColor(msg.author)} border-transparent`)
-                    : msg.rol === 'admin'
-                    ? 'bg-gold/20 border-gold/30 text-gold'
-                    : msg.rol === 'bot'
-                    ? 'bg-gold/30 border-gold/30 text-cream'
-                    : `${avatarColor(msg.author)} border-transparent`
-                }`}>
-                  {msg.isMe && myAvatarUrl
-                    ? <img loading="lazy" src={myAvatarUrl} alt="" className="w-full h-full object-cover" />
-                    : msg.rol === 'admin'
-                    ? <Shield className="w-3.5 h-3.5" />
-                    : msg.author.charAt(0).toUpperCase()
-                  }
-                </div>
-
-                <div className={`flex flex-col gap-1 ${msg.isMe ? 'items-end' : 'items-start'}`}>
-                  {/* Name + badge + time */}
-                  <div className={`flex items-baseline gap-2 px-1 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-xs font-medium text-cream/80">{msg.author}</span>
-                    {msg.rol === 'admin' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Coach</span>}
-                    {msg.rol === 'bot' && <span className="text-[11px] uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">Sistema</span>}
-                    <span className="text-[11px] text-cream/45">{msg.time}</span>
-                  </div>
-
-                  {/* Bubble */}
-                  <div className={`rounded-2xl px-4 py-3 ${
-                    msg.isMe
-                      ? 'bg-gold text-cream rounded-tr-sm'
-                      : msg.rol === 'bot'
-                      ? 'bg-gold/5 border border-[rgba(232,150,46,0.12)] text-cream/80 rounded-tl-sm'
-                      : msg.rol === 'admin'
-                      ? 'bg-gold/20 border border-gold/20 text-gold rounded-tl-sm'
-                      : 'bg-gold/10 text-cream rounded-tl-sm'
-                  }`}>
-                    {msg.tipoArchivo === 'imagen' && msg.archivoUrl && (
-                      <img
-                        src={msg.archivoUrl}
-                        alt="imagen"
-                        className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(msg.archivoUrl)}
-                      />
-                    )}
-                    {(msg.tipoArchivo === 'archivo' || msg.tipoArchivo === 'audio') && msg.archivoUrl && (
-                      <a href={msg.archivoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-gold/8 border border-[rgba(232,150,46,0.14)] hover:bg-gold/15 transition-colors text-sm text-cream/80">
-                        <Paperclip className="w-4 h-4 shrink-0" /> Ver archivo adjunto
-                      </a>
-                    )}
-                    {msg.content && (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap"><Linkified text={msg.content} /></p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Input area */}
-        <div className="p-4 bg-gold/5 border-t border-[rgba(232,150,46,0.12)] shrink-0">
-          <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
-          <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" className="hidden"
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'archivo'); e.target.value = ''; }} />
-
-          <form className="flex items-end gap-2" onSubmit={handleSend}>
-            <div className="flex flex-col gap-1 shrink-0">
-              <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} title="Subir imagen"
-                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
-                <Image className="w-4 h-4" />
-              </button>
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} title="Adjuntar archivo (PDF, imagen, documento)"
-                className="w-10 h-10 rounded-xl bg-gold/5 border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
-                <Paperclip className="w-4 h-4" />
-              </button>
-            </div>
-
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e as unknown as React.FormEvent);
-                }
-              }}
-              placeholder={uploading ? 'Subiendo archivo...' : 'Escribe un mensaje al equipo...'}
-              disabled={uploading}
-              className="flex-1 max-h-32 min-h-[52px] bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 px-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none scrollbar-hide disabled:opacity-50"
-              rows={1}
-            />
-            <button type="submit" disabled={!input.trim() || uploading}
-              className="w-[52px] h-[52px] shrink-0 rounded-xl bg-gold hover:bg-gold disabled:opacity-50 flex items-center justify-center text-cream transition-colors shadow-lg shadow-gold/20">
-              {uploading
-                ? <div className="w-4 h-4 border-2 border-[rgba(232,150,46,0.18)] border-t-white rounded-full animate-spin" />
-                : <Send className="w-5 h-5 ml-1" />
-              }
-            </button>
-          </form>
-        </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar()}
+          placeholder="Escribe al equipo…"
+          className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+        <button onClick={enviar} disabled={!input.trim() || enviando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]">
+          {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+        </button>
       </div>
     </div>
   );
