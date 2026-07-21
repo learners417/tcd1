@@ -1,3 +1,4 @@
+import { COMPLEMENTOS } from '../lib/metodoComplementos';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { usePersistedState } from '../lib/usePersistedState';
@@ -231,6 +232,25 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
         <p className="text-sm text-cream/75">{r.titulo}</p>
+                  {COMPLEMENTOS[r.id] && (
+                    <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
+                      <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
+                      <div className="mt-3 space-y-3">
+                        <p className="text-sm text-cream/80 leading-relaxed">{COMPLEMENTOS[r.id].resumen}</p>
+                        <ul className="space-y-1.5">
+                          {COMPLEMENTOS[r.id].mapa.map((b, bi) => (
+                            <li key={bi} className="text-[13px] text-cream/70 pl-4 relative"><span className="absolute left-0 text-gold">·</span>{b}</li>
+                          ))}
+                        </ul>
+                        {COMPLEMENTOS[r.id].referente && (
+                          <p className="text-[12px] text-cream/55 italic border-l-2 border-gold/30 pl-3">{COMPLEMENTOS[r.id].referente}</p>
+                        )}
+                        {COMPLEMENTOS[r.id].dato && (
+                          <p className="text-[12px] text-goldhi/90">📊 {COMPLEMENTOS[r.id].dato}</p>
+                        )}
+                      </div>
+                    </details>
+                  )}
       </div>
     );
   }
@@ -564,8 +584,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       )}
                       {v.duracion && (
                         <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-[11px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {v.duracion}
+                          
                         </div>
                       )}
                     </div>

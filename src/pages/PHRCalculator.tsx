@@ -82,7 +82,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
       toast.success('Análisis financiero generado');
     } catch (error) {
       console.error('Error generating PHR analysis:', error);
-      toast.error('Error al generar el análisis. Intentá de nuevo.');
+      toast.error('Error al generar el análisis. Intenta de nuevo.');
     } finally {
       setGenerating(false);
     }
@@ -231,7 +231,7 @@ Sé directo, usa números y ejemplos concretos. Formato markdown.`,
             {hasData && margenGanancia < 20 && (
               <div className="mt-4 p-3 rounded-xl bg-danger/10 border border-red-500/20 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-                <p className="text-xs text-red-300">Tu margen es bajo. Considerá subir tarifas o reducir gastos operativos.</p>
+                <p className="text-xs text-red-300">Tu margen es bajo. Considera subir tarifas o reducir gastos operativos.</p>
               </div>
             )}
           </div>

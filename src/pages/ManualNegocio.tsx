@@ -554,7 +554,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
         <CustomSelect
           value={paisLocal}
           onChange={guardarPais}
-          placeholder={savingPais ? 'Guardando…' : 'Elegi tu pais'}
+          placeholder={savingPais ? 'Guardando…' : 'Elige tu pais'}
           options={PAISES.map((p) => ({ value: p.codigo, label: p.nombre }))}
           className="w-full"
         />

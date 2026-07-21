@@ -235,7 +235,7 @@ export default function Liga({ userId, perfil }: { userId?: string; perfil?: Par
         <div className="flex items-center gap-3">
           <Shield className="w-5 h-5 text-gold" />
           <div>
-            <p className="text-sm text-cream font-medium">¿Día difícil? Entrá al Búnker</p>
+            <p className="text-sm text-cream font-medium">¿Día difícil? Entra al Búnker</p>
             <p className="text-[11px] text-cream/45">
               La voz de Javo, tu por qué y los compromisos que firmaste. Para los días que pesan.
             </p>

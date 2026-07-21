@@ -75,14 +75,14 @@ const QUESTIONS: Pregunta[] = [
     id: 8,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Cuál considerás que es tu mayor obstáculo actual para escalar tu práctica?',
+    question: '¿Cuál consideras que es tu mayor obstáculo actual para escalar tu práctica?',
     placeholder: 'Ej: No sé vender sin sentirme incómoda, no tengo un sistema — todo depende de mí, no sé cómo conseguir pacientes online...',
   },
   {
     id: 9,
     bloque: 3,
     tituloBloque: 'Tu Negocio Hoy',
-    question: '¿Ya tenés una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?',
+    question: '¿Ya tienes una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?',
     placeholder: '',
     opciones: [
       { valor: 'establecido', label: 'Sí. Tengo mi manera de hacer las cosas, mi proceso — lo uso hace años.', avatar: 'B' },
@@ -137,7 +137,7 @@ export default function Onboarding() {
 
 Este prototipo es el punto de partida — NO es el ADN definitivo. Es una primera versión que los 10 pilares del programa irán refinando con trabajo real y datos reales.
 
-Analizá las respuestas y genera el ADN prototipo beta con este formato en markdown:
+Analiza las respuestas y genera el ADN prototipo beta con este formato en markdown:
 
 ## Tu ADN Prototipo Beta
 
@@ -151,7 +151,7 @@ Párrafo breve sobre su identidad como sanador basado en sus referentes y lo que
 ### A Quién Servís (hipótesis)
 Primer perfil de paciente ideal basado en el contexto del negocio. Hipótesis de dolores y deseos — se refinará en los Pilares 4 y 5.
 
-### Por Qué Hacés Lo Que Hacés (pista)
+### Por Qué Haces Lo Que Haces (pista)
 Basado en sus miedos, deseos y obstáculos: ¿qué sugieren sobre su motivación profunda? Una hipótesis del propósito que el Pilar 2 profundizará.
 
 ### Objetivo Económico
@@ -171,7 +171,7 @@ Sé directo, honesto y estratégico. Usa segunda persona informal (tú), y si el
       toast.success('Perfil generado exitosamente');
     } catch (error) {
       console.error('Error generating profile:', error);
-      toast.error('Error al generar el perfil. Intentá de nuevo.');
+      toast.error('Error al generar el perfil. Intenta de nuevo.');
     } finally {
       setGenerating(false);
     }

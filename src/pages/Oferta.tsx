@@ -77,7 +77,7 @@ export default function Oferta() {
       setVariants(styledVariants);
       setStep('variants');
     } catch {
-      toast.error("Hubo un error generando las variantes. Intentá de nuevo.");
+      toast.error("Hubo un error generando las variantes. Intenta de nuevo.");
     } finally {
       setIsGenerating(false);
     }
@@ -132,7 +132,7 @@ export default function Oferta() {
       setLandingHtml(html);
       setStep('landing');
     } catch {
-      toast.error("Hubo un error generando la landing page. Intentá de nuevo.");
+      toast.error("Hubo un error generando la landing page. Intenta de nuevo.");
     } finally {
       setIsGenerating(false);
     }
@@ -190,7 +190,7 @@ export default function Oferta() {
 
       <div>
         <h1 className="text-3xl font-light tracking-tight text-cream mb-2">Generador de Oferta Premium</h1>
-        <p className="text-cream/75">Diseñá tu programa high-ticket con Inteligencia Artificial</p>
+        <p className="text-cream/75">Diseña tu programa high-ticket con Inteligencia Artificial</p>
       </div>
 
       {step === 'input' && (

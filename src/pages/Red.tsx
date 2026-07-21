@@ -105,7 +105,7 @@ export default function Red({ userId }: { userId?: string }) {
           <Users className="w-6 h-6 text-gold" /> La Red
         </h1>
         <p className="text-sm text-cream/65 mt-1">
-          Nadie sana solo. Regalá la Semana Blanca a quien lo necesita, y dejale a la cohorte lo que
+          Nadie sana solo. Regala la Semana Blanca a quien lo necesita, y dejale a la cohorte lo que
           aprendiste en el campo.
         </p>
       </div>
@@ -115,11 +115,11 @@ export default function Red({ userId }: { userId?: string }) {
         <div className="flex items-center gap-2 mb-1">
           <Gift className="w-4 h-4 text-gold" />
           <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">
-            Regalá la Semana Blanca
+            Regala la Semana Blanca
           </h2>
         </div>
         <p className="text-sm text-cream/55 mb-4">
-          Tenés <span className="text-gold font-bold">{restantes}</span> de {LLAVES_POR_MES} llaves
+          Tienes <span className="text-gold font-bold">{restantes}</span> de {LLAVES_POR_MES} llaves
           este mes. Cada llave le abre a un colega la primera semana del Camino.
         </p>
 

@@ -1,3 +1,4 @@
+import RuedaVida from '../components/RuedaVida';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
@@ -390,7 +391,7 @@ export default function DiarioDirector({
 ENTRADAS:
 ${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
 
-Devolvé SOLO este JSON:
+Devuelve SOLO este JSON:
 {
   "racha": <días consecutivos>,
   "energia_promedio": <decimal 1>,
@@ -535,6 +536,10 @@ Devolvé SOLO este JSON:
           );
         } catch { return null; }
       })()}
+
+      {/* S5 — La Rueda de la Vida: el registro del fin, no solo del medio */}
+      <RuedaVida />
+
 
       {/* ── Vista: Formulario ── */}
       {vista === 'formulario' && (
