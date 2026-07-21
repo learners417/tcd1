@@ -79,9 +79,9 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
         { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2 },
-        { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
+        { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', minCinturon: 4, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minCinturon: 4 },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 5 },
+        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 4 },
         { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },
       ]
     },

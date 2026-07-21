@@ -39,6 +39,22 @@ export default function MentorPanel({ metaCodigo, metaTitulo, metaDescripcion }:
   const enviar = async () => {
     const texto = input.trim();
     if (!texto || cargando) return;
+    // ── Tope del plan EL NÚMERO: hasta 30 consultas con el Mentor (lo que promete la página del $27) ──
+    try {
+      const perfilPlan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
+      if (perfilPlan === 'ELNUMERO') {
+        const usadas = Number(localStorage.getItem('tcd_mentor_consultas_numero') ?? '0');
+        if (usadas >= 30) {
+          setMsgs((prev) => [...prev, { role: 'user', content: texto }, {
+            role: 'assistant',
+            content: 'Llegamos a las 30 consultas incluidas en EL NÚMERO — las usaste bien. Tu precio nuevo ya está sellado: el siguiente paso no es otra consulta, es tu plan. En LA SESIÓN (40 min, 1 a 1) lo armamos entero antes de vernos — y si sigues al camino completo, el Mentor te acompaña sin tope, todos los días, hasta tus 10 pacientes.',
+          }]);
+          setInput('');
+          return;
+        }
+        localStorage.setItem('tcd_mentor_consultas_numero', String(usadas + 1));
+      }
+    } catch { /* noop */ }
     setInput('');
     const nuevos: Msg[] = [...msgs, { role: 'user', content: texto }];
     setMsgs(nuevos);

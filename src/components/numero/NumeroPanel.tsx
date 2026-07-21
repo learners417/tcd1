@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Check, TrendingUp, Sparkles } from 'lucide-react';
 import {
   type ElNumero, emptyNumero, calcPHR, agujeroAnual, gananciaAnual, gananciaMensual,
-  getElNumero, saveElNumero,
+  getElNumero, saveElNumero, marcarNumeroEnElCamino,
 } from '../../lib/elNumero';
 
 const money = (n: number) => '$' + Math.round(n).toLocaleString('es-AR');
@@ -66,6 +66,8 @@ export default function NumeroPanel({ userId }: Props) {
     setN((prev) => {
       const next = { ...prev, precio_nuevo: valor, fecha_cambio: new Date().toISOString() };
       void saveElNumero(uid, next);
+      // EL NÚMERO es la puerta 1 del Camino: sella el precio → gana su primera punta
+      void marcarNumeroEnElCamino(uid);
       return next;
     });
   }
