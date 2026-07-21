@@ -30,7 +30,24 @@ const ESPECIALIDADES = [
 const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
-  const [step, setStep] = useState<Step>('password');
+  const [step, setStepRaw] = useState<Step>(() => {
+    // El wizard RECUERDA: si el teléfono recarga la página (volver de WhatsApp,
+    // pestaña descartada), retomamos exactamente donde quedó — nunca más
+    // "elegir contraseña" dos veces.
+    try {
+      const guardado = localStorage.getItem('tcd_wizard_step_v1') as Step | null;
+      if (guardado && (STEPS as string[]).includes(guardado)) return guardado;
+    } catch { /* noop */ }
+    return 'password';
+  });
+  const completarWizard = (primeraPagina?: string) => {
+    try { localStorage.removeItem('tcd_wizard_step_v1'); } catch { /* noop */ }
+    onComplete(primeraPagina);
+  };
+  const setStep = (siguiente: Step) => {
+    try { localStorage.setItem('tcd_wizard_step_v1', siguiente); } catch { /* noop */ }
+    setStepRaw(siguiente);
+  };
   // ── El Diagnóstico (Lote 1 · la semilla del ADN) ──
   const [dxAvatar, setDxAvatar] = useState<'A' | 'B' | null>(null);
   const [dxFreno, setDxFreno] = useState('');
@@ -155,7 +172,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         .update({ onboarding_completed: true, status: 'ACTIVE' })
         .eq('id', profile.id);
     }
-    onComplete(firstPage);
+    completarWizard(firstPage);
   }
 
   const nombreCorto = profile.nombre.split(' ')[0];
