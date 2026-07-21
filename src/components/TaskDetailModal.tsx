@@ -59,40 +59,40 @@ export default function TaskDetailModal({
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      <div className="relative z-10 w-full max-w-lg bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-lg bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-[rgba(245,166,35,0.1)]">
+        <div className="flex items-start justify-between p-6 border-b border-[rgba(232,150,46,0.1)]">
           <div className="flex-1 pr-4">
             {tarea.pilarTitulo && (
-              <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-bold mb-2">
+              <p className="text-[11px] text-gold uppercase tracking-widest font-bold mb-2">
                 Pilar {tarea.pilarNumero} — {tarea.pilarTitulo}
               </p>
             )}
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-[#FFFFFF] leading-snug">{tarea.titulo}</h2>
+              <h2 className="text-lg font-semibold text-cream leading-snug">{tarea.titulo}</h2>
               {tieneOutputGuardado && (
                 <span title="Documento guardado">
-                  <FileText className="w-4 h-4 text-[#22C55E] shrink-0" />
+                  <FileText className="w-4 h-4 text-success shrink-0" />
                 </span>
               )}
             </div>
           </div>
-          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-[#FFFFFF]/40 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors">
+          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-cream/55 hover:text-cream hover:bg-gold/10 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
         <div className="p-6 space-y-5">
-          <p className="text-sm text-[#FFFFFF]/80 leading-relaxed">{tarea.descripcion}</p>
+          <p className="text-sm text-cream/80 leading-relaxed">{tarea.descripcion}</p>
 
           {/* Preview del output guardado */}
           {tieneOutputGuardado && (
-            <div className="bg-[#22C55E]/5 border border-[#22C55E]/20 rounded-xl p-4">
-              <p className="text-[10px] text-[#22C55E] uppercase tracking-widest font-bold mb-2 flex items-center gap-1.5">
+            <div className="bg-success/5 border border-success/20 rounded-xl p-4">
+              <p className="text-[11px] text-success uppercase tracking-widest font-bold mb-2 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Documento guardado
               </p>
-              <p className="text-xs text-[#FFFFFF]/50 line-clamp-3 leading-relaxed whitespace-pre-wrap font-mono">
+              <p className="text-xs text-cream/65 line-clamp-3 leading-relaxed whitespace-pre-wrap font-mono">
                 {outputExistente}
               </p>
             </div>
@@ -100,18 +100,18 @@ export default function TaskDetailModal({
 
           {/* Chips de info */}
           <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 text-[11px] text-[#FFFFFF]/50 bg-[#F5A623]/5 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-1.5 text-[11px] text-cream/65 bg-gold/5 rounded-lg px-3 py-1.5">
               <Clock className="w-3.5 h-3.5" />
               <span>{tarea.tiempo_estimado || '15–30 min'}</span>
             </div>
             {tarea.es_estrella && (
-              <div className="flex items-center gap-1.5 text-[11px] text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-lg px-3 py-1.5">
-                <Star className="w-3.5 h-3.5 fill-[#F5A623]" />
+              <div className="flex items-center gap-1.5 text-[11px] text-gold bg-gold/10 border border-gold/20 rounded-lg px-3 py-1.5">
+                <Star className="w-3.5 h-3.5 fill-gold" />
                 <span>Tarea estrella</span>
               </div>
             )}
             {tarea.herramienta_id && (
-              <div className="flex items-center gap-1.5 text-[11px] text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-lg px-3 py-1.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-gold bg-gold/10 border border-gold/20 rounded-lg px-3 py-1.5">
                 <Wrench className="w-3.5 h-3.5" />
                 <span>Herramienta {tarea.herramienta_id}</span>
               </div>
@@ -120,15 +120,15 @@ export default function TaskDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-[rgba(245,166,35,0.1)] gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors">
+        <div className="flex items-center justify-between p-6 border-t border-[rgba(232,150,46,0.1)] gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-cream/65 hover:text-cream transition-colors">
             Cerrar
           </button>
 
           {canUseToolInline ? (
             <button
               onClick={() => setShowWorkModal(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] text-[#0A0A0A] text-sm font-medium transition-colors shadow-lg shadow-[#F5A623]/20"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-ink text-sm font-medium transition-colors shadow-lg shadow-gold/20"
             >
               {tieneOutputGuardado ? (
                 <><FileText className="w-4 h-4" /> Ver / Editar documento</>
@@ -140,7 +140,7 @@ export default function TaskDetailModal({
           ) : destinoPage ? (
             <button
               onClick={() => onNavigate(destinoPage)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] text-[#0A0A0A] text-sm font-medium transition-colors shadow-lg shadow-[#F5A623]/20"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-ink text-sm font-medium transition-colors shadow-lg shadow-gold/20"
             >
               Ver en Hoja de Ruta
               <ArrowRight className="w-4 h-4" />
@@ -148,7 +148,7 @@ export default function TaskDetailModal({
           ) : (
             <button
               onClick={() => onNavigate('roadmap')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5A623]/15 hover:bg-[#F5A623]/25 text-[#FFFFFF] text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold/15 hover:bg-gold/25 text-cream text-sm font-medium transition-colors"
             >
               Ver en Hoja de Ruta <ArrowRight className="w-4 h-4" />
             </button>

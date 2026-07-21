@@ -231,7 +231,6 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
       value_path: fieldRef.valuePath,
     };
     // eslint-disable-next-line no-console
-    console.log('[admin_update_adn_field] llamando con', rpcArgs);
     try {
       const { error, data } = await supabase.rpc('admin_update_adn_field', rpcArgs);
       if (error) {
@@ -240,7 +239,6 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
         throw error;
       }
       // eslint-disable-next-line no-console
-      console.log('[admin_update_adn_field] OK:', data);
       toast.success('Campo actualizado');
       onSaved();
       onClose();
@@ -257,18 +255,18 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-[#0F0F0F] border border-[#F5A623]/30 rounded-2xl shadow-2xl">
-        <div className="flex items-start justify-between p-5 border-b border-[#FFFFFF]/10">
+      <div className="w-full max-w-2xl bg-[#0F0F0F] border border-gold/30 rounded-2xl shadow-2xl">
+        <div className="flex items-start justify-between p-5 border-b border-cream/10">
           <div>
-            <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+            <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
               {campo.codigo} · {campo.pilarOrigen}
             </p>
-            <h3 className="text-xl font-light text-[#FFFFFF] mt-1">{campo.label}</h3>
+            <h3 className="text-xl font-light text-cream mt-1">{campo.label}</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors"
+            className="text-cream/55 hover:text-cream transition-colors"
             aria-label="Cerrar"
           >
             <CloseIcon className="w-5 h-5" />
@@ -277,12 +275,12 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
 
         <div className="p-5 space-y-3">
           {kind === 'array' && (
-            <p className="text-xs text-[#FFFFFF]/50">
+            <p className="text-xs text-cream/65">
               Una entrada por línea. Las líneas vacías se ignoran.
             </p>
           )}
           {kind === 'json' && (
-            <p className="text-xs text-[#FFFFFF]/50">
+            <p className="text-xs text-cream/65">
               Editor de JSON crudo. Mantené la estructura del objeto.
             </p>
           )}
@@ -290,28 +288,28 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={kind === 'json' ? 14 : 10}
-            className={`w-full bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-lg p-3 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/30 focus:outline-none focus:border-[#F5A623]/60 ${kind === 'json' ? 'font-mono' : ''}`}
+            className={`w-full bg-cream/5 border border-cream/10 rounded-lg p-3 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/60 ${kind === 'json' ? 'font-mono' : ''}`}
             placeholder={kind === 'array' ? 'Una línea por elemento…' : kind === 'json' ? '{ … }' : 'Contenido…'}
           />
           {jsonError && (
-            <p className="text-xs text-[#EF4444]">JSON inválido: {jsonError}</p>
+            <p className="text-xs text-danger">JSON inválido: {jsonError}</p>
           )}
           {saveError && (
-            <div className="text-xs text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-lg p-3 whitespace-pre-wrap break-words">
+            <div className="text-xs text-danger bg-danger/10 border border-danger/30 rounded-lg p-3 whitespace-pre-wrap break-words">
               <p className="font-semibold mb-1">Error al guardar</p>
               <p className="font-mono">{saveError}</p>
-              <p className="text-[#FFFFFF]/40 mt-2 text-[10px]">
+              <p className="text-cream/55 mt-2 text-[11px]">
                 Detalle completo en la consola del navegador.
               </p>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[#FFFFFF]/10">
+        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-cream/10">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors"
+            className="px-4 py-2 text-sm text-cream/75 hover:text-cream transition-colors"
             disabled={saving}
           >
             Cancelar
@@ -360,38 +358,38 @@ function TarjetaSeccion({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-5 flex items-center gap-4 hover:bg-[#F5A623]/5 transition-colors text-left"
+        className="w-full p-5 flex items-center gap-4 hover:bg-gold/5 transition-colors text-left"
       >
-        <div className="w-11 h-11 rounded-xl bg-[#F5A623]/15 border border-[#F5A623]/30 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-[#F5A623]" />
+        <div className="w-11 h-11 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <h3 className="text-lg font-medium text-[#FFFFFF] tracking-tight">{seccion.titulo}</h3>
-            <span className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+            <h3 className="text-lg font-medium text-cream tracking-tight">{seccion.titulo}</h3>
+            <span className="text-[11px] text-gold uppercase tracking-widest font-semibold">
               {seccion.codigo} · {seccion.pilarRange}
             </span>
           </div>
-          <p className="text-sm text-[#FFFFFF]/50 mt-0.5">{seccion.subtitulo}</p>
+          <p className="text-sm text-cream/65 mt-0.5">{seccion.subtitulo}</p>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           <div className="text-right">
-            <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-wider">
+            <p className="text-xs text-cream/55 uppercase tracking-wider">
               {completos} / {total}
             </p>
-            <p className="text-base font-medium text-[#F5A623]">{porcentaje}%</p>
+            <p className="text-base font-medium text-gold">{porcentaje}%</p>
           </div>
           {expandida ? (
-            <ChevronUp className="w-5 h-5 text-[#FFFFFF]/40" />
+            <ChevronUp className="w-5 h-5 text-cream/55" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-[#FFFFFF]/40" />
+            <ChevronDown className="w-5 h-5 text-cream/55" />
           )}
         </div>
       </button>
 
-      <div className="h-1 bg-[#F5A623]/5">
+      <div className="h-1 bg-gold/5">
         <div
-          className="h-full bg-[#F5A623] transition-all duration-500"
+          className="h-full bg-gold transition-all duration-500"
           style={{ width: `${porcentaje}%` }}
         />
       </div>
@@ -410,47 +408,47 @@ function TarjetaSeccion({
               <div
                 key={campo.codigo}
                 className="border-l-2 pl-4 py-2"
-                style={{ borderColor: completo ? '#F5A623' : 'rgba(255,255,255,0.1)' }}
+                style={{ borderColor: completo ? '#E8962E' : 'rgba(255,255,255,0.1)' }}
               >
                 <div className="flex items-center justify-between gap-3 mb-1">
                   <div className="flex items-center gap-2 min-w-0">
                     {completo ? (
-                      <Check className="w-3.5 h-3.5 text-[#F5A623] flex-shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" />
                     ) : campo.pending ? (
-                      <AlertCircle className="w-3.5 h-3.5 text-[#FFFFFF]/30 flex-shrink-0" />
+                      <AlertCircle className="w-3.5 h-3.5 text-cream/45 flex-shrink-0" />
                     ) : (
-                      <Circle className="w-3.5 h-3.5 text-[#FFFFFF]/20 flex-shrink-0" />
+                      <Circle className="w-3.5 h-3.5 text-cream/20 flex-shrink-0" />
                     )}
-                    <p className="text-sm text-[#FFFFFF]/90 font-medium truncate">{campo.label}</p>
+                    <p className="text-sm text-cream/90 font-medium truncate">{campo.label}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {campo.criticoDia45 && (
-                      <span className="text-[9px] uppercase tracking-widest text-[#F5A623] font-semibold">
+                      <span className="text-[11px] uppercase tracking-widest text-gold font-semibold">
                         D45
                       </span>
                     )}
-                    <span className="text-[10px] text-[#FFFFFF]/30 font-mono">{campo.pilarOrigen}</span>
+                    <span className="text-[11px] text-cream/45 font-mono">{campo.pilarOrigen}</span>
                     {editable ? (
                       <button
                         type="button"
                         onClick={() => onEditar(campo)}
-                        className="p-1.5 rounded-md bg-[#F5A623]/10 hover:bg-[#F5A623]/20 border border-[#F5A623]/30 transition-colors"
+                        className="p-1.5 rounded-md bg-gold/10 hover:bg-gold/20 border border-gold/30 transition-colors"
                         title="Editar campo"
                       >
-                        <Pencil className="w-3.5 h-3.5 text-[#F5A623]" />
+                        <Pencil className="w-3.5 h-3.5 text-gold" />
                       </button>
                     ) : !canEdit ? (
-                      <Lock className="w-3.5 h-3.5 text-[#FFFFFF]/20" />
+                      <Lock className="w-3.5 h-3.5 text-cream/20" />
                     ) : null}
                   </div>
                 </div>
 
                 {completo ? (
-                  <div className="text-[#FFFFFF]/60 text-sm mt-1 pl-5">
+                  <div className="text-cream/75 text-sm mt-1 pl-5">
                     <p className="whitespace-pre-wrap break-words">{valorTexto}</p>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#FFFFFF]/30 pl-5 italic">
+                  <p className="text-xs text-cream/45 pl-5 italic">
                     {campo.pending
                       ? 'Campo nuevo · se llenará cuando el cliente complete el pilar.'
                       : `Se completa en ${campo.pilarOrigen}.`}
@@ -458,7 +456,7 @@ function TarjetaSeccion({
                 )}
 
                 {ultima && (
-                  <p className="text-[10px] text-[#FFFFFF]/30 pl-5 mt-1 italic">
+                  <p className="text-[11px] text-cream/45 pl-5 mt-1 italic">
                     Editado por {ultima.editor?.nombre ?? 'equipo'} · {fechaCorta(ultima.edited_at)}
                   </p>
                 )}
@@ -595,7 +593,7 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 text-[#F5A623] animate-spin" />
+        <Loader2 className="w-6 h-6 text-gold animate-spin" />
       </div>
     );
   }
@@ -605,14 +603,14 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-semibold">
+          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
             ADN del Negocio · {clienteNombre}
           </p>
-          <h2 className="text-2xl font-light text-[#FFFFFF] tracking-tight mt-1">
+          <h2 className="text-2xl font-light text-cream tracking-tight mt-1">
             7 secciones · 56 campos · v7
           </h2>
           {!canEdit && (
-            <p className="text-xs text-[#FFFFFF]/50 mt-2 flex items-center gap-2">
+            <p className="text-xs text-cream/65 mt-2 flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" />
               Modo lectura — solo owner y manager pueden editar.
             </p>
@@ -621,7 +619,7 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
         <button
           type="button"
           onClick={() => setHistorialAbierto((v) => !v)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFFFFF]/5 hover:bg-[#FFFFFF]/10 border border-[#FFFFFF]/10 text-sm text-[#FFFFFF]/70 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-cream/5 hover:bg-cream/10 border border-cream/10 text-sm text-cream/70 transition-colors"
         >
           <History className="w-4 h-4" />
           {historialAbierto ? 'Ocultar historial' : `Historial (${auditLog.length})`}
@@ -630,18 +628,18 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
 
       {/* Resumen */}
       <div className="card-panel p-5">
-        <p className="text-xs text-[#FFFFFF]/40 uppercase tracking-widest mb-1 font-semibold">
+        <p className="text-xs text-cream/55 uppercase tracking-widest mb-1 font-semibold">
           Progreso del ADN
         </p>
-        <p className="text-2xl font-light text-[#FFFFFF] tracking-tight">
+        <p className="text-2xl font-light text-cream tracking-tight">
           {totalStats.porcentaje}%
-          <span className="text-sm text-[#FFFFFF]/40 ml-2">
+          <span className="text-sm text-cream/55 ml-2">
             ({totalStats.completos} de {totalStats.total} campos)
           </span>
         </p>
-        <div className="h-2 bg-[#F5A623]/5 rounded-full overflow-hidden mt-3">
+        <div className="h-2 bg-gold/5 rounded-full overflow-hidden mt-3">
           <div
-            className="h-full bg-[#F5A623] rounded-full transition-all duration-700"
+            className="h-full bg-gold rounded-full transition-all duration-700"
             style={{ width: `${totalStats.porcentaje}%` }}
           />
         </div>
@@ -650,15 +648,15 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
       {/* Historial de auditoría */}
       {historialAbierto && (
         <div className="card-panel p-5">
-          <h3 className="text-sm font-medium text-[#FFFFFF] mb-3">Últimas ediciones</h3>
+          <h3 className="text-sm font-medium text-cream mb-3">Últimas ediciones</h3>
           {auditLog.length === 0 ? (
-            <p className="text-xs text-[#FFFFFF]/40 italic">Sin ediciones registradas todavía.</p>
+            <p className="text-xs text-cream/55 italic">Sin ediciones registradas todavía.</p>
           ) : (
             <ul className="space-y-2 max-h-72 overflow-y-auto pr-2">
               {auditLog.slice(0, 30).map((entry) => (
-                <li key={entry.id} className="text-xs text-[#FFFFFF]/70 border-l border-[#F5A623]/20 pl-3">
-                  <span className="text-[#F5A623] font-medium">{entry.field_label ?? entry.field_codigo}</span>
-                  <span className="text-[#FFFFFF]/40"> · {entry.editor?.nombre ?? 'equipo'} · {fechaCorta(entry.edited_at)}</span>
+                <li key={entry.id} className="text-xs text-cream/70 border-l border-gold/20 pl-3">
+                  <span className="text-gold font-medium">{entry.field_label ?? entry.field_codigo}</span>
+                  <span className="text-cream/55"> · {entry.editor?.nombre ?? 'equipo'} · {fechaCorta(entry.edited_at)}</span>
                 </li>
               ))}
             </ul>

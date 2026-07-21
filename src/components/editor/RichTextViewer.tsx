@@ -25,7 +25,7 @@ export default function RichTextViewer({ html, className = '' }: RichTextViewerP
         openOnClick: true,
         autolink: true,
         HTMLAttributes: {
-          class: 'text-[#F5A623] underline underline-offset-2 hover:text-[#FFB94D]',
+          class: 'text-gold underline underline-offset-2 hover:text-goldhi',
           target: '_blank',
           rel: 'noopener noreferrer',
         },
@@ -35,7 +35,7 @@ export default function RichTextViewer({ html, className = '' }: RichTextViewerP
     editable: false,
     editorProps: {
       attributes: {
-        class: `prose prose-invert prose-sm max-w-none text-[#FFFFFF]/85 leading-relaxed ${className}`,
+        class: `prose prose-invert prose-sm max-w-none text-cream/85 leading-relaxed ${className}`,
       },
     },
   });

@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, RefreshCw, UserPlus, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../lib/supabase';
 import type { ExtractedProfile, MigrationStep1Data } from '../../lib/migrationTypes';
@@ -60,11 +59,12 @@ const TAB_FIELDS: Record<ReviewTab, (keyof ExtractedProfile)[]> = {
   identidad: ['identidad_colores', 'identidad_tipografia', 'identidad_logo', 'identidad_tono'],
 };
 
-const INPUT_CLASS = 'w-full bg-[#0A0A0A] border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-2.5 text-sm text-[#FFFFFF] placeholder-[#FFFFFF]/20 focus:outline-none focus:border-[#F5A623]/50 transition-colors';
-const LABEL_CLASS = 'block text-[10px] font-bold text-[#FFFFFF]/40 uppercase tracking-wider mb-1.5';
+const INPUT_CLASS = 'w-full bg-ink border border-gold/12 rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 transition-colors';
+const LABEL_CLASS = 'block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5';
 
 export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: MigrationWizardProps) {
   const [step, setStep] = useState(0);
+  const [migAvatar, setMigAvatar] = useState<'A' | 'B' | ''>('');
   const [resyncMode, setResyncMode] = useState(false);
   const pilarOptions = useMemo(() => getPilarOptions(), []);
 
@@ -142,29 +142,26 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         if (!form.nombre.trim() || !form.email.trim() || !form.password.trim()) {
           throw new Error('Completá todos los campos requeridos');
         }
-        const url = import.meta.env.VITE_SUPABASE_URL;
-        const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-        const tempClient = createClient(url, key, {
-          auth: {
-            persistSession: false,
-            storageKey: 'temp_auth_migration',
-            storage: { getItem: () => null, setItem: () => null, removeItem: () => null },
+        // Credencial vía API admin (sin emails de confirmación → sin rate limit).
+        // El usuario queda confirmado al instante; el RPC v2 crea el profile si no existe.
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch('/api/migrar-cliente', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token ?? ''}`,
           },
+          body: JSON.stringify({
+            email: form.email.trim(),
+            nombre: form.nombre.trim(),
+            password: form.password.trim(),
+          }),
         });
+        const out = await resp.json().catch(() => null);
+        if (!resp.ok) throw new Error(out?.error || 'No se pudo crear el usuario');
+        if (!out?.user_id) throw new Error('No se pudo crear el usuario');
 
-        const { data: signUpData, error: signUpError } = await tempClient.auth.signUp({
-          email: form.email.trim(),
-          password: form.password.trim(),
-          options: { data: { nombre: form.nombre.trim() } },
-        });
-        if (signUpError) throw signUpError;
-        if (!signUpData.user) throw new Error('No se pudo crear el usuario');
-
-        profileId = signUpData.user.id;
-        // Pequeña pausa para que Auth propague el user_id antes del RPC.
-        // El RPC v2 crea el profile si no existe, sin depender del trigger.
-        await new Promise(r => setTimeout(r, 1000));
+        profileId = out.user_id as string;
       }
 
       const adnFields = Object.fromEntries(
@@ -185,6 +182,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         fecha_inicio: form.fecha_inicio,
         status: 'ACTIVE',
         onboarding_completed: true,
+        ...(migAvatar ? { avatar_tipo: migAvatar } : {}),
         pilar_actual: pilarNumeroForProfile,
         migration_source: resyncMode ? 'admin_resync' : 'admin_migration',
         migrated_at: new Date().toISOString(),
@@ -244,32 +242,32 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-panel border border-gold/12 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(245,166,35,0.1)] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gold/10 flex-shrink-0">
           <div>
-            <h2 className="text-base font-semibold text-[#FFFFFF]">
+            <h2 className="text-base font-semibold text-cream">
               {resyncMode ? 'Re-sincronizar cliente existente' : 'Migrar cliente existente'}
             </h2>
-            <p className="text-[11px] text-[#FFFFFF]/40 mt-0.5">Paso {step + 1} de {STEPS.length} — {STEPS[step]}</p>
+            <p className="text-[11px] text-cream/55 mt-0.5">Paso {step + 1} de {STEPS.length} — {STEPS[step]}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#FFFFFF]/40 hover:text-[#FFFFFF] hover:bg-[#FFFFFF]/5 transition-all">
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center gap-0 px-6 py-3 border-b border-[rgba(245,166,35,0.08)] flex-shrink-0">
+        <div className="flex items-center gap-0 px-6 py-3 border-b border-gold/8 flex-shrink-0">
           {STEPS.map((label, i) => (
             <div key={i} className="flex items-center flex-1">
-              <div className={`flex items-center gap-1.5 ${i <= step ? 'text-[#F5A623]' : 'text-[#FFFFFF]/20'}`}>
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${i < step ? 'bg-[#F5A623] text-black' : i === step ? 'border-2 border-[#F5A623] text-[#F5A623]' : 'border border-[#FFFFFF]/20 text-[#FFFFFF]/20'}`}>
+              <div className={`flex items-center gap-1.5 ${i <= step ? 'text-gold' : 'text-cream/20'}`}>
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${i < step ? 'bg-gold text-black' : i === step ? 'border-2 border-gold text-gold' : 'border border-cream/20 text-cream/20'}`}>
                   {i < step ? <Check className="w-3 h-3" /> : i + 1}
                 </div>
-                <span className="text-[10px] font-semibold hidden sm:block whitespace-nowrap">{label}</span>
+                <span className="text-[11px] font-semibold hidden sm:block whitespace-nowrap">{label}</span>
               </div>
-              {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-2 ${i < step ? 'bg-[#F5A623]/40' : 'bg-[#FFFFFF]/10'}`} />}
+              {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-2 ${i < step ? 'bg-gold/40' : 'bg-cream/10'}`} />}
             </div>
           ))}
         </div>
@@ -281,12 +279,12 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
           {step === 0 && (
             <div className="space-y-4">
               {/* Toggle modo */}
-              <div className="flex gap-2 p-1 bg-[#0A0A0A] rounded-xl">
+              <div className="flex gap-2 p-1 bg-ink rounded-xl">
                 <button
                   type="button"
                   onClick={() => setResyncMode(false)}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    !resyncMode ? 'bg-[#F5A623] text-black' : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80'
+                    !resyncMode ? 'bg-gold text-black' : 'text-cream/65 hover:text-cream/80'
                   }`}
                 >
                   <UserPlus className="w-3.5 h-3.5" />
@@ -296,7 +294,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                   type="button"
                   onClick={() => setResyncMode(true)}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    resyncMode ? 'bg-[#F5A623] text-black' : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80'
+                    resyncMode ? 'bg-gold text-black' : 'text-cream/65 hover:text-cream/80'
                   }`}
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -307,11 +305,19 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
               {resyncMode ? (
                 /* Modo re-sync: solo email */
                 <div className="space-y-4">
-                  <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-xl px-4 py-3">
-                    <p className="text-[11px] text-[#F5A623]/80">
+                  <div className="bg-gold/5 border border-gold/20 rounded-xl px-4 py-3">
+                    <p className="text-[11px] text-gold/80">
                       La cuenta ya existe. Ingresá el email del cliente para buscarla y actualizar su perfil ADN con la nueva información.
                     </p>
                   </div>
+          <div className="mb-3">
+            <label className="block text-xs text-cream/75 mb-1">Avatar del sanador (para el Mentor)</label>
+            <select value={migAvatar} onChange={(e) => setMigAvatar(e.target.value as 'A' | 'B' | '')} className="w-full bg-black/30 border border-gold/15 rounded-lg px-3 py-2 text-sm text-cream">
+              <option value="">— Sin definir —</option>
+              <option value="B">B · Ya tiene método propio (poda y empaqueta)</option>
+              <option value="A">A · Construye de cero</option>
+            </select>
+          </div>
                   <div>
                     <label className={LABEL_CLASS}>Email del cliente *</label>
                     <input type="email" value={form.email} onChange={e => setFormField('email', e.target.value)}
@@ -321,9 +327,9 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                     <div>
                       <label className={LABEL_CLASS}>Plan</label>
                       <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
-                        <option value="DWY">DWY</option>
-                        <option value="DFY">DFY</option>
-                        <option value="IMPLEMENTACION">Implementación</option>
+                        <option value="DYS">DYS · Solo app</option>
+                        <option value="DWY">DWY · Mentoría</option>
+                        <option value="DFY">DFY · Implementación</option>
                       </select>
                     </div>
                     <div>
@@ -342,7 +348,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                         onChange={v => setFormField('pilar_actual', Number(v))}
                         options={pilarOptions}
                       />
-                      <p className="text-[10px] text-[#FFFFFF]/30 mt-1">
+                      <p className="text-[11px] text-cream/45 mt-1">
                         Se marcan como completadas todas las tareas hasta ese pilar inclusive.
                       </p>
                     </div>
@@ -369,9 +375,9 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                   <div>
                     <label className={LABEL_CLASS}>Plan</label>
                     <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
-                      <option value="DWY">DWY</option>
-                      <option value="DFY">DFY</option>
-                      <option value="IMPLEMENTACION">Implementación</option>
+                      <option value="DYS">DYS · Solo app</option>
+                      <option value="DWY">DWY · Mentoría</option>
+                      <option value="DFY">DFY · Implementación</option>
                     </select>
                   </div>
                   <div>
@@ -390,7 +396,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                       onChange={v => setFormField('pilar_actual', Number(v))}
                       options={pilarOptions}
                     />
-                    <p className="text-[10px] text-[#FFFFFF]/30 mt-1">
+                    <p className="text-[11px] text-cream/45 mt-1">
                       Se marcan como completadas todas las tareas hasta ese pilar.
                     </p>
                   </div>
@@ -402,7 +408,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
           {/* ── PASO 2: Fuente de información ── */}
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-sm text-[#FFFFFF]/60">
+              <p className="text-sm text-cream/75">
                 Pegá toda la información disponible sobre el cliente: historia, método, ofertas, descripción de marca, etc.
                 La IA extraerá los campos automáticamente.
               </p>
@@ -415,21 +421,21 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                   rows={12}
                   className={`${INPUT_CLASS} resize-none`}
                 />
-                <p className="text-[10px] text-[#FFFFFF]/30 mt-1">{textoLibre.length} caracteres</p>
+                <p className="text-[11px] text-cream/45 mt-1">{textoLibre.length} caracteres</p>
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={handleExtract}
                   disabled={!textoLibre.trim() || extracting}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-40 text-black text-sm font-bold transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-40 text-black text-sm font-bold transition-all"
                 >
                   {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {extracting ? 'Extrayendo con IA...' : 'Extraer con IA'}
                 </button>
                 <button
                   onClick={() => setStep(2)}
-                  className="px-4 py-2.5 rounded-xl border border-[rgba(245,166,35,0.2)] text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-gold/12 text-sm text-cream/75 hover:text-cream transition-colors"
                 >
                   Continuar sin IA
                 </button>
@@ -441,24 +447,24 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
           {step === 2 && (
             <div className="space-y-4">
               {iaUsada && extractedCount > 0 && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20">
-                  <Sparkles className="w-3.5 h-3.5 text-[#F5A623] flex-shrink-0" />
-                  <p className="text-[11px] text-[#F5A623]">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/10 border border-gold/20">
+                  <Sparkles className="w-3.5 h-3.5 text-gold flex-shrink-0" />
+                  <p className="text-[11px] text-gold">
                     IA extrajo {extractedCount} campos. Revisá y corregí lo que necesites.
                   </p>
                 </div>
               )}
 
               {/* Tabs */}
-              <div className="flex gap-1 bg-[#0A0A0A] rounded-xl p-1">
+              <div className="flex gap-1 bg-ink rounded-xl p-1">
                 {REVIEW_TABS.map(tab => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
                       activeTab === tab.key
-                        ? 'bg-[#F5A623] text-black'
-                        : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80'
+                        ? 'bg-gold text-black'
+                        : 'text-cream/65 hover:text-cream/80'
                     }`}
                   >
                     {tab.label}
@@ -476,7 +482,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                       <div className="flex items-center gap-2 mb-1.5">
                         <label className={LABEL_CLASS.replace('mb-1.5', '')}>{FIELD_LABEL[fieldKey]}</label>
                         {isAi && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F5A623]/15 text-[#F5A623]">IA</span>
+                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-gold/15 text-gold">IA</span>
                         )}
                       </div>
                       <textarea
@@ -496,30 +502,30 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
           {/* ── PASO 4: Confirmar ── */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="bg-[#0A0A0A] border border-[rgba(245,166,35,0.2)] rounded-2xl p-5 space-y-3">
-                <h3 className="text-sm font-semibold text-[#FFFFFF]">
+              <div className="bg-ink border border-gold/12 rounded-2xl p-5 space-y-3">
+                <h3 className="text-sm font-semibold text-cream">
                   {resyncMode ? 'Resumen de la re-sincronización' : 'Resumen de la migración'}
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-[11px]">
                   {!resyncMode && (
-                    <div><span className="text-[#FFFFFF]/40">Nombre:</span> <span className="text-[#FFFFFF] font-medium">{form.nombre}</span></div>
+                    <div><span className="text-cream/55">Nombre:</span> <span className="text-cream font-medium">{form.nombre}</span></div>
                   )}
-                  <div><span className="text-[#FFFFFF]/40">Email:</span> <span className="text-[#FFFFFF] font-medium">{form.email}</span></div>
-                  <div><span className="text-[#FFFFFF]/40">Plan:</span> <span className="text-[#F5A623] font-bold">{form.plan}</span></div>
-                  <div><span className="text-[#FFFFFF]/40">Pilar inicial:</span> <span className="text-[#FFFFFF] font-medium">P{form.pilar_actual}</span></div>
-                  <div><span className="text-[#FFFFFF]/40">Fecha inicio:</span> <span className="text-[#FFFFFF] font-medium">{form.fecha_inicio}</span></div>
-                  <div><span className="text-[#FFFFFF]/40">Especialidad:</span> <span className="text-[#FFFFFF] font-medium">{form.especialidad || '—'}</span></div>
+                  <div><span className="text-cream/55">Email:</span> <span className="text-cream font-medium">{form.email}</span></div>
+                  <div><span className="text-cream/55">Plan:</span> <span className="text-gold font-bold">{form.plan}</span></div>
+                  <div><span className="text-cream/55">Pilar inicial:</span> <span className="text-cream font-medium">P{form.pilar_actual}</span></div>
+                  <div><span className="text-cream/55">Fecha inicio:</span> <span className="text-cream font-medium">{form.fecha_inicio}</span></div>
+                  <div><span className="text-cream/55">Especialidad:</span> <span className="text-cream font-medium">{form.especialidad || '—'}</span></div>
                 </div>
-                <div className="border-t border-[rgba(245,166,35,0.1)] pt-3">
-                  <p className="text-[11px] text-[#FFFFFF]/40">
-                    Campos ADN completados: <span className="text-[#F5A623] font-bold">{extractedCount}</span> de {Object.keys(FIELD_LABEL).length}
-                    {iaUsada && <span className="ml-2 text-[#F5A623]/60">(extraídos con IA)</span>}
+                <div className="border-t border-gold/10 pt-3">
+                  <p className="text-[11px] text-cream/55">
+                    Campos ADN completados: <span className="text-gold font-bold">{extractedCount}</span> de {Object.keys(FIELD_LABEL).length}
+                    {iaUsada && <span className="ml-2 text-gold/60">(extraídos con IA)</span>}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-xl px-4 py-3">
-                <p className="text-[11px] text-[#F5A623]/80">
+              <div className="bg-gold/5 border border-gold/20 rounded-xl px-4 py-3">
+                <p className="text-[11px] text-gold/80">
                   {resyncMode
                     ? 'Se actualizará el perfil ADN del cliente sin tocar su cuenta ni contraseña.'
                     : 'Se creará la cuenta con acceso directo a la plataforma. El cliente no necesitará completar el onboarding desde cero.'
@@ -531,10 +537,10 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between gap-3 px-6 py-4 border-t border-[rgba(245,166,35,0.1)] flex-shrink-0">
+        <div className="flex justify-between gap-3 px-6 py-4 border-t border-gold/10 flex-shrink-0">
           <button
             onClick={() => step === 0 ? onClose() : setStep(s => s - 1)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-cream/55 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             {step === 0 ? 'Cancelar' : 'Atrás'}
@@ -544,7 +550,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
             <button
               onClick={() => setStep(s => s + 1)}
               disabled={!canGoNext() || (step === 1 && extracting)}
-              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-40 text-black text-sm font-bold transition-all"
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-40 text-black text-sm font-bold transition-all"
             >
               Siguiente <ChevronRight className="w-4 h-4" />
             </button>
@@ -552,7 +558,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
             <button
               onClick={handleCreate}
               disabled={creating}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-black text-sm font-bold transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all"
             >
               {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               {creating

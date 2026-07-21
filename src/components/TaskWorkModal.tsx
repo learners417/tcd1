@@ -180,7 +180,7 @@ export default function TaskWorkModal({
 
   // ── Generar con Gemini ──────────────────────────────────────────────────────
   const handleGenerar = useCallback(async () => {
-    if (!camposCompletos) { toast.error('Completá todos los campos requeridos.'); return; }
+    if (!camposCompletos) { toast.error('Completa todos los campos requeridos.'); return; }
     if (!herramienta) return;
 
     setModo('generando');
@@ -198,7 +198,7 @@ export default function TaskWorkModal({
       setModo('revision');
       setShowInputs(false);
     } catch {
-      toast.error('Error al generar. Intentá de nuevo.');
+      toast.error('Error al generar. Intenta de nuevo.');
       setModo('form');
     }
   }, [camposCompletos, geminiKey, herramienta, inputs, perfil]);
@@ -249,7 +249,7 @@ export default function TaskWorkModal({
       toast.success('¡Documento aprobado y guardado!');
       onApprove(textoFinal);
     } catch {
-      toast.error('Error al guardar. Intentá de nuevo.');
+      toast.error('Error al guardar. Intenta de nuevo.');
     } finally {
       setGuardando(false);
     }
@@ -277,33 +277,33 @@ export default function TaskWorkModal({
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-2xl bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 mb-8">
+      <div className="relative z-10 w-full max-w-2xl bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 mb-8">
 
         {/* ── Header ── */}
-        <div className="flex items-start justify-between p-6 border-b border-[rgba(245,166,35,0.1)]">
+        <div className="flex items-start justify-between p-6 border-b border-[rgba(232,150,46,0.1)]">
           <div className="flex-1 pr-4">
-            <p className="text-[10px] text-[#F5A623] uppercase tracking-widest font-bold mb-1">
+            <p className="text-[11px] text-gold uppercase tracking-widest font-bold mb-1">
               Pilar {tarea.pilarNumero} — {tarea.pilarTitulo}
             </p>
-            <h2 className="text-lg font-semibold text-[#FFFFFF] leading-snug">{tarea.titulo}</h2>
-            <p className="text-xs text-[#FFFFFF]/60 mt-1 leading-relaxed">{tarea.descripcion}</p>
+            <h2 className="text-lg font-semibold text-cream leading-snug">{tarea.titulo}</h2>
+            <p className="text-xs text-cream/75 mt-1 leading-relaxed">{tarea.descripcion}</p>
             <div className="flex flex-wrap items-center gap-3 mt-3">
-              <span className="flex items-center gap-1 text-[10px] text-[#FFFFFF]/40">
+              <span className="flex items-center gap-1 text-[11px] text-cream/55">
                 <Clock className="w-3 h-3" /> {tarea.tiempo_estimado}
               </span>
               {tarea.es_estrella && (
-                <span className="flex items-center gap-1 text-[10px] text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 px-2 py-0.5 rounded-full">
-                  <Star className="w-3 h-3 fill-[#F5A623]" /> Tarea estrella
+                <span className="flex items-center gap-1 text-[11px] text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
+                  <Star className="w-3 h-3 fill-gold" /> Tarea estrella
                 </span>
               )}
               {herramienta && (
-                <span className="text-[10px] text-[#F5A623] bg-[#F5A623]/10 border border-[#F5A623]/20 px-2 py-0.5 rounded-full font-mono">
+                <span className="text-[11px] text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full font-mono">
                   {herramienta.id} — {herramienta.titulo}
                 </span>
               )}
             </div>
           </div>
-          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-[#FFFFFF]/40 hover:text-[#FFFFFF] hover:bg-[#F5A623]/5 transition-colors">
+          <button onClick={onClose} className="shrink-0 p-1.5 rounded-lg text-cream/55 hover:text-cream hover:bg-gold/5 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -314,9 +314,9 @@ export default function TaskWorkModal({
           {/* Sin herramienta: completar manualmente */}
           {!herramienta && (
             <div className="py-8 text-center space-y-4">
-              <FileText className="w-10 h-10 text-[#FFFFFF]/30 mx-auto" />
-              <p className="text-sm text-[#FFFFFF]/80">Esta tarea no tiene herramienta IA asignada.</p>
-              <p className="text-xs text-[#FFFFFF]/40">Completá la actividad según las instrucciones y marcá la tarea como lista desde la Hoja de Ruta.</p>
+              <FileText className="w-10 h-10 text-cream/45 mx-auto" />
+              <p className="text-sm text-cream/80">Esta tarea no tiene herramienta IA asignada.</p>
+              <p className="text-xs text-cream/55">Completa la actividad según las instrucciones y marca la tarea como lista desde El Camino.</p>
             </div>
           )}
 
@@ -327,7 +327,7 @@ export default function TaskWorkModal({
               {(modo === 'revision' || modo === 'edicion' || modo === 'aprobado') && (
                 <button
                   onClick={() => setShowInputs((v) => !v)}
-                  className="flex items-center gap-2 text-xs text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors"
+                  className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors"
                 >
                   {showInputs ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   {showInputs ? 'Ocultar inputs' : 'Modificar inputs'}
@@ -339,17 +339,17 @@ export default function TaskWorkModal({
                 <div className="space-y-4">
                   {herramienta.inputs.map((campo: CampoInput) => (
                     <div key={campo.id}>
-                      <label className="block text-xs font-medium text-[#FFFFFF]/60 mb-1.5 uppercase tracking-wider">
+                      <label className="block text-xs font-medium text-cream/75 mb-1.5 uppercase tracking-wider">
                         {campo.label}
-                        {campo.required && <span className="text-[#EF4444] ml-1">*</span>}
+                        {campo.required && <span className="text-danger ml-1">*</span>}
                         {campo.precargar && inputs[campo.id] && (
-                          <span className="ml-2 text-[10px] text-[#22C55E] normal-case tracking-normal">(de tu perfil)</span>
+                          <span className="ml-2 text-[11px] text-success normal-case tracking-normal">(de tu perfil)</span>
                         )}
                       </label>
                       {campo.tipo === 'textarea' ? (
                         <textarea
                           rows={3}
-                          className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 resize-none transition-all placeholder-[#FFFFFF]/30 outline-none"
+                          className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 resize-none transition-all placeholder-cream/30 outline-none"
                           placeholder={campo.placeholder}
                           value={inputs[campo.id] ?? ''}
                           onChange={(e) => setInputs((prev) => ({ ...prev, [campo.id]: e.target.value }))}
@@ -363,7 +363,7 @@ export default function TaskWorkModal({
                       ) : (
                         <input
                           type={campo.tipo === 'number' ? 'number' : 'text'}
-                          className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 transition-all placeholder-[#FFFFFF]/30 outline-none"
+                          className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 transition-all placeholder-cream/30 outline-none"
                           placeholder={campo.placeholder}
                           value={inputs[campo.id] ?? ''}
                           onChange={(e) => setInputs((prev) => ({ ...prev, [campo.id]: e.target.value }))}
@@ -375,7 +375,7 @@ export default function TaskWorkModal({
                   <button
                     onClick={handleGenerar}
                     disabled={modo === 'generando' || !camposCompletos}
-                    className="w-full py-3 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] disabled:opacity-50 text-[#0A0A0A] font-medium transition-all flex justify-center items-center gap-2"
+                    className="w-full py-3 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink font-medium transition-all flex justify-center items-center gap-2"
                   >
                     {modo === 'generando'
                       ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
@@ -388,21 +388,21 @@ export default function TaskWorkModal({
               {(modo === 'generando' || modo === 'revision' || modo === 'edicion' || modo === 'aprobado') && (
                 <div ref={outputRef} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-[#FFFFFF]/60 uppercase tracking-widest">
-                      {modo === 'aprobado' ? <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> Documento aprobado</span> : herramienta.outputLabel}
+                    <h3 className="text-xs font-bold text-cream/75 uppercase tracking-widest">
+                      {modo === 'aprobado' ? <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Documento aprobado</span> : herramienta.outputLabel}
                     </h3>
                     {(modo === 'revision' || modo === 'edicion' || modo === 'aprobado') && (
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleCopiar}
-                          className="flex items-center gap-1.5 text-xs text-[#FFFFFF]/60 hover:text-[#FFFFFF] bg-[#F5A623]/5 px-2.5 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-cream/75 hover:text-cream bg-gold/5 px-2.5 py-1.5 rounded-lg transition-colors"
                         >
-                          {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                           {copiado ? 'Copiado' : 'Copiar'}
                         </button>
                         <button
                           onClick={() => descargarPDF(tarea.titulo, modo === 'edicion' ? outputEditado : output, perfil?.nombre ?? '')}
-                          className="flex items-center gap-1.5 text-xs text-[#FFFFFF]/60 hover:text-[#FFFFFF] bg-[#F5A623]/5 px-2.5 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-cream/75 hover:text-cream bg-gold/5 px-2.5 py-1.5 rounded-lg transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" /> PDF
                         </button>
@@ -413,19 +413,19 @@ export default function TaskWorkModal({
                   {/* Modo edición */}
                   {modo === 'edicion' ? (
                     <textarea
-                      className="w-full bg-black/20 border border-[#F5A623]/40 rounded-xl p-4 text-sm text-[#FFFFFF]/90 leading-relaxed font-mono resize-none outline-none focus:border-[#F5A623]/60 transition-colors"
+                      className="w-full bg-black/20 border border-gold/40 rounded-xl p-4 text-sm text-cream/90 leading-relaxed font-mono resize-none outline-none focus:border-gold/60 transition-colors"
                       rows={16}
                       value={outputEditado}
                       onChange={(e) => setOutputEditado(e.target.value)}
                     />
                   ) : (
-                    <div className={`bg-black/20 rounded-xl p-4 min-h-32 max-h-96 overflow-y-auto ${modo === 'aprobado' ? 'border border-[#22C55E]/20' : ''}`}>
+                    <div className={`bg-black/20 rounded-xl p-4 min-h-32 max-h-96 overflow-y-auto ${modo === 'aprobado' ? 'border border-success/20' : ''}`}>
                       {output ? (
-                        <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-[#FFFFFF] [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(245,166,35,0.2)]">
+                        <div className="prose prose-invert prose-sm max-w-none text-cream/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
                           <Markdown>{output}</Markdown>
                         </div>
                       ) : (
-                        <span className="text-[#FFFFFF]/40 flex items-center gap-2 text-sm">
+                        <span className="text-cream/55 flex items-center gap-2 text-sm">
                           <Loader2 className="w-4 h-4 animate-spin" /> Generando...
                         </span>
                       )}
@@ -438,32 +438,32 @@ export default function TaskWorkModal({
         </div>
 
         {/* ── Footer con acciones ── */}
-        <div className="flex items-center justify-between p-6 border-t border-[rgba(245,166,35,0.1)] gap-3">
+        <div className="flex items-center justify-between p-6 border-t border-[rgba(232,150,46,0.1)] gap-3">
           {modo === 'aprobado' ? (
             <>
-              <p className="text-xs text-[#22C55E] flex items-center gap-1.5">
+              <p className="text-xs text-success flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4" /> Tarea completada y guardada
               </p>
-              <button onClick={onClose} className="px-5 py-2.5 rounded-xl bg-[#F5A623]/10 hover:bg-[#F5A623]/15 text-[#FFFFFF] text-sm font-medium transition-colors">
+              <button onClick={onClose} className="px-5 py-2.5 rounded-xl bg-gold/10 hover:bg-gold/15 text-cream text-sm font-medium transition-colors">
                 Cerrar
               </button>
             </>
           ) : modo === 'revision' ? (
             <>
-              <button onClick={handleRehacer} className="flex items-center gap-2 text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors">
+              <button onClick={handleRehacer} className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors">
                 <RotateCcw className="w-4 h-4" /> Rehacer
               </button>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => { setOutputEditado(output); setModo('edicion'); }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F5A623]/5 hover:bg-[#F5A623]/10 text-[#FFFFFF] text-sm transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold/5 hover:bg-gold/10 text-cream text-sm transition-colors"
                 >
                   <Edit3 className="w-4 h-4" /> Editar
                 </button>
                 <button
                   onClick={handleAprobar}
                   disabled={guardando}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#22C55E]/80 disabled:opacity-50 text-[#0A0A0A] text-sm font-bold transition-colors shadow-lg shadow-[#22C55E]/20"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-success hover:bg-success/80 disabled:opacity-50 text-ink text-sm font-bold transition-colors shadow-lg shadow-success/20"
                 >
                   {guardando ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   Aprobar
@@ -472,20 +472,20 @@ export default function TaskWorkModal({
             </>
           ) : modo === 'edicion' ? (
             <>
-              <button onClick={() => setModo('revision')} className="text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors">
+              <button onClick={() => setModo('revision')} className="text-sm text-cream/75 hover:text-cream transition-colors">
                 Cancelar edición
               </button>
               <button
                 onClick={handleAprobar}
                 disabled={guardando || !outputEditado.trim()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#22C55E]/80 disabled:opacity-50 text-[#0A0A0A] text-sm font-bold transition-colors shadow-lg shadow-[#22C55E]/20"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-success hover:bg-success/80 disabled:opacity-50 text-ink text-sm font-bold transition-colors shadow-lg shadow-success/20"
               >
                 {guardando ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Aprobar y guardar
               </button>
             </>
           ) : (
-            <button onClick={onClose} className="text-sm text-[#FFFFFF]/60 hover:text-[#FFFFFF] transition-colors">
+            <button onClick={onClose} className="text-sm text-cream/75 hover:text-cream transition-colors">
               Cancelar
             </button>
           )}

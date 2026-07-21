@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -8,17 +8,26 @@ import CreditsBadge from './credits/CreditsBadge';
 import { CREDITS_ENABLED } from '../lib/featureFlags';
 
 interface TopbarProps {
+  currentPage?: string;
+  onBack?: () => void;
   setCurrentPage: (page: string) => void;
   userId?: string;
   onMobileMenuToggle: () => void;
 }
+
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Mentor IA', liga: 'La Liga',
+  red: 'La Red', mensajes: 'Mensajes', adn: 'ADN del Negocio', diario: 'Diario del Fundador',
+  biblioteca: 'El Método', agentes: 'Entrenadores', creador: 'Creador de Contenido',
+  campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
+};
 
 const searchablePages = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Panel principal del programa' },
   { id: 'roadmap', label: 'Hoja de Ruta', icon: Map, desc: 'Tu progreso en los 90 días' },
   { id: 'coach', label: 'Coach IA', icon: MessageSquare, desc: 'Asistente IA con contexto de tu programa' },
   // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
-  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Seguimiento de tu embudo de ventas' },
+  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes' },
   { id: 'diario', label: 'Diario', icon: BookOpen, desc: 'Reflexión diaria' },
   { id: 'biblioteca', label: 'Biblioteca', icon: Library, desc: 'Videos, herramientas, recursos' },
   { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Generar copies e imagenes para Meta Ads' },
@@ -33,11 +42,11 @@ const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
 };
 
 const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10' },
-  tarea: { text: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10' },
-  mensaje: { text: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10' },
-  sistema: { text: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10' },
-  admin: { text: 'text-[#F5A623]', bg: 'bg-[#F5A623]/10' },
+  hito: { text: 'text-gold', bg: 'bg-gold/10' },
+  tarea: { text: 'text-success', bg: 'bg-success/10' },
+  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
+  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
+  admin: { text: 'text-gold', bg: 'bg-gold/10' },
 };
 
 const URL_TO_PAGE: Record<string, string> = {
@@ -68,7 +77,7 @@ function tiempoRelativo(fechaISO: string): string {
   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
+export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,22 +198,29 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
   return (
     <>
       <header className="h-14 md:h-20 px-4 md:px-8 flex items-center justify-between z-20 relative">
-        {/* Hamburger — mobile only */}
-        <button
-          onClick={onMobileMenuToggle}
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-[#FFFFFF]/60 hover:text-[#FFFFFF] hover:bg-[#F5A623]/10 transition-colors"
-          aria-label="Abrir menú"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        {/* Back (sub-páginas) o menú (home) + título de pantalla — mobile */}
+        <div className="md:hidden flex items-center gap-1.5 min-w-0">
+          {currentPage && currentPage !== 'dashboard' && onBack ? (
+            <button onClick={onBack} className="btn-icon -ml-2 shrink-0" aria-label="Volver">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          ) : (
+            <button onClick={onMobileMenuToggle} className="btn-icon -ml-2 shrink-0" aria-label="Abrir menú">
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-base font-semibold text-cream truncate not-italic" style={{ fontFamily: 'var(--font-body)' }}>
+            {(currentPage && PAGE_TITLES[currentPage]) || ''}
+          </h1>
+        </div>
 
         <div
           onClick={() => setShowSearch(true)}
-          className="hidden md:flex items-center w-96 card-panel px-4 py-2 cursor-pointer hover:bg-[#1C1C1C] transition-colors"
+          className="hidden md:flex items-center w-96 card-panel px-4 py-2 cursor-pointer hover:bg-surface transition-colors"
         >
-          <Search className="w-4 h-4 text-[#FFFFFF]/40" />
-          <span className="bg-transparent text-sm text-[#FFFFFF]/40 ml-3">Buscar secciones, tareas...</span>
-          <div className="flex items-center justify-center w-8 h-5 rounded bg-[#FFFFFF]/10 text-[10px] text-[#FFFFFF]/50 font-mono ml-auto">
+          <Search className="w-4 h-4 text-cream/55" />
+          <span className="bg-transparent text-sm text-cream/55 ml-3">Buscar secciones, tareas...</span>
+          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-[11px] text-cream/65 font-mono ml-auto">
             ⌘K
           </div>
         </div>
@@ -218,10 +234,10 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
               onClick={() => setShowNotifications(!showNotifications)}
               className={`w-12 h-12 rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
                 showNotifications
-                  ? 'text-[#FFFFFF] bg-[#1C1C1C] shadow-[0_0_18px_rgba(245,166,35,0.35)] ring-1 ring-[#F5A623]/40'
+                  ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
                   : unreadCount > 0
-                    ? 'text-[#F5A623] shadow-[0_0_14px_rgba(245,166,35,0.25)] ring-1 ring-[#F5A623]/30 hover:text-[#FFB94D]'
-                    : 'text-[#FFFFFF]/60 hover:text-[#FFFFFF]'
+                    ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
+                    : 'text-cream/75 hover:text-cream'
               }`}
               aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'}
             >
@@ -230,25 +246,25 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                 fill={unreadCount > 0 ? 'currentColor' : 'none'}
               />
               {unreadCount > 0 && (
-                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-[#F5A623] text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
-                <div className="p-4 border-b border-[rgba(245,166,35,0.15)] flex items-center justify-between bg-[#1C1C1C]/50">
-                  <h3 className="font-medium text-[#FFFFFF]">Notificaciones</h3>
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
+                <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
+                  <h3 className="font-medium text-cream">Notificaciones</h3>
                   {unreadCount > 0 && (
-                    <span onClick={markAllRead} className="text-xs text-[#F5A623] cursor-pointer hover:text-[#FFB94D]">Marcar todas como leidas</span>
+                    <span onClick={markAllRead} className="text-xs text-gold cursor-pointer hover:text-goldhi">Marcar todas como leidas</span>
                   )}
                 </div>
                 <div className="max-h-[400px] overflow-y-auto">
                   {notifications.length === 0 && (
                     <div className="py-12 text-center">
-                      <Bell className="w-8 h-8 text-[#FFFFFF]/20 mx-auto mb-3" />
-                      <p className="text-sm text-[#FFFFFF]/40">Sin notificaciones</p>
+                      <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
+                      <p className="text-sm text-cream/55">Sin notificaciones</p>
                     </div>
                   )}
                   {notifications.map(notif => {
@@ -259,29 +275,29 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                       <div
                         key={notif.id}
                         onClick={() => handleNotificationClick(notif)}
-                        className={`p-4 border-b border-[rgba(245,166,35,0.08)] hover:bg-[#1C1C1C]/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
+                        className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
                       >
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
                           <IconComponent className={`w-4 h-4 ${colors.text}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start gap-2">
-                            <p className="text-sm font-medium text-[#FFFFFF]/90 mb-0.5">{notif.titulo}</p>
+                            <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
                             {!notif.leida && (
-                              <span className="w-2 h-2 rounded-full bg-[#EF4444] shrink-0 mt-1.5" />
+                              <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
                             )}
                           </div>
                           {notif.descripcion && (
-                            <p className="text-xs text-[#FFFFFF]/50 line-clamp-2">{notif.descripcion}</p>
+                            <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
                           )}
-                          <p className="text-[10px] text-[#FFFFFF]/30 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                          <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                <div className="p-3 text-center border-t border-[rgba(245,166,35,0.15)] bg-[#1C1C1C]/50">
-                  <button onClick={() => setShowNotifications(false)} className="text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors">
+                <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
+                  <button onClick={() => setShowNotifications(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
                     Cerrar
                   </button>
                 </div>
@@ -289,14 +305,14 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
             )}
           </div>
 
-          <div className="flex items-center gap-2 pl-4 border-l border-[rgba(245,166,35,0.15)]">
+          <div className="flex items-center gap-2 pl-4 border-l border-[rgba(232,150,46,0.10)]">
             {(() => {
               const avatarUrl = localStorage.getItem('tcd_avatar');
               const initial = (profile.nombre || 'P').charAt(0).toUpperCase();
               return avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[rgba(245,166,35,0.3)] object-cover" />
+                <img loading="lazy" src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[rgba(232,150,46,0.18)] object-cover" />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-[#F5A623]/20 border border-[#F5A623]/30 flex items-center justify-center text-sm font-bold text-[#F5A623]">
+                <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-bold text-gold">
                   {initial}
                 </div>
               );
@@ -308,18 +324,18 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
       {/* Search Modal ⌘K */}
       {showSearch && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm animate-in fade-in duration-150" onClick={() => setShowSearch(false)}>
-          <div className="w-full max-w-lg bg-[#1C1C1C] border border-[rgba(245,166,35,0.2)] rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 p-4 border-b border-[rgba(245,166,35,0.15)]">
-              <Search className="w-5 h-5 text-[#FFFFFF]/40" />
+          <div className="w-full max-w-lg bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 p-4 border-b border-[rgba(232,150,46,0.10)]">
+              <Search className="w-5 h-5 text-cream/55" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="¿A dónde querés ir?"
-                className="bg-transparent border-none outline-none text-[#FFFFFF] text-sm w-full placeholder-[#FFFFFF]/40"
+                placeholder="¿A dónde quieres ir?"
+                className="bg-transparent border-none outline-none text-cream text-sm w-full placeholder-cream/40"
               />
-              <button onClick={() => setShowSearch(false)} className="text-[#FFFFFF]/40 hover:text-[#FFFFFF]">
+              <button onClick={() => setShowSearch(false)} className="text-cream/55 hover:text-cream">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -331,20 +347,20 @@ export default function Topbar({ setCurrentPage, userId, onMobileMenuToggle }: T
                     setCurrentPage(page.id);
                     setShowSearch(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-[#F5A623]/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-gold/10 transition-colors"
                 >
-                  <page.icon className="w-5 h-5 text-[#FFFFFF]/40" />
+                  <page.icon className="w-5 h-5 text-cream/55" />
                   <div>
-                    <p className="text-sm font-medium text-[#FFFFFF]/90">{page.label}</p>
-                    <p className="text-xs text-[#FFFFFF]/40">{page.desc}</p>
+                    <p className="text-sm font-medium text-cream/90">{page.label}</p>
+                    <p className="text-xs text-cream/55">{page.desc}</p>
                   </div>
                 </button>
               ))}
               {filteredPages.length === 0 && (
-                <p className="text-sm text-[#FFFFFF]/40 text-center py-8">No se encontraron resultados</p>
+                <p className="text-sm text-cream/55 text-center py-8">No se encontraron resultados</p>
               )}
             </div>
-            <div className="p-3 border-t border-[rgba(245,166,35,0.15)] flex items-center gap-4 text-[10px] text-[#FFFFFF]/40">
+            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-[11px] text-cream/55">
               <span>↑↓ Navegar</span>
               <span>↵ Abrir</span>
               <span>esc Cerrar</span>

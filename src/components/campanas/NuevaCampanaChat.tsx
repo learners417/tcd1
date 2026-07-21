@@ -111,7 +111,7 @@ export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel 
   const buildSystemPrompt = (): string => {
     const phaseInstructions: Record<WizardPhase, string> = {
       cliente: `FASE ACTUAL: Cliente (1/6)
-Ya tenes el ADN del profesional arriba. Usa esos datos.
+Ya tienes el ADN del profesional arriba. Usa esos datos.
 Solo necesitas confirmar o completar:
 - Nombre de la campaña (sugerir uno basado en el nicho)
 - Ticket promedio del servicio (si no esta en las ofertas)
@@ -188,8 +188,8 @@ ${adnBlock}
 ${phaseInstructions[currentPhase]}
 
 REGLAS:
-- IMPORTANTE: Ya tenes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
-- Si la fase requiere datos que ya tenes del ADN, usalos directamente y confirma con el usuario
+- IMPORTANTE: Ya tienes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
+- Si la fase requiere datos que ya tienes del ADN, usalos directamente y confirma con el usuario
 - Solo pregunta lo que NO esta en el ADN (presupuesto publicitario, nombre especifico de la campaña, etc.)
 - Pregunta UNA cosa a la vez
 - Se conciso pero completo
@@ -275,7 +275,7 @@ REGLAS:
       {/* Back button */}
       <button
         onClick={onCancel}
-        className="flex items-center gap-2 text-xs text-[#FFFFFF]/40 hover:text-[#FFFFFF] transition-colors mb-4"
+        className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-4"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
       </button>
@@ -293,24 +293,24 @@ REGLAS:
               <div
                 key={phase.id}
                 className={`flex-1 flex flex-col items-center py-2 px-1 cursor-pointer transition-all rounded-lg ${
-                  i < PHASES.length - 1 ? 'border-r border-[rgba(245,166,35,0.1)]' : ''
-                } ${isDone ? 'bg-[#22C55E]/5' : isActive ? 'bg-[#F5A623]/10' : 'opacity-35'}`}
+                  i < PHASES.length - 1 ? 'border-r border-[rgba(232,150,46,0.1)]' : ''
+                } ${isDone ? 'bg-success/5' : isActive ? 'bg-gold/10' : 'opacity-35'}`}
                 onClick={() => {
                   if (isDone || isActive) setCurrentPhase(phase.id);
                 }}
               >
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-1 ${
-                  isDone ? 'bg-[#22C55E]/20 text-[#22C55E]' :
-                  isActive ? 'bg-[#F5A623]/20 text-[#F5A623]' :
-                  'bg-[#FFFFFF]/5 text-[#FFFFFF]/20'
+                  isDone ? 'bg-success/20 text-success' :
+                  isActive ? 'bg-gold/20 text-gold' :
+                  'bg-cream/5 text-cream/20'
                 }`}>
                   {isDone ? <CheckCircle2 className="w-3 h-3" /> :
                    isLocked ? <Lock className="w-2.5 h-2.5" /> :
-                   <span className="text-[9px] font-bold">{phase.numero}</span>}
+                   <span className="text-[11px] font-bold">{phase.numero}</span>}
                 </div>
-                <span className={`text-[9px] font-semibold text-center ${
-                  isDone ? 'text-[#22C55E]' :
-                  isActive ? 'text-[#F5A623]' : 'text-[#FFFFFF]/20'
+                <span className={`text-[11px] font-semibold text-center ${
+                  isDone ? 'text-success' :
+                  isActive ? 'text-gold' : 'text-cream/20'
                 }`}>
                   {phase.label}
                 </span>
@@ -328,23 +328,23 @@ REGLAS:
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#F5A623] to-[#FFB94D] flex items-center justify-center text-xs font-bold text-[#0A0A0A] shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
                     K
                   </div>
                 )}
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-br-sm'
-                    : 'bg-[#1C1C1C] border border-[#FFFFFF]/5 rounded-bl-sm'
+                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
+                    : 'bg-surface border border-cream/5 rounded-bl-sm'
                 }`}>
                   {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-[#FFFFFF] [&_p]:my-1.5 [&_em]:text-[#F5A623]/80">
+                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5 [&_em]:text-gold/80">
                       <Markdown>{msg.content}</Markdown>
                     </div>
                   ) : (
                     <div className="flex gap-1">
                       {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
                       ))}
                     </div>
                   )}
@@ -360,7 +360,7 @@ REGLAS:
                 <button
                   key={opt}
                   onClick={() => handleQuickOption(opt)}
-                  className="px-3 py-2 rounded-xl text-xs border border-[#FFFFFF]/10 text-[#FFFFFF]/50 hover:border-[#F5A623]/30 hover:text-[#FFFFFF]/80 hover:bg-[#F5A623]/5 transition-all"
+                  className="px-3 py-2 rounded-xl text-xs border border-cream/10 text-cream/65 hover:border-gold/30 hover:text-cream/80 hover:bg-gold/5 transition-all"
                 >
                   {opt}
                 </button>
@@ -369,10 +369,10 @@ REGLAS:
           )}
 
           {/* Input */}
-          <div className="p-3 border-t border-[rgba(245,166,35,0.1)]">
+          <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-2.5 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/30 transition-all placeholder-[#FFFFFF]/20"
+                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
                 placeholder="Escribi tu respuesta..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -393,15 +393,15 @@ REGLAS:
         {/* Panel derecho — Resumen / Salida IA / Tips */}
         <div className="lg:w-[300px] lg:min-w-[300px] card-panel flex flex-col">
           {/* Tabs */}
-          <div className="flex border-b border-[rgba(245,166,35,0.1)]">
+          <div className="flex border-b border-[rgba(232,150,46,0.1)]">
             {(['resumen', 'salida', 'tips'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSummaryTab(tab)}
-                className={`flex-1 py-2.5 text-[10px] font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
+                className={`flex-1 py-2.5 text-[11px] font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
                   summaryTab === tab
-                    ? 'text-[#F5A623] border-[#F5A623]'
-                    : 'text-[#FFFFFF]/30 border-transparent hover:text-[#FFFFFF]/50'
+                    ? 'text-gold border-gold'
+                    : 'text-cream/45 border-transparent hover:text-cream/65'
                 }`}
               >
                 {tab === 'salida' ? 'Salida IA' : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -413,16 +413,16 @@ REGLAS:
             {/* Tab: Resumen */}
             {summaryTab === 'resumen' && (
               <div className="space-y-3">
-                <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#FFFFFF]/30 mb-2 flex items-center gap-2">
-                  Campaña actual <div className="flex-1 h-px bg-[rgba(245,166,35,0.1)]" />
+                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                  Campaña actual <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
                 </div>
                 <div className="card-panel overflow-hidden">
-                  <div className="bg-[#F5A623]/10 border-b border-[rgba(245,166,35,0.1)] px-3 py-2">
-                    <span className="text-[10px] font-bold text-[#F5A623]">
+                  <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2">
+                    <span className="text-[11px] font-bold text-gold">
                       {campaignData.objetivo || '— Sin tipo —'}
                     </span>
                   </div>
-                  <div className="divide-y divide-[rgba(245,166,35,0.05)]">
+                  <div className="divide-y divide-[rgba(232,150,46,0.05)]">
                     {[
                       { label: 'Cliente', value: campaignData.nombre },
                       { label: 'Especialidad', value: campaignData.rubro },
@@ -432,16 +432,16 @@ REGLAS:
                       { label: 'Objetivo', value: campaignData.objetivo },
                     ].map((row) => (
                       <div key={row.label} className="flex justify-between items-start px-3 py-2">
-                        <span className="text-[10px] font-semibold text-[#FFFFFF]/30">{row.label}</span>
-                        <span className="text-[10px] text-[#FFFFFF]/60 text-right">{row.value || '—'}</span>
+                        <span className="text-[11px] font-semibold text-cream/45">{row.label}</span>
+                        <span className="text-[11px] text-cream/75 text-right">{row.value || '—'}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#F5A623]/5 border border-[#F5A623]/10">
-                  <div className="text-[10px] font-bold text-[#F5A623] mb-1">Tip</div>
-                  <div className="text-[10px] text-[#FFFFFF]/30 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                <div className="p-3 rounded-xl bg-gold/5 border border-gold/10">
+                  <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
+                  <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     Completa los datos del cliente para que KAI defina la estrategia correcta.
                   </div>
                 </div>
@@ -453,16 +453,16 @@ REGLAS:
               <div>
                 {aiOutput ? (
                   <div className="card-panel overflow-hidden">
-                    <div className="bg-[#F5A623]/10 border-b border-[rgba(245,166,35,0.1)] px-3 py-2 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-pulse" />
-                      <span className="text-[10px] font-bold text-[#F5A623]">Ultima generacion</span>
+                    <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                      <span className="text-[11px] font-bold text-gold">Ultima generacion</span>
                     </div>
-                    <div className="p-3 text-[10px] text-[#FFFFFF]/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
+                    <div className="p-3 text-[11px] text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
                       {aiOutput.slice(0, 500)}{aiOutput.length > 500 ? '...' : ''}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-[#FFFFFF]/20">
+                  <div className="text-center py-8 text-cream/20">
                     <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-xs">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
                   </div>
@@ -473,8 +473,8 @@ REGLAS:
             {/* Tab: Tips */}
             {summaryTab === 'tips' && (
               <div className="space-y-2">
-                <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#FFFFFF]/30 mb-2 flex items-center gap-2">
-                  Guia de fases <div className="flex-1 h-px bg-[rgba(245,166,35,0.1)]" />
+                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                  Guia de fases <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
                 </div>
                 {[
                   { n: 1, title: 'Cliente', tip: 'El ticket es lo mas importante. Define si conviene trafico frio, VSL o agenda directa.' },
@@ -484,9 +484,9 @@ REGLAS:
                   { n: 5, title: 'Creativos', tip: 'El creativo es el 80% del resultado. El copy es el 20%. No al reves.' },
                   { n: 6, title: 'Montaje', tip: 'No tocar nada en las primeras 48-72h. La fase de aprendizaje necesita tiempo.' },
                 ].map((t) => (
-                  <div key={t.n} className="p-3 rounded-xl bg-[#F5A623]/5 border border-[#F5A623]/10">
-                    <div className="text-[10px] font-bold text-[#F5A623] mb-1">{t.n} - {t.title}</div>
-                    <div className="text-[10px] text-[#FFFFFF]/30 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                  <div key={t.n} className="p-3 rounded-xl bg-gold/5 border border-gold/10">
+                    <div className="text-[11px] font-bold text-gold mb-1">{t.n} - {t.title}</div>
+                    <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                       {t.tip}
                     </div>
                   </div>

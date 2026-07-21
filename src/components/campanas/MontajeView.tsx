@@ -40,7 +40,7 @@ export default function MontajeView({ perfil }: Props) {
       setMessages([{
         id: 'init',
         role: 'assistant',
-        content: `Hola! Soy **KAI**, tu asistente de montaje de campañas en Meta Ads.\n\nVamos a configurar tu campaña paso a paso. Empezamos con el **paso 1: ${MONTAJE_STEPS[0].label}**.\n\nContame: ya tenes un Business Manager configurado o necesitas crear uno desde cero?`,
+        content: `Hola! Soy **KAI**, tu asistente de montaje de campañas en Meta Ads.\n\nVamos a configurar tu campaña paso a paso. Empezamos con el **paso 1: ${MONTAJE_STEPS[0].label}**.\n\nContame: ya tienes un Business Manager configurado o necesitas crear uno desde cero?`,
         timestamp: new Date().toISOString(),
       }]);
     }
@@ -134,12 +134,12 @@ INSTRUCCIONES:
   return (
     <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
       <div className="mb-5">
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#F5A623] mb-1">
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Configuracion guiada
         </p>
-        <h2 className="text-xl font-light text-[#FFFFFF]">
+        <h2 className="text-xl font-light text-cream">
           Montaje{' '}
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#F5A623]">
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
             paso a paso
           </span>
         </h2>
@@ -149,10 +149,10 @@ INSTRUCCIONES:
         {/* Checklist izquierda */}
         <div className="lg:w-[300px] lg:min-w-[300px] card-panel p-4">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#FFFFFF]/30">
+            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45">
               Pasos
             </span>
-            <div className="flex-1 h-px bg-[rgba(245,166,35,0.1)]" />
+            <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
           </div>
 
           <div className="space-y-1">
@@ -160,27 +160,27 @@ INSTRUCCIONES:
               <div
                 key={step.id}
                 className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-                  step.status === 'active' ? 'bg-[#F5A623]/10 border border-[#F5A623]/20' :
-                  step.status === 'done' ? 'bg-[#22C55E]/5' : 'opacity-40'
+                  step.status === 'active' ? 'bg-gold/10 border border-gold/20' :
+                  step.status === 'done' ? 'bg-success/5' : 'opacity-40'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                  step.status === 'done' ? 'bg-[#22C55E]/20 text-[#22C55E]' :
-                  step.status === 'active' ? 'bg-[#F5A623]/20 text-[#F5A623]' :
-                  'bg-[#FFFFFF]/5 text-[#FFFFFF]/20'
+                  step.status === 'done' ? 'bg-success/20 text-success' :
+                  step.status === 'active' ? 'bg-gold/20 text-gold' :
+                  'bg-cream/5 text-cream/20'
                 }`}>
                   {step.status === 'done' ? <CheckCircle2 className="w-3.5 h-3.5" /> :
-                   step.status === 'active' ? <span className="text-[10px] font-bold">{step.id}</span> :
+                   step.status === 'active' ? <span className="text-[11px] font-bold">{step.id}</span> :
                    <Lock className="w-3 h-3" />}
                 </div>
                 <div>
                   <div className={`text-xs font-semibold ${
-                    step.status === 'done' ? 'text-[#22C55E]' :
-                    step.status === 'active' ? 'text-[#F5A623]' : 'text-[#FFFFFF]/30'
+                    step.status === 'done' ? 'text-success' :
+                    step.status === 'active' ? 'text-gold' : 'text-cream/45'
                   }`}>
                     {step.label}
                   </div>
-                  <div className="text-[10px] text-[#FFFFFF]/25 mt-0.5 leading-relaxed">
+                  <div className="text-[11px] text-cream/25 mt-0.5 leading-relaxed">
                     {step.description}
                   </div>
                 </div>
@@ -188,9 +188,9 @@ INSTRUCCIONES:
             ))}
           </div>
 
-          <div className="mt-4 p-3 rounded-xl bg-[#F5A623]/5 border border-dashed border-[#F5A623]/15">
-            <div className="text-[10px] font-bold text-[#F5A623] mb-1">Tip</div>
-            <div className="text-[10px] text-[#FFFFFF]/30 leading-relaxed">
+          <div className="mt-4 p-3 rounded-xl bg-gold/5 border border-dashed border-gold/15">
+            <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
+            <div className="text-[11px] text-cream/45 leading-relaxed">
               No tocar nada en las primeras 48-72h despues de publicar. La fase de aprendizaje necesita tiempo.
             </div>
           </div>
@@ -203,23 +203,23 @@ INSTRUCCIONES:
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#F5A623] to-[#FFB94D] flex items-center justify-center text-xs font-bold text-[#0A0A0A] shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
                     K
                   </div>
                 )}
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-br-sm'
-                    : 'bg-[#1C1C1C] border border-[#FFFFFF]/5 rounded-bl-sm'
+                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
+                    : 'bg-surface border border-cream/5 rounded-bl-sm'
                 }`}>
                   {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-[#FFFFFF] [&_p]:my-1.5">
+                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5">
                       <Markdown>{msg.content}</Markdown>
                     </div>
                   ) : (
                     <div className="flex gap-1">
                       {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
                       ))}
                     </div>
                   )}
@@ -229,10 +229,10 @@ INSTRUCCIONES:
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-[rgba(245,166,35,0.1)]">
+          <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl px-4 py-2.5 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/30 transition-all placeholder-[#FFFFFF]/20"
+                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
                 placeholder="Escribi tu respuesta..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

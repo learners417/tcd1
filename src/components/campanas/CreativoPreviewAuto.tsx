@@ -67,7 +67,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
 
       // Title
       ctx.font = 'bold 52px "DM Sans", sans-serif';
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = '#F2EFE9';
       ctx.textAlign = 'center';
       wrapText(ctx, copy.titulo, size / 2, yStart, maxWidth, 60);
 
@@ -80,7 +80,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
 
         // Button background
         const btnX = (size - ctaActualWidth) / 2;
-        ctx.fillStyle = '#F5A623';
+        ctx.fillStyle = '#E8962E';
         roundRect(ctx, btnX, ctaY - 25, ctaActualWidth, 55, 12);
         ctx.fill();
 
@@ -123,10 +123,10 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
             <button
               key={l.id}
               onClick={() => setLayout(l.id)}
-              className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 layout === l.id
-                  ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                  : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/30 hover:text-[#FFFFFF]/50'
+                  ? 'bg-gold/15 text-gold'
+                  : 'bg-cream/5 text-cream/45 hover:text-cream/65'
               }`}
             >
               {l.label}
@@ -135,14 +135,14 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#F5A623] bg-[#F5A623]/10 hover:bg-[#F5A623]/15 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors"
         >
           <Download className="w-3.5 h-3.5" /> Descargar
         </button>
       </div>
 
       {/* Canvas preview */}
-      <div className="rounded-xl overflow-hidden border border-[rgba(245,166,35,0.15)]">
+      <div className="rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)]">
         <canvas ref={canvasRef} className="w-full aspect-square" style={{ imageRendering: 'auto' }} />
       </div>
     </div>

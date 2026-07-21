@@ -35,8 +35,8 @@ const PRIORIDAD_RANK: Record<AdminTareaPrioridad, number> = {
 const PRIORIDAD_PILL: Record<AdminTareaPrioridad, string> = {
   urgente: 'bg-red-500/20 text-red-400',
   alta: 'bg-orange-500/20 text-orange-400',
-  media: 'bg-[#F5A623]/15 text-[#F5A623]',
-  baja: 'bg-[#22C55E]/15 text-[#22C55E]',
+  media: 'bg-gold/15 text-gold',
+  baja: 'bg-success/15 text-success',
 };
 
 const STATUS_ICONS: Record<AdminTareaStatus, React.ComponentType<{ className?: string }>> = {
@@ -92,8 +92,8 @@ export default function TaskListView({
       <button
         onClick={() => toggleSort(k)}
         className={`
-          flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider
-          ${active ? 'text-[#F5A623]' : 'text-[#FFFFFF]/40 hover:text-[#FFFFFF]/70'}
+          flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider
+          ${active ? 'text-gold' : 'text-cream/55 hover:text-cream/70'}
           transition-colors ${className}
         `}
       >
@@ -108,17 +108,17 @@ export default function TaskListView({
 
   if (sorted.length === 0) {
     return (
-      <div className="bg-[#0F0F0F] border border-[rgba(245,166,35,0.1)] rounded-2xl p-12 text-center text-[#FFFFFF]/40 text-sm">
+      <div className="bg-[#0F0F0F] border border-gold/10 rounded-2xl p-12 text-center text-cream/55 text-sm">
         No hay tareas que coincidan con los filtros.
       </div>
     );
   }
 
   return (
-    <div className="bg-[#0F0F0F] border border-[rgba(245,166,35,0.1)] rounded-2xl overflow-hidden">
+    <div className="bg-[#0F0F0F] border border-gold/10 rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#0A0A0A] border-b border-[rgba(245,166,35,0.1)]">
+          <thead className="bg-ink border-b border-gold/10">
             <tr>
               <th className="text-left px-4 py-3 w-[36%]"><SortHeader k="titulo"    label="Tarea" /></th>
               <th className="text-left px-3 py-3"><SortHeader k="asignado"  label="Asignado" /></th>
@@ -158,17 +158,17 @@ export default function TaskListView({
                 >
                   <td className="px-4 py-3 pl-5">
                     <div className="flex items-center gap-2">
-                      <span className={`text-base font-medium leading-snug ${isCompletada ? 'text-[#FFFFFF]/45 line-through' : 'text-[#FFFFFF]'}`}>
+                      <span className={`text-base font-medium leading-snug ${isCompletada ? 'text-cream/45 line-through' : 'text-cream'}`}>
                         {t.titulo}
                       </span>
                       {yoSoyCreadorYNoAsignado && (
-                        <span title="Creada por mí" className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-[#F5A623]/80 bg-[#F5A623]/10 px-1.5 py-0.5 rounded-full">
+                        <span title="Creada por mí" className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-gold/80 bg-gold/10 px-1.5 py-0.5 rounded-full">
                           <UserPlus className="w-3 h-3" />
                         </span>
                       )}
                     </div>
                     {t.cliente_nombre && (
-                      <div className="text-xs text-[#F5A623]/70 mt-0.5">{t.cliente_nombre}</div>
+                      <div className="text-xs text-gold/70 mt-0.5">{t.cliente_nombre}</div>
                     )}
                   </td>
 
@@ -177,7 +177,7 @@ export default function TaskListView({
                       <div className="flex items-center gap-2 min-w-0">
                         <div
                           style={{ backgroundColor: asignadoColor.bg, borderColor: asignadoColor.border, color: asignadoColor.text }}
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold border-[1.5px] shrink-0"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold border-[1.5px] shrink-0"
                         >
                           {getInitials(t.asignado_nombre)}
                         </div>
@@ -186,7 +186,7 @@ export default function TaskListView({
                         </span>
                       </div>
                     ) : (
-                      <span className="text-xs text-[#FFFFFF]/30">Sin asignar</span>
+                      <span className="text-xs text-cream/45">Sin asignar</span>
                     )}
                   </td>
 
@@ -198,12 +198,12 @@ export default function TaskListView({
 
                   <td className="px-3 py-3">
                     {fecha ? (
-                      <div className={`flex items-center gap-1.5 text-xs font-medium ${isOverdue ? 'text-red-400' : 'text-[#FFFFFF]/55'}`}>
+                      <div className={`flex items-center gap-1.5 text-xs font-medium ${isOverdue ? 'text-red-400' : 'text-cream/55'}`}>
                         {isOverdue && <AlertCircle className="w-3.5 h-3.5" />}
                         {fecha}
                       </div>
                     ) : (
-                      <span className="text-xs text-[#FFFFFF]/25">—</span>
+                      <span className="text-xs text-cream/25">—</span>
                     )}
                   </td>
 
@@ -228,14 +228,14 @@ export default function TaskListView({
                       <button
                         onClick={e => { e.stopPropagation(); onEdit(t); }}
                         title="Editar"
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-[#FFFFFF]/40 hover:text-[#F5A623] hover:bg-[#F5A623]/10 transition-all"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/55 hover:text-gold hover:bg-gold/10 transition-all"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); onDelete(t.id); }}
                         title="Eliminar"
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-[#FFFFFF]/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/55 hover:text-red-400 hover:bg-red-500/10 transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

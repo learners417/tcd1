@@ -18,12 +18,13 @@ interface MatrizGridProps {
   clientes: MatrizClienteRow[];
   checks: ChecksByCliente;
   onToggle: (clienteId: string, stepId: string, on: boolean) => void;
+  caminoDone?: Map<string, Set<string>>;
 }
 
-export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridProps) {
+export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
   if (clientes.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16 text-[#FFFFFF]/40 text-sm">
+      <div className="flex items-center justify-center py-16 text-cream/55 text-sm">
         Sin clientes que coincidan
       </div>
     );
@@ -46,7 +47,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               <th
                 key={sec.id}
                 colSpan={sec.items.length}
-                className="sticky top-0 z-30 bg-[#141414] text-[#F5A623] uppercase tracking-widest"
+                className="sticky top-0 z-30 bg-panel text-gold uppercase tracking-widest"
                 style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 12,
@@ -54,7 +55,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                   letterSpacing: 1.5,
                   padding: '10px 0',
                   textAlign: 'center',
-                  borderBottom: '1px solid rgba(245,166,35,0.15)',
+                  borderBottom: '1px solid rgba(232,150,46,0.10)',
                   borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
                 }}
               >
@@ -62,7 +63,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               </th>
             ))}
             <th
-              className="sticky right-0 top-0 z-40 bg-[#141414] text-[#F5A623]"
+              className="sticky right-0 top-0 z-40 bg-panel text-gold"
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: 12,
@@ -70,7 +71,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 letterSpacing: 1.5,
                 padding: '10px 10px',
                 textAlign: 'center',
-                borderBottom: '1px solid rgba(245,166,35,0.15)',
+                borderBottom: '1px solid rgba(232,150,46,0.10)',
                 borderLeft: '2px solid var(--matrix-section-divider)',
                 textTransform: 'uppercase',
               }}
@@ -86,7 +87,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               style={{
                 top: 40,
                 minWidth: 240,
-                borderBottom: '2px solid rgba(245,166,35,0.15)',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
               }}
             />
             {STEPS.map((step, idx) => {
@@ -101,7 +102,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     padding: '10px 8px 12px',
                     fontWeight: 500,
                     verticalAlign: 'bottom',
-                    borderBottom: '2px solid rgba(245,166,35,0.15)',
+                    borderBottom: '2px solid rgba(232,150,46,0.10)',
                     borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
                   }}
                   title={step.title}
@@ -129,7 +130,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               style={{
                 top: 40,
                 padding: '10px 12px 12px',
-                borderBottom: '2px solid rgba(245,166,35,0.15)',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
                 borderLeft: '2px solid var(--matrix-section-divider)',
               }}
             >
@@ -157,7 +158,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
               <tr key={cl.id} className="group">
                 {/* Sticky client cell */}
                 <td
-                  className="sticky left-0 z-20 bg-[#0A0A0A] group-hover:bg-[#141414] transition-colors"
+                  className="sticky left-0 z-20 bg-ink group-hover:bg-panel transition-colors"
                   style={{
                     padding: '0 14px',
                     height: 56,
@@ -170,8 +171,8 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                       style={{
                         width: 36,
                         height: 36,
-                        background: 'rgba(245,166,35,0.12)',
-                        color: '#F5A623',
+                        background: 'rgba(232,150,46,0.12)',
+                        color: 'var(--color-gold)',
                         fontSize: 14,
                         fontWeight: 700,
                       }}
@@ -205,11 +206,12 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                 {STEPS.map((step, idx) => {
                   const isFirstOfSection =
                     idx === 0 || STEPS[idx - 1].sectionId !== step.sectionId;
-                  const on = isChecked(checks, cl.id, step.id);
+                  const autoCamino = Boolean(step.meta && caminoDone?.get(cl.id)?.has(step.meta));
+                  const on = autoCamino || isChecked(checks, cl.id, step.id);
                   return (
                     <td
                       key={step.id}
-                      className="group-hover:bg-[#141414] transition-colors"
+                      className="group-hover:bg-panel transition-colors"
                       style={{
                         padding: 0,
                         textAlign: 'center',
@@ -223,19 +225,19 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     >
                       <button
                         type="button"
-                        onClick={() => onToggle(cl.id, step.id, !on)}
-                        title={`${step.title} — ${on ? 'destildar' : 'tildar'}`}
-                        className="inline-flex items-center justify-center transition-all hover:border-[#F5A623]/60"
+                        onClick={() => { if (!autoCamino) onToggle(cl.id, step.id, !on); }}
+                        title={autoCamino ? `${step.title} — ✓ completado en El Camino (automático)` : `${step.title} — ${on ? 'destildar' : 'tildar'}`}
+                        className="inline-flex items-center justify-center transition-all hover:border-gold/60"
                         style={{
                           width: 30,
                           height: 30,
-                          border: `2px solid ${on ? '#22C55E' : 'var(--matrix-checkbox-off)'}`,
+                          border: `2px solid ${autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'var(--matrix-checkbox-off)'}`,
                           borderRadius: 7,
-                          cursor: 'pointer',
-                          background: on ? '#22C55E' : 'transparent',
+                          cursor: autoCamino ? 'default' : 'pointer',
+                          background: autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'transparent',
                         }}
                       >
-                        {on && <Check className="w-4 h-4" style={{ color: '#0A0A0A', strokeWidth: 3 }} />}
+                        {on && <Check className="w-4 h-4" style={{ color: 'var(--color-ink)', strokeWidth: 3 }} />}
                       </button>
                     </td>
                   );
@@ -243,7 +245,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
 
                 {/* Sticky total */}
                 <td
-                  className="sticky right-0 z-10 bg-[#0A0A0A] group-hover:bg-[#141414] transition-colors"
+                  className="sticky right-0 z-10 bg-ink group-hover:bg-panel transition-colors"
                   style={{
                     padding: '0 12px',
                     height: 56,
@@ -252,7 +254,7 @@ export default function MatrizGrid({ clientes, checks, onToggle }: MatrizGridPro
                     textAlign: 'center',
                     fontSize: 14,
                     minWidth: 84,
-                    color: isComplete ? '#22C55E' : 'var(--matrix-pct-text)',
+                    color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
                     fontWeight: isComplete ? 700 : 500,
                   }}
                   title={`${done}/${TOTAL_STEPS} pasos`}

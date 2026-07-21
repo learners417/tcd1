@@ -24,10 +24,10 @@ export default function CreditsBadge({ userId, variant = 'expanded' }: CreditsBa
   if (!userId) return null;
 
   const color = balance.isEmpty
-    ? 'text-[#EF4444] border-[#EF4444]/40 bg-[#EF4444]/10'
+    ? 'text-danger border-danger/40 bg-danger/10'
     : balance.isLow
-    ? 'text-[#F5A623] border-[#F5A623]/60 bg-[#F5A623]/15'
-    : 'text-[#F5A623] border-[#F5A623]/30 bg-[#F5A623]/10 hover:bg-[#F5A623]/15';
+    ? 'text-gold border-gold/60 bg-gold/15'
+    : 'text-gold border-gold/30 bg-gold/10 hover:bg-gold/15';
 
   return (
     <>

@@ -33,7 +33,7 @@ export default function CampanasSubNav({ currentView, onNavigate }: Props) {
   if (currentView === 'studio' || currentView === 'detail') return null;
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-4 mb-2 border-b border-[rgba(245,166,35,0.1)]">
+    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-4 mb-2 border-b border-[rgba(232,150,46,0.1)]">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = currentView === item.id;
@@ -43,14 +43,14 @@ export default function CampanasSubNav({ currentView, onNavigate }: Props) {
             onClick={() => onNavigate(item.id)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
               isActive
-                ? 'bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30'
-                : 'text-[#FFFFFF]/50 hover:text-[#FFFFFF]/80 hover:bg-[#FFFFFF]/5 border border-transparent'
+                ? 'bg-gold/15 text-gold border border-gold/30'
+                : 'text-cream/65 hover:text-cream/80 hover:bg-cream/5 border border-transparent'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
             {item.label}
             {item.badge && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/25">
+              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-azure/15 text-azure border border-azure/25">
                 {item.badge}
               </span>
             )}

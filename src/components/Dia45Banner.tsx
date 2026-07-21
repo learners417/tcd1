@@ -29,16 +29,16 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
           <AlertTriangle className="w-5 h-5 text-[#ff5e5e]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
             Día {diaActual} · punto de no retorno {diasDespues >= 0 ? `+${diasDespues}` : diasDespues}
           </p>
-          <h3 className="text-lg font-medium text-[#FFFFFF] tracking-tight mb-1">
+          <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
             Tu ADN está incompleto para activar Fase 4
           </h3>
-          <p className="text-sm text-[#FFFFFF]/60">
-            Faltan <span className="text-[#FFFFFF] font-semibold">{validacion.camposFaltantes.length}</span>{' '}
+          <p className="text-sm text-cream/75">
+            Faltan <span className="text-cream font-semibold">{validacion.camposFaltantes.length}</span>{' '}
             campos críticos ({validacion.porcentajeCompleto}% completo). Gastar en ads con ADN incompleto
-            es quemar plata. Volvé a los pilares de abajo antes de seguir.
+            es quemar plata. Vuelve a los pilares de abajo antes de seguir.
           </p>
         </div>
       </div>
@@ -58,17 +58,17 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
             key={pilar}
             type="button"
             onClick={() => onIrAPilar?.(pilar)}
-            className="w-full text-left rounded-xl border border-[#ff5e5e]/20 bg-[#1C1C1C]/40 hover:bg-[#ff5e5e]/5 hover:border-[#ff5e5e]/40 transition-colors p-3 flex items-center gap-3 group"
+            className="w-full text-left rounded-xl border border-[#ff5e5e]/20 bg-surface/40 hover:bg-[#ff5e5e]/5 hover:border-[#ff5e5e]/40 transition-colors p-3 flex items-center gap-3 group"
           >
             <span className="text-xs font-mono text-[#ff5e5e] font-semibold flex-shrink-0">
               {pilar}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#FFFFFF]/80">
+              <p className="text-sm text-cream/80">
                 {campos.map((c) => c.label).join(' · ')}
               </p>
             </div>
-            <ArrowRight className="w-4 h-4 text-[#FFFFFF]/40 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
+            <ArrowRight className="w-4 h-4 text-cream/55 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
           </button>
         ))}
       </div>

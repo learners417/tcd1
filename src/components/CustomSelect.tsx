@@ -56,20 +56,20 @@ export default function CustomSelect({
         className={`
           w-full flex items-center justify-between gap-2
           bg-black/20 border rounded-xl px-3 py-3
-          text-sm text-[#FFFFFF] text-left
+          text-sm text-cream text-left
           transition-all duration-150 outline-none
-          ${open ? 'border-[#F5A623]/50 ring-1 ring-[#F5A623]/20' : 'border-[rgba(245,166,35,0.2)] hover:border-[rgba(245,166,35,0.3)]'}
+          ${open ? 'border-gold/50 ring-1 ring-gold/20' : 'border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'}
         `}
       >
-        <span className={value ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]/40'}>{selectedLabel}</span>
+        <span className={value ? 'text-cream' : 'text-cream/55'}>{selectedLabel}</span>
         <ChevronDown
-          className={`w-4 h-4 text-[#FFFFFF]/60 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-cream/75 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
         <div
-          className={`absolute z-50 left-0 right-0 bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
+          className={`absolute z-50 left-0 right-0 bg-panel border border-[rgba(232,150,46,0.12)] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
           style={{ maxHeight: `${DROPDOWN_MAX_HEIGHT}px` }}
         >
           {options.map((opt) => (
@@ -80,8 +80,8 @@ export default function CustomSelect({
               className={`
                 w-full px-3 py-2.5 text-sm text-left transition-colors duration-100
                 ${opt.value === value
-                  ? 'bg-[#F5A623]/20 text-[#F5A623]'
-                  : 'text-[#FFFFFF]/80 hover:bg-[#F5A623]/5 hover:text-[#FFFFFF]'
+                  ? 'bg-gold/20 text-gold'
+                  : 'text-cream/80 hover:bg-gold/5 hover:text-cream'
                 }
               `}
             >

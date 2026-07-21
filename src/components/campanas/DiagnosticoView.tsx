@@ -116,16 +116,16 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
     <div className="animate-in fade-in duration-500 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#F5A623] mb-1">
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Optimizacion - Carga manual de metricas
         </p>
-        <h2 className="text-xl font-light text-[#FFFFFF]">
+        <h2 className="text-xl font-light text-cream">
           Diagnosticar{' '}
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-[#F5A623]">
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
             campaña
           </span>
         </h2>
-        <p className="text-xs text-[#FFFFFF]/40 mt-1">
+        <p className="text-xs text-cream/55 mt-1">
           Cargas los numeros de Meta Ads Manager y la IA diagnostica que falla y da el plan exacto.
         </p>
       </div>
@@ -134,22 +134,22 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
       <div className="card-panel p-5 space-y-4 mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF]/40 mb-1.5">
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Cliente / campaña
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/30 transition-all placeholder-[#FFFFFF]/20"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Dra. Garcia — Leads Mayo"
               value={form.nombre_campana}
               onChange={(e) => updateField('nombre_campana', e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF]/40 mb-1.5">
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Rubro y ciudad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/30 transition-all placeholder-[#FFFFFF]/20"
+              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Psicologa, Buenos Aires"
               value={form.rubro}
               onChange={(e) => updateField('rubro', e.target.value)}
@@ -159,10 +159,10 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
 
         {/* Metricas */}
         <div className="flex items-center gap-3 pt-2">
-          <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#FFFFFF]/30">
+          <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45">
             Metricas actuales
           </span>
-          <div className="flex-1 h-px bg-[rgba(245,166,35,0.1)]" />
+          <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -175,30 +175,30 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             { key: 'dias' as const, label: 'Dias activa', placeholder: '0', sub: 'dias corriendo', step: undefined },
           ]).map((m) => (
             <div key={m.key} className="card-panel p-3 text-center">
-              <span className="block text-[9px] font-bold tracking-wider uppercase text-[#FFFFFF]/30 mb-2">
+              <span className="block text-[11px] font-bold tracking-wider uppercase text-cream/45 mb-2">
                 {m.label}
               </span>
               <input
                 type="number"
                 step={m.step}
-                className="w-full bg-transparent border-b border-[#FFFFFF]/10 text-[#FFFFFF] text-lg text-center outline-none focus:border-[#F5A623]/50 transition-colors"
+                className="w-full bg-transparent border-b border-cream/10 text-cream text-lg text-center outline-none focus:border-gold/50 transition-colors"
                 style={{ fontFamily: 'var(--font-display)' }}
                 placeholder={m.placeholder}
                 value={form[m.key] || ''}
                 onChange={(e) => updateField(m.key, parseFloat(e.target.value) || 0)}
               />
-              <span className="block text-[9px] text-[#FFFFFF]/20 mt-1">{m.sub}</span>
+              <span className="block text-[11px] text-cream/20 mt-1">{m.sub}</span>
             </div>
           ))}
         </div>
 
         {/* Problema observado */}
         <div>
-          <label className="block text-[10px] font-bold tracking-wider uppercase text-[#FFFFFF]/40 mb-1.5">
+          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
             Que observas que no funciona? (opcional)
           </label>
           <textarea
-            className="w-full bg-black/20 border border-[rgba(245,166,35,0.2)] rounded-xl p-3 text-[#FFFFFF] text-sm focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/30 transition-all resize-none placeholder-[#FFFFFF]/20"
+            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
             rows={2}
             placeholder="Ej: Muchos clicks pero nadie completa el formulario"
             value={form.problema_observado ?? ''}
@@ -224,28 +224,28 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
         <div className="card-panel p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              {generando && <div className="w-2 h-2 rounded-full bg-[#F5A623] animate-pulse" />}
-              <span className="text-xs font-bold tracking-wider uppercase text-[#F5A623]">
+              {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
+              <span className="text-xs font-bold tracking-wider uppercase text-gold">
                 Diagnostico IA
               </span>
             </div>
             {output && !generando && (
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 text-xs text-[#FFFFFF]/50 hover:text-[#FFFFFF] bg-[#FFFFFF]/5 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
               >
-                {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiado ? 'Copiado' : 'Copiar'}
               </button>
             )}
           </div>
           <div className="bg-black/20 rounded-xl p-4">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-[#FFFFFF]/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-[#FFFFFF] [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(245,166,35,0.2)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : (
-              <span className="text-[#FFFFFF]/40 flex items-center gap-2 text-sm">
+              <span className="text-cream/55 flex items-center gap-2 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" /> Analizando metricas...
               </span>
             )}

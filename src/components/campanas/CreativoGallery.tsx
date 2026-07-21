@@ -44,9 +44,9 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
   if (creativos.length === 0) {
     return (
       <div className="text-center py-12">
-        <ImageIcon className="w-12 h-12 text-[#FFFFFF]/10 mx-auto mb-3" />
-        <p className="text-sm text-[#FFFFFF]/30">No hay creativos todavia</p>
-        <p className="text-xs text-[#FFFFFF]/20 mt-1">Genera tu primer creativo en el Studio</p>
+        <ImageIcon className="w-12 h-12 text-cream/10 mx-auto mb-3" />
+        <p className="text-sm text-cream/45">No hay creativos todavia</p>
+        <p className="text-xs text-cream/20 mt-1">Genera tu primer creativo en el Studio</p>
       </div>
     );
   }
@@ -57,16 +57,16 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
       {!compact && (
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-[#FFFFFF]/30" />
-            <span className="text-xs text-[#FFFFFF]/30">Tipo:</span>
+            <Filter className="w-3.5 h-3.5 text-cream/45" />
+            <span className="text-xs text-cream/45">Tipo:</span>
             {(['all', 'imagen_single', 'carrusel'] as FilterType[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setFilterTipo(t)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                   filterTipo === t
-                    ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                    : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/30 hover:text-[#FFFFFF]/50'
+                    ? 'bg-gold/15 text-gold'
+                    : 'bg-cream/5 text-cream/45 hover:text-cream/65'
                 }`}
               >
                 {t === 'all' ? 'Todos' : TIPO_LABELS[t]}
@@ -74,13 +74,13 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
             ))}
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-[#FFFFFF]/30">Angulo:</span>
+            <span className="text-xs text-cream/45">Angulo:</span>
             <button
               onClick={() => setFilterAngulo('all')}
-              className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 filterAngulo === 'all'
-                  ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                  : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/30 hover:text-[#FFFFFF]/50'
+                  ? 'bg-gold/15 text-gold'
+                  : 'bg-cream/5 text-cream/45 hover:text-cream/65'
               }`}
             >
               Todos
@@ -89,10 +89,10 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
               <button
                 key={a}
                 onClick={() => setFilterAngulo(a)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                   filterAngulo === a
-                    ? 'bg-[#F5A623]/15 text-[#F5A623]'
-                    : 'bg-[#FFFFFF]/5 text-[#FFFFFF]/30 hover:text-[#FFFFFF]/50'
+                    ? 'bg-gold/15 text-gold'
+                    : 'bg-cream/5 text-cream/45 hover:text-cream/65'
                 }`}
               >
                 {ANGULO_LABELS[a].titulo}
@@ -112,34 +112,34 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
             <button
               key={creativo.id}
               onClick={() => onSelect(creativo)}
-              className="group text-left bg-[#141414] border border-[rgba(245,166,35,0.1)] rounded-xl overflow-hidden hover:border-[rgba(245,166,35,0.3)] transition-all"
+              className="group text-left bg-panel border border-[rgba(232,150,46,0.1)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] transition-all"
             >
               {/* Image */}
-              <div className="relative aspect-square bg-[#0A0A0A]">
+              <div className="relative aspect-square bg-ink">
                 {firstAsset ? (
-                  <img src={firstAsset.public_url} alt={creativo.nombre ?? 'Creativo'} className="w-full h-full object-cover" />
+                  <img loading="lazy" src={firstAsset.public_url} alt={creativo.nombre ?? 'Creativo'} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ImageIcon className="w-8 h-8 text-[#FFFFFF]/10" />
+                    <ImageIcon className="w-8 h-8 text-cream/10" />
                   </div>
                 )}
 
                 {/* Overlay actions */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#FFFFFF]/10 flex items-center justify-center text-[#FFFFFF] hover:bg-[#FFFFFF]/20 transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-cream/10 flex items-center justify-center text-cream hover:bg-cream/20 transition-colors">
                     <Eye className="w-4 h-4" />
                   </div>
                   {firstAsset && (
                     <div
                       onClick={(e) => handleDownload(e, creativo)}
-                      className="w-9 h-9 rounded-full bg-[#FFFFFF]/10 flex items-center justify-center text-[#FFFFFF] hover:bg-[#FFFFFF]/20 transition-colors"
+                      className="w-9 h-9 rounded-full bg-cream/10 flex items-center justify-center text-cream hover:bg-cream/20 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                     </div>
                   )}
                   <div
                     onClick={(e) => handleDelete(e, creativo)}
-                    className="w-9 h-9 rounded-full bg-[#EF4444]/10 flex items-center justify-center text-[#EF4444] hover:bg-[#EF4444]/20 transition-colors"
+                    className="w-9 h-9 rounded-full bg-danger/10 flex items-center justify-center text-danger hover:bg-danger/20 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </div>
@@ -147,7 +147,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
 
                 {/* Badges */}
                 {creativo.tipo === 'carrusel' && slideCount > 0 && (
-                  <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 text-xs text-[#FFFFFF]">
+                  <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 text-xs text-cream">
                     <Layers className="w-3 h-3" /> {slideCount}
                   </div>
                 )}
@@ -156,12 +156,12 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
               {/* Info */}
               {!compact && (
                 <div className="p-3 space-y-1">
-                  <p className="text-sm font-medium text-[#FFFFFF] truncate">{creativo.titulo}</p>
+                  <p className="text-sm font-medium text-cream truncate">{creativo.titulo}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5A623]/10 text-[#F5A623]">
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-gold/10 text-gold">
                       {ANGULO_LABELS[creativo.angulo].titulo}
                     </span>
-                    <span className="text-[10px] text-[#FFFFFF]/30">
+                    <span className="text-[11px] text-cream/45">
                       {TIPO_LABELS[creativo.tipo]}
                     </span>
                   </div>

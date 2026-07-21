@@ -299,21 +299,21 @@ export default function TasksPipeline({
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-[#FFFFFF]">Tareas</h2>
-          <p className="text-xs text-[#FFFFFF]/40 mt-1">Gestión interna del equipo</p>
+          <h2 className="text-xl font-semibold text-cream">Tareas</h2>
+          <p className="text-xs text-cream/55 mt-1">Gestión interna del equipo</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <TaskViewToggle value={view} onChange={setView} myCount={myCount} />
           <button
             onClick={cargar}
             title="Refrescar"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-[#FFFFFF]/40 hover:text-[#FFFFFF] hover:bg-[#FFFFFF]/5 transition-all"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={() => { setEditingTarea(null); setShowModal(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F5A623] hover:bg-[#FFB94D] text-black text-sm font-bold transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-black text-sm font-bold transition-all"
           >
             <Plus className="w-4 h-4" /> Nueva tarea
           </button>
@@ -327,15 +327,15 @@ export default function TasksPipeline({
           className={`
             flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all
             ${verArchivadas
-              ? 'bg-[#F5A623]/15 text-[#F5A623] border-[#F5A623]/40'
-              : 'bg-[#0F0F0F] text-[#FFFFFF]/55 border-[rgba(255,255,255,0.08)] hover:text-[#FFFFFF] hover:border-[rgba(255,255,255,0.18)]'
+              ? 'bg-gold/15 text-gold border-gold/40'
+              : 'bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-cream hover:border-[rgba(255,255,255,0.18)]'
             }
           `}
         >
           {verArchivadas ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           {verArchivadas ? 'Ocultar archivadas' : 'Ver archivadas'}
           {verArchivadas && archivadasCount > 0 && (
-            <span className="text-[10px] bg-[#F5A623]/25 text-[#F5A623] px-1.5 py-0.5 rounded-full">
+            <span className="text-[11px] bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
               {archivadasCount}
             </span>
           )}
@@ -345,11 +345,11 @@ export default function TasksPipeline({
           <button
             onClick={() => setBulkArchiveOpen(true)}
             title="Archivar todas las tareas completadas"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[#0F0F0F] text-[#FFFFFF]/55 border-[rgba(255,255,255,0.08)] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
           >
             <Archive className="w-3.5 h-3.5" />
             Archivar completadas
-            <span className="text-[10px] bg-[#FFFFFF]/8 px-1.5 py-0.5 rounded-full">
+            <span className="text-[11px] bg-cream/8 px-1.5 py-0.5 rounded-full">
               {completadasNoArchivadasCount}
             </span>
           </button>
@@ -358,25 +358,25 @@ export default function TasksPipeline({
 
       {/* Vista Hoy (banner colapsable) */}
       {tareasHoy.length > 0 && (
-        <div className="bg-[#141414] border border-[rgba(245,166,35,0.2)] rounded-2xl overflow-hidden">
+        <div className="bg-panel border border-gold/12 rounded-2xl overflow-hidden">
           <button
             onClick={() => setShowHoy(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-[#FFFFFF]/5 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-cream/5 transition-colors"
           >
             <div className="flex items-center gap-3">
               {overdueCount > 0 && <AlertCircle className="w-4 h-4 text-red-400" />}
-              <span className="text-sm font-semibold text-[#FFFFFF]">
+              <span className="text-sm font-semibold text-cream">
                 Mis tareas de hoy
               </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${overdueCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-[#F5A623]/20 text-[#F5A623]'}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${overdueCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-gold/20 text-gold'}`}>
                 {tareasHoy.length}
               </span>
             </div>
-            {showHoy ? <ChevronUp className="w-4 h-4 text-[#FFFFFF]/40" /> : <ChevronDown className="w-4 h-4 text-[#FFFFFF]/40" />}
+            {showHoy ? <ChevronUp className="w-4 h-4 text-cream/55" /> : <ChevronDown className="w-4 h-4 text-cream/55" />}
           </button>
 
           {showHoy && (
-            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-[rgba(245,166,35,0.1)]" style={{ paddingTop: '16px' }}>
+            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-gold/10" style={{ paddingTop: '16px' }}>
               {tareasHoy.map(t => (
                 <TaskCard
                   key={t.id}
@@ -404,7 +404,7 @@ export default function TasksPipeline({
 
       {/* Body — vista activa */}
       {loading ? (
-        <div className="flex items-center justify-center h-48 text-[#FFFFFF]/30 text-sm">
+        <div className="flex items-center justify-center h-48 text-cream/45 text-sm">
           Cargando tareas...
         </div>
       ) : view === 'list' ? (
