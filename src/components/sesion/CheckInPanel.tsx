@@ -63,15 +63,9 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         </div>
       </div>
 
-      <div>
-        <p className="text-sm font-semibold text-white mb-2">Objetivo de esta sesión</p>
-        <textarea
-          value={objetivo}
-          onChange={(ev) => setObjetivo(ev.target.value)}
-          rows={2}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 focus:border-gold/60 focus:outline-none resize-none"
-          placeholder="¿Qué quieres lograr sí o sí hoy?"
-        />
+      <div className="rounded-xl border border-gold/25 bg-gradient-to-br from-gold/[0.07] to-transparent px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">🎯 Lo que vas a lograr hoy</p>
+        <p className="text-sm text-white/90 leading-relaxed">{objetivo}</p>
       </div>
 
       <button

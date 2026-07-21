@@ -3,6 +3,8 @@
  * Inline herramienta IA component for the roadmap task flow.
  * Shows form fields → generates with AI (or saves directly if usa_ia=false) → user edits → saves to ADN.
  */
+import BotonAudio from '../sesion/BotonAudio';
+import type { FaseOpcion, FaseBloque } from '../../lib/herramientas';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
 import { notificarAdminsEvidencia } from '../../lib/notifications';
 import React, { useState, useCallback, useRef } from 'react';
@@ -74,6 +76,28 @@ function abrirParaImprimir(titulo: string, texto: string) {
   w.document.close();
 }
 
+/* ══ S9 · EL SELLO DEL ADN — lo grabado, grabado queda ══ */
+interface SelloADN { fecha: string; eleccion: FaseOpcion; bloques: FaseBloque[]; texto: string }
+function getSello(herramientaId: string): SelloADN | null {
+  try { return (JSON.parse(localStorage.getItem('tcd_adn_sellos_v1') ?? '{}'))[herramientaId] ?? null; } catch { return null; }
+}
+function guardarSelloLocal(herramientaId: string, sello: SelloADN): void {
+  try {
+    const all = JSON.parse(localStorage.getItem('tcd_adn_sellos_v1') ?? '{}');
+    all[herramientaId] = sello;
+    localStorage.setItem('tcd_adn_sellos_v1', JSON.stringify(all));
+  } catch { /* noop */ }
+}
+function parseJsonArray<T>(texto: string): T[] | null {
+  try {
+    const limpio = texto.replace(/```json|```/g, '').trim();
+    const ini = limpio.indexOf('['); const fin = limpio.lastIndexOf(']');
+    if (ini < 0 || fin <= ini) return null;
+    const arr = JSON.parse(limpio.slice(ini, fin + 1));
+    return Array.isArray(arr) && arr.length ? arr as T[] : null;
+  } catch { return null; }
+}
+
 interface TaskHerramientaIAProps {
   meta: RoadmapMeta;
   perfil?: Partial<ProfileV2>;
@@ -83,7 +107,7 @@ interface TaskHerramientaIAProps {
   isCompleted: boolean;
 }
 
-type Modo = 'form' | 'generando' | 'revision' | 'edicion' | 'guardado';
+type Modo = 'form' | 'generando' | 'revision' | 'edicion' | 'guardado' | 'opciones' | 'bloques' | 'revisionc' | 'sellado';
 
 export default function TaskHerramientaIA({
   meta, perfil, geminiKey, outputExistente, onSaveADN, isCompleted,
@@ -129,6 +153,20 @@ export default function TaskHerramientaIA({
   const [modo, setModo] = useState<Modo>(
     isCompleted && outputExistente ? 'guardado' : 'form'
   );
+  // ── S9: el Constructor (opciones → bloques → revisión → sello) ──
+  const [opciones, setOpciones] = React.useState<FaseOpcion[]>([]);
+  const [eleccion, setEleccion] = React.useState<FaseOpcion | null>(null);
+  const [bloques, setBloques] = React.useState<FaseBloque[]>([]);
+  const [editIdx, setEditIdx] = React.useState<number | null>(null);
+  const [regenIdx, setRegenIdx] = React.useState<number | null>(null);
+  const [propuseOtra, setPropuseOtra] = React.useState(false);
+  const [selloExistente, setSelloExistente] = React.useState<SelloADN | null>(null);
+  React.useEffect(() => {
+    if (!herramienta?.constructorFases) return;
+    const sello = getSello(herramienta.id);
+    if (sello) { setSelloExistente(sello); setEleccion(sello.eleccion); setBloques(sello.bloques); setModo('sellado'); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [herramienta?.id]);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [output, setOutput] = useState(outputExistente || '');
   const [editOutput, setEditOutput] = useState('');
@@ -150,6 +188,18 @@ export default function TaskHerramientaIA({
 
   // ─── Generate with AI ─────────────────────────────────────────────────────
   const handleGenerate = async () => {
+    // ── S9: flujo Constructor — la IA propone, el fundador elige ──
+    if (herramienta?.constructorFases) {
+      const faltan = herramienta.inputs.filter((c) => c.required && !(formValues[c.id] || '').trim());
+      if (faltan.length) { toast.error('Completa: ' + faltan.map((c) => c.label).join(', ')); return; }
+      setModo('generando');
+      try {
+        const out = await generateText({ prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) });
+        const arr = parseJsonArray<FaseOpcion>(out ?? '');
+        if (arr) { setOpciones(arr.slice(0, 5)); setModo('opciones'); return; }
+      } catch { /* cae al flujo clásico */ }
+      // sin JSON válido: degrada con gracia al flujo de siempre
+    }
     // Fallback v8: si la herramienta NO está registrada en el catálogo
     // (`herramientas.ts`), igual permitimos avanzar. Dos sub-casos:
     //   a) meta.usa_ia !== false → IA genérica con título+descripción+ADN
@@ -222,6 +272,72 @@ export default function TaskHerramientaIA({
   const handleRegenerate = () => {
     setModo('form');
     setOutput('');
+  };
+
+  // ── S9: elegir opción → construir bloques ──
+  const elegirOpcion = async (op: FaseOpcion) => {
+    if (!herramienta?.constructorFases) return;
+    setEleccion(op);
+    setModo('generando');
+    try {
+      const out = await generateText({ prompt: herramienta.constructorFases.promptBloques(op, formValues, perfil ?? {}) });
+      const arr = parseJsonArray<FaseBloque>(out ?? '');
+      if (arr) { setBloques(arr); setModo('bloques'); return; }
+      toast.error('No pude armar las piezas — intenta de nuevo');
+      setModo('opciones');
+    } catch { toast.error('No pude armar las piezas — intenta de nuevo'); setModo('opciones'); }
+  };
+
+  const proponerOtras = async () => {
+    if (!herramienta?.constructorFases || propuseOtra) return;
+    setPropuseOtra(true);
+    setModo('generando');
+    try {
+      const out = await generateText({ prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) + '\n\nIMPORTANTE: propone opciones DISTINTAS a estas, con otro ángulo: ' + opciones.map((o) => o.titulo).join(' · ') });
+      const arr = parseJsonArray<FaseOpcion>(out ?? '');
+      if (arr) setOpciones(arr.slice(0, 5));
+    } catch { /* noop */ }
+    setModo('opciones');
+  };
+
+  const regenerarBloque = async (idx: number) => {
+    if (!herramienta?.constructorFases || !eleccion) return;
+    setRegenIdx(idx);
+    try {
+      const b = bloques[idx];
+      const out = await generateText({ prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${b.titulo}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
+      const arr = parseJsonArray<FaseBloque>(out ?? '');
+      if (arr?.[0]) setBloques((prev) => prev.map((x, i) => (i === idx ? arr[0] : x)));
+    } catch { /* noop */ }
+    setRegenIdx(null);
+  };
+
+  const sellarADN = async () => {
+    if (!herramienta || !eleccion) return;
+    const texto = `# ${eleccion.titulo}\n${eleccion.significado}\n\n` + bloques.map((b) => `## ${b.titulo}\n${b.contenido}`).join('\n\n');
+    const sello: SelloADN = { fecha: new Date().toISOString().split('T')[0], eleccion, bloques, texto };
+    guardarSelloLocal(herramienta.id, sello);
+    setSelloExistente(sello);
+    // El ADN viaja de vuelta: los campos del perfil se escriben (local + base)
+    const campos = herramienta.constructorFases?.camposPerfil;
+    if (campos) {
+      const patch: Record<string, string> = {};
+      if (campos.principal) patch[campos.principal] = eleccion.titulo;
+      if (campos.bloques) patch[campos.bloques] = bloques.map((b) => `${b.titulo}: ${b.contenido}`).join('\n');
+      try {
+        const raw = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+        localStorage.setItem('tcd_profile', JSON.stringify({ ...raw, ...patch }));
+      } catch { /* noop */ }
+      try {
+        const { supabase } = await import('../../lib/supabase');
+        const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+        if (data.user?.id && supabase) await supabase.from('profiles').update(patch).eq('id', data.user.id);
+      } catch { /* sin red: el local ya quedó */ }
+    }
+    setOutput(texto);
+    onSaveADN(texto);
+    toast.success('🧬 Sellado en tu ADN — sobre esto se construye todo');
+    setModo('sellado');
   };
 
   // ─── Render field ─────────────────────────────────────────────────────────
@@ -427,6 +543,121 @@ export default function TaskHerramientaIA({
       )}
 
       {/* ─── REVIEW MODE ───────────────────────────────────────────────────── */}
+      {/* ══ S9 · CONSTRUCTOR — ACTO 1: ELEGIR ══ */}
+      {modo === 'opciones' && herramienta?.constructorFases && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Construido desde tu ADN</p>
+            <h3 className="text-lg font-bold text-cream">{herramienta.constructorFases.etiquetaOpciones}</h3>
+            <p className="text-xs text-cream/55 mt-1">Toca la que te suene a ti. Después armamos las piezas — y editas lo que quieras antes de sellar.</p>
+          </div>
+          <div className="space-y-2.5">
+            {opciones.map((op, i2) => (
+              <button key={i2} type="button" onClick={() => setEleccion(op)}
+                className={`w-full text-left rounded-2xl border p-4 transition-all ${eleccion?.titulo === op.titulo ? 'border-gold bg-gold/10 ring-1 ring-gold/40' : 'border-cream/10 bg-surface/30 hover:border-gold/30'}`}>
+                <p className="text-base font-semibold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{op.titulo}</p>
+                <p className="text-xs text-cream/60 mt-1 leading-relaxed">{op.significado}</p>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            {!propuseOtra && (
+              <button type="button" onClick={proponerOtras} className="text-xs font-bold text-cream/55 hover:text-cream">🔄 Proponme otras</button>
+            )}
+            <button type="button" disabled={!eleccion} onClick={() => eleccion && elegirOpcion(eleccion)}
+              className="flex-1 btn-primary py-3 rounded-xl text-sm font-bold disabled:opacity-40">Continuar con esta →</button>
+          </div>
+        </div>
+      )}
+
+      {/* ══ ACTO 2: CONSTRUIR — bloques editables, uno por uno ══ */}
+      {modo === 'bloques' && eleccion && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus piezas — edita lo que quieras</p>
+            <h3 className="text-lg font-bold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{eleccion.titulo}</h3>
+            <p className="text-xs text-cream/55 mt-1">✏️ edita con tus palabras · 🔄 regenera solo esa pieza · 🎤 habla en vez de escribir</p>
+          </div>
+          <div className="space-y-2.5">
+            {bloques.map((b, i2) => (
+              <div key={i2} className="rounded-2xl border border-cream/10 bg-surface/30 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-semibold text-cream flex-1">{b.titulo}</p>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button type="button" onClick={() => setEditIdx(editIdx === i2 ? null : i2)} title="Editar"
+                      className="text-xs px-2 py-1 rounded-lg border border-cream/15 text-cream/65 hover:text-cream hover:border-gold/40">✏️</button>
+                    <button type="button" onClick={() => regenerarBloque(i2)} disabled={regenIdx !== null} title="Regenerar solo esta pieza"
+                      className="text-xs px-2 py-1 rounded-lg border border-cream/15 text-cream/65 hover:text-cream hover:border-gold/40 disabled:opacity-40">{regenIdx === i2 ? '…' : '🔄'}</button>
+                  </div>
+                </div>
+                {editIdx === i2 ? (
+                  <div className="mt-2">
+                    <textarea value={b.contenido} onChange={(e) => setBloques((prev) => prev.map((x, j) => (j === i2 ? { ...x, contenido: e.target.value } : x)))} rows={3}
+                      className="w-full bg-white/[0.04] border border-gold/30 rounded-xl px-3 py-2.5 text-sm text-cream/90 focus:outline-none focus:border-gold/60" />
+                    <div className="flex items-center justify-between mt-1.5">
+                      <BotonAudio onTexto={(t) => setBloques((prev) => prev.map((x, j) => (j === i2 ? { ...x, contenido: (x.contenido ? x.contenido + '\n' : '') + t } : x)))} />
+                      <button type="button" onClick={() => setEditIdx(null)} className="text-xs font-bold text-gold">Listo ✓</button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-cream/75 leading-relaxed mt-1.5 whitespace-pre-wrap">{b.contenido}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => { setModo('opciones'); setEditIdx(null); }} className="px-4 py-3 rounded-xl text-xs font-bold text-cream/55 hover:text-cream">← Elegir otro</button>
+            <button type="button" onClick={() => { setEditIdx(null); setModo('revisionc'); }} className="flex-1 btn-primary py-3 rounded-xl text-sm font-bold">Revisar y sellar →</button>
+          </div>
+        </div>
+      )}
+
+      {/* ══ ACTO 3: REVISAR — al grabar, queda grabado ══ */}
+      {modo === 'revisionc' && eleccion && (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.06] to-transparent p-5">
+            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{eleccion.titulo}</p>
+            <p className="text-xs text-cream/60 mt-1">{eleccion.significado}</p>
+            <div className="mt-4 space-y-3">
+              {bloques.map((b, i2) => (
+                <div key={i2}>
+                  <p className="text-sm font-semibold text-cream/90">{b.titulo}</p>
+                  <p className="text-sm text-cream/70 leading-relaxed whitespace-pre-wrap">{b.contenido}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-gold/40 bg-gold/[0.06] px-4 py-3">
+            <p className="text-xs text-cream/85"><strong className="text-gold">Revísalo bien.</strong> Al grabar en tu ADN, queda grabado — sobre esto se construye todo lo que sigue.</p>
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setModo('bloques')} className="px-4 py-3 rounded-xl text-xs font-bold text-cream/55 hover:text-cream">← Volver a ajustar</button>
+            <button type="button" onClick={sellarADN} className="flex-1 btn-primary py-3.5 rounded-xl text-sm font-bold">🧬 GRABAR EN MI ADN</button>
+          </div>
+        </div>
+      )}
+
+      {/* ══ ACTO 4: SELLADO — 🔒 lo grabado, grabado queda ══ */}
+      {modo === 'sellado' && eleccion && (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🔒 Sellado en tu ADN{(selloExistente?.fecha) ? ` · ${selloExistente.fecha}` : ''}</p>
+            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{eleccion.titulo}</p>
+            <div className="mt-4 space-y-3">
+              {bloques.map((b, i2) => (
+                <div key={i2}>
+                  <p className="text-sm font-semibold text-cream/90">{b.titulo}</p>
+                  <p className="text-sm text-cream/70 leading-relaxed whitespace-pre-wrap">{b.contenido}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] text-cream/45 text-center">Lo sellado no se edita: se construye encima. Todo lo que sigue lo hereda.</p>
+          <button type="button" onClick={() => abrirParaImprimir(meta.titulo, selloExistente?.texto ?? output)}
+            className="w-full btn-secondary py-3 rounded-xl text-sm font-bold">Imprimir / PDF</button>
+        </div>
+      )}
+
       {modo === 'revision' && (
         <div className="space-y-5" ref={outputRef}>
           <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)]">
