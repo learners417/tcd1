@@ -118,7 +118,7 @@ function classifyImageError(
   }
 
   if (status === 413) {
-    return 'Las imágenes de referencia exceden el límite del servidor (4.5MB). Saca alguna o usá imágenes más livianas.';
+    return 'Las imágenes de referencia exceden el límite del servidor (4.5MB). Saca alguna o usa imágenes más livianas.';
   }
 
   if (status === 429) {

@@ -59,6 +59,8 @@ export const WHATSAPP_TCD = '5492944411854';
 export const waLink = (texto: string) => `https://wa.me/${WHATSAPP_TCD}?text=${encodeURIComponent(texto)}`;
 
 export function planDe(perfil?: Partial<Profile> | null): PlanComercial {
+  // EL NÚMERO ($27, alta automática) = la Semana Blanca: mismo tramo, mismo tope
+  if ((perfil as { plan?: string } | undefined)?.plan === 'ELNUMERO') return 'blanco';
   const p = perfil?.plan_comercial;
   return (p === 'blanco' || p === 'amarillo' || p === 'verde' || p === 'negro') ? p : 'completo';
 }
@@ -78,4 +80,40 @@ export function diasRestantes(perfil?: Partial<Profile> | null): number | null {
 export function accesoVencido(perfil?: Partial<Profile> | null): boolean {
   const d = diasRestantes(perfil);
   return d !== null && d <= 0 && planDe(perfil) === 'blanco';
+}
+
+/* ══════════ LA ESCASEZ QUE ENSEÑA — límites semanales de IA ══════════
+ * El Mentor y los entrenadores no son asistentes infinitos: son maestros.
+ * Presupuesto semanal visible, reset los lunes. (La Semana Blanca conserva
+ * su tope total de 30 — su sistema propio.) */
+export const TOPE_MENTOR_SEMANAL = 10;
+export const TOPE_AGENTE_SEMANAL = 5;
+
+function claveSemana(): string {
+  const d = new Date();
+  const jueves = new Date(d); jueves.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const inicio = new Date(jueves.getFullYear(), 0, 1);
+  const sem = Math.ceil(((+jueves - +inicio) / 86400000 + 1) / 7);
+  return `${jueves.getFullYear()}-W${sem}`;
+}
+
+function leerUsos(): Record<string, number> {
+  try {
+    const raw = JSON.parse(localStorage.getItem('tcd_usos_ia_v1') ?? '{}');
+    if (raw?.semana === claveSemana()) return raw.usos ?? {};
+  } catch { /* noop */ }
+  return {};
+}
+
+/** Cuántos usos lleva esta semana la clave dada ('mentor' o 'agente_<id>'). */
+export function usosSemana(clave: string): number {
+  return leerUsos()[clave] ?? 0;
+}
+
+/** Registra un uso. Devuelve el total tras registrar. */
+export function consumirUso(clave: string): number {
+  const usos = leerUsos();
+  usos[clave] = (usos[clave] ?? 0) + 1;
+  try { localStorage.setItem('tcd_usos_ia_v1', JSON.stringify({ semana: claveSemana(), usos })); } catch { /* noop */ }
+  return usos[clave];
 }

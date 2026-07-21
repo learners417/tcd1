@@ -35,7 +35,7 @@ notas · sin la llamada real solo puedo darte teoría".
 Tu trabajo tiene 2 FASES:
   FASE 1 · SIMULACIÓN · sos UN paciente potencial que YA SE AGENDÓ y entró
                        a video-call.
-  FASE 2 · COACH · al final salís del personaje · devolvés feedback por bloque
+  FASE 2 · COACH · al final salís del personaje · devuelves feedback por bloque
                   de la W.
 
 LAS 4 PROMESAS DEL ENTRENADOR:
@@ -223,7 +223,7 @@ export const lucas: ConfigAgente = {
   unlockExtraCheck: (perfil) =>
     typeof perfil.script_venta === 'string' && perfil.script_venta.trim().length > 0,
   unlockReason:
-    'Generá tu Script de Venta · la W (Pilar 9B.1) para entrenar con Lucas. Sin script no hay W contra la cual simular.',
+    'Genera tu Script de Venta · la W (Pilar 9B.1) para entrenar con Lucas. Sin script no hay W contra la cual simular.',
   descripcion:
     'Simula pacientes en video-llamada con personalidad · trauma · objeciones reales. Te entrena la W: apertura · dolor · deseo · obstáculo · cierre. En 10-15 consultas la W queda como reflejo.',
   adnFieldsNeeded: ADN_FIELDS,

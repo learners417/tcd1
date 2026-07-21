@@ -131,7 +131,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
     id: 'auditar_meta',
     icon: '📸',
     label: 'Audita mi panel de Meta Ads',
-    subtitle: 'Subí screenshot · vos analizás primero · después yo',
+    subtitle: 'Subí screenshot · vos analizas primero · después yo',
     action: 'request_upload',
     first_message:
       'Subí screenshot del panel. Antes de mi análisis · ¿qué ves vos? 3 cosas: una que está bien · una que te preocupa · una que no entendés.',
@@ -196,7 +196,7 @@ export const ramiro: ConfigAgente = {
     const practicas = skill?.practice_count ?? 0;
     return `Hola ${nombre} · soy Ramiro · te entreno a leer tus números.
 
-Mi regla: antes de mi análisis · vos analizás primero. Si te lo doy yo · nunca aprendés a pescar.
+Mi regla: antes de mi análisis · vos analizas primero. Si te lo doy yo · nunca aprendés a pescar.
 
 Estás en Nivel ${nivel} · ${NIVEL_NOMBRE[nivel]} (${practicas} auditorías hechas). ¿Qué necesitás trabajar hoy?`;
   },

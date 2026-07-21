@@ -51,7 +51,7 @@ REGLAS DURAS DE VOZ · NO NEGOCIABLES:
      (tú · tienes · quieres · sabes · puedes · mira · escucha · dime).
    - Si no hay país definido → tuteo neutro por defecto.
    - El avatar.lenguaje del sanador (frases textuales del cliente) tiene prioridad sobre
-     todo lo demás · usá esas frases tal cual.
+     todo lo demás · usa esas frases tal cual.
 
 ═══════════════════════════════════════════════════════════════════
 PALABRAS PROHIBIDAS (coach genérico) · NO USES NINGUNA:

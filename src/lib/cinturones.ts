@@ -117,8 +117,8 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
     }
   }
 
-  // La punta amarilla: la quema (P1.3) completada, sin P1 cerrado todavía.
-  if (masAlto.id === 'blanco' && completadas.has('1-P1.3')) {
+  // La punta amarilla: la quema (P1.3) o EL NÚMERO (P1.5) completados, sin P1 cerrado todavía.
+  if (masAlto.id === 'blanco' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
     const punta = CINTURONES.find((c) => c.id === 'blanco_punta_amarilla');
     if (punta) masAlto = punta;
   }
