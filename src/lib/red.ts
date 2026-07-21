@@ -11,7 +11,7 @@ import { supabase, isSupabaseReady } from './supabase';
 
 export const LLAVES_POR_MES = 2;
 
-/** Slot: el premio real por cada fundador que entra con tu llave. Ajustá el texto. */
+/** Slot: el premio real por cada fundador que entra con tu llave. Ajusta el texto. */
 export const PREMIO_TEXTO = 'un mes de MiClínica Digital sin cargo';
 
 export type EstadoInvitacion = 'pendiente' | 'redimida';
@@ -28,7 +28,7 @@ const INVITE_KEY = 'tcd_invite_code';
 
 /** Genera una llave nueva (máx 2/mes, validado server-side). */
 export async function generarInvitacion(): Promise<{ codigo?: string; error?: string }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Sin conexión. Recargá e intentá de nuevo.' };
+  if (!isSupabaseReady() || !supabase) return { error: 'Sin conexión. Recargá e intenta de nuevo.' };
   try {
     const { data, error } = await supabase.rpc('generar_invitacion');
     if (error) {
@@ -36,14 +36,14 @@ export async function generarInvitacion(): Promise<{ codigo?: string; error?: st
       return {
         error: lim
           ? `Ya usaste tus ${LLAVES_POR_MES} llaves este mes. Vuelven el mes que viene.`
-          : 'No pudimos generar la llave. Intentá de nuevo.',
+          : 'No pudimos generar la llave. Intenta de nuevo.',
       };
     }
     const codigo = typeof data === 'string' ? data : (data as { codigo?: string })?.codigo;
-    if (!codigo) return { error: 'No pudimos generar la llave. Intentá de nuevo.' };
+    if (!codigo) return { error: 'No pudimos generar la llave. Intenta de nuevo.' };
     return { codigo };
   } catch {
-    return { error: 'No pudimos generar la llave. Intentá de nuevo.' };
+    return { error: 'No pudimos generar la llave. Intenta de nuevo.' };
   }
 }
 

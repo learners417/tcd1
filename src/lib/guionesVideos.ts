@@ -253,7 +253,7 @@ En la próxima sesión vas a documentar tu protocolo, paso a paso. Es lo mismo q
 Llegaste. Tienes tu método, tu oferta, tu sistema, tus primeras ventas. Ahora la pregunta cambia: ya no es "cómo consigo un paciente", es "cómo convierto esto en algo que funciona todos los meses sin mí encima".
 
 [DE EJECUTAR A DIRIGIR · 15s-1:30]
-Los primeros pacientes los conseguiste haciendo todo tú. Eso está bien para arrancar — pero no escala. La diferencia entre un profesional ocupado y un director de clínica es esta: el ocupado hace el trabajo; el director hace que el trabajo se haga. Tu campaña corre sola, tu asistente responde solo, tu agenda se llena sola. Tú revisás los números y ajustás. Dejaste de ser el sistema. Ahora lo dirigís.
+Los primeros pacientes los conseguiste haciendo todo tú. Eso está bien para arrancar — pero no escala. La diferencia entre un profesional ocupado y un director de clínica es esta: el ocupado hace el trabajo; el director hace que el trabajo se haga. Tu campaña corre sola, tu asistente responde solo, tu agenda se llena sola. Tú revisás los números y ajustas. Dejaste de ser el sistema. Ahora lo dirigís.
 
 [EL RITMO NUEVO · 1:30-2:30]
 Tu semana ya no es cuarenta y cinco minutos de tarea. Es una revisión: qué números dieron, qué anuncio funcionó mejor, cuántas llamadas, cuántos cierres. Media hora por semana mirando el tablero y tomando una o dos decisiones. Eso es dirigir. El resto del tiempo — el que antes se comía tu negocio — ahora es tuyo. Para atender mejor, para tu familia, para ti.

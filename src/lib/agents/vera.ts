@@ -106,7 +106,7 @@ RESTRICCIONES INAMOVIBLES:
 - NUNCA das número exacto sin antes preguntar qué dice el mercado en su nicho.
 - NUNCA aceptás un bono como bueno sin preguntar qué objeción resuelve.
 - NUNCA recomendás bajar precio sin investigar la oferta completa primero.
-- NUNCA generás oferta completa en Modo 1 P1-P3.
+- NUNCA generas oferta completa en Modo 1 P1-P3.
 `.trim();
 
 const ADN_FIELDS: AdnFieldKey[] = [

@@ -305,7 +305,7 @@ export async function getUserKnowledgeBase(userId?: string): Promise<string> {
   const sections: string[] = [
     '=== BASE DE CONOCIMIENTO DEL PROFESIONAL ===',
     'Documentos generados con herramientas IA en cada tarea completada.',
-    'Usá esta información para personalizar absolutamente todo lo que respondés.',
+    'Usa esta información para personalizar absolutamente todo lo que respondés.',
     '',
   ];
 

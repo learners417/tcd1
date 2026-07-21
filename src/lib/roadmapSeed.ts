@@ -553,7 +553,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Activa tu agente: Herramientas → Meta Business Agent (5 min de configuración)',
           'Pídele a tu Mentor el DOCUMENTO DE ENTRENAMIENTO de tu agente (lo genera con tu oferta, tu avatar y tus 3 preguntas de filtro) — cópialo, guárdalo como PDF (Imprimir → Guardar como PDF) y súbeselo al agente',
           'Configura el agente: responde SOLO a clientes que llegan de anuncios · tono cálido y profesional · las conversaciones clínicas te las deriva a ti SIEMPRE',
-          'Pruébalo: escribile desde el teléfono de alguien cercano como si fueras paciente',
+          'Pruébalo: escríbele desde el teléfono de alguien cercano como si fueras paciente',
           'Crea tu link de agenda (Calendly gratis o similar) con 3+ horarios esta semana',
           'Elige tu medio de cobro según tu país (México/Argentina: MercadoPago · Colombia: Nequi/Bancolombia · Ecuador: Payphone · otros: PayPal) y PRUÉBALO cobrándote $1 hoy',
           'Crea tu canal de WhatsApp "Sala de Espera" — ahí van los que hoy no califican: 1 mensaje semanal de valor, nadie se pierde',
@@ -564,7 +564,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.2',
         titulo: 'El mensaje que atrae a TU paciente ideal',
-        descripcion: 'Genera con la herramienta el copy de tu página y tus anuncios: el mensaje que hace que tu persona ideal se detenga, se reconozca en el dolor y quiera hablar contigo. Usa tu paciente ideal y tu oferta ya definidos. Es sesión-hito (2 h): podés partirla en dos bloques — la app guarda todo donde lo dejes.',
+        descripcion: 'Genera con la herramienta el copy de tu página y tus anuncios: el mensaje que hace que tu persona ideal se detenga, se reconozca en el dolor y quiera hablar contigo. Usa tu paciente ideal y tu oferta ya definidos. Es sesión-hito (2 h): puedes partirla en dos bloques — la app guarda todo donde lo dejes.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '2 h',
@@ -674,7 +674,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.3c',
         titulo: 'Edición simple y subida',
-        descripcion: 'Hoy tus 3 piezas quedan listas: corte simple (inicio y final limpios), subtítulos automáticos, y subidas a tus plataformas. Nada de efectos: la claridad vende más que el brillo. En 2 horas están publicables. Es sesión-hito (2 h): podés partirla en dos bloques — la app guarda todo donde lo dejes. Regla de esta sesión: LA VERSIÓN VERGONZOSA. La primera versión se publica ANTES de que te guste del todo — a propósito. El perfeccionismo no es exigencia: es miedo disfrazado de estándar.',
+        descripcion: 'Hoy tus 3 piezas quedan listas: corte simple (inicio y final limpios), subtítulos automáticos, y subidas a tus plataformas. Nada de efectos: la claridad vende más que el brillo. En 2 horas están publicables. Es sesión-hito (2 h): puedes partirla en dos bloques — la app guarda todo donde lo dejes. Regla de esta sesión: LA VERSIÓN VERGONZOSA. La primera versión se publica ANTES de que te guste del todo — a propósito. El perfeccionismo no es exigencia: es miedo disfrazado de estándar.',
         tipo: 'COACH',
         es_estrella: false,
         tiempo_estimado: '2 h',
