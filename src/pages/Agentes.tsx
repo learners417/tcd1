@@ -13,6 +13,7 @@
  *   La conversación se persiste en `agent_conversations` por (user_id, agent_id).
  *   El score se parsea de las respuestas y actualiza `agent_skill_progress`.
  */
+import { TOPE_AGENTE_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   Loader2,
@@ -278,6 +279,19 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
       const tieneAdjuntos = attachments.length > 0;
       if ((!texto.trim() && !tieneAdjuntos) || !agenteActivo || cargando) return;
 
+      // ─── La escasez que enseña: cada entrenador, 5 consultas por semana ───
+      {
+        const claveUso = 'agente_' + agenteActivo.id;
+        if (usosSemana(claveUso) >= TOPE_AGENTE_SEMANAL) {
+          setMensajes((prev) => [...prev, { role: 'user', content: texto }, {
+            role: 'assistant',
+            content: 'Esta semana ya usaste tus ' + TOPE_AGENTE_SEMANAL + ' consultas conmigo — las buenas preguntas rinden más que las muchas. El lunes se renuevan. Tu sesión de hoy sigue esperándote en El Camino.',
+          }] as typeof prev);
+          return;
+        }
+        consumirUso(claveUso);
+      }
+
       const enviados = attachments;
       setAttachments([]);
 
@@ -338,7 +352,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           await aplicarScore(agenteActivo, score);
         }
       } catch {
-        toast.error('Error al conectar con el entrenador. Intentá de nuevo.');
+        toast.error('Error al conectar con el entrenador. Intenta de nuevo.');
         setMensajes(conUsuario);
       } finally {
         setCargando(false);

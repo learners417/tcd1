@@ -529,7 +529,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
         <CustomSelect
           value={paisLocal}
           onChange={guardarPais}
-          placeholder={savingPais ? 'Guardando…' : 'Elegi tu pais'}
+          placeholder={savingPais ? 'Guardando…' : 'Elige tu pais'}
           options={PAISES.map((p) => ({ value: p.codigo, label: p.nombre }))}
           className="w-full"
         />
@@ -588,7 +588,7 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           />
           <button
             onClick={async () => {
-              if (!propTxt.trim() || !propSec) { toast.error('Elegí la sección y contanos el ajuste'); return; }
+              if (!propTxt.trim() || !propSec) { toast.error('Elige la sección y contanos el ajuste'); return; }
               if (!supabase || !userId) { toast.error('Sesión no disponible'); return; }
               setPropSending(true);
               try {

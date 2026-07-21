@@ -1,4 +1,6 @@
-import { planDe, TOPE_MENTOR_BLANCO } from '../lib/planes';
+import { resumenOrigenParaMentor } from '../lib/origen';
+import { resumenRuedaParaMentor } from '../lib/rueda';
+import { planDe, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { safeGet } from '../lib/safeStorage';
 import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
@@ -61,7 +63,7 @@ function buildInitialMessage(): Message {
   if (semanaActual === 1 && freno) {
     return {
       role: 'assistant',
-      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empezá hoy — el impulso del día 1 vale oro. 🥋`,
+      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
     } as Message;
   }
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
@@ -285,6 +287,18 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
       if ((!text.trim() && !hasAttachments) || isTyping) return;
 
       // ═══ El tope de la Semana Blanca: 30 mensajes, cierre elegante ═══
+      // ─── La escasez que enseña: 10 preguntas de maestro por semana (planes del camino) ───
+      if (planDe(perfil) !== 'blanco') {
+        if (usosSemana('mentor') >= TOPE_MENTOR_SEMANAL) {
+          setMessages((prev) => [...prev, { role: 'user', content: text }, {
+            role: 'assistant',
+            content: 'Usaste tus ' + TOPE_MENTOR_SEMANAL + ' preguntas de maestro de esta semana — bien usadas valen oro. El lunes se renuevan. Mientras tanto, el dojo sigue abierto: tu sesión de hoy te espera en El Camino, y si algo se traba en plena sesión, ahí estoy contigo adentro.',
+          }]);
+          setInput('');
+          return;
+        }
+        consumirUso('mentor');
+      }
       if (planDe(perfil) === 'blanco') {
         let usados = 0;
         try { usados = parseInt(localStorage.getItem('tcd_mentor_blanco_msgs') ?? '0', 10) || 0; } catch { /* noop */ }
@@ -355,7 +369,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
           coachHistorySummary: summaryRef.current ?? undefined,
           nivelesEntrenadoresTexto: nivelesTexto,
           tareasHojaDeRuta: tareasHojaDeRutaRef.current,
-        });
+        }) + resumenRuedaParaMentor() + resumenOrigenParaMentor();
 
         let fullResponse = '';
         for await (const chunk of streamText({
@@ -592,7 +606,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             placeholder={
               isTyping
                 ? 'Tu coach está conectando ideas...'
-                : 'Mencioná tu duda · bloqueo · pega una captura (Ctrl+V)...'
+                : 'Menciona tu duda · bloqueo · pega una captura (Ctrl+V)...'
             }
             className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />

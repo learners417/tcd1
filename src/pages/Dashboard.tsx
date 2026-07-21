@@ -1,6 +1,5 @@
 import type { Profile } from '../lib/supabase';
-import ModoHueco from '../components/ModoHueco';
-import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from '../lib/planes';
+import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -269,8 +268,6 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
-      {/* ═══ Modo Hueco: 10-15 minutos, una acción completable (T12) ═══ */}
-      <ModoHueco onNavigate={setCurrentPage} />
 
       {/* ═══ La Semana Blanca: el plan reservado + la cuenta regresiva ═══ */}
       {planDe(perfil) === 'blanco' && (() => {
@@ -300,146 +297,75 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         );
       })()}
 
-      {/* ZONA A — Header contextual */}
-      <div className="relative overflow-hidden card-panel p-8 border border-gold/20 bg-gradient-to-br from-gold/[0.05] to-transparent">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
-        <div className="relative z-10">
-          <p className="text-2xl font-light text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-          <p className="text-sm text-cream/75 max-w-lg mb-6 leading-relaxed">
-            Llevas <strong className="text-cream/90">{(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return `${c.emoji} Cinturón ${c.nombre} — ${c.metafora}`; } catch { return '⬜ Cinturón Blanco'; } })()}</strong>. Racha: <strong className="text-gold">{rachaDB ?? calcularRacha(null)} 🔥</strong> · hoy te espera <strong className="text-gold">una sesión</strong> para acercarte al siguiente.
-          </p>
-          {(() => {
-            try {
-              const saved = localStorage.getItem('tcd_hoja_ruta_v2');
-              const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : []));
-              return null
-            } catch { return null; }
-          })()}
-          <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] font-bold text-gold hover:text-goldhi transition-colors flex items-center gap-1.5 uppercase tracking-widest bg-gold/10 px-4 py-2 rounded-lg border border-gold/20 w-max">
-            Ver El Camino <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* ZONA A2 — EL VISUALBOARD · lo que quieres lograr, tildándose solo */}
+      {/* ─── EL DOJO ─── día · cinturón · estado. Nada más. */}
       {(() => {
-        let set = setDB ?? new Set<string>();
-        if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
-        const hitos = [
-          { emoji: '🧬', label: 'Método con nombre', done: set.has('2-P2.4') },
-          { emoji: '💎', label: 'Oferta lista', done: set.has('3-P3.4') },
-          { emoji: '⚙️', label: 'Sistema instalado', done: set.has('4-P4.5b') },
-          { emoji: '📣', label: 'Campaña encendida', done: set.has('4-P4.4') },
-          { emoji: '💰', label: 'Primer pago', done: set.has('6-P6.3') },
-        ];
-        const pct = data.totalTareas > 0 ? Math.round((data.completadas / data.totalTareas) * 100) : 0;
+        let c; try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
+        const diaProg = proximoHito?.diaPrograma ?? 1;
+        const diaTarea = data.tareasHoy[0]?.dia_asignado;
+        const delta = typeof diaTarea === 'number' ? diaProg - diaTarea : 0;
+        const estado = delta > 0
+          ? { txt: `${delta} ${delta === 1 ? 'día' : 'días'} por recuperar — hoy te pones al día`, cls: 'text-goldhi' }
+          : delta < 0
+            ? { txt: `Adelantado ${Math.abs(delta)} ${Math.abs(delta) === 1 ? 'día' : 'días'}`, cls: 'text-success' }
+            : { txt: 'Al día', cls: 'text-success' };
         return (
-          <div className="card-ios p-6 sm:p-7">
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu norte · 10 pacientes de $1.000 en 90 días</p>
-              <p className="text-[11px] text-cream/55 num-tab">{pct}% del camino</p>
+          <div className="card-panel p-6 sm:p-7 border border-gold/15">
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <p className="text-2xl font-light text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">Día {diaProg} de 90</p>
             </div>
-            {/* La barra de 10 pacientes */}
-            <div className="flex items-end justify-between mb-2">
-              <div><span className="text-4xl font-light text-cream num-tab">{ventasTotal.count}</span><span className="text-xl font-light text-cream/35"> / 10</span><span className="text-xs text-cream/45 ml-2">pacientes</span></div>
-              <p className="text-sm text-cream/75 num-tab">${ventasTotal.suma.toLocaleString()} <span className="text-cream/35">de $10.000</span></p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+              {c && <p className="text-sm text-cream/80">{c.emoji} Cinturón <strong className="text-cream">{c.nombre}</strong></p>}
+              <p className={`text-sm font-medium ${estado.cls}`}>{estado.txt}</p>
             </div>
-            <div className="flex gap-1.5 mb-5">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="flex-1 h-2.5 rounded-full transition-all" style={{ background: i < ventasTotal.count ? 'linear-gradient(180deg, #F4B65C, #E8962E)' : 'rgba(242,239,233,0.08)', boxShadow: i < ventasTotal.count ? '0 0 8px rgba(232,150,46,0.4)' : 'none' }} />
-              ))}
-            </div>
-            {/* Los 5 hitos */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {hitos.map((h) => (
-                <div key={h.label} className={`rounded-xl border px-3 py-2.5 text-center transition-all ${h.done ? 'border-gold/40 bg-gold/10' : 'border-[rgba(242,239,233,0.07)] bg-black/20 opacity-60'}`}>
-                  <p className="text-lg leading-none mb-1">{h.done ? '✓' : h.emoji}</p>
-                  <p className={`text-[11px] leading-tight ${h.done ? 'text-goldhi font-semibold' : 'text-cream/45'}`}>{h.label}</p>
-                </div>
-              ))}
-            </div>
-            {/* El tiempo recuperado — la otra mitad de la promesa */}
-            {(() => {
-              let horas = 0;
-              if (set.has('4-P4.5b')) horas += 4; // el asistente responde solo
-              if (set.has('4-P4.4')) horas += 3;  // la campaña trae interesados sin vos
-              if (set.has('6-P6.2') || set.has('6-P6.3')) horas += 3; // el protocolo entrega sin improvisar
-              return (
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-[rgba(242,239,233,0.07)] bg-black/20 px-4 py-3">
-                  <span className="text-xl">⏰</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-cream/80"><span className="font-semibold text-goldhi num-tab">{horas}h</span> por semana que tu sistema ya trabaja por ti <span className="text-cream/35">· meta: 10h</span></p>
-                    <div className="h-1 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden mt-1.5">
-                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, horas * 10)}%`, background: 'linear-gradient(90deg, #5A9170, #3D6B4F)' }} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
+          </div>
+        );
+      })()}
 
-            {/* 📔 El cierre del día — el diario es parte del método */}
-            {(() => {
-              try {
-                const hoyStr = new Date().toISOString().slice(0, 10);
-                const raw = localStorage.getItem('tcd_diario_v3');
-                const entradas = raw ? JSON.parse(raw) : [];
-                const hoyHecho = Array.isArray(entradas) && entradas.some((e: { fecha?: string }) => String(e.fecha ?? '').slice(0, 10) === hoyStr);
-                if (hoyHecho) return null;
-                return (
-                  <button onClick={() => setCurrentPage('diario')} className="mt-3 w-full text-left rounded-xl border border-[rgba(232,150,46,0.18)] bg-gold/5 hover:bg-gold/10 px-4 py-2.5 transition-colors">
-                    <p className="text-[12px] text-cream/75">📔 <span className="font-medium text-goldhi">Tu cierre del día</span> · 5 min — todavía pendiente. El diario alimenta a tu Mentor.</p>
-                  </button>
-                );
-              } catch { return null; }
-            })()}
-
-            {/* Las horas del viaje: el esfuerzo también se ve */}
-            {(() => {
-              const parseMin = (t?: string) => { if (!t) return 20; const h = t.match(/([\d.]+)\s*h/); if (h) return Math.round(parseFloat(h[1]) * 60); const m2 = t.match(/(\d+)\s*min/); return m2 ? parseInt(m2[1], 10) : 20; };
-              let hechas = 0, totales = 0;
-              for (const pil of SEED_ROADMAP_V2) for (const m of pil.metas) { const mins = parseMin((m as { tiempo_estimado?: string }).tiempo_estimado); totales += mins; if (set.has(`${pil.numero}-${m.codigo}`)) hechas += mins; }
-              return (
-                <p className="mt-3 text-[11px] text-cream/45">⚒ Llevas <span className="text-goldhi font-semibold num-tab">{(hechas / 60).toFixed(1)}h</span> de ~{Math.round(totales / 60)}h de construcción total — cada micro-sesión suma.</p>
-              );
-            })()}
-
-            {/* Tu inversión, recuperándose */}
-            {ventasTotal.suma > 0 && (
-              <p className="mt-3 text-[11px] text-cream/65">Tu inversión: <span className={`font-semibold ${ventasTotal.suma >= 2000 ? 'text-success' : 'text-goldhi'}`}>{ventasTotal.suma >= 2000 ? `recuperada ${(ventasTotal.suma / 2000).toFixed(1)}×` : `${Math.round((ventasTotal.suma / 2000) * 100)}% recuperada`}</span> · <button onClick={() => setShowReporte(true)} className="underline underline-offset-2 hover:text-gold">📄 Reporte del Director</button></p>
-            )}
-
-            {/* La barra Sanador Libre */}
-            <div className="mt-5">
-              <div className="h-1.5 rounded-full bg-[rgba(242,239,233,0.06)] overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #E8962E, #F4B65C)' }} />
+      {/* LA SESIÓN — el único plato */}
+      <div className="space-y-6">
+        {(() => {
+          const dow = new Date().getDay(); // 0=domingo, 6=sábado
+          // ─── SÁBADO: descanso activo — la vida también es el camino ───
+          if (dow === 6) {
+            const hoyKey = new Date().toISOString().split('T')[0];
+            let guardado = '';
+            try { guardado = (JSON.parse(localStorage.getItem('tcd_descanso_v1') ?? '{}'))[hoyKey] ?? ''; } catch { /* noop */ }
+            return (
+              <div className="card-panel p-6 border border-success/25 bg-gradient-to-b from-success/[0.05] to-transparent">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-success mb-2">Sábado · Descanso activo</p>
+                <p className="text-sm text-cream/80 mb-1">Hoy no hay sesión. Hay vida.</p>
+                <p className="text-xs text-cream/55 mb-4">Deja una línea de tu día — un momento compartido, un rato afuera, lo que te llenó. No viniste solo a hacer dinero: esto también es el camino.</p>
+                {guardado ? (
+                  <p className="text-sm text-cream/85 italic border-l-2 border-success/40 pl-3">“{guardado}” <span className="not-italic text-success text-xs ml-2">✓ guardado</span></p>
+                ) : (
+                  <DescansoInput onGuardar={(t) => {
+                    try {
+                      const all = JSON.parse(localStorage.getItem('tcd_descanso_v1') ?? '{}');
+                      all[hoyKey] = t;
+                      localStorage.setItem('tcd_descanso_v1', JSON.stringify(all));
+                      window.dispatchEvent(new Event('storage'));
+                    } catch { /* noop */ }
+                  }} />
+                )}
               </div>
-              <p className="text-[11px] text-cream/35 mt-1.5 italic">Estás al {pct}% de ser Sanador Libre — cada sesión suma.</p>
-            </div>
-          </div>
-        );
-      })()}
+            );
+          }
+          // ─── DOMINGO: el día del Fundador ───
+          if (dow === 0) {
+            return (
+              <div className="card-panel p-6 border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
+                <p className="text-sm text-cream/80 mb-4">Quince minutos para ti: tu Diario, tu semana, tu intención. La transformación también se registra.</p>
+                <button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
-      
-
-      {/* G3 · Día 75: Tu clínica sigue */}
-      {(() => {
-        let diaG3 = 1;
-        try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) diaG3 = Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ }
-        if (diaG3 < 75) return null;
-        return (
-          <div className="rounded-2xl border border-gold/35 bg-gradient-to-br from-gold/[0.08] to-transparent p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🏥 Tu clínica sigue</p>
-            <p className="text-lg text-cream/90 font-light" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El día 90 termina El Camino — pero tu clínica no se apaga.</p>
-            <p className="text-sm text-cream/75 mt-2 leading-relaxed">Tu agente de WhatsApp, tu agenda, el portal de tus pacientes, tus métricas y tus créditos siguen trabajando con <strong className="text-cream/90">MiClínica Digital · $147/mes</strong>. Todo lo que construiste, funcionando — sin que tengas que tocar nada.</p>
-            <button onClick={() => setCurrentPage('coach')} className="mt-4 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors">Quiero que mi clínica siga →</button>
-          </div>
-        );
-      })()}
-
-      {/* ZONA C — Dos columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Foco de Hoy (60%) */}
-        <div className="lg:col-span-7 card-panel p-6">
+        <div className="card-panel p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
             <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
@@ -515,93 +441,58 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           </div>
         </div>
 
-        {/* Inspiración del Día */}
-        <div className="lg:col-span-5 card-panel p-6 relative overflow-hidden flex flex-col justify-between border-gold/15 bg-gradient-to-br from-gold/[0.05] to-transparent">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-gold/10 blur-[50px] rounded-full" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-success/5 blur-[40px] rounded-full" />
 
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[11px] font-bold text-gold tracking-widest uppercase flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold ring-4 ring-gold/20" /> Inspiración del día
-              </h2>
-              <div className="flex items-center gap-1.5 bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
-                <Sparkles className="w-3 h-3 text-gold" />
-                <span className="text-[11px] font-bold text-gold">Día {proximoHito?.diaPrograma ?? 1}/90</span>
+        {(() => {
+          const dow = new Date().getDay();
+          if (dow === 0 || dow === 6) return null; // el finde tiene sus propias cartas
+          let set = setDB ?? new Set<string>();
+          if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
+          const sistemaVivo = set.has('4-P4.5b') || set.has('4-P4.4');
+          const sesionHecha = data.tareasHoy.length === 0;
+          const mentorRestantes = Math.max(0, TOPE_MENTOR_SEMANAL - usosSemana('mentor'));
+          const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
+            <button onClick={onClick} disabled={!onClick}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[rgba(232,150,46,0.12)] bg-surface/30 hover:border-gold/30'}`}>
+              <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
+              <span className="flex-1 min-w-0">
+                <span className={`block text-sm font-medium ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
+                <span className="block text-[11px] text-cream/50">{meta}</span>
+              </span>
+              {onClick && <ChevronRight className="w-4 h-4 text-cream/40" />}
+            </button>
+          );
+          return (
+            <div className="card-panel p-5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-cream/60 mb-3">Tu día, en orden</p>
+              <div className="space-y-2">
+                <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — el dojo te vio hoy' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
+                {sistemaVivo && (
+                  <Fila n="2" titulo="10 minutos de campo" meta="Responde a tus interesados y registra en Mi Clínica — y vuelve: el Camino te espera"
+                    onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')} />
+                )}
+                <Fila n={sistemaVivo ? '3' : '2'} titulo="Tu pregunta al Mentor" meta={mentorRestantes > 0 ? `Si algo te frena · te quedan ${mentorRestantes} esta semana` : 'Sin consultas esta semana — el lunes se renuevan'} onClick={() => setCurrentPage('coach')} />
+                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta="3 min · tu Diario alimenta a tu Mentor" onClick={() => setCurrentPage('diario')} />
               </div>
             </div>
-
-            {(() => {
-              const QUOTES = [
-                { text: "Puedes tener todo lo que quieras en la vida si ayudas a suficientes personas a conseguir lo que ellas quieren.", author: "Zig Ziglar" },
-                { text: "La gente olvidará lo que dijiste y lo que hiciste, pero nunca olvidará cómo la hiciste sentir.", author: "Maya Angelou" },
-                { text: "El precio es lo que pagas. El valor es lo que recibes.", author: "Warren Buffett" },
-                { text: "Si cambias la forma en que miras las cosas, las cosas que miras cambian.", author: "Wayne Dyer" },
-                { text: "Nadie se ha hecho pobre por dar.", author: "Ana Frank" },
-                { text: "Ganamos con lo que recibimos, pero hacemos una vida con lo que damos.", author: "Winston Churchill" },
-                { text: "El dinero es un excelente sirviente, pero un pésimo amo.", author: "Francis Bacon" },
-                { text: "Quien tiene un porqué puede soportar casi cualquier cómo.", author: "Viktor Frankl" },
-                { text: "El mejor modo de encontrarte a ti mismo es perderte en el servicio a los demás.", author: "Gandhi" },
-                { text: "Cobrar bien no es quitarle a tu paciente: es poder seguir estando para el próximo.", author: "Método CLINICA" },
-              ];
-              const TIPS = [
-                "Completa tu diario hoy — 5 minutos que transforman tu semana.",
-                "Revisa tus métricas semanales para saber qué ajustar.",
-                "Define tu oferta irresistible antes de invertir en publicidad.",
-                "Tu avatar ideal determina toda tu comunicación. ¿Ya lo tienes claro?",
-                "El seguimiento post-consulta es donde se ganan las recomendaciones.",
-                "Medí tu tasa de cierre: ¿cuántos leads se convierten en pacientes?",
-                "Un sistema simple y funcional vale más que uno complejo sin resultados.",
-                "Escribe tu historia en 3 formatos: 300, 150 y 50 palabras.",
-                "Tu propósito es tu filtro de decisiones. Todo lo demás es ruido.",
-                "Cada tarea completada es un ladrillo de tu clínica digital.",
-              ];
-              const dayIndex = (proximoHito?.diaPrograma ?? 1) - 1;
-              const quote = QUOTES[dayIndex % QUOTES.length];
-              const tip = TIPS[dayIndex % TIPS.length];
-              return (
-                <>
-                  <div className="mb-6">
-                    <div className="text-4xl text-gold/20 mb-2 leading-none" style={{ fontFamily: 'Georgia, serif' }}>"</div>
-                    <p className="text-[15px] text-white/90 leading-relaxed italic mb-3" style={{ fontFamily: 'var(--font-display)' }}>
-                      {quote.text}
-                    </p>
-                    <p className="text-xs text-white/55 font-medium">— {quote.author}</p>
-                  </div>
-
-                  <div className="px-3 py-3 rounded-xl bg-success/[0.06] border border-success/15">
-                    <p className="text-[11px] text-success font-bold uppercase tracking-widest mb-1">Tip del día</p>
-                    <p className="text-[12px] text-white/70 leading-relaxed">{tip}</p>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-
-          {/* Day progress mini-bar */}
-          <div className="relative z-10 mt-5">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-white/55 font-bold uppercase tracking-wider">Progreso general</span>
-              <span className="text-[11px] text-white bg-white/10 px-2 py-0.5 rounded-full">{pctTareas}%</span>
-            </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-gold to-goldhi rounded-full transition-all duration-500" style={{ width: `${pctTareas}%` }} />
-            </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
-      {showReporte && (
-        <ReporteDirector
-          nombre={(() => { try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.nombre ?? 'Director'; } catch { return 'Director'; } })()}
-          diaPrograma={(() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })()}
-          completadas={(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); return new Set<string>(saved ? JSON.parse(saved) : []); } catch { return new Set<string>(); } })()}
-          ventas={ventasTotal}
-          racha={rachaDB ?? calcularRacha(null)}
-          onClose={() => setShowReporte(false)}
-        />
-      )}
       {/* El modal único vive en El Camino — el Dashboard navega (G2) */}
+    </div>
+  );
+}
+
+function DescansoInput({ onGuardar }: { onGuardar: (t: string) => void }) {
+  const [t, setT] = React.useState('');
+  const [ok, setOk] = React.useState(false);
+  if (ok) return <p className="text-sm text-success">Guardado. Que siga el buen día. ✓</p>;
+  return (
+    <div className="flex gap-2">
+      <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Hoy… (una línea alcanza)"
+        className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+      <button disabled={!t.trim()} onClick={() => { onGuardar(t.trim()); setOk(true); }}
+        className="btn-primary text-sm font-bold px-4 rounded-xl disabled:opacity-40 min-h-[44px]">Guardar</button>
     </div>
   );
 }

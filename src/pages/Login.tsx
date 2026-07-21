@@ -137,7 +137,7 @@ export default function Login({ onLogin }: LoginProps) {
           </button>
 
           <p className="text-center text-xs text-cream/45 mt-6">
-            ¿Otros problemas? Contactá a tu coach por WhatsApp.
+            ¿Otros problemas? Contacta a tu coach por WhatsApp.
           </p>
         </div>
       </div>

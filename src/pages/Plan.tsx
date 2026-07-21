@@ -91,7 +91,7 @@ export default function Plan({ perfil, userId, setCurrentPage }: PlanProps) {
         <p className="text-sm text-cream/75">
           {ventas.count === 0 && '¡Empieza! Tu primer paciente está del otro lado del sistema que estás construyendo.'}
           {ventas.count > 0 && ventas.count < META_PACIENTES && `Te faltan ${pacientesRestantes} para ser Sanador Libre. Vas a llegar.`}
-          {ventas.count >= META_PACIENTES && '🎉 ¡Lo lograste! 10 pacientes. Sos Sanador Libre.'}
+          {ventas.count >= META_PACIENTES && '🎉 ¡Lo lograste! 10 pacientes. Eres Sanador Libre.'}
         </p>
       </div>
 

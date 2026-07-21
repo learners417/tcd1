@@ -130,6 +130,14 @@ function PaginaBloqueada({ nombre }: { nombre: string }) {
 
 export default function App() {
   const [currentPage, setCurrentPageRaw] = useState<string>(loadCurrentPage);
+  // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
+  useEffect(() => {
+    try {
+      const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
+      if (plan === 'ELNUMERO') setCurrentPageRaw('numero');
+    } catch { /* noop */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const pageHistoryRef = useRef<string[]>([]);
   const setCurrentPage = useCallback((page: string) => {
     setCurrentPageRaw((prev) => {
@@ -345,7 +353,7 @@ export default function App() {
       <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
         <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-cream/65 mt-0.5">Elegí una contraseña nueva para tu cuenta.</p>
+          <p className="text-[11px] text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>

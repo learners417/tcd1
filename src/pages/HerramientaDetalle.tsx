@@ -93,7 +93,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
 
       setOutputGuardado(false);
     } catch {
-      toast.error('Error al generar. Intentá de nuevo.');
+      toast.error('Error al generar. Intenta de nuevo.');
     } finally {
       setGenerando(false);
     }
@@ -170,7 +170,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
         {herramienta.inputs.some((c) => c.precargar && perfil?.[c.precargar as keyof ProfileV2]) && (
           <div className="mt-3 flex items-center gap-2 text-xs text-success bg-success/10 border border-success/20 rounded-xl px-3 py-2">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Campos pre-completados con tu perfil — revisa y ajustá si es necesario
+            Campos pre-completados con tu perfil — revisa y ajusta si es necesario
           </div>
         )}
       </div>

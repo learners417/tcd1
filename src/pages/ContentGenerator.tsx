@@ -113,7 +113,7 @@ export default function ContentGenerator() {
       toast.success('Contenido generado exitosamente');
     } catch (error: any) {
       console.error('Error generating content:', error);
-      toast.error('Error al generar contenido. Intentá de nuevo.');
+      toast.error('Error al generar contenido. Intenta de nuevo.');
     } finally {
       setGenerating(false);
     }
