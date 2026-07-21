@@ -92,7 +92,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P0.0',
         titulo: 'Bienvenida: de profesional a director',
-        descripcion: 'Mira el video de Javo (5 min): qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Mentor te lo cuenta en 5 minutos.',
+        descripcion: 'Mira el video de Javo: qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Mentor te lo cuenta en 5 minutos.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '5 min',
@@ -168,7 +168,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.1',
         titulo: 'Por qué el dinero se sana primero',
-        descripcion: 'Mira el video de Javo (6 min): ningún sistema de ventas funciona sobre una relación rota con el dinero. La historia del mártir que cobra poco "por vocación" — y por qué ese ya no vas a ser tú. Si el video no está aún, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video de Javo: ningún sistema de ventas funciona sobre una relación rota con el dinero. La historia del mártir que cobra poco "por vocación" — y por qué ese ya no vas a ser tú. Si el video no está aún, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '6 min',
@@ -306,7 +306,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.1',
         titulo: 'Tu método propio: el activo que te diferencia',
-        descripcion: 'Mira el video (6 min): por qué un método con nombre vale más que mil servicios sueltos, y cómo se poda: UNA transformación, UN protocolo, UN precio. Aplica igual si atiendes pacientes o formas estudiantes. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: por qué un método con nombre vale más que mil servicios sueltos, y cómo se poda: UNA transformación, UN protocolo, UN precio. Aplica igual si atiendes pacientes o formas estudiantes. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '6 min',
@@ -403,7 +403,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P3.1',
         titulo: 'La oferta que se vende sola',
-        descripcion: 'Mira el video (7 min): la ecuación de valor — resultado soñado × probabilidad, dividido demora × esfuerzo. Por qué tu oferta debe prometer transformación, no sesiones. Y la garantía como permiso para confiar. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: la ecuación de valor — resultado soñado × probabilidad, dividido demora × esfuerzo. Por qué tu oferta debe prometer transformación, no sesiones. Y la garantía como permiso para confiar. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
@@ -524,7 +524,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P4.1',
         titulo: 'El sistema completo, sin humo',
-        descripcion: 'Mira el video (8 min): el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: el circuito real — anuncio → WhatsApp → tu agente de IA filtra → calendario → llamada → venta. Qué hace cada pieza y por qué el filtro automático es lo que te salva: el 55% de los interesados escribe fuera de horario, y el 78% le compra al primero que responde. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '8 min',
@@ -791,7 +791,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P5.1',
         titulo: 'Anatomía de la llamada que cierra',
-        descripcion: 'Mira el video (8 min): la estructura de la llamada — Apertura, Dolor, Cielo, Obstáculos, Cierre (la W). Por qué el que pregunta dirige. Cómo presentar el precio sin que tiemble la voz. Y la regla del decisor: si la decisión la comparte con alguien, ese alguien tiene que estar en la llamada. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: la estructura de la llamada — Apertura, Dolor, Cielo, Obstáculos, Cierre (la W). Por qué el que pregunta dirige. Cómo presentar el precio sin que tiemble la voz. Y la regla del decisor: si la decisión la comparte con alguien, ese alguien tiene que estar en la llamada. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '8 min',
@@ -903,7 +903,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P6.1',
         titulo: 'Entregar sin quemarte',
-        descripcion: 'Mira el video (7 min): el protocolo de entrega — qué recibe tu paciente en las primeras 24 hs, cómo se organiza el seguimiento, qué se automatiza y qué se mantiene humano. Acá nace tu MiClínica Digital. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: el protocolo de entrega — qué recibe tu paciente en las primeras 24 hs, cómo se organiza el seguimiento, qué se automatiza y qué se mantiene humano. Acá nace tu MiClínica Digital. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
@@ -990,7 +990,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P7.1',
         titulo: 'La máquina de 10 por mes',
-        descripcion: 'Mira el video (7 min): de la primera venta al sistema recurrente. Qué medir cada semana (interesados, llamadas, cierres), cuándo ajustar el anuncio, cuándo subir el presupuesto, y qué delegar primero. Si el video no está, tu Mentor te lo cuenta.',
+        descripcion: 'Mira el video: de la primera venta al sistema recurrente. Qué medir cada semana (interesados, llamadas, cierres), cuándo ajustar el anuncio, cuándo subir el presupuesto, y qué delegar primero. Si el video no está, tu Mentor te lo cuenta.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '7 min',
