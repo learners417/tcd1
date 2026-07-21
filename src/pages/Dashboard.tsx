@@ -1,3 +1,4 @@
+import CadenaADN from '../components/CadenaADN';
 import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
@@ -321,6 +322,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           </div>
         );
       })()}
+
+      {/* S10 — La Cadena del ADN: el ikigai encendiéndose */}
+      <CadenaADN />
 
       {/* LA SESIÓN — el único plato */}
       <div className="space-y-6">
