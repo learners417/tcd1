@@ -19,6 +19,20 @@ export interface CampoInput {
   precargar?: keyof ProfileV2;
 }
 
+/* ══ S9 · EL CONSTRUCTOR DEL ADN — la IA propone, el fundador elige ══ */
+export interface FaseOpcion { titulo: string; significado: string }
+export interface FaseBloque { titulo: string; contenido: string }
+export interface ConstructorFases {
+  /** Título de la pantalla de elección (ej: "Elige el nombre de tu método"). */
+  etiquetaOpciones: string;
+  /** Prompt que devuelve SOLO un JSON array de 3-5 opciones {titulo, significado}. */
+  promptOpciones: (inputs: Record<string, string>, perfil: Partial<ProfileV2>) => string;
+  /** Prompt que, con la opción elegida, devuelve SOLO un JSON array de bloques {titulo, contenido}. */
+  promptBloques: (eleccion: FaseOpcion, inputs: Record<string, string>, perfil: Partial<ProfileV2>) => string;
+  /** Al sellar, estos campos del perfil se escriben (el ADN viaja de vuelta). */
+  camposPerfil?: { principal?: string; bloques?: string };
+}
+
 export interface Herramienta {
   id: string;
   grupo: GrupoHerramienta;
@@ -29,6 +43,8 @@ export interface Herramienta {
   inputs: CampoInput[];
   promptTemplate: (inputs: Record<string, string>, perfil: Partial<ProfileV2>) => string;
   outputLabel: string;
+  /** S9: si existe, la herramienta usa el flujo Constructor (opciones → bloques → sello). */
+  constructorFases?: ConstructorFases;
 }
 
 /** Maps emoji strings to lucide icon names for herramientas */
@@ -1137,6 +1153,23 @@ Al final:
 const GRUPO_D: Herramienta[] = [
   {
     id: 'H-P4.2d',
+    constructorFases: {
+      etiquetaOpciones: 'Elige tu recurso para regalar',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}\nFormato elegido: ${inputs.formato ?? 'guía'}\nTAREA: proponer 3 IDEAS de recurso para regalar a cambio de su palabra clave (el título del recurso + el resultado pequeño y real que la persona se lleva hoy).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","significado":"..."}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
+
+Palabra clave del recurso: ${inputs.palabra_recurso ?? 'GUIA'}. Formato: ${inputs.formato ?? 'guía en PDF'}.\nTAREA: crear el recurso entero como piezas. Exactamente 3 bloques: 1) El recurso completo (la guía de 700-1100 palabras lista para PDF, o el guion del video si eligió video: dolor → los 3 errores → el camino en 3-4 pasos con mini-acción → la victoria de hoy → invitación a la palabra CONSULTA), 2) El guion de tu VSL (3-5 min, hablado y natural: dolor → por qué lo viejo falla → tu método → prueba → agenda), 3) Los 3 mensajes de tu agente (entrega cálida + valor al día siguiente + invitación a la consulta al tercer día, listos para pegar).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","contenido":"..."}]`,
+    },
     grupo: 'D',
     titulo: 'Tu Recurso Principal',
     descripcion:
@@ -1909,6 +1942,24 @@ Genera un párrafo de 150-200 palabras que presente a este profesional. Usa tono
   // ─── P1.3: Historia en 3 versiones ──────────────────────────────────────────
   {
     id: 'H-P1.3',
+    constructorFases: {
+      etiquetaOpciones: 'Elige la versión de tu historia',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+Su origen (si está cargado): ${perfil.historia_origen ?? 'usar lo que sepas del contexto'}\nTAREA: proponer 3 VERSIONES de su historia de origen (el enfoque narrativo + la primera frase con la que arranca). Una más íntima, una más profesional, una más cruda. Todas verdaderas, cero drama inventado.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","significado":"..."}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: escribir la historia completa en esa versión, como piezas. Exactamente 4 bloques: 1) El antes (quién era y qué dolía), 2) El quiebre (el momento que lo cambió), 3) El después (quién es hoy y qué hace distinto), 4) Cómo contarla en 30 segundos (la versión hablada corta, para presentarse).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","contenido":"..."}]`,
+      camposPerfil: { bloques: 'historia_origen' },
+    },
     grupo: 'A' as GrupoHerramienta,
     titulo: 'Generador de Historia en 3 versiones',
     descripcion: 'Genera tu historia en 300, 150 y 50 palabras a partir de tu línea de tiempo.',
@@ -2078,6 +2129,22 @@ El avatar tiene que ser una persona real con una vida real, no "profesional de 3
   // ─── P5.2: Definidor de Nicho y PUV ────────────────────────────────────────
   {
     id: 'H-P5.2',
+    constructorFases: {
+      etiquetaOpciones: 'Elige tu PUV — la frase que te define',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+TAREA: proponer la PUV (propuesta única de valor) de este profesional: UNA frase que diga a quién ayuda + qué transformación logra + qué lo hace distinto. Escrita con las palabras de su paciente, no con jerga. Directa, para la primera línea de su bio.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 5 opciones:
+[{"titulo":"La frase PUV completa","significado":"Por qué esta versión le calza a su ADN y a su paciente ideal"}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ su PUV: "${eleccion.titulo}".
+
+TAREA: dejarla lista para usar. Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con exactamente 3 bloques:
+[{"titulo":"Tu PUV","contenido":"La frase final, pulida"},{"titulo":"Versión para tu bio","contenido":"La misma idea en máximo 150 caracteres, lista para pegar en Instagram"},{"titulo":"Cómo decirla en voz alta","contenido":"Cómo presentarse con esta PUV en 10 segundos, hablado y natural"}]`,
+      camposPerfil: { principal: 'posicionamiento' },
+    },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Definidor de Nicho y PUV',
     descripcion: 'Definí tu nicho y creá tu propuesta de valor única.',
@@ -2139,6 +2206,23 @@ Sé específico. Si la PUV podría ser dicha por cualquier colega, no está list
   // ─── P6.3: Constructor de Matriz A→B→C ──────────────────────────────────────
   {
     id: 'H-P6.3',
+    constructorFases: {
+      etiquetaOpciones: 'Elige el dolor central de tu paciente',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+TAREA: proponer 3 LECTURAS del dolor central de su paciente ideal (el dolor que más mueve, dicho con las palabras del paciente + por qué ese es EL dolor según su especialidad y su historia).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","significado":"..."}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: construir su Matriz ABC desde ese dolor central. Exactamente 3 bloques: 1) Matriz A — los dolores (5-7 frases textuales como las diría el paciente), 2) Matriz B — lo que ya intentó y falló (y por qué no alcanzó), 3) Matriz C — la transformación (la vida después, concreta y sensorial).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","contenido":"..."}]`,
+    },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Constructor de Matriz A→B→C',
     descripcion: 'Genera la matriz completa del dolor, obstáculos y resultado.',
@@ -2190,6 +2274,24 @@ El Estado B tiene que ser tan específico que si el paciente lo lee, diga "eso s
   // ─── P7.3: Generador de Método ──────────────────────────────────────────────
   {
     id: 'H-P7.3',
+    constructorFases: {
+      etiquetaOpciones: 'Elige el nombre de tu método',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+TAREA: proponer NOMBRES para el método propio de este profesional, construidos desde SU ADN (su historia, su herida sanada, su paciente ideal, su especialidad). Nombres con alma y con venta: memorables, pronunciables, que un paciente entienda en 3 segundos.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 4 opciones:
+[{"titulo":"Nombre del método (con sigla si suma)","significado":"En 2 líneas: qué significa y por qué le calza a ESTE profesional según su ADN"}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ el nombre de su método: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: construir los pasos de ese método (5 a 7), como un camino con principio y fin que su paciente recorre. Cada paso: nombre corto y potente + qué pasa ahí y qué logra el paciente (3-4 líneas, lenguaje del paciente, cero jerga).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"Paso 1 — Nombre del paso","contenido":"Qué pasa en este paso y qué logra el paciente"}]`,
+      camposPerfil: { principal: 'metodo_nombre', bloques: 'metodo_pasos' },
+    },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Generador de Método',
     descripcion: 'Genera 5 opciones de nombre + 3-7 pasos con descripción.',
@@ -2220,6 +2322,24 @@ Paso 1: [nombre] — [qué es y por qué existe]
   // ─── P8.2: Diseñador de Oferta Mid ──────────────────────────────────────────
   {
     id: 'H-P8.2',
+    constructorFases: {
+      etiquetaOpciones: 'Elige el ángulo de tu oferta',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}\nTAREA: proponer 4 ÁNGULOS para su programa de 1.000 USD (el nombre del programa + desde qué promesa central se vende). Construidos desde su método, su paciente ideal y la transformación real. Nombres que un paciente entienda en 3 segundos.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","significado":"..."}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: construir la oferta completa de ese programa como piezas. Exactamente 5 bloques, en este orden: 1) La promesa (el resultado y el plazo, en lenguaje del paciente), 2) Lo que incluye (los entregables concretos), 3) Los bonos (2-3, cada uno atacando una objeción real), 4) La garantía (asume el riesgo que el paciente no quiere cargar), 5) El precio y cómo se paga (1.000 USD, opciones de pago dignas, sin descuentos por miedo).
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
+[{"titulo":"...","contenido":"..."}]`,
+      camposPerfil: { principal: 'oferta_mid' },
+    },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Diseñador de Oferta Mid',
     descripcion: 'El producto principal. Se construye primero.',
