@@ -1,3 +1,6 @@
+import BotonAudio from './sesion/BotonAudio';
+import { getOrigen, setOrigen } from '../lib/origen';
+import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
 import React, { useState } from 'react';
 import { ArrowRight, Eye, EyeOff, Loader2, CheckCircle2, Sparkles, Map, Bot, MessageSquare, BookOpen, LockKeyhole, UserCircle, Rocket } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -11,7 +14,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'diagnostico' | 'welcome' | 'pacto' | 'guide';
+type Step = 'password' | 'profile' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -24,7 +27,7 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStep] = useState<Step>('password');
@@ -37,6 +40,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [dxEstilo, setDxEstilo] = useState<'hueso' | 'guantes' | ''>('');
   const [dxFe, setDxFe] = useState<'si' | 'no' | ''>('');
   const [dxSaving, setDxSaving] = useState(false);
+  // ── S6: las siembras del ikigai ──
+  const [ogPorque, setOgPorque] = useState('');
+  const [ogHerida, setOgHerida] = useState('');
+  const [ogPaciente, setOgPaciente] = useState('');
+  const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
+  const [pqIni, setPqIni] = useState('');
 
   const guardarDiagnostico = async () => {
     if (!dxAvatar) return;
@@ -56,7 +65,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
       }
     } catch { /* no bloqueamos el flujo */ }
     setDxSaving(false);
-    setStep('welcome');
+    setStep(getOrigen().porque ? 'welcome' : 'origen'); // nada se pregunta dos veces
   };
   // ── El Pacto (F3) ──
   const [pactoTexto, setPactoTexto] = useState('');
@@ -458,6 +467,82 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               className="w-full py-3.5 rounded-xl bg-gold text-ink font-bold text-sm hover:bg-goldhi transition-colors disabled:opacity-40"
             >
               {dxSaving ? 'Guardando…' : 'Continuar →'}
+            </button>
+          </div>
+        )}
+
+        {/* ── S6 · SIEMBRA 2: TU ORIGEN — de aquí nace todo ── */}
+        {step === 'origen' && (
+          <div className="space-y-6 fade-rise">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
+              <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tres preguntas — de aquí nace todo</h2>
+              <p className="text-sm text-cream/55 mt-1">Tu historia contiene tus dones, y tus dones señalan a quién vienes a servir. Puedes responder hablando.</p>
+            </div>
+            {[
+              { v: ogPorque, set: setOgPorque, q: '1 · ¿Por qué elegiste esta profesión?', ph: 'Lo que te trajo hasta acá…' },
+              { v: ogHerida, set: setOgHerida, q: '2 · ¿Qué herida propia sanaste (o sigues sanando)?', ph: 'Casi siempre, tu paciente ideal es tu yo del pasado…' },
+              { v: ogPaciente, set: setOgPaciente, q: '3 · ¿Qué paciente no te olvidas, y por qué?', ph: 'Esa historia es tu prueba de que tu trabajo transforma…' },
+            ].map((item, i) => (
+              <div key={i}>
+                <p className="text-sm font-medium text-cream/85 mb-2">{item.q}</p>
+                <textarea value={item.v} onChange={(e) => item.set(e.target.value)} rows={3} placeholder={item.ph}
+                  className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
+                <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => item.set((item.v ? item.v + '\n' : '') + t)} /></div>
+              </div>
+            ))}
+            <button
+              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep('rueda'); }}
+              className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
+            >
+              Grabar en mi ADN y seguir →
+            </button>
+          </div>
+        )}
+
+        {/* ── S6 · SIEMBRA 3: TU RUEDA + TU PARA QUÉ — la foto vital de partida ── */}
+        {step === 'rueda' && (
+          <div className="space-y-6 fade-rise">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
+              <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Rueda de la Vida — el día 90 la vas a mirar</h2>
+              <p className="text-sm text-cream/55 mt-1">Un toque por dimensión: ¿cómo está hoy tu vida, del 1 al 10? No viniste solo a hacer dinero.</p>
+            </div>
+            <div className="space-y-3">
+              {DIMENSIONES_RUEDA.map((d) => {
+                const v = ruedaIni[d.id];
+                return (
+                  <div key={d.id}>
+                    <div className="flex items-baseline justify-between mb-1">
+                      <p className="text-xs text-cream/80">{d.emoji} {d.label}</p>
+                      <p className="text-[11px] text-cream/50">{typeof v === 'number' ? v + '/10' : '—'}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 10 }).map((_, i) => (
+                        <button key={i} type="button" onClick={() => setRuedaIni((p) => ({ ...p, [d.id]: i + 1 }))}
+                          className={'h-4 flex-1 rounded transition-colors min-w-0 ' + (typeof v === 'number' && i < v ? 'bg-gold' : 'bg-cream/10 hover:bg-cream/20')}
+                          aria-label={d.label + ' ' + (i + 1)} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">Y tu Para Qué: ¿qué vas a crear con el tiempo, el dinero y la energía que recuperes?</p>
+              <textarea value={pqIni} onChange={(e) => setPqIni(e.target.value)} rows={3} placeholder="Para qué es todo esto…"
+                className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
+              <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => setPqIni((p) => (p ? p + '\n' : '') + t)} /></div>
+            </div>
+            <button
+              onClick={() => {
+                if (Object.keys(ruedaIni).length > 0) guardarMedicion(ruedaIni);
+                if (pqIni.trim()) setParaQue(pqIni.trim());
+                setStep('welcome');
+              }}
+              className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
+            >
+              Grabar mi foto de partida →
             </button>
           </div>
         )}

@@ -40,7 +40,7 @@ export default function DetectorHumo() {
 
   if (frios.length === 0) return null;
 
-  const msg = (n: string) => `Hola ${n.split(' ')[0]} 🥋 Vi que hace un par de días no entras al dojo — y no te escribo para retarte: te escribo porque los días sin ganas son exactamente los que te hacen cinturón negro. ¿Qué te frenó — la tarea, o lo que la tarea te hace sentir? Contame. ¿Te llamo 5 minutos hoy?`;
+  const msg = (n: string) => `Hola ${n.split(' ')[0]} 🥋 Vi que hace un par de días no entras al dojo — y no te escribo para retarte: te escribo porque los días sin ganas son exactamente los que te hacen cinturón negro. ¿Qué te frenó — la tarea, o lo que la tarea te hace sentir? Cuéntame. ¿Te llamo 5 minutos hoy?`;
 
   return (
     <div className="card-panel p-5 border border-danger/25 mb-6">

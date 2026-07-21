@@ -22,7 +22,7 @@ interface GraduacionProps {
   comparacion?: Comparacion;
 }
 
-/** Slot: pegá acá la URL de tu video de graduación (VOZ MAESTRO). */
+/** Slot: pega acá la URL de tu video de graduación (VOZ MAESTRO). */
 const GRADUACION_VIDEO_URL = '';
 
 export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId, perfil, comparacion }: GraduacionProps) {
@@ -87,7 +87,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
               </span>
             </div>
             <p className="text-xs text-cream/55 mt-1">
-              Mirá y compartí el antes y el después de estos 90 días.
+              Mira y compartí el antes y el después de estos 90 días.
             </p>
           </button>
         )}

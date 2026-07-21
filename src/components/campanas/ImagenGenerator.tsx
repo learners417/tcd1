@@ -176,7 +176,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       // (~1MB tras compresion sugiere imagen muy compleja o muy grande).
       if (base64SizeBytes(compressed.base64) > 1024 * 1024) {
         toast.warning(
-          `${original.fileName} pesa ${formatBytes(base64SizeBytes(compressed.base64))} aun comprimida — si sumas varias podes superar el limite del servidor.`,
+          `${original.fileName} pesa ${formatBytes(base64SizeBytes(compressed.base64))} aun comprimida — si sumas varias puedes superar el limite del servidor.`,
         );
       }
     }
@@ -354,7 +354,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           if (!narrative) {
             if (necesitaTitulos) {
               throw new Error(
-                `No se pudo armar el hilo narrativo del carrusel${narrativeError ? ` (${narrativeError})` : ''}. Probá de nuevo o simplifica el tema.`
+                `No se pudo armar el hilo narrativo del carrusel${narrativeError ? ` (${narrativeError})` : ''}. Prueba de nuevo o simplifica el tema.`
               );
             } else {
               toast.warning(
@@ -549,7 +549,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
   // ─── Edicion sutil con IA ──────────────────────────────────────────────────
   const applyEdit = useCallback(async () => {
-    if (!editPrompt.trim()) { toast.error('Describi el cambio que queres aplicar'); return; }
+    if (!editPrompt.trim()) { toast.error('Describi el cambio que quieres aplicar'); return; }
     if (images.length === 0) return;
 
     const idx = previewIdx;

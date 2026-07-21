@@ -107,7 +107,7 @@ export default function FotoDia90({
         </div>
 
         <p className="text-center text-[11px] text-cream/55 mt-3">
-          Sacá una captura de esta tarjeta para compartir tu logro.
+          Saca una captura de esta tarjeta para compartir tu logro.
         </p>
       </div>
     </div>

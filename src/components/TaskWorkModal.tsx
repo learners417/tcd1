@@ -198,7 +198,7 @@ export default function TaskWorkModal({
       setModo('revision');
       setShowInputs(false);
     } catch {
-      toast.error('Error al generar. Intentá de nuevo.');
+      toast.error('Error al generar. Intenta de nuevo.');
       setModo('form');
     }
   }, [camposCompletos, geminiKey, herramienta, inputs, perfil]);
@@ -249,7 +249,7 @@ export default function TaskWorkModal({
       toast.success('¡Documento aprobado y guardado!');
       onApprove(textoFinal);
     } catch {
-      toast.error('Error al guardar. Intentá de nuevo.');
+      toast.error('Error al guardar. Intenta de nuevo.');
     } finally {
       setGuardando(false);
     }

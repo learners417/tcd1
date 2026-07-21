@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { X, Award, Download, ExternalLink } from 'lucide-react';
 
-/** Slot: ajustá al dominio público real de TCD si cambia. */
+/** Slot: ajusta al dominio público real de TCD si cambia. */
 const TCD_URL = 'https://tuclinicadigital.com';
 
 export default function CertificadoModal({

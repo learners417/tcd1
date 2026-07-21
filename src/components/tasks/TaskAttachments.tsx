@@ -263,7 +263,7 @@ export default function TaskAttachments({
         {uploading ? (
           <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo…</>
         ) : (
-          <><Upload className="w-3.5 h-3.5" /> Arrastrá archivos o haz clic para subir <span className="text-cream/25">(máx. 25 MB)</span></>
+          <><Upload className="w-3.5 h-3.5" /> Arrastra archivos o haz clic para subir <span className="text-cream/25">(máx. 25 MB)</span></>
         )}
       </label>
     </div>

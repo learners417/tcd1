@@ -80,7 +80,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
 
   const runEdit = useCallback(async () => {
     if (!baseImage) { toast.error('Sumi la imagen a editar'); return; }
-    if (!editInstruction.trim()) { toast.error('Describi el cambio que queres aplicar'); return; }
+    if (!editInstruction.trim()) { toast.error('Describi el cambio que quieres aplicar'); return; }
 
     setEditing(true);
     setResult(null);

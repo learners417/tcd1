@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { X, ShieldAlert, Play, Pause, Flame } from 'lucide-react';
 import type { ProfileV2 } from '../lib/supabase';
 
-/** Slot: pegá acá la URL del MP3 del Búnker (VOZ MAESTRO, ~90 seg). */
+/** Slot: pega acá la URL del MP3 del Búnker (VOZ MAESTRO, ~90 seg). */
 const BUNKER_AUDIO_URL = '';
 
 export default function BunkerModal({
@@ -70,7 +70,7 @@ export default function BunkerModal({
           </p>
           <p className="text-[15px] text-cream leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
             {nombre}, si abriste esto es porque hoy pesa. No viniste a rendirte — viniste a que te
-            recuerde quién sos. Los días sin ganas son exactamente los que te hacen cinturón negro.
+            recuerde quién eres. Los días sin ganas son exactamente los que te hacen cinturón negro.
             No te pido que hagas todo. Te pido un episodio. Uno solo. Hoy.
           </p>
           {BUNKER_AUDIO_URL ? (

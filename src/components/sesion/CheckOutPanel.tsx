@@ -93,13 +93,14 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
         </div>
       </div>
 
+      <p className="text-[11px] text-white/45 text-center">Lo de hoy queda grabado en tu ADN. Mañana, el Camino te espera con la siguiente sesión.</p>
       <button
         type="button"
         disabled={!emocion || cerrando}
         onClick={() => emocion && onCerrar({ emocion, compromisos: compromisosLimpios })}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-success text-black hover:bg-[#3ddb70]"
       >
-        <CheckCircle2 className="w-4 h-4" /> {cerrando ? 'Consolidando…' : 'Cerrar y consolidar la sesión'}
+        <CheckCircle2 className="w-4 h-4" /> {cerrando ? 'Grabando…' : 'Grabar en mi ADN y cerrar'}
       </button>
     </div>
   );

@@ -18,7 +18,7 @@ const CARTAS: Record<number, string> = {
   4: 'Verde. El árbol echó raíces: oferta, precio, garantía — todo firmado. Se abre tu Sala de Entrenamiento: ahí no se estudia, SE ENTRENA. Cámara, ventas, objeciones. A la llamada real se llega entrenado — nunca improvisando.',
   5: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',
   6: 'Azul. La campaña está ENCENDIDA — tu clínica le habla al mundo mientras dormís. Ahora empieza la caza: tres números por semana, paciencia de cazador, y el precio se dice UNA vez. El que pregunta, dirige.',
-  7: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarcá este día.',
+  7: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarca este día.',
   8: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Y dejaste de estar solo: eres parte de los Sanadores Libres, los que se negaron a elegir entre sanar y cobrar con dignidad. Tu clínica sigue el día 91, y tú ya no eres la Foto de Partida. Ahora te toca abrirle la puerta al que recién empieza. Nos vemos del otro lado. 🥋',
 };
 

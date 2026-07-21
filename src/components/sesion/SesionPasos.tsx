@@ -5,6 +5,7 @@
  * micrófono en las preguntas abiertas (idea #5) · Modo 15 min respeta el
  * paso esencial (idea #7) · el Mensaje al Futuro se sella el D1 (idea #10).
  */
+import BotonAudio from './BotonAudio';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowLeft, Mic, MicOff, Check, Sparkles, Pencil, Upload, Loader2 } from 'lucide-react';
 import type { SesionGuiada, PasoGuiado } from '../../lib/sesionesGuiadas';
@@ -354,10 +355,11 @@ export default function SesionPasos({ sesion, perfil, userId, onFirmar, onComple
             </div>
           ) : (
             <>
-              {editandoArtefacto ? (
+              {editandoArtefacto ? (<>
                 <textarea value={artefacto} onChange={(e) => setArtefacto(e.target.value)} rows={9}
                   className="w-full bg-white/[0.04] border border-gold/30 rounded-2xl px-4 py-3.5 text-sm text-white/90 leading-relaxed focus:outline-none focus:border-gold/60 mb-3" />
-              ) : (
+                <div className="flex justify-end -mt-1 mb-2"><BotonAudio onTexto={(t) => setArtefacto((prev) => (prev ? prev + '\n' + t : t))} /></div>
+              </>) : (
                 <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.06] to-transparent p-5 mb-3">
                   <p className="text-sm text-white/85 leading-relaxed whitespace-pre-line">{artefacto}</p>
                 </div>

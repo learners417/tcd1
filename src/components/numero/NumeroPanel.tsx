@@ -143,8 +143,8 @@ export default function NumeroPanel({ userId }: Props) {
         <>
           {/* Simulador de precio nuevo */}
           <section className="rounded-2xl border border-gold/10 bg-panel p-5">
-            <div className="flex items-center gap-2 mb-1"><TrendingUp className="w-5 h-5 text-gold" /><h2 className="text-lg font-semibold text-cream">Simulá tu precio nuevo</h2></div>
-            <p className="text-sm text-cream/65 mb-4">Movelo y mirá qué cambia. (Es una estimación, no una promesa.)</p>
+            <div className="flex items-center gap-2 mb-1"><TrendingUp className="w-5 h-5 text-gold" /><h2 className="text-lg font-semibold text-cream">Simula tu precio nuevo</h2></div>
+            <p className="text-sm text-cream/65 mb-4">Muévelo y mira qué cambia. (Es una estimación, no una promesa.)</p>
             <div className="flex items-baseline justify-between mb-2">
               <span className="text-3xl font-semibold text-cream tabular-nums">{money(precioNuevo)}</span>
               {delta > 0 && <span className="text-sm text-success font-medium">+{money(delta)} vs hoy</span>}
@@ -194,12 +194,12 @@ export default function NumeroPanel({ userId }: Props) {
                 <p className="text-3xl font-semibold text-gold tabular-nums">{money(precioNuevo)}</p>
               </div>
             </div>
-            <div className="bg-panel px-5 py-2.5 text-center text-[11px] text-cream/45">Sacale una captura y compartila. 🌱</div>
+            <div className="bg-panel px-5 py-2.5 text-center text-[11px] text-cream/45">Sácale una captura y compártela. 🌱</div>
           </section>
 
           {/* Generador de mensajes */}
           <section className="rounded-2xl border border-gold/10 bg-panel p-5 space-y-4">
-            <h2 className="text-lg font-semibold text-cream">Anuncialo hoy</h2>
+            <h2 className="text-lg font-semibold text-cream">Anúncialo hoy</h2>
             {([
               ['pac', 'Para tus pacientes actuales', msgPacientes],
               ['ig', 'Historia de Instagram', msgIG],

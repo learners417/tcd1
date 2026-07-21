@@ -177,7 +177,7 @@ export default function BuyCreditsModal({
       onApprove: handleApprove,
       onError: (err: unknown) => {
         console.error('[paypal] onError', err);
-        toast.error('Error en el pago. Probá de nuevo.');
+        toast.error('Error en el pago. Prueba de nuevo.');
       },
       onCancel: () => {
         toast.info('Pago cancelado');
@@ -246,14 +246,14 @@ export default function BuyCreditsModal({
             <div className="rounded-xl border border-danger/30 bg-danger/10 p-4 flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
               <div className="text-sm text-white/80">
-                No hay packs disponibles en este momento. Contactá al equipo.
+                No hay packs disponibles en este momento. Contacta al equipo.
               </div>
             </div>
           ) : (
             <>
               <div>
                 <h3 className="text-sm font-semibold text-white/80 mb-3">
-                  Elegí un pack
+                  Elige un pack
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {packs.map((pack) => {
@@ -326,7 +326,7 @@ export default function BuyCreditsModal({
 
                   {PAYPAL_ENV === 'sandbox' && (
                     <div className="mt-3 text-[11px] text-white/55 text-center">
-                      Modo sandbox · usá una cuenta de prueba de PayPal Developer
+                      Modo sandbox · usa una cuenta de prueba de PayPal Developer
                     </div>
                   )}
                 </div>

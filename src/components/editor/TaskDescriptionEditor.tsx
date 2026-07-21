@@ -113,14 +113,14 @@ export default function TaskDescriptionEditor({
                 <RichTextEditor
                   value={value}
                   onChange={onChange}
-                  placeholder={placeholder ?? 'Escribí algo, o presioná "/" para opciones…'}
+                  placeholder={placeholder ?? 'Escribe algo, o presiona "/" para opciones…'}
                   autoFocus
                   minHeight="60vh"
                 />
               </div>
 
               <p className="text-[11px] text-cream/45 mt-4 text-center">
-                Tipeá <span className="font-mono text-gold/70">/</span> para insertar títulos, listas, checklists y más. Los cambios se guardan al hacer clic en "Listo" y luego "Guardar cambios".
+                Escribe <span className="font-mono text-gold/70">/</span> para insertar títulos, listas, checklists y más. Los cambios se guardan al hacer clic en "Listo" y luego "Guardar cambios".
               </p>
             </div>
           </div>

@@ -111,7 +111,7 @@ export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel 
   const buildSystemPrompt = (): string => {
     const phaseInstructions: Record<WizardPhase, string> = {
       cliente: `FASE ACTUAL: Cliente (1/6)
-Ya tenes el ADN del profesional arriba. Usa esos datos.
+Ya tienes el ADN del profesional arriba. Usa esos datos.
 Solo necesitas confirmar o completar:
 - Nombre de la campaña (sugerir uno basado en el nicho)
 - Ticket promedio del servicio (si no esta en las ofertas)
@@ -188,8 +188,8 @@ ${adnBlock}
 ${phaseInstructions[currentPhase]}
 
 REGLAS:
-- IMPORTANTE: Ya tenes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
-- Si la fase requiere datos que ya tenes del ADN, usalos directamente y confirma con el usuario
+- IMPORTANTE: Ya tienes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
+- Si la fase requiere datos que ya tienes del ADN, usalos directamente y confirma con el usuario
 - Solo pregunta lo que NO esta en el ADN (presupuesto publicitario, nombre especifico de la campaña, etc.)
 - Pregunta UNA cosa a la vez
 - Se conciso pero completo

@@ -24,7 +24,7 @@ export default function ModoHueco({ onNavigate }: Props) {
   let destino: string;
 
   if (enCurso) {
-    titulo = 'Retomá donde quedaste';
+    titulo = 'Retoma donde quedaste';
     detalle = `"${enCurso.metaTitulo}" está pausada, esperándote. Todo quedó guardado — 10 minutos de avance valen más que cero.`;
     cta = 'Retomar la sesión';
     destino = 'roadmap';
@@ -34,7 +34,7 @@ export default function ModoHueco({ onNavigate }: Props) {
     cta = 'Ir a El Camino';
     destino = 'roadmap';
   } else {
-    titulo = 'Contale al Mentor dónde estás';
+    titulo = 'Cuéntale al Mentor dónde estás';
     detalle = 'Dos líneas alcanzan: qué hiciste hoy, qué te frenó. El Mentor con contexto te destraba mejor que el Mentor adivinando.';
     cta = 'Abrir el Mentor';
     destino = 'coach';
@@ -43,7 +43,7 @@ export default function ModoHueco({ onNavigate }: Props) {
   return (
     <div className="rounded-2xl border border-gold/20 bg-gold/[0.04] p-4">
       <p className="text-[11px] font-bold uppercase tracking-widest text-gold flex items-center gap-1.5 mb-1.5">
-        <Zap className="w-3.5 h-3.5" /> ¿Tenés solo 10-15 minutos?
+        <Zap className="w-3.5 h-3.5" /> ¿Tienes solo 10-15 minutos?
       </p>
       <p className="text-sm font-semibold text-cream">{titulo}</p>
       <p className="text-xs text-cream/55 mt-1 leading-relaxed">{detalle}</p>

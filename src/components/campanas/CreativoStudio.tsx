@@ -157,7 +157,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
           ) : saved ? (
             <><CheckCircle2 className="w-3.5 h-3.5 text-success" /><span className="text-cream/70">Guardado en historial</span></>
           ) : copies.length === 0 ? (
-            <span className="text-cream/55">Generá el copy primero</span>
+            <span className="text-cream/55">Genera el copy primero</span>
           ) : (
             <span className="text-cream/55">Se guarda automáticamente al generar la imagen</span>
           )}

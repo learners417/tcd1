@@ -60,7 +60,7 @@ export default function CampanasDashboard({
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
               <Megaphone className="w-8 h-8 text-gold" />
             </div>
-            <p className="text-cream/75 mb-2">Todavia no tenes campanas</p>
+            <p className="text-cream/75 mb-2">Todavia no tienes campanas</p>
             <p className="text-sm text-cream/45 mb-6">
               Crea tu primera campana para empezar a generar creativos con IA
             </p>

@@ -124,7 +124,7 @@ interface RichTextEditorProps {
 export default function RichTextEditor({
   value,
   onChange,
-  placeholder = 'Escribí algo o presioná "/" para opciones…',
+  placeholder = 'Escribe algo o presiona "/" para opciones…',
   autoFocus = false,
   minHeight = '140px',
   fillParent = false,
@@ -346,7 +346,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive('blockquote'))} title="Cita"><Quote className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={btn(editor.isActive('code'))} title="Código en línea"><Code className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={setLink} className={btn(editor.isActive('link'))} title="Enlace"><Link2 className="w-3.5 h-3.5" /></button>
-      <span className="ml-auto text-[11px] text-cream/45 hidden sm:inline">Tip: tipeá "/" para más opciones</span>
+      <span className="ml-auto text-[11px] text-cream/45 hidden sm:inline">Tip: escribe "/" para más opciones</span>
     </div>
   );
 }

@@ -172,14 +172,14 @@ export default function TaskHerramientaIA({
         const text = await generateText({
           prompt: promptGenerico,
           systemInstruction:
-            'Eres un copywriter especialista en profesionales de la salud. Generás contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
+            'Eres un copywriter especialista en profesionales de la salud. Generas contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
         });
         setOutput(text);
         setModo('revision');
         setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al generar: ${msg}. Intentá de nuevo.`);
+        toast.error(`Error al generar: ${msg}. Intenta de nuevo.`);
         setModo('form');
       }
       return;
@@ -195,7 +195,7 @@ export default function TaskHerramientaIA({
         setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al generar: ${msg}. Intentá de nuevo.`);
+        toast.error(`Error al generar: ${msg}. Intenta de nuevo.`);
         setModo('form');
       }
     } else {

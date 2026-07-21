@@ -40,7 +40,7 @@ export default function MontajeView({ perfil }: Props) {
       setMessages([{
         id: 'init',
         role: 'assistant',
-        content: `Hola! Soy **KAI**, tu asistente de montaje de campañas en Meta Ads.\n\nVamos a configurar tu campaña paso a paso. Empezamos con el **paso 1: ${MONTAJE_STEPS[0].label}**.\n\nContame: ya tenes un Business Manager configurado o necesitas crear uno desde cero?`,
+        content: `Hola! Soy **KAI**, tu asistente de montaje de campañas en Meta Ads.\n\nVamos a configurar tu campaña paso a paso. Empezamos con el **paso 1: ${MONTAJE_STEPS[0].label}**.\n\nContame: ya tienes un Business Manager configurado o necesitas crear uno desde cero?`,
         timestamp: new Date().toISOString(),
       }]);
     }

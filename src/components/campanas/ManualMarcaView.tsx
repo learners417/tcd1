@@ -279,7 +279,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       <Field
         icon={Type}
         label="Tipografia"
-        hint="Familia + peso + uso. Podes mencionar varias fuentes y cuando usarlas."
+        hint="Familia + peso + uso. Puedes mencionar varias fuentes y cuando usarlas."
         value={draft.tipografia}
         onChange={(v) => setDraft((d) => ({ ...d, tipografia: v }))}
         placeholder="Inter bold para titulares, Inter regular para cuerpo, alineacion izquierda"
