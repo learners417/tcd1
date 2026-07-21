@@ -313,6 +313,14 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
   const taskRef = useRef<HTMLDivElement>(null);
 
   // ─── Seed enriquecido con videos reales de programa_videos ─────────────
+  // ── Gating por plan: EL NÚMERO ($27) abre P0-P1; el resto queda visible y bloqueado ──
+  const planLimitado = useMemo(() => {
+    try {
+      const p = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
+      return p === 'ELNUMERO';
+    } catch { return false; }
+  }, []);
+
   const seedConVideos: RoadmapPilar[] = useMemo(() => {
     if (Object.keys(videosPorPilar).length === 0) return SEED_ROADMAP_V2;
     return SEED_ROADMAP_V2.map(pilar => {
@@ -490,6 +498,10 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           desbloqueado = qaVerde;
           break;
       }
+      // Plan EL NÚMERO: su tramo es P0-P1; lo demás se ve pero no se abre.
+      // Esa vista bloqueada ES el mapa del camino completo (la venta interna).
+      if (planLimitado && pilar.numero > 1) desbloqueado = false;
+
 
       if (!desbloqueado) return 'bloqueado';
       if (completadasPilar >= totalMetas) return 'completado';

@@ -1136,6 +1136,60 @@ Al final:
 
 const GRUPO_D: Herramienta[] = [
   {
+    id: 'H-P4.2d',
+    grupo: 'D',
+    titulo: 'Tu Recurso Principal',
+    descripcion:
+      'Genera tu recurso para regalar (la guía que entrega tu palabra clave), el guion de tu VSL y los mensajes de entrega de tu agente. Todo desde tu método y tu paciente ideal — listo para usar.',
+    emoji: '🎁',
+    inputs: [
+      {
+        id: 'formato',
+        label: '¿En qué formato vas a regalar tu recurso?',
+        tipo: 'select',
+        opciones: ['Guía en PDF (te la genero lista para imprimir)', 'Video de YouTube (te genero el guion)'],
+        required: true,
+      },
+      {
+        id: 'regalo',
+        label: '¿Qué resultado pequeño regala tu recurso? (opcional — si lo dejas vacío, lo propongo yo)',
+        tipo: 'textarea',
+        placeholder: 'ej: que la persona entienda por qué su ansiedad vuelve, y salga con 1 acción para hoy',
+      },
+      {
+        id: 'palabra_recurso',
+        label: 'Tu palabra clave del RECURSO (la que definiste con Sofi)',
+        tipo: 'text',
+        placeholder: 'ej: GUIA',
+        required: true,
+      },
+    ],
+    promptTemplate: (inputs, perfil) => `${contextoBase(perfil)}
+
+Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}
+Pasos del método: ${perfil.metodo_pasos ?? 'no cargados'}
+Dolores del paciente ideal (Matriz A): ${perfil.matriz_a ?? 'no cargados'}
+Transformación (Matriz C): ${perfil.matriz_c ?? 'no cargada'}
+Oferta principal: ${perfil.oferta_mid ?? 'programa de 1.000 USD'}
+
+TAREA: crear el RECURSO PRINCIPAL de este profesional — lo que regala a cambio de su palabra clave "${inputs.palabra_recurso}". Formato elegido: ${inputs.formato}. Resultado pequeño que debe regalar: ${inputs.regalo || 'proponlo tú: una victoria chica, real y alcanzable hoy, alineada al método'}.
+
+Genera TRES partes, con estos títulos exactos en markdown:
+
+## PARTE 1 — TU RECURSO
+${String(inputs.formato).startsWith('Video') ? 'El guion completo del video de YouTube (5-8 min, hablado y natural, de frente): gancho con el dolor en la primera frase → por qué lo que la persona intenta no alcanza (los 3 errores) → el camino en 3-4 pasos (el qué de su método, no el cómo completo) → una acción para hoy → cierre: invita a escribir la palabra CONSULTA o agendar. Marca las tomas con [PANTALLA] cuando convenga mostrar texto.' : 'La guía completa lista para PDF (700-1100 palabras): título con el beneficio → introducción que nombra el dolor con las palabras del paciente → los 3 errores que comete quien lo intenta solo → el camino en 3-4 pasos (el qué de su método, con una mini-acción por paso) → cierre con la victoria de hoy → última página: invitación clara a la VSL o a escribir la palabra CONSULTA.'}
+
+## PARTE 2 — EL GUION DE TU VSL
+Guion de 3-5 minutos para su página de agenda, hablado y natural: el dolor (30 seg) → por qué lo viejo falla (45 seg) → su método, paso a paso en titulares (90 seg) → prueba o su historia corta (30 seg) → invitación a agendar (30 seg). Frases cortas. Cero rodeo.
+
+## PARTE 3 — LOS MENSAJES DE TU AGENTE
+Los 3 mensajes que su agente envía cuando alguien escribe "${inputs.palabra_recurso}": (1) entrega del recurso, cálido y breve; (2) al día siguiente: un consejo de valor + pregunta genuina; (3) al tercer día: invitación a la consulta con su link de agenda. Cada mensaje listo para pegar.
+
+REGLAS: tuteo neutro (tú/tienes). Prohibido usar: coach, escalar, embudo, funnel, marketing, gurú. Voz del profesional, directa, sin adornos. No inventes datos clínicos.`,
+    outputLabel: 'Tu recurso + tu VSL + los mensajes de entrega',
+  },
+
+  {
     id: 'D1',
     grupo: 'D',
     titulo: 'Bio de Instagram Optimizada',

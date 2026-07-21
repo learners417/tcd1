@@ -23,7 +23,7 @@ export interface Profile {
   email: string;
   especialidad?: string;
   fecha_inicio: string; // date as string YYYY-MM-DD
-  plan: 'DWY' | 'DFY' | 'IMPLEMENTACION';
+  plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';
   rol: 'cliente' | 'admin';
   created_at: string;
   status?: UserStatus;
@@ -363,7 +363,9 @@ export type MetaCodigo =
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
-  | 'P4.1' | 'P4.2' | 'P4.2b' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
+  | 'P4.1' | 'P4.2' | 'P4.2b'
+  | 'P4.2c'
+  | 'P4.2d' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)
@@ -383,6 +385,7 @@ export type MetaCodigo =
   // P11 · Análisis (sin cambios)
   | 'P11.1' | 'P11.2'
   | 'P3.5'
+  | 'P3.6'
   | 'P4.3b'
   | 'P4.3c'
   | 'P4.3d'

@@ -82,3 +82,53 @@ export async function contarSubieronPrecioSemana(): Promise<number> {
     return 0;
   }
 }
+
+/**
+ * EL NÚMERO es la puerta 1 del Camino: al definir su precio nuevo, el
+ * comprador del taller gana su primera punta de cinturón (blanco punta
+ * amarilla) y ve el resto del Camino. Marca P1.5 en la hoja de ruta
+ * (DB + local) y registra el hito. Idempotente y tolerante a fallos.
+ */
+export async function marcarNumeroEnElCamino(userId?: string | null): Promise<void> {
+  // Local primero: el cinturón visual se deriva de acá al instante.
+  try {
+    const raw = localStorage.getItem('tcd_hoja_ruta_v2');
+    const arr: string[] = raw ? JSON.parse(raw) : [];
+    if (!arr.includes('1-P1.5')) {
+      arr.push('1-P1.5');
+      localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(arr));
+    }
+  } catch { /* noop */ }
+
+  if (!supabase || !userId) return;
+  try {
+    await supabase.from('hoja_de_ruta').upsert(
+      {
+        usuario_id: userId,
+        pilar_numero: 1,
+        meta_codigo: 'P1.5',
+        completada: true,
+        es_estrella: false,
+        fecha_completada: new Date().toISOString().split('T')[0],
+      },
+      { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
+    );
+    await supabase.from('hitos_cinturon').upsert(
+      [{
+        usuario_id: userId,
+        cinturon: 'blanco_punta_amarilla',
+        fase: 1,
+        tipo_verificacion: 'automatico',
+        estado: 'aprobado',
+        agente: 'coach',
+        feedback_agente: 'EL NÚMERO completado: precio digno definido.',
+        aprobado_at: new Date().toISOString(),
+      }],
+      { onConflict: 'usuario_id,cinturon', ignoreDuplicates: true },
+    );
+    const { data: prof } = await supabase.from('profiles').select('cinturon').eq('id', userId).single();
+    if (!prof?.cinturon || prof.cinturon === 'blanco') {
+      await supabase.from('profiles').update({ cinturon: 'blanco_punta_amarilla' }).eq('id', userId);
+    }
+  } catch { /* red o RLS: no bloquea la herramienta */ }
+}

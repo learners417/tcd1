@@ -83,6 +83,9 @@ export async function inviteUser(email: string, nombre: string, plan: 'DWY' | 'D
 
 // Sincronizar perfil de Supabase → localStorage (fallback para páginas que aún leen localStorage)
 export function syncProfileToLocalStorage(profile: Profile): void {
+  // Espejo dedicado del plan: el gating del Camino y el tope del Mentor lo leen
+  // de acá (inmune a que el borrador del perfil pise tcd_profile sin el plan).
+  try { localStorage.setItem('tcd_plan', String(profile.plan ?? '')); } catch { /* noop */ }
   localStorage.setItem('tcd_profile', JSON.stringify({
     nombre: profile.nombre,
     email: profile.email,
