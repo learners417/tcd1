@@ -1,3 +1,4 @@
+import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useState } from 'react';
 import { getGuion } from '../../lib/guionesVideos';
 import { Play, CheckCircle2, ExternalLink } from 'lucide-react';
@@ -42,6 +43,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
           {meta.titulo}
         </h3>
         <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <TutorialTecnicoBox codigo={meta.codigo} />
       </div>
 
       {/* YouTube Embed */}

@@ -1,3 +1,4 @@
+import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
 import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
@@ -6,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import TaskChecklist from './TaskChecklist';
+import BotonAudio from '../sesion/BotonAudio';
 
 interface TaskCoachProps {
   meta: RoadmapMeta;
@@ -33,7 +35,27 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
     })();
   }, [meta.codigo, meta.evidencia_requerida]);
   const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
-  const evidenciaLista = !requiereEvidencia || evidencias > 0;
+  // El tramo de entrada (P0-P1) nunca bloquea por evidencia: el que recién llega
+  // no puede quedarse trabado subiendo un archivo. La evidencia suma, no frena.
+  const esTramoEntrada = meta.codigo.startsWith('P0') || meta.codigo.startsWith('P1');
+  const evidenciaLista = !requiereEvidencia || evidencias > 0 || esTramoEntrada;
+
+  // ── El cuaderno de la sesión: acá se vuelca el trabajo (escrito o hablado) ──
+  const KEY_NOTAS = 'tcd_notas_sesion_v1';
+  const [nota, setNota] = React.useState('');
+  const [notaGuardada, setNotaGuardada] = React.useState(false);
+  React.useEffect(() => {
+    try { setNota((JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}'))[meta.codigo] ?? ''); } catch { /* noop */ }
+  }, [meta.codigo]);
+  const guardarNota = () => {
+    try {
+      const all = JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}');
+      all[meta.codigo] = nota;
+      localStorage.setItem(KEY_NOTAS, JSON.stringify(all));
+      setNotaGuardada(true);
+      window.setTimeout(() => setNotaGuardada(false), 2500);
+    } catch { /* noop */ }
+  };
   const handleSubir = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !uid || subiendo) return;
@@ -92,6 +114,34 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             />
           </div>
         )}
+        <TutorialTecnicoBox codigo={meta.codigo} />
+
+        {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
+        {!isCompleted && (
+          <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
+            <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
+            <textarea
+              value={nota}
+              onChange={(e) => setNota(e.target.value)}
+              rows={5}
+              placeholder="Lo que trabajaste, lo que descubriste, lo que decidiste…"
+              className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
+            />
+            <div className="flex items-center justify-between mt-2">
+              <BotonAudio onTexto={(t) => setNota((p) => (p ? p + '\n' + t : t))} />
+              {notaGuardada ? (
+                <span className="text-xs text-success font-bold">Grabado en tu ADN ✓</span>
+              ) : (
+                <button type="button" onClick={guardarNota} disabled={!nota.trim()}
+                  className="text-xs font-bold text-gold hover:text-goldhi disabled:opacity-40">
+                  Grabar en mi ADN →
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
             <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
@@ -149,7 +199,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             <p className="text-xs text-cream/55 text-center mb-3 leading-relaxed">
               {evidenciaLista
                 ? 'Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.'
-                : '📎 Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
+                : 'Este paso pide una evidencia. Súbela arriba cuando puedas — no te frena para seguir.'}
             </p>
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}

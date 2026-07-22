@@ -13,7 +13,7 @@ const KEY_ULTIMO = 'tcd_ultimo_cinturon_visto';
 /** Las cartas de etapa — la voz de Javo al cruzar cada puerta. */
 const CARTAS: Record<number, string> = {
   1: 'Diste el primer paso real — el que la mayoría no da nunca. Tu punta amarilla dice una cosa: la semilla ya no es solo semilla. Se abre tu ADN del Negocio: ahí va a vivir todo lo que firmes. Cuidalo — es tu clínica naciendo.',
-  2: 'Amarillo. El sol ya pega en la tierra. Sanaste lo que nadie ve — el cuarto del dinero — y por eso lo que viene se sostiene. Se abren tu Diario y El Método: escribí lo que te pasa, no solo lo que haces. Firmeza y amorosidad, siempre juntas.',
+  2: 'Amarillo. El sol ya pega en la tierra. Sanaste lo que nadie ve — el cuarto del dinero — y por eso lo que viene se sostiene. Se abren tu Diario y El Método: escribe lo que te pasa, no solo lo que haces. Firmeza y amorosidad, siempre juntas.',
   3: 'Punta verde. Tu método ya tiene nombre — deja de ser «lo que haces» y empieza a ser un activo con tu firma. De acá en adelante, todo lo que construyas lo firma ÉL. No lo muevas. No lo muevas. No lo muevas.',
   4: 'Verde. El árbol echó raíces: oferta, precio, garantía — todo firmado. Se abre tu Sala de Entrenamiento: ahí no se estudia, SE ENTRENA. Cámara, ventas, objeciones. A la llamada real se llega entrenado — nunca improvisando.',
   5: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',

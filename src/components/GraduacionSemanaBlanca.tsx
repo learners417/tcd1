@@ -23,9 +23,9 @@ export default function GraduacionSemanaBlanca() {
     <div className="card-panel p-6 sm:p-7 border border-gold/35 bg-gradient-to-b from-gold/[0.09] to-transparent">
       <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-2">🥋 Terminaste tus 5 días</p>
       <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-        Hace cinco días cobrabas lo que te daba miedo cobrar.
+        Hace cinco días tu precio no decía lo que vale tu trabajo.
       </p>
-      <p className="text-sm text-cream/70 mt-1">Hoy tienes tu número, tu anuncio y tu defensa. Eso no se te quita más.</p>
+      <p className="text-sm text-cream/70 mt-1">Hoy tienes tu número, tu anuncio y tus respuestas. Eso ya no se discute.</p>
 
       <div className="mt-5">
         <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">
@@ -54,6 +54,15 @@ export default function GraduacionSemanaBlanca() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-5 pt-5 border-t border-cream/10">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-2">🎁 Y te dejo dos sesiones más, abiertas</p>
+        <p className="text-sm text-cream/70 leading-relaxed">
+          <strong className="text-cream/90">El dinero en el cuerpo</strong> — para que tu precio también lo sostenga tu voz, no solo tu cabeza.<br />
+          <strong className="text-cream/90">Tu creencia nueva y el Estandarte</strong> — la frase que vas a leer cada vez que dudes.
+        </p>
+        <p className="text-[11px] text-cream/45 mt-2">Están en tu Camino. Hazlas cuando quieras.</p>
       </div>
 
       <p className="text-sm text-cream/85 mt-5 leading-relaxed">

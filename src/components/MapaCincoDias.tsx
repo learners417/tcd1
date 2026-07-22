@@ -8,9 +8,9 @@ import React from 'react';
 import { planLimitado } from '../lib/adnPiezas';
 
 const DIAS = [
-  { d: 'Día 1', t: 'Tu número', s: 'lo que de verdad vale tu hora' },
-  { d: 'Días 2-4', t: 'El miedo y el guion', s: 'por qué cobras poco — y cómo se corta' },
-  { d: 'Día 5', t: 'Tu anuncio', s: 'el mensaje exacto, listo para enviar' },
+  { d: 'Día 1', t: 'Tu número', s: 'lo calculas hoy mismo, en minutos' },
+  { d: 'Días 2-4', t: 'Sostener tu precio', s: 'la parte que nadie te enseñó' },
+  { d: 'Día 5', t: 'Tu precio y tu anuncio', s: 'lo sellas y sale el mensaje, listo para enviar' },
   { d: 'Viernes', t: 'En vivo conmigo', s: 'revisamos tu precio, respondo tus dudas' },
   { d: 'Lunes', t: 'Lo cobras', s: 'con guion y sin culpa' },
 ];
@@ -23,7 +23,7 @@ export default function MapaCincoDias() {
   return (
     <div className="card-panel p-5 border border-gold/20">
       <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus 5 días, guiados</p>
-      <p className="text-xs text-cream/55 mb-4">Tu número lo sacas hoy, en minutos. Los 5 días son para lo difícil: cobrarlo.</p>
+      <p className="text-xs text-cream/55 mb-4">Tu número lo sacas hoy, en minutos. Los 5 días son para lo difícil: sostenerlo.</p>
       <div className="space-y-2.5">
         {DIAS.map((x) => (
           <div key={x.d} className="flex items-baseline gap-3">

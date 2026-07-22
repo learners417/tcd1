@@ -3,6 +3,7 @@
  * Inline herramienta IA component for the roadmap task flow.
  * Shows form fields → generates with AI (or saves directly if usa_ia=false) → user edits → saves to ADN.
  */
+import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import BotonAudio from '../sesion/BotonAudio';
 import type { FaseOpcion, FaseBloque } from '../../lib/herramientas';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
@@ -420,6 +421,7 @@ export default function TaskHerramientaIA({
           {meta.titulo}
         </h3>
         <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <TutorialTecnicoBox codigo={meta.codigo} />
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
