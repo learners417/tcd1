@@ -1,6 +1,6 @@
 /**
- * planes.ts — La escalera comercial de cinturones (la Semana Blanca y los 3 planes)
- * Regla del dojo: en la UI jamás se dice "trial" ni "prueba" — es "Tu Semana Blanca".
+ * planes.ts — La escalera comercial de cinturones (los 5 días y los 3 planes)
+ * Regla del dojo: en la UI jamás se dice "trial" ni "prueba" — es "Tus 5 días".
  */
 import type { Profile } from './supabase';
 
@@ -8,7 +8,7 @@ export type PlanComercial = 'blanco' | 'amarillo' | 'verde' | 'negro' | 'complet
 
 /** Hasta qué pilar del Camino llega cada plan (inclusive). */
 export const PILAR_MAX: Record<PlanComercial, number> = {
-  blanco: 1,      // la Semana Blanca: Sanar el Dinero (P0 + P1)
+  blanco: 1,      // los 5 días: Sanar el Dinero (P0 + P1)
   amarillo: 2,    // Tu Base: + método bautizado (P2)
   verde: 4,       // Tu Sistema: + oferta, perfil, sistema, campaña (P3-P4)
   negro: 99,      // El Programa Completo
@@ -16,7 +16,7 @@ export const PILAR_MAX: Record<PlanComercial, number> = {
 };
 
 export const NOMBRE_PLAN: Record<PlanComercial, string> = {
-  blanco: 'Semana Blanca',
+  blanco: 'Los 5 días',
   amarillo: 'Tu Base',
   verde: 'Tu Sistema',
   negro: 'El Programa Completo',
@@ -52,14 +52,14 @@ export function checkoutUrl(plan: 'amarillo' | 'verde' | 'negro'): string {
   return CHECKOUT_URL[plan] || '';
 }
 
-/** Tope de mensajes del Mentor durante la Semana Blanca. */
+/** Tope de mensajes del Mentor durante los 5 días. */
 export const TOPE_MENTOR_BLANCO = 30;
 
 export const WHATSAPP_TCD = '5492944411854';
 export const waLink = (texto: string) => `https://wa.me/${WHATSAPP_TCD}?text=${encodeURIComponent(texto)}`;
 
 export function planDe(perfil?: Partial<Profile> | null): PlanComercial {
-  // EL NÚMERO ($27, alta automática) = la Semana Blanca: mismo tramo, mismo tope
+  // EL NÚMERO ($27, alta automática) = los 5 días: mismo tramo, mismo tope
   if ((perfil as { plan?: string } | undefined)?.plan === 'ELNUMERO') return 'blanco';
   const p = perfil?.plan_comercial;
   return (p === 'blanco' || p === 'amarillo' || p === 'verde' || p === 'negro') ? p : 'completo';

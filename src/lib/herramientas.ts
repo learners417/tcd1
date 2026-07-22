@@ -45,6 +45,8 @@ export interface Herramienta {
   outputLabel: string;
   /** S9: si existe, la herramienta usa el flujo Constructor (opciones → bloques → sello). */
   constructorFases?: ConstructorFases;
+  /** ZIP E: campo del perfil donde se sella el output del flujo clásico (el ADN viaja de vuelta). */
+  campoPerfil?: string;
 }
 
 /** Maps emoji strings to lucide icon names for herramientas */
@@ -83,6 +85,58 @@ ${instruccionesDialecto(perfil.pais)}
 // ─── GRUPO A — Identidad y Mentalidad ─────────────────────────────────────────
 
 const GRUPO_A: Herramienta[] = [
+  {
+    id: 'H-P1.5b',
+    grupo: 'A',
+    titulo: 'El Guardián del Precio',
+    descripcion:
+      'Las 10 cosas que te van a decir cuando subas tu precio — y tu respuesta exacta para cada una. Con tus palabras, tu tono y tu precio. Para que ninguna te agarre sin defensa.',
+    emoji: '🛡️',
+    inputs: [
+      {
+        id: 'precio_nuevo',
+        label: 'Tu precio nuevo (el que acabas de sellar)',
+        tipo: 'text',
+        placeholder: 'ej: 60 USD por sesión',
+        required: true,
+      },
+    ],
+    promptTemplate: (inputs, perfil) => `${contextoBase(perfil)}
+
+Precio nuevo: ${inputs.precio_nuevo}
+
+TAREA: las 10 objeciones más probables al subir el precio, con la respuesta exacta para cada una.`,
+    outputLabel: 'Tus 10 respuestas',
+    constructorFases: {
+      etiquetaOpciones: 'Elige cómo vas a responder',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+Precio nuevo del profesional: ${inputs.precio_nuevo}
+
+TAREA: proponer 3 ESTILOS de respuesta para cuando alguien cuestione su precio nuevo. Cada estilo debe encajar con SU personalidad y su especialidad (no con un vendedor). Ejemplos de dirección: el que responde de frente y corto · el que responde con calidez y sostiene · el que responde con una pregunta que devuelve el peso.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 3 opciones:
+[{"titulo":"Nombre corto del estilo","significado":"Cómo suena, en 2 líneas, y por qué le calza a este profesional"}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+Precio nuevo: ${inputs.precio_nuevo}
+Estilo de respuesta elegido: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: escribir EL GUARDIÁN DEL PRECIO — las 10 objeciones más probables que va a recibir al comunicar su precio nuevo, con su respuesta exacta en ese estilo.
+
+Cubre estas 10 situaciones, en este orden: 1) "Está muy caro", 2) "Antes me cobrabas menos", 3) "Lo tengo que pensar", 4) "Lo hablo con mi pareja", 5) "Otro profesional cobra la mitad", 6) "¿Me haces un descuento?", 7) "No me alcanza ahora mismo", 8) "¿Y si no me funciona?", 9) el silencio incómodo después de decir el precio, 10) el paciente antiguo que se siente traicionado.
+
+CADA bloque con este formato exacto en "contenido": la respuesta lista para decir (entre comillas, hablada y natural, sin jerga) + salto de línea + "Por qué funciona: ..." (1 línea) + salto de línea + "Nunca digas: ..." (1 línea con el error típico).
+
+El "titulo" de cada bloque es la frase que le van a decir, tal cual la diría la persona.
+
+REGLAS: tuteo neutro. Nunca disculparse por el precio, nunca justificar con costos propios, nunca regalar descuentos por miedo. Prohibido usar: coach, escalar, embudo, funnel, marketing, gurú.
+
+Responde SOLO un JSON array válido de 10 objetos (sin texto antes ni después, sin markdown):
+[{"titulo":"Está muy caro","contenido":"..."}]`,
+    },
+  },
+
   {
     id: 'A1',
     grupo: 'A',
@@ -497,6 +551,51 @@ Sé específico con los números. No redondees de más. Que el plan se sienta ej
 // ─── GRUPO B — Claridad y Oferta ─────────────────────────────────────────────
 
 const GRUPO_B: Herramienta[] = [
+  {
+    id: 'H-P8.4',
+    grupo: 'B',
+    titulo: 'Tu Puerta Chica',
+    descripcion:
+      'Para los que dicen "ahora no". Un tramo corto de TU mismo método, con precio de entrada y crédito completo si después toman el programa entero. No es un descuento: es un escalón.',
+    emoji: '🚪',
+    inputs: [
+      {
+        id: 'precio_programa',
+        label: 'El precio de tu programa principal',
+        tipo: 'text',
+        placeholder: 'ej: 1.000 USD',
+        required: true,
+      },
+    ],
+    promptTemplate: (inputs, perfil) => `${contextoBase(perfil)}
+Programa principal: ${inputs.precio_programa}
+TAREA: diseñar la versión corta de su programa para quien no puede empezar con el completo.`,
+    outputLabel: 'Tu Puerta Chica',
+    constructorFases: {
+      etiquetaOpciones: 'Elige la forma de tu Puerta Chica',
+      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+
+Método propio: ${perfil.metodo_nombre ?? 'su método'}
+Pasos del método: ${perfil.metodo_pasos ?? 'no cargados'}
+Programa principal: ${inputs.precio_programa}
+Oferta principal: ${perfil.oferta_mid ?? 'programa completo'}
+
+TAREA: proponer 3 FORMAS de "puerta chica" — un tramo corto del MISMO método, para quien dice "ahora no puedo con el completo". Nunca un producto nuevo: siempre una porción real de su programa, con resultado propio y cerrado. El precio ronda el 20-30% del principal. Cada forma con nombre y con la primera victoria que entrega.
+
+Reglas: no canibaliza el programa completo porque el precio se acredita 100% si sube dentro de 30 días. Nada de "versión light" ni de sensación de rebaja: es el primer tramo del camino.
+
+Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 3 opciones:
+[{"titulo":"Nombre de la puerta chica","significado":"Qué incluye, cuánto dura y qué victoria concreta se lleva la persona"}]`,
+      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+
+Programa principal: ${inputs.precio_programa}
+Puerta Chica elegida: "${eleccion.titulo}" (${eleccion.significado}).
+
+TAREA: dejarla lista para ofrecer. Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con exactamente 4 bloques:
+[{"titulo":"Qué incluye","contenido":"Los entregables concretos y la duración, en lenguaje del paciente"},{"titulo":"Tu precio de entrada","contenido":"El número (20-30% del principal) y la regla del crédito: se acredita 100% al programa completo dentro de 30 días"},{"titulo":"Cuándo la ofreces en la llamada","contenido":"El momento exacto: solo DESPUÉS de que la persona dijo que no al programa completo, nunca antes ni como primera opción"},{"titulo":"Cómo la dices","contenido":"El guion hablado, natural y corto, sin sonar a rebaja: el escalón, el crédito y el cierre"}]`,
+    },
+  },
+
   {
     id: 'B1',
     grupo: 'B',
@@ -2070,6 +2169,7 @@ Genera el legado en 2-3 oraciones directas. Sin florituras.`.trim(),
   // ─── P4.2: Análisis de 3 pacientes reales ──────────────────────────────────
   {
     id: 'H-P4.2',
+    campoPerfil: 'avatar_cliente',
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Análisis de 3 pacientes reales',
     descripcion: '3 bloques con 5 preguntas cada uno sobre pacientes reales.',
@@ -2253,6 +2353,7 @@ El Estado B tiene que ser tan específico que si el paciente lo lee, diga "eso s
   // ─── P7.2: Documentador del proceso actual ─────────────────────────────────
   {
     id: 'H-P7.2',
+    campoPerfil: 'adn_proceso_actual',
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Documentador del proceso actual',
     descripcion: 'Documentá cómo trabajas con pacientes de principio a fin.',
@@ -2399,6 +2500,7 @@ Genera exactamente:
   // ─── P9A.2: Landing copy ────────────────────────────────────────────────────
   {
     id: 'H-P9A.2',
+    campoPerfil: 'adn_landing_copy',
     grupo: 'D' as GrupoHerramienta,
     titulo: 'Generador de Copy de Landing Page',
     descripcion: 'Copy completo usando Avatar + Matriz + Oferta Mid.',
@@ -2488,6 +2590,7 @@ El contenido debe responder directamente a la objeción/miedo de la semana.`.tri
   // ─── P9B.2: Script de Ventas ────────────────────────────────────────────────
   {
     id: 'H-P9B.2',
+    campoPerfil: 'adn_tablero_cierre',
     grupo: 'E' as GrupoHerramienta,
     titulo: 'Constructor de Script de Ventas',
     descripcion: 'Script completo de llamada de diagnóstico de 45 minutos.',
@@ -2514,6 +2617,7 @@ El tono es de evaluación, no de venta. Estás diagnosticando si puedes ayudar, 
   // ─── P9C.2: Protocolo de Entrega ────────────────────────────────────────────
   {
     id: 'H-P9C.2',
+    campoPerfil: 'adn_protocolo_servicio',
     grupo: 'D' as GrupoHerramienta,
     titulo: 'Documentador de Protocolo de Entrega',
     descripcion: 'Automatizá la entrega sin perder el toque personal.',
