@@ -179,8 +179,12 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         }
       }
 
-      let diary: { entries?: unknown[] } = {}; try { diary = JSON.parse(localStorage.getItem('tcd_diario_v2') || '{}'); } catch { /* diario corrupto */ }
-      const rachaLocal = Array.isArray(diary.entries) ? diary.entries.length : 0;
+      let rachaLocal = 0;
+      try {
+        const rawDiario = localStorage.getItem('tcd_diario_v3') || localStorage.getItem('tcd_diario_v2') || '[]';
+        const d = JSON.parse(rawDiario);
+        rachaLocal = Array.isArray(d) ? d.length : (Array.isArray(d?.entries) ? d.entries.length : 0);
+      } catch { /* diario corrupto */ }
 
       setData({
         profile: { nombre: p.nombre || '', fecha_inicio: p.fecha_inicio || new Date().toISOString() },

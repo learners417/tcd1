@@ -1169,7 +1169,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
             {/* Lista de metas */}
             <div className="p-4 space-y-3">
-              {pilar.metas.map((meta) => {
+              {[...pilar.metas].sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999)).map((meta) => {
                 const key = `${pilar.numero}-${meta.codigo}`;
                 const estaCompletada = completadas.has(key);
                 const tieneOutput = taskOutputs.has(key);
