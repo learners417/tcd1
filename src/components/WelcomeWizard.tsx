@@ -73,12 +73,17 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
       localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
       localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
       if (supabase) {
-        await supabase.from('profiles').update({
+        // Paracaídas móvil: con señal floja, el guardado no puede colgar el botón.
+        // 8 segundos y avanzamos igual — lo local ya quedó, el servidor se sincroniza después.
+        await Promise.race([
+          new Promise((res) => setTimeout(res, 8000)),
+          supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
           diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe },
           ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
-        }).eq('id', profile.id);
+        }).eq('id', profile.id),
+        ]);
       }
     } catch { /* no bloqueamos el flujo */ }
     setDxSaving(false);
@@ -357,7 +362,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <textarea
                   value={frustracion}
                   onChange={e => setFrustracion(e.target.value)}
-                  placeholder="Ej: No sé cómo conseguir pacientes nuevos sin depender de referidos, siento que trabajo mucho y gano poco..."
+                  placeholder="Ej: No sé cómo conseguir consultantes nuevos sin depender de referidos, siento que trabajo mucho y gano poco..."
                   rows={3}
                   className="w-full bg-black/40 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
@@ -416,7 +421,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">1 · ¿Ya tienes una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">1 · ¿Ya tienes una forma propia de trabajar con quienes atiendes — un método, aunque no tenga nombre?</p>
               <div className="space-y-2">
                 {([['B','Sí. Tengo mi manera de hacer las cosas — la uso hace años.'],['A','No, o no lo tengo claro. Trabajo caso por caso.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxAvatar(v)} className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxAvatar === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>
@@ -427,14 +432,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div>
               <p className="text-sm font-medium text-cream/85 mb-2">2 · ¿Qué te frena más hoy?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {['No sé conseguir pacientes online','Me cuesta cobrar lo que valgo','No tengo tiempo — todo depende de mí','Un poco de todo'].map((o) => (
+                {['No sé conseguir consultantes online','Me cuesta cobrar lo que valgo','No tengo tiempo — todo depende de mí','Un poco de todo'].map((o) => (
                   <button key={o} onClick={() => setDxFreno(o)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFreno === o ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{o}</button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">3 · ¿A quién ayudas mejor? (tu paciente típico, en una frase)</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">3 · ¿A quién ayudas mejor? (la persona que mejor atiendes, en una frase)</p>
               <input value={dxNicho} onChange={(e) => setDxNicho(e.target.value)} placeholder="Ej: mujeres de 40-55 con problemas digestivos crónicos" className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50" />
             </div>
 

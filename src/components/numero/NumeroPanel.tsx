@@ -113,7 +113,7 @@ export default function NumeroPanel({ userId }: Props) {
         <div className="grid grid-cols-3 gap-3">
           {([
             ['Precio por sesión', 'precio_sesion'],
-            ['Pacientes / semana', 'pacientes_semana'],
+            ['Sesiones / semana', 'pacientes_semana'],
             ['Horas / semana', 'horas_semana'],
           ] as const).map(([label, key]) => (
             <label key={key} className="block">
@@ -178,7 +178,7 @@ export default function NumeroPanel({ userId }: Props) {
           <section className="rounded-2xl border border-gold/20 bg-gold/[0.06] p-6 text-center">
             <p className="text-sm text-cream/70">Con tu precio nuevo, este año ganás</p>
             <p className="text-4xl md:text-5xl font-semibold text-gold tabular-nums my-2">+{money(cuentaAnimada)}</p>
-            <p className="text-sm text-cream/55">más que hoy — con los mismos pacientes.</p>
+            <p className="text-sm text-cream/55">más que hoy — con las mismas sesiones.</p>
           </section>
 
           {/* Antes / después (compartible por captura) */}
@@ -201,7 +201,7 @@ export default function NumeroPanel({ userId }: Props) {
           <section className="rounded-2xl border border-gold/10 bg-panel p-5 space-y-4">
             <h2 className="text-lg font-semibold text-cream">Anúncialo hoy</h2>
             {([
-              ['pac', 'Para tus pacientes actuales', msgPacientes],
+              ['pac', 'Para quienes ya atiendes', msgPacientes],
               ['ig', 'Historia de Instagram', msgIG],
             ] as const).map(([id, label, texto]) => (
               <div key={id}>

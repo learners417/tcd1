@@ -65,6 +65,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
+    { id: 'adn', icon: Sparkles, label: '🧬 Mi ADN' },
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'coach', icon: Sparkles, label: 'Mentor IA' },
         { id: 'mensajes', icon: MessageSquare, label: 'Soporte', badge: messageBadge > 0 },

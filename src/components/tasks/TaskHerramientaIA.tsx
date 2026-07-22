@@ -265,6 +265,23 @@ export default function TaskHerramientaIA({
     setOutput(finalOutput);
     setModo('guardado');
     onSaveADN(finalOutput);
+    // ZIP E — el ADN viaja de vuelta: lo que esta herramienta produce queda en
+    // su perfil, y todas las herramientas siguientes lo reciben en su contexto.
+    const campo = herramienta?.campoPerfil;
+    if (campo && finalOutput.trim()) {
+      const patch = { [campo]: finalOutput.trim() };
+      try {
+        const raw = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+        localStorage.setItem('tcd_profile', JSON.stringify({ ...raw, ...patch }));
+      } catch { /* noop */ }
+      void (async () => {
+        try {
+          const { supabase } = await import('../../lib/supabase');
+          const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+          if (data.user?.id && supabase) await supabase.from('profiles').update(patch).eq('id', data.user.id);
+        } catch { /* sin red: el local ya quedó */ }
+      })();
+    }
     toast.success('Guardado en tu ADN');
   };
 
