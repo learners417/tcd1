@@ -102,7 +102,7 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
   }
   throw lastError instanceof Error
     ? lastError
-    : new Error('IA no pudo responder · proba de nuevo en unos segundos.');
+    : new Error('IA no pudo responder · prueba de nuevo en unos segundos.');
 }
 
 // ─── Streaming text generation ──────────────────────────────────────────────
@@ -159,5 +159,5 @@ export async function* streamText(
   }
   throw lastError instanceof Error
     ? lastError
-    : new Error('IA no pudo responder · proba de nuevo en unos segundos.');
+    : new Error('IA no pudo responder · prueba de nuevo en unos segundos.');
 }

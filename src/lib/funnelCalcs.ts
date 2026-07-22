@@ -68,8 +68,8 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Costo por Mensaje',
       mensaje: nivel === 'ok' ? 'Buen costo de adquisición de mensajes'
-        : nivel === 'alerta' ? 'El costo por mensaje está subiendo. Revisá creativos.'
-        : 'Costo por mensaje muy alto. Pausá y revisá la segmentación.',
+        : nivel === 'alerta' ? 'El costo por mensaje está subiendo. Revisa tus creativos.'
+        : 'Costo por mensaje muy alto. Pausa y revisa la segmentación.',
       nivel,
       valor: kpis.costo_por_mensaje,
       umbral_ok: 1.5,
@@ -85,7 +85,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'DM → Formulario',
       mensaje: nivel === 'ok' ? 'Buena conversión de mensajes a formularios'
-        : nivel === 'alerta' ? 'Pocos completan el formulario. Revisá el copy del mensaje automático.'
+        : nivel === 'alerta' ? 'Pocos completan el formulario. Revisa el copy del mensaje automático.'
         : 'Muy pocos pasan a formulario. El mensaje inicial no engancha.',
       nivel,
       valor: pct,
@@ -102,7 +102,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Formulario → Agenda',
       mensaje: nivel === 'ok' ? 'Buen ratio de agendamiento'
-        : nivel === 'alerta' ? 'Pocos agendan después del formulario. Revisá el proceso de seguimiento.'
+        : nivel === 'alerta' ? 'Pocos agendan después del formulario. Revisa el proceso de seguimiento.'
         : 'Problema serio de agendamiento. ¿Estás llamando rápido?',
       nivel,
       valor: pct,
@@ -119,8 +119,8 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Tasa de Show',
       mensaje: nivel === 'ok' ? 'Buena asistencia a llamadas'
-        : nivel === 'alerta' ? 'Muchos no se presentan. Mandá recordatorios 24h y 1h antes.'
-        : 'Tasa de show muy baja. El lead no siente urgencia. Revisá tu confirmación.',
+        : nivel === 'alerta' ? 'Muchos no se presentan. Manda recordatorios 24 h y 2 h antes.'
+        : 'Tasa de show muy baja. El lead no siente urgencia. Revisa tu confirmación.',
       nivel,
       valor: pct,
       umbral_ok: 70,
@@ -137,7 +137,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
       etapa: 'Tasa de Cierre',
       mensaje: nivel === 'ok' ? 'Buen cierre de ventas'
         : nivel === 'alerta' ? 'Cerrás pocas llamadas. Practicá con el Simulador de Ventas.'
-        : 'Tasa de cierre muy baja. Revisá tu script y manejo de objeciones.',
+        : 'Tasa de cierre muy baja. Revisa tu script y el manejo de objeciones.',
       nivel,
       valor: pct,
       umbral_ok: 25,

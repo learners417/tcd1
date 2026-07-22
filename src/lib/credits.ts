@@ -167,7 +167,7 @@ export interface ConsumeResult {
 export class InsufficientCreditsError extends Error {
   code = 'INSUFFICIENT_CREDITS' as const;
   constructor() {
-    super('No tenes creditos suficientes. Compra un pack o espera al reseteo mensual.');
+    super('No tienes créditos suficientes. Compra un pack o espera al reseteo mensual.');
     this.name = 'InsufficientCreditsError';
   }
 }

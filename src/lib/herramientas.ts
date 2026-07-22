@@ -1699,7 +1699,7 @@ const GRUPO_E: Herramienta[] = [
         id: 'mejor_resultado',
         label: '¿Cuál es el mejor resultado que lograste con un cliente? (para mencionar si viene al caso)',
         tipo: 'textarea',
-        placeholder: 'Un caso concreto — puede ser anónimo — que muestre de lo que sos capaz...',
+        placeholder: 'Un caso concreto — puede ser anónimo — que muestre de lo que eres capaz...',
       },
       {
         id: 'donde_falla',
@@ -2254,7 +2254,7 @@ TAREA: dejarla lista para usar. Responde SOLO un JSON array válido (sin texto a
     outputLabel: 'Nicho y PUV',
     inputs: [
       { id: 'no_atender', label: '¿A quién específicamente NO quieres atender?', tipo: 'textarea', required: true },
-      { id: 'mejor_que', label: '¿En qué problema sos claramente mejor que el promedio de tu especialidad?', tipo: 'textarea', required: true },
+      { id: 'mejor_que', label: '¿En qué problema eres claramente mejor que el promedio de tu especialidad?', tipo: 'textarea', required: true },
       { id: 'diferencial', label: '¿Qué tienes tú que ningún colega tiene?', tipo: 'textarea', required: true },
       { id: 'quien_busca', label: '¿Qué grupo de personas te busca a tú y no a otro?', tipo: 'textarea', required: true },
     ],

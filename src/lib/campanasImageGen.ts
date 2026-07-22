@@ -19,7 +19,7 @@ import { supabase } from './supabase';
 // Error tipado para que la UI muestre el modal de "comprar creditos"
 export class InsufficientCreditsError extends Error {
   code = 'INSUFFICIENT_CREDITS' as const;
-  constructor(msg = 'No tenes creditos suficientes') {
+  constructor(msg = 'No tienes créditos suficientes') {
     super(msg);
     this.name = 'InsufficientCreditsError';
   }
@@ -113,8 +113,8 @@ function classifyImageError(
     const reqIdMatch = rawText.match(/[a-z0-9]+::([a-z0-9-]+)/i);
     const reqId = reqIdMatch?.[1];
     return reqId
-      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs · req ${reqId}`
-      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs.';
+      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs · req ${reqId}`
+      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs.';
   }
 
   if (status === 413) {
@@ -122,11 +122,11 @@ function classifyImageError(
   }
 
   if (status === 429) {
-    return 'Demasiados pedidos a OpenAI (rate-limit). Esperá 30s y volvé a probar.';
+    return 'Demasiados pedidos a OpenAI (rate-limit). Espera 30 s y vuelve a probar.';
   }
 
   if (status === 401) {
-    return 'Sesión vencida — refrescá la página y volvé a entrar.';
+    return 'Sesión vencida — refresca la página y vuelve a entrar.';
   }
 
   // Errores con body JSON estructurado del endpoint

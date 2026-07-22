@@ -558,7 +558,7 @@ export function detectarContextoConversacion(mensajeUsuario: string): Partial<Co
 export function loadCoachExtraContext(): Pick<ContextoCoach, 'metricasEmbudoV2' | 'energiaPromedio7d'> {
   let metricasEmbudoV2: MetricaSemanaV2 | undefined;
   try {
-    const saved = localStorage.getItem('tcd_metrics_v2');
+    const saved = localStorage.getItem('tcd_metrics_v3') || localStorage.getItem('tcd_metrics_v2');
     if (saved) {
       const arr = JSON.parse(saved) as MetricaSemanaV2[];
       if (arr.length > 0) metricasEmbudoV2 = arr[arr.length - 1];
