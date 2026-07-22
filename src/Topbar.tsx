@@ -1,0 +1,53 @@
+/**
+ * PerlaMaestro — T10 · Plan Maestro.
+ * Una Perla del Maestro: audio sorpresa de Javo en un momento-quiebre.
+ * El slot está listo aunque no haya MP3 todavía (muestra "en camino").
+ */
+import React, { useState } from 'react';
+import { Sparkles, Play, Pause, Lock } from 'lucide-react';
+import type { Perla } from '../lib/perlasMaestro';
+
+export default function PerlaMaestro({ perla }: { perla: Perla }) {
+  const [audio] = useState<HTMLAudioElement | null>(() =>
+    typeof Audio !== 'undefined' && perla.audioUrl ? new Audio(perla.audioUrl) : null,
+  );
+  const [sonando, setSonando] = useState(false);
+  const disponible = !!perla.audioUrl && !!audio;
+
+  const toggle = () => {
+    if (!audio) return;
+    if (sonando) {
+      audio.pause();
+      setSonando(false);
+    } else {
+      audio.onended = () => setSonando(false);
+      void audio.play().then(() => setSonando(true)).catch(() => setSonando(false));
+    }
+  };
+
+  return (
+    <div className="card-panel p-5 border border-gold/20 bg-gradient-to-br from-gold/[0.06] to-transparent">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="w-4 h-4 text-gold" />
+        <span className="text-[11px] font-bold text-gold uppercase tracking-widest">
+          Perla del Maestro
+        </span>
+      </div>
+      <p className="text-sm text-cream font-medium mb-1">{perla.titulo}</p>
+      <p className="text-xs text-cream/55 leading-relaxed mb-3">{perla.texto}</p>
+      {disponible ? (
+        <button
+          onClick={toggle}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gold/15 border border-gold/30 text-gold text-xs font-bold uppercase tracking-wider hover:bg-gold/25 transition-colors"
+        >
+          {sonando ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          {sonando ? 'Pausar' : 'Escuchar a Javo'}
+        </button>
+      ) : (
+        <div className="flex items-center gap-2 text-[11px] text-cream/35 uppercase tracking-wider">
+          <Lock className="w-3.5 h-3.5" /> Perla en camino — Javo la graba pronto
+        </div>
+      )}
+    </div>
+  );
+}
