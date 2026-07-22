@@ -1,3 +1,6 @@
+import MapaCincoDias from '../components/MapaCincoDias';
+import TableroNumeros from '../components/TableroNumeros';
+import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
 import CadenaADN from '../components/CadenaADN';
 import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
@@ -279,7 +282,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const urgente = d !== null && d <= 3;
         return (
           <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tu Semana Blanca</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tus 5 días</p>
             {d !== null && d > 0 ? (
               <p className="text-sm text-cream/85">
                 {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
@@ -323,8 +326,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         );
       })()}
 
+      {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
+      <MapaCincoDias />
+
+      {/* ZIP A — La graduación de los 5 días (solo plan EL NÚMERO, tras el día 5) */}
+      <GraduacionSemanaBlanca />
+
       {/* S10 — La Cadena del ADN: el ikigai encendiéndose */}
-      <CadenaADN />
+      <CadenaADN onAbrir={() => setCurrentPage('adn')} />
 
       {/* LA SESIÓN — el único plato */}
       <div className="space-y-6">
@@ -393,11 +402,42 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               return null;
             })()}
             {data.tareasHoy.length === 0 ? (
-              <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
-                <CheckCircle2 className="w-8 h-8 text-success/50 mx-auto mb-3" />
-                <p className="text-sm text-cream/75">Todo al día. Estás libre.</p>
-                <p className="text-xs text-cream/45 mt-1">Mira El Camino para ver lo que sigue.</p>
-              </div>
+              (() => {
+                let sv = false;
+                try {
+                  const saved = JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[];
+                  sv = saved.includes('4-P4.5b') || saved.includes('4-P4.4');
+                } catch { /* noop */ }
+                if (!sv) return (
+                  <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
+                    <CheckCircle2 className="w-8 h-8 text-success/50 mx-auto mb-3" />
+                    <p className="text-sm text-cream/75">Todo al día. Estás libre.</p>
+                    <p className="text-xs text-cream/45 mt-1">Mira El Camino para ver lo que sigue.</p>
+                  </div>
+                );
+                return (
+                  <div className="rounded-xl border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent p-5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Día de campo</p>
+                    <p className="text-sm text-cream/85">Hoy no hay sesión nueva. Hoy se juega.</p>
+                    <p className="text-xs text-cream/50 mt-1 mb-4">Tu sistema está vivo: esto es lo que mueve tus números hoy.</p>
+                    <div className="space-y-2 mb-4">
+                      {[
+                        'Responde a quien te escribió — tu agente ya filtró',
+                        'Confirma las citas de mañana: 24 h y 2 h antes',
+                        'Atiende y entrega — tus pacientes primero',
+                      ].map((t) => (
+                        <p key={t} className="text-sm text-cream/75 pl-4 relative">
+                          <span className="absolute left-0 text-gold">·</span>{t}
+                        </p>
+                      ))}
+                    </div>
+                    <button onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')}
+                      className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">
+                      Abrir Mi Clínica →
+                    </button>
+                  </div>
+                );
+              })()
             ) : (
               <>
               {/* LA SESIÓN DE HOY — el hero del dojo */}
@@ -466,6 +506,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             </button>
           );
           return (
+            <>
             <div className="card-panel p-5">
               <p className="text-[11px] font-bold uppercase tracking-widest text-cream/60 mb-3">Tu día, en orden</p>
               <div className="space-y-2">
@@ -478,6 +519,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta="3 min · tu Diario alimenta a tu Mentor" onClick={() => setCurrentPage('diario')} />
               </div>
             </div>
+            {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}
+            </>
           );
         })()}
       </div>

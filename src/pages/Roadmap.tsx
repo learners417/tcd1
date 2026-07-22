@@ -1079,7 +1079,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                       {pilar.estado === 'plan_bloqueado' && (
                         <span className="block text-[11px] text-gold/80 mt-1.5 leading-tight">
                           {planDe(perfil) === 'blanco'
-                            ? 'Te espera del otro lado de tu Semana Blanca →'
+                            ? 'Te espera del otro lado de tus 5 días →'
                             : 'Pertenece a un plan superior · Subir (pagas solo la diferencia) →'}
                         </span>
                       )}

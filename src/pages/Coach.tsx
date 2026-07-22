@@ -286,7 +286,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
       const hasAttachments = attachments.length > 0;
       if ((!text.trim() && !hasAttachments) || isTyping) return;
 
-      // ═══ El tope de la Semana Blanca: 30 mensajes, cierre elegante ═══
+      // ═══ El tope de los 5 días: 30 mensajes, cierre elegante ═══
       // ─── La escasez que enseña: 10 preguntas de maestro por semana (planes del camino) ───
       if (planDe(perfil) !== 'blanco') {
         if (usosSemana('mentor') >= TOPE_MENTOR_SEMANAL) {
@@ -305,7 +305,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         if (usados >= TOPE_MENTOR_BLANCO) {
           setMessages((prev) => [...prev, {
             role: 'assistant' as const,
-            content: 'Llegamos al límite de conversaciones de tu Semana Blanca. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
+            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
           }]);
           return;
         }

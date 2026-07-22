@@ -86,7 +86,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
