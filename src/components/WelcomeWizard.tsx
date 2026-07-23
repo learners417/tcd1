@@ -514,7 +514,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
             ))}
             <button
-              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep('rueda'); }}
+              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep(((profile as { plan?: string })?.plan === 'ELNUMERO') ? 'welcome' : 'rueda'); }}
               className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
             >
               Grabar en mi ADN y seguir →

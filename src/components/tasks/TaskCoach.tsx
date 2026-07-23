@@ -1,3 +1,5 @@
+import SesionGuiadaPlayer from '../SesionGuiadaPlayer';
+import { sesionGuiadaDe } from '../../lib/sesionesGuiadas';
 import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
@@ -35,10 +37,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
     })();
   }, [meta.codigo, meta.evidencia_requerida]);
   const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
-  // El tramo de entrada (P0-P1) nunca bloquea por evidencia: el que recién llega
-  // no puede quedarse trabado subiendo un archivo. La evidencia suma, no frena.
-  const esTramoEntrada = meta.codigo.startsWith('P0') || meta.codigo.startsWith('P1');
-  const evidenciaLista = !requiereEvidencia || evidencias > 0 || esTramoEntrada;
+  const evidenciaLista = !requiereEvidencia || evidencias > 0;
 
   // ── El cuaderno de la sesión: acá se vuelca el trabajo (escrito o hablado) ──
   const KEY_NOTAS = 'tcd_notas_sesion_v1';
@@ -47,6 +46,8 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
   React.useEffect(() => {
     try { setNota((JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}'))[meta.codigo] ?? ''); } catch { /* noop */ }
   }, [meta.codigo]);
+  const [playerAbierto, setPlayerAbierto] = React.useState(false);
+  const guionVivo = React.useMemo(() => sesionGuiadaDe(meta.codigo), [meta.codigo]);
   const guardarNota = () => {
     try {
       const all = JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}');
@@ -69,9 +70,14 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
       if (meta.evidencia_requerida?.descripcion) {
         setVeredicto(null);
         setVerificando(true);
-        verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion)
-          .then(setVeredicto)
-          .finally(() => setVerificando(false));
+        const v = await verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion);
+        setVerificando(false);
+        setVeredicto(v);
+        if (v && v.ok === false) {
+          // El testigo no la confirmó: esa evidencia NO cuenta.
+          setEvidencias((n) => Math.max(0, n - 1));
+          setErrorSubida(`Tu testigo no pudo confirmarla${v.motivo ? ': ' + v.motivo : ''}. Sube otra foto — la de verdad.`);
+        }
       }
     } else {
       setErrorSubida((res as { ok: false; motivo: string }).motivo);
@@ -116,6 +122,25 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         )}
         <TutorialTecnicoBox codigo={meta.codigo} />
 
+        {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
+        {guionVivo && !isCompleted && (
+          <button onClick={() => setPlayerAbierto(true)}
+            className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
+            <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
+            <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
+          </button>
+        )}
+        {playerAbierto && guionVivo && (
+          <SesionGuiadaPlayer
+            codigo={meta.codigo}
+            titulo={meta.titulo}
+            onClose={() => setPlayerAbierto(false)}
+            onFinish={(texto) => { setNota(texto); setNotaGuardada(true); setPlayerAbierto(false); }}
+            onMentor={onNavigateToCoach}
+          />
+        )}
+
         {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
         {!isCompleted && (
           <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
@@ -154,6 +179,9 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
                 <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
               </label>
             )}
+            {veredicto?.ok && (
+              <p className="text-xs text-success mt-2">✓ Tu testigo la vio{veredicto.motivo ? `: ${veredicto.motivo}` : ''}. Confirmada.</p>
+            )}
             {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
             {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
             {veredicto && !verificando && (veredicto.ok
@@ -167,26 +195,6 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         )}
       </div>
 
-      {/* Coach instruction — interna: NO se muestra; el Mentor la recibe en su prompt */}
-      {meta.coach_instruccion && (
-        <div className="card-panel p-4 border border-gold/15 bg-gold/[0.03]">
-          <p className="text-sm text-cream/75 leading-relaxed">
-            💬 Tu Mentor ya sabe exactamente qué van a trabajar hoy. Abre el chat y dile:{' '}
-            <span className="text-gold font-medium">"vengo por {meta.titulo}"</span> — él te guía el resto.
-          </p>
-        </div>
-      )}
-
-      {/* Open Coach button */}
-      <button
-        onClick={onNavigateToCoach}
-        className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gold/10 border border-gold/20 text-gold font-medium hover:bg-gold/15 transition-colors"
-      >
-        <MessageSquare className="w-5 h-5" />
-        Abrir el Mentor
-        <ExternalLink className="w-4 h-4 opacity-50" />
-      </button>
-
       {/* Confirmation — prominent completion button */}
       <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
         {checked ? (
@@ -199,7 +207,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             <p className="text-xs text-cream/55 text-center mb-3 leading-relaxed">
               {evidenciaLista
                 ? 'Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.'
-                : 'Este paso pide una evidencia. Súbela arriba cuando puedas — no te frena para seguir.'}
+                : 'Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
             </p>
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}

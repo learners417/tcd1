@@ -69,6 +69,21 @@ export default function GraduacionSemanaBlanca() {
         Subiste tu precio. <strong className="text-gold">Lo que sigue es quién te lo paga:</strong> tu método, tu oferta y el sistema que llena tu agenda — los 90 días completos, hasta tus primeros 10 a tu precio nuevo.
       </p>
 
+      <button
+        onClick={() => {
+          if (!window.confirm('¿Repetir tus 5 días desde el principio? Tu ADN sellado se conserva — solo se reabren las sesiones.')) return;
+          try {
+            const CODS = ['0-P0.0', '0-P0.2', '0-P0.3', '0-P0.4', '1-P1.1', '1-P1.2', '1-P1.2b', '1-P1.3', '1-P1.5', '1-P1.5b'];
+            const hechas = (JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]).filter((c) => !CODS.includes(c));
+            localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(hechas));
+            localStorage.removeItem('tcd_sesion_pasos_v1');
+            window.location.reload();
+          } catch { /* noop */ }
+        }}
+        className="block mt-3 text-[11px] text-cream/45 hover:text-cream underline underline-offset-2"
+      >
+        ¿No subiste tu precio todavía? Repite tus 5 días — tu garantía, sin costo.
+      </button>
       <a href={waLink('Hola · Terminé mis 5 días y quiero seguir el camino completo')} target="_blank" rel="noreferrer"
         className="inline-block mt-4 btn-primary text-[#1a1206] text-sm font-bold px-5 py-3 rounded-xl">
         Quiero seguir el camino →

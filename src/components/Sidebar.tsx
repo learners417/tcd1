@@ -1,3 +1,4 @@
+import { planLimitado } from '../lib/adnPiezas';
 import React, { useState, useEffect } from 'react';
 import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users, TrendingUp  } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
@@ -66,9 +67,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
     { id: 'adn', icon: Sparkles, label: '🧬 Mi ADN' },
+    ...(planLimitado() ? ([{ id: 'camino-completo', icon: Sparkles, label: '🔒 El camino completo', action: () => setCurrentPage('adn') }] as any[]) : []),
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
-        { id: 'coach', icon: Sparkles, label: 'Mentor IA' },
-        { id: 'mensajes', icon: MessageSquare, label: 'Soporte', badge: messageBadge > 0 },
+        { id: 'coach', icon: Sparkles, label: '🥋 Tu Mentor' },
+        { id: 'mensajes', icon: MessageSquare, label: '🛟 Soporte', badge: messageBadge > 0 },
       ]
     },
     {
@@ -167,7 +169,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
             )}
             {collapsed && sidx > 0 && <div className="mx-3 border-t border-[rgba(232,150,46,0.1)] mb-2" />}
             <nav className="space-y-0.5">
-              {section.items.map((item) => {
+              {section.items.filter((item) => !planLimitado() || !['metrics', 'biblioteca', 'miclinica', 'agentes', 'creador', 'campanas'].includes(item.id)).map((item) => {
                 const isActive = currentPage === item.id;
                 const modulosOverride = ((data.profile as { modulos_activos?: string[] })?.modulos_activos) ?? [];
                 const moduloKey = item.id === 'creador' ? 'creativos' : item.id;

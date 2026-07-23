@@ -12,21 +12,21 @@ const KEY_ULTIMO = 'tcd_ultimo_cinturon_visto';
 
 /** Las cartas de etapa — la voz de Javo al cruzar cada puerta. */
 const CARTAS: Record<number, string> = {
-  1: 'Diste el primer paso real — el que la mayoría no da nunca. Tu punta amarilla dice una cosa: la semilla ya no es solo semilla. Se abre tu ADN del Negocio: ahí va a vivir todo lo que firmes. Cuidalo — es tu clínica naciendo.',
-  2: 'Amarillo. El sol ya pega en la tierra. Sanaste lo que nadie ve — el cuarto del dinero — y por eso lo que viene se sostiene. Se abren tu Diario y El Método: escribe lo que te pasa, no solo lo que haces. Firmeza y amorosidad, siempre juntas.',
-  3: 'Punta verde. Tu método ya tiene nombre — deja de ser «lo que haces» y empieza a ser un activo con tu firma. De acá en adelante, todo lo que construyas lo firma ÉL. No lo muevas. No lo muevas. No lo muevas.',
-  4: 'Verde. El árbol echó raíces: oferta, precio, garantía — todo firmado. Se abre tu Sala de Entrenamiento: ahí no se estudia, SE ENTRENA. Cámara, ventas, objeciones. A la llamada real se llega entrenado — nunca improvisando.',
-  5: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',
-  6: 'Azul. La campaña está ENCENDIDA — tu clínica le habla al mundo mientras dormís. Ahora empieza la caza: tres números por semana, paciencia de cazador, y el precio se dice UNA vez. El que pregunta, dirige.',
-  7: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarca este día.',
-  8: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Y dejaste de estar solo: eres parte de los Sanadores Libres, los que se negaron a elegir entre sanar y cobrar con dignidad. Tu clínica sigue el día 91, y tú ya no eres la Foto de Partida. Ahora te toca abrirle la puerta al que recién empieza. Nos vemos del otro lado. 🥋',
+  2: 'Diste el primer paso real — el que la mayoría no da nunca. Tu punta amarilla dice una cosa: la semilla ya no es solo semilla. Se abre tu ADN del Negocio: ahí va a vivir todo lo que firmes. Cuidalo — es tu clínica naciendo.',
+  3: 'Amarillo. El sol ya pega en la tierra. Sanaste lo que nadie ve — el cuarto del dinero — y por eso lo que viene se sostiene. Se abren tu Diario y El Método: escribe lo que te pasa, no solo lo que haces. Firmeza y amorosidad, siempre juntas.',
+  4: 'Punta verde. Tu método ya tiene nombre — deja de ser «lo que haces» y empieza a ser un activo con tu firma. De acá en adelante, todo lo que construyas lo firma ÉL. No lo muevas. No lo muevas. No lo muevas.',
+  5: 'Verde. El árbol echó raíces: oferta, precio, garantía — todo firmado. Se abre tu Sala de Entrenamiento: ahí no se estudia, SE ENTRENA. Cámara, ventas, objeciones. A la llamada real se llega entrenado — nunca improvisando.',
+  6: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',
+  7: 'Azul. La campaña está ENCENDIDA — tu clínica le habla al mundo mientras dormís. Ahora empieza la caza: tres números por semana, paciencia de cazador, y el precio se dice UNA vez. El que pregunta, dirige.',
+  8: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarca este día.',
+  9: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Y dejaste de estar solo: eres parte de los Sanadores Libres, los que se negaron a elegir entre sanar y cobrar con dignidad. Tu clínica sigue el día 91, y tú ya no eres la Foto de Partida. Ahora te toca abrirle la puerta al que recién empieza. Nos vemos del otro lado. 🥋',
 };
 
 const DESBLOQUEOS: Record<number, string> = {
-  1: '🧬 Se abrió: tu ADN del Negocio',
-  2: '📔 Se abrieron: tu Diario del Fundador y El Método',
-  4: '🥊 Se abrió: tu Sala de Entrenamiento',
-  5: '🏭 Se abrieron: el Creador de Contenido y las Campañas',
+  2: '🧬 Se abrió: tu ADN del Negocio',
+  3: '📔 Se abrieron: tu Diario del Fundador y El Método',
+  5: '🥊 Se abrió: tu Sala de Entrenamiento',
+  6: '🏭 Se abrieron: el Creador de Contenido y las Campañas',
 };
 
 export default function CeremoniaCinturon() {
