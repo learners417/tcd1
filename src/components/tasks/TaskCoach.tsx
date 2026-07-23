@@ -48,6 +48,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
   }, [meta.codigo]);
   const [playerAbierto, setPlayerAbierto] = React.useState(false);
   const guionVivo = React.useMemo(() => sesionGuiadaDe(meta.codigo), [meta.codigo]);
+  React.useEffect(() => { if (guionVivo && !isCompleted) setPlayerAbierto(true); }, [guionVivo, isCompleted]);
   const guardarNota = () => {
     try {
       const all = JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}');

@@ -15,8 +15,8 @@ function completadas(): Set<string> {
 export default function GraduacionSemanaBlanca() {
   if (!planLimitado() || !completadas().has('1-P1.5')) return null;
 
-  const suyas = PIEZAS_ADN.filter((p) => p.plan === 'elnumero');
-  const faltan = PIEZAS_ADN.filter((p) => p.plan === 'completo');
+  const suyas = PIEZAS_ADN.filter((p) => p.pilar <= 1);
+  const faltan = PIEZAS_ADN.filter((p) => p.pilar > 1);
   const selladas = suyas.filter((p) => estadoPieza(p).sellada);
 
   return (

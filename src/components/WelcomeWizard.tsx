@@ -108,6 +108,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [frustracion, setFrustracion] = useState('');
   const [energia, setEnergia] = useState(5);
   const [savingProfile, setSavingProfile] = useState(false);
+  // Cada nivel entra a SU camino: los 5 días o los 90.
+  const esCincoDias = String((profile as { plan?: string })?.plan ?? '') === 'ELNUMERO';
 
   async function handlePasswordSubmit() {
     if (newPassword.length < 8) {
@@ -580,8 +582,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               Ya diste el primer paso más difícil: decidir que tu trabajo vale lo suficiente como para invertir en él. Eso mismo — cobrar con dignidad — es lo que vas a aprender a hacer con cada paciente.
             </p>
             <p className="text-sm text-cream/70 leading-relaxed mb-2">
-              Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
-            </p>
+              {esCincoDias ? <>Estás por empezar <strong className="text-cream/90">tus 5 días</strong>: una micro-sesión guiada por día — 30 minutos, un paso por pantalla. El viernes nos vemos en vivo y el lunes cobras tu precio nuevo.</> : <>Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
+            </>}</p>
             <p className="text-sm text-cream/80 leading-relaxed mb-6">
               <span className="text-gold font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
             </p>
@@ -632,7 +634,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <strong className="text-cream">Y a ti:</strong> al profesional que hoy decide dejar de sobrevivir.
               </p>
               <p className="text-sm text-gold/90 leading-relaxed mt-3 font-medium">
-                Mi primer compromiso: llegar al Cinturón Amarillo — sanar mi relación con el dinero — antes del día 10.
+                {esCincoDias ? 'Mi primer compromiso: hacer mis 5 días completos y llegar a mi sesión del viernes con mi precio sellado.' : 'Mi primer compromiso: llegar al Cinturón Amarillo — sanar mi relación con el dinero — antes del día 10.'}
               </p>
             </div>
 
@@ -686,7 +688,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   num: '1',
                   icon: Map,
                   title: 'Abre El Camino',
-                  desc: 'Tu sesión de hoy te espera: el Día 1 completo — tu Foto de Partida. Una sesión por día, todo se hace ahí.',
+                  desc: esCincoDias ? 'Tu Día 1 te espera: entras a tu micro-sesión y sales con tu número. 30 minutos.' : 'Tu sesión de hoy te espera: el Día 1 completo — tu Foto de Partida. Una sesión por día, todo se hace ahí.',
                   styles: {
                     card: 'bg-gold/5 border-gold/20 hover:bg-gold/10',
                     icon: 'bg-gold/20',

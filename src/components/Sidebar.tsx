@@ -1,6 +1,7 @@
 import { planLimitado } from '../lib/adnPiezas';
+import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect } from 'react';
-import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users, TrendingUp  } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users, TrendingUp, Lock, Target } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
@@ -66,22 +67,23 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
-    { id: 'adn', icon: Sparkles, label: '🧬 Mi ADN' },
-    ...(planLimitado() ? ([{ id: 'camino-completo', icon: Sparkles, label: '🔒 El camino completo', action: () => setCurrentPage('adn') }] as any[]) : []),
-        // { id: 'metrics', icon: TrendingUp, label: 'Métricas' }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
-        { id: 'coach', icon: Sparkles, label: '🥋 Tu Mentor' },
-        { id: 'mensajes', icon: MessageSquare, label: '🛟 Soporte', badge: messageBadge > 0 },
+    { id: 'adn', icon: Sparkles, label: 'Mi ADN' },
+    { id: 'numero', icon: Target, label: 'Mi Número', minPilar: 0 },
+    ...(planPermitePilar(planActual(), 99) ? [] : ([{ id: 'camino-completo', icon: Lock, label: 'Lo que sigue', action: () => setCurrentPage('roadmap') }] as any[])),
+        // { id: 'metrics', icon: TrendingUp, label: 'Métricas' , minPilar: 4 }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
+        { id: 'coach', icon: Sparkles, label: 'Tu Mentor' },
+        { id: 'mensajes', icon: MessageSquare, label: 'Soporte', badge: messageBadge > 0 },
       ]
     },
     {
       title: 'HERRAMIENTAS',
       items: [
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
-        { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2 },
-        { id: 'miclinica', icon: Hexagon, label: '🏥 Mi Clínica', minCinturon: 4, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
-        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minCinturon: 4 },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 4 },
-        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5 },
+        { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2, minPilar: 2 },
+        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minCinturon: 4, minPilar: 5, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
+        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minCinturon: 4, minPilar: 5 },
+        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 4, minPilar: 4 },
+        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5, minPilar: 4 },
       ]
     },
     {
@@ -169,7 +171,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
             )}
             {collapsed && sidx > 0 && <div className="mx-3 border-t border-[rgba(232,150,46,0.1)] mb-2" />}
             <nav className="space-y-0.5">
-              {section.items.filter((item) => !planLimitado() || !['metrics', 'biblioteca', 'miclinica', 'agentes', 'creador', 'campanas'].includes(item.id)).map((item) => {
+              {section.items.filter((item) => planPermitePilar(planActual(), (item as { minPilar?: number }).minPilar ?? 0)).map((item) => {
                 const isActive = currentPage === item.id;
                 const modulosOverride = ((data.profile as { modulos_activos?: string[] })?.modulos_activos) ?? [];
                 const moduloKey = item.id === 'creador' ? 'creativos' : item.id;

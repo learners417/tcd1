@@ -1,5 +1,6 @@
+import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -22,15 +23,18 @@ const PAGE_TITLES: Record<string, string> = {
   campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
 
+/** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
 const searchablePages = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Panel principal del programa' },
-  { id: 'roadmap', label: 'Hoja de Ruta', icon: Map, desc: 'Tu progreso en los 90 días' },
-  { id: 'coach', label: 'Coach IA', icon: MessageSquare, desc: 'Asistente IA con contexto de tu programa' },
+  { id: 'dashboard', label: 'Hoy', icon: LayoutDashboard, desc: 'Tu día, en orden', minPilar: 0 },
+  { id: 'roadmap', label: 'El Camino', icon: Map, desc: 'Tus sesiones, una por día', minPilar: 0 },
+  { id: 'adn', label: 'Mi ADN', icon: Sparkles, desc: 'Las piezas que ya sellaste', minPilar: 0 },
+  { id: 'numero', label: 'Mi Número', icon: Target, desc: 'Tu precio digno, calculado y sellado', minPilar: 0 },
+  { id: 'coach', label: 'Tu Mentor', icon: MessageSquare, desc: 'Tu guía del proceso', minPilar: 0 },
   // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
-  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes' },
-  { id: 'diario', label: 'Diario', icon: BookOpen, desc: 'Reflexión diaria' },
-  { id: 'biblioteca', label: 'Biblioteca', icon: Library, desc: 'Videos, herramientas, recursos' },
-  { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Generar copies e imagenes para Meta Ads' },
+  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes', minPilar: 4 },
+  { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0 },
+  { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Las clases del método', minPilar: 2 },
+  { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Anuncios y creativos', minPilar: 4 },
 ];
 
 const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
@@ -166,7 +170,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
     }
   }, [showSearch]);
 
-  const filteredPages = searchablePages.filter(p =>
+  const filteredPages = searchablePages.filter((p) => planPermitePilar(planActual(), (p as { minPilar?: number }).minPilar ?? 0)).filter(p =>
     p.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );

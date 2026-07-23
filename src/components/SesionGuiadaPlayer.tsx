@@ -7,6 +7,7 @@
  * y al final todo lo creado se sella en el ADN. Autoguardado por paso: si el
  * teléfono muere, retoma exacto donde quedó.
  */
+import { loQueViene } from '../lib/teasers';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { sesionGuiadaDe } from '../lib/sesionesGuiadas';
 import { generateText } from '../lib/aiProvider';
@@ -287,6 +288,15 @@ export default function SesionGuiadaPlayer({
               </button>
             )}
             <p className="text-[11px] text-cream/40">Esta noche te espera tu Diario — 2 minutos antes de dormir.</p>
+            {(() => {
+              const t = loQueViene(codigo);
+              return t ? (
+                <div className="rounded-2xl border border-gold/25 bg-gold/[0.05] p-4 text-left mt-2">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Lo que viene</p>
+                  <p className="text-sm text-cream/85 leading-relaxed">{t.frase}</p>
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
       </div>

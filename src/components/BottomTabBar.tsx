@@ -15,7 +15,7 @@ const TABS: Tab[] = [
   { id: 'dashboard', label: 'Hoy', icon: LayoutDashboard },
   { id: 'roadmap', label: 'El Camino', icon: Map },
   { id: 'coach', label: 'Mentor', icon: Sparkles },
-  { id: 'liga', label: 'La Liga', icon: Trophy },
+  { id: 'adn', label: 'Mi ADN', icon: Sparkles },
 ];
 
 interface Props {
