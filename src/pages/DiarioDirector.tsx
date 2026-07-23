@@ -1,4 +1,3 @@
-import RuedaVida from '../components/RuedaVida';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
@@ -299,10 +298,7 @@ export default function DiarioDirector({
       toast.error('Cuéntanos tu logro de hoy — queda en tu historial para siempre.');
       return;
     }
-    if (tareas.length === 0) {
-      toast.error('Marca al menos una cosa en la que estuviste hoy.');
-      return;
-    }
+    // Las actividades son opcionales — con la energía y el logro alcanza.
 
     setSaving(true);
     try {
@@ -538,7 +534,6 @@ Devuelve SOLO este JSON:
       })()}
 
       {/* S5 — La Rueda de la Vida: el registro del fin, no solo del medio */}
-      <RuedaVida />
 
 
       {/* ── Vista: Formulario ── */}

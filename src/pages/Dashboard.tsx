@@ -1,3 +1,4 @@
+import { TarjetaViernes, BonosNumero } from '../components/ExtrasNumero';
 import MapaCincoDias from '../components/MapaCincoDias';
 import TableroNumeros from '../components/TableroNumeros';
 import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
@@ -332,6 +333,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
       <MapaCincoDias />
+
+      {/* C3 — la promesa completa: TU viernes + tus bonos */}
+      <TarjetaViernes />
+      <BonosNumero />
 
       {/* ZIP A — La graduación de los 5 días (solo plan EL NÚMERO, tras el día 5) */}
       <GraduacionSemanaBlanca />

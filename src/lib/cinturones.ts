@@ -90,7 +90,7 @@ export async function otorgarCinturonPorPilar(pilarId: PilarId): Promise<void> {
     // upsert idempotente sobre (usuario_id, cinturon)
     await supabase
       .from('hitos_cinturon')
-      .upsert(hitos, { onConflict: 'usuario_id,cinturon', ignoreDuplicates: true });
+      .insert(hitos); // duplicados o constraint ausente: se ignora abajo
 
     // El cinturón visible del perfil = el más alto (este, por orden de juego).
     await supabase.from('profiles').update({ cinturon: cinturonId }).eq('id', uid);

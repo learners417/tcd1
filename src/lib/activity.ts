@@ -24,7 +24,8 @@ export async function recordTodayActivity(userId: string): Promise<void> {
   try {
     const { error } = await supabase
       .from('user_activity')
-      .upsert({ user_id: userId, fecha: hoy }, { onConflict: 'user_id,fecha' });
+      .insert({ user_id: userId, fecha: hoy });
+    // duplicado del día (23505) u otra falla del servidor: se ignora — es solo un ping
     if (error) {
       console.warn('recordTodayActivity: upsert falló (no crítico):', error.message);
       return;
