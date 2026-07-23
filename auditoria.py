@@ -72,6 +72,12 @@ LEGADO_OK = {'tcd_racha','tcd_diary_weekly','tcd_pacto','tcd_campana_objetivo',
 mismatch = [k for k,v in claves.items() if v['g'] and not v['s'] and k not in LEGADO_OK]
 check('sin claves leídas que nadie escribe', not mismatch, str(mismatch))
 
+fragiles = []
+for f, src in todo.items():
+    if f.endswith('lib/supabase.ts'): continue
+    if re.search(r"onConflict", src): fragiles.append(f.split('/')[-1])
+check('sin upserts frágiles (bomba 42P10)', not fragiles, str(fragiles))
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

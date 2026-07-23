@@ -24,7 +24,9 @@ type PlanComercial = (typeof PLANES_VALIDOS)[number];
 
 /** La Semana Blanca vence a los 7 días; los planes pagos no vencen. */
 function accesoHastaDe(plan: PlanComercial): string | null {
-  if (plan === 'blanco') return new Date(Date.now() + 7 * 86400000).toISOString();
+  // 21 días: sus 5 días + su viernes en vivo (aunque el corte lo mande al siguiente)
+  // + la garantía de repetir la semana. Después entra el modo lectura digno.
+  if (plan === 'blanco') return new Date(Date.now() + 21 * 86400000).toISOString();
   return null;
 }
 
