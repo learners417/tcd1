@@ -10,7 +10,7 @@ import {
   Bot, Globe, Phone, Megaphone, Triangle, Cog, Building2, Handshake,
   Palette, BarChart3, Sunrise, UserCircle,
 } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { getHerramienta, EMOJI_TO_ICON, type CampoInput } from '../lib/herramientas';
 import { streamText } from '../lib/aiProvider';
@@ -107,15 +107,12 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       const outputData = { texto: output, inputs, generado_en: new Date().toISOString() };
 
       if (isSupabaseReady() && supabase) {
-        await supabase.from('herramientas_outputs').upsert(
-          {
+        await guardarFila('herramientas_outputs', {
             usuario_id: userId,
             herramienta_id: herramientaId,
             output: outputData,
             version: 1,
-          },
-          { onConflict: 'usuario_id,herramienta_id' },
-        );
+          }, ['usuario_id', 'herramienta_id']);
       }
 
       // Siempre guardamos en localStorage como backup

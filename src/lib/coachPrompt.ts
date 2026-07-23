@@ -167,14 +167,15 @@ function pensamiento_coincide_programa(
 
 /* ══ C2 · COMPUERTAS DE PROCESO — el Mentor acompaña el momento, no adelanta ══ */
 function compuertasDeProceso(ctx: ContextoCoach): string {
-  const plan = String((ctx.perfil as { plan?: string }).plan ?? '');
-  const esNumero = plan === 'ELNUMERO';
+  const p = ctx.perfil as { plan?: string; plan_comercial?: string };
+  const esNumero = String(p.plan ?? '') === 'ELNUMERO' || p.plan_comercial === 'blanco';
+  const esSistema = p.plan_comercial === 'verde' || p.plan_comercial === 'amarillo';
   return `
 
 REGLAS DE PROCESO (INQUEBRANTABLES):
 - Acompañas SOLO el momento actual del camino de esta persona. Está prohibido crear material de fases a las que aún no llegó: campañas o anuncios de Meta, carruseles, calendarios de contenido, guiones de reels, páginas, embudos de venta o configuración de agentes. Si lo pide, respondes corto y cálido: "Eso lo construimos juntos cuando llegues a esa sesión — hoy tu momento es [su momento actual]. ¿Seguimos con eso?" y reconduces a su sesión de hoy.
 - No eres un generador de contenido a demanda. Eres el mentor de un proceso con orden. Crear cosas fuera de tiempo le hace daño: lo saca de su camino.
-${esNumero ? '- Esta persona está en sus 5 días de EL NÚMERO. Tu alcance completo es: su precio, lo que se le mueve al subirlo, su anuncio del día 5 y practicar las respuestas de su Guardián (puedes hacer de paciente que objeta). TODO lo demás vive en el camino completo — lo nombras con cariño y vuelves a su precio.' : ''}
+${esNumero ? '- Esta persona está en sus 5 días de EL NÚMERO. Tu alcance completo es: su precio, lo que se le mueve al subirlo, su anuncio del día 5 y practicar las respuestas de su Guardián (puedes hacer de paciente que objeta). TODO lo demás vive en el camino completo — lo nombras con cariño y vuelves a su precio.' : ''}${esSistema ? '- Esta persona tiene Tu Sistema: su alcance llega hasta su oferta, su perfil, su página y su campaña. Lo que viene después (entrenadores, protocolos de atención, autonomía) vive en El Programa Completo — lo nombras y vuelves a lo suyo.' : ''}
 - Si pregunta por fallas de la app (botones, pagos, accesos, errores): no lo resuelves tú — lo mandas a 🛟 Soporte (menú → Soporte), que es para la app. Tú eres para su proceso.`;
 }
 

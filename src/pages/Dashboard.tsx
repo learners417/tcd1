@@ -1,3 +1,4 @@
+import PuertaSiguienteNivel from '../components/PuertaSiguienteNivel';
 import { TarjetaViernes, BonosNumero } from '../components/ExtrasNumero';
 import MapaCincoDias from '../components/MapaCincoDias';
 import TableroNumeros from '../components/TableroNumeros';
@@ -7,7 +8,7 @@ import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
@@ -98,10 +99,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 set.add('6-P6.3');
                 localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...set]));
                 if (isSupabaseReady() && supabase && userId) {
-                  await supabase.from('hoja_de_ruta').upsert(
-                    { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() },
-                    { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-                  );
+                  await guardarFila('hoja_de_ruta', { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
                 }
               }
             }
@@ -335,6 +333,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       <MapaCincoDias />
 
       {/* C3 — la promesa completa: TU viernes + tus bonos */}
+      <PuertaSiguienteNivel />
       <TarjetaViernes />
       <BonosNumero />
 

@@ -112,7 +112,7 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
     result.push({
       id: 'cond_atraso',
       icon: '⚠️',
-      label: 'Estoy atrasada · ayudame a retomar',
+      label: 'Profundizar mi sesión de hoy',
     });
   }
 
@@ -120,7 +120,7 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
     result.push({
       id: 'cond_volvi',
       icon: '👋',
-      label: 'Volví · contame qué pasó',
+      label: 'Se me mueve algo con mi precio',
     });
   }
 
@@ -128,7 +128,7 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
     result.push({
       id: 'cond_autonoma',
       icon: '🎉',
-      label: 'Logré autonomía con un entrenador',
+      label: 'Hazme de paciente: dime \"está caro\"',
     });
   }
 
@@ -136,7 +136,7 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
     result.push({
       id: 'cond_metricas',
       icon: '📊',
-      label: 'Cargar mis métricas de esta semana',
+      label: '¿Cómo vengo en mi camino?',
     });
   }
 

@@ -25,7 +25,7 @@ import {
   CloudRain,
   UserX,
 } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
@@ -295,7 +295,7 @@ export default function DiarioDirector({
 
   const handleGuardar = async () => {
     if (!logro.trim()) {
-      toast.error('Cuéntanos tu logro de hoy — queda en tu historial para siempre.');
+      toast.error('Cuéntanos tu logro de hoy — queda guardado en tu historial.');
       return;
     }
     // Las actividades son opcionales — con la energía y el logro alcanza.
@@ -316,10 +316,7 @@ export default function DiarioDirector({
       };
 
       if (isSupabaseReady() && supabase && userId) {
-        const { data: saved, error } = await supabase
-          .from('diario_entradas')
-          .upsert(
-            {
+        const payload = {
               user_id: userId,
               fecha: todayStr,
               energia_nivel: energia,
@@ -335,14 +332,11 @@ export default function DiarioDirector({
               // el diario v3 ya no la usa, pero hay que mandar un valor no-null.
               respuestas: {},
               pensamiento_dominante: logro.trim(),
-            },
-            { onConflict: 'user_id,fecha' },
-          )
-          .select()
-          .single();
-        if (error) throw error;
+            };
+        const { data: filaCruda } = await guardarFila('diario_entradas', payload, ['user_id', 'fecha']);
+        const saved = filaCruda as { id?: string | number; diario_score?: number } | null;
         if (saved) {
-          entradaLocal.id = String(saved.id);
+          if (saved.id != null) entradaLocal.id = String(saved.id);
           entradaLocal.score = saved.diario_score ?? scoreLocal; // score autoritativo del server
         }
       }
@@ -404,10 +398,7 @@ Devuelve SOLO este JSON:
 
         if (isSupabaseReady() && supabase && userId) {
           const semanaInicio = toFechaStr(lunes);
-          await supabase.from('diario_resumen').upsert(
-            { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto },
-            { onConflict: 'user_id,semana_inicio' },
-          );
+          await guardarFila('diario_resumen', { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto }, ['user_id', 'semana_inicio']);
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
         toast.success('Resumen de la semana generado por el Coach.');
@@ -649,7 +640,7 @@ Devuelve SOLO este JSON:
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
-                <p className="text-[11px] text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+                <p className="text-[11px] text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial</p>
               </div>
 
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}

@@ -24,7 +24,7 @@ import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
 import { cinturonDesdeProgreso } from './lib/cinturones';
-import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from './lib/planes';
+import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, checkoutUrl, planActualPermite } from './lib/planes';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -92,16 +92,15 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
         <p className="text-sm text-cream/75 mb-5 leading-relaxed">
-          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
+          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados, esperándote.
         </p>
         {nombreRes && (
           <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
         )}
         <div className="text-left mb-5 space-y-2">
           {([
-            ['🟡', 'Tu Base', '$147', 'La Fase 1 completa: tu relación con el dinero sanada + tu Mentor sin límite.'],
-            ['🟢', 'Tu Sistema', '$497', 'Hasta la Fase 3: tu oferta construida, tu método con nombre y tus primeros entrenadores.'],
-            ['⬛', 'Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
+            ['🟢', 'Tu Sistema', '$497', 'Tu método con nombre, tu oferta construida, tu página y tu primera campaña encendida.'],
+            ['⚫', 'El Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
           ] as const).map(([e, n, p, d]) => (
             <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
               <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
@@ -109,7 +108,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
             </div>
           ))}
         </div>
-        <a href={waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+        <a href={(planReservado && checkoutUrl(planReservado as 'verde' | 'negro')) || waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
@@ -135,15 +134,21 @@ export default function App() {
   useEffect(() => {
     try {
       const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
-      if (plan === 'ELNUMERO') setCurrentPageRaw('numero');
+    // Todos aterrizan en HOY: ahí vive el director del día (mapa, su viernes, la sesión).
     } catch { /* noop */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const pageHistoryRef = useRef<string[]>([]);
+  /** Puerta única: ninguna navegación entra a una sección que su plan no compró. */
   const setCurrentPage = useCallback((page: string) => {
+    const PAGINA_PILAR: Record<string, number> = {
+      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, agentes: 5, miclinica: 5,
+    };
+    const pilarNec = PAGINA_PILAR[page];
+    const destino = pilarNec !== undefined && !planActualPermite(pilarNec) ? 'roadmap' : page;
     setCurrentPageRaw((prev) => {
-      if (page !== prev) pageHistoryRef.current.push(prev);
-      return page;
+      if (destino !== prev) pageHistoryRef.current.push(prev);
+      return destino;
     });
   }, []);
   const goBack = useCallback(() => {

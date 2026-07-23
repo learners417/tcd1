@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { usePersistedState } from '../lib/usePersistedState';
 import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
-import { supabase, isSupabaseReady, type MetricaSemanaV2 } from '../lib/supabase';
+import { supabase, isSupabaseReady, type MetricaSemanaV2, guardarFila } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_METAS } from '../lib/roadmapSeed';
@@ -291,9 +291,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
     let saved: MetricaSemanaV2 = entry;
     if (isSupabaseReady() && supabase && userId) {
-      const { data: row, error } = await supabase.from('metricas_v2')
-        .upsert({ ...entry, user_id: userId }, { onConflict: 'user_id,semana' })
-        .select().single();
+      const { data: row, error } = await guardarFila('metricas_v2', { ...entry, user_id: userId }, ['user_id', 'semana']);
       if (error) {
         // No tragarse el error: reportar, avisar y NO limpiar el form (no se perdió lo cargado).
         const msg = reportError(error, {

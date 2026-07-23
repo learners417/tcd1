@@ -3,7 +3,7 @@
 // Usado por PreactivacionMatriz / MatrizGrid en el panel admin.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { supabase } from './supabase';
+import { supabase, guardarFila } from './supabase';
 import { STEPS, TOTAL_STEPS } from './preactivacionSteps';
 
 export type ChecksByCliente = Map<string, Set<string>>;
@@ -68,14 +68,9 @@ export async function setCheck(
   }
 
   if (on) {
-    const { error } = await supabase
-      .from('cliente_preactivacion_check')
-      .upsert(
-        { cliente_id: clienteId, step_id: stepId, completado_por: completadoPor },
-        { onConflict: 'cliente_id,step_id', ignoreDuplicates: true },
-      );
+    const { error } = await guardarFila('cliente_preactivacion_check', { cliente_id: clienteId, step_id: stepId, completado_por: completadoPor }, ['cliente_id', 'step_id']);
     if (error) {
-      throw new Error(`Error tildando paso: ${error.message}`);
+      throw new Error(`Error tildando paso: ${(error as { message?: string }).message ?? ''}`);
     }
   } else {
     const { error } = await supabase

@@ -305,7 +305,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         if (usados >= TOPE_MENTOR_BLANCO) {
           setMessages((prev) => [...prev, {
             role: 'assistant' as const,
-            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
+            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
           }]);
           return;
         }
@@ -606,7 +606,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             placeholder={
               isTyping
                 ? 'Tu coach está conectando ideas...'
-                : 'Menciona tu duda · bloqueo · pega una captura (Ctrl+V)...'
+                : 'Cuéntale dónde estás — tu Mentor conoce tu camino...'
             }
             className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />

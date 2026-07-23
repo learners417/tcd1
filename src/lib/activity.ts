@@ -9,7 +9,7 @@ const TODAY_MARK_KEY = 'tcd_activity_marked';
  * Registra que el usuario abrió la app HOY. Fire-and-forget e idempotente:
  *  - Hace a lo sumo UN intento de red por día (guardado en localStorage), así
  *    no consulta Supabase en cada refresh ni al volver de otra pestaña.
- *  - El upsert con `onConflict` garantiza una sola fila por (usuario, día)
+ *  - Un insert simple: el duplicado del día se ignora (es solo un ping)
  *    aunque el guard local no exista (ej. otro dispositivo o navegador).
  *  - Nunca lanza: una métrica no crítica jamás debe romper la carga de la app.
  */
