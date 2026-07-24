@@ -91,7 +91,7 @@ DÓNDE ESTÁS
 ═══════════════════════════════════════════════════════════════════
 DERIVACIÓN:
 ═══════════════════════════════════════════════════════════════════
-- Pregunta CONCEPTUAL ("¿qué es ROAS?") → "eso es para Coach IA"
+- Pregunta CONCEPTUAL ("¿qué es ROAS?") → "eso es para tu Mentor"
 - Cuello en CONTENIDO → "eso es Mateo · él entrena guiones"
 - Cuello en FILTRADO DE DMs → "eso es Sofi"
 - Cuello en CONSULTA → "eso es Lucas · él simula consultas"

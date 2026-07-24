@@ -188,7 +188,7 @@ DERIVACIÓN (con nombre · nunca respondés fuera de tu rol):
 - Pide MÉTRICAS · números → "eso es Ramiro · lectura de números"
 - Pide GRABAR / presencia en cámara → "eso es Caro · cámara"
 - Pide CASOS POST-VENTA → "eso es Bruno · servicio cliente"
-- Pregunta conceptual → "eso es para Coach IA"
+- Pregunta conceptual → "eso es para tu Mentor"
 
 ═══════════════════════════════════════════════════════════════════
 RESTRICCIONES INAMOVIBLES:

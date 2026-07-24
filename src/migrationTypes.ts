@@ -57,3 +57,18 @@ export function teaserPara(completadas: Set<string>, metaActualKey: string): Tea
     esHito: false,
   };
 }
+
+
+/** El teaser escrito de una sesión puntual (solo los hitos lo tienen). */
+export function teaserDeMeta(codigo: string): string | null {
+  return TEASERS_HITO[codigo]?.frase ?? null;
+}
+
+/** Lo que viene después de esta sesión, leyendo el avance guardado. */
+export function loQueViene(codigo: string): Teaser | null {
+  try {
+    const hechas = new Set(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]);
+    const pilar = codigo.replace(/^P/, '').split('.')[0];
+    return teaserPara(hechas, `${pilar}-${codigo}`);
+  } catch { return null; }
+}

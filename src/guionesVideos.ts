@@ -24,7 +24,7 @@ export const NOMBRE_PLAN: Record<PlanComercial, string> = {
 };
 
 export const PRECIO_FUNDADOR: Record<string, string> = {
-  amarillo: '$147', verde: '$497', negro: '$997',
+  verde: '$497', negro: '$997',
 };
 
 /**
@@ -41,8 +41,9 @@ export const CHECKOUT_URL: Record<'amarillo' | 'verde' | 'negro', string> = {
 };
 
 /** El plan mínimo (comprable) que desbloquea ese pilar. */
-export function planParaPilar(pilarNum: number): 'amarillo' | 'verde' | 'negro' {
-  if (pilarNum <= PILAR_MAX.amarillo) return 'amarillo';
+export function planParaPilar(pilarNum: number): 'verde' | 'negro' {
+  // La escalera que se vende dentro de la app: $497 (Tu Sistema, hasta P4) y
+  // $997 (El Programa Completo). 'amarillo' queda solo para clientes antiguos.
   if (pilarNum <= PILAR_MAX.verde) return 'verde';
   return 'negro';
 }
@@ -116,4 +117,22 @@ export function consumirUso(clave: string): number {
   usos[clave] = (usos[clave] ?? 0) + 1;
   try { localStorage.setItem('tcd_usos_ia_v1', JSON.stringify({ semana: claveSemana(), usos })); } catch { /* noop */ }
   return usos[clave];
+}
+
+
+/** El plan de quien está usando la app ahora (lee el perfil guardado). */
+export function planActual(): PlanComercial {
+  try {
+    const crudo = localStorage.getItem('tcd_plan') || '';
+    const perfil = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as { plan?: string; plan_comercial?: string };
+    const plan = crudo || perfil.plan || '';
+    if (plan === 'ELNUMERO') return 'blanco';
+    const pc = perfil.plan_comercial;
+    return (pc === 'blanco' || pc === 'amarillo' || pc === 'verde' || pc === 'negro') ? pc : 'completo';
+  } catch { return 'completo'; }
+}
+
+/** ¿Este plan llega a ese pilar? (versión sin perfil a mano) */
+export function planActualPermite(pilarNum: number): boolean {
+  return planPermitePilar(planActual(), pilarNum);
 }

@@ -690,17 +690,12 @@ export const agentConversationsRepo = {
     messages: AgentConversationMessage[],
   ): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('agent_conversations')
-      .upsert(
-        {
+    await guardarFila('agent_conversations', {
           user_id: userId,
           agent_id: agentId,
           messages,
           last_message_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,agent_id' },
-      );
+        }, ['user_id', 'agent_id']);
   },
 
   async reset(userId: string, agentId: string): Promise<void> {
@@ -753,10 +748,7 @@ export const agentSkillProgressRepo = {
     next: { practice_count: number; scores: number[]; current_level: 1 | 2 | 3 | 4 },
   ): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('agent_skill_progress')
-      .upsert(
-        {
+    await guardarFila('agent_skill_progress', {
           user_id: userId,
           agent_id: agentId,
           practice_count: next.practice_count,
@@ -764,9 +756,7 @@ export const agentSkillProgressRepo = {
           current_level: next.current_level,
           last_practice_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,agent_id' },
-      );
+        }, ['user_id', 'agent_id']);
   },
 
   async reset(userId: string, agentId: string): Promise<void> {
@@ -808,17 +798,12 @@ export const coachConversationsRepo = {
 
   async saveMessages(userId: string, messages: CoachConversationMessage[]): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('coach_conversations')
-      .upsert(
-        {
+    await guardarFila('coach_conversations', {
           user_id: userId,
           messages,
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      );
+        }, ['user_id']);
   },
 
   async updateSummary(
@@ -868,4 +853,30 @@ export async function fetchProfileV2(userId: string): Promise<ProfileV2 | null> 
   if (error || !data) return null;
   const profile = (data as ProfileV2[]).find((p) => p.id === userId);
   return profile ?? null;
+}
+
+
+/* ══════════════ GUARDADO RESILIENTE ══════════════
+ * Un upsert falla con 42P10 cuando la tabla no tiene la restricción única que
+ * el código asume ("no unique or exclusion constraint matching the ON CONFLICT").
+ * Eso tumbaba guardados enteros (el diario, el precio sellado). Esta función
+ * intenta el camino rápido y, si la restricción no existe, actualiza por claves
+ * y recién inserta si no había fila — sin duplicar nunca.
+ */
+export async function guardarFila<T extends Record<string, unknown>>(
+  tabla: string,
+  payload: T,
+  claves: string[],
+): Promise<{ data: unknown; error: unknown }> {
+  if (!supabase) return { data: null, error: null };
+  const cli = supabase;
+  const rapido = await cli.from(tabla).upsert(payload as never, { onConflict: claves.join(',') }).select().maybeSingle();
+  if (!rapido.error) return rapido;
+  const señal = `${(rapido.error as { code?: string }).code ?? ''} ${(rapido.error as { message?: string }).message ?? ''}`;
+  if (!/42P10|no unique|exclusion constraint/i.test(señal)) return rapido;
+  let q = cli.from(tabla).update(payload as never);
+  for (const k of claves) q = q.eq(k, payload[k] as never);
+  const upd = await q.select().maybeSingle();
+  if (!upd.error && upd.data) return upd;
+  return await cli.from(tabla).insert(payload as never).select().maybeSingle();
 }

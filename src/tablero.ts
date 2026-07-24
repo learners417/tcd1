@@ -56,7 +56,7 @@ export const SECTIONS: PreactivacionSection[] = [
       { id: 'cobro', lbl: 'Cobro\nconfigurado', title: 'El cobro', detail: 'Su forma de cobrar lista (link, transferencia, pasarela).', meta: 'P4.5' },
       { id: 'landing', lbl: 'Landing\npublicada', title: 'La landing', detail: 'Su página con la oferta, publicada y abriendo.', meta: 'P4.2' },
       { id: 'perfil_ig', lbl: 'Perfil IG\noptimizado', title: 'Perfil de Instagram optimizado', detail: 'Su perfil profesional listo — bio, link y estética que invitan a agendar.', meta: 'P4.2b' },
-      { id: 'followme', lbl: 'Follow-me\ncorriendo', title: 'El anuncio follow-me', detail: 'La campaña de seguidores activa — <strong>la primera pieza en circulación</strong>.', meta: 'P4.6' },
+      { id: 'followme', lbl: 'Montaje\ncompleto', title: 'Los 8 candados', detail: 'El checklist de encendido, <strong>tildado completo</strong>. Nada flojo.', meta: 'P4.6' },
       { id: 'dominio', lbl: 'DOMINIO\nconectado', title: 'El dominio (DNS ok)', detail: 'Su dirección digital propia, conectada y propagada.', meta: 'P4.5b' },
     ],
   },
@@ -77,7 +77,7 @@ export const SECTIONS: PreactivacionSection[] = [
     short: 'CAMPAÑA',
     items: [
       { id: 'validacion', lbl: 'Validación\norgánica', title: 'La validación', detail: 'Publicado orgánico + boost de test corrido.', meta: 'P4.3d' },
-      { id: 'ctwa', lbl: 'CTWA\nENCENDIDA', title: 'La campaña activa', detail: '<strong>En circulación, con captura subida.</strong> El sistema vive.', meta: 'P4.4' },
+      { id: 'ctwa', lbl: 'Campaña\nENCENDIDA', title: 'La campaña única activa', detail: '<strong>En circulación, con captura subida.</strong> El sistema vive.', meta: 'P4.4' },
       { id: 'presupuesto', lbl: 'Presupuesto\ndiario', title: 'El presupuesto', detail: 'Gasto diario confirmado y sostenible.' },
     ],
   },
