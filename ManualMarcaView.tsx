@@ -1,198 +1,98 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Download, RotateCcw } from 'lucide-react';
-import { toast } from 'sonner';
-import { base64ToDataUrl } from '../../lib/campanasImageGen';
-import type { CopyGenerado } from '../../lib/campanasTypes';
+/**
+ * EL MONTAJE — los 8 candados (T4 del Manual de Anuncios).
+ * Nada se enciende hasta que TODO está tildado. Un solo punto flojo quema
+ * el presupuesto entero. Al encender, se guarda la fecha: el tablero y la
+ * regla de los 14 días cuentan desde ahí.
+ */
+import React, { useState } from 'react';
+import TableroCupos from './TableroCupos';
 
-type LayoutMode = 'centered' | 'top' | 'bottom';
+const KEY = 'tcd_montaje_v1';
+const KEY_ON = 'tcd_campana_encendida_v1';
 
-interface Props {
-  image: { base64: string; mimeType: string };
-  copy: CopyGenerado;
-  slideIndex?: number;
-  onExport?: (dataUrl: string) => void;
-}
-
-const LAYOUTS: { id: LayoutMode; label: string }[] = [
-  { id: 'centered', label: 'Centrado' },
-  { id: 'top', label: 'Superior' },
-  { id: 'bottom', label: 'Inferior' },
+const CANDADOS: { id: string; titulo: string; detalle: string; accion?: 'anuncios' }[] = [
+  { id: 'anuncios', titulo: 'Tus 3 anuncios escritos y auditados', detalle: 'Una de piedras, una de dolor o historia, una de resultado — cada una con su auditoría de ingredientes en verde.', accion: 'anuncios' },
+  { id: 'palabra', titulo: 'Tu PALABRA configurada y PROBADA', detalle: 'Comentaste desde otra cuenta y llegó el DM con tu link. Si no llegó, no está lista.' },
+  { id: 'dm', titulo: 'Tu DM con su pregunta + el seguimiento', detalle: 'La respuesta automática entrega tu página y hace UNA pregunta sobre su situación. El seguimiento de 24-48 h queda programado.' },
+  { id: 'pagina', titulo: 'Tu página: precio, agenda y preguntas', detalle: 'Inversión visible («desde $X»), agenda DESPUÉS del precio y tus 3-4 preguntas de reserva activas.' },
+  { id: 'pixel', titulo: 'El píxel activo en tu página', detalle: 'Instalado y verificado: cada visita queda registrada para tu público de mañana.' },
+  { id: 'perfil', titulo: 'Tu perfil ordenado', detalle: 'El link de tu bio apunta a tu página de venta. Tus destacadas muestran quién eres y qué haces.' },
+  { id: 'trabajo', titulo: 'Tu único trabajo, claro', detalle: 'Atender las conversaciones de quienes contestan tu pregunta. Nada más. La campaña hace el resto.' },
+  { id: 'presupuesto', titulo: 'Presupuesto definido: 14 días sin tocar', detalle: 'Una sola campaña, un solo objetivo, 20-25 USD por día. Los primeros 14 días no se opina — se mide.' },
 ];
 
-export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [layout, setLayout] = useState<LayoutMode>('centered');
+function leer<T>(k: string, def: T): T {
+  try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
+}
 
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+export default function MontajeCupos({ onIrAnuncios }: { onIrAnuncios?: () => void }) {
+  const [checks, setChecks] = useState<Record<string, boolean>>(() => leer(KEY, {}));
+  const [encendida, setEncendida] = useState<string | null>(() => leer<string | null>(KEY_ON, null));
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const toggle = (id: string) => {
+    const n = { ...checks, [id]: !checks[id] };
+    setChecks(n);
+    try { localStorage.setItem(KEY, JSON.stringify(n)); } catch { /* noop */ }
+  };
+  const listos = CANDADOS.filter((c) => checks[c.id]).length;
+  const todo = listos === CANDADOS.length;
 
-    const size = 1080;
-    canvas.width = size;
-    canvas.height = size;
-
-    const img = new Image();
-    img.onload = () => {
-      // Draw background image
-      ctx.drawImage(img, 0, 0, size, size);
-
-      // Dark overlay for text readability
-      const gradient = ctx.createLinearGradient(0, 0, 0, size);
-      if (layout === 'top') {
-        gradient.addColorStop(0, 'rgba(0,0,0,0.75)');
-        gradient.addColorStop(0.5, 'rgba(0,0,0,0.2)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0.1)');
-      } else if (layout === 'bottom') {
-        gradient.addColorStop(0, 'rgba(0,0,0,0.1)');
-        gradient.addColorStop(0.5, 'rgba(0,0,0,0.2)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0.75)');
-      } else {
-        gradient.addColorStop(0, 'rgba(0,0,0,0.5)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0.5)');
-      }
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, size, size);
-
-      // Text positioning
-      const padding = 80;
-      const maxWidth = size - padding * 2;
-      let yStart: number;
-
-      if (layout === 'top') yStart = padding + 40;
-      else if (layout === 'bottom') yStart = size - 400;
-      else yStart = size / 2 - 150;
-
-      // Title
-      ctx.font = 'bold 52px "DM Sans", sans-serif';
-      ctx.fillStyle = '#F2EFE9';
-      ctx.textAlign = 'center';
-      wrapText(ctx, copy.titulo, size / 2, yStart, maxWidth, 60);
-
-      // CTA button
-      const ctaY = layout === 'bottom' ? size - padding - 40 : layout === 'top' ? yStart + 200 : size / 2 + 120;
-      if (copy.cta_texto) {
-        const ctaWidth = ctx.measureText(copy.cta_texto).width + 60;
-        ctx.font = 'bold 32px "DM Sans", sans-serif';
-        const ctaActualWidth = ctx.measureText(copy.cta_texto).width + 60;
-
-        // Button background
-        const btnX = (size - ctaActualWidth) / 2;
-        ctx.fillStyle = '#E8962E';
-        roundRect(ctx, btnX, ctaY - 25, ctaActualWidth, 55, 12);
-        ctx.fill();
-
-        // Button text
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 28px "DM Sans", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(copy.cta_texto, size / 2, ctaY + 5);
-      }
-    };
-
-    img.src = base64ToDataUrl(image.base64, image.mimeType);
-  }, [image, copy, layout]);
-
-  useEffect(() => {
-    render();
-  }, [render]);
-
-  const handleExport = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const dataUrl = canvas.toDataURL('image/png');
-    onExport?.(dataUrl);
-
-    // Trigger download
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = `creativo${slideIndex !== undefined ? `-slide${slideIndex + 1}` : ''}.png`;
-    a.click();
-    toast.success('Imagen descargada');
+  const encender = () => {
+    if (!todo) return;
+    const fecha = new Date().toISOString();
+    setEncendida(fecha);
+    try { localStorage.setItem(KEY_ON, JSON.stringify(fecha)); } catch { /* noop */ }
   };
 
-  return (
-    <div className="space-y-3">
-      {/* Layout selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1.5">
-          {LAYOUTS.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setLayout(l.id)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
-                layout === l.id
-                  ? 'bg-gold/15 text-gold'
-                  : 'bg-cream/5 text-cream/45 hover:text-cream/65'
-              }`}
-            >
-              {l.label}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" /> Descargar
-        </button>
+  if (encendida) {
+    const dias = Math.max(1, Math.floor((Date.now() - new Date(encendida).getTime()) / 86400000) + 1);
+    return (
+      <div className="card-panel p-6 text-center space-y-3">
+        <p className="text-4xl">🔴</p>
+        <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Campaña viva — día {Math.min(dias, 99)}</p>
+        {dias <= 14 ? (
+          <p className="text-sm text-cream/70">Estás en los primeros 14 días: <strong className="text-gold">no se opina, se mide</strong>. Faltan {14 - dias + 1} días para decidir. Carga tus conversaciones cada día en el Tablero.</p>
+        ) : (
+          <p className="text-sm text-cream/70">Pasaste los 14 días: ahora las reglas deciden. Tu Tablero te dice qué se apaga, qué queda y cuándo refrescar el creativo.</p>
+        )}
+<TableroCupos diasCampana={dias} />
+        <button onClick={() => { setEncendida(null); try { localStorage.removeItem(KEY_ON); } catch { /* noop */ } }}
+          className="text-[11px] text-cream/40 underline underline-offset-2">Apagué la campaña — volver al montaje</button>
       </div>
+    );
+  }
 
-      {/* Canvas preview */}
-      <div className="rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)]">
-        <canvas ref={canvasRef} className="w-full aspect-square" style={{ imageRendering: 'auto' }} />
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
+        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 8 candados — {listos} de 8</h2>
+        <p className="text-sm text-cream/60 mt-1">Nada se enciende hasta que todo está tildado. Un solo punto flojo quema el presupuesto entero.</p>
       </div>
+      <div className="space-y-2">
+        {CANDADOS.map((c, i) => (
+          <button key={c.id} onClick={() => toggle(c.id)}
+            className={`w-full text-left rounded-2xl border p-4 transition-colors ${checks[c.id] ? 'border-success/40 bg-success/[0.05]' : 'border-cream/10 hover:border-cream/25'}`}>
+            <div className="flex items-start gap-3">
+              <span className={`mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center text-xs shrink-0 ${checks[c.id] ? 'border-success bg-success text-black font-bold' : 'border-cream/25 text-cream/40'}`}>
+                {checks[c.id] ? '✓' : i + 1}
+              </span>
+              <span className="flex-1">
+                <span className="block text-sm font-semibold text-cream">{c.titulo}</span>
+                <span className="block text-xs text-cream/55 mt-0.5 leading-relaxed">{c.detalle}</span>
+                {c.accion === 'anuncios' && onIrAnuncios && (
+                  <span onClick={(e) => { e.stopPropagation(); onIrAnuncios(); }}
+                    className="inline-block text-[11px] font-bold text-gold mt-1.5 hover:text-goldhi">Abrir el Constructor →</span>
+                )}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+      <button onClick={encender} disabled={!todo}
+        className="w-full btn-primary py-4 rounded-xl text-sm font-bold disabled:opacity-40">
+        {todo ? '🚀 ENCENDER — y anotar la fecha' : `Faltan ${8 - listos} candados para encender`}
+      </button>
     </div>
   );
-}
-
-// ─── Canvas helpers ──────────────────────────────────────────────────────────
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-) {
-  const words = text.split(' ');
-  let line = '';
-  let currentY = y;
-
-  for (const word of words) {
-    const test = line + word + ' ';
-    if (ctx.measureText(test).width > maxWidth && line !== '') {
-      ctx.fillText(line.trim(), x, currentY);
-      line = word + ' ';
-      currentY += lineHeight;
-    } else {
-      line = test;
-    }
-  }
-  ctx.fillText(line.trim(), x, currentY);
-}
-
-function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number,
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
 }

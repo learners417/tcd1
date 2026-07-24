@@ -1,255 +1,114 @@
-/**
- * MontajeView.tsx — Montaje paso a paso con checklist + chat KAI
- */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Wrench, Send, Loader2, CheckCircle2, Circle, Lock } from 'lucide-react';
-import { streamText } from '../../lib/aiProvider';
-import { adnContext } from '../../lib/campanasPrompts';
-import type { ProfileV2 } from '../../lib/supabase';
-import type { MontajeStep, KaiMessage } from '../../lib/campanasTypes';
-import Markdown from 'react-markdown';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { Bot, LayoutGrid, FileText, Loader2, Check } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
-const MONTAJE_STEPS: MontajeStep[] = [
-  { id: 1, label: 'Crear Business Manager', description: 'Configurar cuenta publicitaria y permisos', status: 'active' },
-  { id: 2, label: 'Instalar Pixel de Meta', description: 'Pixel en el sitio web o landing page', status: 'locked' },
-  { id: 3, label: 'Crear Audiencias', description: 'Custom audiences y lookalikes', status: 'locked' },
-  { id: 4, label: 'Configurar Campaña', description: 'Objetivo, presupuesto, programacion', status: 'locked' },
-  { id: 5, label: 'Configurar Conjunto de Anuncios', description: 'Audiencia, ubicaciones, placements', status: 'locked' },
-  { id: 6, label: 'Configurar Anuncio', description: 'Creativos, copy, CTA, tracking', status: 'locked' },
-  { id: 7, label: 'Automatizaciones', description: 'ManyChat, GHL, follow-ups', status: 'locked' },
-  { id: 8, label: 'Verificacion Final', description: 'Checklist antes de publicar', status: 'locked' },
+const AGENTES = [
+  { id: 'diego', label: 'Diego' }, { id: 'vera', label: 'Vera' }, { id: 'sofi', label: 'Sofi' },
+  { id: 'mateo', label: 'Mateo' }, { id: 'caro', label: 'Caro' }, { id: 'bruno', label: 'Bruno' },
+  { id: 'lucas', label: 'Lucas' }, { id: 'ramiro', label: 'Ramiro' },
+];
+
+const MODULOS = [
+  { id: 'campanas', label: 'Campañas' },
+  { id: 'creativos', label: 'Creativos' },
+];
+
+const SECCIONES_ADN = [
+  { id: 'ID', label: 'Identidad' }, { id: 'META', label: 'Meta' }, { id: 'IRR', label: 'Oferta' },
+  { id: 'NEG', label: 'Negocio' }, { id: 'INF', label: 'Infraestructura' }, { id: 'CAP', label: 'Captación' },
+  { id: 'MET', label: 'Métricas' },
 ];
 
 interface Props {
-  perfil: Partial<ProfileV2>;
+  clienteId: string;
+  agentesActuales?: string[];
+  modulosActuales?: string[];
+  adnActuales?: string[];
+  onSaved?: () => void;
 }
 
-export default function MontajeView({ perfil }: Props) {
-  const [steps, setSteps] = useState<MontajeStep[]>(MONTAJE_STEPS);
-  const [messages, setMessages] = useState<KaiMessage[]>([]);
-  const [input, setInput] = useState('');
-  const [streaming, setStreaming] = useState(false);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  const activeStep = steps.find((s) => s.status === 'active');
-
-  // Initial KAI message
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{
-        id: 'init',
-        role: 'assistant',
-        content: `Hola! Soy **KAI**, tu asistente de montaje de campañas en Meta Ads.\n\nVamos a configurar tu campaña paso a paso. Empezamos con el **paso 1: ${MONTAJE_STEPS[0].label}**.\n\nContame: ya tienes un Business Manager configurado o necesitas crear uno desde cero?`,
-        timestamp: new Date().toISOString(),
-      }]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const markStepDone = (stepId: number) => {
-    setSteps((prev) => prev.map((s) => {
-      if (s.id === stepId) return { ...s, status: 'done' as const };
-      if (s.id === stepId + 1) return { ...s, status: 'active' as const };
-      return s;
-    }));
+function Fila({ titulo, icon, items, activos, master, onToggle }: {
+  titulo: string; icon: React.ReactNode;
+  items: { id: string; label: string }[];
+  activos: string[]; master?: string;
+  onToggle: (next: string[]) => void;
+}) {
+  const allOn = master ? activos.includes(master) : false;
+  const toggle = (id: string) => {
+    if (master && id === master) return onToggle(allOn ? [] : [master]);
+    const base = activos.filter((a) => a !== master);
+    onToggle(base.includes(id) ? base.filter((a) => a !== id) : [...base, id]);
   };
-
-  const handleSend = useCallback(async () => {
-    const text = input.trim();
-    if (!text || streaming) return;
-
-    const userMsg: KaiMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-    setStreaming(true);
-
-    const systemInstruction = `Eres KAI, un experto en configuracion de campañas en Meta Ads Manager para profesionales de la salud.
-
-Tu rol es guiar al usuario paso a paso para configurar su campaña.
-
-PASO ACTUAL: ${activeStep?.id ?? 1} - ${activeStep?.label ?? 'Crear Business Manager'}
-DESCRIPCION: ${activeStep?.description ?? ''}
-
-${adnContext(perfil)}
-
-INSTRUCCIONES:
-- Responde de forma concisa y accionable
-- Se ESPECIFICO con nombres de botones y menus en Meta Ads Manager
-- Si el usuario completo el paso actual, indicalo claramente con "PASO COMPLETADO"
-- Guia un paso a la vez, no te adelantes
-- Tono profesional pero cercano
-- Escribe en espanol`;
-
-    const allMessages = [...messages, userMsg].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    try {
-      let fullResponse = '';
-      const assistantId = `kai-${Date.now()}`;
-
-      setMessages((prev) => [...prev, {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date().toISOString(),
-      }]);
-
-      for await (const chunk of streamText({ systemInstruction, messages: allMessages })) {
-        fullResponse += chunk;
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            ...updated[updated.length - 1],
-            content: fullResponse,
-          };
-          return updated;
-        });
-      }
-
-      // Auto-advance step if KAI says it's complete
-      if (fullResponse.includes('PASO COMPLETADO') && activeStep) {
-        markStepDone(activeStep.id);
-      }
-    } catch {
-      toast.error('Error en la respuesta de KAI.');
-    } finally {
-      setStreaming(false);
-    }
-  }, [input, streaming, messages, activeStep, perfil]);
+  const isOn = (id: string) => allOn || activos.includes(id);
 
   return (
-    <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
-      <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
-          Configuracion guiada
-        </p>
-        <h2 className="text-xl font-light text-cream">
-          Montaje{' '}
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
-            paso a paso
-          </span>
-        </h2>
+    <div className="flex items-start gap-3 py-2 border-b border-gold/6 last:border-0">
+      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+        {icon}{titulo}
       </div>
-
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        {/* Checklist izquierda */}
-        <div className="lg:w-[300px] lg:min-w-[300px] card-panel p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45">
-              Pasos
-            </span>
-            <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
-          </div>
-
-          <div className="space-y-1">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-                  step.status === 'active' ? 'bg-gold/10 border border-gold/20' :
-                  step.status === 'done' ? 'bg-success/5' : 'opacity-40'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                  step.status === 'done' ? 'bg-success/20 text-success' :
-                  step.status === 'active' ? 'bg-gold/20 text-gold' :
-                  'bg-cream/5 text-cream/20'
-                }`}>
-                  {step.status === 'done' ? <CheckCircle2 className="w-3.5 h-3.5" /> :
-                   step.status === 'active' ? <span className="text-[11px] font-bold">{step.id}</span> :
-                   <Lock className="w-3 h-3" />}
-                </div>
-                <div>
-                  <div className={`text-xs font-semibold ${
-                    step.status === 'done' ? 'text-success' :
-                    step.status === 'active' ? 'text-gold' : 'text-cream/45'
-                  }`}>
-                    {step.label}
-                  </div>
-                  <div className="text-[11px] text-cream/25 mt-0.5 leading-relaxed">
-                    {step.description}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 p-3 rounded-xl bg-gold/5 border border-dashed border-gold/15">
-            <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
-            <div className="text-[11px] text-cream/45 leading-relaxed">
-              No tocar nada en las primeras 48-72h despues de publicar. La fase de aprendizaje necesita tiempo.
-            </div>
-          </div>
-        </div>
-
-        {/* Chat derecha */}
-        <div className="flex-1 card-panel flex flex-col min-h-0">
-          {/* Messages */}
-          <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-3 scrollbar-hide">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
-                    K
-                  </div>
-                )}
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                  msg.role === 'user'
-                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
-                    : 'bg-surface border border-cream/5 rounded-bl-sm'
-                }`}>
-                  {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5">
-                      <Markdown>{msg.content}</Markdown>
-                    </div>
-                  ) : (
-                    <div className="flex gap-1">
-                      {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Input */}
-          <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
-            <div className="flex gap-2">
-              <input
-                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
-                placeholder="Escribi tu respuesta..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                disabled={streaming}
-              />
-              <button
-                onClick={handleSend}
-                disabled={streaming || !input.trim()}
-                className="btn-primary px-4 disabled:opacity-30"
-              >
-                {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="flex flex-wrap gap-1">
+        {master && (
+          <button onClick={() => toggle(master)}
+            className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
+              allOn ? 'bg-gold text-black border-gold' : 'border-gold/25 text-gold/60 hover:text-gold'}`}>
+            {master === 'todas' ? 'Todas' : 'Todos'}
+          </button>
+        )}
+        {items.map((it) => (
+          <button key={it.id} onClick={() => toggle(it.id)} disabled={allOn}
+            className={`px-2 py-0.5 rounded-md text-[11px] border transition-all disabled:opacity-40 ${
+              isOn(it.id) ? 'bg-gold/15 text-gold border-gold/30' : 'border-cream/10 text-cream/35 hover:text-cream/70'}`}>
+            {it.label}
+          </button>
+        ))}
       </div>
+    </div>
+  );
+}
+
+export default function AdnPermisosControl({ clienteId, agentesActuales, modulosActuales, adnActuales, onSaved }: Props) {
+  const [agentes, setAgentes] = useState<string[]>(agentesActuales ?? []);
+  const [modulos, setModulos] = useState<string[]>(modulosActuales ?? []);
+  const [adn, setAdn] = useState<string[]>(adnActuales ?? []);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  const wrap = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setDirty(true); };
+
+  async function guardar() {
+    if (!supabase) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.rpc('admin_migrate_profile', {
+        target_user_id: clienteId,
+        updates: { agentes_activos: agentes, modulos_activos: modulos, adn_edit_secciones: adn },
+      });
+      if (error) throw error;
+      toast.success('Accesos actualizados');
+      setDirty(false);
+      onSaved?.();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="bg-panel border border-gold/10 rounded-2xl px-4 py-3">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">Accesos del cliente</p>
+        <button onClick={guardar} disabled={saving || !dirty}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+            dirty ? 'bg-gold text-black hover:bg-goldhi' : 'bg-cream/5 text-cream/45'} disabled:opacity-60`}>
+          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+          {saving ? 'Guardando' : dirty ? 'Guardar' : 'Guardado'}
+        </button>
+      </div>
+      <Fila titulo="Agentes" icon={<Bot className="w-3 h-3" />} items={AGENTES} activos={agentes} master="todos" onToggle={wrap(setAgentes)} />
+      <Fila titulo="Módulos" icon={<LayoutGrid className="w-3 h-3" />} items={MODULOS} activos={modulos} onToggle={wrap(setModulos)} />
+      <Fila titulo="Edita su ADN" icon={<FileText className="w-3 h-3" />} items={SECCIONES_ADN} activos={adn} master="todas" onToggle={wrap(setAdn)} />
     </div>
   );
 }

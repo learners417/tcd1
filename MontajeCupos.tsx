@@ -1,114 +1,241 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { Bot, LayoutGrid, FileText, Loader2, Check } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+/**
+ * TaskFiltersBar — barra horizontal compacta, una sola fila.
+ * Estructura:
+ *   [icono filtros + count] · scope chips · | · prioridad chips · | · personas (con su color) · [Limpiar]
+ *
+ * Wrapping natural si no entra. Sin labels en caps. Sin secciones gigantes.
+ * Los chips de personas usan el mismo color que sus cards en el board.
+ */
+import { useMemo } from 'react';
+import { Filter, X, UserCheck, UserPlus, AlertCircle, CalendarDays } from 'lucide-react';
+import type { AdminTareaPrioridad, Profile } from '../../../lib/supabase';
+import { ADMIN_TAREA_PRIORIDAD_LABELS } from '../../../lib/supabase';
+import { getTeamColor, getInitials } from '../../../lib/teamColors';
 
-const AGENTES = [
-  { id: 'diego', label: 'Diego' }, { id: 'vera', label: 'Vera' }, { id: 'sofi', label: 'Sofi' },
-  { id: 'mateo', label: 'Mateo' }, { id: 'caro', label: 'Caro' }, { id: 'bruno', label: 'Bruno' },
-  { id: 'lucas', label: 'Lucas' }, { id: 'ramiro', label: 'Ramiro' },
-];
-
-const MODULOS = [
-  { id: 'campanas', label: 'Campañas' },
-  { id: 'creativos', label: 'Creativos' },
-];
-
-const SECCIONES_ADN = [
-  { id: 'ID', label: 'Identidad' }, { id: 'META', label: 'Meta' }, { id: 'IRR', label: 'Oferta' },
-  { id: 'NEG', label: 'Negocio' }, { id: 'INF', label: 'Infraestructura' }, { id: 'CAP', label: 'Captación' },
-  { id: 'MET', label: 'Métricas' },
-];
-
-interface Props {
-  clienteId: string;
-  agentesActuales?: string[];
-  modulosActuales?: string[];
-  adnActuales?: string[];
-  onSaved?: () => void;
+export interface TaskFilters {
+  asignadasAMi: boolean;
+  creadasPorMi: boolean;
+  vencidas: boolean;
+  estaSemana: boolean;
+  prioridades: Set<AdminTareaPrioridad>;
+  asignados: Set<string>; // ids de teamMembers
 }
 
-function Fila({ titulo, icon, items, activos, master, onToggle }: {
-  titulo: string; icon: React.ReactNode;
-  items: { id: string; label: string }[];
-  activos: string[]; master?: string;
-  onToggle: (next: string[]) => void;
-}) {
-  const allOn = master ? activos.includes(master) : false;
-  const toggle = (id: string) => {
-    if (master && id === master) return onToggle(allOn ? [] : [master]);
-    const base = activos.filter((a) => a !== master);
-    onToggle(base.includes(id) ? base.filter((a) => a !== id) : [...base, id]);
-  };
-  const isOn = (id: string) => allOn || activos.includes(id);
+export const EMPTY_FILTERS: TaskFilters = {
+  asignadasAMi: false,
+  creadasPorMi: false,
+  vencidas: false,
+  estaSemana: false,
+  prioridades: new Set<AdminTareaPrioridad>(),
+  asignados: new Set<string>(),
+};
 
+interface TaskFiltersBarProps {
+  filters: TaskFilters;
+  onChange: (filters: TaskFilters) => void;
+  teamMembers: Profile[];
+  currentUserId?: string;
+}
+
+const PRIORIDADES: AdminTareaPrioridad[] = ['urgente', 'alta', 'media', 'baja'];
+
+const PRIORIDAD_CHIP_COLORS: Record<AdminTareaPrioridad, { active: string; idle: string; dot: string }> = {
+  urgente: {
+    active: 'bg-red-500/15 text-red-400 border-red-500/40',
+    idle: 'border-transparent text-cream/55 hover:text-red-400 hover:bg-red-500/5',
+    dot: 'bg-red-500',
+  },
+  alta: {
+    active: 'bg-orange-500/20 text-orange-400 border-orange-500/45',
+    idle: 'border-transparent text-cream/55 hover:text-orange-400 hover:bg-orange-500/8',
+    dot: 'bg-orange-500',
+  },
+  media: {
+    active: 'bg-gold/15 text-gold border-gold/40',
+    idle: 'border-transparent text-cream/55 hover:text-gold hover:bg-gold/5',
+    dot: 'bg-gold',
+  },
+  baja: {
+    active: 'bg-success/15 text-success border-success/40',
+    idle: 'border-transparent text-cream/55 hover:text-success hover:bg-success/5',
+    dot: 'bg-success',
+  },
+};
+
+const CHIP_BASE = 'h-7 inline-flex items-center gap-1.5 px-2.5 rounded-md text-xs font-semibold border transition-all whitespace-nowrap';
+
+function Divider() {
+  return <span className="w-px h-5 bg-cream/10 mx-0.5" aria-hidden />;
+}
+
+function ScopeChip({
+  active, onClick, icon: Icon, children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex items-start gap-3 py-2 border-b border-gold/6 last:border-0">
-      <div className="flex items-center gap-1.5 w-32 shrink-0 pt-0.5 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
-        {icon}{titulo}
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {master && (
-          <button onClick={() => toggle(master)}
-            className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-all ${
-              allOn ? 'bg-gold text-black border-gold' : 'border-gold/25 text-gold/60 hover:text-gold'}`}>
-            {master === 'todas' ? 'Todas' : 'Todos'}
-          </button>
-        )}
-        {items.map((it) => (
-          <button key={it.id} onClick={() => toggle(it.id)} disabled={allOn}
-            className={`px-2 py-0.5 rounded-md text-[11px] border transition-all disabled:opacity-40 ${
-              isOn(it.id) ? 'bg-gold/15 text-gold border-gold/30' : 'border-cream/10 text-cream/35 hover:text-cream/70'}`}>
-            {it.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <button
+      onClick={onClick}
+      className={`${CHIP_BASE} ${active
+        ? 'bg-gold/15 text-gold border-gold/40'
+        : 'border-transparent text-cream/55 hover:text-cream hover:bg-cream/5'
+      }`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {children}
+    </button>
   );
 }
 
-export default function AdnPermisosControl({ clienteId, agentesActuales, modulosActuales, adnActuales, onSaved }: Props) {
-  const [agentes, setAgentes] = useState<string[]>(agentesActuales ?? []);
-  const [modulos, setModulos] = useState<string[]>(modulosActuales ?? []);
-  const [adn, setAdn] = useState<string[]>(adnActuales ?? []);
-  const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
+export default function TaskFiltersBar({ filters, onChange, teamMembers, currentUserId }: TaskFiltersBarProps) {
+  const activeCount = useMemo(() => {
+    let n = 0;
+    if (filters.asignadasAMi) n++;
+    if (filters.creadasPorMi) n++;
+    if (filters.vencidas) n++;
+    if (filters.estaSemana) n++;
+    n += filters.prioridades.size;
+    n += filters.asignados.size;
+    return n;
+  }, [filters]);
 
-  const wrap = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setDirty(true); };
-
-  async function guardar() {
-    if (!supabase) return;
-    setSaving(true);
-    try {
-      const { error } = await supabase.rpc('admin_migrate_profile', {
-        target_user_id: clienteId,
-        updates: { agentes_activos: agentes, modulos_activos: modulos, adn_edit_secciones: adn },
-      });
-      if (error) throw error;
-      toast.success('Accesos actualizados');
-      setDirty(false);
-      onSaved?.();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error al guardar');
-    } finally {
-      setSaving(false);
-    }
+  function togglePrioridad(p: AdminTareaPrioridad) {
+    const next = new Set(filters.prioridades);
+    if (next.has(p)) next.delete(p); else next.add(p);
+    onChange({ ...filters, prioridades: next });
   }
 
+  function toggleAsignado(id: string) {
+    const next = new Set(filters.asignados);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    onChange({ ...filters, asignados: next });
+  }
+
+  function reset() {
+    onChange({ ...EMPTY_FILTERS, prioridades: new Set(), asignados: new Set() });
+  }
+
+  // Ordenar miembros: el currentUser primero
+  const sortedMembers = useMemo(() => {
+    if (!currentUserId) return teamMembers;
+    const me = teamMembers.find(m => m.id === currentUserId);
+    const others = teamMembers
+      .filter(m => m.id !== currentUserId)
+      .sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? ''));
+    return me ? [me, ...others] : teamMembers;
+  }, [teamMembers, currentUserId]);
+
   return (
-    <div className="bg-panel border border-gold/10 rounded-2xl px-4 py-3">
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">Accesos del cliente</p>
-        <button onClick={guardar} disabled={saving || !dirty}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
-            dirty ? 'bg-gold text-black hover:bg-goldhi' : 'bg-cream/5 text-cream/45'} disabled:opacity-60`}>
-          {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-          {saving ? 'Guardando' : dirty ? 'Guardar' : 'Guardado'}
-        </button>
+    <div className="bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-2.5 py-2">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Filter indicator */}
+        <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/55">
+          <Filter className="w-3.5 h-3.5" />
+          {activeCount > 0 && (
+            <span className="text-[11px] font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
+              {activeCount}
+            </span>
+          )}
+        </div>
+
+        <Divider />
+
+        {/* Scope chips */}
+        <ScopeChip
+          active={filters.asignadasAMi}
+          onClick={() => onChange({ ...filters, asignadasAMi: !filters.asignadasAMi })}
+          icon={UserCheck}
+        >
+          Para mí
+        </ScopeChip>
+        <ScopeChip
+          active={filters.creadasPorMi}
+          onClick={() => onChange({ ...filters, creadasPorMi: !filters.creadasPorMi })}
+          icon={UserPlus}
+        >
+          Creé yo
+        </ScopeChip>
+        <ScopeChip
+          active={filters.vencidas}
+          onClick={() => onChange({ ...filters, vencidas: !filters.vencidas })}
+          icon={AlertCircle}
+        >
+          Vencidas
+        </ScopeChip>
+        <ScopeChip
+          active={filters.estaSemana}
+          onClick={() => onChange({ ...filters, estaSemana: !filters.estaSemana })}
+          icon={CalendarDays}
+        >
+          Esta semana
+        </ScopeChip>
+
+        <Divider />
+
+        {/* Prioridad chips con dot de color */}
+        {PRIORIDADES.map(p => {
+          const active = filters.prioridades.has(p);
+          const colors = PRIORIDAD_CHIP_COLORS[p];
+          return (
+            <button
+              key={p}
+              onClick={() => togglePrioridad(p)}
+              className={`${CHIP_BASE} ${active ? colors.active : colors.idle}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
+              {ADMIN_TAREA_PRIORIDAD_LABELS[p]}
+            </button>
+          );
+        })}
+
+        {sortedMembers.length > 0 && <Divider />}
+
+        {/* Personas con su color de equipo */}
+        {sortedMembers.map(m => {
+          const active = filters.asignados.has(m.id);
+          const color = getTeamColor(m.id, currentUserId);
+          const name = (m.nombre ?? m.email ?? '?').split(' ')[0];
+          return (
+            <button
+              key={m.id}
+              onClick={() => toggleAsignado(m.id)}
+              style={active
+                ? { backgroundColor: color.bg, borderColor: color.border, color: color.text }
+                : { borderColor: 'transparent' }
+              }
+              className={`${CHIP_BASE} ${active
+                ? ''
+                : 'text-cream/55 hover:bg-cream/5 hover:text-cream'
+              }`}
+            >
+              <span
+                style={active
+                  ? { backgroundColor: color.solid, color: '#080808' }
+                  : { backgroundColor: color.bg, color: color.text }
+                }
+                className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold leading-none"
+              >
+                {getInitials(m.nombre)}
+              </span>
+              {name}
+            </button>
+          );
+        })}
+
+        {/* Reset alineado a la derecha */}
+        {activeCount > 0 && (
+          <button
+            onClick={reset}
+            className="ml-auto h-7 inline-flex items-center gap-1 px-2 text-xs text-cream/55 hover:text-gold transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            Limpiar
+          </button>
+        )}
       </div>
-      <Fila titulo="Agentes" icon={<Bot className="w-3 h-3" />} items={AGENTES} activos={agentes} master="todos" onToggle={wrap(setAgentes)} />
-      <Fila titulo="Módulos" icon={<LayoutGrid className="w-3 h-3" />} items={MODULOS} activos={modulos} onToggle={wrap(setModulos)} />
-      <Fila titulo="Edita su ADN" icon={<FileText className="w-3 h-3" />} items={SECCIONES_ADN} activos={adn} master="todas" onToggle={wrap(setAdn)} />
     </div>
   );
 }

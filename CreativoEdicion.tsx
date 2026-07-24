@@ -1,62 +1,60 @@
 /**
- * CampanasSubNav.tsx — Tabs horizontales para navegar modulos de campanas
+ * PUERTA AL SIGUIENTE NIVEL (Bloque 2).
+ *
+ * Para quien compró un tramo intermedio (Tu Sistema $497): le muestra lo que
+ * ya selló, las piezas que le faltan con el nombre de la sesión donde se ganan,
+ * y la puerta al nivel que sigue. El del $27 no la ve: tiene su propia
+ * graduación de los 5 días.
  */
-import {
-  Home, Target, PenTool, BarChart3, Wrench, FolderOpen, Trophy, Sparkles } from 'lucide-react';
-import type { CampanasView } from '../../lib/campanasTypes';
+import React from 'react';
+import { PIEZAS_ADN, estadoPieza } from '../lib/adnPiezas';
+import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR, checkoutUrl, waLink } from '../lib/planes';
 
-interface NavItem {
-  id: CampanasView;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-}
+export default function PuertaSiguienteNivel() {
+  const plan = planActual();
+  // Solo tramos intermedios: el de los 5 días tiene su graduación propia.
+  if (plan !== 'verde' && plan !== 'amarillo') return null;
 
-const NAV_ITEMS: NavItem[] = [
-  { id: 'anuncios', label: 'Tus 3 anuncios', icon: Sparkles },
-  { id: 'home', label: 'Inicio', icon: Home },
-  { id: 'nueva', label: 'Nueva campaña', icon: Target },
-  { id: 'copies', label: 'Copies', icon: PenTool },
-  { id: 'diagnostico', label: 'Diagnosticar', icon: BarChart3 },
-  { id: 'montaje', label: 'Montaje', icon: Wrench },
-  { id: 'historial', label: 'Historial', icon: FolderOpen },
-  { id: 'ganadores', label: 'Ganadores', icon: Trophy },
-];
+  const faltan = PIEZAS_ADN.filter((p) => !planPermitePilar(plan, p.pilar));
+  if (!faltan.length) return null;
 
-interface Props {
-  currentView: CampanasView;
-  onNavigate: (view: CampanasView) => void;
-}
+  const suyas = PIEZAS_ADN.filter((p) => planPermitePilar(plan, p.pilar));
+  const selladas = suyas.filter((p) => estadoPieza(p).sellada).length;
+  const nivel = planParaPilar(Math.min(...faltan.map((p) => p.pilar)));
+  const completo = selladas === suyas.length;
 
-export default function CampanasSubNav({ currentView, onNavigate }: Props) {
-  // Hide sub-nav on drill-down views
-  if (currentView === 'studio' || currentView === 'detail') return null;
+  const abrir = () => {
+    const url = checkoutUrl(nivel);
+    window.open(url || waLink(`Hola · Quiero abrir ${NOMBRE_PLAN[nivel]} (${PRECIO_FUNDADOR[nivel]})`), '_blank');
+  };
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-4 mb-2 border-b border-[rgba(232,150,46,0.1)]">
-      {NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
-        const isActive = currentView === item.id;
-        return (
-          <button
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-              isActive
-                ? 'bg-gold/15 text-gold border border-gold/30'
-                : 'text-cream/65 hover:text-cream/80 hover:bg-cream/5 border border-transparent'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {item.label}
-            {item.badge && (
-              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-azure/15 text-azure border border-azure/25">
-                {item.badge}
-              </span>
-            )}
-          </button>
-        );
-      })}
+    <div className="card-panel p-5 border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent">
+      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">
+        {completo ? 'Terminaste tu tramo' : 'Tu tramo'}
+      </p>
+      <p className="text-lg text-cream" style={{ fontFamily: 'var(--font-display)' }}>
+        {selladas} de {suyas.length} piezas selladas
+      </p>
+      {completo && (
+        <p className="text-sm text-cream/70 mt-1.5 leading-relaxed">
+          Tienes tu precio, tu método, tu oferta y tu sistema. Lo que sigue es lo que los sostiene todos los días.
+        </p>
+      )}
+
+      <div className="mt-4 space-y-1.5">
+        {faltan.map((p) => (
+          <div key={p.id} className="flex items-baseline gap-2 text-sm">
+            <span className="text-cream/30">🔒</span>
+            <span className="text-cream/75 flex-1">{p.titulo}</span>
+            <span className="text-[11px] text-cream/40 text-right">{p.sesion}</span>
+          </div>
+        ))}
+      </div>
+
+      <button onClick={abrir} className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold mt-4">
+        Abrir {NOMBRE_PLAN[nivel]} · {PRECIO_FUNDADOR[nivel]} →
+      </button>
     </div>
   );
 }

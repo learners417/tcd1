@@ -1,98 +1,483 @@
-/**
- * EL MONTAJE — los 8 candados (T4 del Manual de Anuncios).
- * Nada se enciende hasta que TODO está tildado. Un solo punto flojo quema
- * el presupuesto entero. Al encender, se guarda la fecha: el tablero y la
- * regla de los 14 días cuentan desde ahí.
- */
-import React, { useState } from 'react';
-import TableroCupos from './TableroCupos';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Plus, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Archive, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
+import TaskModal from './TaskModal';
+import ConfirmDialog from './ConfirmDialog';
+import TaskCard from './tasks/TaskCard';
+import TaskFiltersBar, { EMPTY_FILTERS, type TaskFilters } from './tasks/TaskFiltersBar';
+import TaskViewToggle, { type TaskView } from './tasks/TaskViewToggle';
+import TaskKanbanView from './tasks/TaskKanbanView';
+import TaskListView from './tasks/TaskListView';
+import TaskByPersonView from './tasks/TaskByPersonView';
+import type { AdminTarea, AdminTareaStatus, Profile } from '../../lib/supabase';
+import {
+  fetchAdminTareas,
+  fetchTareasHoy,
+  fetchAdminTareaById,
+  createAdminTarea,
+  updateAdminTarea,
+  updateAdminTareaStatus,
+  deleteAdminTarea,
+  archivarAdminTarea,
+  desarchivarAdminTarea,
+  archivarTodasCompletadas,
+} from '../../lib/adminTasks';
+import { notificarTareaAsignada } from '../../lib/notifications';
+import { parseDateLocal } from '../../lib/dateUtils';
 
-const KEY = 'tcd_montaje_v1';
-const KEY_ON = 'tcd_campana_encendida_v1';
-
-const CANDADOS: { id: string; titulo: string; detalle: string; accion?: 'anuncios' }[] = [
-  { id: 'anuncios', titulo: 'Tus 3 anuncios escritos y auditados', detalle: 'Una de piedras, una de dolor o historia, una de resultado — cada una con su auditoría de ingredientes en verde.', accion: 'anuncios' },
-  { id: 'palabra', titulo: 'Tu PALABRA configurada y PROBADA', detalle: 'Comentaste desde otra cuenta y llegó el DM con tu link. Si no llegó, no está lista.' },
-  { id: 'dm', titulo: 'Tu DM con su pregunta + el seguimiento', detalle: 'La respuesta automática entrega tu página y hace UNA pregunta sobre su situación. El seguimiento de 24-48 h queda programado.' },
-  { id: 'pagina', titulo: 'Tu página: precio, agenda y preguntas', detalle: 'Inversión visible («desde $X»), agenda DESPUÉS del precio y tus 3-4 preguntas de reserva activas.' },
-  { id: 'pixel', titulo: 'El píxel activo en tu página', detalle: 'Instalado y verificado: cada visita queda registrada para tu público de mañana.' },
-  { id: 'perfil', titulo: 'Tu perfil ordenado', detalle: 'El link de tu bio apunta a tu página de venta. Tus destacadas muestran quién eres y qué haces.' },
-  { id: 'trabajo', titulo: 'Tu único trabajo, claro', detalle: 'Atender las conversaciones de quienes contestan tu pregunta. Nada más. La campaña hace el resto.' },
-  { id: 'presupuesto', titulo: 'Presupuesto definido: 14 días sin tocar', detalle: 'Una sola campaña, un solo objetivo, 20-25 USD por día. Los primeros 14 días no se opina — se mide.' },
-];
-
-function leer<T>(k: string, def: T): T {
-  try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
+interface TasksPipelineProps {
+  currentAdminId: string;
+  adminRol: string;
+  teamMembers: Profile[];
+  clientes: Profile[];
+  /**
+   * Si llega un ID de tarea (por ej. desde una notificación), abrimos
+   * el modal de esa tarea automáticamente en cuanto esté cargada.
+   */
+  initialTareaId?: string | null;
+  /** Se llama una vez que se abrió el modal — para que el padre limpie el ID. */
+  onInitialTareaOpened?: () => void;
 }
 
-export default function MontajeCupos({ onIrAnuncios }: { onIrAnuncios?: () => void }) {
-  const [checks, setChecks] = useState<Record<string, boolean>>(() => leer(KEY, {}));
-  const [encendida, setEncendida] = useState<string | null>(() => leer<string | null>(KEY_ON, null));
+function startOfWeek(d: Date): Date {
+  const out = new Date(d);
+  const day = out.getDay();
+  const diff = (day === 0 ? -6 : 1) - day; // lunes
+  out.setDate(out.getDate() + diff);
+  out.setHours(0, 0, 0, 0);
+  return out;
+}
 
-  const toggle = (id: string) => {
-    const n = { ...checks, [id]: !checks[id] };
-    setChecks(n);
-    try { localStorage.setItem(KEY, JSON.stringify(n)); } catch { /* noop */ }
-  };
-  const listos = CANDADOS.filter((c) => checks[c.id]).length;
-  const todo = listos === CANDADOS.length;
+function endOfWeek(d: Date): Date {
+  const out = startOfWeek(d);
+  out.setDate(out.getDate() + 6);
+  out.setHours(23, 59, 59, 999);
+  return out;
+}
 
-  const encender = () => {
-    if (!todo) return;
-    const fecha = new Date().toISOString();
-    setEncendida(fecha);
-    try { localStorage.setItem(KEY_ON, JSON.stringify(fecha)); } catch { /* noop */ }
-  };
+export default function TasksPipeline({
+  currentAdminId,
+  teamMembers,
+  clientes,
+  initialTareaId,
+  onInitialTareaOpened,
+}: TasksPipelineProps) {
+  const [tareas, setTareas] = useState<AdminTarea[]>([]);
+  const [tareasHoy, setTareasHoy] = useState<AdminTarea[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingTarea, setEditingTarea] = useState<AdminTarea | null>(null);
+  const [showHoy, setShowHoy] = useState(true);
+  const [deletingTarea, setDeletingTarea] = useState<AdminTarea | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [verArchivadas, setVerArchivadas] = useState(false);
+  const [bulkArchiveOpen, setBulkArchiveOpen] = useState(false);
+  const [bulkArchiveLoading, setBulkArchiveLoading] = useState(false);
 
-  if (encendida) {
-    const dias = Math.max(1, Math.floor((Date.now() - new Date(encendida).getTime()) / 86400000) + 1);
-    return (
-      <div className="card-panel p-6 text-center space-y-3">
-        <p className="text-4xl">🔴</p>
-        <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Campaña viva — día {Math.min(dias, 99)}</p>
-        {dias <= 14 ? (
-          <p className="text-sm text-cream/70">Estás en los primeros 14 días: <strong className="text-gold">no se opina, se mide</strong>. Faltan {14 - dias + 1} días para decidir. Carga tus conversaciones cada día en el Tablero.</p>
-        ) : (
-          <p className="text-sm text-cream/70">Pasaste los 14 días: ahora las reglas deciden. Tu Tablero te dice qué se apaga, qué queda y cuándo refrescar el creativo.</p>
-        )}
-<TableroCupos diasCampana={dias} />
-        <button onClick={() => { setEncendida(null); try { localStorage.removeItem(KEY_ON); } catch { /* noop */ } }}
-          className="text-[11px] text-cream/40 underline underline-offset-2">Apagué la campaña — volver al montaje</button>
-      </div>
-    );
+  const [view, setView] = useState<TaskView>('people');
+  const [filters, setFilters] = useState<TaskFilters>({
+    ...EMPTY_FILTERS,
+    prioridades: new Set(),
+    asignados: new Set(),
+  });
+
+  const cargar = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [all, hoy] = await Promise.all([
+        fetchAdminTareas({ incluirArchivadas: verArchivadas }),
+        fetchTareasHoy(currentAdminId),
+      ]);
+      setTareas(all);
+      setTareasHoy(hoy);
+    } catch (err) {
+      console.error('Error cargando tareas:', err);
+      toast.error('Error cargando tareas');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentAdminId, verArchivadas]);
+
+  useEffect(() => { cargar(); }, [cargar]);
+
+  // Cuando llega un initialTareaId (ej: click en una notificación), abrimos
+  // el modal de esa tarea. Primero la buscamos en lo cargado; si no está
+  // (puede estar archivada o todavía no haber llegado del fetch), la
+  // pedimos directo a la DB.
+  useEffect(() => {
+    if (!initialTareaId) return;
+    let alive = true;
+    const found = tareas.find(t => t.id === initialTareaId);
+    if (found) {
+      setEditingTarea(found);
+      setShowModal(true);
+      onInitialTareaOpened?.();
+      return;
+    }
+    if (loading) return; // esperar a que termine la carga inicial
+    fetchAdminTareaById(initialTareaId).then(t => {
+      if (!alive) return;
+      if (t) {
+        setEditingTarea(t);
+        setShowModal(true);
+      } else {
+        toast.error('No se encontró la tarea (puede estar archivada)');
+      }
+      onInitialTareaOpened?.();
+    });
+    return () => { alive = false; };
+  }, [initialTareaId, tareas, loading, onInitialTareaOpened]);
+
+  // Filtrado client-side. Las tareas ya vienen enriquecidas con asignado_nombre,
+  // creador_nombre y cliente_nombre desde el RPC get_admin_tareas_with_users.
+  const filtered = useMemo(() => {
+    const now = new Date();
+    const wkStart = startOfWeek(now);
+    const wkEnd = endOfWeek(now);
+
+    return tareas.filter(t => {
+      // Vista "Mis tareas" → asignadas a mí O creadas por mí.
+      if (view === 'mine') {
+        if (t.asignado_a !== currentAdminId && t.creado_por !== currentAdminId) return false;
+      }
+
+      if (filters.asignadasAMi && t.asignado_a !== currentAdminId) return false;
+      if (filters.creadasPorMi && t.creado_por !== currentAdminId) return false;
+
+      if (filters.vencidas) {
+        if (!t.fecha_vencimiento) return false;
+        if (parseDateLocal(t.fecha_vencimiento) >= now) return false;
+        if (t.status === 'completadas') return false;
+      }
+
+      if (filters.estaSemana) {
+        if (!t.fecha_vencimiento) return false;
+        const fv = parseDateLocal(t.fecha_vencimiento);
+        if (fv < wkStart || fv > wkEnd) return false;
+      }
+
+      if (filters.prioridades.size > 0 && !filters.prioridades.has(t.prioridad)) return false;
+      if (filters.asignados.size > 0 && (!t.asignado_a || !filters.asignados.has(t.asignado_a))) return false;
+
+      return true;
+    });
+  }, [tareas, view, filters, currentAdminId]);
+
+  const myCount = useMemo(
+    () => tareas.filter(t => t.asignado_a === currentAdminId || t.creado_por === currentAdminId).length,
+    [tareas, currentAdminId],
+  );
+
+  const completadasNoArchivadasCount = useMemo(
+    () => tareas.filter(t => t.status === 'completadas' && !t.archivada_at).length,
+    [tareas],
+  );
+
+  const archivadasCount = useMemo(
+    () => tareas.filter(t => !!t.archivada_at).length,
+    [tareas],
+  );
+
+  async function handleStatusChange(id: string, status: AdminTareaStatus) {
+    setTareas(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+    try {
+      await updateAdminTareaStatus(id, status);
+      await cargar();
+    } catch {
+      toast.error('Error al mover la tarea');
+      await cargar();
+    }
   }
 
+  async function handleArchive(id: string) {
+    const snapshot = tareas;
+    setTareas(prev => prev.map(t => t.id === id ? { ...t, archivada_at: new Date().toISOString() } : t));
+    try {
+      await archivarAdminTarea(id);
+      toast.success('Tarea archivada');
+      await cargar();
+    } catch {
+      setTareas(snapshot);
+      toast.error('No se pudo archivar la tarea');
+    }
+  }
+
+  async function handleUnarchive(id: string) {
+    const snapshot = tareas;
+    setTareas(prev => prev.map(t => t.id === id ? { ...t, archivada_at: null } : t));
+    try {
+      await desarchivarAdminTarea(id);
+      toast.success('Tarea desarchivada');
+      await cargar();
+    } catch {
+      setTareas(snapshot);
+      toast.error('No se pudo desarchivar la tarea');
+    }
+  }
+
+  async function handleBulkArchive() {
+    setBulkArchiveLoading(true);
+    try {
+      const n = await archivarTodasCompletadas();
+      setBulkArchiveOpen(false);
+      if (n === 0) {
+        toast.info('No había tareas completadas sin archivar');
+      } else {
+        toast.success(`${n} tarea${n === 1 ? '' : 's'} archivada${n === 1 ? '' : 's'}`);
+      }
+      await cargar();
+    } catch {
+      toast.error('No se pudieron archivar las tareas');
+    } finally {
+      setBulkArchiveLoading(false);
+    }
+  }
+
+  async function handleSave(data: Parameters<typeof createAdminTarea>[0] & { status: AdminTareaStatus }) {
+    const adminNombre = teamMembers.find(m => m.id === currentAdminId)?.nombre ?? 'El equipo';
+    let created: AdminTarea | undefined;
+    if (editingTarea) {
+      await updateAdminTarea(editingTarea.id, data);
+      toast.success('Tarea actualizada');
+      if (data.asignado_a && data.asignado_a !== editingTarea.asignado_a && data.asignado_a !== currentAdminId) {
+        notificarTareaAsignada(data.asignado_a, data.titulo, adminNombre, editingTarea.id).catch((err) => {
+          console.error('[notif] falló notificarTareaAsignada:', err);
+        });
+      }
+    } else {
+      created = await createAdminTarea({ ...data, creado_por: currentAdminId });
+      toast.success('Tarea creada');
+      if (data.asignado_a && data.asignado_a !== currentAdminId) {
+        notificarTareaAsignada(data.asignado_a, data.titulo, adminNombre, created.id).catch((err) => {
+          console.error('[notif] falló notificarTareaAsignada:', err);
+        });
+      }
+    }
+    await cargar();
+    setEditingTarea(null);
+    return created;
+  }
+
+  function handleDelete(id: string) {
+    const tarea = tareas.find(t => t.id === id);
+    if (!tarea) return;
+    setDeletingTarea(tarea);
+  }
+
+  async function confirmDelete() {
+    if (!deletingTarea) return;
+    const id = deletingTarea.id;
+    const snapshot = tareas;
+    setDeleteLoading(true);
+    setTareas(prev => prev.filter(t => t.id !== id));
+    setTareasHoy(prev => prev.filter(t => t.id !== id));
+    try {
+      await deleteAdminTarea(id);
+      toast.success('Tarea eliminada');
+      setDeletingTarea(null);
+      cargar().catch(() => null);
+    } catch (err) {
+      setTareas(snapshot);
+      const msg = err instanceof Error ? err.message : 'No se pudo eliminar la tarea';
+      toast.error(msg);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
+  const overdueCount = tareasHoy.filter(t => {
+    if (!t.fecha_vencimiento) return false;
+    const fv = parseDateLocal(t.fecha_vencimiento);
+    fv.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return fv < today;
+  }).length;
+
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
-        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 8 candados — {listos} de 8</h2>
-        <p className="text-sm text-cream/60 mt-1">Nada se enciende hasta que todo está tildado. Un solo punto flojo quema el presupuesto entero.</p>
+    <div className="space-y-5 w-full max-w-full overflow-x-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-cream">Tareas</h2>
+          <p className="text-xs text-cream/55 mt-1">Gestión interna del equipo</p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <TaskViewToggle value={view} onChange={setView} myCount={myCount} />
+          <button
+            onClick={cargar}
+            title="Refrescar"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => { setEditingTarea(null); setShowModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-black text-sm font-bold transition-all"
+          >
+            <Plus className="w-4 h-4" /> Nueva tarea
+          </button>
+        </div>
       </div>
-      <div className="space-y-2">
-        {CANDADOS.map((c, i) => (
-          <button key={c.id} onClick={() => toggle(c.id)}
-            className={`w-full text-left rounded-2xl border p-4 transition-colors ${checks[c.id] ? 'border-success/40 bg-success/[0.05]' : 'border-cream/10 hover:border-cream/25'}`}>
-            <div className="flex items-start gap-3">
-              <span className={`mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center text-xs shrink-0 ${checks[c.id] ? 'border-success bg-success text-black font-bold' : 'border-cream/25 text-cream/40'}`}>
-                {checks[c.id] ? '✓' : i + 1}
+
+      {/* Acciones secundarias: archivar + ver archivadas */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setVerArchivadas(v => !v)}
+          className={`
+            flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all
+            ${verArchivadas
+              ? 'bg-gold/15 text-gold border-gold/40'
+              : 'bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-cream hover:border-[rgba(255,255,255,0.18)]'
+            }
+          `}
+        >
+          {verArchivadas ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          {verArchivadas ? 'Ocultar archivadas' : 'Ver archivadas'}
+          {verArchivadas && archivadasCount > 0 && (
+            <span className="text-[11px] bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
+              {archivadasCount}
+            </span>
+          )}
+        </button>
+
+        {completadasNoArchivadasCount > 0 && (
+          <button
+            onClick={() => setBulkArchiveOpen(true)}
+            title="Archivar todas las tareas completadas"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
+          >
+            <Archive className="w-3.5 h-3.5" />
+            Archivar completadas
+            <span className="text-[11px] bg-cream/8 px-1.5 py-0.5 rounded-full">
+              {completadasNoArchivadasCount}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Vista Hoy (banner colapsable) */}
+      {tareasHoy.length > 0 && (
+        <div className="bg-panel border border-gold/12 rounded-2xl overflow-hidden">
+          <button
+            onClick={() => setShowHoy(v => !v)}
+            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-cream/5 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              {overdueCount > 0 && <AlertCircle className="w-4 h-4 text-red-400" />}
+              <span className="text-sm font-semibold text-cream">
+                Mis tareas de hoy
               </span>
-              <span className="flex-1">
-                <span className="block text-sm font-semibold text-cream">{c.titulo}</span>
-                <span className="block text-xs text-cream/55 mt-0.5 leading-relaxed">{c.detalle}</span>
-                {c.accion === 'anuncios' && onIrAnuncios && (
-                  <span onClick={(e) => { e.stopPropagation(); onIrAnuncios(); }}
-                    className="inline-block text-[11px] font-bold text-gold mt-1.5 hover:text-goldhi">Abrir el Constructor →</span>
-                )}
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${overdueCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-gold/20 text-gold'}`}>
+                {tareasHoy.length}
               </span>
             </div>
+            {showHoy ? <ChevronUp className="w-4 h-4 text-cream/55" /> : <ChevronDown className="w-4 h-4 text-cream/55" />}
           </button>
-        ))}
-      </div>
-      <button onClick={encender} disabled={!todo}
-        className="w-full btn-primary py-4 rounded-xl text-sm font-bold disabled:opacity-40">
-        {todo ? '🚀 ENCENDER — y anotar la fecha' : `Faltan ${8 - listos} candados para encender`}
-      </button>
+
+          {showHoy && (
+            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border-t border-gold/10" style={{ paddingTop: '16px' }}>
+              {tareasHoy.map(t => (
+                <TaskCard
+                  key={t.id}
+                  tarea={t}
+                  currentUserId={currentAdminId}
+                  onStatusChange={handleStatusChange}
+                  onEdit={tarea => { setEditingTarea(tarea); setShowModal(true); }}
+                  onDelete={handleDelete}
+                  onArchive={handleArchive}
+                  onUnarchive={handleUnarchive}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Filtros */}
+      <TaskFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        teamMembers={teamMembers}
+        currentUserId={currentAdminId}
+      />
+
+      {/* Body — vista activa */}
+      {loading ? (
+        <div className="flex items-center justify-center h-48 text-cream/45 text-sm">
+          Cargando tareas...
+        </div>
+      ) : view === 'list' ? (
+        <TaskListView
+          tareas={filtered}
+          currentUserId={currentAdminId}
+          onStatusChange={handleStatusChange}
+          onEdit={t => { setEditingTarea(t); setShowModal(true); }}
+          onDelete={handleDelete}
+        />
+      ) : view === 'people' ? (
+        <TaskByPersonView
+          tareas={filtered}
+          teamMembers={
+            filters.asignados.size > 0
+              ? teamMembers.filter(m => filters.asignados.has(m.id))
+              : teamMembers
+          }
+          currentUserId={currentAdminId}
+          onStatusChange={handleStatusChange}
+          onEdit={t => { setEditingTarea(t); setShowModal(true); }}
+          onDelete={handleDelete}
+          onArchive={handleArchive}
+          onUnarchive={handleUnarchive}
+          onReassign={() => { cargar().catch(() => null); }}
+        />
+      ) : (
+        <TaskKanbanView
+          tareas={filtered}
+          currentUserId={currentAdminId}
+          onStatusChange={handleStatusChange}
+          onEdit={t => { setEditingTarea(t); setShowModal(true); }}
+          onDelete={handleDelete}
+          onArchive={handleArchive}
+          onUnarchive={handleUnarchive}
+        />
+      )}
+
+      {/* Modal crear/editar */}
+      {showModal && (
+        <TaskModal
+          tarea={editingTarea}
+          teamMembers={teamMembers}
+          clientes={clientes}
+          currentAdminId={currentAdminId}
+          onSave={handleSave as Parameters<typeof TaskModal>[0]['onSave']}
+          onClose={() => { setShowModal(false); setEditingTarea(null); }}
+        />
+      )}
+
+      <ConfirmDialog
+        open={deletingTarea !== null}
+        variant="danger"
+        title="Eliminar tarea"
+        message={deletingTarea ? `¿Seguro que querés eliminar «${deletingTarea.titulo}»? Esta acción no se puede deshacer.` : ''}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        loading={deleteLoading}
+        onConfirm={confirmDelete}
+        onCancel={() => { if (!deleteLoading) setDeletingTarea(null); }}
+      />
+
+      <ConfirmDialog
+        open={bulkArchiveOpen}
+        variant="default"
+        title="Archivar completadas"
+        message={`¿Archivar las ${completadasNoArchivadasCount} tarea${completadasNoArchivadasCount === 1 ? '' : 's'} completada${completadasNoArchivadasCount === 1 ? '' : 's'}? Quedan ocultas pero podés volver a verlas con "Ver archivadas".`}
+        confirmLabel="Archivar"
+        cancelLabel="Cancelar"
+        loading={bulkArchiveLoading}
+        onConfirm={handleBulkArchive}
+        onCancel={() => { if (!bulkArchiveLoading) setBulkArchiveOpen(false); }}
+      />
     </div>
   );
 }

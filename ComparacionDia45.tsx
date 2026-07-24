@@ -1,255 +1,96 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Bell, CheckCircle2, MessageSquare, Trophy, Shield } from 'lucide-react';
-import { toast } from 'sonner';
-import {
-  obtenerNotificaciones,
-  marcarLeida,
-  marcarTodasLeidas,
-  contarNoLeidas,
-  type NotificacionDB,
-  type TipoNotificacion,
-} from '../lib/notifications';
-import { supabase, isSupabaseReady } from '../lib/supabase';
-import { playNotificationSound } from '../lib/notificationSound';
+/**
+ * CeremoniaCinturon — T7 · Plan Maestro.
+ * El momento más importante del dojo, tratado como lo que es: pantalla
+ * completa, la metáfora, la carta de Javo, qué se desbloquea, compartible.
+ * Se dispara sola cuando el cinturón sube (compara contra el último visto).
+ */
+import React, { useEffect, useState } from 'react';
+import { X, Copy, Check } from 'lucide-react';
+import { cinturonDesdeProgreso, type Cinturon } from '../lib/cinturones';
 
-const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
-  hito: Trophy,
-  tarea: CheckCircle2,
-  mensaje: MessageSquare,
-  sistema: Bell,
-  admin: Shield,
+const KEY_ULTIMO = 'tcd_ultimo_cinturon_visto';
+
+/** Las cartas de etapa — la voz de Javo al cruzar cada puerta. */
+const CARTAS: Record<number, string> = {
+  2: 'Diste el primer paso real — el que la mayoría no da nunca. Tu punta amarilla dice una cosa: la semilla ya no es solo semilla. Se abre tu ADN del Negocio: ahí va a vivir todo lo que firmes. Cuidalo — es tu clínica naciendo.',
+  3: 'Amarillo. El sol ya pega en la tierra. Sanaste lo que nadie ve — el cuarto del dinero — y por eso lo que viene se sostiene. Se abren tu Diario y El Método: escribe lo que te pasa, no solo lo que haces. Firmeza y amorosidad, siempre juntas.',
+  4: 'Punta verde. Tu método ya tiene nombre — deja de ser «lo que haces» y empieza a ser un activo con tu firma. De acá en adelante, todo lo que construyas lo firma ÉL. No lo muevas. No lo muevas. No lo muevas.',
+  5: 'Verde. El árbol echó raíces: oferta, precio, garantía — todo firmado. Se abre tu Sala de Entrenamiento: ahí no se estudia, SE ENTRENA. Cámara, ventas, objeciones. A la llamada real se llega entrenado — nunca improvisando.',
+  6: 'Verde punta azul. Tu sistema respira: página, agente, piezas con tu cara. Se abren el Creador y las Campañas — tus fábricas. Recordá la doctrina: los cortos dicen lo que NO, el largo dice el SÍ. Primero se lanza, después se arregla.',
+  7: 'Azul. La campaña está ENCENDIDA — tu clínica le habla al mundo mientras dormís. Ahora empieza la caza: tres números por semana, paciencia de cazador, y el precio se dice UNA vez. El que pregunta, dirige.',
+  8: 'ROJO. El fruto maduro. Entró el primer pago de $1.000 — y ese comprobante nadie te lo regaló: lo cazaste con método, precio digno y sistema propio. El primero es el más difícil. Los otros nueve ya saben el camino. Enmarca este día.',
+  9: 'NEGRO. Directora. Director. Diez pacientes, máquina propia, libertad clínica de verdad. El cinturón negro no es el final del camino — es el permiso de enseñarlo. Y dejaste de estar solo: eres parte de los Sanadores Libres, los que se negaron a elegir entre sanar y cobrar con dignidad. Tu clínica sigue el día 91, y tú ya no eres la Foto de Partida. Ahora te toca abrirle la puerta al que recién empieza. Nos vemos del otro lado. 🥋',
 };
 
-const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-gold', bg: 'bg-gold/10' },
-  tarea: { text: 'text-success', bg: 'bg-success/10' },
-  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
-  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
-  admin: { text: 'text-gold', bg: 'bg-gold/10' },
+const DESBLOQUEOS: Record<number, string> = {
+  2: '🧬 Se abrió: tu ADN del Negocio',
+  3: '📔 Se abrieron: tu Diario del Fundador y El Método',
+  5: '🥊 Se abrió: tu Sala de Entrenamiento',
+  6: '🏭 Se abrieron: el Creador de Contenido y las Campañas',
 };
 
-function tiempoRelativo(fechaISO: string): string {
-  const ahora = Date.now();
-  const fecha = new Date(fechaISO).getTime();
-  const diffMs = ahora - fecha;
-  const minutos = Math.floor(diffMs / 60_000);
-  if (minutos < 1) return 'ahora';
-  if (minutos < 60) return `hace ${minutos} min`;
-  const horas = Math.floor(minutos / 60);
-  if (horas < 24) return `hace ${horas} h`;
-  const dias = Math.floor(horas / 24);
-  if (dias < 30) return `hace ${dias} d`;
-  const meses = Math.floor(dias / 30);
-  return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
-}
+export default function CeremoniaCinturon() {
+  const [cinturon, setCinturon] = useState<Cinturon | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
-interface NotificationBellProps {
-  userId?: string;
-  /** Callback con la `accion_url` de la notificación cuando hace click. El padre decide cómo navegar. */
-  onNavigate?: (accionUrl: string) => void;
-  /** Variant compacta (más chica) para usar en headers densos. */
-  size?: 'normal' | 'sm';
-}
-
-export default function NotificationBell({ userId, onNavigate, size = 'normal' }: NotificationBellProps) {
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<NotificacionDB[]>([]);
-  const [unread, setUnread] = useState(0);
-  const [shaking, setShaking] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
-
-  // Re-posicionar el dropdown cuando se abre o cuando cambia el viewport
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current) {
-      setPos(null);
-      return;
-    }
-    const compute = () => {
-      const rect = triggerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      setPos({
-        top: rect.bottom + 12,
-        right: Math.max(8, window.innerWidth - rect.right),
-      });
-    };
-    compute();
-    window.addEventListener('resize', compute);
-    window.addEventListener('scroll', compute, true);
-    return () => {
-      window.removeEventListener('resize', compute);
-      window.removeEventListener('scroll', compute, true);
-    };
-  }, [open]);
-
+  // Detectar subida de cinturón (poll liviano: al montar y al volver el foco)
   useEffect(() => {
-    if (!userId) return;
-    let alive = true;
-    async function load() {
-      const [notifs, count] = await Promise.all([
-        obtenerNotificaciones(userId!, 20),
-        contarNoLeidas(userId!),
-      ]);
-      if (!alive) return;
-      setItems(notifs);
-      setUnread(count);
-    }
-    load();
-
-    if (!isSupabaseReady() || !supabase) return;
-    const channel = supabase.channel(`notif-realtime-${userId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notificaciones',
-        filter: `usuario_id=eq.${userId}`,
-      }, (payload) => {
-        if (!alive) return;
-        const n = payload.new as NotificacionDB;
-        setItems(prev => [n, ...prev].slice(0, 20));
-        setUnread(prev => prev + 1);
-        setShaking(true);
-        window.setTimeout(() => { if (alive) setShaking(false); }, 900);
-        playNotificationSound();
-        toast(n.titulo, {
-          description: n.descripcion ?? undefined,
-          duration: 6000,
-          action: n.accion_url && onNavigate
-            ? { label: 'Ver', onClick: () => onNavigate(n.accion_url!) }
-            : undefined,
-        });
-      })
-      .subscribe();
-
-    return () => {
-      alive = false;
-      if (supabase) supabase.removeChannel(channel);
+    const check = () => {
+      try {
+        const saved = localStorage.getItem('tcd_hoja_ruta_v2');
+        const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : []));
+        const ultimo = parseInt(localStorage.getItem(KEY_ULTIMO) ?? '0', 10);
+        if (c.orden > ultimo) setCinturon(c);
+      } catch { /* noop */ }
     };
-  }, [userId]);
+    check();
+    window.addEventListener('focus', check);
+    window.addEventListener('storage', check);
+    const iv = window.setInterval(check, 4000);
+    return () => { window.removeEventListener('focus', check); window.removeEventListener('storage', check); window.clearInterval(iv); };
+  }, []);
 
-  // Cerrar dropdown con Escape o click afuera
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open]);
+  if (!cinturon || cinturon.orden === 0) return null;
 
-  async function handleClickNotif(notif: NotificacionDB) {
-    if (!notif.leida) {
-      await marcarLeida(notif.id);
-      setItems(prev => prev.map(n => n.id === notif.id ? { ...n, leida: true } : n));
-      setUnread(prev => Math.max(0, prev - 1));
-    }
-    if (notif.accion_url && onNavigate) onNavigate(notif.accion_url);
-    setOpen(false);
-  }
-
-  async function handleMarkAll() {
-    if (!userId) return;
-    await marcarTodasLeidas(userId);
-    setItems(prev => prev.map(n => ({ ...n, leida: true })));
-    setUnread(0);
-  }
-
-  const buttonSize = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
-  const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
-  const hasUnread = unread > 0;
-
-  if (!userId) return null;
+  const cerrar = () => {
+    try { localStorage.setItem(KEY_ULTIMO, String(cinturon.orden)); } catch { /* noop */ }
+    setCinturon(null);
+  };
+  const compartir = () => {
+    const texto = `🥋 Acabo de ganar mi Cinturón ${cinturon.nombre} en Tu Clínica Digital — ${cinturon.metafora}. Cada cinturón se gana con pruebas reales: nadie lo regala.`;
+    try { void navigator.clipboard.writeText(texto); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { /* noop */ }
+  };
 
   return (
-    <>
-      <button
-        ref={triggerRef}
-        onClick={() => setOpen(o => !o)}
-        className={`${buttonSize} rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
-          open
-            ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
-            : hasUnread
-              ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
-              : 'text-cream/75 hover:text-cream'
-        }`}
-        title="Notificaciones"
-        aria-label={hasUnread ? `Notificaciones (${unread} sin leer)` : 'Notificaciones'}
-      >
-        <Bell
-          className={`${iconSize} transition-transform duration-300 ${open ? 'scale-110' : 'hover:scale-110'} ${shaking ? 'bell-shake' : ''}`}
-          fill={hasUnread ? 'currentColor' : 'none'}
-        />
-        {hasUnread && (
-          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
-            {unread > 9 ? '9+' : unread}
-          </span>
-        )}
-      </button>
-
-      {open && pos && createPortal(
-        <>
-          {/* Backdrop invisible para cerrar al click afuera. z muy alto para
-              ganar a cualquier stacking context (backdrop-blur, transform, etc.) */}
-          <div
-            className="fixed inset-0"
-            style={{ zIndex: 9998 }}
-            onClick={() => setOpen(false)}
-          />
-          <div
-            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
-            style={{ top: pos.top, right: pos.right, zIndex: 9999 }}
-          >
-            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
-              <h3 className="font-medium text-cream">Notificaciones</h3>
-              {unread > 0 && (
-                <button onClick={handleMarkAll} className="text-xs text-gold hover:text-goldhi transition-colors">
-                  Marcar todas como leídas
-                </button>
-              )}
-            </div>
-            <div className="max-h-[400px] overflow-y-auto">
-              {items.length === 0 && (
-                <div className="py-12 text-center">
-                  <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
-                  <p className="text-sm text-cream/55">Sin notificaciones</p>
-                </div>
-              )}
-              {items.map(notif => {
-                const Icon = ICON_MAP[notif.tipo] ?? Bell;
-                const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
-                return (
-                  <div
-                    key={notif.id}
-                    onClick={() => handleClickNotif(notif)}
-                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
-                      <Icon className={`w-4 h-4 ${colors.text}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-2">
-                        <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
-                        {!notif.leida && (
-                          <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
-                        )}
-                      </div>
-                      {notif.descripcion && (
-                        <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
-                      )}
-                      <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
-              <button onClick={() => setOpen(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
-                Cerrar
-              </button>
-            </div>
+    <div className="fixed inset-0 z-[95] bg-[#0D0C0B] overflow-y-auto animate-in fade-in duration-700">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gold/12 blur-[140px] rounded-full pointer-events-none" />
+      <button onClick={cerrar} className="absolute top-4 right-4 text-white/45 hover:text-white/70 transition-colors z-10"><X className="w-6 h-6" /></button>
+      <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-14 max-w-lg mx-auto">
+        <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-gold mb-8 animate-in slide-in-from-top-4 duration-700">Ceremonia de cinturón</p>
+        <p className="text-[90px] leading-none mb-6 animate-in zoom-in-50 duration-700">{cinturon.emoji}</p>
+        <h1 className="text-4xl font-light text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          Cinturón {cinturon.nombre}
+        </h1>
+        <p className="text-sm text-gold italic mb-8">{cinturon.metafora}</p>
+        {CARTAS[cinturon.orden] && (
+          <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent p-6 mb-6 text-left">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-3">Una carta para ti</p>
+            <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">{CARTAS[cinturon.orden]}</p>
+            <p className="text-xs text-gold/80 mt-4 text-right" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>— Javo</p>
           </div>
-        </>,
-        document.body,
-      )}
-    </>
+        )}
+        {DESBLOQUEOS[cinturon.orden] && (
+          <p className="text-sm text-success font-medium mb-8 animate-pulse">{DESBLOQUEOS[cinturon.orden]}</p>
+        )}
+        <div className="flex gap-3 w-full">
+          <button onClick={compartir} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.06] border border-white/15 text-white/75 text-sm font-bold hover:bg-white/10 transition-colors">
+            {copiado ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />} {copiado ? 'Copiado' : 'Compartirlo'}
+          </button>
+          <button onClick={cerrar} className="flex-1 py-3 rounded-2xl bg-gold text-black text-sm font-bold hover:bg-goldhi transition-colors">
+            Seguir el camino →
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

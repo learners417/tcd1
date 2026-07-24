@@ -1,93 +1,255 @@
-/**
- * LA GRADUACIÓN DE LOS 5 DÍAS — ZIP A/B.
- * Aparece cuando el comprador de EL NÚMERO ($27) completa su día 5.
- * Lee la taxonomía única del ADN: muestra lo que selló y lo que sigue
- * apagado, con el resultado de cada pieza. Es la puerta, no el muro.
- */
-import React from 'react';
-import { waLink } from '../lib/planes';
-import { PIEZAS_ADN, estadoPieza, planLimitado } from '../lib/adnPiezas';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Bell, CheckCircle2, MessageSquare, Trophy, Shield } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  obtenerNotificaciones,
+  marcarLeida,
+  marcarTodasLeidas,
+  contarNoLeidas,
+  type NotificacionDB,
+  type TipoNotificacion,
+} from '../lib/notifications';
+import { supabase, isSupabaseReady } from '../lib/supabase';
+import { playNotificationSound } from '../lib/notificationSound';
 
-function completadas(): Set<string> {
-  try { return new Set(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]); } catch { return new Set(); }
+const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
+  hito: Trophy,
+  tarea: CheckCircle2,
+  mensaje: MessageSquare,
+  sistema: Bell,
+  admin: Shield,
+};
+
+const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
+  hito: { text: 'text-gold', bg: 'bg-gold/10' },
+  tarea: { text: 'text-success', bg: 'bg-success/10' },
+  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
+  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
+  admin: { text: 'text-gold', bg: 'bg-gold/10' },
+};
+
+function tiempoRelativo(fechaISO: string): string {
+  const ahora = Date.now();
+  const fecha = new Date(fechaISO).getTime();
+  const diffMs = ahora - fecha;
+  const minutos = Math.floor(diffMs / 60_000);
+  if (minutos < 1) return 'ahora';
+  if (minutos < 60) return `hace ${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  if (horas < 24) return `hace ${horas} h`;
+  const dias = Math.floor(horas / 24);
+  if (dias < 30) return `hace ${dias} d`;
+  const meses = Math.floor(dias / 30);
+  return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function GraduacionSemanaBlanca() {
-  if (!planLimitado() || !completadas().has('1-P1.5')) return null;
+interface NotificationBellProps {
+  userId?: string;
+  /** Callback con la `accion_url` de la notificación cuando hace click. El padre decide cómo navegar. */
+  onNavigate?: (accionUrl: string) => void;
+  /** Variant compacta (más chica) para usar en headers densos. */
+  size?: 'normal' | 'sm';
+}
 
-  const suyas = PIEZAS_ADN.filter((p) => p.pilar <= 1);
-  const faltan = PIEZAS_ADN.filter((p) => p.pilar > 1);
-  const selladas = suyas.filter((p) => estadoPieza(p).sellada);
+export default function NotificationBell({ userId, onNavigate, size = 'normal' }: NotificationBellProps) {
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<NotificacionDB[]>([]);
+  const [unread, setUnread] = useState(0);
+  const [shaking, setShaking] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+
+  // Re-posicionar el dropdown cuando se abre o cuando cambia el viewport
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) {
+      setPos(null);
+      return;
+    }
+    const compute = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setPos({
+        top: rect.bottom + 12,
+        right: Math.max(8, window.innerWidth - rect.right),
+      });
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    window.addEventListener('scroll', compute, true);
+    return () => {
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('scroll', compute, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    async function load() {
+      const [notifs, count] = await Promise.all([
+        obtenerNotificaciones(userId!, 20),
+        contarNoLeidas(userId!),
+      ]);
+      if (!alive) return;
+      setItems(notifs);
+      setUnread(count);
+    }
+    load();
+
+    if (!isSupabaseReady() || !supabase) return;
+    const channel = supabase.channel(`notif-realtime-${userId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notificaciones',
+        filter: `usuario_id=eq.${userId}`,
+      }, (payload) => {
+        if (!alive) return;
+        const n = payload.new as NotificacionDB;
+        setItems(prev => [n, ...prev].slice(0, 20));
+        setUnread(prev => prev + 1);
+        setShaking(true);
+        window.setTimeout(() => { if (alive) setShaking(false); }, 900);
+        playNotificationSound();
+        toast(n.titulo, {
+          description: n.descripcion ?? undefined,
+          duration: 6000,
+          action: n.accion_url && onNavigate
+            ? { label: 'Ver', onClick: () => onNavigate(n.accion_url!) }
+            : undefined,
+        });
+      })
+      .subscribe();
+
+    return () => {
+      alive = false;
+      if (supabase) supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  // Cerrar dropdown con Escape o click afuera
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  async function handleClickNotif(notif: NotificacionDB) {
+    if (!notif.leida) {
+      await marcarLeida(notif.id);
+      setItems(prev => prev.map(n => n.id === notif.id ? { ...n, leida: true } : n));
+      setUnread(prev => Math.max(0, prev - 1));
+    }
+    if (notif.accion_url && onNavigate) onNavigate(notif.accion_url);
+    setOpen(false);
+  }
+
+  async function handleMarkAll() {
+    if (!userId) return;
+    await marcarTodasLeidas(userId);
+    setItems(prev => prev.map(n => ({ ...n, leida: true })));
+    setUnread(0);
+  }
+
+  const buttonSize = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
+  const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
+  const hasUnread = unread > 0;
+
+  if (!userId) return null;
 
   return (
-    <div className="card-panel p-6 sm:p-7 border border-gold/35 bg-gradient-to-b from-gold/[0.09] to-transparent">
-      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-2">🥋 Terminaste tus 5 días</p>
-      <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-        Hace cinco días tu precio no decía lo que vale tu trabajo.
-      </p>
-      <p className="text-sm text-cream/70 mt-1">Hoy tienes tu número, tu anuncio y tus respuestas. Eso ya no se discute.</p>
-
-      <div className="mt-5">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">
-          Lo que queda grabado en tu ADN — {selladas.length} de {suyas.length}
-        </p>
-        <div className="space-y-1.5">
-          {suyas.map((p) => {
-            const on = estadoPieza(p).sellada;
-            return (
-              <div key={p.id} className={`flex items-start gap-2.5 ${on ? '' : 'opacity-45'}`}>
-                <span className={`text-sm mt-0.5 ${on ? 'text-success' : 'text-cream/30'}`}>{on ? '✓' : '○'}</span>
-                <p className="text-sm text-cream/85 flex-1">{p.titulo} <span className="text-cream/45">— {p.que}</span></p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-5 pt-5 border-t border-cream/10">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">Lo que sigue apagado — {faltan.length} piezas</p>
-        <div className="space-y-1.5">
-          {faltan.map((p) => (
-            <div key={p.id} className="flex items-start gap-2.5">
-              <span className="text-cream/30 text-sm mt-0.5">🔒</span>
-              <p className="text-sm text-cream/55 flex-1">{p.titulo} <span className="text-cream/35">— {p.que}</span></p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-5 pt-5 border-t border-cream/10">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-2">🎁 Y te dejo dos sesiones más, abiertas</p>
-        <p className="text-sm text-cream/70 leading-relaxed">
-          <strong className="text-cream/90">El dinero en el cuerpo</strong> — para que tu precio también lo sostenga tu voz, no solo tu cabeza.<br />
-          <strong className="text-cream/90">Tu creencia nueva y el Estandarte</strong> — la frase que vas a leer cada vez que dudes.
-        </p>
-        <p className="text-[11px] text-cream/45 mt-2">Están en tu Camino. Hazlas cuando quieras.</p>
-      </div>
-
-      <p className="text-sm text-cream/85 mt-5 leading-relaxed">
-        Subiste tu precio. <strong className="text-gold">Lo que sigue es quién te lo paga:</strong> tu método, tu oferta y el sistema que llena tu agenda — los 90 días completos, hasta tus primeros 10 a tu precio nuevo.
-      </p>
-
+    <>
       <button
-        onClick={() => {
-          if (!window.confirm('¿Repetir tus 5 días desde el principio? Tu ADN sellado se conserva — solo se reabren las sesiones.')) return;
-          try {
-            const CODS = ['0-P0.0', '0-P0.2', '0-P0.3', '0-P0.4', '1-P1.1', '1-P1.2', '1-P1.2b', '1-P1.3', '1-P1.5', '1-P1.5b'];
-            const hechas = (JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]).filter((c) => !CODS.includes(c));
-            localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(hechas));
-            localStorage.removeItem('tcd_sesion_pasos_v1');
-            window.location.reload();
-          } catch { /* noop */ }
-        }}
-        className="block mt-3 text-[11px] text-cream/45 hover:text-cream underline underline-offset-2"
+        ref={triggerRef}
+        onClick={() => setOpen(o => !o)}
+        className={`${buttonSize} rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
+          open
+            ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
+            : hasUnread
+              ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
+              : 'text-cream/75 hover:text-cream'
+        }`}
+        title="Notificaciones"
+        aria-label={hasUnread ? `Notificaciones (${unread} sin leer)` : 'Notificaciones'}
       >
-        ¿No subiste tu precio todavía? Repite tus 5 días — tu garantía, sin costo.
+        <Bell
+          className={`${iconSize} transition-transform duration-300 ${open ? 'scale-110' : 'hover:scale-110'} ${shaking ? 'bell-shake' : ''}`}
+          fill={hasUnread ? 'currentColor' : 'none'}
+        />
+        {hasUnread && (
+          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
       </button>
-      <a href={waLink('Hola · Terminé mis 5 días y quiero seguir el camino completo')} target="_blank" rel="noreferrer"
-        className="inline-block mt-4 btn-primary text-[#1a1206] text-sm font-bold px-5 py-3 rounded-xl">
-        Quiero seguir el camino →
-      </a>
-    </div>
+
+      {open && pos && createPortal(
+        <>
+          {/* Backdrop invisible para cerrar al click afuera. z muy alto para
+              ganar a cualquier stacking context (backdrop-blur, transform, etc.) */}
+          <div
+            className="fixed inset-0"
+            style={{ zIndex: 9998 }}
+            onClick={() => setOpen(false)}
+          />
+          <div
+            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
+            style={{ top: pos.top, right: pos.right, zIndex: 9999 }}
+          >
+            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
+              <h3 className="font-medium text-cream">Notificaciones</h3>
+              {unread > 0 && (
+                <button onClick={handleMarkAll} className="text-xs text-gold hover:text-goldhi transition-colors">
+                  Marcar todas como leídas
+                </button>
+              )}
+            </div>
+            <div className="max-h-[400px] overflow-y-auto">
+              {items.length === 0 && (
+                <div className="py-12 text-center">
+                  <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
+                  <p className="text-sm text-cream/55">Sin notificaciones</p>
+                </div>
+              )}
+              {items.map(notif => {
+                const Icon = ICON_MAP[notif.tipo] ?? Bell;
+                const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
+                return (
+                  <div
+                    key={notif.id}
+                    onClick={() => handleClickNotif(notif)}
+                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
+                      <Icon className={`w-4 h-4 ${colors.text}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2">
+                        <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
+                        {!notif.leida && (
+                          <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
+                        )}
+                      </div>
+                      {notif.descripcion && (
+                        <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
+                      )}
+                      <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
+              <button onClick={() => setOpen(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </>,
+        document.body,
+      )}
+    </>
   );
 }

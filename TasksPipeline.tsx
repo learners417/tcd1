@@ -1,345 +1,271 @@
-/**
- * TaskByPersonView — vista en columnas, una por miembro del equipo.
- * Cada columna agrupa internamente las tareas de la persona por horizonte temporal:
- * Vencidas, Hoy, Esta semana, Después, Sin fecha.
- *
- * Drag-and-drop reasigna la tarea al dropear sobre otra columna.
- */
-import { useMemo, useState } from 'react';
+import { Check } from 'lucide-react';
+import { SECTIONS, STEPS, TOTAL_STEPS } from '../../../lib/preactivacionSteps';
 import {
-  DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
-  type DragEndEvent, type DragStartEvent,
-} from '@dnd-kit/core';
-import { useDroppable, useDraggable } from '@dnd-kit/core';
-import { Users } from 'lucide-react';
-import type { AdminTarea, AdminTareaStatus, Profile } from '../../../lib/supabase';
-import { updateAdminTarea } from '../../../lib/adminTasks';
-import { notificarTareaAsignada } from '../../../lib/notifications';
-import { toast } from 'sonner';
-import TaskCard from './TaskCard';
-import { getTeamColor, getInitials, UNASSIGNED_COLOR } from '../../../lib/teamColors';
-import { parseDateLocal } from '../../../lib/dateUtils';
+  type ChecksByCliente,
+  isChecked,
+  progressPct,
+  completedCount,
+} from '../../../lib/preactivacionCheck';
 
-interface TaskByPersonViewProps {
-  tareas: AdminTarea[];
-  teamMembers: Profile[];
-  currentUserId: string;
-  onStatusChange: (id: string, status: AdminTareaStatus) => void;
-  onEdit: (t: AdminTarea) => void;
-  onDelete: (id: string) => void;
-  onArchive: (id: string) => void;
-  onUnarchive: (id: string) => void;
-  onReassign: () => void; // refresh callback
+export interface MatrizClienteRow {
+  id: string;
+  nombre: string;
+  metodo?: string;
+  initial: string;
 }
 
-type Bucket = 'vencidas' | 'hoy' | 'semana' | 'despues' | 'sinfecha';
-
-const BUCKET_LABELS: Record<Bucket, string> = {
-  vencidas: 'Vencidas',
-  hoy: 'Hoy',
-  semana: 'Esta semana',
-  despues: 'Después',
-  sinfecha: 'Sin fecha',
-};
-
-const BUCKET_ORDER: Bucket[] = ['vencidas', 'hoy', 'semana', 'despues', 'sinfecha'];
-
-function startOfDay(d: Date): Date {
-  const out = new Date(d);
-  out.setHours(0, 0, 0, 0);
-  return out;
+interface MatrizGridProps {
+  clientes: MatrizClienteRow[];
+  checks: ChecksByCliente;
+  onToggle: (clienteId: string, stepId: string, on: boolean) => void;
+  caminoDone?: Map<string, Set<string>>;
 }
 
-function getBucket(t: AdminTarea): Bucket {
-  if (!t.fecha_vencimiento) return 'sinfecha';
-  const fv = startOfDay(parseDateLocal(t.fecha_vencimiento));
-  const today = startOfDay(new Date());
-  const diff = Math.round((fv.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return t.status === 'completadas' ? 'sinfecha' : 'vencidas';
-  if (diff === 0) return 'hoy';
-  if (diff <= 7) return 'semana';
-  return 'despues';
-}
-
-function DraggableCard({
-  tarea, currentUserId, onStatusChange, onEdit, onDelete, onArchive, onUnarchive,
-}: {
-  tarea: AdminTarea;
-  currentUserId: string;
-  onStatusChange: (id: string, status: AdminTareaStatus) => void;
-  onEdit: (t: AdminTarea) => void;
-  onDelete: (id: string) => void;
-  onArchive: (id: string) => void;
-  onUnarchive: (id: string) => void;
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: tarea.id,
-    data: { tarea },
-  });
-  return (
-    <div ref={setNodeRef} {...attributes} {...listeners} className="touch-none">
-      <TaskCard
-        tarea={tarea}
-        currentUserId={currentUserId}
-        onStatusChange={onStatusChange}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onArchive={onArchive}
-        onUnarchive={onUnarchive}
-        isDragging={isDragging}
-        compact
-      />
-    </div>
-  );
-}
-
-interface PersonColumnProps {
-  personId: string | null;
-  personName: string;
-  tareas: AdminTarea[];
-  currentUserId: string;
-  onStatusChange: (id: string, status: AdminTareaStatus) => void;
-  onEdit: (t: AdminTarea) => void;
-  onDelete: (id: string) => void;
-  onArchive: (id: string) => void;
-  onUnarchive: (id: string) => void;
-}
-
-function PersonColumn({
-  personId, personName, tareas, currentUserId,
-  onStatusChange, onEdit, onDelete, onArchive, onUnarchive,
-}: PersonColumnProps) {
-  const dropId = personId ?? '__unassigned__';
-  const { setNodeRef, isOver } = useDroppable({ id: dropId, data: { personId } });
-
-  const color = personId ? getTeamColor(personId, currentUserId) : UNASSIGNED_COLOR;
-
-  const grouped = useMemo(() => {
-    const map: Record<Bucket, AdminTarea[]> = {
-      vencidas: [], hoy: [], semana: [], despues: [], sinfecha: [],
-    };
-    for (const t of tareas) {
-      map[getBucket(t)].push(t);
-    }
-    // Cada bucket: ordenar por fecha asc
-    for (const k of BUCKET_ORDER) {
-      map[k].sort((a, b) => {
-        const av = a.fecha_vencimiento ? parseDateLocal(a.fecha_vencimiento).getTime() : Infinity;
-        const bv = b.fecha_vencimiento ? parseDateLocal(b.fecha_vencimiento).getTime() : Infinity;
-        return av - bv;
-      });
-    }
-    return map;
-  }, [tareas]);
-
-  const activeCount = tareas.filter(t => t.status !== 'completadas').length;
-
-  return (
-    <div
-      className={`min-w-0 flex flex-col rounded-2xl transition-all ${isOver ? 'ring-2 ring-offset-2 ring-offset-ink' : ''}`}
-      style={isOver ? { boxShadow: `0 0 0 2px ${color.solid}` } : undefined}
-    >
-      {/* Column header */}
-      <div
-        className="flex items-center justify-between gap-3 px-3 py-3 rounded-t-2xl border-b border-[rgba(255,255,255,0.05)]"
-        style={{ background: `linear-gradient(180deg, ${color.bg}, transparent 90%)` }}
-      >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div
-            style={{ backgroundColor: color.bg, borderColor: color.border, color: color.text }}
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold border-[1.5px] shrink-0"
-          >
-            {personId ? getInitials(personName) : <Users className="w-4 h-4" />}
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-bold text-cream truncate" style={{ color: color.text }}>
-              {personName}
-            </div>
-            <div className="text-[11px] text-cream/55">
-              {activeCount} activa{activeCount === 1 ? '' : 's'}
-              {tareas.length !== activeCount && ` · ${tareas.length - activeCount} compl.`}
-            </div>
-          </div>
-        </div>
+export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
+  if (clientes.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-16 text-cream/55 text-sm">
+        Sin clientes que coincidan
       </div>
+    );
+  }
 
-      {/* Drop zone con buckets */}
-      <div
-        ref={setNodeRef}
-        className="flex-1 min-h-[300px] rounded-b-2xl bg-[#0F0F0F]/60 border border-t-0 border-[rgba(255,255,255,0.05)] p-2 space-y-3"
+  return (
+    <div className="overflow-auto scrollbar-hide" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+      <table
+        className="border-separate"
+        style={{ borderSpacing: 0, fontSize: 14 }}
       >
-        {tareas.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-cream/15 text-xs px-3 text-center">
-            Sin tareas asignadas. Arrastrá una acá para reasignar.
-          </div>
-        ) : (
-          BUCKET_ORDER.map(bucket => {
-            const items = grouped[bucket];
-            if (items.length === 0) return null;
-            const isVencidas = bucket === 'vencidas';
-            return (
-              <div key={bucket} className="space-y-2">
-                <div className="flex items-center justify-between px-2">
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isVencidas ? 'text-red-400' : 'text-cream/55'}`}>
-                    {BUCKET_LABELS[bucket]}
-                  </span>
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${isVencidas ? 'bg-red-500/15 text-red-400' : 'bg-cream/5 text-cream/55'}`}>
-                    {items.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {items.map(t => (
-                    <DraggableCard
-                      key={t.id}
-                      tarea={t}
-                      currentUserId={currentUserId}
-                      onStatusChange={onStatusChange}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onArchive={onArchive}
-                      onUnarchive={onUnarchive}
-                    />
-                  ))}
-                </div>
+        <thead>
+          {/* Group row */}
+          <tr>
+            <th
+              className="sticky left-0 top-0 z-50 bg-[#0E0E0E]"
+              style={{ minWidth: 240 }}
+            />
+            {SECTIONS.map((sec, idx) => (
+              <th
+                key={sec.id}
+                colSpan={sec.items.length}
+                className="sticky top-0 z-30 bg-panel text-gold uppercase tracking-widest"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 1.5,
+                  padding: '10px 0',
+                  textAlign: 'center',
+                  borderBottom: '1px solid rgba(232,150,46,0.10)',
+                  borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
+                }}
+              >
+                {sec.short}
+              </th>
+            ))}
+            <th
+              className="sticky right-0 top-0 z-40 bg-panel text-gold"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: 1.5,
+                padding: '10px 10px',
+                textAlign: 'center',
+                borderBottom: '1px solid rgba(232,150,46,0.10)',
+                borderLeft: '2px solid var(--matrix-section-divider)',
+                textTransform: 'uppercase',
+              }}
+            >
+              %
+            </th>
+          </tr>
+
+          {/* Column labels */}
+          <tr>
+            <th
+              className="sticky left-0 z-40 bg-[#0E0E0E]"
+              style={{
+                top: 40,
+                minWidth: 240,
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
+              }}
+            />
+            {STEPS.map((step, idx) => {
+              const isFirstOfSection =
+                idx === 0 || STEPS[idx - 1].sectionId !== step.sectionId;
+              return (
+                <th
+                  key={step.id}
+                  className="sticky bg-[#0F0F0F]"
+                  style={{
+                    top: 40,
+                    padding: '10px 8px 12px',
+                    fontWeight: 500,
+                    verticalAlign: 'bottom',
+                    borderBottom: '2px solid rgba(232,150,46,0.10)',
+                    borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
+                  }}
+                  title={step.title}
+                >
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: 'var(--matrix-header-text)',
+                      lineHeight: 1.3,
+                      textAlign: 'center',
+                      minWidth: 84,
+                      whiteSpace: 'pre-line',
+                      wordBreak: 'keep-all',
+                    }}
+                  >
+                    {step.lbl}
+                  </div>
+                </th>
+              );
+            })}
+            <th
+              className="sticky right-0 z-30 bg-[#0F0F0F]"
+              style={{
+                top: 40,
+                padding: '10px 12px 12px',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
+                borderLeft: '2px solid var(--matrix-section-divider)',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: 'var(--matrix-header-text)',
+                  textAlign: 'center',
+                }}
+              >
+                Total
               </div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {clientes.map((cl) => {
+            const pct = progressPct(checks, cl.id);
+            const done = completedCount(checks, cl.id);
+            const isComplete = pct === 100;
+            return (
+              <tr key={cl.id} className="group">
+                {/* Sticky client cell */}
+                <td
+                  className="sticky left-0 z-20 bg-ink group-hover:bg-panel transition-colors"
+                  style={{
+                    padding: '0 14px',
+                    height: 56,
+                    borderBottom: '1px solid var(--matrix-row-divider)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="rounded-md flex items-center justify-center shrink-0"
+                      style={{
+                        width: 36,
+                        height: 36,
+                        background: 'rgba(232,150,46,0.12)',
+                        color: 'var(--color-gold)',
+                        fontSize: 14,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {cl.initial}
+                    </div>
+                    <div className="min-w-0">
+                      <div
+                        className="truncate font-semibold"
+                        style={{ maxWidth: 175, fontSize: 14 }}
+                        title={cl.nombre}
+                      >
+                        {cl.nombre}
+                      </div>
+                      {cl.metodo && (
+                        <div
+                          className="truncate"
+                          style={{
+                            color: 'var(--matrix-subtitle-text)',
+                            fontSize: 12,
+                            maxWidth: 175,
+                          }}
+                        >
+                          {cl.metodo}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+
+                {STEPS.map((step, idx) => {
+                  const isFirstOfSection =
+                    idx === 0 || STEPS[idx - 1].sectionId !== step.sectionId;
+                  const autoCamino = Boolean(step.meta && caminoDone?.get(cl.id)?.has(step.meta));
+                  const on = autoCamino || isChecked(checks, cl.id, step.id);
+                  return (
+                    <td
+                      key={step.id}
+                      className="group-hover:bg-panel transition-colors"
+                      style={{
+                        padding: 0,
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                        height: 56,
+                        borderBottom: '1px solid var(--matrix-row-divider)',
+                        borderLeft: isFirstOfSection
+                          ? '2px solid var(--matrix-section-divider)'
+                          : '1px solid var(--matrix-cell-divider)',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => { if (!autoCamino) onToggle(cl.id, step.id, !on); }}
+                        title={autoCamino ? `${step.title} — ✓ completado en El Camino (automático)` : `${step.title} — ${on ? 'destildar' : 'tildar'}`}
+                        className="inline-flex items-center justify-center transition-all hover:border-gold/60"
+                        style={{
+                          width: 30,
+                          height: 30,
+                          border: `2px solid ${autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'var(--matrix-checkbox-off)'}`,
+                          borderRadius: 7,
+                          cursor: autoCamino ? 'default' : 'pointer',
+                          background: autoCamino ? 'var(--color-gold)' : on ? 'var(--color-success)' : 'transparent',
+                        }}
+                      >
+                        {on && <Check className="w-4 h-4" style={{ color: 'var(--color-ink)', strokeWidth: 3 }} />}
+                      </button>
+                    </td>
+                  );
+                })}
+
+                {/* Sticky total */}
+                <td
+                  className="sticky right-0 z-10 bg-ink group-hover:bg-panel transition-colors"
+                  style={{
+                    padding: '0 12px',
+                    height: 56,
+                    borderBottom: '1px solid var(--matrix-row-divider)',
+                    borderLeft: '2px solid var(--matrix-section-divider)',
+                    textAlign: 'center',
+                    fontSize: 14,
+                    minWidth: 84,
+                    color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
+                    fontWeight: isComplete ? 700 : 500,
+                  }}
+                  title={`${done}/${TOTAL_STEPS} pasos`}
+                >
+                  {pct}%
+                </td>
+              </tr>
             );
-          })
-        )}
-      </div>
+          })}
+        </tbody>
+      </table>
     </div>
-  );
-}
-
-export default function TaskByPersonView({
-  tareas, teamMembers, currentUserId, onStatusChange, onEdit, onDelete,
-  onArchive, onUnarchive, onReassign,
-}: TaskByPersonViewProps) {
-  const [activeId, setActiveId] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-  );
-
-  // Ordenar miembros: el currentUser primero
-  const orderedMembers = useMemo(() => {
-    const me = teamMembers.find(m => m.id === currentUserId);
-    const others = teamMembers
-      .filter(m => m.id !== currentUserId)
-      .sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? ''));
-    return me ? [me, ...others] : teamMembers;
-  }, [teamMembers, currentUserId]);
-
-  const byPerson = useMemo(() => {
-    const map = new Map<string | null, AdminTarea[]>();
-    map.set(null, []); // sin asignar
-    for (const m of orderedMembers) map.set(m.id, []);
-    for (const t of tareas) {
-      const key = t.asignado_a;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(t);
-    }
-    return map;
-  }, [tareas, orderedMembers]);
-
-  const sinAsignar = byPerson.get(null) ?? [];
-
-  const activeTarea = activeId ? tareas.find(t => t.id === activeId) ?? null : null;
-
-  function handleDragStart(e: DragStartEvent) {
-    setActiveId(String(e.active.id));
-  }
-
-  async function handleDragEnd(e: DragEndEvent) {
-    setActiveId(null);
-    const overId = e.over?.id;
-    if (!overId) return;
-    const dragId = String(e.active.id);
-    const tarea = tareas.find(t => t.id === dragId);
-    if (!tarea) return;
-    const targetPersonId = overId === '__unassigned__' ? null : String(overId);
-    if (tarea.asignado_a === targetPersonId) return;
-    try {
-      await updateAdminTarea(tarea.id, { asignado_a: targetPersonId });
-      const targetName = targetPersonId
-        ? orderedMembers.find(m => m.id === targetPersonId)?.nombre ?? 'el equipo'
-        : 'sin asignar';
-      toast.success(`Reasignada a ${targetName}`);
-
-      // Notificar al nuevo asignado (si no soy yo mismo y no es "sin asignar")
-      if (targetPersonId && targetPersonId !== currentUserId) {
-        const miNombre = orderedMembers.find(m => m.id === currentUserId)?.nombre ?? 'El equipo';
-        notificarTareaAsignada(targetPersonId, tarea.titulo, miNombre, tarea.id).catch((err) => {
-          console.error('[notif] falló notificarTareaAsignada:', err);
-        });
-      }
-
-      onReassign();
-    } catch {
-      toast.error('No se pudo reasignar la tarea');
-    }
-  }
-
-  return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveId(null)}
-    >
-      <div className="overflow-x-auto pb-4">
-        <div
-          className="grid gap-3 min-w-fit"
-          style={{
-            gridTemplateColumns: `repeat(${orderedMembers.length + (sinAsignar.length > 0 ? 1 : 0)}, minmax(280px, 1fr))`,
-          }}
-        >
-          {orderedMembers.map(m => (
-            <PersonColumn
-              key={m.id}
-              personId={m.id}
-              personName={m.id === currentUserId ? `${m.nombre ?? 'Yo'} (vos)` : m.nombre ?? 'Sin nombre'}
-              tareas={byPerson.get(m.id) ?? []}
-              currentUserId={currentUserId}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onArchive={onArchive}
-              onUnarchive={onUnarchive}
-            />
-          ))}
-          {sinAsignar.length > 0 && (
-            <PersonColumn
-              key="__unassigned__"
-              personId={null}
-              personName="Sin asignar"
-              tareas={sinAsignar}
-              currentUserId={currentUserId}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onArchive={onArchive}
-              onUnarchive={onUnarchive}
-            />
-          )}
-        </div>
-      </div>
-
-      <DragOverlay dropAnimation={null}>
-        {activeTarea ? (
-          <div className="rotate-2 scale-105 shadow-2xl shadow-black/60 cursor-grabbing">
-            <TaskCard
-              tarea={activeTarea}
-              currentUserId={currentUserId}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onArchive={onArchive}
-              onUnarchive={onUnarchive}
-              compact
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
   );
 }

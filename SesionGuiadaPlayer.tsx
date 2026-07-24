@@ -1,376 +1,253 @@
-import { planActual, planPermitePilar } from '../lib/planes';
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { MessageSquare, Send, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
-import { supabase, isSupabaseReady } from '../lib/supabase';
-import { playNotificationSound } from '../lib/notificationSound';
-import CreditsBadge from './credits/CreditsBadge';
-import { CREDITS_ENABLED } from '../lib/featureFlags';
+import RichTextEditor from '../editor/RichTextEditor';
+import RichTextViewer from '../editor/RichTextViewer';
+import {
+  fetchTareaComentarios,
+  createTareaComentario,
+  deleteTareaComentario,
+  type TareaComentario,
+} from '../../lib/adminTasks';
+import { notificarComentarioTarea } from '../../lib/notifications';
 
-interface TopbarProps {
-  currentPage?: string;
-  onBack?: () => void;
-  setCurrentPage: (page: string) => void;
-  userId?: string;
-  onMobileMenuToggle: () => void;
+interface TaskCommentsProps {
+  tareaId?: string;
+  tareaTitulo: string;
+  creadoPor?: string;
+  asignadoA: string | null;
+  currentUserId: string;
+  currentUserNombre: string;
+  /**
+   * Modo "pendiente": cuando no hay tareaId todavía (creación), los borradores
+   * se guardan en memoria y el padre los envía tras crear la tarea.
+   */
+  pendingComments?: string[];
+  onPendingCommentsChange?: (drafts: string[]) => void;
 }
 
-const PAGE_TITLES: Record<string, string> = {
-  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
-  mensajes: 'Soporte', adn: 'Mi ADN', diario: 'Diario del Fundador',
-  biblioteca: 'El Método', agentes: 'Entrenadores IA', creador: 'Creador de Contenido',
-  campanas: 'Campañas & Creativos', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
-};
-
-/** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
-const searchablePages = [
-  { id: 'dashboard', label: 'Hoy', icon: LayoutDashboard, desc: 'Tu día, en orden', minPilar: 0 },
-  { id: 'roadmap', label: 'El Camino', icon: Map, desc: 'Tus sesiones, una por día', minPilar: 0 },
-  { id: 'adn', label: 'Mi ADN', icon: Sparkles, desc: 'Las piezas que ya sellaste', minPilar: 0 },
-  { id: 'coach', label: 'Tu Mentor', icon: MessageSquare, desc: 'Tu guía del proceso', minPilar: 0 },
-  // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
-  { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes', minPilar: 4 },
-  { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0 },
-  { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Las clases del método', minPilar: 2 },
-  { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Anuncios y creativos', minPilar: 4 },
-];
-
-const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
-  hito: Trophy,
-  tarea: CheckCircle2,
-  mensaje: MessageSquare,
-  sistema: Bell,
-  admin: Shield,
-};
-
-const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-gold', bg: 'bg-gold/10' },
-  tarea: { text: 'text-success', bg: 'bg-success/10' },
-  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
-  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
-  admin: { text: 'text-gold', bg: 'bg-gold/10' },
-};
-
-const URL_TO_PAGE: Record<string, string> = {
-  '/hoja-de-ruta': 'roadmap',
-  '/diario': 'diario',
-  // '/mensajes': 'mensajes', // oculto hasta que esté usable
-  '/metricas': 'metrics',
-  '/admin/clientes': 'admin-clientes',
-  '/admin/mensajes': 'admin-mensajes',
-};
-
-function tiempoRelativo(fechaISO: string): string {
-  const ahora = Date.now();
-  const fecha = new Date(fechaISO).getTime();
-  const diffMs = ahora - fecha;
-  const minutos = Math.floor(diffMs / 60_000);
-
-  if (minutos < 1) return 'ahora';
-  if (minutos < 60) return `hace ${minutos} min`;
-
-  const horas = Math.floor(minutos / 60);
-  if (horas < 24) return `hace ${horas} h`;
-
-  const dias = Math.floor(horas / 24);
-  if (dias < 30) return `hace ${dias} d`;
-
-  const meses = Math.floor(dias / 30);
-  return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
+function formatRelative(iso: string): string {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'ahora mismo';
+  if (min < 60) return `hace ${min} min`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `hace ${hr} h`;
+  const days = Math.floor(hr / 24);
+  if (days < 7) return `hace ${days} d`;
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
 }
 
-export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [notifications, setNotifications] = useState<NotificacionDB[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [shaking, setShaking] = useState(false);
+function isEmpty(html: string): boolean {
+  const stripped = html.replace(/<[^>]*>/g, '').trim();
+  return stripped.length === 0;
+}
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
+export default function TaskComments({
+  tareaId, tareaTitulo, creadoPor, asignadoA, currentUserId, currentUserNombre,
+  pendingComments, onPendingCommentsChange,
+}: TaskCommentsProps) {
+  const isPending = !tareaId;
+  const [comments, setComments] = useState<TareaComentario[]>([]);
+  const [loading, setLoading] = useState(!isPending);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const profile = (() => {
-    try {
-      const saved = localStorage.getItem('tcd_profile');
-      return saved ? JSON.parse(saved) : { nombre: 'Profesional', especialidad: '' };
-    } catch { return { nombre: 'Profesional', especialidad: '' }; }
-  })();
-
-  // Load notifications + real-time subscription
   useEffect(() => {
+    if (!tareaId) {
+      setLoading(false);
+      return;
+    }
     let alive = true;
-    async function load() {
-      if (!userId) return;
-      const notifs = await obtenerNotificaciones(userId, 20);
-      if (!alive) return;
-      setNotifications(notifs);
-      const count = await contarNoLeidas(userId);
-      if (!alive) return;
-      setUnreadCount(count);
-    }
-    load();
-
-    if (isSupabaseReady() && supabase && userId) {
-      const channel = supabase.channel(`notif-realtime-${userId}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notificaciones',
-          filter: `usuario_id=eq.${userId}`,
-        }, (payload) => {
-          if (!alive) return;
-          const n = payload.new as NotificacionDB;
-          setNotifications(prev => [n, ...prev].slice(0, 20));
-          setUnreadCount(prev => prev + 1);
-          setShaking(true);
-          window.setTimeout(() => { if (alive) setShaking(false); }, 900);
-          playNotificationSound();
-          const page = n.accion_url ? URL_TO_PAGE[n.accion_url] : undefined;
-          toast(n.titulo, {
-            description: n.descripcion ?? undefined,
-            duration: 6000,
-            action: page
-              ? { label: 'Ver', onClick: () => setCurrentPage(page) }
-              : undefined,
-          });
-        })
-        .subscribe();
-
-      return () => {
-        alive = false;
-        if (supabase) supabase.removeChannel(channel);
-      };
-    }
+    setLoading(true);
+    fetchTareaComentarios(tareaId)
+      .then(rows => { if (alive) setComments(rows); })
+      .catch(err => {
+        console.error('Error cargando comentarios:', err);
+        if (alive) toast.error('No se pudieron cargar los comentarios');
+      })
+      .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [userId, setCurrentPage]);
+  }, [tareaId]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowSearch(prev => !prev);
+  async function handleSend() {
+    if (isEmpty(draft) || sending) return;
+
+    if (isPending) {
+      if (onPendingCommentsChange) {
+        onPendingCommentsChange([...(pendingComments ?? []), draft]);
       }
-      if (e.key === 'Escape') {
-        setShowSearch(false);
-        setShowNotifications(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (showSearch) {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
-    } else {
-      setSearchQuery('');
-    }
-  }, [showSearch]);
-
-  const filteredPages = searchablePages.filter((p) => planPermitePilar(planActual(), (p as { minPilar?: number }).minPilar ?? 0)).filter(p =>
-    p.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.desc.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const markAllRead = async () => {
-    if (!userId) return;
-    await marcarTodasLeidas(userId);
-    setNotifications(prev => prev.map(n => ({ ...n, leida: true })));
-    setUnreadCount(0);
-  };
-
-  const handleNotificationClick = async (notif: NotificacionDB) => {
-    if (!notif.leida) {
-      await marcarLeida(notif.id);
-      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, leida: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setDraft('');
+      return;
     }
 
-    if (notif.accion_url) {
-      const page = URL_TO_PAGE[notif.accion_url];
-      if (page) {
-        setCurrentPage(page);
-      }
-    }
+    setSending(true);
+    try {
+      const nuevo = await createTareaComentario({
+        tarea_id: tareaId!,
+        autor_id: currentUserId,
+        contenido: draft,
+      });
+      // Optimistic: añadir con nombre actual ya resuelto
+      setComments(prev => [...prev, { ...nuevo, autor_nombre: currentUserNombre }]);
+      setDraft('');
 
-    setShowNotifications(false);
-  };
+      // Notificar a las contrapartes (creador + asignado), excluyendo a uno mismo
+      const destinos = new Set<string>();
+      if (creadoPor && creadoPor !== currentUserId) destinos.add(creadoPor);
+      if (asignadoA && asignadoA !== currentUserId) destinos.add(asignadoA);
+      destinos.forEach(uid => {
+        notificarComentarioTarea(uid, currentUserNombre, tareaTitulo, tareaId).catch((err) => {
+          console.error('[notif] falló notificarComentarioTarea:', err);
+        });
+      });
+    } catch (err) {
+      console.error('Error enviando comentario:', err);
+      toast.error('No se pudo enviar el comentario');
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function handleRemovePending(index: number) {
+    if (!onPendingCommentsChange) return;
+    const next = [...(pendingComments ?? [])];
+    next.splice(index, 1);
+    onPendingCommentsChange(next);
+  }
+
+  async function handleDelete(c: TareaComentario) {
+    if (c.autor_id !== currentUserId) return;
+    if (deletingId) return;
+    setDeletingId(c.id);
+    const snapshot = comments;
+    setComments(prev => prev.filter(x => x.id !== c.id));
+    try {
+      await deleteTareaComentario(c.id);
+    } catch {
+      setComments(snapshot);
+      toast.error('No se pudo eliminar el comentario');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  const pendingList = pendingComments ?? [];
+  const totalCount = isPending ? pendingList.length : comments.length;
 
   return (
-    <>
-      <header className="h-14 md:h-20 px-4 md:px-8 flex items-center justify-between z-20 relative">
-        {/* Back (sub-páginas) o menú (home) + título de pantalla — mobile */}
-        <div className="md:hidden flex items-center gap-1.5 min-w-0">
-          {currentPage && currentPage !== 'dashboard' && onBack ? (
-            <button onClick={onBack} className="btn-icon -ml-2 shrink-0" aria-label="Volver">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-          ) : (
-            <button onClick={onMobileMenuToggle} className="btn-icon -ml-2 shrink-0" aria-label="Abrir menú">
-              <Menu className="w-5 h-5" />
-            </button>
-          )}
-          <h1 className="text-base font-semibold text-cream truncate not-italic" style={{ fontFamily: 'var(--font-body)' }}>
-            {(currentPage && PAGE_TITLES[currentPage]) || ''}
-          </h1>
-        </div>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+        <MessageSquare className="w-3.5 h-3.5" />
+        Conversación
+        {totalCount > 0 && (
+          <span className="text-[11px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+            {totalCount}
+          </span>
+        )}
+      </div>
 
-        <div
-          onClick={() => setShowSearch(true)}
-          className="hidden md:flex items-center w-96 card-panel px-4 py-2 cursor-pointer hover:bg-surface transition-colors"
-        >
-          <Search className="w-4 h-4 text-cream/55" />
-          <span className="bg-transparent text-sm text-cream/55 ml-3">Buscar secciones, tareas...</span>
-          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-[11px] text-cream/65 font-mono ml-auto">
-            ⌘K
+      {/* Hilo */}
+      {isPending ? (
+        pendingList.length === 0 ? (
+          <div className="text-xs text-cream/45 italic px-1">
+            Aún no hay comentarios. Escribe debajo para iniciar la conversación.
           </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Credits balance · click → modal de compra · oculto via flag mientras el sistema esta apagado */}
-          {CREDITS_ENABLED && <CreditsBadge userId={userId} variant="expanded" />}
-
-          <div className="relative">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className={`w-12 h-12 rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
-                showNotifications
-                  ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
-                  : unreadCount > 0
-                    ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
-                    : 'text-cream/75 hover:text-cream'
-              }`}
-              aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'}
-            >
-              <Bell
-                className={`w-6 h-6 transition-transform duration-300 ${showNotifications ? 'scale-110' : 'hover:scale-110'} ${shaking ? 'bell-shake' : ''}`}
-                fill={unreadCount > 0 ? 'currentColor' : 'none'}
-              />
-              {unreadCount > 0 && (
-                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {showNotifications && (
-              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
-                <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
-                  <h3 className="font-medium text-cream">Notificaciones</h3>
-                  {unreadCount > 0 && (
-                    <span onClick={markAllRead} className="text-xs text-gold cursor-pointer hover:text-goldhi">Marcar todas como leidas</span>
-                  )}
-                </div>
-                <div className="max-h-[400px] overflow-y-auto">
-                  {notifications.length === 0 && (
-                    <div className="py-12 text-center">
-                      <Bell className="w-8 h-8 text-cream/20 mx-auto mb-3" />
-                      <p className="text-sm text-cream/55">Sin notificaciones</p>
-                    </div>
-                  )}
-                  {notifications.map(notif => {
-                    const IconComponent = ICON_MAP[notif.tipo] ?? Bell;
-                    const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
-
-                    return (
-                      <div
-                        key={notif.id}
-                        onClick={() => handleNotificationClick(notif)}
-                        className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
-                      >
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
-                          <IconComponent className={`w-4 h-4 ${colors.text}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-2">
-                            <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
-                            {!notif.leida && (
-                              <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
-                            )}
-                          </div>
-                          {notif.descripcion && (
-                            <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
-                          )}
-                          <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
-                  <button onClick={() => setShowNotifications(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
-                    Cerrar
+        ) : (
+          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+            {pendingList.map((html, idx) => (
+              <div
+                key={idx}
+                className="rounded-xl px-3.5 py-2.5 border bg-gold/8 border-gold/20"
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-bold truncate text-gold">
+                      {currentUserNombre}
+                    </span>
+                    <span className="text-[11px] text-gold/70">se enviará al crear la tarea</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePending(idx)}
+                    className="p-1 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    title="Quitar comentario"
+                  >
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
+                <RichTextViewer html={html} className="text-xs" />
               </div>
-            )}
+            ))}
           </div>
-
-          <div className="flex items-center gap-2 pl-4 border-l border-[rgba(232,150,46,0.10)]">
-            {(() => {
-              const avatarUrl = localStorage.getItem('tcd_avatar');
-              const initial = (profile.nombre || 'P').charAt(0).toUpperCase();
-              return avatarUrl ? (
-                <img loading="lazy" src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[rgba(232,150,46,0.18)] object-cover" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-bold text-gold">
-                  {initial}
-                </div>
-              );
-            })()}
-          </div>
+        )
+      ) : loading ? (
+        <div className="text-xs text-cream/45 italic px-1">Cargando…</div>
+      ) : comments.length === 0 ? (
+        <div className="text-xs text-cream/45 italic px-1">
+          Aún no hay comentarios. Escribe debajo para iniciar la conversación.
         </div>
-      </header>
-
-      {/* Search Modal ⌘K */}
-      {showSearch && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm animate-in fade-in duration-150" onClick={() => setShowSearch(false)}>
-          <div className="w-full max-w-lg bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 p-4 border-b border-[rgba(232,150,46,0.10)]">
-              <Search className="w-5 h-5 text-cream/55" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="¿A dónde quieres ir?"
-                className="bg-transparent border-none outline-none text-cream text-sm w-full placeholder-cream/40"
-              />
-              <button onClick={() => setShowSearch(false)} className="text-cream/55 hover:text-cream">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="max-h-[300px] overflow-y-auto p-2">
-              {filteredPages.map(page => (
-                <button
-                  key={page.id}
-                  onClick={() => {
-                    setCurrentPage(page.id);
-                    setShowSearch(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-gold/10 transition-colors"
-                >
-                  <page.icon className="w-5 h-5 text-cream/55" />
-                  <div>
-                    <p className="text-sm font-medium text-cream/90">{page.label}</p>
-                    <p className="text-xs text-cream/55">{page.desc}</p>
+      ) : (
+        <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          {comments.map(c => {
+            const isMine = c.autor_id === currentUserId;
+            return (
+              <div
+                key={c.id}
+                className={`rounded-xl px-3.5 py-2.5 border ${
+                  isMine
+                    ? 'bg-gold/8 border-gold/20'
+                    : 'bg-[#0F0F0F] border-[rgba(255,255,255,0.06)]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`text-xs font-bold truncate ${isMine ? 'text-gold' : 'text-cream/85'}`}>
+                      {c.autor_nombre ?? 'Usuario'}
+                    </span>
+                    <span className="text-[11px] text-cream/35">{formatRelative(c.created_at)}</span>
                   </div>
-                </button>
-              ))}
-              {filteredPages.length === 0 && (
-                <p className="text-sm text-cream/55 text-center py-8">No se encontraron resultados</p>
-              )}
-            </div>
-            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-[11px] text-cream/55">
-              <span>↑↓ Navegar</span>
-              <span>↵ Abrir</span>
-              <span>esc Cerrar</span>
-            </div>
-          </div>
+                  {isMine && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c)}
+                      disabled={deletingId === c.id}
+                      className="p-1 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                      title="Eliminar comentario"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <RichTextViewer html={c.contenido} className="text-xs" />
+              </div>
+            );
+          })}
         </div>
       )}
-    </>
+
+      {/* Composer */}
+      <div className="bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 focus-within:border-gold/50 transition-colors">
+        <RichTextEditor
+          value={draft}
+          onChange={setDraft}
+          placeholder="Escribe una respuesta… (Enter agrega línea, usa el botón para enviar)"
+          minHeight="60px"
+        />
+        <div className="flex justify-end mt-2">
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={isEmpty(draft) || sending}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold transition-all"
+          >
+            {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

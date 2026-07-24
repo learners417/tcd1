@@ -1,338 +1,261 @@
 /**
- * TaskMapaMamuska.tsx — Tarea P8.8 (v8 · Mapa Mamuska)
+ * CONSTRUCTOR "TUS 3 ANUNCIOS" (T2 del Manual de Anuncios).
  *
- * Verificación cruzada del cierre de F3. Cada fila:
- *   Obstáculo (Matriz B) → Paso del Método → En qué oferta lo resuelve → Nivel conciencia
- *
- * Si quedan filas vacías o inconsistentes, la app señala el gap antes de pasar a F4.
- * Reusa el array `adn_metodo_mapeo_obstaculos` que ya armó el usuario en P7.4,
- * y agrega las columnas "oferta" y "nivel_conciencia" para el cierre de F3.
- *
- * Se guarda como JSON estructurado en `adn_metodo_mapeo_obstaculos`.
+ * El corazón de Campañas: autocompleta el brief con lo que el sanador YA
+ * selló en su ADN, aplica la regla del test (1 de piedras + 1 de dolor o
+ * historia + 1 de resultado o método), genera los 3 guiones + la secuencia
+ * de 3 stories con IA, y audita cada pieza contra los 8 ingredientes.
  */
+import React, { useMemo, useState } from 'react';
+import {
+  FORMULAS_ANUNCIOS, FAMILIAS_TEST, NOMBRE_FAMILIA, FORMULA_STORIES,
+  LAS_7_REGLAS, REGLAS_META, auditarPieza, formulaPorId,
+  type FamiliaFormula, type FormulaAnuncio,
+} from '../../lib/formulasAnuncios';
+import { generateText } from '../../lib/aiProvider';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Grid3X3, CheckCircle2, Save, Plus, Trash2, AlertCircle } from 'lucide-react';
-import type { AdnMapeoObstaculos, ProfileV2 } from '../../lib/supabase';
-import type { RoadmapMeta } from '../../lib/roadmapSeed';
+/* ── El brief: 7 insumos, autocompletados desde lo sellado ── */
 
-type MamuskaFila = Required<Pick<AdnMapeoObstaculos, 'obstaculo' | 'paso_metodo'>> &
-  Pick<AdnMapeoObstaculos, 'oferta' | 'nivel_conciencia' | 'nota'>;
-
-/** Fila con id estable para React keys (evita reuso incorrecto de DOM al borrar). */
-interface MamuskaFilaConId extends MamuskaFila {
-  _id: string;
+interface Brief {
+  avatar: string; piedras: string; frases: string; prueba: string;
+  metodo: string; oferta: string; palabra: string;
 }
 
-let _filaIdCounter = 0;
-function nuevoId(): string {
-  _filaIdCounter += 1;
-  return `mamuska-${Date.now().toString(36)}-${_filaIdCounter}`;
+const BRIEF_KEY = 'tcd_brief_anuncios_v1';
+const OUT_KEY = 'tcd_anuncios_v1';
+
+function leerJSON<T>(k: string, def: T): T {
+  try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
 }
 
-interface TaskMapaMamuskaProps {
-  meta: RoadmapMeta;
-  perfil?: Partial<ProfileV2>;
-  /**
-   * Valor existente. Puede venir como `AdnMapeoObstaculos[]` (correcto) o como
-   * `string` (datos legacy guardados como JSON.stringify). Parseamos defensivo.
-   */
-  valorExistente?: MamuskaFila[] | string;
-  onSaveADN: (outputTexto: string, filas: MamuskaFila[]) => void;
-  isCompleted: boolean;
-}
-
-/** Normaliza `valorExistente` que puede venir como array o como JSON string. */
-function parseValorExistente(valor: MamuskaFila[] | string | undefined): MamuskaFila[] | undefined {
-  if (!valor) return undefined;
-  if (Array.isArray(valor)) return valor;
-  if (typeof valor === 'string') {
-    try {
-      const parsed = JSON.parse(valor);
-      if (Array.isArray(parsed)) return parsed as MamuskaFila[];
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
-}
-
-const OFERTA_LABELS: Record<MamuskaFila['oferta'], string> = {
-  '': 'Elegir…',
-  lead_magnet: 'Lead Magnet ($0)',
-  ultralow: 'Ultra Low ($17-47)',
-  low: 'Low ($100-500)',
-  mid: 'Mid ($1K-5K · principal)',
-  high: 'High ($5K+)',
-};
-
-const CONCIENCIA_LABELS: Record<MamuskaFila['nivel_conciencia'], string> = {
-  '': 'Elegir…',
-  A_unaware: 'A · Unaware (no sabe que tiene problema)',
-  B_solution: 'B · Solution aware (sabe, pero con obstáculos)',
-  C_most: 'C · Most aware (busca tu solución específica)',
-};
-
-function filaVacia(obstaculo = '', paso_metodo = ''): MamuskaFilaConId {
+/** Mejor esfuerzo: junta lo que la app ya sabe. Todo queda editable. */
+function briefDesdeADN(): Brief {
+  const guardado = leerJSON<Partial<Brief>>(BRIEF_KEY, {});
+  const perfil = leerJSON<Record<string, unknown>>('tcd_profile', {});
+  const notas = leerJSON<Record<string, string>>('tcd_notas_sesion_v1', {});
+  const str = (v: unknown) => String(v ?? '').trim();
   return {
-    _id: nuevoId(),
-    obstaculo,
-    paso_metodo,
-    oferta: '',
-    nivel_conciencia: '',
+    avatar: guardado.avatar ?? str(perfil.adn_avatar) ?? '',
+    piedras: guardado.piedras ?? str(notas['P0.3']).slice(0, 400),
+    frases: guardado.frases ?? str(notas['P2.3b']).slice(0, 400),
+    prueba: guardado.prueba ?? '',
+    metodo: guardado.metodo ?? str(perfil.metodo_nombre ?? perfil.adn_metodo),
+    oferta: guardado.oferta ?? str(perfil.oferta ?? perfil.adn_oferta),
+    palabra: guardado.palabra ?? '',
   };
 }
 
-/** Asigna id estable a filas que vienen del schema (sin `_id`). */
-function conId(fila: MamuskaFila): MamuskaFilaConId {
-  return { ...filaVacia(), ...fila };
-}
+const CAMPOS: { k: keyof Brief; label: string; ayuda: string }[] = [
+  { k: 'avatar', label: 'Tu cliente, por CONDUCTA', ayuda: 'Qué hace un día normal, cómo cobra, qué persigue hoy. Sin nombrar profesiones.' },
+  { k: 'piedras', label: 'Las 3 tácticas que ya intentó', ayuda: 'Lo que probó y no le funcionó — lo que quemaste en tu QUEMA sirve acá.' },
+  { k: 'frases', label: 'Frases TEXTUALES de tus clientes', ayuda: '2-3 frases exactas que dicen al llegar. Su lenguaje interno.' },
+  { k: 'prueba', label: 'Una prueba real (con permiso)', ayuda: 'Un resultado o testimonio de un cliente tuyo. Si aún no tienes, déjalo vacío.' },
+  { k: 'metodo', label: 'El nombre propio de tu método', ayuda: 'El que creaste en tu Camino. Con nombre suena a sistema.' },
+  { k: 'oferta', label: 'Tu oferta concreta', ayuda: 'Qué es, cuándo empieza, cuántos lugares, desde qué inversión.' },
+  { k: 'palabra', label: 'Tu PALABRA clave', ayuda: 'Una sola, corta, en mayúsculas, ligada a tu oferta. Nunca "INFO".' },
+];
 
-export default function TaskMapaMamuska({
-  meta,
-  perfil,
-  valorExistente,
-  onSaveADN,
-  isCompleted,
-}: TaskMapaMamuskaProps) {
-  // Si hay valor existente lo usamos. Sino, pre-llenamos con los mapeos de P7.4
-  // (adn_metodo_mapeo_obstaculos) extendiendo cada fila con oferta + conciencia vacíos.
-  const seedInicial = useMemo<MamuskaFilaConId[]>(() => {
-    const parsed = parseValorExistente(valorExistente);
-    if (parsed && parsed.length > 0) {
-      return parsed.map(conId);
+/* ── Selección con la regla 1+1+1 ── */
+
+type Familia3 = Exclude<FamiliaFormula, 'acompana'>;
+const FAMILIAS: Familia3[] = ['piedras', 'dolor_historia', 'resultado_metodo'];
+
+interface Pieza { formulaId: number; texto: string }
+
+export default function ConstructorAnuncios() {
+  const [brief, setBrief] = useState<Brief>(() => briefDesdeADN());
+  const [sel, setSel] = useState<Record<Familia3, number>>(() =>
+    leerJSON(OUT_KEY + '_sel', { piedras: 1, dolor_historia: 15, resultado_metodo: 10 }));
+  const [piezas, setPiezas] = useState<Record<number, Pieza>>(() => leerJSON(OUT_KEY, {}));
+  const [stories, setStories] = useState<string>(() => leerJSON(OUT_KEY + '_st', ''));
+  const [generando, setGenerando] = useState<string | null>(null);
+  const [fallo, setFallo] = useState<string | null>(null);
+
+  const sinPrueba = !brief.prueba.trim();
+
+  const setCampo = (k: keyof Brief, v: string) => {
+    const b = { ...brief, [k]: v };
+    setBrief(b);
+    try { localStorage.setItem(BRIEF_KEY, JSON.stringify(b)); } catch { /* noop */ }
+  };
+
+  const elegir = (fam: Familia3, id: number) => {
+    const s = { ...sel, [fam]: id };
+    setSel(s);
+    try { localStorage.setItem(OUT_KEY + '_sel', JSON.stringify(s)); } catch { /* noop */ }
+  };
+
+  const promptDe = (f: FormulaAnuncio) => {
+    const reglas = LAS_7_REGLAS.map((r) => `- ${r.titulo}: ${r.texto}`).join('\n');
+    const meta = REGLAS_META.map((r) => `- ${r}`).join('\n');
+    return `Escribe UN anuncio para Instagram (carrusel) siguiendo EXACTAMENTE esta fórmula.
+
+FÓRMULA «${f.nombre}» — estructura obligatoria, pantalla por pantalla:
+${f.estructura.map((e, i) => `${i + 1}. ${e}`).join('\n')}
+Caption base: ${f.caption}
+Error a evitar: ${f.errorComun}
+
+EL BRIEF (datos reales de esta persona — usa SOLO esto, no inventes):
+- Cliente por conducta: ${brief.avatar || '(no dado — describe conducta genérica de quien atiende uno a uno)'}
+- Tácticas que ya intentó (piedras): ${brief.piedras || '(no dadas)'}
+- Frases textuales de sus clientes: ${brief.frases || '(no dadas)'}
+- Prueba real: ${brief.prueba || 'NO HAY PRUEBA — no inventes ninguna; omite ese bloque o usa la aclaración honesta en su lugar'}
+- Método (nombre propio): ${brief.metodo || '(sin nombre — usa "[MI MÉTODO]")'}
+- Oferta: ${brief.oferta || '(no dada)'}
+- Palabra clave: ${brief.palabra || 'PALABRA'}
+
+REGLAS INQUEBRANTABLES:
+${reglas}
+APROBACIÓN DE META:
+${meta}
+
+REGISTRO: castellano neutro (tú/tienes), hablado y natural, frases cortas, un golpe por línea. Cero jerga de oficio. Filtro por conducta, jamás listando profesiones. Nada de precio en el anuncio.
+
+FORMATO DE SALIDA (texto plano, sin explicaciones):
+PANTALLA 1: …
+PANTALLA 2: …
+(una por paso de la estructura)
+CAPTION: …`;
+  };
+
+  const generar = async () => {
+    setFallo(null);
+    const ids = [sel.piedras, sel.dolor_historia, sel.resultado_metodo];
+    for (const id of ids) {
+      const f = formulaPorId(id);
+      if (!f) continue;
+      setGenerando(f.nombre);
+      try {
+        const texto = await generateText({
+          systemInstruction: 'Eres un redactor de anuncios de venta directa en castellano neutro. Sigues la fórmula al pie de la letra. Nunca inventas datos ni pruebas.',
+          prompt: promptDe(f),
+        });
+        setPiezas((p) => {
+          const n = { ...p, [id]: { formulaId: id, texto: String(texto ?? '').trim() } };
+          try { localStorage.setItem(OUT_KEY, JSON.stringify(n)); } catch { /* noop */ }
+          return n;
+        });
+      } catch {
+        setFallo(`No pudimos generar «${f.nombre}». Revisa tu conexión y toca Generar de nuevo — lo ya creado se conserva.`);
+        setGenerando(null);
+        return;
+      }
     }
-    const mapeoP7 = perfil?.adn_metodo_mapeo_obstaculos;
-    if (Array.isArray(mapeoP7) && mapeoP7.length > 0) {
-      return mapeoP7.map((m) => filaVacia(m.obstaculo, m.paso_metodo));
-    }
-    return [filaVacia(), filaVacia(), filaVacia()];
-  }, [valorExistente, perfil?.adn_metodo_mapeo_obstaculos]);
-
-  const [filas, setFilas] = useState<MamuskaFilaConId[]>(seedInicial);
-  const [saved, setSaved] = useState(isCompleted);
-
-  useEffect(() => {
-    const parsed = parseValorExistente(valorExistente);
-    if (parsed && parsed.length > 0) {
-      setFilas(parsed.map(conId));
-      setSaved(isCompleted);
-    }
-  }, [valorExistente, isCompleted]);
-
-  const handleField = <K extends keyof MamuskaFila>(
-    id: string,
-    field: K,
-    value: MamuskaFila[K],
-  ) => {
-    setFilas((prev) =>
-      prev.map((f) => (f._id === id ? { ...f, [field]: value } : f)),
-    );
-    setSaved(false);
+    // La secuencia de 3 stories acompaña siempre
+    setGenerando('Secuencia de stories');
+    try {
+      const st = await generateText({
+        systemInstruction: 'Eres un redactor de anuncios en castellano neutro. Texto plano.',
+        prompt: `Escribe la secuencia de 3 stories (texto sobre fondo, sin cámara) para acompañar la campaña.\nEstructura: ${FORMULA_STORIES.estructura.join(' | ')}\nBrief: método ${brief.metodo || '[MI MÉTODO]'} · oferta ${brief.oferta || '(cupos limitados)'} · cliente ${brief.avatar || '(quien atiende uno a uno)'} · palabra ${brief.palabra || 'PALABRA'}.\nFormato: STORY 1: … / STORY 2: … / STORY 3: …`,
+      });
+      const limpio = String(st ?? '').trim();
+      setStories(limpio);
+      try { localStorage.setItem(OUT_KEY + '_st', JSON.stringify(limpio)); } catch { /* noop */ }
+    } catch { /* las stories no frenan el resultado principal */ }
+    setGenerando(null);
   };
 
-  const agregarFila = () => {
-    setFilas((prev) => [...prev, filaVacia()]);
-    setSaved(false);
-  };
-
-  const borrarFila = (id: string) => {
-    setFilas((prev) => prev.filter((f) => f._id !== id));
-    setSaved(false);
-  };
-
-  // Gaps: fila completa = todos los 4 campos requeridos llenos.
-  const gaps = useMemo(() => {
-    return filas.filter((fila) =>
-      !fila.obstaculo.trim()
-        || !fila.paso_metodo.trim()
-        || !fila.oferta
-        || !fila.nivel_conciencia,
-    );
-  }, [filas]);
-
-  const handleSave = () => {
-    // Filtramos filas completamente vacías al guardar (no las contamos).
-    // Stripeamos el `_id` interno (es sólo para React keys, no va al ADN).
-    const filasUtiles: MamuskaFila[] = filas
-      .filter(
-        (f) => f.obstaculo.trim() || f.paso_metodo.trim() || f.oferta || f.nivel_conciencia,
-      )
-      .map(({ _id: _ignored, ...resto }) => resto);
-    onSaveADN(JSON.stringify(filasUtiles, null, 2), filasUtiles);
-    setSaved(true);
-  };
-
-  const puedeGuardar = filas.some((f) => f.obstaculo.trim() && f.paso_metodo.trim());
+  const listas = FAMILIAS.every((f) => piezas[sel[f]]?.texto);
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-[11px] font-mono text-gold uppercase tracking-widest font-bold">
-            <Grid3X3 className="w-3 h-3 inline mr-1" />
-            {meta.codigo} · Mapa Mamuska
-          </span>
-          {saved && (
-            <span className="text-[11px] text-success uppercase tracking-widest font-bold flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Guardado
-            </span>
-          )}
-        </div>
-        <h3
-          className="text-lg font-medium text-cream"
-          style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
-        >
-          {meta.titulo}
-        </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El Constructor</p>
+        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 3 anuncios</h2>
+        <p className="text-sm text-cream/60 mt-1">Tres fórmulas que atacan distinto, completadas con TU caso. La regla: una de piedras, una de dolor o historia, una de resultado.</p>
       </div>
 
-      {gaps.length > 0 && (
-        <div className="card-panel p-4 border border-[#F0B429]/40 bg-[#F0B429]/[0.05]">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-[#F0B429] mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs uppercase tracking-widest font-bold text-[#F0B429] mb-1">
-                {gaps.length} {gaps.length === 1 ? 'fila tiene' : 'filas tienen'} gaps
-              </p>
-              <p className="text-sm text-cream/70">
-                Cada fila necesita los 4 campos llenos: obstáculo, paso del método,
-                oferta y nivel de conciencia. Si algo queda vacío te falta cubrir
-                ese obstáculo en tu escalera.
-              </p>
+      {/* EL BRIEF */}
+      <div className="card-panel p-5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">1 · Tu brief — lo trajimos de tu ADN, ajústalo</p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {CAMPOS.map((c) => (
+            <div key={c.k} className={c.k === 'avatar' || c.k === 'oferta' ? 'sm:col-span-2' : ''}>
+              <p className="text-xs font-semibold text-cream mb-1">{c.label}</p>
+              <textarea
+                value={brief[c.k]}
+                onChange={(e) => setCampo(c.k, e.target.value)}
+                placeholder={c.ayuda}
+                rows={c.k === 'palabra' ? 1 : 2}
+                className="w-full bg-surface/40 border border-cream/10 rounded-xl px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:border-gold/40 outline-none resize-none"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* LA ELECCIÓN 1+1+1 */}
+      <div className="card-panel p-5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">2 · Tus 3 fórmulas — una por familia</p>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {FAMILIAS.map((fam) => (
+            <div key={fam}>
+              <p className="text-xs font-semibold text-gold mb-2">{NOMBRE_FAMILIA[fam]}</p>
+              <div className="space-y-1.5">
+                {FAMILIAS_TEST[fam].map((id) => {
+                  const f = formulaPorId(id)!;
+                  const advertir = sinPrueba && (id === 4 || id === 9);
+                  const activa = sel[fam] === id;
+                  return (
+                    <button key={id} onClick={() => elegir(fam, id)}
+                      className={`w-full text-left rounded-xl border px-3 py-2 text-xs transition-colors ${activa ? 'border-gold/60 bg-gold/[0.08] text-cream' : 'border-cream/10 text-cream/70 hover:border-cream/25'}`}>
+                      <span className="font-semibold">{f.id} · {f.nombre}</span>
+                      {advertir && <span className="block text-[10px] text-danger/80 mt-0.5">Necesita prueba real — sin ella, mejor la {fam === 'dolor_historia' ? '15' : '18'}</span>}
+                      {activa && <span className="block text-[10px] text-cream/50 mt-0.5">{f.cuando}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* GENERAR */}
+      <button onClick={() => void generar()} disabled={!!generando}
+        className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold disabled:opacity-60">
+        {generando ? `Escribiendo: ${generando}…` : '✨ Generar mis 3 anuncios + stories'}
+      </button>
+      {fallo && <p className="text-xs text-danger">{fallo}</p>}
+
+      {/* LAS PIEZAS */}
+      {FAMILIAS.map((fam) => {
+        const pieza = piezas[sel[fam]];
+        if (!pieza) return null;
+        const f = formulaPorId(pieza.formulaId)!;
+        const audit = auditarPieza(pieza.texto);
+        return (
+          <div key={fam} className="card-panel p-5">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <p className="text-sm font-bold text-cream">{f.id} · {f.nombre}</p>
+              <button onClick={() => void navigator.clipboard?.writeText(pieza.texto)}
+                className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
+            </div>
+            <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{pieza.texto}</pre>
+            <div className={`mt-3 rounded-xl border p-3 ${audit.aprobada ? 'border-success/25 bg-success/[0.05]' : 'border-danger/25 bg-danger/[0.05]'}`}>
+              <p className="text-[11px] font-bold uppercase tracking-wider mb-1 text-cream/70">Auditoría de ingredientes</p>
+              <p className="text-xs text-cream/70">{audit.nota}</p>
+              {!audit.aprobada && <p className="text-xs text-cream/60 mt-1">Faltan: {audit.faltantes.join(' · ')}</p>}
             </div>
           </div>
+        );
+      })}
+
+      {stories && (
+        <div className="card-panel p-5">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <p className="text-sm font-bold text-cream">12 · La secuencia de 3 stories — acompaña siempre</p>
+            <button onClick={() => void navigator.clipboard?.writeText(stories)}
+              className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
+          </div>
+          <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{stories}</pre>
+          <p className="text-[11px] text-cream/45 mt-2">Se publican el mismo día, con horas de diferencia. Repetible 2-3 veces por semana con distinto ángulo.</p>
         </div>
       )}
 
-      <div className="space-y-3">
-        {filas.map((fila, idx) => {
-          const tieneGap = !fila.obstaculo.trim()
-            || !fila.paso_metodo.trim()
-            || !fila.oferta
-            || !fila.nivel_conciencia;
-          return (
-            <div
-              key={fila._id}
-              className={`card-panel p-4 border ${
-                tieneGap
-                  ? 'border-[#F0B429]/25 bg-surface/30'
-                  : 'border-success/25 bg-success/[0.03]'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono text-cream/55 uppercase tracking-widest">
-                  Fila {idx + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => borrarFila(fila._id)}
-                  className="text-cream/45 hover:text-[#ff5e5e] transition-colors p-1"
-                  aria-label={`Borrar fila ${idx + 1}`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
-                    Obstáculo (Matriz B)
-                  </label>
-                  <textarea
-                    value={fila.obstaculo}
-                    onChange={(e) => handleField(fila._id, 'obstaculo', e.target.value)}
-                    placeholder="Ej: cree que va a ser caro"
-                    rows={2}
-                    className="w-full input-field resize-y text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
-                    Paso del Método que lo resuelve
-                  </label>
-                  <textarea
-                    value={fila.paso_metodo}
-                    onChange={(e) => handleField(fila._id, 'paso_metodo', e.target.value)}
-                    placeholder="Ej: paso 3 · diagnóstico personalizado con plan de costos"
-                    rows={2}
-                    className="w-full input-field resize-y text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
-                    En qué oferta lo resuelve
-                  </label>
-                  <select
-                    value={fila.oferta}
-                    onChange={(e) =>
-                      handleField(fila._id, 'oferta', e.target.value as MamuskaFila['oferta'])
-                    }
-                    className="w-full input-field text-sm"
-                  >
-                    {(Object.keys(OFERTA_LABELS) as MamuskaFila['oferta'][]).map((k) => (
-                      <option key={k} value={k}>
-                        {OFERTA_LABELS[k]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] uppercase tracking-widest text-cream/65 mb-1 font-semibold">
-                    Nivel de conciencia del avatar
-                  </label>
-                  <select
-                    value={fila.nivel_conciencia}
-                    onChange={(e) =>
-                      handleField(
-                        fila._id,
-                        'nivel_conciencia',
-                        e.target.value as MamuskaFila['nivel_conciencia'],
-                      )
-                    }
-                    className="w-full input-field text-sm"
-                  >
-                    {(
-                      Object.keys(CONCIENCIA_LABELS) as MamuskaFila['nivel_conciencia'][]
-                    ).map((k) => (
-                      <option key={k} value={k}>
-                        {CONCIENCIA_LABELS[k]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        onClick={agregarFila}
-        className="w-full btn-secondary flex items-center justify-center gap-2"
-      >
-        <Plus className="w-4 h-4" />
-        Agregar fila
-      </button>
-
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={!puedeGuardar}
-        className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
-      >
-        {saved ? (
-          <>
-            <CheckCircle2 className="w-4 h-4" /> Mapa Mamuska guardado
-          </>
-        ) : (
-          <>
-            <Save className="w-4 h-4" /> Guardar Mapa Mamuska
-          </>
-        )}
-      </button>
+      {listas && (
+        <p className="text-xs text-cream/55 text-center">Tus 3 anuncios están listos. El paso que sigue vive en tu Camino: grabarlos y montar tu campaña.</p>
+      )}
     </div>
   );
 }

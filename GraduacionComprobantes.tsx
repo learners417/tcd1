@@ -1,109 +1,181 @@
-import TutorialTecnicoBox from '../TutorialTecnicoBox';
-import React, { useState } from 'react';
-import { getGuion } from '../../lib/guionesVideos';
-import { Play, CheckCircle2, ExternalLink } from 'lucide-react';
-import type { RoadmapMeta } from '../../lib/roadmapSeed';
+/**
+ * EspejoIdentidadModal.tsx — Pantalla de cierre F1 (v8 · Sprint de Identidad)
+ *
+ * Se muestra al completar P3 (Legado). Es el momento más importante de F1:
+ * el sanador ve junto, por primera vez, las 4 piezas de su identidad —
+ * historia, propósito, legado y los 5 NO — y se le pregunta si se reconoce.
+ *
+ * Diseño: sobrio y reflexivo (no celebratorio festivo). Inspirado por la pantalla
+ * del Espejo de Identidad descripta en mejoras.html · cierre F1.
+ */
 
-interface TaskVideoProps {
-  meta: RoadmapMeta;
-  onComplete: () => void;
-  isCompleted: boolean;
+import { useEffect, useState } from 'react';
+import { Sparkles, ChevronRight, Edit3 } from 'lucide-react';
+import type { AdnCincoNo } from '../lib/supabase';
+
+interface EspejoIdentidadModalProps {
+  /** Historia corta (50 palabras) · `profiles.historia_50`. */
+  historiaCorta?: string;
+  /** Propósito en una frase · `profiles.proposito`. */
+  propositoFrase?: string;
+  /** Declaración de legado · `profiles.legado`. */
+  legadoDeclaracion?: string;
+  /** 5 NOs · `profiles.adn_cinco_no`. */
+  cincoNo?: AdnCincoNo | null;
+  /** Confirma y cierra (continúa a F2). */
+  onConfirmar: () => void;
+  /** Va al editor a corregir antes de cerrar F1. */
+  onEditar: () => void;
 }
 
-function getYoutubeEmbedUrl(videoId: string): string {
-  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
-}
+export default function EspejoIdentidadModal({
+  historiaCorta,
+  propositoFrase,
+  legadoDeclaracion,
+  cincoNo,
+  onConfirmar,
+  onEditar,
+}: EspejoIdentidadModalProps) {
+  const [visible, setVisible] = useState(false);
 
-export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoProps) {
-  const [watched, setWatched] = useState(isCompleted);
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
 
-  const handleMarkWatched = () => {
-    setWatched(true);
-    onComplete();
+  const handleClose = (action: () => void) => {
+    setVisible(false);
+    setTimeout(action, 200);
   };
 
-  const hasRealVideo = meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER');
-  const videoId = hasRealVideo ? meta.video_youtube_id : null;
+  const nos = cincoNo?.nos?.filter((n) => n && n.trim()) ?? [];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Video Title */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 tracking-wider">
-            VIDEO
-          </span>
-          {watched && (
-            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Visto
-            </span>
-          )}
-        </div>
-        <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          {meta.titulo}
-        </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
-        <TutorialTecnicoBox codigo={meta.codigo} />
-      </div>
-
-      {/* YouTube Embed */}
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black">
-        {videoId ? (
-          <iframe
-            src={getYoutubeEmbedUrl(videoId)}
-            title={meta.titulo}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 w-full h-full"
-          />
-        ) : (
-          (() => {
-            const guion = getGuion(meta.codigo);
-            if (guion?.esencia) {
-              return (
-                <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-[#141311] to-[#0B0A09] p-6 sm:p-8">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4">La lección de hoy</p>
-                  <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                    {guion.esencia}
-                  </p>
-                  <p className="text-[11px] text-cream/35 mt-4">La versión en video llega pronto — la lección completa está acá abajo, no te frena nada.</p>
-                </div>
-              );
-            }
-            return (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-panel px-6 text-center">
-                <Play className="w-12 h-12 text-gold/50 mb-3" />
-                <p className="text-sm text-cream/80">🎬 El video de esta sesión está en producción</p>
-                <p className="text-xs text-cream/45 mt-2 leading-relaxed max-w-sm">
-                  No te frena nada: la instrucción completa está aquí abajo.
-                </p>
-              </div>
-            );
-          })()
-        )}
-      </div>
-
-      {/* Mark as watched */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-cream/55">
-          {meta.tiempo_estimado || '10–15 min'}
-        </p>
-
-        {watched ? (
-          <div className="flex items-center gap-2 text-success text-sm font-medium">
-            <CheckCircle2 className="w-5 h-5" />
-            Video completado
+    <div
+      className={`fixed inset-0 z-[200] flex items-center justify-center px-4 transition-opacity duration-300 ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ background: 'rgba(0, 0, 0, 0.85)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="espejo-titulo"
+    >
+      <div
+        className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/30 bg-ink p-8 shadow-2xl transition-transform duration-300 ${
+          visible ? 'scale-100' : 'scale-95'
+        }`}
+      >
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center mb-4">
+            <Sparkles className="w-6 h-6 text-gold" />
           </div>
-        ) : (
-          <button
-            onClick={handleMarkWatched}
-            className="btn-primary flex items-center gap-2"
+          <p className="text-[11px] uppercase tracking-widest text-gold font-bold mb-2">
+            Cierre de Fase 1 · Identidad
+          </p>
+          <h2
+            id="espejo-titulo"
+            className="text-2xl md:text-3xl font-light text-cream tracking-tight leading-tight"
+            style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
-            <CheckCircle2 className="w-4 h-4" />
-            Marcar como visto
+            Espejo de Identidad
+          </h2>
+        </div>
+
+        {/* 4 piezas */}
+        <div className="space-y-5">
+          <Pieza titulo="Tu historia" valor={historiaCorta} fallback="Vuelve a P1.3 para escribir tu historia de 50 palabras." />
+          <Pieza titulo="Tu propósito" valor={propositoFrase} fallback="Vuelve a P2.3 para destilar tu propósito." />
+          <Pieza titulo="Tu legado" valor={legadoDeclaracion} fallback="Vuelve a P3.3 para escribir tu declaración de legado." />
+
+          {/* 5 NOs · lista */}
+          <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
+            <p className="text-[11px] uppercase tracking-widest font-bold text-gold mb-3">
+              Tus 5 NO
+            </p>
+            {nos.length > 0 ? (
+              <ul className="space-y-2">
+                {nos.map((no, idx) => (
+                  <li
+                    key={idx}
+                    className="text-sm text-cream/90 leading-relaxed flex gap-3"
+                  >
+                    <span className="text-gold font-mono text-xs mt-0.5">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="flex-1">{no}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-cream/55 italic">
+                Vuelve a P2.5 para definir tus 5 NO.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Cita central */}
+        <div className="my-8 py-6 border-y border-gold/15 text-center">
+          <p
+            className="text-lg md:text-xl text-cream/90 leading-relaxed"
+            style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
+          >
+            Esto es lo que eres. Esto es lo que viniste a hacer.
+            <br />
+            Esto es lo que va a quedar.
+          </p>
+          <p
+            className="text-2xl md:text-3xl text-gold mt-4 font-light tracking-tight"
+            style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
+          >
+            ¿Te reconocés?
+          </p>
+        </div>
+
+        {/* Acciones */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={() => handleClose(onEditar)}
+            className="flex-1 btn-secondary flex items-center justify-center gap-2"
+          >
+            <Edit3 className="w-4 h-4" />
+            Quiero editar algo
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => handleClose(onConfirmar)}
+            className="flex-1 btn-primary flex items-center justify-center gap-2"
+          >
+            Confirmar y seguir a Fase 2
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
+    </div>
+  );
+}
+
+interface PiezaProps {
+  titulo: string;
+  valor?: string;
+  fallback: string;
+}
+
+function Pieza({ titulo, valor, fallback }: PiezaProps) {
+  const tieneValor = typeof valor === 'string' && valor.trim().length > 0;
+  return (
+    <div className="card-panel p-5 border border-[rgba(232,150,46,0.1)]">
+      <p className="text-[11px] uppercase tracking-widest font-bold text-gold mb-2">
+        {titulo}
+      </p>
+      {tieneValor ? (
+        <p className="text-base text-cream/90 leading-relaxed whitespace-pre-wrap break-words">
+          {valor}
+        </p>
+      ) : (
+        <p className="text-sm text-cream/55 italic">{fallback}</p>
+      )}
     </div>
   );
 }

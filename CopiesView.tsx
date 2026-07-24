@@ -1,312 +1,251 @@
-/**
- * CampanasHome.tsx — Tu Máquina de Pacientes
- * Una pregunta, tres puertas, un paso por pantalla.
- * Regla de producto: TRES tipos de campaña. Ni cuatro, ni "avanzado". La claridad ES el producto.
- */
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { X, Loader2, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
+import type { AdminTarea, AdminTareaStatus, AdminTareaPrioridad } from '../../lib/supabase';
+import { ADMIN_TAREA_STATUS_LABELS, ADMIN_TAREA_PRIORIDAD_LABELS, ADMIN_TAREA_STATUSES } from '../../lib/supabase';
+import type { Profile } from '../../lib/supabase';
+import CustomSelect from '../CustomSelect';
+import TaskDescriptionEditor from '../editor/TaskDescriptionEditor';
+import TaskComments from '../tasks/TaskComments';
+import TaskAttachments from '../tasks/TaskAttachments';
 import {
-  UserPlus, Gift, Wallet, Lock, ArrowRight,
-  Sparkles, FolderOpen, Trophy, ChevronLeft,
-} from 'lucide-react';
-import type { CampanasView, Campana, Creativo } from '../../lib/campanasTypes';
-import { cinturonDesdeProgreso } from '../../lib/cinturones';
+  uploadTareaAdjunto,
+  MAX_ATTACHMENT_BYTES,
+} from '../../lib/adminTasks';
 
-type PuertaId = 'seguidores' | 'comunidad' | 'ventas';
-
-const PUERTAS: Array<{
-  id: PuertaId;
-  emoji: string;
-  icon: React.ComponentType<{ className?: string }>;
-  titulo: string;
-  promesa: string;
-  detalle: string;
-}> = [
-  {
-    id: 'seguidores',
-    emoji: '🌱',
-    icon: UserPlus,
-    titulo: 'Seguidores',
-    promesa: 'Que te conozcan las personas correctas',
-    detalle: 'Tráfico a tu perfil · desde 3 USD/día',
-  },
-  {
-    id: 'comunidad',
-    emoji: '🎁',
-    icon: Gift,
-    titulo: 'Comunidad',
-    promesa: 'Entrega tu recurso gratuito por mensaje y arma tu grupo',
-    detalle: 'Mensajes a Instagram · desde 5 USD/día',
-  },
-  {
-    id: 'ventas',
-    emoji: '💰',
-    icon: Wallet,
-    titulo: 'Primeras Ventas',
-    promesa: 'Pacientes que escriben listos para tu protocolo',
-    detalle: 'Anuncios a tu WhatsApp · desde 10 USD/día',
-  },
-];
-
-const PREGUNTAS: Array<{
-  id: string;
-  q: string;
-  opts: Array<{ v: string; l: string }>;
-}> = [
-  {
-    id: 'protocolo',
-    q: '¿Ya tienes tu protocolo con precio definido?',
-    opts: [
-      { v: 'validado', l: 'Sí, validado' },
-      { v: 'armando', l: 'Lo estoy armando' },
-      { v: 'no', l: 'Todavía no' },
-    ],
-  },
-  {
-    id: 'recurso',
-    q: '¿Tienes un recurso gratuito para regalar? (guía, masterclass, plantilla)',
-    opts: [
-      { v: 'si', l: 'Sí' },
-      { v: 'no', l: 'No' },
-    ],
-  },
-  {
-    id: 'seguidores',
-    q: '¿Cuántos seguidores reales tienes hoy?',
-    opts: [
-      { v: 'pocos', l: 'Menos de 500' },
-      { v: 'medios', l: '500 a 3.000' },
-      { v: 'muchos', l: 'Más de 3.000' },
-    ],
-  },
-  {
-    id: 'presupuesto',
-    q: '¿Cuánto puedes invertir por mes sin sufrir?',
-    opts: [
-      { v: 'bajo', l: 'Menos de 100 USD' },
-      { v: 'medio', l: '100 a 300 USD' },
-      { v: 'alto', l: 'Más de 300 USD' },
-    ],
-  },
-  {
-    id: 'experiencia',
-    q: '¿Ya pusiste anuncios alguna vez?',
-    opts: [
-      { v: 'nunca', l: 'Nunca' },
-      { v: 'fallo', l: 'Probé y no funcionó' },
-      { v: 'exito', l: 'Sí, con resultados' },
-    ],
-  },
-];
-
-interface Props {
-  campanas: Campana[];
-  creativos: Creativo[];
-  perfil?: { nombre?: string; modulos_activos?: string[] };
-  onNavigate: (view: CampanasView) => void;
-  onSelectCampana: (campana: Campana) => void;
+interface TaskModalProps {
+  tarea?: AdminTarea | null;
+  teamMembers: Profile[];
+  clientes: Profile[];
+  currentAdminId: string;
+  onSave: (data: {
+    titulo: string;
+    descripcion: string;
+    asignado_a: string | null;
+    cliente_id: string | null;
+    prioridad: AdminTareaPrioridad;
+    fecha_vencimiento: string | null;
+    status: AdminTareaStatus;
+  }) => Promise<AdminTarea | void>;
+  onClose: () => void;
 }
 
-export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
-  const nombre = perfil?.nombre?.split(' ')[0] ?? 'Doc';
-  const [modo, setModo] = useState<'puertas' | 'diagnostico'>('puertas');
-  const [resp, setResp] = useState<Record<string, string>>({});
+const PRIORIDADES: AdminTareaPrioridad[] = ['baja', 'media', 'alta', 'urgente'];
 
-  // Primeras Ventas se abre con la oferta aprobada (Cinturón Verde) o si el mentor habilitó el módulo.
-  const ventasAbierta = useMemo(() => {
-    try {
-      const saved = localStorage.getItem('tcd_hoja_ruta_v2');
-      const set = new Set<string>(saved ? JSON.parse(saved) : []);
-      if ((cinturonDesdeProgreso(set)?.orden ?? 0) >= 5) return true;
-    } catch { /* noop */ }
-    return (perfil?.modulos_activos ?? []).includes('campanas');
-  }, [perfil]);
+export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId, onSave, onClose }: TaskModalProps) {
+  const [titulo, setTitulo] = useState(tarea?.titulo ?? '');
+  const [descripcion, setDescripcion] = useState(tarea?.descripcion ?? '');
+  const [asignadoA, setAsignadoA] = useState<string>(tarea?.asignado_a ?? '');
+  const [clienteId, setClienteId] = useState<string>(tarea?.cliente_id ?? '');
+  const [prioridad, setPrioridad] = useState<AdminTareaPrioridad>(tarea?.prioridad ?? 'media');
+  const [status, setStatus] = useState<AdminTareaStatus>(tarea?.status ?? 'por_hacer');
+  const [fechaVencimiento, setFechaVencimiento] = useState(tarea?.fecha_vencimiento ?? '');
+  const [saving, setSaving] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
-  const respondidas = PREGUNTAS.every((p) => resp[p.id]);
+  const isEditing = !!tarea;
 
-  const recomendada: PuertaId = useMemo(() => {
-    if (resp.protocolo === 'validado' && resp.presupuesto !== 'bajo' && ventasAbierta) return 'ventas';
-    if (resp.recurso === 'si' && resp.presupuesto !== 'bajo') return 'comunidad';
-    if (resp.protocolo === 'validado' && resp.presupuesto !== 'bajo') return 'comunidad';
-    return 'seguidores';
-  }, [resp, ventasAbierta]);
+  const creadorId = tarea?.creado_por ?? currentAdminId;
+  const creadorNombre =
+    tarea?.creador_nombre
+    ?? teamMembers.find(m => m.id === creadorId)?.nombre
+    ?? 'Vos';
 
-  const razonRecomendada: string = useMemo(() => {
-    if (recomendada === 'ventas') return 'Tu oferta está validada y tienes presupuesto: estás lista para cobrar. Lo demás puede esperar.';
-    if (recomendada === 'comunidad') {
-      const extra = resp.protocolo === 'validado' && !ventasAbierta
-        ? ' Y cuando Vera apruebe tu oferta, pasamos directo a Primeras Ventas.'
-        : '';
-      return `Tienes algo para dar: armemos tu audiencia propia antes de pedirle nada.${extra}`;
+  const currentUserNombre =
+    teamMembers.find(m => m.id === currentAdminId)?.nombre ?? 'Usuario';
+
+  async function flushPendingFiles(tareaId: string) {
+    for (const file of pendingFiles) {
+      if (file.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(`"${file.name}" supera los 25 MB`);
+        continue;
+      }
+      try {
+        await uploadTareaAdjunto({ tarea_id: tareaId, autor_id: currentAdminId, file });
+      } catch (err) {
+        console.error('Error subiendo archivo adjunto:', err);
+        toast.error(`No se pudo subir "${file.name}"`);
+      }
     }
-    return 'Primero que te conozcan las personas correctas. Con tu punto de partida, esta es la puerta que rinde.';
-  }, [recomendada, resp, ventasAbierta]);
+  }
 
-  function elegir(p: PuertaId) {
-    if (p === 'ventas' && !ventasAbierta) return;
-    try { localStorage.setItem('tcd_campana_objetivo', p); } catch { /* noop */ }
-    onNavigate('nueva');
+  async function handleSubmit() {
+    if (!titulo.trim()) return;
+    setSaving(true);
+    try {
+      const result = await onSave({
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim(),
+        asignado_a: asignadoA || null,
+        cliente_id: clienteId || null,
+        prioridad,
+        fecha_vencimiento: fechaVencimiento || null,
+        status,
+      });
+
+      if (!isEditing && result && pendingFiles.length > 0) {
+        await flushPendingFiles(result.id);
+      }
+
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in duration-500">
-
-      {/* Hero */}
-      <div>
-        <p className="text-[11px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
-          Tu Máquina de Pacientes
-        </p>
-        <h1 className="text-3xl font-medium text-cream tracking-tight">
-          Hola, {nombre}.
-        </h1>
-        <p className="text-xl text-gold mt-1">¿Qué quieres lograr con tus anuncios?</p>
-        <p className="text-sm text-cream/55 mt-2">
-          Elige una puerta y te llevamos paso a paso: qué decir, qué mostrar y dónde hacer clic. Nada más.
-        </p>
-      </div>
-
-      {modo === 'puertas' && (
-        <>
-          {/* Las 3 puertas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {PUERTAS.map((p) => {
-              const bloqueada = p.id === 'ventas' && !ventasAbierta;
-              const Icon = bloqueada ? Lock : p.icon;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => elegir(p.id)}
-                  disabled={bloqueada}
-                  className={`text-left rounded-2xl border p-5 transition-all group ${
-                    bloqueada
-                      ? 'bg-[#0d0d0c] border-cream/8 cursor-not-allowed'
-                      : 'bg-panel border-[rgba(232,150,46,0.15)] hover:border-gold/50 hover:bg-[#161512]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-2xl ${bloqueada ? 'opacity-30 grayscale' : ''}`}>{p.emoji}</span>
-                    <Icon className={`w-4 h-4 ${bloqueada ? 'text-cream/25' : 'text-gold/60 group-hover:text-gold'} transition-colors`} />
-                  </div>
-                  <h3 className={`text-base font-semibold ${bloqueada ? 'text-cream/35' : 'text-cream'}`}>
-                    {p.titulo}
-                  </h3>
-                  <p className={`text-xs mt-1 leading-relaxed ${bloqueada ? 'text-cream/25' : 'text-cream/55'}`}>
-                    {p.promesa}
-                  </p>
-                  <p className={`text-[11px] uppercase tracking-wider mt-3 font-semibold ${bloqueada ? 'text-cream/20' : 'text-gold/70'}`}>
-                    {p.detalle}
-                  </p>
-                  {bloqueada && (
-                    <p className="text-[11px] text-gold/50 mt-2 italic leading-relaxed">
-                      Se desbloquea cuando Vera apruebe tu oferta — anunciar sin oferta lista quema dinero.
-                    </p>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Diagnóstico */}
-          <div className="flex justify-center">
-            <button
-              onClick={() => setModo('diagnostico')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.25)] text-sm text-gold hover:bg-gold/10 transition-all"
-            >
-              <Sparkles className="w-4 h-4" />
-              ¿No sabes cuál te toca? Hacer mi diagnóstico (2 min)
-            </button>
-          </div>
-        </>
-      )}
-
-      {modo === 'diagnostico' && (
-        <div className="space-y-5">
-          <button
-            onClick={() => { setModo('puertas'); setResp({}); }}
-            className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" /> Volver a las puertas
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-panel border border-gold/12 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gold/10 shrink-0">
+          <h2 className="text-base font-semibold text-cream">
+            {isEditing ? 'Editar tarea' : 'Nueva tarea'}
+          </h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all">
+            <X className="w-4 h-4" />
           </button>
-
-          {PREGUNTAS.map((p, i) => (
-            <div key={p.id} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
-              <p className="text-sm text-cream/80 font-medium mb-3">
-                <span className="text-gold/60 mr-2">{i + 1}.</span>{p.q}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {p.opts.map((o) => (
-                  <button
-                    key={o.v}
-                    onClick={() => setResp((prev) => ({ ...prev, [p.id]: o.v }))}
-                    className={`px-3.5 py-1.5 rounded-full text-xs border transition-all ${
-                      resp[p.id] === o.v
-                        ? 'bg-gold text-black border-gold font-semibold'
-                        : 'border-cream/15 text-cream/65 hover:text-cream hover:border-cream/30'
-                    }`}
-                  >
-                    {o.l}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {respondidas && (() => {
-            const p = PUERTAS.find((x) => x.id === recomendada)!;
-            return (
-              <div className="bg-[#161310] border border-gold/30 rounded-2xl p-6 animate-in fade-in duration-300">
-                <p className="text-[11px] font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
-                  Tu campaña es
-                </p>
-                <h3 className="text-2xl font-medium text-cream">
-                  {p.emoji} {p.titulo}
-                </h3>
-                <p className="text-sm text-cream/75 mt-2 leading-relaxed">{razonRecomendada}</p>
-                {resp.experiencia === 'fallo' && (
-                  <p className="text-xs text-gold/70 mt-2 italic">
-                    Y algo importante: casi nunca es Meta — es la oferta o la puntería. Esta vez vamos paso a paso.
-                  </p>
-                )}
-                <div className="flex gap-3 mt-5">
-                  <button
-                    onClick={() => elegir(recomendada)}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi text-black text-sm font-bold transition-all"
-                  >
-                    Empezar <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => { setModo('puertas'); }}
-                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-cream/75 hover:text-cream transition-colors"
-                  >
-                    Prefiero elegir yo
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
         </div>
-      )}
 
-      {/* Mis campañas · Ganadores */}
-      <div className="flex flex-wrap gap-3 pt-2 border-t border-[rgba(232,150,46,0.08)]">
-        <button
-          onClick={() => onNavigate('historial')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:text-cream hover:border-cream/25 transition-all"
-        >
-          <FolderOpen className="w-3.5 h-3.5" />
-          Mis campañas
-          {campanas.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-gold text-[11px] font-bold">
-              {campanas.length}
+        {/* Body */}
+        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+          {/* Creado por (readonly) */}
+          <div className="flex items-center gap-2 text-xs text-cream/55 bg-gold/5 border border-gold/15 rounded-lg px-3 py-2">
+            <UserPlus className="w-3.5 h-3.5 text-gold/70 shrink-0" />
+            <span>
+              Creada por <span className="font-semibold text-gold">{creadorNombre}</span>
+              {' '}— {isEditing ? 'el creador siempre ve la tarea.' : 'la verás en tu panel aunque la asignes a otra persona.'}
             </span>
+          </div>
+
+          {/* Título */}
+          <div>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Título *</label>
+            <input
+              type="text"
+              value={titulo}
+              onChange={e => setTitulo(e.target.value)}
+              placeholder="¿Qué hay que hacer?"
+              className="w-full bg-ink border border-gold/12 rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 transition-colors"
+            />
+          </div>
+
+          {/* Descripción (rich text + fullscreen) */}
+          <TaskDescriptionEditor
+            value={descripcion}
+            onChange={setDescripcion}
+            titulo={titulo}
+            onTituloChange={setTitulo}
+            placeholder='Contexto, links, checklist… probá escribir "/" para insertar bloques.'
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Asignado a */}
+            <div>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Asignar a</label>
+              <CustomSelect
+                value={asignadoA}
+                onChange={setAsignadoA}
+                placeholder="Sin asignar"
+                options={[
+                  { value: '', label: 'Sin asignar' },
+                  ...teamMembers.map(m => ({ value: m.id, label: m.nombre ?? m.email })),
+                ]}
+              />
+            </div>
+
+            {/* Prioridad */}
+            <div>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Prioridad</label>
+              <CustomSelect
+                value={prioridad}
+                onChange={v => setPrioridad(v as AdminTareaPrioridad)}
+                options={PRIORIDADES.map(p => ({ value: p, label: ADMIN_TAREA_PRIORIDAD_LABELS[p] }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Estado */}
+            <div>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Estado</label>
+              <CustomSelect
+                value={status}
+                onChange={v => setStatus(v as AdminTareaStatus)}
+                options={ADMIN_TAREA_STATUSES.map(s => ({ value: s, label: ADMIN_TAREA_STATUS_LABELS[s] }))}
+              />
+            </div>
+
+            {/* Fecha vencimiento */}
+            <div>
+              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Vence el</label>
+              <input
+                type="date"
+                value={fechaVencimiento}
+                onChange={e => setFechaVencimiento(e.target.value)}
+                className="w-full bg-ink border border-gold/12 rounded-xl px-3 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Cliente (opcional) */}
+          <div>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Cliente relacionado <span className="normal-case font-normal">(opcional)</span></label>
+            <CustomSelect
+              value={clienteId}
+              onChange={setClienteId}
+              placeholder="Sin cliente"
+              options={[
+                { value: '', label: 'Sin cliente' },
+                ...clientes.map(c => ({ value: c.id, label: c.nombre ?? c.email })),
+              ]}
+            />
+          </div>
+
+          {/* Adjuntos */}
+          <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
+            {isEditing && tarea ? (
+              <TaskAttachments
+                tareaId={tarea.id}
+                currentUserId={currentAdminId}
+              />
+            ) : (
+              <TaskAttachments
+                currentUserId={currentAdminId}
+                pendingFiles={pendingFiles}
+                onPendingFilesChange={setPendingFiles}
+              />
+            )}
+          </div>
+
+          {/* Conversación: solo cuando la tarea ya existe */}
+          {isEditing && tarea && (
+            <div className="pt-2 border-t border-[rgba(255,255,255,0.05)]">
+              <TaskComments
+                tareaId={tarea.id}
+                tareaTitulo={tarea.titulo}
+                creadoPor={tarea.creado_por}
+                asignadoA={tarea.asignado_a}
+                currentUserId={currentAdminId}
+                currentUserNombre={currentUserNombre}
+              />
+            </div>
           )}
-        </button>
-        <button
-          onClick={() => onNavigate('ganadores')}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:text-cream hover:border-cream/25 transition-all"
-        >
-          <Trophy className="w-3.5 h-3.5" />
-          Ganadores
-        </button>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 p-5 border-t border-gold/10 shrink-0">
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm text-cream/55 hover:text-cream transition-colors">
+            Cancelar
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!titulo.trim() || saving}
+            className="px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center gap-2"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {isEditing ? 'Guardar cambios' : 'Crear tarea'}
+          </button>
+        </div>
       </div>
     </div>
   );

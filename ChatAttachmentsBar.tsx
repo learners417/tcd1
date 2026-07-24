@@ -1,271 +1,253 @@
-import { useEffect, useRef, useState } from 'react';
-import { Paperclip, Upload, Loader2, Trash2, Download, FileText, FileImage, FileArchive, File as FileIcon } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { FileText, Image as ImageIcon, Eye, Loader2, CheckCircle2, ArrowLeft, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  fetchTareaAdjuntos,
-  uploadTareaAdjunto,
-  deleteTareaAdjunto,
-  getTareaAdjuntoSignedUrl,
-  MAX_ATTACHMENT_BYTES,
-  type TareaAdjunto,
-} from '../../lib/adminTasks';
+import CopyGenerator from './CopyGenerator';
+import ImagenGenerator from './ImagenGenerator';
+import CreativoEdicion from './CreativoEdicion';
+import CreativoPreviewAuto from './CreativoPreviewAuto';
+import { saveCreativo, updateCreativo, uploadCreativeImage, upsertCreativoAsset } from '../../lib/campanasStorage';
+import type { Campana, CopyGenerado, AnguloCreativo, TipoCreativo, Creativo } from '../../lib/campanasTypes';
+import type { ProfileV2 } from '../../lib/supabase';
 
-interface TaskAttachmentsProps {
-  tareaId?: string;
-  currentUserId: string;
-  /**
-   * Modo "pendiente": cuando no hay tareaId todavía (creación), los archivos
-   * se mantienen en memoria local y luego el padre los sube tras crear la tarea.
-   */
-  pendingFiles?: File[];
-  onPendingFilesChange?: (files: File[]) => void;
+type StudioTab = 'copy' | 'imagen' | 'edicion' | 'preview';
+
+interface Props {
+  campana: Campana;
+  userId?: string;
+  perfil?: Partial<ProfileV2>;
+  geminiKey?: string;
+  onBack: () => void;
+  onSaved: (creativo: Creativo) => void;
 }
 
-function formatSize(bytes: number | null): string {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+const TABS: { id: StudioTab; label: string; icon: React.ElementType }[] = [
+  { id: 'copy', label: 'Copy', icon: FileText },
+  { id: 'imagen', label: 'Imagen', icon: ImageIcon },
+  { id: 'edicion', label: 'Edicion', icon: Wand2 },
+  { id: 'preview', label: 'Preview', icon: Eye },
+];
 
-function getFileIcon(mime: string | null) {
-  if (!mime) return FileIcon;
-  if (mime.startsWith('image/')) return FileImage;
-  if (mime.includes('zip') || mime.includes('rar') || mime.includes('7z')) return FileArchive;
-  if (mime.startsWith('text/') || mime.includes('pdf') || mime.includes('document') || mime.includes('sheet')) return FileText;
-  return FileIcon;
-}
+export default function CreativoStudio({ campana, userId, perfil, geminiKey, onBack, onSaved }: Props) {
+  const [tab, setTab] = useState<StudioTab>('copy');
+  const [copies, setCopies] = useState<CopyGenerado[]>([]);
+  const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
+  const [tipo, setTipo] = useState<TipoCreativo>('imagen_single');
+  const [images, setImages] = useState<{ base64: string; mimeType: string; modelUsed: string }[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  // Ref en lugar de state: persistCreativo es async y leer el state desde su
+  // cierre podia devolver null durante un re-render pendiente, generando un
+  // creativo duplicado en vez de upsertear el existente.
+  const currentCreativoIdRef = useRef<string | null>(null);
+  const saveInFlightRef = useRef(false);
 
-export default function TaskAttachments({
-  tareaId,
-  currentUserId,
-  pendingFiles,
-  onPendingFilesChange,
-}: TaskAttachmentsProps) {
-  const isPending = !tareaId;
-  const [adjuntos, setAdjuntos] = useState<TareaAdjunto[]>([]);
-  const [loading, setLoading] = useState(!isPending);
-  const [uploading, setUploading] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const handleCopyGenerated = useCallback(
+    (newCopies: CopyGenerado[], newAngulo: AnguloCreativo, newTipo: TipoCreativo) => {
+      setCopies(newCopies);
+      setAngulo(newAngulo);
+      setTipo(newTipo);
+      setImages([]); // Reset images when copy changes
+      currentCreativoIdRef.current = null; // nuevo copy = nuevo creativo en proxima generacion
+      setSaved(false);
+    },
+    [],
+  );
 
-  useEffect(() => {
-    if (!tareaId) {
-      setLoading(false);
-      return;
-    }
-    let alive = true;
-    setLoading(true);
-    fetchTareaAdjuntos(tareaId)
-      .then(rows => { if (alive) setAdjuntos(rows); })
-      .catch(err => {
-        console.error('Error cargando adjuntos:', err);
-        if (alive) toast.error('No se pudieron cargar los adjuntos');
-      })
-      .finally(() => { if (alive) setLoading(false); });
-    return () => { alive = false; };
-  }, [tareaId]);
+  // ─── Auto-guardado en historial ────────────────────────────────────────
+  const persistCreativo = useCallback(
+    async (
+      imgs: { base64: string; mimeType: string; modelUsed: string }[],
+      prompts?: string[],
+    ) => {
+      if (!userId || copies.length === 0 || imgs.length === 0) return;
+      if (saveInFlightRef.current) return;
+      saveInFlightRef.current = true;
+      setSaving(true);
+      const creativoIdToUse = currentCreativoIdRef.current;
+      const isFirstSave = creativoIdToUse === null;
+      try {
+        let creativoId = creativoIdToUse;
 
-  async function handleFiles(files: FileList | File[]) {
-    const list = Array.from(files);
-    if (list.length === 0) return;
-
-    if (isPending) {
-      const valid: File[] = [];
-      for (const file of list) {
-        if (file.size > MAX_ATTACHMENT_BYTES) {
-          toast.error(`"${file.name}" supera los 25 MB`);
-          continue;
+        if (!creativoId) {
+          const creativo = await saveCreativo({
+            usuario_id: userId,
+            campana_id: campana.id,
+            tipo,
+            angulo,
+            texto_principal: copies[0].texto_principal,
+            titulo: copies[0].titulo,
+            descripcion: copies[0].descripcion,
+            cta_texto: copies[0].cta_texto,
+            nombre: `${campana.nombre} - ${angulo}`,
+            estado: 'generado',
+            prompt_imagen: prompts && prompts.length > 0 ? JSON.stringify(prompts) : undefined,
+          });
+          if (!creativo) throw new Error('No se pudo guardar el creativo');
+          creativoId = creativo.id;
+          currentCreativoIdRef.current = creativoId;
+          onSaved(creativo);
+        } else if (prompts && prompts.length > 0) {
+          await updateCreativo(creativoId, { prompt_imagen: JSON.stringify(prompts) });
         }
-        valid.push(file);
-      }
-      if (valid.length > 0 && onPendingFilesChange) {
-        onPendingFilesChange([...(pendingFiles ?? []), ...valid]);
-      }
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
 
-    setUploading(true);
-    try {
-      for (const file of list) {
-        if (file.size > MAX_ATTACHMENT_BYTES) {
-          toast.error(`"${file.name}" supera los 25 MB`);
-          continue;
+        for (let i = 0; i < imgs.length; i++) {
+          const uploaded = await uploadCreativeImage(userId, creativoId, i + 1, imgs[i].base64, imgs[i].mimeType);
+          if (uploaded) {
+            await upsertCreativoAsset({
+              creativo_id: creativoId,
+              usuario_id: userId,
+              slide_orden: i + 1,
+              storage_path: uploaded.storagePath,
+              public_url: uploaded.publicUrl,
+              width: 1080,
+              height: 1080,
+              mime_type: imgs[i].mimeType,
+            });
+          }
         }
-        try {
-          const adj = await uploadTareaAdjunto({ tarea_id: tareaId!, autor_id: currentUserId, file });
-          setAdjuntos(prev => [adj, ...prev]);
-          toast.success(`"${file.name}" subido`);
-        } catch (err) {
-          console.error('Error subiendo archivo:', err);
-          toast.error(`No se pudo subir "${file.name}"`);
-        }
+
+        setSaved(true);
+        if (isFirstSave) toast.success('Creativo guardado en historial');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al guardar: ${msg}`);
+      } finally {
+        setSaving(false);
+        saveInFlightRef.current = false;
       }
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  }
+    },
+    [userId, copies, angulo, tipo, campana, onSaved],
+  );
 
-  function handleRemovePending(index: number) {
-    if (!onPendingFilesChange) return;
-    const next = [...(pendingFiles ?? [])];
-    next.splice(index, 1);
-    onPendingFilesChange(next);
-  }
+  const handleImagesGenerated = useCallback(
+    (
+      imgs: { base64: string; mimeType: string; modelUsed: string }[],
+      _mode?: string,
+      prompts?: string[],
+    ) => {
+      setImages(imgs);
+      setSaved(false);
+      void persistCreativo(imgs, prompts);
+    },
+    [persistCreativo],
+  );
 
-  async function handleDownload(adj: TareaAdjunto) {
-    const url = await getTareaAdjuntoSignedUrl(adj.storage_path);
-    if (!url) {
-      toast.error('No se pudo abrir el archivo');
-      return;
-    }
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-
-  async function handleDelete(adj: TareaAdjunto) {
-    if (adj.autor_id !== currentUserId) return;
-    if (deletingId) return;
-    setDeletingId(adj.id);
-    const snapshot = adjuntos;
-    setAdjuntos(prev => prev.filter(x => x.id !== adj.id));
-    try {
-      await deleteTareaAdjunto(adj);
-    } catch {
-      setAdjuntos(snapshot);
-      toast.error('No se pudo eliminar el archivo');
-    } finally {
-      setDeletingId(null);
-    }
-  }
-
-  const pendingList = pendingFiles ?? [];
-  const totalCount = isPending ? pendingList.length : adjuntos.length;
+  const canPreview = copies.length > 0 && images.length > 0;
 
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-center gap-2 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
-        <Paperclip className="w-3.5 h-3.5" />
-        Archivos
-        {totalCount > 0 && (
-          <span className="text-[11px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
-            {totalCount}
-          </span>
-        )}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="text-cream/55 hover:text-cream transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-xl font-semibold text-cream" style={{ fontFamily: "'DM Serif Display', serif", fontStyle: 'italic' }}>
+              Studio de Creativos
+            </h2>
+            <p className="text-sm text-cream/55">{campana.nombre}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-xs">
+          {saving ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /><span className="text-cream/75">Guardando en historial…</span></>
+          ) : saved ? (
+            <><CheckCircle2 className="w-3.5 h-3.5 text-success" /><span className="text-cream/70">Guardado en historial</span></>
+          ) : copies.length === 0 ? (
+            <span className="text-cream/55">Genera el copy primero</span>
+          ) : (
+            <span className="text-cream/55">Se guarda automáticamente al generar la imagen</span>
+          )}
+        </div>
       </div>
 
-      {/* Lista de pendientes (modo creación) */}
-      {isPending && pendingList.length > 0 && (
-        <div className="space-y-1.5">
-          {pendingList.map((file, idx) => {
-            const Icon = getFileIcon(file.type);
-            return (
-              <div
-                key={`${file.name}-${idx}`}
-                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-gold/30 transition-colors"
-              >
-                <div className="w-8 h-8 shrink-0 rounded-md bg-gold/10 text-gold flex items-center justify-center">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-cream truncate">{file.name}</div>
-                  <div className="text-[11px] text-cream/55 flex items-center gap-2">
-                    <span>{formatSize(file.size)}</span>
-                    <span className="text-gold/70">· se subirá al crear la tarea</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemovePending(idx)}
-                  className="p-1.5 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                  title="Quitar"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Tabs */}
+      <div className="flex gap-1 bg-panel p-1 rounded-xl border border-[rgba(232,150,46,0.1)]">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          const disabled = t.id === 'preview' && !canPreview;
+          return (
+            <button
+              key={t.id}
+              onClick={() => !disabled && setTab(t.id)}
+              disabled={disabled}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                tab === t.id
+                  ? 'bg-gold/15 text-gold'
+                  : disabled
+                    ? 'text-cream/15 cursor-not-allowed'
+                    : 'text-cream/55 hover:text-cream/75 hover:bg-cream/5'
+              }`}
+            >
+              <Icon className="w-4 h-4" /> {t.label}
+            </button>
+          );
+        })}
+      </div>
 
-      {/* Lista existente (modo edición) */}
-      {!isPending && (loading ? (
-        <div className="text-xs text-cream/45 italic px-1">Cargando…</div>
-      ) : adjuntos.length > 0 && (
-        <div className="space-y-1.5">
-          {adjuntos.map(adj => {
-            const Icon = getFileIcon(adj.mime_type);
-            const isMine = adj.autor_id === currentUserId;
-            return (
-              <div
-                key={adj.id}
-                className="flex items-center gap-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 hover:border-gold/30 transition-colors group"
-              >
-                <div className="w-8 h-8 shrink-0 rounded-md bg-gold/10 text-gold flex items-center justify-center">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-cream truncate">{adj.file_name}</div>
-                  <div className="text-[11px] text-cream/55 flex items-center gap-2">
-                    <span>{formatSize(adj.size_bytes)}</span>
-                    {adj.autor_nombre && <span>· subido por {adj.autor_nombre}</span>}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDownload(adj)}
-                  className="p-1.5 rounded-md text-cream/55 hover:text-gold hover:bg-gold/10 transition-colors"
-                  title="Descargar"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                </button>
-                {isMine && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(adj)}
-                    disabled={deletingId === adj.id}
-                    className="p-1.5 rounded-md text-cream/45 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
-
-      {/* Dropzone */}
-      <label
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
-        }}
-        className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed cursor-pointer text-xs transition-all ${
-          dragOver
-            ? 'border-gold bg-gold/8 text-gold'
-            : 'border-[rgba(255,255,255,0.08)] text-cream/45 hover:border-gold/40 hover:text-gold'
-        }`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }}
-        />
-        {uploading ? (
-          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo…</>
-        ) : (
-          <><Upload className="w-3.5 h-3.5" /> Arrastra archivos o haz clic para subir <span className="text-cream/25">(máx. 25 MB)</span></>
+      {/* Content */}
+      <div className="bg-surface border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
+        {tab === 'copy' && (
+          <CopyGenerator
+            perfil={perfil ?? {}}
+            geminiKey={geminiKey}
+            objetivo={campana.objetivo}
+            onCopyGenerated={handleCopyGenerated}
+          />
         )}
-      </label>
+
+        {tab === 'imagen' && (
+          <ImagenGenerator
+            copies={copies}
+            angulo={angulo}
+            perfil={perfil ?? {}}
+            geminiKey={geminiKey}
+            onImagesGenerated={handleImagesGenerated}
+          />
+        )}
+
+        {tab === 'edicion' && (
+          <CreativoEdicion
+            campana={campana}
+            userId={userId}
+            perfil={perfil ?? {}}
+            geminiKey={geminiKey}
+            onSaved={onSaved}
+          />
+        )}
+
+        {tab === 'preview' && canPreview && (
+          <div className="space-y-4">
+            {/* Slide selector for carousel */}
+            {images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveSlide(idx)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
+                      activeSlide === idx
+                        ? 'bg-gold/15 text-gold border border-gold/30'
+                        : 'bg-cream/5 text-cream/45'
+                    }`}
+                  >
+                    Slide {idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <CreativoPreviewAuto
+              image={images[activeSlide]}
+              copy={copies[activeSlide] ?? copies[0]}
+              slideIndex={images.length > 1 ? activeSlide : undefined}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

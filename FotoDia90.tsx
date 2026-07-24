@@ -1,73 +1,43 @@
 /**
- * LoadingScreen.tsx
- * Pantalla de carga premium con anillos concentricos, glow dorado y pulso.
+ * TUTORIAL TÉCNICO — el paso a paso donde el fundador más se traba.
+ * Se muestra dentro de la sesión que lo necesita (Business Manager, pixel,
+ * agente, dominio, escalar). Cerrado por defecto: quien no lo necesita, no
+ * lo ve; quien se traba, lo tiene ahí mismo sin salir del Camino.
  */
-import { Stethoscope } from 'lucide-react';
+import React from 'react';
+import { getTutoriales } from '../lib/tutorialesTecnicos';
 
-interface Props {
-  label?: string;
-}
+export default function TutorialTecnicoBox({ codigo }: { codigo: string }) {
+  const tutoriales = getTutoriales(codigo);
+  if (!tutoriales.length) return null;
 
-export default function LoadingScreen({ label = 'Preparando tu dojo…' }: Props) {
   return (
-    <div className="relative min-h-screen bg-ink flex items-center justify-center overflow-hidden">
-      {/* Background glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gold/5 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gold/5 blur-[100px] pointer-events-none" />
-
-      <div className="relative flex flex-col items-center gap-8">
-        {/* Spinner con multiples anillos */}
-        <div className="relative w-24 h-24">
-          {/* Anillo externo estatico */}
-          <div className="absolute inset-0 rounded-full border border-gold/15" />
-
-          {/* Anillo medio girando lento */}
-          <div
-            className="absolute inset-1 rounded-full border-2 border-transparent border-t-gold/40 border-r-gold/20"
-            style={{ animation: 'spin 2.4s linear infinite' }}
-          />
-
-          {/* Anillo principal girando rapido */}
-          <div
-            className="absolute inset-3 rounded-full border-2 border-transparent border-t-gold border-r-gold/60"
-            style={{ animation: 'spin 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite' }}
-          />
-
-          {/* Glow dorado detras */}
-          <div className="absolute inset-0 rounded-full bg-gold/20 blur-2xl animate-pulse" />
-
-          {/* Icono central */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center shadow-lg shadow-gold/20">
-              <Stethoscope className="w-5 h-5 text-gold" />
-            </div>
+    <div className="space-y-2">
+      {tutoriales.map((t) => (
+        <details key={t.titulo} className="rounded-xl border border-gold/20 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
+          <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-gold list-none select-none">
+            🛠️ Paso a paso: {t.titulo}
+          </summary>
+          <div className="mt-3 space-y-3">
+            <p className="text-sm text-cream/75 leading-relaxed">{t.intro}</p>
+            <ol className="space-y-2">
+              {t.pasos.map((p, i) => (
+                <li key={i} className="text-sm text-cream/80 leading-relaxed flex gap-2.5">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-gold/15 text-gold text-[11px] font-bold flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1">{p}</span>
+                </li>
+              ))}
+            </ol>
+            {t.siFalla && (
+              <p className="text-xs text-cream/60 leading-relaxed border-l-2 border-gold/30 pl-3">
+                <strong className="text-cream/80">Si algo no sale:</strong> {t.siFalla}
+              </p>
+            )}
           </div>
-        </div>
-
-        {/* Texto + puntos animados */}
-        <div className="flex flex-col items-center gap-2">
-          <p
-            className="text-[15px] text-cream/70 tracking-wide"
-            style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
-          >
-            {label}
-          </p>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-gold/60" style={{ animation: 'dot-bounce 1.2s ease-in-out infinite', animationDelay: '0s' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-gold/60" style={{ animation: 'dot-bounce 1.2s ease-in-out infinite', animationDelay: '0.15s' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-gold/60" style={{ animation: 'dot-bounce 1.2s ease-in-out infinite', animationDelay: '0.3s' }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Keyframes locales (los globales viven en index.css) */}
-      <style>{`
-        @keyframes dot-bounce {
-          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-          40% { transform: translateY(-6px); opacity: 1; }
-        }
-      `}</style>
+        </details>
+      ))}
     </div>
   );
 }

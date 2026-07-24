@@ -1,180 +1,87 @@
 /**
- * ChatAttachmentsBar — UI reusable para gestionar adjuntos (imagenes + archivos)
- * en los chats con IA (Coach y Entrenadores).
- *
- * Expone 2 piezas independientes:
- *   - `<AttachButton />` boton clip inline que abre el file picker · va al lado
- *     del input / textarea.
- *   - `<AttachmentsPreviewStrip />` tira de previews · solo se renderiza si hay
- *     adjuntos o un upload en curso · va arriba del input.
- *
- * El paste (Ctrl+V) se maneja en el componente padre via onPaste en el input,
- * porque solo el input/textarea con foco recibe el evento del teclado.
+ * TaskChecklist.tsx — Capa 4 · rediseño 4 fases (jul 2026)
+ * El checklist interno de una tarea: los sub-pasos tildables que hacen
+ * posible la autonomía. Cada casilla es una micro-dopamina.
+ * Persistencia local por tarea (se conserva entre sesiones del dispositivo).
  */
-import React, { useRef } from 'react';
-import { Paperclip, X, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
-import {
-  ATTACHMENTS_ACCEPT_ATTR,
-  buildAttachmentFromFile,
-  type ChatAttachment,
-} from '../lib/chatAttachments';
-import { formatBytes } from '../lib/imageUploadUtils';
+import React, { useState } from 'react';
+import { CheckCircle2, Circle } from 'lucide-react';
 
-interface AttachButtonProps {
-  attachments: ChatAttachment[];
-  onChange: (next: ChatAttachment[]) => void;
-  disabled?: boolean;
-  onError?: (msg: string) => void;
-  onUploadingChange?: (uploading: boolean) => void;
-  className?: string;
+interface TaskChecklistProps {
+  /** Código de la tarea (P4.5, P1.3...) — clave de persistencia. */
+  codigo: string;
+  items: string[];
 }
 
-export function AttachButton({
-  attachments,
-  onChange,
-  disabled,
-  onError,
-  onUploadingChange,
-  className,
-}: AttachButtonProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+function loadChecked(codigo: string): boolean[] {
+  try {
+    const raw = localStorage.getItem(`tcd_checklist_${codigo}`);
+    if (raw) return JSON.parse(raw);
+  } catch { /* noop */ }
+  return [];
+}
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    onUploadingChange?.(true);
-    try {
-      const next: ChatAttachment[] = [...attachments];
-      const results = await Promise.allSettled(
-        Array.from(files).map(buildAttachmentFromFile),
-      );
-      for (const r of results) {
-        if (r.status === 'fulfilled') next.push(r.value);
-        else
-          onError?.(
-            r.reason instanceof Error ? r.reason.message : String(r.reason),
-          );
-      }
-      onChange(next);
-    } finally {
-      onUploadingChange?.(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
+export default function TaskChecklist({ codigo, items }: TaskChecklistProps) {
+  const [checked, setChecked] = useState<boolean[]>(() => {
+    const saved = loadChecked(codigo);
+    return items.map((_, i) => Boolean(saved[i]));
+  });
+
+  if (!items || items.length === 0) return null;
+
+  const toggle = (i: number) => {
+    setChecked((prev) => {
+      const next = [...prev];
+      next[i] = !next[i];
+      try {
+        localStorage.setItem(`tcd_checklist_${codigo}`, JSON.stringify(next));
+      } catch { /* noop */ }
+      return next;
+    });
   };
 
-  return (
-    <>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ATTACHMENTS_ACCEPT_ATTR}
-        multiple
-        className="hidden"
-        onChange={(e) => void handleFiles(e.target.files)}
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={disabled}
-        title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
-        className={
-          className ??
-          'shrink-0 w-10 h-10 rounded-xl bg-gold/10 hover:bg-gold/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
-        }
-      >
-        <Paperclip className="w-4 h-4" />
-      </button>
-    </>
-  );
-}
-
-interface AttachmentsPreviewStripProps {
-  attachments: ChatAttachment[];
-  onChange: (next: ChatAttachment[]) => void;
-  uploading?: boolean;
-}
-
-export function AttachmentsPreviewStrip({
-  attachments,
-  onChange,
-  uploading,
-}: AttachmentsPreviewStripProps) {
-  if (attachments.length === 0 && !uploading) return null;
-
-  const removeAttachment = (id: string) => {
-    onChange(attachments.filter((a) => a.id !== id));
-  };
+  const done = checked.filter(Boolean).length;
 
   return (
-    <div className="w-full mb-3 flex items-start gap-2 flex-wrap">
-      {attachments.map((a) => (
-        <AttachmentChip
-          key={a.id}
-          attachment={a}
-          onRemove={() => removeAttachment(a.id)}
-        />
-      ))}
-      {uploading && (
-        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/75">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
-          Procesando...
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface AttachmentChipProps {
-  attachment: ChatAttachment;
-  onRemove: () => void;
-}
-
-function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
-  if (attachment.kind === 'image' && attachment.previewDataUrl) {
-    return (
-      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[rgba(232,150,46,0.18)] group">
-        <img
-          src={attachment.previewDataUrl}
-          alt={attachment.fileName}
-          className="w-full h-full object-cover"
-        />
-        <button
-          type="button"
-          onClick={onRemove}
-          className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 hover:bg-red-600 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Quitar"
-        >
-          <X className="w-3 h-3" />
-        </button>
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 py-0.5">
-          <div className="flex items-center gap-1 text-[11px] text-white/80 truncate">
-            <ImageIcon className="w-2.5 h-2.5 shrink-0" />
-            <span className="truncate">{attachment.fileName}</span>
-          </div>
-        </div>
+    <div className="mt-4 rounded-xl border border-gold/20 bg-[#0F0F0F] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gold">
+          Paso a paso
+        </span>
+        <span className="text-[11px] text-cream/55 font-medium">
+          {done}/{items.length}
+        </span>
       </div>
-    );
-  }
-
-  return (
-    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[rgba(232,150,46,0.18)] bg-gold/10 flex items-center gap-2 group">
-      <FileText className="w-4 h-4 text-gold shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-xs text-white truncate font-medium">
-          {attachment.fileName}
-        </div>
-        <div className="text-[11px] text-white/65 uppercase tracking-wider">
-          {formatBytes(attachment.sizeBytes)}
-          {attachment.kind === 'other' ? ' · formato no leible' : ''}
-        </div>
+      <div className="h-1 rounded-full bg-cream/10 mb-4 overflow-hidden">
+        <div
+          className="h-full bg-gold rounded-full transition-all duration-500"
+          style={{ width: `${items.length === 0 ? 0 : Math.round((done / items.length) * 100)}%` }}
+        />
       </div>
-      <button
-        type="button"
-        onClick={onRemove}
-        className="w-5 h-5 rounded-full bg-black/40 hover:bg-red-600 flex items-center justify-center text-white shrink-0 transition-colors"
-        title="Quitar"
-      >
-        <X className="w-3 h-3" />
-      </button>
+      <ul className="space-y-2.5">
+        {items.map((item, i) => (
+          <li key={i}>
+            <button
+              type="button"
+              onClick={() => toggle(i)}
+              className="flex items-start gap-2.5 text-left w-full group"
+            >
+              {checked[i] ? (
+                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-success" />
+              ) : (
+                <Circle className="w-4 h-4 mt-0.5 flex-shrink-0 text-cream/25 group-hover:text-gold/60 transition-colors" />
+              )}
+              <span
+                className={`text-xs leading-relaxed transition-colors ${
+                  checked[i] ? 'text-cream/35 line-through' : 'text-cream/75'
+                }`}
+              >
+                {item}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

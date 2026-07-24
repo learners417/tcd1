@@ -1,92 +1,180 @@
 /**
- * ReporteDirector.tsx — El Reporte del Director (Cirugía Total G3 · jul 2026)
- * La vista imprimible de los números del cliente: su mes, su camino, su clínica.
- * Sin librerías de PDF: window.print() con estilos de impresión — el navegador hace el resto.
+ * ChatAttachmentsBar — UI reusable para gestionar adjuntos (imagenes + archivos)
+ * en los chats con IA (Coach y Entrenadores).
+ *
+ * Expone 2 piezas independientes:
+ *   - `<AttachButton />` boton clip inline que abre el file picker · va al lado
+ *     del input / textarea.
+ *   - `<AttachmentsPreviewStrip />` tira de previews · solo se renderiza si hay
+ *     adjuntos o un upload en curso · va arriba del input.
+ *
+ * El paste (Ctrl+V) se maneja en el componente padre via onPaste en el input,
+ * porque solo el input/textarea con foco recibe el evento del teclado.
  */
-import React from 'react';
-import { X, Printer } from 'lucide-react';
-import { CINTURONES, cinturonDesdeProgreso } from '../lib/cinturones';
-import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
+import React, { useRef } from 'react';
+import { Paperclip, X, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
+import {
+  ATTACHMENTS_ACCEPT_ATTR,
+  buildAttachmentFromFile,
+  type ChatAttachment,
+} from '../lib/chatAttachments';
+import { formatBytes } from '../lib/imageUploadUtils';
 
-interface ReporteDirectorProps {
-  nombre: string;
-  diaPrograma: number;
-  completadas: Set<string>;
-  ventas: { suma: number; count: number };
-  racha: number;
-  onClose: () => void;
+interface AttachButtonProps {
+  attachments: ChatAttachment[];
+  onChange: (next: ChatAttachment[]) => void;
+  disabled?: boolean;
+  onError?: (msg: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
+  className?: string;
 }
 
-export default function ReporteDirector({ nombre, diaPrograma, completadas, ventas, racha, onClose }: ReporteDirectorProps) {
-  const totalSesiones = SEED_ROADMAP_V2.reduce((a, p) => a + p.metas.length, 0);
-  const hechas = completadas.size;
-  const cint = cinturonDesdeProgreso(completadas);
-  const prox = CINTURONES.find((c) => c.orden === cint.orden + 1);
-  const fecha = new Date().toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
+export function AttachButton({
+  attachments,
+  onChange,
+  disabled,
+  onError,
+  onUploadingChange,
+  className,
+}: AttachButtonProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    onUploadingChange?.(true);
+    try {
+      const next: ChatAttachment[] = [...attachments];
+      const results = await Promise.allSettled(
+        Array.from(files).map(buildAttachmentFromFile),
+      );
+      for (const r of results) {
+        if (r.status === 'fulfilled') next.push(r.value);
+        else
+          onError?.(
+            r.reason instanceof Error ? r.reason.message : String(r.reason),
+          );
+      }
+      onChange(next);
+    } finally {
+      onUploadingChange?.(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 print:p-0 print:bg-white" onClick={onClose}>
-      <div
-        className="bg-[#0B0B0A] print:bg-white border border-gold/30 print:border-0 rounded-2xl print:rounded-none max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-h-none"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ATTACHMENTS_ACCEPT_ATTR}
+        multiple
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={disabled}
+        title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
+        className={
+          className ??
+          'shrink-0 w-10 h-10 rounded-xl bg-gold/10 hover:bg-gold/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
+        }
       >
-        {/* Barra de acciones (no se imprime) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-cream/10 print:hidden">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-gold">El Reporte del Director</p>
-          <div className="flex gap-2">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gold text-black text-xs font-bold hover:bg-goldhi transition-colors">
-              <Printer className="w-3.5 h-3.5" /> Imprimir / Guardar PDF
-            </button>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-cream/10 text-cream/75"><X className="w-4 h-4" /></button>
-          </div>
+        <Paperclip className="w-4 h-4" />
+      </button>
+    </>
+  );
+}
+
+interface AttachmentsPreviewStripProps {
+  attachments: ChatAttachment[];
+  onChange: (next: ChatAttachment[]) => void;
+  uploading?: boolean;
+}
+
+export function AttachmentsPreviewStrip({
+  attachments,
+  onChange,
+  uploading,
+}: AttachmentsPreviewStripProps) {
+  if (attachments.length === 0 && !uploading) return null;
+
+  const removeAttachment = (id: string) => {
+    onChange(attachments.filter((a) => a.id !== id));
+  };
+
+  return (
+    <div className="w-full mb-3 flex items-start gap-2 flex-wrap">
+      {attachments.map((a) => (
+        <AttachmentChip
+          key={a.id}
+          attachment={a}
+          onRemove={() => removeAttachment(a.id)}
+        />
+      ))}
+      {uploading && (
+        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/75">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
+          Procesando...
         </div>
+      )}
+    </div>
+  );
+}
 
-        {/* El reporte */}
-        <div className="p-8 print:p-10 text-[#EDEDED] print:text-[#1a1a1a]">
-          <div className="text-center mb-8">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-gold font-bold">Tu Clínica Digital · Método CLINICA</p>
-            <h1 className="text-3xl font-light mt-2" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>Reporte del Director</h1>
-            <p className="text-sm opacity-60 mt-1">{nombre} · {fecha}</p>
+interface AttachmentChipProps {
+  attachment: ChatAttachment;
+  onRemove: () => void;
+}
+
+function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
+  if (attachment.kind === 'image' && attachment.previewDataUrl) {
+    return (
+      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[rgba(232,150,46,0.18)] group">
+        <img
+          src={attachment.previewDataUrl}
+          alt={attachment.fileName}
+          className="w-full h-full object-cover"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 hover:bg-red-600 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Quitar"
+        >
+          <X className="w-3 h-3" />
+        </button>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 py-0.5">
+          <div className="flex items-center gap-1 text-[11px] text-white/80 truncate">
+            <ImageIcon className="w-2.5 h-2.5 shrink-0" />
+            <span className="truncate">{attachment.fileName}</span>
           </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="border border-gold/25 print:border-gray-300 rounded-xl p-5 text-center">
-              <p className="text-[11px] uppercase tracking-widest opacity-50">Día del programa</p>
-              <p className="text-3xl font-light mt-1">{Math.min(diaPrograma, 90)} <span className="text-sm opacity-40">/ 90</span></p>
-            </div>
-            <div className="border border-gold/25 print:border-gray-300 rounded-xl p-5 text-center">
-              <p className="text-[11px] uppercase tracking-widest opacity-50">Tu cinturón</p>
-              <p className="text-2xl font-light mt-1">{cint.emoji} {cint.nombre}</p>
-              <p className="text-[11px] opacity-40">{cint.metafora}</p>
-            </div>
-            <div className="border border-gold/25 print:border-gray-300 rounded-xl p-5 text-center">
-              <p className="text-[11px] uppercase tracking-widest opacity-50">Sesiones del Camino</p>
-              <p className="text-3xl font-light mt-1">{hechas} <span className="text-sm opacity-40">/ {totalSesiones}</span></p>
-            </div>
-            <div className="border border-gold/25 print:border-gray-300 rounded-xl p-5 text-center">
-              <p className="text-[11px] uppercase tracking-widest opacity-50">Racha de sesiones</p>
-              <p className="text-3xl font-light mt-1">{racha} 🔥</p>
-            </div>
-          </div>
-
-          <div className="border-2 border-success/40 print:border-green-600 rounded-xl p-6 text-center mb-8">
-            <p className="text-[11px] uppercase tracking-widest opacity-60">Tu clínica, en números</p>
-            <p className="text-4xl font-light mt-2 text-success print:text-green-700">${ventas.suma.toLocaleString()}</p>
-            <p className="text-sm opacity-60 mt-1">{ventas.count} paciente{ventas.count !== 1 ? 's' : ''} · {ventas.suma >= 2000 ? `inversión recuperada ${(ventas.suma / 2000).toFixed(1)}×` : `${Math.round((ventas.suma / 2000) * 100)}% de tu inversión recuperada`}</p>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-[11px] uppercase tracking-widest opacity-50 mb-2">Lo que sigue</p>
-            <p className="text-sm opacity-80 leading-relaxed">
-              {prox
-                ? `Tu próximo cinturón es ${prox.emoji} ${prox.nombre} — ${prox.metafora}. Una sesión por día. El sistema sostiene; tú caminas.`
-                : 'Cinturón Negro. Sanador Libre. Tu clínica ya funciona sola — y sigue con MiClínica Digital.'}
-            </p>
-          </div>
-
-          <p className="text-[11px] opacity-30 text-center italic">El taekwondo no se gana en un día de furia — se gana en mil días de presencia. · Tu Clínica Digital</p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[rgba(232,150,46,0.18)] bg-gold/10 flex items-center gap-2 group">
+      <FileText className="w-4 h-4 text-gold shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="text-xs text-white truncate font-medium">
+          {attachment.fileName}
+        </div>
+        <div className="text-[11px] text-white/65 uppercase tracking-wider">
+          {formatBytes(attachment.sizeBytes)}
+          {attachment.kind === 'other' ? ' · formato no leible' : ''}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="w-5 h-5 rounded-full bg-black/40 hover:bg-red-600 flex items-center justify-center text-white shrink-0 transition-colors"
+        title="Quitar"
+      >
+        <X className="w-3 h-3" />
+      </button>
     </div>
   );
 }

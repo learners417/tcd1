@@ -1,326 +1,255 @@
-/**
- * PilarUnlockedModal.tsx
- * Gamification popup shown when a pilar is completed and the next one unlocks.
- * Step 1: Achievement celebration screen.
- * Step 2: Mandatory 1-5 star satisfaction rating + optional comment.
- */
+import NumeroPanel from '../numero/NumeroPanel';
+import ConstructorAnuncios from '../campanas/ConstructorAnuncios';
+import SesionGuiadaPlayer from '../SesionGuiadaPlayer';
+import { sesionGuiadaDe } from '../../lib/sesionesGuiadas';
+import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useEffect, useState } from 'react';
-import { Trophy, ChevronRight, Sparkles, Star, Award } from 'lucide-react';
+import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
+import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
+import { notificarAdminsEvidencia } from '../../lib/notifications';
+import { supabase } from '../../lib/supabase';
+import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
+import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import TaskChecklist from './TaskChecklist';
+import BotonAudio from '../sesion/BotonAudio';
 
-export interface NivelAlcanzado {
-  numero: 1 | 2 | 3 | 4 | 5;
-  nombre: string;
-  descripcion: string;
+interface TaskCoachProps {
+  meta: RoadmapMeta;
+  onComplete: () => void;
+  isCompleted: boolean;
 }
 
-interface PilarUnlockedModalProps {
-  pilarCompletado: string;
-  pilarDesbloqueado?: string;
-  pilarNumero: number;
-  nivelAlcanzado?: NivelAlcanzado;
-  /** Cinturón-planta ganado (rediseño 4 fases). */
-  cinturon?: { nombre: string; emoji: string; metafora: string };
-  /** La pregunta mayéutica del Mentor Javo en este umbral. */
-  mentorPregunta?: string;
-  onClose: () => void;
-  onContinuar?: () => void;
-  onRating?: (rating: number, comentario: string) => Promise<void>;
-}
-
-const RATING_CONFIG: Record<number, { titulo: string; mensaje: string; placeholder: string }> = {
-  5: {
-    titulo: '¡Excelente!',
-    mensaje: '¡Gracias por tu valoración! Nos alegra muchísimo que hayas disfrutado este pilar. Tu compromiso es lo que hace que el programa funcione.',
-    placeholder: '¿Qué fue lo que más te gustó de este pilar? (opcional)',
-  },
-  4: {
-    titulo: 'Muy bueno',
-    mensaje: 'Gracias por tu feedback. Nos acercamos, pero nos gustaría saber qué nos faltó para llegar a las 5 estrellas y seguir mejorando para ti.',
-    placeholder: '¿Qué podríamos mejorar para llegar a las 5 estrellas?',
-  },
-  3: {
-    titulo: 'Aceptable',
-    mensaje: 'Gracias por ser honesto. Queremos entender qué pasó: ¿hay algo que podamos mejorar o que no quedó del todo claro en este pilar?',
-    placeholder: '¿Qué podríamos hacer mejor en este pilar?',
-  },
-  2: {
-    titulo: 'Necesita mejorar',
-    mensaje: 'Lamentamos que este pilar no haya cumplido tus expectativas. Tu opinión es muy valiosa para nosotros, contanos qué estuvo mal.',
-    placeholder: '¿Qué no funcionó en este pilar? Tu opinión nos ayuda mucho.',
-  },
-  1: {
-    titulo: 'Muy por debajo',
-    mensaje: 'Lamentamos profundamente que este pilar haya sido una mala experiencia. Queremos saber exactamente qué pasó para poder solucionarlo.',
-    placeholder: '¿Qué salió mal? Cualquier detalle nos ayuda a mejorar.',
-  },
-};
-
-export default function PilarUnlockedModal({
-  pilarCompletado,
-  pilarDesbloqueado,
-  pilarNumero,
-  nivelAlcanzado,
-  cinturon,
-  mentorPregunta,
-  onClose,
-  onContinuar,
-  onRating,
-}: PilarUnlockedModalProps) {
-  const [visible, setVisible] = useState(false);
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; delay: number }[]>([]);
-  const [step, setStep] = useState<'achievement' | 'rating'>('achievement');
-  const [selectedRating, setSelectedRating] = useState<number>(0);
-  const [hoveredRating, setHoveredRating] = useState<number>(0);
-  const [comentario, setComentario] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
+export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachProps) {
+  // ── Evidencia obligatoria (Cirugía Final F2) ──
+  const [evidencias, setEvidencias] = useState<number>(-1);
+  const [subiendo, setSubiendo] = useState(false);
+  const [errorSubida, setErrorSubida] = useState<string | null>(null);
+  const [veredicto, setVeredicto] = useState<VeredictoVision | null>(null);
+  const [verificando, setVerificando] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
-    setParticles(
-      Array.from({ length: 12 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        delay: Math.random() * 0.5,
-      })),
-    );
-  }, []);
+    if (!meta.evidencia_requerida) return;
+    (async () => {
+      const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+      const userId = data.user?.id ?? null;
+      setUid(userId);
+      if (userId) setEvidencias((await listarEvidencias(userId, meta.codigo)).length);
+      else setEvidencias(0);
+    })();
+  }, [meta.codigo, meta.evidencia_requerida]);
+  const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
+  const evidenciaLista = !requiereEvidencia || evidencias > 0;
 
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 300);
-  };
-
-  const handleContinuar = () => {
-    if (onRating) {
-      setStep('rating');
-    } else {
-      if (onContinuar) onContinuar();
-      handleClose();
-    }
-  };
-
-  const handleSubmitRating = async () => {
-    if (selectedRating === 0 || submitting) return;
-    setSubmitting(true);
+  // ── El cuaderno de la sesión: acá se vuelca el trabajo (escrito o hablado) ──
+  const KEY_NOTAS = 'tcd_notas_sesion_v1';
+  const [nota, setNota] = React.useState('');
+  const [notaGuardada, setNotaGuardada] = React.useState(false);
+  React.useEffect(() => {
+    try { setNota((JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}'))[meta.codigo] ?? ''); } catch { /* noop */ }
+  }, [meta.codigo]);
+  const [playerAbierto, setPlayerAbierto] = React.useState(false);
+  const guionVivo = React.useMemo(() => sesionGuiadaDe(meta.codigo), [meta.codigo]);
+  React.useEffect(() => { if (guionVivo && !isCompleted) setPlayerAbierto(true); }, [guionVivo, isCompleted]);
+  const guardarNota = () => {
     try {
-      await onRating?.(selectedRating, comentario.trim());
-    } finally {
-      setSubmitting(false);
-    }
-    if (onContinuar) onContinuar();
-    handleClose();
+      const all = JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}');
+      all[meta.codigo] = nota;
+      localStorage.setItem(KEY_NOTAS, JSON.stringify(all));
+      setNotaGuardada(true);
+      window.setTimeout(() => setNotaGuardada(false), 2500);
+    } catch { /* noop */ }
   };
+  const handleSubir = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uid || subiendo) return;
+    setSubiendo(true);
+    setErrorSubida(null);
+    const res = await subirEvidencia(uid, meta.codigo, file);
+    if (res.ok) {
+      setEvidencias((n) => Math.max(0, n) + 1);
+      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
+      // CP9 · Visión IA (asistente, nunca bloquea): verifica la imagen en segundo plano.
+      if (meta.evidencia_requerida?.descripcion) {
+        setVeredicto(null);
+        setVerificando(true);
+        const v = await verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion);
+        setVerificando(false);
+        setVeredicto(v);
+        if (v && v.ok === false) {
+          // El testigo no la confirmó: esa evidencia NO cuenta.
+          setEvidencias((n) => Math.max(0, n - 1));
+          setErrorSubida(`Tu testigo no pudo confirmarla${v.motivo ? ': ' + v.motivo : ''}. Sube otra foto — la de verdad.`);
+        }
+      }
+    } else {
+      setErrorSubida((res as { ok: false; motivo: string }).motivo);
+    }
+    setSubiendo(false);
+  };
+  const [checked, setChecked] = useState(isCompleted);
 
-  const activeRating = hoveredRating || selectedRating;
-  const ratingConfig = selectedRating > 0 ? RATING_CONFIG[selectedRating] : null;
+  const handleCheck = () => {
+    setChecked(true);
+    onComplete();
+  };
 
   return (
-    <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 ${
-        visible ? 'opacity-100' : 'opacity-0'
-      }`}
-      onClick={(e) => { if (e.target === e.currentTarget && step === 'achievement') handleClose(); }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-
-      {/* Particles */}
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute w-2 h-2 rounded-full bg-[var(--accent-gold)] animate-ping"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            animationDelay: `${p.delay}s`,
-            animationDuration: '1.5s',
-            opacity: 0.6,
-          }}
-        />
-      ))}
-
-      {/* Modal */}
-      <div
-        className={`relative z-10 w-full max-w-md text-center transition-all duration-500 ${
-          visible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-8'
-        }`}
-      >
-        {/* Trophy glow */}
-        <div className="relative mx-auto w-24 h-24 mb-6">
-          <div className="absolute inset-0 rounded-full bg-[var(--accent-gold)]/20 animate-pulse" />
-          <div className="absolute inset-2 rounded-full bg-[var(--accent-gold)]/10 border-2 border-[var(--accent-gold)]/40 flex items-center justify-center">
-            <Trophy className="w-10 h-10 text-[var(--accent-gold)]" />
-          </div>
-        </div>
-
-        {/* Content card */}
-        <div className="card-panel p-8 rounded-2xl border border-[rgba(232,150,46,0.24)]">
-
-          {step === 'achievement' ? (
-            <>
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 mb-4">
-                <Sparkles className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-gold)]">
-                  Pilar completado
-                </span>
-              </div>
-
-              <h2
-                className="text-2xl font-medium text-cream mb-2"
-                style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
-              >
-                Pilar {pilarNumero} completado
-              </h2>
-              <p className="text-lg text-[var(--accent-gold)] font-medium mb-4">
-                {pilarCompletado}
-              </p>
-
-              <div className="w-16 h-px bg-[var(--accent-gold)]/30 mx-auto mb-4" />
-
-              {cinturon && (
-                <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-gradient-to-b from-[var(--accent-gold)]/10 to-transparent p-5">
-                  <div className="text-4xl mb-2">{cinturon.emoji}</div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
-                    Cinturón ganado
-                  </p>
-                  <p className="text-xl font-semibold text-cream mb-1">{cinturon.nombre}</p>
-                  <p className="text-xs italic text-cream/75">{cinturon.metafora}</p>
-                </div>
-              )}
-
-              {mentorPregunta && (
-                <div className="mb-5 rounded-xl border border-cream/15 bg-ink p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">
-                    El Mentor te espera con una pregunta
-                  </p>
-                  <p className="text-sm text-cream/90 leading-relaxed italic">
-                    «{mentorPregunta}»
-                  </p>
-                  <p className="text-[11px] text-cream/35 mt-2">
-                    No la respondas rápido. Llévala contigo hoy.
-                  </p>
-                </div>
-              )}
-
-              {nivelAlcanzado && (
-                <div className="mb-5 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 p-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Award className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)]">
-                      Nivel {nivelAlcanzado.numero} alcanzado
-                    </span>
-                  </div>
-                  <p className="text-lg font-medium text-cream mb-1">{nivelAlcanzado.nombre}</p>
-                  <p className="text-xs text-cream/75 leading-relaxed">
-                    {nivelAlcanzado.descripcion}
-                  </p>
-                </div>
-              )}
-
-              {pilarDesbloqueado ? (
-                <div className="mb-6">
-                  <p className="text-sm text-cream/75 mb-1">Nuevo pilar desbloqueado:</p>
-                  <p className="text-lg font-medium text-cream">{pilarDesbloqueado}</p>
-                </div>
-              ) : (
-                <div className="mb-6">
-                  <p className="text-sm text-[var(--green-success)] font-medium">
-                    Completaste todos los pilares del programa
-                  </p>
-                </div>
-              )}
-
-              <button
-                onClick={handleContinuar}
-                className="btn-primary w-full flex items-center justify-center gap-2 text-base py-3"
-              >
-                {pilarDesbloqueado ? (
-                  <>
-                    Continuar al siguiente pilar
-                    <ChevronRight className="w-5 h-5" />
-                  </>
-                ) : (
-                  'Continuar'
-                )}
-              </button>
-            </>
-          ) : (
-            <>
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 mb-4">
-                <Star className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-gold)]">
-                  Tu opinión
-                </span>
-              </div>
-
-              <h2
-                className="text-2xl font-medium text-cream mb-2"
-                style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
-              >
-                ¿Cómo te pareció este pilar?
-              </h2>
-              <p className="text-sm text-cream/65 mb-5">
-                Tu valoración nos ayuda a mejorar el programa
-              </p>
-
-              {/* Stars */}
-              <div className="flex items-center justify-center gap-3 mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => { setSelectedRating(star); setComentario(''); }}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className="transition-transform hover:scale-110 focus:outline-none"
-                    aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
-                  >
-                    <Star
-                      className={`w-10 h-10 transition-colors duration-150 ${
-                        star <= activeRating
-                          ? 'text-gold fill-gold'
-                          : 'text-cream/20'
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-
-              {/* Dynamic message based on rating */}
-              {ratingConfig && (
-                <div className="text-left mb-4 transition-all duration-300">
-                  <p className="text-sm font-semibold text-cream mb-1">{ratingConfig.titulo}</p>
-                  <p className="text-sm text-cream/75 leading-relaxed mb-3">
-                    {ratingConfig.mensaje}
-                  </p>
-                  {selectedRating < 5 && (
-                    <textarea
-                      value={comentario}
-                      onChange={(e) => setComentario(e.target.value)}
-                      placeholder={ratingConfig.placeholder}
-                      maxLength={500}
-                      rows={3}
-                      className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50 resize-none"
-                    />
-                  )}
-                </div>
-              )}
-
-              {/* Submit button */}
-              <button
-                onClick={handleSubmitRating}
-                disabled={selectedRating === 0 || submitting}
-                className={`btn-primary w-full flex items-center justify-center gap-2 text-base py-3 transition-opacity ${
-                  selectedRating === 0 ? 'opacity-40 cursor-not-allowed' : ''
-                }`}
-              >
-                {submitting ? 'Enviando...' : 'Enviar valoración'}
-              </button>
-            </>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
+            MENTOR
+          </span>
+          {checked && (
+            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> Completado
+            </span>
           )}
         </div>
+        <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          {meta.titulo}
+        </h3>
+        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
+            <iframe
+              src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
+              title={`Tutorial: ${meta.titulo}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        )}
+        <TutorialTecnicoBox codigo={meta.codigo} />
+
+        {/* EL NÚMERO vive acá: es un ejercicio del Camino, no una sección aparte. */}
+        {/* EL CONSTRUCTOR vive acá: sus 3 anuncios se crean dentro de la sesión. */}
+        {meta.codigo === 'P4.3' && (
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
+            <ConstructorAnuncios />
+          </div>
+        )}
+
+        {meta.codigo === 'P1.5' && (
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">Tu calculadora — acá sale tu número</p>
+            <NumeroPanel />
+          </div>
+        )}
+
+        {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
+        {guionVivo && !isCompleted && (
+          <button onClick={() => setPlayerAbierto(true)}
+            className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
+            <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
+            <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
+          </button>
+        )}
+        {playerAbierto && guionVivo && (
+          <SesionGuiadaPlayer
+            codigo={meta.codigo}
+            titulo={meta.titulo}
+            onClose={() => setPlayerAbierto(false)}
+            onFinish={(texto) => {
+              setNota(texto);
+              try {
+                const all = JSON.parse(localStorage.getItem('tcd_notas_sesion_v1') ?? '{}');
+                all[meta.codigo] = texto;
+                localStorage.setItem('tcd_notas_sesion_v1', JSON.stringify(all));
+              } catch { /* noop */ }
+              setNotaGuardada(true);
+              setPlayerAbierto(false);
+              // Terminar la micro-sesión CIERRA la sesión: se marca hecha y vuelve al Camino.
+              // Si le falta la evidencia, no la damos por cerrada — se lo decimos claro.
+              if (!isCompleted) {
+                if (evidenciaLista) onComplete();
+                else setErrorSubida('Solo te falta tu evidencia para cerrar esta sesión. Súbela acá abajo.');
+              }
+            }}
+          />
+        )}
+
+        {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
+        {!isCompleted && (
+          <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
+            <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
+            <textarea
+              value={nota}
+              onChange={(e) => setNota(e.target.value)}
+              rows={5}
+              placeholder="Lo que trabajaste, lo que descubriste, lo que decidiste…"
+              className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
+            />
+            <div className="flex items-center justify-between mt-2">
+              <BotonAudio onTexto={(t) => setNota((p) => (p ? p + '\n' + t : t))} />
+              {notaGuardada ? (
+                <span className="text-xs text-success font-bold">Grabado en tu ADN ✓</span>
+              ) : (
+                <button type="button" onClick={guardarNota} disabled={!nota.trim()}
+                  className="text-xs font-bold text-gold hover:text-goldhi disabled:opacity-40">
+                  Grabar en mi ADN →
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {meta.evidencia_requerida && (
+          <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
+            <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
+              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
+            </p>
+            <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            {!isCompleted && (
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-gold text-black hover:bg-goldhi'}`}>
+                {subiendo ? 'Subiendo…' : evidencias > 0 ? `✓ ${evidencias} subida${evidencias > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
+                <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
+              </label>
+            )}
+            {veredicto?.ok && (
+              <p className="text-xs text-success mt-2">✓ Tu testigo la vio{veredicto.motivo ? `: ${veredicto.motivo}` : ''}. Confirmada.</p>
+            )}
+            {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
+            {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
+            {veredicto && !verificando && (veredicto.ok
+              ? <p className="text-xs text-success mt-2">✓ Se ve bien — coincide con lo pedido.</p>
+              : <p className="text-xs text-gold mt-2">⚠️ {veredicto.motivo || 'Revisa que la foto muestre lo pedido'} — si estás seguro, puedes seguir igual.</p>
+            )}
+          </div>
+        )}
+        {meta.checklist && meta.checklist.length > 0 && (
+          <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
+        )}
+      </div>
+
+      {/* Confirmation — prominent completion button */}
+      <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
+        {checked ? (
+          <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-success/10 border border-success/30 text-success text-base font-semibold">
+            <CheckCircle2 className="w-5 h-5" />
+            Sesión completada
+          </div>
+        ) : (
+          <>
+            <p className="text-xs text-cream/55 text-center mb-3 leading-relaxed">
+              {evidenciaLista
+                ? 'Cuando termines tu trabajo de hoy, marca este paso como completado y se abre el siguiente.'
+                : 'Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
+            </p>
+            <button
+              onClick={() => { if (evidenciaLista) handleCheck(); }}
+              disabled={!evidenciaLista}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
+            >
+              <CheckCircle2 className="w-5 h-5" />
+              Marcar como completado
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

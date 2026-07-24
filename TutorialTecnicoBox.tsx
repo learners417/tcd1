@@ -1,256 +1,200 @@
-import NumeroPanel from '../numero/NumeroPanel';
-import ConstructorAnuncios from '../campanas/ConstructorAnuncios';
-import SesionGuiadaPlayer from '../SesionGuiadaPlayer';
-import { sesionGuiadaDe } from '../../lib/sesionesGuiadas';
-import TutorialTecnicoBox from '../TutorialTecnicoBox';
-import React, { useEffect, useState } from 'react';
-import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
-import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
-import { notificarAdminsEvidencia } from '../../lib/notifications';
-import { supabase } from '../../lib/supabase';
-import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
-import type { RoadmapMeta } from '../../lib/roadmapSeed';
-import TaskChecklist from './TaskChecklist';
-import BotonAudio from '../sesion/BotonAudio';
+import React, { useState, useCallback } from 'react';
+import { Loader2, Sparkles, Copy, Check, RotateCcw, Image as ImageIcon, Layers, Youtube } from 'lucide-react';
+import { generateText } from '../../lib/aiProvider';
+import { toast } from 'sonner';
+import { buildCopyPrompt } from '../../lib/campanasPrompts';
+import { ANGULO_LABELS, TIPO_LABELS } from '../../lib/campanasTypes';
+import type { AnguloCreativo, TipoCreativo, CopyGenerado, ObjetivoCampana } from '../../lib/campanasTypes';
+import type { ProfileV2 } from '../../lib/supabase';
 
-interface TaskCoachProps {
-  meta: RoadmapMeta;
-  onComplete: () => void;
-  isCompleted: boolean;
+interface Props {
+  perfil: Partial<ProfileV2>;
+  geminiKey?: string;
+  objetivo: ObjetivoCampana;
+  onCopyGenerated: (copies: CopyGenerado[], angulo: AnguloCreativo, tipo: TipoCreativo) => void;
 }
 
-export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachProps) {
-  // ── Evidencia obligatoria (Cirugía Final F2) ──
-  const [evidencias, setEvidencias] = useState<number>(-1);
-  const [subiendo, setSubiendo] = useState(false);
-  const [errorSubida, setErrorSubida] = useState<string | null>(null);
-  const [veredicto, setVeredicto] = useState<VeredictoVision | null>(null);
-  const [verificando, setVerificando] = useState(false);
-  const [uid, setUid] = useState<string | null>(null);
-  useEffect(() => {
-    if (!meta.evidencia_requerida) return;
-    (async () => {
-      const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
-      const userId = data.user?.id ?? null;
-      setUid(userId);
-      if (userId) setEvidencias((await listarEvidencias(userId, meta.codigo)).length);
-      else setEvidencias(0);
-    })();
-  }, [meta.codigo, meta.evidencia_requerida]);
-  const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
-  const evidenciaLista = !requiereEvidencia || evidencias > 0;
+const ANGULOS: AnguloCreativo[] = ['contraintuitivo', 'directo', 'emocional', 'curiosidad', 'autoridad', 'dolor', 'deseo'];
 
-  // ── El cuaderno de la sesión: acá se vuelca el trabajo (escrito o hablado) ──
-  const KEY_NOTAS = 'tcd_notas_sesion_v1';
-  const [nota, setNota] = React.useState('');
-  const [notaGuardada, setNotaGuardada] = React.useState(false);
-  React.useEffect(() => {
-    try { setNota((JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}'))[meta.codigo] ?? ''); } catch { /* noop */ }
-  }, [meta.codigo]);
-  const [playerAbierto, setPlayerAbierto] = React.useState(false);
-  const guionVivo = React.useMemo(() => sesionGuiadaDe(meta.codigo), [meta.codigo]);
-  React.useEffect(() => { if (guionVivo && !isCompleted) setPlayerAbierto(true); }, [guionVivo, isCompleted]);
-  const guardarNota = () => {
+export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGenerated }: Props) {
+  const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
+  const [tipo, setTipo] = useState<TipoCreativo>('imagen_single');
+  const [slideCount, setSlideCount] = useState(5);
+  const [generating, setGenerating] = useState(false);
+  const [copies, setCopies] = useState<CopyGenerado[]>([]);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  const generate = useCallback(async () => {
+    setGenerating(true);
+    setCopies([]);
+
     try {
-      const all = JSON.parse(localStorage.getItem(KEY_NOTAS) ?? '{}');
-      all[meta.codigo] = nota;
-      localStorage.setItem(KEY_NOTAS, JSON.stringify(all));
-      setNotaGuardada(true);
-      window.setTimeout(() => setNotaGuardada(false), 2500);
-    } catch { /* noop */ }
-  };
-  const handleSubir = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !uid || subiendo) return;
-    setSubiendo(true);
-    setErrorSubida(null);
-    const res = await subirEvidencia(uid, meta.codigo, file);
-    if (res.ok) {
-      setEvidencias((n) => Math.max(0, n) + 1);
-      try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
-      // CP9 · Visión IA (asistente, nunca bloquea): verifica la imagen en segundo plano.
-      if (meta.evidencia_requerida?.descripcion) {
-        setVeredicto(null);
-        setVerificando(true);
-        const v = await verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion);
-        setVerificando(false);
-        setVeredicto(v);
-        if (v && v.ok === false) {
-          // El testigo no la confirmó: esa evidencia NO cuenta.
-          setEvidencias((n) => Math.max(0, n - 1));
-          setErrorSubida(`Tu testigo no pudo confirmarla${v.motivo ? ': ' + v.motivo : ''}. Sube otra foto — la de verdad.`);
-        }
+      const prompt = buildCopyPrompt(angulo, tipo, perfil, objetivo, tipo === 'carrusel' ? slideCount : undefined);
+      const text = await generateText({ prompt });
+      // Extraer JSON del response — limpiar markdown code blocks
+      let cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/) ?? cleaned.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No se pudo extraer JSON del response');
       }
-    } else {
-      setErrorSubida((res as { ok: false; motivo: string }).motivo);
-    }
-    setSubiendo(false);
-  };
-  const [checked, setChecked] = useState(isCompleted);
 
-  const handleCheck = () => {
-    setChecked(true);
-    onComplete();
+      // Limpiar caracteres de control y trailing commas antes de parsear
+      let jsonStr = jsonMatch[0]
+        .replace(/[\x00-\x1F\x7F]/g, (c) => c === '\n' || c === '\r' || c === '\t' ? c : '')
+        .replace(/,\s*([}\]])/g, '$1');
+
+      const parsed = JSON.parse(jsonStr);
+      const result: CopyGenerado[] = Array.isArray(parsed) ? parsed : [parsed];
+
+      setCopies(result);
+      onCopyGenerated(result, angulo, tipo);
+      toast.success(`Copy generado (${ANGULO_LABELS[angulo].titulo})`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error generando copy: ${msg}`);
+    } finally {
+      setGenerating(false);
+    }
+  }, [angulo, tipo, slideCount, perfil, geminiKey, objetivo, onCopyGenerated]);
+
+  const handleCopyCopy = (idx: number) => {
+    const c = copies[idx];
+    const text = `TEXTO PRINCIPAL:\n${c.texto_principal}\n\nTITULO:\n${c.titulo}\n\nDESCRIPCION:\n${c.descripcion}\n\nCTA:\n${c.cta_texto}`;
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+    <div className="space-y-6">
+      {/* Tipo selector */}
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
-            MENTOR
-          </span>
-          {checked && (
-            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Completado
-            </span>
+        <label className="block text-xs text-cream/75 mb-2 font-medium">Tipo de Creativo</label>
+        <div className="flex flex-wrap gap-2">
+          {(['imagen_single', 'carrusel', 'yt_thumbnail'] as TipoCreativo[]).map((t) => {
+            const Icon = t === 'yt_thumbnail' ? Youtube : t === 'carrusel' ? Layers : ImageIcon;
+            return (
+              <button
+                key={t}
+                onClick={() => setTipo(t)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                  tipo === t
+                    ? 'bg-gold/15 text-gold border border-gold/30'
+                    : 'bg-panel text-cream/65 border border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)]'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {TIPO_LABELS[t]}
+              </button>
+            );
+          })}
+          {tipo === 'carrusel' && (
+            <div className="flex items-center gap-2 ml-2">
+              <label className="text-xs text-cream/55">Slides:</label>
+              <input
+                type="number"
+                min={3}
+                max={10}
+                value={slideCount}
+                onChange={(e) => setSlideCount(Number(e.target.value))}
+                className="w-16 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-2 py-1.5 text-sm text-cream text-center focus:outline-none focus:border-gold/50"
+              />
+            </div>
           )}
         </div>
-        <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          {meta.titulo}
-        </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
-        {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
-            <iframe
-              src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
-              title={`Tutorial: ${meta.titulo}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
-            />
+      </div>
+
+      {/* Angulo selector */}
+      <div>
+        <label className="block text-xs text-cream/75 mb-2 font-medium">Angulo de Comunicacion</label>
+        <div className="flex flex-wrap gap-2">
+          {ANGULOS.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAngulo(a)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                angulo === a
+                  ? 'bg-gold/15 text-gold border border-gold/30'
+                  : 'bg-panel text-cream/55 border border-[rgba(232,150,46,0.1)] hover:text-cream/75 hover:border-[rgba(232,150,46,0.14)]'
+              }`}
+              title={ANGULO_LABELS[a].descripcion}
+            >
+              {ANGULO_LABELS[a].titulo}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-cream/45 mt-1.5">{ANGULO_LABELS[angulo].descripcion}</p>
+      </div>
+
+      {/* Generate button */}
+      <button
+        onClick={generate}
+        disabled={generating}
+        className="btn-primary flex items-center gap-2 disabled:opacity-40"
+      >
+        {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+        {generating ? 'Generando copy...' : copies.length > 0 ? 'Regenerar Copy' : 'Generar Copy'}
+      </button>
+
+      {/* Results */}
+      {copies.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-cream/55">
+              {tipo === 'yt_thumbnail' ? `${copies.length} variantes de thumbnail` : copies.length === 1 ? 'Copy generado' : `${copies.length} slides generados`}
+              {' '}— {ANGULO_LABELS[angulo].titulo}
+            </span>
           </div>
-        )}
-        <TutorialTecnicoBox codigo={meta.codigo} />
 
-        {/* EL NÚMERO vive acá: es un ejercicio del Camino, no una sección aparte. */}
-        {/* EL CONSTRUCTOR vive acá: sus 3 anuncios se crean dentro de la sesión. */}
-        {meta.codigo === 'P4.3' && (
-          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
-            <ConstructorAnuncios />
-          </div>
-        )}
+          {copies.map((c, idx) => (
+            <div key={idx} className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-3">
+              {copies.length > 1 && (
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gold">{tipo === 'yt_thumbnail' ? `Variante ${idx + 1}` : `Slide ${idx + 1}`}</span>
+                  <button
+                    onClick={() => handleCopyCopy(idx)}
+                    className="flex items-center gap-1 text-xs text-cream/55 hover:text-cream transition-colors"
+                  >
+                    {copiedIdx === idx ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedIdx === idx ? 'Copiado' : 'Copiar'}
+                  </button>
+                </div>
+              )}
 
-        {meta.codigo === 'P1.5' && (
-          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">Tu calculadora — acá sale tu número</p>
-            <NumeroPanel />
-          </div>
-        )}
+              <div>
+                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Texto Principal</label>
+                <p className="text-sm text-cream/80 mt-1 whitespace-pre-line leading-relaxed">{c.texto_principal}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">Titulo</label>
+                  <p className="text-sm font-medium text-cream mt-1">{c.titulo}</p>
+                </div>
+                <div>
+                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">CTA</label>
+                  <p className="text-sm font-medium text-gold mt-1">{c.cta_texto}</p>
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Descripcion</label>
+                <p className="text-sm text-cream/75 mt-1">{c.descripcion}</p>
+              </div>
 
-        {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
-        {guionVivo && !isCompleted && (
-          <button onClick={() => setPlayerAbierto(true)}
-            className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
-            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
-            <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
-            <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
-          </button>
-        )}
-        {playerAbierto && guionVivo && (
-          <SesionGuiadaPlayer
-            codigo={meta.codigo}
-            titulo={meta.titulo}
-            onClose={() => setPlayerAbierto(false)}
-            onFinish={(texto) => {
-              setNota(texto);
-              try {
-                const all = JSON.parse(localStorage.getItem('tcd_notas_sesion_v1') ?? '{}');
-                all[meta.codigo] = texto;
-                localStorage.setItem('tcd_notas_sesion_v1', JSON.stringify(all));
-              } catch { /* noop */ }
-              setNotaGuardada(true);
-              setPlayerAbierto(false);
-              // Terminar la micro-sesión CIERRA la sesión: se marca hecha y vuelve al Camino.
-              // Si le falta la evidencia, no la damos por cerrada — se lo decimos claro.
-              if (!isCompleted) {
-                if (evidenciaLista) onComplete();
-                else setErrorSubida('Solo te falta tu evidencia para cerrar esta sesión. Súbela acá abajo.');
-              }
-            }}
-          />
-        )}
-
-        {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
-        {!isCompleted && (
-          <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
-            <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
-            <textarea
-              value={nota}
-              onChange={(e) => setNota(e.target.value)}
-              rows={5}
-              placeholder="Lo que trabajaste, lo que descubriste, lo que decidiste…"
-              className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
-            />
-            <div className="flex items-center justify-between mt-2">
-              <BotonAudio onTexto={(t) => setNota((p) => (p ? p + '\n' + t : t))} />
-              {notaGuardada ? (
-                <span className="text-xs text-success font-bold">Grabado en tu ADN ✓</span>
-              ) : (
-                <button type="button" onClick={guardarNota} disabled={!nota.trim()}
-                  className="text-xs font-bold text-gold hover:text-goldhi disabled:opacity-40">
-                  Grabar en mi ADN →
-                </button>
+              {copies.length === 1 && (
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => handleCopyCopy(0)}
+                    className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream transition-colors"
+                  >
+                    {copiedIdx === 0 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedIdx === 0 ? 'Copiado' : 'Copiar todo'}
+                  </button>
+                </div>
               )}
             </div>
-          </div>
-        )}
-
-        {meta.evidencia_requerida && (
-          <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
-              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
-            </p>
-            <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
-            {!isCompleted && (
-              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-gold text-black hover:bg-goldhi'}`}>
-                {subiendo ? 'Subiendo…' : evidencias > 0 ? `✓ ${evidencias} subida${evidencias > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
-                <input type="file" accept="image/*,audio/*,video/*,.pdf" className="hidden" onChange={handleSubir} disabled={subiendo} />
-              </label>
-            )}
-            {veredicto?.ok && (
-              <p className="text-xs text-success mt-2">✓ Tu testigo la vio{veredicto.motivo ? `: ${veredicto.motivo}` : ''}. Confirmada.</p>
-            )}
-            {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
-            {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
-            {veredicto && !verificando && (veredicto.ok
-              ? <p className="text-xs text-success mt-2">✓ Se ve bien — coincide con lo pedido.</p>
-              : <p className="text-xs text-gold mt-2">⚠️ {veredicto.motivo || 'Revisa que la foto muestre lo pedido'} — si estás seguro, puedes seguir igual.</p>
-            )}
-          </div>
-        )}
-        {meta.checklist && meta.checklist.length > 0 && (
-          <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
-        )}
-      </div>
-
-      {/* Confirmation — prominent completion button */}
-      <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
-        {checked ? (
-          <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-success/10 border border-success/30 text-success text-base font-semibold">
-            <CheckCircle2 className="w-5 h-5" />
-            Sesión completada
-          </div>
-        ) : (
-          <>
-            <p className="text-xs text-cream/55 text-center mb-3 leading-relaxed">
-              {evidenciaLista
-                ? 'Cuando termines tu trabajo de hoy, marca este paso como completado y se abre el siguiente.'
-                : 'Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
-            </p>
-            <button
-              onClick={() => { if (evidenciaLista) handleCheck(); }}
-              disabled={!evidenciaLista}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
-            >
-              <CheckCircle2 className="w-5 h-5" />
-              Marcar como completado
-            </button>
-          </>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

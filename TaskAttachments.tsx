@@ -1,260 +1,456 @@
 /**
- * CONSTRUCTOR "TUS 3 ANUNCIOS" (T2 del Manual de Anuncios).
- *
- * El corazón de Campañas: autocompleta el brief con lo que el sanador YA
- * selló en su ADN, aplica la regla del test (1 de piedras + 1 de dolor o
- * historia + 1 de resultado o método), genera los 3 guiones + la secuencia
- * de 3 stories con IA, y audita cada pieza contra los 8 ingredientes.
+ * CreativosView.tsx — Generador de creativos con sub-tabs:
+ * Imagen / Carrusel / Portada YouTube / Historial.
  */
-import React, { useMemo, useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
-  FORMULAS_ANUNCIOS, FAMILIAS_TEST, NOMBRE_FAMILIA, FORMULA_STORIES,
-  LAS_7_REGLAS, REGLAS_META, auditarPieza, formulaPorId,
-  type FamiliaFormula, type FormulaAnuncio,
-} from '../../lib/formulasAnuncios';
-import { generateText } from '../../lib/aiProvider';
+  ImageIcon, Loader2, CheckCircle2, Sparkles,
+  Layers, Youtube, FolderOpen, Palette, Wand2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import ImagenGenerator from './ImagenGenerator';
+import CreativoGallery from './CreativoGallery';
+import CreativoDetalle from './CreativoDetalle';
+import CreativoEdicion from './CreativoEdicion';
+import ManualMarcaView from './ManualMarcaView';
+import {
+  saveCreativo,
+  updateCreativo,
+  uploadCreativeImage,
+  upsertCreativoAsset,
+  fetchCreativos,
+} from '../../lib/campanasStorage';
+import type {
+  AnguloCreativo,
+  ImageMode,
+  TipoCreativo,
+  ImageFormat,
+  Creativo,
+} from '../../lib/campanasTypes';
+import { IMAGE_FORMAT_OPTIONS } from '../../lib/campanasTypes';
+import type { ProfileV2 } from '../../lib/supabase';
 
-/* ── El brief: 7 insumos, autocompletados desde lo sellado ── */
-
-interface Brief {
-  avatar: string; piedras: string; frases: string; prueba: string;
-  metodo: string; oferta: string; palabra: string;
-}
-
-const BRIEF_KEY = 'tcd_brief_anuncios_v1';
-const OUT_KEY = 'tcd_anuncios_v1';
-
-function leerJSON<T>(k: string, def: T): T {
-  try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
-}
-
-/** Mejor esfuerzo: junta lo que la app ya sabe. Todo queda editable. */
-function briefDesdeADN(): Brief {
-  const guardado = leerJSON<Partial<Brief>>(BRIEF_KEY, {});
-  const perfil = leerJSON<Record<string, unknown>>('tcd_profile', {});
-  const notas = leerJSON<Record<string, string>>('tcd_notas_sesion_v1', {});
-  const str = (v: unknown) => String(v ?? '').trim();
-  return {
-    avatar: guardado.avatar ?? str(perfil.adn_avatar) ?? '',
-    piedras: guardado.piedras ?? str(notas['P0.3']).slice(0, 400),
-    frases: guardado.frases ?? str(notas['P2.3b']).slice(0, 400),
-    prueba: guardado.prueba ?? '',
-    metodo: guardado.metodo ?? str(perfil.metodo_nombre ?? perfil.adn_metodo),
-    oferta: guardado.oferta ?? str(perfil.oferta ?? perfil.adn_oferta),
-    palabra: guardado.palabra ?? '',
-  };
-}
-
-const CAMPOS: { k: keyof Brief; label: string; ayuda: string }[] = [
-  { k: 'avatar', label: 'Tu cliente, por CONDUCTA', ayuda: 'Qué hace un día normal, cómo cobra, qué persigue hoy. Sin nombrar profesiones.' },
-  { k: 'piedras', label: 'Las 3 tácticas que ya intentó', ayuda: 'Lo que probó y no le funcionó — lo que quemaste en tu QUEMA sirve acá.' },
-  { k: 'frases', label: 'Frases TEXTUALES de tus clientes', ayuda: '2-3 frases exactas que dicen al llegar. Su lenguaje interno.' },
-  { k: 'prueba', label: 'Una prueba real (con permiso)', ayuda: 'Un resultado o testimonio de un cliente tuyo. Si aún no tienes, déjalo vacío.' },
-  { k: 'metodo', label: 'El nombre propio de tu método', ayuda: 'El que creaste en tu Camino. Con nombre suena a sistema.' },
-  { k: 'oferta', label: 'Tu oferta concreta', ayuda: 'Qué es, cuándo empieza, cuántos lugares, desde qué inversión.' },
-  { k: 'palabra', label: 'Tu PALABRA clave', ayuda: 'Una sola, corta, en mayúsculas, ligada a tu oferta. Nunca "INFO".' },
+const ANGULOS: { id: AnguloCreativo; label: string; descripcion: string }[] = [
+  { id: 'directo', label: 'Directo', descripcion: 'Claro y profesional' },
+  { id: 'contraintuitivo', label: 'Contraintuitivo', descripcion: 'Disruptivo, sorprende' },
+  { id: 'emocional', label: 'Emocional', descripcion: 'Conecta con sentimientos' },
+  { id: 'curiosidad', label: 'Curiosidad', descripcion: 'Genera pregunta' },
+  { id: 'autoridad', label: 'Autoridad', descripcion: 'Credibilidad premium' },
+  { id: 'dolor', label: 'Dolor', descripcion: 'Problema actual' },
+  { id: 'deseo', label: 'Deseo', descripcion: 'Resultado ideal' },
 ];
 
-/* ── Selección con la regla 1+1+1 ── */
+type SubTab = 'imagen' | 'carrusel' | 'youtube' | 'edicion' | 'historial' | 'manual_marca';
 
-type Familia3 = Exclude<FamiliaFormula, 'acompana'>;
-const FAMILIAS: Familia3[] = ['piedras', 'dolor_historia', 'resultado_metodo'];
+interface TabConfig {
+  id: SubTab;
+  label: string;
+  icon: typeof ImageIcon;
+  // Los siguientes cuatro campos son del generador de imagenes. La tab
+  // 'manual_marca' no invoca al generador, por eso son opcionales.
+  tipo?: TipoCreativo;
+  format?: ImageFormat;
+  slideCount?: number;
+  lockFormat?: boolean;
+  eyebrow: string;
+  descripcion: string;
+}
 
-interface Pieza { formulaId: number; texto: string }
+const TABS: TabConfig[] = [
+  {
+    id: 'imagen',
+    label: 'Imagen',
+    icon: ImageIcon,
+    tipo: 'imagen_single',
+    format: '1:1',
+    slideCount: 1,
+    lockFormat: false,
+    eyebrow: 'Generador de imagen',
+    descripcion: 'Crea una imagen unica para feed, story o anuncio.',
+  },
+  {
+    id: 'edicion',
+    label: 'Edicion',
+    icon: Wand2,
+    eyebrow: 'Edicion de imagen',
+    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamano y formato original.',
+  },
+  {
+    id: 'carrusel',
+    label: 'Carrusel',
+    icon: Layers,
+    tipo: 'carrusel',
+    format: '1:1',
+    slideCount: 5,
+    lockFormat: false,
+    eyebrow: 'Generador de carrusel',
+    descripcion: 'Genera secuencias de varias slides con narrativa visual coherente.',
+  },
+  {
+    id: 'youtube',
+    label: 'Portada YouTube',
+    icon: Youtube,
+    tipo: 'yt_thumbnail',
+    format: 'yt_thumbnail',
+    slideCount: 1,
+    lockFormat: true,
+    eyebrow: 'Generador de portada',
+    descripcion: 'Thumbnails 1280x720 optimizadas para CTR en YouTube.',
+  },
+  {
+    id: 'historial',
+    label: 'Historial',
+    icon: FolderOpen,
+    tipo: 'imagen_single',
+    format: '1:1',
+    slideCount: 1,
+    lockFormat: false,
+    eyebrow: 'Historial',
+    descripcion: 'Todos los creativos generados para este cliente.',
+  },
+  {
+    id: 'manual_marca',
+    label: 'Manual de marca',
+    icon: Palette,
+    eyebrow: 'Manual de marca',
+    descripcion: 'Paleta, tipografia y reglas que mandan sobre cualquier estilo o referencia al generar imagenes.',
+  },
+];
 
-export default function ConstructorAnuncios() {
-  const [brief, setBrief] = useState<Brief>(() => briefDesdeADN());
-  const [sel, setSel] = useState<Record<Familia3, number>>(() =>
-    leerJSON(OUT_KEY + '_sel', { piedras: 1, dolor_historia: 15, resultado_metodo: 10 }));
-  const [piezas, setPiezas] = useState<Record<number, Pieza>>(() => leerJSON(OUT_KEY, {}));
-  const [stories, setStories] = useState<string>(() => leerJSON(OUT_KEY + '_st', ''));
-  const [generando, setGenerando] = useState<string | null>(null);
-  const [fallo, setFallo] = useState<string | null>(null);
+interface Props {
+  userId?: string;
+  perfil?: Partial<ProfileV2>;
+  geminiKey?: string;
+}
 
-  const sinPrueba = !brief.prueba.trim();
+export default function CreativosView({ userId, perfil, geminiKey }: Props) {
+  const [activeTab, setActiveTab] = useState<SubTab>('imagen');
+  const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
+  const [images, setImages] = useState<{ base64: string; mimeType: string; modelUsed: string }[]>([]);
+  const [, setImageMode] = useState<ImageMode>('completa');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  // Ref en vez de state para evitar cierres stale en persistCreativo: si la
+  // segunda llamada concurrente (StrictMode dev o click rapido) leia el state
+  // antes del re-render, veia null y creaba un creativo duplicado.
+  const currentCreativoIdRef = useRef<string | null>(null);
+  const saveInFlightRef = useRef(false);
 
-  const setCampo = (k: keyof Brief, v: string) => {
-    const b = { ...brief, [k]: v };
-    setBrief(b);
-    try { localStorage.setItem(BRIEF_KEY, JSON.stringify(b)); } catch { /* noop */ }
-  };
+  // Perfil local para que el Manual de Marca actualice los prompts del
+  // generador sin recargar la pagina. Se resincroniza cuando cambia la prop.
+  const [perfilLocal, setPerfilLocal] = useState<Partial<ProfileV2> | undefined>(perfil);
+  useEffect(() => { setPerfilLocal(perfil); }, [perfil]);
+  const handleManualSaved = useCallback((patch: Partial<ProfileV2>) => {
+    setPerfilLocal((prev) => ({ ...(prev ?? {}), ...patch }));
+  }, []);
 
-  const elegir = (fam: Familia3, id: number) => {
-    const s = { ...sel, [fam]: id };
-    setSel(s);
-    try { localStorage.setItem(OUT_KEY + '_sel', JSON.stringify(s)); } catch { /* noop */ }
-  };
+  // Historial state
+  const [creativos, setCreativos] = useState<Creativo[]>([]);
+  const [loadingHist, setLoadingHist] = useState(false);
+  const [selectedCreativo, setSelectedCreativo] = useState<Creativo | null>(null);
 
-  const promptDe = (f: FormulaAnuncio) => {
-    const reglas = LAS_7_REGLAS.map((r) => `- ${r.titulo}: ${r.texto}`).join('\n');
-    const meta = REGLAS_META.map((r) => `- ${r}`).join('\n');
-    return `Escribe UN anuncio para Instagram (carrusel) siguiendo EXACTAMENTE esta fórmula.
+  const config = TABS.find((t) => t.id === activeTab) ?? TABS[0];
 
-FÓRMULA «${f.nombre}» — estructura obligatoria, pantalla por pantalla:
-${f.estructura.map((e, i) => `${i + 1}. ${e}`).join('\n')}
-Caption base: ${f.caption}
-Error a evitar: ${f.errorComun}
+  // Reset preview cuando cambias de tab (nuevo tab = nuevo creativo si genera)
+  useEffect(() => {
+    setImages([]);
+    setSaved(false);
+    currentCreativoIdRef.current = null;
+  }, [activeTab]);
 
-EL BRIEF (datos reales de esta persona — usa SOLO esto, no inventes):
-- Cliente por conducta: ${brief.avatar || '(no dado — describe conducta genérica de quien atiende uno a uno)'}
-- Tácticas que ya intentó (piedras): ${brief.piedras || '(no dadas)'}
-- Frases textuales de sus clientes: ${brief.frases || '(no dadas)'}
-- Prueba real: ${brief.prueba || 'NO HAY PRUEBA — no inventes ninguna; omite ese bloque o usa la aclaración honesta en su lugar'}
-- Método (nombre propio): ${brief.metodo || '(sin nombre — usa "[MI MÉTODO]")'}
-- Oferta: ${brief.oferta || '(no dada)'}
-- Palabra clave: ${brief.palabra || 'PALABRA'}
+  // Cambio de angulo dentro de un mismo tab = nuevo creativo en proxima generacion
+  useEffect(() => {
+    currentCreativoIdRef.current = null;
+    setSaved(false);
+  }, [angulo]);
 
-REGLAS INQUEBRANTABLES:
-${reglas}
-APROBACIÓN DE META:
-${meta}
-
-REGISTRO: castellano neutro (tú/tienes), hablado y natural, frases cortas, un golpe por línea. Cero jerga de oficio. Filtro por conducta, jamás listando profesiones. Nada de precio en el anuncio.
-
-FORMATO DE SALIDA (texto plano, sin explicaciones):
-PANTALLA 1: …
-PANTALLA 2: …
-(una por paso de la estructura)
-CAPTION: …`;
-  };
-
-  const generar = async () => {
-    setFallo(null);
-    const ids = [sel.piedras, sel.dolor_historia, sel.resultado_metodo];
-    for (const id of ids) {
-      const f = formulaPorId(id);
-      if (!f) continue;
-      setGenerando(f.nombre);
-      try {
-        const texto = await generateText({
-          systemInstruction: 'Eres un redactor de anuncios de venta directa en castellano neutro. Sigues la fórmula al pie de la letra. Nunca inventas datos ni pruebas.',
-          prompt: promptDe(f),
-        });
-        setPiezas((p) => {
-          const n = { ...p, [id]: { formulaId: id, texto: String(texto ?? '').trim() } };
-          try { localStorage.setItem(OUT_KEY, JSON.stringify(n)); } catch { /* noop */ }
-          return n;
-        });
-      } catch {
-        setFallo(`No pudimos generar «${f.nombre}». Revisa tu conexión y toca Generar de nuevo — lo ya creado se conserva.`);
-        setGenerando(null);
-        return;
-      }
-    }
-    // La secuencia de 3 stories acompaña siempre
-    setGenerando('Secuencia de stories');
+  const loadHistorial = useCallback(async () => {
+    if (!userId) return;
+    setLoadingHist(true);
     try {
-      const st = await generateText({
-        systemInstruction: 'Eres un redactor de anuncios en castellano neutro. Texto plano.',
-        prompt: `Escribe la secuencia de 3 stories (texto sobre fondo, sin cámara) para acompañar la campaña.\nEstructura: ${FORMULA_STORIES.estructura.join(' | ')}\nBrief: método ${brief.metodo || '[MI MÉTODO]'} · oferta ${brief.oferta || '(cupos limitados)'} · cliente ${brief.avatar || '(quien atiende uno a uno)'} · palabra ${brief.palabra || 'PALABRA'}.\nFormato: STORY 1: … / STORY 2: … / STORY 3: …`,
-      });
-      const limpio = String(st ?? '').trim();
-      setStories(limpio);
-      try { localStorage.setItem(OUT_KEY + '_st', JSON.stringify(limpio)); } catch { /* noop */ }
-    } catch { /* las stories no frenan el resultado principal */ }
-    setGenerando(null);
-  };
+      const list = await fetchCreativos(userId);
+      setCreativos(list);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al cargar historial: ${msg}`);
+    } finally {
+      setLoadingHist(false);
+    }
+  }, [userId]);
 
-  const listas = FAMILIAS.every((f) => piezas[sel[f]]?.texto);
+  useEffect(() => {
+    if (activeTab === 'historial') {
+      loadHistorial();
+    }
+  }, [activeTab, loadHistorial]);
+
+  // ─── Auto-guardado en historial ─────────────────────────────────────────
+  // Se dispara cuando ImagenGenerator entrega nuevas imagenes.
+  //   - Primera generacion (forceNew=false): crea el creativo y sube los slides.
+  //     El id queda como currentCreativoId y sucesivas subidas del MISMO set
+  //     (ej: si el generador retransmite progreso) se upsertan en la misma fila.
+  //   - Regeneracion o edicion (forceNew=true): crea SIEMPRE un creativo nuevo
+  //     para no perder versiones anteriores. NO actualiza currentCreativoId asi
+  //     la proxima regen tambien crea otro creativo nuevo.
+  const persistCreativo = useCallback(
+    async (
+      imgs: { base64: string; mimeType: string; modelUsed: string }[],
+      prompts?: string[],
+      opts?: { forceNew?: boolean },
+    ) => {
+      if (!userId || imgs.length === 0) return;
+      if (saveInFlightRef.current) return;
+      saveInFlightRef.current = true;
+      setSaving(true);
+      const creativoIdToUse = opts?.forceNew ? null : currentCreativoIdRef.current;
+      const isFirstSave = creativoIdToUse === null;
+      try {
+        const dims = IMAGE_FORMAT_OPTIONS[config.format ?? '1:1'];
+        let creativoId = creativoIdToUse;
+
+        if (!creativoId) {
+          const creativo = await saveCreativo({
+            usuario_id: userId,
+            tipo: config.tipo ?? 'imagen_single',
+            angulo,
+            texto_principal: '',
+            titulo: `${config.label} ${angulo}`,
+            descripcion: '',
+            cta_texto: '',
+            nombre: `${config.label} ${angulo} — ${new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`,
+            estado: 'generado',
+            prompt_imagen: prompts && prompts.length > 0 ? JSON.stringify(prompts) : undefined,
+          });
+          if (!creativo) throw new Error('No se pudo guardar el creativo');
+          creativoId = creativo.id;
+          // Solo marcamos este id como "current" cuando NO es forceNew — asi
+          // regen/edit no reusan el id y cada versionado queda como entrada
+          // propia en el historial.
+          if (!opts?.forceNew) currentCreativoIdRef.current = creativoId;
+        } else if (prompts && prompts.length > 0) {
+          await updateCreativo(creativoId, { prompt_imagen: JSON.stringify(prompts) });
+        }
+
+        for (let i = 0; i < imgs.length; i++) {
+          const uploaded = await uploadCreativeImage(
+            userId,
+            creativoId,
+            i + 1,
+            imgs[i].base64,
+            imgs[i].mimeType,
+          );
+          if (uploaded) {
+            await upsertCreativoAsset({
+              creativo_id: creativoId,
+              usuario_id: userId,
+              slide_orden: i + 1,
+              storage_path: uploaded.storagePath,
+              public_url: uploaded.publicUrl,
+              width: dims.width,
+              height: dims.height,
+              mime_type: imgs[i].mimeType,
+            });
+          }
+        }
+
+        setSaved(true);
+        if (isFirstSave) {
+          toast.success(
+            opts?.forceNew
+              ? `Nueva version guardada en historial`
+              : `${config.label} guardado en historial`,
+          );
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al guardar: ${msg}`);
+      } finally {
+        setSaving(false);
+        saveInFlightRef.current = false;
+      }
+    },
+    [userId, angulo, config],
+  );
+
+  const handleImagesGenerated = useCallback(
+    (
+      newImages: { base64: string; mimeType: string; modelUsed: string }[],
+      mode: ImageMode,
+      prompts?: string[],
+      opts?: { asNewEntry?: boolean },
+    ) => {
+      setImages(newImages);
+      setImageMode(mode);
+      setSaved(false);
+      void persistCreativo(newImages, prompts, { forceNew: opts?.asNewEntry ?? false });
+    },
+    [persistCreativo],
+  );
+
+  const HeaderIcon = config.icon;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El Constructor</p>
-        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 3 anuncios</h2>
-        <p className="text-sm text-cream/60 mt-1">Tres fórmulas que atacan distinto, completadas con TU caso. La regla: una de piedras, una de dolor o historia, una de resultado.</p>
-      </div>
-
-      {/* EL BRIEF */}
-      <div className="card-panel p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">1 · Tu brief — lo trajimos de tu ADN, ajústalo</p>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {CAMPOS.map((c) => (
-            <div key={c.k} className={c.k === 'avatar' || c.k === 'oferta' ? 'sm:col-span-2' : ''}>
-              <p className="text-xs font-semibold text-cream mb-1">{c.label}</p>
-              <textarea
-                value={brief[c.k]}
-                onChange={(e) => setCampo(c.k, e.target.value)}
-                placeholder={c.ayuda}
-                rows={c.k === 'palabra' ? 1 : 2}
-                className="w-full bg-surface/40 border border-cream/10 rounded-xl px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:border-gold/40 outline-none resize-none"
-              />
-            </div>
-          ))}
+    <div className="animate-in fade-in duration-500 max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gold/15 flex items-center justify-center">
+          <HeaderIcon className="w-5 h-5 text-gold" />
+        </div>
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-0.5">
+            {config.eyebrow}
+          </p>
+          <h2 className="text-xl font-light text-cream">
+            Creativos{' '}
+            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }} className="text-gold">
+              con IA
+            </span>
+          </h2>
+          <p className="text-[11px] text-cream/55 mt-1">{config.descripcion}</p>
         </div>
       </div>
 
-      {/* LA ELECCIÓN 1+1+1 */}
-      <div className="card-panel p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">2 · Tus 3 fórmulas — una por familia</p>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {FAMILIAS.map((fam) => (
-            <div key={fam}>
-              <p className="text-xs font-semibold text-gold mb-2">{NOMBRE_FAMILIA[fam]}</p>
-              <div className="space-y-1.5">
-                {FAMILIAS_TEST[fam].map((id) => {
-                  const f = formulaPorId(id)!;
-                  const advertir = sinPrueba && (id === 4 || id === 9);
-                  const activa = sel[fam] === id;
-                  return (
-                    <button key={id} onClick={() => elegir(fam, id)}
-                      className={`w-full text-left rounded-xl border px-3 py-2 text-xs transition-colors ${activa ? 'border-gold/60 bg-gold/[0.08] text-cream' : 'border-cream/10 text-cream/70 hover:border-cream/25'}`}>
-                      <span className="font-semibold">{f.id} · {f.nombre}</span>
-                      {advertir && <span className="block text-[10px] text-danger/80 mt-0.5">Necesita prueba real — sin ella, mejor la {fam === 'dolor_historia' ? '15' : '18'}</span>}
-                      {activa && <span className="block text-[10px] text-cream/50 mt-0.5">{f.cuando}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Sub-tabs */}
+      <div className="flex flex-wrap gap-2 border-b border-[rgba(232,150,46,0.10)] pb-3">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          const isActive = activeTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                isActive
+                  ? 'bg-gold/15 text-gold border-gold/40'
+                  : 'bg-transparent text-cream/65 border-cream/8 hover:border-gold/25 hover:text-cream/80'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* GENERAR */}
-      <button onClick={() => void generar()} disabled={!!generando}
-        className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold disabled:opacity-60">
-        {generando ? `Escribiendo: ${generando}…` : '✨ Generar mis 3 anuncios + stories'}
-      </button>
-      {fallo && <p className="text-xs text-danger">{fallo}</p>}
-
-      {/* LAS PIEZAS */}
-      {FAMILIAS.map((fam) => {
-        const pieza = piezas[sel[fam]];
-        if (!pieza) return null;
-        const f = formulaPorId(pieza.formulaId)!;
-        const audit = auditarPieza(pieza.texto);
-        return (
-          <div key={fam} className="card-panel p-5">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <p className="text-sm font-bold text-cream">{f.id} · {f.nombre}</p>
-              <button onClick={() => void navigator.clipboard?.writeText(pieza.texto)}
-                className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
+      {/* HISTORIAL */}
+      {activeTab === 'historial' && (
+        <div className="space-y-4">
+          {selectedCreativo ? (
+            <CreativoDetalle
+              creativo={selectedCreativo}
+              userId={userId}
+              onBack={() => setSelectedCreativo(null)}
+              onDeleted={() => {
+                setSelectedCreativo(null);
+                loadHistorial();
+              }}
+            />
+          ) : loadingHist ? (
+            <div className="flex items-center justify-center py-16 text-cream/55 gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
             </div>
-            <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{pieza.texto}</pre>
-            <div className={`mt-3 rounded-xl border p-3 ${audit.aprobada ? 'border-success/25 bg-success/[0.05]' : 'border-danger/25 bg-danger/[0.05]'}`}>
-              <p className="text-[11px] font-bold uppercase tracking-wider mb-1 text-cream/70">Auditoría de ingredientes</p>
-              <p className="text-xs text-cream/70">{audit.nota}</p>
-              {!audit.aprobada && <p className="text-xs text-cream/60 mt-1">Faltan: {audit.faltantes.join(' · ')}</p>}
-            </div>
-          </div>
-        );
-      })}
-
-      {stories && (
-        <div className="card-panel p-5">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <p className="text-sm font-bold text-cream">12 · La secuencia de 3 stories — acompaña siempre</p>
-            <button onClick={() => void navigator.clipboard?.writeText(stories)}
-              className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
-          </div>
-          <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{stories}</pre>
-          <p className="text-[11px] text-cream/45 mt-2">Se publican el mismo día, con horas de diferencia. Repetible 2-3 veces por semana con distinto ángulo.</p>
+          ) : (
+            <CreativoGallery
+              creativos={creativos}
+              userId={userId}
+              onSelect={(c) => setSelectedCreativo(c)}
+              onRefresh={loadHistorial}
+            />
+          )}
         </div>
       )}
 
-      {listas && (
-        <p className="text-xs text-cream/55 text-center">Tus 3 anuncios están listos. El paso que sigue vive en tu Camino: grabarlos y montar tu campaña.</p>
+      {/* MANUAL DE MARCA */}
+      {activeTab === 'manual_marca' && (
+        <ManualMarcaView
+          userId={userId}
+          perfil={perfilLocal}
+          onSaved={handleManualSaved}
+        />
+      )}
+
+      {/* EDICION DE IMAGEN */}
+      {activeTab === 'edicion' && (
+        <div className="card-panel p-5">
+          <CreativoEdicion
+            userId={userId}
+            perfil={perfilLocal ?? {}}
+            geminiKey={geminiKey}
+            onSaved={() => { /* historial se recarga al cambiar a la tab */ }}
+          />
+        </div>
+      )}
+
+      {/* GENERADORES (imagen / carrusel / youtube) */}
+      {activeTab !== 'historial' && activeTab !== 'manual_marca' && activeTab !== 'edicion' && (
+        <>
+          {/* Angulo de comunicacion (opcional) */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-cream/55" />
+              <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/65">
+                Angulo de comunicacion
+              </span>
+              <span className="text-[11px] text-cream/25">— opcional, orienta el tono visual</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {ANGULOS.map((a) => {
+                const isActive = angulo === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => setAngulo(a.id)}
+                    className={`p-2 rounded-xl border text-left transition-all ${
+                      isActive
+                        ? 'border-gold/50 bg-gold/10'
+                        : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'
+                    }`}
+                  >
+                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/80'}`}>
+                      {a.label}
+                    </div>
+                    <div className="text-[11px] text-cream/45 mt-0.5 leading-tight">{a.descripcion}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Generador (re-monta segun tab gracias al key) */}
+          <div className="card-panel p-5">
+            <ImagenGenerator
+              key={activeTab}
+              angulo={angulo}
+              perfil={perfilLocal ?? {}}
+              geminiKey={geminiKey}
+              initialFormat={config.format ?? '1:1'}
+              initialSlideCount={config.slideCount ?? 1}
+              lockFormat={config.lockFormat ?? false}
+              onImagesGenerated={handleImagesGenerated}
+            />
+          </div>
+
+          {/* Estado del auto-guardado */}
+          {images.length > 0 && (
+            <div className="flex items-center justify-between rounded-xl bg-gold/5 border border-gold/20 px-4 py-2.5">
+              <div className="flex items-center gap-2 text-xs">
+                {saving ? (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Guardando en historial…</span></>
+                ) : saved ? (
+                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automaticamente en historial</span></>
+                ) : (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Preparando…</span></>
+                )}
+              </div>
+              <button
+                onClick={() => setActiveTab('historial')}
+                className="text-[11px] font-semibold text-gold hover:underline"
+              >
+                Ver historial →
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

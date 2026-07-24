@@ -1,472 +1,502 @@
-import React, { useCallback, useRef, useState } from 'react';
+/**
+ * NuevaCampanaChat.tsx — Wizard conversacional con KAI (6 fases)
+ * Chat-based campaign creation flow
+ */
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  Loader2, Wand2, Upload, X, User, Image as ImageIcon, Download, Save, RotateCcw,
+  Send, Loader2, ArrowLeft, CheckCircle2, Lock, User,
+  Target, Users, PenTool, ImageIcon, Wrench, Sparkles,
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { editImage, base64ToDataUrl } from '../../lib/campanasImageGen';
-import type { ImageGenProgress } from '../../lib/campanasImageGen';
-import {
-  fileToBase64, loadImageDimensions, detectClosestFormat, validateImageFile,
-  resizeBase64ToExact, compressImageBase64, ACCEPT_ATTR,
-} from '../../lib/imageUploadUtils';
-import type { UploadedImageWithDimensions, UploadedImage } from '../../lib/imageUploadUtils';
-import { saveCreativo, uploadCreativeImage, upsertCreativoAsset } from '../../lib/campanasStorage';
-import { IMAGE_FORMAT_OPTIONS } from '../../lib/campanasTypes';
-import type { Campana, Creativo, ImageFormat } from '../../lib/campanasTypes';
+import { streamText } from '../../lib/aiProvider';
+import { adnContext } from '../../lib/campanasPrompts';
+import { saveCampana } from '../../lib/campanasStorage';
 import type { ProfileV2 } from '../../lib/supabase';
+import type { KaiMessage, WizardPhase, Campana } from '../../lib/campanasTypes';
+import Markdown from 'react-markdown';
+import { toast } from 'sonner';
+
+const PHASES: { id: WizardPhase; label: string; numero: number }[] = [
+  { id: 'cliente', label: 'Cliente', numero: 1 },
+  { id: 'estrategia', label: 'Estrategia', numero: 2 },
+  { id: 'audiencias', label: 'Audiencias', numero: 3 },
+  { id: 'copies', label: 'Copies', numero: 4 },
+  { id: 'creativos', label: 'Creativos', numero: 5 },
+  { id: 'montaje', label: 'Montaje', numero: 6 },
+];
+
+const PHASE_ICONS: Record<WizardPhase, React.ComponentType<{ className?: string }>> = {
+  cliente: User,
+  estrategia: Target,
+  audiencias: Users,
+  copies: PenTool,
+  creativos: ImageIcon,
+  montaje: Wrench,
+};
 
 interface Props {
-  campana?: Campana;
   userId?: string;
-  perfil: Partial<ProfileV2>;
-  geminiKey?: string;
-  onSaved?: (creativo: Creativo) => void;
+  perfil?: Partial<ProfileV2>;
+  onComplete: (campana: Campana) => void;
+  onCancel: () => void;
 }
 
-interface EditedResult {
-  base64: string;
-  mimeType: string;
-  modelUsed: string;
+interface CampaignData {
+  nombre: string;
+  rubro: string;
+  ubicacion: string;
+  ticket: string;
+  presupuesto: string;
+  objetivo: string;
+  estrategia: string;
+  audiencias: string;
+  copies: string;
+  creativos: string;
+  montaje: string;
 }
 
-export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }: Props) {
-  const [baseImage, setBaseImage] = useState<UploadedImageWithDimensions | null>(null);
-  const [characterRef, setCharacterRef] = useState<UploadedImage | null>(null);
-  const [editInstruction, setEditInstruction] = useState('');
-  const [result, setResult] = useState<EditedResult | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [progress, setProgress] = useState<ImageGenProgress | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [savedId, setSavedId] = useState<string | null>(null);
-  const baseInputRef = useRef<HTMLInputElement>(null);
-  const charInputRef = useRef<HTMLInputElement>(null);
+export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel }: Props) {
+  const [currentPhase, setCurrentPhase] = useState<WizardPhase>('cliente');
+  const [completedPhases, setCompletedPhases] = useState<Set<WizardPhase>>(new Set());
+  const [messages, setMessages] = useState<KaiMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [streaming, setStreaming] = useState(false);
+  const [campaignData, setCampaignData] = useState<CampaignData>({
+    nombre: perfil?.nombre ? `${perfil.nombre} — Nueva campaña` : '',
+    rubro: perfil?.especialidad ?? '',
+    ubicacion: '',
+    ticket: '',
+    presupuesto: '',
+    objetivo: '',
+    estrategia: '',
+    audiencias: '',
+    copies: '',
+    creativos: '',
+    montaje: '',
+  });
+  const [summaryTab, setSummaryTab] = useState<'resumen' | 'salida' | 'tips'>('resumen');
+  const [aiOutput, setAiOutput] = useState('');
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const detectedFormat: ImageFormat | null = baseImage
-    ? detectClosestFormat(baseImage.width, baseImage.height)
-    : null;
+  const currentPhaseIndex = PHASES.findIndex((p) => p.id === currentPhase);
 
-  const handleBaseUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    const validationError = validateImageFile(file);
-    if (validationError) { toast.error(validationError); return; }
-    try {
-      const uploaded = await fileToBase64(file);
-      const dims = await loadImageDimensions(uploaded.base64, uploaded.mimeType);
-      setBaseImage({ ...uploaded, ...dims });
-      setResult(null);
-      setSavedId(null);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`No se pudo cargar la imagen: ${msg}`);
+  // Initial message
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        id: 'init',
+        role: 'assistant',
+        content: perfil?.nombre
+          ? `Hola! Soy **KAI**, tu asistente de campañas.\n\nYa tengo el ADN de **${perfil.nombre}** (${perfil.especialidad ?? 'profesional de salud'}${perfil.nicho ? ` — ${perfil.nicho}` : ''}).\n\nPara crear la campaña solo necesito:\n1. **Nombre de la campaña**\n2. **Presupuesto publicitario**\n3. **Objetivo** (trafico al perfil, mensajes retargeting, o clientes potenciales)\n\nEmpezamos?`
+          : `Hola! Soy **KAI**, tu asistente de campañas.\n\nVamos a crear tu campaña paso a paso.\n\n**Cual es el nombre de tu cliente o campaña?**`,
+        timestamp: new Date().toISOString(),
+        phase: 'cliente',
+      }]);
     }
   }, []);
 
-  const handleCharUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    const validationError = validateImageFile(file);
-    if (validationError) { toast.error(validationError); return; }
-    try {
-      const uploaded = await fileToBase64(file);
-      setCharacterRef(uploaded);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`No se pudo cargar la referencia: ${msg}`);
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, []);
+  }, [messages]);
 
-  const runEdit = useCallback(async () => {
-    if (!baseImage) { toast.error('Sumi la imagen a editar'); return; }
-    if (!editInstruction.trim()) { toast.error('Describi el cambio que quieres aplicar'); return; }
-
-    setEditing(true);
-    setResult(null);
-    setSavedId(null);
-    try {
-      const format: ImageFormat = detectedFormat ?? '1:1';
-
-      // Comprimir antes de enviar al backend: PNGs grandes (3-4MB) saturan el
-      // limite de payload. Reducir a max 1536px lado mayor + JPEG q0.9 baja
-      // a ~300-500KB sin perdida visual notable. Las dims originales se
-      // preservan en baseImage para el resize final.
-      const compressedBase = await compressImageBase64(
-        baseImage.base64, baseImage.mimeType, 1536, 0.92,
-      );
-      const compressedChar = characterRef
-        ? await compressImageBase64(characterRef.base64, characterRef.mimeType, 1024, 0.85)
-        : null;
-
-      // quality 'medium' es ~4x mas rapido que 'high' y suficiente para
-      // retoques (la base ya tiene la composicion). 'high' con 2 refs
-      // grandes hace timeout en 120s con frecuencia.
-      const aiResult = await editImage(
-        { base64: compressedBase.base64, mimeType: compressedBase.mimeType },
-        editInstruction.trim(),
-        setProgress,
-        { geminiKey, format, quality: 'medium' },
-        compressedChar
-          ? { base64: compressedChar.base64, mimeType: compressedChar.mimeType }
-          : undefined,
-      );
-
-      // Resize a las dimensiones EXACTAS del original. Usamos 'cover' porque
-      // OpenAI solo acepta 1024x1024, 1024x1536 y 1536x1024 — formatos como
-      // 4:5 (0.8) caen al preset 2:3 (0.667), mas vertical. Con 'contain' eso
-      // generaba bandas oscuras a los costados que hacian ver el resultado mas
-      // finito que el original. 'cover' recorta minimamente los bordes donde
-      // el modelo extendio el canvas (no hay contenido critico ahi porque la
-      // composicion sigue a la base) y devuelve la imagen exactamente con el
-      // tamano del original sin bandas.
-      const resized = await resizeBase64ToExact(
-        aiResult.imageBase64,
-        aiResult.mimeType,
-        baseImage.width,
-        baseImage.height,
-        'cover',
-      );
-
-      setResult({
-        base64: resized.base64,
-        mimeType: resized.mimeType,
-        modelUsed: aiResult.modelUsed,
-      });
-      toast.success('Edicion lista');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error en la edicion: ${msg}`);
-    } finally {
-      setEditing(false);
-      setProgress(null);
+  const advancePhase = () => {
+    setCompletedPhases((prev) => new Set([...prev, currentPhase]));
+    const nextIndex = currentPhaseIndex + 1;
+    if (nextIndex < PHASES.length) {
+      setCurrentPhase(PHASES[nextIndex].id);
     }
-  }, [baseImage, characterRef, editInstruction, detectedFormat, geminiKey]);
+  };
 
-  const persistAsNewCreativo = useCallback(async () => {
-    if (!result || !baseImage) return;
-    if (!userId) { toast.error('Sesion sin usuario — no se puede guardar'); return; }
+  const buildSystemPrompt = (): string => {
+    const phaseInstructions: Record<WizardPhase, string> = {
+      cliente: `FASE ACTUAL: Cliente (1/6)
+Ya tienes el ADN del profesional arriba. Usa esos datos.
+Solo necesitas confirmar o completar:
+- Nombre de la campaña (sugerir uno basado en el nicho)
+- Ticket promedio del servicio (si no esta en las ofertas)
+- Presupuesto publicitario disponible
+- Objetivo principal (trafico al perfil, retargeting por mensajes, o clientes potenciales)
 
-    setSaving(true);
+Resume lo que ya sabes del profesional gracias al ADN y pregunta SOLO lo que falta.
+Cuando el usuario confirme, responde con "FASE COMPLETADA" al final.`,
+
+      estrategia: `FASE ACTUAL: Estrategia (2/6)
+Con los datos del cliente, define LA MEJOR estrategia.
+
+Datos recopilados:
+${JSON.stringify(campaignData, null, 2)}
+
+Analiza el ticket y presupuesto para recomendar:
+- Ticket < $100: leads baratos, trafico frio
+- Ticket $100-500: contenido + retargeting
+- Ticket > $500: VSL + agenda o Done-For-You
+
+Presenta tu estrategia recomendada con KPIs esperados.
+Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
+
+      audiencias: `FASE ACTUAL: Audiencias (3/6)
+Define las audiencias para Meta Ads.
+
+Estrategia definida: ${campaignData.estrategia}
+
+Recomienda:
+- Audiencias frias (intereses, comportamientos)
+- Custom audiences (retargeting)
+- Lookalikes
+- Rango de edad, genero, ubicacion
+
+Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
+
+      copies: `FASE ACTUAL: Copies (4/6)
+Genera los copies para la campaña.
+
+Datos completos: ${JSON.stringify(campaignData, null, 2)}
+
+Genera 3 variantes de copy con:
+- Hook (primera linea que frena el scroll)
+- Desarrollo (2-3 parrafos)
+- CTA
+
+Cuando el usuario elija o apruebe, responde con "FASE COMPLETADA".`,
+
+      creativos: `FASE ACTUAL: Creativos (5/6)
+Define la direccion creativa.
+
+Recomienda:
+- Tipo de creativos (imagen, carrusel, video)
+- Estilo visual
+- Elementos clave
+- Formatos
+
+Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
+
+      montaje: `FASE ACTUAL: Montaje (6/6)
+Da las instrucciones finales de montaje en Meta Ads Manager.
+
+Resume la campaña completa con un checklist de configuracion.
+Cuando el usuario confirme que esta listo, responde con "FASE COMPLETADA".`,
+    };
+
+    const adnBlock = perfil ? adnContext(perfil) : '';
+
+    return `Eres KAI, un experto en Meta Ads para profesionales de la salud.
+Tu rol es guiar al usuario en la creacion de una campaña, fase por fase.
+
+${adnBlock}
+
+${phaseInstructions[currentPhase]}
+
+REGLAS:
+- IMPORTANTE: Ya tienes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
+- Si la fase requiere datos que ya tienes del ADN, usalos directamente y confirma con el usuario
+- Solo pregunta lo que NO esta en el ADN (presupuesto publicitario, nombre especifico de la campaña, etc.)
+- Pregunta UNA cosa a la vez
+- Se conciso pero completo
+- Usa markdown para formatear
+- Tono profesional pero cercano
+- Escribe en espanol`;
+  };
+
+  const handleSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text || streaming) return;
+
+    const userMsg: KaiMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: text,
+      timestamp: new Date().toISOString(),
+      phase: currentPhase,
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setStreaming(true);
+
+    const allMessages = [...messages, userMsg].map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
     try {
-      const fechaCorta = new Date().toLocaleDateString('es-AR', {
-        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-      });
-      const creativo = await saveCreativo({
-        usuario_id: userId,
-        campana_id: campana?.id,
-        tipo: 'imagen_single',
-        angulo: 'directo',
-        texto_principal: '',
-        titulo: `Edicion ${fechaCorta}`,
-        nombre: campana ? `${campana.nombre} - Edicion ${fechaCorta}` : `Edicion ${fechaCorta}`,
-        estado: 'generado',
-        prompt_imagen: editInstruction.trim(),
-      });
-      if (!creativo) throw new Error('No se pudo crear el creativo');
+      let fullResponse = '';
+      const assistantId = `kai-${Date.now()}`;
 
-      const uploaded = await uploadCreativeImage(userId, creativo.id, 1, result.base64, result.mimeType);
-      if (uploaded) {
-        await upsertCreativoAsset({
-          creativo_id: creativo.id,
-          usuario_id: userId,
-          slide_orden: 1,
-          storage_path: uploaded.storagePath,
-          public_url: uploaded.publicUrl,
-          width: baseImage.width,
-          height: baseImage.height,
-          mime_type: result.mimeType,
+      setMessages((prev) => [...prev, {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date().toISOString(),
+        phase: currentPhase,
+      }]);
+
+      for await (const chunk of streamText({
+        systemInstruction: buildSystemPrompt(),
+        messages: allMessages,
+      })) {
+        fullResponse += chunk;
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: fullResponse,
+          };
+          return updated;
         });
       }
 
-      setSavedId(creativo.id);
-      onSaved?.(creativo);
-      toast.success('Guardado como creativo nuevo');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al guardar: ${msg}`);
+      setAiOutput(fullResponse);
+
+      // Check for phase completion
+      if (fullResponse.includes('FASE COMPLETADA')) {
+        advancePhase();
+      }
+
+      // Extract data from conversation
+      if (currentPhase === 'cliente') {
+        if (text.length > 3 && !campaignData.nombre) {
+          setCampaignData((prev) => ({ ...prev, nombre: text }));
+        }
+      }
+    } catch {
+      toast.error('Error en la respuesta de KAI.');
     } finally {
-      setSaving(false);
+      setStreaming(false);
     }
-  }, [result, baseImage, userId, campana, editInstruction, onSaved]);
+  }, [input, streaming, messages, currentPhase, campaignData, perfil]);
 
-  const downloadResult = useCallback(() => {
-    if (!result) return;
-    const a = document.createElement('a');
-    a.href = base64ToDataUrl(result.base64, result.mimeType);
-    const ext = result.mimeType === 'image/jpeg' ? 'jpg' : 'png';
-    a.download = `edicion-${Date.now()}.${ext}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }, [result]);
-
-  const continueEditing = useCallback(async () => {
-    if (!result) return;
-    const dims = await loadImageDimensions(result.base64, result.mimeType);
-    setBaseImage({
-      base64: result.base64,
-      mimeType: result.mimeType,
-      fileName: 'edicion-previa',
-      width: dims.width,
-      height: dims.height,
-    });
-    setResult(null);
-    setSavedId(null);
-    setEditInstruction('');
-  }, [result]);
-
-  const reset = useCallback(() => {
-    setBaseImage(null);
-    setCharacterRef(null);
-    setEditInstruction('');
-    setResult(null);
-    setSavedId(null);
-  }, []);
-
-  const formatLabel = detectedFormat ? IMAGE_FORMAT_OPTIONS[detectedFormat].label : null;
+  const handleQuickOption = (text: string) => {
+    setInput(text);
+  };
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div>
-        <h3 className="text-sm font-semibold text-cream">
-          Edicion de imagen
-        </h3>
-        <p className="text-xs text-cream/55 mt-1">
-          Sumi una imagen existente, escribi los cambios y opcionalmente una referencia de personaje. La salida mantiene el tamano original.
-        </p>
+    <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
+      {/* Back button */}
+      <button
+        onClick={onCancel}
+        className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-4"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
+      </button>
+
+      {/* Phase progress bar */}
+      <div className="card-panel p-3 mb-4">
+        <div className="flex">
+          {PHASES.map((phase, i) => {
+            const Icon = PHASE_ICONS[phase.id];
+            const isDone = completedPhases.has(phase.id);
+            const isActive = currentPhase === phase.id;
+            const isLocked = !isDone && !isActive;
+
+            return (
+              <div
+                key={phase.id}
+                className={`flex-1 flex flex-col items-center py-2 px-1 cursor-pointer transition-all rounded-lg ${
+                  i < PHASES.length - 1 ? 'border-r border-[rgba(232,150,46,0.1)]' : ''
+                } ${isDone ? 'bg-success/5' : isActive ? 'bg-gold/10' : 'opacity-35'}`}
+                onClick={() => {
+                  if (isDone || isActive) setCurrentPhase(phase.id);
+                }}
+              >
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-1 ${
+                  isDone ? 'bg-success/20 text-success' :
+                  isActive ? 'bg-gold/20 text-gold' :
+                  'bg-cream/5 text-cream/20'
+                }`}>
+                  {isDone ? <CheckCircle2 className="w-3 h-3" /> :
+                   isLocked ? <Lock className="w-2.5 h-2.5" /> :
+                   <span className="text-[11px] font-bold">{phase.numero}</span>}
+                </div>
+                <span className={`text-[11px] font-semibold text-center ${
+                  isDone ? 'text-success' :
+                  isActive ? 'text-gold' : 'text-cream/20'
+                }`}>
+                  {phase.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Drop zones */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Imagen a editar */}
-        <div className="card-panel p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <ImageIcon className="w-3.5 h-3.5 text-gold" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-cream/70">
-                Imagen a editar
-              </span>
-              <span className="text-[11px] text-danger/70 normal-case font-normal tracking-normal">obligatorio</span>
-            </div>
-            {baseImage && (
-              <button
-                onClick={() => setBaseImage(null)}
-                className="text-cream/45 hover:text-danger transition-colors"
-                aria-label="Quitar imagen"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {baseImage ? (
-            <div className="space-y-2">
-              <div className="relative rounded-lg overflow-hidden border border-[rgba(232,150,46,0.12)]">
-                <img
-                  src={base64ToDataUrl(baseImage.base64, baseImage.mimeType)}
-                  alt="Imagen a editar"
-                  className="w-full h-40 object-contain bg-black/30"
-                />
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-cream/55">
-                <span>{baseImage.width} × {baseImage.height}px</span>
-                {formatLabel && (
-                  <>
-                    <span className="text-cream/20">•</span>
-                    <span className="text-gold/80">{formatLabel}</span>
-                  </>
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+        {/* Chat principal */}
+        <div className="flex-1 card-panel flex flex-col">
+          {/* Messages */}
+          <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-3 scrollbar-hide">
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
+                {msg.role === 'assistant' && (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
+                    K
+                  </div>
                 )}
-                <span className="text-cream/20">•</span>
-                <span className="truncate max-w-[140px]">{baseImage.fileName}</span>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                  msg.role === 'user'
+                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
+                    : 'bg-surface border border-cream/5 rounded-bl-sm'
+                }`}>
+                  {msg.content ? (
+                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5 [&_em]:text-gold/80">
+                      <Markdown>{msg.content}</Markdown>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+            ))}
+          </div>
+
+          {/* Quick options for first phase */}
+          {currentPhase === 'cliente' && messages.length <= 2 && !streaming && (
+            <div className="px-4 pb-2 flex flex-wrap gap-2">
+              {['Trafico al perfil', 'Retargeting por mensajes', 'Clientes potenciales (leads)'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleQuickOption(opt)}
+                  className="px-3 py-2 rounded-xl text-xs border border-cream/10 text-cream/65 hover:border-gold/30 hover:text-cream/80 hover:bg-gold/5 transition-all"
+                >
+                  {opt}
+                </button>
+              ))}
             </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center gap-2 p-6 border border-dashed border-gold/30 rounded-lg cursor-pointer hover:border-gold/60 hover:bg-gold/5 transition-colors min-h-[160px]">
-              <Upload className="w-5 h-5 text-cream/45" />
-              <span className="text-xs text-cream/65">Subir imagen</span>
-              <span className="text-[11px] text-cream/25">JPG / PNG / WebP — max 10MB</span>
-              <input
-                ref={baseInputRef}
-                type="file"
-                accept={ACCEPT_ATTR}
-                className="hidden"
-                onChange={handleBaseUpload}
-              />
-            </label>
           )}
+
+          {/* Input */}
+          <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
+            <div className="flex gap-2">
+              <input
+                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+                placeholder="Escribi tu respuesta..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                disabled={streaming}
+              />
+              <button
+                onClick={handleSend}
+                disabled={streaming || !input.trim()}
+                className="btn-primary px-4 disabled:opacity-30"
+              >
+                {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Personaje de referencia */}
-        <div className="card-panel p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-cream/55" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-cream/70">
-                Personaje de referencia
-              </span>
-              <span className="text-[11px] text-cream/45 normal-case font-normal tracking-normal">opcional</span>
-            </div>
-            {characterRef && (
+        {/* Panel derecho — Resumen / Salida IA / Tips */}
+        <div className="lg:w-[300px] lg:min-w-[300px] card-panel flex flex-col">
+          {/* Tabs */}
+          <div className="flex border-b border-[rgba(232,150,46,0.1)]">
+            {(['resumen', 'salida', 'tips'] as const).map((tab) => (
               <button
-                onClick={() => setCharacterRef(null)}
-                className="text-cream/45 hover:text-danger transition-colors"
-                aria-label="Quitar referencia"
+                key={tab}
+                onClick={() => setSummaryTab(tab)}
+                className={`flex-1 py-2.5 text-[11px] font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
+                  summaryTab === tab
+                    ? 'text-gold border-gold'
+                    : 'text-cream/45 border-transparent hover:text-cream/65'
+                }`}
               >
-                <X className="w-3.5 h-3.5" />
+                {tab === 'salida' ? 'Salida IA' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
+            ))}
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 scrollbar-hide">
+            {/* Tab: Resumen */}
+            {summaryTab === 'resumen' && (
+              <div className="space-y-3">
+                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                  Campaña actual <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
+                </div>
+                <div className="card-panel overflow-hidden">
+                  <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2">
+                    <span className="text-[11px] font-bold text-gold">
+                      {campaignData.objetivo || '— Sin tipo —'}
+                    </span>
+                  </div>
+                  <div className="divide-y divide-[rgba(232,150,46,0.05)]">
+                    {[
+                      { label: 'Cliente', value: campaignData.nombre },
+                      { label: 'Especialidad', value: campaignData.rubro },
+                      { label: 'Pais', value: campaignData.ubicacion },
+                      { label: 'Ticket', value: campaignData.ticket },
+                      { label: 'Presupuesto', value: campaignData.presupuesto },
+                      { label: 'Objetivo', value: campaignData.objetivo },
+                    ].map((row) => (
+                      <div key={row.label} className="flex justify-between items-start px-3 py-2">
+                        <span className="text-[11px] font-semibold text-cream/45">{row.label}</span>
+                        <span className="text-[11px] text-cream/75 text-right">{row.value || '—'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-gold/5 border border-gold/10">
+                  <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
+                  <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                    Completa los datos del cliente para que KAI defina la estrategia correcta.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Salida IA */}
+            {summaryTab === 'salida' && (
+              <div>
+                {aiOutput ? (
+                  <div className="card-panel overflow-hidden">
+                    <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                      <span className="text-[11px] font-bold text-gold">Ultima generacion</span>
+                    </div>
+                    <div className="p-3 text-[11px] text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
+                      {aiOutput.slice(0, 500)}{aiOutput.length > 500 ? '...' : ''}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-cream/20">
+                    <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab: Tips */}
+            {summaryTab === 'tips' && (
+              <div className="space-y-2">
+                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                  Guia de fases <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
+                </div>
+                {[
+                  { n: 1, title: 'Cliente', tip: 'El ticket es lo mas importante. Define si conviene trafico frio, VSL o agenda directa.' },
+                  { n: 2, title: 'Estrategia', tip: 'Con ticket <$100: leads baratos. Con ticket >$500: VSL + agenda o DFY.' },
+                  { n: 3, title: 'Audiencias', tip: 'Para salud, los intereses de comportamiento superan a los demograficos puro.' },
+                  { n: 4, title: 'Copies', tip: 'La primera linea para el scroll. Si no para el dedo, el resto no importa.' },
+                  { n: 5, title: 'Creativos', tip: 'El creativo es el 80% del resultado. El copy es el 20%. No al reves.' },
+                  { n: 6, title: 'Montaje', tip: 'No tocar nada en las primeras 48-72h. La fase de aprendizaje necesita tiempo.' },
+                ].map((t) => (
+                  <div key={t.n} className="p-3 rounded-xl bg-gold/5 border border-gold/10">
+                    <div className="text-[11px] font-bold text-gold mb-1">{t.n} - {t.title}</div>
+                    <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                      {t.tip}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-
-          {characterRef ? (
-            <div className="space-y-2">
-              <div className="relative rounded-lg overflow-hidden border border-cream/10">
-                <img
-                  src={base64ToDataUrl(characterRef.base64, characterRef.mimeType)}
-                  alt="Personaje de referencia"
-                  className="w-full h-40 object-contain bg-black/30"
-                />
-              </div>
-              <p className="text-[11px] text-cream/55 truncate">{characterRef.fileName}</p>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center gap-2 p-6 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 hover:bg-cream/[0.02] transition-colors min-h-[160px]">
-              <Upload className="w-5 h-5 text-cream/20" />
-              <span className="text-xs text-cream/55">Subir referencia</span>
-              <span className="text-[11px] text-cream/25">para reemplazar al personaje del slide</span>
-              <input
-                ref={charInputRef}
-                type="file"
-                accept={ACCEPT_ATTR}
-                className="hidden"
-                onChange={handleCharUpload}
-              />
-            </label>
-          )}
         </div>
       </div>
-
-      {/* Instrucciones */}
-      <div>
-        <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">
-          Indicaciones de cambio
-        </label>
-        <textarea
-          value={editInstruction}
-          onChange={(e) => setEditInstruction(e.target.value)}
-          rows={4}
-          aria-label="Indicaciones de cambio"
-          placeholder="Ej: Cambia el titulo principal a 'NUEVO TITULO'. Reemplaza al personaje por la persona de la referencia. Cambia el fondo a azul oscuro manteniendo todo lo demas igual."
-          className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
-          disabled={editing}
-        />
-        {characterRef && (
-          <p className="text-[11px] text-gold/70 mt-1.5">
-            La referencia de personaje se usara para reemplazar al personaje del slide manteniendo pose, iluminacion y composicion.
-          </p>
-        )}
-      </div>
-
-      {/* Acciones */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={runEdit}
-          disabled={editing || !baseImage || !editInstruction.trim()}
-          className="flex-1 btn-primary flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {editing
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando edicion...</>
-            : <><Wand2 className="w-4 h-4" /> Editar imagen</>}
-        </button>
-        {(baseImage || characterRef || result) && !editing && (
-          <button
-            onClick={reset}
-            className="px-4 py-2 rounded-xl border border-cream/10 text-xs text-cream/65 hover:border-cream/25 hover:text-cream/80 transition-all"
-          >
-            Limpiar
-          </button>
-        )}
-      </div>
-
-      {/* Progress */}
-      {editing && progress && (
-        <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-cream/75">
-              Modelo: <span className="text-gold">{progress.modelName}</span>
-            </span>
-            <span className="text-xs text-cream/55">Intento {progress.attempt}/{progress.total}</span>
-          </div>
-          <div className="h-1.5 bg-cream/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gold rounded-full transition-all duration-500"
-              style={{ width: `${(progress.attempt / progress.total) * 100}%` }}
-            />
-          </div>
-          {progress.status === 'failed' && (
-            <p className="text-xs text-danger/60 mt-1">Fallo, intentando siguiente modelo...</p>
-          )}
-        </div>
-      )}
-
-      {/* Resultado */}
-      {result && baseImage && (
-        <div className="space-y-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-cream/55">
-            Resultado
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <p className="text-[11px] text-cream/55 uppercase tracking-wider">Original</p>
-              <div className="rounded-xl overflow-hidden border border-cream/10">
-                <img
-                  src={base64ToDataUrl(baseImage.base64, baseImage.mimeType)}
-                  alt="Original"
-                  className="w-full h-auto block"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-[11px] text-gold uppercase tracking-wider">Editada</p>
-              <div className="rounded-xl overflow-hidden border border-gold/30">
-                <img
-                  src={base64ToDataUrl(result.base64, result.mimeType)}
-                  alt="Editada"
-                  className="w-full h-auto block"
-                />
-              </div>
-              <p className="text-[11px] text-cream/45">Modelo: {result.modelUsed}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={downloadResult}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-cream/15 text-xs text-cream/70 hover:border-gold/40 hover:text-gold transition-all"
-            >
-              <Download className="w-3.5 h-3.5" /> Descargar
-            </button>
-            <button
-              onClick={persistAsNewCreativo}
-              disabled={saving || savedId !== null}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold/15 text-gold border border-gold/40 text-xs font-semibold hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {saving
-                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Guardando...</>
-                : savedId
-                  ? <><Save className="w-3.5 h-3.5" /> Guardado en historial</>
-                  : <><Save className="w-3.5 h-3.5" /> Guardar en historial</>}
-            </button>
-            <button
-              onClick={continueEditing}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-cream/10 text-xs text-cream/65 hover:border-cream/25 hover:text-cream/80 transition-all"
-            >
-              <RotateCcw className="w-3.5 h-3.5" /> Editar de nuevo
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+

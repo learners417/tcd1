@@ -1,502 +1,574 @@
-/**
- * NuevaCampanaChat.tsx — Wizard conversacional con KAI (6 fases)
- * Chat-based campaign creation flow
- */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  Send, Loader2, ArrowLeft, CheckCircle2, Lock, User,
-  Target, Users, PenTool, ImageIcon, Wrench, Sparkles,
-} from 'lucide-react';
-import { streamText } from '../../lib/aiProvider';
-import { adnContext } from '../../lib/campanasPrompts';
-import { saveCampana } from '../../lib/campanasStorage';
-import type { ProfileV2 } from '../../lib/supabase';
-import type { KaiMessage, WizardPhase, Campana } from '../../lib/campanasTypes';
-import Markdown from 'react-markdown';
+import { useMemo, useState } from 'react';
+import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, RefreshCw, UserPlus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
+import type { Profile } from '../../lib/supabase';
+import type { ExtractedProfile, MigrationStep1Data } from '../../lib/migrationTypes';
+import { extractFromText } from '../../lib/migrationExtractor';
+import {
+  buildHojaDeRutaFromExtracted,
+  getPilarOptions,
+} from '../../lib/migrationHojaDeRuta';
+import CustomSelect from '../CustomSelect';
 
-const PHASES: { id: WizardPhase; label: string; numero: number }[] = [
-  { id: 'cliente', label: 'Cliente', numero: 1 },
-  { id: 'estrategia', label: 'Estrategia', numero: 2 },
-  { id: 'audiencias', label: 'Audiencias', numero: 3 },
-  { id: 'copies', label: 'Copies', numero: 4 },
-  { id: 'creativos', label: 'Creativos', numero: 5 },
-  { id: 'montaje', label: 'Montaje', numero: 6 },
-];
+interface MigrationWizardProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  clientes?: Profile[];
+}
 
-const PHASE_ICONS: Record<WizardPhase, React.ComponentType<{ className?: string }>> = {
-  cliente: User,
-  estrategia: Target,
-  audiencias: Users,
-  copies: PenTool,
-  creativos: ImageIcon,
-  montaje: Wrench,
+const STEPS = ['Datos básicos', 'Información del cliente', 'Revisar campos', 'Confirmar'];
+
+const REVIEW_TABS = [
+  { key: 'historia', label: 'Historia' },
+  { key: 'matriz', label: 'Matriz' },
+  { key: 'metodo', label: 'Método' },
+  { key: 'identidad', label: 'Identidad' },
+] as const;
+
+type ReviewTab = typeof REVIEW_TABS[number]['key'];
+
+const FIELD_LABEL: Record<keyof ExtractedProfile, string> = {
+  historia_300: 'Historia (300 palabras)',
+  historia_150: 'Historia corta (150 palabras)',
+  historia_50: 'Historia breve (50 palabras)',
+  proposito: 'Propósito / Misión',
+  legado: 'Legado',
+  nicho: 'Nicho de mercado',
+  posicionamiento: 'Posicionamiento único',
+  por_que_oficial: '"Por qué" oficial',
+  matriz_a: 'Matriz A — Dolores actuales',
+  matriz_b: 'Matriz B — Obstáculos',
+  matriz_c: 'Matriz C — Visión del resultado',
+  metodo_nombre: 'Nombre del método',
+  metodo_pasos: 'Pasos del método',
+  oferta_high: 'Oferta Premium',
+  oferta_mid: 'Oferta Estándar',
+  oferta_low: 'Oferta de Entrada',
+  lead_magnet: 'Lead Magnet',
+  identidad_colores: 'Colores de marca',
+  identidad_tipografia: 'Tipografías',
+  identidad_logo: 'Logo / Identidad visual',
+  identidad_tono: 'Tono de comunicación',
 };
 
-interface Props {
-  userId?: string;
-  perfil?: Partial<ProfileV2>;
-  onComplete: (campana: Campana) => void;
-  onCancel: () => void;
-}
+const TAB_FIELDS: Record<ReviewTab, (keyof ExtractedProfile)[]> = {
+  historia: ['historia_300', 'historia_150', 'historia_50', 'proposito', 'legado', 'nicho', 'posicionamiento', 'por_que_oficial'],
+  matriz: ['matriz_a', 'matriz_b', 'matriz_c'],
+  metodo: ['metodo_nombre', 'metodo_pasos', 'oferta_high', 'oferta_mid', 'oferta_low', 'lead_magnet'],
+  identidad: ['identidad_colores', 'identidad_tipografia', 'identidad_logo', 'identidad_tono'],
+};
 
-interface CampaignData {
-  nombre: string;
-  rubro: string;
-  ubicacion: string;
-  ticket: string;
-  presupuesto: string;
-  objetivo: string;
-  estrategia: string;
-  audiencias: string;
-  copies: string;
-  creativos: string;
-  montaje: string;
-}
+const INPUT_CLASS = 'w-full bg-ink border border-gold/12 rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/20 focus:outline-none focus:border-gold/50 transition-colors';
+const LABEL_CLASS = 'block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5';
 
-export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel }: Props) {
-  const [currentPhase, setCurrentPhase] = useState<WizardPhase>('cliente');
-  const [completedPhases, setCompletedPhases] = useState<Set<WizardPhase>>(new Set());
-  const [messages, setMessages] = useState<KaiMessage[]>([]);
-  const [input, setInput] = useState('');
-  const [streaming, setStreaming] = useState(false);
-  const [campaignData, setCampaignData] = useState<CampaignData>({
-    nombre: perfil?.nombre ? `${perfil.nombre} — Nueva campaña` : '',
-    rubro: perfil?.especialidad ?? '',
-    ubicacion: '',
-    ticket: '',
-    presupuesto: '',
-    objetivo: '',
-    estrategia: '',
-    audiencias: '',
-    copies: '',
-    creativos: '',
-    montaje: '',
+export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: MigrationWizardProps) {
+  const [step, setStep] = useState(0);
+  const [migAvatar, setMigAvatar] = useState<'A' | 'B' | ''>('');
+  const [resyncMode, setResyncMode] = useState(false);
+  const pilarOptions = useMemo(() => getPilarOptions(), []);
+
+  // `pilar_actual` acá representa `numero_orden` (0–13) — secuencial sin ambigüedad
+  // entre P9A/P9B/P9C. Al guardar en profile se convierte al `numero` correspondiente.
+  const [form, setForm] = useState<MigrationStep1Data>({
+    nombre: '', email: '', password: '', plan: 'DWY', especialidad: '',
+    fecha_inicio: new Date().toISOString().split('T')[0], pilar_actual: 0,
   });
-  const [summaryTab, setSummaryTab] = useState<'resumen' | 'salida' | 'tips'>('resumen');
-  const [aiOutput, setAiOutput] = useState('');
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const currentPhaseIndex = PHASES.findIndex((p) => p.id === currentPhase);
+  // Step 2
+  const [textoLibre, setTextoLibre] = useState('');
+  const [extracting, setExtracting] = useState(false);
+  const [iaUsada, setIaUsada] = useState(false);
 
-  // Initial message
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{
-        id: 'init',
-        role: 'assistant',
-        content: perfil?.nombre
-          ? `Hola! Soy **KAI**, tu asistente de campañas.\n\nYa tengo el ADN de **${perfil.nombre}** (${perfil.especialidad ?? 'profesional de salud'}${perfil.nicho ? ` — ${perfil.nicho}` : ''}).\n\nPara crear la campaña solo necesito:\n1. **Nombre de la campaña**\n2. **Presupuesto publicitario**\n3. **Objetivo** (trafico al perfil, mensajes retargeting, o clientes potenciales)\n\nEmpezamos?`
-          : `Hola! Soy **KAI**, tu asistente de campañas.\n\nVamos a crear tu campaña paso a paso.\n\n**Cual es el nombre de tu cliente o campaña?**`,
-        timestamp: new Date().toISOString(),
-        phase: 'cliente',
-      }]);
+  // Step 3
+  const [extracted, setExtracted] = useState<ExtractedProfile>({});
+  const [aiFields, setAiFields] = useState<Set<keyof ExtractedProfile>>(new Set());
+  const [activeTab, setActiveTab] = useState<ReviewTab>('historia');
+
+  // Step 4
+  const [creating, setCreating] = useState(false);
+
+  function setFormField<K extends keyof MigrationStep1Data>(key: K, value: MigrationStep1Data[K]) {
+    setForm(prev => ({ ...prev, [key]: value }));
+  }
+
+  function setExtractedField(key: keyof ExtractedProfile, value: string) {
+    setExtracted(prev => ({ ...prev, [key]: value }));
+    setAiFields(prev => { const next = new Set(prev); next.delete(key); return next; });
+  }
+
+  function canGoNext(): boolean {
+    if (step === 0) {
+      if (resyncMode) return !!(form.email.trim());
+      return !!(form.nombre.trim() && form.email.trim() && form.password.trim());
     }
-  }, []);
+    if (step === 1) return true;
+    if (step === 2) return true;
+    return false;
+  }
 
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const advancePhase = () => {
-    setCompletedPhases((prev) => new Set([...prev, currentPhase]));
-    const nextIndex = currentPhaseIndex + 1;
-    if (nextIndex < PHASES.length) {
-      setCurrentPhase(PHASES[nextIndex].id);
-    }
-  };
-
-  const buildSystemPrompt = (): string => {
-    const phaseInstructions: Record<WizardPhase, string> = {
-      cliente: `FASE ACTUAL: Cliente (1/6)
-Ya tienes el ADN del profesional arriba. Usa esos datos.
-Solo necesitas confirmar o completar:
-- Nombre de la campaña (sugerir uno basado en el nicho)
-- Ticket promedio del servicio (si no esta en las ofertas)
-- Presupuesto publicitario disponible
-- Objetivo principal (trafico al perfil, retargeting por mensajes, o clientes potenciales)
-
-Resume lo que ya sabes del profesional gracias al ADN y pregunta SOLO lo que falta.
-Cuando el usuario confirme, responde con "FASE COMPLETADA" al final.`,
-
-      estrategia: `FASE ACTUAL: Estrategia (2/6)
-Con los datos del cliente, define LA MEJOR estrategia.
-
-Datos recopilados:
-${JSON.stringify(campaignData, null, 2)}
-
-Analiza el ticket y presupuesto para recomendar:
-- Ticket < $100: leads baratos, trafico frio
-- Ticket $100-500: contenido + retargeting
-- Ticket > $500: VSL + agenda o Done-For-You
-
-Presenta tu estrategia recomendada con KPIs esperados.
-Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
-
-      audiencias: `FASE ACTUAL: Audiencias (3/6)
-Define las audiencias para Meta Ads.
-
-Estrategia definida: ${campaignData.estrategia}
-
-Recomienda:
-- Audiencias frias (intereses, comportamientos)
-- Custom audiences (retargeting)
-- Lookalikes
-- Rango de edad, genero, ubicacion
-
-Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
-
-      copies: `FASE ACTUAL: Copies (4/6)
-Genera los copies para la campaña.
-
-Datos completos: ${JSON.stringify(campaignData, null, 2)}
-
-Genera 3 variantes de copy con:
-- Hook (primera linea que frena el scroll)
-- Desarrollo (2-3 parrafos)
-- CTA
-
-Cuando el usuario elija o apruebe, responde con "FASE COMPLETADA".`,
-
-      creativos: `FASE ACTUAL: Creativos (5/6)
-Define la direccion creativa.
-
-Recomienda:
-- Tipo de creativos (imagen, carrusel, video)
-- Estilo visual
-- Elementos clave
-- Formatos
-
-Cuando el usuario apruebe, responde con "FASE COMPLETADA".`,
-
-      montaje: `FASE ACTUAL: Montaje (6/6)
-Da las instrucciones finales de montaje en Meta Ads Manager.
-
-Resume la campaña completa con un checklist de configuracion.
-Cuando el usuario confirme que esta listo, responde con "FASE COMPLETADA".`,
-    };
-
-    const adnBlock = perfil ? adnContext(perfil) : '';
-
-    return `Eres KAI, un experto en Meta Ads para profesionales de la salud.
-Tu rol es guiar al usuario en la creacion de una campaña, fase por fase.
-
-${adnBlock}
-
-${phaseInstructions[currentPhase]}
-
-REGLAS:
-- IMPORTANTE: Ya tienes toda la info del ADN del profesional arriba. NO preguntes datos que ya conoces (nombre, especialidad, nicho, avatar, dolores, metodo, ofertas, etc.)
-- Si la fase requiere datos que ya tienes del ADN, usalos directamente y confirma con el usuario
-- Solo pregunta lo que NO esta en el ADN (presupuesto publicitario, nombre especifico de la campaña, etc.)
-- Pregunta UNA cosa a la vez
-- Se conciso pero completo
-- Usa markdown para formatear
-- Tono profesional pero cercano
-- Escribe en espanol`;
-  };
-
-  const handleSend = useCallback(async () => {
-    const text = input.trim();
-    if (!text || streaming) return;
-
-    const userMsg: KaiMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date().toISOString(),
-      phase: currentPhase,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-    setStreaming(true);
-
-    const allMessages = [...messages, userMsg].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
+  async function handleExtract() {
+    if (!textoLibre.trim()) return;
+    setExtracting(true);
     try {
-      let fullResponse = '';
-      const assistantId = `kai-${Date.now()}`;
-
-      setMessages((prev) => [...prev, {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date().toISOString(),
-        phase: currentPhase,
-      }]);
-
-      for await (const chunk of streamText({
-        systemInstruction: buildSystemPrompt(),
-        messages: allMessages,
-      })) {
-        fullResponse += chunk;
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            ...updated[updated.length - 1],
-            content: fullResponse,
-          };
-          return updated;
-        });
-      }
-
-      setAiOutput(fullResponse);
-
-      // Check for phase completion
-      if (fullResponse.includes('FASE COMPLETADA')) {
-        advancePhase();
-      }
-
-      // Extract data from conversation
-      if (currentPhase === 'cliente') {
-        if (text.length > 3 && !campaignData.nombre) {
-          setCampaignData((prev) => ({ ...prev, nombre: text }));
-        }
-      }
-    } catch {
-      toast.error('Error en la respuesta de KAI.');
+      const result = await extractFromText(textoLibre.trim());
+      setExtracted(result);
+      setAiFields(new Set(Object.keys(result) as (keyof ExtractedProfile)[]));
+      setIaUsada(true);
+      toast.success('Información extraída correctamente');
+      setStep(2);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error al extraer información');
     } finally {
-      setStreaming(false);
+      setExtracting(false);
     }
-  }, [input, streaming, messages, currentPhase, campaignData, perfil]);
+  }
 
-  const handleQuickOption = (text: string) => {
-    setInput(text);
-  };
+  async function handleCreate() {
+    setCreating(true);
+    try {
+      if (!supabase) throw new Error('Supabase no está configurado');
+
+      let profileId: string;
+
+      if (resyncMode) {
+        const emailNorm = form.email.trim().toLowerCase();
+        const existing = clientes.find(c => c.email?.toLowerCase() === emailNorm);
+        if (!existing) {
+          throw new Error(`No se encontró ningún cliente con el email ${form.email.trim()}`);
+        }
+        profileId = existing.id;
+      } else {
+        if (!form.nombre.trim() || !form.email.trim() || !form.password.trim()) {
+          throw new Error('Completá todos los campos requeridos');
+        }
+        // Credencial vía API admin (sin emails de confirmación → sin rate limit).
+        // El usuario queda confirmado al instante; el RPC v2 crea el profile si no existe.
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch('/api/migrar-cliente', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token ?? ''}`,
+          },
+          body: JSON.stringify({
+            email: form.email.trim(),
+            nombre: form.nombre.trim(),
+            password: form.password.trim(),
+          }),
+        });
+        const out = await resp.json().catch(() => null);
+        if (!resp.ok) throw new Error(out?.error || 'No se pudo crear el usuario');
+        if (!out?.user_id) throw new Error('No se pudo crear el usuario');
+
+        profileId = out.user_id as string;
+      }
+
+      const adnFields = Object.fromEntries(
+        Object.entries(extracted)
+          .filter(([, v]) => typeof v === 'string' && v.trim())
+          .map(([k, v]) => [k, (v as string).trim()])
+      );
+
+      // `form.pilar_actual` es `numero_orden` (0–13). El profile column espera
+      // el `numero` (0–11) por compat con código existente.
+      const pilarOrden = form.pilar_actual;
+      const pilarSel = pilarOptions.find(p => p.numero_orden === pilarOrden);
+      const pilarNumeroForProfile = pilarSel?.numero ?? 0;
+
+      const profileUpdate: Record<string, unknown> = {
+        ...(form.especialidad.trim() && { especialidad: form.especialidad.trim() }),
+        plan: form.plan,
+        fecha_inicio: form.fecha_inicio,
+        status: 'ACTIVE',
+        onboarding_completed: true,
+        ...(migAvatar ? { avatar_tipo: migAvatar } : {}),
+        pilar_actual: pilarNumeroForProfile,
+        migration_source: resyncMode ? 'admin_resync' : 'admin_migration',
+        migrated_at: new Date().toISOString(),
+        migration_raw_json: { texto: textoLibre, extracted },
+        ...adnFields,
+      };
+
+      // 1) Perfil: RPC con SECURITY DEFINER (el UPDATE directo vía cliente
+      //    Supabase es filtrado silenciosamente por RLS, afecta 0 filas sin error).
+      const { data: rpcResult, error: rpcError } = await supabase.rpc(
+        'admin_migrate_profile',
+        { target_user_id: profileId, updates: profileUpdate }
+      );
+      if (rpcError) throw rpcError;
+      if (!rpcResult) {
+        throw new Error('La actualización no devolvió resultado — verificá permisos admin');
+      }
+
+      const updatedCount =
+        (rpcResult as { updated_fields?: string[] } | null)?.updated_fields?.length ?? 0;
+
+      // 2) Hoja de ruta: sembrar progreso para que Dashboard, Roadmap y Coach
+      //    muestren los pilares anteriores como completados, con los outputs
+      //    extraídos inyectados en las metas que corresponden.
+      const hojaRows = buildHojaDeRutaFromExtracted(pilarOrden, extracted);
+      let seededRows = 0;
+      if (hojaRows.length > 0) {
+        const { data: seedResult, error: seedError } = await supabase.rpc(
+          'admin_bulk_upsert_hoja_de_ruta',
+          { target_user_id: profileId, rows_data: hojaRows }
+        );
+        if (seedError) throw seedError;
+        seededRows = typeof seedResult === 'number' ? seedResult : 0;
+      }
+
+      toast.success(
+        resyncMode
+          ? `Sincronizado: ${updatedCount} campos perfil, ${seededRows} tareas de hoja de ruta (${Object.keys(adnFields).length} ADN)`
+          : `Cliente ${form.nombre} migrado: ${seededRows} tareas completadas + ${Object.keys(adnFields).length} campos ADN`
+      );
+      onSuccess();
+      onClose();
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : typeof (e as { message?: unknown })?.message === 'string'
+            ? (e as { message: string }).message
+            : 'Error en la migración';
+      toast.error(msg);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  const extractedCount = Object.values(extracted).filter(v => typeof v === 'string' && v.trim()).length;
 
   return (
-    <div className="animate-in fade-in duration-500 flex flex-col h-[calc(100vh-10rem)]">
-      {/* Back button */}
-      <button
-        onClick={onCancel}
-        className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-4"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
-      </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-panel border border-gold/12 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
 
-      {/* Phase progress bar */}
-      <div className="card-panel p-3 mb-4">
-        <div className="flex">
-          {PHASES.map((phase, i) => {
-            const Icon = PHASE_ICONS[phase.id];
-            const isDone = completedPhases.has(phase.id);
-            const isActive = currentPhase === phase.id;
-            const isLocked = !isDone && !isActive;
-
-            return (
-              <div
-                key={phase.id}
-                className={`flex-1 flex flex-col items-center py-2 px-1 cursor-pointer transition-all rounded-lg ${
-                  i < PHASES.length - 1 ? 'border-r border-[rgba(232,150,46,0.1)]' : ''
-                } ${isDone ? 'bg-success/5' : isActive ? 'bg-gold/10' : 'opacity-35'}`}
-                onClick={() => {
-                  if (isDone || isActive) setCurrentPhase(phase.id);
-                }}
-              >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-1 ${
-                  isDone ? 'bg-success/20 text-success' :
-                  isActive ? 'bg-gold/20 text-gold' :
-                  'bg-cream/5 text-cream/20'
-                }`}>
-                  {isDone ? <CheckCircle2 className="w-3 h-3" /> :
-                   isLocked ? <Lock className="w-2.5 h-2.5" /> :
-                   <span className="text-[11px] font-bold">{phase.numero}</span>}
-                </div>
-                <span className={`text-[11px] font-semibold text-center ${
-                  isDone ? 'text-success' :
-                  isActive ? 'text-gold' : 'text-cream/20'
-                }`}>
-                  {phase.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        {/* Chat principal */}
-        <div className="flex-1 card-panel flex flex-col">
-          {/* Messages */}
-          <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-3 scrollbar-hide">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
-                    K
-                  </div>
-                )}
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                  msg.role === 'user'
-                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
-                    : 'bg-surface border border-cream/5 rounded-bl-sm'
-                }`}>
-                  {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5 [&_em]:text-gold/80">
-                      <Markdown>{msg.content}</Markdown>
-                    </div>
-                  ) : (
-                    <div className="flex gap-1">
-                      {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gold/10 flex-shrink-0">
+          <div>
+            <h2 className="text-base font-semibold text-cream">
+              {resyncMode ? 'Re-sincronizar cliente existente' : 'Migrar cliente existente'}
+            </h2>
+            <p className="text-[11px] text-cream/55 mt-0.5">Paso {step + 1} de {STEPS.length} — {STEPS[step]}</p>
           </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Quick options for first phase */}
-          {currentPhase === 'cliente' && messages.length <= 2 && !streaming && (
-            <div className="px-4 pb-2 flex flex-wrap gap-2">
-              {['Trafico al perfil', 'Retargeting por mensajes', 'Clientes potenciales (leads)'].map((opt) => (
+        {/* Step indicators */}
+        <div className="flex items-center gap-0 px-6 py-3 border-b border-gold/8 flex-shrink-0">
+          {STEPS.map((label, i) => (
+            <div key={i} className="flex items-center flex-1">
+              <div className={`flex items-center gap-1.5 ${i <= step ? 'text-gold' : 'text-cream/20'}`}>
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${i < step ? 'bg-gold text-black' : i === step ? 'border-2 border-gold text-gold' : 'border border-cream/20 text-cream/20'}`}>
+                  {i < step ? <Check className="w-3 h-3" /> : i + 1}
+                </div>
+                <span className="text-[11px] font-semibold hidden sm:block whitespace-nowrap">{label}</span>
+              </div>
+              {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-2 ${i < step ? 'bg-gold/40' : 'bg-cream/10'}`} />}
+            </div>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+
+          {/* ── PASO 1: Datos básicos ── */}
+          {step === 0 && (
+            <div className="space-y-4">
+              {/* Toggle modo */}
+              <div className="flex gap-2 p-1 bg-ink rounded-xl">
                 <button
-                  key={opt}
-                  onClick={() => handleQuickOption(opt)}
-                  className="px-3 py-2 rounded-xl text-xs border border-cream/10 text-cream/65 hover:border-gold/30 hover:text-cream/80 hover:bg-gold/5 transition-all"
+                  type="button"
+                  onClick={() => setResyncMode(false)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    !resyncMode ? 'bg-gold text-black' : 'text-cream/65 hover:text-cream/80'
+                  }`}
                 >
-                  {opt}
+                  <UserPlus className="w-3.5 h-3.5" />
+                  Nueva cuenta
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setResyncMode(true)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    resyncMode ? 'bg-gold text-black' : 'text-cream/65 hover:text-cream/80'
+                  }`}
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Re-sincronizar existente
+                </button>
+              </div>
+
+              {resyncMode ? (
+                /* Modo re-sync: solo email */
+                <div className="space-y-4">
+                  <div className="bg-gold/5 border border-gold/20 rounded-xl px-4 py-3">
+                    <p className="text-[11px] text-gold/80">
+                      La cuenta ya existe. Ingresá el email del cliente para buscarla y actualizar su perfil ADN con la nueva información.
+                    </p>
+                  </div>
+          <div className="mb-3">
+            <label className="block text-xs text-cream/75 mb-1">Avatar del sanador (para el Mentor)</label>
+            <select value={migAvatar} onChange={(e) => setMigAvatar(e.target.value as 'A' | 'B' | '')} className="w-full bg-black/30 border border-gold/15 rounded-lg px-3 py-2 text-sm text-cream">
+              <option value="">— Sin definir —</option>
+              <option value="B">B · Ya tiene método propio (poda y empaqueta)</option>
+              <option value="A">A · Construye de cero</option>
+            </select>
+          </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Email del cliente *</label>
+                    <input type="email" value={form.email} onChange={e => setFormField('email', e.target.value)}
+                      placeholder="cliente@ejemplo.com" className={INPUT_CLASS} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className={LABEL_CLASS}>Plan</label>
+                      <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
+                        <option value="DYS">DYS · Solo app</option>
+                        <option value="DWY">DWY · Mentoría</option>
+                        <option value="DFY">DFY · Implementación</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={LABEL_CLASS}>Especialidad</label>
+                      <input type="text" value={form.especialidad} onChange={e => setFormField('especialidad', e.target.value)}
+                        placeholder="Ej: Nutricionista" className={INPUT_CLASS} />
+                    </div>
+                    <div>
+                      <label className={LABEL_CLASS}>Fecha de inicio</label>
+                      <input type="date" value={form.fecha_inicio} onChange={e => setFormField('fecha_inicio', e.target.value)} className={INPUT_CLASS} />
+                    </div>
+                    <div>
+                      <label className={LABEL_CLASS}>¿Hasta qué pilar completó el cliente?</label>
+                      <CustomSelect
+                        value={String(form.pilar_actual)}
+                        onChange={v => setFormField('pilar_actual', Number(v))}
+                        options={pilarOptions}
+                      />
+                      <p className="text-[11px] text-cream/45 mt-1">
+                        Se marcan como completadas todas las tareas hasta ese pilar inclusive.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Modo nueva cuenta */
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className={LABEL_CLASS}>Nombre completo *</label>
+                    <input type="text" value={form.nombre} onChange={e => setFormField('nombre', e.target.value)}
+                      placeholder="Ej: María González" className={INPUT_CLASS} />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Email *</label>
+                    <input type="email" value={form.email} onChange={e => setFormField('email', e.target.value)}
+                      placeholder="cliente@ejemplo.com" className={INPUT_CLASS} />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Contraseña temporal *</label>
+                    <input type="password" value={form.password} onChange={e => setFormField('password', e.target.value)}
+                      placeholder="Mínimo 8 caracteres" className={INPUT_CLASS} />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Plan</label>
+                    <select value={form.plan} onChange={e => setFormField('plan', e.target.value as MigrationStep1Data['plan'])} className={INPUT_CLASS}>
+                      <option value="DYS">DYS · Solo app</option>
+                      <option value="DWY">DWY · Mentoría</option>
+                      <option value="DFY">DFY · Implementación</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Especialidad</label>
+                    <input type="text" value={form.especialidad} onChange={e => setFormField('especialidad', e.target.value)}
+                      placeholder="Ej: Nutricionista" className={INPUT_CLASS} />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>Fecha de inicio</label>
+                    <input type="date" value={form.fecha_inicio} onChange={e => setFormField('fecha_inicio', e.target.value)} className={INPUT_CLASS} />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLASS}>¿Hasta qué pilar completó?</label>
+                    <CustomSelect
+                      value={String(form.pilar_actual)}
+                      onChange={v => setFormField('pilar_actual', Number(v))}
+                      options={pilarOptions}
+                    />
+                    <p className="text-[11px] text-cream/45 mt-1">
+                      Se marcan como completadas todas las tareas hasta ese pilar.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Input */}
-          <div className="p-3 border-t border-[rgba(232,150,46,0.1)]">
-            <div className="flex gap-2">
-              <input
-                className="flex-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
-                placeholder="Escribi tu respuesta..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                disabled={streaming}
-              />
-              <button
-                onClick={handleSend}
-                disabled={streaming || !input.trim()}
-                className="btn-primary px-4 disabled:opacity-30"
-              >
-                {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Panel derecho — Resumen / Salida IA / Tips */}
-        <div className="lg:w-[300px] lg:min-w-[300px] card-panel flex flex-col">
-          {/* Tabs */}
-          <div className="flex border-b border-[rgba(232,150,46,0.1)]">
-            {(['resumen', 'salida', 'tips'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSummaryTab(tab)}
-                className={`flex-1 py-2.5 text-[11px] font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
-                  summaryTab === tab
-                    ? 'text-gold border-gold'
-                    : 'text-cream/45 border-transparent hover:text-cream/65'
-                }`}
-              >
-                {tab === 'salida' ? 'Salida IA' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 scrollbar-hide">
-            {/* Tab: Resumen */}
-            {summaryTab === 'resumen' && (
-              <div className="space-y-3">
-                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
-                  Campaña actual <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
-                </div>
-                <div className="card-panel overflow-hidden">
-                  <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2">
-                    <span className="text-[11px] font-bold text-gold">
-                      {campaignData.objetivo || '— Sin tipo —'}
-                    </span>
-                  </div>
-                  <div className="divide-y divide-[rgba(232,150,46,0.05)]">
-                    {[
-                      { label: 'Cliente', value: campaignData.nombre },
-                      { label: 'Especialidad', value: campaignData.rubro },
-                      { label: 'Pais', value: campaignData.ubicacion },
-                      { label: 'Ticket', value: campaignData.ticket },
-                      { label: 'Presupuesto', value: campaignData.presupuesto },
-                      { label: 'Objetivo', value: campaignData.objetivo },
-                    ].map((row) => (
-                      <div key={row.label} className="flex justify-between items-start px-3 py-2">
-                        <span className="text-[11px] font-semibold text-cream/45">{row.label}</span>
-                        <span className="text-[11px] text-cream/75 text-right">{row.value || '—'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-gold/5 border border-gold/10">
-                  <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
-                  <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                    Completa los datos del cliente para que KAI defina la estrategia correcta.
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab: Salida IA */}
-            {summaryTab === 'salida' && (
+          {/* ── PASO 2: Fuente de información ── */}
+          {step === 1 && (
+            <div className="space-y-4">
+              <p className="text-sm text-cream/75">
+                Pegá toda la información disponible sobre el cliente: historia, método, ofertas, descripción de marca, etc.
+                La IA extraerá los campos automáticamente.
+              </p>
               <div>
-                {aiOutput ? (
-                  <div className="card-panel overflow-hidden">
-                    <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                      <span className="text-[11px] font-bold text-gold">Ultima generacion</span>
-                    </div>
-                    <div className="p-3 text-[11px] text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
-                      {aiOutput.slice(0, 500)}{aiOutput.length > 500 ? '...' : ''}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-cream/20">
-                    <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-xs">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
-                  </div>
-                )}
+                <label className={LABEL_CLASS}>Información del cliente</label>
+                <textarea
+                  value={textoLibre}
+                  onChange={e => setTextoLibre(e.target.value)}
+                  placeholder="Pegá aquí cualquier texto con información sobre el cliente: bio, propuesta de valor, descripción de servicios, historia personal, etc."
+                  rows={12}
+                  className={`${INPUT_CLASS} resize-none`}
+                />
+                <p className="text-[11px] text-cream/45 mt-1">{textoLibre.length} caracteres</p>
               </div>
-            )}
 
-            {/* Tab: Tips */}
-            {summaryTab === 'tips' && (
-              <div className="space-y-2">
-                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
-                  Guia de fases <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
+              <div className="flex gap-3">
+                <button
+                  onClick={handleExtract}
+                  disabled={!textoLibre.trim() || extracting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-40 text-black text-sm font-bold transition-all"
+                >
+                  {extracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {extracting ? 'Extrayendo con IA...' : 'Extraer con IA'}
+                </button>
+                <button
+                  onClick={() => setStep(2)}
+                  className="px-4 py-2.5 rounded-xl border border-gold/12 text-sm text-cream/75 hover:text-cream transition-colors"
+                >
+                  Continuar sin IA
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── PASO 3: Revisión de campos ── */}
+          {step === 2 && (
+            <div className="space-y-4">
+              {iaUsada && extractedCount > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/10 border border-gold/20">
+                  <Sparkles className="w-3.5 h-3.5 text-gold flex-shrink-0" />
+                  <p className="text-[11px] text-gold">
+                    IA extrajo {extractedCount} campos. Revisá y corregí lo que necesites.
+                  </p>
                 </div>
-                {[
-                  { n: 1, title: 'Cliente', tip: 'El ticket es lo mas importante. Define si conviene trafico frio, VSL o agenda directa.' },
-                  { n: 2, title: 'Estrategia', tip: 'Con ticket <$100: leads baratos. Con ticket >$500: VSL + agenda o DFY.' },
-                  { n: 3, title: 'Audiencias', tip: 'Para salud, los intereses de comportamiento superan a los demograficos puro.' },
-                  { n: 4, title: 'Copies', tip: 'La primera linea para el scroll. Si no para el dedo, el resto no importa.' },
-                  { n: 5, title: 'Creativos', tip: 'El creativo es el 80% del resultado. El copy es el 20%. No al reves.' },
-                  { n: 6, title: 'Montaje', tip: 'No tocar nada en las primeras 48-72h. La fase de aprendizaje necesita tiempo.' },
-                ].map((t) => (
-                  <div key={t.n} className="p-3 rounded-xl bg-gold/5 border border-gold/10">
-                    <div className="text-[11px] font-bold text-gold mb-1">{t.n} - {t.title}</div>
-                    <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                      {t.tip}
-                    </div>
-                  </div>
+              )}
+
+              {/* Tabs */}
+              <div className="flex gap-1 bg-ink rounded-xl p-1">
+                {REVIEW_TABS.map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      activeTab === tab.key
+                        ? 'bg-gold text-black'
+                        : 'text-cream/65 hover:text-cream/80'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+
+              {/* Fields per tab */}
+              <div className="space-y-3">
+                {TAB_FIELDS[activeTab].map(fieldKey => {
+                  const isAi = aiFields.has(fieldKey);
+                  const isLong = ['historia_300', 'historia_150', 'metodo_pasos'].includes(fieldKey);
+                  return (
+                    <div key={fieldKey}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <label className={LABEL_CLASS.replace('mb-1.5', '')}>{FIELD_LABEL[fieldKey]}</label>
+                        {isAi && (
+                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-gold/15 text-gold">IA</span>
+                        )}
+                      </div>
+                      <textarea
+                        value={(extracted[fieldKey] as string) ?? ''}
+                        onChange={e => setExtractedField(fieldKey, e.target.value)}
+                        rows={isLong ? 5 : 2}
+                        placeholder="Completar manualmente..."
+                        className={`${INPUT_CLASS} resize-none`}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── PASO 4: Confirmar ── */}
+          {step === 3 && (
+            <div className="space-y-4">
+              <div className="bg-ink border border-gold/12 rounded-2xl p-5 space-y-3">
+                <h3 className="text-sm font-semibold text-cream">
+                  {resyncMode ? 'Resumen de la re-sincronización' : 'Resumen de la migración'}
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-[11px]">
+                  {!resyncMode && (
+                    <div><span className="text-cream/55">Nombre:</span> <span className="text-cream font-medium">{form.nombre}</span></div>
+                  )}
+                  <div><span className="text-cream/55">Email:</span> <span className="text-cream font-medium">{form.email}</span></div>
+                  <div><span className="text-cream/55">Plan:</span> <span className="text-gold font-bold">{form.plan}</span></div>
+                  <div><span className="text-cream/55">Pilar inicial:</span> <span className="text-cream font-medium">P{form.pilar_actual}</span></div>
+                  <div><span className="text-cream/55">Fecha inicio:</span> <span className="text-cream font-medium">{form.fecha_inicio}</span></div>
+                  <div><span className="text-cream/55">Especialidad:</span> <span className="text-cream font-medium">{form.especialidad || '—'}</span></div>
+                </div>
+                <div className="border-t border-gold/10 pt-3">
+                  <p className="text-[11px] text-cream/55">
+                    Campos ADN completados: <span className="text-gold font-bold">{extractedCount}</span> de {Object.keys(FIELD_LABEL).length}
+                    {iaUsada && <span className="ml-2 text-gold/60">(extraídos con IA)</span>}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gold/5 border border-gold/20 rounded-xl px-4 py-3">
+                <p className="text-[11px] text-gold/80">
+                  {resyncMode
+                    ? 'Se actualizará el perfil ADN del cliente sin tocar su cuenta ni contraseña.'
+                    : 'Se creará la cuenta con acceso directo a la plataforma. El cliente no necesitará completar el onboarding desde cero.'
+                  }
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between gap-3 px-6 py-4 border-t border-gold/10 flex-shrink-0">
+          <button
+            onClick={() => step === 0 ? onClose() : setStep(s => s - 1)}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-cream/55 hover:text-cream transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            {step === 0 ? 'Cancelar' : 'Atrás'}
+          </button>
+
+          {step < 3 ? (
+            <button
+              onClick={() => setStep(s => s + 1)}
+              disabled={!canGoNext() || (step === 1 && extracting)}
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-40 text-black text-sm font-bold transition-all"
+            >
+              Siguiente <ChevronRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleCreate}
+              disabled={creating}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all"
+            >
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {creating
+                ? (resyncMode ? 'Sincronizando...' : 'Creando cuenta...')
+                : (resyncMode ? 'Sincronizar perfil' : 'Crear cliente migrado')
+              }
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
