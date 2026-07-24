@@ -5,6 +5,7 @@
  * esa vista es la puerta al camino completo.
  */
 import React from 'react';
+import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR } from '../lib/planes';
 import { Lock, ChevronRight } from 'lucide-react';
 import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, type PiezaADN } from '../lib/adnPiezas';
 import type { ProfileV2 } from '../lib/supabase';
@@ -53,6 +54,9 @@ function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
 export default function ADN({ setCurrentPage }: ADNProps) {
   const { selladas, total } = resumenADN();
   const limitado = planLimitado();
+  const planHoy = planActual();
+  const faltantes = PIEZAS_ADN.filter((p) => !planPermitePilar(planHoy, p.pilar));
+  const nivelQueSigue = faltantes.length ? planParaPilar(Math.min(...faltantes.map((p) => p.pilar))) : null;
   const alma = PIEZAS_ADN.filter((p) => p.grupo === 'alma');
   const activos = PIEZAS_ADN.filter((p) => p.grupo === 'activo');
   const irAlCamino = setCurrentPage ? () => setCurrentPage('roadmap') : undefined;
@@ -89,11 +93,10 @@ export default function ADN({ setCurrentPage }: ADNProps) {
         <div className="space-y-2">{activos.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 
-      {limitado && bloqueadas > 0 && (
+      {nivelQueSigue && faltantes.length > 0 && (
         <div className="card-panel p-5 border border-gold/30 bg-gradient-to-b from-gold/[0.07] to-transparent">
           <p className="text-sm text-cream/85 leading-relaxed">
-            Te faltan <strong className="text-gold">{bloqueadas} piezas</strong>: tu método, tu oferta y el sistema que las vende. Son las que convierten tu precio nuevo en pacientes que lo pagan.
-          </p>
+            Te faltan <strong className="text-gold">{faltantes.length} piezas</strong> de tu ADN. Se abren con <strong className="text-cream">{NOMBRE_PLAN[nivelQueSigue]}</strong> ({PRECIO_FUNDADOR[nivelQueSigue]}) — son las que convierten lo que ya sellaste en pacientes que lo pagan.</p>
         </div>
       )}
 

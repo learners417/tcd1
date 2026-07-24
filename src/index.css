@@ -1,531 +1,755 @@
-@import "tailwindcss";
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-/* @theme · Tokens de marca como utilidades Tailwind (CP1). Mismos valores que la paleta original. */
-@theme {
-  --color-ink: #080808;
-  --color-panel: #111110;
-  --color-surface: #1A1917;
-  --color-gold: #E8962E;
-  --color-goldhi: #F4B65C;
-  --color-azure: #3B82F6;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-cream: #F2EFE9;
-  /* CP2 · escala tipográfica mobile-first (gentle +1px) */
-  --text-xs: 0.8125rem;
-  --text-sm: 0.9375rem;
-}
-@plugin "@tailwindcss/typography";
+import CeremoniaCinturon from './components/CeremoniaCinturon';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import CustomSelect from './components/CustomSelect';
+import Sidebar from './components/Sidebar';
+import BottomTabBar from './components/BottomTabBar';
+import NumeroPanel from './components/numero/NumeroPanel';
+import Topbar from './components/Topbar';
+import Dashboard from './pages/Dashboard';
+import Roadmap from './pages/Roadmap';
+import Coach from './pages/Coach';
+import Metrics from './pages/Metrics';
+import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
+import DiarioDirector from './pages/DiarioDirector';
+import Biblioteca from './pages/Biblioteca';
+import Agentes from './pages/Agentes';
+import ManualNegocio from './pages/ManualNegocio';
+import ADN from './pages/ADN';
+import Login from './pages/Login';
+import Admin from './pages/Admin';
+import Campanas from './pages/Campanas';
+import { cinturonDesdeProgreso } from './lib/cinturones';
+import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, checkoutUrl, planActualPermite } from './lib/planes';
+import CreadorContenido from './pages/CreadorContenido';
+import WelcomeWizard from './components/WelcomeWizard';
+import LoadingScreen from './components/LoadingScreen';
+import { X, User, Bell, Shield, CreditCard, LogOut, Camera, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
+import { supabase, isSupabaseReady, type Profile as SupabaseProfile } from './lib/supabase';
+import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
+import { recordTodayActivity } from './lib/activity';
+import { setSentryUser } from './lib/sentry';
+import { toast } from 'sonner';
 
-/* Safelist: dynamic pilar color classes used in Roadmap.tsx */
-@source inline("{bg,border,shadow}-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500");
-@source inline("{bg,border,shadow}-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-400");
-@source inline("bg-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{5,8,10,12,15,20,25,30,35,60}");
-@source inline("border-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{15,20,25,30,35,60}");
-@source inline("shadow-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{10,15,20}");
+type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
 
-/* ─── Design Tokens V4 — Bright Tech Palette ──────────────────── */
-:root {
-  --bg-root: #080808;
-  --bg-card: #111110;
-  --bg-surface2: #1A1917;
-  --accent-gold: #E8962E;
-  --accent-gold-hover: #F4B65C;
-  --accent-blue: #3B82F6;
-  --green-success: #22C55E;
-  --red-alert: #EF4444;
-  --text-cream: #F2EFE9;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --border-gold: rgba(232, 150, 46, 0.14);
-  --border-gold-strong: rgba(232, 150, 46, 0.30);
-  --font-body: 'Sora', system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, serif;
-
-  /* Matrix-specific tokens (preactivacion grid) so the table can
-     theme cleanly without hardcoded hex inside inline styles. */
-  --matrix-section-divider: #252830;
-  /* Sereno Pro: la profundidad iOS — sombras en capas, no un solo blur */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.50);
-  --shadow-gold: 0 8px 24px rgba(232, 150, 46, 0.22);
-  --matrix-cell-divider: rgba(26, 28, 34, 0.35);
-  --matrix-row-divider: rgba(255, 255, 255, 0.05);
-  --matrix-header-text: rgba(255, 255, 255, 0.78);
-  --matrix-subtitle-text: rgba(255, 255, 255, 0.5);
-  --matrix-pct-text: rgba(255, 255, 255, 0.7);
-  --matrix-checkbox-off: #3a3d44;
+interface Profile {
+  nombre: string;
+  email: string;
+  especialidad: string;
+  fecha_inicio: string;
+  plan: 'DWY' | 'DFY';
 }
 
-html,
-body,
-#root {
-  background-color: var(--bg-root);
-  height: 100%;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-body);
-  font-size: 16px;
-  color: var(--text-cream);
+function loadProfile(): Profile {
+  try {
+    const saved = localStorage.getItem('tcd_profile');
+    if (saved) return JSON.parse(saved);
+  } catch { /* noop */ }
+  const today = new Date().toISOString().split('T')[0];
+  return { nombre: 'Profesional', email: '', especialidad: '', fecha_inicio: today, plan: 'DWY' };
 }
 
-/* ─── Typography ─────────────────────────────────────────────────── */
-h1, h2, h3 {
-  font-family: var(--font-display);
-  font-style: italic;
+// Páginas válidas — fuente de verdad para validar lo guardado en localStorage
+const VALID_PAGES = [
+  'dashboard', 'roadmap', 'coach', 'metrics',
+  'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
+  'campanas',
+] as const;
+const PAGE_STORAGE_KEY = 'tcd_current_page';
+
+function loadCurrentPage(): string {
+  try {
+    const saved = localStorage.getItem(PAGE_STORAGE_KEY);
+    if (saved && (VALID_PAGES as readonly string[]).includes(saved)) return saved;
+  } catch { /* noop */ }
+  return 'dashboard';
 }
 
-/* ─── Utility classes ────────────────────────────────────────────── */
-@layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+type AuthState = 'loading' | 'logged_out' | 'logged_in';
 
-  /* Legacy alias — keep for backward compat during migration */
-  .glass-panel {
-    @apply bg-panel/80 backdrop-blur-xl border border-[rgba(232,150,46,0.12)] shadow-2xl;
-  }
 
-  /* New card panel */
-  .card-panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border-gold);
-    border-radius: 20px;
-    box-shadow: var(--shadow-card);
-  }
 
-  /* Primary button */
-  .btn-primary {
-    background: var(--accent-gold);
-    color: #080808;
-    font-weight: 700;
-    font-size: 0.875rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 0.75rem;
-    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px rgba(232, 150, 46, 0.4), 0 0 40px rgba(232, 150, 46, 0.1);
-      background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
-    box-shadow: var(--shadow-gold);
-    border-radius: 14px;
-  }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:hover {
-    background: var(--accent-gold-hover);
-    box-shadow: 0 6px 28px rgba(232, 150, 46, 0.30), 0 0 60px rgba(232, 150, 46, 0.15);
-    transform: translateY(-1px);
-  }
-
-  /* Secondary button */
-  .btn-secondary {
-    background: transparent;
-    color: var(--accent-gold);
-    border: 1px solid var(--border-gold);
-    font-weight: 500;
-    font-size: 0.875rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 0.75rem;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .btn-secondary:hover {
-    background: rgba(232, 150, 46, 0.1);
-    border-color: var(--border-gold-strong);
-  }
-
-  /* Input field */
-  .input-field {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-gold);
-    border-radius: 0.5rem;
-    padding: 0.625rem 1rem;
-    color: var(--text-cream);
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .input-field:focus {
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 12px rgba(232, 150, 46, 0.15);
-  }
-  .input-field::placeholder {
-    color: var(--text-muted);
-  }
-
-  /* Section title */
-  .section-title {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 1.5rem;
-    color: var(--text-cream);
-  }
-
-  /* Tech glow utility */
-  .glow-accent {
-    box-shadow: 0 0 20px rgba(232, 150, 46, 0.15), 0 0 60px rgba(232, 150, 46, 0.05);
-  }
-
-  /* Custom select — override native browser dropdown */
-  .custom-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-gold);
-    border-radius: 0.5rem;
-    padding: 0.625rem 2.5rem 0.625rem 1rem;
-    color: var(--text-cream);
-    font-size: 0.9375rem;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23F5A623' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1rem;
-  }
-  .custom-select:focus {
-    border-color: var(--accent-gold);
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  .custom-select option {
-    background: #111110;
-    color: var(--text-cream);
-    padding: 0.5rem;
-  }
-
-  /* Bell shake — se dispara al recibir una notificación nueva */
-  @keyframes bell-shake {
-    0%, 100% { transform: rotate(0); }
-    15% { transform: rotate(-18deg); }
-    30% { transform: rotate(14deg); }
-    45% { transform: rotate(-10deg); }
-    60% { transform: rotate(7deg); }
-    75% { transform: rotate(-4deg); }
-    90% { transform: rotate(2deg); }
-  }
-  .bell-shake {
-    animation: bell-shake 0.9s cubic-bezier(.36,.07,.19,.97) both;
-    transform-origin: 50% 10%;
-  }
-
-  /* Badge pulse — el contador rojo "respira" mientras haya unread */
-  @keyframes badge-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 150, 46, 0.6), 0 0 12px rgba(232, 150, 46, 0.8); }
-    50%      { box-shadow: 0 0 0 6px rgba(232, 150, 46, 0),   0 0 16px rgba(232, 150, 46, 1); }
-  }
-  .badge-pulse {
-    animation: badge-pulse 1.8s ease-in-out infinite;
-  }
+/** La Semana Blanca terminó: modo lectura digno — su trabajo preservado, la puerta abierta. */
+function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReservado?: string | null }) {
+  let quemas = 0; let racha = 0;
+  try {
+    const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+    quemas = set.has('1-P1.3') ? 1 : 0;
+    racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
+  } catch { /* noop */ }
+  const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
+  const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
+  return (
+    <div className="min-h-screen bg-ink flex items-center justify-center p-6">
+      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
+        <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+          {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
+        </h1>
+        <p className="text-sm text-cream/75 mb-5 leading-relaxed">
+          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados, esperándote.
+        </p>
+        {nombreRes && (
+          <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+        )}
+        <div className="text-left mb-5 space-y-2">
+          {([
+            ['🟢', 'Tu Sistema', '$497', 'Tu método con nombre, tu oferta construida, tu página y tu primera campaña encendida.'],
+            ['⚫', 'El Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
+          ] as const).map(([e, n, p, d]) => (
+            <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
+              <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
+              <p className="text-[11px] text-cream/55 mt-0.5">{d}</p>
+            </div>
+          ))}
+        </div>
+        <a href={(planReservado && checkoutUrl(planReservado as 'verde' | 'negro')) || waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+           className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
+          Retomar mi camino →
+        </a>
+        <p className="text-[11px] text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+      </div>
+    </div>
+  );
 }
 
-/* ─── Light theme overrides ─────────────────────────────────────────
-   Activated via [data-theme="light"] on <html>. Currently used only
-   in the admin view — see src/lib/theme.ts. The selectors target the
-   hardcoded Tailwind arbitrary-value classes that fill Admin.tsx so we
-   can flip the palette without rewriting thousands of lines of JSX.
-
-   Strategy:
-   - Light palette in the surface scale: #F3F5F8 (root) / #F2EFE9 (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
-   - Text scale: #0F172A primary, rgba(15,23,42,X) for opacity variants.
-   - Gold accent stays #E8962E for fills (gold-on-anything works) but
-     gold-as-text drops to #B45309 (amber-700) for AA contrast on white.
-   - Borders bump alpha so they read on white.
-   - Hover variants (`hover:`, `group-hover:`) get their own selectors
-     so row/card hover feedback still works in light mode.
-*/
-[data-theme="light"] {
-  --bg-root: #E8ECF1;
-  --bg-card: #F2EFE9;
-  --bg-surface2: #EAEDF2;
-  --accent-gold: #D97706;
-  --accent-gold-hover: #B45309;
-  --text-cream: #0F172A;
-  --text-muted: rgba(15, 23, 42, 0.7);
-  --border-gold: rgba(217, 119, 6, 0.4);
-  --border-gold-strong: rgba(217, 119, 6, 0.65);
-
-  --matrix-section-divider: rgba(217, 119, 6, 0.2);
-  --matrix-cell-divider: rgba(15, 23, 42, 0.06);
-  --matrix-row-divider: rgba(15, 23, 42, 0.08);
-  --matrix-header-text: rgba(15, 23, 42, 0.78);
-  --matrix-subtitle-text: rgba(15, 23, 42, 0.6);
-  --matrix-pct-text: rgba(15, 23, 42, 0.72);
-  --matrix-checkbox-off: rgba(15, 23, 42, 0.28);
-
-  color-scheme: light;
+function PaginaBloqueada({ nombre }: { nombre: string }) {
+  return (
+    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
+      <p className="text-4xl mb-4">🔒</p>
+      <h2 className="text-lg text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
+      <p className="text-sm text-cream/55">Se desbloquea con el <span className="text-goldhi">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
+    </div>
+  );
 }
 
-[data-theme="light"] html,
-[data-theme="light"] body,
-[data-theme="light"] #root {
-  background-color: var(--bg-root);
-  color: var(--text-cream);
-}
+export default function App() {
+  const [currentPage, setCurrentPageRaw] = useState<string>(loadCurrentPage);
+  // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
+  useEffect(() => {
+    try {
+      const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
+    // Todos aterrizan en HOY: ahí vive el director del día (mapa, su viernes, la sesión).
+    } catch { /* noop */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const pageHistoryRef = useRef<string[]>([]);
+  /** Puerta única: ninguna navegación entra a una sección que su plan no compró. */
+  const setCurrentPage = useCallback((page: string) => {
+    const PAGINA_PILAR: Record<string, number> = {
+      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, agentes: 5, miclinica: 5,
+    };
+    const pilarNec = PAGINA_PILAR[page];
+    let destino = pilarNec !== undefined && !planActualPermite(pilarNec) ? 'roadmap' : page;
+    // Diario y El Método se ganan terminando Sanar el Dinero (cinturón 2) — igual que el menú.
+    if ((page === 'diario' || page === 'biblioteca') && destino === page) {
+      try {
+        const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+        if (cinturonDesdeProgreso(hechas).orden < 2) destino = 'roadmap';
+      } catch { /* noop */ }
+    }
+    setCurrentPageRaw((prev) => {
+      if (destino !== prev) pageHistoryRef.current.push(prev);
+      return destino;
+    });
+  }, []);
+  const goBack = useCallback(() => {
+    setCurrentPageRaw((prev) => {
+      const target = pageHistoryRef.current.pop() ?? 'dashboard';
+      return target === prev ? 'dashboard' : target;
+    });
+  }, []);
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
+  const [profile, setProfile] = useState<Profile>(loadProfile);
+  const [profileDraft, setProfileDraft] = useState<Profile>(loadProfile);
+  const [authState, setAuthState] = useState<AuthState>('loading');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [supabaseProfile, setSupabaseProfile] = useState<SupabaseProfile | null>(null);
 
-/* ── Surface hierarchy ────────────────────────────────────────────
-   Body (root)        → #E8ECF1 (slate-100ish)
-   Sidebar/columns    → #F2EFE9   (sticky, max contrast against body)
-   Panel wrappers     → #F8FAFC   (subtle slate-50 — sits between body and cards)
-   Cards/popovers     → #F2EFE9   (pop on panel)
-   Surface2 (settings sidebar etc.) → #EEF1F5
-*/
-[data-theme="light"] .bg-\[\#080808\]    { background-color: #E8ECF1 !important; }
-[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
-[data-theme="light"] .bg-\[\#111110\]    { background-color: #F8FAFC !important; }
-[data-theme="light"] .bg-\[\#111110\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
-[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #EEF1F5 !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/20 { background-color: rgba(232, 150, 46, 0.06) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/30 { background-color: rgba(232, 150, 46, 0.09) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
-[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #EEF1F5 !important; }
+  // El avance vive en la base: sin esto, un cliente migrado (o recién logueado en
+  // otro teléfono) arranca con el set vacío → cinturón blanco → todo cerrado.
+  useEffect(() => {
+    const uid = supabaseProfile?.id;
+    if (!uid || !supabase) return;
+    let vivo = true;
+    void (async () => {
+      const { data } = await supabase.from('hoja_de_ruta').select('pilar_numero, meta_codigo, completada').eq('usuario_id', uid);
+      if (!vivo || !data) return;
+      try {
+        const locales = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+        (data as Array<{ pilar_numero: number; meta_codigo: string; completada: boolean }>)
+          .filter((r) => r.completada)
+          .forEach((r) => locales.add(`${r.pilar_numero}-${r.meta_codigo}`));
+        localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...locales]));
+      } catch { /* noop */ }
+    })();
+    return () => { vivo = false; };
+  }, [supabaseProfile?.id]);
 
-/* ── Surface backgrounds — Tailwind standard `white` token ───────── */
-[data-theme="light"] .bg-white\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-white\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
-/* ── Surface backgrounds — rgba shorthand variants ───────────────── */
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(15, 23, 42, 0.05) !important; }
+  // Password recovery (post-click en mail de reset)
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [recoveryPassword, setRecoveryPassword] = useState('');
+  const [recoveryPassword2, setRecoveryPassword2] = useState('');
+  const [recoveryShowPwd, setRecoveryShowPwd] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
-/* ── Hover-variant backgrounds — restore feedback in light mode ──── */
-[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #EAEDF2 !important; }
-[data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
-[data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #EAEDF2 !important; }
+  // ─── Auth init ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isSupabaseReady() || !supabase) {
+      // No Supabase configured — skip auth, go straight to app (dev mode)
+      const existing = localStorage.getItem('tcd_profile');
+      if (!existing) localStorage.setItem('tcd_profile', JSON.stringify(profile));
+      setAuthState('logged_in');
+      return;
+    }
 
-/* ── Light scrim overlays inside content (not modal backdrops) ───── */
-[data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.08) !important; }
-/* Modal scrims (bg-black/60/70/80) stay dark intentionally so modals
-   keep clear separation from the page underneath. */
+    // Safety valve: never leave user stuck on spinner
+    const safetyTimer = setTimeout(() => {
+      setAuthState(prev => prev === 'loading' ? 'logged_out' : prev);
+    }, 5000);
 
-/* ── White-on-content overlays → invert to dark overlays ─────────── */
-[data-theme="light"] .bg-\[\#F2EFE9\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+    // Single source of truth — handles page load (INITIAL_SESSION) + login + logout
+    // TOKEN_REFRESHED is intentionally ignored to avoid UI flicker when switching tabs
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        clearTimeout(safetyTimer);
+        setSentryUser(null);
+        setSupabaseProfile(null);
+        setAuthState('logged_out');
+        return;
+      }
+      if (event === 'TOKEN_REFRESHED') {
+        // Token silently refreshed — user is still logged in, no UI update needed
+        clearTimeout(safetyTimer);
+        return;
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        // El usuario llegó desde el mail de reset — pedir nueva contraseña antes
+        // de cargar el resto de la app.
+        clearTimeout(safetyTimer);
+        setShowRecoveryModal(true);
+        return;
+      }
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        // Asociar usuario a Sentry para que los errores muestren quién los disparó.
+        setSentryUser({ id: session.user.id, email: session.user.email });
+        // Only do a full profile load on real login / first load, not on tab refocus
+        setProfileLoading(true);
+        await loadSupabaseProfile(session.user.id);
+        clearTimeout(safetyTimer);
+        setProfileLoading(false);
+        setAuthState('logged_in');
+        // Registrar el día como "conectado" (no bloqueante, idempotente, máx 1/día).
+        void recordTodayActivity(session.user.id);
+      }
+    });
 
-/* ── Text scale ─────────────────────────────────────────────────────
-   White-on-dark and slate-on-light are not symmetric perceptually:
-   dark text on white reads MUCH heavier than white text on black at
-   the same opacity. So we shift the mapping down a notch — what was
-   `/60` on white becomes ~0.6 slate, not 0.72. This keeps icons and
-   muted UI feeling soft instead of stamped. Mid range still hits AA.
-*/
-[data-theme="light"] .text-white       { color: #0F172A !important; }
-[data-theme="light"] .text-white\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-white\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-white\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-white\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-white\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-white\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-white\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+    return () => {
+      clearTimeout(safetyTimer);
+      subscription.unsubscribe();
+    };
+  }, []);
 
-[data-theme="light"] .text-\[\#F2EFE9\]       { color: #0F172A !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
+  async function loadSupabaseProfile(userId: string): Promise<boolean> {
+    if (!supabase) return false;
+    try {
+      const fetchPromise = supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-/* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-\[\#F2EFE9\]:hover     { color: #0F172A !important; }
-[data-theme="light"] .hover\:text-white:hover            { color: #0F172A !important; }
-[data-theme="light"] .group:hover .group-hover\:text-\[\#F2EFE9\] { color: #0F172A !important; }
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: new Error('Profile fetch timeout') }), 4000)
+      );
 
-/* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
-/* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
-[data-theme="light"] .text-\[\#E8962E\] { color: #B45309 !important; }
-
-/* ── Gold borders — bump alpha so they remain visible on white ───── */
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(217, 119, 6, 0.3) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(217, 119, 6, 0.32) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(217, 119, 6, 0.38) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(217, 119, 6, 0.42) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(217, 119, 6, 0.5) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(217, 119, 6, 0.6) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(217, 119, 6, 0.7) !important; }
-
-/* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-\[\#F2EFE9\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-white\/5           { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-white\/10          { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-white\/20          { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(15, 23, 42, 0.1) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(15, 23, 42, 0.22) !important; }
-
-/* ── Inline-style fallback ───────────────────────────────────────────
-   React serializes `color: '#F2EFE9'` to `color: rgb(255, 255, 255)`
-   in the DOM style attribute, so we match both forms.            */
-[data-theme="light"] [style*="color: #F2EFE9"],
-[data-theme="light"] [style*="color:#F2EFE9"],
-[data-theme="light"] [style*="color: rgb(255, 255, 255)"],
-[data-theme="light"] [style*="color:rgb(255,255,255)"] {
-  color: #0F172A !important;
-}
-
-/* ── Shadow — soften the heavy black shadows on white surfaces ───── */
-[data-theme="light"] .shadow-2xl {
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
-}
-[data-theme="light"] .shadow-xl {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
-}
-[data-theme="light"] .shadow-black\/50 {
-  --tw-shadow-color: rgba(15, 23, 42, 0.15) !important;
-}
-
-/* ── Tailwind Typography `prose-invert` ──────────────────────────────
-   `prose-invert` is the dark-bg variant of @tailwindcss/typography —
-   it swaps the prose color tokens to light values. On a light theme
-   panel that makes body text invisible. Remap the invert tokens to
-   slate so the output content (Markdown render, code blocks, lists,
-   etc.) keeps readable contrast without changing the className.
-*/
-[data-theme="light"] .prose-invert {
-  --tw-prose-invert-body: #0F172A;
-  --tw-prose-invert-headings: #0F172A;
-  --tw-prose-invert-lead: rgba(15, 23, 42, 0.78);
-  --tw-prose-invert-links: #B45309;
-  --tw-prose-invert-bold: #0F172A;
-  --tw-prose-invert-counters: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-bullets: rgba(15, 23, 42, 0.4);
-  --tw-prose-invert-hr: rgba(15, 23, 42, 0.15);
-  --tw-prose-invert-quotes: rgba(15, 23, 42, 0.85);
-  --tw-prose-invert-quote-borders: rgba(217, 119, 6, 0.4);
-  --tw-prose-invert-captions: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-code: #0F172A;
-  --tw-prose-invert-pre-code: #0F172A;
-  --tw-prose-invert-pre-bg: rgba(15, 23, 42, 0.05);
-  --tw-prose-invert-th-borders: rgba(15, 23, 42, 0.2);
-  --tw-prose-invert-td-borders: rgba(15, 23, 42, 0.1);
-}
-
-
-/* ═══ DOJO PREMIUM (E2): la cinta y el tilde ceremonial ═══ */
-@keyframes cinta-seda { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
-.cinta-brillo { animation: cinta-seda 9s ease-in-out infinite; }
-@keyframes tilde-ceremonial { 0% { transform: scale(0.6); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-.tilde-ceremonial { animation: tilde-ceremonial 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
-@media (prefers-reduced-motion: reduce) { .cinta-brillo, .tilde-ceremonial { animation: none; } }
-
-/* ═══════════════════════════════════════════════════════════════
-   LOTE H · PULIDO ESTÉTICO iOS — de 6 a 10
-   Profundidad sutil, aire, movimiento con propósito.
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Sombras suaves tipo iOS (profundidad sin bordes gruesos) */
-.card-ios {
-  background: var(--surface, #111110);
-  border: 1px solid rgba(232, 150, 46, 0.10);
-  border-radius: 20px;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.20),
-    0 8px 24px rgba(0, 0, 0, 0.28);
-  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1), box-shadow 0.25s ease;
-}
-.card-ios:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.24),
-    0 16px 40px rgba(0, 0, 0, 0.36);
-}
-
-/* Botón primario con profundidad y respuesta táctil */
-.btn-ios-primary {
-  background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
-  color: #080808;
-  border-radius: 14px;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(232, 150, 46, 0.30);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-}
-.btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(232, 150, 46, 0.42); }
-.btn-ios-primary:active { transform: scale(0.97); }
-
-/* Números tabulares para métricas (alineación premium) */
-.num-tab { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-
-/* Aire: respiración entre secciones (el espacio negativo de iOS) */
-.stack-ios > * + * { margin-top: 1.75rem; }
-
-/* Scrollbar sutil (detalle que se nota) */
-* { scrollbar-width: thin; scrollbar-color: rgba(232,150,46,0.25) transparent; }
-*::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: rgba(232,150,46,0.22); border-radius: 8px; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(232,150,46,0.38); }
-*::-webkit-scrollbar-track { background: transparent; }
-
-/* Entrada suave de las tarjetas al aparecer */
-@keyframes fade-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-rise { animation: fade-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-@media (prefers-reduced-motion: reduce) {
-  .card-ios, .btn-ios-primary, .fade-rise { transition: none; animation: none; }
-}
-
-/* ═══════════ CP3 · Primitivos e interacción de nivel app ═══════════ */
-@layer base {
-  button, a, input, textarea, select, label, [role="button"], summary {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+      if (!error && data) {
+        setSupabaseProfile(data as SupabaseProfile);
+        try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
+        syncProfileToLocalStorage(data as SupabaseProfile);
+        const p: Profile = {
+          nombre: data.nombre,
+          email: data.email,
+          especialidad: data.especialidad ?? '',
+          fecha_inicio: data.fecha_inicio,
+          plan: data.plan,
+        };
+        setProfile(p);
+        setProfileDraft(p);
+        return true;
+      }
+      console.warn('loadSupabaseProfile: no data or timeout.', error?.message);
+      return false;
+    } catch (err) {
+      console.error('loadSupabaseProfile exception:', err);
+      return false;
+    }
   }
-  /* Foco visible SOLO por teclado — accesibilidad sin molestar al mouse */
-  :focus-visible {
-    outline: 2px solid var(--color-gold);
-    outline-offset: 2px;
+
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0;
+  }, [currentPage]);
+
+  // Persistir la página actual para que sobreviva al refresh
+  useEffect(() => {
+    try {
+      localStorage.setItem(PAGE_STORAGE_KEY, currentPage);
+    } catch { /* noop */ }
+  }, [currentPage]);
+
+  const openSettings = () => {
+    setProfileDraft(loadProfile());
+    setShowSettings(true);
+  };
+
+  const handleAvatarUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      localStorage.setItem('tcd_avatar', dataUrl);
+      setAvatarUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const saveProfile = async () => {
+    localStorage.setItem('tcd_profile', JSON.stringify(profileDraft));
+    setProfile(profileDraft);
+
+    // Also update in Supabase if available
+    if (supabase && supabaseProfile) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          nombre: profileDraft.nombre,
+          especialidad: profileDraft.especialidad,
+          fecha_inicio: profileDraft.fecha_inicio,
+          plan: profileDraft.plan,
+        })
+        .eq('id', supabaseProfile.id);
+
+      if (error) {
+        toast.error('Error al guardar en la nube. Los cambios se guardaron localmente.');
+      }
+    }
+
+    setShowSettings(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    localStorage.removeItem('tcd_profile');
+    setShowSettings(false);
+    setAuthState('logged_out');
+  };
+
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (recoveryPassword.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (recoveryPassword !== recoveryPassword2) {
+      toast.error('Las contraseñas no coinciden.');
+      return;
+    }
+    setRecoveryLoading(true);
+    const { error } = await updatePassword(recoveryPassword);
+    setRecoveryLoading(false);
+    if (error) {
+      toast.error(`Error: ${error}`);
+      return;
+    }
+    toast.success('Contraseña actualizada. Ya puedes usar la app.');
+    setShowRecoveryModal(false);
+    setRecoveryPassword('');
+    setRecoveryPassword2('');
+  };
+
+  const RecoveryModal = showRecoveryModal ? (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+          <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
+          <p className="text-[11px] text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
+        </div>
+        <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
+              <input
+                type={recoveryShowPwd ? 'text' : 'password'}
+                value={recoveryPassword}
+                onChange={(e) => setRecoveryPassword(e.target.value)}
+                placeholder="Mínimo 8 caracteres"
+                required
+                minLength={8}
+                disabled={recoveryLoading}
+                autoFocus
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => setRecoveryShowPwd(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/70 transition-colors"
+              >
+                {recoveryShowPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
+              <input
+                type={recoveryShowPwd ? 'text' : 'password'}
+                value={recoveryPassword2}
+                onChange={(e) => setRecoveryPassword2(e.target.value)}
+                placeholder="Repetí la contraseña"
+                required
+                disabled={recoveryLoading}
+                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={recoveryLoading || !recoveryPassword || !recoveryPassword2}
+            className="w-full py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+          >
+            {recoveryLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : 'Guardar contraseña'}
+          </button>
+        </form>
+      </div>
+    </div>
+  ) : null;
+
+  // ─── Loading state ──────────────────────────────────────────────────────────
+  // Solo mostramos el loader cuando no tenemos profile todavia. Si Supabase
+  // refresca el token al volver el foco al browser, profileLoading pega un
+  // flash pero ya tenemos el profile cargado — no hay que re-renderizar el
+  // loader en ese caso (sino la app parece que recarga cada vez que cambias
+  // de pestaña).
+  if (authState === 'loading' || (profileLoading && !supabaseProfile)) {
+    return (
+      <>
+        <LoadingScreen />
+        {RecoveryModal}
+      </>
+    );
   }
-  :focus:not(:focus-visible) { outline: none; }
-}
-@layer utilities {
-  /* Área táctil mínima (44px) + estado disabled en los primitivos de clase */
-  .btn-primary, .btn-secondary { min-height: 2.75rem; }
-  .btn-primary:disabled, .btn-secondary:disabled {
-    opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none;
+
+  // ─── Not logged in ──────────────────────────────────────────────────────────
+  if (authState === 'logged_out') {
+    return (
+      <>
+        <Login onLogin={() => { /* noop: onAuthStateChange handles state */ }} />
+        {RecoveryModal}
+      </>
+    );
   }
-  .input-field { min-height: 2.75rem; }
-  /* Botón de ícono (para CP4 y adopción gradual) */
-  .btn-icon {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 2.75rem; min-height: 2.75rem; border-radius: 0.75rem;
-    color: var(--color-cream); transition: background .2s, color .2s;
+
+  // ─── Admin view ─────────────────────────────────────────────────────────────
+  if (supabaseProfile?.rol === 'admin') {
+    return (
+      <>
+        <Admin adminProfile={supabaseProfile} onSignOut={handleSignOut} />
+        {RecoveryModal}
+      </>
+    );
   }
-  .btn-icon:hover { background: color-mix(in oklab, var(--color-gold) 12%, transparent); }
+
+  // ─── Onboarding wizard (primer login) ──────────────────────────────────────
+  if (supabaseProfile && supabaseProfile.onboarding_completed === false) {
+    return (
+      <>
+        <WelcomeWizard
+          profile={supabaseProfile}
+          onComplete={(firstPage) => {
+            if (firstPage) setCurrentPage(firstPage);
+            loadSupabaseProfile(supabaseProfile.id);
+          }}
+        />
+        {RecoveryModal}
+      </>
+    );
+  }
+
+  // ─── Main app ────────────────────────────────────────────────────────────────
+  // ═══ La Semana Blanca vencida: modo lectura digno (nada se borra) ═══
+  if (supabaseProfile && accesoVencido(supabaseProfile)) {
+    return <SemanaCompleta nombre={supabaseProfile.nombre ?? undefined} planReservado={supabaseProfile.plan_reservado} />;
+  }
+
+  return (
+    <div className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
+      {/* Background Glow */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
+
+      {/* Mobile overlay backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      <Sidebar
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        onOpenSettings={openSettings}
+        onSignOut={handleSignOut}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(v => !v)}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
+
+      <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
+        <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
+        <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
+          <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+            <CeremoniaCinturon />
+            {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
+            {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
+            {currentPage === 'diario' && (
+              <DiarioDirector
+                userId={supabaseProfile?.id}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+            {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'numero' && <NumeroPanel userId={supabaseProfile?.id} />}
+            {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
+            {currentPage === 'agentes' && (
+              <Agentes
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
+            {currentPage === 'campanas' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'campanas' && (
+              <Campanas
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+            {currentPage === 'creador' && (() => {
+              try {
+                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
+              } catch { /* noop */ }
+              return null;
+            })() || currentPage === 'creador' && (
+              <CreadorContenido
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
+              <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-cream/75 hover:text-cream transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-1 overflow-hidden">
+              {/* Settings Sidebar */}
+              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-surface/50 flex flex-col">
+                <div className="flex-1 space-y-2">
+                  {([
+                    { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
+                    { id: 'notificaciones' as SettingsTab, label: 'Notificaciones', icon: Bell },
+                    { id: 'seguridad' as SettingsTab, label: 'Seguridad', icon: Shield },
+                    { id: 'facturacion' as SettingsTab, label: 'Facturación', icon: CreditCard },
+                  ]).map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSettingsTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
+                        settingsTab === tab.id
+                          ? 'bg-gold/10 text-gold font-medium'
+                          : 'text-cream/75 hover:bg-gold/5 hover:text-cream'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" /> {tab.label}
+                    </button>
+                  ))}
+                </div>
+                {/* Sign out */}
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors mt-auto"
+                >
+                  <LogOut className="w-4 h-4" /> Cerrar sesión
+                </button>
+              </div>
+
+              {/* Settings Content */}
+              <div className="w-2/3 p-6 overflow-y-auto">
+                {settingsTab === 'perfil' && (
+                  <div className="space-y-6">
+                    {/* Avatar upload */}
+                    <div className="flex flex-col items-center gap-3">
+                      <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                      <button
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
+                      >
+                        {avatarUrl ? (
+                          <img loading="lazy" src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gold/10 flex items-center justify-center text-2xl font-bold text-gold">
+                            {(profileDraft.nombre || 'P').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-white" />
+                        </div>
+                      </button>
+                      <p className="text-xs text-cream/55">Clic para cambiar foto de perfil</p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-cream mb-4">Información Personal</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs text-cream/75 mb-1">Nombre Completo</label>
+                          <input
+                            type="text"
+                            value={profileDraft.nombre}
+                            onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-cream/75 mb-1">Correo Electrónico</label>
+                          <input
+                            type="email"
+                            value={profileDraft.email}
+                            disabled
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
+                          />
+                          <p className="text-xs text-cream/45 mt-1">El email no se puede cambiar desde aquí</p>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-cream/75 mb-1">Especialidad</label>
+                          <input
+                            type="text"
+                            value={profileDraft.especialidad}
+                            onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
+                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
+                      <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors">
+                        Cancelar
+                      </button>
+                      <button onClick={saveProfile} className="btn-primary">
+                        Guardar Cambios
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'notificaciones' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium text-cream mb-4">Preferencias de Notificaciones</h3>
+                    {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
+                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
+                        <span className="text-sm text-cream/80">{item}</span>
+                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-gold" />
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                {settingsTab === 'seguridad' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium text-cream mb-4">Seguridad</h3>
+                    <div>
+                      <p className="text-sm text-cream/75 mb-2">Cambia tu contraseña cuando quieras: te enviamos un email con el enlace seguro.</p>
+                      <button
+                        onClick={async () => {
+                          const email = supabaseProfile?.email;
+                          if (!email || !supabase) return;
+                          const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+                          if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
+                          else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
+                        }}
+                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-gold text-sm hover:bg-gold/10 transition-colors"
+                      >
+                        Enviarme el email de restablecimiento
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'facturacion' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium text-cream mb-4">Facturación</h3>
+                    <div className="bg-surface/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-cream/80">Plan Actual</span>
+                        <span className="px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-medium">
+                          Tu Clínica Digital — {profile.plan}
+                        </span>
+                      </div>
+                      <p className="text-xs text-cream/55">Programa de 90 días</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {RecoveryModal}
+    </div>
+  );
 }

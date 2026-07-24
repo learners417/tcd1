@@ -1,3 +1,4 @@
+import { teaserDeMeta } from '../lib/teasers';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { listarEvidencias, subirEvidencia } from '../lib/evidencia';
 import {
@@ -49,7 +50,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Palette,
   BarChart3,
 };
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { HojaDeRutaItem, VentaRegistrada, ProfileV2 } from '../lib/supabase';
 import {
   SEED_ROADMAP_V2,
@@ -70,7 +71,7 @@ import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
-import { planDe, planPermitePilar, NOMBRE_PLAN, waLink } from '../lib/planes';
+import { planDe, planPermitePilar, NOMBRE_PLAN, waLink, planParaPilar, checkoutUrl, PRECIO_FUNDADOR } from '../lib/planes';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
 import CintaCinturon from '../components/CintaCinturon';
@@ -673,17 +674,14 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
 
       // Sincronizar con Supabase
       if (isSupabaseReady() && supabase && userId) {
-        await supabase.from('hoja_de_ruta').upsert(
-          {
+        await guardarFila('hoja_de_ruta', {
             usuario_id: userId,
             pilar_numero: pilarNum,
             meta_codigo: meta.codigo,
             completada: ahoraCompletada,
             es_estrella: meta.es_estrella,
             fecha_completada: ahoraCompletada ? new Date().toISOString().split('T')[0] : null,
-          },
-          { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-        );
+          }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
       }
     },
     [completadas, userId],
@@ -740,8 +738,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     setTimeout(() => setCelebracion(null), 5000);
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
-      supabase.from('hoja_de_ruta').upsert(
-        {
+      guardarFila('hoja_de_ruta', {
           usuario_id: userId,
           pilar_numero: pilarNum,
           meta_codigo: meta.codigo,
@@ -749,9 +746,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           es_estrella: meta.es_estrella,
           fecha_completada: new Date().toISOString().split('T')[0],
           output_generado: { texto: outputTexto },
-        },
-        { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-      ).then(() => {});
+        }, ['usuario_id', 'pilar_numero', 'meta_codigo']).then(() => {});
 
       // ─── Save to profiles table (ADN field) ─────────────────────────────
       if (meta.adn_field) {
@@ -802,17 +797,14 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
     }
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
-      supabase.from('hoja_de_ruta').upsert(
-        {
+      guardarFila('hoja_de_ruta', {
           usuario_id: userId,
           pilar_numero: pilarNum,
           meta_codigo: meta.codigo,
           completada: true,
           es_estrella: meta.es_estrella,
           fecha_completada: new Date().toISOString().split('T')[0],
-        },
-        { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-      ).then(() => {});
+        }, ['usuario_id', 'pilar_numero', 'meta_codigo']).then(() => {});
     }
   }, [userId]);
 
@@ -1017,7 +1009,12 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                     <button
                       key={pilar.numero}
                       onClick={() => {
-                        if (pilar.estado === 'plan_bloqueado') { window.open(waLink(`Hola · Quiero subir mi plan para desbloquear «${pilar.titulo}»`), '_blank'); return; }
+                        if (pilar.estado === 'plan_bloqueado') {
+                          const planNec = planParaPilar(pilar.numero);
+                          const url = checkoutUrl(planNec);
+                          window.open(url || waLink(`Hola · Quiero abrir «${pilar.titulo}» (${NOMBRE_PLAN[planNec]} ${PRECIO_FUNDADOR[planNec]})`), '_blank');
+                          return;
+                        }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
                         setPilarAbierto(siguiente);
                         if (siguiente !== null) {
@@ -1076,13 +1073,14 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
                         </p>
                       )}
-                      {pilar.estado === 'plan_bloqueado' && (
-                        <span className="block text-[11px] text-gold/80 mt-1.5 leading-tight">
-                          {planDe(perfil) === 'blanco'
-                            ? 'Te espera del otro lado de tus 5 días →'
-                            : 'Pertenece a un plan superior · Subir (pagas solo la diferencia) →'}
-                        </span>
-                      )}
+                      {pilar.estado === 'plan_bloqueado' && (() => {
+                        const planNec = planParaPilar(pilar.numero);
+                        return (
+                          <span className="block text-[11px] text-gold/85 mt-1.5 leading-relaxed">
+                            Se abre con <strong>{NOMBRE_PLAN[planNec]}</strong> · {PRECIO_FUNDADOR[planNec]} — toca para verlo
+                          </span>
+                        );
+                      })()}
                     </button>
                   );
                 })}
@@ -1242,10 +1240,17 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                             </span>
                           )}
                           {!unlocked && (
-                            <span className="text-xs text-cream/45 font-medium flex items-center gap-1">
-                              <Lock className="w-3 h-3" />{' '}
-                              {bloqueoMsg ?? 'Completa la tarea anterior primero'}
-                            </span>
+                            teaserDeMeta(meta.codigo) ? (
+                              <span className="text-xs text-gold/80 font-medium flex items-start gap-1.5 leading-relaxed">
+                                <Lock className="w-3 h-3 mt-0.5 shrink-0" />
+                                <span>{teaserDeMeta(meta.codigo)}</span>
+                              </span>
+                            ) : (
+                              <span className="text-xs text-cream/45 font-medium flex items-center gap-1">
+                                <Lock className="w-3 h-3" />{' '}
+                                {bloqueoMsg ?? 'Completa la tarea anterior primero'}
+                              </span>
+                            )
                           )}
                         </div>
                       </div>
@@ -1257,11 +1262,19 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                         {meta.tipo === 'VIDEO' && (
                           <TaskVideo
                             meta={meta}
-                            onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                            onComplete={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
                             isCompleted={estaCompletada}
                           />
                         )}
                         {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
+                          <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#0d0a06]">
+                            <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
+                              <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
+                              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
+                              <span className="text-xs text-cream/40">{meta.codigo}</span>
+                            </div>
+                            <div className="max-w-2xl mx-auto px-4 py-6">
+
                           <SesionViva
                             metaKey={key}
                             metaCodigo={meta.codigo}
@@ -1307,12 +1320,14 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                         {meta.tipo === 'COACH' && (
                           <TaskCoach
                             meta={meta}
-                            onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                            onComplete={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
                             isCompleted={estaCompletada}
-                            onNavigateToCoach={() => onNavigate?.('coach')}
                           />
                         )}
                           </SesionViva>
+                        
+                            </div>
+                          </div>
                         )}
                       
                         <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
@@ -1402,16 +1417,13 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
           }}
           onRating={async (rating, comentario) => {
             if (!isSupabaseReady() || !supabase || !userId) return;
-            await supabase.from('pilar_satisfaction_ratings').upsert(
-              {
+            await guardarFila('pilar_satisfaction_ratings', {
                 usuario_id: userId,
                 pilar_numero: pilarUnlocked.numero,
                 pilar_titulo: pilarUnlocked.completado,
                 rating,
                 comentario: comentario || null,
-              },
-              { onConflict: 'usuario_id,pilar_numero' },
-            );
+              }, ['usuario_id', 'pilar_numero']);
           }}
         />
       )}

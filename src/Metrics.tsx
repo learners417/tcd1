@@ -427,7 +427,8 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
   const [clientSearch, setClientSearch] = useState('');
-  const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
+  // Arranca en ACTIVE: los pausados e inactivos no deben inflar la cuenta.
+  const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ACTIVE');
   const [filtroPlan, setFiltroPlan] = useState<string>('ALL');
 
   // Campanas — cliente seleccionado
@@ -889,7 +890,9 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           .from('hoja_de_ruta')
           .select('pilar_numero, meta_codigo, completada, es_estrella, fecha_completada')
           .eq('usuario_id', p.id);
-        if (tareas.length === 0) {
+        // hoja_de_ruta es la fuente de verdad: el Camino escribe SIEMPRE ahí.
+        // (Antes se prefería get_user_tasks y el progreso se quedaba viejo.)
+        {
           if (hrRows && hrRows.length > 0) {
             tareas = hrRows.map((r: any) => ({
               ...r,
@@ -3022,8 +3025,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {[
                       { label: 'Profesionales activos', value: clientes.length, icon: Users, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
-                      { label: 'En ritmo', value: clientes.filter(c => c.semaforo === 'verde').length, icon: CheckCheck, color: 'text-success', border: 'border-success/20', bg: 'bg-success/5' },
-                      { label: 'Necesitan atención', value: clientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
+                      { label: 'En ritmo', value: filteredClientes.filter(c => c.semaforo === 'verde').length, icon: CheckCheck, color: 'text-success', border: 'border-success/20', bg: 'bg-success/5' },
+                      { label: 'Necesitan atención', value: filteredClientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                       { label: 'Progreso promedio', value: clientes.length ? `${Math.round(clientes.reduce((a, c) => a + (c.tareas_total > 0 ? (c.tareas_completadas / c.tareas_total) * 100 : (c.progreso_porcentaje ?? 0)), 0) / clientes.length)}%` : '—', icon: TrendingUp, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                       { label: 'Satisfacción promedio', value: satisfaccionGlobal !== null ? `${satisfaccionGlobal.toFixed(1)} / 5` : '—', icon: Star, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                     ].map((s, i) => (

@@ -1,3 +1,5 @@
+import PuertaSiguienteNivel from '../components/PuertaSiguienteNivel';
+import { TarjetaViernes, BonosNumero } from '../components/ExtrasNumero';
 import MapaCincoDias from '../components/MapaCincoDias';
 import TableroNumeros from '../components/TableroNumeros';
 import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
@@ -6,7 +8,7 @@ import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
@@ -50,6 +52,14 @@ interface ProximoHito {
 }
 
 export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurrentPage: (page: string) => void, userId?: string, perfil?: Partial<Profile> }) {
+  // El Diario se abre al terminar Sanar el Dinero (cinturón 2) — igual que en el menú.
+  const diarioAbierto = React.useMemo(() => {
+    try {
+      const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+      return cinturonDesdeProgreso(hechas).orden >= 2;
+    } catch { return false; }
+  }, []);
+
   const [data, setData] = useState({
     profile: { nombre: '', fecha_inicio: new Date().toISOString() },
     semanaActual: 1,
@@ -97,10 +107,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 set.add('6-P6.3');
                 localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...set]));
                 if (isSupabaseReady() && supabase && userId) {
-                  await supabase.from('hoja_de_ruta').upsert(
-                    { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() },
-                    { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-                  );
+                  await guardarFila('hoja_de_ruta', { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
                 }
               }
             }
@@ -179,8 +186,12 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         }
       }
 
-      let diary: { entries?: unknown[] } = {}; try { diary = JSON.parse(localStorage.getItem('tcd_diario_v2') || '{}'); } catch { /* diario corrupto */ }
-      const rachaLocal = Array.isArray(diary.entries) ? diary.entries.length : 0;
+      let rachaLocal = 0;
+      try {
+        const rawDiario = localStorage.getItem('tcd_diario_v3') || localStorage.getItem('tcd_diario_v2') || '[]';
+        const d = JSON.parse(rawDiario);
+        rachaLocal = Array.isArray(d) ? d.length : (Array.isArray(d?.entries) ? d.entries.length : 0);
+      } catch { /* diario corrupto */ }
 
       setData({
         profile: { nombre: p.nombre || '', fecha_inicio: p.fecha_inicio || new Date().toISOString() },
@@ -329,6 +340,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
       <MapaCincoDias />
 
+      {/* C3 — la promesa completa: TU viernes + tus bonos */}
+      <PuertaSiguienteNivel />
+      <TarjetaViernes />
+      <BonosNumero />
+
       {/* ZIP A — La graduación de los 5 días (solo plan EL NÚMERO, tras el día 5) */}
       <GraduacionSemanaBlanca />
 
@@ -370,7 +386,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               <div className="card-panel p-6 border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent">
                 <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
                 <p className="text-sm text-cream/80 mb-4">Quince minutos para ti: tu Diario, tu semana, tu intención. La transformación también se registra.</p>
-                <button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>
+                {diarioAbierto && (<button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>)}
               </div>
             );
           }
@@ -516,7 +532,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                     onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')} />
                 )}
                 <Fila n={sistemaVivo ? '3' : '2'} titulo="Tu pregunta al Mentor" meta={mentorRestantes > 0 ? `Si algo te frena · te quedan ${mentorRestantes} esta semana` : 'Sin consultas esta semana — el lunes se renuevan'} onClick={() => setCurrentPage('coach')} />
-                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta="3 min · tu Diario alimenta a tu Mentor" onClick={() => setCurrentPage('diario')} />
+                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta={diarioAbierto ? "3 min · tu Diario alimenta a tu Mentor" : "Se abre al sellar tu precio — día 5"} onClick={diarioAbierto ? () => setCurrentPage('diario') : undefined} />
               </div>
             </div>
             {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}
