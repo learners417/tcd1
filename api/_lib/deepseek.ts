@@ -5,7 +5,7 @@
  * La API de DeepSeek es OpenAI-compatible · no requiere SDK propio · solo
  * fetch directo contra https://api.deepseek.com/v1/chat/completions.
  *
- * Modelo default: deepseek-chat (apunta a la version estable mas reciente
+ * Modelo default: deepseek-v4-pro (apunta a la version estable mas reciente
  * publicada por DeepSeek · al momento de escribir esto suele ser V3.x).
  * Si DeepSeek lanza un V4 con id distinto · override via env var
  * DEEPSEEK_MODEL sin necesidad de redeploy.
@@ -20,7 +20,7 @@
  */
 
 const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/v1/chat/completions';
-const DEFAULT_MODEL = 'deepseek-chat';
+const DEFAULT_MODEL = 'deepseek-v4-pro';
 const DEFAULT_MAX_TOKENS = 8192;
 
 export interface DeepSeekMessage {
