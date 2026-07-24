@@ -394,7 +394,7 @@ export type CampanasView =
   | 'ganadores'
   | 'creativos'
   | 'studio'
-  | 'detail';
+  | 'detail' | 'anuncios';
 
 // ─── Chat KAI (wizard conversacional) ──────────────────────────────────────
 

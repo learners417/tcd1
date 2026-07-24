@@ -7,6 +7,8 @@
  * y al final todo lo creado se sella en el ADN. Autoguardado por paso: si el
  * teléfono muere, retoma exacto donde quedó.
  */
+import NumeroPanel from './numero/NumeroPanel';
+import { cinturonDesdeProgreso } from '../lib/cinturones';
 import { loQueViene } from '../lib/teasers';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { sesionGuiadaDe } from '../lib/sesionesGuiadas';
@@ -40,6 +42,17 @@ function limpiarEstado(codigo: string): void {
   } catch { /* noop */ }
 }
 
+/** Ningún paso puede pedir escribir sin decir qué. Red de seguridad por tipo. */
+const CONSIGNA_POR_TIPO: Record<string, string> = {
+  artefacto: 'Escríbelo con tus palabras — o pídele a tu Mentor que lo arme contigo y lo ajustas.',
+  abierta: 'Escríbelo con tus palabras — o dilo en voz alta.',
+  radar: 'Anota los números que te salgan. Sin maquillaje: los de verdad.',
+  audio_futuro: 'Grábate hablándole a la persona que vas a ser. Escribe acá lo que le dijiste.',
+  evidencia: 'Tenla lista: al cerrar la sesión te la vamos a pedir para dar el paso por hecho.',
+  ia_propone: 'Toca crear y lo armamos juntos. Después lo ajustas a tu manera.',
+  opciones: 'Elige lo que más se parezca a lo tuyo.',
+};
+
 const PREPARACION = [
   { e: '☕', t: 'Tu mate o tu café, servido', s: 'Esta sesión se toma con algo caliente al lado.' },
   { e: '📓', t: 'Tu cuaderno físico, a mano', s: 'Lo que se escribe a mano, el cuerpo lo recuerda distinto.' },
@@ -51,15 +64,20 @@ export default function SesionGuiadaPlayer({
   titulo,
   onFinish,
   onClose,
-  onMentor,
 }: {
   codigo: string;
   titulo: string;
   onFinish: (texto: string) => void;
   onClose: () => void;
-  onMentor?: () => void;
 }) {
   const [selladoTexto, setSelladoTexto] = useState<string | null>(null);
+  // El Diario se abre al terminar el protocolo del dinero: no lo prometemos antes.
+  const diarioAbierto = React.useMemo(() => {
+    try {
+      const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+      return cinturonDesdeProgreso(hechas).orden >= 2;
+    } catch { return false; }
+  }, []);
   const ses = useMemo(() => sesionGuiadaDe(codigo), [codigo]);
   const [st, setSt] = useState<Estado>(() => leerEstado(codigo));
   const [fuego, setFuego] = useState(false);
@@ -189,15 +207,15 @@ export default function SesionGuiadaPlayer({
             <p className="text-[11px] font-bold text-cream/45">Paso {st.idx + 1} de {total}</p>
             <div className="flex gap-1">{pasos.map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${i <= st.idx ? 'bg-gold' : 'bg-cream/12'}`} />)}</div>
 
-            {(paso.titulo || paso.texto) && (
+            {(paso.titulo || paso.texto || paso.tituloArtefacto) && (
               <div className="rounded-2xl border border-gold/20 bg-gradient-to-b from-gold/[0.05] to-transparent p-5">
-                {paso.titulo && <p className="text-lg font-semibold text-cream mb-2" style={{ fontFamily: 'var(--font-display)' }}>{paso.titulo}</p>}
+                {(paso.titulo || paso.tituloArtefacto) && <p className="text-lg font-semibold text-cream mb-2" style={{ fontFamily: 'var(--font-display)' }}>{paso.titulo ?? paso.tituloArtefacto}</p>}
                 {paso.texto && <p className="text-[15px] text-cream/80 leading-relaxed whitespace-pre-wrap">{paso.texto}</p>}
                 {paso.nota && <p className="text-xs text-gold/80 mt-3 border-l-2 border-gold/30 pl-3">{paso.nota}</p>}
               </div>
             )}
 
-            {paso.pregunta && <p className="text-base text-cream font-medium">{paso.pregunta}</p>}
+            <p className="text-base text-cream font-medium">{paso.pregunta ?? CONSIGNA_POR_TIPO[paso.tipo] ?? 'Escríbelo con tus palabras.'}</p>
 
             {paso.tipo === 'opciones' && Array.isArray(paso.opciones) && (
               <div className="space-y-2">
@@ -221,6 +239,12 @@ export default function SesionGuiadaPlayer({
               </div>
             )}
 
+            {paso.tipo === 'radar' && codigo === 'P1.5' && (
+              <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-3 mb-4 text-left">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Tu calculadora — de acá sale tu número</p>
+                <NumeroPanel />
+              </div>
+            )}
             {['abierta', 'artefacto', 'radar', 'audio_futuro', 'evidencia'].includes(paso.tipo) && (
               <div>
                 <textarea value={iaOut[pasoKey(paso, st.idx)] && respActual === iaOut[pasoKey(paso, st.idx)] ? respActual : respActual}
@@ -231,7 +255,7 @@ export default function SesionGuiadaPlayer({
               </div>
             )}
 
-            {paso.tipo === 'ia_propone' && (
+            {(paso.tipo === 'ia_propone' || (paso.tipo === 'artefacto' && paso.promptIA)) && (
               <div className="space-y-3">
                 {respActual ? (
                   <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-4">
@@ -246,7 +270,11 @@ export default function SesionGuiadaPlayer({
             )}
 
             <Btn disabled={!puedeSeguir} onClick={avanzar}>
-              {paso.tipo === 'ritual' ? '🔥 Lo quemé — que arda' : st.idx === total - 1 ? 'Terminar y revisar →' : 'Siguiente →'}
+              {!puedeSeguir
+                ? (paso.tipo === 'opciones' ? 'Elige una opción para seguir ↑' : 'Escribe tu respuesta para seguir ↑')
+                : paso.tipo === 'ritual' ? '🔥 Lo quemé — que arda'
+                : st.idx === total - 1 ? 'Terminar y revisar →'
+                : 'Siguiente →'}
             </Btn>
           </div>
         )}
@@ -279,15 +307,11 @@ export default function SesionGuiadaPlayer({
           <div className="space-y-5 text-center">
             <p className="text-5xl">🧬</p>
             <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Sellado en tu ADN</p>
-            <p className="text-sm text-cream/60">Tu sesión de hoy está hecha. Saliste del espacio de trabajo.</p>
-            <button onClick={() => onFinish(selladoTexto)} className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold">Terminar por hoy →</button>
-            {onMentor && (
-              <button onClick={() => { onFinish(selladoTexto); onMentor(); }}
-                className="w-full py-3.5 rounded-xl border border-gold/30 text-gold text-sm font-bold hover:bg-gold/[0.06]">
-                💬 Profundizar con tu Mentor
-              </button>
+            <p className="text-sm text-cream/60">Tu sesión de hoy está hecha. Queda marcada como completada en tu Camino.</p>
+            <button onClick={() => onFinish(selladoTexto)} className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold">Terminar y volver al Camino →</button>
+            {diarioAbierto && (
+              <p className="text-[11px] text-cream/40">Esta noche te espera tu Diario — 2 minutos antes de dormir.</p>
             )}
-            <p className="text-[11px] text-cream/40">Esta noche te espera tu Diario — 2 minutos antes de dormir.</p>
             {(() => {
               const t = loQueViene(codigo);
               return t ? (

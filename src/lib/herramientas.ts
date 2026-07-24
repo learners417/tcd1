@@ -1270,7 +1270,7 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","contenido":"..."}]`,
     },
     grupo: 'D',
-    titulo: 'Tu Recurso Principal',
+    titulo: 'Tu Página de Venta',
     descripcion:
       'Genera tu recurso para regalar (la guía que entrega tu palabra clave), el guion de tu VSL y los mensajes de entrega de tu agente. Todo desde tu método y tu paciente ideal — listo para usar.',
     emoji: '🎁',

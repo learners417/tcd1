@@ -1,3 +1,5 @@
+import NumeroPanel from '../numero/NumeroPanel';
+import ConstructorAnuncios from '../campanas/ConstructorAnuncios';
 import SesionGuiadaPlayer from '../SesionGuiadaPlayer';
 import { sesionGuiadaDe } from '../../lib/sesionesGuiadas';
 import TutorialTecnicoBox from '../TutorialTecnicoBox';
@@ -15,10 +17,9 @@ interface TaskCoachProps {
   meta: RoadmapMeta;
   onComplete: () => void;
   isCompleted: boolean;
-  onNavigateToCoach: () => void;
 }
 
-export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToCoach }: TaskCoachProps) {
+export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachProps) {
   // ── Evidencia obligatoria (Cirugía Final F2) ──
   const [evidencias, setEvidencias] = useState<number>(-1);
   const [subiendo, setSubiendo] = useState(false);
@@ -123,6 +124,21 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         )}
         <TutorialTecnicoBox codigo={meta.codigo} />
 
+        {/* EL NÚMERO vive acá: es un ejercicio del Camino, no una sección aparte. */}
+        {/* EL CONSTRUCTOR vive acá: sus 3 anuncios se crean dentro de la sesión. */}
+        {meta.codigo === 'P4.3' && (
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
+            <ConstructorAnuncios />
+          </div>
+        )}
+
+        {meta.codigo === 'P1.5' && (
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">Tu calculadora — acá sale tu número</p>
+            <NumeroPanel />
+          </div>
+        )}
+
         {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
         {guionVivo && !isCompleted && (
           <button onClick={() => setPlayerAbierto(true)}
@@ -137,8 +153,22 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
             codigo={meta.codigo}
             titulo={meta.titulo}
             onClose={() => setPlayerAbierto(false)}
-            onFinish={(texto) => { setNota(texto); setNotaGuardada(true); setPlayerAbierto(false); }}
-            onMentor={onNavigateToCoach}
+            onFinish={(texto) => {
+              setNota(texto);
+              try {
+                const all = JSON.parse(localStorage.getItem('tcd_notas_sesion_v1') ?? '{}');
+                all[meta.codigo] = texto;
+                localStorage.setItem('tcd_notas_sesion_v1', JSON.stringify(all));
+              } catch { /* noop */ }
+              setNotaGuardada(true);
+              setPlayerAbierto(false);
+              // Terminar la micro-sesión CIERRA la sesión: se marca hecha y vuelve al Camino.
+              // Si le falta la evidencia, no la damos por cerrada — se lo decimos claro.
+              if (!isCompleted) {
+                if (evidenciaLista) onComplete();
+                else setErrorSubida('Solo te falta tu evidencia para cerrar esta sesión. Súbela acá abajo.');
+              }
+            }}
           />
         )}
 
@@ -201,13 +231,13 @@ export default function TaskCoach({ meta, onComplete, isCompleted, onNavigateToC
         {checked ? (
           <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-success/10 border border-success/30 text-success text-base font-semibold">
             <CheckCircle2 className="w-5 h-5" />
-            Sesión con el Mentor completada
+            Sesión completada
           </div>
         ) : (
           <>
             <p className="text-xs text-cream/55 text-center mb-3 leading-relaxed">
               {evidenciaLista
-                ? 'Cuando termines de hablar con el Mentor, haz clic acá para marcar este paso como completado y desbloquear el siguiente.'
+                ? 'Cuando termines tu trabajo de hoy, marca este paso como completado y se abre el siguiente.'
                 : 'Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no se gana.'}
             </p>
             <button

@@ -2,8 +2,7 @@
  * CampanasSubNav.tsx — Tabs horizontales para navegar modulos de campanas
  */
 import {
-  Home, Target, PenTool, BarChart3, Wrench, FolderOpen, Trophy,
-} from 'lucide-react';
+  Home, Target, PenTool, BarChart3, Wrench, FolderOpen, Trophy, Sparkles } from 'lucide-react';
 import type { CampanasView } from '../../lib/campanasTypes';
 
 interface NavItem {
@@ -14,6 +13,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { id: 'anuncios', label: 'Tus 3 anuncios', icon: Sparkles },
   { id: 'home', label: 'Inicio', icon: Home },
   { id: 'nueva', label: 'Nueva campaña', icon: Target },
   { id: 'copies', label: 'Copies', icon: PenTool },

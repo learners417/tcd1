@@ -52,6 +52,14 @@ interface ProximoHito {
 }
 
 export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurrentPage: (page: string) => void, userId?: string, perfil?: Partial<Profile> }) {
+  // El Diario se abre al terminar Sanar el Dinero (cinturón 2) — igual que en el menú.
+  const diarioAbierto = React.useMemo(() => {
+    try {
+      const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+      return cinturonDesdeProgreso(hechas).orden >= 2;
+    } catch { return false; }
+  }, []);
+
   const [data, setData] = useState({
     profile: { nombre: '', fecha_inicio: new Date().toISOString() },
     semanaActual: 1,
@@ -378,7 +386,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               <div className="card-panel p-6 border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent">
                 <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
                 <p className="text-sm text-cream/80 mb-4">Quince minutos para ti: tu Diario, tu semana, tu intención. La transformación también se registra.</p>
-                <button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>
+                {diarioAbierto && (<button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>)}
               </div>
             );
           }
@@ -524,7 +532,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                     onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')} />
                 )}
                 <Fila n={sistemaVivo ? '3' : '2'} titulo="Tu pregunta al Mentor" meta={mentorRestantes > 0 ? `Si algo te frena · te quedan ${mentorRestantes} esta semana` : 'Sin consultas esta semana — el lunes se renuevan'} onClick={() => setCurrentPage('coach')} />
-                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta="3 min · tu Diario alimenta a tu Mentor" onClick={() => setCurrentPage('diario')} />
+                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta={diarioAbierto ? "3 min · tu Diario alimenta a tu Mentor" : "Se abre al sellar tu precio — día 5"} onClick={diarioAbierto ? () => setCurrentPage('diario') : undefined} />
               </div>
             </div>
             {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}

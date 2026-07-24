@@ -83,7 +83,7 @@ El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
 · Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
 · Fase 4 — Servicio y Escala (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
 El progreso se mide en CINTURONES (taekwondo/planta): Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
-EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · los anuncios CTWA (P4.3-P4.4) · el anuncio follow-me (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
+EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · tus 3 anuncios y la campaña única (P4.3-P4.4) · el montaje de campaña (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
 TRATO: espejá el voseo o tuteo del usuario.
 === FIN DEL CONTEXTO VIGENTE ===`;
 

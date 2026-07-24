@@ -68,7 +68,6 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
         { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
     { id: 'adn', icon: Sparkles, label: 'Mi ADN' },
-    { id: 'numero', icon: Target, label: 'Mi Número', minPilar: 0 },
     ...(planPermitePilar(planActual(), 99) ? [] : ([{ id: 'camino-completo', icon: Lock, label: 'Lo que sigue', action: () => setCurrentPage('roadmap') }] as any[])),
         // { id: 'metrics', icon: TrendingUp, label: 'Métricas' , minPilar: 4 }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
         { id: 'coach', icon: Sparkles, label: 'Tu Mentor' },
@@ -80,10 +79,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
         { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2, minPilar: 2 },
-        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minCinturon: 4, minPilar: 5, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
-        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minCinturon: 4, minPilar: 5 },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minCinturon: 4, minPilar: 4 },
-        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minCinturon: 5, minPilar: 4 },
+        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minPilar: 5, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
+        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minPilar: 5 },
+        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minPilar: 4 },
+        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minPilar: 4 },
       ]
     },
     {

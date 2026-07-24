@@ -5,11 +5,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CampanasSubNav from '../components/campanas/CampanasSubNav';
+import ConstructorAnuncios from '../components/campanas/ConstructorAnuncios';
 import CampanasHome from '../components/campanas/CampanasHome';
 import CopiesView from '../components/campanas/CopiesView';
 import DiagnosticoView from '../components/campanas/DiagnosticoView';
 import NuevaCampanaChat from '../components/campanas/NuevaCampanaChat';
 import MontajeView from '../components/campanas/MontajeView';
+import MontajeCupos from '../components/campanas/MontajeCupos';
 import HistorialView from '../components/campanas/HistorialView';
 import GanadoresView from '../components/campanas/GanadoresView';
 import CreativoStudio from '../components/campanas/CreativoStudio';
@@ -25,7 +27,7 @@ interface CampanasProps {
 }
 
 export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
-  const [view, setView] = useState<CampanasView>('home');
+  const [view, setView] = useState<CampanasView>('anuncios');
   const [previousView, setPreviousView] = useState<CampanasView>('home');
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [creativos, setCreativos] = useState<Creativo[]>([]);
@@ -118,7 +120,8 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       <div ref={topRef} />
 
       {/* El header ceremonial (Lote 5 · la piel) */}
-      {view === 'home' && (
+      {view === 'anuncios' && <ConstructorAnuncios />}
+        {view === 'home' && (
         <div className="mb-6">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
           <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
@@ -168,9 +171,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
         <DiagnosticoView perfil={perfil ?? {}} />
       )}
 
-      {view === 'montaje' && (
-        <MontajeView perfil={perfil ?? {}} />
-      )}
+      {view === 'montaje' && <MontajeCupos onIrAnuncios={() => setView('anuncios')} />}
 
       {view === 'historial' && (
         <HistorialView

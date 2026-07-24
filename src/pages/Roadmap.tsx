@@ -1262,7 +1262,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                         {meta.tipo === 'VIDEO' && (
                           <TaskVideo
                             meta={meta}
-                            onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                            onComplete={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
                             isCompleted={estaCompletada}
                           />
                         )}
@@ -1320,9 +1320,8 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                         {meta.tipo === 'COACH' && (
                           <TaskCoach
                             meta={meta}
-                            onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                            onComplete={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
                             isCompleted={estaCompletada}
-                            onNavigateToCoach={() => onNavigate?.('coach')}
                           />
                         )}
                           </SesionViva>

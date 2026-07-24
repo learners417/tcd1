@@ -17,10 +17,10 @@ interface TopbarProps {
 }
 
 const PAGE_TITLES: Record<string, string> = {
-  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Mentor IA', liga: 'La Liga',
-  red: 'La Red', mensajes: 'Mensajes', adn: 'ADN del Negocio', diario: 'Diario del Fundador',
-  biblioteca: 'El Método', agentes: 'Entrenadores', creador: 'Creador de Contenido',
-  campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
+  dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
+  mensajes: 'Soporte', adn: 'Mi ADN', diario: 'Diario del Fundador',
+  biblioteca: 'El Método', agentes: 'Entrenadores IA', creador: 'Creador de Contenido',
+  campanas: 'Campañas & Creativos', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
 
 /** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
@@ -28,7 +28,6 @@ const searchablePages = [
   { id: 'dashboard', label: 'Hoy', icon: LayoutDashboard, desc: 'Tu día, en orden', minPilar: 0 },
   { id: 'roadmap', label: 'El Camino', icon: Map, desc: 'Tus sesiones, una por día', minPilar: 0 },
   { id: 'adn', label: 'Mi ADN', icon: Sparkles, desc: 'Las piezas que ya sellaste', minPilar: 0 },
-  { id: 'numero', label: 'Mi Número', icon: Target, desc: 'Tu precio digno, calculado y sellado', minPilar: 0 },
   { id: 'coach', label: 'Tu Mentor', icon: MessageSquare, desc: 'Tu guía del proceso', minPilar: 0 },
   // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
   { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes', minPilar: 4 },

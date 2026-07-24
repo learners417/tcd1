@@ -149,7 +149,7 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
       { codigo: 'INF.landing_copy_completo', label: 'Copy completo de landing', pilarOrigen: 'P4.5b', profileKey: 'adn_landing_copy' },
       { codigo: 'INF.vsl_script', label: 'Script del VSL', pilarOrigen: 'P5.2', profileKey: 'adn_vsl_script' },
       { codigo: 'INF.perfil_ig_optimizado', label: 'Perfil de IG optimizado (bio + destacadas + link)', pilarOrigen: 'P4.2b', profileKey: 'adn_perfil_ig' },
-      { codigo: 'INF.anuncio_followme', label: 'Anuncio follow-me (seguidores correctos)', pilarOrigen: 'P4.6', profileKey: 'adn_anuncio_followme' },
+      { codigo: 'INF.anuncio_followme', label: 'El montaje de campaña (los 8 candados)', pilarOrigen: 'P4.6', profileKey: 'adn_anuncio_followme' },
       { codigo: 'INF.anuncios_meta_6_creativos', label: 'Anuncios Meta · 6 creativos N1/N2/N3', pilarOrigen: 'P4.3', profileKey: 'adn_anuncios' },
       { codigo: 'INF.validacion_organica', label: 'Validación orgánica (mínimo 3 piezas)', pilarOrigen: 'P4.3d', profileKey: 'adn_validacion_organica' },
       { codigo: 'INF.meta_config', label: 'Configuración Meta Ads', pilarOrigen: 'P9A.5', profileKey: 'adn_meta_config' },

@@ -66,7 +66,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
                   <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     {guion.esencia}
                   </p>
-                  <p className="text-[11px] text-cream/35 mt-4">La versión en video llega pronto — la lección es la misma. Tu Mentor la conoce completa: pregúntale lo que quieras.</p>
+                  <p className="text-[11px] text-cream/35 mt-4">La versión en video llega pronto — la lección completa está acá abajo, no te frena nada.</p>
                 </div>
               );
             }
@@ -75,7 +75,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
                 <Play className="w-12 h-12 text-gold/50 mb-3" />
                 <p className="text-sm text-cream/80">🎬 El video de esta sesión está en producción</p>
                 <p className="text-xs text-cream/45 mt-2 leading-relaxed max-w-sm">
-                  No te frena nada: la instrucción completa está aquí abajo, y tu Mentor conoce esta lección entera — pregúntale lo que necesites.
+                  No te frena nada: la instrucción completa está aquí abajo.
                 </p>
               </div>
             );
