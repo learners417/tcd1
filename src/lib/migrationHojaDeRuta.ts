@@ -1,46 +1,128 @@
+import { SEED_ROADMAP_V3 } from './roadmapSeed';
+import type { ExtractedProfile } from './migrationTypes';
+
+export interface HojaDeRutaSeedRow {
+  pilar_numero: number;
+  meta_codigo: string;
+  completada: boolean;
+  es_estrella: boolean;
+  output_generado: { texto: string; migrated: true } | null;
+  fecha_completada: string | null;
+}
+
+// Mapea cada `adn_field` del seed a uno o más campos de ExtractedProfile.
+// Campos sin entrada acá quedan sin output (solo se marca completada para progreso).
+type AdnMapping = keyof ExtractedProfile | (keyof ExtractedProfile)[];
+
+const ADN_FIELD_TO_EXTRACTED: Record<string, AdnMapping> = {
+  // Matches directos (misma semántica)
+  historia_300: 'historia_300',
+  proposito: 'proposito',
+  legado: 'legado',
+  matriz_a: 'matriz_a',
+  metodo_nombre: ['metodo_nombre', 'metodo_pasos'],
+  oferta_mid: 'oferta_mid',
+  oferta_high: ['oferta_high', 'oferta_low', 'lead_magnet'],
+  adn_nicho: ['nicho', 'posicionamiento'],
+  adn_identidad_sistema: [
+    'identidad_colores',
+    'identidad_tipografia',
+    'identidad_logo',
+    'identidad_tono',
+  ],
+  // Derivaciones razonables para que la hoja de ruta no quede con outputs
+  // vacíos tras migrar — contenido aproximado a partir de los campos extraídos.
+  adn_linea_tiempo: 'historia_300',
+  adn_formulario_bienvenida: ['proposito', 'nicho', 'posicionamiento'],
+  adn_cinco_por_que: ['por_que_oficial', 'proposito'],
+  adn_carta_futuro: 'legado',
+  adn_avatar: ['nicho', 'posicionamiento'],
+  adn_transformaciones: ['matriz_b', 'matriz_c'],
+  adn_proceso_actual: ['metodo_nombre', 'metodo_pasos'],
+};
+
+function formatLabel(key: keyof ExtractedProfile): string {
+  return key.toUpperCase().replace(/_/g, ' ');
+}
+
+function buildOutputForMeta(
+  adnField: string,
+  extracted: ExtractedProfile,
+): string | null {
+  // Caso especial: historia combina 3 versiones con los delimitadores que
+  // ManualNegocio.tsx parsea (regex "--- HISTORIA 300 PALABRAS ---" etc.)
+  if (adnField === 'historia_300') {
+    const h300 = extracted.historia_300?.trim();
+    const h150 = extracted.historia_150?.trim();
+    const h50 = extracted.historia_50?.trim();
+    if (!h300 && !h150 && !h50) return null;
+    const parts: string[] = [];
+    if (h300) parts.push(`--- HISTORIA 300 PALABRAS ---\n${h300}`);
+    if (h150) parts.push(`--- HISTORIA 150 PALABRAS ---\n${h150}`);
+    if (h50) parts.push(`--- HISTORIA 50 PALABRAS ---\n${h50}`);
+    return parts.join('\n\n');
+  }
+
+  const mapping = ADN_FIELD_TO_EXTRACTED[adnField];
+  if (!mapping) return null;
+
+  if (typeof mapping === 'string') {
+    const v = extracted[mapping]?.trim();
+    return v ? v : null;
+  }
+
+  const parts: string[] = [];
+  for (const k of mapping) {
+    const v = extracted[k]?.trim();
+    if (v) parts.push(`${formatLabel(k)}:\n${v}`);
+  }
+  return parts.length > 0 ? parts.join('\n\n') : null;
+}
+
 /**
- * domTranslationGuard.ts
- *
- * Protege contra el crash recurrente:
- *   "NotFoundError: Failed to execute 'removeChild' on 'Node'"
- *   "NotFoundError: Failed to execute 'insertBefore' on 'Node'"
- *
- * Ocurre cuando un traductor del navegador (Google Translate en Chrome Mobile,
- * extensiones de Edge/Firefox, etc.) reescribe los nodos de texto que React
- * controla, envolviéndolos en <font>. Al cambiar de vista React intenta remover
- * un nodo que el traductor ya movió/reemplazó y el DOM lanza una excepción que
- * tumba toda la app (la captura el ErrorBoundary y se ve la pantalla de error).
- *
- * El `<meta name="google" content="notranslate">` + `lang="es" translate="no"`
- * en index.html cubren a Google Translate, pero no todos los traductores los
- * respetan. Este parche es la red de seguridad: si el nodo a remover/insertar ya
- * no pertenece al padre esperado, se hace no-op en vez de lanzar.
- *
- * Mitigación recomendada por la comunidad mientras React no trae fix nativo:
- * https://github.com/facebook/react/issues/11538
+ * Construye las filas de `hoja_de_ruta` a insertar cuando se migra un cliente.
+ * Marca como completadas todas las metas hasta el pilar seleccionado (inclusivo),
+ * inyectando los outputs ADN extraídos por la IA en las metas que tienen `adn_field`.
+ * `pilarActualOrden` representa el último pilar completado por el cliente.
  */
-export function installDomTranslationGuard(): void {
-  if (typeof Node === 'undefined' || !Node.prototype) return;
+export function buildHojaDeRutaFromExtracted(
+  pilarActualOrden: number,
+  extracted: ExtractedProfile,
+): HojaDeRutaSeedRow[] {
+  const rows: HojaDeRutaSeedRow[] = [];
+  const today = new Date().toISOString().split('T')[0];
 
-  const originalRemoveChild = Node.prototype.removeChild;
-  Node.prototype.removeChild = function <T extends Node>(this: Node, child: T): T {
-    if (child.parentNode !== this) {
-      // El nodo ya fue movido por un traductor del navegador → evitamos el throw.
-      return child;
+  for (const pilar of SEED_ROADMAP_V3) {
+    if (pilar.numero_orden > pilarActualOrden) continue;
+    for (const meta of pilar.metas) {
+      const texto = meta.adn_field ? buildOutputForMeta(meta.adn_field, extracted) : null;
+      rows.push({
+        pilar_numero: pilar.numero,
+        meta_codigo: meta.codigo,
+        completada: true,
+        es_estrella: meta.es_estrella,
+        output_generado: texto ? { texto, migrated: true } : null,
+        fecha_completada: today,
+      });
     }
-    return originalRemoveChild.call(this, child) as T;
-  };
+  }
 
-  const originalInsertBefore = Node.prototype.insertBefore;
-  Node.prototype.insertBefore = function <T extends Node>(
-    this: Node,
-    newNode: T,
-    referenceNode: Node | null,
-  ): T {
-    if (referenceNode && referenceNode.parentNode !== this) {
-      // El nodo de referencia fue movido por un traductor → insertamos al final.
-      return originalInsertBefore.call(this, newNode, null) as T;
-    }
-    return originalInsertBefore.call(this, newNode, referenceNode) as T;
-  };
+  return rows;
+}
+
+/** Options para el selector de pilar en el MigrationWizard. */
+export interface PilarOption {
+  value: string;       // stringified numero_orden
+  label: string;       // "P3 — Legado"
+  numero: number;      // para guardar en profile.pilar_actual (backcompat)
+  numero_orden: number;
+}
+
+export function getPilarOptions(): PilarOption[] {
+  return SEED_ROADMAP_V3.map(p => ({
+    value: String(p.numero_orden),
+    label: `${p.id} — ${p.titulo}`,
+    numero: p.numero,
+    numero_orden: p.numero_orden,
+  }));
 }

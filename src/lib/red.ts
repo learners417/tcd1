@@ -1,232 +1,173 @@
 /**
- * SESIÓN VIVA — la unidad atómica de la mentoría hecha app (Cirugía T1).
- *
- * Cada meta del Camino se vive como una sesión real con la liturgia de Javo:
- * check-in (emoción + objetivo) → trabajo con cronómetro → check-out
- * (emoción + compromisos) → consolidación al ADN → registro permanente.
- *
- * Este módulo es la fundación: tipos, persistencia (Supabase + fallback
- * localStorage), el estado "en curso" para pausar/retomar, y el parser
- * del tiempo estimado para el cronómetro.
+ * red.ts — T12 · LA RED (Plan Maestro).
+ * Dos capas: la Semana Blanca regalable (invitaciones con atribución, 2 llaves
+ * por mes validadas server-side) y la Herencia de la cohorte (objeciones/hooks
+ * reales, anónimos). Todo degrada con elegancia: sin las tablas/RPCs (que van
+ * en la migración aparte), devuelve vacío y nunca rompe.
  */
-import { supabase } from './supabase';
+import { supabase, isSupabaseReady } from './supabase';
 
-// ── Tipos ────────────────────────────────────────────────────────────────
+// ── La Semana Blanca regalable ──────────────────────────────────────────────
 
-export type EmocionSesion =
-  | 'enfocado' | 'con_dudas' | 'cansado' | 'con_miedo' | 'encendido' | 'en_paz' | 'orgulloso';
+export const LLAVES_POR_MES = 2;
 
-export const EMOCIONES_ENTRADA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
-  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
-  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
-  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
-  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
-  { id: 'con_miedo', emoji: '😰', label: 'Con miedo' },
-  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
-];
+/** Slot: el premio real por cada fundador que entra con tu llave. Ajusta el texto. */
+export const PREMIO_TEXTO = 'un mes de MiClínica Digital sin cargo';
 
-export const EMOCIONES_SALIDA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
-  { id: 'orgulloso', emoji: '🏆', label: 'Orgulloso/a' },
-  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
-  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
-  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
-  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
-  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
-];
+export type EstadoInvitacion = 'pendiente' | 'redimida';
 
-export interface SessionLog {
-  id?: string;
-  user_id: string;
-  meta_codigo: string;
-  meta_titulo: string;
-  checkin_emocion: EmocionSesion | null;
-  checkin_objetivo: string;
-  checkout_emocion: EmocionSesion | null;
-  compromisos: string[];
-  duracion_seg: number;
-  pausas: number;
-  resumen_consolidado: string | null;
-  artefacto_url: string | null;
-  completada: boolean;
-  created_at?: string;
-  closed_at?: string | null;
+export interface Invitacion {
+  id: string;
+  codigo: string;
+  invitado_id: string | null;
+  estado: EstadoInvitacion;
+  created_at: string;
 }
 
-/** Estado de una sesión EN CURSO (para pausar/retomar aunque se cierre la app). */
-export interface SesionEnCurso {
-  metaKey: string; // `${pilarNumero}-${metaCodigo}` — misma clave que hoja de ruta
-  metaCodigo: string;
-  metaTitulo: string;
-  checkinEmocion: EmocionSesion;
-  checkinObjetivo: string;
-  /** Segundos acumulados de trabajo (se congela al pausar). */
-  segundosAcumulados: number;
-  /** Epoch ms del último arranque del cronómetro; null = pausada. */
-  corriendoDesde: number | null;
-  pausas: number;
-  iniciadaEn: string; // ISO
-  /** id del session_log en Supabase si ya se creó el borrador. */
-  logId?: string;
-  /** true si la sesión se abrió en modo corto (15 min). */
-  modoCorto?: boolean;
-}
+const INVITE_KEY = 'tcd_invite_code';
 
-// ── Parser del tiempo estimado ("1 h" · "45 min" · "1.5 h" · "5 días…") ──
-
-/**
- * Devuelve los segundos objetivo del cronómetro, o null si la meta es una
- * misión sin cronómetro (paralelas, permanentes, "min/día", "por semana").
- */
-export function parseTiempoEstimado(tiempo?: string | null): number | null {
-  if (!tiempo) return null;
-  const t = tiempo.toLowerCase();
-  // La duración concreta AL INICIO manda ("4 h (día especial)" ES una sesión de 4h);
-  // las misiones se detectan solo cuando NO hay duración inicial en h/min.
-  const m = t.match(/^\s*([\d.,]+)\s*(h\b|hora|min)/);
-  if (!m) {
-    return null; // "5 días (en paralelo)", "45 min/día", "20 min/semana", "permanente"…
-  }
-  if (/\/(día|dia|semana)/.test(t)) return null; // "45 min/día" es rutina, no sesión
-  const n = parseFloat(m[1].replace(',', '.'));
-  if (Number.isNaN(n) || n <= 0) return null;
-  return m[2].startsWith('h') ? Math.round(n * 3600) : Math.round(n * 60);
-}
-
-export function formatoCrono(seg: number): string {
-  const s = Math.max(0, Math.floor(seg));
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const ss = s % 60;
-  return h > 0
-    ? `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
-    : `${m}:${String(ss).padStart(2, '0')}`;
-}
-
-// ── Estado en curso: persistencia local (sobrevive a cerrar la app) ──────
-
-const KEY_EN_CURSO = 'tcd_sesion_en_curso_v1';
-
-export function getSesionEnCurso(): SesionEnCurso | null {
+/** Genera una llave nueva (máx 2/mes, validado server-side). */
+export async function generarInvitacion(): Promise<{ codigo?: string; error?: string }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Sin conexión. Recargá e intenta de nuevo.' };
   try {
-    const raw = localStorage.getItem(KEY_EN_CURSO);
-    return raw ? (JSON.parse(raw) as SesionEnCurso) : null;
+    const { data, error } = await supabase.rpc('generar_invitacion');
+    if (error) {
+      const lim = /limit|límite|cupo/i.test(error.message);
+      return {
+        error: lim
+          ? `Ya usaste tus ${LLAVES_POR_MES} llaves este mes. Vuelven el mes que viene.`
+          : 'No pudimos generar la llave. Intenta de nuevo.',
+      };
+    }
+    const codigo = typeof data === 'string' ? data : (data as { codigo?: string })?.codigo;
+    if (!codigo) return { error: 'No pudimos generar la llave. Intenta de nuevo.' };
+    return { codigo };
   } catch {
-    return null;
+    return { error: 'No pudimos generar la llave. Intenta de nuevo.' };
   }
 }
 
-export function setSesionEnCurso(s: SesionEnCurso | null): void {
-  try {
-    if (s) localStorage.setItem(KEY_EN_CURSO, JSON.stringify(s));
-    else localStorage.removeItem(KEY_EN_CURSO);
-  } catch {
-    /* noop */
-  }
-}
-
-/** Segundos de trabajo reales ahora mismo (acumulado + tramo corriendo). */
-export function segundosDeSesion(s: SesionEnCurso): number {
-  const extra = s.corriendoDesde ? (Date.now() - s.corriendoDesde) / 1000 : 0;
-  return Math.floor(s.segundosAcumulados + extra);
-}
-
-export function pausarSesion(s: SesionEnCurso): SesionEnCurso {
-  if (!s.corriendoDesde) return s;
-  const actualizada: SesionEnCurso = {
-    ...s,
-    segundosAcumulados: segundosDeSesion(s),
-    corriendoDesde: null,
-    pausas: s.pausas + 1,
-  };
-  setSesionEnCurso(actualizada);
-  return actualizada;
-}
-
-export function reanudarSesion(s: SesionEnCurso): SesionEnCurso {
-  if (s.corriendoDesde) return s;
-  const actualizada: SesionEnCurso = { ...s, corriendoDesde: Date.now() };
-  setSesionEnCurso(actualizada);
-  return actualizada;
-}
-
-// ── Supabase: el registro permanente ─────────────────────────────────────
-
-/** Crea el borrador del log al abrir la sesión (check-in). Silencioso si falla. */
-export async function abrirSessionLog(
-  userId: string,
-  meta: { codigo: string; titulo: string },
-  checkin: { emocion: EmocionSesion; objetivo: string },
-): Promise<string | undefined> {
-  if (!supabase || !userId) return undefined;
+/** Las invitaciones del fundador (propias). [] si no hay o sin conexión. */
+export async function misInvitaciones(userId: string): Promise<Invitacion[]> {
+  if (!isSupabaseReady() || !supabase || !userId) return [];
   try {
     const { data, error } = await supabase
-      .from('session_logs')
-      .insert({
-        user_id: userId,
-        meta_codigo: meta.codigo,
-        meta_titulo: meta.titulo,
-        checkin_emocion: checkin.emocion,
-        checkin_objetivo: checkin.objetivo,
-        compromisos: [],
-        duracion_seg: 0,
-        pausas: 0,
-        completada: false,
-      })
-      .select('id')
-      .single();
-    if (error) return undefined;
-    return data?.id as string | undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/** Cierra el log en el check-out con todo el registro de la sesión. */
-export async function cerrarSessionLog(
-  logId: string | undefined,
-  datos: {
-    checkout_emocion: EmocionSesion;
-    compromisos: string[];
-    duracion_seg: number;
-    pausas: number;
-    resumen_consolidado?: string | null;
-    artefacto_url?: string | null;
-  },
-): Promise<void> {
-  if (!supabase || !logId) return;
-  try {
-    await supabase
-      .from('session_logs')
-      .update({ ...datos, completada: true, closed_at: new Date().toISOString() })
-      .eq('id', logId);
-  } catch {
-    /* noop — el progreso local nunca se bloquea por red */
-  }
-}
-
-/** Guarda el resumen consolidado a posteriori (cuando el agente lo genera). */
-export async function guardarResumenSesion(logId: string | undefined, resumen: string): Promise<void> {
-  if (!supabase || !logId) return;
-  try {
-    await supabase.from('session_logs').update({ resumen_consolidado: resumen }).eq('id', logId);
-  } catch {
-    /* noop */
-  }
-}
-
-/** Lista los logs de un usuario (para el cockpit de Lupe y el historial propio). */
-export async function listarSessionLogs(userId: string, limite = 60): Promise<SessionLog[]> {
-  if (!supabase || !userId) return [];
-  try {
-    const { data, error } = await supabase
-      .from('session_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limite);
-    if (error) return [];
-    return (data ?? []) as SessionLog[];
+      .from('invitaciones')
+      .select('id, codigo, invitado_id, estado, created_at')
+      .eq('invitador_id', userId)
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+    return data as Invitacion[];
   } catch {
     return [];
+  }
+}
+
+/** Cuántas llaves generó este mes (para mostrar el saldo restante). */
+export function llavesEsteMes(invs: Invitacion[]): number {
+  const ahora = new Date();
+  return invs.filter((i) => {
+    const d = new Date(i.created_at);
+    return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth();
+  }).length;
+}
+
+/** El link para compartir una llave. */
+export function linkInvitacion(codigo: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}/?invite=${encodeURIComponent(codigo)}`;
+}
+
+/** Captura ?invite= de la URL y lo guarda (para atribuir al registrarse). */
+export function capturarInviteDeURL(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const code = new URLSearchParams(window.location.search).get('invite');
+    if (code) localStorage.setItem(INVITE_KEY, code);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Si hay un código guardado y el usuario está logueado, lo redime (idempotente). */
+export async function redimirInvitacionPendiente(): Promise<void> {
+  if (!isSupabaseReady() || !supabase) return;
+  let code: string | null = null;
+  try {
+    code = localStorage.getItem(INVITE_KEY);
+  } catch {
+    /* noop */
+  }
+  if (!code) return;
+  try {
+    await supabase.rpc('redimir_invitacion', { p_codigo: code });
+    try {
+      localStorage.removeItem(INVITE_KEY);
+    } catch {
+      /* noop */
+    }
+  } catch {
+    /* red o RLS: se reintenta la próxima sesión */
+  }
+}
+
+// ── La Herencia de la cohorte ───────────────────────────────────────────────
+
+export type TipoHerencia = 'objecion' | 'hook';
+
+export interface HerenciaEntry {
+  id?: string;
+  alias?: string;
+  tipo: TipoHerencia;
+  texto: string;
+  respuesta?: string | null;
+  created_at?: string;
+  es_tu?: boolean;
+}
+
+/** Publica una objeción/hook en la Herencia. Devuelve true si guardó. */
+export async function postHerencia(entry: {
+  tipo: TipoHerencia;
+  texto: string;
+  respuesta?: string;
+}): Promise<boolean> {
+  if (!isSupabaseReady() || !supabase) return false;
+  try {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth?.user?.id;
+    if (!uid) return false;
+    const { error } = await supabase.from('herencia_cohorte').insert({
+      autor_id: uid,
+      tipo: entry.tipo,
+      texto: entry.texto,
+      respuesta: entry.respuesta ?? null,
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** La Herencia de la cohorte (anonimizada). null si sin conexión o RPC ausente. */
+export async function getHerencia(): Promise<HerenciaEntry[] | null> {
+  if (!isSupabaseReady() || !supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('get_herencia');
+    if (error || !data) return null;
+    const rows = data as Array<{
+      id?: string; alias?: string; tipo?: string; texto?: string;
+      respuesta?: string | null; created_at?: string; es_tu?: boolean;
+    }>;
+    return rows.map((r) => ({
+      id: r.id,
+      alias: r.alias ?? 'Un fundador',
+      tipo: (r.tipo === 'hook' ? 'hook' : 'objecion') as TipoHerencia,
+      texto: r.texto ?? '',
+      respuesta: r.respuesta ?? null,
+      created_at: r.created_at,
+      es_tu: r.es_tu ?? false,
+    }));
+  } catch {
+    return null;
   }
 }

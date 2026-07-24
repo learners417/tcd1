@@ -1,219 +1,232 @@
 /**
- * diarioCalcs.ts — Cálculos del Diario del Fundador
+ * SESIÓN VIVA — la unidad atómica de la mentoría hecha app (Cirugía T1).
  *
- * Toda la lógica de KPIs vive acá como funciones puras para poder testearla y
- * reusarla en la UI (preview) y en la vista de Lupe. El `score` autoritativo se
- * recalcula server-side al guardar (ver migración SQL), pero estas fórmulas son
- * el espejo exacto de ese cálculo para mostrarlo en el front.
+ * Cada meta del Camino se vive como una sesión real con la liturgia de Javo:
+ * check-in (emoción + objetivo) → trabajo con cronómetro → check-out
+ * (emoción + compromisos) → consolidación al ADN → registro permanente.
  *
- * Fórmulas (spec "Diario del Fundador"):
- *   Score del día      = Energía×0.25 + Promedio3dim×0.25 + FocoNegocio×0.25 + Checkeos×0.25 → 0–100
- *   Índice bienestar   = promedio(cuerpo, mente, emociones, checkeos positivos normalizados a 0–10)
- *   Foco en negocio    = % de tags seleccionados que son de negocio (excluye descanso y admin)
- *   Consistencia 7d    = días completados en los últimos 7 / 7 × 100
- *   Equilibrio integral= promedio simple de cuerpo + mente + emociones
- *   Promedio energía 7d= suma energía últimos 7 días / días completados
- *   Racha activa       = días consecutivos con diario completado sin saltear
+ * Este módulo es la fundación: tipos, persistencia (Supabase + fallback
+ * localStorage), el estado "en curso" para pausar/retomar, y el parser
+ * del tiempo estimado para el cronómetro.
  */
+import { supabase } from './supabase';
 
-// ─── Catálogos (fuente de verdad para UI y validaciones) ───────────────────────
+// ── Tipos ────────────────────────────────────────────────────────────────
 
-export interface TareaTag {
-  id: string;
-  label: string;
-  /** true si cuenta para "Foco en negocio". `descanso` y `admin` son false. */
-  esNegocio: boolean;
+export type EmocionSesion =
+  | 'enfocado' | 'con_dudas' | 'cansado' | 'con_miedo' | 'encendido' | 'en_paz' | 'orgulloso';
+
+export const EMOCIONES_ENTRADA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
+  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
+  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
+  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
+  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
+  { id: 'con_miedo', emoji: '😰', label: 'Con miedo' },
+  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
+];
+
+export const EMOCIONES_SALIDA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
+  { id: 'orgulloso', emoji: '🏆', label: 'Orgulloso/a' },
+  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
+  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
+  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
+  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
+  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
+];
+
+export interface SessionLog {
+  id?: string;
+  user_id: string;
+  meta_codigo: string;
+  meta_titulo: string;
+  checkin_emocion: EmocionSesion | null;
+  checkin_objetivo: string;
+  checkout_emocion: EmocionSesion | null;
+  compromisos: string[];
+  duracion_seg: number;
+  pausas: number;
+  resumen_consolidado: string | null;
+  artefacto_url: string | null;
+  completada: boolean;
+  created_at?: string;
+  closed_at?: string | null;
 }
 
-/** Tags de "¿En qué estuviste hoy?" — multi-select, mínimo 1. */
-export const TAREAS_TAGS: readonly TareaTag[] = [
-  { id: 'contenido_organico', label: 'Contenido orgánico', esNegocio: true },
-  { id: 'llamadas_venta', label: 'Llamadas de venta', esNegocio: true },
-  { id: 'publicidad_ads', label: 'Publicidad / ads', esNegocio: true },
-  { id: 'tareas_programa', label: 'Tareas del programa', esNegocio: true },
-  { id: 'admin_gestion', label: 'Admin / gestión', esNegocio: false },
-  { id: 'formacion_estudio', label: 'Formación / estudio', esNegocio: true },
-  { id: 'prospeccion', label: 'Prospección', esNegocio: true },
-  { id: 'seguimiento_leads', label: 'Seguimiento leads', esNegocio: true },
-  { id: 'diseno_edicion', label: 'Diseño / edición', esNegocio: true },
-  { id: 'descanso_intencional', label: 'Descanso intencional', esNegocio: false },
-] as const;
-
-export interface CheckeoChip {
-  id: string;
-  label: string;
-  /** Emoji para la UI. */
-  emoji: string;
-  /** true = aporta bienestar (suma); false = resta (ansiedad, soledad). */
-  positivo: boolean;
+/** Estado de una sesión EN CURSO (para pausar/retomar aunque se cierre la app). */
+export interface SesionEnCurso {
+  metaKey: string; // `${pilarNumero}-${metaCodigo}` — misma clave que hoja de ruta
+  metaCodigo: string;
+  metaTitulo: string;
+  checkinEmocion: EmocionSesion;
+  checkinObjetivo: string;
+  /** Segundos acumulados de trabajo (se congela al pausar). */
+  segundosAcumulados: number;
+  /** Epoch ms del último arranque del cronómetro; null = pausada. */
+  corriendoDesde: number | null;
+  pausas: number;
+  iniciadaEn: string; // ISO
+  /** id del session_log en Supabase si ya se creó el borrador. */
+  logId?: string;
+  /** true si la sesión se abrió en modo corto (15 min). */
+  modoCorto?: boolean;
 }
 
-/** Checkeos rápidos — chips opcionales que alimentan el Índice de bienestar. */
-export const CHECKEOS_CHIPS: readonly CheckeoChip[] = [
-  { id: 'durmio_bien', label: 'Dormí bien', emoji: '🌙', positivo: true },
-  { id: 'comio_bien', label: 'Comí bien', emoji: '🥗', positivo: true },
-  { id: 'entreno', label: 'Entrené', emoji: '💪', positivo: true },
-  { id: 'tiempo_libre', label: 'Tiempo libre', emoji: '⏱', positivo: true },
-  { id: 'conecto_alguien', label: 'Conecté con alguien', emoji: '👥', positivo: true },
-  { id: 'inspirado', label: 'Me sentí inspirado', emoji: '💡', positivo: true },
-  { id: 'ansioso', label: 'Estuve ansioso', emoji: '😟', positivo: false },
-  { id: 'solo', label: 'Me sentí solo', emoji: '🫥', positivo: false },
-] as const;
+// ── Parser del tiempo estimado ("1 h" · "45 min" · "1.5 h" · "5 días…") ──
 
-export const CHECKEOS_POSITIVOS_TOTAL = CHECKEOS_CHIPS.filter((c) => c.positivo).length;
-
-export const LOGRO_MAX_CHARS = 400;
-export const BLOQUEO_MAX_CHARS = 500;
-
-// ─── Tipos ─────────────────────────────────────────────────────────────────────
-
-/** Datos crudos de una entrada del diario (lo que el usuario carga + se persiste). */
-export interface EntradaDiarioInput {
-  fecha: string; // YYYY-MM-DD
-  energia: number; // 1–10
-  cuerpo: number; // 1–10
-  mente: number; // 1–10
-  emociones: number; // 1–10
-  logro: string;
-  /** ids de TAREAS_TAGS seleccionados. */
-  tareas: string[];
-  /** ids de CHECKEOS_CHIPS seleccionados. */
-  checkeos: string[];
-  bloqueo: string;
-}
-
-export interface DiarioKPIs {
-  score: number; // 0–100
-  indiceBienestar: number; // 0–10
-  focoNegocio: number; // 0–100 (%)
-  equilibrioIntegral: number; // 0–10
-  consistencia7d: number; // 0–100 (%)
-  energiaPromedio7d: number | null; // 0–10
-  racha: number; // días
-}
-
-// ─── Helpers de normalización ──────────────────────────────────────────────────
-
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
-
-/** Promedio simple de las 3 dimensiones (0–10). */
-export function equilibrioIntegral(cuerpo: number, mente: number, emociones: number): number {
-  return round1((cuerpo + mente + emociones) / 3);
-}
-
-/** % de tags seleccionados que son de negocio. 0 si no hay tags. */
-export function focoNegocio(tareas: readonly string[]): number {
-  if (tareas.length === 0) return 0;
-  const negocioIds = new Set(TAREAS_TAGS.filter((t) => t.esNegocio).map((t) => t.id));
-  const deNegocio = tareas.filter((id) => negocioIds.has(id)).length;
-  return Math.round((deNegocio / tareas.length) * 100);
-}
-
-/** Checkeos positivos seleccionados, normalizados a 0–10. */
-export function checkeosNormalizado(checkeos: readonly string[]): number {
-  const positivosIds = new Set(CHECKEOS_CHIPS.filter((c) => c.positivo).map((c) => c.id));
-  const negativosIds = new Set(CHECKEOS_CHIPS.filter((c) => !c.positivo).map((c) => c.id));
-  const positivos = checkeos.filter((id) => positivosIds.has(id)).length;
-  const negativos = checkeos.filter((id) => negativosIds.has(id)).length;
-  // Cada negativo resta medio punto del aporte positivo.
-  const neto = clamp(positivos - negativos * 0.5, 0, CHECKEOS_POSITIVOS_TOTAL);
-  return round1((neto / CHECKEOS_POSITIVOS_TOTAL) * 10);
-}
-
-/** Índice de bienestar (0–10): promedio de cuerpo, mente, emociones y checkeos. */
-export function indiceBienestar(input: Pick<EntradaDiarioInput, 'cuerpo' | 'mente' | 'emociones' | 'checkeos'>): number {
-  const check10 = checkeosNormalizado(input.checkeos);
-  return round1((input.cuerpo + input.mente + input.emociones + check10) / 4);
-}
-
-/** Score del día (0–100) — fórmula autoritativa, espejo del trigger SQL. */
-export function calcularScore(input: EntradaDiarioInput): number {
-  const energiaNorm = (clamp(input.energia, 0, 10) / 10) * 100;
-  const prom3Norm = ((input.cuerpo + input.mente + input.emociones) / 3 / 10) * 100;
-  const foco = focoNegocio(input.tareas);
-  const checkeos = (checkeosNormalizado(input.checkeos) / 10) * 100;
-  const score = energiaNorm * 0.25 + prom3Norm * 0.25 + foco * 0.25 + checkeos * 0.25;
-  return Math.round(clamp(score, 0, 100));
-}
-
-// ─── KPIs que dependen del histórico ───────────────────────────────────────────
-
-/** Entrada histórica mínima necesaria para los KPIs de ventana. */
-export interface EntradaHistorica {
-  fecha: string; // YYYY-MM-DD
-  energia: number;
-  cuerpo: number;
-  mente: number;
-  emociones: number;
-  score?: number;
-  bloqueo?: string;
-  tareas?: string[];
-}
-
-function ultimosNDias(entradas: readonly EntradaHistorica[], n: number): EntradaHistorica[] {
-  return [...entradas].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, n);
-}
-
-/** Promedio de energía de los últimos 7 días cargados (0–10), o null si no hay datos. */
-export function energiaPromedio7d(entradas: readonly EntradaHistorica[]): number | null {
-  const last7 = ultimosNDias(entradas, 7);
-  if (last7.length === 0) return null;
-  const sum = last7.reduce((acc, e) => acc + e.energia, 0);
-  return round1(sum / last7.length);
-}
-
-/** Días con diario en los últimos 7 días calendario / 7 × 100. */
-export function consistencia7d(entradas: readonly EntradaHistorica[], hoy: Date): number {
-  const fechasSet = new Set(entradas.map((e) => e.fecha));
-  let completados = 0;
-  for (let i = 0; i < 7; i++) {
-    const fecha = new Date(hoy);
-    fecha.setDate(hoy.getDate() - i);
-    if (fechasSet.has(toFechaStr(fecha))) completados++;
+/**
+ * Devuelve los segundos objetivo del cronómetro, o null si la meta es una
+ * misión sin cronómetro (paralelas, permanentes, "min/día", "por semana").
+ */
+export function parseTiempoEstimado(tiempo?: string | null): number | null {
+  if (!tiempo) return null;
+  const t = tiempo.toLowerCase();
+  // La duración concreta AL INICIO manda ("4 h (día especial)" ES una sesión de 4h);
+  // las misiones se detectan solo cuando NO hay duración inicial en h/min.
+  const m = t.match(/^\s*([\d.,]+)\s*(h\b|hora|min)/);
+  if (!m) {
+    return null; // "5 días (en paralelo)", "45 min/día", "20 min/semana", "permanente"…
   }
-  return Math.round((completados / 7) * 100);
+  if (/\/(día|dia|semana)/.test(t)) return null; // "45 min/día" es rutina, no sesión
+  const n = parseFloat(m[1].replace(',', '.'));
+  if (Number.isNaN(n) || n <= 0) return null;
+  return m[2].startsWith('h') ? Math.round(n * 3600) : Math.round(n * 60);
 }
 
-/** Días consecutivos con diario completado terminando hoy (o ayer si hoy falta). */
-export function rachaActiva(entradas: readonly EntradaHistorica[], hoy: Date): number {
-  const fechasSet = new Set(entradas.map((e) => e.fecha));
-  let racha = 0;
-  for (let i = 0; i < 365; i++) {
-    const fecha = new Date(hoy);
-    fecha.setDate(hoy.getDate() - i);
-    if (fechasSet.has(toFechaStr(fecha))) {
-      racha++;
-    } else if (i > 0) {
-      break; // hoy puede faltar (todavía no lo cargó); cualquier otro hueco corta.
-    }
+export function formatoCrono(seg: number): string {
+  const s = Math.max(0, Math.floor(seg));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = s % 60;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
+    : `${m}:${String(ss).padStart(2, '0')}`;
+}
+
+// ── Estado en curso: persistencia local (sobrevive a cerrar la app) ──────
+
+const KEY_EN_CURSO = 'tcd_sesion_en_curso_v1';
+
+export function getSesionEnCurso(): SesionEnCurso | null {
+  try {
+    const raw = localStorage.getItem(KEY_EN_CURSO);
+    return raw ? (JSON.parse(raw) as SesionEnCurso) : null;
+  } catch {
+    return null;
   }
-  return racha;
 }
 
-// ─── Utilidades de formato/fecha ───────────────────────────────────────────────
-
-function round1(n: number): number {
-  return Math.round(n * 10) / 10;
+export function setSesionEnCurso(s: SesionEnCurso | null): void {
+  try {
+    if (s) localStorage.setItem(KEY_EN_CURSO, JSON.stringify(s));
+    else localStorage.removeItem(KEY_EN_CURSO);
+  } catch {
+    /* noop */
+  }
 }
 
-/** YYYY-MM-DD en hora local (evita el corrimiento de toISOString en UTC-3). */
-export function toFechaStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+/** Segundos de trabajo reales ahora mismo (acumulado + tramo corriendo). */
+export function segundosDeSesion(s: SesionEnCurso): number {
+  const extra = s.corriendoDesde ? (Date.now() - s.corriendoDesde) / 1000 : 0;
+  return Math.floor(s.segundosAcumulados + extra);
 }
 
-export function etiquetaEnergia(valor: number): string {
-  if (valor <= 3) return 'Sin energía';
-  if (valor <= 6) return 'Regular';
-  if (valor <= 9) return 'Bien';
-  return 'Imparable';
+export function pausarSesion(s: SesionEnCurso): SesionEnCurso {
+  if (!s.corriendoDesde) return s;
+  const actualizada: SesionEnCurso = {
+    ...s,
+    segundosAcumulados: segundosDeSesion(s),
+    corriendoDesde: null,
+    pausas: s.pausas + 1,
+  };
+  setSesionEnCurso(actualizada);
+  return actualizada;
 }
 
-/** Color del fill de un slider de dimensión: ≤4 naranja, 5–7 dorado, 8+ verde. */
-export function colorDimension(valor: number): string {
-  if (valor <= 4) return '#E09040';
-  if (valor <= 7) return '#C8893A';
-  return '#2DD4A0';
+export function reanudarSesion(s: SesionEnCurso): SesionEnCurso {
+  if (s.corriendoDesde) return s;
+  const actualizada: SesionEnCurso = { ...s, corriendoDesde: Date.now() };
+  setSesionEnCurso(actualizada);
+  return actualizada;
+}
+
+// ── Supabase: el registro permanente ─────────────────────────────────────
+
+/** Crea el borrador del log al abrir la sesión (check-in). Silencioso si falla. */
+export async function abrirSessionLog(
+  userId: string,
+  meta: { codigo: string; titulo: string },
+  checkin: { emocion: EmocionSesion; objetivo: string },
+): Promise<string | undefined> {
+  if (!supabase || !userId) return undefined;
+  try {
+    const { data, error } = await supabase
+      .from('session_logs')
+      .insert({
+        user_id: userId,
+        meta_codigo: meta.codigo,
+        meta_titulo: meta.titulo,
+        checkin_emocion: checkin.emocion,
+        checkin_objetivo: checkin.objetivo,
+        compromisos: [],
+        duracion_seg: 0,
+        pausas: 0,
+        completada: false,
+      })
+      .select('id')
+      .single();
+    if (error) return undefined;
+    return data?.id as string | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Cierra el log en el check-out con todo el registro de la sesión. */
+export async function cerrarSessionLog(
+  logId: string | undefined,
+  datos: {
+    checkout_emocion: EmocionSesion;
+    compromisos: string[];
+    duracion_seg: number;
+    pausas: number;
+    resumen_consolidado?: string | null;
+    artefacto_url?: string | null;
+  },
+): Promise<void> {
+  if (!supabase || !logId) return;
+  try {
+    await supabase
+      .from('session_logs')
+      .update({ ...datos, completada: true, closed_at: new Date().toISOString() })
+      .eq('id', logId);
+  } catch {
+    /* noop — el progreso local nunca se bloquea por red */
+  }
+}
+
+/** Guarda el resumen consolidado a posteriori (cuando el agente lo genera). */
+export async function guardarResumenSesion(logId: string | undefined, resumen: string): Promise<void> {
+  if (!supabase || !logId) return;
+  try {
+    await supabase.from('session_logs').update({ resumen_consolidado: resumen }).eq('id', logId);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Lista los logs de un usuario (para el cockpit de Lupe y el historial propio). */
+export async function listarSessionLogs(userId: string, limite = 60): Promise<SessionLog[]> {
+  if (!supabase || !userId) return [];
+  try {
+    const { data, error } = await supabase
+      .from('session_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limite);
+    if (error) return [];
+    return (data ?? []) as SessionLog[];
+  } catch {
+    return [];
+  }
 }

@@ -1,9 +1,11 @@
 import type { AdnFieldKey, ConfigAgente, QuickReplyEstructurado } from './types';
 import { buildSystemPrompt } from './voz-javo';
+import { ESTRATEGIA_CUPOS } from './estrategia';
 import { buildAdnContext, getNombreSanador } from './adn-context';
 import { CARO_THRESHOLDS, NIVEL_NOMBRE } from './skillProgress';
 
-const CARO_PROMPT = `
+const CARO_PROMPT = `${ESTRATEGIA_CUPOS}
+
 ═══════════════════════════════════════════════════════════════════
 SOS CARO · ENTRENADORA DE CÁMARA Y PRESENCIA
 ═══════════════════════════════════════════════════════════════════

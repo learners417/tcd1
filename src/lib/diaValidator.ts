@@ -1,551 +1,172 @@
 /**
- * campanasImageGen.ts — Orquestador de generacion de imagenes con cascada.
+ * diaValidator.ts — Validador del Día 45 (Regla #6 v8)
  *
- * Prioridad:
- *   1. OpenAI gpt-image-2 (server-side via /api/ai/image) — PRIMARIO
- *   2. Gemini Nano Banana 2  (gemini-3.1-flash-image-preview)
- *   3. Gemini Nano Banana Pro (gemini-3-pro-image-preview)
- *   4. Gemini Nano Banana     (gemini-2.5-flash-image)
+ * El día 45 es el "punto de no retorno": al cerrar Fase 3 (P8) el ADN debe tener
+ * los campos críticos completos. Si el usuario intenta avanzar a Fase 4 con
+ * el ADN incompleto a partir del día 45, la app muestra un banner bloqueando
+ * el avance y listando qué campos faltan y en qué pilar se completan.
  *
- * Si OpenAI falla, degradamos a la cascada Gemini existente. El consumidor
- * no se entera de que cambio el proveedor — solo ve modelName en progress.
+ * v8 también ofrece `compararFotoPartida()`: compara `META_autoevaluacion_dia1`
+ * (Foto de Partida tomada en P0.2) con el estado real del ADN para mostrar
+ * el efecto revelación de "lo que no sabías que no sabías".
+ *
+ * Los campos críticos están definidos en `ADN_SCHEMA_V8` con `criticoDia45: true`
+ * y se exportan como `CAMPOS_CRITICOS_DIA_45`. Ver Anexo D de mejoras.html.
  */
-import { GoogleGenAI } from '@google/genai';
-import type { ImageFormat, ImageQuality } from './campanasTypes';
-import { OPENAI_IMAGE_SIZE, IMAGE_QUALITY_DEFAULT, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
-import { resizeBase64ToExact } from './imageUploadUtils';
-import { supabase } from './supabase';
 
-// Error tipado para que la UI muestre el modal de "comprar creditos"
-export class InsufficientCreditsError extends Error {
-  code = 'INSUFFICIENT_CREDITS' as const;
-  constructor(msg = 'No tienes créditos suficientes') {
-    super(msg);
-    this.name = 'InsufficientCreditsError';
-  }
-}
+import type { ProfileV2 } from './supabase';
+import {
+  ADN_SCHEMA_V8,
+  campoEstaCompleto,
+  calcularAutoevaluacionActual,
+  DIMENSIONES_FOTO_PARTIDA,
+  type ADNCampo,
+} from './adnSchema';
 
-// ─── Modelos Gemini (cascada de fallback) ────────────────────────────────────
+export const DIA_PUNTO_DE_NO_RETORNO = 45;
 
-const GEMINI_MODELS = [
-  { id: 'gemini-3.1-flash-image-preview', name: 'Nano Banana 2' },
-  { id: 'gemini-3-pro-image-preview', name: 'Nano Banana Pro' },
-  { id: 'gemini-2.5-flash-image', name: 'Nano Banana' },
-] as const;
-
-// Timeout por intento. Si cuelga, avanzamos al siguiente en vez de esperar.
-const MODEL_TIMEOUT_MS = 90_000;
-const OPENAI_TIMEOUT_MS = 120_000; // gpt-image-2 en high puede ser lento
-
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error(`Timeout: ${label} no respondio en ${Math.round(ms / 1000)}s`)),
-      ms,
-    );
-    promise.then(
-      (value) => { clearTimeout(timer); resolve(value); },
-      (err) => { clearTimeout(timer); reject(err); },
-    );
-  });
-}
-
-// ─── Tipos publicos ──────────────────────────────────────────────────────────
-
-export type ImageModelName =
-  | 'OpenAI gpt-image-2'
-  | 'Nano Banana 2'
-  | 'Nano Banana Pro'
-  | 'Nano Banana';
-
-export interface ImageGenResult {
-  imageBase64: string;
-  mimeType: string;
-  modelUsed: string;
-  modelName: ImageModelName;
-}
-
-export interface ImageGenProgress {
-  modelName: string;
-  attempt: number;
-  total: number;
-  status: 'trying' | 'failed' | 'success';
-  error?: string;
-}
-
-export interface ReferenceImages {
-  characterRefs?: { base64: string; mimeType: string }[];
-  styleRefs?: { base64: string; mimeType: string }[];
-}
-
-export interface ImageGenOptions {
-  geminiKey?: string;
-  format?: ImageFormat;
-  quality?: ImageQuality;
-}
-
-// Total de modelos que puede intentar la cascada (1 OpenAI + 3 Gemini).
-const TOTAL_MODELS = 1 + GEMINI_MODELS.length;
-
-// ─── OpenAI (primario) ───────────────────────────────────────────────────────
-
-interface OpenAIImageResponse {
-  imageBase64?: string;
-  mimeType?: string;
-  modelUsed?: string;
-  error?: string;
+export interface ValidacionDia45 {
+  /** true si todos los campos críticos están completos. */
+  ok: boolean;
+  /** true si el usuario ya está en Día 45 o después. */
+  esDespuesDelDia45: boolean;
+  /** Campos que faltan completar (cuando ok === false). */
+  camposFaltantes: ADNCampo[];
+  /** Porcentaje de campos críticos completados. */
+  porcentajeCompleto: number;
+  /**
+   * true si la Fase 4 debe estar bloqueada: está después del día 45 y tiene
+   * campos críticos incompletos.
+   */
+  debeBloquearFase4: boolean;
 }
 
 /**
- * Clasifica el error del endpoint /api/ai/image en un mensaje accionable.
- * Distingue crash/timeout de Vercel (FUNCTION_INVOCATION_FAILED) de errores
- * reales de OpenAI, payload, rate-limit y red. Extrae el request ID de Vercel
- * cuando esta presente para que el usuario lo pueda ir a buscar a los logs.
+ * Devuelve los campos del ADN marcados como críticos para el Día 45.
+ * Reutiliza la bandera `criticoDia45` del schema v8.
  */
-function classifyImageError(
-  status: number,
-  rawText: string,
-  parsed: (OpenAIImageResponse & { code?: string }) | null,
-): string {
-  // Vercel crash o timeout — el handler nunca respondio.
-  // Formato tipico: "A server error has occurred FUNCTION_INVOCATION_FAILED gru1::p2dwh-1779300347050-387cd0aa7d4b"
-  if (rawText.includes('FUNCTION_INVOCATION_FAILED')) {
-    const reqIdMatch = rawText.match(/[a-z0-9]+::([a-z0-9-]+)/i);
-    const reqId = reqIdMatch?.[1];
-    return reqId
-      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs · req ${reqId}`
-      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs.';
-  }
-
-  if (status === 413) {
-    return 'Las imágenes de referencia exceden el límite del servidor (4.5MB). Saca alguna o usa imágenes más livianas.';
-  }
-
-  if (status === 429) {
-    return 'Demasiados pedidos a OpenAI (rate-limit). Espera 30 s y vuelve a probar.';
-  }
-
-  if (status === 401) {
-    return 'Sesión vencida — refresca la página y vuelve a entrar.';
-  }
-
-  // Errores con body JSON estructurado del endpoint
-  if (parsed?.error) {
-    return parsed.error;
-  }
-
-  // 5xx sin clasificar
-  if (status >= 500) {
-    return `Error del servidor (HTTP ${status}). ${rawText.slice(0, 200) || 'Sin detalle.'}`;
-  }
-
-  return `HTTP ${status}: ${rawText.slice(0, 200) || 'sin detalle'}`;
+export function obtenerCamposCriticosDia45(): ADNCampo[] {
+  return ADN_SCHEMA_V8
+    .flatMap((seccion) => seccion.campos)
+    .filter((c) => c.criticoDia45);
 }
 
-async function tryOpenAI(
-  prompt: string,
-  referenceImages: ReferenceImages | undefined,
-  format: ImageFormat,
-  quality: ImageQuality,
-): Promise<ImageGenResult> {
-  const size = OPENAI_IMAGE_SIZE[format] ?? '1024x1024';
+/**
+ * Valida el estado del ADN respecto al umbral del Día 45.
+ *
+ * @param perfil    perfil del usuario (puede ser parcial)
+ * @param diaActual día del programa (1-90); si es undefined asume el día actual
+ *                  no es relevante y solo mira los campos
+ */
+export function validarADNDia45(
+  perfil: Partial<ProfileV2>,
+  diaActual?: number,
+): ValidacionDia45 {
+  const criticos = obtenerCamposCriticosDia45();
+  const completos = criticos.filter((c) => campoEstaCompleto(perfil, c));
+  const faltantes = criticos.filter((c) => !campoEstaCompleto(perfil, c));
 
-  // Aplanamos character + style refs en una sola lista para la API /edits.
-  const refs = [
-    ...(referenceImages?.characterRefs ?? []),
-    ...(referenceImages?.styleRefs ?? []),
-  ];
+  const porcentaje = criticos.length === 0
+    ? 100
+    : Math.round((completos.length / criticos.length) * 100);
 
-  const payload = {
-    prompt,
-    size,
-    quality,
-    referenceImages: refs.length > 0 ? refs : undefined,
-  };
-
-  // Inyectar el JWT del usuario para que el endpoint pueda consumir credito.
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (supabase) {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-
-  const resp = await withTimeout(
-    fetch('/api/ai/image', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    }),
-    OPENAI_TIMEOUT_MS,
-    'OpenAI gpt-image-2',
-  );
-
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => '');
-    let parsed: (OpenAIImageResponse & { code?: string }) | null = null;
-    try { parsed = JSON.parse(text) as OpenAIImageResponse & { code?: string }; } catch { /* noop */ }
-
-    // 402 = INSUFFICIENT_CREDITS · NO degradar a Gemini (es una decision de negocio,
-    // no una falla tecnica · el usuario debe comprar creditos)
-    if (resp.status === 402 || parsed?.code === 'INSUFFICIENT_CREDITS') {
-      throw new InsufficientCreditsError(parsed?.error || 'Sin creditos');
-    }
-
-    throw new Error(classifyImageError(resp.status, text, parsed));
-  }
-
-  const data = await resp.json() as OpenAIImageResponse;
-  if (!data.imageBase64) {
-    throw new Error(data.error || 'OpenAI response missing imageBase64');
-  }
+  const esDespues = typeof diaActual === 'number' && diaActual >= DIA_PUNTO_DE_NO_RETORNO;
+  const ok = faltantes.length === 0;
 
   return {
-    imageBase64: data.imageBase64,
-    mimeType: data.mimeType || 'image/png',
-    modelUsed: data.modelUsed || 'gpt-image-2',
-    modelName: 'OpenAI gpt-image-2',
+    ok,
+    esDespuesDelDia45: esDespues,
+    camposFaltantes: faltantes,
+    porcentajeCompleto: porcentaje,
+    debeBloquearFase4: esDespues && !ok,
   };
 }
 
-// ─── Gemini (fallback cascada) ───────────────────────────────────────────────
-
-async function tryGemini(
-  apiKey: string,
-  prompt: string,
-  referenceImages: ReferenceImages | undefined,
-  onProgress: ((progress: ImageGenProgress) => void) | undefined,
-  modelAttemptOffset: number, // para numerar attempts correctamente (2, 3, 4)
-): Promise<ImageGenResult> {
-  const ai = new GoogleGenAI({ apiKey });
-
-  const parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] = [
-    { text: prompt },
-  ];
-  for (const ref of referenceImages?.characterRefs ?? []) {
-    parts.push({ inlineData: { mimeType: ref.mimeType, data: ref.base64 } });
+/**
+ * Agrupa los campos faltantes por el pilar de origen, para mostrarle al usuario
+ * a dónde tiene que volver para completar cada uno.
+ */
+export function agruparFaltantesPorPilar(
+  faltantes: ADNCampo[],
+): Array<{ pilar: string; campos: ADNCampo[] }> {
+  const grupos = new Map<string, ADNCampo[]>();
+  for (const campo of faltantes) {
+    // "P5.2" → "P5"
+    const pilar = campo.pilarOrigen.split('.')[0];
+    const actual = grupos.get(pilar) ?? [];
+    actual.push(campo);
+    grupos.set(pilar, actual);
   }
-  for (const ref of referenceImages?.styleRefs ?? []) {
-    parts.push({ inlineData: { mimeType: ref.mimeType, data: ref.base64 } });
-  }
-
-  let lastError: Error | null = null;
-
-  for (let i = 0; i < GEMINI_MODELS.length; i++) {
-    const model = GEMINI_MODELS[i];
-    const attempt = modelAttemptOffset + i;
-
-    onProgress?.({
-      modelName: model.name,
-      attempt,
-      total: TOTAL_MODELS,
-      status: 'trying',
-    });
-
-    try {
-      const response = await withTimeout(
-        ai.models.generateContent({
-          model: model.id,
-          contents: [{ role: 'user', parts: parts as never[] }],
-          config: { responseModalities: ['TEXT', 'IMAGE'] },
-        }),
-        MODEL_TIMEOUT_MS,
-        model.name,
-      );
-
-      const responseParts = response.candidates?.[0]?.content?.parts;
-      if (!responseParts) throw new Error('No response parts');
-
-      const imagePart = responseParts.find(
-        (p: Record<string, unknown>) => p.inlineData && typeof p.inlineData === 'object',
-      );
-
-      if (!imagePart || !imagePart.inlineData) {
-        throw new Error('No image in response');
-      }
-
-      const { data, mimeType } = imagePart.inlineData as { data: string; mimeType: string };
-
-      onProgress?.({
-        modelName: model.name,
-        attempt,
-        total: TOTAL_MODELS,
-        status: 'success',
-      });
-
-      return {
-        imageBase64: data,
-        mimeType: mimeType || 'image/png',
-        modelUsed: model.id,
-        modelName: model.name as ImageModelName,
-      };
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      onProgress?.({
-        modelName: model.name,
-        attempt,
-        total: TOTAL_MODELS,
-        status: 'failed',
-        error: lastError.message,
-      });
-    }
-  }
-
-  throw lastError ?? new Error('Todos los modelos Gemini fallaron');
+  return Array.from(grupos.entries())
+    .map(([pilar, campos]) => ({ pilar, campos }))
+    .sort((a, b) => a.pilar.localeCompare(b.pilar));
 }
 
-// ─── Normalizacion de tamano final ───────────────────────────────────────────
+// ─── Comparación Día 45 · Foto de Partida vs ADN real (v8) ──────────────────
+
+export interface ComparacionDimension {
+  /** Slug interno de la dimensión (ej "historia"). */
+  key: string;
+  /** Label visible (ej "Tu historia en 30 segundos"). */
+  label: string;
+  /** Score 1-5 que el usuario se puso el día 1 en P0.2 (Foto de Partida). */
+  dia1: number;
+  /** Score 1-5 derivado del estado real del ADN al día actual. */
+  dia45: number;
+  /** Delta dia45 - dia1 (positivo = creció, negativo = se conoció más y bajó). */
+  delta: number;
+}
+
+export interface ComparacionDia45 {
+  /** true si el usuario tomó la Foto de Partida (P0.2). */
+  tieneFotoPartida: boolean;
+  /** Comparación dimensión por dimensión. */
+  dimensiones: ComparacionDimension[];
+  /** Promedio dia1 (puede usarse para mostrar score global). */
+  promedioDia1: number;
+  /** Promedio dia45. */
+  promedioDia45: number;
+  /** Delta promedio (positivo = avance neto, negativo = revelación de gaps). */
+  deltaPromedio: number;
+}
 
 /**
- * Lleva el output de cualquier proveedor al tamano exacto del formato canonico
- * de redes (ej: 1080x1350 para 4:5, 1080x1920 para 9:16). OpenAI gpt-image-2
- * solo expone 1024x1024 / 1024x1536 / 1536x1024, y Gemini puede devolver
- * cualquier cosa cercana al ratio pedido. Usa fit 'cover' para no dejar bandas.
+ * Compara la autoevaluación que el usuario hizo el día 1 (Foto de Partida en P0.2)
+ * contra el estado real de su ADN al día actual.
  *
- * Si el resize falla por cualquier motivo (canvas, CORS, navegador raro),
- * devolvemos la imagen original para no romper el flujo — el usuario igual ve
- * algo. El log permite detectarlo.
+ * Es el efecto revelación de la regla v8: "lo que no sabías que no sabías".
+ * Muchas dimensiones que el usuario se autocalificó alto el día 1 bajan al día 45
+ * porque al ver el ADN real toma dimensión de lo que faltaba.
  */
-async function normalizeToFormat(
-  result: ImageGenResult,
-  format: ImageFormat,
-): Promise<ImageGenResult> {
-  const target = IMAGE_FORMAT_OPTIONS[format];
-  try {
-    const resized = await resizeBase64ToExact(
-      result.imageBase64,
-      result.mimeType,
-      target.width,
-      target.height,
-      'cover',
-    );
+export function compararFotoPartida(perfil: Partial<ProfileV2>): ComparacionDia45 {
+  const dia1Raw = perfil.adn_autoevaluacion_dia1 ?? [];
+  const tieneFotoPartida = dia1Raw.length === DIMENSIONES_FOTO_PARTIDA.length;
+  const dia45Raw = calcularAutoevaluacionActual(perfil);
+
+  const dimensiones: ComparacionDimension[] = DIMENSIONES_FOTO_PARTIDA.map((dim, i) => {
+    const dia1 = tieneFotoPartida ? dia1Raw[i] : 0;
+    const dia45 = dia45Raw[i];
     return {
-      ...result,
-      imageBase64: resized.base64,
-      mimeType: resized.mimeType,
+      key: dim.key,
+      label: dim.label,
+      dia1,
+      dia45,
+      delta: dia45 - dia1,
     };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[campanasImageGen] normalizeToFormat fallo, usando imagen original', msg);
-    return result;
-  }
-}
-
-// ─── Generador principal con cascada ─────────────────────────────────────────
-
-/**
- * Intenta OpenAI gpt-image-2 primero; si falla, cae a la cascada Gemini.
- *
- * @param options - format (para mapear size de OpenAI), quality (low/med/high/auto),
- *                  geminiKey (fallback). Si ambos proveedores fallan, tira error.
- */
-export async function generateImageWithFallback(
-  prompt: string,
-  onProgress?: (progress: ImageGenProgress) => void,
-  referenceImages?: ReferenceImages,
-  options: ImageGenOptions = {},
-): Promise<ImageGenResult> {
-  const format: ImageFormat = options.format ?? '1:1';
-  const quality: ImageQuality = options.quality ?? IMAGE_QUALITY_DEFAULT;
-
-  let openaiError: Error | null = null;
-
-  // ── 1) OpenAI primario ─────────────────────────────────────────────────────
-  onProgress?.({
-    modelName: 'OpenAI gpt-image-2',
-    attempt: 1,
-    total: TOTAL_MODELS,
-    status: 'trying',
   });
 
-  try {
-    const result = await tryOpenAI(prompt, referenceImages, format, quality);
-    onProgress?.({
-      modelName: 'OpenAI gpt-image-2',
-      attempt: 1,
-      total: TOTAL_MODELS,
-      status: 'success',
-    });
-    return await normalizeToFormat(result, format);
-  } catch (err) {
-    // INSUFFICIENT_CREDITS · cortar la cascada (es decision de negocio, no falla)
-    if (err instanceof InsufficientCreditsError) {
-      onProgress?.({
-        modelName: 'OpenAI gpt-image-2',
-        attempt: 1,
-        total: TOTAL_MODELS,
-        status: 'failed',
-        error: 'Sin creditos',
-      });
-      throw err;
-    }
-    openaiError = err instanceof Error ? err : new Error(String(err));
-    onProgress?.({
-      modelName: 'OpenAI gpt-image-2',
-      attempt: 1,
-      total: TOTAL_MODELS,
-      status: 'failed',
-      error: openaiError.message,
-    });
-  }
+  const promedio = (arr: number[]) =>
+    arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length;
+  const promedioDia1 = tieneFotoPartida
+    ? promedio(dimensiones.map((d) => d.dia1))
+    : 0;
+  const promedioDia45 = promedio(dimensiones.map((d) => d.dia45));
 
-  // ── 2) Cascada Gemini ──────────────────────────────────────────────────────
-  if (!options.geminiKey) {
-    throw new Error(
-      `OpenAI fallo y no hay Gemini key configurada como fallback. Error: ${openaiError.message}`,
-    );
-  }
-
-  try {
-    const result = await tryGemini(
-      options.geminiKey,
-      prompt,
-      referenceImages,
-      onProgress,
-      /* attemptOffset */ 2,
-    );
-    return await normalizeToFormat(result, format);
-  } catch (geminiError) {
-    // Gemini queda como fallback silencioso. Si tambien falla, el usuario solo
-    // ve el error de OpenAI (que es el flujo primario) · el de Gemini va a la consola.
-    if (typeof console !== 'undefined') {
-      const gMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
-      console.error('[campanasImageGen] Fallback Gemini tambien fallo:', gMsg);
-    }
-    throw new Error(openaiError.message);
-  }
-}
-
-// ─── Edicion sutil de imagen existente ───────────────────────────────────────
-
-/**
- * Describe el personaje principal de una imagen via Claude Vision.
- * Usado por editImage() cuando hay un character ref para evitar mandar 2
- * imagenes al endpoint /edits de OpenAI (que las combina en una nueva en vez
- * de tratar una como base y otra como ref auxiliar).
- */
-export async function describeCharacter(
-  image: { base64: string; mimeType: string },
-): Promise<string> {
-  const resp = await fetch('/api/ai/describe-image', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageBase64: image.base64, mimeType: image.mimeType }),
-  });
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => '');
-    let parsed: { error?: string } | null = null;
-    try { parsed = JSON.parse(text) as { error?: string }; } catch { /* noop */ }
-    throw new Error(parsed?.error || `HTTP ${resp.status}: ${text.slice(0, 200)}`);
-  }
-  const data = await resp.json() as { description?: string; error?: string };
-  if (!data.description) throw new Error(data.error || 'Descripcion vacia');
-  return data.description;
-}
-
-/**
- * Edita una imagen ya generada con instrucciones precisas.
- * La imagen original va como input + un prompt de edicion; el modelo devuelve
- * la misma imagen con SOLO los cambios pedidos (no rehace la imagen entera).
- *
- * Si se pasa `characterRef`, primero pedimos a Claude que describa al personaje
- * de la ref en texto, y luego mandamos solo la imagen base + prompt enriquecido
- * con esa descripcion. Mandar 2 imagenes a /v1/images/edits hace que gpt-image-2
- * las combine (toma texto/composicion de ambas) en vez de preservar la base.
- */
-export async function editImage(
-  baseImage: { base64: string; mimeType: string },
-  editInstruction: string,
-  onProgress?: (progress: ImageGenProgress) => void,
-  options: ImageGenOptions = {},
-  characterRef?: { base64: string; mimeType: string },
-): Promise<ImageGenResult> {
-  let characterReplacementBlock = '';
-
-  if (characterRef) {
-    onProgress?.({
-      modelName: 'Analizando personaje de referencia',
-      attempt: 0,
-      total: TOTAL_MODELS,
-      status: 'trying',
-    });
-    try {
-      const description = await describeCharacter(characterRef);
-      characterReplacementBlock = `
-
-REEMPLAZO DE PERSONAJE:
-- Reemplazar al personaje principal de la imagen base por una persona con estas caracteristicas exactas: ${description}
-- Mantener IDENTICOS: pose, encuadre, angulo de camara, iluminacion, vestuario general (salvo que la instruccion lo pida), fondo, composicion.
-- Solo cambian los rasgos del personaje. Todo lo demas queda igual a la imagen base.`;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(`No se pudo analizar el personaje de referencia: ${msg}`);
-    }
-  }
-
-  const editPrompt = `EDICION SUTIL DE IMAGEN — modo edit/inpainting.
-
-INSTRUCCION DE EDICION DEL USUARIO:
-"${editInstruction.trim()}"
-
-REGLAS CRITICAS:
-- La imagen base esta adjunta como referencia obligatoria.
-- Devolver la MISMA imagen con SOLO el cambio pedido aplicado.
-- Mantener IDENTICOS: composicion, encuadre, iluminacion, paleta, personajes (salvo reemplazo explicito), tipografia, textos que no se hayan pedido cambiar, fondo, todos los demas elementos.
-- NO rehacer la imagen desde cero. NO cambiar el estilo. NO mover elementos que no se hayan pedido mover.
-- Si la instruccion pide quitar algo (logo, icono, elemento), borrarlo limpiamente respetando el fondo que estaba debajo.
-- Si pide cambiar un color, cambiar SOLO ese color, todo lo demas igual.
-- Si pide agregar algo, integrarlo respetando la estetica y la iluminacion existentes.
-- Resultado: la imagen debe verse como si alguien hubiera retocado un detalle en Photoshop, no como una nueva generacion.${characterReplacementBlock}`;
-
-  // SOLO la base como ref. La descripcion del personaje (si la hay) ya esta
-  // en el prompt — mandar la imagen del personaje haria que gpt-image-2 la
-  // combine con la base en vez de respetarla.
-  return generateImageWithFallback(
-    editPrompt,
-    onProgress,
-    { styleRefs: [{ base64: baseImage.base64, mimeType: baseImage.mimeType }] },
-    options,
-  );
-}
-
-// ─── Generar multiples imagenes para carrusel ────────────────────────────────
-
-export async function generateCarouselImages(
-  prompts: string[],
-  onProgress?: (slideIndex: number, progress: ImageGenProgress) => void,
-  referenceImages?: ReferenceImages,
-  options: ImageGenOptions = {},
-): Promise<ImageGenResult[]> {
-  const results: ImageGenResult[] = [];
-
-  for (let i = 0; i < prompts.length; i++) {
-    const result = await generateImageWithFallback(
-      prompts[i],
-      (progress) => onProgress?.(i, progress),
-      referenceImages,
-      options,
-    );
-    results.push(result);
-  }
-
-  return results;
-}
-
-// ─── Utilidad: base64 a Blob ─────────────────────────────────────────────────
-
-export function base64ToBlob(base64: string, mimeType: string = 'image/png'): Blob {
-  const byteString = atob(base64);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeType });
-}
-
-// ─── Utilidad: base64 a data URL ─────────────────────────────────────────────
-
-export function base64ToDataUrl(base64: string, mimeType: string = 'image/png'): string {
-  return `data:${mimeType};base64,${base64}`;
+  return {
+    tieneFotoPartida,
+    dimensiones,
+    promedioDia1,
+    promedioDia45,
+    deltaPromedio: promedioDia45 - promedioDia1,
+  };
 }

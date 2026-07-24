@@ -110,6 +110,17 @@ familias = _re.findall(r"familia: '(\w+)'", fa)
 reparto = (familias.count('piedras'), familias.count('dolor_historia'), familias.count('resultado_metodo'), familias.count('acompana'))
 check('las 18 fórmulas completas (6 campos c/u, familias 6+5+6+1)', len(ids) == 18 and campos_ok and reparto == (6, 5, 6, 1), f'ids={len(ids)} campos={campos_ok} reparto={reparto}')
 
+# La estrategia de cupos, sin restos del sistema viejo en lo que ve el cliente
+VIEJO_ADS = ['CTWA', 'follow-me', 'agente de WhatsApp', 'lead magnet']
+restos = []
+for f, src in todo.items():
+    # preactivacionSteps es el checklist interno del equipo: ahí el agente de
+    # WhatsApp SÍ existe como activo de operación (no como camino de anuncios).
+    if any(x in f for x in ['Admin', 'estrategia.ts', 'preactivacionSteps']): continue
+    for pal in VIEJO_ADS:
+        if pal in src: restos.append(f.split('/')[-1] + ':' + pal)
+check('sin restos del sistema de anuncios viejo', not restos, str(sorted(set(restos))[:6]))
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

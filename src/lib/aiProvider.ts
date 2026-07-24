@@ -1,342 +1,163 @@
 /**
- * campanasStorage.ts — Helpers de Supabase Storage para assets de creativos
+ * aiProvider.ts — Cliente unificado de generacion de texto.
+ *
+ * Habla solo con `/api/ai/generate` y `/api/ai/stream`. El backend decide
+ * que proveedor usar (DeepSeek primario · Claude fallback). El cliente NO
+ * elige proveedor · si fuera necesario forzarlo se hace via env var
+ * server-side (FORCE_AI_PROVIDER en Vercel).
+ *
+ * Gemini sigue usandose en campanasImageGen.ts para GENERACION de imagenes ·
+ * ese flujo es independiente y no usa este modulo.
+ *
+ * Reintentos del cliente: cuando el endpoint server devuelve un error
+ * transitorio (5xx · timeout) hacemos hasta CLIENT_RETRIES intentos con
+ * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
-import { supabase, isSupabaseReady } from './supabase';
-import type { Campana, Creativo, CreativoAsset } from './campanasTypes';
-import { base64ToBlob } from './campanasImageGen';
 
-const BUCKET = 'creativos-assets';
+const API_BASE = '/api/ai';
 
-// ─── Upload de imagen ────────────────────────────────────────────────────────
+const CLIENT_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1500;
 
-export async function uploadCreativeImage(
-  userId: string,
-  creativoId: string,
-  slideOrden: number,
-  imageBase64: string,
-  mimeType: string = 'image/png',
-): Promise<{ storagePath: string; publicUrl: string } | null> {
-  if (!isSupabaseReady() || !supabase) return null;
-
-  const ext = mimeType === 'image/jpeg' ? 'jpg' : 'png';
-  const path = `${userId}/${creativoId}/${slideOrden}.${ext}`;
-  const blob = base64ToBlob(imageBase64, mimeType);
-
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, blob, { contentType: mimeType, upsert: true });
-
-  if (uploadError) {
-    console.error('Upload error:', uploadError.message);
-    throw new Error(`Storage rechazo la imagen: ${uploadError.message}`);
-  }
-
-  const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(path);
-
-  return { storagePath: path, publicUrl: urlData.publicUrl };
+export interface AIGenerateOptions {
+  /** Single prompt (used when messages is not provided) */
+  prompt?: string;
+  /** System instruction / persona */
+  systemInstruction?: string;
+  /** Multi-turn conversation messages */
+  messages?: Array<{ role: string; content: string }>;
 }
 
-// ─── Guardar asset en tabla ──────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-export async function saveCreativoAsset(
-  asset: Omit<CreativoAsset, 'id' | 'created_at'>,
-): Promise<CreativoAsset | null> {
-  if (!isSupabaseReady() || !supabase) return null;
-
-  const { data, error } = await supabase
-    .from('creativo_assets')
-    .insert(asset)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Save asset error:', error.message);
-    throw new Error(`DB rechazo el asset: ${error.message}`);
-  }
-  return data as CreativoAsset;
+function delay(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
-// ─── Upsert asset (reemplaza slide existente) ────────────────────────────────
-// Al regenerar o editar con IA, reemplazamos la fila existente para
-// (creativo_id, slide_orden). Usamos delete + insert porque la tabla no tiene
-// UNIQUE constraint en (creativo_id, slide_orden).
-
-export async function upsertCreativoAsset(
-  asset: Omit<CreativoAsset, 'id' | 'created_at'>,
-): Promise<CreativoAsset | null> {
-  if (!isSupabaseReady() || !supabase) return null;
-
-  const { error: deleteError } = await supabase
-    .from('creativo_assets')
-    .delete()
-    .eq('creativo_id', asset.creativo_id)
-    .eq('slide_orden', asset.slide_orden);
-
-  if (deleteError) {
-    console.error('Upsert delete error:', deleteError.message);
-    throw new Error(`DB rechazo el delete previo: ${deleteError.message}`);
+function isTransientError(err: unknown): boolean {
+  if (!err) return false;
+  const e = err as { status?: number; message?: string };
+  if (e.status === 429 || e.status === 502 || e.status === 503 || e.status === 504 || e.status === 529) {
+    return true;
   }
-
-  const { data, error } = await supabase
-    .from('creativo_assets')
-    .insert(asset)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Upsert asset error:', error.message);
-    throw new Error(`DB rechazo el asset: ${error.message}`);
-  }
-  return data as CreativoAsset;
+  const msg = (e.message ?? '').toLowerCase();
+  return (
+    msg.includes('timeout') ||
+    msg.includes('etimedout') ||
+    msg.includes('econnreset') ||
+    msg.includes('network')
+  );
 }
 
-// ─── Fetch de imagen existente a base64 (para edit-with-AI desde historial) ──
-
-export async function fetchImageAsBase64(
-  url: string,
-): Promise<{ base64: string; mimeType: string }> {
-  const response = await fetch(url, { cache: 'no-store' });
-  if (!response.ok) throw new Error(`No se pudo descargar la imagen (${response.status})`);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const base64 = dataUrl.split(',')[1] ?? '';
-      resolve({ base64, mimeType: blob.type || 'image/png' });
-    };
-    reader.onerror = () => reject(reader.error ?? new Error('FileReader error'));
-    reader.readAsDataURL(blob);
-  });
-}
-
-// ─── Eliminar assets de un creativo ──────────────────────────────────────────
-
-export async function deleteCreativoAssets(
-  creativoId: string,
-  userId: string,
-): Promise<void> {
-  if (!isSupabaseReady() || !supabase) return;
-
-  // Obtener paths
-  const { data: assets } = await supabase
-    .from('creativo_assets')
-    .select('storage_path')
-    .eq('creativo_id', creativoId);
-
-  if (assets && assets.length > 0) {
-    const paths = assets.map((a: { storage_path: string }) => a.storage_path);
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
-
-  // Eliminar registros
-  await supabase.from('creativo_assets').delete().eq('creativo_id', creativoId);
-}
-
-// ─── CRUD de Campanas ────────────────────────────────────────────────────────
-
-export async function fetchCampanas(userId: string): Promise<Campana[]> {
-  if (!isSupabaseReady() || !supabase) {
-    return loadCampanasFromLocal();
-  }
-
-  const { data, error } = await supabase
-    .from('campanas')
-    .select('*')
-    .eq('usuario_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Fetch campanas error:', error.message);
-    return loadCampanasFromLocal();
-  }
-
-  const campanas = data as Campana[];
-  localStorage.setItem('tcd_campanas', JSON.stringify(campanas));
-  return campanas;
-}
-
-export async function saveCampana(
-  campana: Omit<Campana, 'id' | 'created_at' | 'updated_at'>,
-): Promise<Campana | null> {
-  if (!isSupabaseReady() || !supabase) {
-    return saveCampanaLocal(campana);
-  }
-
-  const { data, error } = await supabase
-    .from('campanas')
-    .insert(campana)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Save campana error:', error.message);
-    return saveCampanaLocal(campana);
-  }
-
-  return data as Campana;
-}
-
-export async function updateCampana(
-  id: string,
-  fields: Partial<Campana>,
-): Promise<void> {
-  if (!isSupabaseReady() || !supabase) return;
-
-  await supabase
-    .from('campanas')
-    .update({ ...fields, updated_at: new Date().toISOString() })
-    .eq('id', id);
-}
-
-export async function deleteCampana(id: string): Promise<void> {
-  if (!isSupabaseReady() || !supabase) return;
-  await supabase.from('campanas').delete().eq('id', id);
-}
-
-// ─── CRUD de Creativos ───────────────────────────────────────────────────────
-
-export async function fetchCreativos(
-  userId: string,
-  campanaId?: string,
-): Promise<Creativo[]> {
-  if (!isSupabaseReady() || !supabase) {
-    return loadCreativosFromLocal(campanaId);
-  }
-
-  let query = supabase
-    .from('creativos')
-    .select('*, assets:creativo_assets(*)')
-    .eq('usuario_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (campanaId) {
-    query = query.eq('campana_id', campanaId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Fetch creativos error:', error.message);
-    return loadCreativosFromLocal(campanaId);
-  }
-
-  const creativos = data as Creativo[];
-  safeSetCreativosCache(creativos);
-  return creativos;
-}
-
-export async function saveCreativo(
-  creativo: Omit<Creativo, 'id' | 'created_at' | 'assets'>,
-): Promise<Creativo | null> {
-  if (!isSupabaseReady() || !supabase) {
-    // Offline / Supabase no configurado: fallback a localStorage (unico caso
-    // legitimo para usarlo — un fallback silencioso ante errores de RLS/red
-    // oculta bugs reales como el que vio el admin generando para un cliente).
-    return saveCreativoLocal(creativo);
-  }
-
-  const { data, error } = await supabase
-    .from('creativos')
-    .insert(creativo)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Save creativo error:', error.message);
-    // Propagamos el error con contexto util para que el caller muestre un
-    // toast honesto (antes caia a localStorage y simulaba exito).
-    throw new Error(`DB rechazo el creativo: ${error.message}`);
-  }
-
-  return data as Creativo;
-}
-
-export async function updateCreativo(
-  id: string,
-  fields: Partial<Creativo>,
-): Promise<void> {
-  if (!isSupabaseReady() || !supabase) return;
-  await supabase.from('creativos').update(fields).eq('id', id);
-}
-
-export async function deleteCreativo(
-  id: string,
-  userId: string,
-): Promise<void> {
-  await deleteCreativoAssets(id, userId);
-  if (isSupabaseReady() && supabase) {
-    await supabase.from('creativos').delete().eq('id', id);
-  }
-}
-
-// ─── Descarga ────────────────────────────────────────────────────────────────
-
-export function downloadImage(url: string, filename: string): void {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.target = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-// ─── localStorage fallbacks ──────────────────────────────────────────────────
-
-// El cache de creativos en localStorage solo sirve como fallback offline.
-// Strippeamos campos pesados (assets URLs largos, prompt_imagen serializado)
-// para que la lista no explote la cuota de ~5MB del navegador. Si igual no
-// entra, mejor borrar el cache que romper la lectura.
-function stripHeavyFields(creativos: Creativo[]): Creativo[] {
-  return creativos.map(({ assets: _assets, prompt_imagen: _prompt, ...rest }) => rest);
-}
-
-function safeSetCreativosCache(creativos: Creativo[]): void {
+async function safeReadError(res: Response): Promise<string> {
   try {
-    localStorage.setItem('tcd_creativos', JSON.stringify(stripHeavyFields(creativos)));
-  } catch (err) {
-    // QuotaExceededError u otros — el cache es best-effort, no debe romper UX.
-    console.warn('No se pudo cachear creativos en localStorage:', err);
-    try { localStorage.removeItem('tcd_creativos'); } catch { /* ignore */ }
+    const text = await res.text();
+    if (!text) return '';
+    try {
+      const parsed = JSON.parse(text);
+      return parsed?.details || parsed?.error || text.slice(0, 200);
+    } catch {
+      return text.slice(0, 200);
+    }
+  } catch {
+    return '';
   }
 }
 
-function loadCampanasFromLocal(): Campana[] {
-  try {
-    const saved = localStorage.getItem('tcd_campanas');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
+function makeError(status: number, detail: string): Error & { status: number } {
+  const err = new Error(
+    `IA API error: ${status}${detail ? ` — ${detail}` : ''}`,
+  ) as Error & { status: number };
+  err.status = status;
+  return err;
 }
 
-function loadCreativosFromLocal(campanaId?: string): Creativo[] {
-  try {
-    const saved = localStorage.getItem('tcd_creativos');
-    const all: Creativo[] = saved ? JSON.parse(saved) : [];
-    return campanaId ? all.filter(c => c.campana_id === campanaId) : all;
-  } catch { return []; }
+// ─── Non-streaming text generation ──────────────────────────────────────────
+
+export async function generateText(options: AIGenerateOptions): Promise<string> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok || !contentType.includes('application/json')) {
+        throw makeError(res.status, await safeReadError(res));
+      }
+
+      const data = await res.json();
+      if (typeof data?.text !== 'string') {
+        throw new Error('IA API devolvio respuesta vacia');
+      }
+      return data.text;
+    } catch (err) {
+      lastError = err;
+      if (!isTransientError(err) || attempt === CLIENT_RETRIES) break;
+      await delay(RETRY_BASE_DELAY_MS * (attempt + 1));
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('IA no pudo responder · prueba de nuevo en unos segundos.');
 }
 
-function saveCampanaLocal(campana: Omit<Campana, 'id' | 'created_at' | 'updated_at'>): Campana {
-  const now = new Date().toISOString();
-  const full: Campana = {
-    ...campana,
-    id: crypto.randomUUID(),
-    created_at: now,
-    updated_at: now,
-  };
-  const existing = loadCampanasFromLocal();
-  localStorage.setItem('tcd_campanas', JSON.stringify([full, ...existing]));
-  return full;
-}
+// ─── Streaming text generation ──────────────────────────────────────────────
 
-function saveCreativoLocal(creativo: Omit<Creativo, 'id' | 'created_at' | 'assets'>): Creativo {
-  const full: Creativo = {
-    ...creativo,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  };
-  const existing = loadCreativosFromLocal();
-  safeSetCreativosCache([full, ...existing]);
-  return full;
+export async function* streamText(
+  options: AIGenerateOptions,
+): AsyncGenerator<string> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= CLIENT_RETRIES; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE}/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok || !contentType.includes('text/event-stream')) {
+        throw makeError(res.status, await safeReadError(res));
+      }
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) return;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const raw = line.slice(6).trim();
+            if (raw === '[DONE]') return;
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed.text) yield parsed.text;
+              if (parsed.error) throw new Error(parsed.error);
+            } catch (e) {
+              if (e instanceof SyntaxError) continue;
+              throw e;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      lastError = err;
+      if (!isTransientError(err) || attempt === CLIENT_RETRIES) break;
+      await delay(RETRY_BASE_DELAY_MS * (attempt + 1));
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('IA no pudo responder · prueba de nuevo en unos segundos.');
 }

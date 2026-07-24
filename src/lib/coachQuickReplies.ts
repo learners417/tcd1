@@ -1,84 +1,154 @@
-import type { ExtractedProfile } from './migrationTypes';
-import { generateText } from './aiProvider';
+/**
+ * Quick replies dinámicos para el Coach IA · cambian según el pilar activo
+ * del sanador y condiciones especiales (días de atraso · nivel 4 alcanzado · etc).
+ *
+ * Brief 13/05/2026: el Coach IA muestra hasta 6 quick replies abajo de la
+ * conversación · combinando:
+ *   - 3 condicionales (solo si aplican)
+ *   - 0-3 dinámicos por pilar
+ *   - 3 fijos (siempre presentes al final)
+ *
+ * Resultado · slice a 6.
+ */
+import type { PilarId } from './supabase';
 
-const SYSTEM_PROMPT = `Eres un asistente experto en extraer información de negocio de textos en español.
-Dado un texto sobre un profesional de la salud o bienestar, extrae los campos disponibles y devuelve SOLO un objeto JSON válido, sin markdown ni comentarios.
-Omite campos que no encuentres en el texto — nunca inventes información.
-
-Campos disponibles (todos opcionales):
-- historia_300: historia del negocio/profesional en ~300 palabras
-- historia_150: versión corta en ~150 palabras
-- historia_50: versión muy corta en ~50 palabras
-- proposito: propósito de vida o misión del profesional
-- legado: legado que quiere dejar al mundo
-- matriz_a: dolores actuales de sus pacientes/clientes (qué sufren hoy)
-- matriz_b: obstáculos que impiden que avancen solos (por qué no pueden sin ayuda)
-- matriz_c: visión positiva del resultado o transformación que ofrece
-- metodo_nombre: nombre de su método o programa propio
-- metodo_pasos: pasos del método, separados por saltos de línea
-- oferta_high: descripción del programa o servicio premium
-- oferta_mid: descripción del programa o servicio estándar
-- oferta_low: descripción del programa o servicio de entrada
-- lead_magnet: descripción del lead magnet o recurso gratuito
-- identidad_colores: paleta de colores de marca
-- identidad_tipografia: tipografías o fuentes de marca
-- identidad_logo: descripción del logo o identidad visual
-- identidad_tono: tono y voz de comunicación de la marca
-- nicho: nicho de mercado específico
-- posicionamiento: propuesta de valor única
-- por_que_oficial: el "por qué" profundo y personal del profesional`;
-
-// La IA a veces devuelve arrays u objetos donde el schema espera string
-// (ej. `metodo_pasos: ["paso 1", "paso 2"]`). Sin esta coerción, cualquier
-// `.trim()` posterior crashea con `TypeError: <var>.trim is not a function`
-// y tira la UI a pantalla negra.
-function coerceToString(value: unknown): string | undefined {
-  if (value === null || value === undefined) return undefined;
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => coerceToString(item))
-      .filter((s): s is string => !!s && s.trim().length > 0)
-      .join('\n');
-  }
-  if (typeof value === 'object') {
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
+export interface CoachQuickReply {
+  id: string;
+  icon: string;
+  label: string;
 }
 
-function normalizeExtracted(raw: unknown): ExtractedProfile {
-  if (!raw || typeof raw !== 'object') return {};
-  const out: Record<string, string> = {};
-  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
-    const str = coerceToString(value);
-    if (str && str.trim()) out[key] = str.trim();
-  }
-  return out as ExtractedProfile;
+export interface CoachQuickReplyContext {
+  pilarActivo: PilarId | null;
+  diasAtraso: number;
+  diasSinEntrar: number;
+  alcanzoNivel4EstaSemana: boolean;
+  diasSinMetricas: number; // 999 si nunca cargó
 }
 
-export async function extractFromText(texto: string): Promise<ExtractedProfile> {
-  // Usa el wrapper de IA: Claude (Vercel serverless) con fallback transparente
-  // a DeepSeek server-side si la cuenta Anthropic se queda sin credito o cae.
-  const text = await generateText({
-    systemInstruction: SYSTEM_PROMPT,
-    prompt: `Extrae la información de negocio de este texto y devuelve SOLO JSON:\n\n${texto}`,
-  });
+const FIJOS: CoachQuickReply[] = [
+  { id: 'continuar', icon: '💬', label: 'Seguimos donde quedamos' },
+  { id: 'progreso', icon: '📈', label: '¿Cómo vengo? Mi progreso real' },
+  { id: 'duda', icon: '❓', label: 'Tengo una duda' },
+];
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('La IA no devolvió JSON válido');
+const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
+  P0: [
+    { id: 'p0_objetivo', icon: '🎯', label: 'Definamos mi objetivo' },
+    { id: 'p0_punto_partida', icon: '📍', label: 'Ver mi punto de partida real' },
+    { id: 'p0_app', icon: '🗺', label: '¿Cómo se usa esta app?' },
+  ],
+  P1: [
+    { id: 'p1_revisar_historia', icon: '✍️', label: 'Revisa mi historia — sin filtro' },
+    { id: 'p1_trabada_historia', icon: '🤔', label: 'Estoy trabada con mi historia' },
+    { id: 'p1_historia_contenido', icon: '🎬', label: '¿Cómo uso mi historia en contenido?' },
+  ],
+  P2: [
+    { id: 'p2_revisar_proposito', icon: '🧭', label: 'Revisemos mi propósito' },
+    { id: 'p2_proposito_filtra', icon: '🔍', label: '¿Mi propósito filtra bien?' },
+    { id: 'p2_no_encuentro', icon: '😕', label: 'No encuentro mi propósito' },
+  ],
+  P3: [
+    { id: 'p3_revisar_legado', icon: '🌳', label: 'Revisemos mi legado a 10 años' },
+    { id: 'p3_legado_honesto', icon: '🪞', label: '¿Es honesto mi legado?' },
+    { id: 'p3_no_imagino', icon: '😶', label: 'No imagino mi legado' },
+  ],
+  P4: [
+    { id: 'p4_avatar_bien', icon: '🧑‍⚕️', label: '¿Mi avatar está bien definido?' },
+    { id: 'p4_no_claro', icon: '🤷', label: 'No tengo claro mi avatar' },
+    { id: 'p4_validar_casos', icon: '📋', label: 'Validar avatar contra casos reales' },
+  ],
+  P5: [
+    { id: 'p5_puv', icon: '💡', label: '¿Mi PUV es clara?' },
+    { id: 'p5_nicho', icon: '🎯', label: '¿Mi nicho es suficientemente específico?' },
+    { id: 'p5_transformaciones', icon: '🔄', label: '¿Mis transformaciones son creíbles?' },
+  ],
+  P6: [
+    { id: 'p6_duele', icon: '🩹', label: '¿Mi matriz duele lo suficiente?' },
+    { id: 'p6_revisar_matriz', icon: '🔥', label: 'Revisemos infierno · obstáculos · cielo' },
+    { id: 'p6_no_sale', icon: '😩', label: 'No me sale armar la matriz' },
+  ],
+  P7: [
+    { id: 'p7_nombre_metodo', icon: '🏷', label: '¿El nombre de mi método funciona?' },
+    { id: 'p7_pasos', icon: '🔢', label: '¿Los pasos están bien?' },
+    { id: 'p7_practicar_vera', icon: '💰', label: 'Practicar pricing con Vera' },
+  ],
+  P8: [
+    { id: 'p8_3_ofertas', icon: '🪜', label: '¿Mis 3 ofertas son coherentes?' },
+    { id: 'p8_precio', icon: '💵', label: '¿Mi precio sostiene?' },
+    { id: 'p8_lead_magnet', icon: '🎁', label: '¿Mi regalo gratuito es buen entry?' },
+  ],
+  P9A: [
+    { id: 'p9a_landing', icon: '🌐', label: 'Revisar mi landing antes de publicar' },
+    { id: 'p9a_numeros_ramiro', icon: '📊', label: 'Practicar con Ramiro mis números' },
+    { id: 'p9a_pauta', icon: '🚀', label: '¿Estoy lista para activar pauta?' },
+  ],
+  P9B: [
+    { id: 'p9b_practicar_w', icon: '📞', label: 'Practicar la W con Lucas' },
+    { id: 'p9b_practicar_sofi', icon: '💬', label: 'Practicar filtrado con Sofi' },
+    { id: 'p9b_objecion', icon: '🛡', label: '¿Cómo manejo la primera objeción?' },
+  ],
+  P9C: [
+    { id: 'p9c_secuencia', icon: '📧', label: 'Revisar mi secuencia de seguimiento' },
+    { id: 'p9c_no_cerraron', icon: '🪞', label: 'Las consultas que no cerraron · revisemos' },
+    { id: 'p9c_primer_mes', icon: '🗓', label: 'Mi primer mes de consultas · ¿qué viste?' },
+  ],
+  P10: [
+    { id: 'p10_sistema_visual', icon: '🎨', label: 'Revisar mi sistema visual' },
+    { id: 'p10_feed', icon: '🖼', label: '¿Mi muro es coherente?' },
+    { id: 'p10_paleta', icon: '🌈', label: 'No sé qué paleta usar' },
+  ],
+  P11: [
+    { id: 'p11_retro', icon: '📅', label: 'Iniciar retrospectiva' },
+    { id: 'p11_plan_proximo', icon: '➡️', label: 'Plan próximo mes' },
+    { id: 'p11_replicar', icon: '🔁', label: '¿Qué replicar · cambiar · cortar?' },
+  ],
+};
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch {
-    throw new Error('La IA devolvió JSON malformado');
+function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
+  const result: CoachQuickReply[] = [];
+
+  if (ctx.diasAtraso > 7) {
+    result.push({
+      id: 'cond_atraso',
+      icon: '⚠️',
+      label: 'Profundizar mi sesión de hoy',
+    });
   }
 
-  return normalizeExtracted(parsed);
+  if (ctx.diasSinEntrar >= 5) {
+    result.push({
+      id: 'cond_volvi',
+      icon: '👋',
+      label: 'Se me mueve algo con mi precio',
+    });
+  }
+
+  if (ctx.alcanzoNivel4EstaSemana) {
+    result.push({
+      id: 'cond_autonoma',
+      icon: '🎉',
+      label: 'Hazme de paciente: dime \"está caro\"',
+    });
+  }
+
+  if (ctx.diasSinMetricas > 7) {
+    result.push({
+      id: 'cond_metricas',
+      icon: '📊',
+      label: '¿Cómo vengo en mi camino?',
+    });
+  }
+
+  return result;
 }
+
+export function getCoachQuickReplies(ctx: CoachQuickReplyContext): CoachQuickReply[] {
+  const condicionales = buildCondicionales(ctx);
+  const dinamicos = ctx.pilarActivo ? PILAR_QUICK_REPLIES[ctx.pilarActivo] ?? [] : [];
+  // Orden de prioridad: condicionales primero · luego dinámicos · luego fijos.
+  // Slice a 6 para no saturar la UI.
+  return [...condicionales, ...dinamicos, ...FIJOS].slice(0, 6);
+}
+
+export { PILAR_QUICK_REPLIES, FIJOS };

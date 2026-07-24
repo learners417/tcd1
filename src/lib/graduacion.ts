@@ -1,61 +1,59 @@
 /**
- * CP9 · Verificación de evidencia con visión IA.
- *
- * FILOSOFÍA: es un ASISTENTE, no un portón. Nunca niega un hito.
- * - Solo analiza imágenes (audio/video/pdf → null, sin veredicto).
- * - Sin API key o cualquier error → null (la subida y el cinturón siguen igual).
- * - El prompt pide ser GENEROSO: solo marca falso si la imagen claramente
- *   no tiene relación. Así se evitan falsos rechazos de evidencia legítima.
- * El veredicto es solo una señal para el sanador (y, si duda, para el equipo).
+ * graduacion.ts — T11 · LA EMOCIÓN FINAL (Plan Maestro).
+ * Los datos de la graduación completa: los comprobantes de los 10 (viven en
+ * Storage, subidos como evidencia en los hitos de venta) y el Mensaje al
+ * Futuro (el audio sellado del Día 1, que se abre en la graduación — T3 #10).
+ * Todo degrada con elegancia: sin conexión o sin archivos, devuelve vacío.
  */
-import { GoogleGenAI } from '@google/genai';
-import { fileToBase64 } from './imageUploadUtils';
+import { supabase, isSupabaseReady } from './supabase';
+import { listarEvidencias, urlEvidencia, type Evidencia } from './evidencia';
 
-export interface VeredictoVision {
-  ok: boolean;
-  motivo: string;
+/** Los hitos donde vive el comprobante de pago (primer $1.000 y los 10). */
+const CODIGOS_COMPROBANTE = ['P6.3', 'P6.4', 'P7.3'];
+
+export interface Comprobante extends Evidencia {
+  url?: string;
+  esImagen: boolean;
 }
 
-export async function verificarEvidenciaVision(
-  file: File,
-  descripcionEsperada: string,
-): Promise<VeredictoVision | null> {
-  // Solo imágenes — el resto (audio, video, pdf) no se analiza.
-  if (!file.type.startsWith('image/')) return null;
-
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-  if (!apiKey) return null;
-
-  try {
-    const { base64, mimeType } = await fileToBase64(file);
-    const ai = new GoogleGenAI({ apiKey });
-    const resp = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              text:
-                `Una persona subió esta imagen como evidencia de: "${descripcionEsperada}".\n` +
-                `¿La imagen es coherente con esa evidencia? Sé GENEROSO: si podría razonablemente serlo, responde ok:true. ` +
-                `Solo responde ok:false si la imagen claramente NO tiene ninguna relación con lo pedido.\n` +
-                `Responde SOLO JSON, sin markdown: {"ok": boolean, "motivo": "máximo 10 palabras, en español"}`,
-            },
-            { inlineData: { mimeType, data: base64 } },
-          ],
-        },
-      ],
-    });
-
-    const text = ((resp as { text?: string }).text ?? '').replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text) as Partial<VeredictoVision>;
-    if (typeof parsed.ok === 'boolean') {
-      return { ok: parsed.ok, motivo: String(parsed.motivo ?? '') };
+/** Los comprobantes de los 10 (evidencia subida en los hitos de venta). */
+export async function fetchComprobantes(userId: string): Promise<Comprobante[]> {
+  if (!userId) return [];
+  const todas: Evidencia[] = [];
+  for (const codigo of CODIGOS_COMPROBANTE) {
+    try {
+      const ev = await listarEvidencias(userId, codigo);
+      todas.push(...ev);
+    } catch {
+      /* un hito sin evidencia no rompe el resto */
     }
-    return null;
+  }
+  return Promise.all(
+    todas.map(async (e) => ({
+      ...e,
+      url: (await urlEvidencia(e.path)) ?? undefined,
+      esImagen: /\.(png|jpe?g|webp|gif|heic)$/i.test(e.name),
+    })),
+  );
+}
+
+const BUCKET = 'task-attachments';
+
+/**
+ * El Mensaje al Futuro: el audio sellado del Día 1. Se busca en Storage bajo
+ * mensaje-futuro/{userId}/. Devuelve la URL firmada o null (todavía no grabado).
+ */
+export async function fetchMensajeFuturo(userId: string): Promise<string | null> {
+  if (!isSupabaseReady() || !supabase || !userId) return null;
+  try {
+    const { data } = await supabase.storage.from(BUCKET).list(`mensaje-futuro/${userId}`, { limit: 5 });
+    const audio = (data ?? []).find((f) => f.name && /\.(mp3|m4a|wav|ogg|webm)$/i.test(f.name));
+    if (!audio) return null;
+    const { data: signed } = await supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(`mensaje-futuro/${userId}/${audio.name}`, 3600);
+    return signed?.signedUrl ?? null;
   } catch {
-    // Cualquier fallo (red, parseo, modelo) → sin veredicto. NUNCA bloquea.
     return null;
   }
 }

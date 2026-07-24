@@ -1,9 +1,11 @@
 import type { AdnFieldKey, ConfigAgente, QuickReplyEstructurado } from './types';
 import { buildSystemPrompt } from './voz-javo';
+import { ESTRATEGIA_CUPOS } from './estrategia';
 import { buildAdnContext, getNombreSanador } from './adn-context';
 import { DEFAULT_THRESHOLDS, NIVEL_NOMBRE } from './skillProgress';
 
-const MATEO_PROMPT = `
+const MATEO_PROMPT = `${ESTRATEGIA_CUPOS}
+
 ═══════════════════════════════════════════════════════════════════
 SOS MATEO · ENTRENADOR DE CONTENIDO VIRAL (GUIONES + PRODUCCIÓN)
 ═══════════════════════════════════════════════════════════════════

@@ -1,103 +1,128 @@
 /**
- * adnPiezas.ts — LA TAXONOMÍA ÚNICA DEL ADN (ZIP B).
- *
- * Una sola lista, consumida por la página ADN y por la Cadena de HOY.
- * Cada pieza dice EXACTO en qué sesión se completa — y esa sesión es la
- * única forma de cambiarla: lo sellado no se edita por fuera, se rehace.
- *
- * 9 piezas del ALMA (el ikigai, en orden causal) + 5 ACTIVOS de operación.
+ * EL NÚMERO — el registro base de la Semana Blanca.
+ * Todas las herramientas leen/escriben de acá.
+ * Persiste en Supabase (tabla `el_numero`) con respaldo en localStorage
+ * para que funcione al instante y sea resiliente si falla la red.
  */
+import { supabase, guardarFila } from './supabase';
 
-import { planActualPermite } from './planes';
-
-export type GrupoPieza = 'alma' | 'activo';
-export type PlanPieza = 'elnumero' | 'completo';
-
-export interface PiezaADN {
-  id: string;
-  titulo: string;
-  /** Qué es, en una línea — el resultado, no el concepto. */
-  que: string;
-  /** Dónde se sella. 'onboarding' = las siembras del primer día. */
-  sesion: string;
-  grupo: GrupoPieza;
-  plan: PlanPieza;
-  /** Pilar del Camino donde se sella — el plan decide si está a su alcance. */
-  pilar: number;
-  /** Cómo saber si ya está sellada. */
-  chequeo: { origen?: 'porque' | 'herida' | 'paciente'; sello?: string; campo?: string; progreso?: string };
+export interface ElNumero {
+  precio_sesion: number;
+  pacientes_semana: number;
+  horas_semana: number;
+  phr: number;
+  precio_nuevo: number | null;
+  fecha_cambio: string | null;
 }
 
-export const PIEZAS_ADN: PiezaADN[] = [
-  // ─────────── EL ALMA (9) — el orden causal del ikigai ───────────
-  { id: 'historia', titulo: 'Tu Historia', que: 'de dónde vienes y por qué esta profesión',
-    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'porque', sello: 'H-P1.3' } },
-  { id: 'herida', titulo: 'Tu Herida Sanada', que: 'lo que atravesaste y hoy sabes curar',
-    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'herida' } },
-  { id: 'dones', titulo: 'Tus Dones', que: 'lo que haces distinto sin darte cuenta',
-    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'paciente' } },
-  { id: 'precio', titulo: 'Tu Precio Digno', que: 'el número que sale de tu meta, no de tu miedo',
-    sesion: 'Día 5 · EL NÚMERO', grupo: 'alma', plan: 'elnumero', pilar: 1, chequeo: { progreso: '1-P1.5' } },
-  { id: 'proposito', titulo: 'Tu Propósito', que: 'lo que sostiene el precio cuando tiemblas',
-    sesion: 'Tu creencia nueva y el Estandarte', grupo: 'alma', plan: 'completo', pilar: 1, chequeo: { progreso: '1-P1.6', campo: 'proposito' } },
-  { id: 'avatar', titulo: 'A Quién Sirves', que: 'el paciente exacto que paga sin dudar',
-    sesion: 'Tu paciente ideal · los 3 mejores', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'avatar_cliente', progreso: '2-P2.3' } },
-  { id: 'puv', titulo: 'Tu PUV', que: 'la frase que te separa de todos los demás',
-    sesion: 'Tu PUV · la frase que te define', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'posicionamiento', sello: 'H-P5.2' } },
-  { id: 'metodo', titulo: 'Tu Método', que: 'tu proceso con nombre — dejas de vender horas',
-    sesion: 'Genera tu método · nombre + pasos', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'metodo_nombre', sello: 'H-P7.3' } },
-  { id: 'oferta', titulo: 'Tu Oferta', que: 'el programa completo que se cobra en miles',
-    sesion: 'Diseña tu oferta principal', grupo: 'alma', plan: 'completo', pilar: 3, chequeo: { campo: 'oferta_mid', sello: 'H-P8.2' } },
+const LS_KEY = 'tcd_el_numero';
 
-  // ─────────── LOS ACTIVOS (5) — lo que opera todos los días ───────────
-  { id: 'guardian', titulo: 'Tu Guardián del Precio', que: 'las 10 respuestas para cuando cuestionen tu número',
-    sesion: 'Día 5 · El Guardián del Precio', grupo: 'activo', plan: 'elnumero', pilar: 1, chequeo: { sello: 'H-P1.5b', progreso: '1-P1.5b' } },
-  { id: 'matriz', titulo: 'Tu Matriz ABC', que: 'el dolor, lo que falló y la transformación — en sus palabras',
-    sesion: 'Tu Matriz ABC', grupo: 'activo', plan: 'completo', pilar: 2, chequeo: { sello: 'H-P6.3', progreso: '2-P2.3b' } },
-  { id: 'mensaje', titulo: 'Tu Mensaje', que: 'el gancho que atrae a tu paciente ideal',
-    sesion: 'El mensaje que atrae a TU paciente', grupo: 'activo', plan: 'completo', pilar: 4, chequeo: { progreso: '4-P4.2' } },
-  { id: 'script', titulo: 'Tu Script de Ventas', que: 'la conversación que cierra sin empujar',
-    sesion: 'Tu script de ventas propio', grupo: 'activo', plan: 'completo', pilar: 5, chequeo: { progreso: '5-P5.2' } },
-  { id: 'protocolo', titulo: 'Tu Protocolo de Entrega', que: 'cómo entregas sin quemarte',
-    sesion: 'Tu protocolo de entrega', grupo: 'activo', plan: 'completo', pilar: 6, chequeo: { progreso: '6-P6.2' } },
-];
-
-/* ══════════ Lectura del estado (local-first, sin red) ══════════ */
-
-function leerJSON<T>(clave: string, porDefecto: T): T {
-  try { return JSON.parse(localStorage.getItem(clave) ?? '') as T; } catch { return porDefecto; }
+export function calcPHR(precioSesion: number, pacientesSemana: number, horasSemana: number): number {
+  if (!horasSemana) return 0;
+  return Math.round((precioSesion * pacientesSemana) / horasSemana);
 }
 
-export function planLimitado(): boolean {
+/** El agujero anual: lo que se pierde por cobrar por debajo del PHR (como en la landing). */
+export function agujeroAnual(precioSesion: number, phr: number, horasSemana: number): number {
+  return Math.max(0, Math.round((precioSesion - phr) * horasSemana * 48));
+}
+
+/** Ganancia extra al año con el precio nuevo (estimación, no promesa). */
+export function gananciaAnual(precioNuevo: number, precioSesion: number, pacientesSemana: number): number {
+  return Math.max(0, Math.round((precioNuevo - precioSesion) * pacientesSemana * 48));
+}
+
+/** Ganancia extra al mes con el precio nuevo (estimación). */
+export function gananciaMensual(precioNuevo: number, precioSesion: number, pacientesSemana: number): number {
+  return Math.max(0, Math.round((precioNuevo - precioSesion) * pacientesSemana * 4));
+}
+
+export function emptyNumero(): ElNumero {
+  return { precio_sesion: 0, pacientes_semana: 0, horas_semana: 0, phr: 0, precio_nuevo: null, fecha_cambio: null };
+}
+
+export async function getElNumero(userId?: string): Promise<ElNumero | null> {
+  // Supabase primero
   try {
-    const p = localStorage.getItem('tcd_plan') || (leerJSON<{ plan?: string }>('tcd_profile', {}).plan ?? '');
-    return p === 'ELNUMERO';
-  } catch { return false; }
+    if (supabase && userId) {
+      const { data } = await supabase.from('el_numero').select('*').eq('usuario_id', userId).maybeSingle();
+      if (data) return data as unknown as ElNumero;
+    }
+  } catch { /* cae al respaldo */ }
+  // Respaldo local
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw) as ElNumero;
+  } catch { /* noop */ }
+  return null;
 }
 
-/** ¿Está sellada esta pieza? Con la fecha del sello si la hay. */
-export function estadoPieza(p: PiezaADN): { sellada: boolean; fecha?: string; bloqueada: boolean } {
-  const bloqueada = !planActualPermite(p.pilar);
-  const origen = leerJSON<Record<string, string>>('tcd_origen_v1', {});
-  const sellos = leerJSON<Record<string, { fecha?: string }>>('tcd_adn_sellos_v1', {});
-  const perfil = leerJSON<Record<string, unknown>>('tcd_profile', {});
-  const hechas = leerJSON<string[]>('tcd_hoja_ruta_v2', []);
-
-  let sellada = false;
-  let fecha: string | undefined;
-  if (p.chequeo.origen && String(origen[p.chequeo.origen] ?? '').trim()) sellada = true;
-  if (p.chequeo.sello && sellos[p.chequeo.sello]) { sellada = true; fecha = sellos[p.chequeo.sello]?.fecha; }
-  if (p.chequeo.campo && String(perfil[p.chequeo.campo] ?? '').trim()) sellada = true;
-  if (p.chequeo.progreso && Array.isArray(hechas) && hechas.includes(p.chequeo.progreso)) sellada = true;
-
-  return { sellada, fecha, bloqueada };
+export async function saveElNumero(userId: string | undefined, n: ElNumero): Promise<void> {
+  // Local siempre (instantáneo)
+  try { localStorage.setItem(LS_KEY, JSON.stringify(n)); } catch { /* noop */ }
+  // Supabase si se puede
+  try {
+    if (supabase && userId) {
+      await guardarFila('el_numero', { usuario_id: userId, ...n }, ['usuario_id']);
+    }
+  } catch { /* el local ya guardó */ }
 }
 
-export function resumenADN(): { selladas: number; total: number; disponibles: number } {
-  const estados = PIEZAS_ADN.map(estadoPieza);
-  return {
-    selladas: estados.filter((e) => e.sellada).length,
-    total: PIEZAS_ADN.length,
-    disponibles: estados.filter((e) => !e.bloqueada).length,
-  };
+/** Cuántas personas de la cohorte subieron su precio esta semana (efecto "el grupo, vivo"). */
+export async function contarSubieronPrecioSemana(): Promise<number> {
+  try {
+    if (!supabase) return 0;
+    const desde = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from('el_numero')
+      .select('usuario_id', { count: 'exact', head: true })
+      .gte('fecha_cambio', desde);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * EL NÚMERO es la puerta 1 del Camino: al definir su precio nuevo, el
+ * comprador del taller gana su primera punta de cinturón (blanco punta
+ * amarilla) y ve el resto del Camino. Marca P1.5 en la hoja de ruta
+ * (DB + local) y registra el hito. Idempotente y tolerante a fallos.
+ */
+export async function marcarNumeroEnElCamino(userId?: string | null): Promise<void> {
+  // Local primero: el cinturón visual se deriva de acá al instante.
+  try {
+    const raw = localStorage.getItem('tcd_hoja_ruta_v2');
+    const arr: string[] = raw ? JSON.parse(raw) : [];
+    if (!arr.includes('1-P1.5')) {
+      arr.push('1-P1.5');
+      localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(arr));
+    }
+  } catch { /* noop */ }
+
+  if (!supabase || !userId) return;
+  try {
+    await guardarFila('hoja_de_ruta', {
+        usuario_id: userId,
+        pilar_numero: 1,
+        meta_codigo: 'P1.5',
+        completada: true,
+        es_estrella: false,
+        fecha_completada: new Date().toISOString().split('T')[0],
+      }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
+    await supabase.from('hitos_cinturon').insert([{
+        usuario_id: userId,
+        cinturon: 'blanco_punta_amarilla',
+        fase: 1,
+        tipo_verificacion: 'automatico',
+        estado: 'aprobado',
+        agente: 'coach',
+        feedback_agente: 'EL NÚMERO completado: precio digno definido.',
+        aprobado_at: new Date().toISOString(),
+      }]); // duplicados: se ignoran
+    const { data: prof } = await supabase.from('profiles').select('cinturon').eq('id', userId).single();
+    if (!prof?.cinturon || prof.cinturon === 'blanco') {
+      await supabase.from('profiles').update({ cinturon: 'blanco_punta_amarilla' }).eq('id', userId);
+    }
+  } catch { /* red o RLS: no bloquea la herramienta */ }
 }

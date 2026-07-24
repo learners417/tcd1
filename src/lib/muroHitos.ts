@@ -1,67 +1,90 @@
 /**
- * mentorPanelPrompt.ts — T4 · Plan Maestro.
- * El cerebro del panel lateral del Episodio. Dos personalidades, un lugar:
- *   MENTOR (metas de fondo): pregunta, ordena, confronta con amor. NO resuelve.
- *   ASISTENTE TÉCNICO (metas técnicas): paciente, paso a paso, cero socrático.
- * La app decide sola según la meta abierta — el fundador nunca elige "a quién".
+ * muroHitos.ts — El Muro de Hitos (T10 · idea #3 del Plan Maestro).
+ * Los logros de la cohorte en tiempo (casi) real, ANÓNIMOS: se celebra el
+ * hito, no el nombre. Los mismos momentos-quiebre del Camino (la quema, el
+ * precio en voz alta, el primer $1.000…). La cohorte llega por RPC
+ * `get_muro_hitos`; si no existe aún, se muestran tus propios hitos desde el
+ * progreso local — sin romper.
  */
+import { supabase, isSupabaseReady } from './supabase';
+import { SEED_ROADMAP_V2 } from './roadmapSeed';
 
-/** Metas donde el terreno es técnico: acá se guía click a click, sin filosofía. */
-const CODIGOS_TECNICOS = new Set([
-  'P2.2', 'P4.5', 'P4.5b', 'P4.4', 'P4.6', 'P4.3c', 'P4.3d', 'P5.5',
-]);
-const PALABRAS_TECNICAS = /business manager|meta|píxel|pixel|dominio|dns|campaña|whatsapp business|subir|editar|publicar|conectar|configurar/i;
-
-export function esMetaTecnica(codigo: string, titulo?: string): boolean {
-  if (CODIGOS_TECNICOS.has(codigo)) return true;
-  return !!titulo && PALABRAS_TECNICAS.test(titulo);
+export interface HitoDef {
+  codigo: string; // MetaCodigo del hito (ej. 'P1.3')
+  label: string; // cómo se lee en el muro ("hizo LA QUEMA")
+  emoji: string;
 }
 
-const VOZ_COMUN = `
-Escribes en castellano neutro (tú/tienes). Respuestas CORTAS: 2-6 líneas — esto es un panel lateral en medio de una sesión, no una clase.
-PROHIBIDO usar estas palabras: coach, embudo, funnel, marketing, gurú, plata, escalar, avatar, nivel.
-NUNCA ofrezcas "links" ni "enlaces" (no puedes generarlos): si algo vive en otra pantalla, da el camino de clics con los nombres reales del menú. La app se llama Tu Clínica Digital.
-Nunca inventes datos del fundador que no estén en el contexto.`;
+/** Los hitos que se celebran (espejo de los teasers-hito del Camino). */
+export const HITOS_MURO: HitoDef[] = [
+  { codigo: 'P0.2', label: 'plantó su Foto de Partida', emoji: '📸' },
+  { codigo: 'P1.3', label: 'hizo LA QUEMA', emoji: '🔥' },
+  { codigo: 'P1.5', label: 'dijo su precio en voz alta', emoji: '💬' },
+  { codigo: 'P4.3b', label: 'grabó su primer video', emoji: '🎬' },
+  { codigo: 'P4.4', label: 'encendió su clínica al mundo', emoji: '🚀' },
+  { codigo: 'P5.4', label: 'tomó su primera llamada', emoji: '📞' },
+  { codigo: 'P6.3', label: 'cobró su primer $1.000', emoji: '💰' },
+  { codigo: 'P7.3', label: 'entró en la última recta', emoji: '🥋' },
+];
 
-const MENTOR = `Eres el Mentor de Tu Clínica Digital — la voz de Javo dentro del episodio. El fundador está EN MEDIO de una sesión y se trabó, dudó o tiene miedo. Tu trabajo NO es resolverle la tarea: es destrabarlo para que la haga él.
+const POR_CODIGO = new Map(HITOS_MURO.map((h) => [h.codigo, h] as const));
+export function hitoDef(codigo: string): HitoDef | undefined {
+  return POR_CODIGO.get(codigo);
+}
 
-CÓMO MENTOREAS (el método de Javo):
-- Primero UNA pregunta que lo haga pensar, después orientas. El que pregunta, dirige.
-- Firmeza y amorosidad son hermanos: confrontas la evasión con cariño real.
-- Si pide que le hagas el trabajo ("escríbemelo tú"), lo devuelves con calidez: "Eso te toca a ti — y puedes. ¿Qué es lo que de verdad te frena de escribirlo?"
-- Reconoces la resistencia y la nombras: "Sé lo que estás pensando…". El miedo se ataca de frente, no de costado, no en diagonal.
-- Recuerdas la matemática del propósito: cada miedo que le gana es un paciente menos que ayuda.
-- DISTINGUE dos cosas: la EVASIÓN (miedo disfrazado de excusa → la confrontas con cariño) y el DOLOR REAL (cuando toca la herida del dinero, la familia, el linaje → NO lo empujas). Si aparece emoción de verdad — llanto, angustia, un recuerdo pesado — bajas el ritmo, validas ("tiene todo el sentido que esto duela") y ofreces respirar antes de seguir. La tarea puede esperar; la persona no.
-- Nunca apuras un momento de ceremonia ni un cierre emocional. Lo que se abre, se cierra con calma.
-- Cuando la ciencia ayuda (las heridas del dinero de Klontz, el cuerpo que guarda el estrés de van der Kolk), la nombras con calidez, no como cátedra — para que entienda que lo que siente tiene nombre y no está roto.
-- Cierras corto, con acción: "¿Hasta acá? Dale — el paso te espera."
-${VOZ_COMUN}`;
+export interface MuroEntry {
+  alias: string;
+  codigo: string;
+  label: string;
+  emoji: string;
+  cuando: string; // ISO
+  es_tu: boolean;
+}
 
-const TECNICO = `Eres el Asistente Técnico de Tu Clínica Digital. El fundador está en una tarea TÉCNICA (Meta, dominios, campañas, configuraciones) y se trabó. Aquí NO hay preguntas socráticas ni filosofía: hay pasos.
+/** El Muro de la cohorte (anónimo). null si Supabase apagado o RPC ausente. */
+export async function fetchMuroHitos(): Promise<MuroEntry[] | null> {
+  if (!isSupabaseReady() || !supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('get_muro_hitos');
+    if (error || !data) return null;
+    const rows = data as Array<{
+      alias?: string; meta_codigo?: string; fecha_completada?: string; es_tu?: boolean;
+    }>;
+    return rows
+      .map((r): MuroEntry | null => {
+        const def = hitoDef(r.meta_codigo ?? '');
+        if (!def) return null;
+        return {
+          alias: r.alias ?? 'Un fundador',
+          codigo: def.codigo,
+          label: def.label,
+          emoji: def.emoji,
+          cuando: r.fecha_completada ?? '',
+          es_tu: r.es_tu ?? false,
+        };
+      })
+      .filter((x): x is MuroEntry => x !== null);
+  } catch {
+    return null;
+  }
+}
 
-CÓMO ASISTES:
-- Respuestas de pasos numerados, cortos, uno por línea. "¿Qué ves en tu pantalla ahora?" es tu única pregunta válida — para ubicarte.
-- Lenguaje de botones reales: "Toca Configuración → Dominios → Agregar".
-- Calma técnica siempre: "Esto le pasa a todos. No rompiste nada."
-- Si el problema puede tardar (DNS, revisiones de Meta), lo dices: "Puede tardar unas horas — es normal, no lo toques de nuevo."
-- Si de verdad excede lo que se puede resolver por chat, indicas escribir al equipo por WhatsApp — sin drama.
-${VOZ_COMUN}`;
-
-export function buildPanelPrompt(args: {
-  tecnica: boolean;
-  metaTitulo: string;
-  metaDescripcion?: string;
-  nombre?: string;
-  especialidad?: string;
-  frenoD1?: string;
-}): string {
-  const base = args.tecnica ? TECNICO : MENTOR;
-  const ctx = [
-    `\n=== CONTEXTO VIVO ===`,
-    `Sesión abierta AHORA: «${args.metaTitulo.replace('⭐', '').trim()}»`,
-    args.metaDescripcion ? `De qué va: ${args.metaDescripcion.slice(0, 300)}` : '',
-    args.nombre ? `Fundador: ${args.nombre}${args.especialidad ? ` · ${args.especialidad}` : ''}` : '',
-    !args.tecnica && args.frenoD1 ? `Su freno declarado el día 1: «${args.frenoD1}» — si su traba de hoy huele a ese freno, nómbralo.` : '',
-  ].filter(Boolean).join('\n');
-  return base + ctx;
+/** Tus propios hitos alcanzados (desde el progreso local) — siempre disponible. */
+export function misHitos(): Array<{ codigo: string; label: string; emoji: string }> {
+  let set = new Set<string>();
+  try {
+    set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') || '[]'));
+  } catch {
+    /* noop */
+  }
+  const out: Array<{ codigo: string; label: string; emoji: string }> = [];
+  for (const pil of SEED_ROADMAP_V2) {
+    for (const m of pil.metas ?? []) {
+      const def = hitoDef(m.codigo);
+      if (def && set.has(`${pil.numero}-${m.codigo}`)) {
+        out.push({ codigo: def.codigo, label: def.label, emoji: def.emoji });
+      }
+    }
+  }
+  return out;
 }

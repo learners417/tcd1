@@ -1,127 +1,119 @@
-/**
- * cinturones.ts — Capa 3 del rediseño 4 fases (jul 2026)
- * El servicio que OTORGA los cinturones-planta:
- *  - registra el hito en `hitos_cinturon` (la evidencia)
- *  - actualiza `profiles.cinturon` (el estado visible)
- *  - deriva el cinturón desde el progreso local (para Sidebar/Dashboard)
- * La validación del comprobante (screenshot/pago) ocurre conversacionalmente
- * con el Coach ANTES de completar la tarea — este servicio registra el logro.
- */
-import { supabase } from './supabase';
-import type { PilarId } from './supabase';
-import {
-  CINTURONES,
-  SEED_ROADMAP_V2,
-  calcularCinturon,
-  type Cinturon,
-} from './roadmapSeed';
+// ═══════════════════════════════════════════════════════════════════════════
+// API helpers para cliente_preactivacion_check
+// Usado por PreactivacionMatriz / MatrizGrid en el panel admin.
+// ═══════════════════════════════════════════════════════════════════════════
 
-export type { Cinturon };
-export { CINTURONES, calcularCinturon };
+import { supabase, guardarFila } from './supabase';
+import { STEPS, TOTAL_STEPS } from './preactivacionSteps';
 
-/** Mapeo pilar → cinturón (espejo del seed, para registro en DB). */
-const CINTURON_POR_PILAR: Record<string, string> = {
-  P0: 'blanco',
-  P1: 'amarillo',
-  P2: 'amarillo_punta_verde',
-  P3: 'verde',
-  P4: 'verde_punta_azul',
-  P5: 'azul',
-  P6: 'rojo',
-  P7: 'negro',
-};
+export type ChecksByCliente = Map<string, Set<string>>;
 
-/** Pilares cuyo hito requiere comprobante visual (validado con el Coach). */
-const HITOS_CON_COMPROBANTE: Record<string, string> = {
-  P4: 'screenshot de campaña activa',
-  P5: 'screenshot de la primera llamada (Meet/Zoom)',
-  P6: 'comprobante del primer pago',
-  P7: 'comprobantes de los 10 pacientes',
-};
+const VALID_STEP_IDS = new Set(STEPS.map((s) => s.id));
 
-/**
- * Otorga el cinturón correspondiente a un pilar completado.
- * Idempotente: si el hito ya existe, no duplica (unique usuario+cinturon).
- * Al completar P1 también registra la punta amarilla (la quema, P1.3)
- * por si el registro incremental no ocurrió.
- */
-export async function otorgarCinturonPorPilar(pilarId: PilarId): Promise<void> {
-  if (!supabase) return;
-  const cinturonId = CINTURON_POR_PILAR[pilarId];
-  if (!cinturonId) return;
-
-  try {
-    const { data: auth } = await supabase.auth.getUser();
-    const uid = auth?.user?.id;
-    if (!uid) return;
-
-    const pilar = SEED_ROADMAP_V2.find((p) => p.id === pilarId);
-    const fase = pilar?.fase ?? null;
-    const tipo = HITOS_CON_COMPROBANTE[pilarId] ? 'agente_texto' : 'automatico';
-
-    const hitos: Array<Record<string, unknown>> = [];
-
-    // La punta amarilla (la quema · P1.3) acompaña al amarillo si faltara.
-    if (pilarId === 'P1') {
-      hitos.push({
-        usuario_id: uid,
-        cinturon: 'blanco_punta_amarilla',
-        fase: 1,
-        tipo_verificacion: 'automatico',
-        estado: 'aprobado',
-        agente: 'coach',
-        aprobado_at: new Date().toISOString(),
-      });
-    }
-
-    hitos.push({
-      usuario_id: uid,
-      cinturon: cinturonId,
-      fase,
-      tipo_verificacion: tipo,
-      estado: 'aprobado',
-      agente: 'coach',
-      feedback_agente: HITOS_CON_COMPROBANTE[pilarId]
-        ? `Validado con el Coach (${HITOS_CON_COMPROBANTE[pilarId]}).`
-        : null,
-      aprobado_at: new Date().toISOString(),
-    });
-
-    // upsert idempotente sobre (usuario_id, cinturon)
-    await supabase
-      .from('hitos_cinturon')
-      .insert(hitos); // duplicados o constraint ausente: se ignora abajo
-
-    // El cinturón visible del perfil = el más alto (este, por orden de juego).
-    await supabase.from('profiles').update({ cinturon: cinturonId }).eq('id', uid);
-  } catch {
-    /* red o RLS: el progreso local no se bloquea por esto */
+function countValidChecks(checks: ChecksByCliente, clienteId: string): number {
+  const set = checks.get(clienteId);
+  if (!set) return 0;
+  let n = 0;
+  for (const id of set) {
+    if (VALID_STEP_IDS.has(id)) n++;
   }
+  return n;
+}
+
+interface CheckRow {
+  cliente_id: string;
+  step_id: string;
 }
 
 /**
- * Deriva el cinturón actual desde el set de tareas completadas (localStorage),
- * incluyendo la punta amarilla apenas se completa la quema (P1.3) aunque
- * el pilar P1 no esté cerrado. Para Sidebar/Dashboard (visual instantáneo).
+ * Trae TODOS los rows tildados de todos los clientes.
+ * Solo admins (RLS bloquea al resto). Vuelve un Map<cliente_id, Set<step_id>>.
  */
-export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
-  let masAlto: Cinturon = CINTURONES[0];
+export async function loadAllChecks(): Promise<ChecksByCliente> {
+  const map: ChecksByCliente = new Map();
+  if (!supabase) return map;
 
-  for (const pilar of SEED_ROADMAP_V2) {
-    const metas = pilar.metas ?? [];
-    if (metas.length === 0) continue;
-    const completo = metas.every((m) => completadas.has(`${pilar.numero}-${m.codigo}`));
-    if (completo) {
-      const c = calcularCinturon(pilar.id);
-      if (c.orden > masAlto.orden) masAlto = c;
+  const { data, error } = await supabase
+    .from('cliente_preactivacion_check')
+    .select('cliente_id, step_id');
+
+  if (error) {
+    throw new Error(`Error cargando checklist: ${error.message}`);
+  }
+
+  for (const row of (data ?? []) as CheckRow[]) {
+    let set = map.get(row.cliente_id);
+    if (!set) {
+      set = new Set<string>();
+      map.set(row.cliente_id, set);
+    }
+    set.add(row.step_id);
+  }
+  return map;
+}
+
+/**
+ * Toggle de un paso para un cliente.
+ * - on=true  → INSERT (idempotente, ignora duplicados)
+ * - on=false → DELETE
+ */
+export async function setCheck(
+  clienteId: string,
+  stepId: string,
+  on: boolean,
+  completadoPor: string,
+): Promise<void> {
+  if (!supabase) {
+    throw new Error('Supabase no está configurado');
+  }
+
+  if (on) {
+    const { error } = await guardarFila('cliente_preactivacion_check', { cliente_id: clienteId, step_id: stepId, completado_por: completadoPor }, ['cliente_id', 'step_id']);
+    if (error) {
+      throw new Error(`Error tildando paso: ${(error as { message?: string }).message ?? ''}`);
+    }
+  } else {
+    const { error } = await supabase
+      .from('cliente_preactivacion_check')
+      .delete()
+      .match({ cliente_id: clienteId, step_id: stepId });
+    if (error) {
+      throw new Error(`Error destildando paso: ${error.message}`);
     }
   }
+}
 
-  // La punta amarilla: la quema (P1.3) o EL NÚMERO (P1.5) completados, sin P1 cerrado todavía.
-  if (masAlto.id === 'blanco' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
-    const punta = CINTURONES.find((c) => c.id === 'blanco_punta_amarilla');
-    if (punta) masAlto = punta;
-  }
+/** Mutación inmutable del map (devuelve uno nuevo con el toggle aplicado). */
+export function applyToggle(
+  checks: ChecksByCliente,
+  clienteId: string,
+  stepId: string,
+  on: boolean,
+): ChecksByCliente {
+  const next = new Map(checks);
+  const prevSet = next.get(clienteId);
+  const nextSet = new Set(prevSet ?? []);
+  if (on) nextSet.add(stepId);
+  else nextSet.delete(stepId);
+  if (nextSet.size === 0) next.delete(clienteId);
+  else next.set(clienteId, nextSet);
+  return next;
+}
 
-  return masAlto;
+export function isChecked(
+  checks: ChecksByCliente,
+  clienteId: string,
+  stepId: string,
+): boolean {
+  return checks.get(clienteId)?.has(stepId) ?? false;
+}
+
+export function progressPct(checks: ChecksByCliente, clienteId: string): number {
+  if (TOTAL_STEPS === 0) return 0;
+  const done = Math.min(countValidChecks(checks, clienteId), TOTAL_STEPS);
+  return Math.round((done / TOTAL_STEPS) * 100);
+}
+
+export function completedCount(checks: ChecksByCliente, clienteId: string): number {
+  return countValidChecks(checks, clienteId);
 }

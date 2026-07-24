@@ -1,96 +1,98 @@
+import { supabase, isSupabaseReady, type Profile } from './supabase';
+
+// ─── Auth helpers ─────────────────────────────────────────────────────────────
+
+export async function signIn(email: string, password: string): Promise<{ error: string | null }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+export async function signOut(): Promise<void> {
+  if (!isSupabaseReady() || !supabase) return;
+  await supabase.auth.signOut();
+}
+
 /**
- * tutorialesTecnicos.ts — Los pasos técnicos donde el sanador más se traba (Lote G · jul 2026)
- *
- * Cada tutorial es un paso a paso claro, SIN jerga, pensado para alguien que le teme
- * a la tecnología. El Mentor y los agentes los usan para guiar; también se muestran
- * en la sesión del Camino que corresponde.
+ * Envía un mail de reset de contraseña. Supabase manda un link al mail con
+ * token de recovery; al hacer click, el usuario vuelve a la app con una
+ * sesión temporal + evento PASSWORD_RECOVERY, y el app muestra el modal
+ * para fijar la nueva contraseña.
  */
-
-export interface TutorialTecnico {
-  codigo: string;
-  titulo: string;
-  intro: string;
-  pasos: string[];
-  siFalla: string;
+export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
+  const redirectTo = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+  if (error) return { error: error.message };
+  return { error: null };
 }
 
-export const TUTORIALES: Record<string, TutorialTecnico> = {
-  'P2.2': {
-    codigo: 'P2.2',
-    titulo: 'Crear tu cuenta de Meta (Business Manager)',
-    intro: 'Es la cuenta central desde donde vas a manejar tus anuncios. Suena técnico, pero son 10 minutos y lo haces una sola vez.',
-    pasos: [
-      'Entra a business.facebook.com y toca "Crear cuenta".',
-      'Pon el nombre de tu negocio, tu nombre y tu email de trabajo.',
-      'Revisa tu email y confirmá (Meta te manda un enlace).',
-      'Dentro, ve a "Configuración del negocio" → "Cuentas" → "Cuentas publicitarias" → "Agregar" → "Crear una nueva".',
-      'Elige tu país, tu moneda y la zona horaria correctas — esto no se puede cambiar después.',
-      'Listo: ya tienes tu central de anuncios. La vas a usar cuando montes la campaña.',
-    ],
-    siFalla: 'Si te pide verificar tu negocio con documentos, puedes saltarlo por ahora — no lo necesitas para empezar. Si algo no carga, prueba desde una computadora (no el celular) — Meta funciona mejor así.',
-  },
-  'P4.5-pixel': {
-    codigo: 'P4.5',
-    titulo: 'Instalar el Pixel de Meta (el sensor de tu página)',
-    intro: 'El Pixel es un código invisible que le avisa a Meta quién visita tu página. Sin él, tus anuncios vuelan a ciegas. Es copiar y pegar.',
-    pasos: [
-      'En tu Business Manager, ve a "Administrador de eventos" → "Conectar orígenes de datos" → "Web" → "Pixel de Meta".',
-      'Ponle un nombre (tu negocio) y toca "Crear".',
-      'Meta te da un código. Copialo entero.',
-      'Pegalo en la configuración de tu página (el tutorial de tu plataforma te muestra dónde — suele ser "Código de encabezado" o "Header").',
-      'Vuelve a Meta y toca "Verificar" — o instala la extensión "Meta Pixel Helper" en Chrome, entra a tu página, y si el ícono se pone azul, funciona.',
-    ],
-    siFalla: 'Si el Pixel no verifica al toque, espera unas horas — a veces tarda. Si tu plataforma no tiene dónde pegar el código, avisá por Mensajes: hay una forma alternativa con "Google Tag Manager" que te guiamos.',
-  },
-  'P4.5-agente': {
-    codigo: 'P4.5',
-    titulo: 'Tu agente de WhatsApp (el que responde por ti)',
-    intro: 'Es un asistente que contesta a los interesados a cualquier hora, hace las preguntas clave y agenda — aunque estés durmiendo o atendiendo.',
-    pasos: [
-      'En tu sistema (Mi Clínica / GHL), ve a la sección de conversaciones o automatizaciones.',
-      'Activá la plantilla del agente que ya viene cargada para tu tipo de práctica.',
-      'Personalizá el saludo con tu nombre y el de tu método.',
-      'Definí las 3 preguntas clave que quieres que haga (profesión del interesado, su problema principal, su urgencia).',
-      'Conectá el botón "Agendar" a tu calendario.',
-      'Probalo ti: escribile como si fueras un paciente y mira que responda bien.',
-    ],
-    siFalla: 'Si el agente responde raro, revisa el saludo y las preguntas — suelen ser el 90% del problema. Bruno (tu entrenador de WhatsApp) te ayuda a afinarlo.',
-  },
-  'P4.5b': {
-    codigo: 'P4.5b',
-    titulo: 'Conectar tu dominio (tu dirección digital)',
-    intro: 'Tu dominio es tu dirección propia en internet, como "tunombre.com". Le da seriedad a todo. Es técnico pero te llevo de la mano.',
-    pasos: [
-      '¿Ya tienes un dominio? Si no, comprá uno simple en Namecheap o Google Domains: tu nombre + ".com", cuesta ~$12 al año.',
-      'En tu sistema, ve a "Configuración" → "Dominios" → "Agregar dominio".',
-      'El sistema te muestra dos datos llamados "registros DNS" (son como coordenadas). Cópialos.',
-      'Entra a donde compraste el dominio → "Administrar DNS" → pega eeres dos registros.',
-      'Guarda y vuelve a tu sistema. Toca "Verificar".',
-      'Si dice "pendiente", es normal: la conexión puede tardar hasta 24 horas. No rompiste nada — se sigue mañana.',
-    ],
-    siFalla: 'Lo más común es que tarde en activarse — eso es esperar, no arreglar. Si a las 24 horas sigue sin conectar, revisa que copiaste los registros SIN espacios de más. Sofi te ayuda con esto.',
-  },
-  'P4.4': {
-    codigo: 'P4.4',
-    titulo: 'Escalar tu campaña ganadora (sin quemar plata)',
-    intro: 'Ya sabes cuál de tus anuncios funciona. Escalar es ponerle más presupuesto al ganador, con cabeza — no de golpe.',
-    pasos: [
-      'Identificá tu anuncio ganador: el que trae mensajes más baratos (Ramiro te ayuda a leer el número).',
-      'Pausá los que no funcionan — no tiene sentido gastar en ellos.',
-      'Al ganador, subile el presupuesto de a poco: 20% cada 2-3 días, no el doble de golpe (eso confunde al algoritmo).',
-      'Mira que el costo por mensaje se mantenga estable mientras subes. Si se dispara, frená y espera.',
-      'Cuando encuentres tu techo (donde el costo empieza a subir), quedate ahí. Ese es tu ritmo sostenible.',
-    ],
-    siFalla: 'Si al subir el presupuesto los resultados empeoran, bajá al nivel anterior y espera 3 días. Escalar es paciencia, no apuro. Ramiro te lee los números si tienes dudas.',
-  },
-};
-
-/** Devuelve el tutorial de un paso, o null. */
-export function getTutorial(codigo: string): TutorialTecnico | null {
-  return TUTORIALES[codigo] ?? null;
+/**
+ * Actualiza la contraseña del usuario logueado. Solo funciona con sesión
+ * activa — usado dentro del flujo PASSWORD_RECOVERY tras click en el mail.
+ */
+export async function updatePassword(newPassword: string): Promise<{ error: string | null }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { error: error.message };
+  return { error: null };
 }
 
-/** Devuelve TODOS los tutoriales de un paso (P4.5 tiene pixel Y agente). */
-export function getTutoriales(codigo: string): TutorialTecnico[] {
-  return Object.values(TUTORIALES).filter((t) => t.codigo === codigo);
+export async function getSession() {
+  if (!isSupabaseReady() || !supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session;
+}
+
+export async function getCurrentProfile(): Promise<Profile | null> {
+  if (!isSupabaseReady() || !supabase) return null;
+  const session = await getSession();
+  if (!session) return null;
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+
+  return data ?? null;
+}
+
+// Crear perfil de usuario nuevo (llamado tras crear auth.user en el admin)
+export async function createProfile(profile: Omit<Profile, 'created_at'>): Promise<{ error: string | null }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
+  const { error } = await supabase.from('profiles').insert(profile);
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+// Crear usuario via Admin API (solo desde un entorno seguro o Edge Function)
+// En producción esto se llama desde una Supabase Edge Function con service_role key
+export async function inviteUser(email: string, nombre: string, plan: 'DWY' | 'DFY', especialidad: string, fecha_inicio: string): Promise<{ error: string | null }> {
+  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
+
+  // Llamar a la Edge Function que usa service_role para crear el usuario
+  const { error } = await supabase.functions.invoke('invite-user', {
+    body: { email, nombre, plan, especialidad, fecha_inicio }
+  });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+// Sincronizar perfil de Supabase → localStorage (fallback para páginas que aún leen localStorage)
+export function syncProfileToLocalStorage(profile: Profile): void {
+  // Espejo dedicado del plan: el gating del Camino y el tope del Mentor lo leen
+  // de acá (inmune a que el borrador del perfil pise tcd_profile sin el plan).
+  try { localStorage.setItem('tcd_plan', String(profile.plan ?? '')); } catch { /* noop */ }
+  localStorage.setItem('tcd_profile', JSON.stringify({
+    nombre: profile.nombre,
+    email: profile.email,
+    especialidad: profile.especialidad ?? '',
+    fecha_inicio: profile.fecha_inicio,
+    plan: profile.plan,
+    modulos_activos: profile.modulos_activos ?? [],
+    agentes_activos: profile.agentes_activos ?? [],
+  }));
 }

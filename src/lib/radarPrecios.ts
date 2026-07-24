@@ -1,59 +1,33 @@
 /**
- * graduacion.ts — T11 · LA EMOCIÓN FINAL (Plan Maestro).
- * Los datos de la graduación completa: los comprobantes de los 10 (viven en
- * Storage, subidos como evidencia en los hitos de venta) y el Mensaje al
- * Futuro (el audio sellado del Día 1, que se abre en la graduación — T3 #10).
- * Todo degrada con elegancia: sin conexión o sin archivos, devuelve vacío.
+ * radarPrecios.ts — Idea #16 · el argumento del shopping, automatizado.
+ * Rangos reales de programas high-ticket por familia de especialidad en
+ * el mercado hispano (LATAM + España + hispanos US). Curado a mano;
+ * actualizable sin tocar código de UI.
  */
-import { supabase, isSupabaseReady } from './supabase';
-import { listarEvidencias, urlEvidencia, type Evidencia } from './evidencia';
 
-/** Los hitos donde vive el comprobante de pago (primer $1.000 y los 10). */
-const CODIGOS_COMPROBANTE = ['P6.3', 'P6.4', 'P7.3'];
-
-export interface Comprobante extends Evidencia {
-  url?: string;
-  esImagen: boolean;
+export interface RangoPrecio {
+  familia: string;
+  match: string[]; // palabras clave para detectar la especialidad del perfil
+  rango: string;
+  ejemplos: string;
 }
 
-/** Los comprobantes de los 10 (evidencia subida en los hitos de venta). */
-export async function fetchComprobantes(userId: string): Promise<Comprobante[]> {
-  if (!userId) return [];
-  const todas: Evidencia[] = [];
-  for (const codigo of CODIGOS_COMPROBANTE) {
-    try {
-      const ev = await listarEvidencias(userId, codigo);
-      todas.push(...ev);
-    } catch {
-      /* un hito sin evidencia no rompe el resto */
-    }
-  }
-  return Promise.all(
-    todas.map(async (e) => ({
-      ...e,
-      url: (await urlEvidencia(e.path)) ?? undefined,
-      esImagen: /\.(png|jpe?g|webp|gif|heic)$/i.test(e.name),
-    })),
-  );
-}
+export const RADAR_PRECIOS: RangoPrecio[] = [
+  { familia: 'Psicología y terapia', match: ['psic', 'terap', 'mental', 'ansiedad', 'trauma'], rango: '$600 – $2.500 USD', ejemplos: 'Programas de ansiedad en 8-12 semanas · procesos de trauma · terapia intensiva de pareja' },
+  { familia: 'Nutrición y salud metabólica', match: ['nutri', 'aliment', 'metab', 'peso', 'diabet'], rango: '$500 – $2.000 USD', ejemplos: 'Transformación metabólica 90 días · protocolos de descenso con seguimiento · salud hormonal' },
+  { familia: 'Medicina y especialidades', match: ['medic', 'doctor', 'dermat', 'endocrin', 'ginec', 'oncol', 'kinesi', 'fisio'], rango: '$800 – $3.500 USD', ejemplos: 'Programas de acompañamiento integral · protocolos post-tratamiento · medicina funcional' },
+  { familia: 'Coaching y desarrollo personal', match: ['coach', 'desarrollo', 'lider', 'bienestar', 'mindful', 'espiritual'], rango: '$500 – $3.000 USD', ejemplos: 'Procesos de 90 días 1:1 · programas grupales de transformación · mentorías temáticas' },
+  { familia: 'Salud física y movimiento', match: ['entren', 'fitness', 'yoga', 'pilates', 'deport'], rango: '$400 – $1.500 USD', ejemplos: 'Programas de recomposición corporal · rehabilitación guiada · hábitos de movimiento' },
+];
 
-const BUCKET = 'task-attachments';
+const DEFAULT: RangoPrecio = {
+  familia: 'Profesionales de salud y transformación',
+  match: [],
+  rango: '$500 – $2.500 USD',
+  ejemplos: 'Programas de transformación de 8-12 semanas con acompañamiento cercano',
+};
 
-/**
- * El Mensaje al Futuro: el audio sellado del Día 1. Se busca en Storage bajo
- * mensaje-futuro/{userId}/. Devuelve la URL firmada o null (todavía no grabado).
- */
-export async function fetchMensajeFuturo(userId: string): Promise<string | null> {
-  if (!isSupabaseReady() || !supabase || !userId) return null;
-  try {
-    const { data } = await supabase.storage.from(BUCKET).list(`mensaje-futuro/${userId}`, { limit: 5 });
-    const audio = (data ?? []).find((f) => f.name && /\.(mp3|m4a|wav|ogg|webm)$/i.test(f.name));
-    if (!audio) return null;
-    const { data: signed } = await supabase.storage
-      .from(BUCKET)
-      .createSignedUrl(`mensaje-futuro/${userId}/${audio.name}`, 3600);
-    return signed?.signedUrl ?? null;
-  } catch {
-    return null;
-  }
+export function radarPara(especialidad?: string | null): RangoPrecio {
+  const esp = (especialidad ?? '').toLowerCase();
+  return RADAR_PRECIOS.find((r) => r.match.some((m) => esp.includes(m))) ?? DEFAULT;
 }

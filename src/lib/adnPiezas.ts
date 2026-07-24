@@ -1,443 +1,103 @@
 /**
- * campanasTypes.ts — Tipos para el modulo de Campanas & Creativos
+ * adnPiezas.ts — LA TAXONOMÍA ÚNICA DEL ADN (ZIP B).
+ *
+ * Una sola lista, consumida por la página ADN y por la Cadena de HOY.
+ * Cada pieza dice EXACTO en qué sesión se completa — y esa sesión es la
+ * única forma de cambiarla: lo sellado no se edita por fuera, se rehace.
+ *
+ * 9 piezas del ALMA (el ikigai, en orden causal) + 5 ACTIVOS de operación.
  */
 
-// ─── Campanas ────────────────────────────────────────────────────────────────
+import { planActualPermite } from './planes';
 
-export type ObjetivoCampana = 'trafico_perfil' | 'mensajes_retargeting' | 'clientes_potenciales';
-export type EstadoCampana = 'borrador' | 'configurada' | 'activa' | 'pausada' | 'completada';
+export type GrupoPieza = 'alma' | 'activo';
+export type PlanPieza = 'elnumero' | 'completo';
 
-export interface Campana {
+export interface PiezaADN {
   id: string;
-  usuario_id: string;
-  nombre: string;
-  objetivo: ObjetivoCampana;
-  nicho?: string;
-  ubicacion?: string;
-  edad_min: number;
-  edad_max: number;
-  genero: 'todos' | 'mujeres' | 'hombres';
-  intereses?: string[];
-  presupuesto_diario?: number;
-  duracion_dias: number;
-  monto_inversion_filtro?: number;
-  url_landing?: string;
-  url_vsl?: string;
-  guia_configuracion?: string;
-  estado: EstadoCampana;
-  created_at: string;
-  updated_at: string;
-}
-
-/** Estado del formulario del wizard (antes de guardar) */
-export interface CampanaFormState {
-  nombre: string;
-  objetivo: ObjetivoCampana;
-  nicho: string;
-  ubicacion: string;
-  edad_min: number;
-  edad_max: number;
-  genero: 'todos' | 'mujeres' | 'hombres';
-  intereses: string[];
-  presupuesto_diario: string;
-  duracion_dias: number;
-  monto_inversion_filtro: string;
-  url_landing: string;
-  url_vsl: string;
-}
-
-export const CAMPANA_FORM_INITIAL: CampanaFormState = {
-  nombre: '',
-  objetivo: 'trafico_perfil',
-  nicho: '',
-  ubicacion: '',
-  edad_min: 25,
-  edad_max: 55,
-  genero: 'todos',
-  intereses: [],
-  presupuesto_diario: '',
-  duracion_dias: 7,
-  monto_inversion_filtro: '500',
-  url_landing: '',
-  url_vsl: '',
-};
-
-export const OBJETIVO_LABELS: Record<ObjetivoCampana, { titulo: string; descripcion: string }> = {
-  trafico_perfil: {
-    titulo: 'Trafico al Perfil',
-    descripcion: 'CTA con palabra clave para activar automatizacion en ManyChat y GHL. Envio de recursos automatico y generacion de conversacion.',
-  },
-  mensajes_retargeting: {
-    titulo: 'Mensajes (Retargeting)',
-    descripcion: 'Campaña de retargeting para personas que ya interactuaron con la campaña de trafico. Segundo contacto estrategico.',
-  },
-  clientes_potenciales: {
-    titulo: 'Clientes Potenciales',
-    descripcion: 'Directo a landing page con VSL. Objetivo: agendar llamada via formulario y calendario de GHL. Filtro API de inversion.',
-  },
-};
-
-export const ESTADO_COLORS: Record<EstadoCampana, string> = {
-  borrador: '#E8962E',
-  configurada: '#3B82F6',
-  activa: '#22C55E',
-  pausada: '#EAB308',
-  completada: '#8B5CF6',
-};
-
-// ─── Creativos ───────────────────────────────────────────────────────────────
-
-export type TipoCreativo = 'imagen_single' | 'carrusel' | 'yt_thumbnail';
-export type AnguloCreativo = 'contraintuitivo' | 'directo' | 'emocional' | 'curiosidad' | 'autoridad' | 'dolor' | 'deseo';
-export type EstadoCreativo = 'generado' | 'aprobado' | 'descartado';
-
-export interface Creativo {
-  id: string;
-  usuario_id: string;
-  campana_id?: string;
-  tipo: TipoCreativo;
-  angulo: AnguloCreativo;
-  texto_principal: string;
   titulo: string;
-  descripcion?: string;
-  cta_texto?: string;
-  nombre?: string;
-  estado: EstadoCreativo;
-  prompt_imagen?: string;
-  created_at: string;
-  // Joined
-  assets?: CreativoAsset[];
+  /** Qué es, en una línea — el resultado, no el concepto. */
+  que: string;
+  /** Dónde se sella. 'onboarding' = las siembras del primer día. */
+  sesion: string;
+  grupo: GrupoPieza;
+  plan: PlanPieza;
+  /** Pilar del Camino donde se sella — el plan decide si está a su alcance. */
+  pilar: number;
+  /** Cómo saber si ya está sellada. */
+  chequeo: { origen?: 'porque' | 'herida' | 'paciente'; sello?: string; campo?: string; progreso?: string };
 }
 
-export interface CreativoAsset {
-  id: string;
-  creativo_id: string;
-  usuario_id: string;
-  slide_orden: number;
-  storage_path: string;
-  public_url: string;
-  width?: number;
-  height?: number;
-  mime_type: string;
-  created_at: string;
-}
+export const PIEZAS_ADN: PiezaADN[] = [
+  // ─────────── EL ALMA (9) — el orden causal del ikigai ───────────
+  { id: 'historia', titulo: 'Tu Historia', que: 'de dónde vienes y por qué esta profesión',
+    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'porque', sello: 'H-P1.3' } },
+  { id: 'herida', titulo: 'Tu Herida Sanada', que: 'lo que atravesaste y hoy sabes curar',
+    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'herida' } },
+  { id: 'dones', titulo: 'Tus Dones', que: 'lo que haces distinto sin darte cuenta',
+    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'paciente' } },
+  { id: 'precio', titulo: 'Tu Precio Digno', que: 'el número que sale de tu meta, no de tu miedo',
+    sesion: 'Día 5 · EL NÚMERO', grupo: 'alma', plan: 'elnumero', pilar: 1, chequeo: { progreso: '1-P1.5' } },
+  { id: 'proposito', titulo: 'Tu Propósito', que: 'lo que sostiene el precio cuando tiemblas',
+    sesion: 'Tu creencia nueva y el Estandarte', grupo: 'alma', plan: 'completo', pilar: 1, chequeo: { progreso: '1-P1.6', campo: 'proposito' } },
+  { id: 'avatar', titulo: 'A Quién Sirves', que: 'el paciente exacto que paga sin dudar',
+    sesion: 'Tu paciente ideal · los 3 mejores', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'avatar_cliente', progreso: '2-P2.3' } },
+  { id: 'puv', titulo: 'Tu PUV', que: 'la frase que te separa de todos los demás',
+    sesion: 'Tu PUV · la frase que te define', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'posicionamiento', sello: 'H-P5.2' } },
+  { id: 'metodo', titulo: 'Tu Método', que: 'tu proceso con nombre — dejas de vender horas',
+    sesion: 'Genera tu método · nombre + pasos', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'metodo_nombre', sello: 'H-P7.3' } },
+  { id: 'oferta', titulo: 'Tu Oferta', que: 'el programa completo que se cobra en miles',
+    sesion: 'Diseña tu oferta principal', grupo: 'alma', plan: 'completo', pilar: 3, chequeo: { campo: 'oferta_mid', sello: 'H-P8.2' } },
 
-export interface CopyGenerado {
-  texto_principal: string;
-  titulo: string;
-  descripcion: string;
-  cta_texto: string;
-}
-
-/** Para carruseles: un CopyGenerado por slide */
-export interface CarouselCopyGenerado {
-  slides: CopyGenerado[];
-}
-
-export const ANGULO_LABELS: Record<AnguloCreativo, { titulo: string; descripcion: string }> = {
-  contraintuitivo: {
-    titulo: 'Contraintuitivo',
-    descripcion: 'Hook impactante que contradice una creencia comun del nicho',
-  },
-  directo: {
-    titulo: 'Directo',
-    descripcion: 'Beneficio claro y CTA sin rodeos',
-  },
-  emocional: {
-    titulo: 'Emocional',
-    descripcion: 'Conecta con el dolor o deseo mas profundo del avatar',
-  },
-  curiosidad: {
-    titulo: 'Curiosidad',
-    descripcion: 'Open loop que genera necesidad irresistible de hacer clic',
-  },
-  autoridad: {
-    titulo: 'Autoridad',
-    descripcion: 'Posicionamiento como experto, metodo propio y prueba social',
-  },
-  dolor: {
-    titulo: 'Desde el Dolor',
-    descripcion: 'Apunta al punto de dolor especifico del avatar',
-  },
-  deseo: {
-    titulo: 'Desde el Deseo',
-    descripcion: 'Vision aspiracional del resultado que el avatar quiere',
-  },
-};
-
-export const TIPO_LABELS: Record<TipoCreativo, string> = {
-  imagen_single: 'Imagen Unica',
-  carrusel: 'Carrusel',
-  yt_thumbnail: 'YouTube Thumbnail',
-};
-
-// ─── Estilos visuales y modos de imagen ─────────────────────────────────────
-
-export type EstiloVisual =
-  | 'foto_real'
-  | 'bold'
-  | 'pixar'
-  | 'caricatura'
-  | 'comic'
-  | 'plasticina'
-  | 'noticias'
-  | 'twitter';
-
-// Maps legacy keys (stored in old prompt_imagen strings or passed externally) to current keys
-export const LEGACY_ESTILO_MAP: Record<string, EstiloVisual> = {
-  fotografico_profesional: 'foto_real',
-  grafico_bold: 'bold',
-  minimalista: 'foto_real',
-  lifestyle: 'foto_real',
-  testimonio: 'foto_real',
-  educativo: 'bold',
-  antes_despues: 'bold',
-  urgencia: 'bold',
-};
-
-export function normalizeEstilo(value: string): EstiloVisual {
-  const valid: EstiloVisual[] = ['foto_real', 'bold', 'pixar', 'caricatura', 'comic', 'plasticina', 'noticias', 'twitter'];
-  if (valid.includes(value as EstiloVisual)) return value as EstiloVisual;
-  return LEGACY_ESTILO_MAP[value] ?? 'foto_real';
-}
-
-export type ImageMode = 'completa' | 'fondo';
-
-export const ESTILO_VISUAL_OPTIONS: Record<EstiloVisual, { titulo: string; descripcion: string; prompt: string }> = {
-  foto_real: {
-    titulo: 'Estilo Foto Real',
-    descripcion: 'Fotografia profesional, naturalista, editorial',
-    prompt: 'High-end editorial photography. Full-frame DSLR look, natural key light, shallow depth of field with smooth bokeh. Photorealistic skin tones and materials. Magazine-cover commercial quality. Premium stock photo aesthetic. No illustration, no CGI — pure photographic realism.',
-  },
-  bold: {
-    titulo: 'Estilo Bold',
-    descripcion: 'Grafico de alto contraste, colores fuertes, scroll-stopping',
-    prompt: 'Bold graphic design, maximum contrast, oversized sans-serif typography treatment area, flat vector shapes, asymmetric dynamic layout, limited aggressive color palette (black + one saturated accent). Scroll-stopping poster aesthetic. Behance editorial design quality. Clean geometric composition.',
-  },
-  pixar: {
-    titulo: 'Estilo PIXAR',
-    descripcion: '3D animado cinematografico, personajes expresivos',
-    prompt: 'Pixar-Disney 3D animated style. Cinematic soft lighting with subsurface scattering on skin. Expressive stylized characters with large eyes and smooth skin. Rich saturated color palette. Depth of field, volumetric light. Polished render quality matching Toy Story or Up. Warm, friendly, family-safe aesthetic.',
-  },
-  caricatura: {
-    titulo: 'Estilo Caricatura',
-    descripcion: 'Ilustracion 2D cartoon, contornos marcados, colores planos',
-    prompt: '2D cartoon illustration style. Bold clean black outlines. Flat cel-shaded colors with minimal shadow. Exaggerated expressive features. Vibrant Saturday-morning animation palette. Hand-drawn feel with high readability. Similar to modern animated series. No photorealism, pure 2D illustration.',
-  },
-  comic: {
-    titulo: 'Estilo Comic',
-    descripcion: 'Comic book americano, halftone dots, contornos gruesos',
-    prompt: 'American comic book style. Thick bold ink outlines. Halftone dot shading (Ben-Day dots). Limited saturated primary palette. Dynamic action-style composition. Marvel or DC aesthetic quality. Strong dramatic shadows with cross-hatching details. Panel-ready framing. Pure comic art, no photography.',
-  },
-  plasticina: {
-    titulo: 'Estilo Plasticina',
-    descripcion: 'Claymation 3D, texturas de arcilla, estilo artesanal',
-    prompt: 'Handmade claymation stop-motion aesthetic. Visible fingerprint and tool-mark textures on clay surfaces. Imperfect charming organic shapes. Warm studio lighting with shallow depth of field. Aardman Studios quality (Wallace and Gromit). Tactile plasticine 3D feel. Soft colors, handmade charm.',
-  },
-  noticias: {
-    titulo: 'Estilo Noticias',
-    descripcion: 'Captura tipo medio viral: foto real + titular bold + badge urgente + dato/estadistica',
-    prompt: 'Viral news/media post style — looks like an authentic screenshot of a viral news outlet post on Instagram (in the vein of El Kilombo, Infobae viral, FilterNews). Real photographic image as background (a person reacting, a relevant scene, candid documentary photo — NOT a TV anchor in a studio). Bold uppercase sans-serif headline overlaid at the bottom over a subtle dark gradient — headline includes a SHOCKING DATA POINT, percentage, statistic, or surprising claim (ej: "EL 67% DE LOS USUARIOS...", "ESPANA ES EL PAIS CON MAS..."). Small colored rectangular badge at the top-left of the headline area saying "VIRAL", "ULTIMO MOMENTO", "URGENTE" or similar in red/yellow. Optional small fake media logo bottom-left and small swipe arrow ">>" bottom-right. Vertical 4:5 or 9:16 framing. The vibe is tabloid digital, scroll-stopping, data-driven shock value — NOT a TV news broadcast, NOT a studio, NOT an anchor with chyron.',
-  },
-  twitter: {
-    titulo: 'Estilo Twitter/X',
-    descripcion: 'Screenshot organico de un post real en X — texto a tamano normal, no titular gigante',
-    prompt: 'AUTHENTIC X (Twitter) post screenshot — must look like a real screenshot taken from the X mobile or desktop app. Pixel-perfect replica of the platform UI: profile avatar circle (40-48px), display name in bold sans-serif at NORMAL size (~15-17px equivalent), verified blue checkmark next to name, gray @handle and timestamp on the same row, post body text rendered at 15-16px equivalent (NORMAL reading size — NOT giant headline-size text, NOT poster typography, NOT bold display). The post body uses regular weight sans-serif (system font: Segoe UI / SF Pro / Helvetica), left-aligned, with normal line-height. Below the text: small action row (reply, retweet, like, view counts) in muted gray. Dark mode (#15202B background, #F2EFE9 text) or light mode (white background, #0F1419 text). The post should occupy a card with subtle border. ABSOLUTE RULES: text in the body must be the same size as a real tweet — small enough that you could fit 280 characters. No oversized typography, no poster design, no decorative effects, no gradients, no extra graphics. Just a clean, organic, believable Twitter/X post screenshot.',
-  },
-};
-
-// ─── Formatos de imagen ─────────────────────────────────────────────────────
-
-export type ImageFormat =
-  | '1:1'
-  | '4:5'
-  | '9:16'
-  | '16:9'
-  | 'yt_thumbnail';
-
-export const IMAGE_FORMAT_OPTIONS: Record<ImageFormat, { label: string; descripcion: string; width: number; height: number }> = {
-  '1:1':          { label: 'Cuadrado 1:1',      descripcion: 'Feed de Instagram',           width: 1080, height: 1080 },
-  '4:5':          { label: 'Vertical 4:5',       descripcion: 'Feed de Instagram (vertical)', width: 1080, height: 1350 },
-  '9:16':         { label: 'Story / Reel 9:16',  descripcion: 'Stories, Reels, TikTok',       width: 1080, height: 1920 },
-  '16:9':         { label: 'Horizontal 16:9',     descripcion: 'Facebook, LinkedIn',            width: 1920, height: 1080 },
-  'yt_thumbnail': { label: 'YouTube Thumbnail',   descripcion: 'Portada de video (1280x720)',   width: 1280, height: 720 },
-};
-
-// ─── Calidad de generacion (OpenAI gpt-image-2) ─────────────────────────────
-// Trade-off de costo/velocidad: low = rapido y barato, high = fidelidad maxima.
-
-export type ImageQuality = 'low' | 'medium' | 'high' | 'auto';
-
-export const IMAGE_QUALITY_OPTIONS: Record<ImageQuality, { label: string; descripcion: string; costoAprox: string }> = {
-  auto:   { label: 'Auto',   descripcion: 'Deja que el modelo decida',                  costoAprox: 'variable' },
-  low:    { label: 'Baja',   descripcion: 'Rapida y barata — borradores, iteracion',    costoAprox: '~$0.006/img' },
-  medium: { label: 'Media',  descripcion: 'Default recomendado — balance calidad/costo', costoAprox: '~$0.053/img' },
-  high:   { label: 'Alta',   descripcion: 'Fidelidad maxima — assets finales, texto denso', costoAprox: '~$0.211/img' },
-};
-
-export const IMAGE_QUALITY_DEFAULT: ImageQuality = 'medium';
-
-// Mapea nuestro ImageFormat (1:1, 4:5, etc) al size string que acepta gpt-image-2.
-// La API soporta resoluciones flexibles pero los presets canonicos son 1024 y 1536.
-export const OPENAI_IMAGE_SIZE: Record<ImageFormat, '1024x1024' | '1024x1536' | '1536x1024'> = {
-  '1:1':          '1024x1024',
-  '4:5':          '1024x1536', // vertical ~4:5 → cerca de 2:3
-  '9:16':         '1024x1536', // vertical (OpenAI no expone 9:16 nativo; 2:3 es el mas cercano)
-  '16:9':         '1536x1024', // horizontal
-  'yt_thumbnail': '1536x1024', // horizontal
-};
-
-// ─── Zona segura por formato ────────────────────────────────────────────────
-// Cada formato tiene 2 fuentes de "zona muerta" que el modelo TIENE que evitar:
-//   1) Recorte interno (cover crop): OpenAI entrega tamanos canonicos (1024/1536)
-//      que no calzan con los formatos de redes. Al normalizar con cover, recortamos
-//      bordes (~8-9% en el eje que sobra).
-//   2) UI de la plataforma de destino: Instagram tapa username arriba, likes/caption
-//      abajo. Stories/Reels tapan perfil arriba y botones de accion abajo. YouTube
-//      tapa la esquina inferior derecha con la duracion del video.
-//
-// Acumulamos AMBAS fuentes en margenes por lado (top/bottom/left/right) y se las
-// damos al modelo en el prompt como "zonas muertas" donde solo puede haber fondo.
-// Cuanto mas estrictos seamos, mas chance de que el modelo deje los CTA/titulos
-// en el area util central.
-
-export interface SafeZoneConfig {
-  topPct: number;       // 0.16 = primer 16% del alto reservado
-  bottomPct: number;
-  leftPct: number;
-  rightPct: number;
-  reasonTop?: string;
-  reasonBottom?: string;
-  reasonLeft?: string;
-  reasonRight?: string;
-}
-
-export const SAFE_ZONE_BY_FORMAT: Record<ImageFormat, SafeZoneConfig> = {
-  '1:1': {
-    topPct: 0.16,
-    bottomPct: 0.20,
-    leftPct: 0.06,
-    rightPct: 0.06,
-    reasonTop: 'username y handle de Instagram',
-    reasonBottom: 'iconos de like, comentar y caption de Instagram',
-  },
-  '4:5': {
-    topPct: 0.22,
-    bottomPct: 0.22,
-    leftPct: 0.06,
-    rightPct: 0.06,
-    reasonTop: 'recorte al ajustar de 2:3 a 4:5 + username de Instagram',
-    reasonBottom: 'recorte al ajustar de 2:3 a 4:5 + iconos y caption de Instagram',
-  },
-  '9:16': {
-    topPct: 0.18,
-    bottomPct: 0.20,
-    leftPct: 0.10,
-    rightPct: 0.10,
-    reasonTop: 'foto de perfil y nombre del autor en Stories/Reels',
-    reasonBottom: 'botones de accion (Me gusta, Compartir, Comentar) en Stories/Reels',
-    reasonLeft: 'recorte al ajustar de 2:3 a 9:16',
-    reasonRight: 'recorte al ajustar de 2:3 a 9:16',
-  },
-  '16:9': {
-    topPct: 0.12,
-    bottomPct: 0.12,
-    leftPct: 0,
-    rightPct: 0,
-    reasonTop: 'recorte al ajustar de 3:2 a 16:9',
-    reasonBottom: 'recorte al ajustar de 3:2 a 16:9',
-  },
-  'yt_thumbnail': {
-    topPct: 0.12,
-    bottomPct: 0.14,
-    leftPct: 0,
-    rightPct: 0.12,
-    reasonTop: 'recorte al ajustar de 3:2 a 16:9',
-    reasonBottom: 'recorte + overlay de duracion del video en YouTube',
-    reasonRight: 'overlay de duracion del video en YouTube (esquina inferior derecha)',
-  },
-};
-
-// ─── Referencias, texto custom y control de slides ──────────────────────────
-
-export interface ReferenceImage {
-  base64: string;
-  mimeType: string;
-  fileName: string;
-}
-
-export type TextSource = 'ia' | 'personalizado';
-
-export type ImageGenerationMode = 'ia_completa' | 'texto_personalizado' | 'solo_fondo';
-
-export interface CustomText {
-  h1: string;
-  h2: string;
-  h3?: string;
-  cta: string;
-}
-
-export interface SlideConfig {
-  textSource: TextSource;
-  customText?: CustomText;
-}
-
-// ─── Vistas internas de la pagina ────────────────────────────────────────────
-
-export type CampanasView =
-  | 'home'
-  | 'nueva'
-  | 'copies'
-  | 'diagnostico'
-  | 'montaje'
-  | 'historial'
-  | 'ganadores'
-  | 'creativos'
-  | 'studio'
-  | 'detail' | 'anuncios';
-
-// ─── Chat KAI (wizard conversacional) ──────────────────────────────────────
-
-export type WizardPhase = 'cliente' | 'estrategia' | 'audiencias' | 'copies' | 'creativos' | 'montaje';
-
-export interface KaiMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  phase?: WizardPhase;
-}
-
-export const WIZARD_PHASES: { id: WizardPhase; label: string; numero: number }[] = [
-  { id: 'cliente', label: 'Cliente', numero: 1 },
-  { id: 'estrategia', label: 'Estrategia', numero: 2 },
-  { id: 'audiencias', label: 'Audiencias', numero: 3 },
-  { id: 'copies', label: 'Copies', numero: 4 },
-  { id: 'creativos', label: 'Creativos', numero: 5 },
-  { id: 'montaje', label: 'Montaje', numero: 6 },
+  // ─────────── LOS ACTIVOS (5) — lo que opera todos los días ───────────
+  { id: 'guardian', titulo: 'Tu Guardián del Precio', que: 'las 10 respuestas para cuando cuestionen tu número',
+    sesion: 'Día 5 · El Guardián del Precio', grupo: 'activo', plan: 'elnumero', pilar: 1, chequeo: { sello: 'H-P1.5b', progreso: '1-P1.5b' } },
+  { id: 'matriz', titulo: 'Tu Matriz ABC', que: 'el dolor, lo que falló y la transformación — en sus palabras',
+    sesion: 'Tu Matriz ABC', grupo: 'activo', plan: 'completo', pilar: 2, chequeo: { sello: 'H-P6.3', progreso: '2-P2.3b' } },
+  { id: 'mensaje', titulo: 'Tu Mensaje', que: 'el gancho que atrae a tu paciente ideal',
+    sesion: 'El mensaje que atrae a TU paciente', grupo: 'activo', plan: 'completo', pilar: 4, chequeo: { progreso: '4-P4.2' } },
+  { id: 'script', titulo: 'Tu Script de Ventas', que: 'la conversación que cierra sin empujar',
+    sesion: 'Tu script de ventas propio', grupo: 'activo', plan: 'completo', pilar: 5, chequeo: { progreso: '5-P5.2' } },
+  { id: 'protocolo', titulo: 'Tu Protocolo de Entrega', que: 'cómo entregas sin quemarte',
+    sesion: 'Tu protocolo de entrega', grupo: 'activo', plan: 'completo', pilar: 6, chequeo: { progreso: '6-P6.2' } },
 ];
 
-// ─── Diagnostico de campana ────────────────────────────────────────────────
+/* ══════════ Lectura del estado (local-first, sin red) ══════════ */
 
-export interface DiagnosticoInput {
-  nombre_campana: string;
-  rubro: string;
-  gasto: number;
-  clicks: number;
-  leads: number;
-  ctr: number;
-  impresiones: number;
-  dias: number;
-  problema_observado?: string;
+function leerJSON<T>(clave: string, porDefecto: T): T {
+  try { return JSON.parse(localStorage.getItem(clave) ?? '') as T; } catch { return porDefecto; }
 }
 
-// ─── Montaje paso a paso ───────────────────────────────────────────────────
+export function planLimitado(): boolean {
+  try {
+    const p = localStorage.getItem('tcd_plan') || (leerJSON<{ plan?: string }>('tcd_profile', {}).plan ?? '');
+    return p === 'ELNUMERO';
+  } catch { return false; }
+}
 
-export type MontajeStepStatus = 'done' | 'active' | 'locked';
+/** ¿Está sellada esta pieza? Con la fecha del sello si la hay. */
+export function estadoPieza(p: PiezaADN): { sellada: boolean; fecha?: string; bloqueada: boolean } {
+  const bloqueada = !planActualPermite(p.pilar);
+  const origen = leerJSON<Record<string, string>>('tcd_origen_v1', {});
+  const sellos = leerJSON<Record<string, { fecha?: string }>>('tcd_adn_sellos_v1', {});
+  const perfil = leerJSON<Record<string, unknown>>('tcd_profile', {});
+  const hechas = leerJSON<string[]>('tcd_hoja_ruta_v2', []);
 
-export interface MontajeStep {
-  id: number;
-  label: string;
-  description: string;
-  status: MontajeStepStatus;
+  let sellada = false;
+  let fecha: string | undefined;
+  if (p.chequeo.origen && String(origen[p.chequeo.origen] ?? '').trim()) sellada = true;
+  if (p.chequeo.sello && sellos[p.chequeo.sello]) { sellada = true; fecha = sellos[p.chequeo.sello]?.fecha; }
+  if (p.chequeo.campo && String(perfil[p.chequeo.campo] ?? '').trim()) sellada = true;
+  if (p.chequeo.progreso && Array.isArray(hechas) && hechas.includes(p.chequeo.progreso)) sellada = true;
+
+  return { sellada, fecha, bloqueada };
+}
+
+export function resumenADN(): { selladas: number; total: number; disponibles: number } {
+  const estados = PIEZAS_ADN.map(estadoPieza);
+  return {
+    selladas: estados.filter((e) => e.sellada).length,
+    total: PIEZAS_ADN.length,
+    disponibles: estados.filter((e) => !e.bloqueada).length,
+  };
 }

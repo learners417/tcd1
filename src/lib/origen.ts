@@ -1,71 +1,27 @@
 /**
- * perlasMaestro.ts — Las Perlas del Maestro (T10 · Plan Maestro).
- * Audios sorpresa de Javo (VOZ MAESTRO) que aparecen en los momentos-quiebre.
- * Los SLOTS están listos; `audioUrl` queda vacío hasta que Javo grabe las
- * 15-20 perlas en una tarde y suba los MP3. Mismo patrón de slots que
- * teasers.ts (los micro-videos). Con audioUrl vacío, la perla se muestra
- * como "en camino" — nunca rompe.
+ * origen.ts — S6 · La siembra del ikigai.
+ * Tres preguntas que contienen todo: la historia, la herida sanada y el
+ * paciente inolvidable. De ahí nacen los dones, el avatar (casi siempre su
+ * yo del pasado) y el propósito. La oferta es la última consecuencia.
  */
-export interface Perla {
-  titulo: string;
-  texto: string; // el pie de texto (y guía de lo que dirá el audio)
-  audioUrl?: string; // slot: pegá acá la URL del MP3 cuando lo tengas
+
+export interface Origen { porque?: string; herida?: string; paciente?: string; }
+const KEY = 'tcd_origen_v1';
+
+export function getOrigen(): Origen {
+  try { return JSON.parse(localStorage.getItem(KEY) ?? '{}') as Origen; } catch { return {}; }
+}
+export function setOrigen(o: Origen): void {
+  try { localStorage.setItem(KEY, JSON.stringify({ ...getOrigen(), ...o })); } catch { /* noop */ }
 }
 
-/** Perla por código de meta-hito. Llená `audioUrl` cuando grabes cada una. */
-export const PERLAS: Record<string, Perla> = {
-  'P0.2': {
-    titulo: 'Antes de empezar',
-    texto: 'La Foto de Partida honesta —números sin maquillaje— es el acto más valiente del camino. Sin ella, no hay antes ni después.',
-    audioUrl: '',
-  },
-  'P1.3': {
-    titulo: 'Después de la quema',
-    texto: 'Lo que se quema no vuelve, y ese es exactamente el punto. Hoy soltaste peso que cargabas hace años.',
-    audioUrl: '',
-  },
-  'P1.5': {
-    titulo: 'Tu precio en voz alta',
-    texto: 'La primera vez que decís tu número sin pedir perdón, algo cambia para siempre. Ya no volvés atrás.',
-    audioUrl: '',
-  },
-  'P4.4': {
-    titulo: 'El día que encendés',
-    texto: 'Hoy tu clínica existe para el mundo. Respirá. Empezó. Este día lo vas a recordar.',
-    audioUrl: '',
-  },
-  'P5.4': {
-    titulo: 'Tu primera llamada',
-    texto: 'Llegás entrenado. No vendés: diagnosticás. Todo lo que construiste fue para este momento.',
-    audioUrl: '',
-  },
-  'P6.3': {
-    titulo: 'El primer $1.000',
-    texto: 'Guardá este comprobante. Es la prueba física de que el sistema funciona. El fruto maduro.',
-    audioUrl: '',
-  },
-  'P7.3': {
-    titulo: 'La última recta',
-    texto: 'Casi cinturón negro. Lo que empezó con miedo termina con oficio. Los diez te esperan.',
-    audioUrl: '',
-  },
-};
-
-export function perlaDe(codigo: string): Perla | undefined {
-  return PERLAS[codigo];
-}
-
-/**
- * La perla más relevante para la etapa: la del último hito alcanzado que
- * tenga perla. Devuelve null si todavía no alcanzó ninguno con perla.
- */
-export function perlaParaEtapa(
-  hitosAlcanzados: string[],
-): { codigo: string; perla: Perla } | null {
-  for (let i = hitosAlcanzados.length - 1; i >= 0; i--) {
-    const codigo = hitosAlcanzados[i];
-    const perla = PERLAS[codigo];
-    if (perla) return { codigo, perla };
-  }
-  return null;
+/** El origen le habla al Mentor: el porqué detrás de todo lo que hace el fundador. */
+export function resumenOrigenParaMentor(): string {
+  const o = getOrigen();
+  if (!o.porque && !o.herida && !o.paciente) return '';
+  const p: string[] = ['\n=== SU ORIGEN (el ikigai del fundador — su avatar suele ser su yo del pasado; sus dones nacieron de su herida) ==='];
+  if (o.porque) p.push(`Por qué eligió esta profesión: "${o.porque}"`);
+  if (o.herida) p.push(`La herida propia que sanó: "${o.herida}"`);
+  if (o.paciente) p.push(`El paciente que no olvida: "${o.paciente}"`);
+  return p.join('\n');
 }

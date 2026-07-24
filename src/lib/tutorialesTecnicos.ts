@@ -1,90 +1,96 @@
 /**
- * muroHitos.ts — El Muro de Hitos (T10 · idea #3 del Plan Maestro).
- * Los logros de la cohorte en tiempo (casi) real, ANÓNIMOS: se celebra el
- * hito, no el nombre. Los mismos momentos-quiebre del Camino (la quema, el
- * precio en voz alta, el primer $1.000…). La cohorte llega por RPC
- * `get_muro_hitos`; si no existe aún, se muestran tus propios hitos desde el
- * progreso local — sin romper.
+ * tutorialesTecnicos.ts — Los pasos técnicos donde el sanador más se traba (Lote G · jul 2026)
+ *
+ * Cada tutorial es un paso a paso claro, SIN jerga, pensado para alguien que le teme
+ * a la tecnología. El Mentor y los agentes los usan para guiar; también se muestran
+ * en la sesión del Camino que corresponde.
  */
-import { supabase, isSupabaseReady } from './supabase';
-import { SEED_ROADMAP_V2 } from './roadmapSeed';
 
-export interface HitoDef {
-  codigo: string; // MetaCodigo del hito (ej. 'P1.3')
-  label: string; // cómo se lee en el muro ("hizo LA QUEMA")
-  emoji: string;
-}
-
-/** Los hitos que se celebran (espejo de los teasers-hito del Camino). */
-export const HITOS_MURO: HitoDef[] = [
-  { codigo: 'P0.2', label: 'plantó su Foto de Partida', emoji: '📸' },
-  { codigo: 'P1.3', label: 'hizo LA QUEMA', emoji: '🔥' },
-  { codigo: 'P1.5', label: 'dijo su precio en voz alta', emoji: '💬' },
-  { codigo: 'P4.3b', label: 'grabó su primer video', emoji: '🎬' },
-  { codigo: 'P4.4', label: 'encendió su clínica al mundo', emoji: '🚀' },
-  { codigo: 'P5.4', label: 'tomó su primera llamada', emoji: '📞' },
-  { codigo: 'P6.3', label: 'cobró su primer $1.000', emoji: '💰' },
-  { codigo: 'P7.3', label: 'entró en la última recta', emoji: '🥋' },
-];
-
-const POR_CODIGO = new Map(HITOS_MURO.map((h) => [h.codigo, h] as const));
-export function hitoDef(codigo: string): HitoDef | undefined {
-  return POR_CODIGO.get(codigo);
-}
-
-export interface MuroEntry {
-  alias: string;
+export interface TutorialTecnico {
   codigo: string;
-  label: string;
-  emoji: string;
-  cuando: string; // ISO
-  es_tu: boolean;
+  titulo: string;
+  intro: string;
+  pasos: string[];
+  siFalla: string;
 }
 
-/** El Muro de la cohorte (anónimo). null si Supabase apagado o RPC ausente. */
-export async function fetchMuroHitos(): Promise<MuroEntry[] | null> {
-  if (!isSupabaseReady() || !supabase) return null;
-  try {
-    const { data, error } = await supabase.rpc('get_muro_hitos');
-    if (error || !data) return null;
-    const rows = data as Array<{
-      alias?: string; meta_codigo?: string; fecha_completada?: string; es_tu?: boolean;
-    }>;
-    return rows
-      .map((r): MuroEntry | null => {
-        const def = hitoDef(r.meta_codigo ?? '');
-        if (!def) return null;
-        return {
-          alias: r.alias ?? 'Un fundador',
-          codigo: def.codigo,
-          label: def.label,
-          emoji: def.emoji,
-          cuando: r.fecha_completada ?? '',
-          es_tu: r.es_tu ?? false,
-        };
-      })
-      .filter((x): x is MuroEntry => x !== null);
-  } catch {
-    return null;
-  }
+export const TUTORIALES: Record<string, TutorialTecnico> = {
+  'P2.2': {
+    codigo: 'P2.2',
+    titulo: 'Crear tu cuenta de Meta (Business Manager)',
+    intro: 'Es la cuenta central desde donde vas a manejar tus anuncios. Suena técnico, pero son 10 minutos y lo haces una sola vez.',
+    pasos: [
+      'Entra a business.facebook.com y toca "Crear cuenta".',
+      'Pon el nombre de tu negocio, tu nombre y tu email de trabajo.',
+      'Revisa tu email y confirmá (Meta te manda un enlace).',
+      'Dentro, ve a "Configuración del negocio" → "Cuentas" → "Cuentas publicitarias" → "Agregar" → "Crear una nueva".',
+      'Elige tu país, tu moneda y la zona horaria correctas — esto no se puede cambiar después.',
+      'Listo: ya tienes tu central de anuncios. La vas a usar cuando montes la campaña.',
+    ],
+    siFalla: 'Si te pide verificar tu negocio con documentos, puedes saltarlo por ahora — no lo necesitas para empezar. Si algo no carga, prueba desde una computadora (no el celular) — Meta funciona mejor así.',
+  },
+  'P4.5-pixel': {
+    codigo: 'P4.5',
+    titulo: 'Instalar el Pixel de Meta (el sensor de tu página)',
+    intro: 'El Pixel es un código invisible que le avisa a Meta quién visita tu página. Sin él, tus anuncios vuelan a ciegas. Es copiar y pegar.',
+    pasos: [
+      'En tu Business Manager, ve a "Administrador de eventos" → "Conectar orígenes de datos" → "Web" → "Pixel de Meta".',
+      'Ponle un nombre (tu negocio) y toca "Crear".',
+      'Meta te da un código. Copialo entero.',
+      'Pegalo en la configuración de tu página (el tutorial de tu plataforma te muestra dónde — suele ser "Código de encabezado" o "Header").',
+      'Vuelve a Meta y toca "Verificar" — o instala la extensión "Meta Pixel Helper" en Chrome, entra a tu página, y si el ícono se pone azul, funciona.',
+    ],
+    siFalla: 'Si el Pixel no verifica al toque, espera unas horas — a veces tarda. Si tu plataforma no tiene dónde pegar el código, avisá por Mensajes: hay una forma alternativa con "Google Tag Manager" que te guiamos.',
+  },
+  'P4.5-dm': {
+    codigo: 'P4.5',
+    titulo: 'Tu DM automático (el que responde por ti)',
+    intro: 'Cuando alguien comenta tu PALABRA, este flujo le manda el link de tu página y le hace una pregunta. Es la pieza que convierte comentarios en conversaciones — y trabaja mientras duermes.',
+    pasos: [
+      'Entra a tu subcuenta de GoHighLevel → Automatización → Workflows → + Crear workflow',
+      'Disparador: «Instagram Comment» (comentario en Instagram). Elige tu cuenta y déjalo para TODOS tus anuncios',
+      'Condición: que el comentario CONTENGA tu PALABRA exacta (la misma de tus anuncios, en mayúsculas)',
+      'Acción 1: «Send Instagram DM» y pega tu mensaje: «¡Buenísimo! Acá tienes todo lo de [TU PROGRAMA] 👉 [LINK DE TU PÁGINA]. Míralo tranquilo y cuéntame: [TU PREGUNTA]»',
+      'Acción 2: Espera de 24 horas → segundo DM solo si NO respondió: «¿Pudiste verlo? ¿Qué te quedó dando vueltas?»',
+      'Publica el workflow y PRUÉBALO: comenta tu palabra desde otra cuenta y espera el DM. Si no llega, revisa que la cuenta de Instagram esté conectada en Settings → Integrations',
+    ],
+    siFalla: 'Si el DM no llega: revisa que tu Instagram sea cuenta profesional y esté conectada en Settings → Integrations, que el workflow esté PUBLICADO (no en borrador), y que la palabra del comentario coincida exacto. Prueba siempre desde otra cuenta, nunca desde la tuya.',
+  },
+  'P4.5b': {
+    codigo: 'P4.5b',
+    titulo: 'Conectar tu dominio (tu dirección digital)',
+    intro: 'Tu dominio es tu dirección propia en internet, como "tunombre.com". Le da seriedad a todo. Es técnico pero te llevo de la mano.',
+    pasos: [
+      '¿Ya tienes un dominio? Si no, comprá uno simple en Namecheap o Google Domains: tu nombre + ".com", cuesta ~$12 al año.',
+      'En tu sistema, ve a "Configuración" → "Dominios" → "Agregar dominio".',
+      'El sistema te muestra dos datos llamados "registros DNS" (son como coordenadas). Cópialos.',
+      'Entra a donde compraste el dominio → "Administrar DNS" → pega eeres dos registros.',
+      'Guarda y vuelve a tu sistema. Toca "Verificar".',
+      'Si dice "pendiente", es normal: la conexión puede tardar hasta 24 horas. No rompiste nada — se sigue mañana.',
+    ],
+    siFalla: 'Lo más común es que tarde en activarse — eso es esperar, no arreglar. Si a las 24 horas sigue sin conectar, revisa que copiaste los registros SIN espacios de más. Sofi te ayuda con esto.',
+  },
+  'P4.4': {
+    codigo: 'P4.4',
+    titulo: 'Escalar tu campaña ganadora (sin quemar plata)',
+    intro: 'Ya sabes cuál de tus anuncios funciona. Escalar es ponerle más presupuesto al ganador, con cabeza — no de golpe.',
+    pasos: [
+      'Identificá tu anuncio ganador: el que trae mensajes más baratos (Ramiro te ayuda a leer el número).',
+      'Pausá los que no funcionan — no tiene sentido gastar en ellos.',
+      'Al ganador, subile el presupuesto de a poco: 20% cada 2-3 días, no el doble de golpe (eso confunde al algoritmo).',
+      'Mira que el costo por mensaje se mantenga estable mientras subes. Si se dispara, frená y espera.',
+      'Cuando encuentres tu techo (donde el costo empieza a subir), quedate ahí. Ese es tu ritmo sostenible.',
+    ],
+    siFalla: 'Si al subir el presupuesto los resultados empeoran, bajá al nivel anterior y espera 3 días. Escalar es paciencia, no apuro. Ramiro te lee los números si tienes dudas.',
+  },
+};
+
+/** Devuelve el tutorial de un paso, o null. */
+export function getTutorial(codigo: string): TutorialTecnico | null {
+  return TUTORIALES[codigo] ?? null;
 }
 
-/** Tus propios hitos alcanzados (desde el progreso local) — siempre disponible. */
-export function misHitos(): Array<{ codigo: string; label: string; emoji: string }> {
-  let set = new Set<string>();
-  try {
-    set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') || '[]'));
-  } catch {
-    /* noop */
-  }
-  const out: Array<{ codigo: string; label: string; emoji: string }> = [];
-  for (const pil of SEED_ROADMAP_V2) {
-    for (const m of pil.metas ?? []) {
-      const def = hitoDef(m.codigo);
-      if (def && set.has(`${pil.numero}-${m.codigo}`)) {
-        out.push({ codigo: def.codigo, label: def.label, emoji: def.emoji });
-      }
-    }
-  }
-  return out;
+/** Devuelve TODOS los tutoriales de un paso (P4.5 tiene pixel Y agente). */
+export function getTutoriales(codigo: string): TutorialTecnico[] {
+  return Object.values(TUTORIALES).filter((t) => t.codigo === codigo);
 }

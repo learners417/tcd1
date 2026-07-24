@@ -1,154 +1,219 @@
 /**
- * Quick replies dinámicos para el Coach IA · cambian según el pilar activo
- * del sanador y condiciones especiales (días de atraso · nivel 4 alcanzado · etc).
+ * diarioCalcs.ts — Cálculos del Diario del Fundador
  *
- * Brief 13/05/2026: el Coach IA muestra hasta 6 quick replies abajo de la
- * conversación · combinando:
- *   - 3 condicionales (solo si aplican)
- *   - 0-3 dinámicos por pilar
- *   - 3 fijos (siempre presentes al final)
+ * Toda la lógica de KPIs vive acá como funciones puras para poder testearla y
+ * reusarla en la UI (preview) y en la vista de Lupe. El `score` autoritativo se
+ * recalcula server-side al guardar (ver migración SQL), pero estas fórmulas son
+ * el espejo exacto de ese cálculo para mostrarlo en el front.
  *
- * Resultado · slice a 6.
+ * Fórmulas (spec "Diario del Fundador"):
+ *   Score del día      = Energía×0.25 + Promedio3dim×0.25 + FocoNegocio×0.25 + Checkeos×0.25 → 0–100
+ *   Índice bienestar   = promedio(cuerpo, mente, emociones, checkeos positivos normalizados a 0–10)
+ *   Foco en negocio    = % de tags seleccionados que son de negocio (excluye descanso y admin)
+ *   Consistencia 7d    = días completados en los últimos 7 / 7 × 100
+ *   Equilibrio integral= promedio simple de cuerpo + mente + emociones
+ *   Promedio energía 7d= suma energía últimos 7 días / días completados
+ *   Racha activa       = días consecutivos con diario completado sin saltear
  */
-import type { PilarId } from './supabase';
 
-export interface CoachQuickReply {
+// ─── Catálogos (fuente de verdad para UI y validaciones) ───────────────────────
+
+export interface TareaTag {
   id: string;
-  icon: string;
   label: string;
+  /** true si cuenta para "Foco en negocio". `descanso` y `admin` son false. */
+  esNegocio: boolean;
 }
 
-export interface CoachQuickReplyContext {
-  pilarActivo: PilarId | null;
-  diasAtraso: number;
-  diasSinEntrar: number;
-  alcanzoNivel4EstaSemana: boolean;
-  diasSinMetricas: number; // 999 si nunca cargó
+/** Tags de "¿En qué estuviste hoy?" — multi-select, mínimo 1. */
+export const TAREAS_TAGS: readonly TareaTag[] = [
+  { id: 'contenido_organico', label: 'Contenido orgánico', esNegocio: true },
+  { id: 'llamadas_venta', label: 'Llamadas de venta', esNegocio: true },
+  { id: 'publicidad_ads', label: 'Publicidad / ads', esNegocio: true },
+  { id: 'tareas_programa', label: 'Tareas del programa', esNegocio: true },
+  { id: 'admin_gestion', label: 'Admin / gestión', esNegocio: false },
+  { id: 'formacion_estudio', label: 'Formación / estudio', esNegocio: true },
+  { id: 'prospeccion', label: 'Prospección', esNegocio: true },
+  { id: 'seguimiento_leads', label: 'Seguimiento leads', esNegocio: true },
+  { id: 'diseno_edicion', label: 'Diseño / edición', esNegocio: true },
+  { id: 'descanso_intencional', label: 'Descanso intencional', esNegocio: false },
+] as const;
+
+export interface CheckeoChip {
+  id: string;
+  label: string;
+  /** Emoji para la UI. */
+  emoji: string;
+  /** true = aporta bienestar (suma); false = resta (ansiedad, soledad). */
+  positivo: boolean;
 }
 
-const FIJOS: CoachQuickReply[] = [
-  { id: 'continuar', icon: '💬', label: 'Seguimos donde quedamos' },
-  { id: 'progreso', icon: '📈', label: '¿Cómo vengo? Mi progreso real' },
-  { id: 'duda', icon: '❓', label: 'Tengo una duda' },
-];
+/** Checkeos rápidos — chips opcionales que alimentan el Índice de bienestar. */
+export const CHECKEOS_CHIPS: readonly CheckeoChip[] = [
+  { id: 'durmio_bien', label: 'Dormí bien', emoji: '🌙', positivo: true },
+  { id: 'comio_bien', label: 'Comí bien', emoji: '🥗', positivo: true },
+  { id: 'entreno', label: 'Entrené', emoji: '💪', positivo: true },
+  { id: 'tiempo_libre', label: 'Tiempo libre', emoji: '⏱', positivo: true },
+  { id: 'conecto_alguien', label: 'Conecté con alguien', emoji: '👥', positivo: true },
+  { id: 'inspirado', label: 'Me sentí inspirado', emoji: '💡', positivo: true },
+  { id: 'ansioso', label: 'Estuve ansioso', emoji: '😟', positivo: false },
+  { id: 'solo', label: 'Me sentí solo', emoji: '🫥', positivo: false },
+] as const;
 
-const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
-  P0: [
-    { id: 'p0_objetivo', icon: '🎯', label: 'Definamos mi objetivo' },
-    { id: 'p0_punto_partida', icon: '📍', label: 'Ver mi punto de partida real' },
-    { id: 'p0_app', icon: '🗺', label: '¿Cómo se usa esta app?' },
-  ],
-  P1: [
-    { id: 'p1_revisar_historia', icon: '✍️', label: 'Revisa mi historia — sin filtro' },
-    { id: 'p1_trabada_historia', icon: '🤔', label: 'Estoy trabada con mi historia' },
-    { id: 'p1_historia_contenido', icon: '🎬', label: '¿Cómo uso mi historia en contenido?' },
-  ],
-  P2: [
-    { id: 'p2_revisar_proposito', icon: '🧭', label: 'Revisemos mi propósito' },
-    { id: 'p2_proposito_filtra', icon: '🔍', label: '¿Mi propósito filtra bien?' },
-    { id: 'p2_no_encuentro', icon: '😕', label: 'No encuentro mi propósito' },
-  ],
-  P3: [
-    { id: 'p3_revisar_legado', icon: '🌳', label: 'Revisemos mi legado a 10 años' },
-    { id: 'p3_legado_honesto', icon: '🪞', label: '¿Es honesto mi legado?' },
-    { id: 'p3_no_imagino', icon: '😶', label: 'No imagino mi legado' },
-  ],
-  P4: [
-    { id: 'p4_avatar_bien', icon: '🧑‍⚕️', label: '¿Mi avatar está bien definido?' },
-    { id: 'p4_no_claro', icon: '🤷', label: 'No tengo claro mi avatar' },
-    { id: 'p4_validar_casos', icon: '📋', label: 'Validar avatar contra casos reales' },
-  ],
-  P5: [
-    { id: 'p5_puv', icon: '💡', label: '¿Mi PUV es clara?' },
-    { id: 'p5_nicho', icon: '🎯', label: '¿Mi nicho es suficientemente específico?' },
-    { id: 'p5_transformaciones', icon: '🔄', label: '¿Mis transformaciones son creíbles?' },
-  ],
-  P6: [
-    { id: 'p6_duele', icon: '🩹', label: '¿Mi matriz duele lo suficiente?' },
-    { id: 'p6_revisar_matriz', icon: '🔥', label: 'Revisemos infierno · obstáculos · cielo' },
-    { id: 'p6_no_sale', icon: '😩', label: 'No me sale armar la matriz' },
-  ],
-  P7: [
-    { id: 'p7_nombre_metodo', icon: '🏷', label: '¿El nombre de mi método funciona?' },
-    { id: 'p7_pasos', icon: '🔢', label: '¿Los pasos están bien?' },
-    { id: 'p7_practicar_vera', icon: '💰', label: 'Practicar pricing con Vera' },
-  ],
-  P8: [
-    { id: 'p8_3_ofertas', icon: '🪜', label: '¿Mis 3 ofertas son coherentes?' },
-    { id: 'p8_precio', icon: '💵', label: '¿Mi precio sostiene?' },
-    { id: 'p8_lead_magnet', icon: '🎁', label: '¿Mi regalo gratuito es buen entry?' },
-  ],
-  P9A: [
-    { id: 'p9a_landing', icon: '🌐', label: 'Revisar mi landing antes de publicar' },
-    { id: 'p9a_numeros_ramiro', icon: '📊', label: 'Practicar con Ramiro mis números' },
-    { id: 'p9a_pauta', icon: '🚀', label: '¿Estoy lista para activar pauta?' },
-  ],
-  P9B: [
-    { id: 'p9b_practicar_w', icon: '📞', label: 'Practicar la W con Lucas' },
-    { id: 'p9b_practicar_sofi', icon: '💬', label: 'Practicar filtrado con Sofi' },
-    { id: 'p9b_objecion', icon: '🛡', label: '¿Cómo manejo la primera objeción?' },
-  ],
-  P9C: [
-    { id: 'p9c_secuencia', icon: '📧', label: 'Revisar mi secuencia de seguimiento' },
-    { id: 'p9c_no_cerraron', icon: '🪞', label: 'Las consultas que no cerraron · revisemos' },
-    { id: 'p9c_primer_mes', icon: '🗓', label: 'Mi primer mes de consultas · ¿qué viste?' },
-  ],
-  P10: [
-    { id: 'p10_sistema_visual', icon: '🎨', label: 'Revisar mi sistema visual' },
-    { id: 'p10_feed', icon: '🖼', label: '¿Mi muro es coherente?' },
-    { id: 'p10_paleta', icon: '🌈', label: 'No sé qué paleta usar' },
-  ],
-  P11: [
-    { id: 'p11_retro', icon: '📅', label: 'Iniciar retrospectiva' },
-    { id: 'p11_plan_proximo', icon: '➡️', label: 'Plan próximo mes' },
-    { id: 'p11_replicar', icon: '🔁', label: '¿Qué replicar · cambiar · cortar?' },
-  ],
-};
+export const CHECKEOS_POSITIVOS_TOTAL = CHECKEOS_CHIPS.filter((c) => c.positivo).length;
 
-function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
-  const result: CoachQuickReply[] = [];
+export const LOGRO_MAX_CHARS = 400;
+export const BLOQUEO_MAX_CHARS = 500;
 
-  if (ctx.diasAtraso > 7) {
-    result.push({
-      id: 'cond_atraso',
-      icon: '⚠️',
-      label: 'Profundizar mi sesión de hoy',
-    });
-  }
+// ─── Tipos ─────────────────────────────────────────────────────────────────────
 
-  if (ctx.diasSinEntrar >= 5) {
-    result.push({
-      id: 'cond_volvi',
-      icon: '👋',
-      label: 'Se me mueve algo con mi precio',
-    });
-  }
-
-  if (ctx.alcanzoNivel4EstaSemana) {
-    result.push({
-      id: 'cond_autonoma',
-      icon: '🎉',
-      label: 'Hazme de paciente: dime \"está caro\"',
-    });
-  }
-
-  if (ctx.diasSinMetricas > 7) {
-    result.push({
-      id: 'cond_metricas',
-      icon: '📊',
-      label: '¿Cómo vengo en mi camino?',
-    });
-  }
-
-  return result;
+/** Datos crudos de una entrada del diario (lo que el usuario carga + se persiste). */
+export interface EntradaDiarioInput {
+  fecha: string; // YYYY-MM-DD
+  energia: number; // 1–10
+  cuerpo: number; // 1–10
+  mente: number; // 1–10
+  emociones: number; // 1–10
+  logro: string;
+  /** ids de TAREAS_TAGS seleccionados. */
+  tareas: string[];
+  /** ids de CHECKEOS_CHIPS seleccionados. */
+  checkeos: string[];
+  bloqueo: string;
 }
 
-export function getCoachQuickReplies(ctx: CoachQuickReplyContext): CoachQuickReply[] {
-  const condicionales = buildCondicionales(ctx);
-  const dinamicos = ctx.pilarActivo ? PILAR_QUICK_REPLIES[ctx.pilarActivo] ?? [] : [];
-  // Orden de prioridad: condicionales primero · luego dinámicos · luego fijos.
-  // Slice a 6 para no saturar la UI.
-  return [...condicionales, ...dinamicos, ...FIJOS].slice(0, 6);
+export interface DiarioKPIs {
+  score: number; // 0–100
+  indiceBienestar: number; // 0–10
+  focoNegocio: number; // 0–100 (%)
+  equilibrioIntegral: number; // 0–10
+  consistencia7d: number; // 0–100 (%)
+  energiaPromedio7d: number | null; // 0–10
+  racha: number; // días
 }
 
-export { PILAR_QUICK_REPLIES, FIJOS };
+// ─── Helpers de normalización ──────────────────────────────────────────────────
+
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+
+/** Promedio simple de las 3 dimensiones (0–10). */
+export function equilibrioIntegral(cuerpo: number, mente: number, emociones: number): number {
+  return round1((cuerpo + mente + emociones) / 3);
+}
+
+/** % de tags seleccionados que son de negocio. 0 si no hay tags. */
+export function focoNegocio(tareas: readonly string[]): number {
+  if (tareas.length === 0) return 0;
+  const negocioIds = new Set(TAREAS_TAGS.filter((t) => t.esNegocio).map((t) => t.id));
+  const deNegocio = tareas.filter((id) => negocioIds.has(id)).length;
+  return Math.round((deNegocio / tareas.length) * 100);
+}
+
+/** Checkeos positivos seleccionados, normalizados a 0–10. */
+export function checkeosNormalizado(checkeos: readonly string[]): number {
+  const positivosIds = new Set(CHECKEOS_CHIPS.filter((c) => c.positivo).map((c) => c.id));
+  const negativosIds = new Set(CHECKEOS_CHIPS.filter((c) => !c.positivo).map((c) => c.id));
+  const positivos = checkeos.filter((id) => positivosIds.has(id)).length;
+  const negativos = checkeos.filter((id) => negativosIds.has(id)).length;
+  // Cada negativo resta medio punto del aporte positivo.
+  const neto = clamp(positivos - negativos * 0.5, 0, CHECKEOS_POSITIVOS_TOTAL);
+  return round1((neto / CHECKEOS_POSITIVOS_TOTAL) * 10);
+}
+
+/** Índice de bienestar (0–10): promedio de cuerpo, mente, emociones y checkeos. */
+export function indiceBienestar(input: Pick<EntradaDiarioInput, 'cuerpo' | 'mente' | 'emociones' | 'checkeos'>): number {
+  const check10 = checkeosNormalizado(input.checkeos);
+  return round1((input.cuerpo + input.mente + input.emociones + check10) / 4);
+}
+
+/** Score del día (0–100) — fórmula autoritativa, espejo del trigger SQL. */
+export function calcularScore(input: EntradaDiarioInput): number {
+  const energiaNorm = (clamp(input.energia, 0, 10) / 10) * 100;
+  const prom3Norm = ((input.cuerpo + input.mente + input.emociones) / 3 / 10) * 100;
+  const foco = focoNegocio(input.tareas);
+  const checkeos = (checkeosNormalizado(input.checkeos) / 10) * 100;
+  const score = energiaNorm * 0.25 + prom3Norm * 0.25 + foco * 0.25 + checkeos * 0.25;
+  return Math.round(clamp(score, 0, 100));
+}
+
+// ─── KPIs que dependen del histórico ───────────────────────────────────────────
+
+/** Entrada histórica mínima necesaria para los KPIs de ventana. */
+export interface EntradaHistorica {
+  fecha: string; // YYYY-MM-DD
+  energia: number;
+  cuerpo: number;
+  mente: number;
+  emociones: number;
+  score?: number;
+  bloqueo?: string;
+  tareas?: string[];
+}
+
+function ultimosNDias(entradas: readonly EntradaHistorica[], n: number): EntradaHistorica[] {
+  return [...entradas].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, n);
+}
+
+/** Promedio de energía de los últimos 7 días cargados (0–10), o null si no hay datos. */
+export function energiaPromedio7d(entradas: readonly EntradaHistorica[]): number | null {
+  const last7 = ultimosNDias(entradas, 7);
+  if (last7.length === 0) return null;
+  const sum = last7.reduce((acc, e) => acc + e.energia, 0);
+  return round1(sum / last7.length);
+}
+
+/** Días con diario en los últimos 7 días calendario / 7 × 100. */
+export function consistencia7d(entradas: readonly EntradaHistorica[], hoy: Date): number {
+  const fechasSet = new Set(entradas.map((e) => e.fecha));
+  let completados = 0;
+  for (let i = 0; i < 7; i++) {
+    const fecha = new Date(hoy);
+    fecha.setDate(hoy.getDate() - i);
+    if (fechasSet.has(toFechaStr(fecha))) completados++;
+  }
+  return Math.round((completados / 7) * 100);
+}
+
+/** Días consecutivos con diario completado terminando hoy (o ayer si hoy falta). */
+export function rachaActiva(entradas: readonly EntradaHistorica[], hoy: Date): number {
+  const fechasSet = new Set(entradas.map((e) => e.fecha));
+  let racha = 0;
+  for (let i = 0; i < 365; i++) {
+    const fecha = new Date(hoy);
+    fecha.setDate(hoy.getDate() - i);
+    if (fechasSet.has(toFechaStr(fecha))) {
+      racha++;
+    } else if (i > 0) {
+      break; // hoy puede faltar (todavía no lo cargó); cualquier otro hueco corta.
+    }
+  }
+  return racha;
+}
+
+// ─── Utilidades de formato/fecha ───────────────────────────────────────────────
+
+function round1(n: number): number {
+  return Math.round(n * 10) / 10;
+}
+
+/** YYYY-MM-DD en hora local (evita el corrimiento de toISOString en UTC-3). */
+export function toFechaStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+export function etiquetaEnergia(valor: number): string {
+  if (valor <= 3) return 'Sin energía';
+  if (valor <= 6) return 'Regular';
+  if (valor <= 9) return 'Bien';
+  return 'Imparable';
+}
+
+/** Color del fill de un slider de dimensión: ≤4 naranja, 5–7 dorado, 8+ verde. */
+export function colorDimension(valor: number): string {
+  if (valor <= 4) return '#E09040';
+  if (valor <= 7) return '#C8893A';
+  return '#2DD4A0';
+}

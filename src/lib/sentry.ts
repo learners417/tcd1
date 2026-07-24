@@ -1,71 +1,86 @@
-import { supabase, isSupabaseReady } from './supabase';
-import { formatDateLocal, startOfDayLocal } from './dateUtils';
-
-// Guard local: recuerda el último día ya registrado para no pegarle a la red
-// en cada refresh o cambio de pestaña. Formato del valor: `${userId}:${YYYY-MM-DD}`.
-const TODAY_MARK_KEY = 'tcd_activity_marked';
-
 /**
- * Registra que el usuario abrió la app HOY. Fire-and-forget e idempotente:
- *  - Hace a lo sumo UN intento de red por día (guardado en localStorage), así
- *    no consulta Supabase en cada refresh ni al volver de otra pestaña.
- *  - Un insert simple: el duplicado del día se ignora (es solo un ping)
- *    aunque el guard local no exista (ej. otro dispositivo o navegador).
- *  - Nunca lanza: una métrica no crítica jamás debe romper la carga de la app.
+ * Sentry — inicialización del SDK para el frontend (React + Vite).
+ *
+ * Se ejecuta una sola vez al arrancar la app, desde src/main.tsx.
+ * Si VITE_SENTRY_DSN no está seteada (ej. en dev local), Sentry queda
+ * desactivado silenciosamente — la app sigue funcionando normal.
+ *
+ * Variables de entorno necesarias (poner en .env.local y en Vercel):
+ *   VITE_SENTRY_DSN          → DSN del proyecto React (obligatoria para activar)
+ *   VITE_SENTRY_ENVIRONMENT  → 'production' | 'preview' | 'development' (opcional)
+ *   VITE_APP_VERSION         → release tag, ej. commit SHA (opcional)
  */
-export async function recordTodayActivity(userId: string): Promise<void> {
-  if (!isSupabaseReady() || !supabase || !userId) return;
+import * as Sentry from '@sentry/react';
 
-  const hoy = formatDateLocal(new Date());
-  try {
-    if (localStorage.getItem(TODAY_MARK_KEY) === `${userId}:${hoy}`) return;
-  } catch { /* localStorage no disponible: seguimos e intentamos el upsert igual */ }
+const DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;
+const ENVIRONMENT =
+  (import.meta.env.VITE_SENTRY_ENVIRONMENT as string | undefined) ??
+  (import.meta.env.MODE === 'production' ? 'production' : 'development');
+const RELEASE = import.meta.env.VITE_APP_VERSION as string | undefined;
 
-  try {
-    const { error } = await supabase
-      .from('user_activity')
-      .insert({ user_id: userId, fecha: hoy });
-    // duplicado del día (23505) u otra falla del servidor: se ignora — es solo un ping
-    if (error) {
-      console.warn('recordTodayActivity: upsert falló (no crítico):', error.message);
-      return;
+export function initSentry(): void {
+  if (!DSN) {
+    // Sin DSN no inicializamos — útil en dev local sin querer reportar nada.
+    if (import.meta.env.DEV) {
+      console.info('[sentry] VITE_SENTRY_DSN no configurado, Sentry desactivado.');
     }
-    try { localStorage.setItem(TODAY_MARK_KEY, `${userId}:${hoy}`); } catch { /* noop */ }
-  } catch (err) {
-    console.warn('recordTodayActivity: excepción (no crítico):', err);
+    return;
+  }
+
+  Sentry.init({
+    dsn: DSN,
+    environment: ENVIRONMENT,
+    release: RELEASE,
+
+    // ─── Performance Monitoring (tracing) ──────────────────────────────
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        // Por privacidad: enmascarar texto e inputs del usuario por defecto.
+        // Si querés ver el contenido real en los replays, poné estos en false.
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+
+    // Muestreo de traces: 100% en dev, 20% en prod para no consumir cuota.
+    tracesSampleRate: ENVIRONMENT === 'production' ? 0.2 : 1.0,
+
+    // ─── Session Replay ────────────────────────────────────────────────
+    // Replays de sesiones normales: 10% (muestra representativa).
+    replaysSessionSampleRate: 0.1,
+    // Replays cuando hay un error: 100% (queremos ver TODOS los errores).
+    replaysOnErrorSampleRate: 1.0,
+
+    // ─── Filtros de ruido ──────────────────────────────────────────────
+    ignoreErrors: [
+      // Errores típicos de extensiones del browser / ad blockers.
+      'ResizeObserver loop limit exceeded',
+      'ResizeObserver loop completed with undelivered notifications',
+      'Non-Error promise rejection captured',
+      // Errores de red transitorios que no son bugs de la app.
+      'NetworkError when attempting to fetch resource',
+      'Load failed',
+    ],
+  });
+
+  if (import.meta.env.DEV) {
+    console.info('[sentry] inicializado en entorno:', ENVIRONMENT);
   }
 }
 
 /**
- * Lunes 00:00 local de la semana que contiene `ref` (default: hoy).
- * La semana se considera lunes → domingo (convención local argentina).
+ * Asocia un usuario logueado con los eventos de Sentry.
+ * Llamar después de login exitoso. Llamar con `null` al hacer logout.
  */
-export function startOfWeekLocal(ref: Date = new Date()): Date {
-  const d = startOfDayLocal(ref);
-  const dow = d.getDay();        // 0=Dom, 1=Lun ... 6=Sáb
-  const diasDesdeLunes = (dow + 6) % 7;
-  d.setDate(d.getDate() - diasDesdeLunes);
-  return d;
-}
-
-/**
- * Cuenta los días distintos en que el usuario se conectó durante la semana
- * actual (lunes → hoy, hora local). Devuelve 0 si no hay datos, no hay sesión
- * o Supabase está apagado. Es solo lectura: no escribe nada.
- */
-export async function getActiveDaysThisWeek(userId: string): Promise<number> {
-  if (!isSupabaseReady() || !supabase || !userId) return 0;
-
-  const lunes = formatDateLocal(startOfWeekLocal());
-  try {
-    const { data, error } = await supabase
-      .from('user_activity')
-      .select('fecha')
-      .eq('user_id', userId)
-      .gte('fecha', lunes);
-    if (error || !data) return 0;
-    return new Set(data.map((r: { fecha: string }) => r.fecha)).size;
-  } catch {
-    return 0;
+export function setSentryUser(user: { id: string; email?: string } | null): void {
+  if (!DSN) return;
+  if (user === null) {
+    Sentry.setUser(null);
+    return;
   }
+  Sentry.setUser({ id: user.id, email: user.email });
 }
+
+// Re-exportamos lo que vamos a usar desde otros archivos.
+export { Sentry };

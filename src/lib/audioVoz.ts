@@ -1,98 +1,84 @@
-import { supabase, isSupabaseReady, type Profile } from './supabase';
-
-// ─── Auth helpers ─────────────────────────────────────────────────────────────
-
-export async function signIn(email: string, password: string): Promise<{ error: string | null }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
-  return { error: null };
-}
-
-export async function signOut(): Promise<void> {
-  if (!isSupabaseReady() || !supabase) return;
-  await supabase.auth.signOut();
-}
-
 /**
- * Envía un mail de reset de contraseña. Supabase manda un link al mail con
- * token de recovery; al hacer click, el usuario vuelve a la app con una
- * sesión temporal + evento PASSWORD_RECOVERY, y el app muestra el modal
- * para fijar la nueva contraseña.
+ * audioVoz.ts — S3 · La Sesión Viva habla.
+ * El fundador responde HABLANDO: graba con el micrófono, Gemini transcribe,
+ * y el texto cae en su respuesta (el ADN se llena con la voz).
+ * Mismo transporte que visionEvidencia: Gemini multimodal con la clave VITE.
+ * Sin clave o sin micrófono → la función degrada en silencio (no bloquea nada).
  */
-export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
-  const redirectTo = `${window.location.origin}${window.location.pathname}`;
-  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
-  if (error) return { error: error.message };
-  return { error: null };
+
+const MODELO = 'gemini-2.5-flash';
+
+export function audioDisponible(): boolean {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+  return Boolean(apiKey) && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
 
-/**
- * Actualiza la contraseña del usuario logueado. Solo funciona con sesión
- * activa — usado dentro del flujo PASSWORD_RECOVERY tras click en el mail.
- */
-export async function updatePassword(newPassword: string): Promise<{ error: string | null }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) return { error: error.message };
-  return { error: null };
+/** Transcribe un audio (base64, sin prefijo dataURL). Devuelve el texto o null. */
+export async function transcribirAudio(base64: string, mimeType: string): Promise<string | null> {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+  if (!apiKey) return null;
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: 'Transcribe este audio en castellano, fielmente, en primera persona, sin comentarios tuyos ni encabezados. Solo el texto de lo que dice la persona, con puntuación natural.' },
+              { inline_data: { mime_type: mimeType, data: base64 } },
+            ],
+          }],
+          generationConfig: { temperature: 0.1 },
+        }),
+      },
+    );
+    if (!r.ok) return null;
+    const j = await r.json();
+    const texto = j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('').trim();
+    return texto || null;
+  } catch {
+    return null;
+  }
 }
 
-export async function getSession() {
-  if (!isSupabaseReady() || !supabase) return null;
-  const { data } = await supabase.auth.getSession();
-  return data.session;
-}
+/** Grabadora simple: start() → stop() devuelve { base64, mimeType }. */
+export function crearGrabadora() {
+  let mediaRecorder: MediaRecorder | null = null;
+  let chunks: Blob[] = [];
+  let stream: MediaStream | null = null;
 
-export async function getCurrentProfile(): Promise<Profile | null> {
-  if (!isSupabaseReady() || !supabase) return null;
-  const session = await getSession();
-  if (!session) return null;
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
-
-  return data ?? null;
-}
-
-// Crear perfil de usuario nuevo (llamado tras crear auth.user en el admin)
-export async function createProfile(profile: Omit<Profile, 'created_at'>): Promise<{ error: string | null }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
-  const { error } = await supabase.from('profiles').insert(profile);
-  if (error) return { error: error.message };
-  return { error: null };
-}
-
-// Crear usuario via Admin API (solo desde un entorno seguro o Edge Function)
-// En producción esto se llama desde una Supabase Edge Function con service_role key
-export async function inviteUser(email: string, nombre: string, plan: 'DWY' | 'DFY', especialidad: string, fecha_inicio: string): Promise<{ error: string | null }> {
-  if (!isSupabaseReady() || !supabase) return { error: 'Supabase no configurado' };
-
-  // Llamar a la Edge Function que usa service_role para crear el usuario
-  const { error } = await supabase.functions.invoke('invite-user', {
-    body: { email, nombre, plan, especialidad, fecha_inicio }
-  });
-
-  if (error) return { error: error.message };
-  return { error: null };
-}
-
-// Sincronizar perfil de Supabase → localStorage (fallback para páginas que aún leen localStorage)
-export function syncProfileToLocalStorage(profile: Profile): void {
-  // Espejo dedicado del plan: el gating del Camino y el tope del Mentor lo leen
-  // de acá (inmune a que el borrador del perfil pise tcd_profile sin el plan).
-  try { localStorage.setItem('tcd_plan', String(profile.plan ?? '')); } catch { /* noop */ }
-  localStorage.setItem('tcd_profile', JSON.stringify({
-    nombre: profile.nombre,
-    email: profile.email,
-    especialidad: profile.especialidad ?? '',
-    fecha_inicio: profile.fecha_inicio,
-    plan: profile.plan,
-    modulos_activos: profile.modulos_activos ?? [],
-    agentes_activos: profile.agentes_activos ?? [],
-  }));
+  return {
+    async start(): Promise<boolean> {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+        mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+        chunks = [];
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.start();
+        return true;
+      } catch { return false; }
+    },
+    stop(): Promise<{ base64: string; mimeType: string } | null> {
+      return new Promise((resolve) => {
+        if (!mediaRecorder) return resolve(null);
+        const mime = mediaRecorder.mimeType || 'audio/webm';
+        mediaRecorder.onstop = () => {
+          stream?.getTracks().forEach((t) => t.stop());
+          const blob = new Blob(chunks, { type: mime });
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = String(reader.result ?? '');
+            const base64 = dataUrl.split(',')[1] ?? '';
+            resolve(base64 ? { base64, mimeType: mime } : null);
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        };
+        mediaRecorder.stop();
+      });
+    },
+  };
 }

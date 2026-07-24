@@ -1,114 +1,130 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// Pre-Activación Checklist — versión operativa (validada por Ivan + Lupe).
-// 6 secciones · 32 pasos tácticos con herramienta asociada.
-// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * tablero.ts — LA MATEMÁTICA DE LOS 10 (ZIP C).
+ *
+ * La promesa deja de ser una frase y pasa a ser una cuenta:
+ *   300 conversaciones → 57 agendas → 40 llamadas → 10 pacientes.
+ *
+ * Los porcentajes no son optimismo: son los rangos que se miden en ventas
+ * por llamada (cierre 21-29%) y en asistencia a citas agendadas (60-75%,
+ * y 70-80% cuando hay confirmación de 24 h y 2 h antes).
+ *
+ * El tablero registra 3 números por semana y dice DÓNDE está la fuga.
+ * Nada más. Tres números, un diagnóstico, una acción.
+ */
 
-export interface PreactivacionStepDef {
-  id: string;
-  /** La sesión equivalente en El Camino (para el tildado automático de clientes-app). */
-  meta?: string;
-  /** Label corto multilínea para columna. Usar \n para forzar salto de línea. */
-  lbl: string;
-  title: string;
-  /** Detail rendered as HTML — puede contener <strong>. */
-  detail: string;
+export const META_PACIENTES = 10;
+export const TASA_CIERRE = 0.25;      // de cada 4 llamadas reales, 1 dice que sí
+export const TASA_ASISTENCIA = 0.70;  // 3 de cada 10 agendas no se presentan
+export const TASA_AGENDA = 0.19;      // de las conversaciones, ~1 de cada 5 agenda
+
+export interface CadenaMeta {
+  ventas: number;
+  llamadas: number;
+  agendas: number;
+  conversaciones: number;
 }
 
-export interface PreactivacionSection {
-  id: string;
-  title: string;
-  /** Etiqueta corta para el header de grupo en la matriz. */
-  short: string;
-  items: PreactivacionStepDef[];
+/** La cadena completa para llegar a la meta. */
+export function cadenaPara(ventas = META_PACIENTES): CadenaMeta {
+  const llamadas = Math.ceil(ventas / TASA_CIERRE);
+  const agendas = Math.ceil(llamadas / TASA_ASISTENCIA);
+  const conversaciones = Math.ceil(agendas / TASA_AGENDA);
+  return { ventas, llamadas, agendas, conversaciones };
 }
 
-export interface PreactivacionStep extends PreactivacionStepDef {
-  sectionId: string;
+/** La misma cadena, repartida en las semanas que le quedan de operación. */
+export function metaSemanal(diaActual: number, ventasHechas = 0): CadenaMeta & { semanas: number } {
+  const faltan = Math.max(0, META_PACIENTES - ventasHechas);
+  const diasRestantes = Math.max(7, 90 - diaActual);
+  const semanas = Math.max(1, Math.round(diasRestantes / 7));
+  const total = cadenaPara(faltan);
+  return {
+    semanas,
+    ventas: Math.round((total.ventas / semanas) * 10) / 10,
+    llamadas: Math.ceil(total.llamadas / semanas),
+    agendas: Math.ceil(total.agendas / semanas),
+    conversaciones: Math.ceil(total.conversaciones / semanas),
+  };
 }
 
-export const SECTIONS: PreactivacionSection[] = [
-  {
-    id: 'base',
-    title: 'Base — Fases 1-2 del Camino',
-    short: 'BASE',
-    items: [
-      { id: 'pacto', lbl: 'Pacto\nfirmado', title: 'El Pacto firmado', detail: 'Su promesa escrita y firmada en el onboarding. <strong>Sin pacto no hay camino.</strong>', meta: 'P0.4' },
-      { id: 'foto_partida', lbl: 'Foto de\nPartida', title: 'Foto de Partida', detail: 'Su autoevaluación inicial completa — el ANTES contra el que se mide todo.', meta: 'P0.2' },
-      { id: 'quema', lbl: 'LA\nQUEMA', title: 'LA QUEMA 🔥 (D4 · foto) (con evidencia)', detail: 'La creencia raíz quemada, <strong>con foto de las cenizas subida</strong>.', meta: 'P1.3' },
-      { id: 'numero', lbl: 'EL\nNÚMERO', title: 'El Número (su precio)', detail: 'Su precio digno calculado y <strong>dicho en voz alta (audio subido)</strong>.', meta: 'P1.5' },
-      { id: 'metodo', lbl: 'Método\ncon nombre', title: 'El Método con su nombre', detail: 'Su proceso destilado en 3-5 pasos con nombre propio.', meta: 'P2.4' },
-      { id: 'avatar', lbl: 'Avatar\ndefinido', title: 'El avatar', detail: 'La persona exacta: quién es, qué le duele, qué dice después de sesión.', meta: 'P2.3' },
-      { id: 'oferta', lbl: 'Oferta\n$1.000', title: 'La Oferta Irresistible', detail: 'Promesa, entregables, garantía y precio — la oferta de $1.000 completa.', meta: 'P3.2' },
-      { id: 'pitch', lbl: 'Pitch\ngrabado', title: 'El pitch de 60 segundos', detail: 'Su oferta sonando en el mundo — <strong>audio subido</strong>.', meta: 'P3.4' },
-    ],
-  },
-  {
-    id: 'tecnico',
-    title: 'Técnico — la infraestructura',
-    short: 'TÉCNICO',
-    items: [
-      { id: 'bm', lbl: 'Business\nManager', title: 'Business Manager creado', detail: 'Su BM de Meta activo y verificado.', meta: 'P2.2' },
-      { id: 'pixel', lbl: 'Pixel\ninstalado', title: 'El Pixel de Meta', detail: 'Instalado en su página y <strong>verificado con el Helper de Meta</strong>. Sin pixel, los anuncios vuelan a ciegas.', meta: 'P4.5' },
-      { id: 'wa_business', lbl: 'WhatsApp\nBusiness', title: 'WhatsApp Business activo', detail: 'Su número de negocio conectado.' },
-      { id: 'subcuenta', lbl: 'Subcuenta\nGHL', title: 'Su subcuenta GHL viva', detail: 'Creada desde el snapshot maestro — el motor invisible.' },
-      { id: 'agente', lbl: 'Agente\nrespondiendo', title: 'El agente de WhatsApp', detail: 'Configurado y respondiendo — la Sala de Espera abierta.', meta: 'P4.5' },
-      { id: 'agenda', lbl: 'Agenda\ncon horarios', title: 'La agenda', detail: 'Calendario con sus horarios reales, link funcionando.', meta: 'P4.5' },
-      { id: 'cobro', lbl: 'Cobro\nconfigurado', title: 'El cobro', detail: 'Su forma de cobrar lista (link, transferencia, pasarela).', meta: 'P4.5' },
-      { id: 'landing', lbl: 'Landing\npublicada', title: 'La landing', detail: 'Su página con la oferta, publicada y abriendo.', meta: 'P4.2' },
-      { id: 'perfil_ig', lbl: 'Perfil IG\noptimizado', title: 'Perfil de Instagram optimizado', detail: 'Su perfil profesional listo — bio, link y estética que invitan a agendar.', meta: 'P4.2b' },
-      { id: 'followme', lbl: 'Montaje\ncompleto', title: 'Los 8 candados', detail: 'El checklist de encendido, <strong>tildado completo</strong>. Nada flojo.', meta: 'P4.6' },
-      { id: 'dominio', lbl: 'DOMINIO\nconectado', title: 'El dominio (DNS ok)', detail: 'Su dirección digital propia, conectada y propagada.', meta: 'P4.5b' },
-    ],
-  },
-  {
-    id: 'contenido',
-    title: 'Contenido — las piezas',
-    short: 'CONTENIDO',
-    items: [
-      { id: 'guiones', lbl: 'Guiones\naprobados', title: 'Los guiones', detail: 'Sus 3 guiones de anuncio escritos con Mateo.', meta: 'P4.3' },
-      { id: 'videos', lbl: '3 videos\ngrabados', title: 'El Día de Grabación', detail: 'Las 3 piezas grabadas — <strong>evidencia subida</strong>.', meta: 'P4.3b' },
-      { id: 'edicion', lbl: 'Editados\ny subidos', title: 'Edición y subida', detail: 'Cortados, subtitulados, exportados en vertical.', meta: 'P4.3c' },
-      { id: 'estaticos', lbl: 'Creativos\nestáticos', title: 'Los estáticos (fábrica IA)', detail: '2-3 anuncios de imagen generados con la fábrica.', meta: 'P4.3c' },
-    ],
-  },
-  {
-    id: 'campana',
-    title: 'Campaña — el encendido',
-    short: 'CAMPAÑA',
-    items: [
-      { id: 'validacion', lbl: 'Validación\norgánica', title: 'La validación', detail: 'Publicado orgánico + boost de test corrido.', meta: 'P4.3d' },
-      { id: 'ctwa', lbl: 'Campaña\nENCENDIDA', title: 'La campaña única activa', detail: '<strong>En circulación, con captura subida.</strong> El sistema vive.', meta: 'P4.4' },
-      { id: 'presupuesto', lbl: 'Presupuesto\ndiario', title: 'El presupuesto', detail: 'Gasto diario confirmado y sostenible.' },
-    ],
-  },
-  {
-    id: 'venta',
-    title: 'Venta — los cierres',
-    short: 'VENTA',
-    items: [
-      { id: 'script', lbl: 'Script\nLa W', title: 'El script de ventas', detail: 'Su W personal escrita con Lucas.', meta: 'P5.2' },
-      { id: 'roleplay', lbl: 'Roleplay\naprobado', title: 'El roleplay', detail: 'Tres rondas contra el prospecto difícil.', meta: 'P5.3' },
-      { id: 'llamada', lbl: '1ª llamada\nreal', title: 'La primera llamada', detail: 'Realizada y registrada — <strong>el Azul</strong>.', meta: 'P5.4' },
-      { id: 'pago', lbl: 'PRIMER\nPAGO', title: 'El primer pago 💰', detail: '<strong>Comprobante subido — el Rojo.</strong> El momento que cambia todo.', meta: 'P6.3' },
-    ],
-  },
-  {
-    id: 'entrega',
-    title: 'Entrega — la clínica',
-    short: 'ENTREGA',
-    items: [
-      { id: 'protocolo', lbl: 'Protocolo\ndocumentado', title: 'El protocolo de entrega', detail: 'Su forma de entregar, documentada (lista para MCD).', meta: 'P6.2' },
-      { id: 'testimonio', lbl: 'Testimonio\npedido', title: 'El testimonio', detail: 'Pedido a cada paciente que termina — su prueba social.' },
-    ],
-  },
-];
+/* ══════════ El registro semanal (3 números, nada más) ══════════ */
 
-export const STEPS: PreactivacionStep[] = SECTIONS.flatMap((section) =>
-  section.items.map<PreactivacionStep>((item) => ({ ...item, sectionId: section.id }))
-);
+export interface SemanaTablero {
+  fecha: string;          // lunes de esa semana (ISO corto)
+  conversaciones: number;
+  llamadas: number;
+  ventas: number;
+}
 
-export const TOTAL_STEPS = STEPS.length;
+const KEY = 'tcd_tablero_v1';
 
-export function getSectionById(id: string): PreactivacionSection | undefined {
-  return SECTIONS.find((s) => s.id === id);
+export function historialTablero(): SemanaTablero[] {
+  try {
+    const arr = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+    return Array.isArray(arr) ? (arr as SemanaTablero[]) : [];
+  } catch { return []; }
+}
+
+export function lunesDeEstaSemana(): string {
+  const d = new Date();
+  const diff = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - diff);
+  return d.toISOString().split('T')[0];
+}
+
+export function registrarSemana(s: Omit<SemanaTablero, 'fecha'>): void {
+  const fecha = lunesDeEstaSemana();
+  const hist = historialTablero().filter((x) => x.fecha !== fecha);
+  hist.push({ ...s, fecha });
+  try { localStorage.setItem(KEY, JSON.stringify(hist.slice(-20))); } catch { /* noop */ }
+}
+
+export function semanaActual(): SemanaTablero | null {
+  return historialTablero().find((x) => x.fecha === lunesDeEstaSemana()) ?? null;
+}
+
+export function ventasTotales(): number {
+  return historialTablero().reduce((a, s) => a + (s.ventas || 0), 0);
+}
+
+/* ══════════ El diagnóstico: dónde está la fuga ══════════ */
+
+export interface Diagnostico {
+  cuello: 'volumen' | 'filtro' | 'cierre' | 'ninguno';
+  titulo: string;
+  detalle: string;
+  accion: string;
+}
+
+export function diagnosticar(s: SemanaTablero, meta: CadenaMeta): Diagnostico {
+  if (s.conversaciones < meta.conversaciones * 0.7) {
+    return {
+      cuello: 'volumen',
+      titulo: 'Tu cuello es el volumen',
+      detalle: `Tuviste ${s.conversaciones} conversaciones y necesitas ~${meta.conversaciones} por semana. No es tu técnica: es que no te está escribiendo suficiente gente.`,
+      accion: 'Sube el presupuesto de tu anuncio o publica más esta semana. Es lo único que mueve este número.',
+    };
+  }
+  if (s.llamadas < meta.llamadas * 0.7) {
+    return {
+      cuello: 'filtro',
+      titulo: 'Tu cuello está entre el chat y la agenda',
+      detalle: `Te escribieron ${s.conversaciones} pero solo agendaste ${s.llamadas} llamadas. La gente llega y no avanza.`,
+      accion: 'Revisa dos cosas: que tu agente responda en menos de un minuto, y que tu mensaje hable del dolor de tu paciente, no de tu técnica. Y confirma cada cita 24 h y 2 h antes: sin eso, 3 de cada 10 no se presentan.',
+    };
+  }
+  if (s.ventas < meta.ventas * 0.7) {
+    return {
+      cuello: 'cierre',
+      titulo: 'Tu cuello es el cierre',
+      detalle: `Hiciste ${s.llamadas} llamadas y cerraste ${s.ventas}. Las conversaciones llegan; la decisión no.`,
+      accion: 'Practica un roleplay con tu Mentor esta semana y revisa dos reglas: que esté quien decide, y que las objeciones salgan ANTES del precio.',
+    };
+  }
+  return {
+    cuello: 'ninguno',
+    titulo: 'Vas en ritmo',
+    detalle: 'Tus tres números están donde tienen que estar.',
+    accion: 'No cambies nada. Repite exactamente lo mismo la semana que viene.',
+  };
 }

@@ -1,188 +1,101 @@
 /**
- * Paleta de colores para diferenciar miembros del equipo en la UI de tareas.
- * Asignación determinística: el mismo userId siempre obtiene el mismo color.
- *
- * Cada color trae:
- *  - solid: hex puro para borde / acento.
- *  - bg: tinta semi-transparente para fondo del avatar.
- *  - border: tinta para borde del avatar.
- *  - text: el solid pero pensado para usar como color de texto sobre fondo oscuro.
- *  - tagBg / tagBorder: para chips/pills.
+ * racha.ts — La racha de sesiones (Lote A · jul 2026)
+ * Cuenta días HÁBILES (lunes a viernes) consecutivos con al menos 1 sesión.
+ * Sábado y domingo son libres: NO suman ni rompen la racha (el dojo respira).
+ * Gracia de 1 día hábil: un día hábil sin sesión no rompe; el segundo sí.
+ * Todo por CALENDARIO REAL (getDay()), no por día contado del programa.
  */
 
-export interface TeamColor {
-  key: string;
-  solid: string;
-  bg: string;
-  border: string;
-  text: string;
-  tagBg: string;
-  tagBorder: string;
+const KEY = 'tcd_racha_sesiones';
+
+interface RachaData {
+  fechas: string[]; // ISO (YYYY-MM-DD) con sesión completada
 }
 
-export const UNASSIGNED_COLOR: TeamColor = {
-  key: 'unassigned',
-  solid: '#6B6B72',
-  bg: 'rgba(107,107,114,0.15)',
-  border: 'rgba(107,107,114,0.40)',
-  text: '#A0A0A8',
-  tagBg: 'rgba(107,107,114,0.12)',
-  tagBorder: 'rgba(107,107,114,0.30)',
-};
+function hoyISO(): string {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+}
 
-// Paleta principal — el primer color (oro) es el accent de la app y queda
-// reservado para el creador (el admin que está logueado mirando la vista).
-export const TEAM_PALETTE: TeamColor[] = [
-  { key: 'gold',    solid: '#E8962E', bg: 'rgba(232,150,46,0.10)',  border: 'rgba(232,150,46,0.45)',  text: '#F4B65C', tagBg: 'rgba(232,150,46,0.12)', tagBorder: 'rgba(232,150,46,0.20)' },
-  { key: 'blue',    solid: '#4FA3E3', bg: 'rgba(79,163,227,0.15)',  border: 'rgba(79,163,227,0.45)',  text: '#7BBFF0', tagBg: 'rgba(79,163,227,0.12)', tagBorder: 'rgba(79,163,227,0.35)' },
-  { key: 'violet',  solid: '#A88BF5', bg: 'rgba(168,139,245,0.15)', border: 'rgba(168,139,245,0.45)', text: '#C4ADFF', tagBg: 'rgba(168,139,245,0.12)', tagBorder: 'rgba(168,139,245,0.35)' },
-  { key: 'green',   solid: '#5BC68A', bg: 'rgba(91,198,138,0.15)',  border: 'rgba(91,198,138,0.45)',  text: '#7DDBA6', tagBg: 'rgba(91,198,138,0.12)', tagBorder: 'rgba(91,198,138,0.35)' },
-  { key: 'pink',    solid: '#E879A6', bg: 'rgba(232,121,166,0.15)', border: 'rgba(232,121,166,0.45)', text: '#F195C0', tagBg: 'rgba(232,121,166,0.12)', tagBorder: 'rgba(232,121,166,0.35)' },
-  { key: 'cyan',    solid: '#4FD1C5', bg: 'rgba(79,209,197,0.15)',  border: 'rgba(79,209,197,0.45)',  text: '#7DE0D7', tagBg: 'rgba(79,209,197,0.12)', tagBorder: 'rgba(79,209,197,0.35)' },
-  { key: 'orange',  solid: '#F38C40', bg: 'rgba(243,140,64,0.15)',  border: 'rgba(243,140,64,0.45)',  text: '#FBA868', tagBg: 'rgba(243,140,64,0.12)', tagBorder: 'rgba(243,140,64,0.35)' },
-  { key: 'indigo',  solid: '#7C8BF7', bg: 'rgba(124,139,247,0.15)', border: 'rgba(124,139,247,0.45)', text: '#A0ADFF', tagBg: 'rgba(124,139,247,0.12)', tagBorder: 'rgba(124,139,247,0.35)' },
-];
+function isoDe(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-/** Hash determinístico simple sobre un string. */
-function hashString(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h << 5) - h + s.charCodeAt(i);
-    h |= 0; // 32-bit int
+/** ¿Es fin de semana? (sábado=6, domingo=0) — por calendario real. */
+export function esFinDeSemana(d: Date): boolean {
+  const g = d.getDay();
+  return g === 0 || g === 6;
+}
+
+/** Compat: ¿hoy es día de descanso? (por calendario real, ignora el arg viejo). */
+export function esDiaDescanso(_diaPrograma?: number): boolean {
+  return esFinDeSemana(new Date());
+}
+
+function leer(): RachaData {
+  try {
+    const raw = localStorage.getItem(KEY);
+    return raw ? (JSON.parse(raw) as RachaData) : { fechas: [] };
+  } catch {
+    return { fechas: [] };
   }
-  return Math.abs(h);
+}
+
+/** Registra que HOY se completó una sesión. */
+export function registrarSesionCompletada(): void {
+  const d = leer();
+  const hoy = hoyISO();
+  if (!d.fechas.includes(hoy)) {
+    d.fechas.push(hoy);
+    d.fechas = d.fechas.slice(-120);
+    localStorage.setItem(KEY, JSON.stringify(d));
+  }
 }
 
 /**
- * Devuelve un color determinístico para un userId.
- * Si `currentUserId` se pasa, ese usuario siempre obtiene oro (TEAM_PALETTE[0])
- * y el resto se reparte por hash sobre los colores restantes — así la persona
- * que está mirando se reconoce siempre del mismo color.
+ * Calcula la racha: días hábiles consecutivos con sesión, hacia atrás.
+ * - Fin de semana: se saltea (no suma ni rompe).
+ * - Gracia: 1 día hábil sin sesión se tolera; 2 días hábiles seguidos sin sesión rompen.
+ * El arg fechaInicio se acepta por compatibilidad; ya no se usa (todo es calendario real).
  */
-export function getTeamColor(
-  userId: string | null | undefined,
-  currentUserId?: string,
-): TeamColor {
-  if (!userId) return UNASSIGNED_COLOR;
-  if (currentUserId && userId === currentUserId) return TEAM_PALETTE[0];
-  const pool = currentUserId ? TEAM_PALETTE.slice(1) : TEAM_PALETTE;
-  return pool[hashString(userId) % pool.length];
+export function calcularRacha(_fechaInicio?: string | null): number {
+  return calcularRachaDesdeFechas(leer().fechas);
 }
 
-/** Iniciales de un nombre — máximo 2 letras. */
-export function getInitials(name?: string | null): string {
-  if (!name) return '?';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+/**
+ * La lógica PURA de la racha — compartida por el cliente (localStorage/DB) y
+ * el Admin (fecha_completada de hoja_de_ruta). UNA definición en toda la app:
+ * días hábiles reales, finde libre, gracia de 1 día hábil.
+ */
+export function calcularRachaDesdeFechas(fechas: string[]): number {
+  if (fechas.length === 0) return 0;
+  const set = new Set(fechas.map((f) => f.slice(0, 10)));
+  let racha = 0;
+  let graciaUsada = false;
+  const cursor = new Date();
+
+  // El día en curso no castiga: si hoy aún no hay sesión, empezamos a mirar desde ayer.
+  if (!set.has(isoDe(cursor))) cursor.setDate(cursor.getDate() - 1);
+
+  for (let i = 0; i < 180; i++) {
+    if (esFinDeSemana(cursor)) {
+      cursor.setDate(cursor.getDate() - 1);
+      continue; // el finde no cuenta ni rompe
+    }
+    // día hábil
+    if (set.has(isoDe(cursor))) {
+      racha++;
+    } else if (!graciaUsada) {
+      graciaUsada = true; // primer hábil sin sesión: gracia
+    } else {
+      break; // segundo hábil sin sesión: se corta
+    }
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return racha;
 }
 
-// ─── Colores por status (para column headers de Kanban / Lista) ─────────────
-
-import type { AdminTareaStatus, AdminTareaPrioridad } from './supabase';
-
-export const STATUS_COLORS: Record<AdminTareaStatus, TeamColor> = {
-  por_hacer: {
-    key: 'status-todo',
-    solid: '#9CA3AF',
-    bg: 'rgba(156,163,175,0.12)',
-    border: 'rgba(156,163,175,0.32)',
-    text: '#CBD5E1',
-    tagBg: 'rgba(156,163,175,0.10)',
-    tagBorder: 'rgba(156,163,175,0.25)',
-  },
-  en_proceso: {
-    key: 'status-doing',
-    solid: '#3B82F6',
-    bg: 'rgba(59,130,246,0.13)',
-    border: 'rgba(59,130,246,0.36)',
-    text: '#7BA8F2',
-    tagBg: 'rgba(59,130,246,0.10)',
-    tagBorder: 'rgba(59,130,246,0.25)',
-  },
-  en_revision: {
-    key: 'status-review',
-    solid: '#F59E0B',
-    bg: 'rgba(245,158,11,0.13)',
-    border: 'rgba(245,158,11,0.36)',
-    text: '#FBBF24',
-    tagBg: 'rgba(245,158,11,0.10)',
-    tagBorder: 'rgba(245,158,11,0.25)',
-  },
-  completadas: {
-    key: 'status-done',
-    solid: '#10B981',
-    bg: 'rgba(16,185,129,0.12)',
-    border: 'rgba(16,185,129,0.34)',
-    text: '#34D399',
-    tagBg: 'rgba(16,185,129,0.10)',
-    tagBorder: 'rgba(16,185,129,0.25)',
-  },
-};
-
-// ─── Fondos tintados por prioridad para las cards ──────────────────────────
-
-export interface PriorityBg {
-  /** Gradient diagonal sutil para superponer al bg base de la card. */
-  image: string;
-  /** Color sólido de acento (chip, dot). */
-  accent: string;
+/** ¿Hoy ya tiene sesión registrada? (para el estado visual del Dashboard). */
+export function hoyTieneSesion(): boolean {
+  return leer().fechas.includes(hoyISO());
 }
-
-// ─── Stage colors — pipeline de clientes (6 fases del programa) ───────────
-
-export const STAGE_COLORS: TeamColor[] = [
-  // 0 Onboarding
-  { key: 'stage-0', solid: '#9CA3AF', bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.32)', text: '#CBD5E1', tagBg: 'rgba(156,163,175,0.10)', tagBorder: 'rgba(156,163,175,0.25)' },
-  // 1 Sprint Identidad
-  { key: 'stage-1', solid: '#E8962E', bg: 'rgba(232,150,46,0.13)', border: 'rgba(232,150,46,0.36)', text: '#F4B65C', tagBg: 'rgba(232,150,46,0.10)', tagBorder: 'rgba(232,150,46,0.14)' },
-  // 2 Sprint Mercado
-  { key: 'stage-2', solid: '#4FA3E3', bg: 'rgba(79,163,227,0.13)', border: 'rgba(79,163,227,0.36)', text: '#7BBFF0', tagBg: 'rgba(79,163,227,0.10)', tagBorder: 'rgba(79,163,227,0.25)' },
-  // 3 Sprint Oferta
-  { key: 'stage-3', solid: '#A88BF5', bg: 'rgba(168,139,245,0.13)', border: 'rgba(168,139,245,0.36)', text: '#C4ADFF', tagBg: 'rgba(168,139,245,0.10)', tagBorder: 'rgba(168,139,245,0.25)' },
-  // 4 Activación y Ventas
-  { key: 'stage-4', solid: '#F97316', bg: 'rgba(249,115,22,0.13)', border: 'rgba(249,115,22,0.36)', text: '#FB923C', tagBg: 'rgba(249,115,22,0.10)', tagBorder: 'rgba(249,115,22,0.25)' },
-  // 5 Análisis y Optimización
-  { key: 'stage-5', solid: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.34)', text: '#34D399', tagBg: 'rgba(16,185,129,0.10)', tagBorder: 'rgba(16,185,129,0.25)' },
-];
-
-export type Semaforo = 'verde' | 'amarillo' | 'rojo' | 'gris';
-
-export const SEMAFORO_BG: Record<Semaforo, PriorityBg> = {
-  verde: {
-    image: 'linear-gradient(135deg, rgba(34,197,94,0.10), rgba(34,197,94,0.025) 55%, rgba(34,197,94,0) 80%)',
-    accent: '#22C55E',
-  },
-  amarillo: {
-    image: 'linear-gradient(135deg, rgba(251,191,36,0.14), rgba(251,191,36,0.035) 55%, rgba(251,191,36,0) 80%)',
-    accent: '#FBBF24',
-  },
-  rojo: {
-    image: 'linear-gradient(135deg, rgba(239,68,68,0.16), rgba(239,68,68,0.04) 50%, rgba(239,68,68,0) 80%)',
-    accent: '#EF4444',
-  },
-  gris: {
-    image: 'linear-gradient(135deg, rgba(156,163,175,0.07), rgba(156,163,175,0.015) 55%, rgba(156,163,175,0) 80%)',
-    accent: '#9CA3AF',
-  },
-};
-
-export const PRIORITY_BG: Record<AdminTareaPrioridad, PriorityBg> = {
-  urgente: {
-    image: 'linear-gradient(135deg, rgba(239,68,68,0.16), rgba(239,68,68,0.04) 50%, rgba(239,68,68,0) 80%)',
-    accent: '#EF4444',
-  },
-  alta: {
-    image: 'linear-gradient(135deg, rgba(249,115,22,0.18), rgba(249,115,22,0.05) 50%, rgba(249,115,22,0) 80%)',
-    accent: '#F97316',
-  },
-  media: {
-    image: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02) 50%, rgba(232,150,46,0) 80%)',
-    accent: '#E8962E',
-  },
-  baja: {
-    image: 'linear-gradient(135deg, rgba(34,197,94,0.09), rgba(34,197,94,0.02) 50%, rgba(34,197,94,0) 80%)',
-    accent: '#22C55E',
-  },
-};
