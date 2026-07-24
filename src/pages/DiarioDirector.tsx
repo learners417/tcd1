@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   BookOpen,
   Loader2,
@@ -138,6 +138,15 @@ function mapRow(d: any): EntradaDiario {
 
 // ─── Escala 1–10 interactiva ───────────────────────────────────────────────────
 
+/** Cinco toques con palabra — nadie sabe qué es un 7 sobre 10. */
+const NIVELES_ENERGIA = [
+  { valor: 2, emoji: '🪫', palabra: 'En cero' },
+  { valor: 4, emoji: '😮‍💨', palabra: 'Bajo' },
+  { valor: 6, emoji: '😐', palabra: 'Normal' },
+  { valor: 8, emoji: '💪', palabra: 'Bien' },
+  { valor: 10, emoji: '⚡', palabra: 'Encendido' },
+];
+
 function Escala10({
   valor,
   onChange,
@@ -246,6 +255,15 @@ export default function DiarioDirector({
 
   const historicas = entries.map(toHistorica);
   const racha = rachaActiva(historicas, hoy);
+  /** Lo que cerró hoy en su Camino — para no arrancar de una hoja en blanco. */
+  const sesionDeHoy = useMemo(() => {
+    try {
+      const ult = JSON.parse(localStorage.getItem('tcd_ultima_sesion_v1') ?? 'null') as { titulo?: string; fecha?: string } | null;
+      const hoyISO = new Date().toISOString().slice(0, 10);
+      if (ult?.titulo && (!ult.fecha || ult.fecha.slice(0, 10) === hoyISO)) return ult.titulo;
+    } catch { /* noop */ }
+    return null;
+  }, []);
   const esDomingo = hoy.getDay() === 0;
   const energiaPromedio = energiaPromedio7d(historicas);
 
@@ -443,7 +461,7 @@ Devuelve SOLO este JSON:
           <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
             <span className="text-[13px]">⏱</span>
             <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
-            <span className="text-[11px] text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca y arranca · 3 min y listo'}</span>
+            <span className="text-[11px] text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
           </button>
         </div>
         <div className="flex items-center gap-3">
@@ -605,20 +623,32 @@ Devuelve SOLO este JSON:
                   <BookOpen className="w-5 h-5 text-gold" />
                 </div>
                 <div>
-                  <h2 className="text-base font-medium text-cream">¿Cómo fue hoy?</h2>
-                  <p className="text-xs text-cream/75">Tu cierre diario · 5 minutos</p>
+                  <h2 className="text-base font-medium text-cream">Tu cierre de hoy</h2>
+                  <p className="text-xs text-cream/75">Dos toques y una línea. Nada más.</p>
                 </div>
               </div>
 
               {/* Energía general */}
               <div className="bg-surface/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-yellow-400" /> Energía general del día
-                  </span>
-                  <span className="text-sm font-bold text-gold">{energia} · {etiquetaEnergia(energia)}</span>
+                <p className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2 mb-3">
+                  <Zap className="w-4 h-4 text-yellow-400" /> ¿Cómo estuvo tu energía hoy?
+                </p>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {NIVELES_ENERGIA.map((n) => {
+                    const activo = energia === n.valor;
+                    return (
+                      <button
+                        key={n.valor}
+                        type="button"
+                        onClick={() => setEnergia(n.valor)}
+                        className={`rounded-xl border py-2.5 px-1 transition-all ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
+                      >
+                        <span className="block text-xl leading-none mb-1">{n.emoji}</span>
+                        <span className={`block text-[10px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <Escala10 valor={energia} onChange={setEnergia} />
                 {ayerEntry && (
                   <p className="text-[11px] text-cream/45 mt-2 text-center">
                     Ayer tuviste <span className="text-success">{ayerEntry.energia}</span>
@@ -630,8 +660,18 @@ Devuelve SOLO este JSON:
               {/* Logro */}
               <div>
                 <label className="block text-xs font-medium text-cream/80 mb-2 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-gold" /> Tu logro de hoy — ¿qué avance te enorgullece?
+                  <Award className="w-4 h-4 text-gold" /> Tu victoria de hoy
                 </label>
+                {sesionDeHoy && !logro.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => setLogro(`Hice mi sesión: ${sesionDeHoy}. `)}
+                    className="w-full text-left rounded-xl border border-gold/25 bg-gold/[0.05] px-3 py-2 mb-2 hover:border-gold/50 transition-colors"
+                  >
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gold">Hoy hiciste</span>
+                    <span className="block text-sm text-cream/85">{sesionDeHoy} — toca para empezar por acá</span>
+                  </button>
+                )}
                 <textarea
                   rows={2}
                   maxLength={LOGRO_MAX_CHARS}
@@ -761,7 +801,9 @@ Devuelve SOLO este JSON:
                 )}
               </button>
               <p className="text-[11px] text-cream/45 text-center -mt-3">
-                El score se calcula y se muestra después de guardar.
+                {racha > 0
+                  ? `Llevas ${racha} ${racha === 1 ? 'día' : 'días'} seguidos. Esto es lo que tu Mentor va a recordar mañana.`
+                  : 'Dos minutos. Esto es lo que tu Mentor va a recordar mañana.'}
               </p>
             </div>
           )}

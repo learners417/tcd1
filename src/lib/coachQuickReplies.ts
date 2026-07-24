@@ -14,7 +14,7 @@ import type { PilarId } from './supabase';
 
 export interface CoachQuickReply {
   id: string;
-  icon: string;
+  icon?: string;
   label: string;
 }
 
@@ -27,81 +27,81 @@ export interface CoachQuickReplyContext {
 }
 
 const FIJOS: CoachQuickReply[] = [
-  { id: 'continuar', icon: '💬', label: 'Seguimos donde quedamos' },
-  { id: 'progreso', icon: '📈', label: '¿Cómo vengo? Mi progreso real' },
-  { id: 'duda', icon: '❓', label: 'Tengo una duda' },
+  { id: 'continuar', label: 'Seguimos donde quedamos' },
+  { id: 'progreso', label: '¿Cómo vengo? Mi progreso real' },
+  { id: 'duda', label: 'Tengo una duda' },
 ];
 
 const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
   P0: [
-    { id: 'p0_objetivo', icon: '🎯', label: 'Definamos mi objetivo' },
-    { id: 'p0_punto_partida', icon: '📍', label: 'Ver mi punto de partida real' },
-    { id: 'p0_app', icon: '🗺', label: '¿Cómo se usa esta app?' },
+    { id: 'p0_objetivo', label: 'Definamos mi objetivo' },
+    { id: 'p0_punto_partida', label: 'Ver mi punto de partida real' },
+    { id: 'p0_app', label: '¿Cómo se usa esta app?' },
   ],
   P1: [
-    { id: 'p1_revisar_historia', icon: '✍️', label: 'Revisa mi historia — sin filtro' },
-    { id: 'p1_trabada_historia', icon: '🤔', label: 'Estoy trabada con mi historia' },
-    { id: 'p1_historia_contenido', icon: '🎬', label: '¿Cómo uso mi historia en contenido?' },
+    { id: 'p1_revisar_historia', label: 'Revisa mi historia — sin filtro' },
+    { id: 'p1_trabada_historia', label: 'Estoy trabada con mi historia' },
+    { id: 'p1_historia_contenido', label: '¿Cómo uso mi historia en contenido?' },
   ],
   P2: [
-    { id: 'p2_revisar_proposito', icon: '🧭', label: 'Revisemos mi propósito' },
-    { id: 'p2_proposito_filtra', icon: '🔍', label: '¿Mi propósito filtra bien?' },
-    { id: 'p2_no_encuentro', icon: '😕', label: 'No encuentro mi propósito' },
+    { id: 'p2_revisar_proposito', label: 'Revisemos mi propósito' },
+    { id: 'p2_proposito_filtra', label: '¿Mi propósito filtra bien?' },
+    { id: 'p2_no_encuentro', label: 'No encuentro mi propósito' },
   ],
   P3: [
-    { id: 'p3_revisar_legado', icon: '🌳', label: 'Revisemos mi legado a 10 años' },
-    { id: 'p3_legado_honesto', icon: '🪞', label: '¿Es honesto mi legado?' },
-    { id: 'p3_no_imagino', icon: '😶', label: 'No imagino mi legado' },
+    { id: 'p3_revisar_legado', label: 'Revisemos mi legado a 10 años' },
+    { id: 'p3_legado_honesto', label: '¿Es honesto mi legado?' },
+    { id: 'p3_no_imagino', label: 'No imagino mi legado' },
   ],
   P4: [
-    { id: 'p4_avatar_bien', icon: '🧑‍⚕️', label: '¿Mi avatar está bien definido?' },
-    { id: 'p4_no_claro', icon: '🤷', label: 'No tengo claro mi avatar' },
-    { id: 'p4_validar_casos', icon: '📋', label: 'Validar avatar contra casos reales' },
+    { id: 'p4_avatar_bien', label: '¿Mi avatar está bien definido?' },
+    { id: 'p4_no_claro', label: 'No tengo claro mi avatar' },
+    { id: 'p4_validar_casos', label: 'Validar avatar contra casos reales' },
   ],
   P5: [
-    { id: 'p5_puv', icon: '💡', label: '¿Mi PUV es clara?' },
-    { id: 'p5_nicho', icon: '🎯', label: '¿Mi nicho es suficientemente específico?' },
-    { id: 'p5_transformaciones', icon: '🔄', label: '¿Mis transformaciones son creíbles?' },
+    { id: 'p5_puv', label: '¿Mi PUV es clara?' },
+    { id: 'p5_nicho', label: '¿Mi nicho es suficientemente específico?' },
+    { id: 'p5_transformaciones', label: '¿Mis transformaciones son creíbles?' },
   ],
   P6: [
-    { id: 'p6_duele', icon: '🩹', label: '¿Mi matriz duele lo suficiente?' },
-    { id: 'p6_revisar_matriz', icon: '🔥', label: 'Revisemos infierno · obstáculos · cielo' },
-    { id: 'p6_no_sale', icon: '😩', label: 'No me sale armar la matriz' },
+    { id: 'p6_duele', label: '¿Mi matriz duele lo suficiente?' },
+    { id: 'p6_revisar_matriz', label: 'Revisemos infierno · obstáculos · cielo' },
+    { id: 'p6_no_sale', label: 'No me sale armar la matriz' },
   ],
   P7: [
-    { id: 'p7_nombre_metodo', icon: '🏷', label: '¿El nombre de mi método funciona?' },
-    { id: 'p7_pasos', icon: '🔢', label: '¿Los pasos están bien?' },
-    { id: 'p7_practicar_vera', icon: '💰', label: 'Practicar pricing con Vera' },
+    { id: 'p7_nombre_metodo', label: '¿El nombre de mi método funciona?' },
+    { id: 'p7_pasos', label: '¿Los pasos están bien?' },
+    { id: 'p7_practicar_vera', label: 'Practicar pricing con Vera' },
   ],
   P8: [
-    { id: 'p8_3_ofertas', icon: '🪜', label: '¿Mis 3 ofertas son coherentes?' },
-    { id: 'p8_precio', icon: '💵', label: '¿Mi precio sostiene?' },
-    { id: 'p8_lead_magnet', icon: '🎁', label: '¿Mi regalo gratuito es buen entry?' },
+    { id: 'p8_3_ofertas', label: '¿Mis 3 ofertas son coherentes?' },
+    { id: 'p8_precio', label: '¿Mi precio sostiene?' },
+    { id: 'p8_lead_magnet', label: '¿Mi regalo gratuito es buen entry?' },
   ],
   P9A: [
-    { id: 'p9a_landing', icon: '🌐', label: 'Revisar mi landing antes de publicar' },
-    { id: 'p9a_numeros_ramiro', icon: '📊', label: 'Practicar con Ramiro mis números' },
-    { id: 'p9a_pauta', icon: '🚀', label: '¿Estoy lista para activar pauta?' },
+    { id: 'p9a_landing', label: 'Revisar mi landing antes de publicar' },
+    { id: 'p9a_numeros_ramiro', label: 'Practicar con Ramiro mis números' },
+    { id: 'p9a_pauta', label: '¿Estoy lista para activar pauta?' },
   ],
   P9B: [
-    { id: 'p9b_practicar_w', icon: '📞', label: 'Practicar la W con Lucas' },
-    { id: 'p9b_practicar_sofi', icon: '💬', label: 'Practicar filtrado con Sofi' },
-    { id: 'p9b_objecion', icon: '🛡', label: '¿Cómo manejo la primera objeción?' },
+    { id: 'p9b_practicar_w', label: 'Practicar la W con Lucas' },
+    { id: 'p9b_practicar_sofi', label: 'Practicar filtrado con Sofi' },
+    { id: 'p9b_objecion', label: '¿Cómo manejo la primera objeción?' },
   ],
   P9C: [
-    { id: 'p9c_secuencia', icon: '📧', label: 'Revisar mi secuencia de seguimiento' },
-    { id: 'p9c_no_cerraron', icon: '🪞', label: 'Las consultas que no cerraron · revisemos' },
-    { id: 'p9c_primer_mes', icon: '🗓', label: 'Mi primer mes de consultas · ¿qué viste?' },
+    { id: 'p9c_secuencia', label: 'Revisar mi secuencia de seguimiento' },
+    { id: 'p9c_no_cerraron', label: 'Las consultas que no cerraron · revisemos' },
+    { id: 'p9c_primer_mes', label: 'Mi primer mes de consultas · ¿qué viste?' },
   ],
   P10: [
-    { id: 'p10_sistema_visual', icon: '🎨', label: 'Revisar mi sistema visual' },
-    { id: 'p10_feed', icon: '🖼', label: '¿Mi muro es coherente?' },
-    { id: 'p10_paleta', icon: '🌈', label: 'No sé qué paleta usar' },
+    { id: 'p10_sistema_visual', label: 'Revisar mi sistema visual' },
+    { id: 'p10_feed', label: '¿Mi muro es coherente?' },
+    { id: 'p10_paleta', label: 'No sé qué paleta usar' },
   ],
   P11: [
-    { id: 'p11_retro', icon: '📅', label: 'Iniciar retrospectiva' },
-    { id: 'p11_plan_proximo', icon: '➡️', label: 'Plan próximo mes' },
-    { id: 'p11_replicar', icon: '🔁', label: '¿Qué replicar · cambiar · cortar?' },
+    { id: 'p11_retro', label: 'Iniciar retrospectiva' },
+    { id: 'p11_plan_proximo', label: 'Plan próximo mes' },
+    { id: 'p11_replicar', label: '¿Qué replicar · cambiar · cortar?' },
   ],
 };
 
@@ -111,31 +111,27 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
   if (ctx.diasAtraso > 7) {
     result.push({
       id: 'cond_atraso',
-      icon: '⚠️',
-      label: 'Profundizar mi sesión de hoy',
+      label: 'Vengo atrasada — ayúdame a retomar',
     });
   }
 
   if (ctx.diasSinEntrar >= 5) {
     result.push({
       id: 'cond_volvi',
-      icon: '👋',
-      label: 'Se me mueve algo con mi precio',
+      label: 'Volví después de unos días',
     });
   }
 
   if (ctx.alcanzoNivel4EstaSemana) {
     result.push({
       id: 'cond_autonoma',
-      icon: '🎉',
-      label: 'Hazme de paciente: dime \"está caro\"',
+      label: 'Logré algo grande esta semana',
     });
   }
 
   if (ctx.diasSinMetricas > 7) {
     result.push({
       id: 'cond_metricas',
-      icon: '📊',
       label: '¿Cómo vengo en mi camino?',
     });
   }
@@ -144,11 +140,23 @@ function buildCondicionales(ctx: CoachQuickReplyContext): CoachQuickReply[] {
 }
 
 export function getCoachQuickReplies(ctx: CoachQuickReplyContext): CoachQuickReply[] {
+  const sesion = sesionDeHoy();
+  const propios: CoachQuickReply[] = [];
+  if (sesion) propios.push({ id: 'profundizar', label: `Profundizar mi sesión: ${sesion}` });
+  propios.push({ id: 'precio', label: 'Se me mueve algo con mi precio' });
+  propios.push({ id: 'roleplay', label: 'Hazme de paciente: dime «está caro»' });
+  // Si algo urgente aplica (atraso, vuelve después de días), entra primero.
   const condicionales = buildCondicionales(ctx);
-  const dinamicos = ctx.pilarActivo ? PILAR_QUICK_REPLIES[ctx.pilarActivo] ?? [] : [];
-  // Orden de prioridad: condicionales primero · luego dinámicos · luego fijos.
-  // Slice a 6 para no saturar la UI.
-  return [...condicionales, ...dinamicos, ...FIJOS].slice(0, 6);
+  return [...condicionales, ...propios].slice(0, 3);
+}
+
+/** La última sesión que cerró en su Camino — para llamarla por su nombre. */
+function sesionDeHoy(): string | null {
+  try {
+    const ult = JSON.parse(localStorage.getItem('tcd_ultima_sesion_v1') ?? 'null') as { titulo?: string } | null;
+    const t = String(ult?.titulo ?? '').trim();
+    return t ? (t.length > 34 ? t.slice(0, 32) + '…' : t) : null;
+  } catch { return null; }
 }
 
 export { PILAR_QUICK_REPLIES, FIJOS };

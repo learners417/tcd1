@@ -570,7 +570,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 disabled={isTyping}
                 className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-gold/10 to-transparent hover:from-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
-                <span className="text-[11px]">{qr.icon}</span>
+                {qr.icon && <span className="text-[11px]">{qr.icon}</span>}
                 {qr.label}
               </button>
             ))}
