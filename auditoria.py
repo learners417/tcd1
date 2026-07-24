@@ -78,6 +78,38 @@ for f, src in todo.items():
     if re.search(r"onConflict", src): fragiles.append(f.split('/')[-1])
 check('sin upserts frágiles (bomba 42P10)', not fragiles, str(fragiles))
 
+guiones = rd('src/lib/sesionesGuiadas.ts')
+player = rd('src/components/SesionGuiadaPlayer.tsx')
+tipos_input = set(re.findall(r"tipo: '(\w+)'", guiones)) - {'intro', 'ritual', 'cierre'}
+bloque_red = player[player.find('CONSIGNA_POR_TIPO'):player.find('CONSIGNA_POR_TIPO') + 1200]
+sin_red = [t for t in tipos_input if (t + ':') not in bloque_red]
+check('ningún paso puede quedar sin consigna', not sin_red, str(sorted(sin_red)))
+
+SESION_FILES = ['SesionGuiadaPlayer.tsx', 'TaskCoach.tsx', 'TaskHerramientaIA.tsx', 'TaskVideo.tsx', 'SesionViva.tsx']
+fugas = []
+for f, src in todo.items():
+    if f.split('/')[-1] not in SESION_FILES: continue
+    for m in re.finditer(r"onClick=\{[^}]{0,120}(setCurrentPage\('coach'\)|onNavigateToCoach\(\)|onMentor\(\))", src):
+        fugas.append(f.split('/')[-1])
+check('ninguna sesión expulsa al Mentor', not fugas, str(sorted(set(fugas))))
+
+# Toda página nombrada en un título o en el buscador tiene que existir en el router
+app_src = rd('src/App.tsx')
+rutas = set(re.findall(r"currentPage === '(\w+)'", app_src))
+tb = rd('src/components/Topbar.tsx')
+nombradas = set(re.findall(r"^  (\w+): '", tb, re.M)) | set(re.findall(r"id: '(\w+)', label:", tb))
+fantasmas = sorted(p for p in nombradas - rutas if p not in ('ajustes', 'salir'))
+check('sin páginas fantasma en títulos/buscador', not fantasmas, str(fantasmas))
+
+# La lib madre de anuncios: 18 fórmulas, ninguna incompleta
+fa = rd('src/lib/formulasAnuncios.ts')
+import re as _re
+ids = _re.findall(r"\n    id: (\d+),", fa)
+campos_ok = all(fa.count(c) >= 18 for c in ['cuando:', 'porque:', 'estructura: [', 'caption:', 'ejemplo:', 'errorComun:'])
+familias = _re.findall(r"familia: '(\w+)'", fa)
+reparto = (familias.count('piedras'), familias.count('dolor_historia'), familias.count('resultado_metodo'), familias.count('acompana'))
+check('las 18 fórmulas completas (6 campos c/u, familias 6+5+6+1)', len(ids) == 18 and campos_ok and reparto == (6, 5, 6, 1), f'ids={len(ids)} campos={campos_ok} reparto={reparto}')
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

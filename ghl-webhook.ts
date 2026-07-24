@@ -82,9 +82,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2) Perfil con plan ELNUMERO — sin pisar un plan superior
     const { data: perfil } = await admin.from('profiles').select('id, plan, nombre').eq('id', userId).maybeSingle();
     if (!perfil) {
-      await admin.from('profiles').insert({ id: userId, nombre: nombre || email.split('@')[0], plan: 'ELNUMERO' });
+      await admin.from('profiles').insert({ id: userId, nombre: nombre || email.split('@')[0], plan: 'ELNUMERO', acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() });
     } else if (!perfil.plan) {
-      await admin.from('profiles').update({ plan: 'ELNUMERO' }).eq('id', userId);
+      await admin.from('profiles').update({ plan: 'ELNUMERO', acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() }).eq('id', userId);
     } // si ya tiene DWY/DFY/IMPLEMENTACION, no se toca
 
     return res.status(200).json({ ok: true, estado, plan_resultante: perfil?.plan ?? 'ELNUMERO' });
