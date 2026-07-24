@@ -1,114 +1,172 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// Pre-Activación Checklist — versión operativa (validada por Ivan + Lupe).
-// 6 secciones · 32 pasos tácticos con herramienta asociada.
-// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * diaValidator.ts — Validador del Día 45 (Regla #6 v8)
+ *
+ * El día 45 es el "punto de no retorno": al cerrar Fase 3 (P8) el ADN debe tener
+ * los campos críticos completos. Si el usuario intenta avanzar a Fase 4 con
+ * el ADN incompleto a partir del día 45, la app muestra un banner bloqueando
+ * el avance y listando qué campos faltan y en qué pilar se completan.
+ *
+ * v8 también ofrece `compararFotoPartida()`: compara `META_autoevaluacion_dia1`
+ * (Foto de Partida tomada en P0.2) con el estado real del ADN para mostrar
+ * el efecto revelación de "lo que no sabías que no sabías".
+ *
+ * Los campos críticos están definidos en `ADN_SCHEMA_V8` con `criticoDia45: true`
+ * y se exportan como `CAMPOS_CRITICOS_DIA_45`. Ver Anexo D de mejoras.html.
+ */
 
-export interface PreactivacionStepDef {
-  id: string;
-  /** La sesión equivalente en El Camino (para el tildado automático de clientes-app). */
-  meta?: string;
-  /** Label corto multilínea para columna. Usar \n para forzar salto de línea. */
-  lbl: string;
-  title: string;
-  /** Detail rendered as HTML — puede contener <strong>. */
-  detail: string;
+import type { ProfileV2 } from './supabase';
+import {
+  ADN_SCHEMA_V8,
+  campoEstaCompleto,
+  calcularAutoevaluacionActual,
+  DIMENSIONES_FOTO_PARTIDA,
+  type ADNCampo,
+} from './adnSchema';
+
+export const DIA_PUNTO_DE_NO_RETORNO = 45;
+
+export interface ValidacionDia45 {
+  /** true si todos los campos críticos están completos. */
+  ok: boolean;
+  /** true si el usuario ya está en Día 45 o después. */
+  esDespuesDelDia45: boolean;
+  /** Campos que faltan completar (cuando ok === false). */
+  camposFaltantes: ADNCampo[];
+  /** Porcentaje de campos críticos completados. */
+  porcentajeCompleto: number;
+  /**
+   * true si la Fase 4 debe estar bloqueada: está después del día 45 y tiene
+   * campos críticos incompletos.
+   */
+  debeBloquearFase4: boolean;
 }
 
-export interface PreactivacionSection {
-  id: string;
-  title: string;
-  /** Etiqueta corta para el header de grupo en la matriz. */
-  short: string;
-  items: PreactivacionStepDef[];
+/**
+ * Devuelve los campos del ADN marcados como críticos para el Día 45.
+ * Reutiliza la bandera `criticoDia45` del schema v8.
+ */
+export function obtenerCamposCriticosDia45(): ADNCampo[] {
+  return ADN_SCHEMA_V8
+    .flatMap((seccion) => seccion.campos)
+    .filter((c) => c.criticoDia45);
 }
 
-export interface PreactivacionStep extends PreactivacionStepDef {
-  sectionId: string;
+/**
+ * Valida el estado del ADN respecto al umbral del Día 45.
+ *
+ * @param perfil    perfil del usuario (puede ser parcial)
+ * @param diaActual día del programa (1-90); si es undefined asume el día actual
+ *                  no es relevante y solo mira los campos
+ */
+export function validarADNDia45(
+  perfil: Partial<ProfileV2>,
+  diaActual?: number,
+): ValidacionDia45 {
+  const criticos = obtenerCamposCriticosDia45();
+  const completos = criticos.filter((c) => campoEstaCompleto(perfil, c));
+  const faltantes = criticos.filter((c) => !campoEstaCompleto(perfil, c));
+
+  const porcentaje = criticos.length === 0
+    ? 100
+    : Math.round((completos.length / criticos.length) * 100);
+
+  const esDespues = typeof diaActual === 'number' && diaActual >= DIA_PUNTO_DE_NO_RETORNO;
+  const ok = faltantes.length === 0;
+
+  return {
+    ok,
+    esDespuesDelDia45: esDespues,
+    camposFaltantes: faltantes,
+    porcentajeCompleto: porcentaje,
+    debeBloquearFase4: esDespues && !ok,
+  };
 }
 
-export const SECTIONS: PreactivacionSection[] = [
-  {
-    id: 'base',
-    title: 'Base — Fases 1-2 del Camino',
-    short: 'BASE',
-    items: [
-      { id: 'pacto', lbl: 'Pacto\nfirmado', title: 'El Pacto firmado', detail: 'Su promesa escrita y firmada en el onboarding. <strong>Sin pacto no hay camino.</strong>', meta: 'P0.4' },
-      { id: 'foto_partida', lbl: 'Foto de\nPartida', title: 'Foto de Partida', detail: 'Su autoevaluación inicial completa — el ANTES contra el que se mide todo.', meta: 'P0.2' },
-      { id: 'quema', lbl: 'LA\nQUEMA', title: 'LA QUEMA 🔥 (D4 · foto) (con evidencia)', detail: 'La creencia raíz quemada, <strong>con foto de las cenizas subida</strong>.', meta: 'P1.3' },
-      { id: 'numero', lbl: 'EL\nNÚMERO', title: 'El Número (su precio)', detail: 'Su precio digno calculado y <strong>dicho en voz alta (audio subido)</strong>.', meta: 'P1.5' },
-      { id: 'metodo', lbl: 'Método\ncon nombre', title: 'El Método con su nombre', detail: 'Su proceso destilado en 3-5 pasos con nombre propio.', meta: 'P2.4' },
-      { id: 'avatar', lbl: 'Avatar\ndefinido', title: 'El avatar', detail: 'La persona exacta: quién es, qué le duele, qué dice después de sesión.', meta: 'P2.3' },
-      { id: 'oferta', lbl: 'Oferta\n$1.000', title: 'La Oferta Irresistible', detail: 'Promesa, entregables, garantía y precio — la oferta de $1.000 completa.', meta: 'P3.2' },
-      { id: 'pitch', lbl: 'Pitch\ngrabado', title: 'El pitch de 60 segundos', detail: 'Su oferta sonando en el mundo — <strong>audio subido</strong>.', meta: 'P3.4' },
-    ],
-  },
-  {
-    id: 'tecnico',
-    title: 'Técnico — la infraestructura',
-    short: 'TÉCNICO',
-    items: [
-      { id: 'bm', lbl: 'Business\nManager', title: 'Business Manager creado', detail: 'Su BM de Meta activo y verificado.', meta: 'P2.2' },
-      { id: 'pixel', lbl: 'Pixel\ninstalado', title: 'El Pixel de Meta', detail: 'Instalado en su página y <strong>verificado con el Helper de Meta</strong>. Sin pixel, los anuncios vuelan a ciegas.', meta: 'P4.5' },
-      { id: 'wa_business', lbl: 'WhatsApp\nBusiness', title: 'WhatsApp Business activo', detail: 'Su número de negocio conectado.' },
-      { id: 'subcuenta', lbl: 'Subcuenta\nGHL', title: 'Su subcuenta GHL viva', detail: 'Creada desde el snapshot maestro — el motor invisible.' },
-      { id: 'agente', lbl: 'Agente\nrespondiendo', title: 'El agente de WhatsApp', detail: 'Configurado y respondiendo — la Sala de Espera abierta.', meta: 'P4.5' },
-      { id: 'agenda', lbl: 'Agenda\ncon horarios', title: 'La agenda', detail: 'Calendario con sus horarios reales, link funcionando.', meta: 'P4.5' },
-      { id: 'cobro', lbl: 'Cobro\nconfigurado', title: 'El cobro', detail: 'Su forma de cobrar lista (link, transferencia, pasarela).', meta: 'P4.5' },
-      { id: 'landing', lbl: 'Landing\npublicada', title: 'La landing', detail: 'Su página con la oferta, publicada y abriendo.', meta: 'P4.2' },
-      { id: 'perfil_ig', lbl: 'Perfil IG\noptimizado', title: 'Perfil de Instagram optimizado', detail: 'Su perfil profesional listo — bio, link y estética que invitan a agendar.', meta: 'P4.2b' },
-      { id: 'followme', lbl: 'Montaje\ncompleto', title: 'Los 8 candados', detail: 'El checklist de encendido, <strong>tildado completo</strong>. Nada flojo.', meta: 'P4.6' },
-      { id: 'dominio', lbl: 'DOMINIO\nconectado', title: 'El dominio (DNS ok)', detail: 'Su dirección digital propia, conectada y propagada.', meta: 'P4.5b' },
-    ],
-  },
-  {
-    id: 'contenido',
-    title: 'Contenido — las piezas',
-    short: 'CONTENIDO',
-    items: [
-      { id: 'guiones', lbl: 'Guiones\naprobados', title: 'Los guiones', detail: 'Sus 3 guiones de anuncio escritos con Mateo.', meta: 'P4.3' },
-      { id: 'videos', lbl: '3 videos\ngrabados', title: 'El Día de Grabación', detail: 'Las 3 piezas grabadas — <strong>evidencia subida</strong>.', meta: 'P4.3b' },
-      { id: 'edicion', lbl: 'Editados\ny subidos', title: 'Edición y subida', detail: 'Cortados, subtitulados, exportados en vertical.', meta: 'P4.3c' },
-      { id: 'estaticos', lbl: 'Creativos\nestáticos', title: 'Los estáticos (fábrica IA)', detail: '2-3 anuncios de imagen generados con la fábrica.', meta: 'P4.3c' },
-    ],
-  },
-  {
-    id: 'campana',
-    title: 'Campaña — el encendido',
-    short: 'CAMPAÑA',
-    items: [
-      { id: 'validacion', lbl: 'Validación\norgánica', title: 'La validación', detail: 'Publicado orgánico + boost de test corrido.', meta: 'P4.3d' },
-      { id: 'ctwa', lbl: 'Campaña\nENCENDIDA', title: 'La campaña única activa', detail: '<strong>En circulación, con captura subida.</strong> El sistema vive.', meta: 'P4.4' },
-      { id: 'presupuesto', lbl: 'Presupuesto\ndiario', title: 'El presupuesto', detail: 'Gasto diario confirmado y sostenible.' },
-    ],
-  },
-  {
-    id: 'venta',
-    title: 'Venta — los cierres',
-    short: 'VENTA',
-    items: [
-      { id: 'script', lbl: 'Script\nLa W', title: 'El script de ventas', detail: 'Su W personal escrita con Lucas.', meta: 'P5.2' },
-      { id: 'roleplay', lbl: 'Roleplay\naprobado', title: 'El roleplay', detail: 'Tres rondas contra el prospecto difícil.', meta: 'P5.3' },
-      { id: 'llamada', lbl: '1ª llamada\nreal', title: 'La primera llamada', detail: 'Realizada y registrada — <strong>el Azul</strong>.', meta: 'P5.4' },
-      { id: 'pago', lbl: 'PRIMER\nPAGO', title: 'El primer pago 💰', detail: '<strong>Comprobante subido — el Rojo.</strong> El momento que cambia todo.', meta: 'P6.3' },
-    ],
-  },
-  {
-    id: 'entrega',
-    title: 'Entrega — la clínica',
-    short: 'ENTREGA',
-    items: [
-      { id: 'protocolo', lbl: 'Protocolo\ndocumentado', title: 'El protocolo de entrega', detail: 'Su forma de entregar, documentada (lista para MCD).', meta: 'P6.2' },
-      { id: 'testimonio', lbl: 'Testimonio\npedido', title: 'El testimonio', detail: 'Pedido a cada paciente que termina — su prueba social.' },
-    ],
-  },
-];
+/**
+ * Agrupa los campos faltantes por el pilar de origen, para mostrarle al usuario
+ * a dónde tiene que volver para completar cada uno.
+ */
+export function agruparFaltantesPorPilar(
+  faltantes: ADNCampo[],
+): Array<{ pilar: string; campos: ADNCampo[] }> {
+  const grupos = new Map<string, ADNCampo[]>();
+  for (const campo of faltantes) {
+    // "P5.2" → "P5"
+    const pilar = campo.pilarOrigen.split('.')[0];
+    const actual = grupos.get(pilar) ?? [];
+    actual.push(campo);
+    grupos.set(pilar, actual);
+  }
+  return Array.from(grupos.entries())
+    .map(([pilar, campos]) => ({ pilar, campos }))
+    .sort((a, b) => a.pilar.localeCompare(b.pilar));
+}
 
-export const STEPS: PreactivacionStep[] = SECTIONS.flatMap((section) =>
-  section.items.map<PreactivacionStep>((item) => ({ ...item, sectionId: section.id }))
-);
+// ─── Comparación Día 45 · Foto de Partida vs ADN real (v8) ──────────────────
 
-export const TOTAL_STEPS = STEPS.length;
+export interface ComparacionDimension {
+  /** Slug interno de la dimensión (ej "historia"). */
+  key: string;
+  /** Label visible (ej "Tu historia en 30 segundos"). */
+  label: string;
+  /** Score 1-5 que el usuario se puso el día 1 en P0.2 (Foto de Partida). */
+  dia1: number;
+  /** Score 1-5 derivado del estado real del ADN al día actual. */
+  dia45: number;
+  /** Delta dia45 - dia1 (positivo = creció, negativo = se conoció más y bajó). */
+  delta: number;
+}
 
-export function getSectionById(id: string): PreactivacionSection | undefined {
-  return SECTIONS.find((s) => s.id === id);
+export interface ComparacionDia45 {
+  /** true si el usuario tomó la Foto de Partida (P0.2). */
+  tieneFotoPartida: boolean;
+  /** Comparación dimensión por dimensión. */
+  dimensiones: ComparacionDimension[];
+  /** Promedio dia1 (puede usarse para mostrar score global). */
+  promedioDia1: number;
+  /** Promedio dia45. */
+  promedioDia45: number;
+  /** Delta promedio (positivo = avance neto, negativo = revelación de gaps). */
+  deltaPromedio: number;
+}
+
+/**
+ * Compara la autoevaluación que el usuario hizo el día 1 (Foto de Partida en P0.2)
+ * contra el estado real de su ADN al día actual.
+ *
+ * Es el efecto revelación de la regla v8: "lo que no sabías que no sabías".
+ * Muchas dimensiones que el usuario se autocalificó alto el día 1 bajan al día 45
+ * porque al ver el ADN real toma dimensión de lo que faltaba.
+ */
+export function compararFotoPartida(perfil: Partial<ProfileV2>): ComparacionDia45 {
+  const dia1Raw = perfil.adn_autoevaluacion_dia1 ?? [];
+  const tieneFotoPartida = dia1Raw.length === DIMENSIONES_FOTO_PARTIDA.length;
+  const dia45Raw = calcularAutoevaluacionActual(perfil);
+
+  const dimensiones: ComparacionDimension[] = DIMENSIONES_FOTO_PARTIDA.map((dim, i) => {
+    const dia1 = tieneFotoPartida ? dia1Raw[i] : 0;
+    const dia45 = dia45Raw[i];
+    return {
+      key: dim.key,
+      label: dim.label,
+      dia1,
+      dia45,
+      delta: dia45 - dia1,
+    };
+  });
+
+  const promedio = (arr: number[]) =>
+    arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length;
+  const promedioDia1 = tieneFotoPartida
+    ? promedio(dimensiones.map((d) => d.dia1))
+    : 0;
+  const promedioDia45 = promedio(dimensiones.map((d) => d.dia45));
+
+  return {
+    tieneFotoPartida,
+    dimensiones,
+    promedioDia1,
+    promedioDia45,
+    deltaPromedio: promedioDia45 - promedioDia1,
+  };
 }
