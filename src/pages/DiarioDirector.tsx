@@ -211,10 +211,8 @@ function KpiCard({
 
 export default function DiarioDirector({
   userId,
-  geminiKey,
 }: {
   userId?: string;
-  geminiKey?: string;
 }) {
   const [entries, setEntries] = useState<EntradaDiario[]>([]);
   const [cronoSegundos, setCronoSegundos] = useState(180);
@@ -381,7 +379,7 @@ export default function DiarioDirector({
   // ─── Resumen semanal (domingo) ────────────────────────────────────────────
   const generarResumenSemana = useCallback(
     async (todasEntradas: EntradaDiario[]) => {
-      if (!import.meta.env.VITE_GEMINI_API_KEY) return;
+      
 
       const ahora = new Date();
       const lunes = new Date(ahora);
@@ -409,7 +407,7 @@ Devuelve SOLO este JSON:
   "acciones_proxima_semana": ["<acción 1>", "<acción 2>", "<acción 3>"]
 }`;
 
-        const texto = await generateText({ prompt });
+        const texto = await generateText({ tarea: 'guion', prompt });
         const jsonMatch = texto.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('No JSON');
         const resumenTexto = JSON.stringify(JSON.parse(jsonMatch[0]));
@@ -426,7 +424,7 @@ Devuelve SOLO este JSON:
         setGenerandoResumen(false);
       }
     },
-    [geminiKey, userId],
+    [userId],
   );
 
   // ─── KPIs (se muestran DESPUÉS de guardar) ────────────────────────────────

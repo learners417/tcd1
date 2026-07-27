@@ -58,7 +58,10 @@ const NUEVO_UNLOCK: Array<{ match: string; pilares: PilarId[] }> = [
   { match: 'caro',   pilares: ['P3'] },
   { match: 'bruno',  pilares: ['P4'] },
   { match: 'lucas',  pilares: ['P4'] },
-  { match: 'ramiro', pilares: ['P5'] },
+  // Ramiro leia numeros desde P5 (dia 37), pero el Tablero de Numeros es
+  // P4.7 (dia 29) y la campana enciende en P4.4 (dia 29): el sanador pasaba
+  // 8 dias cargando numeros sin el entrenador que se los lee.
+  { match: 'ramiro', pilares: ['P4'] },
 ];
 
 /** Pilares de desbloqueo efectivos: el remapeo nuevo si existe, si no la config. */

@@ -5,6 +5,7 @@ import type { ProfileV2 } from './supabase';
 import type { CampanaFormState, AnguloCreativo, TipoCreativo, ObjetivoCampana, EstiloVisual, ImageMode, CustomText, ImageFormat } from './campanasTypes';
 import { ESTILO_VISUAL_OPTIONS, IMAGE_FORMAT_OPTIONS, SAFE_ZONE_BY_FORMAT } from './campanasTypes';
 import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
+import { primero } from './primero';
 
 // ─── Contexto ADN del profesional ────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ export function adnContext(perfil: Partial<ProfileV2>): string {
   - SUENOS: ${avatar.suenos?.join(', ') || 'no definidos'}
   - OBJECIONES: ${avatar.objeciones?.join(', ') || 'no definidas'}
   - LENGUAJE que usa: ${avatar.lenguaje?.join(', ') || 'no definido'}`
-    : perfil.avatar_cliente ?? 'no definido';
+    : primero(perfil.avatar_cliente) || 'no definido';
 
   const paisInfo = getPaisInfo(perfil.pais);
   const paisLinea = paisInfo
@@ -28,36 +29,36 @@ export function adnContext(perfil: Partial<ProfileV2>): string {
 
   return `
 === CONTEXTO DEL SANADOR ===
-- Nombre: ${perfil.nombre ?? 'Sanador'}
-- Especialidad: ${perfil.especialidad ?? 'salud'}
+- Nombre: ${primero(perfil.nombre) || 'Sanador'}
+- Especialidad: ${primero(perfil.especialidad) || 'salud'}
 ${paisLinea}
-- Nicho: ${perfil.nicho ?? perfil.adn_nicho ?? 'no definido'}
-- PUV: ${perfil.adn_usp ?? 'no definido'}
-- Posicionamiento: ${perfil.posicionamiento ?? 'no definido'}
+- Nicho: ${primero(perfil.nicho, perfil.adn_nicho) || 'no definido'}
+- PUV: ${primero(perfil.adn_usp) || 'no definido'}
+- Posicionamiento: ${primero(perfil.posicionamiento) || 'no definido'}
 
 === AVATAR DEL CLIENTE IDEAL ===
 ${avatarStr}
 
 === MATRIZ DE TRANSFORMACION ===
-- Punto A (El Infierno — dolores actuales): ${perfil.matriz_a ?? 'no definido'}
-- Punto B (Los Obstaculos — por que no avanzan): ${perfil.matriz_b ?? 'no definido'}
-- Punto C (El Cielo — resultado deseado): ${perfil.matriz_c ?? 'no definido'}
+- Punto A (El Infierno — dolores actuales): ${primero(perfil.matriz_a) || 'no definido'}
+- Punto B (Los Obstaculos — por que no avanzan): ${primero(perfil.matriz_b) || 'no definido'}
+- Punto C (El Cielo — resultado deseado): ${primero(perfil.matriz_c) || 'no definido'}
 
 === METODO Y OFERTA ===
-- Metodo: ${perfil.metodo_nombre ?? 'no definido'}
-- Pasos del metodo: ${perfil.metodo_pasos ?? 'no definido'}
-- Oferta High Ticket: ${perfil.oferta_high ?? 'no definida'}
-- Oferta Mid Ticket: ${perfil.oferta_mid ?? 'no definida'}
-- Oferta Low / Lead Magnet: ${perfil.oferta_low ?? perfil.lead_magnet ?? 'no definido'}
+- Metodo: ${primero(perfil.metodo_nombre) || 'no definido'}
+- Pasos del metodo: ${primero(perfil.metodo_pasos) || 'no definido'}
+- Oferta High Ticket: ${primero(perfil.oferta_high) || 'no definida'}
+- Oferta Mid Ticket: ${primero(perfil.oferta_mid) || 'no definida'}
+- Oferta Low / Lead Magnet: ${primero(perfil.oferta_low, perfil.lead_magnet) || 'no definido'}
 
 === HISTORIA ===
-- Historia 50 palabras: ${perfil.historia_50 ?? 'no cargada'}
-- Historia 150 palabras: ${perfil.historia_150 ?? 'no cargada'}
+- Historia 50 palabras: ${primero(perfil.historia_50) || 'no cargada'}
+- Historia 150 palabras: ${primero(perfil.historia_150) || 'no cargada'}
 
 === IDENTIDAD VISUAL ===
-- Colores: ${perfil.identidad_colores ?? 'no definidos'}
-- Tipografia: ${perfil.identidad_tipografia ?? 'no definida'}
-- Tono de comunicacion: ${perfil.identidad_tono ?? 'no definido'}
+- Colores: ${primero(perfil.identidad_colores) || 'no definidos'}
+- Tipografia: ${primero(perfil.identidad_tipografia) || 'no definida'}
+- Tono de comunicacion: ${primero(perfil.identidad_tono) || 'no definido'}
 
 ${instruccionesDialecto(perfil.pais)}
 `.trim();
@@ -418,7 +419,7 @@ ${estiloBlock}${brandBrief}
 === BRIEF DEL USUARIO (intencion del carrusel) ===
 ${brief.trim().length > 0
   ? brief
-  : `(sin brief explicito — inventa una historia coherente al nicho "${perfil.nicho ?? perfil.adn_nicho ?? perfil.especialidad ?? 'salud y bienestar'}" y al angulo elegido. Asegurate de que cada slide avance el argumento: Slide 1 = hook fuerte distinto al resto, slides intermedios = una idea concreta diferente cada uno, slide final = CTA accionable.)`}
+  : `(sin brief explicito — inventa una historia coherente al nicho "${primero(perfil.nicho, perfil.adn_nicho, perfil.especialidad) || 'salud y bienestar'}" y al angulo elegido. Asegurate de que cada slide avance el argumento: Slide 1 = hook fuerte distinto al resto, slides intermedios = una idea concreta diferente cada uno, slide final = CTA accionable.)`}
 
 === TAREA ===
 1) Crea ${totalSlides} titulares encadenados que se LEAN como una sola historia de izquierda a derecha.
@@ -499,9 +500,9 @@ export function buildImagePrompt(
     };
   },
 ): string {
-  const nicho = perfil.nicho ?? perfil.adn_nicho ?? perfil.especialidad ?? 'salud y bienestar';
-  const colores = perfil.identidad_colores ?? 'tonos profesionales, dorado y oscuro';
-  const tono = perfil.identidad_tono ?? 'profesional y cercano';
+  const nicho = primero(perfil.nicho, perfil.adn_nicho, perfil.especialidad) || 'salud y bienestar';
+  const colores = primero(perfil.identidad_colores) || 'tonos profesionales, dorado y oscuro';
+  const tono = primero(perfil.identidad_tono) || 'profesional y cercano';
   const mode = options?.mode ?? 'completa';
   const estilo = options?.estilo;
 

@@ -23,10 +23,9 @@ import type { ProfileV2 } from '../lib/supabase';
 interface CampanasProps {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
 }
 
-export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
+export default function Campanas({ userId, perfil }: CampanasProps) {
   const [view, setView] = useState<CampanasView>('anuncios');
   const [previousView, setPreviousView] = useState<CampanasView>('home');
   const [campanas, setCampanas] = useState<Campana[]>([]);
@@ -193,7 +192,6 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
           campana={selectedCampana}
           userId={userId}
           perfil={perfil}
-          geminiKey={geminiKey}
           onBack={handleBack}
           onSaved={handleCreativoSaved}
         />

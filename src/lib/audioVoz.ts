@@ -6,44 +6,40 @@
  * Sin clave o sin micrófono → la función degrada en silencio (no bloquea nada).
  */
 
-const MODELO = 'gemini-2.5-flash';
 
 export function audioDisponible(): boolean {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-  return Boolean(apiKey) && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+  // Antes preguntaba si existía la clave en el navegador. Ahora la clave está
+  // en el servidor, así que lo único que puede faltar es el micrófono.
+  return typeof navigator !== 'undefined'
+    && !!navigator.mediaDevices?.getUserMedia;
 }
 
 /** Transcribe un audio (base64, sin prefijo dataURL). Devuelve el texto o null. */
 export async function transcribirAudio(base64: string, mimeType: string): Promise<string | null> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-  if (!apiKey) return null;
+  // La clave de Gemini vive en el SERVIDOR, sin prefijo VITE_. Todo lo que
+  // lleva ese prefijo se empaqueta dentro del bundle y cualquiera que abra
+  // la app puede leerlo y gastarlo.
   try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: 'Transcribe este audio en castellano, fielmente, en primera persona, sin comentarios tuyos ni encabezados. Solo el texto de lo que dice la persona, con puntuación natural.' },
-              { inline_data: { mime_type: mimeType, data: base64 } },
-            ],
-          }],
-          generationConfig: { temperature: 0.1 },
-        }),
-      },
-    );
+    const r = await fetch('/api/ai/transcribir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        base64, mimeType, feature: 'sesion',
+        userId: (() => {
+          try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}').id ?? null; }
+          catch { return null; }
+        })(),
+      }),
+    });
     if (!r.ok) return null;
-    const j = await r.json();
-    const texto = j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('').trim();
-    return texto || null;
+    const data = await r.json() as { texto?: string };
+    return data.texto?.trim() || null;
   } catch {
+    // Sin transcripción, el sanador escribe. Nunca se rompe la sesión.
     return null;
   }
 }
 
-/** Grabadora simple: start() → stop() devuelve { base64, mimeType }. */
 export function crearGrabadora() {
   let mediaRecorder: MediaRecorder | null = null;
   let chunks: Blob[] = [];

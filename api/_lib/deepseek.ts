@@ -37,6 +37,8 @@ export interface DeepSeekCallOptions {
   maxTokens?: number;
   /** Default: 0.7 · valores bajos = mas determinista. */
   temperature?: number;
+  /** Modelo explícito. Lo manda el enrutador por tarea; si falta, el default. */
+  model?: string;
 }
 
 export interface DeepSeekResult {
@@ -74,7 +76,7 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
     throw new Error('DEEPSEEK_API_KEY not configured');
   }
 
-  const model = process.env.DEEPSEEK_MODEL || DEFAULT_MODEL;
+  const model = options.model || process.env.DEEPSEEK_MODEL || DEFAULT_MODEL;
   const maxTokens = options.maxTokens
     ?? (process.env.DEEPSEEK_MAX_TOKENS ? Number(process.env.DEEPSEEK_MAX_TOKENS) : DEFAULT_MAX_TOKENS);
 

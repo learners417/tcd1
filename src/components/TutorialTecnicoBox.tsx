@@ -5,10 +5,15 @@
  * lo ve; quien se traba, lo tiene ahí mismo sin salir del Camino.
  */
 import React from 'react';
-import { getTutoriales } from '../lib/tutorialesTecnicos';
+import { getTutoriales, getTutorial, type TutorialTecnico } from '../lib/tutorialesTecnicos';
 
-export default function TutorialTecnicoBox({ codigo }: { codigo: string }) {
-  const tutoriales = getTutoriales(codigo);
+export default function TutorialTecnicoBox(
+  { codigo, clave }: { codigo?: string; clave?: string },
+) {
+  // `clave` trae UNO exacto; `codigo` trae todos los de esa sesión.
+  const tutoriales = clave
+    ? [getTutorial(clave)].filter(Boolean) as TutorialTecnico[]
+    : getTutoriales(codigo ?? '');
   if (!tutoriales.length) return null;
 
   return (

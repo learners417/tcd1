@@ -83,6 +83,7 @@ export default function SesionGuiadaPlayer({
   const [fuego, setFuego] = useState(false);
   const [iaOut, setIaOut] = useState<Record<string, string>>({});
   const [iaCargando, setIaCargando] = useState(false);
+  const [iaFallo, setIaFallo] = useState<string | null>(null);
   const [inicio] = useState(() => Date.now());
   const [reloj, setReloj] = useState('0:00');
   const topRef = useRef<HTMLDivElement>(null);
@@ -116,13 +117,22 @@ export default function SesionGuiadaPlayer({
 
   const generarIA = async () => {
     if (!paso || iaCargando) return;
+    setIaFallo(null);
     setIaCargando(true);
     try {
       const contexto = Object.entries(st.resp).map(([k, v]) => `${k}: ${v}`).join('\n');
       const base = String(paso.prompt ?? paso.promptIA ?? paso.texto ?? paso.pregunta ?? '');
-      const out = await generateText({ prompt: `${base}\n\nLo que la persona respondió hasta acá:\n${contexto}\n\nResponde en tuteo neutro, corto, hablado y natural.` });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: `${base}\n\nLo que la persona respondió hasta acá:\n${contexto}\n\nResponde en tuteo neutro, corto, hablado y natural.` });
       if (out) { setIaOut((p) => ({ ...p, [pasoKey(paso, st.idx)]: out })); setResp(out); }
-    } catch { /* noop */ }
+    } catch (err) {
+      // Antes esto era `catch { /* noop */ }`: el botón no hacía nada y no
+      // decía por qué. Un botón mudo es peor que un botón que falla.
+      setIaFallo(
+        err instanceof Error && err.message
+          ? err.message
+          : 'No pudimos generarlo ahora. Toca de nuevo en unos segundos.',
+      );
+    }
     setIaCargando(false);
   };
 
@@ -262,6 +272,11 @@ export default function SesionGuiadaPlayer({
                     <p className="text-sm text-cream/85 whitespace-pre-wrap leading-relaxed">{respActual}</p>
                   </div>
                 ) : null}
+                {iaFallo && (
+                  <div className="rounded-xl border border-danger/40 bg-danger/[0.06] px-4 py-3">
+                    <p className="text-sm text-cream/85">{iaFallo}</p>
+                  </div>
+                )}
                 <button onClick={generarIA} disabled={iaCargando}
                   className="w-full py-3 rounded-xl border border-gold/30 text-gold text-sm font-bold hover:bg-gold/[0.06] disabled:opacity-50">
                   {iaCargando ? 'Creando contigo…' : respActual ? '🔄 Proponme otra versión' : '✨ Crear con mi Mentor'}

@@ -19,7 +19,6 @@ interface Props {
   campana?: Campana;
   userId?: string;
   perfil: Partial<ProfileV2>;
-  geminiKey?: string;
   onSaved?: (creativo: Creativo) => void;
 }
 
@@ -29,7 +28,7 @@ interface EditedResult {
   modelUsed: string;
 }
 
-export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }: Props) {
+export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
   const [baseImage, setBaseImage] = useState<UploadedImageWithDimensions | null>(null);
   const [characterRef, setCharacterRef] = useState<UploadedImage | null>(null);
   const [editInstruction, setEditInstruction] = useState('');
@@ -106,7 +105,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
         { base64: compressedBase.base64, mimeType: compressedBase.mimeType },
         editInstruction.trim(),
         setProgress,
-        { geminiKey, format, quality: 'medium' },
+        { format, quality: 'medium' },
         compressedChar
           ? { base64: compressedChar.base64, mimeType: compressedChar.mimeType }
           : undefined,
@@ -141,7 +140,7 @@ export default function CreativoEdicion({ campana, userId, geminiKey, onSaved }:
       setEditing(false);
       setProgress(null);
     }
-  }, [baseImage, characterRef, editInstruction, detectedFormat, geminiKey]);
+  }, [baseImage, characterRef, editInstruction, detectedFormat, undefined]);
 
   const persistAsNewCreativo = useCallback(async () => {
     if (!result || !baseImage) return;

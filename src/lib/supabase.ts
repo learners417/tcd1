@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+/**
+ * Las variables llegan de Vite dentro del navegador. Fuera de él
+ * `import.meta.env` no existe, y leerlo directo hacía que el módulo REVENTARA
+ * al cargarse — lo que volvía imposible montar cualquier pantalla en una
+ * prueba, que es la única forma de saber si una pantalla no explota al
+ * abrirse. Con la guarda, el módulo carga y el aviso de abajo hace su trabajo.
+ */
+const entorno = (import.meta.env ?? process.env ?? {}) as Record<string, string | undefined>;
+
+const supabaseUrl = entorno.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = entorno.VITE_SUPABASE_ANON_KEY as string;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('[Supabase] Variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY no configuradas. El modo offline (localStorage) está activo.');
@@ -10,6 +19,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
+
+/**
+ * El cliente de Supabase, garantizado.
+ *
+ * `supabase` es null cuando faltan las variables de entorno. Sin comprobación
+ * de nulos activada, decenas de llamadas lo usaban directo: si el despliegue
+ * sale sin esas variables, la app no avisa — revienta con "cannot read
+ * properties of null" en la primera consulta.
+ *
+ * Esto falla con una frase que se entiende, en el mismo lugar donde está el
+ * problema de verdad.
+ */
+export function db() {
+  if (!supabase) {
+    throw new Error(
+      'La app no está conectada a su base de datos. Faltan las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.',
+    );
+  }
+  return supabase;
+}
 
 export const isSupabaseReady = () => supabase !== null;
 
@@ -371,6 +400,7 @@ export type MetaCodigo =
   | 'P4.2c'
   | 'P4.2d' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
   | 'P4.7'
+  | 'P4.8'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)
@@ -544,7 +574,7 @@ export const NIVEL_METADATA: Record<1 | 2 | 3 | 4 | 5, NivelMeta> = {
   2: {
     nombre: 'Sanador Narrado',
     triggerPilar: 'P3',
-    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué vos?" en 30 segundos.',
+    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué tú?" en 30 segundos.',
   },
   3: {
     nombre: 'Sanador Posicionado',

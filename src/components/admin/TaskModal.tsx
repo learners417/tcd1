@@ -49,7 +49,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
   const creadorNombre =
     tarea?.creador_nombre
     ?? teamMembers.find(m => m.id === creadorId)?.nombre
-    ?? 'Vos';
+    ?? 'Tú';
 
   const currentUserNombre =
     teamMembers.find(m => m.id === currentAdminId)?.nombre ?? 'Usuario';

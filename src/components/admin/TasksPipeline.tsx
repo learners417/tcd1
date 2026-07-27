@@ -459,7 +459,7 @@ export default function TasksPipeline({
         open={deletingTarea !== null}
         variant="danger"
         title="Eliminar tarea"
-        message={deletingTarea ? `¿Seguro que querés eliminar «${deletingTarea.titulo}»? Esta acción no se puede deshacer.` : ''}
+        message={deletingTarea ? `¿Seguro que quieres eliminar «${deletingTarea.titulo}»? Esta acción no se puede deshacer.` : ''}
         confirmLabel="Eliminar"
         cancelLabel="Cancelar"
         loading={deleteLoading}
@@ -471,7 +471,7 @@ export default function TasksPipeline({
         open={bulkArchiveOpen}
         variant="default"
         title="Archivar completadas"
-        message={`¿Archivar las ${completadasNoArchivadasCount} tarea${completadasNoArchivadasCount === 1 ? '' : 's'} completada${completadasNoArchivadasCount === 1 ? '' : 's'}? Quedan ocultas pero podés volver a verlas con "Ver archivadas".`}
+        message={`¿Archivar las ${completadasNoArchivadasCount} tarea${completadasNoArchivadasCount === 1 ? '' : 's'} completada${completadasNoArchivadasCount === 1 ? '' : 's'}? Quedan ocultas pero puedes volver a verlas con "Ver archivadas".`}
         confirmLabel="Archivar"
         cancelLabel="Cancelar"
         loading={bulkArchiveLoading}

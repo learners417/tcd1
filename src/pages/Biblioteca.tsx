@@ -314,7 +314,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
   const [videosLoading, setVideosLoading] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+  
   const completadas = useMemo(() => getCompletadas(), []);
 
   const activeTab = CLINICA_TABS.find((t) => t.id === activeTabId) ?? CLINICA_TABS[0];
@@ -425,7 +425,6 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         <HerramientaDetalle
           herramientaId={herramientaActivaId}
           userId={userId}
-          geminiKey={geminiKey}
           onVolver={() => setHerramientaActivaId(null)}
         />
       </div>
@@ -625,18 +624,6 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             <Sparkles className="w-4 h-4 text-gold" /> Herramientas IA
           </h2>
 
-          {!geminiKey && (
-            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4">
-              <Lock className="w-4 h-4 text-gold shrink-0" />
-              <p className="text-sm text-amber-300">
-                Configura la variable{' '}
-                <code className="bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-mono text-xs">
-                  VITE_GEMINI_API_KEY
-                </code>{' '}
-                para activar las herramientas IA.
-              </p>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {herramientas.map((h) => (
@@ -664,15 +651,13 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
 
                 <button
                   onClick={() => setHerramientaActivaId(h.id)}
-                  disabled={!geminiKey}
+
                   className={`w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                    geminiKey
-                      ? 'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
-                      : 'bg-gold/5 text-cream/45 cursor-not-allowed border border-[rgba(232,150,46,0.1)]'
+                    'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  {geminiKey ? 'Abrir Herramienta' : 'Sin API Key'}
+                  Abrir Herramienta
                 </button>
               </div>
             ))}

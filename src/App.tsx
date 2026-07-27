@@ -531,14 +531,13 @@ export default function App() {
             <CeremoniaCinturon />
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}
-            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
             {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
@@ -549,7 +548,6 @@ export default function App() {
               <Agentes
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 setCurrentPage={setCurrentPage}
               />
             )}
@@ -563,7 +561,6 @@ export default function App() {
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
               />
             )}
             {currentPage === 'creador' && (() => {

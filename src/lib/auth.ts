@@ -86,7 +86,13 @@ export function syncProfileToLocalStorage(profile: Profile): void {
   // Espejo dedicado del plan: el gating del Camino y el tope del Mentor lo leen
   // de acá (inmune a que el borrador del perfil pise tcd_profile sin el plan).
   try { localStorage.setItem('tcd_plan', String(profile.plan ?? '')); } catch { /* noop */ }
+  // Los campos del ADN viajan en ProfileV2. Sin espejarlos, toda herramienta
+  // que autocompleta desde el ADN (el Constructor de anuncios, entre otras)
+  // lee undefined y muestra un formulario vacio aunque el cliente lo haya
+  // sellado. El id va tambien: lo necesita el cobro de creditos.
+  const v2 = profile as unknown as Record<string, unknown>;
   localStorage.setItem('tcd_profile', JSON.stringify({
+    id: profile.id,
     nombre: profile.nombre,
     email: profile.email,
     especialidad: profile.especialidad ?? '',
@@ -94,5 +100,13 @@ export function syncProfileToLocalStorage(profile: Profile): void {
     plan: profile.plan,
     modulos_activos: profile.modulos_activos ?? [],
     agentes_activos: profile.agentes_activos ?? [],
+    // plan_comercial y acceso_hasta gobiernan la ESCALERA de venta: sin
+    // espejarlos, planActual() caia siempre en 'completo' (pilar 99) y un
+    // comprador de plan blanco (pilar 1) se llevaba la app entera.
+    plan_comercial: v2.plan_comercial ?? null,
+    acceso_hasta: v2.acceso_hasta ?? null,
+    adn_avatar: v2.adn_avatar ?? null,
+    metodo_nombre: v2.metodo_nombre ?? '',
+    oferta_mid: v2.oferta_mid ?? '',
   }));
 }

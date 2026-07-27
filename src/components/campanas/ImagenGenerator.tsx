@@ -53,7 +53,6 @@ interface Props {
   copies?: CopyGenerado[];
   angulo?: AnguloCreativo;
   perfil: Partial<ProfileV2>;
-  geminiKey?: string;
   initialFormat?: ImageFormat;
   initialSlideCount?: number;
   lockFormat?: boolean;
@@ -65,7 +64,7 @@ interface Props {
   ) => void;
 }
 
-export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, initialFormat, initialSlideCount, lockFormat, onImagesGenerated }: Props) {
+export default function ImagenGenerator({ copies, angulo, perfil, initialFormat, initialSlideCount, lockFormat, onImagesGenerated }: Props) {
   const copyList = copies ?? [];
   const effectiveAngulo: AnguloCreativo = angulo ?? 'directo';
 
@@ -299,7 +298,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           ...baseOpts,
           customText: effectiveCustomText,
         });
-        const result = await generateImageWithFallback(prompt, setProgress, refs, { geminiKey, format, quality });
+        const result = await generateImageWithFallback(prompt, setProgress, refs, { format, quality });
         const imgs = [{ base64: result.imageBase64, mimeType: result.mimeType, modelUsed: result.modelUsed }];
         setImages(imgs);
         setSlidePrompts([prompt]);
@@ -329,7 +328,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               perfil,
               styleRefs.length > 0 ? undefined : estilo,
             );
-            const text = await generateText({ prompt: narrPrompt });
+            const text = await generateText({ feature: 'creativo', tarea: 'chat', prompt: narrPrompt });
             const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
             const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -409,7 +408,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
         const results = await generateCarouselImages(prompts, (slideIdx, prog) => {
           setCurrentSlide(slideIdx);
           setProgress(prog);
-        }, refs, { geminiKey, format, quality });
+        }, refs, { format, quality });
         const imgs = results.map((r) => ({ base64: r.imageBase64, mimeType: r.mimeType, modelUsed: r.modelUsed }));
         setImages(imgs);
         setSlidePrompts(prompts);
@@ -427,7 +426,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       setGenerating(false);
       setProgress(null);
     }
-  }, [copyList, effectiveAngulo, perfil, geminiKey, onImagesGenerated, estilo, mode, genMode, instrucciones, characterRefs, styleRefs, customText, slideConfigs, format, quality, userPrompt, textSource, isCarousel, totalSlides]);
+  }, [copyList, effectiveAngulo, perfil, onImagesGenerated, estilo, mode, genMode, instrucciones, characterRefs, styleRefs, customText, slideConfigs, format, quality, userPrompt, textSource, isCarousel, totalSlides]);
 
   // ─── Regenerar UNA sola slide ──────────────────────────────────────────────
   // Reconstruye el prompt desde el estado UI actual (estilo, tema, instrucciones,
@@ -517,7 +516,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
     setRegeneratingIdx(idx);
     try {
-      const result = await generateImageWithFallback(prompt, setProgress, refs, { geminiKey, format, quality });
+      const result = await generateImageWithFallback(prompt, setProgress, refs, { format, quality });
       // Guardar el prompt nuevo y las refs actuales para futuras regeneraciones
       setSlidePrompts(prev => { const next = [...prev]; next[idx] = prompt; return next; });
       setSlideRefsUsed(prev => { const next = [...prev]; next[idx] = refs; return next; });
@@ -544,7 +543,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
   }, [
     totalSlides, isCarousel, characterRefs, styleRefs, estilo, mode, instrucciones,
     userPrompt, format, genMode, customText, copyList, effectiveAngulo, perfil,
-    slideConfigs, savedNarrative, geminiKey, quality, onImagesGenerated,
+    slideConfigs, savedNarrative, quality, onImagesGenerated,
   ]);
 
   // ─── Edicion sutil con IA ──────────────────────────────────────────────────
@@ -560,7 +559,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
         { base64: baseImg.base64, mimeType: baseImg.mimeType },
         editPrompt.trim(),
         setProgress,
-        { geminiKey, format, quality },
+        { format, quality },
       );
       // Mismo motivo que en regenerateSingle: nada de side effects dentro del
       // updater (StrictMode invoca el updater dos veces en dev).
@@ -581,7 +580,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       setEditing(false);
       setProgress(null);
     }
-  }, [geminiKey, editPrompt, images, previewIdx, mode, onImagesGenerated, format, quality, slidePrompts]);
+  }, [editPrompt, images, previewIdx, mode, onImagesGenerated, format, quality, slidePrompts]);
 
   return (
     <div className="space-y-3">
@@ -797,7 +796,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                 <Type className={`w-3.5 h-3.5 ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream/55'}`} />
                 <span className={`text-xs font-semibold ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream'}`}>Texto personalizado</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Vos escribis el texto que va en la imagen</p>
+              <p className="text-[11px] text-cream/45 leading-tight">Tú escribis el texto que va en la imagen</p>
             </button>
             <button onClick={() => setGenMode('solo_fondo')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'solo_fondo' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">

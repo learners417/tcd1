@@ -297,7 +297,7 @@ export default function TaskByPersonView({
             <PersonColumn
               key={m.id}
               personId={m.id}
-              personName={m.id === currentUserId ? `${m.nombre ?? 'Yo'} (vos)` : m.nombre ?? 'Sin nombre'}
+              personName={m.id === currentUserId ? `${m.nombre ?? 'Yo'} (tú)` : m.nombre ?? 'Sin nombre'}
               tareas={byPerson.get(m.id) ?? []}
               currentUserId={currentUserId}
               onStatusChange={onStatusChange}

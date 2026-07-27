@@ -37,7 +37,7 @@ export function initSentry(): void {
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration({
         // Por privacidad: enmascarar texto e inputs del usuario por defecto.
-        // Si querés ver el contenido real en los replays, poné estos en false.
+        // Si quieres ver el contenido real en los replays, poné estos en false.
         maskAllText: true,
         blockAllMedia: true,
       }),

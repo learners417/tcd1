@@ -22,7 +22,7 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
     pasos: [
       'Entra a business.facebook.com y toca "Crear cuenta".',
       'Pon el nombre de tu negocio, tu nombre y tu email de trabajo.',
-      'Revisa tu email y confirmá (Meta te manda un enlace).',
+      'Revisa tu email y confirma (Meta te manda un enlace).',
       'Dentro, ve a "Configuración del negocio" → "Cuentas" → "Cuentas publicitarias" → "Agregar" → "Crear una nueva".',
       'Elige tu país, tu moneda y la zona horaria correctas — esto no se puede cambiar después.',
       'Listo: ya tienes tu central de anuncios. La vas a usar cuando montes la campaña.',
@@ -79,13 +79,20 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
       'Pausá los que no funcionan — no tiene sentido gastar en ellos.',
       'Al ganador, subile el presupuesto de a poco: 20% cada 2-3 días, no el doble de golpe (eso confunde al algoritmo).',
       'Mira que el costo por mensaje se mantenga estable mientras subes. Si se dispara, frená y espera.',
-      'Cuando encuentres tu techo (donde el costo empieza a subir), quedate ahí. Ese es tu ritmo sostenible.',
+      'Cuando encuentres tu techo (donde el costo empieza a subir), quédate ahí. Ese es tu ritmo sostenible.',
     ],
     siFalla: 'Si al subir el presupuesto los resultados empeoran, bajá al nivel anterior y espera 3 días. Escalar es paciencia, no apuro. Ramiro te lee los números si tienes dudas.',
   },
 };
 
-/** Devuelve el tutorial de un paso, o null. */
+/**
+ * Devuelve el tutorial por su CLAVE exacta, o null.
+ *
+ * Usar esta y no getTutoriales cuando se quiere uno solo: hay dos entradas
+ * con el mismo `codigo` ('P4.5-pixel' y 'P4.5-dm'), así que buscar por código
+ * devuelve las dos — y a un cliente que sigue el tutorial equivocado se le
+ * va una tarde.
+ */
 export function getTutorial(codigo: string): TutorialTecnico | null {
   return TUTORIALES[codigo] ?? null;
 }

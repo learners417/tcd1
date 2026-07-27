@@ -430,7 +430,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       toast.error(
         msg.includes('column') && msg.includes('pais')
           ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN pais text'
-          : 'No se pudo guardar el pais · probalo de nuevo',
+          : 'No se pudo guardar el pais · pruébalo de nuevo',
       );
     } finally {
       setSavingPais(false);

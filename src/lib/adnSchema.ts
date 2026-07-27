@@ -271,7 +271,7 @@ export const DIMENSIONES_FOTO_PARTIDA = [
   { key: 'metodo_nombrado',  label: 'Tu método con nombre propio',          refCampo: 'IRR.metodo_nombre' },
   { key: 'escalera_ofertas', label: 'Tu escalera de ofertas armada',        refCampo: 'NEG.oferta_mid' },
   { key: 'contenido_nivel',  label: 'Tu contenido por nivel de awareness',  refCampo: 'INF.anuncios_meta_6_creativos' },
-  { key: 'sistema_autonomo', label: 'Tu sistema funcionando sin vos',       refCampo: 'CAP.retargeting_config' },
+  { key: 'sistema_autonomo', label: 'Tu sistema funcionando sin ti',       refCampo: 'CAP.retargeting_config' },
 ] as const;
 
 export type DimensionFotoPartida = (typeof DIMENSIONES_FOTO_PARTIDA)[number]['key'];

@@ -120,10 +120,9 @@ const TABS: TabConfig[] = [
 interface Props {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
 }
 
-export default function CreativosView({ userId, perfil, geminiKey }: Props) {
+export default function CreativosView({ userId, perfil }: Props) {
   const [activeTab, setActiveTab] = useState<SubTab>('imagen');
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
   const [images, setImages] = useState<{ base64: string; mimeType: string; modelUsed: string }[]>([]);
@@ -375,7 +374,6 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           <CreativoEdicion
             userId={userId}
             perfil={perfilLocal ?? {}}
-            geminiKey={geminiKey}
             onSaved={() => { /* historial se recarga al cambiar a la tab */ }}
           />
         </div>
@@ -422,7 +420,6 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               key={activeTab}
               angulo={angulo}
               perfil={perfilLocal ?? {}}
-              geminiKey={geminiKey}
               initialFormat={config.format ?? '1:1'}
               initialSlideCount={config.slideCount ?? 1}
               lockFormat={config.lockFormat ?? false}

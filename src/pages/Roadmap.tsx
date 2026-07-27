@@ -127,7 +127,6 @@ interface PilarConEstado extends RoadmapPilar {
 interface Props {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   onNavigate?: (page: string) => void;
   onProfileFieldUpdate?: (fields: Record<string, unknown>) => void;
 }
@@ -241,7 +240,7 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
   );
 }
 
-export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfileFieldUpdate }: Props) {
+export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpdate }: Props) {
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
   // T2/T3 · registrar venta + graduación (rediseño 4 fases)
@@ -1311,7 +1310,6 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
                           <TaskHerramientaIA
                             meta={meta}
                             perfil={perfil}
-                            geminiKey={geminiKey}
                             outputExistente={taskOutputs.get(key)}
                             onSaveADN={(output) => handleSaveADN(pilar.numero, meta, output)}
                             isCompleted={estaCompletada}
@@ -1371,7 +1369,7 @@ export default function Roadmap({ userId, perfil, geminiKey, onNavigate, onProfi
             <p className="text-xs text-cream/65 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
             <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
             <input
-              type="number"
+              type="number" inputMode="decimal"
               value={ventaMonto}
               onChange={(e) => setVentaMonto(e.target.value)}
               placeholder="1000"

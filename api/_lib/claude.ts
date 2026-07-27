@@ -21,6 +21,10 @@ export interface ClaudeCallOptions {
   messages: Array<{ role: string; content: string }>;
   /** Default: CLAUDE_MAX_TOKENS env var o 16384. */
   maxTokens?: number;
+  /** Modelo explícito. Lo manda el enrutador por tarea; si falta, el default. */
+  model?: string;
+  /** 0 = determinista. Para clasificar y auditar conviene bajo. */
+  temperature?: number;
 }
 
 export interface ClaudeResult {
@@ -54,7 +58,7 @@ export async function callClaude(options: ClaudeCallOptions): Promise<ClaudeResu
     throw new Error('ANTHROPIC_API_KEY not configured');
   }
 
-  const model = process.env.CLAUDE_MODEL || DEFAULT_MODEL;
+  const model = options.model || process.env.CLAUDE_MODEL || DEFAULT_MODEL;
   const maxTokens = options.maxTokens
     ?? (process.env.CLAUDE_MAX_TOKENS ? Number(process.env.CLAUDE_MAX_TOKENS) : DEFAULT_MAX_TOKENS);
 
@@ -72,6 +76,7 @@ export async function callClaude(options: ClaudeCallOptions): Promise<ClaudeResu
         model,
         max_tokens: maxTokens,
         ...(options.system ? { system: options.system } : {}),
+        ...(typeof options.temperature === 'number' ? { temperature: options.temperature } : {}),
         messages: claudeMessages,
       });
 

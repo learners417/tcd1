@@ -375,7 +375,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div>
                   <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Ingresos mensuales (USD)</label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={ingresosMensuales}
                     onChange={e => setIngresosMensuales(e.target.value)}
                     placeholder="Ej: 2000"
@@ -385,7 +385,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div>
                   <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Horas/semana</label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={horasSemana}
                     onChange={e => setHorasSemana(e.target.value)}
                     placeholder="Ej: 40"

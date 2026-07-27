@@ -31,11 +31,10 @@ interface Props {
   herramientaId: string;
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   onVolver: () => void;
 }
 
-export default function HerramientaDetalle({ herramientaId, userId, perfil, geminiKey, onVolver }: Props) {
+export default function HerramientaDetalle({ herramientaId, userId, perfil, onVolver }: Props) {
   const herramienta = getHerramienta(herramientaId);
 
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
@@ -86,7 +85,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
     try {
       const prompt = herramienta.promptTemplate(inputs, perfil ?? {});
       let textoCompleto = '';
-      for await (const chunk of streamText({ prompt })) {
+      for await (const chunk of streamText({ feature: 'sesion', tarea: 'chat', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
       }
@@ -97,7 +96,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
     } finally {
       setGenerando(false);
     }
-  }, [camposCompletos, geminiKey, herramienta, inputs, perfil]);
+  }, [camposCompletos, herramienta, inputs, perfil]);
 
   // ─── Guardar en Supabase ───────────────────────────────────────────────────
   const handleGuardar = useCallback(async () => {

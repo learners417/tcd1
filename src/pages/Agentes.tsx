@@ -119,7 +119,6 @@ const CATEGORIA_ORDEN: AgenteCategoria[] = [
 interface AgentesProps {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   setCurrentPage?: (page: string) => void;
 }
 
@@ -333,7 +332,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           : '';
 
         const snapshot = obtenerSnapshot(agenteActivo);
-        const respuesta = await generateText({
+        const respuesta = await generateText({ feature: 'agentes', tarea: 'chat',
           prompt: `${baseConocimiento}\n\n---HISTORIAL---\n${historial}\n\nAgente:`,
           systemInstruction: CONTEXTO_REDISENO + '\n\n' + agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
         });
@@ -442,7 +441,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
 
   const copiarConversacion = useCallback(() => {
     const texto = mensajes
-      .map((m) => `${m.rol === 'agente' ? 'ENTRENADOR' : 'VOS'}: ${m.contenido}`)
+      .map((m) => `${m.rol === 'agente' ? 'ENTRENADOR' : 'TÚ'}: ${m.contenido}`)
       .join('\n\n');
     navigator.clipboard.writeText(texto);
     setCopiado(true);
@@ -464,7 +463,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           </h1>
           <p className="text-sm text-white/75 mt-1">
             Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
-            cuando avanzás en El Camino.
+            cuando avanzas en El Camino.
           </p>
         </div>
 

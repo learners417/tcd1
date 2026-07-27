@@ -108,7 +108,7 @@ INSTRUCCIONES:
         timestamp: new Date().toISOString(),
       }]);
 
-      for await (const chunk of streamText({ systemInstruction, messages: allMessages })) {
+      for await (const chunk of streamText({ feature: 'creativo', tarea: 'guion', systemInstruction, messages: allMessages })) {
         fullResponse += chunk;
         setMessages((prev) => {
           const updated = [...prev];

@@ -140,7 +140,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
         profileId = existing.id;
       } else {
         if (!form.nombre.trim() || !form.email.trim() || !form.password.trim()) {
-          throw new Error('Completá todos los campos requeridos');
+          throw new Error('Completa todos los campos requeridos');
         }
         // Credencial vía API admin (sin emails de confirmación → sin rate limit).
         // El usuario queda confirmado al instante; el RPC v2 crea el profile si no existe.
@@ -198,7 +198,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
       );
       if (rpcError) throw rpcError;
       if (!rpcResult) {
-        throw new Error('La actualización no devolvió resultado — verificá permisos admin');
+        throw new Error('La actualización no devolvió resultado — verifica permisos admin');
       }
 
       const updatedCount =
@@ -307,7 +307,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                 <div className="space-y-4">
                   <div className="bg-gold/5 border border-gold/20 rounded-xl px-4 py-3">
                     <p className="text-[11px] text-gold/80">
-                      La cuenta ya existe. Ingresá el email del cliente para buscarla y actualizar su perfil ADN con la nueva información.
+                      La cuenta ya existe. Ingresa el email del cliente para buscarla y actualizar su perfil ADN con la nueva información.
                     </p>
                   </div>
           <div className="mb-3">
@@ -409,7 +409,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
           {step === 1 && (
             <div className="space-y-4">
               <p className="text-sm text-cream/75">
-                Pegá toda la información disponible sobre el cliente: historia, método, ofertas, descripción de marca, etc.
+                Pega toda la información disponible sobre el cliente: historia, método, ofertas, descripción de marca, etc.
                 La IA extraerá los campos automáticamente.
               </p>
               <div>
@@ -417,7 +417,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                 <textarea
                   value={textoLibre}
                   onChange={e => setTextoLibre(e.target.value)}
-                  placeholder="Pegá aquí cualquier texto con información sobre el cliente: bio, propuesta de valor, descripción de servicios, historia personal, etc."
+                  placeholder="Pega aquí cualquier texto con información sobre el cliente: bio, propuesta de valor, descripción de servicios, historia personal, etc."
                   rows={12}
                   className={`${INPUT_CLASS} resize-none`}
                 />
@@ -450,7 +450,7 @@ export default function MigrationWizard({ onClose, onSuccess, clientes = [] }: M
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/10 border border-gold/20">
                   <Sparkles className="w-3.5 h-3.5 text-gold flex-shrink-0" />
                   <p className="text-[11px] text-gold">
-                    IA extrajo {extractedCount} campos. Revisá y corregí lo que necesites.
+                    IA extrajo {extractedCount} campos. Revisa y corrige lo que necesites.
                   </p>
                 </div>
               )}

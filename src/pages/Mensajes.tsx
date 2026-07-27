@@ -83,7 +83,7 @@ function SoporteIA() {
     setMsgs(nuevos);
     setCargando(true);
     try {
-      const out = await generateText({
+      const out = await generateText({ tarea: 'chat',
         systemInstruction: PROMPT_SOPORTE,
         messages: nuevos.slice(-8).map((m) => ({ role: m.role, content: m.content })),
       });

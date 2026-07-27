@@ -45,7 +45,7 @@ export default function NumeroPanel({ userId }: Props) {
       const guardado = await getElNumero(uid);
       if (guardado) {
         setN(guardado);
-        setPrecioNuevo(guardado.precio_nuevo ?? Math.round(guardado.phr || guardado.precio_sesion * 1.5));
+        setPrecioNuevo((guardado.precio_nuevo || Math.round(guardado.phr || guardado.precio_sesion * 1.5)));
       }
       setCargado(true);
     })();
@@ -84,7 +84,7 @@ export default function NumeroPanel({ userId }: Props) {
 
   const msgPacientes =
     `Hola 👋 Te escribo para contarte algo con transparencia: a partir de ${fechaTxt} el valor de mis sesiones pasa a ser ${money(precioNuevo)}. ` +
-    `Es una decisión que tomé para poder sostener mi trabajo con la calidad y la dedicación que merecés. ` +
+    `Es una decisión que tomé para poder sostener mi trabajo con la calidad y la dedicación que mereces. ` +
     `Tu proceso y tu cuidado siguen siendo mi prioridad de siempre. Cualquier duda, acá estoy. Gracias por la confianza. 🙏`;
 
   const msgIG =
@@ -176,7 +176,7 @@ export default function NumeroPanel({ userId }: Props) {
 
           {/* La cuenta que crece */}
           <section className="rounded-2xl border border-gold/20 bg-gold/[0.06] p-6 text-center">
-            <p className="text-sm text-cream/70">Con tu precio nuevo, este año ganás</p>
+            <p className="text-sm text-cream/70">Con tu precio nuevo, este año ganas</p>
             <p className="text-4xl md:text-5xl font-semibold text-gold tabular-nums my-2">+{money(cuentaAnimada)}</p>
             <p className="text-sm text-cream/55">más que hoy — con las mismas sesiones.</p>
           </section>

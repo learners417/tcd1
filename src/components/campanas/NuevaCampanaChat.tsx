@@ -14,6 +14,7 @@ import type { ProfileV2 } from '../../lib/supabase';
 import type { KaiMessage, WizardPhase, Campana } from '../../lib/campanasTypes';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
+import { primero } from '../../lib/primero';
 
 const PHASES: { id: WizardPhase; label: string; numero: number }[] = [
   { id: 'cliente', label: 'Cliente', numero: 1 },
@@ -86,7 +87,7 @@ export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel 
         id: 'init',
         role: 'assistant',
         content: perfil?.nombre
-          ? `Hola! Soy **KAI**, tu asistente de campañas.\n\nYa tengo el ADN de **${perfil.nombre}** (${perfil.especialidad ?? 'profesional de salud'}${perfil.nicho ? ` — ${perfil.nicho}` : ''}).\n\nPara crear la campaña solo necesito:\n1. **Nombre de la campaña**\n2. **Presupuesto publicitario**\n3. **Objetivo** (trafico al perfil, mensajes retargeting, o clientes potenciales)\n\nEmpezamos?`
+          ? `Hola! Soy **KAI**, tu asistente de campañas.\n\nYa tengo el ADN de **${perfil.nombre}** (${primero(perfil.especialidad) || 'profesional de salud'}${perfil.nicho ? ` — ${perfil.nicho}` : ''}).\n\nPara crear la campaña solo necesito:\n1. **Nombre de la campaña**\n2. **Presupuesto publicitario**\n3. **Objetivo** (trafico al perfil, mensajes retargeting, o clientes potenciales)\n\nEmpezamos?`
           : `Hola! Soy **KAI**, tu asistente de campañas.\n\nVamos a crear tu campaña paso a paso.\n\n**Cual es el nombre de tu cliente o campaña?**`,
         timestamp: new Date().toISOString(),
         phase: 'cliente',
@@ -231,7 +232,7 @@ REGLAS:
         phase: currentPhase,
       }]);
 
-      for await (const chunk of streamText({
+      for await (const chunk of streamText({ feature: 'campana_chat', tarea: 'chat',
         systemInstruction: buildSystemPrompt(),
         messages: allMessages,
       })) {

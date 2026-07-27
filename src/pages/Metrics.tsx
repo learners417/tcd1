@@ -99,7 +99,7 @@ function NumField({
       <div className="relative">
         {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/45 text-sm">{prefix}</span>}
         <input
-          type="number" step="any" min="0" value={value}
+          type="number" inputMode="decimal" step="any" min="0" value={value}
           onChange={(e) => onChange(e.target.value)} placeholder="0"
           className={`w-full input-field ${prefix ? 'pl-7' : ''}`}
         />
@@ -364,7 +364,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Período */}
         <div className="card-panel p-5 rounded-2xl">
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-gold mb-3">¿Qué período cargás?</p>
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-gold mb-3">¿Qué período cargas?</p>
           <div className="flex gap-2 mb-3">
             {(['dia', 'semana'] as const).map((t) => (
               <button

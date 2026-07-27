@@ -4,6 +4,7 @@
  */
 import type { ProfileV2 } from './supabase';
 import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
+import { primero } from './primero';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -70,13 +71,13 @@ function contextoBase(perfil: Partial<ProfileV2>): string {
 
   return `
 Contexto del profesional de salud:
-- Nombre: ${perfil.nombre ?? 'el profesional'}
-- Especialidad: ${perfil.especialidad ?? 'salud'}
+- Nombre: ${primero(perfil.nombre) || 'el profesional'}
+- Especialidad: ${primero(perfil.especialidad) || 'salud'}
 ${paisLinea}
-- Nicho: ${perfil.nicho ?? 'no definido aún'}
-- Avatar de cliente ideal: ${perfil.avatar_cliente ?? 'no definido aún'}
-- Posicionamiento: ${perfil.posicionamiento ?? 'no definido aún'}
-- Historia de origen: ${perfil.historia_origen ?? 'no cargada aún'}
+- Nicho: ${primero(perfil.nicho) || 'no definido aún'}
+- Avatar de cliente ideal: ${primero(perfil.avatar_cliente) || 'no definido aún'}
+- Posicionamiento: ${primero(perfil.posicionamiento) || 'no definido aún'}
+- Historia de origen: ${primero(perfil.historia_origen) || 'no cargada aún'}
 
 ${instruccionesDialecto(perfil.pais)}
 `.trim();
@@ -169,7 +170,7 @@ Responde SOLO un JSON array válido de 10 objetos (sin texto antes ni después, 
       },
       {
         id: 'resultado_que_logras',
-        label: '¿Qué resultado concreto lográs con tus clientes?',
+        label: '¿Qué resultado concreto logras con tus clientes?',
         tipo: 'textarea',
         placeholder: 'No el proceso ("hago sesiones de..."), sino el resultado final que transforma su vida...',
         required: true,
@@ -178,7 +179,7 @@ Responde SOLO un JSON array válido de 10 objetos (sin texto antes ni después, 
         id: 'situacion_actual',
         label: '¿Cómo está tu práctica hoy? Sé honesto/a',
         tipo: 'textarea',
-        placeholder: 'Cuántos clientes tienes, cómo conseguís pacientes, qué te frustra, qué funciona...',
+        placeholder: 'Cuántos clientes tienes, cómo consigues pacientes, qué te frustra, qué funciona...',
         required: true,
       },
       {
@@ -204,7 +205,7 @@ Responde SOLO un JSON array válido de 10 objetos (sin texto antes ni después, 
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Sos un coach de negocios para profesionales de la salud. Genera el "Perfil de Fundador/a" completo de este profesional.
+Eres un coach de negocios para profesionales de la salud. Genera el "Perfil de Fundador/a" completo de este profesional.
 
 DATOS DEL PROFESIONAL:
 - Especialidad: ${inputs.especialidad}
@@ -227,7 +228,7 @@ Genera el Perfil de Fundador/a con estas secciones:
 7. SOMBRA A TRABAJAR (el miedo o creencia que más puede frenarlo — dicho con respeto pero sin suavizar)
 8. PRIMER PASO RECOMENDADO (qué debería hacer en los próximos 7 días basado en su situación actual)
 
-Escribe en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, poderoso y sin clichés de coaching.
+Escribe en segunda persona ("Eres...", "Tu diferencial es...") en tono directo, poderoso y sin clichés de coaching.
     `.trim(),
     outputLabel: 'Perfil de Fundador/a',
   },
@@ -251,14 +252,14 @@ Escribe en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, p
         id: 'situacion_actual',
         label: '¿Cómo es tu vida y tu práctica hoy, en el Día 1?',
         tipo: 'textarea',
-        placeholder: 'Cuántos clientes tienes, cuánto ganas, cómo te sentís, qué te preocupa, cuál es tu mayor tensión...',
+        placeholder: 'Cuántos clientes tienes, cuánto ganas, cómo te sientes, qué te preocupa, cuál es tu mayor tensión...',
         required: true,
       },
       {
         id: 'miedo_principal',
         label: '¿Cuál es tu miedo más grande al iniciar este camino?',
         tipo: 'textarea',
-        placeholder: 'Sé completamente honesto/a — esto solo lo leés tú...',
+        placeholder: 'Sé completamente honesto/a — esto solo lo lees tú...',
         required: true,
       },
       {
@@ -270,7 +271,7 @@ Escribe en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, p
       },
       {
         id: 'para_quien',
-        label: '¿Por quién o para qué haces este esfuerzo más allá de tú?',
+        label: '¿Por quién o para qué haces este esfuerzo más allá de ti?',
         tipo: 'textarea',
         placeholder: 'Tu familia, una deuda que quieres saldar, la libertad que quieres vivir, el ejemplo que quieres dar...',
       },
@@ -278,14 +279,14 @@ Escribe en segunda persona ("Sos...", "Tu diferencial es...") en tono directo, p
         id: 'como_te_ves_dia91',
         label: '¿Cómo te imaginas el Día 91? ¿Qué cambió?',
         tipo: 'textarea',
-        placeholder: 'Sé específico/a — no solo los números, también cómo te sentís, cómo arrancás el día...',
+        placeholder: 'Sé específico/a — no solo los números, también cómo te sientes, cómo arrancas el día...',
         required: true,
       },
     ],
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Escribe la "Carta del Día 91" para ${perfil.nombre ?? 'este profesional de la salud'}.
+Escribe la "Carta del Día 91" para ${primero(perfil.nombre) || 'este profesional de la salud'}.
 Esta carta la escribe HOY (Día 1) y la lee al terminar el programa (Día 91). Es su brújula emocional — el texto que le recordará en los días difíciles por qué empezó.
 
 SITUACIÓN DEL PROFESIONAL EN EL DÍA 1:
@@ -343,7 +344,7 @@ Extensión: 350-450 palabras. Sin títulos ni bullets — solo carta corrida.
         id: 'conexion_cliente',
         label: '¿Cómo conecta tu historia con el problema de tus clientes?',
         tipo: 'textarea',
-        placeholder: 'Por qué tu historia hace que tu cliente sienta que tú entendés su situación mejor que nadie...',
+        placeholder: 'Por qué tu historia hace que tu cliente sienta que tú entiendes su situación mejor que nadie...',
         required: true,
       },
       {
@@ -364,7 +365,7 @@ Extensión: 350-450 palabras. Sin títulos ni bullets — solo carta corrida.
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera la Historia de Origen de ${perfil.nombre ?? 'este profesional'} en 3 versiones con estructura A→B→C:
+Genera la Historia de Origen de ${primero(perfil.nombre) || 'este profesional'} en 3 versiones con estructura A→B→C:
 
 A (INFIERNO): ${inputs.infierno}
 B (BRECHA): ${inputs.brecha}
@@ -418,7 +419,7 @@ Reglas: no uses frases genéricas de coaching. Menciona la especialidad específ
       },
       {
         id: 'de_donde_viene',
-        label: '¿De dónde creés que vienen estas creencias? (familia, escuela, cultura médica...)',
+        label: '¿De dónde crees que vienen estas creencias? (familia, escuela, cultura médica...)',
         tipo: 'textarea',
         placeholder: 'Qué te enseñaron sobre el dinero y los profesionales de la salud...',
       },
@@ -439,7 +440,7 @@ Reglas: no uses frases genéricas de coaching. Menciona la especialidad específ
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Sos un coach de mentalidad especializado en profesionales de la salud. Tu trabajo es reformular creencias limitantes con lógica, evidencia real y respeto — sin frases vacías de autoayuda.
+Eres un coach de mentalidad especializado en profesionales de la salud. Tu trabajo es reformular creencias limitantes con lógica, evidencia real y respeto — sin frases vacías de autoayuda.
 
 CREENCIAS A REFORMULAR:
 1. "${inputs.creencia1}"
@@ -513,7 +514,7 @@ Tono: directo, específico para el sector salud, sin clichés. Que cada reformul
       },
       {
         id: 'mayor_traba',
-        label: '¿Cuál creés que es la mayor traba para llegar a esa meta?',
+        label: '¿Cuál crees que es la mayor traba para llegar a esa meta?',
         tipo: 'textarea',
         placeholder: 'Sin clientes suficientes, precio bajo, miedo a vender, falta de visibilidad, poco tiempo...',
       },
@@ -521,7 +522,7 @@ Tono: directo, específico para el sector salud, sin clichés. Que cada reformul
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera el análisis de Visión Financiera completo para ${perfil.nombre ?? 'este profesional'}.
+Genera el análisis de Visión Financiera completo para ${primero(perfil.nombre) || 'este profesional'}.
 
 DATOS:
 - Meta de ingreso mensual en 90 días: $${inputs.ingreso_meta} USD
@@ -532,7 +533,7 @@ DATOS:
 - Significado personal de la meta: ${inputs.que_significa}
 - Mayor traba percibida: ${inputs.mayor_traba || 'no especificada'}
 
-Calculá y presentá:
+Calcula y presenta:
 1. INGRESO NETO OBJETIVO (meta - gastos) y cuántos protocolos representa
 2. PROTOCOLOS NECESARIOS POR MES y por semana
 3. EMBUDO REQUERIDO (cuántas llamadas y leads necesitas asumiendo 30% cierre en llamada y 20% conversión lead→llamada)
@@ -575,10 +576,10 @@ TAREA: diseñar la versión corta de su programa para quien no puede empezar con
       etiquetaOpciones: 'Elige la forma de tu Puerta Chica',
       promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
 
-Método propio: ${perfil.metodo_nombre ?? 'su método'}
-Pasos del método: ${perfil.metodo_pasos ?? 'no cargados'}
+Método propio: ${primero(perfil.metodo_nombre) || 'su método'}
+Pasos del método: ${primero(perfil.metodo_pasos) || 'no cargados'}
 Programa principal: ${inputs.precio_programa}
-Oferta principal: ${perfil.oferta_mid ?? 'programa completo'}
+Oferta principal: ${primero(perfil.oferta_mid) || 'programa completo'}
 
 TAREA: proponer 3 FORMAS de "puerta chica" — un tramo corto del MISMO método, para quien dice "ahora no puedo con el completo". Nunca un producto nuevo: siempre una porción real de su programa, con resultado propio y cerrado. El precio ronda el 20-30% del principal. Cada forma con nombre y con la primera victoria que entrega.
 
@@ -893,7 +894,7 @@ CÓMO TESTEARLA: [cómo saber si funciona en las primeras 2 semanas]
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera la estructura completa del protocolo "${inputs.nombre_protocolo}" de ${perfil.nombre ?? 'este profesional'}.
+Genera la estructura completa del protocolo "${inputs.nombre_protocolo}" de ${primero(perfil.nombre) || 'este profesional'}.
 
 DATOS:
 - Duración: ${inputs.duracion}
@@ -907,7 +908,7 @@ Genera:
 1. NOMBRE DEFINITIVO DEL PROTOCOLO (el que ya tiene + 2 alternativas si puede mejorarse)
 2. DESCRIPCIÓN PARA LA LANDING (párrafo de 80-100 palabras — para quien llega sin saber nada)
 3. FASES DEL PROTOCOLO (3-4 fases con nombre atractivo, descripción de qué pasa y qué resultado parcial se logra)
-4. LO QUE INCLUYE (bullet list para la página de ventas — con formato "accés a / recibís / tienes")
+4. LO QUE INCLUYE (bullet list para la página de ventas — con formato "acceso a / recibes / tienes")
 5. RESULTADOS VERIFICABLES (qué puede decir el cliente al finalizar cada fase)
 6. PARA QUIÉN ES Y PARA QUIÉN NO ES (criterio de calificación)
 7. PROMESA PRINCIPAL (1 oración de resultado — la que va arriba del precio)
@@ -959,7 +960,7 @@ Genera:
       },
       {
         id: 'objecion_mas_comun',
-        label: '¿Cuál es la objeción de precio más común que recibís?',
+        label: '¿Cuál es la objeción de precio más común que recibes?',
         tipo: 'textarea',
         placeholder: 'ej: "Es caro", "Tengo que pensarlo", "No tengo ese dinero ahora"...',
         required: true,
@@ -968,7 +969,7 @@ Genera:
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Construí la justificación completa de precio para el protocolo de ${perfil.nombre ?? 'este profesional'} a $${inputs.precio} USD.
+Construye la justificación completa de precio para el protocolo de ${primero(perfil.nombre) || 'este profesional'} a $${inputs.precio} USD.
 
 PRECIO ACTUAL QUE COBRA: $${inputs.precio_actual_cobras || 'no especificado'}
 VALOR DEL RESULTADO PARA EL CLIENTE: ${inputs.resultado_del_cliente}
@@ -977,7 +978,7 @@ COSTO DE NO ACTUAR: ${inputs.costo_no_actuar}
 OBJECIÓN MÁS COMÚN: ${inputs.objecion_mas_comun}
 
 Genera:
-1. ANÁLISIS DE ROI (si el resultado puede cuantificarse, calculá el retorno del cliente — cuánto gana o recupera por cada dólar invertido)
+1. ANÁLISIS DE ROI (si el resultado puede cuantificarse, calcula el retorno del cliente — cuánto gana o recupera por cada dólar invertido)
 2. COMPARACIÓN CON ALTERNATIVAS (tabla: alternativa | costo total | tiempo | resultado | conveniencia)
 3. EL COSTO DE ESPERAR (cuánto pierde el cliente por cada mes que posterga — en dinero, salud, tiempo)
 4. LOS 5 ARGUMENTOS DE PRECIO MÁS SÓLIDOS (lógica de valor, no de costo)
@@ -1046,7 +1047,7 @@ const GRUPO_C: Herramienta[] = [
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera 21 ideas de stories para ${perfil.nombre ?? 'este profesional'} divididas en 3 tipos (7 de cada tipo).
+Genera 21 ideas de stories para ${primero(perfil.nombre) || 'este profesional'} divididas en 3 tipos (7 de cada tipo).
 
 NICHO: ${inputs.nicho}
 AVATAR: ${inputs.avatar}
@@ -1121,7 +1122,7 @@ Al final: 3 ERRORES COMUNES al hacer stories en este nicho que el profesional de
         id: 'cta',
         label: '¿Cuál es el CTA?',
         tipo: 'select',
-        opciones: ['Escribime "INFO"', 'Agenda una consulta gratuita', 'Mandame un DM', 'Link en bio', 'Guardalo para después'],
+        opciones: ['Escríbeme "INFO"', 'Agenda una consulta gratuita', 'Mándame un DM', 'Link en bio', 'Guárdalo para después'],
         required: true,
       },
       {
@@ -1134,7 +1135,7 @@ Al final: 3 ERRORES COMUNES al hacer stories en este nicho que el profesional de
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera el guión completo de un Reel de ${inputs.duracion} para ${perfil.nombre ?? 'este profesional'}.
+Genera el guión completo de un Reel de ${inputs.duracion} para ${primero(perfil.nombre) || 'este profesional'}.
 
 ÁNGULO: ${inputs.angulo}
 TEMA: ${inputs.tema}
@@ -1202,7 +1203,7 @@ Reglas: el hook no puede empezar con "Hola" ni presentación. Debe provocar curi
       },
       {
         id: 'resultado_cliente_semana',
-        label: '¿Tenés algún resultado de cliente que puedas compartir esta semana?',
+        label: '¿Tienes algún resultado de cliente que puedas compartir esta semana?',
         tipo: 'textarea',
         placeholder: 'Opcional pero muy valioso: resultado específico, transformación reciente (anónimo si hace falta)...',
       },
@@ -1221,7 +1222,7 @@ Reglas: el hook no puede empezar con "Hola" ni presentación. Debe provocar curi
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera el Plan de Contenido Semanal completo para ${perfil.nombre ?? 'este profesional'}.
+Genera el Plan de Contenido Semanal completo para ${primero(perfil.nombre) || 'este profesional'}.
 
 TEMA FOCO DE LA SEMANA: ${inputs.semana_foco}
 NICHO: ${inputs.nicho}
@@ -1256,7 +1257,7 @@ const GRUPO_D: Herramienta[] = [
       etiquetaOpciones: 'Elige tu recurso para regalar',
       promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
 
-Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}\nFormato elegido: ${inputs.formato ?? 'guía'}\nTAREA: proponer 3 IDEAS de recurso para regalar a cambio de su palabra clave (el título del recurso + el resultado pequeño y real que la persona se lleva hoy).
+Método propio: ${primero(perfil.metodo_nombre) || 'sin nombre aún'}\nFormato elegido: ${inputs.formato ?? 'guía'}\nTAREA: proponer 3 IDEAS de recurso para regalar a cambio de su palabra clave (el título del recurso + el resultado pequeño y real que la persona se lleva hoy).
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
@@ -1298,11 +1299,11 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
     ],
     promptTemplate: (inputs, perfil) => `${contextoBase(perfil)}
 
-Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}
-Pasos del método: ${perfil.metodo_pasos ?? 'no cargados'}
-Dolores del paciente ideal (Matriz A): ${perfil.matriz_a ?? 'no cargados'}
-Transformación (Matriz C): ${perfil.matriz_c ?? 'no cargada'}
-Oferta principal: ${perfil.oferta_mid ?? 'programa de 1.000 USD'}
+Método propio: ${primero(perfil.metodo_nombre) || 'sin nombre aún'}
+Pasos del método: ${primero(perfil.metodo_pasos) || 'no cargados'}
+Dolores del paciente ideal (Matriz A): ${primero(perfil.matriz_a) || 'no cargados'}
+Transformación (Matriz C): ${primero(perfil.matriz_c) || 'no cargada'}
+Oferta principal: ${primero(perfil.oferta_mid) || 'programa de 1.000 USD'}
 
 TAREA: crear el RECURSO PRINCIPAL de este profesional — lo que regala a cambio de su palabra clave "${inputs.palabra_recurso}". Formato elegido: ${inputs.formato}. Resultado pequeño que debe regalar: ${inputs.regalo || 'proponlo tú: una victoria chica, real y alcanzable hoy, alineada al método'}.
 
@@ -1338,7 +1339,7 @@ REGLAS: tuteo neutro (tú/tienes). Prohibido usar: coach, escalar, embudo, funne
       },
       {
         id: 'resultado',
-        label: 'El resultado principal que lográs con tus clientes',
+        label: 'El resultado principal que logras con tus clientes',
         tipo: 'text',
         required: true,
         placeholder: 'ej: "Perdieron 10kg sin dietas" o "Salieron de la deuda en 6 meses"',
@@ -1357,7 +1358,7 @@ REGLAS: tuteo neutro (tú/tienes). Prohibido usar: coach, escalar, embudo, funne
         opciones: [
           'Agenda una consulta gratuita',
           'Descargá el recurso gratis',
-          'Escribime para más info',
+          'Escríbeme para más info',
           'Conocé el protocolo',
           'Mira cómo trabajo',
         ],
@@ -1380,7 +1381,7 @@ REGLAS: tuteo neutro (tú/tienes). Prohibido usar: coach, escalar, embudo, funne
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera 3 versiones de bio de Instagram para ${perfil.nombre ?? 'este profesional'}.
+Genera 3 versiones de bio de Instagram para ${primero(perfil.nombre) || 'este profesional'}.
 
 NICHO: ${inputs.nicho}
 RESULTADO: ${inputs.resultado}
@@ -1444,7 +1445,7 @@ Luego:
       },
       {
         id: 'historia_breve',
-        label: '¿Querés incluir una mini historia personal? (una línea)',
+        label: '¿Quieres incluir una mini historia personal? (una línea)',
         tipo: 'text',
         placeholder: 'ej: "Yo estuve exactamente donde estás tú hace 3 años..."',
       },
@@ -1458,7 +1459,7 @@ Luego:
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Escribe el email de bienvenida para quien se suscribió al protocolo de entrada "${inputs.nombre_protocolo}" de ${perfil.nombre ?? 'este profesional'}.
+Escribe el email de bienvenida para quien se suscribió al protocolo de entrada "${inputs.nombre_protocolo}" de ${primero(perfil.nombre) || 'este profesional'}.
 
 RESULTADO PROMETIDO: ${inputs.resultado}
 CÓMO LLEGÓ: ${inputs.como_llego}
@@ -1555,7 +1556,7 @@ Para CADA keyword genera:
 
 Luego genera:
 4. RESPUESTA A "¿CUÁNTO CUESTA?" (bot que da el precio con contexto de valor, no solo el número)
-5. RESPUESTA A "MANDAME MÁS INFO" (da info sin revelar todo)
+5. RESPUESTA A "MÁNDAME MÁS INFO" (da info sin revelar todo)
 6. RESPUESTA A "NO ME INTERESA / GRACIAS" (cierre elegante que deja la puerta abierta)
 7. GUÍA DE CONFIGURACIÓN: dónde y cómo pegar cada mensaje en ManyChat (paso a paso, máximo 8 pasos)
 
@@ -1612,7 +1613,7 @@ Tono: cálido, personal, que no parezca un bot. Que el lead sienta que hay una p
       },
       {
         id: 'garantia',
-        label: '¿Ofrecés algún tipo de garantía?',
+        label: '¿Ofreces algún tipo de garantía?',
         tipo: 'textarea',
         placeholder: 'ej: Si en 30 días no ves resultados te devuelvo el 100%, garantía de satisfacción...',
       },
@@ -1620,7 +1621,7 @@ Tono: cálido, personal, que no parezca un bot. Que el lead sienta que hay una p
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera el copy completo de la landing page para el protocolo "${inputs.nombre_protocolo}" de ${perfil.nombre ?? 'este profesional'}.
+Genera el copy completo de la landing page para el protocolo "${inputs.nombre_protocolo}" de ${primero(perfil.nombre) || 'este profesional'}.
 
 AVATAR: ${inputs.avatar}
 RESULTADO: ${inputs.resultado}
@@ -1634,14 +1635,14 @@ Genera TODAS estas secciones:
 1. HEADLINE PRINCIPAL (1 oración que para el scroll — debe tener el avatar y el resultado)
 2. SUBHEADLINE (amplía el headline, 2 líneas — el "cómo" o el "sin lo malo")
 3. VIDEO O IMAGEN (descripción de qué debería mostrar el hero visual)
-4. PARA VOS SI... (5 bullets del avatar ideal — en lenguaje del cliente)
-5. NO ES PARA VOS SI... (3 bullets de descalificación — crea confianza)
+4. PARA TI SI... (5 bullets del avatar ideal — en lenguaje del cliente)
+5. NO ES PARA TI SI... (3 bullets de descalificación — crea confianza)
 6. EL PROBLEMA (párrafo de agitación del dolor — en lenguaje del cliente, no clínico)
 7. POR QUÉ LO QUE INTENTASTE ANTES NO FUNCIONÓ (destruir objeciones previas)
 8. LA SOLUCIÓN — presentación del protocolo (nombre + promesa en 2 párrafos)
-9. QUÉ INCLUYE (bullets de deliverables — con formato "Acceso a / Recibís / Vas a poder")
+9. QUÉ INCLUYE (bullets de deliverables — con formato "Acceso a / Recibes / Vas a poder")
 10. RESULTADOS ESPERADOS (bullets concretos — no promesas vacías)
-11. SOBRE ${(perfil.nombre ?? 'el profesional').toUpperCase()} (bio de autoridad, 80-100 palabras — con historia personal si aplica)
+11. SOBRE ${(primero(perfil.nombre) || 'el profesional').toUpperCase()} (bio de autoridad, 80-100 palabras — con historia personal si aplica)
 12. TESTIMONIO (si lo hay, presentado de forma que impacte)
 13. PREGUNTAS FRECUENTES (5 FAQs reales del nicho — con respuestas directas)
 14. CTA PRINCIPAL (botón + texto de urgencia o escasez si aplica)
@@ -1690,7 +1691,7 @@ const GRUPO_E: Herramienta[] = [
       },
       {
         id: 'objeciones',
-        label: '¿Cuáles son las 3 objeciones más comunes que recibís?',
+        label: '¿Cuáles son las 3 objeciones más comunes que recibes?',
         tipo: 'textarea',
         placeholder: 'ej: Es caro, tengo que pensarlo, no tengo tiempo, necesito consultarlo con alguien...',
         required: true,
@@ -1703,7 +1704,7 @@ const GRUPO_E: Herramienta[] = [
       },
       {
         id: 'donde_falla',
-        label: '¿En qué punto de la llamada sentís que perdés más cierres?',
+        label: '¿En qué punto de la llamada sientes que pierdes más cierres?',
         tipo: 'select',
         opciones: [
           'Al presentar el precio',
@@ -1766,7 +1767,7 @@ El guión debe tener los textos EXACTOS (no temas, sino lo que el profesional di
       },
       {
         id: 'objeciones_top',
-        label: '¿Cuáles son las 3 objeciones más frecuentes que escuchás?',
+        label: '¿Cuáles son las 3 objeciones más frecuentes que escuchas?',
         tipo: 'textarea',
         required: true,
         placeholder: 'Texto exacto que dicen los leads, no solo el tema...',
@@ -1860,9 +1861,9 @@ Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
       },
       {
         id: 'mayor_problema_percibido',
-        label: '¿Cuál creés que es el mayor problema en tu embudo ahora mismo?',
+        label: '¿Cuál crees que es el mayor problema en tu embudo ahora mismo?',
         tipo: 'textarea',
-        placeholder: 'Lo que sentís que está fallando: no llegan suficientes leads, los leads no son calificados, no cierro las llamadas...',
+        placeholder: 'Lo que sientes que está fallando: no llegan suficientes leads, los leads no son calificados, no cierro las llamadas...',
         required: true,
       },
       {
@@ -1875,7 +1876,7 @@ Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Analiza las métricas del embudo de ${perfil.nombre ?? 'este profesional'} de las últimas 4 semanas.
+Analiza las métricas del embudo de ${primero(perfil.nombre) || 'este profesional'} de las últimas 4 semanas.
 
 MÉTRICAS:
 - Visitas a la landing: ${inputs.visitas_landing || 'no registrado'}
@@ -1888,7 +1889,7 @@ MÉTRICAS:
 PERCEPCIÓN DEL PROFESIONAL: ${inputs.mayor_problema_percibido}
 META DEL PRÓXIMO MES: ${inputs.objetivo_proximo_mes} ventas
 
-Calculá y presentá:
+Calcula y presenta:
 
 1. TASAS DE CONVERSIÓN POR ETAPA:
    - Landing → Lead: X%
@@ -1990,7 +1991,7 @@ export const HERRAMIENTAS_V3: HerramientaV3[] = [
     id: 'H-P0.2',
     grupo: 'A' as GrupoHerramienta,
     titulo: 'Formulario de bienvenida',
-    descripcion: 'Respondé las preguntas iniciales para generar tu ADN prototipo beta.',
+    descripcion: 'Responde las preguntas iniciales para generar tu ADN prototipo beta.',
     emoji: '🌱',
     usa_ia: true,
     adn_field: 'adn_formulario_bienvenida',
@@ -2000,13 +2001,13 @@ export const HERRAMIENTAS_V3: HerramientaV3[] = [
       { id: 'que_tienen', label: '¿Qué tienen ellos que tú quieres tener?', tipo: 'textarea', required: true },
       { id: 'impedimento', label: '¿Qué te impidió hasta ahora cobrar lo que vale tu trabajo?', tipo: 'textarea', required: true },
       { id: 'vida_10k', label: '¿Cómo te imaginas tu vida con $10K/mes extra?', tipo: 'textarea', required: true },
-      { id: 'anios_profesion', label: '¿Cuántos años ejercés tu profesión?', tipo: 'number', required: true },
+      { id: 'anios_profesion', label: '¿Cuántos años ejerces tu profesión?', tipo: 'number', required: true },
       { id: 'modalidad', label: '¿Presencial, online o mixto?', tipo: 'select', opciones: ['Presencial', 'Online', 'Mixto'], required: true },
       { id: 'pacientes_mes', label: '¿Cuántos pacientes pagando por mes?', tipo: 'number', required: true },
       { id: 'problema_principal', label: '¿Qué problema principal resuelves?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
-Sos un consultor de negocios para profesionales de salud. Con las respuestas del formulario de bienvenida, genera un párrafo de presentación profesional (ADN prototipo beta). Debe ser personal, cálido y en primera persona.
+Eres un consultor de negocios para profesionales de salud. Con las respuestas del formulario de bienvenida, genera un párrafo de presentación profesional (ADN prototipo beta). Debe ser personal, cálido y en primera persona.
 ${adnContext(perfil)}
 
 Respuestas del formulario:
@@ -2027,13 +2028,13 @@ Genera un párrafo de 150-200 palabras que presente a este profesional. Usa tono
     id: 'H-P1.2',
     grupo: 'A' as GrupoHerramienta,
     titulo: 'Línea de tiempo vital',
-    descripcion: 'Anotá los 5-8 momentos que más te marcaron. Escritura pura, sin IA.',
+    descripcion: 'Anota los 5-8 momentos que más te marcaron. Escritura pura, sin IA.',
     emoji: '📖',
     usa_ia: false,
     adn_field: 'adn_linea_tiempo',
     outputLabel: 'Línea de tiempo',
     inputs: [
-      { id: 'linea_tiempo', label: 'Anotá los 5 a 8 momentos que más te marcaron en la vida. Fracasos, enfermedades, cambios de rumbo, descubrimientos. No los ve nadie más — es el insumo para construir tu historia.', tipo: 'textarea', required: true },
+      { id: 'linea_tiempo', label: 'Anota los 5 a 8 momentos que más te marcaron en la vida. Fracasos, enfermedades, cambios de rumbo, descubrimientos. No los ve nadie más — es el insumo para construir tu historia.', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs) => inputs.linea_tiempo,
   },
@@ -2045,7 +2046,7 @@ Genera un párrafo de 150-200 palabras que presente a este profesional. Usa tono
       etiquetaOpciones: 'Elige la versión de tu historia',
       promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
 
-Su origen (si está cargado): ${perfil.historia_origen ?? 'usar lo que sepas del contexto'}\nTAREA: proponer 3 VERSIONES de su historia de origen (el enfoque narrativo + la primera frase con la que arranca). Una más íntima, una más profesional, una más cruda. Todas verdaderas, cero drama inventado.
+Su origen (si está cargado): ${primero(perfil.historia_origen) || 'usar lo que sepas del contexto'}\nTAREA: proponer 3 VERSIONES de su historia de origen (el enfoque narrativo + la primera frase con la que arranca). Una más íntima, una más profesional, una más cruda. Todas verdaderas, cero drama inventado.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
@@ -2069,7 +2070,7 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
     outputLabel: 'Historia en 3 versiones',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un copywriter especializado en historias personales para profesionales de salud. A partir de la línea de tiempo vital del profesional, genera 3 versiones de su historia de origen.
+Eres un copywriter especializado en historias personales para profesionales de salud. A partir de la línea de tiempo vital del profesional, genera 3 versiones de su historia de origen.
 ${adnContext(perfil)}
 
 Genera exactamente en este formato:
@@ -2119,7 +2120,7 @@ Usa tono rioplatense, directo, sin jerga de marketing. La historia tiene que son
     outputLabel: 'Propósito destilado',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un coach de propósito para profesionales de salud. Lee las 5 respuestas del ejercicio "Los 5 por qué" y destilá 3 versiones de la oración de propósito.
+Eres un coach de propósito para profesionales de salud. Lee las 5 respuestas del ejercicio "Los 5 por qué" y destilá 3 versiones de la oración de propósito.
 ${adnContext(perfil)}
 
 Las 5 respuestas: ${perfil.adn_cinco_por_que ? (Array.isArray(perfil.adn_cinco_por_que) ? perfil.adn_cinco_por_que.join('\n') : perfil.adn_cinco_por_que) : 'No disponibles'}
@@ -2140,7 +2141,7 @@ Genera 3 versiones diferentes, cada una en su propio párrafo numerado. La oraci
     adn_field: 'adn_carta_futuro',
     outputLabel: 'Carta al futuro',
     inputs: [
-      { id: 'carta', label: 'Es el año 2035. Lograste todo lo que querías lograr. ¿Cómo es tu vida? ¿A quiénes ayudaste? ¿Qué dejaste? ¿Cómo te sentís? Mínimo 200 palabras.', tipo: 'textarea', required: true },
+      { id: 'carta', label: 'Es el año 2035. Lograste todo lo que querías lograr. ¿Cómo es tu vida? ¿A quiénes ayudaste? ¿Qué dejaste? ¿Cómo te sientes? Mínimo 200 palabras.', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs) => inputs.carta,
   },
@@ -2158,10 +2159,10 @@ Genera 3 versiones diferentes, cada una en su propio párrafo numerado. La oraci
     outputLabel: 'Legado sintetizado',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Lee la carta al yo de 10 años de este profesional y extraé el legado en 2-3 oraciones. Distinguí entre legado real (impacto en otros), metas financieras y reconocimiento personal. El legado trasciende lo económico.
+Lee la carta al yo de 10 años de este profesional y extrae el legado en 2-3 oraciones. Distinguí entre legado real (impacto en otros), metas financieras y reconocimiento personal. El legado trasciende lo económico.
 ${adnContext(perfil)}
 
-Carta al futuro: ${perfil.adn_carta_futuro ?? 'No disponible'}
+Carta al futuro: ${primero(perfil.adn_carta_futuro) || 'No disponible'}
 
 Genera el legado en 2-3 oraciones directas. Sin florituras.`.trim(),
   },
@@ -2210,7 +2211,7 @@ Genera el legado en 2-3 oraciones directas. Sin florituras.`.trim(),
     outputLabel: 'Avatar del paciente ideal',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un experto en construcción de avatares de cliente. Lee los análisis de 3 pacientes reales y construí un perfil completo del avatar ideal.
+Eres un experto en construcción de avatares de cliente. Lee los análisis de 3 pacientes reales y construye un perfil completo del avatar ideal.
 ${adnContext(perfil)}
 
 Genera exactamente esto:
@@ -2247,7 +2248,7 @@ TAREA: dejarla lista para usar. Responde SOLO un JSON array válido (sin texto a
     },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Definidor de Nicho y PUV',
-    descripcion: 'Definí tu nicho y creá tu propuesta de valor única.',
+    descripcion: 'Define tu nicho y creá tu propuesta de valor única.',
     emoji: '💡',
     usa_ia: true,
     adn_field: 'adn_nicho',
@@ -2259,7 +2260,7 @@ TAREA: dejarla lista para usar. Responde SOLO un JSON array válido (sin texto a
       { id: 'quien_busca', label: '¿Qué grupo de personas te busca a tú y no a otro?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
-Sos un estratega de posicionamiento para profesionales de salud. Con las respuestas y el ADN del profesional, genera:
+Eres un estratega de posicionamiento para profesionales de salud. Con las respuestas y el ADN del profesional, genera:
 1. Descripción del nicho (2-3 oraciones)
 2. 3 versiones de PUV con la estructura: "Ayudo a [avatar] a [resultado] sin [obstáculo que temen]."
 ${adnContext(perfil)}
@@ -2333,7 +2334,7 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
     outputLabel: 'Matriz A→B→C',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un estratega de oferta para profesionales de salud. Lee las transformaciones de pacientes reales y construí la Matriz A→B→C.
+Eres un estratega de oferta para profesionales de salud. Lee las transformaciones de pacientes reales y construye la Matriz A→B→C.
 ${adnContext(perfil)}
 
 Genera exactamente:
@@ -2356,7 +2357,7 @@ El Estado B tiene que ser tan específico que si el paciente lo lee, diga "eso s
     campoPerfil: 'adn_proceso_actual',
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Documentador del proceso actual',
-    descripcion: 'Documentá cómo trabajas con pacientes de principio a fin.',
+    descripcion: 'Documenta cómo trabajas con pacientes de principio a fin.',
     emoji: '⚙️',
     usa_ia: false,
     adn_field: 'adn_proceso_actual',
@@ -2403,7 +2404,7 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
     outputLabel: 'Método propio',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un consultor de branding para profesionales de salud. Lee el proceso actual del profesional y la Matriz A→B→C, y genera:
+Eres un consultor de branding para profesionales de salud. Lee el proceso actual del profesional y la Matriz A→B→C, y genera:
 ${adnContext(perfil)}
 
 1. 5 opciones de nombre para el método. El nombre tiene que evocar el RESULTADO, no el mecanismo. "Sesiones de fisioterapia" es genérico. "Protocolo de Reintegración Funcional" es un activo diferenciador.
@@ -2427,7 +2428,7 @@ Paso 1: [nombre] — [qué es y por qué existe]
       etiquetaOpciones: 'Elige el ángulo de tu oferta',
       promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
 
-Método propio: ${perfil.metodo_nombre ?? 'sin nombre aún'}\nTAREA: proponer 4 ÁNGULOS para su programa de 1.000 USD (el nombre del programa + desde qué promesa central se vende). Construidos desde su método, su paciente ideal y la transformación real. Nombres que un paciente entienda en 3 segundos.
+Método propio: ${primero(perfil.metodo_nombre) || 'sin nombre aún'}\nTAREA: proponer 4 ÁNGULOS para su programa de 1.000 USD (el nombre del programa + desde qué promesa central se vende). Construidos desde su método, su paciente ideal y la transformación real. Nombres que un paciente entienda en 3 segundos.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
@@ -2451,12 +2452,12 @@ Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
     inputs: [
       { id: 'duracion_protocolo', label: '¿Cuánto tiempo dura el protocolo completo?', tipo: 'text', required: true },
       { id: 'sesiones', label: '¿Cuántas sesiones incluye?', tipo: 'number', required: true },
-      { id: 'resultado_garantizado', label: '¿Qué resultado concreto y medible garantizás?', tipo: 'textarea', required: true },
+      { id: 'resultado_garantizado', label: '¿Qué resultado concreto y medible garantizas?', tipo: 'textarea', required: true },
       { id: 'soporte_adicional', label: '¿Qué soporte adicional incluye?', tipo: 'textarea', required: true },
       { id: 'precio_mente', label: '¿Qué precio tienes en mente?', tipo: 'text', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
-Sos un diseñador de ofertas para profesionales de salud. Diseña la Oferta Mid usando el Método y la Matriz A→B→C del ADN.
+Eres un diseñador de ofertas para profesionales de salud. Diseña la Oferta Mid usando el Método y la Matriz A→B→C del ADN.
 ${adnContext(perfil)}
 
 Datos de la oferta:
@@ -2482,7 +2483,7 @@ Genera: nombre de la oferta, promesa principal, para quién es, qué incluye, pr
     outputLabel: 'Escalera de ofertas',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un estratega de ofertas. A partir de la Oferta Mid ya diseñada, genera las otras 3 ofertas de la escalera.
+Eres un estratega de ofertas. A partir de la Oferta Mid ya diseñada, genera las otras 3 ofertas de la escalera.
 ${adnContext(perfil)}
 
 Genera exactamente:
@@ -2510,7 +2511,7 @@ Genera exactamente:
     outputLabel: 'Copy de landing page',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un copywriter de landing pages para profesionales de salud. Genera el copy completo usando el ADN del profesional.
+Eres un copywriter de landing pages para profesionales de salud. Genera el copy completo usando el ADN del profesional.
 ${adnContext(perfil)}
 
 Genera las siguientes secciones:
@@ -2540,7 +2541,7 @@ Tono: directo, empático, sin hipérboles. El avatar tiene que sentir que le est
     outputLabel: '3 anuncios para Meta',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un copywriter de anuncios para Meta/Instagram. Genera 3 versiones de anuncios usando el ADN del profesional.
+Eres un copywriter de anuncios para Meta/Instagram. Genera 3 versiones de anuncios usando el ADN del profesional.
 ${adnContext(perfil)}
 
 ---ANUNCIO 1: DESDE EL DOLOR (Estado A)---
@@ -2563,7 +2564,7 @@ Cada anuncio debe hablar al avatar específico. CTA: palabra clave para DM.`.tri
     id: 'H-P9A.4',
     grupo: 'C' as GrupoHerramienta,
     titulo: 'Genius Contenido — Plan semanal orgánico',
-    descripcion: 'Genera 5 ideas de contenido para la semana. Podés volver cada semana.',
+    descripcion: 'Genera 5 ideas de contenido para la semana. Puedes volver cada semana.',
     emoji: '📣',
     usa_ia: true,
     es_recurrente: true,
@@ -2572,7 +2573,7 @@ Cada anuncio debe hablar al avatar específico. CTA: palabra clave para DM.`.tri
       { id: 'objecion_semana', label: '¿Qué objeción o miedo de tu avatar apareció más esta semana?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
-Sos un estratega de contenido orgánico para profesionales de salud. Genera 5 ideas de contenido para esta semana.
+Eres un estratega de contenido orgánico para profesionales de salud. Genera 5 ideas de contenido para esta semana.
 ${adnContext(perfil)}
 
 Objeción/miedo de la semana: ${inputs.objecion_semana}
@@ -2600,7 +2601,7 @@ El contenido debe responder directamente a la objeción/miedo de la semana.`.tri
     outputLabel: 'Script de ventas',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un coach de ventas para profesionales de salud. Construí un script completo de llamada de diagnóstico de 45 minutos.
+Eres un coach de ventas para profesionales de salud. Construye un script completo de llamada de diagnóstico de 45 minutos.
 ${adnContext(perfil)}
 
 Secciones del script:
@@ -2633,7 +2634,7 @@ El tono es de evaluación, no de venta. Estás diagnosticando si puedes ayudar, 
       { id: 'cierre', label: '¿Qué pasa al terminar el protocolo?', tipo: 'textarea', required: true },
     ],
     promptTemplate: (inputs, perfil) => `
-Sos un consultor de automatización para profesionales de salud. Genera el protocolo de entrega completo.
+Eres un consultor de automatización para profesionales de salud. Genera el protocolo de entrega completo.
 ${adnContext(perfil)}
 
 Datos del servicio actual:
@@ -2661,7 +2662,7 @@ Genera:
     outputLabel: 'Sistema de identidad visual',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Sos un diseñador de identidad visual para profesionales de salud. Usando el ADN del profesional (Historia, Propósito, Avatar, Nicho), genera un sistema completo.
+Eres un diseñador de identidad visual para profesionales de salud. Usando el ADN del profesional (Historia, Propósito, Avatar, Nicho), genera un sistema completo.
 ${adnContext(perfil)}
 
 Genera exactamente:

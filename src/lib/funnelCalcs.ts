@@ -136,7 +136,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Tasa de Cierre',
       mensaje: nivel === 'ok' ? 'Buen cierre de ventas'
-        : nivel === 'alerta' ? 'Cerrás pocas llamadas. Practicá con el Simulador de Ventas.'
+        : nivel === 'alerta' ? 'Cierras pocas llamadas. Practicá con el Simulador de Ventas.'
         : 'Tasa de cierre muy baja. Revisa tu script y el manejo de objeciones.',
       nivel,
       valor: pct,
@@ -152,8 +152,8 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Costo por Venta',
       mensaje: nivel === 'ok' ? 'Buen retorno sobre inversión publicitaria'
-        : nivel === 'alerta' ? 'CPV subiendo. Optimizá el embudo o aumentá el ticket.'
-        : 'CPV insostenible. Necesitás revisar todo el embudo.',
+        : nivel === 'alerta' ? 'CPV subiendo. Optimizá el embudo o aumenta el ticket.'
+        : 'CPV insostenible. Necesitas revisar todo el embudo.',
       nivel,
       valor: kpis.cpv,
       umbral_ok: 100,

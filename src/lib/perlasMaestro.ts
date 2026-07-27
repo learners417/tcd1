@@ -9,7 +9,7 @@
 export interface Perla {
   titulo: string;
   texto: string; // el pie de texto (y guía de lo que dirá el audio)
-  audioUrl?: string; // slot: pegá acá la URL del MP3 cuando lo tengas
+  audioUrl?: string; // slot: pega acá la URL del MP3 cuando lo tengas
 }
 
 /** Perla por código de meta-hito. Llená `audioUrl` cuando grabes cada una. */
@@ -26,17 +26,17 @@ export const PERLAS: Record<string, Perla> = {
   },
   'P1.5': {
     titulo: 'Tu precio en voz alta',
-    texto: 'La primera vez que decís tu número sin pedir perdón, algo cambia para siempre. Ya no volvés atrás.',
+    texto: 'La primera vez que dices tu número sin pedir perdón, algo cambia para siempre. Ya no vuelves atrás.',
     audioUrl: '',
   },
   'P4.4': {
-    titulo: 'El día que encendés',
+    titulo: 'El día que enciendes',
     texto: 'Hoy tu clínica existe para el mundo. Respirá. Empezó. Este día lo vas a recordar.',
     audioUrl: '',
   },
   'P5.4': {
     titulo: 'Tu primera llamada',
-    texto: 'Llegás entrenado. No vendés: diagnosticás. Todo lo que construiste fue para este momento.',
+    texto: 'Llegas entrenado. No vendes: diagnosticas. Todo lo que construiste fue para este momento.',
     audioUrl: '',
   },
   'P6.3': {

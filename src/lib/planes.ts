@@ -30,7 +30,7 @@ export const PRECIO_FUNDADOR: Record<string, string> = {
 /**
  * URLs de checkout self-serve (order forms de GHL, con PayPal). AC1.
  * Se configuran en Vercel (sin tocar código): VITE_CHECKOUT_AMARILLO,
- * VITE_CHECKOUT_VERDE, VITE_CHECKOUT_NEGRO → pegás el link del order form y
+ * VITE_CHECKOUT_VERDE, VITE_CHECKOUT_NEGRO → pegas el link del order form y
  * redeploy. Con la URL vacía, el candado cae al WhatsApp de siempre
  * (degradación elegante) hasta que la configures.
  */
@@ -87,8 +87,19 @@ export function accesoVencido(perfil?: Partial<Profile> | null): boolean {
  * El Mentor y los entrenadores no son asistentes infinitos: son maestros.
  * Presupuesto semanal visible, reset los lunes. (La Semana Blanca conserva
  * su tope total de 30 — su sistema propio.) */
-export const TOPE_MENTOR_SEMANAL = 10;
-export const TOPE_AGENTE_SEMANAL = 5;
+/**
+ * Estos números se fijaron cuando la IA se veía como el costo del negocio.
+ * Con el criterio actual —el costo es el tiempo humano, no los modelos— el
+ * tope no está para racionar: está para frenar el abuso. Un cliente que
+ * conversa mucho con su Mentor gasta unos pocos dólares y probablemente le
+ * esté sacando más provecho a la app que uno que entra dos veces.
+ *
+ * LA AUTORIDAD ES EL SERVIDOR: estos valores son solo un aviso rápido en
+ * pantalla. El freno real vive en api/_lib/uso-server.ts (TOPES_SEMANA) y
+ * tiene que dar los mismos números — lo verifica la lente 6.6 de auditoria.py.
+ */
+export const TOPE_MENTOR_SEMANAL = 200;
+export const TOPE_AGENTE_SEMANAL = 150;
 
 function claveSemana(): string {
   const d = new Date();

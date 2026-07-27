@@ -46,6 +46,7 @@ import type { ProfileV2 } from '../lib/supabase';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { generateText } from '../lib/aiProvider';
 import { getCompletadas, isPilarCompletado } from '../lib/agents/unlock';
+import { primero } from '../lib/primero';
 
 interface CreadorContenidoProps {
   userId?: string;
@@ -96,7 +97,7 @@ function buildPrompt(
   perfil: Partial<ProfileV2>,
 ): string {
   const contexto = [
-    `Profesión: ${perfil.especialidad ?? 'profesional de la salud'}`,
+    `Profesión: ${primero(perfil.especialidad) || 'profesional de la salud'}`,
     perfil.metodo_nombre ? `Método propio: ${perfil.metodo_nombre}` : '',
     perfil.metodo_pasos ? `Pasos del método: ${perfil.metodo_pasos}` : '',
     perfil.matriz_a ? `Matriz A (dolores del avatar): ${perfil.matriz_a}` : '',
@@ -285,7 +286,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     setOutput('');
     try {
       const prompt = buildPrompt(tipo, nivel, tema, perfil ?? {});
-      const result = await generateText({
+      const result = await generateText({ feature: 'creativo', tarea: 'guion',
         prompt,
         systemInstruction:
           'Eres un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
@@ -345,7 +346,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
           </div>
           <div>
             <p className="text-lg font-medium text-cream">
-              Necesitás completar P6 (Matriz A→B→C) para desbloquear el Creador
+              Necesitas completar P6 (Matriz A→B→C) para desbloquear el Creador
             </p>
             <p className="text-sm text-cream/75 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.

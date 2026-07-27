@@ -192,7 +192,7 @@ export default function TaskCard({
         <div className="flex items-center gap-1" data-card-action>
           {yoSoyCreadorYNoAsignado && !isArchivada && (
             <span
-              title="Vos creaste esta tarea"
+              title="Tú creaste esta tarea"
               className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full"
             >
               <UserPlus className="w-3 h-3" /> Creada por mí

@@ -57,7 +57,7 @@ function parseValorExistente(valor: MamuskaFila[] | string | undefined): Mamuska
   return undefined;
 }
 
-const OFERTA_LABELS: Record<MamuskaFila['oferta'], string> = {
+const OFERTA_LABELS: Record<NonNullable<MamuskaFila['oferta']>, string> = {
   '': 'Elegir…',
   lead_magnet: 'Lead Magnet ($0)',
   ultralow: 'Ultra Low ($17-47)',
@@ -66,7 +66,7 @@ const OFERTA_LABELS: Record<MamuskaFila['oferta'], string> = {
   high: 'High ($5K+)',
 };
 
-const CONCIENCIA_LABELS: Record<MamuskaFila['nivel_conciencia'], string> = {
+const CONCIENCIA_LABELS: Record<NonNullable<MamuskaFila['nivel_conciencia']>, string> = {
   '': 'Elegir…',
   A_unaware: 'A · Unaware (no sabe que tiene problema)',
   B_solution: 'B · Solution aware (sabe, pero con obstáculos)',
@@ -271,7 +271,7 @@ export default function TaskMapaMamuska({
                     }
                     className="w-full input-field text-sm"
                   >
-                    {(Object.keys(OFERTA_LABELS) as MamuskaFila['oferta'][]).map((k) => (
+                    {(Object.keys(OFERTA_LABELS) as NonNullable<MamuskaFila['oferta']>[]).map((k) => (
                       <option key={k} value={k}>
                         {OFERTA_LABELS[k]}
                       </option>
@@ -294,7 +294,7 @@ export default function TaskMapaMamuska({
                     className="w-full input-field text-sm"
                   >
                     {(
-                      Object.keys(CONCIENCIA_LABELS) as MamuskaFila['nivel_conciencia'][]
+                      Object.keys(CONCIENCIA_LABELS) as NonNullable<MamuskaFila['nivel_conciencia']>[]
                     ).map((k) => (
                       <option key={k} value={k}>
                         {CONCIENCIA_LABELS[k]}

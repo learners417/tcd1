@@ -87,7 +87,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
               </span>
             </div>
             <p className="text-xs text-cream/55 mt-1">
-              Mira y compartí el antes y el después de estos 90 días.
+              Mira y comparte el antes y el después de estos 90 días.
             </p>
           </button>
         )}

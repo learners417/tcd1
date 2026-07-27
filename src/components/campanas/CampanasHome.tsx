@@ -143,7 +143,9 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
 
   function elegir(p: PuertaId) {
     if (p === 'ventas' && !ventasAbierta) return;
-    try { localStorage.setItem('tcd_campana_objetivo', p); } catch { /* noop */ }
+    // Se guarda como JSON para que lo lea `leer()` igual que el resto.
+    // Antes iba como texto pelado y el Tablero no podía usarlo.
+    try { localStorage.setItem('tcd_campana_objetivo', JSON.stringify(p)); } catch { /* noop */ }
     onNavigate('nueva');
   }
 

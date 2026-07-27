@@ -7,6 +7,7 @@ import { supabase, isSupabaseReady } from '../lib/supabase';
 import { playNotificationSound } from '../lib/notificationSound';
 import CreditsBadge from './credits/CreditsBadge';
 import { CREDITS_ENABLED } from '../lib/featureFlags';
+import { useConexion } from '../lib/conexion';
 
 interface TopbarProps {
   currentPage?: string;
@@ -52,11 +53,32 @@ const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
   admin: { text: 'text-gold', bg: 'bg-gold/10' },
 };
 
+/**
+ * A dónde lleva cada aviso.
+ *
+ * Si un destino NO está acá, el botón «Ver» no aparece y el clic no hace
+ * nada: el aviso queda mudo. Pasó con 18 de los 26 destinos que la app
+ * escribía —incluidos los once avisos automáticos que apuntan a Campañas—,
+ * y no se veía porque nada rompía: simplemente no pasaba nada.
+ *
+ * REGLA: todo `accion_url` que se escriba en cualquier parte del repo tiene
+ * que estar en este mapa. Lo verifica la lente 6.36 de auditoria.py.
+ */
 const URL_TO_PAGE: Record<string, string> = {
+  '/dashboard': 'dashboard',
   '/hoja-de-ruta': 'roadmap',
   '/diario': 'diario',
-  // '/mensajes': 'mensajes', // oculto hasta que esté usable
+  '/campanas': 'campanas',
+  '/agentes': 'agentes',
+  '/creador': 'creador',
+  '/miclinica': 'campanas',   // MiClínica todavía es un enlace externo:
+                              // el puente vive dentro de Campañas.
   '/metricas': 'metrics',
+  '/numero': 'numero',
+  '/adn': 'adn',
+  '/coach': 'coach',
+  '/biblioteca': 'biblioteca',
+  // '/mensajes': 'mensajes', // oculto hasta que esté usable
   '/admin/clientes': 'admin-clientes',
   '/admin/mensajes': 'admin-mensajes',
 };
@@ -198,8 +220,17 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
     setShowNotifications(false);
   };
 
+  /** Sin esto, quedarse sin señal se veía como errores sueltos sin explicación:
+   *  el sanador que carga sus números desde el teléfono es justo el caso. */
+  const conexion = useConexion();
+
   return (
     <>
+      {conexion === 'sin_internet' && (
+        <div className="bg-danger/90 text-white text-center text-[11px] py-1.5 px-3">
+          Sin internet. Lo que escribas queda guardado acá y sube solo cuando vuelva la señal.
+        </div>
+      )}
       <header className="h-14 md:h-20 px-4 md:px-8 flex items-center justify-between z-20 relative">
         {/* Back (sub-páginas) o menú (home) + título de pantalla — mobile */}
         <div className="md:hidden flex items-center gap-1.5 min-w-0">

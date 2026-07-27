@@ -283,6 +283,33 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
+      {/* ── EL PACTO ──
+          El sanador lo escribe y lo FIRMA en la bienvenida, y hasta ahora se
+          guardaba en el navegador y no se lo devolvía nadie nunca. Pedirle a
+          alguien que firme algo y no volver a mostrárselo es lo contrario de
+          lo que hace que un compromiso sostenga. */}
+      {(() => {
+        let pacto: { texto?: string; firma?: string } | null = null;
+        try {
+          const raw = localStorage.getItem('tcd_pacto');
+          if (raw) pacto = JSON.parse(raw) as { texto?: string; firma?: string };
+        } catch { /* noop */ }
+        if (!pacto?.texto) return null;
+        return (
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
+              Lo que te prometiste
+            </p>
+            <p className="text-base text-cream/90 leading-relaxed italic">
+              «{pacto.texto}»
+            </p>
+            {pacto.firma && (
+              <p className="text-xs text-cream/50 mt-2">— {pacto.firma}</p>
+            )}
+          </div>
+        );
+      })()}
+
 
       {/* ═══ La Semana Blanca: el plan reservado + la cuenta regresiva ═══ */}
       {planDe(perfil) === 'blanco' && (() => {

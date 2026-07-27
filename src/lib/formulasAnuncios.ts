@@ -98,9 +98,9 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       '✗ [TÁCTICA VIEJA 3] — una línea.',
       '«Lo que SÍ necesitas 👉» — 3 puntos numerados, cada uno con una línea del porqué (el QUÉ, no el CÓMO).',
       'Prueba: [TESTIMONIO O RESULTADO REAL].',
-      '«Abrí [CUPOS] lugares para [PROGRAMA]. Comenta [PALABRA] y te envío los detalles.»',
+      '«Abre [CUPOS] lugares para [PROGRAMA]. Comenta [PALABRA] y te envío los detalles.»',
     ],
-    caption: '«Te estancas por hacer demasiado. Necesitas enfoque. Abrí [CUPOS] lugares — comenta [PALABRA] y te envío todo.»',
+    caption: '«Te estancas por hacer demasiado. Necesitas enfoque. Abre [CUPOS] lugares — comenta [PALABRA] y te envío todo.»',
     ejemplo: '«Déjame decirte lo que NO necesitas para volver a dormir de noche: otra app de meditación, otro libro de hábitos, otras vacaciones…»',
     errorComun: 'Piedras genéricas («no necesitas suerte»). Las piedras deben ser tácticas CONCRETAS que tu cliente realmente probó — si no se reconoce en la lista, el anuncio no le habla.',
   },
@@ -269,7 +269,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
     porque: 'Las stories hablan a los que ya te siguen — la audiencia más caliente que existe. Tres toques el mismo día crean efecto de evento: algo está por pasar y los lugares son limitados.',
     estructura: [
       'Story 1 — Curiosidad: «[AFIRMACIÓN INTRIGANTE sobre el resultado o el método]» + encuesta o caja de preguntas.',
-      'Story 2 — Contexto: «Abrí [CUPOS] lugares para [PROGRAMA]. Es para quien [CONDUCTA DE TU CLIENTE].»',
+      'Story 2 — Contexto: «Abre [CUPOS] lugares para [PROGRAMA]. Es para quien [CONDUCTA DE TU CLIENTE].»',
       'Story 3 — CTA: «Escríbeme [PALABRA] por DM y te envío los detalles antes que a nadie.»',
     ],
     caption: 'No lleva caption. Las 3 stories se publican con horas de diferencia el mismo día. Repetible 2-3 veces por semana con distinto ángulo.',
@@ -432,22 +432,122 @@ export const DM_AUTOMATICO = {
 
 /* ══════════════════ MÉTRICAS Y DECISIÓN ══════════════════ */
 
+/**
+ * El objetivo de la campana decide con QUE regla se la juzga.
+ * Un clic a mensaje abre un chat, no un checkout: el evento que Meta optimiza
+ * esta antes en el embudo, asi que el costo NO se compara con el de una
+ * campana de trafico. Juzgar mensajes con el umbral de visitas apagaba
+ * anuncios sanos.
+ */
+export type ObjetivoCampana = 'perfil' | 'mensajes' | 'mensajes_alto';
+
+export interface UmbralObjetivo {
+  etiqueta: string;
+  /** Como se llama la unidad que se compra */
+  unidad: string;
+  /** Zona sana (USD) */
+  sano: [number, number];
+  /** Arriba de esto se apaga */
+  alarma: number;
+  nota: string;
+}
+
+export const UMBRALES: Record<ObjetivoCampana, UmbralObjetivo> = {
+  perfil: {
+    etiqueta: 'Trafico al perfil',
+    unidad: 'visita',
+    sano: [0.02, 0.07],
+    alarma: 0.07,
+    nota: 'Compra visitas al perfil. Es la mas barata y la mas lejos de la venta.',
+  },
+  mensajes: {
+    etiqueta: 'Mensajes (LATAM)',
+    unidad: 'conversacion',
+    sano: [0.25, 0.70],
+    alarma: 1.50,
+    nota: 'LATAM es de los mercados mas baratos del mundo para mensajes. Arriba de $1,50 el problema es el creativo.',
+  },
+  mensajes_alto: {
+    etiqueta: 'Mensajes · ticket alto',
+    unidad: 'conversacion',
+    sano: [1.20, 2.50],
+    alarma: 3.00,
+    nota: 'Publico chico y caro: la conversacion cuesta mas, pero una venta paga muchas.',
+  },
+};
+
 export const METRICAS_REGLAS = {
-  /** Umbral operativo: por visita al perfil (USD). Arriba de esto, el anuncio se apaga. */
+  /** @deprecated Usar UMBRALES.perfil.alarma. Se conserva para no romper llamadas viejas. */
   maxCostoPorVisitaUSD: 0.07,
-  /** Los primeros N días no se opina: se mide. */
+  /** Los primeros N dias no se opina: se mide. */
   diasSinOpinar: 14,
+  /** De cada 4 conversaciones, al menos 1 tiene que agendar. Debajo de esto el
+   *  problema NO es el anuncio: es el DM o la pagina. */
+  minConversacionAAgenda: 0.25,
   /** Refrescar el creativo del ganador cada N semanas (mismo esqueleto, otro hook). */
   semanasRefresh: [2, 4] as [number, number],
-  primaria: 'Costo por conversación iniciada (comentario con la palabra o DM). Es lo único que la campaña controla.',
-  negocio: 'Conversaciones → reservas calificadas o ventas. Se mira por semana, no por día.',
-  alarma: 'Muchas conversaciones y cero reservas = el problema NO es el anuncio — es la página o el DM. No se toca el anuncio hasta revisar los otros dos.',
-  continuidad: 'El ganador queda corriendo; los otros dos se apagan. Gana el de menor costo por conversación QUE ADEMÁS genera reservas.',
+  primaria: 'Costo por conversacion iniciada (comentario con la palabra o DM). Es lo unico que la campana controla.',
+  negocio: 'Conversaciones → reservas calificadas o ventas. Se mira por semana, no por dia.',
+  alarma: 'Muchas conversaciones y cero reservas = el problema NO es el anuncio — es la pagina o el DM. No se toca el anuncio hasta revisar los otros dos.',
+  continuidad: 'El ganador queda corriendo; los otros dos se apagan. Gana el de menor costo por conversacion QUE ADEMAS genera reservas.',
 };
+
+/**
+ * Los dias de medicion dependen del gasto, no del calendario. Con $10 al dia,
+ * 4 dias no dan senal y apagar temprano es tirar plata; con $50 o mas la
+ * senal llega antes y esperar 14 dias es quemar presupuesto.
+ */
+export function diasDeMedicion(gastoDiarioUSD: number): number {
+  if (gastoDiarioUSD >= 50) return 7;
+  if (gastoDiarioUSD >= 25) return 10;
+  return METRICAS_REGLAS.diasSinOpinar;
+}
+
+/** El veredicto de una pieza, con la regla que corresponde a SU objetivo. */
+export function veredictoAnuncio(
+  objetivo: ObjetivoCampana,
+  d: { gasto: number; visitas: number; conversaciones: number; agendas: number },
+): { estado: 'rojo' | 'amarillo' | 'verde' | 'sin_datos'; texto: string } {
+  const u = UMBRALES[objetivo];
+  const { gasto, visitas, conversaciones, agendas } = d;
+  if (!gasto && !visitas && !conversaciones) {
+    return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+  }
+  const base = objetivo === 'perfil' ? visitas : conversaciones;
+  const costo = base > 0 ? gasto / base : null;
+
+  if (costo !== null && costo > u.alarma) {
+    return {
+      estado: 'rojo',
+      texto: `$${costo.toFixed(2)} por ${u.unidad} — el tope de esta campana es $${u.alarma.toFixed(2)}. Apagalo y refresca el creativo con otro hook.`,
+    };
+  }
+  if (conversaciones >= 5 && agendas === 0) {
+    return {
+      estado: 'amarillo',
+      texto: 'Conversaciones si, agendas no — el problema NO es el anuncio: revisa tu pagina y tu DM antes de tocar nada.',
+    };
+  }
+  if (conversaciones >= 8 && agendas / conversaciones < METRICAS_REGLAS.minConversacionAAgenda) {
+    return {
+      estado: 'amarillo',
+      texto: `Solo ${Math.round((agendas / conversaciones) * 100)}% de tus conversaciones agenda (deberia ser 25% o mas). El anuncio trae gente; el DM la pierde.`,
+    };
+  }
+  if (conversaciones > 0 && agendas > 0) {
+    return {
+      estado: 'verde',
+      texto: `$${(gasto / conversaciones).toFixed(2)} por conversacion y agenda. Este queda.`,
+    };
+  }
+  return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+}
 
 /* ══════════════════ AUDITORÍA DE INGREDIENTES ══════════════════ */
 
 export interface ResultadoAuditoria {
+  /** Los ids de lo que falta, para poder pedirle a la IA que lo escriba. */
+  faltantesIds?: string[];
   presentes: string[];
   faltantes: string[];
   aprobada: boolean;
@@ -462,7 +562,11 @@ export interface ResultadoAuditoria {
 export function auditarPieza(texto: string): ResultadoAuditoria {
   const t = ' ' + texto.toLowerCase() + ' ';
   const senales: Record<string, RegExp> = {
-    hook: /./, // toda pieza tiene primera línea; el hook se evalúa a ojo — cuenta como presente
+    // El hook NO puede darse por presente siempre: así estaba antes (/./)
+    // y aprobaba cualquier primera línea, incluidas las genéricas. Se juzga
+    // por lo que hace un hook: prometer un resultado, nombrar un dolor,
+    // contradecir una creencia o abrir con una pregunta — en pocas palabras.
+    hook: /^[^\n]{8,150}(\?|:|\.\.\.|—|!)|^(c[oó]mo|por qu[eé]|si |cuando |deja de|nunca|lo que|nadie|3 |4 |5 |el error|te mintieron|no necesitas)/i,
     piedras: /(no necesitas|no hagas|deja de|nunca hagas|sin (otro|otra|más)|no hice|abandon[eé])/,
     analogia: /(funciona como|es como|igual que|imagina|como un |como una )/,
     nombre: /(\[m[eé]todo\]|\[programa\]|\[nombre\]|\bm[eé]todo [a-záéíóúñ]{3,}|protocolo [a-záéíóúñ]{3,})/,
@@ -471,16 +575,21 @@ export function auditarPieza(texto: string): ResultadoAuditoria {
     aclaracion: /(no es magia|no pas[oó] de la noche|tarda|no fue de un d[ií]a|resultados dependen|si empiezas de cero)/,
     cta: /comenta\s+[«"']?[a-záéíóúñ]{3,}/,
   };
+  const primeraLinea = texto.trim().split('\n')[0]?.trim() ?? '';
   const presentes: string[] = [];
   const faltantes: string[] = [];
+  const faltantesIds: string[] = [];
   for (const ing of INGREDIENTES) {
-    if (senales[ing.id]?.test(t)) presentes.push(ing.nombre);
-    else faltantes.push(ing.nombre);
+    // El hook vive en la primera línea; el resto puede estar en cualquier lado.
+    const donde = ing.id === 'hook' ? primeraLinea : t;
+    if (senales[ing.id]?.test(donde)) presentes.push(ing.nombre);
+    else { faltantes.push(ing.nombre); faltantesIds.push(ing.id); }
   }
   const aprobada = faltantes.length <= 2;
   return {
     presentes,
     faltantes,
+    faltantesIds,
     aprobada,
     nota: aprobada
       ? 'La pieza tiene sus ingredientes. Revísala una vez en voz alta y está lista.'
@@ -495,3 +604,435 @@ export function formulaPorId(id: number): FormulaAnuncio | null {
 }
 
 export const FORMULA_STORIES = FORMULAS_ANUNCIOS.find((f) => f.id === 12)!;
+
+
+/* ══════════════════ RECOMENDADOR DE FÓRMULAS ══════════════════ */
+
+/**
+ * Elige las 3 fórmulas por el sanador, en vez de darle un menú de 18.
+ *
+ * POR QUÉ: las opciones matan al principiante. Alguien que arranca no tiene
+ * criterio para elegir entre "El espejo" y "¿Te pasó?", y elegir mal le
+ * cuesta una semana de pauta. El default anterior era el mismo para todos
+ * (1, 15 y 10) sin mirar nada de su ADN.
+ *
+ * La regla del Manual no se toca: una de piedras, una de dolor o historia y
+ * una de resultado o método. Lo que decide acá es CUÁL de cada familia,
+ * según lo que el sanador ya selló.
+ */
+
+export interface SenalesSanador {
+  /** Tiene un resultado propio, con permiso para contarlo. */
+  tienePrueba: boolean;
+  /** Su marca es él: cuenta su historia, da la cara. */
+  marcaPersonal: boolean;
+  /** Tiene frases textuales de sus clientes. */
+  tieneFrases: boolean;
+  /** Su método tiene nombre propio. */
+  metodoConNombre: boolean;
+  /** Cargó las tácticas que su cliente ya probó y le fallaron. */
+  tienePiedras: boolean;
+}
+
+export interface Recomendacion {
+  id: number;
+  nombre: string;
+  /** Por qué esta y no otra. Se le muestra al sanador. */
+  porQue: string;
+}
+
+export type RecomendacionTrio = Record<Familia3, Recomendacion>;
+
+/** Familias del test (la 12, de stories, acompaña siempre y no cuenta). */
+export type Familia3 = 'piedras' | 'dolor_historia' | 'resultado_metodo';
+
+function ficha(id: number): FormulaAnuncio {
+  const f = FORMULAS_ANUNCIOS.find((x) => x.id === id);
+  if (!f) throw new Error(`fórmula ${id} inexistente`);
+  return f;
+}
+
+/**
+ * Las tres fórmulas para este sanador, con el motivo de cada una.
+ *
+ * Las guías vienen del Manual: sin prueba propia fuerte se evitan la 4 y la 9
+ * y se considera la 18; con marca personal y una historia real van la 7, la
+ * 14 o la 16; con avatar corporativo, la 13, la 15 y la 18.
+ */
+export function recomendarFormulas(s: SenalesSanador): RecomendacionTrio {
+  // ── PIEDRAS: lo que su cliente ya probó y no le funcionó ──
+  let piedras: Recomendacion;
+  if (s.tienePiedras) {
+    piedras = {
+      ...ficha(1),
+      porQue: 'Cargaste lo que tu paciente ya intentó. Esta fórmula usa exactamente eso, y es la más segura para abrir una campaña.',
+    };
+  } else if (s.marcaPersonal) {
+    piedras = {
+      ...ficha(16),
+      porQue: 'Tu marca eres tú: una decisión concreta tuya, con fecha, filtra mejor que una lista de errores ajenos.',
+    };
+  } else {
+    piedras = {
+      ...ficha(13),
+      porQue: 'Sin marca personal fuerte, la comparación lado a lado explica sola: se entiende sin que tengas que dar la cara.',
+    };
+  }
+
+  // ── DOLOR o HISTORIA ──
+  let dolor: Recomendacion;
+  if (s.marcaPersonal && s.tienePrueba) {
+    dolor = {
+      ...ficha(7),
+      porQue: 'Tienes marca personal y un resultado real: tu historia es tu activo más fuerte y esta fórmula la pone a trabajar.',
+    };
+  } else if (s.tieneFrases) {
+    dolor = {
+      ...ficha(15),
+      porQue: 'Tienes las frases textuales de tus pacientes. Esta fórmula las devuelve como espejo, con sus palabras y no con las tuyas.',
+    };
+  } else {
+    dolor = {
+      ...ficha(17),
+      porQue: 'Todavía no cargaste frases de tus pacientes, así que conviene un momento concreto de fracaso que cualquiera reconozca.',
+    };
+  }
+
+  // ── RESULTADO o MÉTODO ──
+  let resultado: Recomendacion;
+  if (s.tienePrueba) {
+    resultado = {
+      ...ficha(4),
+      porQue: 'Tienes un resultado comprobable y con permiso. Es la fórmula más fuerte del catálogo, y solo se puede usar cuando la prueba es real.',
+    };
+  } else if (s.metodoConNombre) {
+    resultado = {
+      ...ficha(10),
+      porQue: 'Tu método ya tiene nombre propio. Sin prueba propia todavía, presentarlo como algo distinto es el camino honesto.',
+    };
+  } else {
+    resultado = {
+      ...ficha(18),
+      porQue: 'Sin prueba propia ni método nombrado, la autoridad se toma prestada de los grandes de tu campo. Nunca se inventa.',
+    };
+  }
+
+  return { piedras, dolor_historia: dolor, resultado_metodo: resultado };
+}
+
+/**
+ * Fórmulas que este sanador NO debería usar todavía, con el motivo.
+ *
+ * Se le muestra para que entienda el criterio, no para esconderle opciones:
+ * si igual quiere usarlas, puede — pero sabiendo qué le falta.
+ */
+export function formulasBloqueadas(s: SenalesSanador): Array<{ id: number; nombre: string; porQue: string }> {
+  const fuera: Array<{ id: number; nombre: string; porQue: string }> = [];
+  if (!s.tienePrueba) {
+    fuera.push({
+      ...ficha(4),
+      porQue: 'Necesita un resultado tuyo, comprobable y con permiso. Sin eso se termina inventando, y eso se nota.',
+    });
+    fuera.push({
+      ...ficha(9),
+      porQue: 'Necesita un antes y un después reales. Sin caso propio no hay contraste que mostrar.',
+    });
+  }
+  if (!s.marcaPersonal) {
+    fuera.push({
+      ...ficha(14),
+      porQue: 'Confesar un error propio funciona cuando la marca eres tú. Con avatar corporativo suena raro.',
+    });
+  }
+  return fuera;
+}
+
+/* ══════════════════ ESTADO REAL DE LAS 3 PIEZAS ══════════════════ */
+
+export interface EstadoPiezas {
+  /** Cuántas de las 3 están escritas. */
+  escritas: number;
+  /** Cuántas pasaron la auditoría de los 8 ingredientes. */
+  aprobadas: number;
+  /** true = las 3 escritas Y las 3 aprobadas. */
+  listas: boolean;
+  /** Qué le falta a cada una, para poder decirlo sin adivinar. */
+  pendientes: Array<{ formulaId: number; nombre: string; falta: string[] }>;
+}
+
+/**
+ * Lee las piezas guardadas y dice si de verdad están listas.
+ *
+ * Existe porque el primer candado del montaje decía "Tus 3 anuncios escritos
+ * y auditados" y era una casilla que cualquiera podía tildar. Un candado que
+ * no verifica nada no es un candado: es un adorno que da falsa seguridad
+ * justo antes de encender una campaña con dinero real.
+ */
+export function estadoDeLasPiezas(
+  guardadas: Record<number, { formulaId: number; texto: string }>,
+  elegidas: number[],
+  /** La palabra clave del sanador. Sin ella en la pieza, el comentario no
+   *  dispara el mensaje automático y toda la campaña queda muda. */
+  palabraClave = '',
+): EstadoPiezas {
+  const pendientes: EstadoPiezas['pendientes'] = [];
+  let escritas = 0;
+  let aprobadas = 0;
+
+  for (const id of elegidas) {
+    const p = guardadas[id];
+    const f = FORMULAS_ANUNCIOS.find((x) => x.id === id);
+    const nombre = f?.nombre ?? `Fórmula ${id}`;
+    if (!p?.texto?.trim()) {
+      pendientes.push({ formulaId: id, nombre, falta: ['todavía no está escrita'] });
+      continue;
+    }
+    escritas++;
+    const a = auditarPieza(p.texto);
+    // Una pieza puede tener los 8 ingredientes y aun así no poder publicarse.
+    // El candado tiene que mirar las dos cosas: si solo mirara ingredientes,
+    // dejaría encender una campaña que la plataforma va a rechazar.
+    const bloqueantes = revisarPoliticas(p.texto).filter((x) => x.gravedad === 'bloquea');
+    const car = armarCarrusel(p.texto, palabraClave);
+    const sinPalabra = !!palabraClave && !car.palabraPresente;
+
+    if (a.aprobada && bloqueantes.length === 0 && !sinPalabra) aprobadas++;
+    else {
+      pendientes.push({
+        formulaId: id, nombre,
+        falta: [
+          ...a.faltantes,
+          ...bloqueantes.map((b) => `no se puede publicar «${b.que}»`),
+          ...(sinPalabra ? [`falta tu palabra «${palabraClave}» en el cierre`] : []),
+        ],
+      });
+    }
+  }
+
+  return {
+    escritas,
+    aprobadas,
+    listas: elegidas.length > 0 && aprobadas === elegidas.length,
+    pendientes,
+  };
+}
+
+/* ══════════════════ POLÍTICAS DE PUBLICACIÓN ══════════════════ */
+
+export type GravedadPolitica = 'bloquea' | 'revisa';
+
+export interface AlertaPolitica {
+  id: string;
+  gravedad: GravedadPolitica;
+  /** Qué se encontró, con las palabras del texto. */
+  que: string;
+  /** Por qué es un problema, en una línea. */
+  porQue: string;
+  /** Cómo se escribe lo mismo sin romper la regla. */
+  comoSeArregla: string;
+  /** El fragmento exacto, para que lo pueda buscar. */
+  fragmento: string;
+}
+
+/**
+ * Revisa una pieza contra las políticas de publicación, SIN llamar a un modelo.
+ *
+ * Por qué determinista: las reglas ya se le cuentan al modelo en el prompt y
+ * el crítico también las mira, pero las dos cosas cuestan una llamada y
+ * pueden fallar. Esto corre gratis, siempre, en cada tecla, y bloquea.
+ *
+ * Lo que se juega: una cuenta publicitaria inhabilitada. Recuperarla tarda
+ * semanas y a veces no se recupera. Vale más frenar de más que de menos.
+ */
+
+/** Condiciones que NO se pueden atribuir al lector en segunda persona. */
+const CONDICIONES = [
+  'ansiedad', 'depresi[oó]n', 'estr[eé]s cr[oó]nico', 'insomnio', 'diabetes',
+  'obesidad', 'sobrepeso', 'hipertensi[oó]n', 'colon irritable', 'menopausia',
+  'burnout', 'p[aá]nico', 'trauma', 'adicci[oó]n', 'anorexia', 'bulimia',
+  'infertilidad', 'c[aá]ncer', 'tiroides', 'candidiasis',
+];
+
+const REGLAS: Array<{
+  id: string;
+  gravedad: GravedadPolitica;
+  patron: RegExp;
+  porQue: string;
+  comoSeArregla: string;
+}> = [
+  {
+    id: 'atributo_personal',
+    gravedad: 'bloquea',
+    // "tú tienes ansiedad", "sufres de insomnio", "tu depresión", "estás obesa"
+    patron: new RegExp(
+      `\\b(t[uú] (tienes|sufres|padeces)|tienes|sufres de|padeces( de)?|tu |tus )\\s*(${CONDICIONES.join('|')})`,
+      'i',
+    ),
+    porQue: 'Afirmar la condición del lector es lo que más cuentas inhabilita: la plataforma lo lee como dar por sentado algo privado de quien mira.',
+    comoSeArregla: 'Dilo en tercera persona o como pregunta abierta sobre una situación, no sobre la persona: en vez de «tú tienes ansiedad», «hay días en que el cuerpo no afloja».',
+  },
+  {
+    id: 'estado_personal',
+    gravedad: 'bloquea',
+    // El adjetivo puede no venir pegado al verbo: "estás agotada Y DEPRIMIDA".
+    // Se permite un hueco corto, pero la lista de adjetivos se mantiene en
+    // CONDICIONES y estados clínicos — "estás cansada" NO se bloquea, porque
+    // el cansancio no es una condición y frenarlo sería un falso positivo
+    // constante en este nicho, que es lo que hace que dejen de creerle al aviso.
+    patron: /\b(est[aá]s|te sientes)\b[^.!?\n]{0,40}?\b(deprimid|ansios|obes|enferm[ao]|diab[eé]tic|bipolar|adict|an[oó]rexic|bul[ií]mic)/i,
+    porQue: 'Es la misma regla de atributos personales: le estás diciendo al lector qué condición tiene.',
+    comoSeArregla: 'Describe la escena, no a la persona: «a las 3 de la mañana el techo se vuelve conocido».',
+  },
+  {
+    id: 'garantia',
+    gravedad: 'bloquea',
+    patron: /\b(garantiz\w+|resultados? asegurad\w+|100\s*%\s*(de\s*)?(efectiv|seguro|garantiz)|sin fallar)\b/i,
+    porQue: 'Prometer un resultado garantizado no se puede sostener y la plataforma lo rechaza.',
+    comoSeArregla: 'Cambia la garantía del RESULTADO por una del PROCESO: «si haces los pasos y no ves cambios en 30 días, te devuelvo la inversión».',
+  },
+  {
+    id: 'cifra_ingreso',
+    gravedad: 'bloquea',
+    patron: /\b(gana|factura|ingresa|hac[eé]|consegu[ií])\w*\s*(hasta\s*)?[$€]\s?\d|[$€]\s?\d[\d.,]*\s*(al mes|por mes|mensuales|en 30 d[ií]as|en un mes)/i,
+    porQue: 'Una cifra de ingreso como expectativa típica es rechazo directo, y además atrae al público equivocado.',
+    comoSeArregla: 'Habla del cambio, no del número: «llenar la agenda sin perseguir a nadie».',
+  },
+  {
+    id: 'lenguaje_medico',
+    gravedad: 'bloquea',
+    patron: /\b(cur[ao]|curar|curamos|curo|trat[ao] la|tratamiento (de|para) (la|el)|diagnostic[ao]|sana (la|el) \w+itis|elimina (la|el) (ansiedad|depresi))/i,
+    porQue: 'Curar, tratar o diagnosticar son verbos clínicos: en un anuncio de bienestar activan revisión y suelen terminar en rechazo.',
+    comoSeArregla: 'Habla de acompañar y de lo que la persona logra: «acompaño a recuperar la energía», no «curo el agotamiento».',
+  },
+  {
+    id: 'antes_despues',
+    gravedad: 'bloquea',
+    patron: /\b(antes y despu[eé]s|baj[eé]\s*\d+\s*(kilos?|kg)|perd[ií]\s*\d+\s*(kilos?|kg)|\d+\s*kilos? menos)/i,
+    porQue: 'Las comparaciones corporales están prohibidas de forma explícita, con foto o sin foto.',
+    comoSeArregla: 'Cuenta lo que cambió en su vida, no en su cuerpo: «volvió a jugar con sus hijos sin quedarse sin aire».',
+  },
+  {
+    id: 'testimonio_sin_descargo',
+    gravedad: 'revisa',
+    // Hay un caso real contado, pero en ningún lado se aclara que no es garantía.
+    patron: /(mi (paciente|cliente|alumna?)|una (paciente|clienta)|logr[oó]|pas[oó] de)/i,
+    porQue: 'Cuando cuentas un caso real hace falta aclarar que los resultados dependen de cada persona.',
+    comoSeArregla: 'Agrega al pie: «resultados individuales, dependen del compromiso de cada persona».',
+  },
+];
+
+/** Lo que ya cuenta como descargo, para no pedirlo dos veces. */
+const TIENE_DESCARGO =
+  /(resultados? (individuales|dependen|var[ií]an)|no es magia|depende de cada persona|no garantiza)/i;
+
+export function revisarPoliticas(texto: string): AlertaPolitica[] {
+  const t = texto ?? '';
+  const alertas: AlertaPolitica[] = [];
+
+  for (const r of REGLAS) {
+    const m = r.patron.exec(t);
+    if (!m) continue;
+    // El testimonio solo alerta si NO hay descargo en ningún lado.
+    if (r.id === 'testimonio_sin_descargo' && TIENE_DESCARGO.test(t)) continue;
+
+    const i = Math.max(0, m.index - 25);
+    alertas.push({
+      id: r.id,
+      gravedad: r.gravedad,
+      que: m[0].trim(),
+      porQue: r.porQue,
+      comoSeArregla: r.comoSeArregla,
+      fragmento: `…${t.slice(i, m.index + m[0].length + 25).trim()}…`,
+    });
+  }
+  return alertas;
+}
+
+/** ¿Se puede publicar? Solo lo impiden las que bloquean. */
+export function puedePublicarse(texto: string): boolean {
+  return !revisarPoliticas(texto).some((a) => a.gravedad === 'bloquea');
+}
+
+/* ══════════════════ DEL GUION AL CARRUSEL ══════════════════ */
+
+export interface Lamina {
+  n: number;
+  /** 'portada' la primera, 'cierre' la última, 'lamina' el resto. */
+  tipo: 'portada' | 'lamina' | 'cierre';
+  texto: string;
+  /** Cuántos caracteres. Arriba de ~180 no entra cómodo en una lámina. */
+  largo: number;
+  /** true = se pasa de largo para leerse en el teléfono. */
+  larga: boolean;
+}
+
+export interface Carrusel {
+  laminas: Lamina[];
+  caption: string;
+  /** true = la palabra clave aparece en el cierre o en el caption. */
+  palabraPresente: boolean;
+  /** Lo que impide armarlo, si algo lo impide. */
+  problema?: string;
+}
+
+/** Arriba de esto, la lámina no se lee cómoda en un teléfono. */
+export const LARGO_MAX_LAMINA = 180;
+
+/**
+ * Parte el guion en láminas de carrusel.
+ *
+ * El modelo ya devuelve el texto marcado con "PANTALLA 1:", "PANTALLA 2:" y
+ * un "CAPTION:" al final — el prompt se lo pide así desde siempre. Lo que
+ * faltaba era LEERLO: la app mostraba el bloque entero como un solo texto y
+ * el sanador tenía que adivinar dónde cortaba cada lámina, contarlas a mano
+ * y copiarlas de a pedazos.
+ *
+ * Determinista y gratis: no hace falta una segunda llamada al modelo para
+ * partir algo que ya viene partido.
+ */
+export function armarCarrusel(texto: string, palabraClave: string): Carrusel {
+  const t = (texto ?? '').trim();
+  if (!t) return { laminas: [], caption: '', palabraPresente: false, problema: 'Todavía no está escrito.' };
+
+  // El caption va al final, después de la última pantalla.
+  const corte = t.search(/^\s*CAPTION\s*:/im);
+  const cuerpo = corte >= 0 ? t.slice(0, corte) : t;
+  const caption = corte >= 0
+    ? t.slice(corte).replace(/^\s*CAPTION\s*:/i, '').trim()
+    : '';
+
+  // Cada "PANTALLA N:" abre una lámina.
+  const partes = cuerpo
+    .split(/^\s*PANTALLA\s*\d*\s*:/gim)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  if (partes.length < 2) {
+    return {
+      laminas: [], caption, palabraPresente: false,
+      problema: 'El texto no vino separado en pantallas. Vuelve a generarlo.',
+    };
+  }
+
+  const laminas: Lamina[] = partes.map((texto, i) => {
+    const largo = texto.length;
+    return {
+      n: i + 1,
+      tipo: i === 0 ? 'portada' : i === partes.length - 1 ? 'cierre' : 'lamina',
+      texto,
+      largo,
+      larga: largo > LARGO_MAX_LAMINA,
+    };
+  });
+
+  // La palabra clave tiene que estar donde se pide comentar: en el cierre o
+  // en el caption. Si no está en ninguno, la campaña no puede funcionar —
+  // el comentario es lo que dispara el mensaje automático.
+  const p = (palabraClave ?? '').trim();
+  const cierre = laminas[laminas.length - 1]?.texto ?? '';
+  const palabraPresente = !!p
+    && (cierre.toUpperCase().includes(p.toUpperCase())
+        || caption.toUpperCase().includes(p.toUpperCase()));
+
+  return { laminas, caption, palabraPresente };
+}

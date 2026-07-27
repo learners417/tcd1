@@ -63,7 +63,7 @@ function buildInitialMessage(): Message {
   if (semanaActual === 1 && freno) {
     return {
       role: 'assistant',
-      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
+      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
     } as Message;
   }
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
@@ -372,7 +372,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         }) + resumenRuedaParaMentor() + resumenOrigenParaMentor();
 
         let fullResponse = '';
-        for await (const chunk of streamText({
+        for await (const chunk of streamText({ feature: 'mentor', tarea: 'chat',
           systemInstruction: systemPrompt,
           messages: aiMessages,
         })) {

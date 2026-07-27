@@ -4,7 +4,7 @@
  * Para agregar un video:
  * 1. Copiá la URL del video de YouTube (ej: https://youtu.be/dQw4w9WgXcQ)
  *    o el código de embed que da YouTube (iframe src="...embed/VIDEO_ID...")
- * 2. Agregá un nuevo objeto al array VIDEOS con el grupo correspondiente
+ * 2. Agrega un nuevo objeto al array VIDEOS con el grupo correspondiente
  *
  * Grupos:
  *   A = Identidad y Mentalidad
@@ -42,8 +42,8 @@ export function getYoutubeVideoId(url: string): string | null {
 }
 
 /**
- * Catálogo de videos — agregá los tuyos acá.
- * El array empieza vacío. Cuando tengas los links, completalo.
+ * Catálogo de videos — agrega los tuyos acá.
+ * El array empieza vacío. Cuando tengas los links, complétalo.
  */
 export const VIDEOS: VideoModulo[] = [
   // Ejemplo (borrarlo cuando agregues los reales):
@@ -51,7 +51,7 @@ export const VIDEOS: VideoModulo[] = [
   //   id: 'v-a1',
   //   grupo: 'A',
   //   titulo: 'Módulo 1 — Identidad del Fundador',
-  //   descripcion: 'Definí quién sos como emprendedor/a de la salud antes de empezar a vender.',
+  //   descripcion: 'Define quién eres como emprendedor/a de la salud antes de empezar a vender.',
   //   youtubeUrl: 'https://youtu.be/REEMPLAZAR_CON_TU_ID',
   //   duracion: '18:45',
   // },

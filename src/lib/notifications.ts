@@ -200,7 +200,9 @@ export async function notificarMensajeAdmin(
     tipo: 'mensaje',
     titulo: `Nuevo mensaje de ${adminNombre}`,
     descripcion: 'Tienes un mensaje nuevo en tu bandeja privada.',
-    accion_url: '/mensajes',
+    // Mensajes está oculto hasta que sea usable: el aviso lleva al
+    // Dashboard, donde el cliente ve que tiene algo pendiente.
+    accion_url: '/dashboard',
   });
 }
 

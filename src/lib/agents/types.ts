@@ -73,7 +73,7 @@ export interface LevelThresholds {
 /**
  * Snapshot del progreso del sanador con un entrenador específico.
  * Se carga desde `agent_skill_progress` y se pasa al system prompt para
- * que el entrenador adapte su tono (e.g. "ya tenés esto" al nivel 4).
+ * que el entrenador adapte su tono (e.g. "ya tienes esto" al nivel 4).
  */
 export interface AgenteSkillSnapshot {
   practice_count: number;

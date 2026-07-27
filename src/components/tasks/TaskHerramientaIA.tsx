@@ -102,7 +102,6 @@ function parseJsonArray<T>(texto: string): T[] | null {
 interface TaskHerramientaIAProps {
   meta: RoadmapMeta;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   outputExistente?: string;
   onSaveADN: (outputTexto: string) => void;
   isCompleted: boolean;
@@ -111,7 +110,7 @@ interface TaskHerramientaIAProps {
 type Modo = 'form' | 'generando' | 'revision' | 'edicion' | 'guardado' | 'opciones' | 'bloques' | 'revisionc' | 'sellado';
 
 export default function TaskHerramientaIA({
-  meta, perfil, geminiKey, outputExistente, onSaveADN, isCompleted,
+  meta, perfil, outputExistente, onSaveADN, isCompleted,
 }: TaskHerramientaIAProps) {
   // ── Evidencia obligatoria (F2) ──
   const [evidCount, setEvidCount] = React.useState<number>(-1);
@@ -195,7 +194,7 @@ export default function TaskHerramientaIA({
       if (faltan.length) { toast.error('Completa: ' + faltan.map((c) => c.label).join(', ')); return; }
       setModo('generando');
       try {
-        const out = await generateText({ prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) });
+        const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) });
         const arr = parseJsonArray<FaseOpcion>(out ?? '');
         if (arr) { setOpciones(arr.slice(0, 5)); setModo('opciones'); return; }
       } catch { /* cae al flujo clásico */ }
@@ -220,7 +219,7 @@ export default function TaskHerramientaIA({
       setModo('generando');
       try {
         const promptGenerico = buildPromptGenerico(meta, perfil ?? {});
-        const text = await generateText({
+        const text = await generateText({ feature: 'sesion', tarea: 'chat',
           prompt: promptGenerico,
           systemInstruction:
             'Eres un copywriter especialista en profesionales de la salud. Generas contenido auténtico, en voz del profesional, sin promesas exageradas. Empatía primero. Tono Argentino/voseo si no se especifica otro país.',
@@ -240,7 +239,7 @@ export default function TaskHerramientaIA({
       setModo('generando');
       try {
         const prompt = herramienta.promptTemplate(formValues, perfil ?? {});
-        const text = await generateText({ prompt });
+        const text = await generateText({ feature: 'sesion', tarea: 'chat', prompt });
         setOutput(text);
         setModo('revision');
         setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
@@ -298,7 +297,7 @@ export default function TaskHerramientaIA({
     setEleccion(op);
     setModo('generando');
     try {
-      const out = await generateText({ prompt: herramienta.constructorFases.promptBloques(op, formValues, perfil ?? {}) });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(op, formValues, perfil ?? {}) });
       const arr = parseJsonArray<FaseBloque>(out ?? '');
       if (arr) { setBloques(arr); setModo('bloques'); return; }
       toast.error('No pude armar las piezas — intenta de nuevo');
@@ -311,7 +310,7 @@ export default function TaskHerramientaIA({
     setPropuseOtra(true);
     setModo('generando');
     try {
-      const out = await generateText({ prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) + '\n\nIMPORTANTE: propone opciones DISTINTAS a estas, con otro ángulo: ' + opciones.map((o) => o.titulo).join(' · ') });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptOpciones(formValues, perfil ?? {}) + '\n\nIMPORTANTE: propone opciones DISTINTAS a estas, con otro ángulo: ' + opciones.map((o) => o.titulo).join(' · ') });
       const arr = parseJsonArray<FaseOpcion>(out ?? '');
       if (arr) setOpciones(arr.slice(0, 5));
     } catch { /* noop */ }
@@ -323,7 +322,7 @@ export default function TaskHerramientaIA({
     setRegenIdx(idx);
     try {
       const b = bloques[idx];
-      const out = await generateText({ prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${b.titulo}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${b.titulo}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
       const arr = parseJsonArray<FaseBloque>(out ?? '');
       if (arr?.[0]) setBloques((prev) => prev.map((x, i) => (i === idx ? arr[0] : x)));
     } catch { /* noop */ }

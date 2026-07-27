@@ -67,7 +67,7 @@ TONO / ANGULO: ${tono}`;
 
 TIPO DE ANUNCIO: Carrusel de Meta Ads (Instagram/Facebook)
 
-Tu tarea: armar UN SOLO carrusel bien trabajado (NO variantes). Vos decidis cuantos slides necesita el carrusel para contar la historia completa, con un MAXIMO ABSOLUTO de 10 slides. Usa la cantidad minima necesaria — si la idea cierra en 6, usa 6.
+Tu tarea: armar UN SOLO carrusel bien trabajado (NO variantes). Tú decidis cuantos slides necesita el carrusel para contar la historia completa, con un MAXIMO ABSOLUTO de 10 slides. Usa la cantidad minima necesaria — si la idea cierra en 6, usa 6.
 
 ESTRUCTURA DEL CARRUSEL:
 - Slide 1: HOOK que frena el scroll (puede ser una afirmacion contraintuitiva, una pregunta, un dato impactante)
@@ -159,7 +159,7 @@ REGLAS:
 
     try {
       let textoCompleto = '';
-      for await (const chunk of streamText({ prompt })) {
+      for await (const chunk of streamText({ feature: 'copy', tarea: 'guion', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
       }

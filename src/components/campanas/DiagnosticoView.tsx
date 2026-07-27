@@ -8,6 +8,7 @@ import type { ProfileV2 } from '../../lib/supabase';
 import type { DiagnosticoInput } from '../../lib/campanasTypes';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
+import { primero } from '../../lib/primero';
 
 interface Props {
   perfil: Partial<ProfileV2>;
@@ -49,9 +50,9 @@ export default function DiagnosticoView({ perfil }: Props) {
 Tu tarea es DIAGNOSTICAR una campaña activa y dar recomendaciones accionables.
 
 === DATOS DEL PROFESIONAL ===
-- Nombre: ${perfil.nombre ?? 'Profesional'}
-- Especialidad: ${perfil.especialidad ?? form.rubro}
-- Nicho: ${perfil.nicho ?? 'salud'}
+- Nombre: ${primero(perfil.nombre) || 'Profesional'}
+- Especialidad: ${primero(perfil.especialidad, form.rubro)}
+- Nicho: ${primero(perfil.nicho) || 'salud'}
 
 === CAMPAÑA A DIAGNOSTICAR ===
 - Nombre: ${form.nombre_campana}
@@ -94,7 +95,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
 
     try {
       let textoCompleto = '';
-      for await (const chunk of streamText({ prompt })) {
+      for await (const chunk of streamText({ feature: 'campana_chat', tarea: 'chat', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
       }

@@ -15,7 +15,6 @@ interface Props {
   campana: Campana;
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   onBack: () => void;
   onSaved: (creativo: Creativo) => void;
 }
@@ -27,7 +26,7 @@ const TABS: { id: StudioTab; label: string; icon: React.ElementType }[] = [
   { id: 'preview', label: 'Preview', icon: Eye },
 ];
 
-export default function CreativoStudio({ campana, userId, perfil, geminiKey, onBack, onSaved }: Props) {
+export default function CreativoStudio({ campana, userId, perfil, onBack, onSaved }: Props) {
   const [tab, setTab] = useState<StudioTab>('copy');
   const [copies, setCopies] = useState<CopyGenerado[]>([]);
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
@@ -193,7 +192,6 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
         {tab === 'copy' && (
           <CopyGenerator
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             objetivo={campana.objetivo}
             onCopyGenerated={handleCopyGenerated}
           />
@@ -204,7 +202,6 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
             copies={copies}
             angulo={angulo}
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             onImagesGenerated={handleImagesGenerated}
           />
         )}
@@ -214,7 +211,6 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
             campana={campana}
             userId={userId}
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             onSaved={onSaved}
           />
         )}

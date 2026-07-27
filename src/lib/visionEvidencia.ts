@@ -8,7 +8,6 @@
  *   no tiene relación. Así se evitan falsos rechazos de evidencia legítima.
  * El veredicto es solo una señal para el sanador (y, si duda, para el equipo).
  */
-import { GoogleGenAI } from '@google/genai';
 import { fileToBase64 } from './imageUploadUtils';
 
 export interface VeredictoVision {
@@ -23,39 +22,24 @@ export async function verificarEvidenciaVision(
   // Solo imágenes — el resto (audio, video, pdf) no se analiza.
   if (!file.type.startsWith('image/')) return null;
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-  if (!apiKey) return null;
-
   try {
     const { base64, mimeType } = await fileToBase64(file);
-    const ai = new GoogleGenAI({ apiKey });
-    const resp = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              text:
-                `Una persona subió esta imagen como evidencia de: "${descripcionEsperada}".\n` +
-                `¿La imagen es coherente con esa evidencia? Sé GENEROSO: si podría razonablemente serlo, responde ok:true. ` +
-                `Solo responde ok:false si la imagen claramente NO tiene ninguna relación con lo pedido.\n` +
-                `Responde SOLO JSON, sin markdown: {"ok": boolean, "motivo": "máximo 10 palabras, en español"}`,
-            },
-            { inlineData: { mimeType, data: base64 } },
-          ],
-        },
-      ],
+    const r = await fetch('/api/ai/vision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        base64, mimeType, descripcion: descripcionEsperada, feature: 'sesion',
+        userId: (() => {
+          try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}').id ?? null; }
+          catch { return null; }
+        })(),
+      }),
     });
-
-    const text = ((resp as { text?: string }).text ?? '').replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text) as Partial<VeredictoVision>;
-    if (typeof parsed.ok === 'boolean') {
-      return { ok: parsed.ok, motivo: String(parsed.motivo ?? '') };
-    }
-    return null;
+    if (!r.ok) return null;
+    const data = await r.json() as { veredicto?: VeredictoVision | null };
+    return data.veredicto ?? null;
   } catch {
-    // Cualquier fallo (red, parseo, modelo) → sin veredicto. NUNCA bloquea.
+    // Cualquier fallo → sin veredicto. NUNCA bloquea.
     return null;
   }
 }

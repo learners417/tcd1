@@ -55,7 +55,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
 
       <div>
         <p className="text-sm font-semibold text-white mb-1">Compromisos para la próxima</p>
-        <p className="text-xs text-white/55 mb-2">Concretos y chiquitos. Lo que prometés acá, tu mentor lo recuerda.</p>
+        <p className="text-xs text-white/55 mb-2">Concretos y chiquitos. Lo que prometes acá, tu mentor lo recuerda.</p>
         <div className="space-y-2">
           {compromisos.map((c, i) => (
             <div key={i} className="flex gap-2">

@@ -298,7 +298,7 @@ export default function BuyCreditsModal({
               {selectedPack && (
                 <div className="border-t border-white/10 pt-5">
                   <div className="text-sm text-white/70 mb-3">
-                    Pagás <span className="text-white font-semibold">${selectedPack.price_usd.toFixed(2)} USD</span>
+                    Pagas <span className="text-white font-semibold">${selectedPack.price_usd.toFixed(2)} USD</span>
                     {' '}por <span className="text-gold font-semibold">{selectedPack.credits} créditos</span>
                   </div>
 

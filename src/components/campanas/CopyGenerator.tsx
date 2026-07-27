@@ -9,14 +9,13 @@ import type { ProfileV2 } from '../../lib/supabase';
 
 interface Props {
   perfil: Partial<ProfileV2>;
-  geminiKey?: string;
   objetivo: ObjetivoCampana;
   onCopyGenerated: (copies: CopyGenerado[], angulo: AnguloCreativo, tipo: TipoCreativo) => void;
 }
 
 const ANGULOS: AnguloCreativo[] = ['contraintuitivo', 'directo', 'emocional', 'curiosidad', 'autoridad', 'dolor', 'deseo'];
 
-export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGenerated }: Props) {
+export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Props) {
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
   const [tipo, setTipo] = useState<TipoCreativo>('imagen_single');
   const [slideCount, setSlideCount] = useState(5);
@@ -30,7 +29,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
 
     try {
       const prompt = buildCopyPrompt(angulo, tipo, perfil, objetivo, tipo === 'carrusel' ? slideCount : undefined);
-      const text = await generateText({ prompt });
+      const text = await generateText({ feature: 'copy', tarea: 'guion', prompt });
       // Extraer JSON del response — limpiar markdown code blocks
       let cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       const jsonMatch = cleaned.match(/\[[\s\S]*\]/) ?? cleaned.match(/\{[\s\S]*\}/);
@@ -55,7 +54,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
     } finally {
       setGenerating(false);
     }
-  }, [angulo, tipo, slideCount, perfil, geminiKey, objetivo, onCopyGenerated]);
+  }, [angulo, tipo, slideCount, perfil, objetivo, onCopyGenerated]);
 
   const handleCopyCopy = (idx: number) => {
     const c = copies[idx];
@@ -92,7 +91,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
             <div className="flex items-center gap-2 ml-2">
               <label className="text-xs text-cream/55">Slides:</label>
               <input
-                type="number"
+                type="number" inputMode="numeric"
                 min={3}
                 max={10}
                 value={slideCount}

@@ -10,6 +10,14 @@ import { esDiaDescanso, calcularRachaDesdeFechas } from '../lib/racha';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
+import TableroPlata from '../components/admin/TableroPlata';
+import PanelMotorIA from '../components/admin/PanelMotorIA';
+import ColaDelDia from '../components/admin/ColaDelDia';
+import Supervision from '../components/admin/Supervision';
+import SalaDeMando from '../components/admin/SalaDeMando';
+import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
+import MiRol from '../components/admin/MiRol';
+import CargarSesion from '../components/admin/CargarSesion';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
   Stethoscope, CheckCircle2, Circle, LogOut,
@@ -19,16 +27,16 @@ import {
   CheckCheck, AlertTriangle, Image, Mic, Settings, Camera,
   Video, Trash2, Youtube, Play, ChevronDown, FileText,
   Globe, Flame, Star, DollarSign, Pencil,
-  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
+  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
-  Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
+  Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck, Cpu,
   Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
   Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
 };
-import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, type UserStatus, type PilarId, isSupabaseReady, PILAR_ORDER, fetchProfileV2 } from '../lib/supabase';
+import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, type UserStatus, type PilarId, isSupabaseReady, PILAR_ORDER, fetchProfileV2, db } from '../lib/supabase';
 import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
@@ -45,7 +53,7 @@ import Markdown from 'react-markdown';
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
 type AdminRol = 'owner' | 'manager' | 'staff';
-type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas';
+type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones';
 type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
@@ -204,7 +212,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
     if (!supabase || !input.trim()) return;
     setEnviando(true);
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal, emisor_id: adminProfile.id, contenido: input.trim()
       });
       if (error) throw error;
@@ -222,15 +230,15 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
     try {
       const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'mp3');
       const path = `admin/${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage.from('mensajes-archivos').upload(path, file);
+      const { data, error } = await db().storage.from('mensajes-archivos').upload(path, file);
       if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('mensajes-archivos').getPublicUrl(data.path);
-      const { error: msgErr } = await supabase.from('mensajes').insert({
+      const { data: { publicUrl } } = db().storage.from('mensajes-archivos').getPublicUrl(data.path);
+      const { error: msgErr } = await db().from('mensajes').insert({
         canal, emisor_id: adminProfile.id, contenido: '', tipo_archivo: tipo, archivo_url: publicUrl
       });
       if (msgErr) throw msgErr;
     } catch {
-      toast.error('Error subiendo archivo. Verificá que el bucket exista en Supabase.');
+      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
     } finally {
       setUploading(false);
     }
@@ -250,7 +258,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare className="w-12 h-12 text-gray-800 mb-4" />
-            <p className="text-cream/55">Este canal está en silencio. Rompelo vos.</p>
+            <p className="text-cream/55">Este canal está en silencio. Rompelo tú.</p>
           </div>
         ) : (
           messages.map((m) => {
@@ -341,12 +349,29 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
-  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas'];
+  /**
+   * El ROL, no el permiso. Decide qué ve, en qué orden, y qué no le toca.
+   * Los tres nombres viejos siguen en la base y se traducen acá.
+   */
+  const rol = rolDe((adminProfile as any).admin_rol);
+  const defRol = ROLES[rol];
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones'];
   const [mainTab, setMainTab] = usePersistedState<MainTab>(
     'tcd_admin_main_tab',
     'clientes',
     { validate: (v) => VALID_MAIN_TABS.includes(v) },
   );
+  // Las tabs de dueño no pueden dejar a un manager mirando una pantalla vacía:
+  // el título se dibuja igual pero el cuerpo está detrás de una guarda de rol.
+  // Pasa cuando la tab quedó guardada de una sesión anterior o llegó por URL.
+  const TABS_SOLO_DUENO: MainTab[] = ['equipo', 'plata', 'motor', 'sala'];
+  useEffect(() => {
+    if (adminRol !== 'owner' && adminRol && TABS_SOLO_DUENO.includes(mainTab)) {
+      setMainTab('clientes');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminRol, mainTab]);
+
   // ID de tarea pendiente de abrir vía notificación. Se setea desde el
   // handler de NotificationBell y se limpia cuando TasksPipeline abre el modal.
   const [pendingTareaId, setPendingTareaId] = useState<string | null>(null);
@@ -382,9 +407,9 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     setConvsLoading(true);
     try {
       const [agRes, coRes] = await Promise.all([
-        supabase.from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
+        db().from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
         .order('last_message_at', { ascending: false }),
-        supabase.from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
+        db().from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
       ]);
       // El Mentor (coach_conversations) + los 8 entrenadores (agent_conversations), juntos.
       const coachRow = (coRes.data ?? [])[0] as { messages?: unknown; updated_at?: string } | undefined;
@@ -408,11 +433,11 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     setEvidenciasLoading(true);
     try {
       const base = `evidencias/${clienteId}`;
-      const { data: carpetas } = await supabase.storage.from('task-attachments').list(base, { limit: 60 });
+      const { data: carpetas } = await db().storage.from('task-attachments').list(base, { limit: 60 });
       const resultado: { meta: string; archivos: { name: string; path: string }[] }[] = [];
       for (const c of carpetas ?? []) {
         if (!c.name || c.name.startsWith('.')) continue;
-        const { data: archivos } = await supabase.storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
+        const { data: archivos } = await db().storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
         const files = (archivos ?? []).filter((f) => f.name && !f.name.startsWith('.')).map((f) => ({ name: f.name, path: `${base}/${c.name}/${f.name}` }));
         if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
       }
@@ -423,7 +448,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   }, []);
   const abrirEvidencia = async (path: string) => {
     if (!supabase) return;
-    const { data } = await supabase.storage.from('task-attachments').createSignedUrl(path, 3600);
+    const { data } = await db().storage.from('task-attachments').createSignedUrl(path, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
   const [clientSearch, setClientSearch] = useState('');
@@ -616,7 +641,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
         async (payload) => {
           if (!supabase) return;
           if (payload.new.emisor_id === adminProfile.id) return;
-          const { data } = await supabase.from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
+          const { data } = await db().from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
           if (data && data.canal === 'privado' && (data.emisor_id === chatCliente.id || data.receptor_id === chatCliente.id)) {
             setChatMessages(prev => {
               if (prev.find(m => m.id === data.id)) return prev;
@@ -625,7 +650,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
           }
         }
       ).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db().removeChannel(channel); };
   }, [chatCliente, mainTab, mensajesChannel, adminProfile.id]);
 
   useEffect(() => {
@@ -640,7 +665,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes' },
         async (payload) => {
           if (payload.new.emisor_id === adminProfile.id) return;
-          const { data } = await supabase.from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
+          const { data } = await db().from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
           if (data && data.canal === 'privado' && (data.emisor_id === selectedCliente.id || data.receptor_id === selectedCliente.id)) {
             setDetalleMensajes(prev => {
               if (prev.find(m => m.id === data.id)) return prev;
@@ -649,7 +674,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
           }
         }
       ).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db().removeChannel(channel); };
   }, [selectedCliente, mainTab, adminProfile.id]);
 
   useEffect(() => {
@@ -692,7 +717,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     if (!outputText || outputText.length < 20) return;
     setTareaResumenLoading(true);
     try {
-      const prompt = `Sos asistente del equipo de coaching que acompaña a profesionales de la salud.
+      const prompt = `Eres asistente del equipo de coaching que acompaña a profesionales de la salud.
 El cliente "${clienteNombre}" completó la tarea "${meta.titulo}" del programa Tu Clínica Digital.
 
 Este es el output que generó con la IA:
@@ -705,7 +730,7 @@ Escribí un resumen de 2-3 oraciones en español para el equipo que explique:
 2. Una observación relevante para guiarlo mejor en la próxima sesión
 
 Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emojis.`;
-      const resumen = await generateText({ prompt });
+      const resumen = await generateText({ tarea: 'estructura', prompt });
       setTareaResumen(resumen);
     } catch {
       // resumen is optional
@@ -719,8 +744,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     setMetricasTareasLoading(true);
     try {
       const [tareasRes, outputsRes] = await Promise.all([
-        supabase.from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
-        supabase.from('herramienta_outputs').select('*').eq('usuario_id', clientId),
+        db().from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
+        db().from('herramienta_outputs').select('*').eq('usuario_id', clientId),
       ]);
       setMetricasTareas(tareasRes.data ?? []);
       setMetricasOutputs(outputsRes.data ?? []);
@@ -735,7 +760,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setMetricasLoading(true);
     try {
-      const { data } = await supabase.rpc('get_metricas_globales');
+      const { data } = await db().rpc('get_metricas_globales');
       setMetricasGlobales(data ?? {});
     } catch {
       toast.error('Error cargando métricas globales');
@@ -746,7 +771,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
 
   async function cargarSatisfaccionGlobal() {
     if (!supabase) return;
-    const { data } = await supabase.from('pilar_satisfaction_ratings').select('rating');
+    const { data } = await db().from('pilar_satisfaction_ratings').select('rating');
     if (data && data.length > 0) {
       const avg = data.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / data.length;
       setSatisfaccionGlobal(Math.round(avg * 10) / 10);
@@ -842,11 +867,11 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setLoading(true);
     try {
-      const { data: profiles, error } = await supabase.rpc('get_all_profiles');
+      const { data: profiles, error } = await db().rpc('get_all_profiles');
       if (error || !profiles) { setLoading(false); return; }
       // ═══ Blindaje: el RPC puede no traer las columnas del plan — las mergeamos directo ═══
       try {
-        const { data: planes } = await supabase.from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
+        const { data: planes } = await db().from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
         if (planes) {
           const porId = new Map(planes.map((x) => [x.id, x]));
           for (const p of profiles as Array<{ id: string; plan_comercial?: string; plan_reservado?: string | null; acceso_hasta?: string | null }>) {
@@ -879,14 +904,14 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
         const [tareasRes, metricasRes, diarioRes] = await Promise.all([
-          supabase.rpc('get_user_tasks', { target_user_id: p.id }),
-          supabase.rpc('get_user_metrics', { target_user_id: p.id }),
-          supabase.rpc('get_user_diary', { target_user_id: p.id }),
+          db().rpc('get_user_tasks', { target_user_id: p.id }),
+          db().rpc('get_user_metrics', { target_user_id: p.id }),
+          db().rpc('get_user_diary', { target_user_id: p.id }),
         ]);
 
         let tareas = tareasRes.data ?? [];
         // FIX progreso: el Camino escribe SIEMPRE en hoja_de_ruta (columna `completada`).
-        const { data: hrRows } = await supabase
+        const { data: hrRows } = await db()
           .from('hoja_de_ruta')
           .select('pilar_numero, meta_codigo, completada, es_estrella, fecha_completada')
           .eq('usuario_id', p.id);
@@ -935,7 +960,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           .map((r: any) => String(r.fecha_completada));
         const rachaActual = calcularRachaDesdeFechas(fechasSesiones);
 
-        const ventasRes = await supabase.rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
+        const ventasRes = await db().rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
         const ventas_count = (ventasRes.data ?? []).length;
 
         const tareasEstrella = tareas.filter((t: any) => t.es_estrella && t.completada).length;
@@ -998,13 +1023,13 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     try {
       if (detalleTab === 'resumen') {
         const [t, d, m] = await Promise.all([
-          supabase.rpc('get_user_tasks', { target_user_id: userId }),
-          supabase.rpc('get_user_diary', { target_user_id: userId }),
-          supabase.rpc('get_user_metrics', { target_user_id: userId }),
+          db().rpc('get_user_tasks', { target_user_id: userId }),
+          db().rpc('get_user_diary', { target_user_id: userId }),
+          db().rpc('get_user_metrics', { target_user_id: userId }),
         ]);
         let tareasDetalle = t.data ?? [];
         if (tareasDetalle.length === 0) {
-          const { data: hrRows } = await supabase
+          const { data: hrRows } = await db()
             .from('hoja_de_ruta')
             .select('pilar_numero, meta_codigo, completada, es_estrella')
             .eq('usuario_id', userId);
@@ -1031,13 +1056,13 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       } else if (detalleTab === 'evidencias') {
         if (selectedCliente) cargarEvidenciasCliente(selectedCliente.id);
       } else if (detalleTab === 'diario') {
-        const { data } = await supabase.rpc('get_user_diary', { target_user_id: userId });
+        const { data } = await db().rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
       } else if (detalleTab === 'metricas') {
         const [metricsRes, tareasRes, outputsRes] = await Promise.all([
-          supabase.rpc('get_user_metrics', { target_user_id: userId }),
-          supabase.from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
-          supabase.from('herramienta_outputs').select('*').eq('usuario_id', userId),
+          db().rpc('get_user_metrics', { target_user_id: userId }),
+          db().from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
+          db().from('herramienta_outputs').select('*').eq('usuario_id', userId),
         ]);
         setDetalleMetricas(metricsRes.data ?? []);
         setMetricasTareas(tareasRes.data ?? []);
@@ -1074,7 +1099,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         ? `Cómo se sintió: "${lastDiary.q1 || '—'}". Lo que lo frenó: "${lastDiary.q2 || '—'}". Energía: ${lastDiary.q3 || '—'}/10. Acción tomada: "${lastDiary.q4 || '—'}". Plan para mañana: "${lastDiary.q7 || '—'}".`
         : 'Sin entradas de diario recientes.';
 
-      const prompt = `Sos el sistema de inteligencia de coaching del programa "Sanar OS" para profesionales de la salud. Tu rol es asistir al DIRECTOR/COACH humano dándole un briefing claro sobre el estado de un cliente específico y recomendaciones accionables para su próxima intervención.
+      const prompt = `Eres el sistema de inteligencia de coaching del programa "Sanar OS" para profesionales de la salud. Tu rol es asistir al DIRECTOR/COACH humano dándole un briefing claro sobre el estado de un cliente específico y recomendaciones accionables para su próxima intervención.
 
 CLIENTE: ${selectedCliente.nombre} (${selectedCliente.especialidad || 'especialidad no indicada'})
 PLAN: ${selectedCliente.plan} · Día ${selectedCliente.dia_programa} de 90 · Semana ${selectedCliente.semana_programa} de 12
@@ -1091,7 +1116,7 @@ Generá un briefing para el coach en 3 partes:
 
 Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
-      const recomendacion = await generateText({ prompt });
+      const recomendacion = await generateText({ tarea: 'estructura', prompt });
       setIaRecomendacion(recomendacion);
     } catch {
       toast.error('Error generando recomendación IA');
@@ -1116,7 +1141,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setDetalleMensajes(prev => [...prev, optimisticMsg]);
     setMensajeInput('');
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: selectedCliente.id, contenido: texto
       });
       if (error) throw error;
@@ -1158,7 +1183,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setChatMessages(prev => [...prev, optimistic]);
     setChatInput('');
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto
       });
       if (error) throw error;
@@ -1200,7 +1225,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   async function saveAdminVideo(v: Omit<AdminVideo, 'id'> & { id?: string }) {
     if (!supabase) return;
     if (!v.pilar_id) {
-      toast.error('Elegí un pilar antes de guardar el video.');
+      toast.error('Elige un pilar antes de guardar el video.');
       return;
     }
     try {
@@ -1289,7 +1314,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     const texto = notaInput.trim();
     setNotaInput('');
     try {
-      const { error } = await supabase.from('admin_notes').insert({
+      const { error } = await db().from('admin_notes').insert({
         client_id: selectedCliente.id,
         author_id: adminProfile.id,
         content: texto,
@@ -1306,7 +1331,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     setStatusCambiando(true);
     try {
-      await supabase.rpc('update_client_status', {
+      await db().rpc('update_client_status', {
         target_user_id: selectedCliente.id,
         new_status: nuevoStatus,
       });
@@ -1331,7 +1356,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     const newEmail = newEmailInput.trim().toLowerCase();
     if (!newEmail || !newEmail.includes('@')) {
-      toast.error('Ingresá un email válido');
+      toast.error('Ingresa un email válido');
       return;
     }
     if (newEmail === selectedCliente.email?.toLowerCase()) {
@@ -1340,7 +1365,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     }
     setChangingEmail(true);
     try {
-      const { error } = await supabase.rpc('admin_change_client_email', {
+      const { error } = await db().rpc('admin_change_client_email', {
         target_user_id: selectedCliente.id,
         new_email: newEmail,
       });
@@ -1364,7 +1389,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setSendingReset(true);
     try {
       const redirectTo = `${window.location.origin}${window.location.pathname}`;
-      const { error } = await supabase.auth.resetPasswordForEmail(selectedCliente.email, { redirectTo });
+      const { error } = await db().auth.resetPasswordForEmail(selectedCliente.email, { redirectTo });
       if (error) throw error;
       toast.success(`Mail de recuperación enviado a ${selectedCliente.email}`);
     } catch (e: unknown) {
@@ -1379,7 +1404,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     const newVal = !selectedCliente.full_agent_access;
     try {
-      const { error } = await supabase.rpc('toggle_full_agent_access', {
+      const { error } = await db().rpc('toggle_full_agent_access', {
         target_user_id: selectedCliente.id,
         new_value: newVal,
       });
@@ -1399,7 +1424,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setGuardandoAdmin(true);
     try {
       if (supabase) {
-        await supabase.from('profiles').update({
+        await db().from('profiles').update({
           nombre: adminDraft.nombre,
           especialidad: adminDraft.cargo,
         }).eq('id', adminProfile.id);
@@ -1438,7 +1463,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         auth: {
           persistSession: false,
           storageKey: 'temp_auth',
-          storage: { getItem: () => null, setItem: () => null, removeItem: () => null }
+          storage: { getItem: () => null, setItem: () => { /* no persiste */ }, removeItem: () => { /* no persiste */ } }
         }
       });
 
@@ -1453,7 +1478,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
       if (signUpData.user && supabase) {
         await new Promise(r => setTimeout(r, 1500));
-        await supabase.from('profiles').update({
+        await db().from('profiles').update({
           especialidad: nuevoForm.especialidad.trim() || null,
           plan: nuevoForm.plan,
           fecha_inicio: nuevoForm.fecha_inicio,
@@ -1479,7 +1504,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     try {
       // RPC SECURITY DEFINER — la RLS de profiles solo deja ver el propio
       // profile, por eso un SELECT directo devuelve 1 solo miembro.
-      const { data, error } = await supabase.rpc('get_team_members');
+      const { data, error } = await db().rpc('get_team_members');
       if (error) throw error;
       setTeamMembers(data ?? []);
     } catch {
@@ -1496,7 +1521,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       const url = import.meta.env.VITE_SUPABASE_URL;
       const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
       const tempClient = createClient(url, key, {
-        auth: { persistSession: false, storageKey: 'temp_auth_team', storage: { getItem: () => null, setItem: () => null, removeItem: () => null } }
+        auth: { persistSession: false, storageKey: 'temp_auth_team', storage: { getItem: () => null, setItem: () => { /* no persiste */ }, removeItem: () => { /* no persiste */ } } }
       });
       const { data: signUpData, error } = await tempClient.auth.signUp({
         email: teamForm.email.trim(),
@@ -1513,7 +1538,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         let lastErr: string | null = null;
         for (let attempt = 0; attempt < 4 && !promoted; attempt++) {
           await new Promise(r => setTimeout(r, attempt === 0 ? 1500 : 1000));
-          const { error: rpcErr } = await supabase.rpc('promover_a_admin', {
+          const { error: rpcErr } = await db().rpc('promover_a_admin', {
             p_user_id: signUpData.user.id,
             p_admin_rol: teamForm.admin_rol,
           });
@@ -1544,7 +1569,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       // UPDATE directo no funciona por RLS (auth.uid() != target.id). Usamos la
       // misma RPC promover_a_admin — es idempotente: si ya es admin, solo
       // actualiza admin_rol.
-      const { error } = await supabase.rpc('promover_a_admin', {
+      const { error } = await db().rpc('promover_a_admin', {
         p_user_id: targetId,
         p_admin_rol: newRol,
       });
@@ -1561,7 +1586,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !clienteAEliminar) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.rpc('admin_delete_cliente', { p_user_id: clienteAEliminar.id });
+      const { error } = await db().rpc('admin_delete_cliente', { p_user_id: clienteAEliminar.id });
       if (error) throw error;
       const deletedId = clienteAEliminar.id;
       setClientes(prev => prev.filter(c => c.id !== deletedId));
@@ -1582,7 +1607,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !miembroAEliminar) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.rpc('admin_delete_team_member', { p_user_id: miembroAEliminar.id });
+      const { error } = await db().rpc('admin_delete_team_member', { p_user_id: miembroAEliminar.id });
       if (error) throw error;
       const deletedId = miembroAEliminar.id;
       setTeamMembers(prev => prev.filter(m => m.id !== deletedId));
@@ -1658,6 +1683,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   // ─── SIDEBAR NAV CONFIG ───────────────────────────────────────────────────────
 
   const sidebarItems: { id: MainTab; label: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
+    { id: 'hoy',       label: 'Hoy',       icon: Sunrise },
+    { id: 'supervision', label: 'Supervisión', icon: LayoutGrid },
+    { id: 'sala',      label: 'Sala de Mando', icon: Compass, ownerOnly: true },
+    { id: 'sesiones',  label: 'Cargar sesión', icon: FileText },
+    { id: 'mirol',     label: 'Mi rol',    icon: UserCircle },
     { id: 'clientes',  label: 'Clientes',  icon: Users },
     { id: 'pipeline',  label: 'Activación', icon: ClipboardCheck },
     { id: 'mensajes',  label: 'Mensajes',  icon: MessageSquare },
@@ -1667,6 +1697,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     { id: 'campanas',  label: 'Campañas',  icon: Megaphone },
     { id: 'creativos', label: 'Creativos', icon: Image },
     { id: 'tareas',    label: 'Tareas',    icon: ClipboardCheck },
+    { id: 'plata',     label: 'Mesa de plata', icon: TrendingUp, ownerOnly: true },
+    { id: 'motor',     label: 'Motor IA',      icon: Cpu, ownerOnly: true },
   ];
 
   const headerTitles: Record<MainTab, string> = {
@@ -1679,6 +1711,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     campanas: 'Campañas & Creativos',
     creativos: 'Generador de Creativos',
     tareas: 'Pipeline de Tareas Internas',
+    hoy: 'Hoy — lo que hay que atender',
+    supervision: 'Supervisión — todas las cuentas a la vez',
+    sala: 'Sala de Mando — qué está frenado y quién lo destraba',
+    mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
+    sesiones: 'Cargar sesión — que lo que se dijo lo herede el equipo',
+    plata: 'Mesa de plata — la cadena de cada cuenta',
+    motor: 'Motor de IA — qué se usa, qué cuesta, qué falla',
   };
 
   // ─── RENDER ───────────────────────────────────────────────────────────────────
@@ -1720,6 +1759,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <nav className="space-y-0.5">
             {sidebarItems
               .filter(item => !item.ownerOnly || adminRol === 'owner' || !adminRol)
+              // Lo del rol va primero. Lo demás sigue accesible, pero no
+              // compite por la atención de quien entra a hacer su trabajo.
+              .sort((a, b) => {
+                const ia = tabsDe(rol).indexOf(a.id);
+                const ib = tabsDe(rol).indexOf(b.id);
+                return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+              })
               .map(item => {
                 const totalUnread = item.id === 'mensajes'
                   ? (channelUnread['comunidad'] ?? 0) + (channelUnread['victorias'] ?? 0) + (channelUnread['consultas'] ?? 0)
@@ -2081,8 +2127,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           onClick={() => {
                             const nombre = selectedCliente.nombre.split(' ')[0];
                             const msj = selectedCliente.traba_sesion
-                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Contame y lo destrabamos juntos. De frente, no de costado. 🥋`
-                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escribime y retomamos hoy, aunque sea 20 minutos. 🥋`;
+                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado. 🥋`
+                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos. 🥋`;
                             try { navigator.clipboard?.writeText(msj); } catch { /* noop */ }
                             setDetalleTab('mensajes');
                             setEmpujonListo(msj);
@@ -2181,7 +2227,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     if (!supabase) return;
                                     const dias = p === 'blanco' ? 7 : p === 'amarillo' ? 45 : (p === 'verde' || p === 'negro') ? 90 : null;
                                     const hasta = dias ? new Date(Date.now() + dias * 86400000).toISOString() : null;
-                                    const { error } = await supabase.from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
+                                    const { error } = await db().from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
                                     if (error) toast.error('No se pudo cambiar el plan');
                                     else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
                                   }}
@@ -2196,7 +2242,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 <button key={p || 'ninguno'}
                                   onClick={async () => {
                                     if (!supabase) return;
-                                    const { error } = await supabase.from('profiles').update({ plan_reservado: p || null }).eq('id', selectedCliente.id);
+                                    const { error } = await db().from('profiles').update({ plan_reservado: p || null }).eq('id', selectedCliente.id);
                                     if (error) toast.error('No se pudo guardar la reserva');
                                     else { toast.success(p ? `Reserva: ${label}` : 'Reserva quitada'); void cargarClientes(); }
                                   }}
@@ -2228,7 +2274,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       if (!window.confirm(`${b.t} para ${selectedCliente.nombre}: el programa se corre ${b.d} días hacia adelante. ¿Confirmar?`)) return;
                                       const nueva = new Date(selectedCliente.fecha_inicio);
                                       nueva.setDate(nueva.getDate() + b.d);
-                                      const { error } = await supabase.from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
+                                      const { error } = await db().from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
                                       if (!error) { alert(`${b.t} aplicada. Recarga la lista para ver el día nuevo.`); }
                                     }}
                                     className="px-2 py-1 rounded-md bg-gold/10 border border-gold/25 text-[11px] font-semibold text-gold hover:bg-gold/20 transition-colors"
@@ -2723,7 +2769,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           ) : detalleNotas.length === 0 ? (
                             <div className="text-center py-12">
                               <BookOpen className="w-8 h-8 text-gray-800 mx-auto mb-3" />
-                              <p className="text-cream/55 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
+                              <p className="text-cream/55 text-sm">Sin notas aún. Usa esto para documentar contexto importante del cliente.</p>
                             </div>
                           ) : detalleNotas.map(nota => (
                             <div key={nota.id} className="bg-panel border border-gold/12 rounded-xl p-4">
@@ -2741,7 +2787,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <>
                 {empujonListo && (
                   <div className="mb-3 rounded-xl border border-gold/30 bg-gold/8 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si querés</p>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si quieres</p>
                     <p className="text-xs text-white/70 italic">{empujonListo}</p>
                   </div>
                 )}
@@ -3422,7 +3468,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>
-                  <p className="text-sm text-cream/55 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
+                  <p className="text-sm text-cream/55 mt-1">Agrega videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
                 </div>
                 <button
                   onClick={() => { setVideoForm({ pilar_id: '', titulo: '', descripcion: '', youtubeUrl: '', duracion: '' }); setShowAddVideo(true); }}
@@ -3529,7 +3575,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ) : teamMembers.length === 0 ? (
                   <div className="text-center py-16">
                     <UsersRound className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-cream/55 text-sm">El equipo se arma acá — agregá al primero.</p>
+                    <p className="text-cream/55 text-sm">El equipo se arma acá — agrega al primero.</p>
                   </div>
                 ) : (
                   <table className="w-full">
@@ -3582,7 +3628,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </td>
                             <td className="px-5 py-4 text-right">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[11px] text-cream/45 italic">Vos</span>
+                                <span className="text-[11px] text-cream/45 italic">Tú</span>
                               ) : (
                                 <button
                                   type="button"
@@ -3683,7 +3729,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   key={campanasClienteId}
                   userId={campanasClienteId}
                   perfil={campanasClientePerfil}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
@@ -3732,7 +3777,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   key={campanasClienteId}
                   userId={campanasClienteId}
                   perfil={campanasClientePerfil}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
@@ -3748,6 +3792,86 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {/* ═══════════════════════════════════════════════════════════════
               TAB: TAREAS INTERNAS
               ═══════════════════════════════════════════════════════════════ */}
+          {mainTab === 'hoy' && (
+            <ColaDelDia clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              plan_comercial: (c as { plan_comercial?: string | null }).plan_comercial ?? null,
+            }))} />
+          )}
+
+          {mainTab === 'supervision' && (
+            <Supervision clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))} />
+          )}
+
+          {mainTab === 'sesiones' && (
+            <div className="max-w-3xl mx-auto space-y-5">
+              <div className="card-panel p-4">
+                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+                  De qué cliente fue la sesión
+                </label>
+                <CustomSelect
+                  value={campanasClienteId ?? ''}
+                  onChange={(val) => setCampanasClienteId(val || null)}
+                  options={clientes.map(c => ({ value: c.id, label: c.nombre }))}
+                />
+              </div>
+              {campanasClienteId ? (
+                <CargarSesion
+                  clienteId={campanasClienteId}
+                  nombreCliente={clientes.find((c) => c.id === campanasClienteId)?.nombre ?? 'el cliente'}
+                  quienLaDio={(adminProfile as { nombre?: string }).nombre ?? 'tu equipo'}
+                />
+              ) : (
+                <p className="text-sm text-cream/45">Elige un cliente para cargar su sesión.</p>
+              )}
+            </div>
+          )}
+
+          {mainTab === 'mirol' && (
+            <MiRol rol={rol}
+              enInstalacion={clientes.filter((c) =>
+                ((c as { etapa_actual?: number | null }).etapa_actual ?? 0) < 5).length} />
+          )}
+
+          {mainTab === 'sala' && (adminRol === 'owner' || !adminRol) && (
+            <SalaDeMando clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              etapa_actual: (c as { etapa_actual?: number | null }).etapa_actual ?? null,
+              etapa_desde: (c as { etapa_desde?: string | null }).etapa_desde ?? null,
+              fecha_venta: (c as { fecha_venta?: string | null }).fecha_venta ?? null,
+            }))} />
+          )}
+
+          {mainTab === 'motor' && (adminRol === 'owner' || !adminRol) && (
+            <PanelMotorIA />
+          )}
+
+          {mainTab === 'plata' && (adminRol === 'owner' || !adminRol) && (
+            <div className="max-w-6xl mx-auto space-y-5">
+              {/* Sin selector propio, esta tab decía "elige un cliente arriba"
+                  y arriba no había nada que elegir. */}
+              <div className="card-panel p-4">
+                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+                  De qué cliente
+                </label>
+                <CustomSelect
+                  value={campanasClienteId ?? ''}
+                  onChange={(val) => setCampanasClienteId(val || null)}
+                  options={clientes.map(c => ({
+                    value: c.id,
+                    label: `${c.nombre} — ${c.especialidad ?? 'Sin especialidad'}`,
+                  }))}
+                />
+              </div>
+            <TableroPlata
+              clienteId={campanasClienteId ?? undefined}
+              nombreCliente={
+                clientes.find((c) => c.id === campanasClienteId)?.nombre ?? undefined
+              }
+            />
+            </div>
+          )}
+
           {mainTab === 'tareas' && (
             <TasksPipeline
               currentAdminId={adminProfile?.id ?? ''}
@@ -3910,7 +4034,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
               <div className="bg-gold/5 border border-gold/20 rounded-xl px-3 py-2">
                 <p className="text-[11px] text-gold/80">
-                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si querés que la cambie, mandá "Enviar reset" después.
+                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si quieres que la cambie, mandá "Enviar reset" después.
                 </p>
               </div>
               <div className="flex gap-2 pt-2">
@@ -4042,7 +4166,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   value={videoForm.pilar_id}
                   onChange={(val) => setVideoForm({ ...videoForm, pilar_id: val as PilarId | '' })}
                   options={[
-                    { value: '', label: 'Elegí un pilar…' },
+                    { value: '', label: 'Elige un pilar…' },
                     ...PILAR_OPTIONS.map(p => ({ value: p.id, label: p.label })),
                   ]}
                 />

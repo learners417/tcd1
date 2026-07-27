@@ -92,7 +92,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P0.0',
         titulo: 'Bienvenida: de profesional a director',
-        descripcion: 'Mira el video de Javo: qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibís el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Mentor te lo cuenta en 5 minutos.',
+        descripcion: 'Mira el video de Javo: qué vas a lograr en 90 días, cómo funciona tu app, las 4 fases y los cinturones. De regalo de bienvenida recibes el libro "Sanadores Libres" (PDF) — la filosofía completa detrás de tu camino. Si el video todavía no está disponible, tu Mentor te lo cuenta en 5 minutos.',
         tipo: 'VIDEO',
         es_estrella: false,
         tiempo_estimado: '5 min',
@@ -100,7 +100,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 1,
         usa_ia: false,
         video_youtube_id: '6PG6nsJhnxA',
-        coach_instruccion: 'MODO VIDEO-FALLBACK: si el video no está disponible, contale en 5 min: (1) la promesa — 10 pacientes de tu precio digno en 90 días y el SISTEMA para repetirlo; (2) las 4 fases — Sanar el Dinero, Tu Protocolo, Captación y Ventas, Servicio y Escala; (3) los cinturones — se ganan por hitos REALES verificados, como una planta que crece de semilla a árbol; (4) la regla — una tarea por día, 45-60 min, de lunes a viernes: el sábado descansas y el domingo, si quieres, escribes tu Diario; (5) el requisito — presupuesto de publicidad de ~$400-700 en los 90 días, que se autofinancia desde tu primera venta. Entregale el libro Sanadores Libres.',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: si el video no está disponible, cuéntale en 5 min: (1) la promesa — 10 pacientes de tu precio digno en 90 días y el SISTEMA para repetirlo; (2) las 4 fases — Sanar el Dinero, Tu Protocolo, Captación y Ventas, Servicio y Escala; (3) los cinturones — se ganan por hitos REALES verificados, como una planta que crece de semilla a árbol; (4) la regla — una tarea por día, 45-60 min, de lunes a viernes: el sábado descansas y el domingo, si quieres, escribes tu Diario; (5) el requisito — presupuesto de publicidad de ~$400-700 en los 90 días, que se autofinancia desde tu primera venta. Entregale el libro Sanadores Libres.',
       },
       {
         codigo: 'P0.2',
@@ -126,7 +126,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 1,
         usa_ia: true,
         evidencia_requerida: { tipo: 'foto', descripcion: 'La foto de tu Búnker de Luz ya construido (la caja, no el contenido — el contenido es solo tuyo).' },
-        coach_instruccion: 'EL BÚNKER DE LUZ — el antídoto antes de la montaña. Guía: (1) explicale el porqué con la metáfora del tanque de oxígeno: esta semana se abre el cuarto del dinero y va a doler; el búnker es lo que lo devuelve a su esencia cuando todo se oscurezca. (2) Ayudalo a elegir 3-5 objetos de CARGA PURA: momentos de luz real de su historia (una foto, una carta, un objeto chiquito con mucha historia, un video que se grabe ahora diciéndose por qué empezó esto). NO objetos genéricos: cada uno tiene que devolverle un recuerdo exacto. (3) Que la arme FÍSICAMENTE hoy — caja chiquita, escondida, ultra personal, ni la pareja la conoce. (4) Cerrá: "cuando llegue la noche oscura — y va a llegar — primero el búnker, después seguimos". Evidencia: foto de la caja cerrada.',
+        coach_instruccion: 'EL BÚNKER DE LUZ — el antídoto antes de la montaña. Guía: (1) explícale el porqué con la metáfora del tanque de oxígeno: esta semana se abre el cuarto del dinero y va a doler; el búnker es lo que lo devuelve a su esencia cuando todo se oscurezca. (2) Ayudalo a elegir 3-5 objetos de CARGA PURA: momentos de luz real de su historia (una foto, una carta, un objeto chiquito con mucha historia, un video que se grabe ahora diciéndose por qué empezó esto). NO objetos genéricos: cada uno tiene que devolverle un recuerdo exacto. (3) Que la arme FÍSICAMENTE hoy — caja chiquita, escondida, ultra personal, ni la pareja la conoce. (4) Cierra: "cuando llegue la noche oscura — y va a llegar — primero el búnker, después seguimos". Evidencia: foto de la caja cerrada.',
       },
       {
         codigo: 'P0.4',
@@ -139,7 +139,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 1,
         usa_ia: false,
         video_youtube_id: 'lVglslFMDeA',
-        coach_instruccion: 'MODO VIDEO-FALLBACK: explicá la app en 5 min — El Camino muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cerrá con el pacto: 1 hora por día. Pedile que lo escriba con sus palabras.',
+        coach_instruccion: 'MODO VIDEO-FALLBACK: explica la app en 5 min — El Camino muestra UNA tarea por día; los Entrenadores se desbloquean con cada cinturón; los hitos grandes piden comprobante real (screenshot/pago). Las reglas del reloj: 90 días reales, 1 pausa de hasta 14 días con motivo, extensión de $200/30 días después del día 90. Cierra con el pacto: 1 hora por día. Pídele que lo escriba con sus palabras.',
       },
     ],
   },
@@ -181,7 +181,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.2',
         titulo: 'Tu radiografía emocional',
-        descripcion: 'Abre el chat con tu Mentor y haz el primer trabajo: di tu precio actual en voz alta, registra qué sentís, y rastrea de dónde viene esa incomodidad. Vas a salir con TU creencia raíz identificada en una frase — y una imagen generada por IA de esa "voz heredada", para verla afuera tuyo por primera vez.',
+        descripcion: 'Abre el chat con tu Mentor y haz el primer trabajo: di tu precio actual en voz alta, registra qué sientes, y rastrea de dónde viene esa incomodidad. Vas a salir con TU creencia raíz identificada en una frase — y una imagen generada por IA de esa "voz heredada", para verla afuera tuyo por primera vez.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -194,12 +194,12 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Completa las 4 frases: "El dinero es…", "La gente rica es…", "Cobrar caro a un paciente es…", "Si gano mucho, mi familia…"',
           'Cierra con tu creencia raíz escrita en UNA frase',
         ],
-        coach_instruccion: 'Guiá la radiografía del dinero con los money scripts de Klontz (nombrá la ciencia: esto es psicología financiera, no autoayuda). Pedile que diga su precio actual en voz alta y describa qué siente en el cuerpo. Aplicá el test de las 4 frases (el dinero es… / la gente rica es… / cobrar caro es… / si gano mucho, mi familia…). Sus respuestas SON sus scripts: devuelveselos nombrados. Cerrá identificando LA creencia raíz en una frase textual. Ofrecé generar la imagen de esa "voz heredada" con la herramienta de imágenes.',
+        coach_instruccion: 'Guía la radiografía del dinero con los money scripts de Klontz (nombra la ciencia: esto es psicología financiera, no autoayuda). Pídele que diga su precio actual en voz alta y describa qué siente en el cuerpo. Aplicá el test de las 4 frases (el dinero es… / la gente rica es… / cobrar caro es… / si gano mucho, mi familia…). Sus respuestas SON sus scripts: devuelveselos nombrados. Cierra identificando LA creencia raíz en una frase textual. Ofrecé generar la imagen de esa "voz heredada" con la herramienta de imágenes.',
       },
       {
         codigo: 'P1.2b',
         titulo: 'La lealtad invisible y tu linaje',
-        descripcion: 'Con tu Mentor: si prosperás de verdad, ¿a quién sentís que traicionás? El ejercicio del linaje — 3 generaciones y su relación con el dinero. La lealtad invisible a la familia, al gremio, al "sanador pobre pero noble". Verla es el 80% de soltarla. Salís con tu frase ancla: "Honro tu historia Y elijo distinto."',
+        descripcion: 'Con tu Mentor: si prosperás de verdad, ¿a quién sientes que traicionas? El ejercicio del linaje — 3 generaciones y su relación con el dinero. La lealtad invisible a la familia, al gremio, al "sanador pobre pero noble". Verla es el 80% de soltarla. Sales con tu frase ancla: "Honro tu historia Y elijo distinto."',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '30 min',
@@ -212,7 +212,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Encuentra el patrón con el Mentor: ¿a quién le eres fiel siendo pobre?',
           'Escribe tu frase ancla: "Honro tu historia Y elijo distinto"',
         ],
-        coach_instruccion: 'Explorá la lealtad invisible con el ejercicio del linaje (presentalo como marco simbólico de las lealtades familiares — no como ciencia; su poder es de sentido, y eso se dice honesto). 3 generaciones, la relación de cada una con el dinero. El patrón salta solo. Preguntá: ¿esa fidelidad es amor, o miedo disfrazado de amor? ¿Esa persona querría que vivas ajustado? Cerrá con la frase ancla escrita: "Honro tu historia Y elijo distinto" — se guarda y vuelve en los momentos de resistencia.',
+        coach_instruccion: 'Explorá la lealtad invisible con el ejercicio del linaje (presentalo como marco simbólico de las lealtades familiares — no como ciencia; su poder es de sentido, y eso se dice honesto). 3 generaciones, la relación de cada una con el dinero. El patrón salta solo. Pregunta: ¿esa fidelidad es amor, o miedo disfrazado de amor? ¿Esa persona querría que vivas ajustado? Cierra con la frase ancla escrita: "Honro tu historia Y elijo distinto" — se guarda y vuelve en los momentos de resistencia.',
       },
       {
         codigo: 'P1.3',
@@ -233,12 +233,12 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Cuéntale al Mentor qué sentiste al verla arder',
         ],
         // CAPA 3: completar esta tarea otorga 'blanco_punta_amarilla' vía hitos_cinturon
-        coach_instruccion: 'LA CEREMONIA COMPLETA en 3 actos — guiá uno por uno, sin apurar. ACTO 1 · LAS DOS CARTAS: (a) inventario del valor — que liste TODO lo adquirido: formaciones, años, casos, errores (los errores capitalizan: lo que aprendió de lo que salió mal ES su capital hoy). Que lo vea junto: eso es lo que vende, no su tiempo. (b) Carta al dinero — billete físico enfrente (de 100 si tiene): que narre la relación completa (cómo lo trató, qué le dijeron papá/mamá/abuelos, qué espera ahora). Acá aparece la creencia madre: nombrala con sus palabras. ACTO 2 · LA QUEMA física: papel + fuego real en una fuente, mirando cómo se va. Que le explique a su mente qué se está yendo (la versión vieja, el mandato heredado). Foto de las cenizas = la evidencia. ACTO 3 · EL CIERRE de gratitud: lo que se abre se cierra — 10 gratitudes escritas, incluidas las difíciles (gracias papá por enseñarme esto, que hoy me permitió darme cuenta). Si su idioma espiritual está activado: este acto es oración y plegaria, nombralo así. Si está en modo neutro: gratitud como práctica de cierre. AVISO: es sesión de 2 horas — puede partirla en dos bloques (cartas hoy, quema y cierre mañana temprano); la app guarda todo. Si aparece llanto: vaso de agua, pausa, y se sigue — se llora, se libera, y se sigue.',
+        coach_instruccion: 'LA CEREMONIA COMPLETA en 3 actos — guía uno por uno, sin apurar. ACTO 1 · LAS DOS CARTAS: (a) inventario del valor — que liste TODO lo adquirido: formaciones, años, casos, errores (los errores capitalizan: lo que aprendió de lo que salió mal ES su capital hoy). Que lo vea junto: eso es lo que vende, no su tiempo. (b) Carta al dinero — billete físico enfrente (de 100 si tiene): que narre la relación completa (cómo lo trató, qué le dijeron papá/mamá/abuelos, qué espera ahora). Acá aparece la creencia madre: nómbrala con sus palabras. ACTO 2 · LA QUEMA física: papel + fuego real en una fuente, mirando cómo se va. Que le explique a su mente qué se está yendo (la versión vieja, el mandato heredado). Foto de las cenizas = la evidencia. ACTO 3 · EL CIERRE de gratitud: lo que se abre se cierra — 10 gratitudes escritas, incluidas las difíciles (gracias papá por enseñarme esto, que hoy me permitió darme cuenta). Si su idioma espiritual está activado: este acto es oración y plegaria, nómbralo así. Si está en modo neutro: gratitud como práctica de cierre. AVISO: es sesión de 2 horas — puede partirla en dos bloques (cartas hoy, quema y cierre mañana temprano); la app guarda todo. Si aparece llanto: vaso de agua, pausa, y se sigue — se llora, se libera, y se sigue.',
       },
       {
         codigo: 'P1.4',
         titulo: 'El dinero en el cuerpo',
-        descripcion: 'Trabajo somático breve con tu Mentor: escaneo corporal guiado, encuentra dónde se aloja la tensión cuando piensas en cobrar, y soltala con respiración 4-7-8. Registrás tu nivel de tensión antes y después (1-10). Para que el precio nuevo no sea solo mental.',
+        descripcion: 'Trabajo somático breve con tu Mentor: escaneo corporal guiado, encuentra dónde se aloja la tensión cuando piensas en cobrar, y soltala con respiración 4-7-8. Registras tu nivel de tensión antes y después (1-10). Para que el precio nuevo no sea solo mental.',
         tipo: 'COACH',
         es_estrella: false,
         tiempo_estimado: '45 min',
@@ -246,7 +246,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 8,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_P1_4_AUDIO',
-        coach_instruccion: 'MODO AUDIO-FALLBACK: si el audio no está disponible, guiá el trabajo somático (nombrá la ciencia: van der Kolk, el cuerpo lleva la cuenta). Escaneo corporal guiado paso a paso: ojos cerrados, imagina cobrando su precio nuevo a un paciente real, registra dónde aparece tensión (1-10). Respiración 4-7-8 (práctica yóguica, declarada como práctica) tres veces sobre esa zona. Repetir la escena. Registrar el después (1-10). Preguntá: ¿qué cambió?',
+        coach_instruccion: 'MODO AUDIO-FALLBACK: si el audio no está disponible, guía el trabajo somático (nombra la ciencia: van der Kolk, el cuerpo lleva la cuenta). Escaneo corporal guiado paso a paso: ojos cerrados, imagina cobrando su precio nuevo a un paciente real, registra dónde aparece tensión (1-10). Respiración 4-7-8 (práctica yóguica, declarada como práctica) tres veces sobre esa zona. Repetir la escena. Registrar el después (1-10). Pregunta: ¿qué cambió?',
       },
       {
         codigo: 'P1.5',
@@ -265,7 +265,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Propón TU número (concreto, no un rango)',
           'Dilo en voz alta 3 veces — la tercera, grábate un audio de WhatsApp a ti mismo',
         ],
-        coach_instruccion: 'EL NÚMERO + ÓPTICA Y CÓDIGO. Parte 1 — el precio digno: guialo a su número (el que se dice en voz alta, grabado — la evidencia de hoy). Parte 2 — el cambio de idioma: mostrale que vive en un mundo de palabras y el juego se juega en números. \'¿Por qué te compran?\' se responde con números, no con poesía: cuánto le duele HOY a su paciente, cuánto pierde por día, cuánto vale el antes-y-después que él produce. Que cuantifique el COSTO DE LA INACCIÓN: si no hacía este trabajo de la semana, ¿cuánto perdía en 90 días? Número concreto, anotado — entra en la consolidación de la sesión. Parte 3 — LA TAREA DEL FINDE (el ejercicio del Mall): este fin de semana va a un shopping o centro comercial y pregunta el precio de 5 cosas que valgan cerca de su nuevo precio (un teléfono, una cartera, un curso) SIN comprar nada. Solo preguntar, escuchar el número, y observarse. El lunes lo conversa contigo: qué sintió, qué descubrió. Es exposición pura al idioma del número — su clienta compra el iPhone de 1.500 sin culpa; que él escuche esos números con sus propios oídos.',
+        coach_instruccion: 'EL NÚMERO + ÓPTICA Y CÓDIGO. Parte 1 — el precio digno: guíalo a su número (el que se dice en voz alta, grabado — la evidencia de hoy). Parte 2 — el cambio de idioma: muéstrale que vive en un mundo de palabras y el juego se juega en números. \'¿Por qué te compran?\' se responde con números, no con poesía: cuánto le duele HOY a su paciente, cuánto pierde por día, cuánto vale el antes-y-después que él produce. Que cuantifique el COSTO DE LA INACCIÓN: si no hacía este trabajo de la semana, ¿cuánto perdía en 90 días? Número concreto, anotado — entra en la consolidación de la sesión. Parte 3 — LA TAREA DEL FINDE (el ejercicio del Mall): este fin de semana va a un shopping o centro comercial y pregunta el precio de 5 cosas que valgan cerca de su nuevo precio (un teléfono, una cartera, un curso) SIN comprar nada. Solo preguntar, escuchar el número, y observarse. El lunes lo conversa contigo: qué sintió, qué descubrió. Es exposición pura al idioma del número — su clienta compra el iPhone de 1.500 sin culpa; que él escuche esos números con sus propios oídos.',
       },
       {
         codigo: 'P1.5b',
@@ -287,14 +287,14 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P1.6',
         titulo: 'Tu creencia nueva y el Estandarte',
-        descripcion: 'Cerrás el protocolo instalando la creencia elegida por ti: tu nueva frase sobre el dinero, en presente y con tus palabras. La IA te genera tu ESTANDARTE — una imagen-símbolo con tu frase, que se vuelve la pantalla de tu cinturón. Al completarla: Cinturón AMARILLO — la raíz está en la tierra. Y aparece por primera vez el Mentor. Y junto al Estandarte, construyes EL EXPEDIENTE: un documento con tu nombre y 10 resultados reales que ya produjiste — pacientes que mejoraron, procesos que funcionaron, agradecimientos recibidos. No es para mostrar: es tu prueba interna. El día que la voz del impostor pregunte \'¿quién eres tú para cobrar esto?\', el Expediente responde con hechos.',
+        descripcion: 'Cierras el protocolo instalando la creencia elegida por ti: tu nueva frase sobre el dinero, en presente y con tus palabras. La IA te genera tu ESTANDARTE — una imagen-símbolo con tu frase, que se vuelve la pantalla de tu cinturón. Al completarla: Cinturón AMARILLO — la raíz está en la tierra. Y aparece por primera vez el Mentor. Y junto al Estandarte, construyes EL EXPEDIENTE: un documento con tu nombre y 10 resultados reales que ya produjiste — pacientes que mejoraron, procesos que funcionaron, agradecimientos recibidos. No es para mostrar: es tu prueba interna. El día que la voz del impostor pregunte \'¿quién eres tú para cobrar esto?\', el Expediente responde con hechos.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '1 h',
         orden: 8,
         dia_asignado: 9,
         usa_ia: false,
-        coach_instruccion: 'Cierre del protocolo: que formule su creencia nueva en una frase propia, en presente y primera persona. Que la escriba. Generale el ESTANDARTE con la herramienta de imágenes: una imagen-símbolo con su frase (estética: fondo oscuro, dorado, sobrio). Recordale: cada vez que dude del precio, vuelve a esta frase y esta imagen. Celebrá el Cinturón Amarillo: la raíz está en la tierra. Anunciá que el Mentor lo espera con una pregunta. EL EXPEDIENTE anti-impostor: después del Estandarte, guialo a compilar 10 RESULTADOS REALES de su historia profesional (nombre del caso o iniciales, qué llegó, qué se llevó — concreto). Los casos chicos también cuentan: una persona que durmió mejor ES un resultado. Que lo escriba como documento con su nombre arriba: \'Expediente de [nombre] — la evidencia\'. Regla de uso: cada vez que aparezca el \'quién soy yo para cobrar esto\', se abre el Expediente ANTES de negociar con esa voz. El impostor discute con opiniones; el Expediente responde con hechos.',
+        coach_instruccion: 'Cierre del protocolo: que formule su creencia nueva en una frase propia, en presente y primera persona. Que la escriba. Generale el ESTANDARTE con la herramienta de imágenes: una imagen-símbolo con su frase (estética: fondo oscuro, dorado, sobrio). Recuérdale: cada vez que dude del precio, vuelve a esta frase y esta imagen. Celebrá el Cinturón Amarillo: la raíz está en la tierra. Anunciá que el Mentor lo espera con una pregunta. EL EXPEDIENTE anti-impostor: después del Estandarte, guíalo a compilar 10 RESULTADOS REALES de su historia profesional (nombre del caso o iniciales, qué llegó, qué se llevó — concreto). Los casos chicos también cuentan: una persona que durmió mejor ES un resultado. Que lo escriba como documento con su nombre arriba: \'Expediente de [nombre] — la evidencia\'. Regla de uso: cada vez que aparezca el \'quién soy yo para cobrar esto\', se abre el Expediente ANTES de negociar con esa voz. El impostor discute con opiniones; el Expediente responde con hechos.',
       },
     ],
   },
@@ -318,7 +318,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
     cinturon_otorga: 'amarillo_punta_verde',
     hito_mensaje: '🥋 Amarillo punta VERDE — el primer brote asoma. Tu método ya tiene nombre y estructura.',
     hito_tipo: 'checkpoint',
-    mentor_pregunta: '¿Tu método existía antes de que lo nombraras — o recién ahora que tiene nombre te animás a verlo?',
+    mentor_pregunta: '¿Tu método existía antes de que lo nombraras — o recién ahora que tiene nombre te animas a verlo?',
     metas: [
       {
         codigo: 'P2.1',
@@ -357,7 +357,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.3',
         titulo: 'Tu paciente ideal: los 3 mejores que tuviste',
-        descripcion: 'Elige los 3 mejores pacientes (o estudiantes) que pasaron por ti y completa la herramienta. Extrae el patrón: quién es tu persona ideal, qué le duele, qué compró de verdad. ¿No tienes 3 pacientes todavía? Usa 3 personas cercanas que tengan el problema que resolvés — o tu propia historia: tú fuiste tu primer caso.',
+        descripcion: 'Elige los 3 mejores pacientes (o estudiantes) que pasaron por ti y completa la herramienta. Extrae el patrón: quién es tu persona ideal, qué le duele, qué compró de verdad. ¿No tienes 3 pacientes todavía? Usa 3 personas cercanas que tengan el problema que resuelves — o tu propia historia: tú fuiste tu primer caso.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '1.5 h',
@@ -387,7 +387,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P2.4',
         titulo: 'Genera tu método: nombre + pasos',
-        descripcion: 'La herramienta usa tu proceso documentado + tu paciente ideal y genera: 5 opciones de nombre propio (eliges una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién servís y qué transformás). Acá nace tu activo.',
+        descripcion: 'La herramienta usa tu proceso documentado + tu paciente ideal y genera: 5 opciones de nombre propio (eliges una), tu protocolo estructurado en 3 a 7 pasos claros, y tu línea de posicionamiento (una frase que dice a quién sirves y qué transformas). Acá nace tu activo.',
         tipo: 'HERRAMIENTA',
         es_estrella: true,
         tiempo_estimado: '1.5 h',
@@ -409,7 +409,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 6,
         dia_asignado: 13,
         usa_ia: false,
-        coach_instruccion: 'Validá el nombre del método: ¿evoca el resultado del paciente o describe el proceso técnico? Si describe proceso, ayudale a girarlo hacia el resultado. Cuando el nombre prometa el destino, aprobá y celebrá: Amarillo punta verde, el primer brote asoma.',
+        coach_instruccion: 'Valida el nombre del método: ¿evoca el resultado del paciente o describe el proceso técnico? Si describe proceso, ayúdale a girarlo hacia el resultado. Cuando el nombre prometa el destino, aprueba y celebrá: Amarillo punta verde, el primer brote asoma.',
       },
       {
         codigo: 'P2.6',
@@ -491,12 +491,12 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: false,
         entrenador: 'vera',
         checklist: [
-          'Abre el chat y pedí el roleplay de defensa de precio',
+          'Abre el chat y pide el roleplay de defensa de precio',
           'Supera la objeción "es caro" sin bajar el precio',
           'Supera "lo tengo que pensar" con una pregunta, no con presión',
           'Supera "¿hay descuento?" sin ceder — 3 seguidas y pasas',
         ],
-        coach_instruccion: 'Roleplay de defensa de precio: hacé de prospecto que objeta "es caro" / "lo tengo que pensar" / "¿hay descuento?". Evaluá si defiende con seguridad o se disculpa. Si aparece el precio-disculpa, recordale su creencia nueva del Día 7 y su estandarte. Repetir hasta que defienda con calma 3 objeciones seguidas.',
+        coach_instruccion: 'Roleplay de defensa de precio: haz de prospecto que objeta "es caro" / "lo tengo que pensar" / "¿hay descuento?". Evalúa si defiende con seguridad o se disculpa. Si aparece el precio-disculpa, recuérdale su creencia nueva del Día 7 y su estandarte. Repetir hasta que defienda con calma 3 objeciones seguidas.',
       },
       {
         codigo: 'P3.4',
@@ -509,7 +509,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 17,
         evidencia_requerida: { tipo: 'audio', descripcion: 'Tu pitch de 60 segundos grabado. Es la primera vez que tu oferta suena en el mundo.' },
         usa_ia: false,
-        coach_instruccion: 'Auditá la oferta final contra 4 criterios: (1) promete una transformación concreta, no sesiones; (2) el contenido es claro; (3) el precio es el número digno del Día 6, sin rebajas de miedo; (4) la garantía es real y específica. Solo si los 4 pasan, aprobá y otorgá el Cinturón Verde.',
+        coach_instruccion: 'Auditá la oferta final contra 4 criterios: (1) promete una transformación concreta, no sesiones; (2) el contenido es claro; (3) el precio es el número digno del Día 6, sin rebajas de miedo; (4) la garantía es real y específica. Solo si los 4 pasan, aprueba y otorga el Cinturón Verde.',
       },
       {
         codigo: 'P3.4b',
@@ -539,7 +539,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 5,
         dia_asignado: 18,
         usa_ia: false,
-        coach_instruccion: 'Sesión de puesta al día. Revisá con el sanador su ADN hasta acá: ¿método con nombre? ¿avatar claro? ¿oferta aprobada con precio digno? Lo que falte, se completa HOY con la herramienta correspondiente. Si está al día: reconocelo con sobriedad (sin inflar) y prepará la expectativa de la semana que viene: se monta el sistema técnico. Es la semana más operativa del programa.',
+        coach_instruccion: 'Sesión de puesta al día. Revisa con el sanador su ADN hasta acá: ¿método con nombre? ¿avatar claro? ¿oferta aprobada con precio digno? Lo que falte, se completa HOY con la herramienta correspondiente. Si está al día: reconocelo con sobriedad (sin inflar) y prepará la expectativa de la semana que viene: se monta el sistema técnico. Es la semana más operativa del programa.',
         checklist: [
           'Abre tu ADN y revisa: ¿tu método tiene nombre? ¿tu avatar es una persona real? ¿tu oferta tiene precio digno?',
           'Lo que esté incompleto: vuelve a esa herramienta y termínalo hoy',
@@ -564,7 +564,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Envía los 10 hoy, uno por uno, con su nombre',
           'Sube captura de 3 conversaciones abiertas',
         ],
-        coach_instruccion: 'La Primera Cosecha: ayudalo a armar su lista de 10 contactos calientes (pacientes actuales, ex-pacientes, colegas que derivan) y su mensaje personal — anuncio del programa nuevo + pregunta genuina de a quién le serviría, NUNCA un pitch ni un mensaje de difusión masiva. Revisá que suene a él. Evidencia: captura de 3 conversaciones abiertas. Si le da vergüenza escribir, recordale: estas personas ya confiaron en él una vez — merecen enterarse primero.',
+        coach_instruccion: 'La Primera Cosecha: ayudalo a armar su lista de 10 contactos calientes (pacientes actuales, ex-pacientes, colegas que derivan) y su mensaje personal — anuncio del programa nuevo + pregunta genuina de a quién le serviría, NUNCA un pitch ni un mensaje de difusión masiva. Revisa que suene a él. Evidencia: captura de 3 conversaciones abiertas. Si le da vergüenza escribir, recuérdale: estas personas ya confiaron en él una vez — merecen enterarse primero.',
       },
     ],
   },
@@ -708,7 +708,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         adn_field: 'adn_validacion_organica',
         entrenador: 'mateo',
         checklist: [
-          'Abre Campañas → «Tus 3 anuncios»: tu brief ya está cargado desde tu ADN — ajústalo si hace falta',
+          'Abre Campañas → «Tus 3 anuncios»: ahí está tu brief con lo que ya sellaste — completa lo que falte',
           'Elige tus 3 fórmulas (una de piedras, una de dolor o historia, una de resultado) y genera',
           'Revisa la auditoría de ingredientes de cada pieza: con más de dos faltando, la pieza no sale',
           'Lee cada anuncio EN VOZ ALTA: si no lo dirías de frente, se corrige',
@@ -726,7 +726,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: false,
         entrenador: 'caro',
         evidencia_requerida: { tipo: 'video', descripcion: 'Al menos una de tus 3 piezas grabada. La cámara ya no te frena.' },
-        coach_instruccion: 'El Día de Grabación. Antes de grabar: 2 minutos con Caro para soltar el cuerpo (hombros, mandíbula, respiración). Reglas: máximo 3 tomas por pieza — la tercera va, aunque no sea perfecta; hablarle a UNA persona (su avatar, con nombre); guion como guía, no como jaula. Si aparece "no me gusta cómo me veo": eso es la identidad vieja defendiéndose — nombralo con respeto y seguí. Al final: que suba al menos una pieza como evidencia.',
+        coach_instruccion: 'El Día de Grabación. Antes de grabar: 2 minutos con Caro para soltar el cuerpo (hombros, mandíbula, respiración). Reglas: máximo 3 tomas por pieza — la tercera va, aunque no sea perfecta; hablarle a UNA persona (su avatar, con nombre); guion como guía, no como jaula. Si aparece "no me gusta cómo me veo": eso es la identidad vieja defendiéndose — nómbralo con respeto y sigue. Al final: que suba al menos una pieza como evidencia.',
         checklist: [
           'Prepara el espacio: luz de frente, fondo simple, celular a la altura de los ojos',
           '2 minutos de respiración con Caro antes de la primera toma',
@@ -745,7 +745,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         orden: 8,
         dia_asignado: 26,
         usa_ia: false,
-        coach_instruccion: 'Edición mínima viable: CapCut o similar — cortar inicio/final, subtítulos automáticos, exportar vertical. Nada más. Si se traba con la herramienta técnica, resolvelo paso a paso. El objetivo del día: 3 piezas EXPORTADAS y listas. No se pule: se publica. LA VERSIÓN VERGONZOSA como regla de la sesión: la pieza se publica cuando está CLARA, no cuando está perfecta. Si dice \'quiero regrabar\', \'no me gusta cómo quedó\', \'una toma más\': eso es la identidad vieja defendiéndose — nombralo con respeto y publicá igual. La fórmula de Javo: \'primero lanzo, después arreglo\'. Los datos del test (mañana) valen mil veces más que la opinión que él tiene de su propio video hoy. Recordale el Experimento de 48hs: su predicción catastrófica ya falló una vez.',
+        coach_instruccion: 'Edición mínima viable: CapCut o similar — cortar inicio/final, subtítulos automáticos, exportar vertical. Nada más. Si se traba con la herramienta técnica, resolvelo paso a paso. El objetivo del día: 3 piezas EXPORTADAS y listas. No se pule: se publica. LA VERSIÓN VERGONZOSA como regla de la sesión: la pieza se publica cuando está CLARA, no cuando está perfecta. Si dice \'quiero regrabar\', \'no me gusta cómo quedó\', \'una toma más\': eso es la identidad vieja defendiéndose — nómbralo con respeto y publicá igual. La fórmula de Javo: \'primero lanzo, después arreglo\'. Los datos del test (mañana) valen mil veces más que la opinión que él tiene de su propio video hoy. Recuérdale el Experimento de 48hs: su predicción catastrófica ya falló una vez.',
         checklist: [
           'BONUS: entra al menú Campañas (desbloqueado con tu Verde) y genera 2-3 anuncios ESTÁTICOS con la fábrica de imágenes — estáticos + videos = mejor test',
           'Corta el inicio y el final de cada pieza (que arranque en la primera palabra)',
@@ -766,7 +766,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: false,
         adn_field: 'adn_validacion_organica',
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Captura de tus 3 piezas publicadas. Ya estás en el campo.' },
-        coach_instruccion: 'Día de publicar. Guiá: subir las 3 piezas orgánicas + boost de $2/día a cada una por 3 días (total ~$18). Explicá QUÉ mirar durante el test: retención (¿la ven completa?), comentarios/DMs (¿alguien pregunta?), y CTR si hay link. NO se toca nada por 3 días: los datos necesitan cocinarse. Los próximos 2 días son de campo: responder cada mensaje en menos de 5 minutos. Registrá la evidencia.',
+        coach_instruccion: 'Día de publicar. Guía: subir las 3 piezas orgánicas + boost de $2/día a cada una por 3 días (total ~$18). Explica QUÉ mirar durante el test: retención (¿la ven completa?), comentarios/DMs (¿alguien pregunta?), y CTR si hay link. NO se toca nada por 3 días: los datos necesitan cocinarse. Los próximos 2 días son de campo: responder cada mensaje en menos de 5 minutos. Registrá la evidencia.',
         checklist: [
           'Publica las 3 piezas en tu cuenta profesional',
           'Ponle a cada una un impulso de $2/día por 3 días',
@@ -786,7 +786,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 28,
         usa_ia: false,
         video_youtube_id: 'PLACEHOLDER_TUTORIAL_DOMINIO',
-        coach_instruccion: 'Sesión técnica del dominio. Guiá paso a paso: (1) si tiene dominio propio: conectarlo en la configuración de su sistema (los 2 registros DNS — explicá qué son en una línea, sin jerga); (2) si no tiene: comprar uno simple (su nombre o su método, .com, ~$12/año) o usar el subdominio provisto; (3) verificar que su link de agenda abra con su dirección. Si el DNS demora en propagar (hasta 24h), tranquilizá: es normal, se sigue mañana. El hito: su link con SU nombre, compartible.',
+        coach_instruccion: 'Sesión técnica del dominio. Guía paso a paso: (1) si tiene dominio propio: conectarlo en la configuración de su sistema (los 2 registros DNS — explica qué son en una línea, sin jerga); (2) si no tiene: comprar uno simple (su nombre o su método, .com, ~$12/año) o usar el subdominio provisto; (3) verificar que su link de agenda abra con su dirección. Si el DNS demora en propagar (hasta 24h), tranquilizá: es normal, se sigue mañana. El hito: su link con SU nombre, compartible.',
         checklist: [
           'Decide: ¿dominio propio (tu-nombre.com) o el subdominio que te damos?',
           'Si es propio: agrega los 2 registros DNS que te muestra el tutorial',
@@ -829,7 +829,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Regla de oro: NO toques la campaña por 72 hs (fase de aprendizaje de Meta — cambiarla la resetea)',
           'Saca screenshot donde se vea el estado ACTIVO y el presupuesto — súbelo acá',
         ],
-        coach_instruccion: 'Checklist antes de aprobar: ¿escaló la pieza ganadora de la validación (no otra)? ¿el circuito completo funciona (PALABRA → DM → página → agenda)? ¿entiende que NO debe tocar la campaña por 72 hs (aprendizaje de Meta)? Pedí el screenshot de la campaña ACTIVA: estado activo + presupuesto diario visibles. Si es válido, otorgá Verde punta azul y prepará la expectativa: en 24-72 hs llegan los primeros mensajes — la próxima fase le enseña a convertirlos.',
+        coach_instruccion: 'Checklist antes de aprobar: ¿escaló la pieza ganadora de la validación (no otra)? ¿el circuito completo funciona (PALABRA → DM → página → agenda)? ¿entiende que NO debe tocar la campaña por 72 hs (aprendizaje de Meta)? Pide el screenshot de la campaña ACTIVA: estado activo + presupuesto diario visibles. Si es válido, otorga Verde punta azul y prepará la expectativa: en 24-72 hs llegan los primeros mensajes — la próxima fase le enseña a convertirlos.',
       },
       {
         codigo: 'P4.7',
@@ -847,7 +847,32 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Escribe tu meta de esta semana: conversaciones y llamadas',
           'Agenda el rito del viernes: cargar los 3 números',
         ],
-        coach_instruccion: 'EL TABLERO. Explicale su cuenta con SUS números, sin jerga: de la meta hacia atrás (10 pacientes ← 40 llamadas ← 57 agendas ← 300 conversaciones) y bajala a la semana. Dejale grabada la idea madre: el problema casi nunca es la técnica, es el volumen — y cuando no es volumen, es filtro; y cuando no es filtro, es cierre. Cerrá fijando el rito del viernes: 3 números, un diagnóstico, una acción. Si se asusta con los números, recuérdale que su DM da la primera respuesta: solo toma 5 llamadas por semana.',
+        coach_instruccion: 'EL TABLERO. Explícale su cuenta con SUS números, sin jerga: de la meta hacia atrás (10 pacientes ← 40 llamadas ← 57 agendas ← 300 conversaciones) y bajala a la semana. Dejale grabada la idea madre: el problema casi nunca es la técnica, es el volumen — y cuando no es volumen, es filtro; y cuando no es filtro, es cierre. Cierra fijando el rito del viernes: 3 números, un diagnóstico, una acción. Si se asusta con los números, recuérdale que su DM da la primera respuesta: solo toma 5 llamadas por semana.',
+      },
+      {
+        // LA PRUEBA DE FUEGO. El guion vivía en sesionesGuiadas.ts desde
+        // siempre y NO ESTABA EN EL CAMINO: ningún cliente llegaba nunca.
+        // Y es la sesión de la que depende la regla más dura del recorrido —
+        // de la etapa 4 no se sale sin el cobro de prueba verificado.
+        // Encender con la cadena sin probar es tirar el presupuesto: la gente
+        // comenta, no le llega el mensaje, y se descubre con la pauta andando.
+        codigo: 'P4.8',
+        titulo: 'La Prueba de Fuego — un lead recorre tu cadena entera',
+        descripcion: 'Antes de gastar un peso: un lead de prueba comenta, recibe tu mensaje, entra a tu página y paga. Si algo se corta, se ve hoy y no con la campaña andando.',
+        tipo: 'COACH',
+        es_estrella: true,
+        tiempo_estimado: '30 min',
+        orden: 15,
+        dia_asignado: 30,
+        usa_ia: false,
+        entrenador: 'mentor',
+        checklist: [
+          'Comenta tu palabra desde otra cuenta y espera el mensaje',
+          'Sigue el link como lo seguiría un paciente',
+          'Haz el cobro de prueba completo, hasta que el dinero entre',
+          'Anota dónde se cortó, si se cortó',
+        ],
+        coach_instruccion: 'LA PRUEBA DE FUEGO. Acompáñalo estación por estación: comentario, mensaje automático, link, página, checkout, cobro. En cada una pregúntale qué pasó DE VERDAD, no lo que debería pasar. Si algo falla, eso es lo único que importa hoy: sin la cadena probada no se enciende nada.',
       },
     ],
   },
@@ -912,12 +937,12 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         usa_ia: false,
         entrenador: 'lucas',
         checklist: [
-          'Pedí el roleplay completo con tu script en mano',
+          'Pide el roleplay completo con tu script en mano',
           'Completa la llamada entera: apertura → dolor → cielo → obstáculos → precio → cierre',
           'Supera las 3 objeciones reales: "es caro" · "lo hablo con mi pareja" · "lo tengo que pensar"',
           'Recibí las 2 mejoras del Mentor, anotalas, y repite una segunda simulación',
         ],
-        coach_instruccion: 'Roleplay completo con SU script y la estructura W (Apertura-Dolor-Cielo-Obstáculos-Cierre). Hacé de prospecto realista con el banco de objeciones REALES: "es caro" (defensa sin disculpa), "lo hablo con mi pareja" (el decisor — enseñale a invitarlo a una próxima llamada con ambos, no a perseguir), "lo tengo que pensar" (pregunta que destapa la objeción real detrás). Evaluá apertura, manejo del dolor, presentación de precio con silencio posterior, y cierre. Dale 2 mejoras concretas. Repetir hasta una simulación sólida.',
+        coach_instruccion: 'Roleplay completo con SU script y la estructura W (Apertura-Dolor-Cielo-Obstáculos-Cierre). Haz de prospecto realista con el banco de objeciones REALES: "es caro" (defensa sin disculpa), "lo hablo con mi pareja" (el decisor — enseñale a invitarlo a una próxima llamada con ambos, no a perseguir), "lo tengo que pensar" (pregunta que destapa la objeción real detrás). Evalúa apertura, manejo del dolor, presentación de precio con silencio posterior, y cierre. Dale 2 mejoras concretas. Repetir hasta una simulación sólida.',
       },
       {
         codigo: 'P5.5',
@@ -941,7 +966,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
       {
         codigo: 'P5.4',
         titulo: '◆ TU PRIMERA LLAMADA REAL',
-        descripcion: 'Los días previos son de campo: responde cada mensaje en <5 min, confirma agendas — la app no te asigna tarea nueva porque el juego está en tu WhatsApp. Y entonces llega: atiende a tu primer prospecto real del sistema. No importa si no cierra — importa que la hiciste. Sube el screenshot del Meet/Zoom (puedes tapar el nombre) y haz el debrief con tu Mentor. Ganás el Cinturón AZUL: alcanzaste el cielo.',
+        descripcion: 'Los días previos son de campo: responde cada mensaje en <5 min, confirma agendas — la app no te asigna tarea nueva porque el juego está en tu WhatsApp. Y entonces llega: atiende a tu primer prospecto real del sistema. No importa si no cierra — importa que la hiciste. Sube el screenshot del Meet/Zoom (puedes tapar el nombre) y haz el debrief con tu Mentor. Ganas el Cinturón AZUL: alcanzaste el cielo.',
         tipo: 'COACH',
         es_estrella: true,
         tiempo_estimado: '60 min',
@@ -958,7 +983,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Saca screenshot de la videollamada (tapa el nombre si quieres)',
           'Sube el screenshot y haz el debrief con tu Mentor',
         ],
-        coach_instruccion: 'Debrief de la primera llamada real: pedile el screenshot del Meet/Zoom (debe verse la videollamada — puede tapar el nombre por privacidad). Verificá que sea real. El debrief: ¿qué funcionó? ¿dónde se trabó? ¿qué objeción no supo manejar? ¿estaba el decisor si correspondía? Cerrá con 1 ajuste para la próxima. Otorgá el Cinturón Azul: alcanzó el cielo. Anticipале la resistencia que viene: los primeros NO duelen — y son parte de la matemática (cierre 20% = 4 de 5 dicen no Y el sistema funciona).',
+        coach_instruccion: 'Debrief de la primera llamada real: pídele el screenshot del Meet/Zoom (debe verse la videollamada — puede tapar el nombre por privacidad). Verifica que sea real. El debrief: ¿qué funcionó? ¿dónde se trabó? ¿qué objeción no supo manejar? ¿estaba el decisor si correspondía? Cierra con 1 ajuste para la próxima. Otorga el Cinturón Azul: alcanzó el cielo. Anticipале la resistencia que viene: los primeros NO duelen — y son parte de la matemática (cierre 20% = 4 de 5 dicen no Y el sistema funciona).',
       },
     ],
   },
@@ -1046,7 +1071,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Saca captura del comprobante (tapa datos sensibles si quieres)',
           'Súbelo y celebra con tu Mentor — este momento es LA transformación',
         ],
-        coach_instruccion: 'Verificación del primer pago: pedile el comprobante (captura de transferencia, recibo, o foto del efectivo — puede tapar datos sensibles). Verificá 3 cosas: monto visible, fecha reciente, coherencia con su precio declarado en el ADN. Si dudás, marcalo para revisión del equipo. Si es válido, otorgá el Cinturón Rojo y celebrá en serio: este momento separa al que lo intentó del que lo hizo. Preguntá cómo se siente cobrar su precio digno — y recordale reinvertir: la pauta ahora puede subir a $8-12/día, se paga sola.',
+        coach_instruccion: 'Verificación del primer pago: pídele el comprobante (captura de transferencia, recibo, o foto del efectivo — puede tapar datos sensibles). Verifica 3 cosas: monto visible, fecha reciente, coherencia con su precio declarado en el ADN. Si dudas, márcalo para revisión del equipo. Si es válido, otorga el Cinturón Rojo y celebrá en serio: este momento separa al que lo intentó del que lo hizo. Pregunta cómo se siente cobrar su precio digno — y recuérdale reinvertir: la pauta ahora puede subir a $8-12/día, se paga sola.',
       },
     ],
   },
@@ -1103,7 +1128,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
           'Registra cada venta nueva — el contador X/10 avanza contigo',
           'Pide testimonio a cada paciente que termina (video de 60 seg o audio) — tu prueba social vende por ti',
         ],
-        coach_instruccion: 'Revisión semanal de embudo: pedile sus números (leads, agendadas, hechas, cierres). Diagnosticá el cuello: pocos leads = el anuncio; no agendan = el filtro/agente; no cierran = la llamada (derivá a Lucas para roleplay). UN solo ajuste concreto por semana. Registrá el avance hacia los 10 y celebrá cada venta. Anticipá resistencias por tramo: semana 7-8 la meseta ("¿viniste por 3 o por la libertad?"); semana 10-11 el autosabotaje cerca de la meta — nombrarlo ANTES lo desarma.',
+        coach_instruccion: 'Revisión semanal de embudo: pídele sus números (leads, agendadas, hechas, cierres). Diagnostica el cuello: pocos leads = el anuncio; no agendan = el filtro/agente; no cierran = la llamada (deriva a Lucas para roleplay). UN solo ajuste concreto por semana. Registrá el avance hacia los 10 y celebrá cada venta. Anticipá resistencias por tramo: semana 7-8 la meseta ("¿viniste por 3 o por la libertad?"); semana 10-11 el autosabotaje cerca de la meta — nombrarlo ANTES lo desarma.',
       },
             {
         codigo: 'P7.C1',
@@ -1116,7 +1141,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 52,
         usa_ia: true,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Tu scorecard de la semana: conversaciones abiertas, llamadas, cierres y pagos. El número real, no el deseado — en el dojo se mide todo.' },
-        coach_instruccion: 'SEMANA DE CAZA 1/5 — sos el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisá con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mandalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
+        coach_instruccion: 'SEMANA DE CAZA 1/5 — eres el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisa con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mándalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
       },
       {
         codigo: 'P7.C2',
@@ -1129,7 +1154,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 59,
         usa_ia: true,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Tu scorecard de la semana: conversaciones abiertas, llamadas, cierres y pagos. El número real, no el deseado — en el dojo se mide todo.' },
-        coach_instruccion: 'SEMANA DE CAZA 2/5 — sos el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisá con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mandalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
+        coach_instruccion: 'SEMANA DE CAZA 2/5 — eres el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisa con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mándalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
       },
       {
         codigo: 'P7.C3',
@@ -1142,7 +1167,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 66,
         usa_ia: true,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Tu scorecard de la semana: conversaciones abiertas, llamadas, cierres y pagos. El número real, no el deseado — en el dojo se mide todo.' },
-        coach_instruccion: 'SEMANA DE CAZA 3/5 — sos el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisá con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mandalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
+        coach_instruccion: 'SEMANA DE CAZA 3/5 — eres el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisa con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mándalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
       },
       {
         codigo: 'P7.C4',
@@ -1155,7 +1180,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 73,
         usa_ia: true,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Tu scorecard de la semana: conversaciones abiertas, llamadas, cierres y pagos. El número real, no el deseado — en el dojo se mide todo.' },
-        coach_instruccion: 'SEMANA DE CAZA 4/5 — sos el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisá con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mandalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
+        coach_instruccion: 'SEMANA DE CAZA 4/5 — eres el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisa con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mándalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
       },
       {
         codigo: 'P7.C5',
@@ -1168,7 +1193,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 80,
         usa_ia: true,
         evidencia_requerida: { tipo: 'screenshot', descripcion: 'Tu scorecard de la semana: conversaciones abiertas, llamadas, cierres y pagos. El número real, no el deseado — en el dojo se mide todo.' },
-        coach_instruccion: 'SEMANA DE CAZA 5/5 — sos el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisá con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mandalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
+        coach_instruccion: 'SEMANA DE CAZA 5/5 — eres el director técnico del ritmo semanal. RITO 1 (lunes, 30 min): revisa con él los números de la semana pasada SIN juicio y CON matemática (cuántas conversaciones → cuántas llamadas → cuántos cierres; la conversión dice dónde está la fuga). Fijen el número de esta semana (conversaciones a abrir) y UN ángulo de contenido/anuncio — uno solo, el que mejor midió. RITO 2 (miércoles): mándalo con material REAL — que le pegue a Sofi 1-2 conversaciones de WhatsApp textuales (o a Lucas una llamada) y vuelva con la conducta corregida y el mensaje exacto. Si no tiene conversaciones que revisar, ESO es el hallazgo: el problema es volumen, no técnica — más pauta o más contenido, hoy. RITO 3 (viernes, 20 min): el scorecard con números reales (la evidencia de la semana). Si hubo pago: celebración específica + comprobante registrado. Si no hubo: matemática, no drama — ¿dónde se cayó el embudo esta semana? Un ajuste concreto para el lunes. Frase de la etapa: no encontrar el ángulo es escasez absoluta — se testea hasta encontrarlo.',
       },
 {
         codigo: 'P7.3',
@@ -1181,7 +1206,7 @@ export const SEED_ROADMAP_V8: RoadmapPilar[] = [
         dia_asignado: 85,
         usa_ia: false,
         evidencia_requerida: { tipo: 'comprobante', descripcion: 'El registro de tus 10 pacientes: capturas de los pagos o tu planilla de cobros. El Cinturón Negro se gana con hechos — como todos los anteriores.' },
-        coach_instruccion: 'Certificación del Cinturón Negro: pedile evidencia de los 10 pacientes cobrados (comprobantes o el registro de ventas). Verificá que la suma alcance ~$10K. Si es válido, certificá: Sanador Libre. La retrospectiva: ¿qué cambió en 90 días — en su negocio Y en él? El después: el sistema ahora produce 10/mes, su clínica opera en MiClínica Digital, y el cinturón negro es 1er dan — el Nivel 2 ($25K/mes) existe cuando esté listo.',
+        coach_instruccion: 'Certificación del Cinturón Negro: pídele evidencia de los 10 pacientes cobrados (comprobantes o el registro de ventas). Verifica que la suma alcance ~$10K. Si es válido, certificá: Sanador Libre. La retrospectiva: ¿qué cambió en 90 días — en su negocio Y en él? El después: el sistema ahora produce 10/mes, su clínica opera en MiClínica Digital, y el cinturón negro es 1er dan — el Nivel 2 ($25K/mes) existe cuando esté listo.',
       },
     ],
   },

@@ -128,7 +128,7 @@ export default function EspejoIdentidadModal({
             className="text-2xl md:text-3xl text-gold mt-4 font-light tracking-tight"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
-            ¿Te reconocés?
+            ¿Te reconoces?
           </p>
         </div>
 
