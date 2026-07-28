@@ -95,9 +95,68 @@ async function main() {
   dibuja('TableroPlata · con cliente',
     <TableroPlata clienteId="a" nombreCliente="Rosana" />);
 
+  const { default: Jornada } = await import('../src/components/admin/Jornada');
+  const cola = [{
+    clienteId: 'a', nombre: 'Rosana', cuello: 'conv_a_agenda',
+    situacion: 'El DM pierde a la gente.', accion: 'Revisar el DM.',
+    como: 'Mensaje al cliente.', quien: 'operador' as const,
+    enRiesgo: 1000, semanasIgual: 0, yaSeIntento: false,
+  }];
+  dibuja('Jornada · sin empezar', <Jornada personaId="p" rol="acompanamiento" items={cola} />);
+  dibuja('Jornada · sin cuentas', <Jornada personaId="p" rol="acompanamiento" items={[]} />);
+
+  const { default: LaSemana } = await import('../src/components/admin/LaSemana');
+  for (const rol of ['direccion', 'acompanamiento', 'desarrollo'] as const) {
+    dibuja(`LaSemana · ${rol}`,
+      <LaSemana rol={rol} jornadas={[]} clientesActivos={11} clientesQueVendieron={7}
+        cuentasFrenadas={[]} facturadoClientes={9000} />);
+  }
+  dibuja('LaSemana · con trabas y frenados',
+    <LaSemana rol="direccion"
+      jornadas={[{ personaId: 'l', dia: '2026-07-27', inicio: '2026-07-27T09:00:00Z',
+        fin: '2026-07-27T17:00:00Z', planeados: [], cerradas: [], atendidos: ['a'],
+        traba: 'no le llega el DM automatico' }]}
+      clientesActivos={11} clientesQueVendieron={7}
+      cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde gente', semanasIgual: 3, enRiesgo: 3000 }]}
+      facturadoClientes={9000} />);
+
   const { default: CargarSesion } = await import('../src/components/admin/CargarSesion');
   dibuja('CargarSesion',
     <CargarSesion clienteId="a" nombreCliente="Rosana" quienLaDio="Lupe" />);
+
+  // ── LA PRUEBA MÁS IMPORTANTE ──
+  // No alcanza con que el permiso diga que no. Hay que verificar que el
+  // número NO ESTÉ EN EL HTML que se le entrega al navegador del empleado.
+  // Si está y solo se esconde con CSS, cualquiera lo lee.
+  console.log('\n══ el dinero NO viaja al navegador del empleado ══');
+  const conPlata = {
+    jornadas: [{ personaId: 'l', dia: '2026-07-27', inicio: '2026-07-27T09:00:00Z',
+      fin: '2026-07-27T17:00:00Z', planeados: [], cerradas: [], atendidos: ['a'] }],
+    clientesActivos: 11, clientesQueVendieron: 7,
+    cuentasFrenadas: [{ clienteId: 'a', nombre: 'Rosana', cuello: 'x', semanasIgual: 1, enRiesgo: 987654 }],
+    facturadoClientes: 123456,
+  };
+  const { default: LS } = await import('../src/components/admin/LaSemana');
+  const { renderToStaticMarkup: rr } = await import('react-dom/server');
+
+  // Se comparan solo los dígitos: el separador de miles cambia según dónde
+  // corra, y una prueba que depende del formato no prueba nada.
+  const soloDigitos = (t: string) => t.replace(/[^0-9]/g, '');
+
+  for (const rol of ['acompanamiento', 'desarrollo', 'produccion'] as const) {
+    const digitos = soloDigitos(rr(<LS rol={rol} {...conPlata} />));
+    const html = rr(<LS rol={rol} {...conPlata} />);
+    linea(!digitos.includes('123456'), `${rol}: lo facturado NO está en el HTML`);
+    linea(!digitos.includes('987654'), `${rol}: el dinero en riesgo NO está en el HTML`);
+    linea(!html.includes('Humano por cliente'),
+      `${rol}: el rendimiento del equipo NO está en el HTML`);
+  }
+
+  const htmlJefe = rr(<LS rol="direccion" {...conPlata} />);
+  linea(soloDigitos(htmlJefe).includes('123456'),
+    'dirección SÍ ve lo facturado — si no, el permiso estaría de más');
+  linea(htmlJefe.includes('Humano por cliente'),
+    'y sí ve el rendimiento del equipo');
 
   console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
   process.exit(fallas === 0 ? 0 : 1);

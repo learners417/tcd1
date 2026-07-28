@@ -18,6 +18,12 @@ import SalaDeMando from '../components/admin/SalaDeMando';
 import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
 import MiRol from '../components/admin/MiRol';
 import CargarSesion from '../components/admin/CargarSesion';
+import LaSemana from '../components/admin/LaSemana';
+import JornadaPanel from '../components/admin/Jornada';
+import { jornadasRecientes } from '../lib/jornadaStorage';
+import { comparativaSemana } from '../lib/mesaPlataStorage';
+import type { Jornada as JornadaTipo } from '../lib/jornada';
+import { rolDe as rolPermisos } from '../lib/permisos';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
   Stethoscope, CheckCircle2, Circle, LogOut,
@@ -27,7 +33,7 @@ import {
   CheckCheck, AlertTriangle, Image, Mic, Settings, Camera,
   Video, Trash2, Youtube, Play, ChevronDown, FileText,
   Globe, Flame, Star, DollarSign, Pencil,
-  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass,
+  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass, CalendarDays,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck, Cpu,
   Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer } from 'lucide-react';
@@ -53,7 +59,7 @@ import Markdown from 'react-markdown';
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
 type AdminRol = 'owner' | 'manager' | 'staff';
-type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones';
+type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana';
 type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
@@ -349,13 +355,14 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
+
   /**
    * El ROL, no el permiso. Decide qué ve, en qué orden, y qué no le toca.
    * Los tres nombres viejos siguen en la base y se traducen acá.
    */
   const rol = rolDe((adminProfile as any).admin_rol);
   const defRol = ROLES[rol];
-  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones'];
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana'];
   const [mainTab, setMainTab] = usePersistedState<MainTab>(
     'tcd_admin_main_tab',
     'clientes',
@@ -457,11 +464,55 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [filtroPlan, setFiltroPlan] = useState<string>('ALL');
 
   // Campanas — cliente seleccionado
+  /** Las jornadas del equipo y los números de la semana, para La Semana. */
+  const [jornadasEquipo, setJornadasEquipo] = useState<JornadaTipo[]>([]);
+  const [semanaClientes, setSemanaClientes] = useState<{
+    vendieron: number; facturado: number;
+    frenadas: Array<{ clienteId: string; nombre: string; cuello: string; semanasIgual: number; enRiesgo: number }>;
+  }>({ vendieron: 0, facturado: 0, frenadas: [] });
+
   const [campanasClienteId, setCampanasClienteId] = usePersistedState<string | null>(
     'tcd_admin_campanas_cliente',
     null,
     { validate: (v) => v === null || typeof v === 'string' },
   );
+
+  /**
+   * Las jornadas del equipo y la comparativa de la semana.
+   *
+   * Se cargan cuando se abre Hoy o La Semana, no al entrar al Admin: son dos
+   * consultas que no le sirven a nadie que esté mirando otra cosa.
+   */
+  useEffect(() => {
+    if (mainTab !== 'semana' && mainTab !== 'hoy') return;
+    let vivo = true;
+    void (async () => {
+      try {
+        const [js, comp] = await Promise.all([
+          jornadasRecientes(7),
+          comparativaSemana(clientes.map((c) => c.id)),
+        ]);
+        if (!vivo) return;
+        setJornadasEquipo(js);
+        const nombre = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? 'Cliente';
+        setSemanaClientes({
+          vendieron: comp.filter((f) => (f.ventas ?? 0) > 0).length,
+          facturado: comp.reduce((t, f) => t + (f.facturado || 0), 0),
+          frenadas: comp
+            .filter((f) => f.sinCargar || (f.domino?.indicador?.brecha ?? 0) > 0.5)
+            .map((f) => ({
+              clienteId: f.clienteId,
+              nombre: nombre(f.clienteId),
+              cuello: f.domino?.titulo ?? 'Sin diagnóstico',
+              semanasIgual: 0,
+              enRiesgo: Math.round(f.facturado * Math.min(f.urgencia, 5)),
+            })),
+        });
+      } catch { /* La Semana funciona igual con lo que haya */ }
+    })();
+    return () => { vivo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainTab, clientes.length]);
   const [campanasClientePerfil, setCampanasClientePerfil] = useState<ProfileV2 | null>(null);
   const [campanasPerfilLoading, setCampanasPerfilLoading] = useState(false);
 
@@ -1682,24 +1733,66 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
   // ─── SIDEBAR NAV CONFIG ───────────────────────────────────────────────────────
 
+  /**
+   * EL MENÚ SON CUATRO MOMENTOS, NO DIECISIETE TABS.
+   *
+   * Están ordenados por CUÁNDO se usan, no por lo que son. El problema de un
+   * equipo no es encontrar información: es saber qué hacer ahora.
+   *
+   *   · Hoy        — todos los días, al empezar y al cerrar
+   *   · La Semana  — una vez por semana, mismo día y hora
+   *   · Clientes   — cuando entras a un cliente
+   *   · El Negocio — cuando quieres saber cómo va todo (solo dirección)
+   *
+   * Lo de adentro no desapareció: vive dentro del momento donde se usa, y se
+   * llega con las pestañas de arriba. Antes eran diecisiete entradas planas
+   * y nadie sabía cuál abrir primero.
+   */
   const sidebarItems: { id: MainTab; label: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
-    { id: 'hoy',       label: 'Hoy',       icon: Sunrise },
-    { id: 'supervision', label: 'Supervisión', icon: LayoutGrid },
-    { id: 'sala',      label: 'Sala de Mando', icon: Compass, ownerOnly: true },
-    { id: 'sesiones',  label: 'Cargar sesión', icon: FileText },
-    { id: 'mirol',     label: 'Mi rol',    icon: UserCircle },
-    { id: 'clientes',  label: 'Clientes',  icon: Users },
-    { id: 'pipeline',  label: 'Activación', icon: ClipboardCheck },
-    { id: 'mensajes',  label: 'Mensajes',  icon: MessageSquare },
-    { id: 'metricas',  label: 'Métricas',  icon: BarChart2 },
-    { id: 'videos',    label: 'Videos',    icon: Video },
-    { id: 'equipo',    label: 'Equipo',    icon: UsersRound, ownerOnly: true },
-    { id: 'campanas',  label: 'Campañas',  icon: Megaphone },
-    { id: 'creativos', label: 'Creativos', icon: Image },
-    { id: 'tareas',    label: 'Tareas',    icon: ClipboardCheck },
-    { id: 'plata',     label: 'Mesa de plata', icon: TrendingUp, ownerOnly: true },
-    { id: 'motor',     label: 'Motor IA',      icon: Cpu, ownerOnly: true },
+    { id: 'hoy',      label: 'Hoy',        icon: Sunrise },
+    { id: 'semana',   label: 'La Semana',  icon: CalendarDays },
+    { id: 'clientes', label: 'Clientes',   icon: Users },
+    { id: 'sala',     label: 'El Negocio', icon: Compass, ownerOnly: true },
   ];
+
+  /**
+   * Lo que vive adentro de cada momento. Se dibuja como pestañas arriba del
+   * contenido, no como entradas del menú lateral.
+   */
+  const DENTRO_DE: Partial<Record<MainTab, { id: MainTab; label: string; ownerOnly?: boolean }[]>> = {
+    hoy: [
+      { id: 'hoy',      label: 'Mi día' },
+      { id: 'tareas',   label: 'Tareas' },
+      { id: 'mensajes', label: 'Mensajes' },
+      { id: 'mirol',    label: 'Mi rol' },
+    ],
+    clientes: [
+      { id: 'clientes',    label: 'Todos' },
+      { id: 'supervision', label: 'De un vistazo' },
+      { id: 'pipeline',    label: 'Activación' },
+      { id: 'campanas',    label: 'Campañas' },
+      { id: 'creativos',   label: 'Creativos' },
+      { id: 'sesiones',    label: 'Cargar sesión' },
+      { id: 'plata',       label: 'Mesa de plata', ownerOnly: true },
+    ],
+    sala: [
+      { id: 'sala',     label: 'Mi motor' },
+      { id: 'motor',    label: 'Motor IA' },
+      { id: 'equipo',   label: 'Equipo' },
+      { id: 'metricas', label: 'Métricas' },
+      { id: 'videos',   label: 'Videos' },
+    ],
+  };
+
+  /** A qué momento pertenece cada pantalla, para saber cuál marcar. */
+  const MOMENTO_DE: Partial<Record<MainTab, MainTab>> = Object.fromEntries(
+    Object.entries(DENTRO_DE).flatMap(([momento, hijas]) =>
+      (hijas ?? []).map((h) => [h.id, momento as MainTab])),
+  ) as Partial<Record<MainTab, MainTab>>;
+
+  const momentoActual = MOMENTO_DE[mainTab] ?? mainTab;
+  const pestanasDelMomento = (DENTRO_DE[momentoActual] ?? [])
+    .filter((h) => !h.ownerOnly || adminRol === 'owner' || !adminRol);
 
   const headerTitles: Record<MainTab, string> = {
     clientes: 'Panel de Control — Clientes',
@@ -1712,6 +1805,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     creativos: 'Generador de Creativos',
     tareas: 'Pipeline de Tareas Internas',
     hoy: 'Hoy — lo que hay que atender',
+    semana: 'La Semana — el marcador, las trabas y lo frenado',
     supervision: 'Supervisión — todas las cuentas a la vez',
     sala: 'Sala de Mando — qué está frenado y quién lo destraba',
     mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
@@ -1759,13 +1853,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <nav className="space-y-0.5">
             {sidebarItems
               .filter(item => !item.ownerOnly || adminRol === 'owner' || !adminRol)
-              // Lo del rol va primero. Lo demás sigue accesible, pero no
-              // compite por la atención de quien entra a hacer su trabajo.
-              .sort((a, b) => {
-                const ia = tabsDe(rol).indexOf(a.id);
-                const ib = tabsDe(rol).indexOf(b.id);
-                return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-              })
+              // Ya no se ordenan por rol: son cuatro y su orden es el del día.
               .map(item => {
                 const totalUnread = item.id === 'mensajes'
                   ? (channelUnread['comunidad'] ?? 0) + (channelUnread['victorias'] ?? 0) + (channelUnread['consultas'] ?? 0)
@@ -1782,12 +1870,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     }}
                     title={sidebarCollapsed ? item.label : undefined}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative ${sidebarCollapsed ? 'md:justify-center md:px-0 md:gap-0' : ''} ${
-                      mainTab === item.id
+                      momentoActual === item.id
                         ? 'bg-gold/10 text-gold'
                         : 'text-cream/75 hover:bg-gold/10 hover:text-cream'
                     }`}
                   >
-                    {mainTab === item.id && (
+                    {momentoActual === item.id && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gold rounded-r-full" />
                     )}
                     <span className="relative shrink-0">
@@ -3792,15 +3880,51 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {/* ═══════════════════════════════════════════════════════════════
               TAB: TAREAS INTERNAS
               ═══════════════════════════════════════════════════════════════ */}
+          {/* Lo que vive adentro del momento. Nada quedó inalcanzable: lo que
+              antes era una entrada del menú ahora es una pestaña de acá. */}
+          {pestanasDelMomento.length > 1 && (
+            <div className="flex gap-2 flex-wrap mb-5">
+              {pestanasDelMomento.map((h) => (
+                <button key={h.id} onClick={() => setMainTab(h.id)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    mainTab === h.id
+                      ? 'bg-gold/20 border border-gold/50 text-gold'
+                      : 'border border-cream/15 text-cream/60 hover:text-cream/85'}`}>
+                  {h.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {mainTab === 'hoy' && (
+            <JornadaPanel
+              personaId={(adminProfile as { id?: string }).id ?? ''}
+              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              items={[]}
+              jornadasDelEquipo={jornadasEquipo.filter(
+                (j) => j.personaId !== (adminProfile as { id?: string }).id)}
+            >
             <ColaDelDia clientes={clientes.map((c) => ({
               id: c.id, nombre: c.nombre,
               plan_comercial: (c as { plan_comercial?: string | null }).plan_comercial ?? null,
             }))} />
+            </JornadaPanel>
           )}
 
           {mainTab === 'supervision' && (
             <Supervision clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))} />
+          )}
+
+          {mainTab === 'semana' && (
+            <LaSemana
+              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              jornadas={jornadasEquipo}
+              clientesActivos={clientes.filter((c) =>
+                ((c as { estado?: string }).estado ?? 'ACTIVE') === 'ACTIVE').length}
+              clientesQueVendieron={semanaClientes.vendieron}
+              cuentasFrenadas={semanaClientes.frenadas}
+              facturadoClientes={semanaClientes.facturado}
+            />
           )}
 
           {mainTab === 'sesiones' && (

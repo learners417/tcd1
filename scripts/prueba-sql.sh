@@ -117,8 +117,14 @@ select limpiar_uso_ia();
 select limpiar_gasto_ia();
 select guardar_semana_cliente('11111111-1111-1111-1111-111111111111','2026-W31',
   '{"precio":1000,"gasto":250,"conversaciones":100,"agendas":35,"ventas":7}'::jsonb);
+-- La jornada: abrir, abrir otra vez (no debe duplicar), cerrar, y leer.
+select abrir_jornada('11111111-1111-1111-1111-111111111111', array['22222222-2222-2222-2222-222222222222']::uuid[]);
+select abrir_jornada('11111111-1111-1111-1111-111111111111', array['33333333-3333-3333-3333-333333333333']::uuid[]);
+select cerrar_jornada('11111111-1111-1111-1111-111111111111',
+  array['33333333-3333-3333-3333-333333333333']::uuid[], 'no le llega el DM automatico', null);
+select * from jornadas_recientes(7);
 SQL
-marcar $? "las 11 funciones se ejecutan sin errores de tipo"
+marcar $? "las 14 funciones se ejecutan sin errores de tipo"
 grep -E "^ERROR|^psql.*ERROR" "$DATA/f.txt" | head -3
 
 # Guardar dos veces la misma semana no puede duplicar: el viernes se carga,
@@ -131,6 +137,18 @@ FILAS=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
 select count(*) from sala_metricas_semana where anuncio is null;
 SQL
 )
+JORN=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select count(*) from jornadas;
+SQL
+)
+[ "$JORN" = "1" ]
+marcar $? "abrir el día dos veces no duplica la jornada (filas: $JORN)"
+TRABA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select coalesce(traba,'-') from jornadas limit 1;
+SQL
+)
+[ "$TRABA" != "-" ]
+marcar $? "la traba queda guardada y la puede leer todo el equipo"
 [ "$FILAS" = "1" ]
 marcar $? "guardar la misma semana dos veces reemplaza, no duplica (filas: $FILAS)"
 

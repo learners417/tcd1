@@ -994,8 +994,11 @@ if _os29.path.exists('src/lib/roles.ts'):
           'decirle que trabaje más rompe el modelo en silencio')
     check('sin rol cargado se asume el más acotado, nunca dirección',
           "default: return 'acompanamiento'" in _rl)
-    check('el rol ordena el menú, no solo esconde tabs',
-          'tabsDe(rol).indexOf' in _adm29)
+    # El menú pasó a ser cuatro momentos con un orden fijo —el del día—, así
+    # que ya no se ordena por rol. Lo que el rol decide es QUÉ VE, y eso lo
+    # verifica la lente 6.38 sobre las categorías de dato.
+    check('el rol decide qué ve, y eso se verifica por categoría de dato',
+          'puedeVer' in rd('src/lib/permisos.ts'))
     check('el traspaso está escrito, con el porqué de cada paso',
           'TRASPASO' in _rl and _rl.count('porque:') >= 7,
           'una conversación se olvida y el que la dio se vuelve necesario para siempre')
@@ -1219,6 +1222,160 @@ check('todo destino apunta a una página que existe',
 # escribe cifras imposibles. Ninguna de esas puede dejarlo mirando algo roto.
 check('se prueba el uso en desorden y con datos imposibles',
       _os35.path.exists('scripts/prueba-desorden.ts'))
+
+# ── 6.38 · Los permisos: lo más delicado de la app ─────────────────────
+# Si esto falla, un empleado ve las ventas del dueño o el rendimiento de un
+# compañero. No hay forma de deshacerlo: una vez que alguien lo vio, lo vio.
+# El permiso va sobre EL DATO, no sobre la pantalla: si se esconden tabs,
+# alcanza con que alguien agregue un número a una pantalla compartida.
+import os as _os38
+if _os38.path.exists('src/lib/permisos.ts'):
+    _pm = rd('src/lib/permisos.ts')
+    # Las tres categorías que ningún empleado puede ver, verificadas leyendo
+    # las listas `ve:` de cada rol que no sea dirección.
+    import re as _re38
+    _bloques38 = _re38.findall(r"^  (acompanamiento|desarrollo|produccion): \{(.*?)\n  \},",
+                               _pm, _re38.S | _re38.M)
+    _fugas38 = []
+    for _rol, _cuerpo in _bloques38:
+        _ve = _re38.search(r've: \[(.*?)\]', _cuerpo, _re38.S)
+        _lista = _ve.group(1) if _ve else ''
+        for _prohibida in ('dinero_tcd', 'motor_propio', 'rendimiento_equipo'):
+            if f"'{_prohibida}'" in _lista:
+                _fugas38.append(f'{_rol} ve {_prohibida}')
+    check('ningún empleado ve el dinero del dueño ni el rendimiento del equipo',
+          not _fugas38, '; '.join(_fugas38))
+    check('el permiso va sobre el DATO, no sobre la pantalla',
+          'export function puedeVer' in _pm and 'Categoria' in _pm,
+          'si se esconden tabs, un número nuevo en una pantalla compartida se filtra')
+    check('cada negativa tiene su porqué escrito',
+          _pm.count('porQueNoVe') >= 4 and _pm.count(':') > 40,
+          'para que nadie la afloje sin pensar')
+    check('lo desconocido NUNCA cae en dirección',
+          "default: return 'acompanamiento'" in _pm)
+    check('El Negocio no depende del costo de la IA',
+          "requiere: ['dinero_tcd', 'motor_propio', 'rendimiento_equipo']" in _pm,
+          'si dependiera, desarrollo entraría a la pantalla donde están las ventas del dueño')
+    check('son cuatro momentos, no dieciséis tabs',
+          _pm.count("{ id: '") >= 4 and 'MOMENTOS' in _pm)
+    check('los permisos están probados',
+          _os38.path.exists('scripts/prueba-permisos.ts'))
+
+# ── 6.39 · El cierre del día ───────────────────────────────────────────
+if _os38.path.exists('src/lib/cierreDelDia.ts'):
+    _cd39 = rd('src/lib/cierreDelDia.ts')
+    check('las trabas se agrupan aunque estén escritas distinto',
+          'PARECIDO_MINIMO' in _cd39 and 'function raiz' in _cd39,
+          'una traba que no se agrupa nunca llega a las tres veces y nunca se detecta')
+    check('a las tres veces la traba pasa a ser del sistema',
+          'VECES_PARA_SER_SISTEMA' in _cd39,
+          'deja de ser un problema de esfuerzo: no se arregla insistiendo')
+    check('los minutos se calculan, no se le preguntan a nadie',
+          'export function minutosDelDia' in _cd39)
+    check('el cierre está probado',
+          _os38.path.exists('scripts/prueba-cierre.ts'))
+
+# ── 6.40 · La jornada y el círculo del negocio ─────────────────────────
+# Check-in al empezar, check-out al cerrar. No es control horario: a nadie se
+# le pide que cargue horas. Lo que se mira es cuántos minutos de humano costó
+# cada cliente, y eso tiene que bajar mes a mes.
+import os as _os40
+if _os40.path.exists('src/lib/jornada.ts'):
+    _jo = rd('src/lib/jornada.ts')
+    _js = rd('src/components/admin/Jornada.tsx')
+    _ls = rd('src/components/admin/LaSemana.tsx')
+    check('hay check-in y check-out, a la hora que sea',
+          'export function iniciarJornada' in _jo and 'export function cerrarJornada' in _jo)
+    check('una jornada olvidada no ensucia el número',
+          'HORAS_PARA_CERRAR_SOLA' in _jo,
+          'una abierta 30 horas es alguien que se olvidó de cerrar, no que trabajó 30 horas')
+    check('la app avisa si dos atienden la misma cuenta',
+          'export function cuentasPisadas' in _jo,
+          'es lo único que el check-in resuelve y el cierre solo no puede')
+    check('el objetivo es UNO: que todos los clientes vendan',
+          'pctVendiendo' in _jo and 'clientesQueVendieron' in _jo)
+    check('el círculo se mide con dos números a la vez',
+          'export function comoVaElCirculo' in _jo
+          and 'no escala' in _jo and 'todavía no está resolviendo' in _jo,
+          'si venden más pero cuesta más trabajo, se está comprando resultado con horas')
+    check('una traba repetida manda sobre todo lo demás en el titular',
+          'trabasDelSistema > 0' in _jo)
+    check('el cierre pregunta qué trabó, no cuántas horas',
+          '¿Algo te trabó?' in _js and 'se mira el viernes' in _js)
+    check('el dinero y el rendimiento se ocultan POR DATO en La Semana',
+          "puedeVer(rol, 'dinero_tcd')" in _ls
+          and "puedeVer(rol, 'rendimiento_equipo')" in _ls,
+          'si se ocultara la pantalla entera, un número nuevo se filtraría')
+    check('se verifica que el dinero NO viaje al navegador del empleado',
+          'el dinero NO viaja al navegador' in rd('scripts/prueba-pantallas.tsx'),
+          'no alcanza con esconderlo: si está en el HTML, cualquiera lo lee')
+    check('la jornada está probada',
+          _os40.path.exists('scripts/prueba-jornada.ts'))
+
+# ── 6.41 · La jornada llega al equipo ──────────────────────────────────
+# Las trabas viven en la BASE y no en el navegador: si vivieran en el
+# navegador de cada uno, la lista del viernes estaría vacía para todos menos
+# para quien la escribió — y esa lista es para lo que existe todo esto.
+import os as _os41
+if _os41.path.exists('src/lib/jornadaStorage.ts'):
+    _jst = rd('src/lib/jornadaStorage.ts')
+    _sql41 = rd('sala-de-mando.sql')
+    _jp41 = rd('src/components/admin/Jornada.tsx')
+    _adm41 = rd('src/pages/Admin.tsx')
+    check('las jornadas viven en la base, no en el navegador',
+          'create table if not exists jornadas' in _sql41
+          and 'export async function jornadasRecientes' in _jst,
+          'las trabas de uno tienen que llegarle al resto el viernes')
+    check('abrir el día dos veces no duplica la jornada',
+          'jornada_persona_dia' in _sql41 and 'on conflict (persona_id, dia)' in _sql41,
+          'contaría el trabajo dos veces')
+    check('todo el equipo lee las jornadas de todos',
+          'jornada_equipo_lee' in _sql41,
+          'sin eso no hay lista de trabas compartida')
+    check('el día arranca aunque falle la red',
+          'Tu día arrancó igual' in _jp41)
+    check('si la traba no subió, se avisa',
+          'Tu traba no llegó al equipo' in _jp41,
+          'es lo más valioso del cierre: perderla en silencio es lo peor que puede pasar')
+    check('la base manda sobre el navegador',
+          'jornadaDeHoy' in _jp41,
+          'si abrió el día en el teléfono y entra por la computadora, tiene que ver su día abierto')
+    check('Hoy envuelve la cola en la jornada',
+          '<JornadaPanel' in _adm41 and '</JornadaPanel>' in _adm41)
+    check('La Semana recibe datos reales, no vacíos',
+          'jornadas={jornadasEquipo}' in _adm41
+          and 'clientesQueVendieron={semanaClientes.vendieron}' in _adm41)
+    check('las jornadas se cargan solo cuando hacen falta',
+          "mainTab !== 'semana' && mainTab !== 'hoy'" in _adm41,
+          'son dos consultas que no le sirven a quien está mirando otra cosa')
+
+# ── 6.42 · El menú son CUATRO momentos ─────────────────────────────────
+# Llegó a tener diecisiete entradas planas y nadie sabía cuál abrir primero.
+# Están ordenadas por CUÁNDO se usan, no por lo que son.
+import re as _re42
+_adm42 = rd('src/pages/Admin.tsx')
+_m42 = _re42.search(r'sidebarItems: .*?= \[(.*?)\n  \];', _adm42, _re42.S)
+_menu42 = set(_re42.findall(r"id: '([a-z]+)'", _m42.group(1))) if _m42 else set()
+check(f'el menú tiene cuatro entradas, no diecisiete (tiene {len(_menu42)})',
+      len(_menu42) == 4,
+      'el problema de un equipo no es encontrar información: es saber qué hacer ahora')
+check('las cuatro son los momentos del día, en orden',
+      _menu42 == {'hoy', 'semana', 'clientes', 'sala'})
+check('la primera es Hoy',
+      _adm42.index("id: 'hoy',      label: 'Hoy'") < _adm42.index("id: 'semana'"),
+      'es la única que se abre todos los días')
+
+# NADA puede quedar inalcanzable: toda pantalla que se dibuja tiene que estar
+# en el menú o en las pestañas de algún momento.
+_d42 = _re42.search(r'DENTRO_DE: .*?= \{(.*?)\n  \};', _adm42, _re42.S)
+_dentro42 = set(_re42.findall(r"id: '([a-z]+)'", _d42.group(1))) if _d42 else set()
+_render42 = set(_re42.findall(r"mainTab === '([a-z]+)'", _adm42))
+_perdidas42 = sorted(_render42 - _menu42 - _dentro42)
+check('ninguna pantalla quedó inalcanzable',
+      not _perdidas42, ', '.join(_perdidas42))
+check('el menú marca el MOMENTO, no la pantalla exacta',
+      'momentoActual === item.id' in _adm42,
+      'si marcara la pantalla, entrar a una pestaña interna apagaría el menú entero')
 
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')

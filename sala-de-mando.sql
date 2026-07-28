@@ -574,3 +574,99 @@ create policy sala_metricas_admin on sala_metricas_semana
   for all to authenticated
   using (exists (select 1 from profiles p
                  where p.id = auth.uid() and p.rol = 'admin'));
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- LA JORNADA — entrada, trabajo y salida (turno del cableado)
+--
+-- Vive en la base y no en el navegador porque las trabas que anota una
+-- persona tienen que llegarle al resto el viernes. Si vivieran en el
+-- navegador de cada uno, la lista de la semana estaría vacía para todos
+-- menos para quien la escribió.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+create table if not exists jornadas (
+  id uuid primary key default gen_random_uuid(),
+  persona_id uuid not null,
+  dia date not null,
+  inicio timestamptz not null default now(),
+  fin timestamptz,
+  -- En qué dijo que iba a trabajar y qué terminó atendiendo.
+  planeados uuid[] default '{}',
+  atendidos uuid[] default '{}',
+  -- Lo que trabó. Es el dato más valioso de toda la tabla.
+  traba text,
+  traba_cliente uuid,
+  creado_en timestamptz default now()
+);
+
+-- Una jornada por persona y día. Sin esto, tocar «Empezar» dos veces
+-- duplicaría el día y contaría el trabajo dos veces.
+create unique index if not exists jornada_persona_dia
+  on jornadas (persona_id, dia);
+
+create index if not exists jornada_por_dia on jornadas (dia desc);
+
+alter table jornadas enable row level security;
+
+-- Cada uno escribe la suya.
+drop policy if exists jornada_propia on jornadas;
+create policy jornada_propia on jornadas
+  for all to authenticated
+  using (persona_id = auth.uid())
+  with check (persona_id = auth.uid());
+
+-- Y todo el equipo lee las de todos: sin eso no hay lista de trabas
+-- compartida, que es justo para lo que existe la tabla.
+drop policy if exists jornada_equipo_lee on jornadas;
+create policy jornada_equipo_lee on jornadas
+  for select to authenticated
+  using (exists (select 1 from profiles p
+                 where p.id = auth.uid() and p.rol = 'admin'));
+
+-- Abre el día. Si ya estaba abierto, actualiza lo planeado en vez de duplicar.
+create or replace function abrir_jornada(
+  p_persona uuid,
+  p_planeados uuid[]
+) returns uuid
+language plpgsql security definer as $$
+declare v_id uuid;
+begin
+  insert into jornadas (persona_id, dia, planeados)
+  values (p_persona, current_date, coalesce(p_planeados, '{}'))
+  on conflict (persona_id, dia)
+  do update set planeados = excluded.planeados
+  returning id into v_id;
+  return v_id;
+end $$;
+
+-- Cierra el día.
+create or replace function cerrar_jornada(
+  p_persona uuid,
+  p_atendidos uuid[],
+  p_traba text default null,
+  p_traba_cliente uuid default null
+) returns void
+language plpgsql security definer as $$
+begin
+  update jornadas
+  set fin = now(),
+      atendidos = coalesce(p_atendidos, '{}'),
+      traba = nullif(trim(coalesce(p_traba, '')), ''),
+      traba_cliente = p_traba_cliente
+  where persona_id = p_persona and dia = current_date;
+end $$;
+
+-- Las jornadas de los últimos N días, para armar La Semana.
+create or replace function jornadas_recientes(p_dias int default 7)
+returns table (
+  persona_id uuid, dia date, inicio timestamptz, fin timestamptz,
+  planeados uuid[], atendidos uuid[], traba text, traba_cliente uuid
+)
+language sql security definer as $$
+  select j.persona_id, j.dia, j.inicio, j.fin,
+         j.planeados, j.atendidos, j.traba, j.traba_cliente
+  from jornadas j
+  where j.dia >= current_date - p_dias
+  order by j.dia desc, j.inicio desc;
+$$;
