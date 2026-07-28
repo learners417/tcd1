@@ -123,8 +123,15 @@ select abrir_jornada('11111111-1111-1111-1111-111111111111', array['33333333-333
 select cerrar_jornada('11111111-1111-1111-1111-111111111111',
   array['33333333-3333-3333-3333-333333333333']::uuid[], 'no le llega el DM automatico', null);
 select * from jornadas_recientes(7);
+-- La carga compartida: guardar, corregir, y el webhook que SUMA sin pisar.
+select guardar_campo('11111111-1111-1111-1111-111111111111','2026-W31','gasto',140,'lupe','Lupe');
+select guardar_campo('11111111-1111-1111-1111-111111111111','2026-W31','gasto',160,'lupe','Lupe');
+select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1,'webhook');
+select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1,'webhook');
+select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1,'webhook');
+select * from carga_de_semana('11111111-1111-1111-1111-111111111111','2026-W31');
 SQL
-marcar $? "las 14 funciones se ejecutan sin errores de tipo"
+marcar $? "las 17 funciones se ejecutan sin errores de tipo"
 grep -E "^ERROR|^psql.*ERROR" "$DATA/f.txt" | head -3
 
 # Guardar dos veces la misma semana no puede duplicar: el viernes se carga,
@@ -143,6 +150,18 @@ SQL
 )
 [ "$JORN" = "1" ]
 marcar $? "abrir el día dos veces no duplica la jornada (filas: $JORN)"
+GASTO=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select valor from carga_semanal where campo='gasto';
+SQL
+)
+[ "$GASTO" = "160" ]
+marcar $? "corregir un campo reemplaza, no duplica (gasto: $GASTO)"
+AGEN=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select valor from carga_semanal where campo='agendas';
+SQL
+)
+[ "$AGEN" = "3" ]
+marcar $? "tres agendas por webhook SUMAN, no se pisan (agendas: $AGEN)"
 TRABA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
 select coalesce(traba,'-') from jornadas limit 1;
 SQL

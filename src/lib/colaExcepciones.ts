@@ -85,6 +85,14 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
     accion: 'Roleplay de llamada.',
     como: 'Agendarlo en la sesión grupal del miércoles. Antes de tocar el guion, verificar que las agendas sean del cliente correcto.',
   },
+  cpm: {
+    accion: 'Cambiar el gancho de las tres piezas.',
+    como: 'Mensaje: «Le está costando caro que te vean para tu mercado. No es el presupuesto: es el primer segundo del anuncio. Entra al Constructor y genera tres con otro gancho.»',
+  },
+  frecuencia: {
+    accion: 'Ampliar el público o sumar otro país.',
+    como: 'Mensaje: «Tu público ya vio el anuncio más de tres veces esta semana: se agotó. NO es que el creativo dejó de servir — el público es muy chico. Ampliá la edad o sumá otro país.»',
+  },
   costo_agenda: {
     accion: 'Revisar a quién le está hablando el anuncio.',
     como: 'En el 1-1: si cada agenda cuesta más del 5% de su precio, el anuncio trae a la persona equivocada. Se toca el avatar del gancho, no el presupuesto.',

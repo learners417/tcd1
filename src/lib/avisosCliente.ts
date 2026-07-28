@@ -74,6 +74,16 @@ const AVISOS: Record<string, { titulo: string; descripcion: string; destino: str
     descripcion: 'Lucas puede escuchar una contigo y decirte dónde se cae.',
     destino: '/agentes',
   },
+  cpm: {
+    titulo: 'Te está costando caro que te vean',
+    descripcion: 'Para tu mercado, el costo de aparecer está alto. No es el presupuesto: es el primer segundo del anuncio. Genera tres piezas con otro gancho.',
+    destino: '/campanas',
+  },
+  frecuencia: {
+    titulo: 'Tu público ya vio el anuncio demasiadas veces',
+    descripcion: 'Lo vieron más de tres veces esta semana: se agotó. No es que el creativo dejó de servir — el público es muy chico. Amplía la edad o suma otro país.',
+    destino: '/campanas',
+  },
   costo_agenda: {
     titulo: 'Cada agenda te está saliendo cara',
     descripcion: 'El anuncio trae gente, pero no la que reserva. Revisa a quién le hablas en el gancho, no el presupuesto.',

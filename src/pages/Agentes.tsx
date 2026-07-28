@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import type { ProfileV2, AgentSkillProgressRow } from '../lib/supabase';
+import { bloqueDeDerivacion, type Entrenador } from '../lib/microPasos';
 import {
   agentConversationsRepo,
   agentSkillProgressRepo,
@@ -334,7 +335,19 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
         const snapshot = obtenerSnapshot(agenteActivo);
         const respuesta = await generateText({ feature: 'agentes', tarea: 'chat',
           prompt: `${baseConocimiento}\n\n---HISTORIAL---\n${historial}\n\nAgente:`,
-          systemInstruction: CONTEXTO_REDISENO + '\n\n' + agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
+          systemInstruction: [
+            CONTEXTO_REDISENO,
+            agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
+            // El mismo mapa que agrupa la cola le enseña a derivar. Antes cada
+            // uno tenía su lista escrita a mano, desparejas, y Diego no tenía
+            // ninguna: contestaba de todo sin decir que no era lo suyo.
+            bloqueDeDerivacion(entrenadorDe(agenteActivo.id)),
+            // Y si viene con un diagnóstico, abre sabiendo. El que no sabe qué
+            // preguntar es justamente el que más ayuda necesita.
+            // El briefing entra cuando el cliente llega desde su tablero con
+            // un cuello señalado. Vacío mientras no venga de ahí.
+            '',
+          ].filter(Boolean).join('\n\n'),
         });
 
         const respuestaTexto = respuesta || 'Sin respuesta del agente.';
@@ -742,6 +755,17 @@ const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: stri
   diego:  { inicial: 'D', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(244,182,92,0.50)' },
   mateo:  { inicial: 'M', frase: 'Guiones y contenido que suenan a ti — cero humo, cero plantillas.', anillo: 'rgba(244,182,92,0.50)' },
 };
+/**
+ * Del id del agente a la clave del entrenador.
+ *
+ * Los ids son largos ('agente-diego-producto') y el mapa usa nombres cortos.
+ * Si no se reconoce, cae en el de números: es el más neutro, y devolver algo
+ * es mejor que dejar al entrenador sin regla de derivación.
+ */
+const ENTRENADORES: Entrenador[] = ['sofi', 'lucas', 'vera', 'diego', 'mateo', 'caro', 'ramiro', 'bruno'];
+const entrenadorDe = (agenteId: string): Entrenador =>
+  ENTRENADORES.find((e) => agenteId.includes(e)) ?? 'ramiro';
+
 const identidadDe = (agenteId: string) => {
   const key = Object.keys(IDENTIDADES).find((k) => agenteId.includes(k));
   return key ? IDENTIDADES[key] : null;

@@ -3,6 +3,8 @@ import { RefreshCw } from 'lucide-react';
 import { supervision, type FilaSupervision, type Semaforo } from '../../lib/mesaPlataStorage';
 import { semanaISO } from '../../lib/bitacoraCampana';
 import { mensajeDeFalla, causaDe } from '../../lib/conexion';
+import { situacionDe } from '../../lib/salaDeMando';
+import { marcarEncendida } from '../../lib/salaDeMandoStorage';
 
 /**
  * SUPERVISIÓN — todas las cuentas a la vez, lo rojo arriba.
@@ -16,7 +18,13 @@ import { mensajeDeFalla, causaDe } from '../../lib/conexion';
  * mirando de a una.
  */
 
-interface Cliente { id: string; nombre: string }
+interface Cliente {
+  id: string;
+  nombre: string;
+  /** Desde cuándo corre su campaña. Sin esto queda como «instalando». */
+  campana_desde?: string | null;
+  campana_pausada?: boolean;
+}
 
 const PUNTO: Record<Semaforo, string> = {
   verde: 'bg-success',
@@ -55,9 +63,35 @@ export default function Supervision({ clientes }: { clientes: Cliente[] }) {
     }
   }, [clientes]);
 
-  useEffect(() => { void cargar(); }, [cargar]);
+  /** La guarda evita tocar estado de un componente que ya no está en pantalla:
+   *  si se cambia de tab mientras carga, la respuesta llega a la nada. */
+  useEffect(() => {
+    let vivo = true;
+    void (async () => { if (vivo) await cargar(); })();
+    return () => { vivo = false; };
+  }, [cargar]);
 
   const nombre = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? 'Cliente';
+  const cliente = (id: string) => clientes.find((c) => c.id === id);
+
+  /**
+   * Encender la campaña. Sin esto, `situacionDe` nunca recibe una fecha y
+   * todos quedan como «instalando» para siempre: el diagnóstico de campaña
+   * no se activa nunca.
+   */
+  const [encendiendo, setEncendiendo] = useState<string | null>(null);
+  const encender = async (id: string) => {
+    if (!window.confirm('¿La campaña de este cliente ya está corriendo?')) return;
+    setEncendiendo(id);
+    try {
+      await marcarEncendida(id);
+      await cargar();
+    } catch (err) {
+      setProblema(mensajeDeFalla(err, 'marcar la campaña'));
+    } finally {
+      setEncendiendo(null);
+    }
+  };
 
   const sinCargar = (filas ?? []).filter((f) => f.sinCargar).length;
   const rotas = (filas ?? []).filter(
@@ -104,6 +138,7 @@ export default function Supervision({ clientes }: { clientes: Cliente[] }) {
                 <th className="font-semibold px-2 py-2.5" title="Atracción">Atrae</th>
                 <th className="font-semibold px-2 py-2.5" title="Conversión">Convierte</th>
                 <th className="font-semibold px-2 py-2.5" title="Retención">Retiene</th>
+                <th className="text-left font-semibold px-3 py-2.5">Situación</th>
                 <th className="text-left font-semibold px-3 py-2.5">Dónde se traba</th>
                 <th className="text-right font-semibold px-3 py-2.5">Ventas</th>
                 <th className="text-right font-semibold px-4 py-2.5">Cobrado</th>
@@ -111,9 +146,9 @@ export default function Supervision({ clientes }: { clientes: Cliente[] }) {
             </thead>
             <tbody>
               {filas === null ? (
-                <tr><td colSpan={7} className="px-4 py-6 text-sm text-cream/40">Cargando…</td></tr>
+                <tr><td colSpan={8} className="px-4 py-6 text-sm text-cream/40">Cargando…</td></tr>
               ) : filas.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-6 text-sm text-cream/40">
+                <tr><td colSpan={8} className="px-4 py-6 text-sm text-cream/40">
                   Todavía no hay cuentas con números cargados.
                 </td></tr>
               ) : filas.map((f) => (
@@ -126,6 +161,30 @@ export default function Supervision({ clientes }: { clientes: Cliente[] }) {
                         className={`inline-block w-2.5 h-2.5 rounded-full ${PUNTO[f[t]]}`} />
                     </td>
                   ))}
+                  <td className="px-3 py-2.5">
+                    {(() => {
+                      const c = cliente(f.clienteId);
+                      const sit = situacionDe({
+                        campanaDesde: c?.campana_desde,
+                        campanaPausada: c?.campana_pausada,
+                      });
+                      if (sit.estado === 'instalando') {
+                        return (
+                          <button onClick={() => void encender(f.clienteId)}
+                            disabled={encendiendo === f.clienteId}
+                            className="text-[11px] text-cream/45 hover:text-gold underline underline-offset-2 disabled:opacity-40">
+                            {encendiendo === f.clienteId ? 'Marcando…' : 'Instalando · marcar encendida'}
+                          </button>
+                        );
+                      }
+                      return (
+                        <span className={`text-[11px] ${
+                          sit.estado === 'pausado' ? 'text-cream/40' : 'text-success/80'}`}>
+                          {sit.linea}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-3 py-2.5 text-cream/70">
                     {f.cuello}
                     {f.semanasIgual > 1 && (

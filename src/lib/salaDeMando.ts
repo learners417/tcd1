@@ -248,3 +248,83 @@ export interface Marcador {
   activos: number;
   frenados: number;
 }
+
+// ── Lanzado o instalando ───────────────────────────────────────────────────
+
+/**
+ * EL DATO QUE FALTABA: ¿tiene campaña corriendo ahora mismo?
+ *
+ * Es la primera pregunta de la mañana, y hasta ahora no existía. La app sabía
+ * en qué ETAPA estaba cada cliente, que es parecido pero no es lo mismo:
+ * alguien puede estar en la etapa 6 con la campaña pausada hace dos semanas.
+ *
+ * Y de esto depende **qué conversación se tiene con él**:
+ *
+ *   · **Lanzado** → se miran resultados. El problema es un número.
+ *   · **Instalando** → se mira qué falta. El problema es un avance.
+ *
+ * A un cliente que no encendió NUNCA se le dice que su costo por conversación
+ * está alto: no tiene conversaciones. Se le dice qué le falta para encender.
+ */
+export type EstadoCampana = 'instalando' | 'lanzado' | 'pausado';
+
+export interface SituacionCliente {
+  estado: EstadoCampana;
+  /** Días desde que encendió, si encendió. */
+  diasLanzado: number | null;
+  /** La línea que va arriba de su ficha. */
+  linea: string;
+  /** Qué conversación abrir con él. */
+  conversacion: 'activacion' | 'metricas';
+}
+
+/** Antes de esto, los números todavía no dicen nada. */
+export const DIAS_ANTES_DE_MEDIR = 3;
+
+export function situacionDe(x: {
+  campanaDesde?: string | null;
+  campanaPausada?: boolean;
+  etapa?: number | null;
+  faltanEnCuadro?: number;
+}): SituacionCliente {
+  const dias = x.campanaDesde
+    ? Math.max(0, Math.floor((Date.now() - new Date(x.campanaDesde).getTime()) / 86400000))
+    : null;
+
+  if (!x.campanaDesde || !Number.isFinite(dias ?? NaN)) {
+    const faltan = x.faltanEnCuadro ?? 0;
+    return {
+      estado: 'instalando',
+      diasLanzado: null,
+      linea: faltan > 0
+        ? `Instalando · le ${faltan === 1 ? 'falta 1 cosa' : `faltan ${faltan} cosas`}`
+        : 'Instalando',
+      // Mirarle métricas que no tiene lo distrae de terminar de instalar.
+      conversacion: 'activacion',
+    };
+  }
+
+  if (x.campanaPausada) {
+    return {
+      estado: 'pausado',
+      diasLanzado: dias,
+      linea: `Pausado · estuvo ${dias} ${dias === 1 ? 'día' : 'días'} al aire`,
+      conversacion: 'metricas',
+    };
+  }
+
+  return {
+    estado: 'lanzado',
+    diasLanzado: dias,
+    linea: dias! < DIAS_ANTES_DE_MEDIR
+      ? `Lanzado hace ${dias} ${dias === 1 ? 'día' : 'días'} · todavía no se opina`
+      : `Lanzado hace ${dias} días`,
+    conversacion: 'metricas',
+  };
+}
+
+/** ¿Se le puede hablar de sus números? */
+export function sePuedeDiagnosticar(s: SituacionCliente): boolean {
+  return s.estado !== 'instalando'
+    && (s.diasLanzado ?? 0) >= DIAS_ANTES_DE_MEDIR;
+}

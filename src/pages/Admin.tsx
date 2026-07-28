@@ -3912,7 +3912,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           )}
 
           {mainTab === 'supervision' && (
-            <Supervision clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))} />
+            <Supervision clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              campana_desde: (c as { campana_desde?: string | null }).campana_desde ?? null,
+              campana_pausada: (c as { campana_pausada?: boolean }).campana_pausada ?? false,
+            }))} />
           )}
 
           {mainTab === 'semana' && (

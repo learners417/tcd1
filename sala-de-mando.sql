@@ -670,3 +670,122 @@ language sql security definer as $$
   where j.dia >= current_date - p_dias
   order by j.dia desc, j.inicio desc;
 $$;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- LA CARGA COMPARTIDA — un formulario, dos puertas (turno 2)
+--
+-- Había dos tableros cargando lo mismo sin enterarse uno del otro: el cliente
+-- en Campañas y el equipo en la Mesa de plata. Y si ninguno cargaba, la cola
+-- quedaba ciega — no mostraba menos, mostraba que todo estaba bien.
+--
+-- Acá cada CAMPO es una fila con su firma. Así se sabe qué falta y quién lo
+-- puso, sin coordinar nada entre las dos puertas.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+create table if not exists carga_semanal (
+  id uuid primary key default gen_random_uuid(),
+  cliente_id uuid not null,
+  semana_iso text not null,
+  campo text not null,
+  valor numeric not null default 0,
+  -- Quién lo cargó. 'webhook' cuando entró solo.
+  por_quien text not null,
+  nombre_quien text,
+  cargado_en timestamptz default now(),
+  unique (cliente_id, semana_iso, campo)
+);
+
+create index if not exists carga_por_cliente
+  on carga_semanal (cliente_id, semana_iso);
+
+alter table carga_semanal enable row level security;
+
+-- El cliente escribe la suya.
+drop policy if exists carga_propia on carga_semanal;
+create policy carga_propia on carga_semanal
+  for all to authenticated
+  using (cliente_id = auth.uid())
+  with check (cliente_id = auth.uid());
+
+-- Y el equipo escribe la de cualquiera: es la mitad del punto de todo esto.
+drop policy if exists carga_equipo on carga_semanal;
+create policy carga_equipo on carga_semanal
+  for all to authenticated
+  using (exists (select 1 from profiles p
+                 where p.id = auth.uid() and p.rol = 'admin'));
+
+-- Guarda un campo con su firma. Reemplaza si ya estaba: durante la semana se
+-- corrige, y lo que vale es el último valor.
+create or replace function guardar_campo(
+  p_cliente uuid,
+  p_semana text,
+  p_campo text,
+  p_valor numeric,
+  p_quien text,
+  p_nombre text default null
+) returns void
+language plpgsql security definer as $$
+begin
+  insert into carga_semanal (cliente_id, semana_iso, campo, valor, por_quien, nombre_quien)
+  values (p_cliente, p_semana, p_campo, p_valor, p_quien, p_nombre)
+  on conflict (cliente_id, semana_iso, campo)
+  do update set valor = excluded.valor,
+                por_quien = excluded.por_quien,
+                nombre_quien = excluded.nombre_quien,
+                cargado_en = now();
+end $$;
+
+-- Suma uno a un campo, sin pisar lo que hay. Es lo que usa el webhook de
+-- agendas: cada cita que entra suma una, no reemplaza el total.
+create or replace function sumar_campo(
+  p_cliente uuid,
+  p_semana text,
+  p_campo text,
+  p_cuanto numeric default 1,
+  p_quien text default 'webhook'
+) returns void
+language plpgsql security definer as $$
+begin
+  insert into carga_semanal (cliente_id, semana_iso, campo, valor, por_quien)
+  values (p_cliente, p_semana, p_campo, p_cuanto, p_quien)
+  on conflict (cliente_id, semana_iso, campo)
+  do update set valor = carga_semanal.valor + p_cuanto,
+                cargado_en = now();
+end $$;
+
+-- La carga de una semana, con las firmas.
+create or replace function carga_de_semana(p_cliente uuid, p_semana text)
+returns table (campo text, valor numeric, por_quien text, nombre_quien text, cargado_en timestamptz)
+language sql security definer as $$
+  select c.campo, c.valor, c.por_quien, c.nombre_quien, c.cargado_en
+  from carga_semanal c
+  where c.cliente_id = p_cliente and c.semana_iso = p_semana;
+$$;
+
+-- Los mercados donde corre la pauta de cada cliente. NO es donde vive:
+-- puede vivir en Chile y anunciar en Perú, Colombia y México.
+alter table profiles
+  add column if not exists mercados text[] default '{}',
+  add column if not exists campana_desde date,
+  add column if not exists campana_pausada boolean default false;
+
+-- Lo que la app aprende de sus propios clientes, por mercado. En cuatro
+-- semanas vale más que cualquier benchmark ajeno, porque es de este nicho,
+-- a este precio.
+create table if not exists mercado_aprendido (
+  mercado text primary key,
+  semanas int default 0,
+  cpm_min numeric,
+  cpm_max numeric,
+  costo_conversacion numeric,
+  pct_compra numeric,
+  precio_min numeric,
+  precio_max numeric,
+  actualizado_en timestamptz default now()
+);
+
+alter table mercado_aprendido enable row level security;
+drop policy if exists mercado_lee on mercado_aprendido;
+create policy mercado_lee on mercado_aprendido
+  for select to authenticated using (true);

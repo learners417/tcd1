@@ -58,3 +58,50 @@ export async function derogarDecision(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+
+// ── Encender y pausar la campaña ───────────────────────────────────────────
+
+/**
+ * Marca que la campaña de un cliente está corriendo desde hoy.
+ *
+ * Sin esto, `situacionDe` nunca recibe una fecha y TODOS quedan como
+ * «instalando» para siempre — el diagnóstico de campaña no se activa nunca y
+ * la ficha abre siempre en Activación. El modelo estaba construido y suelto.
+ */
+export async function marcarEncendida(clienteId: string): Promise<void> {
+  const { error } = await db()
+    .from('profiles')
+    .update({
+      campana_desde: new Date().toISOString().slice(0, 10),
+      campana_pausada: false,
+    })
+    .eq('id', clienteId);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Pausa la campaña sin borrar desde cuándo estuvo al aire.
+ *
+ * Se conserva la fecha a propósito: al reanudar, saber que ya estuvo veinte
+ * días corriendo cambia el diagnóstico — no es una campaña nueva que necesita
+ * su período de medición.
+ */
+export async function marcarPausada(clienteId: string, pausada: boolean): Promise<void> {
+  const { error } = await db()
+    .from('profiles')
+    .update({ campana_pausada: pausada })
+    .eq('id', clienteId);
+  if (error) throw new Error(error.message);
+}
+
+/** Los mercados donde corre la pauta. No es donde vive el sanador. */
+export async function guardarMercados(
+  clienteId: string,
+  mercados: string[],
+): Promise<void> {
+  const { error } = await db()
+    .from('profiles')
+    .update({ mercados })
+    .eq('id', clienteId);
+  if (error) throw new Error(error.message);
+}

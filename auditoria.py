@@ -1377,6 +1377,175 @@ check('el menú marca el MOMENTO, no la pantalla exacta',
       'momentoActual === item.id' in _adm42,
       'si marcara la pantalla, entrar a una pestaña interna apagaría el menú entero')
 
+# ── 6.43 · El diagnóstico no miente ────────────────────────────────────
+# El mismo CPM de $11,67 es NORMAL en España y casi el triple del techo en
+# Argentina. Antes los dos se medían igual, y eso se equivoca en las dos
+# direcciones: le dice "caro" a quien está bien, y "barato" a quien trae
+# gente que no puede pagarle.
+import os as _os43
+if _os43.path.exists('src/lib/mercados.ts'):
+    _mk = rd('src/lib/mercados.ts')
+    _vc43 = rd('src/lib/valueChain.ts')
+    _sm43 = rd('src/lib/salaDeMando.ts')
+    check('los mercados son DÓNDE CORRE LA PAUTA, no dónde vive el sanador',
+          'mercados?: string[]' in _vc43 and 'NO es donde vive el sanador' in _vc43)
+    check('la banda del CPM sale del mercado',
+          "add('cpm'" in _vc43 and 'banda.cpmMin' in _vc43)
+    check('con varios países se toma el rango que abarca a todos',
+          'Math.min(min' in _mk and 'Math.max(max' in _mk)
+    check('y el poder de compra, del MÁS BAJO',
+          'poder = Math.min' in _mk,
+          'si la mitad de la audiencia no puede pagar, eso ya explica una conversión floja')
+    check('existe la frecuencia y dice que NO es el creativo',
+          "add('frecuencia'" in _vc43 and 'No es el creativo' in _vc43,
+          'sin ese número parece que la pieza se gastó cuando el público es angosto')
+    check('la app acumula sus propios datos desde el día uno',
+          'export function aprenderDeSemana' in _mk)
+    check('los datos propios ganan sobre la referencia',
+          'SEMANAS_PARA_CONFIAR' in _mk and 'propia = true' in _mk)
+    check('sin datos propios NO recomienda mercados',
+          'Todavía no tengo datos propios' in _mk,
+          'una recomendación inventada es peor que ninguna, y ya nos costó una vez')
+    check('recomienda el que MÁS COMPRA, no el más barato',
+          'pctCompra / Math.max' in _mk)
+    check('existe lanzado o instalando',
+          'export function situacionDe' in _sm43 and 'EstadoCampana' in _sm43)
+    check('al que no encendió NUNCA se le habla de sus números',
+          'export function sePuedeDiagnosticar' in _sm43
+          and "estado !== 'instalando'" in _sm43,
+          'no tiene conversaciones: se le dice qué le falta para encender')
+    check('la ficha abre en la conversación que corresponde',
+          "conversacion: 'activacion'" in _sm43 and "conversacion: 'metricas'" in _sm43)
+    check('los mercados están probados',
+          _os43.path.exists('scripts/prueba-mercados.ts'))
+
+# ── 6.44 · Que el dato entre, y que se sepa qué falta ──────────────────
+# Había DOS tableros cargando lo mismo sin enterarse uno del otro. Y si
+# ninguno cargaba, la cola quedaba ciega: no mostraba menos, MOSTRABA QUE
+# TODO ESTABA BIEN.
+import os as _os44
+if _os44.path.exists('src/lib/cargaCompartida.ts'):
+    _cc = rd('src/lib/cargaCompartida.ts')
+    _sql44 = rd('sala-de-mando.sql')
+    _wh44 = rd('api/ghl-agenda.ts')
+    check('cada campo sabe quién lo cargó y cuándo',
+          'ValorConFirma' in _cc and 'export function firmaDe' in _cc,
+          'el que entra ve qué falta y lo completa, sin coordinar nada')
+    check('un campo vacío lo dice, no queda en blanco',
+          'nadie lo cargó todavía' in _cc)
+    check('la app NUNCA se calla: dice hasta dónde puede opinar',
+          'export function hastaDondePuedoOpinar' in _cc
+          and 'Todavía no puedo decirte nada' in _cc,
+          'sin esto la cola mostraba «todo bien» cuando no sabía nada')
+    check('y qué le falta para llegar más lejos',
+          'Para seguir me' in _cc,
+          'convierte el dato faltante en una tarea concreta en vez de un vacío')
+    check('CERO es un dato: cargar cero no es no cargar',
+          'carga[c] !== undefined' in _cc)
+    check('se sabe de quién se espera cada campo',
+          'SE_ESPERA_DE' in _cc,
+          'sirve para saber a quién recordarle, no para bloquear a nadie')
+    check('la carga vive en la base con firma por campo',
+          'create table if not exists carga_semanal' in _sql44
+          and 'por_quien' in _sql44)
+    check('corregir un campo REEMPLAZA y el webhook SUMA',
+          'guardar_campo' in _sql44 and 'sumar_campo' in _sql44
+          and 'carga_semanal.valor + p_cuanto' in _sql44,
+          'si el webhook reemplazara, tres agendas contarían como una')
+    check('el equipo puede cargar la de cualquiera',
+          'carga_equipo' in _sql44,
+          'es la mitad del punto: que la cola no quede ciega')
+    check('existe el webhook de agendas',
+          _os44.path.exists('api/ghl-agenda.ts') and 'sumar_campo' in _wh44)
+    check('el webhook nunca falla ruidosamente',
+          'GHL reintenta' in _wh44,
+          'un reintento que suma dos veces ensucia la semana entera: mejor perder una agenda que contar de más')
+    check('los mercados y el estado de campaña están en la base',
+          'add column if not exists mercados text[]' in _sql44
+          and 'campana_desde' in _sql44)
+    check('la carga compartida está probada',
+          _os44.path.exists('scripts/prueba-carga.ts'))
+
+# ── 6.45 · Un mapa único: la cola y los entrenadores ───────────────────
+# La cadena habla en idioma de tablero («conversan mucho y agendan poco») y
+# eso no le alcanza a nadie para organizarse: quien atiende piensa en ÁREAS,
+# porque cada una se atiende distinto y con otra persona.
+import os as _os45, re as _re45
+if _os45.path.exists('src/lib/microPasos.ts'):
+    _mp45 = rd('src/lib/microPasos.ts')
+    _ag45 = rd('src/pages/Agentes.tsx')
+
+    # TODO indicador de la cadena tiene que tener su micro-paso, y ninguno
+    # del mapa puede apuntar a un indicador que no existe.
+    _cuellosVC = set(_re45.findall(r"add\('([a-z_]+)'", rd('src/lib/valueChain.ts')))
+    _cuellosMP = set(_re45.findall(r"cuello: '([a-z_]+)'", _mp45))
+    check('todo indicador de la cadena tiene su micro-paso',
+          not (_cuellosVC - _cuellosMP), str(sorted(_cuellosVC - _cuellosMP)))
+    check('y el mapa no apunta a indicadores que no existen',
+          not (_cuellosMP - _cuellosVC), str(sorted(_cuellosMP - _cuellosVC)))
+
+    # Los entrenadores del mapa tienen que ser los que existen de verdad.
+    _reales = set()
+    for _f in _os45.listdir('src/lib/agents'):
+        if _f.endswith('.ts') and _f not in ('index.ts', 'types.ts'):
+            if 'ConfigAgente' in rd(f'src/lib/agents/{_f}'):
+                _reales.add(_f[:-3])
+    # Solo el bloque DE_QUE_SE_OCUPA: el patrón ancho agarraba también los
+    # nombres de las ÁREAS, que no son entrenadores.
+    _bloque45 = _re45.search(r'DE_QUE_SE_OCUPA[^=]*= \{(.*?)\n\};', _mp45, _re45.S)
+    _delMapa = set(_re45.findall(r"^  ([a-z]+):", _bloque45.group(1), _re45.M)) if _bloque45 else set()
+    check('los entrenadores del mapa existen de verdad',
+          _delMapa <= _reales or not (_delMapa - _reales),
+          str(sorted(_delMapa - _reales)))
+
+    check('cada micro-paso dice qué significa en idioma de negocio',
+          _mp45.count('significa:') >= 15)
+    check('lo que no es de un entrenador dice a quién va',
+          "a: 'dev'" in _mp45)
+    check('el entrenador abre sabiendo, sin preguntar lo que ya sabe',
+          'export function briefingPara' in _mp45 and 'no se lo preguntes' in _mp45,
+          'el que no sabe qué preguntar es el que más ayuda necesita')
+    check('los ocho reciben la MISMA regla de derivación',
+          'export function bloqueDeDerivacion' in _mp45
+          and 'bloqueDeDerivacion(' in _ag45,
+          'antes cada uno tenía su lista a mano y Diego no tenía ninguna')
+    check('un entrenador no se deriva a sí mismo',
+          'filter((e) => e !== yo)' in _mp45)
+    check('la cola se agrupa por área, en el orden del embudo',
+          'export function agruparPorArea' in _mp45,
+          'tres casos de setting juntos cuestan menos que saltar entre temas')
+    check('un cuello desconocido no se pierde de la cola',
+          'sinArea.length > 0' in _mp45)
+    check('el mapa está probado contra la cadena real',
+          _os45.path.exists('scripts/prueba-micropasos.ts'))
+
+# ── 6.46 · Nada construido queda suelto ────────────────────────────────
+# La clase de error más silenciosa de todas: un motor probado, verde en toda
+# la batería, que ninguna pantalla usa. Pasó con «lanzado o instalando»: el
+# modelo funcionaba y NADIE PODÍA MARCAR UNA CAMPAÑA COMO ENCENDIDA, así que
+# todos los clientes quedaban «instalando» para siempre.
+import glob as _g46, re as _re46, os as _os46
+_SRC46 = {f: rd(f) for f in _g46.glob('src/**/*.ts*', recursive=True)}
+_SCR46 = {f: rd(f) for f in _g46.glob('scripts/*.ts*')}
+
+# Todo campo del modelo que se LEE tiene que poder ESCRIBIRSE desde algún lado.
+_camposClave = ['campana_desde', 'mercados', 'impresiones']
+_sinEscribir = []
+for _c46 in _camposClave:
+    _escribe = any(_re46.search(rf'{_c46}:\s*(new Date|\[|[a-z])', _s)
+                   for _f, _s in _SRC46.items() if '/lib/' in _f or '/components/' in _f)
+    if not _escribe: _sinEscribir.append(_c46)
+check('todo campo que la app lee se puede escribir desde algún lado',
+      not _sinEscribir, ', '.join(_sinEscribir))
+
+check('se puede marcar una campaña como encendida',
+      'export async function marcarEncendida' in rd('src/lib/salaDeMandoStorage.ts')
+      and 'marcarEncendida' in rd('src/components/admin/Supervision.tsx'),
+      'sin esto, todos los clientes quedan «instalando» para siempre')
+check('pausar conserva desde cuándo estuvo al aire',
+      'sin borrar desde cuándo' in rd('src/lib/salaDeMandoStorage.ts'),
+      'al reanudar, saber que ya estuvo 20 días corriendo cambia el diagnóstico')
+
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')
            for m in re.finditer(r"<button(?![^>]*onClick)(?![^>]*onMouseDown)(?![^>]*type=\"submit\")[^>]*>", src)]

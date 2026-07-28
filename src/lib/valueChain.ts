@@ -39,12 +39,25 @@ export type TipoIndicador = 'predictivo' | 'historico';
 // ── Lo que se carga ────────────────────────────────────────────────────────
 
 /** Los números crudos de una semana. Todo lo demás se calcula. */
+import { bandaDe } from './mercados';
+
 export interface NumerosSemana {
   /** Precio del programa que vende. Manda sobre casi todas las referencias. */
   precio: number;
 
+  /**
+   * Dónde corre la pauta. NO es donde vive el sanador: puede vivir en Chile
+   * y anunciar en Perú, Colombia y México. Sin esto, todos se miden con la
+   * misma vara y el diagnóstico miente en las dos direcciones.
+   */
+  mercados?: string[];
+
   // ── Atracción (predictivos: se ejecutan) ──
   gasto: number;
+  /** Cuántas veces se mostró el anuncio. De acá salen el CPM y la frecuencia. */
+  impresiones: number;
+  /** A cuánta gente distinta llegó. Con las impresiones da la frecuencia. */
+  alcance: number;
   piezasPublicadas: number;
   mensajesEnviados: number;
 
@@ -73,7 +86,8 @@ export interface NumerosSemana {
 }
 
 export const SEMANA_VACIA: NumerosSemana = {
-  precio: 0, gasto: 0, piezasPublicadas: 0, mensajesEnviados: 0,
+  precio: 0, gasto: 0, impresiones: 0, alcance: 0, piezasPublicadas: 0, mensajesEnviados: 0,
+  mercados: [],
   comentarios: 0, conversaciones: 0, agendas: 0,
   llamadasTomadas: 0, ofertasPresentadas: 0, ventas: 0,
   facturado: 0, cobrado: 0, cuotasPorCobrar: 0, cuotasCobradas: 0,
@@ -220,6 +234,26 @@ export function calcularCadena(n: NumerosSemana): Indicador[] {
   add('mensajes', 'Mensajes enviados', 'atraccion', 'predictivo',
     n.mensajesEnviados || null, [20, 150], 'entero', 'mayor_mejor',
     'En orgánico no se proyecta gasto: se proyecta actividad. Este número lo decides tú.');
+
+  // ── EL CPM Y LA FRECUENCIA ──
+  //
+  // La banda del CPM sale del MERCADO donde corre la pauta, no de una
+  // referencia única: el techo argentino está por debajo del piso español, y
+  // medirlos igual se equivoca en las dos direcciones.
+  const banda = bandaDe(n.mercados ?? []);
+
+  add('cpm', 'Costo por mil impresiones', 'atraccion', 'historico',
+    div(n.gasto * 1000, n.impresiones), [banda.cpmMin, banda.cpmMax], 'dinero', 'menor_mejor',
+    'Alto con pocos comentarios: el creativo no para el scroll. Alto con muchos: la audiencia es cara pero funciona, y no hay que tocarla.',
+    { tiene: n.impresiones, necesita: 1000 });
+
+  // La frecuencia es el número que evita tirar un creativo que está bien.
+  // Con presupuesto y público chicos sube rapidísimo, y sin verla parece que
+  // la pieza se gastó cuando el problema es que el público es muy angosto.
+  add('frecuencia', 'Veces que cada uno lo vio', 'atraccion', 'historico',
+    div(n.impresiones, n.alcance), [1, 3], 'veces', 'menor_mejor',
+    'Arriba de 3 en una semana, la audiencia se agotó: ampliar el público o sumar otro país. No es el creativo.',
+    { tiene: n.alcance, necesita: 500 });
 
   add('costo_conversacion', 'Costo por conversación', 'atraccion', 'historico',
     div(n.gasto, n.conversaciones), [p * 0.001, p * 0.01], 'dinero', 'menor_mejor',

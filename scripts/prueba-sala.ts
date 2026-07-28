@@ -7,6 +7,7 @@ import {
   ETAPAS, ETAPA_CON_CANDADO, DIAS_HASTA_ACTIVACION, armarRecorrido,
   veredictoMotor, DIAS_PAUTA_SIN_AGENDA, REINVERSION_POR_VENTA, TOPE_REINVERSION,
   type EstadoMotor,
+  situacionDe, sePuedeDiagnosticar,
 } from '../src/lib/salaDeMando';
 
 let fallas = 0;
@@ -111,6 +112,33 @@ linea(cumplido.faltaParaObjetivo === 0 && cumplido.titular.includes('cumplido'),
   'cumplido el objetivo, lo dice y deja de empujar');
 linea(veredictoMotor({ ...base, cobrado: 40000 }).faltaParaObjetivo === 0,
   'pasarse del objetivo no da un número negativo');
+
+// ── 6 · Lanzado o instalando ───────────────────────────────────────────────
+console.log('\n══ lanzado o instalando ══');
+const hoyMenos = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
+
+const sinEncender = situacionDe({ faltanEnCuadro: 4 });
+linea(sinEncender.estado === 'instalando' && sinEncender.conversacion === 'activacion',
+  'el que no encendió abre en Activación, no en Métricas');
+linea(sinEncender.linea.includes('faltan 4'), `y dice qué le falta: "${sinEncender.linea}"`);
+linea(!sePuedeDiagnosticar(sinEncender),
+  'NUNCA se le habla de su costo por conversación: no tiene conversaciones');
+
+const ayer = situacionDe({ campanaDesde: hoyMenos(1) });
+linea(ayer.estado === 'lanzado' && !sePuedeDiagnosticar(ayer),
+  `lanzado hace un día: ${ayer.linea}`);
+
+const doceDias = situacionDe({ campanaDesde: hoyMenos(12) });
+linea(sePuedeDiagnosticar(doceDias), 'a los 12 días sí se opina');
+linea(doceDias.conversacion === 'metricas', 'y abre en Métricas, no en Activación');
+
+const pausado = situacionDe({ campanaDesde: hoyMenos(20), campanaPausada: true });
+linea(pausado.estado === 'pausado' && pausado.linea.includes('estuvo'),
+  `el pausado se distingue: "${pausado.linea}"`);
+
+linea(situacionDe({ campanaDesde: 'fecha rota' }).estado === 'instalando',
+  'una fecha rota cae en instalando, que es lo conservador');
+linea(situacionDe({}).linea === 'Instalando', 'sin nada cargado no inventa nada');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);
