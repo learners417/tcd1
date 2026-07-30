@@ -119,7 +119,7 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
       <div ref={topRef} />
 
       {/* El header ceremonial (Lote 5 · la piel) */}
-      {view === 'anuncios' && <ConstructorAnuncios />}
+      {view === 'anuncios' && <ConstructorAnuncios clienteId={userId} />}
         {view === 'home' && (
         <div className="mb-6">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>

@@ -3,6 +3,7 @@ import { Check, Clock } from 'lucide-react';
 import {
   OBJETIVO, PRINCIPIOS, jornadasDeInduccion,
   MINUTOS_DE_CONTENIDO, SE_APRENDE_EN_EL_LUGAR,
+  HISTORIA, SISTEMA_POR_DENTRO, VALORES,
 } from '../../lib/casa';
 
 /**
@@ -20,7 +21,8 @@ export default function LaCasa() {
     try { return new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]') as number[]); }
     catch { return new Set(); }
   });
-  const [vista, setVista] = useState<'induccion' | 'objetivo' | 'principios'>('induccion');
+  const [vista, setVista] = useState<
+    'induccion' | 'objetivo' | 'principios' | 'historia' | 'sistema'>('induccion');
 
   const marcar = (n: number) => {
     setHechas((h) => {
@@ -42,6 +44,8 @@ export default function LaCasa() {
           ['induccion', 'Tus primeros 3 días'],
           ['objetivo', 'Qué prometemos'],
           ['principios', 'Cómo se decide'],
+          ['historia', 'Por qué Javo'],
+          ['sistema', 'El sistema por dentro'],
         ] as const).map(([id, label]) => (
           <button key={id} onClick={() => setVista(id)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
@@ -102,6 +106,24 @@ export default function LaCasa() {
                       <span className="text-[11px] text-cream/40 block mt-1">
                         {s.porQueAntes}
                       </span>
+
+                      {/* Los números concretos, no «esto importa». */}
+                      {s.datos && s.datos.length > 0 && (
+                        <span className="block mt-2 space-y-0.5">
+                          {s.datos.map((d) => (
+                            <span key={d} className="block text-[11px] text-cream/55">· {d}</span>
+                          ))}
+                        </span>
+                      )}
+
+                      {/* El espacio del video existe aunque el video no.
+                          Así se sabe qué falta en vez de no saber que faltaba. */}
+                      <span className={`block mt-2 rounded-lg border border-dashed p-2.5 text-center ${
+                        s.video ? 'border-gold/30' : 'border-cream/12'}`}>
+                        <span className="text-[11px] text-cream/45">
+                          {s.video ? '▶ Ver el video (3-5 min)' : 'Video pendiente de grabar'}
+                        </span>
+                      </span>
                     </span>
                   </button>
                 ))}
@@ -150,6 +172,70 @@ export default function LaCasa() {
             </p>
             <p className="text-base text-cream leading-snug">{OBJETIVO.elNumero}</p>
             <p className="text-xs text-cream/60 mt-2 leading-relaxed">{OBJETIVO.porQueEseNumero}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── POR QUÉ JAVO ── */}
+      {vista === 'historia' && (
+        <div className="space-y-3">
+          <p className="text-xs text-cream/50">
+            Sin esto, el equipo vende un sistema. Con esto, vende una convicción.
+          </p>
+          {HISTORIA.map((c) => (
+            <div key={c.titulo}
+              className={`rounded-2xl border p-4 ${
+                c.pendiente ? 'border-dashed border-gold/25' : 'border-cream/12'}`}>
+              <p className="text-sm text-cream/90 leading-snug"
+                style={{ fontFamily: 'var(--font-display)' }}>
+                {c.titulo}
+              </p>
+              <p className={`text-xs mt-1.5 leading-relaxed ${
+                c.pendiente ? 'text-gold/60 italic' : 'text-cream/70'}`}>
+                {c.texto}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── EL SISTEMA POR DENTRO ── */}
+      {vista === 'sistema' && (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <p className="text-xs text-cream/50">
+              Esto es lo que te deja defender una decisión de la app frente a un
+              cliente que la cuestiona. Sin esto, la única respuesta posible es
+              «porque lo dice la app» — y esa no la acepta nadie que pagó.
+            </p>
+            {SISTEMA_POR_DENTRO.map((p) => (
+              <div key={p.pregunta} className="rounded-2xl border border-cream/12 p-4">
+                <p className="text-sm text-cream/90 leading-snug">{p.pregunta}</p>
+                <p className="text-xs text-cream/65 mt-1.5 leading-relaxed">{p.respuesta}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
+              Los valores, con lo que cuestan
+            </p>
+            <p className="text-[11px] text-cream/45 mb-3">
+              Un valor sin costo es una frase.
+            </p>
+            <div className="space-y-3">
+              {VALORES.map((v) => (
+                <div key={v.valor} className="border-b border-cream/[0.07] pb-3 last:border-0">
+                  <p className="text-sm text-cream/90">{v.valor}</p>
+                  <p className="text-xs text-cream/55 mt-1">
+                    <strong className="text-cream/70">Cuesta:</strong> {v.cuestaEsto}
+                  </p>
+                  <p className="text-xs text-cream/55 mt-0.5">
+                    <strong className="text-cream/70">Lo aceptamos porque:</strong> {v.loAceptamosPorque}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -73,3 +73,55 @@ export async function subirNumerosDelCliente(
     return false;
   }
 }
+
+// ── El brief y los anuncios generados ──────────────────────────────────────
+
+/**
+ * Lo que el cliente construyó en el Constructor.
+ *
+ * ═══ POR QUÉ ESTO TAMBIÉN ═══
+ *
+ * El brief y los anuncios generados vivían **solo en el navegador**. Y a
+ * diferencia de un número, que se puede volver a cargar en treinta segundos,
+ * **estas piezas las pagó con créditos**. Perderlas es perder algo que costó
+ * dinero, y volver a generarlas cuesta dinero otra vez.
+ *
+ * Se guarda en la misma tabla que las respuestas de las sesiones: es lo mismo
+ * —trabajo del cliente que no se puede reponer solo— y tener dos tablas para
+ * la misma idea termina en dos comportamientos distintos.
+ */
+export async function guardarTrabajoDeCampanas(
+  clienteId: string | undefined,
+  que: 'brief' | 'anuncios',
+  contenido: unknown,
+): Promise<boolean> {
+  if (!clienteId) return false;
+  try {
+    const { error } = await db().rpc('guardar_respuestas', {
+      p_cliente: clienteId,
+      // Con prefijo para no chocar con los códigos de sesión, que son P0.1 y
+      // parecidos: si compartieran espacio, un brief podría pisar una sesión.
+      p_meta: `campanas:${que}`,
+      p_estado: { contenido },
+    });
+    return !error;
+  } catch { return false; }
+}
+
+/** Lo que había guardado, para retomarlo en cualquier dispositivo. */
+export async function leerTrabajoDeCampanas(
+  clienteId: string | undefined,
+  que: 'brief' | 'anuncios',
+): Promise<unknown | null> {
+  if (!clienteId) return null;
+  try {
+    const { data, error } = await db()
+      .from('sesion_respuestas')
+      .select('estado')
+      .eq('cliente_id', clienteId)
+      .eq('meta_codigo', `campanas:${que}`)
+      .maybeSingle();
+    if (error || !data) return null;
+    return (data as { estado: { contenido?: unknown } }).estado?.contenido ?? null;
+  } catch { return null; }
+}

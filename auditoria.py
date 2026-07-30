@@ -1666,7 +1666,9 @@ if _os49.path.exists('src/lib/glosario.ts'):
         _visible49 = ' '.join(_re49.findall(r'>([^<>{}]{3,120})<', _s49)).lower()
         _tieneTermino = 'Termino' in _s49 or 'buscarTermino' in _s49
         for _p49 in _palabras49:
-            if _p49 in _visible49 and not _tieneTermino:
+            # Palabra completa: «traba» estaba dentro de «trabajando» y de
+            # «trabajo», y la lente marcaba pantallas que no la usaban.
+            if _re49.search(rf'\b{_re49.escape(_p49)}\b', _visible49) and not _tieneTermino:
                 _sinExplicar49.append(f'{_os49.path.basename(_f49)[:-4]}: «{_p49}»')
     check('todo concepto del sistema se puede explicar donde aparece',
           not _sinExplicar49, '; '.join(sorted(set(_sinExplicar49))[:4]))
@@ -1797,10 +1799,13 @@ import re as _re53
 for _f53, _que53 in [
     ('src/components/campanas/TableroCupos.tsx', 'los números de la semana'),
     ('src/components/SesionGuiadaPlayer.tsx', 'lo que escribe en sus sesiones'),
+    # El brief y los anuncios los PAGÓ CON CRÉDITOS: perderlos significa
+    # volver a pagar por generarlos.
+    ('src/components/campanas/ConstructorAnuncios.tsx', 'el brief y los anuncios que pagó'),
 ]:
     if _os53.path.exists(_f53):
         _s53 = rd(_f53)
-        _sube = bool(_re53.search(r'subir|guardarEnLaBase|subirNumeros', _s53))
+        _sube = bool(_re53.search(r'subir|guardarEnLaBase|subirNumeros|guardarTrabajoDeCampanas', _s53))
         check(f'{_os53.path.basename(_f53)[:-4]} sube {_que53}',
               _sube, 'si no sube, el cliente hace su parte y nadie se entera')
 
@@ -1829,7 +1834,7 @@ if _os54.path.exists('api/ghl-webhook.ts'):
 # créditos.
 #
 # El problema no era la lentitud: era que FALLAR COSTABA DINERO.
-import os as _os55, glob as _g55
+import os as _os55, glob as _g55, re as _re55
 if _os55.path.exists('api/_lib/tope.ts'):
     _tp55 = rd('api/_lib/tope.ts')
     check('las llamadas a la IA tienen su propio tope de tiempo',
@@ -1840,11 +1845,215 @@ if _os55.path.exists('api/_lib/tope.ts'):
     check('el tope está aplicado a la llamada real',
           'signal,' in rd('api/_lib/deepseek.ts')
           and 'limpiar()' in rd('api/_lib/deepseek.ts'))
+    # TODA llamada a un proveedor de IA, no solo la de texto. Generar una
+    # imagen tarda MÁS, así que ese endpoint es todavía más propenso.
+    _sinTope55 = []
+    for _f55 in _g55.glob('api/**/*.ts', recursive=True):
+        _s55 = rd(_f55)
+        if _re55.search(r'fetch\([\'"`]https://api\.(openai|anthropic|deepseek|generativelanguage)', _s55):
+            if 'signal' not in _s55: _sinTope55.append(_os55.path.basename(_f55))
+    check('NINGUNA llamada a un proveedor de IA queda sin tope',
+          not _sinTope55, ', '.join(_sinTope55))
     _largos55 = [f for f in _g55.glob('api/ai/*.ts') if 'maxDuration: 120' in rd(f)]
     check('ninguna función pide más tiempo del que la plataforma da',
           not _largos55, ', '.join(_largos55))
     check('el motivo está escrito, para que nadie lo suba de nuevo',
           'deshacerCobro' in rd('api/ai/generate.ts'))
+
+# ── 6.56 · EL CEREBRO: una sola lista de trabajo ───────────────────────
+#
+# La cola detectaba, escribía la acción, y ahí se terminaba: no creaba tarea,
+# no quedaba asignada, no se podía modificar, desaparecía al recargar. Eran
+# DOS LISTAS QUE NUNCA SE VEÍAN JUNTAS, y por eso nadie podía entender su día
+# ni contestar «¿por qué esta tarea?».
+import os as _os56
+if _os56.path.exists('src/lib/cerebro.ts'):
+    _cb = rd('src/lib/cerebro.ts')
+    _cs = rd('src/lib/cerebroStorage.ts')
+    _sq56 = rd('sala-de-mando.sql')
+    check('la cola CREA tareas, no las muestra y las olvida',
+          'crear_tarea_del_sistema' in _sq56 and 'crearDesdeElSistema' in _cs)
+    check('una causa, una tarea: no se duplica',
+          'tarea_por_causa' in _sq56 and 'on conflict' in _sq56,
+          'cada recálculo crearía otra tarea por el mismo cuello y la lista sería inusable')
+    check('las cinco fuentes están, cada una con su origen',
+          all(f'desde{x}' in _cb for x in ('LaCadena', 'ElSoporte', 'ElRecorrido', 'UnaSesion')))
+    check('cada origen se explica solo',
+          'export const POR_QUE' in _cb,
+          'es lo que contesta «¿por qué esta tarea?» sin que nadie pregunte')
+    check('cada tarea sabe A DÓNDE LLEVA',
+          'ETIQUETA_DESTINO' in _cb and 'Abrir el Creador' in _cb,
+          'nunca «buscalo vos»: siempre un botón que abre lo que hace falta')
+    check('lo VENCIDO va primero, venga de donde venga',
+          'a.vencida ? -1 : 1' in _cb,
+          'una tarea vencida ya falló una vez')
+    check('alguien esperando respuesta pesa más que el peor cuello',
+          'vencido ? 100_000' in _cb,
+          'una cuenta rota se destraba mañana; una persona esperando se va hoy')
+    check('lo técnico y lo de criterio NO se resuelven con un mensaje al cliente',
+          "esTecnico || esCriterio ? 'escalar'" in _cb)
+    check('la lista de Hoy es LA MISMA que la de Tareas',
+          'mi_lista_de_hoy' in _sq56 and 'miListaDeHoy' in _cs,
+          'tener dos listas es lo que hizo que nadie entendiera su día')
+
+    # EL BOTÓN QUE MENTÍA.
+    check('«Mandárselo» manda de verdad',
+          'export async function mandarleAlCliente' in _cs
+          and "from('mensajes').insert" in _cs,
+          'antes solo tachaba el ítem: el botón prometía algo y quien lo tocaba creía que pasó')
+    check('y el cliente se entera aunque no tenga la app abierta',
+          "from('notificaciones').insert" in _cs)
+    check('el cerebro está probado',
+          _os56.path.exists('scripts/prueba-cerebro.ts'))
+
+# ── 6.57 · Cada tarea lleva a donde se resuelve ────────────────────────
+# Es lo que la vuelve útil en vez de una lista de recordatorios. Y el destino
+# es un CONTRATO, no una URL: una URL suelta obliga a quien la escribe a saber
+# cómo está armada la app, y el día que una pantalla cambia de nombre los
+# botones dejan de andar EN SILENCIO.
+import os as _os57
+if _os57.path.exists('src/lib/cerebro.ts'):
+    _cb57 = rd('src/lib/cerebro.ts')
+    _lh57 = rd('src/components/admin/ListaDeHoy.tsx')
+    _ad57 = rd('src/pages/Admin.tsx')
+    check('el destino es un contrato, no una URL',
+          'AperturaDeTarea' in _cb57 and 'export function comoSeResuelve' in _cb57)
+    check('y la pantalla que sabe navegar decide CÓMO',
+          'abrirDestino' in _ad57 and 'onAbrir' in _lh57)
+    check('un mensaje NO navega: se manda desde donde está',
+          'Sacarla de su lista para escribir' in _cb57,
+          'mandar a alguien a otra pantalla a escribir un mensaje que ya está escrito es trabajo inventado')
+    check('el creador se abre CON EL BRIEF CARGADO',
+          'con su brief cargado' in _cb57,
+          'pedirle a alguien que copie el brief de una pantalla a otra es el trabajo que sobra')
+    check('el escalado sabe a quién va y por qué',
+          'export function aQuienEscala' in _cb57)
+    check('y al cliente se le avisa siempre que se escala',
+          'export function avisoDeEscalado' in _cb57,
+          'el silencio mientras alguien espera es lo que rompe la confianza')
+    check('la lista dice POR QUÉ está cada tarea y por qué ahí',
+          'porQueAca' in _lh57 and 'POR_QUE[t.origen]' in _lh57)
+    check('si el mensaje no salió, se dice',
+          'No salió: prueba de nuevo' in _lh57,
+          'creer que salió cuando no salió es el error que esta pantalla vino a arreglar')
+    check('sin persona identificada no queda un cargando eterno',
+          'No se pudo identificar tu usuario' in _lh57,
+          'un «mirando…» que nunca termina parece que la app se colgó')
+
+# ── 6.58 · Los frenos de atención ──────────────────────────────────────
+# LA REGLA QUE LOS HACE FUNCIONAR: si aparecen siempre, dejan de frenar a
+# nadie. Un diálogo que sale en cada clic se contesta sin leerlo en tres días,
+# y ahí es PEOR que no tenerlo: da una sensación de control que no existe.
+import os as _os58
+if _os58.path.exists('src/lib/frenos.ts'):
+    _fr = rd('src/lib/frenos.ts')
+    check('son tres niveles y nada más',
+          "'confirmar' | 'escribir' | 'testigo'" in _fr)
+    check('la pregunta para asignar nivel es qué pasa SI SE HACE POR ERROR',
+          '¿Qué pasa si se hace por error?' in _fr,
+          'no «¿esto es importante?», porque todo parece importante')
+    check('NINGÚN freno pregunta «¿estás seguro?»',
+          'estás seguro' not in _fr.lower(),
+          'preguntar eso no informa nada: el título tiene que decir QUÉ VA A PASAR')
+    check('encender una campaña pide escribir la palabra',
+          "palabra: 'ENCENDER'" in _fr,
+          'el gasto empieza en ese momento y quien lo aprueba tiene que estar mirando')
+    check('lo que le pasa a un tercero deja constancia',
+          "nivel: 'testigo'" in _fr and 'lo va a ver' in _fr,
+          'el registro no es control: es que el que decide sepa que decide')
+    check('escribir la palabra no exige teclear bien',
+          'toUpperCase()' in _fr,
+          'el freno es para que lea, no para que teclee')
+    check('la lista de frenos tiene tope',
+          'TOPE_POR_NIVEL' in _fr,
+          'cada freno nuevo le quita fuerza a los que ya están')
+    check('el diálogo existe y distingue los tres niveles',
+          _os58.path.exists('src/components/Freno.tsx')
+          and 'ShieldAlert' in rd('src/components/Freno.tsx'))
+
+# ── 6.59 · La Casa, completa ───────────────────────────────────────────
+if _os58.path.exists('src/lib/casa.ts'):
+    _ca59 = rd('src/lib/casa.ts')
+    _lc59 = rd('src/components/admin/LaCasa.tsx')
+    check('cada sesión trae números concretos',
+          _ca59.count('datos:') >= 6,
+          'no «el presupuesto importa» sino los $6,50 por día y los 50 eventos semanales')
+    check('el espacio del video existe aunque el video no',
+          'Video pendiente de grabar' in _lc59,
+          'así se sabe qué falta, en vez de no saber que faltaba')
+    check('está la historia, con lo pendiente marcado',
+          'HISTORIA' in _ca59 and 'pendiente?: boolean' in _ca59,
+          'sin esto el equipo vende un sistema; con esto vende una convicción')
+    check('y lo que solo puede escribir Javo está señalado',
+          _ca59.count('pendiente: true') == 3)
+    check('el sistema por dentro contesta las siete preguntas',
+          'SISTEMA_POR_DENTRO' in _ca59 and _ca59.count('pregunta:') >= 7,
+          'es lo que permite defender una decisión de la app ante un cliente que la cuestiona')
+    check('admite el error propio del benchmark ajeno',
+          'nos pasó' in _ca59)
+    check('los valores dicen QUÉ CUESTAN',
+          'cuestaEsto' in _ca59 and 'loAceptamosPorque' in _ca59,
+          'un valor sin costo es una frase')
+    check('los frenos y La Casa están probados',
+          _os58.path.exists('scripts/prueba-frenos.ts'))
+
+# ── 6.60 · El cliente también tiene UNA lista ──────────────────────────
+# Tenía cinco lugares distintos —su Camino, su cuadro, su tablero, sus piezas
+# y sus avisos—. Cada uno le decía algo cierto y ninguno le decía QUÉ HACER
+# AHORA. Y EL QUE ABRE LA APP SIN SABER QUÉ HACER, CIERRA LA APP.
+import os as _os60
+if _os60.path.exists('src/lib/cerebroCliente.ts'):
+    _cc60 = rd('src/lib/cerebroCliente.ts')
+    check('la lista del cliente es CORTA a propósito',
+          'CUANTAS_A_LA_VEZ' in _cc60 and 'paraliza' in _cc60,
+          'un sanador que ve quince pendientes no elige el más importante: cierra la app')
+    check('cargar los números gana a todo lo demás',
+          'es lo único que desbloquea' in _cc60 or 'desbloquea a las otras' in _cc60,
+          'no porque sea lo más importante: porque sin números la app no puede decirle nada más')
+    check('publicar va ÚLTIMO, con su motivo',
+          'generar piezas nuevas es más fácil' in _cc60.lower()
+          or 'Generar otra no sirve' in _cc60,
+          'por eso mucha gente se queda generando en vez de publicar')
+    check('al que no lanzó NUNCA se le piden números',
+          'x.lanzado && x.numerosSinCargar' in _cc60)
+    check('los primeros días mandan sobre el «todo al día»',
+          'no necesita que lo feliciten' in _cc60,
+          'sin eso apaga la campaña el martes porque «no estaba pasando nada»')
+    check('cada tarea dice CUÁNTO le lleva',
+          'minutos: number' in _cc60,
+          'no saber cuánto tarda algo es lo que frena a la gente')
+    check('y el botón del entrenador no dice «agente» ni «IA»',
+          "entrenador: 'Hablar con quien sabe'" in _cc60)
+    check('el orden del cliente NO es por dinero en riesgo',
+          'qué lo desbloquea' in _cc60,
+          'el equipo elige CUÁL cuenta atender; el cliente necesita saber QUÉ PASO SIGUE')
+    check('la lista del cliente está probada',
+          _os60.path.exists('scripts/prueba-cliente.ts'))
+
+# ── 6.61 · Una sola fuente de verdad para «la campaña está encendida» ──
+#
+# El cliente encendía desde su pantalla y guardaba la fecha SOLO en su
+# navegador, mientras `campana_desde` vivía en la base. DOS FUENTES DE VERDAD
+# para el mismo hecho: el cliente encendía, el equipo no se enteraba, la
+# cuenta quedaba «instalando» para siempre, su diagnóstico nunca se activaba,
+# y NADIE MIRABA UNA CUENTA QUE YA ESTABA GASTANDO DINERO.
+import os as _os61
+if _os61.path.exists('src/components/campanas/MontajeCupos.tsx'):
+    _mc61 = rd('src/components/campanas/MontajeCupos.tsx')
+    check('encender avisa a la base, no solo al navegador',
+          'marcarEncendida' in _mc61,
+          'si no, el cliente enciende y el equipo no se entera')
+    check('y pausar también',
+          'marcarPausada' in _mc61)
+    check('encender pasa por el freno de escribir la palabra',
+          "frenoDe('encender_campana'" in _mc61 and 'confirmando' in _mc61,
+          'es lo más caro que hace la app: el gasto empieza en ese momento')
+    check('el freno se usa de verdad en algún lado',
+          'from \'../Freno\'' in _mc61 or "from '../Freno'" in _mc61,
+          'un freno construido y sin usar no frena nada')
+    check('el cuadro por ticket está MONTADO de verdad',
+          '<CuadroDelCliente' in rd('src/pages/Admin.tsx'),
+          'estuvo construido, probado y con el import puesto, pero sin dibujarse')
 
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')

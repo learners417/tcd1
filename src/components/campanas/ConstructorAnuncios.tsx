@@ -18,6 +18,7 @@ import { generateText } from '../../lib/aiProvider';
 import { primero } from '../../lib/primero';
 import { armarPaquete } from '../../lib/paqueteCampana';
 import { revisarPieza, type VeredictoCritico } from '../../lib/criticoPieza';
+import { guardarTrabajoDeCampanas } from '../../lib/tableroSync';
 
 /* ── El brief: 7 insumos, autocompletados desde lo sellado ── */
 
@@ -95,7 +96,13 @@ const FAMILIAS: Familia3[] = ['piedras', 'dolor_historia', 'resultado_metodo'];
 
 interface Pieza { formulaId: number; texto: string }
 
-export default function ConstructorAnuncios() {
+export default function ConstructorAnuncios(
+  { clienteId }: {
+    /** Sin esto, el brief y los anuncios que PAGÓ CON CRÉDITOS viven solo en
+     *  este navegador. Perderlos significa volver a pagar por generarlos. */
+    clienteId?: string;
+  } = {},
+) {
   const [brief, setBrief] = useState<Brief>(() => briefDesdeADN());
   /** Lo que la app sabe del sanador, leído de su brief. */
   const senales: SenalesSanador = useMemo(() => ({
@@ -140,6 +147,7 @@ export default function ConstructorAnuncios() {
         : `${actual.texto.trimEnd()}\n\n${linea}`;
       const nuevo = { ...p, [id]: { ...actual, texto } };
       try { localStorage.setItem(OUT_KEY, JSON.stringify(nuevo)); } catch { /* noop */ }
+      void guardarTrabajoDeCampanas(clienteId, 'anuncios', nuevo);
       return nuevo;
     });
     // Lo aplicado sale de la lista: no se ofrece dos veces lo mismo.
@@ -175,6 +183,7 @@ export default function ConstructorAnuncios() {
     const b = { ...brief, [k]: v };
     setBrief(b);
     try { localStorage.setItem(BRIEF_KEY, JSON.stringify(b)); } catch { /* noop */ }
+    void guardarTrabajoDeCampanas(clienteId, 'brief', b);
   };
 
   const elegir = (fam: Familia3, id: number) => {

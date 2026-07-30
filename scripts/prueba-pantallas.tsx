@@ -120,6 +120,10 @@ async function main() {
       cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde gente', semanasIgual: 3, enRiesgo: 3000 }]}
       facturadoClientes={9000} />);
 
+  const { default: ListaDeHoy } = await import('../src/components/admin/ListaDeHoy');
+  dibuja('ListaDeHoy · sin id', <ListaDeHoy personaId="" />);
+  dibuja('ListaDeHoy · con persona', <ListaDeHoy personaId="p1" />);
+
   const { default: LaCasa } = await import('../src/components/admin/LaCasa');
   dibuja('LaCasa · la inducción', <LaCasa />);
 

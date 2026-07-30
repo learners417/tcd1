@@ -8,6 +8,9 @@ import React, { useState } from 'react';
 import TableroCupos from './TableroCupos';
 import { estadoDeLasPiezas } from '../../lib/formulasAnuncios';
 import TutorialTecnicoBox from '../TutorialTecnicoBox';
+import { marcarEncendida, marcarPausada } from '../../lib/salaDeMandoStorage';
+import { frenoDe } from '../../lib/frenos';
+import Freno from '../Freno';
 
 const KEY = 'tcd_montaje_v1';
 const KEY_ON = 'tcd_campana_encendida_v1';
@@ -79,6 +82,8 @@ export default function MontajeCupos(
   const [encendida, setEncendida] = useState<string | null>(() => leer<string | null>(KEY_ON, null));
   const [historial, setHistorial] = useState<string[]>(() => leer<string[]>(KEY_HIST, []));
   const restantes = TOPE_CAMPANAS - historial.length;
+  /** Encender es lo más caro que hace la app: el gasto empieza ahí. */
+  const [confirmando, setConfirmando] = useState(false);
 
   const toggle = (id: string) => {
     const n = { ...checks, [id]: !checks[id] };
@@ -108,6 +113,12 @@ export default function MontajeCupos(
 
   const encender = () => {
     if (!todo || restantes <= 0) return;
+    // No enciende directo: el gasto empieza en este momento y no se recupera.
+    setConfirmando(true);
+  };
+
+  const encenderDeVerdad = () => {
+    setConfirmando(false);
     const fecha = new Date().toISOString();
     const hist = [...historial, fecha];
     setEncendida(fecha);
@@ -116,6 +127,10 @@ export default function MontajeCupos(
       localStorage.setItem(KEY_ON, JSON.stringify(fecha));
       localStorage.setItem(KEY_HIST, JSON.stringify(hist));
     } catch { /* noop */ }
+    // Y A LA BASE. Sin esto el cliente enciende y el equipo no se entera:
+    // queda como «instalando» para siempre, su diagnóstico de campaña nunca
+    // se activa, y nadie mira una cuenta que ya está gastando dinero.
+    void marcarEncendida(clienteId ?? '');
   };
 
   /** Cerrar la campana viva. Antes de los 14 dias no se puede: es la regla
@@ -128,6 +143,7 @@ export default function MontajeCupos(
       localStorage.removeItem(KEY_ON);
       localStorage.setItem(KEY, JSON.stringify({}));
     } catch { /* noop */ }
+    void marcarPausada(clienteId ?? '', true);
   };
 
   if (encendida) {
@@ -161,6 +177,15 @@ export default function MontajeCupos(
   }
 
   return (
+    <>
+      {/* El freno más caro de la app: acá empieza el gasto. */}
+      {confirmando && (
+        <Freno
+          freno={frenoDe('encender_campana', { nombreCliente: 'tu campaña', monto: 0 })}
+          onSeguir={encenderDeVerdad}
+          onCancelar={() => setConfirmando(false)}
+        />
+      )}
     <div className="space-y-4">
       <div>
         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
@@ -227,5 +252,6 @@ export default function MontajeCupos(
           : todo ? '🚀 ENCENDER — y anotar la fecha' : `Faltan ${8 - listos} candados para encender`}
       </button>
     </div>
+    </>
   );
 }

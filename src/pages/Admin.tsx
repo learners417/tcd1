@@ -20,6 +20,8 @@ import MiRol from '../components/admin/MiRol';
 import CargarSesion from '../components/admin/CargarSesion';
 import LaSemana from '../components/admin/LaSemana';
 import LaCasa from '../components/admin/LaCasa';
+import ListaDeHoy from '../components/admin/ListaDeHoy';
+import type { AperturaDeTarea } from '../lib/cerebro';
 import CuadroDelCliente from '../components/admin/CuadroDelCliente';
 import JornadaPanel from '../components/admin/Jornada';
 import { jornadasRecientes } from '../lib/jornadaStorage';
@@ -358,6 +360,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
 
+
   /**
    * El ROL, no el permiso. Decide qué ve, en qué orden, y qué no le toca.
    * Los tres nombres viejos siguen en la base y se traducen acá.
@@ -398,6 +401,28 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
+
+  /**
+   * Lleva a donde se resuelve la tarea.
+   *
+   * El cerebro declara QUÉ hay que abrir; esta función sabe CÓMO. Así el día
+   * que una pantalla cambia de nombre, se corrige acá y no en veinte lugares.
+   */
+  const abrirDestino = (a: AperturaDeTarea) => {
+    if (a.clienteId) {
+      const c = clientes.find((x) => x.id === a.clienteId);
+      if (c) setSelectedCliente(c as never);
+    }
+    switch (a.tab) {
+      case 'mensajes':  setMainTab('mensajes'); break;
+      case 'campanas':  setMainTab('campanas'); break;
+      case 'creador':   setMainTab('creativos'); break;
+      case 'clientes':
+        setMainTab(a.seccion === 'numeros' ? 'plata' : 'clientes');
+        break;
+      default: setMainTab('hoy');
+    }
+  };
   const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'mentor', 'sesiones', 'metricas', 'mensajes', 'notas', 'adn'];
   const [empujonListo, setEmpujonListo] = useState<string | null>(null);
   const [detalleSesiones, setDetalleSesiones] = useState<Array<Record<string, unknown>>>([]);
@@ -1971,6 +1996,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'pipeline' && (
             <>
+              {/* Qué le falta instalar SEGÚN LO QUE PAGÓ. Estuvo construido y
+                  suelto hasta que existió el puente plan ↔ ticket: sin él la
+                  app no sabía que un cliente «verde» es uno de $5.000, y el de
+                  ticket alto no recibía nada distinto acá adentro. */}
+              {selectedCliente && (
+                <div className="mb-6">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-cream/45 mb-3">
+                    {selectedCliente.nombre} — qué le falta según su plan
+                  </p>
+                  <CuadroDelCliente
+                    plan={(selectedCliente as { plan_comercial?: string | null }).plan_comercial}
+                  />
+                </div>
+              )}
+
               {/* G4 · El proceso de activación — la guía operativa de Lupe */}
               <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.05] to-transparent p-5 mb-4 mx-1">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
@@ -3908,6 +3948,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               jornadasDelEquipo={jornadasEquipo.filter(
                 (j) => j.personaId !== (adminProfile as { id?: string }).id)}
             >
+            <ListaDeHoy
+              personaId={(adminProfile as { id?: string }).id ?? ''}
+              onAbrir={abrirDestino}
+            />
+
             <ColaDelDia clientes={clientes.map((c) => ({
               id: c.id, nombre: c.nombre,
               plan_comercial: (c as { plan_comercial?: string | null }).plan_comercial ?? null,

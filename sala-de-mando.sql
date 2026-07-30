@@ -852,3 +852,115 @@ language sql security definer as $$
   from sesion_respuestas r
   where r.cliente_id = p_cliente;
 $$;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- EL CEREBRO — que todo el trabajo viva en un solo lugar
+--
+-- La cola detectaba qué estaba roto, escribía la acción, y ahí se terminaba:
+-- no creaba tarea, no quedaba asignada, no se podía modificar, y desaparecía
+-- al recargar. Mientras tanto `admin_tareas` ya tenía todo lo que hacía falta.
+--
+-- Faltaban tres cosas: DE DÓNDE VINO la tarea (para poder contestar «¿por qué
+-- esta tarea?»), A QUÉ APUNTA (para no crear la misma dos veces) y A DÓNDE
+-- LLEVA (para que se pueda resolver en un toque, no buscando).
+-- ═══════════════════════════════════════════════════════════════════════════
+
+alter table admin_tareas
+  -- cadena · soporte · recorrido · sesion · persona
+  add column if not exists origen text default 'persona',
+  -- El cuello, el mensaje o la etapa que la generó. Con cliente_id forma la
+  -- huella que evita duplicar: la misma causa no crea dos tareas.
+  add column if not exists ref text,
+  -- mensaje · contenido · campana · conversacion · numeros · escalar · ninguno
+  add column if not exists destino text default 'ninguno',
+  -- Lo que hay que decir, ya escrito, cuando el destino es un mensaje.
+  add column if not exists texto_listo text,
+  -- Cuánto pesa en el orden. Lo calcula la app, no la persona.
+  add column if not exists peso int default 0;
+
+-- Una causa, una tarea. Sin esto, cada vez que se recalcula la cadena se
+-- crearía otra tarea por el mismo cuello y la lista se volvería inusable.
+create unique index if not exists tarea_por_causa
+  on admin_tareas (cliente_id, origen, ref)
+  where ref is not null and status <> 'completada';
+
+create index if not exists tarea_por_dueno_status
+  on admin_tareas (asignado_a, status, peso desc);
+
+/**
+ * Crea una tarea desde el sistema, sin duplicar.
+ *
+ * Si ya existe una abierta por la misma causa, ACTUALIZA su peso y su texto
+ * en vez de crear otra: el cuello puede haber empeorado, y lo que hay que
+ * decir puede haber cambiado, pero es la misma tarea.
+ */
+create or replace function crear_tarea_del_sistema(
+  p_titulo text,
+  p_descripcion text,
+  p_asignado uuid,
+  p_cliente uuid,
+  p_origen text,
+  p_ref text,
+  p_destino text default 'ninguno',
+  p_texto_listo text default null,
+  p_peso int default 0,
+  p_prioridad text default 'media',
+  p_vence date default null
+) returns uuid
+language plpgsql security definer as $$
+declare v_id uuid;
+begin
+  insert into admin_tareas (
+    titulo, descripcion, asignado_a, creado_por, cliente_id,
+    origen, ref, destino, texto_listo, peso, prioridad, fecha_vencimiento, status
+  ) values (
+    p_titulo, p_descripcion, p_asignado, p_asignado, p_cliente,
+    p_origen, p_ref, p_destino, p_texto_listo, p_peso, p_prioridad::admin_tarea_prioridad,
+    p_vence, 'pendiente'
+  )
+  on conflict (cliente_id, origen, ref) where ref is not null and status <> 'completada'
+  do update set
+    peso = excluded.peso,
+    titulo = excluded.titulo,
+    descripcion = excluded.descripcion,
+    texto_listo = excluded.texto_listo,
+    updated_at = now()
+  returning id into v_id;
+  return v_id;
+end $$;
+
+/**
+ * La lista de hoy de una persona: TODO su trabajo, venga de donde venga.
+ *
+ * Es la misma lista que ve en Tareas. Nunca dos listas.
+ */
+create or replace function mi_lista_de_hoy(p_persona uuid)
+returns table (
+  id uuid, titulo text, descripcion text, cliente_id uuid,
+  origen text, ref text, destino text, texto_listo text,
+  peso int, prioridad text, fecha_vencimiento date, status text
+)
+language sql security definer as $$
+  select t.id, t.titulo, t.descripcion, t.cliente_id,
+         t.origen, t.ref, t.destino, t.texto_listo,
+         t.peso, t.prioridad::text, t.fecha_vencimiento, t.status::text
+  from admin_tareas t
+  where t.asignado_a = p_persona
+    and t.status <> 'completada'
+    and t.archivada_at is null
+  -- Lo vencido primero: una tarea vencida YA FALLÓ UNA VEZ.
+  order by (t.fecha_vencimiento is not null and t.fecha_vencimiento < current_date) desc,
+           t.peso desc,
+           t.created_at asc;
+$$;
+
+/** Cierra una tarea y deja constancia de quién la cerró. */
+create or replace function cerrar_tarea(p_tarea uuid, p_quien uuid)
+returns void
+language plpgsql security definer as $$
+begin
+  update admin_tareas
+  set status = 'completada', completada_at = now(), updated_at = now()
+  where id = p_tarea;
+end $$;

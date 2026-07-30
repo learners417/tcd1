@@ -38,6 +38,7 @@ import {
   consumeCreditServer,
 } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
+import { conTope } from '../_lib/tope.js';
 
 // Vercel function config · maxDuration aplica solo si tu plan lo soporta.
 // Hobby = max 60s · Pro = hasta 300s · Enterprise = hasta 900s.
@@ -178,6 +179,11 @@ async function handleImageRequest(req: any, res: any) {
 
   // ─── Generacion de imagen en OpenAI ─────────────────────────────────────────
   try {
+    // Generar una imagen tarda MÁS que generar texto, así que este endpoint
+    // es todavía más propenso al problema que dejó sin créditos a una
+    // clienta: si la plataforma mata la función, el crédito no se devuelve.
+    const tope = conTope();
+
     let openaiRes: Response;
 
     if (hasRefs) {
@@ -197,6 +203,7 @@ async function handleImageRequest(req: any, res: any) {
       });
 
       openaiRes = await fetch('https://api.openai.com/v1/images/edits', {
+        signal: tope.signal,
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}` },
         body: form,
@@ -204,6 +211,7 @@ async function handleImageRequest(req: any, res: any) {
     } else {
       // /v1/images/generations — JSON body.
       openaiRes = await fetch('https://api.openai.com/v1/images/generations', {
+        signal: tope.signal,
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -218,6 +226,8 @@ async function handleImageRequest(req: any, res: any) {
         }),
       });
     }
+
+    tope.limpiar();
 
     if (!openaiRes.ok) {
       const text = await openaiRes.text();

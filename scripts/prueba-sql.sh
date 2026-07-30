@@ -62,10 +62,16 @@ create table profiles (
   acceso_hasta timestamptz, fecha_inicio date,
   modulos_activos text[], agentes_activos text[],
   adn_avatar jsonb, metodo_nombre text, oferta_mid text);
+-- La tabla de prueba tiene que parecerse a la real: le faltaban las
+-- columnas de archivo y fechas, y por eso una función correcta fallaba acá.
+create type admin_tarea_prioridad as enum ('baja','media','alta','urgente');
+
 create table admin_tareas (
   id uuid primary key default gen_random_uuid(), titulo text, descripcion text,
   asignado_a uuid, creado_por uuid, cliente_id uuid, prioridad text,
-  fecha_vencimiento date, status text);
+  fecha_vencimiento date, status text,
+  completada_at timestamptz, archivada_at timestamptz,
+  created_at timestamptz default now(), updated_at timestamptz default now());
 create table user_credits (
   user_id uuid primary key, monthly_quota_remaining int, topup_balance int);
 create table credit_transactions (
