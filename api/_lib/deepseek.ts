@@ -19,6 +19,8 @@
  *     inicio de la lista (formato OpenAI · no top-level como Anthropic).
  */
 
+import { conTope } from './tope.js';
+
 const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/v1/chat/completions';
 const DEFAULT_MODEL = 'deepseek-v4-pro';
 const DEFAULT_MAX_TOKENS = 8192;
@@ -88,7 +90,13 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
     payloadMessages.push({ role: normalizeRole(m.role), content: m.content });
   }
 
+  // El tope propio evita que Vercel mate la función a mitad de camino: si la
+  // mata, `deshacerCobro` nunca corre y el cliente pierde el crédito por una
+  // llamada que nunca respondió. Es preferible cortar antes y devolverlo.
+  const { signal, limpiar } = conTope();
+
   const response = await fetch(DEEPSEEK_ENDPOINT, {
+    signal,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -102,6 +110,8 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
       stream: false,
     }),
   });
+
+  limpiar();
 
   if (!response.ok) {
     const detail = await safeReadText(response);

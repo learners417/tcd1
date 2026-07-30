@@ -19,7 +19,11 @@ import { withSentry } from '../_lib/sentry.js';
 
 const MAX_TOKENS = 16384;
 
-export const config = { maxDuration: 120 };
+// 60 y no 120: el tope de la llamada es de 45 segundos, así que la función
+// siempre llega a responder, a devolver el crédito y a decir qué pasó. Con
+// 120 dependíamos de que la plataforma no la matara antes — y cuando la mata,
+// `deshacerCobro` nunca corre y el cliente pierde el crédito.
+export const config = { maxDuration: 60 };
 
 function startSseStream(res: any): void {
   res.setHeader('Content-Type', 'text/event-stream');

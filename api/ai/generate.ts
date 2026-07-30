@@ -27,7 +27,11 @@ const MAX_TOKENS = 16384;
 
 // Vercel function config · sin esto el default es 10s (hobby) o 60s (pro).
 // Los entrenadores tienen system prompts grandes; mejor margen de 120s.
-export const config = { maxDuration: 120 };
+// 60 y no 120: el tope de la llamada es de 45 segundos, así que la función
+// siempre llega a responder, a devolver el crédito y a decir qué pasó. Con
+// 120 dependíamos de que la plataforma no la matara antes — y cuando la mata,
+// `deshacerCobro` nunca corre y el cliente pierde el crédito.
+export const config = { maxDuration: 60 };
 
 async function handler(req: any, res: any) {
   if (req.method !== 'POST') {

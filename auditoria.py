@@ -1820,6 +1820,32 @@ if _os54.path.exists('api/ghl-webhook.ts'):
     check('el motivo está escrito, para que nadie lo vuelva atrás',
           'a partir del cliente 51' in _wh54)
 
+# ── 6.55 · Fallar no puede costar dinero ───────────────────────────────
+#
+# INCIDENTE REAL: una clienta recibió FUNCTION_INVOCATION_FAILED y después «ya
+# no me deja hacer nada». La cadena: el modelo tardó de más → Vercel MATÓ la
+# función → como el proceso murió, `deshacerCobro` NUNCA CORRIÓ → el crédito
+# quedó cobrado por una llamada que no respondió → reintentó → se quedó sin
+# créditos.
+#
+# El problema no era la lentitud: era que FALLAR COSTABA DINERO.
+import os as _os55, glob as _g55
+if _os55.path.exists('api/_lib/tope.ts'):
+    _tp55 = rd('api/_lib/tope.ts')
+    check('las llamadas a la IA tienen su propio tope de tiempo',
+          'TOPE_MS' in _tp55 and 'AbortController' in _tp55)
+    check('y el tope es MÁS CORTO que el de la plataforma',
+          '45_000' in _tp55,
+          'así la función siempre llega a responder y a devolver el crédito')
+    check('el tope está aplicado a la llamada real',
+          'signal,' in rd('api/_lib/deepseek.ts')
+          and 'limpiar()' in rd('api/_lib/deepseek.ts'))
+    _largos55 = [f for f in _g55.glob('api/ai/*.ts') if 'maxDuration: 120' in rd(f)]
+    check('ninguna función pide más tiempo del que la plataforma da',
+          not _largos55, ', '.join(_largos55))
+    check('el motivo está escrito, para que nadie lo suba de nuevo',
+          'deshacerCobro' in rd('api/ai/generate.ts'))
+
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')
            for m in re.finditer(r"<button(?![^>]*onClick)(?![^>]*onMouseDown)(?![^>]*type=\"submit\")[^>]*>", src)]
