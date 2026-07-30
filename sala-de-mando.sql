@@ -789,3 +789,66 @@ alter table mercado_aprendido enable row level security;
 drop policy if exists mercado_lee on mercado_aprendido;
 create policy mercado_lee on mercado_aprendido
   for select to authenticated using (true);
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- LO QUE EL CLIENTE ESCRIBE EN SUS SESIONES
+--
+-- El cronómetro y la emoción ya vivían en `session_logs`. Lo que el cliente
+-- ESCRIBE —su método, su oferta, su avatar, sus artefactos— vivía SOLO en el
+-- navegador. Si cambiaba de teléfono o limpiaba el navegador, lo perdía.
+--
+-- Y las sesiones guiadas SON el producto: perder eso es perder lo único que
+-- justifica lo que pagó.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+create table if not exists sesion_respuestas (
+  cliente_id uuid not null,
+  meta_codigo text not null,
+  -- El estado completo del paso a paso, tal como lo dejó.
+  estado jsonb not null default '{}'::jsonb,
+  actualizado_en timestamptz default now(),
+  primary key (cliente_id, meta_codigo)
+);
+
+create index if not exists sesion_resp_cliente
+  on sesion_respuestas (cliente_id, actualizado_en desc);
+
+alter table sesion_respuestas enable row level security;
+
+-- Cada uno escribe y lee lo suyo.
+drop policy if exists sesion_resp_propia on sesion_respuestas;
+create policy sesion_resp_propia on sesion_respuestas
+  for all to authenticated
+  using (cliente_id = auth.uid())
+  with check (cliente_id = auth.uid());
+
+-- Y el equipo lee, para poder acompañar sin pedirle que reenvíe nada.
+drop policy if exists sesion_resp_equipo on sesion_respuestas;
+create policy sesion_resp_equipo on sesion_respuestas
+  for select to authenticated
+  using (exists (select 1 from profiles p
+                 where p.id = auth.uid() and p.rol = 'admin'));
+
+-- Guarda el estado de una sesión. Reemplaza: lo que vale es lo último.
+create or replace function guardar_respuestas(
+  p_cliente uuid,
+  p_meta text,
+  p_estado jsonb
+) returns void
+language plpgsql security definer as $$
+begin
+  insert into sesion_respuestas (cliente_id, meta_codigo, estado)
+  values (p_cliente, p_meta, coalesce(p_estado, '{}'::jsonb))
+  on conflict (cliente_id, meta_codigo)
+  do update set estado = excluded.estado, actualizado_en = now();
+end $$;
+
+-- Todo lo que escribió, para poder retomarlo en cualquier dispositivo.
+create or replace function respuestas_de(p_cliente uuid)
+returns table (meta_codigo text, estado jsonb, actualizado_en timestamptz)
+language sql security definer as $$
+  select r.meta_codigo, r.estado, r.actualizado_en
+  from sesion_respuestas r
+  where r.cliente_id = p_cliente;
+$$;

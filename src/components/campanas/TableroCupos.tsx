@@ -17,6 +17,7 @@ import {
   type EntradaBitacora,
 } from '../../lib/bitacoraCampana';
 import { formulaPorId } from '../../lib/formulasAnuncios';
+import { subirNumerosDelCliente } from '../../lib/tableroSync';
 
 const KEY_DIA = 'tcd_tablero_diario_v1';
 const KEY_SEM = 'tcd_tablero_semana_v1';
@@ -32,7 +33,13 @@ function leer<T>(k: string, def: T): T {
 const hoy = () => new Date().toISOString().slice(0, 10);
 
 export default function TableroCupos(
-  { diasCampana, onIrAnuncios }: { diasCampana: number; onIrAnuncios?: () => void },
+  { diasCampana, onIrAnuncios, clienteId }: {
+    diasCampana: number;
+    onIrAnuncios?: () => void;
+    /** Sin esto, lo que carga vive solo en este navegador y la cola del
+     *  equipo queda ciega aunque él haya cargado. */
+    clienteId?: string;
+  },
 ) {
   const [diario, setDiario] = useState<Record<string, number>>(() => leer(KEY_DIA, {}));
   const [convHoy, setConvHoy] = useState<string>(() => String(leer<Record<string, number>>(KEY_DIA, {})[hoy()] ?? ''));
@@ -99,6 +106,10 @@ export default function TableroCupos(
     const n = semana.map((f, j) => (j === i ? { ...f, [k]: v } : f));
     setSemana(n);
     try { localStorage.setItem(KEY_SEM, JSON.stringify(n)); } catch { /* noop */ }
+    // Y a la base. Sin esto, el cliente podía cargar sus números todas las
+    // semanas y LA COLA DEL EQUIPO QUEDABA CIEGA IGUAL: la cola lee de la
+    // base, y estos números nunca llegaban.
+    void subirNumerosDelCliente(clienteId, n);
   };
 
   const num = (v: string) => parseFloat(v || '0') || 0;

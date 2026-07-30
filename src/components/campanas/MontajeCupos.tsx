@@ -68,7 +68,13 @@ function leer<T>(k: string, def: T): T {
   try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
 }
 
-export default function MontajeCupos({ onIrAnuncios }: { onIrAnuncios?: () => void }) {
+export default function MontajeCupos(
+  { onIrAnuncios, clienteId }: {
+    onIrAnuncios?: () => void;
+    /** Se pasa hasta el tablero: sin esto sus números no llegan al equipo. */
+    clienteId?: string;
+  },
+) {
   const [checks, setChecks] = useState<Record<string, boolean>>(() => leer(KEY, {}));
   const [encendida, setEncendida] = useState<string | null>(() => leer<string | null>(KEY_ON, null));
   const [historial, setHistorial] = useState<string[]>(() => leer<string[]>(KEY_HIST, []));
@@ -135,7 +141,7 @@ export default function MontajeCupos({ onIrAnuncios }: { onIrAnuncios?: () => vo
         ) : (
           <p className="text-sm text-cream/70">Pasaste los 14 días: ahora las reglas deciden. Tu Tablero te dice qué se apaga, qué queda y cuándo refrescar el creativo.</p>
         )}
-<TableroCupos diasCampana={dias} onIrAnuncios={onIrAnuncios} />
+<TableroCupos diasCampana={dias} clienteId={clienteId} onIrAnuncios={onIrAnuncios} />
         {dias <= DIAS_MINIMOS ? (
           <p className="text-[11px] text-cream/40">
             Esta campaña se puede cerrar a partir del día {DIAS_MINIMOS + 1}. Antes, los números no dicen nada todavía.

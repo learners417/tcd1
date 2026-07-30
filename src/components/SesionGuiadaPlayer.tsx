@@ -8,9 +8,10 @@
  * teléfono muere, retoma exacto donde quedó.
  */
 import NumeroPanel from './numero/NumeroPanel';
+import { guardarEnLaBase, leerLoQueEscribio } from '../lib/respuestasSesion';
 import { cinturonDesdeProgreso } from '../lib/cinturones';
 import { loQueViene } from '../lib/teasers';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { sesionGuiadaDe } from '../lib/sesionesGuiadas';
 import { generateText } from '../lib/aiProvider';
 import BotonAudio from './sesion/BotonAudio';
@@ -27,12 +28,20 @@ function leerEstado(codigo: string): Estado {
   } catch { /* noop */ }
   return { idx: -1, resp: {}, esencial: false, prep: 0 };
 }
+/**
+ * Guarda en el navegador Y en la base.
+ *
+ * El navegador es la copia rápida —para que escribir no espere a la red— y
+ * **la base es la verdad**. Antes solo existía la copia: si el cliente
+ * cambiaba de teléfono o limpiaba el navegador, perdía su método, su oferta
+ * y su avatar. Y las sesiones guiadas SON el producto.
+ */
 function guardarEstado(codigo: string, e: Estado): void {
   try {
     const all = JSON.parse(localStorage.getItem(KEY) ?? '{}');
     all[codigo] = e;
     localStorage.setItem(KEY, JSON.stringify(all));
-  } catch { /* noop */ }
+  } catch { /* si el navegador no deja, la base sigue siendo la verdad */ }
 }
 function limpiarEstado(codigo: string): void {
   try {
@@ -64,13 +73,45 @@ export default function SesionGuiadaPlayer({
   titulo,
   onFinish,
   onClose,
+  clienteId,
 }: {
   codigo: string;
   titulo: string;
   onFinish: (texto: string) => void;
   onClose: () => void;
+  /** Sin esto, lo que escriba vive solo en este navegador. */
+  clienteId?: string;
 }) {
+  /** true cuando algo quedó sin subir. Se le dice: perderlo en silencio es peor. */
+  const [sinSubir, setSinSubir] = useState(false);
   const [selladoTexto, setSelladoTexto] = useState<string | null>(null);
+
+  /**
+   * La base manda sobre el navegador.
+   *
+   * Si abrió esta sesión en el teléfono y ahora entra desde la computadora,
+   * tiene que ver lo que escribió — no una copia vieja ni una pantalla en
+   * blanco.
+   */
+  useEffect(() => {
+    if (!clienteId) return;
+    let vivo = true;
+    void (async () => {
+      const { estado, deLaBase } = await leerLoQueEscribio(clienteId, codigo);
+      if (!vivo || !deLaBase || !estado) return;
+      const e = estado as unknown as Estado;
+      if (typeof e.idx === 'number') setSt(e);
+    })();
+    return () => { vivo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clienteId, codigo]);
+
+  /** Sube lo escrito. Si no llega, se avisa: perderlo en silencio es peor. */
+  const subir = useCallback((e: Estado) => {
+    if (!clienteId) return;
+    void guardarEnLaBase(clienteId, codigo, e as unknown as Record<string, unknown>)
+      .then((ok) => setSinSubir(!ok));
+  }, [clienteId, codigo]);
   // El Diario se abre al terminar el protocolo del dinero: no lo prometemos antes.
   const diarioAbierto = React.useMemo(() => {
     try {
@@ -96,7 +137,7 @@ export default function SesionGuiadaPlayer({
     return () => window.clearInterval(t);
   }, [inicio]);
 
-  useEffect(() => { guardarEstado(codigo, st); topRef.current?.scrollTo?.(0, 0); }, [codigo, st]);
+  useEffect(() => { guardarEstado(codigo, st); subir(st); topRef.current?.scrollTo?.(0, 0); }, [codigo, subir, st]);
 
   if (!ses) return null;
   const todos = ses.pasos as Array<Record<string, any>>;

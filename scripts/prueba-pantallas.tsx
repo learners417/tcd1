@@ -120,6 +120,21 @@ async function main() {
       cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde gente', semanasIgual: 3, enRiesgo: 3000 }]}
       facturadoClientes={9000} />);
 
+  const { default: LaCasa } = await import('../src/components/admin/LaCasa');
+  dibuja('LaCasa · la inducción', <LaCasa />);
+
+  const { default: TablaFunciones } = await import('../src/components/admin/TablaFunciones');
+  dibuja('TablaFunciones · sin datos',
+    <TablaFunciones estaSemana={[]} semanasAnteriores={[]} clientesActivos={11} hitos={[]} />);
+  dibuja('TablaFunciones · con hito y deuda',
+    <TablaFunciones
+      estaSemana={[{ funcion: 'instalacion', minutos: 200 }, { funcion: 'absorber', minutos: 120 }]}
+      semanasAnteriores={[[{ funcion: 'instalacion', minutos: 320 }]]}
+      clientesActivos={11}
+      hitos={[{ id: 'h', que: 'los tutoriales del píxel', funcion: 'instalacion',
+        minutosEstimados: 100, desde: '2026-07-01', porQuien: 'dev' }]}
+      clientes={[{ id: 'a', nombre: 'Rosana', ticket: 'mil', minutos: 18 }]} />);
+
   const { default: CargarSesion } = await import('../src/components/admin/CargarSesion');
   dibuja('CargarSesion',
     <CargarSesion clienteId="a" nombreCliente="Rosana" quienLaDio="Lupe" />);

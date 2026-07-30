@@ -170,7 +170,7 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
         <DiagnosticoView perfil={perfil ?? {}} />
       )}
 
-      {view === 'montaje' && <MontajeCupos onIrAnuncios={() => setView('anuncios')} />}
+      {view === 'montaje' && <MontajeCupos clienteId={userId} onIrAnuncios={() => setView('anuncios')} />}
 
       {view === 'historial' && (
         <HistorialView

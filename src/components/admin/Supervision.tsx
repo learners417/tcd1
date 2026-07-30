@@ -5,6 +5,7 @@ import { semanaISO } from '../../lib/bitacoraCampana';
 import { mensajeDeFalla, causaDe } from '../../lib/conexion';
 import { situacionDe } from '../../lib/salaDeMando';
 import { marcarEncendida } from '../../lib/salaDeMandoStorage';
+import Termino from '../Termino';
 
 /**
  * SUPERVISIÓN — todas las cuentas a la vez, lo rojo arriba.
@@ -139,7 +140,9 @@ export default function Supervision({ clientes }: { clientes: Cliente[] }) {
                 <th className="font-semibold px-2 py-2.5" title="Conversión">Convierte</th>
                 <th className="font-semibold px-2 py-2.5" title="Retención">Retiene</th>
                 <th className="text-left font-semibold px-3 py-2.5">Situación</th>
-                <th className="text-left font-semibold px-3 py-2.5">Dónde se traba</th>
+                <th className="text-left font-semibold px-3 py-2.5">
+                  <Termino p="cuello de botella">Dónde se traba</Termino>
+                </th>
                 <th className="text-right font-semibold px-3 py-2.5">Ventas</th>
                 <th className="text-right font-semibold px-4 py-2.5">Cobrado</th>
               </tr>

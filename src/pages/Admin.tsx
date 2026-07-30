@@ -19,6 +19,8 @@ import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
 import MiRol from '../components/admin/MiRol';
 import CargarSesion from '../components/admin/CargarSesion';
 import LaSemana from '../components/admin/LaSemana';
+import LaCasa from '../components/admin/LaCasa';
+import CuadroDelCliente from '../components/admin/CuadroDelCliente';
 import JornadaPanel from '../components/admin/Jornada';
 import { jornadasRecientes } from '../lib/jornadaStorage';
 import { comparativaSemana } from '../lib/mesaPlataStorage';
@@ -59,7 +61,7 @@ import Markdown from 'react-markdown';
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
 type AdminRol = 'owner' | 'manager' | 'staff';
-type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana';
+type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana' | 'casa';
 type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
@@ -362,7 +364,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
    */
   const rol = rolDe((adminProfile as any).admin_rol);
   const defRol = ROLES[rol];
-  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana'];
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa'];
   const [mainTab, setMainTab] = usePersistedState<MainTab>(
     'tcd_admin_main_tab',
     'clientes',
@@ -1765,6 +1767,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       { id: 'tareas',   label: 'Tareas' },
       { id: 'mensajes', label: 'Mensajes' },
       { id: 'mirol',    label: 'Mi rol' },
+      { id: 'casa',     label: 'La casa' },
     ],
     clientes: [
       { id: 'clientes',    label: 'Todos' },
@@ -1806,6 +1809,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     tareas: 'Pipeline de Tareas Internas',
     hoy: 'Hoy — lo que hay que atender',
     semana: 'La Semana — el marcador, las trabas y lo frenado',
+    casa: 'La casa — qué prometemos, cómo se decide, y tus primeros 3 días',
     supervision: 'Supervisión — todas las cuentas a la vez',
     sala: 'Sala de Mando — qué está frenado y quién lo destraba',
     mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
@@ -3954,6 +3958,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               )}
             </div>
           )}
+
+          {mainTab === 'casa' && <LaCasa />}
 
           {mainTab === 'mirol' && (
             <MiRol rol={rol}

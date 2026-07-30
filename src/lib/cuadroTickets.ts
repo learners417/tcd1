@@ -229,3 +229,45 @@ export function avanceDe(
     pct: aplican.length > 0 ? Math.round((listos / aplican.length) * 100) : 0,
   };
 }
+
+
+// ── El puente entre los dos vocabularios ───────────────────────────────────
+
+/**
+ * De qué plan a qué ticket.
+ *
+ * ═══ POR QUÉ HACÍA FALTA ═══
+ *
+ * La app tenía DOS vocabularios que no se hablaban: `planes.ts` gobierna el
+ * acceso con colores (blanco, amarillo, verde, negro) y este archivo decide
+ * qué instala cada uno con montos (mil, dos_mil, cinco_mil, diez_mil).
+ *
+ * **Nada traducía entre los dos.** Y la consecuencia era que este cuadro —que
+ * está construido y probado— no se podía usar: la app no sabía que un cliente
+ * «verde» es uno de $5.000. Por eso también quedó sin montar en ninguna
+ * pantalla, y por eso el de $5.000 no recibía nada distinto dentro de la app.
+ *
+ * El puente vive acá y no en planes.ts a propósito: **planes.ts gobierna el
+ * acceso y no tiene por qué saber de tickets.** Acá sí, porque el ticket es
+ * el concepto de este archivo.
+ */
+export const TICKET_DE_PLAN: Record<string, Ticket> = {
+  blanco: 'mil',
+  amarillo: 'dos_mil',
+  verde: 'cinco_mil',
+  negro: 'diez_mil',
+  // «completo» es el acceso total que se le da al equipo y a las pruebas:
+  // se trata como el más alto para que nada quede oculto por accidente.
+  completo: 'diez_mil',
+};
+
+/**
+ * El ticket de un cliente, a partir de su plan.
+ *
+ * Si el plan no se reconoce cae en el MÁS BAJO, no en el más alto: mostrarle
+ * de menos a alguien que pagó se arregla con un mensaje; mostrarle de más a
+ * quien no pagó le enseña que no hacía falta pagar.
+ */
+export function ticketDe(plan: string | null | undefined): Ticket {
+  return TICKET_DE_PLAN[plan ?? ''] ?? 'mil';
+}

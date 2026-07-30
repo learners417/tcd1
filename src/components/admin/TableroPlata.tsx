@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cargarSemana, guardarSemana, historialCliente, type SemanaCliente } from '../../lib/mesaPlataStorage';
 import { semanaISO } from '../../lib/bitacoraCampana';
 import { mensajeDeFalla } from '../../lib/conexion';
+import Termino from '../Termino';
 import {
   calcularCadena, encontrarDomino, proyectar, formatear, formatearRef, validarNumeros,
   TRAMO_LABEL, SEMANA_VACIA,
@@ -303,7 +304,7 @@ export default function TableroPlata({
                 </tbody>
               </table>
               <p className="text-[11px] text-cream/35 mt-2">
-                Si el cuello de botella se repite tres semanas seguidas, el problema no es
+                Si el <Termino p="cuello de botella" /> se repite tres semanas seguidas, el problema no es
                 la campaña: es lo que hay detrás.
               </p>
             </div>

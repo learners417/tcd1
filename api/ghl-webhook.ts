@@ -49,10 +49,27 @@ export default async function handler(req: any, res: any) {
     const admin = getAdminClient();
 
     // 1) Buscar el user por email.
-    const { data: list } = await admin.auth.admin.listUsers();
-    let userId = (list?.users as Array<{ id: string; email?: string }> | undefined)?.find(
-      (u) => (u.email ?? '').toLowerCase() === email,
-    )?.id;
+    //
+    // Se busca en `profiles` y NO con listUsers(): esa función devuelve solo
+    // la primera página —cincuenta usuarios— y a partir del cliente 51 no
+    // encontraba a quien ya existía. El resultado era que intentaba crearlo
+    // de nuevo: o fallaba, o le mandaba una segunda invitación a alguien que
+    // ya tenía cuenta. Un error que no se ve hasta que el negocio crece, que
+    // es exactamente cuando peor duele.
+    const { data: perfilExistente } = await admin
+      .from('profiles').select('id').eq('email', email).maybeSingle();
+    let userId = (perfilExistente as { id: string } | null)?.id;
+
+    // Respaldo: si el perfil todavía no existe pero el usuario sí (una cuenta
+    // vieja sin perfil), se busca paginando de verdad.
+    if (!userId) {
+      for (let pagina = 1; pagina <= 20 && !userId; pagina++) {
+        const { data: list } = await admin.auth.admin.listUsers({ page: pagina, perPage: 200 });
+        const encontrados = (list?.users ?? []) as Array<{ id: string; email?: string }>;
+        userId = encontrados.find((u) => (u.email ?? '').toLowerCase() === email)?.id;
+        if (encontrados.length < 200) break;
+      }
+    }
 
     // 2) Si no existe (entrada del $27), crearlo. El trigger arma el perfil y
     //    Supabase le manda el mail de acceso.

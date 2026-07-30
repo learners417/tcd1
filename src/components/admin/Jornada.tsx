@@ -9,6 +9,7 @@ import { calcularCarga } from '../../lib/roles';
 import type { ItemCola } from '../../lib/colaExcepciones';
 import { abrirJornada, cerrarJornadaEnBase, jornadaDeHoy } from '../../lib/jornadaStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
+import Termino from '../Termino';
 
 /**
  * HOY — la única pantalla que se abre todos los días.
@@ -270,7 +271,7 @@ export default function Jornada({
           </div>
 
           <div>
-            <p className="text-sm text-cream/85 mb-1">¿Algo te trabó?</p>
+            <p className="text-sm text-cream/85 mb-1">¿Alguna <Termino p="traba" />?</p>
             <p className="text-[11px] text-cream/45 mb-2">
               Una línea. No se discute ahora: se mira el viernes con todo lo demás.
               Si algo se repite tres veces, deja de ser cuestión de insistir.

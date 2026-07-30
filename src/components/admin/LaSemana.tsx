@@ -3,6 +3,9 @@ import { AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { armarMarcador, comoVaElCirculo, minutosDe, type Jornada, type Marcador } from '../../lib/jornada';
 import { agruparTrabas, type CierreDelDia } from '../../lib/cierreDelDia';
 import { puedeVer, type Rol } from '../../lib/permisos';
+import TablaFunciones from './TablaFunciones';
+import { MINUTOS_POR, type ObservacionFuncion, type HitoDeAbsorcion } from '../../lib/funciones';
+import Termino from '../Termino';
 
 /**
  * LA SEMANA — la reunión, ya preparada.
@@ -39,6 +42,8 @@ export default function LaSemana({
   cuentasFrenadas,
   facturadoClientes,
   marcadorAnterior = null,
+  hitos = [],
+  clientesConMinutos = [],
 }: {
   rol: Rol;
   jornadas: Jornada[];
@@ -47,6 +52,9 @@ export default function LaSemana({
   cuentasFrenadas: CuentaFrenada[];
   facturadoClientes: number;
   marcadorAnterior?: Marcador | null;
+  /** Lo que se declaró que dejó de necesitar humano. */
+  hitos?: HitoDeAbsorcion[];
+  clientesConMinutos?: Array<{ id: string; nombre: string; ticket: string; minutos: number }>;
 }) {
   const cierres: CierreDelDia[] = useMemo(
     () => jornadas.filter((j) => j.fin).map((j) => ({
@@ -95,6 +103,21 @@ export default function LaSemana({
         </h3>
       </div>
 
+      {/* ── LA TABLA DE FUNCIONES ──
+          Solo para quien ve el rendimiento del equipo: es la pantalla que
+          dice si el negocio escaló o si simplemente hubo menos trabajo. */}
+      {veRendimiento && (
+        <TablaFunciones
+          estaSemana={cierres.flatMap((c): ObservacionFuncion[] => [
+            { funcion: MINUTOS_POR.excepcion.funcion, minutos: c.minutos },
+          ])}
+          semanasAnteriores={[]}
+          clientesActivos={clientesActivos}
+          hitos={hitos}
+          clientes={clientesConMinutos}
+        />
+      )}
+
       {/* ── 2 · EL MARCADOR ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Numero
@@ -136,7 +159,7 @@ export default function LaSemana({
       {/* ── 4 · LAS TRABAS ── */}
       <div className="rounded-2xl border border-cream/12 p-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
-          Lo que trabó
+          Lo que trabó — <Termino p="traba">qué es esto</Termino>
         </p>
         <p className="text-[11px] text-cream/45 mb-3">
           Lo que se repite va primero: es lo que hay que arreglar de raíz,

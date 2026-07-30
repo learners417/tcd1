@@ -27,11 +27,11 @@ estados = re.search(r"AdminTareaStatus\s*=\s*((?:\s*\|\s*'[a-z_]+')+)", sup)
 lista = re.findall(r"'([a-z_]+)'", estados.group(1)) if estados else []
 chk('AdminTareaStatus tiene 4 estados', len(lista) == 4, str(lista))
 chk('el doc usa esos 4 y no los inventados',
-    all(e in rd('SALA-DE-MANDO.md') for e in lista))
+    all(e in rd('planes-archivados/SALA-DE-MANDO.md') for e in lista))
 chk('el doc NO manda crear sala_tareas',
-    'NO se crea.** Se usa `admin_tareas`' in rd('SALA-DE-MANDO.md'))
+    'NO se crea.** Se usa `admin_tareas`' in rd('planes-archivados/SALA-DE-MANDO.md'))
 chk('espejo de perfil advertido en el doc',
-    'syncProfileToLocalStorage' in rd('SALA-DE-MANDO.md'))
+    'syncProfileToLocalStorage' in rd('planes-archivados/SALA-DE-MANDO.md'))
 chk('profiles es la tabla de clientes', "from('profiles')" in admin)
 
 print('══ umbrales por objetivo (la Sala los importa, no los reinventa) ══')
@@ -45,10 +45,10 @@ chk('el tablero usa el veredicto de la lib, no el suyo',
 chk('mensajes NO se juzga con el umbral de perfil',
     "sano: [0.25, 0.70]" in fa and "alarma: 1.50" in fa)
 chk('el doc prohibe escribir umbrales propios',
-    'no escribe umbrales propios' in rd('SALA-DE-MANDO.md'))
+    'no escribe umbrales propios' in rd('planes-archivados/SALA-DE-MANDO.md'))
 
 print('══ el eje del doc ══')
-doc = rd('SALA-DE-MANDO.md')
+doc = rd('planes-archivados/SALA-DE-MANDO.md')
 chk('define cargos, no personas', 'Los cargos — no las personas' in doc)
 chk('Hoy es cola de excepciones', 'la cola de excepciones' in doc)
 chk('orden de construccion explicito', 'El orden importa y no es negociable' in doc)
@@ -56,7 +56,7 @@ chk('ningun item de traspaso sin dueno', 'Ningún ítem sin dueño' in doc)
 
 print('══ coherencia doc ↔ SQL ↔ manual ══')
 import os as _os
-_doc = rd('SALA-DE-MANDO.md')
+_doc = rd('planes-archivados/SALA-DE-MANDO.md')
 _sql = rd('sala-de-mando.sql') if _os.path.exists('sala-de-mando.sql') else ''
 _man = rd('MANUAL-OPERATIVO.html') if _os.path.exists('MANUAL-OPERATIVO.html') else ''
 _NO_CREAR = {'sala_tareas', 'sala_clientes', 'sala_campanas', 'sala_campana_metricas'}

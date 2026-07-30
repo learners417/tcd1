@@ -1300,8 +1300,9 @@ if _os40.path.exists('src/lib/jornada.ts'):
           'si venden más pero cuesta más trabajo, se está comprando resultado con horas')
     check('una traba repetida manda sobre todo lo demás en el titular',
           'trabasDelSistema > 0' in _jo)
+    # El texto pasó a usar el glosario: «¿Alguna <Termino p="traba" />?»
     check('el cierre pregunta qué trabó, no cuántas horas',
-          '¿Algo te trabó?' in _js and 'se mira el viernes' in _js)
+          'Termino p="traba"' in _js and 'se mira el viernes' in _js)
     check('el dinero y el rendimiento se ocultan POR DATO en La Semana',
           "puedeVer(rol, 'dinero_tcd')" in _ls
           and "puedeVer(rol, 'rendimiento_equipo')" in _ls,
@@ -1545,6 +1546,279 @@ check('se puede marcar una campaña como encendida',
 check('pausar conserva desde cuándo estuvo al aire',
       'sin borrar desde cuándo' in rd('src/lib/salaDeMandoStorage.ts'),
       'al reanudar, saber que ya estuvo 20 días corriendo cambia el diagnóstico')
+
+# ── 6.47 · El Admin mide reducción, no esfuerzo ────────────────────────
+# La app medía los minutos de humano por cliente EN TOTAL. Y en total no sirve
+# para decidir nada: si bajaron de 44 a 38, ¿fue porque una instalación
+# terminó o porque un aviso automático destrabó tres cuentas? La primera es
+# aritmética. La segunda es que el negocio escaló.
+import os as _os47
+if _os47.path.exists('src/lib/funciones.ts'):
+    _fn = rd('src/lib/funciones.ts')
+    _tf = rd('src/components/admin/TablaFunciones.tsx')
+    # 7 y no 6: la interfaz declara el campo una vez y suma uno. Es el mismo
+    # error de conteo que ya cometí con los roles.
+    check('las seis funciones se definen por lo que pasa si NADIE las hace',
+          _fn.count('siNadie:') == 7)
+    check('cada función declara su DESTINO con el porqué escrito',
+          _fn.count('destino:') >= 7 and _fn.count('porQue:') >= 6,
+          'una que debe reducirse y no se reduce en seis meses es una que nadie está atacando')
+    check('el criterio queda humano y absorber es la única que crece',
+          "destino: 'permanente'" in _fn and "destino: 'crece'" in _fn)
+    check('la lectura sale del DESTINO, no del número',
+          "case 'crece':" in _fn and "case 'permanente':" in _fn,
+          'que absorber baje es una mala noticia disfrazada de buena')
+    check('absorber en cero es la peor noticia de la tabla',
+          'Nadie trabajó en absorber' in _fn)
+    check('bajar CON hito declarado se distingue de bajar sin explicación',
+          'haber construido algo' in _fn and 'aritmética' in _fn,
+          'es la única forma de saber si el negocio escaló')
+    check('LA DECLARACIÓN SE VERIFICA CONTRA LA REALIDAD',
+          'La estimación estaba mal' in _fn,
+          'sin esta verificación, «lo automatizamos» es una frase; con ella, es un dato')
+    check('que el criterio suba NO es una alarma, y se dice por qué',
+          'no un problema' in _fn and 'tres meses seguidos' in _fn)
+    check('el gradiente por ticket está declarado',
+          'MINUTOS_QUE_PERMITE' in _fn and 'mil: 0' in _fn,
+          'un cliente de $1.000 tiene que costar cero: es el modelo de negocio')
+    check('el exceso se convierte en tarea, no en queja sobre el cliente',
+          'deuda que absorber tiene que pagar' in _fn)
+    check('la reunión abre con UNA sola pregunta',
+          '¿Qué función bajó sus minutos, y por qué?' in _tf)
+    check('la tabla solo la ve quien ve el rendimiento del equipo',
+          'veRendimiento && (' in rd('src/components/admin/LaSemana.tsx'),
+          'es información de dirección, no de todo el equipo')
+    check('la medición por función está probada',
+          _os47.path.exists('scripts/prueba-funciones.ts'))
+
+# ── 6.48 · El criterio escrito y el glosario en su lugar ────────────────
+# De las diez situaciones que van a pasar, siete las resuelve la cola. LAS
+# TRES QUE QUEDAN SON TODAS DE CRITERIO — y eso explicaba por qué terminaban
+# en una pregunta hacia dirección: no había criterio escrito para ellas.
+import os as _os48
+if _os48.path.exists('src/lib/criterio.ts'):
+    _cr = rd('src/lib/criterio.ts')
+    _gl = rd('src/lib/glosario.ts')
+    check('las tres situaciones de criterio están escritas',
+          _cr.count('cuando:') >= 3 and 'trabado_en_su_metodo' in _cr
+          and 'pide_fuera_de_plan' in _cr and 'quiere_pausar' in _cr)
+    check('cada una dice lo que PASA DE VERDAD, no solo qué hacer',
+          _cr.count('loQuePasa:') >= 4)
+    check('cada una trae el mensaje listo y su LÍMITE',
+          _cr.count('comoSeDice:') >= 4 and _cr.count('hastaCuando:') >= 4,
+          'una salida por defecto sin límite se vuelve la regla')
+    check('cada negativa tiene su porqué',
+          _cr.count('porque:') >= 7)
+    check('prohíbe retener con descuento, con el motivo',
+          'descuento' in _cr and 'se va igual el mes que viene' in _cr)
+    check('una pausa sin fecha se llama por su nombre',
+          'baja que nadie quiso decir' in _cr)
+    check('y nombra lo incómodo: aceptar la baja sin mirar la cadena es falla nuestra',
+          'falla de seguimiento' in _cr)
+    check('tres pedidos iguales dejan de ser excepción',
+          'VECES_PARA_SER_PRODUCTO' in _cr and 'señal de producto' in _cr)
+    check('REUSA el agrupador de trabas en vez de escribir otro',
+          'agruparTrabas' in _cr,
+          'dos agrupadores de texto parecido agrupan distinto y el mismo pedido cuenta dos veces')
+    check('y su límite está documentado',
+          'no por significado' in _cr,
+          'agrupa palabras parecidas; agrupar por significado pediría una llamada de modelo')
+
+if _os48.path.exists('src/lib/glosario.ts'):
+    _gl48 = rd('src/lib/glosario.ts')
+    import re as _re48
+    _terminos48 = _re48.findall(r"^  ([a-z_]+): \{", _gl48, _re48.M)
+    check(f'el glosario tiene 12 términos, no más ({len(_terminos48)})',
+          len(_terminos48) == 12,
+          'si crece deja de ser un glosario y se vuelve otro documento que nadie lee')
+    check('cada término se explica sin jerga',
+          _gl48.count('que:') >= 12)
+    check('la mayoría dice POR QUÉ está definido así',
+          _gl48.count('porQue:') >= 9)
+    check('la palabra se explica DONDE aparece',
+          _os48.path.exists('src/components/Termino.tsx'))
+    check('si la palabra no está, no rompe la frase',
+          'if (!t) return <>{texto}</>' in rd('src/components/Termino.tsx'))
+    check('el criterio y el glosario están probados',
+          _os48.path.exists('scripts/prueba-criterio.ts'))
+
+# ── 6.49 · EL TEST DE GERBER, AUTOMATIZADO ─────────────────────────────
+#
+# Michael Gerber, en The E-Myth Revisited: «si no podés escribir exactamente
+# cómo se hace algo, darle ese documento a alguien nuevo, y que produzca el
+# mismo resultado — no tenés un sistema, tenés una dependencia».
+#
+# Esta lente lo convierte en un chequeo: TODO CONCEPTO DEL SISTEMA QUE UNA
+# PANTALLA DEL EQUIPO MUESTRE TIENE QUE PODER EXPLICARSE AHÍ MISMO. Si aparece
+# «cuello de botella» y no hay forma de saber qué es sin preguntarle a alguien,
+# eso es una dependencia.
+import os as _os49, re as _re49, glob as _g49
+if _os49.path.exists('src/lib/glosario.ts'):
+    _gl49 = rd('src/lib/glosario.ts')
+    # Las palabras del glosario, como aparecen en pantalla.
+    _palabras49 = [m.lower() for m in _re49.findall(r"palabra: '([^']+)'", _gl49)]
+    # Las pantallas del equipo.
+    _pantallas49 = _g49.glob('src/components/admin/*.tsx')
+    _sinExplicar49 = []
+    for _f49 in _pantallas49:
+        _s49 = rd(_f49)
+        # El texto que ve el usuario: entre etiquetas y en cadenas.
+        _visible49 = ' '.join(_re49.findall(r'>([^<>{}]{3,120})<', _s49)).lower()
+        _tieneTermino = 'Termino' in _s49 or 'buscarTermino' in _s49
+        for _p49 in _palabras49:
+            if _p49 in _visible49 and not _tieneTermino:
+                _sinExplicar49.append(f'{_os49.path.basename(_f49)[:-4]}: «{_p49}»')
+    check('todo concepto del sistema se puede explicar donde aparece',
+          not _sinExplicar49, '; '.join(sorted(set(_sinExplicar49))[:4]))
+
+# Y el objetivo y los principios tienen que estar DENTRO de la app, no solo en
+# un archivo de la raíz que nadie que no sea programador va a abrir.
+if _os49.path.exists('src/lib/casa.ts'):
+    _ca49 = rd('src/lib/casa.ts')
+    check('el objetivo estratégico vive dentro de la app',
+          'export const OBJETIVO' in _ca49 and 'elNumero' in _ca49,
+          'un archivo en la raíz de un repo no lo abre nadie que no sea programador')
+    check('los principios dicen qué discusión resuelve cada uno',
+          _ca49.count('resuelve:') >= 7,
+          'si no resuelven una discusión concreta, son valores de pared')
+    check('la inducción son dos horas de contenido, no un mes',
+          'MINUTOS_DE_CONTENIDO' in _ca49 and _ca49.count('minutos: 20') == 6)
+    check('cada sesión termina en una acción real, no en un quiz',
+          _ca49.count('accion:') >= 6)
+    check('y cada una justifica por qué no se puede aprender trabajando',
+          _ca49.count('porQueAntes:') >= 6,
+          'lo que se puede aprender haciendo no va en la inducción')
+    check('lo que queda afuera dice dónde se aprende',
+          'SE_APRENDE_EN_EL_LUGAR' in _ca49,
+          'para que nadie sienta que le falta algo por olvido')
+    check('la inducción está dentro de la app y montada',
+          _os49.path.exists('src/components/admin/LaCasa.tsx')
+          and 'LaCasa' in rd('src/pages/Admin.tsx'))
+    check('el objetivo y los principios están probados',
+          _os49.path.exists('scripts/prueba-casa.ts'))
+
+# ── 6.50 · Lo que el cliente escribe no se pierde ──────────────────────
+# El cronómetro y la emoción ya vivían en session_logs. Lo que el cliente
+# ESCRIBE —su método, su oferta, su avatar— vivía SOLO en el navegador. Si
+# cambiaba de teléfono o limpiaba el navegador, lo perdía. Y LAS SESIONES
+# GUIADAS SON EL PRODUCTO.
+import os as _os50
+if _os50.path.exists('src/lib/respuestasSesion.ts'):
+    _rs = rd('src/lib/respuestasSesion.ts')
+    _pl = rd('src/components/SesionGuiadaPlayer.tsx')
+    _sq = rd('sala-de-mando.sql')
+    check('lo que el cliente escribe se guarda en la base',
+          'create table if not exists sesion_respuestas' in _sq
+          and 'guardarEnLaBase' in _rs)
+    check('y el player lo sube en cada paso',
+          'subir(st)' in _pl,
+          'antes solo escribía en localStorage')
+    check('la base manda sobre el navegador',
+          'leerLoQueEscribio' in _pl and 'La base manda' in _rs,
+          'si empezó en el teléfono y sigue en la computadora, tiene que ver lo que escribió')
+    check('si el guardado no llegó, se avisa',
+          'sinSubir' in _pl and 'seguir en silencio' in _rs,
+          'un guardado que no llegó y nadie dijo nada es la peor forma de perder algo')
+    check('el equipo puede leer lo que escribió sin pedirle que lo reenvíe',
+          'sesion_resp_equipo' in _sq)
+
+# ── 6.51 · Un solo vocabulario de ticket ───────────────────────────────
+# planes.ts gobierna el acceso con colores y cuadroTickets con montos, y NADA
+# traducía entre los dos. Por eso el cuadro estaba construido, probado y sin
+# montar: la app no sabía que un cliente «verde» es uno de $5.000.
+if _os50.path.exists('src/lib/cuadroTickets.ts'):
+    _ct50 = rd('src/lib/cuadroTickets.ts')
+    check('existe el puente plan ↔ ticket',
+          'TICKET_DE_PLAN' in _ct50 and 'export function ticketDe' in _ct50)
+    check('un plan desconocido cae en el ticket MÁS BAJO',
+          "?? 'mil'" in _ct50,
+          'mostrar de menos se arregla con un mensaje; mostrar de más enseña que no hacía falta pagar')
+    check('el cuadro está MONTADO, no suelto',
+          _os50.path.exists('src/components/admin/CuadroDelCliente.tsx')
+          and 'CuadroDelCliente' in rd('src/pages/Admin.tsx'),
+          'el de $5.000 tiene que ver lo que compró')
+
+# ── 6.52 · El soporte, con reloj y compromiso ──────────────────────────
+# El circuito funcionaba, pero si nadie respondía NADA lo señalaba. Tres días
+# de silencio en un producto de miles es la diferencia entre un cliente y un
+# reembolso.
+if _os50.path.exists('src/lib/soporte.ts'):
+    _so = rd('src/lib/soporte.ts')
+    check('hay un compromiso de respuesta, con número',
+          'COMPROMISO' in _so and 'horas: 24' in _so and 'horas: 4' in _so,
+          'un número que se puede fallar es mejor que ninguno')
+    check('una duda y algo roto se tratan distinto',
+          "'duda'" in _so and "'roto'" in _so
+          and "vaA: 'absorber'" in _so,
+          'una espera un día; algo roto le está costando dinero ahora')
+    check('el mensaje sin responder aparece, con su reloj',
+          'export function mensajesQueEsperan' in _so and 'vencido' in _so)
+    check('lo vencido va primero, no lo que llegó primero',
+          'vencido ? 10_000 : 0' in _so)
+    check('y NO se ordena por ticket',
+          'ticket a propósito' in _so,
+          'quien pagó menos y lleva tres días esperando está más cerca de irse')
+    check('el marcador mide el % respondido dentro de lo prometido',
+          'pctATiempo' in _so)
+    check('una bandeja vacía con mal porcentaje IGUAL es alarma',
+          'pct < 80' in _so,
+          'se responde tarde y después se pone al día, y el cliente ya lo sintió')
+    check('el soporte y el puente están probados',
+          _os50.path.exists('scripts/prueba-soporte.ts'))
+
+# ── 6.53 · Lo que el cliente carga LLEGA AL EQUIPO ─────────────────────
+#
+# LA PEOR FORMA DE FALLAR: el cliente hace su parte y el sistema no se entera.
+# El tablero guardaba los números solo en el navegador, y la cola del equipo
+# lee de la base — así que el cliente podía cargar todas las semanas y LA COLA
+# QUEDABA CIEGA IGUAL, mostrando «todo bien» sobre una cuenta de la que no
+# sabía nada.
+import os as _os53
+if _os53.path.exists('src/lib/tableroSync.ts'):
+    _ts53 = rd('src/lib/tableroSync.ts')
+    _tc53 = rd('src/components/campanas/TableroCupos.tsx')
+    check('los números del tablero suben a la base',
+          'subirNumerosDelCliente' in _ts53 and 'subirNumerosDelCliente' in _tc53)
+    check('y la cadena de props llega hasta el tablero',
+          'clienteId' in rd('src/components/campanas/MontajeCupos.tsx')
+          and 'clienteId={userId}' in rd('src/pages/Campanas.tsx'),
+          'sin el id, sube a la nada')
+    check('subir no corta la pantalla si falla la red',
+          'no lanza si falla' in _ts53 or 'No lanza si falla' in _ts53,
+          'el cliente ya vio su número guardado: cortarle la pantalla sería peor')
+    check('el tipo no se duplica entre el tablero y la subida',
+          'NO define la forma' in _ts53,
+          'dos tipos con el mismo nombre terminan separándose')
+
+# Y la regla general de esta clase, para que no vuelva a pasar:
+# toda pantalla del CLIENTE que guarde algo que el EQUIPO necesita ver tiene
+# que subirlo. Se verifican las tres que cargan datos de negocio.
+import re as _re53
+for _f53, _que53 in [
+    ('src/components/campanas/TableroCupos.tsx', 'los números de la semana'),
+    ('src/components/SesionGuiadaPlayer.tsx', 'lo que escribe en sus sesiones'),
+]:
+    if _os53.path.exists(_f53):
+        _s53 = rd(_f53)
+        _sube = bool(_re53.search(r'subir|guardarEnLaBase|subirNumeros', _s53))
+        check(f'{_os53.path.basename(_f53)[:-4]} sube {_que53}',
+              _sube, 'si no sube, el cliente hace su parte y nadie se entera')
+
+# ── 6.54 · La venta automática aguanta el crecimiento ──────────────────
+# `listUsers()` sin paginar devuelve SOLO LA PRIMERA PÁGINA —cincuenta
+# usuarios—, así que a partir del cliente 51 no encontraba a quien ya existía
+# e intentaba crearlo de nuevo. Un error que no se ve hasta que el negocio
+# crece, que es exactamente cuando peor duele.
+import os as _os54
+if _os54.path.exists('api/ghl-webhook.ts'):
+    _wh54 = rd('api/ghl-webhook.ts')
+    check('el webhook de pago busca por perfil, no por la primera página',
+          "from('profiles').select('id').eq('email'" in _wh54)
+    check('y si tiene que paginar, pagina de verdad',
+          'perPage: 200' in _wh54 and 'pagina <= 20' in _wh54,
+          'listUsers() sin argumentos trae 50 y calla el resto')
+    check('el motivo está escrito, para que nadie lo vuelva atrás',
+          'a partir del cliente 51' in _wh54)
 
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')
