@@ -621,7 +621,8 @@ if _os19.path.exists('src/lib/mesaPlataStorage.ts'):
 import os as _os20
 if _os20.path.exists('src/lib/colaExcepciones.ts'):
     _cola = rd('src/lib/colaExcepciones.ts')
-    _cd = rd('src/components/admin/ColaDelDia.tsx')
+    # La cola vieja se borró: su trabajo lo hace ListaDeHoy.
+    _cd = rd('src/components/admin/ListaDeHoy.tsx')
     _adm20 = rd('src/pages/Admin.tsx')
     check('existe la cola y arma acciones, no diagnósticos',
           'export function armarCola' in _cola and 'accion:' in _cola and 'como:' in _cola)
@@ -641,10 +642,11 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
     check('la cola es la PRIMERA tab del menú',
           _adm20.index("id: 'hoy'") < _adm20.index("id: 'clientes'"),
           'es lo primero que se abre cada día')
+    _lh22 = rd('src/components/admin/ListaDeHoy.tsx')
     check('se puede copiar el mensaje y marcar lo hecho',
-          'Copiar el mensaje' in _cd and 'Ya lo hice' in _cd)
-    check('cuando falta el SQL lo dice en vez de verse vacía',
-          'sala-de-mando.sql' in _cd)
+          'Copiar' in _lh22 and 'Ya lo hice' in _lh22)
+    check('cuando falla la consulta lo dice en vez de verse vacía',
+          'mensajeDeFalla' in _lh22)
     check('la cola está probada con escenarios',
           _os20.path.exists('scripts/prueba-cola.ts'))
 
@@ -678,8 +680,8 @@ if _os21.path.exists('src/components/admin/Supervision.tsx'):
     check('una semana sana borra la racha',
           'if (!actual) return { cuello: null, semanas: 0 }' in _cola21)
     check('la cola YA USA la racha real, no un cero fijo',
-          'rachasDeTodos' in rd('src/components/admin/ColaDelDia.tsx')
-          and 'semanasIgual: 0,' not in rd('src/components/admin/ColaDelDia.tsx'),
+          'peso' in rd('src/lib/cerebro.ts')
+          and 'semanasIgual' in rd('src/lib/cerebro.ts'),
           'sin esto nada escalaba nunca de la app a una persona')
     check('el contador es lógica pura y se puede probar sin la base',
           'contarRacha' in _cola21 and 'from ./supabase' not in _cola21)
@@ -693,7 +695,7 @@ if _os21.path.exists('src/components/admin/Supervision.tsx'):
 import os as _os22
 if _os22.path.exists('src/lib/avisosCliente.ts'):
     _av = rd('src/lib/avisosCliente.ts')
-    _cd22 = rd('src/components/admin/ColaDelDia.tsx')
+    _cd22 = rd('src/components/admin/ListaDeHoy.tsx')
     _cola22 = rd('src/lib/colaExcepciones.ts')
     check('existe el planificador de avisos', 'export function planificarAvisos' in _av)
     check('el aviso se elige por el ID del cuello, no leyendo texto',
@@ -720,8 +722,7 @@ if _os22.path.exists('src/lib/avisosCliente.ts'):
     check('mandar nunca lanza: el trabajo de la persona no se pierde',
           _av.count('return false;') >= 2)
     check('la cola puede mandar el aviso dentro de la app',
-          'Mandárselo en la app' in _cd22 and 'mandarLosAutomaticos' in _cd22,
-          'antes viajaba por WhatsApp y se perdía entre mensajes')
+          'mandarleAlCliente' in rd('src/lib/cerebroStorage.ts'))
     check('los avisos están probados con escenarios',
           _os22.path.exists('scripts/prueba-avisos.ts'))
 
@@ -762,7 +763,7 @@ check('el pacto que el sanador firma vuelve a su pantalla',
       'pedirle que firme algo y no volver a mostrárselo es lo contrario de un compromiso')
 
 # Los efectos asíncronos del código nuevo no tocan estado tras desmontar.
-for _c23 in ('ColaDelDia', 'Supervision', 'TableroPlata', 'PanelMotorIA'):
+for _c23 in ('ListaDeHoy', 'Supervision', 'TableroPlata', 'PanelMotorIA'):
     _p23 = f'src/components/admin/{_c23}.tsx'
     if not _os610.path.exists(_p23): continue
     _src23 = rd(_p23)
@@ -792,7 +793,7 @@ if _os24.path.exists('src/lib/conexion.ts'):
           'es lo único que evita que vuelva a escribir todo o abandone')
     check('la barra de sin internet está en la pantalla que se ve siempre',
           'useConexion' in rd('src/components/Topbar.tsx'))
-    _pantallas24 = ['TableroPlata', 'ColaDelDia', 'Supervision', 'PanelMotorIA']
+    _pantallas24 = ['TableroPlata', 'ListaDeHoy', 'Supervision', 'PanelMotorIA']
     _sin = [c for c in _pantallas24
             if 'mensajeDeFalla' not in rd(f'src/components/admin/{c}.tsx')]
     check('las pantallas nuevas traducen sus fallas', not _sin, ', '.join(_sin))
@@ -1181,16 +1182,16 @@ check('supabase.ts carga fuera del navegador',
       'leer import.meta.env sin guarda hacía imposible montar cualquier pantalla en una prueba')
 _pant35 = rd('scripts/prueba-pantallas.tsx') if _os35.path.exists('scripts/prueba-pantallas.tsx') else ''
 check('se montan todas las pantallas nuevas',
-      all(c in _pant35 for c in ('TableroCupos', 'MontajeCupos', 'MiRol', 'ColaDelDia',
+      all(c in _pant35 for c in ('TableroCupos', 'MontajeCupos', 'MiRol', 'ListaDeHoy',
                                  'Supervision', 'SalaDeMando', 'PanelMotorIA',
                                  'TableroPlata', 'CargarSesion')))
 check('se prueban con datos vacíos, que es como llegan la primera vez',
       'clientes={[]}' in _pant35)
 check('una pantalla que dibuja casi nada se marca como muda',
       'PANTALLA MUDA' in _pant35)
-_cola35 = rd('src/components/admin/ColaDelDia.tsx')
+_cola35 = rd('src/components/admin/ListaDeHoy.tsx')
 check('las pantallas que cargan datos lo dicen desde el primer dibujo',
-      'useState(true)' in _cola35,
+      'Mirando tu lista' in _cola35,
       'con false, mostraban un guion hasta que llegaban los datos')
 
 # ── 6.36 · Ningún aviso queda mudo ─────────────────────────────────────
@@ -2054,6 +2055,116 @@ if _os61.path.exists('src/components/campanas/MontajeCupos.tsx'):
     check('el cuadro por ticket está MONTADO de verdad',
           '<CuadroDelCliente' in rd('src/pages/Admin.tsx'),
           'estuvo construido, probado y con el import puesto, pero sin dibujarse')
+
+# ── 6.62 · No hay dos listas dibujadas a la vez ────────────────────────
+#
+# Construí ListaDeHoy y NO SAQUÉ ColaDelDia: quedaron las dos apiladas en la
+# misma pantalla, mostrando lo mismo, con un botón que decía «Mandárselo» y
+# no mandaba nada al lado de uno que sí. Agregar sin sacar es exactamente el
+# error que esta app existe para evitar.
+import re as _re62, os as _os62
+_adm62 = rd('src/pages/Admin.tsx')
+check('la cola vieja no se monta en ningún lado',
+      '<ColaDelDia' not in _adm62,
+      'quien tocaba su botón creía que el mensaje había salido')
+check('y en Hoy hay UNA sola lista',
+      _adm62.count('<ListaDeHoy') == 1)
+check('el archivo viejo se borró, no se dejó dando vueltas',
+      not _os62.path.exists('src/components/admin/ColaDelDia.tsx'),
+      'un archivo que nadie monta es lo que alguien vuelve a montar por error')
+
+# ── 6.63 · NINGÚN cliente de IA queda sin tope ─────────────────────────
+#
+# Lo arreglé tres veces, de a uno: primero deepseek (le pasó a Ale), después
+# el endpoint de imágenes, y ahora claude vía SDK (le estaba pasando a Mariana
+# con el Mentor). LA LECCIÓN: arreglarlo archivo por archivo garantiza que el
+# próximo también nazca sin tope. Esta lente barre TODOS los caminos.
+import os as _os63, glob as _g63, re as _re63
+_sinTope63 = []
+for _f63 in _g63.glob('api/**/*.ts', recursive=True):
+    _s63 = rd(_f63)
+    # Camino 1: fetch directo a un proveedor.
+    if _re63.search(r"fetch\(['\"`]https://api\.(openai|anthropic|deepseek|generativelanguage)", _s63):
+        if 'signal' not in _s63: _sinTope63.append(f'{_os63.path.basename(_f63)} (fetch)')
+    # Camino 2: un SDK que hace la llamada por vos. Es el que se me escapó.
+    if _re63.search(r"new (Anthropic|OpenAI|GoogleGenerativeAI)\(", _s63):
+        if 'timeout' not in _s63: _sinTope63.append(f'{_os63.path.basename(_f63)} (SDK)')
+check('ninguna llamada a un proveedor de IA queda sin tope',
+      not _sinTope63, ', '.join(_sinTope63))
+
+check('el tope del SDK se reparte entre los reintentos',
+      'TOPE_MS / (MAX_RETRIES + 1)' in rd('api/_lib/claude.ts'),
+      'tres intentos con el tope entero sumarían el triple y la plataforma mataría igual')
+
+# Y EL MENSAJE QUE MENTÍA.
+check('el Mentor dice la causa real, no «error de red»',
+      'mensajeDeFalla' in rd('src/pages/Coach.tsx')
+      and 'Hubo un error de red' not in rd('src/pages/Coach.tsx'),
+      'si se quedó sin créditos reintentar no sirve; decirle mal la causa lo deja probando lo que no funciona')
+
+# ── 6.64 · FALLAR NUNCA PUEDE COSTARLE PLATA AL CLIENTE ────────────────
+#
+# Dos clientas reportaron lo mismo por caminos distintos: la función moría, el
+# crédito quedaba cobrado, reintentaban y se quedaban sin créditos. Lo arreglé
+# CUATRO VECES DE A UNA —deepseek, imágenes, claude vía SDK, describir imagen—
+# y cada vez apareció otro camino.
+#
+# Esta lente barre TODOS los caminos a la vez: es la única forma de que el
+# próximo no nazca roto.
+import os as _os64, glob as _g64, re as _re64
+_API64 = {f: rd(f) for f in _g64.glob('api/**/*.ts', recursive=True)}
+
+# 1 · Ninguna llamada externa sin tope, por la vía que sea.
+_sinTope64 = []
+for _f64, _s64 in _API64.items():
+    _n64 = _os64.path.basename(_f64)
+    for _m in _re64.finditer(r"fetch\(\s*['\"`](https://[^'\"`\s]+)", _s64):
+        if 'supabase' in _m.group(1): continue
+        if 'signal' not in _s64[max(0, _m.start()-500):_m.start()+400]:
+            _sinTope64.append(f'{_n64} (fetch)')
+    for _m in _re64.finditer(r'new (Anthropic|OpenAI|GoogleGenerativeAI|Groq|Mistral)\(', _s64):
+        _tramo = _s64[_m.start():_m.start()+200]
+        if 'timeout' not in _tramo: _sinTope64.append(f'{_n64} (SDK {_m.group(1)})')
+check('ninguna llamada externa queda sin tope de tiempo',
+      not _sinTope64, ', '.join(sorted(set(_sinTope64))))
+
+# 2 · Todo endpoint que cobra tiene que poder devolver.
+# HAY DOS SISTEMAS DE COBRO y yo solo miraba uno. `image.ts` no pasa por el
+# guardián: cobra directo con consumeCreditServer, y por eso no aparecía en el
+# barrido anterior aunque llevaba un «TODO: auto-refund» escrito en el archivo.
+_cobranSinDevolver = [
+    _os64.path.basename(_f) for _f, _s in _API64.items()
+    if ('guardarLlamada' in _s and 'deshacerCobro' not in _s)
+    or ('consumeCreditServer(' in _s and 'devolverCreditoServer' not in _s
+        and '_lib/' not in _f)]
+check('todo endpoint que cobra puede devolver el crédito',
+      not _cobranSinDevolver, ', '.join(_cobranSinDevolver),
+      )
+
+# 3 · Y la devolución tiene que estar en el catch, no solo en un camino feliz.
+_sinEnCatch64 = []
+for _f64, _s64 in _API64.items():
+    if 'deshacerCobro' not in _s64: continue
+    for _m in _re64.finditer(r'catch\s*\([^)]*\)\s*\{([\s\S]{0,400}?)\n  \}', _s64):
+        if 'deshacerCobro' not in _m.group(1) and 'status(5' in _m.group(1):
+            _sinEnCatch64.append(_os64.path.basename(_f64))
+check('image.ts devuelve el crédito si no entregó la imagen',
+      'devolverCreditoServer' in rd('api/ai/image.ts')
+      and 'cobrado = true' in rd('api/ai/image.ts'),
+      'el archivo decía «TODO: si quisiéramos auto-refund…» y esa deuda dejó sin créditos a dos clientas')
+
+check('la devolución está en el catch, donde de verdad falla',
+      not _sinEnCatch64, ', '.join(sorted(set(_sinEnCatch64))))
+
+# 4 · Ningún mensaje al cliente inventa la causa.
+_mienten64 = []
+for _f64 in _g64.glob('src/**/*.tsx', recursive=True):
+    _s64 = rd(_f64)
+    for _m in _re64.finditer(r"content: '[^']*error de red[^']*'", _s64):
+        _mienten64.append(_os64.path.basename(_f64))
+check('ningún mensaje dice «error de red» sin haber mirado la causa',
+      not _mienten64, ', '.join(sorted(set(_mienten64))),
+      )
 
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')

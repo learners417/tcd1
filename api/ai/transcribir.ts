@@ -1,5 +1,6 @@
 import { withSentry } from '../_lib/sentry.js';
-import { guardarLlamada, anotarCosto } from '../_lib/guardian.js';
+import { guardarLlamada, anotarCosto, deshacerCobro } from '../_lib/guardian.js';
+import { conTope } from '../_lib/tope.js';
 
 /**
  * TRANSCRIBIR AUDIO — del lado del servidor.
@@ -53,9 +54,13 @@ async function handler(req: any, res: any) {
 
   const t0 = Date.now();
   try {
+    // Con tope, como todas: sin él la plataforma mata la función y el
+    // `deshacerCobro` de abajo nunca llega a correr.
+    const tope = conTope();
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${apiKey}`,
       {
+        signal: tope.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,6 +91,9 @@ async function handler(req: any, res: any) {
 
     return res.status(200).json({ texto });
   } catch (err) {
+    // SE DEVUELVE EL CRÉDITO. Cobraba y nunca devolvía: si el proveedor
+    // fallaba, el cliente perdía el crédito por algo que no recibió.
+    await deshacerCobro(userId, veredicto, 'falló el proveedor');
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[api/ai/transcribir] falló:', msg);
     await anotarCosto(userId, {

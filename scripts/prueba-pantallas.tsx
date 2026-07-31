@@ -68,10 +68,6 @@ async function main() {
   dibuja('MiRol · semana cargada',
     <MiRol rol="acompanamiento" excepciones={12} sesiones={8} enInstalacion={15} />);
 
-  const { default: ColaDelDia } = await import('../src/components/admin/ColaDelDia');
-  dibuja('ColaDelDia · sin clientes', <ColaDelDia clientes={[]} />);
-  dibuja('ColaDelDia · con clientes',
-    <ColaDelDia clientes={[{ id: 'a', nombre: 'Rosana', plan_comercial: 'completo' }]} />);
 
   const { default: Supervision } = await import('../src/components/admin/Supervision');
   dibuja('Supervision · sin clientes', <Supervision clientes={[]} />);

@@ -1,5 +1,6 @@
 import { withSentry } from '../_lib/sentry.js';
-import { guardarLlamada, anotarCosto } from '../_lib/guardian.js';
+import { guardarLlamada, anotarCosto, deshacerCobro } from '../_lib/guardian.js';
+import { conTope } from '../_lib/tope.js';
 
 /**
  * VERIFICAR EVIDENCIA CON VISIÓN — del lado del servidor.
@@ -44,9 +45,13 @@ async function handler(req: any, res: any) {
 
   const t0 = Date.now();
   try {
+    // Con tope, como todas: sin él la plataforma mata la función y el
+    // `deshacerCobro` de abajo nunca llega a correr.
+    const tope = conTope();
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${apiKey}`,
       {
+        signal: tope.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,6 +94,9 @@ async function handler(req: any, res: any) {
       veredicto: { ok: parsed.ok, motivo: String(parsed.motivo ?? '') },
     });
   } catch (err) {
+    // SE DEVUELVE EL CRÉDITO. Cobraba y nunca devolvía: si el proveedor
+    // fallaba, el cliente perdía el crédito por algo que no recibió.
+    await deshacerCobro(userId, veredictoGuardian, 'falló el proveedor');
     // Cualquier fallo → sin veredicto. NUNCA bloquea una evidencia legítima.
     const msg = err instanceof Error ? err.message : String(err);
     console.warn('[api/ai/vision] sin veredicto:', msg);

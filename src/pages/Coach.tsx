@@ -32,6 +32,7 @@ import {
   type PilarId,
   type HojaDeRutaItem,
 } from '../lib/supabase';
+import { mensajeDeFalla } from '../lib/conexion';
 import {
   loadCoachState,
   saveCoachMessages,
@@ -390,13 +391,19 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         ];
         await persist(finales);
         await intentarRotarSummary(finales);
-      } catch {
-        toast.error('El Mentor no pudo responder. Vuelve a intentarlo en un momento.');
+      } catch (err) {
+        // ANTES DECÍA «hubo un error de red» PARA CUALQUIER FALLA.
+        //
+        // Y eso le impide al cliente hacer lo único que ayudaría: si se quedó
+        // sin créditos, reintentar no sirve; si tardó de más, sí. Decirle mal
+        // la causa lo deja probando lo que no funciona.
+        const causa = mensajeDeFalla(err, 'responderte');
+        toast.error(causa);
         setMessages((prev) => {
           const next = [...prev];
           next[next.length - 1] = {
             ...next[next.length - 1],
-            content: 'Hubo un error de red. ¿Podrías repetirme eso?',
+            content: causa,
           };
           return next;
         });

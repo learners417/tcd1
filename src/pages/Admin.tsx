@@ -12,7 +12,6 @@ import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
 import TableroPlata from '../components/admin/TableroPlata';
 import PanelMotorIA from '../components/admin/PanelMotorIA';
-import ColaDelDia from '../components/admin/ColaDelDia';
 import Supervision from '../components/admin/Supervision';
 import SalaDeMando from '../components/admin/SalaDeMando';
 import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
@@ -3953,10 +3952,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               onAbrir={abrirDestino}
             />
 
-            <ColaDelDia clientes={clientes.map((c) => ({
-              id: c.id, nombre: c.nombre,
-              plan_comercial: (c as { plan_comercial?: string | null }).plan_comercial ?? null,
-            }))} />
+            {/* La cola vieja SE FUE de acá.
+
+                Estaban las dos apiladas: la lista nueva y esta, que mostraba
+                lo mismo con un botón que decía «Mandárselo en la app» y NO
+                mandaba nada. Quien lo tocaba creía que el mensaje había
+                salido.
+
+                Agregué la nueva y no saqué la vieja — que es exactamente el
+                error que esta app existe para evitar. */}
             </JornadaPanel>
           )}
 
