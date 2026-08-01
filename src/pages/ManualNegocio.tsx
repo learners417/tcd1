@@ -359,7 +359,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
               <span className="text-gold font-bold text-base" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 {section.letter}
               </span>
-              <span className="text-[11px] text-cream/45 font-medium tracking-wider uppercase">
+              <span className="text-sm text-cream/45 font-medium tracking-wider uppercase">
                 {section.pillars}
               </span>
             </div>
@@ -370,7 +370,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
         </div>
 
         <div className="flex items-center gap-3 shrink-0 ml-4">
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-[rgba(232,150,46,0.12)] bg-gold/10 text-gold">
+          <span className="px-2.5 py-1 rounded-full text-sm font-semibold border border-[rgba(232,150,46,0.12)] bg-gold/10 text-gold">
             {completed}/{total} completados
           </span>
           {isExpanded

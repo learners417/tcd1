@@ -83,7 +83,7 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
                   {SOURCE_LABELS[tx.source]}
                 </div>
                 {tx.reason && (
-                  <div className="text-[11px] text-white/55 truncate">
+                  <div className="text-sm text-white/55 truncate">
                     {tx.reason}
                   </div>
                 )}
@@ -97,7 +97,7 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
               >
                 {isPositive ? '+' : ''}{tx.delta}
               </span>
-              <span className="text-[11px] text-white/45 w-16 text-right">
+              <span className="text-sm text-white/45 w-16 text-right">
                 {new Date(tx.created_at).toLocaleDateString('es-AR', {
                   day: '2-digit',
                   month: 'short',

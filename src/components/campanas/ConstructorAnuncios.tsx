@@ -284,14 +284,14 @@ CAPTION: …`;
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El Constructor</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">El Constructor</p>
         <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 3 anuncios</h2>
         <p className="text-sm text-cream/60 mt-1">Tres fórmulas que atacan distinto, completadas con TU caso. La regla: una de piedras, una de dolor o historia, una de resultado.</p>
       </div>
 
       {/* EL BRIEF */}
       <div className="card-panel p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
           1 · Tu brief{faltantes.length === 0 ? ' — lo trajimos de tu ADN, ajústalo' : ''}
         </p>
         {faltantes.length > 0 && (
@@ -299,16 +299,16 @@ CAPTION: …`;
             <p className="text-sm text-cream font-semibold mb-1">
               Todavía no puedo traerlo de tu ADN.
             </p>
-            <p className="text-xs text-cream/70 mb-2">
+            <p className="text-sm text-cream/70 mb-2">
               Estos anuncios salen de lo que ya sellaste en tu Camino. Te
               {faltantes.length === 1 ? ' falta esta sesión' : ` faltan ${faltantes.length} sesiones`}:
             </p>
             <ul className="space-y-1">
               {faltantes.map((k) => (
-                <li key={k} className="text-xs text-gold">· {ORIGEN[k]}</li>
+                <li key={k} className="text-sm text-gold">· {ORIGEN[k]}</li>
               ))}
             </ul>
-            <p className="text-[11px] text-cream/50 mt-2">
+            <p className="text-sm text-cream/50 mt-2">
               Puedes escribirlo a mano igual — pero si lo sellas en el Camino, entra solo y queda en tu ADN.
             </p>
           </div>
@@ -316,7 +316,7 @@ CAPTION: …`;
         <div className="grid sm:grid-cols-2 gap-4">
           {CAMPOS.map((c) => (
             <div key={c.k} className={c.k === 'avatar' || c.k === 'oferta' ? 'sm:col-span-2' : ''}>
-              <p className="text-xs font-semibold text-cream mb-1">{c.label}</p>
+              <p className="text-sm font-semibold text-cream mb-1">{c.label}</p>
               <textarea
                 value={brief[c.k]}
                 onChange={(e) => setCampo(c.k, e.target.value)}
@@ -331,10 +331,10 @@ CAPTION: …`;
 
       {/* LO QUE LA APP ELIGIÓ POR TI */}
       <div className="card-panel p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
           2 · Tus 3 anuncios
         </p>
-        <p className="text-xs text-cream/55 mb-4">
+        <p className="text-sm text-cream/55 mb-4">
           Elegidas con lo que ya sellaste. Una ataca lo que tu paciente probó, otra su dolor
           y otra tu resultado: si las tres dijeran lo mismo, no sabrías cuál funcionó.
         </p>
@@ -346,14 +346,14 @@ CAPTION: …`;
             const f = formulaPorId(elegidas[fam])!;
             return (
               <div key={fam} className="rounded-xl border border-gold/25 bg-gold/[0.04] p-4">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-gold/70 mb-1">
+                <p className="text-xs uppercase tracking-[0.2em] text-gold/70 mb-1">
                   {NOMBRE_FAMILIA[fam]}
                 </p>
                 <p className="text-sm font-semibold text-cream mb-1">
                   {f.id} · {f.nombre}
-                  {cambiada && <span className="text-[10px] text-cream/40 font-normal ml-2">— la cambiaste tú</span>}
+                  {cambiada && <span className="text-xs text-cream/40 font-normal ml-2">— la cambiaste tú</span>}
                 </p>
-                <p className="text-xs text-cream/70">{cambiada ? f.cuando : r.porQue}</p>
+                <p className="text-sm text-cream/70">{cambiada ? f.cuando : r.porQue}</p>
               </div>
             );
           })}
@@ -362,12 +362,12 @@ CAPTION: …`;
         {/* Lo que todavía no le sirve, con el motivo */}
         {bloqueadas.length > 0 && (
           <div className="mt-4 rounded-xl border border-cream/12 p-4">
-            <p className="text-[11px] text-cream/55 mb-2">
+            <p className="text-sm text-cream/55 mb-2">
               Hay {bloqueadas.length} fórmulas que todavía no te conviene usar:
             </p>
             <ul className="space-y-1.5">
               {bloqueadas.map((b) => (
-                <li key={b.id} className="text-xs text-cream/60">
+                <li key={b.id} className="text-sm text-cream/60">
                   <strong className="text-cream/80">{b.nombre}</strong> — {b.porQue}
                 </li>
               ))}
@@ -377,7 +377,7 @@ CAPTION: …`;
 
         {/* La puerta a las 18, para quien ya tiene criterio */}
         <button onClick={() => setVerTodas((v) => !v)}
-          className="text-[11px] text-cream/45 underline underline-offset-2 mt-4">
+          className="text-sm text-cream/45 underline underline-offset-2 mt-4">
           {verTodas ? 'Ocultar las demás' : 'Prefiero elegirlas yo'}
         </button>
 
@@ -385,7 +385,7 @@ CAPTION: …`;
           <div className="grid sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-cream/10">
             {FAMILIAS.map((fam) => (
               <div key={fam}>
-                <p className="text-xs font-semibold text-gold mb-2">{NOMBRE_FAMILIA[fam]}</p>
+                <p className="text-sm font-semibold text-gold mb-2">{NOMBRE_FAMILIA[fam]}</p>
                 <div className="space-y-1.5">
                   {FAMILIAS_TEST[fam].map((id) => {
                     const f = formulaPorId(id)!;
@@ -394,13 +394,13 @@ CAPTION: …`;
                     const sugerida = recomendado[fam].id === id;
                     return (
                       <button key={id} onClick={() => elegir(fam, id)}
-                        className={`w-full text-left rounded-xl border px-3 py-2 text-xs transition ${
+                        className={`w-full text-left rounded-xl border px-3 py-2 text-sm transition ${
                           activa ? 'border-gold/60 bg-gold/10 text-cream'
                                  : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}>
                         <span className="font-semibold">{f.id} · {f.nombre}</span>
-                        {sugerida && <span className="block text-[10px] text-gold/70 mt-0.5">La que te recomendamos</span>}
-                        {impedida && <span className="block text-[10px] text-danger/80 mt-0.5">{impedida.porQue}</span>}
-                        {activa && !sugerida && <span className="block text-[10px] text-cream/50 mt-0.5">{f.cuando}</span>}
+                        {sugerida && <span className="block text-xs text-gold/70 mt-0.5">La que te recomendamos</span>}
+                        {impedida && <span className="block text-xs text-danger/80 mt-0.5">{impedida.porQue}</span>}
+                        {activa && !sugerida && <span className="block text-xs text-cream/50 mt-0.5">{f.cuando}</span>}
                       </button>
                     );
                   })}
@@ -416,7 +416,7 @@ CAPTION: …`;
         className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold disabled:opacity-60">
         {generando ? `Escribiendo: ${generando}…` : '✨ Generar mis 3 anuncios + stories'}
       </button>
-      {fallo && <p className="text-xs text-danger">{fallo}</p>}
+      {fallo && <p className="text-sm text-danger">{fallo}</p>}
 
       {/* LAS PIEZAS */}
       {FAMILIAS.map((fam) => {
@@ -446,14 +446,14 @@ CAPTION: …`;
                     ? `No se puede publicar así: ${bloqueantes[0].que}`
                     : 'Todavía le falta algo. Revísala antes de publicarla.'
                 }
-                className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
+                className="text-sm font-bold text-gold hover:text-goldhi shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
                 Copiar ⧉
               </button>
             </div>
             {carrusel.problema ? (
               <>
                 <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{pieza.texto}</pre>
-                <p className="text-[11px] text-gold mt-2">{carrusel.problema}</p>
+                <p className="text-sm text-gold mt-2">{carrusel.problema}</p>
               </>
             ) : (
               <div className="space-y-2">
@@ -464,12 +464,12 @@ CAPTION: …`;
                       : l.tipo === 'cierre' ? 'border-success/25 bg-success/[0.04]'
                       : 'border-cream/12'}`}>
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-cream/45">
+                      <span className="text-xs uppercase tracking-[0.2em] text-cream/45">
                         {l.tipo === 'portada' ? 'Portada' : l.tipo === 'cierre' ? 'Cierre' : `Lámina ${l.n}`}
                         {l.larga && <span className="text-gold ml-2">· muy larga para el teléfono</span>}
                       </span>
                       <button onClick={() => void navigator.clipboard?.writeText(l.texto)}
-                        className="text-[10px] font-bold text-gold hover:text-goldhi shrink-0">
+                        className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
                         Copiar
                       </button>
                     </div>
@@ -480,11 +480,11 @@ CAPTION: …`;
                 {carrusel.caption && (
                   <div className="rounded-xl border border-cream/12 p-3">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-cream/45">
+                      <span className="text-xs uppercase tracking-[0.2em] text-cream/45">
                         Texto del post
                       </span>
                       <button onClick={() => void navigator.clipboard?.writeText(carrusel.caption)}
-                        className="text-[10px] font-bold text-gold hover:text-goldhi shrink-0">
+                        className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
                         Copiar
                       </button>
                     </div>
@@ -493,7 +493,7 @@ CAPTION: …`;
                 )}
 
                 {!carrusel.palabraPresente && (
-                  <p className="text-[11px] text-danger/85">
+                  <p className="text-sm text-danger/85">
                     {brief.palabra
                       ? `Tu palabra «${brief.palabra}» no aparece ni en el cierre ni en el texto del post. Sin eso, el comentario no dispara el mensaje automático y la campaña no puede funcionar.`
                       : 'Todavía no configuraste tu palabra clave. Es lo que dispara el mensaje automático cuando alguien comenta.'}
@@ -507,7 +507,7 @@ CAPTION: …`;
                 bloqueantes.length > 0
                   ? 'border-danger/45 bg-danger/[0.07]'
                   : 'border-gold/30 bg-gold/[0.05]'}`}>
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-cream/70">
+                <p className="text-sm font-bold uppercase tracking-wider mb-2 text-cream/70">
                   {bloqueantes.length > 0
                     ? 'Esto no se puede publicar así'
                     : 'Revisa esto antes de publicar'}
@@ -515,18 +515,18 @@ CAPTION: …`;
                 <div className="space-y-2.5">
                   {politicas.map((a) => (
                     <div key={a.id}>
-                      <p className="text-xs text-cream/85">
+                      <p className="text-sm text-cream/85">
                         <strong className={a.gravedad === 'bloquea' ? 'text-danger' : 'text-gold'}>
                           «{a.que}»
                         </strong> — {a.porQue}
                       </p>
-                      <p className="text-[11px] text-cream/55 mt-0.5">{a.comoSeArregla}</p>
-                      <p className="text-[10px] text-cream/35 mt-0.5 italic">{a.fragmento}</p>
+                      <p className="text-sm text-cream/55 mt-0.5">{a.comoSeArregla}</p>
+                      <p className="text-xs text-cream/35 mt-0.5 italic">{a.fragmento}</p>
                     </div>
                   ))}
                 </div>
                 {bloqueantes.length > 0 && (
-                  <p className="text-[11px] text-cream/45 mt-2.5 border-t border-cream/10 pt-2">
+                  <p className="text-sm text-cream/45 mt-2.5 border-t border-cream/10 pt-2">
                     Lo que está en juego es tu cuenta publicitaria. Recuperarla tarda semanas
                     y a veces no se recupera.
                   </p>
@@ -536,35 +536,35 @@ CAPTION: …`;
 
             <div className={`mt-3 rounded-xl border p-3 ${
               listaParaPublicar ? 'border-success/25 bg-success/[0.05]' : 'border-gold/30 bg-gold/[0.05]'}`}>
-              <p className="text-[11px] font-bold uppercase tracking-wider mb-1 text-cream/70">
+              <p className="text-sm font-bold uppercase tracking-wider mb-1 text-cream/70">
                 {listaParaPublicar ? 'Lista para publicar' : 'Todavía no está lista'}
               </p>
-              <p className="text-xs text-cream/70">{audit.nota}</p>
+              <p className="text-sm text-cream/70">{audit.nota}</p>
               {!audit.aprobada && (
-                <p className="text-xs text-cream/60 mt-1">Le falta: {audit.faltantes.join(' · ')}</p>
+                <p className="text-sm text-cream/60 mt-1">Le falta: {audit.faltantes.join(' · ')}</p>
               )}
 
               {/* La segunda revisión: otro modelo, y escribe lo que falta */}
               {!audit.aprobada && !rev && (
                 <button onClick={() => void revisar(pieza.formulaId, pieza.texto)}
                   disabled={revisando === pieza.formulaId}
-                  className="mt-3 w-full py-2 rounded-lg border border-gold/40 text-gold text-xs font-bold disabled:opacity-50">
+                  className="mt-3 w-full py-2 rounded-lg border border-gold/40 text-gold text-sm font-bold disabled:opacity-50">
                   {revisando === pieza.formulaId ? 'Revisando…' : 'Que la revise y escriba lo que falta'}
                 </button>
               )}
 
               {rev?.problema && (
-                <p className="text-xs text-danger/85 mt-2">{rev.problema}</p>
+                <p className="text-sm text-danger/85 mt-2">{rev.problema}</p>
               )}
 
               {rev?.alertasMeta && rev.alertasMeta.length > 0 && (
                 <div className="mt-3 rounded-lg border border-danger/40 bg-danger/[0.06] p-3">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-danger mb-1">
+                  <p className="text-sm font-bold uppercase tracking-wider text-danger mb-1">
                     Esto te lo pueden rechazar
                   </p>
                   <ul className="space-y-1">
                     {rev.alertasMeta.map((a, i) => (
-                      <li key={i} className="text-xs text-cream/85">· {a}</li>
+                      <li key={i} className="text-sm text-cream/85">· {a}</li>
                     ))}
                   </ul>
                 </div>
@@ -572,17 +572,17 @@ CAPTION: …`;
 
               {rev?.correcciones && rev.correcciones.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  <p className="text-[11px] text-cream/55">
+                  <p className="text-sm text-cream/55">
                     Escribí lo que faltaba. Míralo y agrégalo si te suena tuyo:
                   </p>
                   {rev.correcciones.map((c) => (
                     <div key={c.ingrediente} className="rounded-lg border border-cream/12 p-3">
-                      <p className="text-[10px] uppercase tracking-wider text-gold/70 mb-1">
+                      <p className="text-xs uppercase tracking-wider text-gold/70 mb-1">
                         {c.ingrediente}{c.donde ? ` · ${c.donde}` : ''}
                       </p>
                       <p className="text-sm text-cream/85 mb-2">{c.linea}</p>
                       <button onClick={() => aplicar(pieza.formulaId, c.linea, c.ingrediente, c.posicion)}
-                        className="text-[11px] font-bold text-gold">
+                        className="text-sm font-bold text-gold">
                         Agregarlo a mi anuncio
                       </button>
                     </div>
@@ -591,7 +591,7 @@ CAPTION: …`;
               )}
 
               {rev?.correcciones && rev.correcciones.length === 0 && !rev.problema && (
-                <p className="text-xs text-cream/55 mt-2">
+                <p className="text-sm text-cream/55 mt-2">
                   El revisor no encontró nada más que agregar.
                 </p>
               )}
@@ -605,15 +605,15 @@ CAPTION: …`;
           <div className="flex items-start justify-between gap-3 mb-2">
             <p className="text-sm font-bold text-cream">12 · La secuencia de 3 stories — acompaña siempre</p>
             <button onClick={() => void navigator.clipboard?.writeText(stories)}
-              className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
+              className="text-sm font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
           </div>
           <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{stories}</pre>
-          <p className="text-[11px] text-cream/45 mt-2">Se publican el mismo día, con horas de diferencia. Repetible 2-3 veces por semana con distinto ángulo.</p>
+          <p className="text-sm text-cream/45 mt-2">Se publican el mismo día, con horas de diferencia. Repetible 2-3 veces por semana con distinto ángulo.</p>
         </div>
       )}
 
       {listas && (
-        <p className="text-xs text-cream/55 text-center">Tus 3 anuncios están listos. El paso que sigue vive en tu Camino: grabarlos y montar tu campaña.</p>
+        <p className="text-sm text-cream/55 text-center">Tus 3 anuncios están listos. El paso que sigue vive en tu Camino: grabarlos y montar tu campaña.</p>
       )}
 
       {/* EL PAQUETE — todo junto, listo para encender */}
@@ -621,16 +621,16 @@ CAPTION: …`;
         <div className="card-panel p-5">
           <div className="flex items-start justify-between gap-3 mb-1">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">
                 4 · Tu paquete para encender
               </p>
-              <p className="text-xs text-cream/55 mt-1">
+              <p className="text-sm text-cream/55 mt-1">
                 Todo lo que necesitas, junto. No hace falta que armes nada a mano.
               </p>
             </div>
             {paquete.textoCompleto && (
               <button onClick={() => void navigator.clipboard?.writeText(paquete.textoCompleto)}
-                className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">
+                className="text-sm font-bold text-gold hover:text-goldhi shrink-0">
                 Copiar todo
               </button>
             )}
@@ -662,17 +662,17 @@ CAPTION: …`;
                       {x.estado === 'listo' ? '✓' : x.estado === 'revisar' ? '!' : '○'}
                     </span>{' '}
                     {x.titulo}
-                    {!x.obligatoria && <span className="text-[10px] text-cream/35 ml-2">opcional</span>}
+                    {!x.obligatoria && <span className="text-xs text-cream/35 ml-2">opcional</span>}
                   </span>
                   {x.contenido && (
                     <button onClick={() => void navigator.clipboard?.writeText(x.contenido)}
-                      className="text-[10px] font-bold text-gold hover:text-goldhi shrink-0">
+                      className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
                       Copiar
                     </button>
                   )}
                 </div>
-                {x.aviso && <p className="text-[11px] text-danger/85 mt-1">{x.aviso}</p>}
-                {!x.contenido && <p className="text-[11px] text-cream/45 mt-1">{x.donde}</p>}
+                {x.aviso && <p className="text-sm text-danger/85 mt-1">{x.aviso}</p>}
+                {!x.contenido && <p className="text-sm text-cream/45 mt-1">{x.donde}</p>}
               </div>
             ))}
           </div>

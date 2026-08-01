@@ -95,7 +95,7 @@ export default function ElCaminoView({ clientes, checks, onToggle, caminoDone }:
                     <div className="flex-1 min-w-0">
                       <div className="text-base font-semibold text-cream mb-1 flex items-center gap-2 flex-wrap">
                         <span>{sectionIdx + 1}.{itemIdx + 1} · {item.title}</span>
-                        {autoCamino && <span className="text-[11px] uppercase tracking-wider text-gold/80 font-bold">auto</span>}
+                        {autoCamino && <span className="text-sm uppercase tracking-wider text-gold/80 font-bold">auto</span>}
                       </div>
                       <div className="text-[14px] leading-relaxed text-cream/65" dangerouslySetInnerHTML={{ __html: item.detail }} />
                     </div>

@@ -150,7 +150,7 @@ export default function CreativoStudio({ campana, userId, perfil, onBack, onSave
           </div>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-sm">
           {saving ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /><span className="text-cream/75">Guardando en historial…</span></>
           ) : saved ? (
@@ -224,7 +224,7 @@ export default function CreativoStudio({ campana, userId, perfil, onBack, onSave
                   <button
                     key={idx}
                     onClick={() => setActiveSlide(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-all ${
                       activeSlide === idx
                         ? 'bg-gold/15 text-gold border border-gold/30'
                         : 'bg-cream/5 text-cream/45'

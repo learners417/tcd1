@@ -46,7 +46,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
       <div className="text-center py-12">
         <ImageIcon className="w-12 h-12 text-cream/10 mx-auto mb-3" />
         <p className="text-sm text-cream/45">No hay creativos todavia</p>
-        <p className="text-xs text-cream/20 mt-1">Genera tu primer creativo en el Studio</p>
+        <p className="text-sm text-cream/20 mt-1">Genera tu primer creativo en el Studio</p>
       </div>
     );
   }
@@ -58,12 +58,12 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-cream/45" />
-            <span className="text-xs text-cream/45">Tipo:</span>
+            <span className="text-sm text-cream/45">Tipo:</span>
             {(['all', 'imagen_single', 'carrusel'] as FilterType[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setFilterTipo(t)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all ${
                   filterTipo === t
                     ? 'bg-gold/15 text-gold'
                     : 'bg-cream/5 text-cream/45 hover:text-cream/65'
@@ -74,10 +74,10 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
             ))}
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-cream/45">Angulo:</span>
+            <span className="text-sm text-cream/45">Angulo:</span>
             <button
               onClick={() => setFilterAngulo('all')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all ${
                 filterAngulo === 'all'
                   ? 'bg-gold/15 text-gold'
                   : 'bg-cream/5 text-cream/45 hover:text-cream/65'
@@ -89,7 +89,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
               <button
                 key={a}
                 onClick={() => setFilterAngulo(a)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all ${
                   filterAngulo === a
                     ? 'bg-gold/15 text-gold'
                     : 'bg-cream/5 text-cream/45 hover:text-cream/65'
@@ -147,7 +147,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
 
                 {/* Badges */}
                 {creativo.tipo === 'carrusel' && slideCount > 0 && (
-                  <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 text-xs text-cream">
+                  <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 text-sm text-cream">
                     <Layers className="w-3 h-3" /> {slideCount}
                   </div>
                 )}
@@ -158,10 +158,10 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
                 <div className="p-3 space-y-1">
                   <p className="text-sm font-medium text-cream truncate">{creativo.titulo}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-gold/10 text-gold">
+                    <span className="text-sm px-2 py-0.5 rounded-full bg-gold/10 text-gold">
                       {ANGULO_LABELS[creativo.angulo].titulo}
                     </span>
-                    <span className="text-[11px] text-cream/45">
+                    <span className="text-sm text-cream/45">
                       {TIPO_LABELS[creativo.tipo]}
                     </span>
                   </div>

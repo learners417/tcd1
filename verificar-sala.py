@@ -86,7 +86,12 @@ def _superficies(tab: str, titulo: str) -> bool:
             and f"id: '{tab}'" in _adm and titulo in _adm
             and f"mainTab === '{tab}'" in _adm)
 
-chk('plata en las 5 superficies del Admin', _superficies('plata', "plata: 'Mesa de plata"))
+# `plata` YA NO ES UNA SUPERFICIE del menú: se dibuja dentro de Supervisión al
+# tocar una fila, porque las dos mostraban lo mismo —el cuello y las semanas—
+# una para todos y otra para uno. No son dos pantallas: son una lista y su
+# detalle.
+chk('la mesa de plata vive dentro de Supervisión',
+    '<TableroPlata' in rd('src/components/admin/Supervision.tsx'))
 chk('motor IA en las 5 superficies del Admin', _superficies('motor', "motor: 'Motor de IA"))
 chk('las tabs de dueño no dejan pantalla vacía (equipo, plata, motor)',
     "TABS_SOLO_DUENO" in _adm and "'motor'" in _adm.split('TABS_SOLO_DUENO')[1][:80])

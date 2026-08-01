@@ -58,7 +58,7 @@ export default function SalaDeMando({ clientes }: { clientes: Cliente[] }) {
       <div className="flex gap-2 flex-wrap">
         {VISTAS.map((v) => (
           <button key={v.id} onClick={() => setVista(v.id)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
               vista === v.id
                 ? 'bg-gold/20 border border-gold/50 text-gold'
                 : 'border border-cream/15 text-cream/60'}`}>
@@ -121,8 +121,8 @@ function Marcador(
         ].map(([l, v, sub]) => (
           <div key={l} className="rounded-2xl border border-cream/12 p-4 text-center">
             <p className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>{v}</p>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-1">{l}</p>
-            <p className="text-[10px] text-cream/30">{sub}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-cream/45 mt-1">{l}</p>
+            <p className="text-xs text-cream/30">{sub}</p>
           </div>
         ))}
       </div>
@@ -136,7 +136,7 @@ function Marcador(
               ? 'Hay una cuenta frenada en su etapa.'
               : `Hay ${frenados} cuentas frenadas en su etapa.`}
         </p>
-        <p className="text-xs text-cream/55 mt-1">
+        <p className="text-sm text-cream/55 mt-1">
           {frenados === 0
             ? 'Todo el mundo está dentro del tiempo de su etapa.'
             : 'Están en Recorrido, con el criterio que les falta y quién lo destraba.'}
@@ -186,7 +186,7 @@ function Recorrido(
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-cream/45">
+      <p className="text-sm text-cream/45">
         Cada cliente vive en una sola etapa. Nadie avanza sin cumplir el criterio de salida.
       </p>
 
@@ -198,13 +198,13 @@ function Recorrido(
             <div className="flex items-baseline justify-between gap-3 mb-1">
               <p className="text-sm font-semibold text-cream">
                 {e.numero} · {e.nombre}
-                <span className="text-[11px] text-cream/40 font-normal ml-2">{e.dueno}</span>
+                <span className="text-sm text-cream/40 font-normal ml-2">{e.dueno}</span>
               </p>
-              <span className="text-[11px] text-cream/35 shrink-0">
+              <span className="text-sm text-cream/35 shrink-0">
                 {aqui.length} {aqui.length === 1 ? 'cliente' : 'clientes'}
               </span>
             </div>
-            <p className="text-[11px] text-cream/45 mb-3">Para salir: {e.criterioSalida}</p>
+            <p className="text-sm text-cream/45 mb-3">Para salir: {e.criterioSalida}</p>
 
             <div className="space-y-2">
               {aqui.map((c) => (
@@ -216,7 +216,7 @@ function Recorrido(
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm text-cream/90">{c.nombre}</p>
-                      <p className="text-[11px] text-cream/45">
+                      <p className="text-sm text-cream/45">
                         {c.diasEnEtapa} {c.diasEnEtapa === 1 ? 'día' : 'días'} en esta etapa
                         {c.fueraDeVentana && (
                           <span className="text-danger ml-2">
@@ -231,7 +231,7 @@ function Recorrido(
                     {c.etapa < ETAPAS.length - 1 && (
                       <button onClick={() => void mover(c, c.etapa + 1)}
                         disabled={moviendo === c.id}
-                        className="flex items-center gap-1 text-[11px] font-bold text-gold hover:text-goldhi disabled:opacity-40 shrink-0">
+                        className="flex items-center gap-1 text-sm font-bold text-gold hover:text-goldhi disabled:opacity-40 shrink-0">
                         {moviendo === c.id ? 'Moviendo…' : <>Avanzar <ArrowRight size={11} /></>}
                       </button>
                     )}
@@ -286,7 +286,7 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-cream/45">
+      <p className="text-sm text-cream/45">
         El criterio que no se escribe se vuelve a discutir. Y cada vez que se vuelve a
         discutir, alguien tiene que estar presente para decidirlo otra vez.
       </p>
@@ -296,7 +296,7 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
           placeholder="Buscar una decisión…"
           className="flex-1 bg-surface/40 border border-cream/15 rounded-xl px-3 py-2 text-sm text-cream" />
         <button onClick={() => setAbriendo((a) => !a)}
-          className="flex items-center gap-1 btn-primary px-3 py-2 rounded-xl text-xs font-bold shrink-0">
+          className="flex items-center gap-1 btn-primary px-3 py-2 rounded-xl text-sm font-bold shrink-0">
           {abriendo ? <X size={13} /> : <Plus size={13} />}
           {abriendo ? 'Cerrar' : 'Anotar'}
         </button>
@@ -312,7 +312,7 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
             rows={3}
             className="w-full bg-surface/40 border border-cream/15 rounded-xl px-3 py-2 text-sm text-cream" />
           <button onClick={() => void guardar()} disabled={titulo.trim().length < 5}
-            className="w-full btn-primary py-2 rounded-xl text-xs font-bold disabled:opacity-40">
+            className="w-full btn-primary py-2 rounded-xl text-sm font-bold disabled:opacity-40">
             Guardar
           </button>
         </div>
@@ -332,9 +332,9 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
                 <div className="min-w-0">
                   <p className="text-sm text-cream/90">{d.titulo}</p>
                   {d.criterio && (
-                    <p className="text-xs text-cream/60 mt-1 leading-relaxed">{d.criterio}</p>
+                    <p className="text-sm text-cream/60 mt-1 leading-relaxed">{d.criterio}</p>
                   )}
-                  <p className="text-[11px] text-cream/35 mt-1">
+                  <p className="text-sm text-cream/35 mt-1">
                     {new Date(d.decidida_en).toLocaleDateString()}
                   </p>
                 </div>
@@ -345,7 +345,7 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
                       void derogarDecision(d.id).then(cargar);
                     }
                   }}
-                  className="text-[11px] text-cream/35 hover:text-cream/60 shrink-0">
+                  className="text-sm text-cream/35 hover:text-cream/60 shrink-0">
                   Ya no aplica
                 </button>
               </div>
@@ -401,14 +401,14 @@ function MiMotor() {
             <div className="h-full bg-gold rounded-full transition-all"
               style={{ width: `${pct}%` }} />
           </div>
-          <p className="text-[11px] text-cream/50 mt-1.5">
+          <p className="text-sm text-cream/50 mt-1.5">
             ${e.cobrado.toLocaleString()} de ${e.objetivo.toLocaleString()} · {pct}%
           </p>
         </div>
       </div>
 
       {e.cerradas > 0 && !v.cortar && (
-        <p className="text-xs text-cream/55">
+        <p className="text-sm text-cream/55">
           De cada venta vuelven $1.000 a pauta, con tope de $3.000.
           Con {e.cerradas} {e.cerradas === 1 ? 'venta' : 'ventas'} puedes reinvertir
           hasta <strong className="text-gold">${v.reinversionDisponible.toLocaleString()}</strong>.
@@ -416,22 +416,22 @@ function MiMotor() {
       )}
 
       {e.diasSinAgenda > 0 && e.diasSinAgenda < DIAS_PAUTA_SIN_AGENDA && (
-        <p className="text-xs text-gold/85">
+        <p className="text-sm text-gold/85">
           {e.diasSinAgenda} de {DIAS_PAUTA_SIN_AGENDA} días sin agendas. Al séptimo se corta.
         </p>
       )}
 
       <div className="rounded-2xl border border-cream/12 p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
             Tus números
           </p>
-          {guardado && <span className="text-[11px] text-success/80">Guardado ✓</span>}
+          {guardado && <span className="text-sm text-success/80">Guardado ✓</span>}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {CAMPOS.map(([k, label]) => (
             <div key={k}>
-              <label className="block text-[10px] text-cream/45 mb-1">{label}</label>
+              <label className="block text-xs text-cream/45 mb-1">{label}</label>
               <input inputMode="decimal" value={String(e[k] ?? 0)}
                 onChange={(ev) => set(k, ev.target.value)}
                 className="w-full bg-surface/40 border border-cream/12 rounded-lg px-2 py-1.5 text-sm text-cream" />

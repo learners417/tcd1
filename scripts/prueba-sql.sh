@@ -64,6 +64,19 @@ create table profiles (
   adn_avatar jsonb, metodo_nombre text, oferta_mid text);
 -- La tabla de prueba tiene que parecerse a la real: le faltaban las
 -- columnas de archivo y fechas, y por eso una función correcta fallaba acá.
+-- La tabla de mensajes: sin ella, las funciones de soporte fallan en la
+-- prueba aunque estén bien. La de prueba tiene que parecerse a la real.
+create table mensajes (
+  id uuid primary key default gen_random_uuid(),
+  canal text, emisor_id uuid, receptor_id uuid, contenido text,
+  respondido_en timestamptz, tipo text default 'duda',
+  created_at timestamptz default now());
+
+create table notificaciones (
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid, titulo text, descripcion text, accion_url text,
+  leida boolean default false, created_at timestamptz default now());
+
 create type admin_tarea_prioridad as enum ('baja','media','alta','urgente');
 
 create table admin_tareas (
@@ -136,6 +149,10 @@ select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1
 select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1,'webhook');
 select sumar_campo('11111111-1111-1111-1111-111111111111','2026-W31','agendas',1,'webhook');
 select * from carga_de_semana('11111111-1111-1111-1111-111111111111','2026-W31');
+-- El soporte: un mensaje entra sin responder y se marca al contestarlo.
+insert into mensajes (canal, emisor_id, contenido)
+  values ('humano','22222222-2222-2222-2222-222222222222','no me llega el DM');
+select marcar_respondido('22222222-2222-2222-2222-222222222222');
 SQL
 marcar $? "las 17 funciones se ejecutan sin errores de tipo"
 grep -E "^ERROR|^psql.*ERROR" "$DATA/f.txt" | head -3

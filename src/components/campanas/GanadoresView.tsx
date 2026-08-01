@@ -16,7 +16,7 @@ export default function GanadoresView({ creativos, onSelectCreativo }: Props) {
   return (
     <div className="animate-in fade-in duration-500 max-w-5xl mx-auto">
       <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
+        <p className="text-sm font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Top performers
         </p>
         <h2 className="text-xl font-light text-cream">
@@ -30,7 +30,7 @@ export default function GanadoresView({ creativos, onSelectCreativo }: Props) {
         <div className="card-panel p-12 text-center">
           <Trophy className="w-10 h-10 text-cream/15 mx-auto mb-3" />
           <p className="text-sm text-cream/55 mb-1">Todavia no hay creativos ganadores.</p>
-          <p className="text-xs text-cream/25">
+          <p className="text-sm text-cream/25">
             Aprueba creativos desde el estudio para que aparezcan aca.
           </p>
         </div>
@@ -57,13 +57,13 @@ export default function GanadoresView({ creativos, onSelectCreativo }: Props) {
                 </div>
               )}
 
-              <div className="text-[11px] text-cream/45 mb-0.5">
+              <div className="text-sm text-cream/45 mb-0.5">
                 {ANGULO_LABELS[c.angulo].titulo}
               </div>
               <div className="text-sm font-semibold text-cream mb-2 line-clamp-2">
                 {c.titulo || c.nombre || 'Sin titulo'}
               </div>
-              <div className="flex gap-3 text-[11px] text-cream/45">
+              <div className="flex gap-3 text-sm text-cream/45">
                 <span>
                   Angulo: <strong className="text-gold">{c.angulo}</strong>
                 </span>

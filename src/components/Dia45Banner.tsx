@@ -29,7 +29,7 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
           <AlertTriangle className="w-5 h-5 text-[#ff5e5e]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
             Día {diaActual} · punto de no retorno {diasDespues >= 0 ? `+${diasDespues}` : diasDespues}
           </p>
           <h3 className="text-lg font-medium text-cream tracking-tight mb-1">

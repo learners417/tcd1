@@ -643,8 +643,11 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
           _adm20.index("id: 'hoy'") < _adm20.index("id: 'clientes'"),
           'es lo primero que se abre cada día')
     _lh22 = rd('src/components/admin/ListaDeHoy.tsx')
+    # Copiar y marcar viven ahora en TarjetaCliente, que es la que dibuja
+    # cada ítem de la lista.
     check('se puede copiar el mensaje y marcar lo hecho',
-          'Copiar' in _lh22 and 'Ya lo hice' in _lh22)
+          'Copy' in rd('src/components/admin/TarjetaCliente.tsx')
+          and 'Marcarla hecha' in _lh22)
     check('cuando falla la consulta lo dice en vez de verse vacía',
           'mensajeDeFalla' in _lh22)
     check('la cola está probada con escenarios',
@@ -1372,7 +1375,10 @@ check('la primera es Hoy',
 _d42 = _re42.search(r'DENTRO_DE: .*?= \{(.*?)\n  \};', _adm42, _re42.S)
 _dentro42 = set(_re42.findall(r"id: '([a-z]+)'", _d42.group(1))) if _d42 else set()
 _render42 = set(_re42.findall(r"mainTab === '([a-z]+)'", _adm42))
-_perdidas42 = sorted(_render42 - _menu42 - _dentro42)
+# `plata` ya no necesita puerta propia: se dibuja DENTRO de Supervisión, al
+# tocar una fila. Antes eran dos tabs mostrando lo mismo.
+_dentroDeOtra42 = {'plata'} if '<TableroPlata' in rd('src/components/admin/Supervision.tsx') else set()
+_perdidas42 = sorted(_render42 - _menu42 - _dentro42 - _dentroDeOtra42)
 check('ninguna pantalla quedó inalcanzable',
       not _perdidas42, ', '.join(_perdidas42))
 check('el menú marca el MOMENTO, no la pantalla exacta',
@@ -2165,6 +2171,144 @@ for _f64 in _g64.glob('src/**/*.tsx', recursive=True):
 check('ningún mensaje dice «error de red» sin haber mirado la causa',
       not _mienten64, ', '.join(sorted(set(_mienten64))),
       )
+
+# ── 6.65 · LA LETRA SE LEE ─────────────────────────────────────────────
+#
+# Medí y tenía razón la queja: **473 usos de 12px o menos contra 298 de 14 o
+# más — el 61%**. El estándar para tableros es 14-16 de cuerpo y 18-24 de
+# título; el mínimo accesible son 15-16.
+#
+# Y la advertencia que describe exactamente lo que hice: «achicar la
+# tipografía para meter más filas cambia legibilidad por cantidad; usá un modo
+# compacto con tipografía sana, no letra diminuta».
+import glob as _g65, re as _re65, os as _os65
+_chico65 = []
+for _f65 in _g65.glob('src/**/*.tsx', recursive=True):
+    _s65 = rd(_f65)
+    for _m in _re65.finditer(r'text-\[(\d+)px\]', _s65):
+        if int(_m.group(1)) < 12:
+            _chico65.append(f'{_os65.path.basename(_f65)[:-4]} ({_m.group(1)}px)')
+check('ningún texto por debajo de 12px en toda la app',
+      not _chico65, ', '.join(sorted(set(_chico65))[:5]))
+
+# Y la proporción: el cuerpo tiene que ganarle a lo diminuto.
+_admin65 = ' '.join(rd(f) for f in _g65.glob('src/components/admin/*.tsx'))
+_admin65 += rd('src/pages/Admin.tsx')
+_min65 = len(_re65.findall(r'text-xs\b', _admin65))
+_sano65 = len(_re65.findall(r'text-sm\b|text-base\b|text-lg\b|text-xl\b|text-2xl\b|text-3xl\b', _admin65))
+check(f'el texto sano le gana al chico en el Admin ({_sano65} contra {_min65})',
+      _sano65 > _min65 * 3,
+      'un tablero se lee de un vistazo o no se lee')
+
+# ── 6.66 · El reloj del soporte, conectado ─────────────────────────────
+# El modelo estaba probado y SIN USAR: un mensaje sin responder no aparecía en
+# ningún lado. Podía quedar tres días esperando sin que la cola, la
+# supervisión ni el marcador lo señalaran.
+import os as _os66
+if _os66.path.exists('src/lib/soporteStorage.ts'):
+    _ss66 = rd('src/lib/soporteStorage.ts')
+    _lh66 = rd('src/components/admin/ListaDeHoy.tsx')
+    check('los mensajes esperando se convierten en tareas',
+          'crearTareasDeSoporte' in _ss66 and 'crearTareasDeSoporte' in _lh66)
+    check('«respondido» se deduce, no se marca a mano',
+          'resp > m.created_at' in _ss66,
+          'marcar es una tarea más que alguien olvida, y entonces el reloj miente')
+    check('las tareas se crean ANTES de traer la lista',
+          'Va ANTES de traer la lista' in _lh66,
+          'si se crearan después, habría que recargar para verlas y quien no recarga no se entera')
+
+# ── 6.67 · Un formulario, dos puertas, con firma ───────────────────────
+# Había DOS tableros cargando lo mismo sin enterarse uno del otro, y si
+# ninguno cargaba LA COLA QUEDABA CIEGA — no mostraba menos, mostraba que todo
+# estaba bien.
+import os as _os67
+if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
+    _nds = rd('src/components/admin/NumerosDeLaSemana.tsx')
+    _sup67 = rd('src/components/admin/Supervision.tsx')
+    check('el formulario con firma existe y está montado',
+          'firmaDe' in _nds and '<NumerosDeLaSemana' in _sup67)
+    check('se carga DENTRO del cliente, sin cambiar de pantalla',
+          'sin cambiar de pantalla' in _sup67,
+          'antes había que ir a otra tab, cargar ahí, y volver')
+    check('cada campo dice quién lo cargó',
+          'firmaDe(v)' in _nds)
+    check('dice de quién se espera, no quién puede',
+          'de quién se espera, no quién puede' in _nds,
+          'cualquiera puede cargar cualquiera: la regla es para recordar, no para bloquear')
+    check('si un número no se guardó, se dice',
+          'Ese número no quedó' in _nds,
+          'creer que se guardó cuando no se guardó es peor que un error')
+    check('y dice hasta dónde se puede opinar con lo que hay',
+          'hastaDondePuedoOpinar' in _nds)
+
+# ── 6.66 · Nadie espera en silencio ────────────────────────────────────
+#
+# El circuito de soporte funcionaba de punta a punta, pero SI NADIE RESPONDÍA
+# NADA LO SEÑALABA. En un producto de miles, tres días de silencio es la
+# diferencia entre un cliente y un reembolso.
+import os as _os66
+if _os66.path.exists('src/components/admin/BandejaSoporte.tsx'):
+    _bs66 = rd('src/components/admin/BandejaSoporte.tsx')
+    _sql66 = rd('sala-de-mando.sql')
+    _adm66 = rd('src/pages/Admin.tsx')
+    check('los mensajes sin responder se ven',
+          'mensajesQueEsperan' in _bs66 and 'respondido_en' in _sql66)
+    check('y la bandeja va ARRIBA de la lista de tareas',
+          _adm66.index('<BandejaSoporte') < _adm66.index('<ListaDeHoy'),
+          'alguien esperando manda sobre cualquier cuello: una cuenta rota se destraba mañana, una persona esperando se va hoy')
+    check('el compromiso se dice en la pantalla',
+          'Prometemos' in _bs66,
+          'un número que se puede fallar es mejor que ninguno')
+    check('responder marca a TODOS los mensajes de esa persona',
+          'marcar_respondido' in _sql66 and 'marcar_respondido' in rd('src/lib/cerebroStorage.ts'),
+          'dejarlos abiertos haría que la bandeja muestre gente que ya fue atendida')
+    check('se refresca sola, sin recargar la pantalla',
+          'setInterval' in _bs66,
+          'alguien esperando no puede depender de que alguien recargue a mano')
+    check('el primer dibujo dice PARA QUÉ SIRVE, no solo «cargando»',
+          'Acá aparece todo el que escribió' in _bs66)
+
+# ── 6.67 · Un formulario, DOS puertas ──────────────────────────────────
+#
+# Se llamaba «un formulario, dos puertas» y SOLO TENÍA UNA: el equipo cargaba
+# en Supervisión y el cliente seguía con su tablero viejo. Los dos lados no
+# se enteraban — que es exactamente el problema que este componente vino a
+# arreglar.
+import os as _os67
+if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
+    _mc67 = rd('src/components/campanas/MontajeCupos.tsx')
+    _sv67 = rd('src/components/admin/Supervision.tsx')
+    check('el EQUIPO carga por su puerta',
+          '<NumerosDeLaSemana' in _sv67)
+    check('y el CLIENTE por la suya',
+          '<NumerosDeLaSemana' in _mc67 or 'NumerosDeLaSemana' in _mc67,
+          'si solo carga uno, los dos lados siguen sin enterarse')
+    check('los dos escriben en el MISMO lugar',
+          'guardar_campo' in rd('src/components/admin/NumerosDeLaSemana.tsx'),
+          'dos formularios distintos es lo que dejaba la cola ciega')
+    check('cada campo dice quién lo cargó',
+          'firmaDe' in rd('src/components/admin/NumerosDeLaSemana.tsx'))
+
+# ── 6.68 · La app empuja sola ──────────────────────────────────────────
+#
+# `avisosCliente` estaba CONSTRUIDO, PROBADO Y SIN DISPARAR. Es el módulo que
+# hace que la app empuje: sin él, toda cuenta que se traba espera a que una
+# persona la mire, y el modelo entero deja de escalar.
+import os as _os68
+_cron68 = rd('api/cron/alarmas-inactividad.ts')
+check('los avisos al cliente se disparan solos',
+      'AVISOS[' in _cron68 and 'clientes_para_avisar' in _cron68,
+      'estaban construidos y nadie los mandaba')
+check('van en el cron que ya existe, no en uno nuevo',
+      'sumar otro cron sería otro lugar' in _cron68,
+      'otro cron es otro lugar donde algo puede fallar en silencio')
+check('si fallan los avisos, las alarmas del equipo igual salieron',
+      'No tumba el cron' in _cron68,
+      'perder las alarmas por un fallo de los avisos sería cambiar un problema por dos')
+check('sin datos no se opina: se le pide que cargue',
+      "!it.cargo ? 'no_cargo'" in _cron68)
+check('el mapa de avisos se exporta, no se duplica',
+      'export const AVISOS' in rd('src/lib/avisosCliente.ts'))
 
 print('══ 7) UI ══')
 botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')

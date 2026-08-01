@@ -32,7 +32,7 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
   const Eslabon = ({ n, label }: { n: number; label: string }) => (
     <div className="flex-1 min-w-0 text-center">
       <p className="text-lg font-semibold text-gold" style={{ fontFamily: 'var(--font-display)' }}>{n}</p>
-      <p className="text-[10px] text-cream/50 leading-tight">{label}</p>
+      <p className="text-xs text-cream/50 leading-tight">{label}</p>
     </div>
   );
 
@@ -42,8 +42,8 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
   return (
     <div className={`card-panel p-5 ${pideNumeros ? 'border border-gold/40' : ''}`}>
       <div className="flex items-baseline justify-between mb-1">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60">📊 Tu tablero</p>
-        <p className="text-[11px] font-bold text-gold">{hechas} de {META_PACIENTES} pacientes</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">📊 Tu tablero</p>
+        <p className="text-sm font-bold text-gold">{hechas} de {META_PACIENTES} pacientes</p>
       </div>
       <p className="text-xs text-cream/50 mb-4">
         {pideNumeros ? 'Hoy es viernes: carga tus 3 números y sabrás qué corregir.' : 'Lo que falta, en números — no en ganas.'}

@@ -276,7 +276,7 @@ REGLAS:
       {/* Back button */}
       <button
         onClick={onCancel}
-        className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-4"
+        className="flex items-center gap-2 text-sm text-cream/55 hover:text-cream transition-colors mb-4"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
       </button>
@@ -307,9 +307,9 @@ REGLAS:
                 }`}>
                   {isDone ? <CheckCircle2 className="w-3 h-3" /> :
                    isLocked ? <Lock className="w-2.5 h-2.5" /> :
-                   <span className="text-[11px] font-bold">{phase.numero}</span>}
+                   <span className="text-sm font-bold">{phase.numero}</span>}
                 </div>
-                <span className={`text-[11px] font-semibold text-center ${
+                <span className={`text-sm font-semibold text-center ${
                   isDone ? 'text-success' :
                   isActive ? 'text-gold' : 'text-cream/20'
                 }`}>
@@ -329,7 +329,7 @@ REGLAS:
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-xs font-bold text-ink shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-goldhi flex items-center justify-center text-sm font-bold text-ink shrink-0">
                     K
                   </div>
                 )}
@@ -339,7 +339,7 @@ REGLAS:
                     : 'bg-surface border border-cream/5 rounded-bl-sm'
                 }`}>
                   {msg.content ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-xs leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5 [&_em]:text-gold/80">
+                    <div className="prose prose-invert prose-sm max-w-none text-cream/85 text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-cream [&_p]:my-1.5 [&_em]:text-gold/80">
                       <Markdown>{msg.content}</Markdown>
                     </div>
                   ) : (
@@ -361,7 +361,7 @@ REGLAS:
                 <button
                   key={opt}
                   onClick={() => handleQuickOption(opt)}
-                  className="px-3 py-2 rounded-xl text-xs border border-cream/10 text-cream/65 hover:border-gold/30 hover:text-cream/80 hover:bg-gold/5 transition-all"
+                  className="px-3 py-2 rounded-xl text-sm border border-cream/10 text-cream/65 hover:border-gold/30 hover:text-cream/80 hover:bg-gold/5 transition-all"
                 >
                   {opt}
                 </button>
@@ -399,7 +399,7 @@ REGLAS:
               <button
                 key={tab}
                 onClick={() => setSummaryTab(tab)}
-                className={`flex-1 py-2.5 text-[11px] font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
+                className={`flex-1 py-2.5 text-sm font-bold tracking-wider uppercase text-center transition-all border-b-2 ${
                   summaryTab === tab
                     ? 'text-gold border-gold'
                     : 'text-cream/45 border-transparent hover:text-cream/65'
@@ -414,12 +414,12 @@ REGLAS:
             {/* Tab: Resumen */}
             {summaryTab === 'resumen' && (
               <div className="space-y-3">
-                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                <div className="text-sm font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
                   Campaña actual <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
                 </div>
                 <div className="card-panel overflow-hidden">
                   <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2">
-                    <span className="text-[11px] font-bold text-gold">
+                    <span className="text-sm font-bold text-gold">
                       {campaignData.objetivo || '— Sin tipo —'}
                     </span>
                   </div>
@@ -433,16 +433,16 @@ REGLAS:
                       { label: 'Objetivo', value: campaignData.objetivo },
                     ].map((row) => (
                       <div key={row.label} className="flex justify-between items-start px-3 py-2">
-                        <span className="text-[11px] font-semibold text-cream/45">{row.label}</span>
-                        <span className="text-[11px] text-cream/75 text-right">{row.value || '—'}</span>
+                        <span className="text-sm font-semibold text-cream/45">{row.label}</span>
+                        <span className="text-sm text-cream/75 text-right">{row.value || '—'}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-gold/5 border border-gold/10">
-                  <div className="text-[11px] font-bold text-gold mb-1">Tip</div>
-                  <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                  <div className="text-sm font-bold text-gold mb-1">Tip</div>
+                  <div className="text-sm text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     Completa los datos del cliente para que KAI defina la estrategia correcta.
                   </div>
                 </div>
@@ -456,16 +456,16 @@ REGLAS:
                   <div className="card-panel overflow-hidden">
                     <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2 flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                      <span className="text-[11px] font-bold text-gold">Ultima generacion</span>
+                      <span className="text-sm font-bold text-gold">Ultima generacion</span>
                     </div>
-                    <div className="p-3 text-[11px] text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
+                    <div className="p-3 text-sm text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
                       {aiOutput.slice(0, 500)}{aiOutput.length > 500 ? '...' : ''}
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-cream/20">
                     <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-xs">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
+                    <p className="text-sm">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
                   </div>
                 )}
               </div>
@@ -474,7 +474,7 @@ REGLAS:
             {/* Tab: Tips */}
             {summaryTab === 'tips' && (
               <div className="space-y-2">
-                <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
+                <div className="text-sm font-bold tracking-[0.15em] uppercase text-cream/45 mb-2 flex items-center gap-2">
                   Guia de fases <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
                 </div>
                 {[
@@ -486,8 +486,8 @@ REGLAS:
                   { n: 6, title: 'Montaje', tip: 'No tocar nada en las primeras 48-72h. La fase de aprendizaje necesita tiempo.' },
                 ].map((t) => (
                   <div key={t.n} className="p-3 rounded-xl bg-gold/5 border border-gold/10">
-                    <div className="text-[11px] font-bold text-gold mb-1">{t.n} - {t.title}</div>
-                    <div className="text-[11px] text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                    <div className="text-sm font-bold text-gold mb-1">{t.n} - {t.title}</div>
+                    <div className="text-sm text-cream/45 leading-relaxed" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                       {t.tip}
                     </div>
                   </div>

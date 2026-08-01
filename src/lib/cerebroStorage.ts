@@ -116,6 +116,10 @@ export async function mandarleAlCliente(x: {
       accion_url: '/dashboard',
     });
 
+    // Responder al último es responder a todos los anteriores: dejarlos
+    // abiertos haría que la bandeja muestre gente que ya fue atendida.
+    await db().rpc('marcar_respondido', { p_cliente: x.clienteId });
+
     if (x.tareaId) await cerrar(x.tareaId, x.deQuien);
     return true;
   } catch { return false; }

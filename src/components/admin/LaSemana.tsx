@@ -95,7 +95,7 @@ export default function LaSemana({
         marcador.trabasDelSistema > 0 ? 'border-danger/40 bg-danger/[0.06]'
         : marcador.enRojo > 0 ? 'border-gold/35 bg-gold/[0.05]'
         : 'border-success/30 bg-success/[0.05]'}`}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
           Esta semana
         </p>
         <h3 className="text-2xl text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
@@ -158,10 +158,10 @@ export default function LaSemana({
 
       {/* ── 4 · LAS TRABAS ── */}
       <div className="rounded-2xl border border-cream/12 p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
           Lo que trabó — <Termino p="traba">qué es esto</Termino>
         </p>
-        <p className="text-[11px] text-cream/45 mb-3">
+        <p className="text-sm text-cream/45 mb-3">
           Lo que se repite va primero: es lo que hay que arreglar de raíz,
           aunque suene menos urgente que lo de ayer.
         </p>
@@ -182,12 +182,12 @@ export default function LaSemana({
                   )}
                   <div>
                     <p className="text-sm text-cream/90">{t.texto}</p>
-                    <p className="text-[11px] text-cream/50 mt-0.5">
+                    <p className="text-sm text-cream/50 mt-0.5">
                       {t.veces === 1 ? 'una vez' : `${t.veces} veces`}
                       {t.clientes.length > 0 && ` · ${t.clientes.length} ${t.clientes.length === 1 ? 'cliente' : 'clientes'}`}
                     </p>
                     {t.esDelSistema && (
-                      <p className="text-xs text-danger/90 mt-1.5">
+                      <p className="text-sm text-danger/90 mt-1.5">
                         Esta ya no se arregla insistiendo. Va a desarrollo.
                       </p>
                     )}
@@ -202,7 +202,7 @@ export default function LaSemana({
       {/* ── 5 · LAS CUENTAS FRENADAS ── */}
       {cuentasFrenadas.length > 0 && (
         <div className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
             Las cuentas frenadas
           </p>
           <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function LaSemana({
                 className="flex items-baseline justify-between gap-3 border-b border-cream/[0.06] pb-2 last:border-0">
                 <div className="min-w-0">
                   <p className="text-sm text-cream/90">{c.nombre}</p>
-                  <p className="text-[11px] text-cream/50">
+                  <p className="text-sm text-cream/50">
                     {c.cuello}
                     {c.semanasIgual > 1 && (
                       <span className="text-danger ml-1.5">· {c.semanasIgual}ª semana igual</span>
@@ -219,7 +219,7 @@ export default function LaSemana({
                   </p>
                 </div>
                 {veDinero && (
-                  <span className="text-[11px] text-cream/40 shrink-0">
+                  <span className="text-sm text-cream/40 shrink-0">
                     ${c.enRiesgo.toLocaleString()}
                   </span>
                 )}
@@ -229,7 +229,7 @@ export default function LaSemana({
         </div>
       )}
 
-      <p className="text-[11px] text-cream/30 text-center">
+      <p className="text-sm text-cream/30 text-center">
         Lo que se decida acá queda escrito en Decisiones. El criterio que no se
         escribe se vuelve a discutir.
       </p>
@@ -249,8 +249,8 @@ function Numero(
         style={{ fontFamily: 'var(--font-display)' }}>
         {valor}
       </p>
-      <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-1">{etiqueta}</p>
-      <p className="text-[10px] text-cream/30">{sub}</p>
+      <p className="text-xs uppercase tracking-[0.2em] text-cream/45 mt-1">{etiqueta}</p>
+      <p className="text-xs text-cream/30">{sub}</p>
     </div>
   );
 }

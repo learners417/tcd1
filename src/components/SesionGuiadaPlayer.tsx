@@ -207,7 +207,7 @@ export default function SesionGuiadaPlayer({
       {/* barra superior: se nota que estás ADENTRO */}
       <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
         <button onClick={onClose} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">Micro-sesión</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Micro-sesión</p>
         <p className="text-xs text-cream/60 tabular-nums">⏱ {reloj}</p>
       </div>
 
@@ -216,7 +216,7 @@ export default function SesionGuiadaPlayer({
         {st.idx === -1 && (
           <div className="space-y-5">
             <div className="text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">Estás entrando a tu sesión</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">Estás entrando a tu sesión</p>
               <p className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{titulo}</p>
               <p className="text-xs text-cream/50 mt-2">{total} pasos · un paso por pantalla · tu avance se guarda solo</p>
             </div>
@@ -255,7 +255,7 @@ export default function SesionGuiadaPlayer({
         {/* ══ UN PASO POR PANTALLA ══ */}
         {paso && !fuego && (
           <div className="space-y-5">
-            <p className="text-[11px] font-bold text-cream/45">Paso {st.idx + 1} de {total}</p>
+            <p className="text-sm font-bold text-cream/45">Paso {st.idx + 1} de {total}</p>
             <div className="flex gap-1">{pasos.map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${i <= st.idx ? 'bg-gold' : 'bg-cream/12'}`} />)}</div>
 
             {(paso.titulo || paso.texto || paso.tituloArtefacto) && (
@@ -292,7 +292,7 @@ export default function SesionGuiadaPlayer({
 
             {paso.tipo === 'radar' && codigo === 'P1.5' && (
               <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-3 mb-4 text-left">
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Tu calculadora — de acá sale tu número</p>
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Tu calculadora — de acá sale tu número</p>
                 <NumeroPanel />
               </div>
             )}
@@ -339,7 +339,7 @@ export default function SesionGuiadaPlayer({
         {st.idx >= total && !fuego && !selladoTexto && (
           <div className="space-y-5">
             <div className="text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">Estás saliendo de tu sesión</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">Estás saliendo de tu sesión</p>
               <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Esto es lo que creaste hoy</p>
             </div>
             <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent p-5 space-y-4">
@@ -366,13 +366,13 @@ export default function SesionGuiadaPlayer({
             <p className="text-sm text-cream/60">Tu sesión de hoy está hecha. Queda marcada como completada en tu Camino.</p>
             <button onClick={() => onFinish(selladoTexto)} className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold">Terminar y volver al Camino →</button>
             {diarioAbierto && (
-              <p className="text-[11px] text-cream/40">Esta noche te espera tu Diario — 2 minutos antes de dormir.</p>
+              <p className="text-sm text-cream/40">Esta noche te espera tu Diario — 2 minutos antes de dormir.</p>
             )}
             {(() => {
               const t = loQueViene(codigo);
               return t ? (
                 <div className="rounded-2xl border border-gold/25 bg-gold/[0.05] p-4 text-left mt-2">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Lo que viene</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Lo que viene</p>
                   <p className="text-sm text-cream/85 leading-relaxed">{t.frase}</p>
                 </div>
               ) : null;

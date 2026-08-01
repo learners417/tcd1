@@ -123,7 +123,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
             <button
               key={l.id}
               onClick={() => setLayout(l.id)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all ${
                 layout === l.id
                   ? 'bg-gold/15 text-gold'
                   : 'bg-cream/5 text-cream/45 hover:text-cream/65'
@@ -135,7 +135,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gold bg-gold/10 hover:bg-gold/15 transition-colors"
         >
           <Download className="w-3.5 h-3.5" /> Descargar
         </button>

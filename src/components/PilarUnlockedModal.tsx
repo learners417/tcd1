@@ -182,7 +182,7 @@ export default function PilarUnlockedModal({
               {cinturon && (
                 <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-gradient-to-b from-[var(--accent-gold)]/10 to-transparent p-5">
                   <div className="text-4xl mb-2">{cinturon.emoji}</div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
+                  <p className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
                     Cinturón ganado
                   </p>
                   <p className="text-xl font-semibold text-cream mb-1">{cinturon.nombre}</p>
@@ -192,13 +192,13 @@ export default function PilarUnlockedModal({
 
               {mentorPregunta && (
                 <div className="mb-5 rounded-xl border border-cream/15 bg-ink p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">
+                  <p className="text-sm font-bold uppercase tracking-widest text-cream/55 mb-2">
                     El Mentor te espera con una pregunta
                   </p>
                   <p className="text-sm text-cream/90 leading-relaxed italic">
                     «{mentorPregunta}»
                   </p>
-                  <p className="text-[11px] text-cream/35 mt-2">
+                  <p className="text-sm text-cream/35 mt-2">
                     No la respondas rápido. Llévala contigo hoy.
                   </p>
                 </div>
@@ -208,7 +208,7 @@ export default function PilarUnlockedModal({
                 <div className="mb-5 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 p-4">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Award className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-gold)]">
+                    <span className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)]">
                       Nivel {nivelAlcanzado.numero} alcanzado
                     </span>
                   </div>

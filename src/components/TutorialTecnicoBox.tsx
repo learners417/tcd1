@@ -20,7 +20,7 @@ export default function TutorialTecnicoBox(
     <div className="space-y-2">
       {tutoriales.map((t) => (
         <details key={t.titulo} className="rounded-xl border border-gold/20 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
-          <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-gold list-none select-none">
+          <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">
             🛠️ Paso a paso: {t.titulo}
           </summary>
           <div className="mt-3 space-y-3">
@@ -28,7 +28,7 @@ export default function TutorialTecnicoBox(
             <ol className="space-y-2">
               {t.pasos.map((p, i) => (
                 <li key={i} className="text-sm text-cream/80 leading-relaxed flex gap-2.5">
-                  <span className="shrink-0 w-5 h-5 rounded-full bg-gold/15 text-gold text-[11px] font-bold flex items-center justify-center mt-0.5">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-gold/15 text-gold text-sm font-bold flex items-center justify-center mt-0.5">
                     {i + 1}
                   </span>
                   <span className="flex-1">{p}</span>

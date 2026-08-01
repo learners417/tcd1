@@ -118,12 +118,12 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
           <button type="button" onClick={() => setSeccion('todas')}
-            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border transition-colors ${seccion === 'todas' ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}>
+            className={`px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider border transition-colors ${seccion === 'todas' ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}>
             Todas · {TOTAL_STEPS}
           </button>
           {SECTIONS.map((sec) => (
             <button key={sec.id} type="button" onClick={() => setSeccion(sec.id)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border transition-colors ${seccion === sec.id ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider border transition-colors ${seccion === sec.id ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}
               title={sec.title}>
               {sec.short} · {sec.items.length}
             </button>
@@ -131,7 +131,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
         </div>
         <div className="flex items-center gap-1.5 ml-auto">
           <select value={orden} onChange={(e) => setOrden(e.target.value as Orden)}
-            className="bg-surface/50 border border-cream/12 rounded-lg px-2.5 py-1.5 text-[11px] text-cream/80 outline-none focus:border-gold/40">
+            className="bg-surface/50 border border-cream/12 rounded-lg px-2.5 py-1.5 text-sm text-cream/80 outline-none focus:border-gold/40">
             <option value="atrasados">Más atrasados primero</option>
             <option value="avanzados">Más avanzados primero</option>
             <option value="nombre">Por nombre</option>
@@ -147,7 +147,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
         </div>
       </div>
 
-      <p className="text-[11px] text-cream/40">
+      <p className="text-sm text-cream/40">
         {seccion === 'todas' ? 'Arrastra la tabla con el mouse, usa la barra de abajo o Shift + rueda para moverte entre las 32 columnas.' : `Viendo solo ${SECTIONS.find((x) => x.id === seccion)?.title ?? ''}.`}
         {' '}Toca una celda para pasar de Pendiente → En proceso (•) → Listo (✓) → No aplica (–). El tilde dorado es automático: ya lo hizo en su Camino. Con ＋ pegas link y nota; con 🔗 clic derecho lo abres. La sigla dice quién lo hace: C cliente · A agencia · C+A ambos.</p>
 
@@ -444,7 +444,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
               className="sticky left-0 bottom-0 z-30 bg-[#0E0E0E]"
               style={{ padding: '0 14px', height: 46, borderTop: '2px solid rgba(232,150,46,0.14)' }}
             >
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gold">Cuántos lo tienen</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-gold">Cuántos lo tienen</span>
             </td>
             {pasos.map((step, idx) => {
               const n = totalPorPaso.get(step.id) ?? 0;
@@ -478,7 +478,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
               className="sticky right-0 bottom-0 z-30 bg-[#0E0E0E]"
               style={{ height: 46, textAlign: 'center', borderTop: '2px solid rgba(232,150,46,0.14)', borderLeft: '2px solid var(--matrix-section-divider)' }}
             >
-              <span className="text-[11px] font-bold text-cream/50">{clientes.length}</span>
+              <span className="text-sm font-bold text-cream/50">{clientes.length}</span>
             </td>
           </tr>
         </tfoot>

@@ -117,7 +117,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
     <div className="animate-in fade-in duration-500 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
+        <p className="text-sm font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Optimizacion - Carga manual de metricas
         </p>
         <h2 className="text-xl font-light text-cream">
@@ -126,7 +126,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             campaña
           </span>
         </h2>
-        <p className="text-xs text-cream/55 mt-1">
+        <p className="text-sm text-cream/55 mt-1">
           Cargas los numeros de Meta Ads Manager y la IA diagnostica que falla y da el plan exacto.
         </p>
       </div>
@@ -135,7 +135,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
       <div className="card-panel p-5 space-y-4 mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Cliente / campaña
             </label>
             <input
@@ -146,7 +146,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Rubro y ciudad
             </label>
             <input
@@ -160,7 +160,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
 
         {/* Metricas */}
         <div className="flex items-center gap-3 pt-2">
-          <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/45">
+          <span className="text-sm font-bold tracking-[0.15em] uppercase text-cream/45">
             Metricas actuales
           </span>
           <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
@@ -176,7 +176,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             { key: 'dias' as const, label: 'Dias activa', placeholder: '0', sub: 'dias corriendo', step: undefined },
           ]).map((m) => (
             <div key={m.key} className="card-panel p-3 text-center">
-              <span className="block text-[11px] font-bold tracking-wider uppercase text-cream/45 mb-2">
+              <span className="block text-sm font-bold tracking-wider uppercase text-cream/45 mb-2">
                 {m.label}
               </span>
               <input
@@ -188,14 +188,14 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
                 value={form[m.key] || ''}
                 onChange={(e) => updateField(m.key, parseFloat(e.target.value) || 0)}
               />
-              <span className="block text-[11px] text-cream/20 mt-1">{m.sub}</span>
+              <span className="block text-sm text-cream/20 mt-1">{m.sub}</span>
             </div>
           ))}
         </div>
 
         {/* Problema observado */}
         <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+          <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
             Que observas que no funciona? (opcional)
           </label>
           <textarea
@@ -226,14 +226,14 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
-              <span className="text-xs font-bold tracking-wider uppercase text-gold">
+              <span className="text-sm font-bold tracking-wider uppercase text-gold">
                 Diagnostico IA
               </span>
             </div>
             {output && !generando && (
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 text-sm text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
               >
                 {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiado ? 'Copiado' : 'Copiar'}

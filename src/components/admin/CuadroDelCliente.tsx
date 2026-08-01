@@ -41,7 +41,7 @@ export default function CuadroDelCliente({
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
           {def.nombre}
         </p>
         <p className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>
@@ -59,7 +59,7 @@ export default function CuadroDelCliente({
 
       {porQuien.map(([quien, suyos]) => (
         <div key={quien} className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
             {quien} · {suyos.filter((i) => hechos.has(i.id)).length} de {suyos.length}
           </p>
           <div className="space-y-1.5">
@@ -83,7 +83,7 @@ export default function CuadroDelCliente({
         </div>
       ))}
 
-      <p className="text-[11px] text-cream/35 text-center">
+      <p className="text-sm text-cream/35 text-center">
         Solo se muestran los {avance.total} ítems que su plan incluye.
         Los demás no le aplican y no cuentan para su avance.
       </p>

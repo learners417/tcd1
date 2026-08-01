@@ -45,13 +45,13 @@ export default function TaskDescriptionEditor({
     <>
       <div className="relative">
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+          <label className="text-sm font-bold text-cream/55 uppercase tracking-wider">
             Descripción
           </label>
           <button
             type="button"
             onClick={() => setFullscreen(true)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-cream/45 hover:text-gold transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-cream/45 hover:text-gold transition-colors"
             title="Abrir en pantalla completa"
           >
             <Maximize2 className="w-3 h-3" />
@@ -82,7 +82,7 @@ export default function TaskDescriptionEditor({
                 <Minimize2 className="w-3.5 h-3.5" />
                 Cerrar
               </button>
-              <span className="text-[11px] text-cream/45 uppercase tracking-widest font-bold">Editando tarea</span>
+              <span className="text-sm text-cream/45 uppercase tracking-widest font-bold">Editando tarea</span>
             </div>
             <button
               type="button"
@@ -119,7 +119,7 @@ export default function TaskDescriptionEditor({
                 />
               </div>
 
-              <p className="text-[11px] text-cream/45 mt-4 text-center">
+              <p className="text-sm text-cream/45 mt-4 text-center">
                 Escribe <span className="font-mono text-gold/70">/</span> para insertar títulos, listas, checklists y más. Los cambios se guardan al hacer clic en "Listo" y luego "Guardar cambios".
               </p>
             </div>

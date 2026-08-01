@@ -167,15 +167,15 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
             {/* Stats */}
             <div className="hidden md:flex items-center gap-5 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-cream/55 uppercase tracking-wider font-semibold">Clientes</span>
+                <span className="text-sm text-cream/55 uppercase tracking-wider font-semibold">Clientes</span>
                 <span className="text-cream font-bold text-base">{stats.total}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-cream/55 uppercase tracking-wider font-semibold">Listos</span>
+                <span className="text-sm text-cream/55 uppercase tracking-wider font-semibold">Listos</span>
                 <span className="text-success font-bold text-base">{stats.listos}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-cream/55 uppercase tracking-wider font-semibold">Avance</span>
+                <span className="text-sm text-cream/55 uppercase tracking-wider font-semibold">Avance</span>
                 <span className="text-gold font-bold text-base">{stats.avgPct}%</span>
               </div>
             </div>

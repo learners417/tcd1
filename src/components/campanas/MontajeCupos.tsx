@@ -11,6 +11,7 @@ import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import { marcarEncendida, marcarPausada } from '../../lib/salaDeMandoStorage';
 import { frenoDe } from '../../lib/frenos';
 import Freno from '../Freno';
+import NumerosDeLaSemana from '../admin/NumerosDeLaSemana';
 
 const KEY = 'tcd_montaje_v1';
 const KEY_ON = 'tcd_campana_encendida_v1';
@@ -157,18 +158,34 @@ export default function MontajeCupos(
         ) : (
           <p className="text-sm text-cream/70">Pasaste los 14 días: ahora las reglas deciden. Tu Tablero te dice qué se apaga, qué queda y cuándo refrescar el creativo.</p>
         )}
+      {/* LA SEGUNDA PUERTA.
+          Se llamaba «un formulario, dos puertas» y solo tenía una: el equipo.
+          El cliente cargaba en otro lado, y los dos lados no se enteraban.
+          Ahora los dos escriben acá, y cada campo dice quién lo cargó. */}
+      {clienteId && (
+        <div className="mb-6">
+          <NumerosDeLaSemana
+            clienteId={clienteId}
+            nombreCliente=""
+            quienCarga={clienteId}
+            nombreQuienCarga="tú"
+          />
+        </div>
+      )}
+
+
 <TableroCupos diasCampana={dias} clienteId={clienteId} onIrAnuncios={onIrAnuncios} />
         {dias <= DIAS_MINIMOS ? (
-          <p className="text-[11px] text-cream/40">
+          <p className="text-sm text-cream/40">
             Esta campaña se puede cerrar a partir del día {DIAS_MINIMOS + 1}. Antes, los números no dicen nada todavía.
           </p>
         ) : restantes > 0 ? (
           <button onClick={() => cerrarCampana(dias)}
-            className="text-[11px] text-cream/40 underline underline-offset-2">
+            className="text-sm text-cream/40 underline underline-offset-2">
             Cerrar esta campaña y montar la próxima — te {restantes === 1 ? 'queda 1' : `quedan ${restantes}`}
           </button>
         ) : (
-          <p className="text-[11px] text-cream/40">
+          <p className="text-sm text-cream/40">
             Es tu campaña 3 de 3. Si esta no trae pacientes, el problema no está en el anuncio: escríbele a Soporte.
           </p>
         )}
@@ -188,9 +205,9 @@ export default function MontajeCupos(
       )}
     <div className="space-y-4">
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
         <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 8 candados — {listos} de 8</h2>
-        <p className="text-[11px] text-gold mt-1">Campaña {Math.min(historial.length + 1, TOPE_CAMPANAS)} de {TOPE_CAMPANAS}</p>
+        <p className="text-sm text-gold mt-1">Campaña {Math.min(historial.length + 1, TOPE_CAMPANAS)} de {TOPE_CAMPANAS}</p>
         <p className="text-sm text-cream/60 mt-1">Nada se enciende hasta que todo está tildado. Un solo punto flojo quema el presupuesto entero.</p>
       </div>
       <div className="space-y-2">
@@ -199,14 +216,14 @@ export default function MontajeCupos(
             onClick={() => { if (c.id !== 'anuncios') toggle(c.id); }}
             className={`w-full text-left rounded-2xl border p-4 transition-colors ${verificado(c.id) ? 'border-success/40 bg-success/[0.05]' : 'border-cream/10 hover:border-cream/25'}`}>
             <div className="flex items-start gap-3">
-              <span className={`mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center text-xs shrink-0 ${checks[c.id] ? 'border-success bg-success text-black font-bold' : 'border-cream/25 text-cream/40'}`}>
+              <span className={`mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center text-sm shrink-0 ${checks[c.id] ? 'border-success bg-success text-black font-bold' : 'border-cream/25 text-cream/40'}`}>
                 {verificado(c.id) ? '✓' : i + 1}
               </span>
               <span className="flex-1">
                 <span className="block text-sm font-semibold text-cream">{c.titulo}</span>
-                <span className="block text-xs text-cream/55 mt-0.5 leading-relaxed">{c.detalle}</span>
+                <span className="block text-sm text-cream/55 mt-0.5 leading-relaxed">{c.detalle}</span>
                 {c.id === 'anuncios' && (
-                  <span className="block text-[11px] mt-1.5 leading-relaxed">
+                  <span className="block text-sm mt-1.5 leading-relaxed">
                     {estadoPiezas.listas ? (
                       <span className="text-success/80">
                         Las 3 escritas y auditadas. Este candado se marca solo.
@@ -227,7 +244,7 @@ export default function MontajeCupos(
                   </span>
                 )}
                 {c.sesion && !verificado(c.id) && (
-                  <span className="block text-[11px] text-cream/45 mt-1">
+                  <span className="block text-sm text-cream/45 mt-1">
                     Se sella en la sesión «{c.sesion}» de tu Camino.
                   </span>
                 )}
@@ -238,7 +255,7 @@ export default function MontajeCupos(
                 )}
                 {c.accion === 'anuncios' && onIrAnuncios && (
                   <span onClick={(e) => { e.stopPropagation(); onIrAnuncios(); }}
-                    className="inline-block text-[11px] font-bold text-gold mt-1.5 hover:text-goldhi">Abrir el Constructor →</span>
+                    className="inline-block text-sm font-bold text-gold mt-1.5 hover:text-goldhi">Abrir el Constructor →</span>
                 )}
               </span>
             </div>

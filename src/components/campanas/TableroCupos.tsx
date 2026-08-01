@@ -262,7 +262,7 @@ export default function TableroCupos(
         : decision.decisiones.some((d) => d.estado === 'muerto')
           ? 'border-danger/35 bg-danger/[0.05]'
           : 'border-success/25 bg-success/[0.05]'}`}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
           Hoy
         </p>
         <p className="text-base text-cream leading-snug">{decision.accionPrincipal}</p>
@@ -279,7 +279,7 @@ export default function TableroCupos(
       {/* QUÉ PASA CON CADA ANUNCIO */}
       {decision.decisiones.some((d) => d.estado !== 'sin_datos') && (
         <div className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
             Tus 3 anuncios
           </p>
           <div className="space-y-3">
@@ -287,15 +287,15 @@ export default function TableroCupos(
               <div key={d.i} className="border-b border-cream/[0.06] pb-3 last:border-0 last:pb-0">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-sm text-cream/85">{d.nombre}</span>
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${COLOR_ESTADO[d.estado]}`}>
+                  <span className={`text-sm font-bold uppercase tracking-wider ${COLOR_ESTADO[d.estado]}`}>
                     {d.estado === 'sin_datos' ? 'sin datos'
                       : d.estado === 'midiendo' ? 'midiendo'
                       : d.estado === 'muerto' ? 'apagar'
                       : d.estado === 'ganador' ? 'ganador' : 'sigue'}
                   </span>
                 </div>
-                <p className="text-xs text-cream/55 mt-0.5">{d.porQue}</p>
-                <p className="text-xs text-cream/75 mt-1">{d.queHacer}</p>
+                <p className="text-sm text-cream/55 mt-0.5">{d.porQue}</p>
+                <p className="text-sm text-cream/75 mt-1">{d.queHacer}</p>
               </div>
             ))}
           </div>
@@ -304,13 +304,13 @@ export default function TableroCupos(
 
       {/* CON QUÉ REGLA SE TE MIDE — sin esto, el número no significa nada */}
       <div className="rounded-2xl border border-cream/15 p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cream/55 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.2em] text-cream/55 mb-2">
           Qué compra tu campaña
         </p>
         <div className="grid grid-cols-3 gap-2 mb-3">
           {(Object.keys(UMBRALES) as ObjetivoCampana[]).map((o) => (
             <button key={o} onClick={() => cambiarObjetivo(o)}
-              className={`rounded-lg px-2 py-2 text-[11px] font-semibold transition ${
+              className={`rounded-lg px-2 py-2 text-sm font-semibold transition ${
                 objetivo === o
                   ? 'bg-gold/20 border border-gold/50 text-gold'
                   : 'border border-cream/15 text-cream/60'}`}>
@@ -318,11 +318,11 @@ export default function TableroCupos(
             </button>
           ))}
         </div>
-        <p className="text-xs text-cream/70">
+        <p className="text-sm text-cream/70">
           Se te mide por <strong className="text-cream">costo por {u.unidad}</strong>.
           Sano entre ${u.sano[0].toFixed(2)} y ${u.sano[1].toFixed(2)} · se apaga arriba de ${u.alarma.toFixed(2)}.
         </p>
-        <p className="text-[11px] text-cream/45 mt-1">{u.nota}</p>
+        <p className="text-sm text-cream/45 mt-1">{u.nota}</p>
       </div>
 
       {enMedicion ? (
@@ -337,7 +337,7 @@ export default function TableroCupos(
 
       {/* SU MARCADOR DE LOS 90 DÍAS */}
       <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
           Tus 90 días
         </p>
         <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
@@ -361,12 +361,12 @@ export default function TableroCupos(
           ].map(([l, v]) => (
             <div key={String(l)} className="text-center">
               <p className="text-base text-cream">{v}</p>
-              <p className="text-[10px] uppercase tracking-wider text-cream/40">{l}</p>
+              <p className="text-xs uppercase tracking-wider text-cream/40">{l}</p>
             </div>
           ))}
         </div>
 
-        <p className="text-[11px] text-cream/45 mt-3">
+        <p className="text-sm text-cream/45 mt-3">
           {proyeccion.usandoRealidad
             ? 'Calculado con TUS tasas reales, no con promedios.'
             : 'Con tasas de referencia. Cuando cargues unas semanas, se recalcula con las tuyas.'}
@@ -380,17 +380,17 @@ export default function TableroCupos(
       <div className="rounded-2xl border border-cream/12 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
               Lo que ya probaste
             </p>
-            <p className="text-xs text-cream/50 mt-1">
+            <p className="text-sm text-cream/50 mt-1">
               {resumen.semanas === 0
                 ? 'Todavía no guardaste ninguna semana. Sin historia no se aprende de una a la otra.'
                 : `${resumen.semanas} ${resumen.semanas === 1 ? 'semana' : 'semanas'} · $${resumen.gastoTotal} · ${resumen.ventasTotal} ventas`}
             </p>
           </div>
           <button onClick={guardarEnBitacora}
-            className="text-[11px] font-bold text-gold hover:text-goldhi shrink-0">
+            className="text-sm font-bold text-gold hover:text-goldhi shrink-0">
             Guardar esta semana
           </button>
         </div>
@@ -421,15 +421,15 @@ export default function TableroCupos(
             </div>
 
             <button onClick={() => setVerHistoria((v) => !v)}
-              className="text-[11px] text-cream/40 underline underline-offset-2 mt-3">
+              className="text-sm text-cream/40 underline underline-offset-2 mt-3">
               {verHistoria ? 'Ocultar el detalle' : 'Ver semana por semana'}
             </button>
 
             {verHistoria && (
               <div className="mt-3 overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-[10px] uppercase tracking-wider text-cream/40">
+                    <tr className="text-xs uppercase tracking-wider text-cream/40">
                       <th className="text-left font-semibold py-1.5">Semana</th>
                       <th className="text-left font-semibold py-1.5">Qué se probó</th>
                       <th className="text-right font-semibold py-1.5">Por conversación</th>
@@ -457,7 +457,7 @@ export default function TableroCupos(
                     ))}
                   </tbody>
                 </table>
-                <p className="text-[11px] text-cream/35 mt-2">
+                <p className="text-sm text-cream/35 mt-2">
                   La flecha compara cada anuncio contra su propia semana anterior, no contra los otros.
                 </p>
               </div>
@@ -468,19 +468,19 @@ export default function TableroCupos(
 
       {/* CARGA DIARIA */}
       <div className="card-panel p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-2">Hoy · 30 segundos</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-2">Hoy · 30 segundos</p>
         <div className="flex items-center gap-3">
           <input inputMode="numeric" value={convHoy} onChange={(e) => setConvHoy(e.target.value)}
             placeholder="0"
             className="w-24 bg-surface/40 border border-cream/10 rounded-xl px-3 py-2 text-lg text-cream text-center focus:border-gold/40 outline-none" />
           <p className="text-sm text-cream/70 flex-1">conversaciones nuevas (comentarios con tu PALABRA + DMs)</p>
           <button onClick={guardarDia}
-            className="btn-primary text-xs font-bold px-4 py-2 rounded-xl shrink-0">
+            className="btn-primary text-sm font-bold px-4 py-2 rounded-xl shrink-0">
             {guardado ? 'Guardado ✓' : 'Guardar'}
           </button>
         </div>
         {racha > 0 && (
-          <p className="text-[11px] text-cream/50 mt-2">
+          <p className="text-sm text-cream/50 mt-2">
             {racha === 1
               ? 'Primer día cargado. Mañana son dos.'
               : `${racha} días seguidos cargando. Esto es lo que hace que el tablero sirva.`}
@@ -491,29 +491,29 @@ export default function TableroCupos(
       {/* CARGA DEL VIERNES — de a un dato por pantalla */}
       <div className="card-panel p-4">
         <div className="flex items-start justify-between gap-3 mb-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">
             El viernes · 2 minutos
           </p>
           <button onClick={() => setVerTabla((v) => !v)}
-            className="text-[10px] text-cream/40 underline underline-offset-2 shrink-0">
+            className="text-xs text-cream/40 underline underline-offset-2 shrink-0">
             {verTabla ? 'Guiado' : 'Ver la tabla'}
           </button>
         </div>
 
         {verTabla ? (
           <>
-            <p className="text-xs text-cream/50 mb-3">
+            <p className="text-sm text-cream/50 mb-3">
               Los números salen del administrador de anuncios y de tu calendario.
             </p>
             {semana.map((f, i) => {
               const v = veredicto(f);
               return (
                 <div key={i} className="rounded-xl border border-cream/10 p-3 mb-2">
-                  <p className="text-xs font-bold text-cream mb-2">Anuncio {i + 1}</p>
+                  <p className="text-sm font-bold text-cream mb-2">Anuncio {i + 1}</p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {PASOS.map((ps) => (
                       <div key={ps.k}>
-                        <p className="text-[10px] text-cream/45 mb-1">
+                        <p className="text-xs text-cream/45 mb-1">
                           {ps.k === 'gasto' ? 'Gasto USD' : ps.k === 'visitas' ? 'Alcance'
                             : ps.k === 'conversaciones' ? 'Conversaciones'
                             : ps.k === 'agendas' ? 'Agendas' : 'Ventas'}
@@ -524,7 +524,7 @@ export default function TableroCupos(
                       </div>
                     ))}
                   </div>
-                  {v && <p className={`text-xs mt-2 leading-relaxed ${v.color}`}>{v.texto}</p>}
+                  {v && <p className={`text-sm mt-2 leading-relaxed ${v.color}`}>{v.texto}</p>}
                 </div>
               );
             })}
@@ -541,13 +541,13 @@ export default function TableroCupos(
             <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
               {PASOS[paso].titulo}
             </p>
-            <p className="text-xs text-cream/55 mt-1">{PASOS[paso].ayuda}</p>
-            <p className="text-[11px] text-gold/75 mt-1">{PASOS[paso].donde}</p>
+            <p className="text-sm text-cream/55 mt-1">{PASOS[paso].ayuda}</p>
+            <p className="text-sm text-gold/75 mt-1">{PASOS[paso].donde}</p>
 
             <div className="space-y-2 mt-4">
               {semana.map((f, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <span className="text-xs text-cream/55 w-20 shrink-0">Anuncio {i + 1}</span>
+                  <span className="text-sm text-cream/55 w-20 shrink-0">Anuncio {i + 1}</span>
                   <input
                     inputMode="decimal"
                     value={f[PASOS[paso].k]}
@@ -577,14 +577,14 @@ export default function TableroCupos(
                 </button>
               )}
             </div>
-            <p className="text-[11px] text-cream/35 mt-2">
+            <p className="text-sm text-cream/35 mt-2">
               Se guarda solo a medida que escribes. Puedes salir y volver.
             </p>
           </>
         )}
 
         {totalSemana > 0 && (
-          <p className="text-[11px] text-cream/45 mt-1">La cuenta de los 10: ~5 conversaciones por día te dan las ~300 del mes — de ahí salen tus agendas y tus llamadas.</p>
+          <p className="text-sm text-cream/45 mt-1">La cuenta de los 10: ~5 conversaciones por día te dan las ~300 del mes — de ahí salen tus agendas y tus llamadas.</p>
         )}
       </div>
     </div>

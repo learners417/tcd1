@@ -117,7 +117,7 @@ function SoporteIA() {
           className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
         <button onClick={enviar} disabled={!input.trim() || cargando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]"><Send className="w-4 h-4" /></button>
       </div>
-      <p className="text-[11px] text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
+      <p className="text-sm text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
     </div>
   );
 }
@@ -181,7 +181,7 @@ function SoporteHumano({ userId }: { userId?: string }) {
         {msgs.map((m) => (
           <div key={m.id} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.emisor_id === userId ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
             {m.contenido}
-            <p className="text-[10px] text-cream/35 mt-1">{new Date(m.created_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+            <p className="text-xs text-cream/35 mt-1">{new Date(m.created_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
           </div>
         ))}
       </div>

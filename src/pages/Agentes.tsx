@@ -569,13 +569,13 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               <h2 className="text-sm font-medium text-gold flex items-center gap-2">
                 {agenteActivo.titulo}
                 {autonomoActivo && (
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
                     <Trophy className="w-3 h-3" /> Autónoma
                   </span>
                 )}
               </h2>
               {identidadDe(agenteActivo.id) && (
-                <p className="text-[11px] text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
+                <p className="text-sm text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
               )}
               <p className="text-xs text-white/65">
                 Nivel {snapshotActivo.current_level} · {NIVEL_NOMBRE[snapshotActivo.current_level]} ·{' '}
@@ -676,7 +676,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 <span className="text-base shrink-0 mt-0.5">{qr.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium">{qr.label}</div>
-                  <div className="text-[11px] text-white/55 mt-0.5 leading-snug">
+                  <div className="text-sm text-white/55 mt-0.5 leading-snug">
                     {qr.subtitle}
                   </div>
                 </div>
@@ -832,7 +832,7 @@ function AgenteCard({
             </h3>
             {!unlocked && <Lock className="w-3.5 h-3.5 text-white/55" />}
             {autonomo && (
-              <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 Autónoma
               </span>
             )}
@@ -846,7 +846,7 @@ function AgenteCard({
       </p>
 
       <div
-        className={`mt-3 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider ${
+        className={`mt-3 flex items-center justify-between text-sm font-medium uppercase tracking-wider ${
           autonomo
             ? 'text-emerald-300'
             : unlocked

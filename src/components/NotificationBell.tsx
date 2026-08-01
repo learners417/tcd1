@@ -179,7 +179,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
           fill={hasUnread ? 'currentColor' : 'none'}
         />
         {hasUnread && (
-          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
+          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-sm font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -235,7 +235,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                       {notif.descripcion && (
                         <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
                       )}
-                      <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                      <p className="text-sm text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                     </div>
                   </div>
                 );

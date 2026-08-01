@@ -141,7 +141,7 @@ export default function TableroPlata({
       {/* ── LO QUE NO CIERRA ── frena antes de diagnosticar sobre datos imposibles */}
       {errores.length > 0 && (
         <div className="rounded-2xl border border-danger/40 bg-danger/[0.06] p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-danger mb-2">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-danger mb-2">
             Estos números no cierran
           </p>
           <ul className="space-y-1 mb-2">
@@ -149,7 +149,7 @@ export default function TableroPlata({
               <li key={e.campos.join('-')} className="text-sm text-cream/85">· {e.texto}</li>
             ))}
           </ul>
-          <p className="text-xs text-cream/50">
+          <p className="text-sm text-cream/50">
             El diagnóstico de abajo está calculado sobre estos números. Corrígelos antes de
             decidir nada.
           </p>
@@ -161,7 +161,7 @@ export default function TableroPlata({
         domino.indicador
           ? 'border-danger/40 bg-danger/[0.06]'
           : 'border-success/30 bg-success/[0.05]'}`}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
           El dominó{nombreCliente ? ` · ${nombreCliente}` : ''}
         </p>
         <h3 className="text-2xl text-cream mb-2" style={{ fontFamily: 'var(--font-display)' }}>
@@ -173,14 +173,14 @@ export default function TableroPlata({
           )}
         </h3>
         {domino.indicador && (
-          <p className="text-xs text-cream/45 mb-2">
+          <p className="text-sm text-cream/45 mb-2">
             Debería estar entre {formatearRef(domino.indicador.ref, domino.indicador.formato)}
             {domino.tramo && ` · tramo de ${TRAMO_LABEL[domino.tramo].toLowerCase()}`}
           </p>
         )}
         <p className="text-sm text-cream/80">{domino.porque}</p>
         {domino.indicador && (
-          <p className="text-[11px] text-cream/40 mt-3 border-t border-cream/10 pt-3">
+          <p className="text-sm text-cream/40 mt-3 border-t border-cream/10 pt-3">
             Este número dice <strong className="text-cream/60">dónde</strong> mirar, no qué arreglar.
             Para saber qué arreglar hay que ver la conversación real: el DM entero, la llamada con
             sus silencios. Ninguna planilla guarda eso.
@@ -192,7 +192,7 @@ export default function TableroPlata({
       <div className="grid md:grid-cols-3 gap-4">
         {(['atraccion', 'conversion', 'retencion'] as Tramo[]).map((t) => (
           <div key={t} className="rounded-2xl border border-cream/12 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold mb-3">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-gold mb-3">
               {TRAMO_LABEL[t]}
             </p>
             <div className="space-y-3">
@@ -206,7 +206,7 @@ export default function TableroPlata({
                         {formatear(i.valor, i.formato)}
                       </span>
                     </div>
-                    <p className="text-[10px] text-cream/35">
+                    <p className="text-xs text-cream/35">
                       {formatearRef(i.ref, i.formato)}
                       {i.tipo === 'predictivo' && ' · lo decides tú'}
                     </p>
@@ -222,7 +222,7 @@ export default function TableroPlata({
       {hayDatos && (
         <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
           <div className="flex items-baseline justify-between flex-wrap gap-3 mb-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">
               Para llegar a
             </p>
             <div className="flex items-center gap-2">
@@ -241,11 +241,11 @@ export default function TableroPlata({
             ].map(([l, v]) => (
               <div key={String(l)} className="rounded-xl bg-ink/40 py-3">
                 <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>{v}</p>
-                <p className="text-[10px] uppercase tracking-wider text-cream/45">{l}</p>
+                <p className="text-xs uppercase tracking-wider text-cream/45">{l}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-cream/60 mt-3">
+          <p className="text-sm text-cream/60 mt-3">
             Calculado con <strong className="text-cream">sus tasas reales</strong>
             {!proy.usandoRealidad && ' (todavía no hay suficientes, se usan las de referencia)'} y
             un colchón del 30%: se mueve el cuerpo apuntando más alto para aterrizar en el número
@@ -260,25 +260,25 @@ export default function TableroPlata({
         <div className="rounded-2xl border border-cream/12 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
                 Cómo viene esta cuenta
               </p>
-              <p className="text-xs text-cream/50 mt-1">
+              <p className="text-sm text-cream/50 mt-1">
                 {historial.length} semanas cargadas. La Mesa de plata no es mirar hoy:
                 es ver cómo se movió desde la semana pasada.
               </p>
             </div>
             <button onClick={() => setVerHistorial((v) => !v)}
-              className="text-[11px] text-cream/40 underline underline-offset-2 shrink-0">
+              className="text-sm text-cream/40 underline underline-offset-2 shrink-0">
               {verHistorial ? 'Ocultar' : 'Ver'}
             </button>
           </div>
 
           {verHistorial && (
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-cream/40">
+                  <tr className="text-xs uppercase tracking-wider text-cream/40">
                     <th className="text-left font-semibold py-1.5">Semana</th>
                     <th className="text-right font-semibold py-1.5">Invertido</th>
                     <th className="text-right font-semibold py-1.5">Conversaciones</th>
@@ -303,7 +303,7 @@ export default function TableroPlata({
                   })}
                 </tbody>
               </table>
-              <p className="text-[11px] text-cream/35 mt-2">
+              <p className="text-sm text-cream/35 mt-2">
                 Si el <Termino p="cuello de botella" /> se repite tres semanas seguidas, el problema no es
                 la campaña: es lo que hay detrás.
               </p>
@@ -314,19 +314,19 @@ export default function TableroPlata({
 
       {/* ── CARGA ── */}
       <div className="rounded-2xl border border-cream/12 p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
           Los números de la semana
         </p>
-        <p className="text-xs text-cream/45 mb-4">
+        <p className="text-sm text-cream/45 mb-4">
           De Meta Business y de lo que reportó el cliente. Dos minutos.
         </p>
         {grupos.map((g) => (
           <div key={g} className="mb-4">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-gold/70 mb-2">{g}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-gold/70 mb-2">{g}</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {CAMPOS.filter((c) => c.grupo === g).map((c) => (
                 <div key={c.k}>
-                  <label className="block text-[11px] text-cream/60 mb-1" htmlFor={`f-${c.k}`}>
+                  <label className="block text-sm text-cream/60 mb-1" htmlFor={`f-${c.k}`}>
                     {c.label}
                   </label>
                   <input id={`f-${c.k}`} type="number" inputMode="numeric" min={0} value={n[c.k] || ''}
@@ -335,7 +335,7 @@ export default function TableroPlata({
                     className={`w-full bg-surface rounded-lg px-3 py-2 text-sm text-cream border ${
                       errores.some((e) => e.campos.includes(c.k))
                         ? 'border-danger/60' : 'border-cream/15'}`} />
-                  <p className="text-[10px] text-cream/30 mt-0.5">{c.ayuda}</p>
+                  <p className="text-xs text-cream/30 mt-0.5">{c.ayuda}</p>
                 </div>
               ))}
             </div>
@@ -348,16 +348,16 @@ export default function TableroPlata({
               {guardando ? 'Guardando…' : cargando ? 'Cargando…' : `Guardar la semana ${semana}`}
             </button>
             {guardado && (
-              <p className="text-[11px] text-success/80 mt-2">
+              <p className="text-sm text-success/80 mt-2">
                 Guardado a las {guardado}. Queda en el historial de esta cuenta.
               </p>
             )}
             {problema && (
-              <p className="text-[11px] text-danger/90 mt-2">{problema}</p>
+              <p className="text-sm text-danger/90 mt-2">{problema}</p>
             )}
           </>
         ) : (
-          <p className="text-[11px] text-cream/45 mt-2">
+          <p className="text-sm text-cream/45 mt-2">
             Elige un cliente arriba para poder guardar esta semana.
           </p>
         )}

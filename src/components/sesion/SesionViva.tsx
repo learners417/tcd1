@@ -173,7 +173,7 @@ export default function SesionViva({
     const outE = EMOCIONES_SALIDA.find((e) => e.id === cierre.emocionOut);
     return (
       <div className="rounded-2xl border border-success/25 bg-success/5 p-5 space-y-3">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
+        <p className="text-sm font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" /> Sesión consolidada
         </p>
         <h4 className="text-white font-bold">Hoy produjiste esto</h4>
@@ -196,7 +196,7 @@ export default function SesionViva({
             </div>
           )}
         </div>
-        <p className="text-[11px] text-white/55">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
+        <p className="text-sm text-white/55">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
       </div>
     );
   }

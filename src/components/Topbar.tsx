@@ -227,7 +227,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
   return (
     <>
       {conexion === 'sin_internet' && (
-        <div className="bg-danger/90 text-white text-center text-[11px] py-1.5 px-3">
+        <div className="bg-danger/90 text-white text-center text-sm py-1.5 px-3">
           Sin internet. Lo que escribas queda guardado acá y sube solo cuando vuelva la señal.
         </div>
       )}
@@ -254,7 +254,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
         >
           <Search className="w-4 h-4 text-cream/55" />
           <span className="bg-transparent text-sm text-cream/55 ml-3">Buscar secciones, tareas...</span>
-          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-[11px] text-cream/65 font-mono ml-auto">
+          <div className="flex items-center justify-center w-8 h-5 rounded bg-cream/10 text-sm text-cream/65 font-mono ml-auto">
             ⌘K
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
                 fill={unreadCount > 0 ? 'currentColor' : 'none'}
               />
               {unreadCount > 0 && (
-                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
+                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-sm font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -324,7 +324,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
                           {notif.descripcion && (
                             <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
                           )}
-                          <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                          <p className="text-sm text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                         </div>
                       </div>
                     );
@@ -394,7 +394,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
                 <p className="text-sm text-cream/55 text-center py-8">No se encontraron resultados</p>
               )}
             </div>
-            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-[11px] text-cream/55">
+            <div className="p-3 border-t border-[rgba(232,150,46,0.10)] flex items-center gap-4 text-sm text-cream/55">
               <span>↑↓ Navegar</span>
               <span>↵ Abrir</span>
               <span>esc Cerrar</span>

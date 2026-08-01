@@ -11,6 +11,17 @@
 
 import { getAdminClient } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
+import { AVISOS } from '../../src/lib/avisosCliente.js';
+
+/** La semana ISO, igual que en el resto de la app: '2026-W31'. */
+function semanaISOde(d: Date): string {
+  const f = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dia = f.getUTCDay() || 7;
+  f.setUTCDate(f.getUTCDate() + 4 - dia);
+  const eneUno = new Date(Date.UTC(f.getUTCFullYear(), 0, 1));
+  const n = Math.ceil(((f.getTime() - eneUno.getTime()) / 86400000 + 1) / 7);
+  return `${f.getUTCFullYear()}-W${String(n).padStart(2, '0')}`;
+}
 
 // El calendario del Camino v4 (generado del seed — pilar, código, día asignado)
 const CAMINO: { p: number; c: string; d: number }[] = [
@@ -137,7 +148,54 @@ async function handler(req: any, res: any) {
       alarmas++;
     }
 
-    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas}`);
+    // ── LOS AVISOS QUE LA APP MANDA SOLA ──
+    //
+    // `avisosCliente` estaba construido y probado, y NADIE LO DISPARABA. Es
+    // el módulo que hace que la app empuje sola: sin esto, toda cuenta que se
+    // traba espera a que una persona la mire, y el modelo deja de escalar.
+    //
+    // Va acá y no en un cron propio porque este ya corre todos los días y ya
+    // recorre a los clientes activos: sumar otro cron sería otro lugar más
+    // donde algo puede fallar en silencio.
+    let avisados = 0;
+    try {
+      const semana = semanaISOde(new Date());
+      const { data: filas } = await admin.rpc('clientes_para_avisar', { p_semana: semana });
+      const items = (filas ?? []) as unknown as Array<{
+        cliente_id: string; gasto: number; conversaciones: number;
+        agendas: number; ventas: number; cargo: boolean;
+      }>;
+
+      for (const it of items) {
+        // El primer tramo roto, de arriba hacia abajo. Sin datos no se opina:
+        // se le pide que cargue.
+        const cuello = !it.cargo ? 'no_cargo'
+          : it.gasto > 0 && it.conversaciones === 0 ? 'comentario_a_conversacion'
+          : it.conversaciones > 0 && it.agendas / it.conversaciones < 0.15 ? 'conv_a_agenda'
+          : it.agendas > 0 && it.ventas === 0 ? 'close_rate'
+          : null;
+        if (!cuello) continue;
+
+        const texto = AVISOS[cuello];
+        if (!texto) continue;
+
+        await admin.from('notificaciones').insert({
+          usuario_id: it.cliente_id,
+          tipo: 'sistema',
+          titulo: texto.titulo,
+          descripcion: texto.descripcion,
+          accion_url: texto.destino,
+          leida: false,
+        });
+        avisados++;
+      }
+    } catch (err) {
+      // No tumba el cron: las alarmas del equipo ya se mandaron, y perderlas
+      // por un fallo de los avisos sería cambiar un problema por dos.
+      console.error('[cron/alarmas-inactividad] fallaron los avisos', err);
+    }
+
+    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados}`);
     return res.status(200).json({ ok: true, alarmas });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

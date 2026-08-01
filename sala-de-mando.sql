@@ -964,3 +964,73 @@ begin
   set status = 'completada', completada_at = now(), updated_at = now()
   where id = p_tarea;
 end $$;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- QUIÉN ESTÁ ESPERANDO RESPUESTA
+--
+-- El circuito de soporte funcionaba de punta a punta, pero SI NADIE RESPONDÍA
+-- NADA LO SEÑALABA: un mensaje podía quedar tres días sin respuesta sin
+-- aparecer en la cola, ni en la supervisión, ni en el marcador.
+--
+-- En un producto de miles, tres días de silencio es la diferencia entre un
+-- cliente y un reembolso.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+alter table mensajes
+  -- Cuándo el equipo respondió. Null = todavía espera.
+  add column if not exists respondido_en timestamptz,
+  -- 'duda' o 'roto'. Se atienden distinto: una duda puede esperar un día,
+  -- algo roto le está costando dinero ahora.
+  add column if not exists tipo text default 'duda';
+
+create index if not exists mensajes_sin_responder
+  on mensajes (created_at)
+  where respondido_en is null;
+
+/**
+ * Marca respondidos todos los mensajes de un cliente.
+ *
+ * Se llama cuando alguien del equipo le escribe: responder al último es
+ * responder a todos los anteriores, y dejarlos abiertos haría que la bandeja
+ * mostrara gente que ya fue atendida.
+ */
+create or replace function marcar_respondido(p_cliente uuid)
+returns void
+language plpgsql security definer as $$
+begin
+  update mensajes
+  set respondido_en = now()
+  where emisor_id = p_cliente
+    and canal = 'humano'
+    and respondido_en is null;
+end $$;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- LOS DATOS QUE EL CRON NECESITA PARA MANDAR LOS AVISOS
+--
+-- `avisosCliente` estaba construido y probado, y NADIE LO DISPARABA — es el
+-- módulo que hace que la app empuje sola. Sin esto, toda cuenta que se traba
+-- espera a que una persona la mire, y el modelo entero deja de escalar.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+create or replace function clientes_para_avisar(p_semana text)
+returns table (cliente_id uuid, gasto numeric, conversaciones numeric,
+               agendas numeric, ventas numeric, cargo boolean)
+language sql security definer as $$
+  select
+    p.id,
+    coalesce(max(case when c.campo = 'gasto' then c.valor end), 0),
+    coalesce(max(case when c.campo = 'conversaciones' then c.valor end), 0),
+    coalesce(max(case when c.campo = 'agendas' then c.valor end), 0),
+    coalesce(max(case when c.campo = 'ventas' then c.valor end), 0),
+    count(c.campo) > 0
+  from profiles p
+  left join carga_semanal c
+    on c.cliente_id = p.id and c.semana_iso = p_semana
+  where p.rol = 'cliente'
+    and p.campana_desde is not null
+    and coalesce(p.campana_pausada, false) = false
+  group by p.id;
+$$;

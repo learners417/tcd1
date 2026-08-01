@@ -27,7 +27,7 @@ export function TarjetaViernes() {
   const { fecha } = proximoViernes();
   return (
     <div className="card-panel p-5 border border-gold/30 bg-gradient-to-r from-gold/[0.08] to-transparent">
-      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">🔴 Tu sesión en vivo</p>
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">🔴 Tu sesión en vivo</p>
       <p className="text-lg text-cream" style={{ fontFamily: 'var(--font-display)' }}>{fecha}</p>
       <p className="text-xs text-cream/55 mt-1">
         1 hora, en vivo conmigo. Llega con tus 5 días hechos: ahí revisamos tu precio y respondo lo tuyo.
@@ -41,7 +41,7 @@ export function BonosNumero() {
   if (!planLimitado()) return null;
   return (
     <div className="card-panel p-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">🎁 Tus bonos — incluidos en tu compra</p>
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-3">🎁 Tus bonos — incluidos en tu compra</p>
       <div className="space-y-2.5">
         <div className="text-sm text-cream/80">
           <span className="font-semibold text-cream">El Guion de tu Anuncio</span>
@@ -64,7 +64,7 @@ export function BonosNumero() {
                   <span className="text-gold font-semibold whitespace-nowrap">{r.rango}</span>
                 </div>
               ))}
-              <p className="text-[10px] text-cream/40 pt-1">Rangos dignos de referencia — tu número exacto sale de TU meta, no de la tabla.</p>
+              <p className="text-xs text-cream/40 pt-1">Rangos dignos de referencia — tu número exacto sale de TU meta, no de la tabla.</p>
             </div>
           )}
         </div>

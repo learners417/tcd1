@@ -152,10 +152,10 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
           {(() => { const iconName = EMOJI_TO_ICON[herramienta.emoji]; const IC = iconName ? HERRAMIENTA_ICON_MAP[iconName] : null; return IC ? <IC className="w-8 h-8 text-gold" /> : null; })()}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] bg-gold/10 text-cream/75 px-2 py-0.5 rounded font-mono">
+              <span className="text-sm bg-gold/10 text-cream/75 px-2 py-0.5 rounded font-mono">
                 {herramienta.id}
               </span>
-              <span className="text-[11px] text-cream/55">Grupo {herramienta.grupo}</span>
+              <span className="text-sm text-cream/55">Grupo {herramienta.grupo}</span>
             </div>
             <h1 className="text-lg font-light text-cream mt-0.5">{herramienta.titulo}</h1>
             <p className="text-sm text-cream/75">{herramienta.descripcion}</p>
@@ -181,7 +181,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
               {campo.label}
               {campo.required && <span className="text-red-400 ml-1">*</span>}
               {campo.precargar && inputs[campo.id] && (
-                <span className="ml-2 text-[11px] text-success normal-case tracking-normal">
+                <span className="ml-2 text-sm text-success normal-case tracking-normal">
                   (precargado de tu perfil)
                 </span>
               )}

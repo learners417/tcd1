@@ -146,11 +146,11 @@ export default function TaskAttachments({
 
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center gap-2 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-sm font-bold text-cream/55 uppercase tracking-wider">
         <Paperclip className="w-3.5 h-3.5" />
         Archivos
         {totalCount > 0 && (
-          <span className="text-[11px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+          <span className="text-sm bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
             {totalCount}
           </span>
         )}
@@ -171,7 +171,7 @@ export default function TaskAttachments({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold text-cream truncate">{file.name}</div>
-                  <div className="text-[11px] text-cream/55 flex items-center gap-2">
+                  <div className="text-sm text-cream/55 flex items-center gap-2">
                     <span>{formatSize(file.size)}</span>
                     <span className="text-gold/70">· se subirá al crear la tarea</span>
                   </div>
@@ -208,7 +208,7 @@ export default function TaskAttachments({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold text-cream truncate">{adj.file_name}</div>
-                  <div className="text-[11px] text-cream/55 flex items-center gap-2">
+                  <div className="text-sm text-cream/55 flex items-center gap-2">
                     <span>{formatSize(adj.size_bytes)}</span>
                     {adj.autor_nombre && <span>· subido por {adj.autor_nombre}</span>}
                   </div>

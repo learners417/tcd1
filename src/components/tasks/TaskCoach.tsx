@@ -98,11 +98,11 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
+          <span className="text-sm uppercase font-bold px-2 py-0.5 rounded-full bg-cream/10 text-cream/70 border border-cream/15 tracking-wider">
             MENTOR
           </span>
           {checked && (
-            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+            <span className="text-sm uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Completado
             </span>
           )}
@@ -134,7 +134,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
 
         {meta.codigo === 'P1.5' && (
           <div className="rounded-2xl border border-gold/25 bg-gold/[0.03] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">Tu calculadora — acá sale tu número</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-3">Tu calculadora — acá sale tu número</p>
             <NumeroPanel />
           </div>
         )}
@@ -143,7 +143,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {guionVivo && !isCompleted && (
           <button onClick={() => setPlayerAbierto(true)}
             className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
-            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
+            <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
             <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
             <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
           </button>
@@ -175,7 +175,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
         {!isCompleted && (
           <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
             <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
             <textarea
               value={nota}
@@ -200,7 +200,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
 
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
+            <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
               {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
             </p>
             <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>

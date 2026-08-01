@@ -70,7 +70,7 @@ function saveMetricsLocal(data: MetricaSemanaV2[]) {
 function KPICard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
     <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-gold/30' : 'border-[rgba(232,150,46,0.1)]'}`}>
-      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className="text-sm text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
       <p className={`text-2xl font-light tracking-tight ${highlight ? 'text-gold' : 'text-cream'}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
@@ -81,7 +81,7 @@ function KPICard({ label, value, sub, highlight }: { label: string; value: strin
 function KPICardTone({ label, value, tone, sub }: { label: string; value: string; tone: DiagnosticoNivel; sub?: string }) {
   return (
     <div className="card-panel p-4 rounded-2xl border-[rgba(232,150,46,0.1)]">
-      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className="text-sm text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
       <p className={`text-2xl font-light tracking-tight ${nivelColor(tone)}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
@@ -364,7 +364,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Período */}
         <div className="card-panel p-5 rounded-2xl">
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-gold mb-3">¿Qué período cargas?</p>
+          <p className="text-sm font-semibold tracking-widest uppercase text-gold mb-3">¿Qué período cargas?</p>
           <div className="flex gap-2 mb-3">
             {(['dia', 'semana'] as const).map((t) => (
               <button
@@ -392,7 +392,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
             <Sprout className="w-4 h-4 text-success" />
-            <p className="text-[11px] font-semibold tracking-widest uppercase text-success">A — Contenido orgánico</p>
+            <p className="text-sm font-semibold tracking-widest uppercase text-success">A — Contenido orgánico</p>
           </div>
           <p className="text-xs text-cream/55 mb-3">Posts publicados por plataforma</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
@@ -410,7 +410,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
             <Megaphone className="w-4 h-4 text-gold" />
-            <p className="text-[11px] font-semibold tracking-widest uppercase text-gold">B — Publicidad (Ads)</p>
+            <p className="text-sm font-semibold tracking-widest uppercase text-gold">B — Publicidad (Ads)</p>
           </div>
 
           <p className="text-xs text-cream/55 mb-2">Plataforma activa este período</p>
@@ -448,7 +448,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
         {/* KPIs en vivo */}
         <div>
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-success mb-3">KPIs calculados</p>
+          <p className="text-sm font-semibold tracking-widest uppercase text-success mb-3">KPIs calculados</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KPICardTone label="ROAS" value={kpis.roas !== null ? `${kpis.roas.toFixed(1)}×` : '—'} tone={roasTone(kpis.roas)} />
             <KPICardTone label="Tasa de cierre" value={formatPct(kpis.tasa_cierre)} tone={cierreTone(kpis.tasa_cierre)} />

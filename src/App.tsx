@@ -87,7 +87,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
@@ -104,7 +104,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
           ] as const).map(([e, n, p, d]) => (
             <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
               <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
-              <p className="text-[11px] text-cream/55 mt-0.5">{d}</p>
+              <p className="text-sm text-cream/55 mt-0.5">{d}</p>
             </div>
           ))}
         </div>
@@ -112,7 +112,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
-        <p className="text-[11px] text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+        <p className="text-sm text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
       </div>
     </div>
   );
@@ -387,11 +387,11 @@ export default function App() {
       <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
         <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
+          <p className="text-sm text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
@@ -415,7 +415,7 @@ export default function App() {
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input

@@ -140,7 +140,7 @@ export default function Jornada({
     return (
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
             Empezar el día
           </p>
           <h3 className="text-2xl text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
@@ -172,7 +172,7 @@ export default function Jornada({
                 </span>
                 <span>
                   <span className="text-sm text-cream/90 block">{i.nombre}</span>
-                  <span className="text-[11px] text-cream/50">{i.accion}</span>
+                  <span className="text-sm text-cream/50">{i.accion}</span>
                 </span>
               </button>
             ))}
@@ -185,7 +185,7 @@ export default function Jornada({
           <LogIn size={14} className="inline mb-0.5 mr-1.5" />
           {guardando ? 'Abriendo…' : 'Empezar'}
         </button>
-        {problema && <p className="text-[11px] text-danger/90">{problema}</p>}
+        {problema && <p className="text-sm text-danger/90">{problema}</p>}
       </div>
     );
   }
@@ -205,13 +205,13 @@ export default function Jornada({
             {jornada.traba && ' · una traba anotada'}
           </p>
           {jornada.traba && (
-            <p className="text-xs text-cream/55 mt-2">
+            <p className="text-sm text-cream/55 mt-2">
               Lo que anotaste se mira el viernes, junto con lo de todos.
             </p>
           )}
         </div>
         <button onClick={() => guardarLocal(null)}
-          className="text-[11px] text-cream/45 underline underline-offset-2">
+          className="text-sm text-cream/45 underline underline-offset-2">
           Volver a abrir el día
         </button>
       </div>
@@ -232,9 +232,9 @@ export default function Jornada({
       )}
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-cream/50">{carga.lectura}</p>
+        <p className="text-sm text-cream/50">{carga.lectura}</p>
         <button onClick={() => setCerrando(true)}
-          className="flex items-center gap-1.5 text-[11px] font-bold text-gold hover:text-goldhi shrink-0">
+          className="flex items-center gap-1.5 text-sm font-bold text-gold hover:text-goldhi shrink-0">
           <LogOut size={12} /> Cerrar el día
         </button>
       </div>
@@ -245,7 +245,7 @@ export default function Jornada({
       {/* ── SALIDA ── */}
       {cerrando && (
         <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-5 space-y-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70">
             Cerrar el día
           </p>
 
@@ -272,7 +272,7 @@ export default function Jornada({
 
           <div>
             <p className="text-sm text-cream/85 mb-1">¿Alguna <Termino p="traba" />?</p>
-            <p className="text-[11px] text-cream/45 mb-2">
+            <p className="text-sm text-cream/45 mb-2">
               Una línea. No se discute ahora: se mira el viernes con todo lo demás.
               Si algo se repite tres veces, deja de ser cuestión de insistir.
             </p>
@@ -304,7 +304,7 @@ export default function Jornada({
         </div>
       )}
 
-      <p className="text-[11px] text-cream/30 text-center">
+      <p className="text-sm text-cream/30 text-center">
         {ROLES[rol].nombre} · empezaste a las{' '}
         {new Date(jornada.inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </p>

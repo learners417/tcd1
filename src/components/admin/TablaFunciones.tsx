@@ -52,7 +52,7 @@ export default function TablaFunciones({
       {/* ── LA ÚNICA PREGUNTA DE LA REUNIÓN ── */}
       <div className={`rounded-2xl border p-5 ${
         hayAlerta ? 'border-gold/35 bg-gold/[0.05]' : 'border-success/30 bg-success/[0.05]'}`}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
           ¿Qué función bajó sus minutos, y por qué?
         </p>
         <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
@@ -65,7 +65,7 @@ export default function TablaFunciones({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-[10px] uppercase tracking-wider text-cream/45">
+              <tr className="text-xs uppercase tracking-wider text-cream/45">
                 <th className="text-left font-semibold px-4 py-2.5">Función</th>
                 <th className="text-right font-semibold px-2 py-2.5">Minutos</th>
                 <th className="text-right font-semibold px-2 py-2.5">Por cliente</th>
@@ -80,7 +80,7 @@ export default function TablaFunciones({
             </tbody>
           </table>
         </div>
-        <p className="text-[11px] text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
+        <p className="text-sm text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
           La columna que importa es la última: distingue haber trabajado menos
           de haber construido algo.
         </p>
@@ -89,10 +89,10 @@ export default function TablaFunciones({
       {/* ── LA DEUDA POR CLIENTE ── */}
       {deudas.length > 0 && (
         <div className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
             Los que cuestan más de lo que su ticket permite
           </p>
-          <p className="text-[11px] text-cream/45 mb-3">
+          <p className="text-sm text-cream/45 mb-3">
             No son clientes pesados: son deuda técnica con nombre. Cada uno es
             una tarea para la función que absorbe.
           </p>
@@ -102,11 +102,11 @@ export default function TablaFunciones({
                 className="border-b border-cream/[0.06] pb-2 last:border-0">
                 <p className="text-sm text-cream/90">
                   {d.nombre}
-                  <span className="text-cream/45 text-xs ml-2">
+                  <span className="text-cream/45 text-sm ml-2">
                     {d.minutos}′ este mes · su ticket permite {d.permitidos}′
                   </span>
                 </p>
-                <p className="text-xs text-cream/60 mt-0.5">{d.lectura}</p>
+                <p className="text-sm text-cream/60 mt-0.5">{d.lectura}</p>
               </div>
             ))}
           </div>
@@ -125,7 +125,7 @@ function Fila({ f }: { f: MinutosDeFuncion }) {
     <tr className={`border-t border-cream/[0.07] ${f.alerta ? 'bg-gold/[0.03]' : ''}`}>
       <td className="px-4 py-2.5">
         <span className="text-cream/85">{f.nombre}</span>
-        <span className="block text-[10px] text-cream/35">
+        <span className="block text-xs text-cream/35">
           {ETIQUETA_DESTINO[f.destino]}
         </span>
       </td>
@@ -135,7 +135,7 @@ function Fila({ f }: { f: MinutosDeFuncion }) {
         <span className="inline-flex items-center gap-1">
           {FLECHA[dir]}
           {f.cambio !== null && dir !== 'igual' && (
-            <span className="text-[11px] text-cream/50">
+            <span className="text-sm text-cream/50">
               {Math.abs(Math.round(f.cambio * 100))}%
             </span>
           )}
@@ -144,10 +144,10 @@ function Fila({ f }: { f: MinutosDeFuncion }) {
       <td className="px-3 py-2.5">
         <div className="flex items-start gap-1.5">
           {f.alerta && <AlertTriangle size={12} className="text-gold mt-0.5 shrink-0" />}
-          <span className="text-xs text-cream/70 leading-relaxed">{f.lectura}</span>
+          <span className="text-sm text-cream/70 leading-relaxed">{f.lectura}</span>
         </div>
         {f.hitos.length > 0 && (
-          <p className="text-[11px] text-success/70 mt-1">
+          <p className="text-sm text-success/70 mt-1">
             {f.hitos.map((h) => h.que).join(' · ')}
           </p>
         )}

@@ -116,6 +116,22 @@ async function main() {
       cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde gente', semanasIgual: 3, enRiesgo: 3000 }]}
       facturadoClientes={9000} />);
 
+  const { default: BandejaSoporte } = await import('../src/components/admin/BandejaSoporte');
+  dibuja('BandejaSoporte', <BandejaSoporte />);
+
+  const { default: TarjetaCliente } = await import('../src/components/admin/TarjetaCliente');
+  dibuja('TarjetaCliente · sana',
+    <TarjetaCliente nombre="Rosana" estado="lanzada hace 12 días" semaforo="bien"
+      numero="18" numeroDe="2" etiqueta="charlas → agendas"
+      frase="El anuncio trae gente y el mensaje la pierde." />);
+  dibuja('TarjetaCliente · frenada con acciones',
+    <TarjetaCliente nombre="Ana" estado="instalando" semaforo="frenado"
+      numero="34" numeroDe="51" etiqueta="ítems instalados"
+      frase="Le faltan 17 para poder encender."
+      accionPrincipal={{ label: 'Abrir el tutorial', onClick: () => {} }}
+      mensajeListo="Hola Ana, ¿seguimos con el píxel?"
+      extras={[{ id: 'a', label: 'Ver su historial', onClick: () => {} }]} />);
+
   const { default: ListaDeHoy } = await import('../src/components/admin/ListaDeHoy');
   dibuja('ListaDeHoy · sin id', <ListaDeHoy personaId="" />);
   dibuja('ListaDeHoy · con persona', <ListaDeHoy personaId="p1" />);

@@ -92,7 +92,7 @@ export default function TaskListView({
       <button
         onClick={() => toggleSort(k)}
         className={`
-          flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider
+          flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider
           ${active ? 'text-gold' : 'text-cream/55 hover:text-cream/70'}
           transition-colors ${className}
         `}
@@ -162,7 +162,7 @@ export default function TaskListView({
                         {t.titulo}
                       </span>
                       {yoSoyCreadorYNoAsignado && (
-                        <span title="Creada por mí" className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-gold/80 bg-gold/10 px-1.5 py-0.5 rounded-full">
+                        <span title="Creada por mí" className="shrink-0 flex items-center gap-1 text-sm font-bold text-gold/80 bg-gold/10 px-1.5 py-0.5 rounded-full">
                           <UserPlus className="w-3 h-3" />
                         </span>
                       )}
@@ -177,7 +177,7 @@ export default function TaskListView({
                       <div className="flex items-center gap-2 min-w-0">
                         <div
                           style={{ backgroundColor: asignadoColor.bg, borderColor: asignadoColor.border, color: asignadoColor.text }}
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold border-[1.5px] shrink-0"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold border-[1.5px] shrink-0"
                         >
                           {getInitials(t.asignado_nombre)}
                         </div>

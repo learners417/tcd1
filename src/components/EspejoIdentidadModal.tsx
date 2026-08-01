@@ -69,7 +69,7 @@ export default function EspejoIdentidadModal({
           <div className="w-14 h-14 mx-auto rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center mb-4">
             <Sparkles className="w-6 h-6 text-gold" />
           </div>
-          <p className="text-[11px] uppercase tracking-widest text-gold font-bold mb-2">
+          <p className="text-sm uppercase tracking-widest text-gold font-bold mb-2">
             Cierre de Fase 1 · Identidad
           </p>
           <h2
@@ -89,7 +89,7 @@ export default function EspejoIdentidadModal({
 
           {/* 5 NOs · lista */}
           <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-gold mb-3">
+            <p className="text-sm uppercase tracking-widest font-bold text-gold mb-3">
               Tus 5 NO
             </p>
             {nos.length > 0 ? (
@@ -166,7 +166,7 @@ function Pieza({ titulo, valor, fallback }: PiezaProps) {
   const tieneValor = typeof valor === 'string' && valor.trim().length > 0;
   return (
     <div className="card-panel p-5 border border-[rgba(232,150,46,0.1)]">
-      <p className="text-[11px] uppercase tracking-widest font-bold text-gold mb-2">
+      <p className="text-sm uppercase tracking-widest font-bold text-gold mb-2">
         {titulo}
       </p>
       {tieneValor ? (

@@ -68,7 +68,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
     <div className="space-y-6">
       {/* Tipo selector */}
       <div>
-        <label className="block text-xs text-cream/75 mb-2 font-medium">Tipo de Creativo</label>
+        <label className="block text-sm text-cream/75 mb-2 font-medium">Tipo de Creativo</label>
         <div className="flex flex-wrap gap-2">
           {(['imagen_single', 'carrusel', 'yt_thumbnail'] as TipoCreativo[]).map((t) => {
             const Icon = t === 'yt_thumbnail' ? Youtube : t === 'carrusel' ? Layers : ImageIcon;
@@ -76,7 +76,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
               <button
                 key={t}
                 onClick={() => setTipo(t)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                   tipo === t
                     ? 'bg-gold/15 text-gold border border-gold/30'
                     : 'bg-panel text-cream/65 border border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)]'
@@ -89,7 +89,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
           })}
           {tipo === 'carrusel' && (
             <div className="flex items-center gap-2 ml-2">
-              <label className="text-xs text-cream/55">Slides:</label>
+              <label className="text-sm text-cream/55">Slides:</label>
               <input
                 type="number" inputMode="numeric"
                 min={3}
@@ -105,13 +105,13 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
 
       {/* Angulo selector */}
       <div>
-        <label className="block text-xs text-cream/75 mb-2 font-medium">Angulo de Comunicacion</label>
+        <label className="block text-sm text-cream/75 mb-2 font-medium">Angulo de Comunicacion</label>
         <div className="flex flex-wrap gap-2">
           {ANGULOS.map((a) => (
             <button
               key={a}
               onClick={() => setAngulo(a)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 angulo === a
                   ? 'bg-gold/15 text-gold border border-gold/30'
                   : 'bg-panel text-cream/55 border border-[rgba(232,150,46,0.1)] hover:text-cream/75 hover:border-[rgba(232,150,46,0.14)]'
@@ -122,7 +122,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
             </button>
           ))}
         </div>
-        <p className="text-xs text-cream/45 mt-1.5">{ANGULO_LABELS[angulo].descripcion}</p>
+        <p className="text-sm text-cream/45 mt-1.5">{ANGULO_LABELS[angulo].descripcion}</p>
       </div>
 
       {/* Generate button */}
@@ -139,7 +139,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
       {copies.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-cream/55">
+            <span className="text-sm text-cream/55">
               {tipo === 'yt_thumbnail' ? `${copies.length} variantes de thumbnail` : copies.length === 1 ? 'Copy generado' : `${copies.length} slides generados`}
               {' '}— {ANGULO_LABELS[angulo].titulo}
             </span>
@@ -149,10 +149,10 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
             <div key={idx} className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-3">
               {copies.length > 1 && (
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gold">{tipo === 'yt_thumbnail' ? `Variante ${idx + 1}` : `Slide ${idx + 1}`}</span>
+                  <span className="text-sm font-medium text-gold">{tipo === 'yt_thumbnail' ? `Variante ${idx + 1}` : `Slide ${idx + 1}`}</span>
                   <button
                     onClick={() => handleCopyCopy(idx)}
-                    className="flex items-center gap-1 text-xs text-cream/55 hover:text-cream transition-colors"
+                    className="flex items-center gap-1 text-sm text-cream/55 hover:text-cream transition-colors"
                   >
                     {copiedIdx === idx ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     {copiedIdx === idx ? 'Copiado' : 'Copiar'}
@@ -161,21 +161,21 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
               )}
 
               <div>
-                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Texto Principal</label>
+                <label className="text-sm text-cream/45 uppercase tracking-wider">Texto Principal</label>
                 <p className="text-sm text-cream/80 mt-1 whitespace-pre-line leading-relaxed">{c.texto_principal}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">Titulo</label>
+                  <label className="text-sm text-cream/45 uppercase tracking-wider">Titulo</label>
                   <p className="text-sm font-medium text-cream mt-1">{c.titulo}</p>
                 </div>
                 <div>
-                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">CTA</label>
+                  <label className="text-sm text-cream/45 uppercase tracking-wider">CTA</label>
                   <p className="text-sm font-medium text-gold mt-1">{c.cta_texto}</p>
                 </div>
               </div>
               <div>
-                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Descripcion</label>
+                <label className="text-sm text-cream/45 uppercase tracking-wider">Descripcion</label>
                 <p className="text-sm text-cream/75 mt-1">{c.descripcion}</p>
               </div>
 
@@ -183,7 +183,7 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
                 <div className="flex justify-end pt-2">
                   <button
                     onClick={() => handleCopyCopy(0)}
-                    className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-cream/55 hover:text-cream transition-colors"
                   >
                     {copiedIdx === 0 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiedIdx === 0 ? 'Copiado' : 'Copiar todo'}

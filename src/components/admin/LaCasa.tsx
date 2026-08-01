@@ -48,7 +48,7 @@ export default function LaCasa() {
           ['sistema', 'El sistema por dentro'],
         ] as const).map(([id, label]) => (
           <button key={id} onClick={() => setVista(id)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
               vista === id
                 ? 'bg-gold/20 border border-gold/50 text-gold'
                 : 'border border-cream/15 text-cream/60'}`}>
@@ -74,10 +74,10 @@ export default function LaCasa() {
 
           {jornadas.map((j) => (
             <div key={j.dia} className="rounded-2xl border border-cream/12 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">
                 Día {j.dia} · {j.titulo}
               </p>
-              <p className="text-[11px] text-cream/40 mb-3">
+              <p className="text-sm text-cream/40 mb-3">
                 <Clock size={10} className="inline mb-0.5 mr-1" />
                 {j.minutos} minutos de contenido
               </p>
@@ -97,13 +97,13 @@ export default function LaCasa() {
                         hechas.has(s.numero) ? 'text-cream/60' : 'text-cream/90'}`}>
                         {s.titulo}
                       </span>
-                      <span className="text-xs text-cream/60 block mt-0.5">
+                      <span className="text-sm text-cream/60 block mt-0.5">
                         {s.queQuedaClaro}
                       </span>
-                      <span className="text-[11px] text-gold/75 block mt-1.5">
+                      <span className="text-sm text-gold/75 block mt-1.5">
                         → {s.accion}
                       </span>
-                      <span className="text-[11px] text-cream/40 block mt-1">
+                      <span className="text-sm text-cream/40 block mt-1">
                         {s.porQueAntes}
                       </span>
 
@@ -111,7 +111,7 @@ export default function LaCasa() {
                       {s.datos && s.datos.length > 0 && (
                         <span className="block mt-2 space-y-0.5">
                           {s.datos.map((d) => (
-                            <span key={d} className="block text-[11px] text-cream/55">· {d}</span>
+                            <span key={d} className="block text-sm text-cream/55">· {d}</span>
                           ))}
                         </span>
                       )}
@@ -120,7 +120,7 @@ export default function LaCasa() {
                           Así se sabe qué falta en vez de no saber que faltaba. */}
                       <span className={`block mt-2 rounded-lg border border-dashed p-2.5 text-center ${
                         s.video ? 'border-gold/30' : 'border-cream/12'}`}>
-                        <span className="text-[11px] text-cream/45">
+                        <span className="text-sm text-cream/45">
                           {s.video ? '▶ Ver el video (3-5 min)' : 'Video pendiente de grabar'}
                         </span>
                       </span>
@@ -129,22 +129,22 @@ export default function LaCasa() {
                 ))}
               </div>
 
-              <p className="text-xs text-cream/55 mt-3 pt-3 border-t border-cream/[0.07]">
+              <p className="text-sm text-cream/55 mt-3 pt-3 border-t border-cream/[0.07]">
                 <strong className="text-cream/75">Después:</strong> {j.despues}
               </p>
             </div>
           ))}
 
           <div className="rounded-2xl border border-cream/10 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/45 mb-1">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/45 mb-1">
               Lo que no está acá a propósito
             </p>
-            <p className="text-[11px] text-cream/40 mb-3">
+            <p className="text-sm text-cream/40 mb-3">
               No es un olvido: se aprende mejor cuando aparece.
             </p>
             <div className="space-y-1.5">
               {SE_APRENDE_EN_EL_LUGAR.map((x) => (
-                <p key={x.que} className="text-xs text-cream/60">
+                <p key={x.que} className="text-sm text-cream/60">
                   <strong className="text-cream/80">{x.que}</strong> — {x.donde}
                 </p>
               ))}
@@ -162,16 +162,16 @@ export default function LaCasa() {
             ['Cómo lo hacemos', OBJETIVO.comoLoHacemos],
           ] as const).map(([t, c]) => (
             <div key={t} className="rounded-2xl border border-cream/12 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-1.5">{t}</p>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-1.5">{t}</p>
               <p className="text-sm text-cream/85 leading-relaxed">{c}</p>
             </div>
           ))}
           <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-1.5">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-1.5">
               El único número que dice si funciona
             </p>
             <p className="text-base text-cream leading-snug">{OBJETIVO.elNumero}</p>
-            <p className="text-xs text-cream/60 mt-2 leading-relaxed">{OBJETIVO.porQueEseNumero}</p>
+            <p className="text-sm text-cream/60 mt-2 leading-relaxed">{OBJETIVO.porQueEseNumero}</p>
           </div>
         </div>
       )}
@@ -179,7 +179,7 @@ export default function LaCasa() {
       {/* ── POR QUÉ JAVO ── */}
       {vista === 'historia' && (
         <div className="space-y-3">
-          <p className="text-xs text-cream/50">
+          <p className="text-sm text-cream/50">
             Sin esto, el equipo vende un sistema. Con esto, vende una convicción.
           </p>
           {HISTORIA.map((c) => (
@@ -190,7 +190,7 @@ export default function LaCasa() {
                 style={{ fontFamily: 'var(--font-display)' }}>
                 {c.titulo}
               </p>
-              <p className={`text-xs mt-1.5 leading-relaxed ${
+              <p className={`text-sm mt-1.5 leading-relaxed ${
                 c.pendiente ? 'text-gold/60 italic' : 'text-cream/70'}`}>
                 {c.texto}
               </p>
@@ -203,7 +203,7 @@ export default function LaCasa() {
       {vista === 'sistema' && (
         <div className="space-y-4">
           <div className="space-y-3">
-            <p className="text-xs text-cream/50">
+            <p className="text-sm text-cream/50">
               Esto es lo que te deja defender una decisión de la app frente a un
               cliente que la cuestiona. Sin esto, la única respuesta posible es
               «porque lo dice la app» — y esa no la acepta nadie que pagó.
@@ -211,26 +211,26 @@ export default function LaCasa() {
             {SISTEMA_POR_DENTRO.map((p) => (
               <div key={p.pregunta} className="rounded-2xl border border-cream/12 p-4">
                 <p className="text-sm text-cream/90 leading-snug">{p.pregunta}</p>
-                <p className="text-xs text-cream/65 mt-1.5 leading-relaxed">{p.respuesta}</p>
+                <p className="text-sm text-cream/65 mt-1.5 leading-relaxed">{p.respuesta}</p>
               </div>
             ))}
           </div>
 
           <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
               Los valores, con lo que cuestan
             </p>
-            <p className="text-[11px] text-cream/45 mb-3">
+            <p className="text-sm text-cream/45 mb-3">
               Un valor sin costo es una frase.
             </p>
             <div className="space-y-3">
               {VALORES.map((v) => (
                 <div key={v.valor} className="border-b border-cream/[0.07] pb-3 last:border-0">
                   <p className="text-sm text-cream/90">{v.valor}</p>
-                  <p className="text-xs text-cream/55 mt-1">
+                  <p className="text-sm text-cream/55 mt-1">
                     <strong className="text-cream/70">Cuesta:</strong> {v.cuestaEsto}
                   </p>
-                  <p className="text-xs text-cream/55 mt-0.5">
+                  <p className="text-sm text-cream/55 mt-0.5">
                     <strong className="text-cream/70">Lo aceptamos porque:</strong> {v.loAceptamosPorque}
                   </p>
                 </div>
@@ -243,14 +243,14 @@ export default function LaCasa() {
       {/* ── LOS PRINCIPIOS ── */}
       {vista === 'principios' && (
         <div className="space-y-3">
-          <p className="text-xs text-cream/50">
+          <p className="text-sm text-cream/50">
             No son valores de pared. Cada uno resuelve una discusión que se repite,
             y está escrito para no volver a tenerla.
           </p>
           {PRINCIPIOS.map((p) => (
             <div key={p.id} className="rounded-2xl border border-cream/12 p-4">
               <p className="text-sm text-cream/90 leading-snug">{p.dice}</p>
-              <p className="text-xs text-cream/55 mt-1.5 leading-relaxed">
+              <p className="text-sm text-cream/55 mt-1.5 leading-relaxed">
                 <strong className="text-cream/70">Resuelve:</strong> {p.resuelve}
               </p>
             </div>

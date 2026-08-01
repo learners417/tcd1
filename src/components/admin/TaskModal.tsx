@@ -109,7 +109,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Creado por (readonly) */}
-          <div className="flex items-center gap-2 text-xs text-cream/55 bg-gold/5 border border-gold/15 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 text-sm text-cream/55 bg-gold/5 border border-gold/15 rounded-lg px-3 py-2">
             <UserPlus className="w-3.5 h-3.5 text-gold/70 shrink-0" />
             <span>
               Creada por <span className="font-semibold text-gold">{creadorNombre}</span>
@@ -119,7 +119,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
           {/* Título */}
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Título *</label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Título *</label>
             <input
               type="text"
               value={titulo}
@@ -141,7 +141,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
           <div className="grid grid-cols-2 gap-3">
             {/* Asignado a */}
             <div>
-              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Asignar a</label>
+              <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Asignar a</label>
               <CustomSelect
                 value={asignadoA}
                 onChange={setAsignadoA}
@@ -155,7 +155,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
             {/* Prioridad */}
             <div>
-              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Prioridad</label>
+              <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Prioridad</label>
               <CustomSelect
                 value={prioridad}
                 onChange={v => setPrioridad(v as AdminTareaPrioridad)}
@@ -167,7 +167,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
           <div className="grid grid-cols-2 gap-3">
             {/* Estado */}
             <div>
-              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Estado</label>
+              <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Estado</label>
               <CustomSelect
                 value={status}
                 onChange={v => setStatus(v as AdminTareaStatus)}
@@ -177,7 +177,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
             {/* Fecha vencimiento */}
             <div>
-              <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Vence el</label>
+              <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Vence el</label>
               <input
                 type="date"
                 value={fechaVencimiento}
@@ -189,7 +189,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
 
           {/* Cliente (opcional) */}
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Cliente relacionado <span className="normal-case font-normal">(opcional)</span></label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Cliente relacionado <span className="normal-case font-normal">(opcional)</span></label>
             <CustomSelect
               value={clienteId}
               onChange={setClienteId}

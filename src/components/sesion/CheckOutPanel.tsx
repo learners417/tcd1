@@ -24,7 +24,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-success mb-1">Cierre de sesión</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         <p className="text-xs text-white/55 mt-1">
           Trabajaste {formatoCrono(duracionSeg)}{entrada ? <> · llegaste {entrada.emoji} {entrada.label.toLowerCase()}</> : null}.
@@ -93,7 +93,7 @@ export default function CheckOutPanel({ metaTitulo, duracionSeg, emocionEntrada,
         </div>
       </div>
 
-      <p className="text-[11px] text-white/45 text-center">Lo de hoy queda grabado en tu ADN. Mañana, el Camino te espera con la siguiente sesión.</p>
+      <p className="text-sm text-white/45 text-center">Lo de hoy queda grabado en tu ADN. Mañana, el Camino te espera con la siguiente sesión.</p>
       <button
         type="button"
         disabled={!emocion || cerrando}

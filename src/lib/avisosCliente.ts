@@ -38,7 +38,7 @@ export const AVISOS_ANTES_DE_ESCALAR = 2;
  * cola le dice a Lupe «revisar el DM con él» acá le dice a él «tus mensajes
  * se están enfriando». Es el mismo hecho contado desde su lado.
  */
-const AVISOS: Record<string, { titulo: string; descripcion: string; destino: string }> = {
+export const AVISOS: Record<string, { titulo: string; descripcion: string; destino: string }> = {
   no_cargo: {
     titulo: 'Faltan tus números de esta semana',
     descripcion: 'Son cinco datos y dos minutos. Sin ellos tu tablero no puede decirte nada.',

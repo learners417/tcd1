@@ -135,7 +135,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
         <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/55">
           <Filter className="w-3.5 h-3.5" />
           {activeCount > 0 && (
-            <span className="text-[11px] font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
+            <span className="text-sm font-bold bg-gold/20 text-gold px-1.5 py-0.5 rounded-full leading-none">
               {activeCount}
             </span>
           )}
@@ -216,7 +216,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
                   ? { backgroundColor: color.solid, color: '#080808' }
                   : { backgroundColor: color.bg, color: color.text }
                 }
-                className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold leading-none"
+                className="w-4 h-4 rounded-full flex items-center justify-center text-sm font-bold leading-none"
               >
                 {getInitials(m.nombre)}
               </span>

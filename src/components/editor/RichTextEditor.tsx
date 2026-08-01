@@ -298,7 +298,7 @@ export default function RichTextEditor({
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-semibold text-cream">{opt.label}</div>
-                  <div className="text-[11px] text-cream/55 truncate">{opt.description}</div>
+                  <div className="text-sm text-cream/55 truncate">{opt.description}</div>
                 </div>
               </button>
             );
@@ -346,7 +346,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive('blockquote'))} title="Cita"><Quote className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={btn(editor.isActive('code'))} title="Código en línea"><Code className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={setLink} className={btn(editor.isActive('link'))} title="Enlace"><Link2 className="w-3.5 h-3.5" /></button>
-      <span className="ml-auto text-[11px] text-cream/45 hidden sm:inline">Tip: escribe "/" para más opciones</span>
+      <span className="ml-auto text-sm text-cream/45 hidden sm:inline">Tip: escribe "/" para más opciones</span>
     </div>
   );
 }

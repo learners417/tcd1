@@ -263,7 +263,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                     <div key={i} className={`h-1 w-8 rounded-full transition-colors ${newPassword.length >= i * 4 ? 'bg-success' : 'bg-gold/10'}`} />
                   ))}
                 </div>
-                <span className="text-[11px] text-cream/55">
+                <span className="text-sm text-cream/55">
                   {newPassword.length < 4 ? 'Muy corta' : newPassword.length < 8 ? 'Casi...' : <span className="flex items-center gap-0.5">Lista <CheckCircle2 className="w-3 h-3 text-success inline" /></span>}
                 </span>
               </div>
@@ -368,7 +368,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   rows={3}
                   className="w-full bg-black/40 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
-                <p className="text-[11px] text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
+                <p className="text-sm text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -417,7 +417,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'diagnostico' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Siete preguntas — la semilla de tu ADN</h2>
               <p className="text-sm text-cream/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
             </div>
@@ -499,7 +499,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'origen' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tres preguntas — de aquí nace todo</h2>
               <p className="text-sm text-cream/55 mt-1">Tu historia contiene tus dones, y tus dones señalan a quién vienes a servir. Puedes responder hablando.</p>
             </div>
@@ -528,7 +528,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'rueda' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Rueda de la Vida — el día 90 la vas a mirar</h2>
               <p className="text-sm text-cream/55 mt-1">Un toque por dimensión: ¿cómo está hoy tu vida, del 1 al 10? No viniste solo a hacer dinero.</p>
             </div>
@@ -539,7 +539,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   <div key={d.id}>
                     <div className="flex items-baseline justify-between mb-1">
                       <p className="text-xs text-cream/80">{d.emoji} {d.label}</p>
-                      <p className="text-[11px] text-cream/50">{typeof v === 'number' ? v + '/10' : '—'}</p>
+                      <p className="text-sm text-cream/50">{typeof v === 'number' ? v + '/10' : '—'}</p>
                     </div>
                     <div className="flex gap-1">
                       {Array.from({ length: 10 }).map((_, i) => (
@@ -597,7 +597,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div key={item.label} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4">
                   <div className="mb-2"><item.icon className="w-6 h-6 text-gold" /></div>
                   <p className="text-xs font-semibold text-cream mb-1">{item.label}</p>
-                  <p className="text-[11px] text-cream/55">{item.desc}</p>
+                  <p className="text-sm text-cream/55">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -618,7 +618,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div className="text-center mb-6">
               <p className="text-4xl mb-3">🥋</p>
               <h1 className="text-2xl font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El Pacto</h1>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
             </div>
 
             <div className="rounded-2xl border border-cream/10 bg-[#0F0F0F] p-5 mb-5">
@@ -638,7 +638,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </p>
             </div>
 
-            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
             <textarea
               value={pactoTexto}
               onChange={(e) => setPactoTexto(e.target.value)}
@@ -646,7 +646,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               placeholder="Hago este camino porque…"
               className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none resize-none"
             />
-            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
             <input
               value={pactoFirma}
               onChange={(e) => setPactoFirma(e.target.value)}
@@ -667,7 +667,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             >
               FIRMO MI PACTO
             </button>
-            <p className="text-[11px] text-cream/45 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
+            <p className="text-sm text-cream/45 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
           </div>
         )}
 
@@ -740,7 +740,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       <item.icon className={`w-4 h-4 ${item.styles.iconColor}`} />
                     </div>
                     <div className="flex-1">
-                      <span className={`text-[11px] font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
+                      <span className={`text-sm font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
                       <p className={`text-sm font-semibold mb-0.5 mt-0.5 ${item.styles.title}`}>{item.title}</p>
                       <p className="text-xs text-cream/55 leading-relaxed">{item.desc}</p>
                     </div>

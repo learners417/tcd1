@@ -42,7 +42,7 @@ export default function FotoDia90({
         <div className="rounded-3xl overflow-hidden border border-gold/40 bg-gradient-to-b from-[#141210] to-ink">
           <div className="p-6 text-center">
             <div className="text-4xl mb-2">⬛</div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-1">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-1">
               Día {dia ?? 90} · Sanador Libre
             </p>
             <h2
@@ -61,14 +61,14 @@ export default function FotoDia90({
                   <p className="text-3xl font-bold text-cream/65 font-mono">
                     {comparacion.promedioDia1.toFixed(1)}
                   </p>
-                  <p className="text-[11px] uppercase tracking-widest text-cream/55 mt-1">Día 1</p>
+                  <p className="text-sm uppercase tracking-widest text-cream/55 mt-1">Día 1</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gold" />
                 <div className="text-center">
                   <p className="text-3xl font-bold text-gold font-mono">
                     {comparacion.promedioDia45.toFixed(1)}
                   </p>
-                  <p className="text-[11px] uppercase tracking-widest text-cream/55 mt-1">Hoy</p>
+                  <p className="text-sm uppercase tracking-widest text-cream/55 mt-1">Hoy</p>
                 </div>
               </div>
 
@@ -100,13 +100,13 @@ export default function FotoDia90({
 
           <div className="border-t border-gold/15 px-6 py-3 flex items-center justify-center gap-1.5">
             <Camera className="w-3.5 h-3.5 text-gold/70" />
-            <span className="text-[11px] uppercase tracking-widest text-cream/55">
+            <span className="text-sm uppercase tracking-widest text-cream/55">
               Tu Clínica Digital · Sanadores Libres
             </span>
           </div>
         </div>
 
-        <p className="text-center text-[11px] text-cream/55 mt-3">
+        <p className="text-center text-sm text-cream/55 mt-3">
           Saca una captura de esta tarjeta para compartir tu logro.
         </p>
       </div>

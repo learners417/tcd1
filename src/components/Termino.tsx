@@ -33,7 +33,7 @@ export default function Termino({ p, children }: { p: string; children?: React.R
       {abierto && (
         <span className="absolute left-0 top-full mt-1.5 z-30 block w-72 rounded-xl
           border border-gold/30 bg-[#0d0d0d] p-3 text-left shadow-xl">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gold/70 mb-1">
+          <span className="block text-sm font-bold uppercase tracking-wider text-gold/70 mb-1">
             {t.palabra}
           </span>
           <span className="block text-xs text-cream/85 leading-relaxed">{t.que}</span>
@@ -43,7 +43,7 @@ export default function Termino({ p, children }: { p: string; children?: React.R
             </span>
           )}
           <button onClick={(e) => { e.stopPropagation(); setAbierto(false); }}
-            className="block text-[10px] text-cream/35 mt-2 underline underline-offset-2">
+            className="block text-xs text-cream/35 mt-2 underline underline-offset-2">
             cerrar
           </button>
         </span>

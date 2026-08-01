@@ -6,8 +6,10 @@ import {
   type TareaDelCerebro, type TareaOrdenada, type AperturaDeTarea,
 } from '../../lib/cerebro';
 import { miListaDeHoy, cerrar, mandarleAlCliente } from '../../lib/cerebroStorage';
+import { mensajesEsperando, crearTareasDeSoporte } from '../../lib/soporteStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
 import Termino from '../Termino';
+import TarjetaCliente, { type Semaforo } from './TarjetaCliente';
 
 /**
  * LA LISTA ÚNICA — todo el trabajo del día, venga de donde venga.
@@ -27,8 +29,11 @@ export default function ListaDeHoy({
   personaId,
   onAbrir,
   onNuevaTarea,
+  clientes = [],
 }: {
   personaId: string;
+  /** Para poder mirar quién está esperando respuesta. */
+  clientes?: Array<{ id: string; nombre: string }>;
   /** La pantalla que sabe navegar decide CÓMO; acá solo se dice QUÉ abrir. */
   onAbrir?: (a: AperturaDeTarea) => void;
   onNuevaTarea?: () => void;
@@ -39,6 +44,15 @@ export default function ListaDeHoy({
 
   const cargar = useCallback(async () => {
     try {
+      // Primero se miran los mensajes esperando y se convierten en tareas.
+      // Va ANTES de traer la lista para que aparezcan en la misma pasada: si
+      // se hiciera después, habría que recargar para verlos y quien no
+      // recarga no se entera — que es el problema que esto viene a arreglar.
+      if (clientes.length > 0) {
+        const esperando = await mensajesEsperando(clientes);
+        if (esperando.length > 0) await crearTareasDeSoporte(esperando, personaId);
+      }
+
       const crudas = await miListaDeHoy(personaId);
       setTareas(ordenar(crudas));
       setProblema(null);
@@ -46,7 +60,7 @@ export default function ListaDeHoy({
       setProblema(mensajeDeFalla(err, 'traer tu lista'));
       setTareas([]);
     }
-  }, [personaId]);
+  }, [personaId, clientes]);
 
   useEffect(() => {
     let vivo = true;
@@ -87,7 +101,7 @@ export default function ListaDeHoy({
         <p className="text-sm text-cream/70">
           No se pudo identificar tu usuario, así que no puedo traerte tu lista.
         </p>
-        <p className="text-[11px] text-cream/45 mt-1">
+        <p className="text-sm text-cream/45 mt-1">
           Sal y vuelve a entrar. Si sigue igual, avisale al equipo.
         </p>
       </div>
@@ -98,7 +112,7 @@ export default function ListaDeHoy({
     return (
       <div className="rounded-2xl border border-cream/12 p-5">
         <p className="text-sm text-cream/60">Mirando tu lista…</p>
-        <p className="text-[11px] text-cream/35 mt-1">
+        <p className="text-sm text-cream/35 mt-1">
           Traigo todo tu trabajo del día: lo que detectó la app, lo que
           escribiste tú y lo que te asignaron.
         </p>
@@ -119,7 +133,7 @@ export default function ListaDeHoy({
           {titularDelDia(tareas)}
         </p>
         {tareas.length > 0 && (
-          <p className="text-[11px] text-cream/50 mt-1.5">
+          <p className="text-sm text-cream/50 mt-1.5">
             Es la misma lista que ves en Tareas. Lo que agregues allá aparece acá.
           </p>
         )}
@@ -133,7 +147,7 @@ export default function ListaDeHoy({
 
       {grupos.map((g) => (
         <div key={g.nombre} className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
             {g.nombre} · {g.tareas.length}
           </p>
           <div className="space-y-3">
@@ -162,6 +176,14 @@ export default function ListaDeHoy({
   );
 }
 
+/**
+ * Cada tarea, con la tarjeta de cliente.
+ *
+ * Antes esta tarjeta dibujaba seis botones a la vista. Con seis botones,
+ * **elegir cuesta más que hacer** — y quien atiende veinte cuentas paga ese
+ * costo veinte veces. Ahora: un número, una frase, un botón, y el resto
+ * detrás de los tres puntos.
+ */
 function Tarjeta({
   t, ocupado, onMandar, onHecha, onAbrir,
 }: {
@@ -171,88 +193,43 @@ function Tarjeta({
   onHecha: () => void;
   onAbrir?: (a: AperturaDeTarea) => void;
 }) {
-  const [copiado, setCopiado] = useState(false);
   const apertura = comoSeResuelve(t);
   const escala = t.destino === 'escalar' ? aQuienEscala(t) : null;
 
+  const semaforo: Semaforo = t.vencida ? 'frenado'
+    : t.origen === 'soporte' ? 'atencion' : 'bien';
+
+  // El único botón visible: el que la app recomienda.
+  const principal = t.destino === 'mensaje' && t.textoListo
+    ? { label: ocupado ? 'Mandando…' : 'Mandárselo', onClick: onMandar }
+    : escala
+      ? { label: `Pasar a ${escala.rol === 'desarrollo' ? 'desarrollo' : 'dirección'}`, onClick: onHecha }
+      : apertura && onAbrir
+        ? { label: ETIQUETA_DESTINO[t.destino], onClick: () => onAbrir(apertura) }
+        : { label: 'Ya lo hice', onClick: onHecha };
+
+  const extras = [
+    ...(apertura && onAbrir && t.destino === 'mensaje'
+      ? [{ id: 'abrir', label: ETIQUETA_DESTINO[t.destino], onClick: () => onAbrir(apertura) }]
+      : []),
+    { id: 'hecha', label: 'Marcarla hecha', onClick: onHecha },
+  ];
+
+  // El número que se lee de lejos sale del título si lo trae; si no, del peso.
+  const numeros = t.titulo.match(/(\d+)\D+(\d+)/);
+
   return (
-    <div className={`rounded-xl border p-3.5 ${
-      t.vencida ? 'border-danger/35 bg-danger/[0.04]' : 'border-cream/12'}`}>
-
-      <div className="flex items-start gap-2.5">
-        {t.vencida && <AlertTriangle size={14} className="text-danger mt-0.5 shrink-0" />}
-        <div className="min-w-0 flex-1">
-          <p className="text-sm text-cream/90 leading-snug">{t.titulo}</p>
-          <p className="text-xs text-cream/60 mt-1 leading-relaxed">{t.descripcion}</p>
-
-          {/* Por qué esta tarea, y por qué acá. Es lo que faltaba. */}
-          <p className="text-[11px] text-cream/35 mt-1.5">
-            {t.porQueAca} · {POR_QUE[t.origen]}
-          </p>
-        </div>
-      </div>
-
-      {/* El mensaje ya escrito */}
-      {t.destino === 'mensaje' && t.textoListo && (
-        <p className="text-xs text-cream/70 bg-surface/30 rounded-lg p-2.5 mt-2.5 leading-relaxed">
-          {t.textoListo}
-        </p>
-      )}
-
-      {/* Lo que pasa si se escala */}
-      {escala && (
-        <p className="text-xs text-cream/55 mt-2 leading-relaxed">
-          {escala.porque}
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {t.destino === 'mensaje' && t.textoListo && (
-          <>
-            <button onClick={onMandar} disabled={ocupado}
-              className="btn-primary rounded-lg px-3 py-1.5 text-xs font-bold disabled:opacity-50">
-              <Send size={11} className="inline mb-0.5 mr-1" />
-              {ocupado ? 'Mandando…' : 'Mandárselo'}
-            </button>
-            <button
-              onClick={() => {
-                void navigator.clipboard?.writeText(t.textoListo ?? '');
-                setCopiado(true);
-                setTimeout(() => setCopiado(false), 1800);
-              }}
-              className="rounded-lg border border-cream/15 px-3 py-1.5 text-xs text-cream/70">
-              <Copy size={11} className="inline mb-0.5 mr-1" />
-              {copiado ? 'Copiado' : 'Copiar'}
-            </button>
-          </>
-        )}
-
-        {apertura && onAbrir && (
-          <button onClick={() => onAbrir(apertura)}
-            className="btn-primary rounded-lg px-3 py-1.5 text-xs font-bold">
-            {ETIQUETA_DESTINO[t.destino]}
-            <ArrowUpRight size={11} className="inline mb-0.5 ml-1" />
-          </button>
-        )}
-
-        {escala && (
-          <button onClick={onHecha} disabled={ocupado}
-            className="btn-primary rounded-lg px-3 py-1.5 text-xs font-bold disabled:opacity-50">
-            <ArrowUpRight size={11} className="inline mb-0.5 mr-1" />
-            Pasar a {escala.rol === 'desarrollo' ? 'desarrollo' : 'dirección'}
-          </button>
-        )}
-
-        <button onClick={onHecha} disabled={ocupado}
-          className="text-[11px] text-cream/45 underline underline-offset-2 disabled:opacity-50">
-          <Check size={10} className="inline mb-0.5 mr-0.5" />
-          Ya lo hice
-        </button>
-      </div>
-
-      {apertura?.aviso && (
-        <p className="text-[11px] text-cream/40 mt-2">{apertura.aviso}</p>
-      )}
-    </div>
+    <TarjetaCliente
+      nombre={t.titulo.split('—')[0].trim()}
+      estado={t.porQueAca}
+      semaforo={semaforo}
+      numero={numeros ? numeros[1] : (t.vencida ? '!' : '·')}
+      numeroDe={numeros ? numeros[2] : undefined}
+      etiqueta={POR_QUE[t.origen]}
+      frase={t.descripcion}
+      accionPrincipal={principal}
+      mensajeListo={t.textoListo}
+      extras={extras}
+    />
   );
 }

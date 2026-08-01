@@ -34,7 +34,7 @@ export default function BotonAudio({ onTexto }: { onTexto: (texto: string) => vo
       onClick={toggle}
       disabled={estado === 'transcribiendo'}
       title={estado === 'grabando' ? 'Toca para terminar' : 'Responde hablando'}
-      className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-colors min-h-[40px] ${
+      className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-bold uppercase tracking-wider transition-colors min-h-[40px] ${
         estado === 'grabando'
           ? 'border-danger/60 bg-danger/15 text-danger animate-pulse'
           : estado === 'transcribiendo'

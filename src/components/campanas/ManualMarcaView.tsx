@@ -244,7 +244,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={cargarEjemplo}
           title="Cargar un ejemplo para probar"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-gold border border-gold/30 hover:bg-gold/10 transition-all whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gold border border-gold/30 hover:bg-gold/10 transition-all whitespace-nowrap"
         >
           <Sparkles className="w-3 h-3" />
           Cargar ejemplo
@@ -254,10 +254,10 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       {/* Progreso */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-cream/55">
+          <span className="text-sm font-bold tracking-[0.2em] uppercase text-cream/55">
             Completado
           </span>
-          <span className="text-[11px] font-semibold text-cream/70">{completos}/3</span>
+          <span className="text-sm font-semibold text-cream/70">{completos}/3</span>
         </div>
         <div className="flex-1 max-w-xs h-1.5 rounded-full bg-cream/5 overflow-hidden">
           <div
@@ -301,7 +301,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(232,150,46,0.10)]">
         <button
           onClick={syncConAdn}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-cream/75 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-cream/75 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Sincronizar con ADN
@@ -309,7 +309,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={guardar}
           disabled={saving || !dirty || !userId}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? (
             <>
@@ -348,16 +348,16 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
     <div>
       <div className="flex items-center gap-2 mb-1.5">
         <Palette className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <label className="text-sm font-bold tracking-wider uppercase text-cream/75">
           Paleta de colores
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">
+          <span className="text-sm text-gold/70 font-medium">
             · {swatches.length} color{swatches.length === 1 ? '' : 'es'}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-3">
+      <p className="text-sm text-cream/55 mb-3">
         Estos colores se aplican con prioridad sobre el estilo visual y sobre cualquier imagen de
         referencia al generar.
       </p>
@@ -503,7 +503,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
           value={swatch.rol}
           onChange={(e) => onChange({ rol: e.target.value })}
           placeholder="rol (ej: fondo, acento)"
-          className="w-full bg-transparent border-0 border-b border-cream/10 text-[11px] text-cream/70 placeholder-cream/25 focus:outline-none focus:border-gold/40 pb-0.5"
+          className="w-full bg-transparent border-0 border-b border-cream/10 text-sm text-cream/70 placeholder-cream/25 focus:outline-none focus:border-gold/40 pb-0.5"
         />
       </div>
 
@@ -538,14 +538,14 @@ function Field({ icon: Icon, label, hint, value, onChange, placeholder, rows }: 
     <div>
       <div className="flex items-center gap-2 mb-1.5">
         <Icon className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <label className="text-sm font-bold tracking-wider uppercase text-cream/75">
           {label}
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">· cargado</span>
+          <span className="text-sm text-gold/70 font-medium">· cargado</span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-2">{hint}</p>
+      <p className="text-sm text-cream/55 mb-2">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

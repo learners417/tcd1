@@ -28,7 +28,7 @@ function getTypeBadge(tipo?: string) {
 function MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="card-panel p-5">
-      <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
+      <p className="text-sm text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
       <p className="text-2xl font-light text-cream tracking-tight">{value}</p>
       <p className="text-xs text-cream/65 mt-1">{sub}</p>
     </div>
@@ -297,7 +297,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         if (!pacto?.texto) return null;
         return (
           <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-2">
               Lo que te prometiste
             </p>
             <p className="text-base text-cream/90 leading-relaxed italic">
@@ -320,7 +320,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const urgente = d !== null && d <= 3;
         return (
           <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tus 5 días</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tus 5 días</p>
             {d !== null && d > 0 ? (
               <p className="text-sm text-cream/85">
                 {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
@@ -354,7 +354,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           <div className="card-panel p-6 sm:p-7 border border-gold/15">
             <div className="flex flex-wrap items-baseline justify-between gap-3">
               <p className="text-2xl font-light text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">Día {diaProg} de 90</p>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Día {diaProg} de 90</p>
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
               {c && <p className="text-sm text-cream/80">{c.emoji} Cinturón <strong className="text-cream">{c.nombre}</strong></p>}
@@ -389,7 +389,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             try { guardado = (JSON.parse(localStorage.getItem('tcd_descanso_v1') ?? '{}'))[hoyKey] ?? ''; } catch { /* noop */ }
             return (
               <div className="card-panel p-6 border border-success/25 bg-gradient-to-b from-success/[0.05] to-transparent">
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-success mb-2">Sábado · Descanso activo</p>
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-success mb-2">Sábado · Descanso activo</p>
                 <p className="text-sm text-cream/80 mb-1">Hoy no hay sesión. Hay vida.</p>
                 <p className="text-xs text-cream/55 mb-4">Deja una línea de tu día — un momento compartido, un rato afuera, lo que te llenó. No viniste solo a hacer dinero: esto también es el camino.</p>
                 {guardado ? (
@@ -411,7 +411,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           if (dow === 0) {
             return (
               <div className="card-panel p-6 border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent">
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
                 <p className="text-sm text-cream/80 mb-4">Quince minutos para ti: tu Diario, tu semana, tu intención. La transformación también se registra.</p>
                 {diarioAbierto && (<button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>)}
               </div>
@@ -423,8 +423,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         {/* Foco de Hoy (60%) */}
         <div className="card-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[11px] font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
-            <button onClick={() => setCurrentPage('roadmap')} className="text-[11px] text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
+            <h2 className="text-sm font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
+            <button onClick={() => setCurrentPage('roadmap')} className="text-sm text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
               Ir a tareas →
             </button>
           </div>
@@ -460,7 +460,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 );
                 return (
                   <div className="rounded-xl border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent p-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Día de campo</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Día de campo</p>
                     <p className="text-sm text-cream/85">Hoy no hay sesión nueva. Hoy se juega.</p>
                     <p className="text-xs text-cream/50 mt-1 mb-4">Tu sistema está vivo: esto es lo que mueve tus números hoy.</p>
                     <div className="space-y-2 mb-4">
@@ -489,7 +489,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                   onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
                   className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
                 >
-                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
                   <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
                   <p className="text-xs text-cream/65 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
                   <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">COMENZAR →</span>
@@ -508,16 +508,16 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-cream/90">{t.titulo}</p>
-                  <p className="text-[11px] text-cream/55 mt-1">{t.pilarTitulo}</p>
+                  <p className="text-sm text-cream/55 mt-1">{t.pilarTitulo}</p>
                   <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <span className={`text-[11px] uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
+                    <span className={`text-sm uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
                       {t.tipo || `Pilar ${t.pilarNumero}`}
                     </span>
-                    <span className="text-[11px] text-cream/55 flex items-center gap-1 font-medium">
+                    <span className="text-sm text-cream/55 flex items-center gap-1 font-medium">
                       <Clock className="w-3 h-3" /> {t.tiempo_estimado || '15–30 min'}
                     </span>
                     {t.herramienta_id && (
-                      <span className="text-[11px] text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
+                      <span className="text-sm text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
                     )}
                   </div>
                 </div>
@@ -540,10 +540,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
             <button onClick={onClick} disabled={!onClick}
               className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[rgba(232,150,46,0.12)] bg-surface/30 hover:border-gold/30'}`}>
-              <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
+              <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
               <span className="flex-1 min-w-0">
                 <span className={`block text-sm font-medium ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
-                <span className="block text-[11px] text-cream/50">{meta}</span>
+                <span className="block text-sm text-cream/50">{meta}</span>
               </span>
               {onClick && <ChevronRight className="w-4 h-4 text-cream/40" />}
             </button>
@@ -551,7 +551,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           return (
             <>
             <div className="card-panel p-5">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-cream/60 mb-3">Tu día, en orden</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-cream/60 mb-3">Tu día, en orden</p>
               <div className="space-y-2">
                 <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — el dojo te vio hoy' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
                 {sistemaVivo && (

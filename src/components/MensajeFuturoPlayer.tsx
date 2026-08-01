@@ -43,7 +43,7 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
     <div className="rounded-xl border border-gold/20 bg-gold/[0.05] p-4 text-left">
       <div className="flex items-center gap-2 mb-2">
         <Mail className="w-4 h-4 text-gold" />
-        <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+        <p className="text-sm font-bold uppercase tracking-widest text-gold">
           Tu Mensaje al Futuro
         </p>
       </div>
@@ -61,7 +61,7 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
           </button>
         </>
       ) : (
-        <div className="flex items-center gap-2 text-[11px] text-cream/45">
+        <div className="flex items-center gap-2 text-sm text-cream/45">
           <Lock className="w-3.5 h-3.5" /> Tu mensaje del Día 1 se reproduce acá cuando lo grabes en el
           Camino.
         </div>

@@ -215,16 +215,16 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
   return (
     <div className="mt-4 pt-4 border-t border-[rgba(232,150,46,0.08)]">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/55">📎 Documenta tu trabajo</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55">📎 Documenta tu trabajo</p>
         <button
           onClick={() => inputRef.current?.click()}
           disabled={subiendo}
-          className="text-[11px] px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.2)] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+          className="text-sm px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.2)] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
         >
           {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
         </button>
       </div>
-      {items.length > 0 && <p className="text-[11px] text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
+      {items.length > 0 && <p className="text-sm text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
       <input ref={inputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt" className="hidden" onChange={async (e) => {
         const f = e.target.files?.[0];
         if (!f || !userId) return;
@@ -862,14 +862,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             if (dia < 50) return null;
             return (
               <div className="card-ios p-5 mb-6" style={{ borderColor: 'rgba(90,145,112,0.35)', background: 'linear-gradient(135deg, rgba(61,107,79,0.12), transparent)' }}>
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#5A9170] mb-2">Fase Autonomía · tu semana tipo</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-cream/70">
+                <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#5A9170] mb-2">Fase Autonomía · tu semana tipo</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm text-cream/70">
                   <div className="rounded-lg bg-black/20 px-3 py-2">📞 Llamadas con interesados</div>
                   <div className="rounded-lg bg-black/20 px-3 py-2">🩺 Entrega con tu protocolo</div>
                   <div className="rounded-lg bg-black/20 px-3 py-2">📊 Métricas y ajuste de campaña</div>
                   <div className="rounded-lg bg-black/20 px-3 py-2">🗓 Tu revisión semanal (20 min)</div>
                 </div>
-                <p className="text-[11px] text-cream/55 mt-2 italic">La máquina ya está construida — ahora se opera. Cada paciente nuevo se enciende en tu tablero.</p>
+                <p className="text-sm text-cream/55 mt-2 italic">La máquina ya está construida — ahora se opera. Cada paciente nuevo se enciende en tu tablero.</p>
               </div>
             );
           } catch { return null; }
@@ -890,7 +890,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             const esFinde = [0, 6].includes(new Date().getDay());
             return (
               <div className="card-ios p-5 sm:p-6 mb-6" style={{ borderColor: 'rgba(232,150,46,0.35)', background: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02))' }}>
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
+                <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                   <div className="flex-1 min-w-0">
                     <p className="text-xl sm:text-2xl font-light text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{hoy.titulo}</p>
@@ -926,16 +926,16 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-surface/50 rounded-xl p-3 text-center">
             <p className="text-lg font-light text-cream">{perfil?.dia_programa ?? 1}</p>
-            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Día de prog.</p>
+            <p className="text-sm text-cream/55 uppercase tracking-wider">Día de prog.</p>
           </div>
           <div className="bg-surface/50 rounded-xl p-3 text-center relative">
             <p className="text-lg font-light text-cream">
               {ventas.length}<span className="text-cream/35 text-sm">/10</span>
             </p>
-            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Pacientes</p>
+            <p className="text-sm text-cream/55 uppercase tracking-wider">Pacientes</p>
             <button
               onClick={() => setVentaModal(true)}
-              className="mt-1.5 text-[11px] font-semibold text-gold hover:text-goldhi transition-colors"
+              className="mt-1.5 text-sm font-semibold text-gold hover:text-goldhi transition-colors"
             >
               🎉 Registrar venta
             </button>
@@ -944,7 +944,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             <p className="text-lg font-light text-cream">
               {pilaresConEstado.filter((p) => p.estado === 'completado').length}
             </p>
-            <p className="text-[11px] text-cream/55 uppercase tracking-wider">Pilares completados</p>
+            <p className="text-sm text-cream/55 uppercase tracking-wider">Pilares completados</p>
           </div>
         </div>
       </div>
@@ -1067,7 +1067,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
-                        <p className="text-[11px] text-cream/45 mt-1.5 leading-tight">
+                        <p className="text-sm text-cream/45 mt-1.5 leading-tight">
                           {pilar.desbloqueo === 'venta_real' && 'Requiere 1 venta real'}
                           {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
                         </p>
@@ -1075,7 +1075,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       {pilar.estado === 'plan_bloqueado' && (() => {
                         const planNec = planParaPilar(pilar.numero);
                         return (
-                          <span className="block text-[11px] text-gold/85 mt-1.5 leading-relaxed">
+                          <span className="block text-sm text-gold/85 mt-1.5 leading-relaxed">
                             Se abre con <strong>{NOMBRE_PLAN[planNec]}</strong> · {PRECIO_FUNDADOR[planNec]} — toca para verlo
                           </span>
                         );
@@ -1207,11 +1207,11 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="text-[11px] font-mono text-cream/55 bg-gold/5 px-2 py-0.5 rounded">
+                          <span className="text-sm font-mono text-cream/55 bg-gold/5 px-2 py-0.5 rounded">
                             {meta.codigo}
                           </span>
                           {/* Type badge */}
-                          <span className={`text-[11px] uppercase font-bold px-1.5 py-0.5 rounded-full border ${badge.bg} ${badge.color} flex items-center gap-1`}>
+                          <span className={`text-sm uppercase font-bold px-1.5 py-0.5 rounded-full border ${badge.bg} ${badge.color} flex items-center gap-1`}>
                             <BadgeIcon className="w-3 h-3" /> {badge.label}
                           </span>
                           {meta.es_estrella && (
@@ -1269,7 +1269,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#0d0a06]">
                             <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
                               <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
-                              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
+                              <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
                               <span className="text-xs text-cream/40">{meta.codigo}</span>
                             </div>
                             <div className="max-w-2xl mx-auto px-4 py-6">
@@ -1367,7 +1367,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               🎉 Registrar una venta
             </h3>
             <p className="text-xs text-cream/65 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
-            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
             <input
               type="number" inputMode="decimal"
               value={ventaMonto}

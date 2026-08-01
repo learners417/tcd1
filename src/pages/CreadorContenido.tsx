@@ -192,22 +192,22 @@ function CarruselPreview({ texto }: { texto: string }) {
   if (slides.length < 3) return null;
   return (
     <div className="mb-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
+      <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
       <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
         {slides.map((s) => (
           <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
-            <span className="absolute top-3 right-3 text-[11px] font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
+            <span className="absolute top-3 right-3 text-sm font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
             <div className="flex-1 flex items-center">
               <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
                 {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
               </p>
             </div>
-            {s.n === slides.length && <p className="text-[11px] font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
+            {s.n === slides.length && <p className="text-sm font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
             <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+      <p className="text-sm text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
     </div>
   );
 }
@@ -327,7 +327,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="space-y-3">
-          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+          <p className="text-sm text-gold uppercase tracking-widest font-semibold">
             v8 · Herramienta nueva
           </p>
           <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
@@ -371,7 +371,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+        <p className="text-sm text-gold uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
         <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
@@ -386,7 +386,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -429,7 +429,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de nivel */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           2 · ¿Para qué nivel de awareness?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -466,7 +466,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Tema */}
       <div className="card-panel p-5 space-y-3">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           3 · Tema · ángulo · objeción a abordar
         </p>
         <textarea
@@ -502,7 +502,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       {output && (
         <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+            <p className="text-sm uppercase tracking-widest text-gold font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
             </p>
             <div className="flex items-center gap-2">

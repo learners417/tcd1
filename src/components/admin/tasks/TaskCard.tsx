@@ -182,7 +182,7 @@ export default function TaskCard({
           {isArchivada && (
             <span
               title="Tarea archivada"
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cream/8 text-cream/45 border border-cream/10 flex items-center gap-1 shrink-0"
+              className="text-sm font-bold px-2 py-0.5 rounded-full bg-cream/8 text-cream/45 border border-cream/10 flex items-center gap-1 shrink-0"
             >
               <Archive className="w-3 h-3" /> Archivada
             </span>
@@ -193,7 +193,7 @@ export default function TaskCard({
           {yoSoyCreadorYNoAsignado && !isArchivada && (
             <span
               title="Tú creaste esta tarea"
-              className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full"
+              className="hidden sm:flex items-center gap-1 text-sm font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full"
             >
               <UserPlus className="w-3 h-3" /> Creada por mí
             </span>
@@ -243,7 +243,7 @@ export default function TaskCard({
                 className="z-50 bg-[#1E1E1E] border border-gold/12 rounded-xl shadow-xl py-1"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="px-3 py-1.5 text-[11px] font-bold text-cream/45 uppercase tracking-wider">
+                <div className="px-3 py-1.5 text-sm font-bold text-cream/45 uppercase tracking-wider">
                   Mover a
                 </div>
                 {ADMIN_TAREA_STATUSES.filter(s => s !== tarea.status).map(s => (
@@ -330,7 +330,7 @@ export default function TaskCard({
             <div
               title={`Creada por ${tarea.creador_nombre}`}
               style={{ backgroundColor: creadorColor.bg, borderColor: creadorColor.border, color: creadorColor.text }}
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold border"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold border"
             >
               {getInitials(tarea.creador_nombre)}
             </div>

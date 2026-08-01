@@ -407,11 +407,11 @@ export default function TaskHerramientaIA({
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider">
+          <span className="text-sm uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider">
             HERRAMIENTA {usaIA ? 'IA' : ''}
           </span>
           {modo === 'guardado' && (
-            <span className="text-[11px] uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
+            <span className="text-sm uppercase font-bold px-2 py-0.5 rounded-full bg-success/15 text-success border border-success/25 tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Guardado en ADN
             </span>
           )}
@@ -434,7 +434,7 @@ export default function TaskHerramientaIA({
         )}
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border mt-3 ${evidLista && evidCount > 0 ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
-            <p className="text-[11px] font-bold uppercase tracking-widest mb-2 text-gold">
+            <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
               {evidCount > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida para completar'}
             </p>
             <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
@@ -565,7 +565,7 @@ export default function TaskHerramientaIA({
       {modo === 'opciones' && herramienta?.constructorFases && (
         <div className="space-y-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Construido desde tu ADN</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Construido desde tu ADN</p>
             <h3 className="text-lg font-bold text-cream">{herramienta.constructorFases.etiquetaOpciones}</h3>
             <p className="text-xs text-cream/55 mt-1">Toca la que te suene a ti. Después armamos las piezas — y editas lo que quieras antes de sellar.</p>
           </div>
@@ -592,7 +592,7 @@ export default function TaskHerramientaIA({
       {modo === 'bloques' && eleccion && (
         <div className="space-y-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus piezas — edita lo que quieras</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus piezas — edita lo que quieras</p>
             <h3 className="text-lg font-bold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{eleccion.titulo}</h3>
             <p className="text-xs text-cream/55 mt-1">✏️ edita con tus palabras · 🔄 regenera solo esa pieza · 🎤 habla en vez de escribir</p>
           </div>
@@ -659,7 +659,7 @@ export default function TaskHerramientaIA({
       {modo === 'sellado' && eleccion && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">🔒 Sellado en tu ADN{(selloExistente?.fecha) ? ` · ${selloExistente.fecha}` : ''}</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">🔒 Sellado en tu ADN{(selloExistente?.fecha) ? ` · ${selloExistente.fecha}` : ''}</p>
             <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{eleccion.titulo}</p>
             <div className="mt-4 space-y-3">
               {bloques.map((b, i2) => (
@@ -670,7 +670,7 @@ export default function TaskHerramientaIA({
               ))}
             </div>
           </div>
-          <p className="text-[11px] text-cream/45 text-center">Lo sellado no se edita: se construye encima. Todo lo que sigue lo hereda.</p>
+          <p className="text-sm text-cream/45 text-center">Lo sellado no se edita: se construye encima. Todo lo que sigue lo hereda.</p>
           <button type="button" onClick={() => abrirParaImprimir(meta.titulo, selloExistente?.texto ?? output)}
             className="w-full btn-secondary py-3 rounded-xl text-sm font-bold">Imprimir / PDF</button>
         </div>
@@ -679,7 +679,7 @@ export default function TaskHerramientaIA({
       {modo === 'revision' && (
         <div className="space-y-5" ref={outputRef}>
           <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)]">
-            <p className="text-[11px] text-gold uppercase tracking-widest font-bold mb-3">
+            <p className="text-sm text-gold uppercase tracking-widest font-bold mb-3">
               {usaIA ? 'Resultado generado' : 'Tu contenido'}
             </p>
             <div className="text-sm text-cream/90 leading-relaxed prose prose-invert max-w-none prose-a:text-gold prose-headings:text-gold prose-headings:font-semibold prose-strong:text-cream prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">
@@ -748,7 +748,7 @@ export default function TaskHerramientaIA({
       {modo === 'guardado' && (
         <div className="space-y-5">
           <div className="card-panel p-5 border border-success/20 bg-success/[0.03]">
-            <p className="text-[11px] text-success uppercase tracking-widest font-bold mb-3 flex items-center gap-1.5">
+            <p className="text-sm text-success uppercase tracking-widest font-bold mb-3 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" /> Guardado en tu ADN
             </p>
             <div className="text-sm text-cream/80 leading-relaxed prose prose-invert max-w-none prose-a:text-gold prose-headings:text-gold prose-headings:font-semibold prose-strong:text-cream prose-strong:font-bold prose-p:leading-relaxed prose-li:my-0.5 prose-hr:border-[rgba(232,150,46,0.10)]">

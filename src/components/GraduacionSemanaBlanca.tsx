@@ -21,14 +21,14 @@ export default function GraduacionSemanaBlanca() {
 
   return (
     <div className="card-panel p-6 sm:p-7 border border-gold/35 bg-gradient-to-b from-gold/[0.09] to-transparent">
-      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-gold mb-2">🥋 Terminaste tus 5 días</p>
+      <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-2">🥋 Terminaste tus 5 días</p>
       <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
         Hace cinco días tu precio no decía lo que vale tu trabajo.
       </p>
       <p className="text-sm text-cream/70 mt-1">Hoy tienes tu número, tu anuncio y tus respuestas. Eso ya no se discute.</p>
 
       <div className="mt-5">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">
+        <p className="text-sm font-bold uppercase tracking-wider text-cream/55 mb-2">
           Lo que queda grabado en tu ADN — {selladas.length} de {suyas.length}
         </p>
         <div className="space-y-1.5">
@@ -45,7 +45,7 @@ export default function GraduacionSemanaBlanca() {
       </div>
 
       <div className="mt-5 pt-5 border-t border-cream/10">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">Lo que sigue apagado — {faltan.length} piezas</p>
+        <p className="text-sm font-bold uppercase tracking-wider text-cream/55 mb-2">Lo que sigue apagado — {faltan.length} piezas</p>
         <div className="space-y-1.5">
           {faltan.map((p) => (
             <div key={p.id} className="flex items-start gap-2.5">
@@ -57,12 +57,12 @@ export default function GraduacionSemanaBlanca() {
       </div>
 
       <div className="mt-5 pt-5 border-t border-cream/10">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-2">🎁 Y te dejo dos sesiones más, abiertas</p>
+        <p className="text-sm font-bold uppercase tracking-wider text-gold mb-2">🎁 Y te dejo dos sesiones más, abiertas</p>
         <p className="text-sm text-cream/70 leading-relaxed">
           <strong className="text-cream/90">El dinero en el cuerpo</strong> — para que tu precio también lo sostenga tu voz, no solo tu cabeza.<br />
           <strong className="text-cream/90">Tu creencia nueva y el Estandarte</strong> — la frase que vas a leer cada vez que dudes.
         </p>
-        <p className="text-[11px] text-cream/45 mt-2">Están en tu Camino. Hazlas cuando quieras.</p>
+        <p className="text-sm text-cream/45 mt-2">Están en tu Camino. Hazlas cuando quieras.</p>
       </div>
 
       <p className="text-sm text-cream/85 mt-5 leading-relaxed">
@@ -80,7 +80,7 @@ export default function GraduacionSemanaBlanca() {
             window.location.reload();
           } catch { /* noop */ }
         }}
-        className="block mt-3 text-[11px] text-cream/45 hover:text-cream underline underline-offset-2"
+        className="block mt-3 text-sm text-cream/45 hover:text-cream underline underline-offset-2"
       >
         ¿No subiste tu precio todavía? Repite tus 5 días — tu garantía, sin costo.
       </button>

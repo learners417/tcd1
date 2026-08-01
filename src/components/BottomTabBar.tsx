@@ -46,7 +46,7 @@ export default function BottomTabBar({ currentPage, setCurrentPage, onMore }: Pr
               }`}
             >
               <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 2} />
-              <span className="text-[11px] font-medium leading-none">{tab.label}</span>
+              <span className="text-sm font-medium leading-none">{tab.label}</span>
             </button>
           );
         })}
@@ -56,7 +56,7 @@ export default function BottomTabBar({ currentPage, setCurrentPage, onMore }: Pr
           className="flex flex-col items-center justify-center gap-1 flex-1 min-h-[3.5rem] pt-2 pb-1.5 text-cream/65 hover:text-cream/80 transition-colors"
         >
           <Menu className="w-[22px] h-[22px]" strokeWidth={2} />
-          <span className="text-[11px] font-medium leading-none">Más</span>
+          <span className="text-sm font-medium leading-none">Más</span>
         </button>
       </div>
     </nav>

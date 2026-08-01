@@ -258,7 +258,7 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
       <div className="w-full max-w-2xl bg-[#0F0F0F] border border-gold/30 rounded-2xl shadow-2xl">
         <div className="flex items-start justify-between p-5 border-b border-cream/10">
           <div>
-            <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+            <p className="text-sm text-gold uppercase tracking-widest font-semibold">
               {campo.codigo} · {campo.pilarOrigen}
             </p>
             <h3 className="text-xl font-light text-cream mt-1">{campo.label}</h3>
@@ -275,12 +275,12 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
 
         <div className="p-5 space-y-3">
           {kind === 'array' && (
-            <p className="text-xs text-cream/65">
+            <p className="text-sm text-cream/65">
               Una entrada por línea. Las líneas vacías se ignoran.
             </p>
           )}
           {kind === 'json' && (
-            <p className="text-xs text-cream/65">
+            <p className="text-sm text-cream/65">
               Editor de JSON crudo. Mantené la estructura del objeto.
             </p>
           )}
@@ -292,13 +292,13 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
             placeholder={kind === 'array' ? 'Una línea por elemento…' : kind === 'json' ? '{ … }' : 'Contenido…'}
           />
           {jsonError && (
-            <p className="text-xs text-danger">JSON inválido: {jsonError}</p>
+            <p className="text-sm text-danger">JSON inválido: {jsonError}</p>
           )}
           {saveError && (
-            <div className="text-xs text-danger bg-danger/10 border border-danger/30 rounded-lg p-3 whitespace-pre-wrap break-words">
+            <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg p-3 whitespace-pre-wrap break-words">
               <p className="font-semibold mb-1">Error al guardar</p>
               <p className="font-mono">{saveError}</p>
-              <p className="text-cream/55 mt-2 text-[11px]">
+              <p className="text-cream/55 mt-2 text-sm">
                 Detalle completo en la consola del navegador.
               </p>
             </div>
@@ -366,7 +366,7 @@ function TarjetaSeccion({
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
             <h3 className="text-lg font-medium text-cream tracking-tight">{seccion.titulo}</h3>
-            <span className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+            <span className="text-sm text-gold uppercase tracking-widest font-semibold">
               {seccion.codigo} · {seccion.pilarRange}
             </span>
           </div>
@@ -374,7 +374,7 @@ function TarjetaSeccion({
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           <div className="text-right">
-            <p className="text-xs text-cream/55 uppercase tracking-wider">
+            <p className="text-sm text-cream/55 uppercase tracking-wider">
               {completos} / {total}
             </p>
             <p className="text-base font-medium text-gold">{porcentaje}%</p>
@@ -423,11 +423,11 @@ function TarjetaSeccion({
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {campo.criticoDia45 && (
-                      <span className="text-[11px] uppercase tracking-widest text-gold font-semibold">
+                      <span className="text-sm uppercase tracking-widest text-gold font-semibold">
                         D45
                       </span>
                     )}
-                    <span className="text-[11px] text-cream/45 font-mono">{campo.pilarOrigen}</span>
+                    <span className="text-sm text-cream/45 font-mono">{campo.pilarOrigen}</span>
                     {editable ? (
                       <button
                         type="button"
@@ -448,7 +448,7 @@ function TarjetaSeccion({
                     <p className="whitespace-pre-wrap break-words">{valorTexto}</p>
                   </div>
                 ) : (
-                  <p className="text-xs text-cream/45 pl-5 italic">
+                  <p className="text-sm text-cream/45 pl-5 italic">
                     {campo.pending
                       ? 'Campo nuevo · se llenará cuando el cliente complete el pilar.'
                       : `Se completa en ${campo.pilarOrigen}.`}
@@ -456,7 +456,7 @@ function TarjetaSeccion({
                 )}
 
                 {ultima && (
-                  <p className="text-[11px] text-cream/45 pl-5 mt-1 italic">
+                  <p className="text-sm text-cream/45 pl-5 mt-1 italic">
                     Editado por {ultima.editor?.nombre ?? 'equipo'} · {fechaCorta(ultima.edited_at)}
                   </p>
                 )}
@@ -603,14 +603,14 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+          <p className="text-sm text-gold uppercase tracking-widest font-semibold">
             ADN del Negocio · {clienteNombre}
           </p>
           <h2 className="text-2xl font-light text-cream tracking-tight mt-1">
             7 secciones · 56 campos · v7
           </h2>
           {!canEdit && (
-            <p className="text-xs text-cream/65 mt-2 flex items-center gap-2">
+            <p className="text-sm text-cream/65 mt-2 flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" />
               Modo lectura — solo owner y manager pueden editar.
             </p>
@@ -628,7 +628,7 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
 
       {/* Resumen */}
       <div className="card-panel p-5">
-        <p className="text-xs text-cream/55 uppercase tracking-widest mb-1 font-semibold">
+        <p className="text-sm text-cream/55 uppercase tracking-widest mb-1 font-semibold">
           Progreso del ADN
         </p>
         <p className="text-2xl font-light text-cream tracking-tight">
@@ -650,11 +650,11 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
         <div className="card-panel p-5">
           <h3 className="text-sm font-medium text-cream mb-3">Últimas ediciones</h3>
           {auditLog.length === 0 ? (
-            <p className="text-xs text-cream/55 italic">Sin ediciones registradas todavía.</p>
+            <p className="text-sm text-cream/55 italic">Sin ediciones registradas todavía.</p>
           ) : (
             <ul className="space-y-2 max-h-72 overflow-y-auto pr-2">
               {auditLog.slice(0, 30).map((entry) => (
-                <li key={entry.id} className="text-xs text-cream/70 border-l border-gold/20 pl-3">
+                <li key={entry.id} className="text-sm text-cream/70 border-l border-gold/20 pl-3">
                   <span className="text-gold font-medium">{entry.field_label ?? entry.field_codigo}</span>
                   <span className="text-cream/55"> · {entry.editor?.nombre ?? 'equipo'} · {fechaCorta(entry.edited_at)}</span>
                 </li>

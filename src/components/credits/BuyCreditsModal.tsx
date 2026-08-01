@@ -285,7 +285,7 @@ export default function BuyCreditsModal({
                         <div className="text-xl font-bold text-gold">
                           ${pack.price_usd.toFixed(2)}
                         </div>
-                        <div className="text-[11px] text-white/55 mt-1">
+                        <div className="text-sm text-white/55 mt-1">
                           ${pricePerCredit.toFixed(3)} / crédito
                         </div>
                       </button>
@@ -325,7 +325,7 @@ export default function BuyCreditsModal({
                   <div ref={paypalContainerRef} className={processing ? 'opacity-50 pointer-events-none' : ''} />
 
                   {PAYPAL_ENV === 'sandbox' && (
-                    <div className="mt-3 text-[11px] text-white/55 text-center">
+                    <div className="mt-3 text-sm text-white/55 text-center">
                       Modo sandbox · usa una cuenta de prueba de PayPal Developer
                     </div>
                   )}

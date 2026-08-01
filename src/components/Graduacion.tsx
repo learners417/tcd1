@@ -44,7 +44,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         }`}
       >
         <div className="text-6xl mb-4">⬛</div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">
           Cinturón Negro
         </p>
         <h2
@@ -77,7 +77,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-gold" />
-                <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+                <p className="text-sm font-bold uppercase tracking-widest text-gold">
                   Tu Foto del Día 90
                 </p>
               </div>
@@ -105,7 +105,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         ) : (
           <div className="mb-4 rounded-xl border border-cream/10 bg-[#0F0F0F] p-4 flex items-center gap-2 text-left">
             <Film className="w-4 h-4 text-gold/70 shrink-0" />
-            <p className="text-[11px] text-cream/45">
+            <p className="text-sm text-cream/45">
               Tu video de graduación (la palabra de Javo para este momento) aparece acá.
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         {/* Las dos puertas */}
         <div className="space-y-3 mb-6 text-left">
           <div className="rounded-xl border border-gold/25 bg-gold/[0.05] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">
+            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-1">
               Puerta 1 · Tu clínica sigue operando
             </p>
             <p className="text-xs text-cream/70 leading-relaxed">
@@ -136,7 +136,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
             </p>
           </div>
           <div className="rounded-xl border border-cream/15 bg-[#0F0F0F] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-cream/65 mb-1">
+            <p className="text-sm font-bold uppercase tracking-widest text-cream/65 mb-1">
               Puerta 2 · El Nivel 2 existe
             </p>
             <p className="text-xs text-cream/70 leading-relaxed">
@@ -166,7 +166,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
 
         <div className="flex items-center justify-center gap-1.5 mt-6 opacity-60">
           <Trophy className="w-3.5 h-3.5 text-gold" />
-          <span className="text-[11px] uppercase tracking-widest text-cream/55">
+          <span className="text-sm uppercase tracking-widest text-cream/55">
             Tu Clínica Digital · Sanadores Libres
           </span>
         </div>

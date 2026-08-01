@@ -32,14 +32,14 @@ function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
           <p className={`text-sm font-semibold ${sellada ? 'text-cream' : bloqueada ? 'text-cream/45' : 'text-cream/85'}`}>{p.titulo}</p>
           <p className={`text-xs mt-0.5 leading-relaxed ${sellada ? 'text-cream/60' : 'text-cream/40'}`}>{p.que}</p>
           {sellada ? (
-            <p className="text-[11px] text-success mt-2">Sellado{fecha ? ' · ' + fecha : ''} — se cambia rehaciendo su sesión</p>
+            <p className="text-sm text-success mt-2">Sellado{fecha ? ' · ' + fecha : ''} — se cambia rehaciendo su sesión</p>
           ) : bloqueada ? (
-            <p className="text-[11px] text-cream/35 mt-2">Se abre con el camino completo</p>
+            <p className="text-sm text-cream/35 mt-2">Se abre con el camino completo</p>
           ) : (
             <div className="mt-2 flex items-center justify-between gap-3">
-              <p className="text-[11px] text-cream/55">Se completa en: <span className="text-gold font-medium">{p.sesion}</span></p>
+              <p className="text-sm text-cream/55">Se completa en: <span className="text-gold font-medium">{p.sesion}</span></p>
               {onIr && (
-                <button onClick={onIr} className="shrink-0 inline-flex items-center gap-1 text-[11px] font-bold text-gold hover:text-goldhi">
+                <button onClick={onIr} className="shrink-0 inline-flex items-center gap-1 text-sm font-bold text-gold hover:text-goldhi">
                   Ir <ChevronRight className="w-3 h-3" />
                 </button>
               )}
@@ -71,8 +71,8 @@ export default function ADN({ setCurrentPage }: ADNProps) {
 
       <div className="card-panel px-5 py-4">
         <div className="flex items-baseline justify-between mb-2.5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/60">Sellado</p>
-          <p className="text-[11px] font-bold text-gold">{selladas} de {total}{selladas === total ? ' — completo' : ''}</p>
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">Sellado</p>
+          <p className="text-sm font-bold text-gold">{selladas} de {total}{selladas === total ? ' — completo' : ''}</p>
         </div>
         <div className="flex gap-1">
           {PIEZAS_ADN.map((p) => (
@@ -83,13 +83,13 @@ export default function ADN({ setCurrentPage }: ADNProps) {
       </div>
 
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">El alma — quién eres</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">El alma — quién eres</p>
         <p className="text-xs text-cream/45 mb-3">En orden: tu historia trae tus dones, tus dones señalan a quién sirves, y de ahí nace tu oferta. Nunca al revés.</p>
         <div className="space-y-2">{alma.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Los activos — lo que opera</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Los activos — lo que opera</p>
         <div className="space-y-2">{activos.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 
@@ -100,7 +100,7 @@ export default function ADN({ setCurrentPage }: ADNProps) {
         </div>
       )}
 
-      <p className="text-[11px] text-cream/40 text-center leading-relaxed">
+      <p className="text-sm text-cream/40 text-center leading-relaxed">
         Lo sellado no se edita por fuera: se cambia rehaciendo esa sesión.<br />
         Así tu ADN nunca se contradice con lo que la app construye.
       </p>

@@ -300,7 +300,7 @@ export default function TasksPipeline({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-semibold text-cream">Tareas</h2>
-          <p className="text-xs text-cream/55 mt-1">Gestión interna del equipo</p>
+          <p className="text-sm text-cream/55 mt-1">Gestión interna del equipo</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <TaskViewToggle value={view} onChange={setView} myCount={myCount} />
@@ -325,7 +325,7 @@ export default function TasksPipeline({
         <button
           onClick={() => setVerArchivadas(v => !v)}
           className={`
-            flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all
+            flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all
             ${verArchivadas
               ? 'bg-gold/15 text-gold border-gold/40'
               : 'bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-cream hover:border-[rgba(255,255,255,0.18)]'
@@ -335,7 +335,7 @@ export default function TasksPipeline({
           {verArchivadas ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           {verArchivadas ? 'Ocultar archivadas' : 'Ver archivadas'}
           {verArchivadas && archivadasCount > 0 && (
-            <span className="text-[11px] bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
+            <span className="text-sm bg-gold/25 text-gold px-1.5 py-0.5 rounded-full">
               {archivadasCount}
             </span>
           )}
@@ -345,11 +345,11 @@ export default function TasksPipeline({
           <button
             onClick={() => setBulkArchiveOpen(true)}
             title="Archivar todas las tareas completadas"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
           >
             <Archive className="w-3.5 h-3.5" />
             Archivar completadas
-            <span className="text-[11px] bg-cream/8 px-1.5 py-0.5 rounded-full">
+            <span className="text-sm bg-cream/8 px-1.5 py-0.5 rounded-full">
               {completadasNoArchivadasCount}
             </span>
           </button>
@@ -368,7 +368,7 @@ export default function TasksPipeline({
               <span className="text-sm font-semibold text-cream">
                 Mis tareas de hoy
               </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${overdueCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-gold/20 text-gold'}`}>
+              <span className={`text-sm px-2 py-0.5 rounded-full font-bold ${overdueCount > 0 ? 'bg-red-500/20 text-red-400' : 'bg-gold/20 text-gold'}`}>
                 {tareasHoy.length}
               </span>
             </div>

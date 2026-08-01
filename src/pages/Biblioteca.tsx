@@ -230,11 +230,11 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
   if (!r.youtubeId) {
     return (
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
         <p className="text-sm text-cream/75">{r.titulo}</p>
                   {COMPLEMENTOS[r.id] && (
                     <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
-                      <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
+                      <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
                       <div className="mt-3 space-y-3">
                         <p className="text-sm text-cream/80 leading-relaxed">{COMPLEMENTOS[r.id].resumen}</p>
                         <ul className="space-y-1.5">
@@ -258,9 +258,9 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
     return (
       <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
         <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
         <p className="text-sm text-cream/70">{r.titulo}</p>
-        <p className="text-[11px] text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
+        <p className="text-sm text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
       </div>
     );
   }
@@ -274,9 +274,9 @@ function RecursoVideoInApp({ r }: { r: RecursoADN }) {
   return (
     <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-gold/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
       <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-gold/5 transition-colors">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
         <p className="text-sm text-cream/90 font-medium">{r.titulo}</p>
-        <p className="text-[11px] text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
+        <p className="text-sm text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
       </button>
       {abierto && (
         <div className="aspect-video w-full bg-black">
@@ -485,7 +485,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                     {tab.letter}
                   </span>
                 )}
-                <span className="text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap">
+                <span className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap">
                   {tab.label}
                 </span>
               </button>
@@ -582,7 +582,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                         </div>
                       )}
                       {v.duracion && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-[11px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-sm font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
                           
                         </div>
                       )}
@@ -590,7 +590,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
 
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                        <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                           {v.pilar_id ?? v.id}
                         </span>
                       </div>
@@ -603,7 +603,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       {!isPlaceholder && (
                         <button
                           onClick={() => setVideoActivo(v)}
-                          className="mt-3 w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-gold/80 hover:bg-gold text-cream transition-all flex items-center justify-center gap-2"
+                          className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest bg-gold/80 hover:bg-gold text-cream transition-all flex items-center justify-center gap-2"
                         >
                           <Play className="w-3.5 h-3.5 fill-white" /> Ver Video
                         </button>
@@ -635,7 +635,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                   {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-gold shrink-0" /> : <Sparkles className="w-6 h-6 text-gold shrink-0" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                      <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                         {h.id}
                       </span>
                     </div>
@@ -652,7 +652,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                 <button
                   onClick={() => setHerramientaActivaId(h.id)}
 
-                  className={`w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
                     'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
                   }`}
                 >

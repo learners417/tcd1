@@ -131,19 +131,19 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
             </div>
             <div className="min-w-0">
               <p className="text-cream text-sm font-medium truncate">{data.profile.nombre}</p>
-              <p className="text-[11px] text-cream/55 uppercase tracking-wider truncate">Prog: {data.profile.plan}</p>
+              <p className="text-sm text-cream/55 uppercase tracking-wider truncate">Prog: {data.profile.plan}</p>
             </div>
           </div>
 
           <div className="bg-surface/60 border border-[rgba(232,150,46,0.10)] rounded-xl p-3 relative group">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] text-cream/65 font-medium tracking-wide">{data.cinturon.emoji} {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
-              <span className="text-[11px] text-cream font-medium">{data.progress}%</span>
+              <span className="text-sm text-cream/65 font-medium tracking-wide">{data.cinturon.emoji} {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
+              <span className="text-sm text-cream font-medium">{data.progress}%</span>
             </div>
             <div className="h-1 bg-cream/10 rounded-full overflow-hidden">
               <div className="h-full bg-gold rounded-full transition-all duration-1000" style={{ width: `${data.progress}%` }} />
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-full left-0 mt-2 w-full bg-surface border border-[rgba(232,150,46,0.12)] text-[11px] text-cream/70 p-2 rounded-lg shadow-xl pointer-events-none z-50">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-full left-0 mt-2 w-full bg-surface border border-[rgba(232,150,46,0.12)] text-sm text-cream/70 p-2 rounded-lg shadow-xl pointer-events-none z-50">
               ADN del Negocio: {data.progress}% completado
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         {sections.map((section, sidx) => (
           <div key={sidx} className="w-full">
             {!collapsed && (
-              <h3 className="px-6 text-[11px] font-bold text-cream/25 uppercase tracking-[0.1em] mb-2">
+              <h3 className="px-6 text-sm font-bold text-cream/25 uppercase tracking-[0.1em] mb-2">
                 {section.title}
               </h3>
             )}
@@ -230,7 +230,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       >
         {collapsed
           ? <ChevronRight className="w-4 h-4" />
-          : <><ChevronLeft className="w-4 h-4" /><span className="text-[11px]">Contraer</span></>
+          : <><ChevronLeft className="w-4 h-4" /><span className="text-sm">Contraer</span></>
         }
       </button>
     </aside>

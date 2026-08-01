@@ -22,7 +22,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
   return (
     <div className="space-y-5">
       {/* CP6 · Cómo funciona una sesión — el ritual en 3 pasos */}
-      <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-cream/55 rounded-xl border border-gold/10 bg-gold/[0.04] px-3 py-2">
+      <div className="flex items-center gap-1.5 flex-wrap text-sm text-cream/55 rounded-xl border border-gold/10 bg-gold/[0.04] px-3 py-2">
         <span className="font-semibold text-gold/80">Así funciona:</span>
         <span>1 · entras con tu objetivo</span>
         <span className="text-cream/45">→</span>
@@ -31,7 +31,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         <span>3 · cierras lo hecho</span>
       </div>
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-gold mb-1">Sesión de hoy</p>
         <h3 className="text-lg font-bold text-white leading-snug">{metaTitulo}</h3>
         {segundosObjetivo ? (
           <p className="text-xs text-white/55 mt-1">
@@ -64,7 +64,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
       </div>
 
       <div className="rounded-xl border border-gold/25 bg-gradient-to-br from-gold/[0.07] to-transparent px-4 py-3.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">🎯 Lo que vas a lograr hoy</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">🎯 Lo que vas a lograr hoy</p>
         <p className="text-sm text-white/90 leading-relaxed">{objetivo}</p>
       </div>
 
@@ -76,7 +76,7 @@ export default function CheckInPanel({ metaTitulo, objetivoSugerido, tiempoEstim
         <span>🕐 Hoy tengo poco tiempo — modo 15 minutos</span>
         <span className="font-bold">{modoCorto ? 'ON' : 'OFF'}</span>
       </button>
-      <p className="text-[11px] text-white/45 -mt-2">{modoCorto ? 'Haces solo el paso esencial de hoy. Mantiene tu racha y tu avance — mejor un día corto que un día cero.' : ''}</p>
+      <p className="text-sm text-white/45 -mt-2">{modoCorto ? 'Haces solo el paso esencial de hoy. Mantiene tu racha y tu avance — mejor un día corto que un día cero.' : ''}</p>
 
       <button
         type="button"

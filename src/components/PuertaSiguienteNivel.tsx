@@ -30,7 +30,7 @@ export default function PuertaSiguienteNivel() {
 
   return (
     <div className="card-panel p-5 border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent">
-      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">
         {completo ? 'Terminaste tu tramo' : 'Tu tramo'}
       </p>
       <p className="text-lg text-cream" style={{ fontFamily: 'var(--font-display)' }}>
@@ -47,7 +47,7 @@ export default function PuertaSiguienteNivel() {
           <div key={p.id} className="flex items-baseline gap-2 text-sm">
             <span className="text-cream/30">🔒</span>
             <span className="text-cream/75 flex-1">{p.titulo}</span>
-            <span className="text-[11px] text-cream/40 text-right">{p.sesion}</span>
+            <span className="text-sm text-cream/40 text-right">{p.sesion}</span>
           </div>
         ))}
       </div>

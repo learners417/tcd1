@@ -82,7 +82,7 @@ export default function PanelMotorIA() {
         <div className="flex gap-2">
           {DIAS.map((d) => (
             <button key={d} onClick={() => setDias(d)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
                 dias === d
                   ? 'bg-gold/20 border border-gold/50 text-gold'
                   : 'border border-cream/15 text-cream/60'}`}>
@@ -91,7 +91,7 @@ export default function PanelMotorIA() {
           ))}
         </div>
         <button onClick={() => void cargar()} disabled={cargando}
-          className="flex items-center gap-2 text-xs text-cream/60 disabled:opacity-40">
+          className="flex items-center gap-2 text-sm text-cream/60 disabled:opacity-40">
           <RefreshCw size={13} className={cargando ? 'animate-spin' : ''} />
           {cargando ? 'Cargando…' : 'Actualizar'}
         </button>
@@ -114,14 +114,14 @@ export default function PanelMotorIA() {
           ].map(([l, v]) => (
             <div key={l} className="rounded-2xl border border-cream/12 p-4 text-center">
               <p className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>{v}</p>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-1">{l}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-cream/45 mt-1">{l}</p>
             </div>
           ))}
         </div>
       )}
 
       {hayEstimado && (
-        <p className="text-[11px] text-cream/45">
+        <p className="text-sm text-cream/45">
           {usd(total?.usd_estimado)} de ese total se calculó con precios <strong>estimados</strong>,
           no confirmados con el proveedor. Se corrigen cargando la variable PRECIOS_IA.
         </p>
@@ -129,7 +129,7 @@ export default function PanelMotorIA() {
 
       {/* ── Qué se usa y qué cuesta ── */}
       <div className="rounded-2xl border border-cream/12 overflow-hidden">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold px-4 pt-4 pb-3">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold px-4 pt-4 pb-3">
           Por modelo y tarea
         </p>
         {modelos === null ? (
@@ -140,7 +140,7 @@ export default function PanelMotorIA() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-cream/45">
+                <tr className="text-xs uppercase tracking-wider text-cream/45">
                   <th className="text-left font-semibold px-4 py-2">Modelo</th>
                   <th className="text-left font-semibold px-3 py-2">Tarea</th>
                   <th className="text-right font-semibold px-3 py-2">Llamadas</th>
@@ -172,7 +172,7 @@ export default function PanelMotorIA() {
             </table>
           </div>
         )}
-        <p className="text-[11px] text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
+        <p className="text-sm text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
           La mediana dice cómo se siente normalmente. El P95 dice cuánto espera el cliente
           en el peor de cada veinte intentos — es el que hace abandonar.
         </p>
@@ -180,7 +180,7 @@ export default function PanelMotorIA() {
 
       {/* ── Qué está fallando ── */}
       <div className="rounded-2xl border border-cream/12 p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-3">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-3">
           Últimas fallas
         </p>
         {fallas === null ? (
@@ -193,7 +193,7 @@ export default function PanelMotorIA() {
               <div key={i} className="flex gap-2 items-start border-b border-cream/[0.06] pb-2 last:border-0">
                 <AlertTriangle size={13} className="text-danger mt-1 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-cream/45">
+                  <p className="text-sm text-cream/45">
                     {new Date(f.creado_en).toLocaleString()} · {f.modelo ?? '—'} · {f.tarea ?? '—'}
                     {f.feature ? ` · ${f.feature}` : ''}
                   </p>
@@ -203,7 +203,7 @@ export default function PanelMotorIA() {
             ))}
           </div>
         )}
-        <p className="text-[11px] text-cream/40 mt-3">
+        <p className="text-sm text-cream/40 mt-3">
           El número de arriba dice que algo falla. Esta lista dice por qué.
         </p>
       </div>

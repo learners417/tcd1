@@ -132,7 +132,7 @@ export default function CargarSesion({
           onClick={() => {
             setListo(false); setTexto(''); setExtraccion(null); setFuera(new Set());
           }}
-          className="text-[11px] font-bold text-gold hover:text-goldhi mt-2">
+          className="text-sm font-bold text-gold hover:text-goldhi mt-2">
           Cargar otra sesión
         </button>
       </div>
@@ -145,10 +145,10 @@ export default function CargarSesion({
       {/* ── PEGAR ── */}
       {!extraccion && (
         <div className="rounded-2xl border border-cream/12 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
             La sesión con {nombreCliente}
           </p>
-          <p className="text-xs text-cream/50 mb-3">
+          <p className="text-sm text-cream/50 mb-3">
             Pega la transcripción completa. Lo que no se carga vive en la cabeza
             de quien dio la sesión, y el que sigue arranca de cero.
           </p>
@@ -160,13 +160,13 @@ export default function CargarSesion({
             className="w-full bg-surface/40 border border-cream/15 rounded-xl px-3 py-2 text-sm text-cream" />
 
           <div className="flex items-center justify-between gap-3 mt-2">
-            <p className="text-[11px] text-cream/40">
+            <p className="text-sm text-cream/40">
               {validacion.puede
                 ? `${texto.trim().length.toLocaleString()} caracteres`
                 : validacion.porque}
             </p>
             <button onClick={() => void leer()} disabled={!validacion.puede || leyendo}
-              className="btn-primary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 shrink-0">
+              className="btn-primary px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40 shrink-0">
               {leyendo ? <><Loader size={12} className="inline animate-spin mr-1" />Leyendo…</> : 'Leer la sesión'}
             </button>
           </div>
@@ -184,7 +184,7 @@ export default function CargarSesion({
         <>
           <div className="rounded-2xl border border-gold/30 bg-gold/[0.04] p-4">
             <p className="text-sm text-cream">{resumirExtraccion(extraccion)}</p>
-            <p className="text-[11px] text-cream/50 mt-1">
+            <p className="text-sm text-cream/50 mt-1">
               Desmarca lo que esté mal leído. Nada se guarda sin que lo mires.
             </p>
           </div>
@@ -223,7 +223,7 @@ export default function CargarSesion({
 
           {extraccion.resumenParaElCliente && (
             <div className="rounded-2xl border border-cream/12 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-1">
                 Lo que va a leer {nombreCliente}
               </p>
               <p className="text-sm text-cream/85 leading-relaxed">
@@ -261,8 +261,8 @@ function Bloque(
 ) {
   return (
     <div className="rounded-2xl border border-cream/12 p-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/50">{titulo}</p>
-      <p className="text-[11px] text-cream/40 mb-3">{nota}</p>
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50">{titulo}</p>
+      <p className="text-sm text-cream/40 mb-3">{nota}</p>
       <div className="space-y-2">{children}</div>
     </div>
   );
@@ -284,7 +284,7 @@ function Fila(
         <span className={`text-sm block ${fuera ? 'text-cream/45 line-through' : 'text-cream/85'}`}>
           {texto}
         </span>
-        {sub && <span className="text-[11px] text-cream/45">{sub}</span>}
+        {sub && <span className="text-sm text-cream/45">{sub}</span>}
       </span>
     </button>
   );

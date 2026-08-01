@@ -102,7 +102,7 @@ export default function CertificadoModal({
         >
           <div className="absolute inset-3 border border-gold/20 rounded-xl pointer-events-none" />
           <Award className="w-10 h-10 text-gold mx-auto mb-3" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-4">
             Tu Clínica Digital · Sanadores Libres
           </p>
           <p className="text-xs uppercase tracking-widest text-cream/65 mb-2">Certifica que</p>
@@ -125,7 +125,7 @@ export default function CertificadoModal({
               </>
             )}
           </p>
-          <p className="text-[11px] text-cream/45">
+          <p className="text-sm text-cream/45">
             Clínica digital instalada · {pacientes} pacientes con precio digno · {fecha}
           </p>
         </div>

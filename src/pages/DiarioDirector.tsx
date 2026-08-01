@@ -199,10 +199,10 @@ function KpiCard({
     <div className="card-panel p-4 rounded-2xl border border-[rgba(232,150,46,0.12)]">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-gold/60" />
-        <p className="text-[11px] text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
+        <p className="text-sm text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
       </div>
       <p className={`text-xl font-medium ${valColor}`}>{value}</p>
-      {delta && <p className="text-[11px] text-cream/55 mt-0.5">{delta}</p>}
+      {delta && <p className="text-sm text-cream/55 mt-0.5">{delta}</p>}
     </div>
   );
 }
@@ -455,11 +455,11 @@ Devuelve SOLO este JSON:
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
             <span className="text-gold/80 font-medium">· Día {getCurrentDay()} de 90</span>
           </p>
-          <p className="text-[11px] text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
+          <p className="text-sm text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
           <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
             <span className="text-[13px]">⏱</span>
             <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
-            <span className="text-[11px] text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
+            <span className="text-sm text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
           </button>
         </div>
         <div className="flex items-center gap-3">
@@ -471,7 +471,7 @@ Devuelve SOLO este JSON:
             }`}>
               <Zap className="w-3.5 h-3.5" />
               <span className="text-sm font-bold">{energiaPromedio}</span>
-              <span className="text-[11px] opacity-60">7d</span>
+              <span className="text-sm opacity-60">7d</span>
             </div>
           )}
           {racha > 0 && (
@@ -508,23 +508,23 @@ Devuelve SOLO este JSON:
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Energía promedio</p>
+                  <p className="text-cream/55 uppercase tracking-wider text-sm">Energía promedio</p>
                   <p className="text-cream font-medium mt-0.5">{datos.energia_promedio}/10 — {datos.tendencia_energia}</p>
                 </div>
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Racha del Diario</p>
+                  <p className="text-cream/55 uppercase tracking-wider text-sm">Racha del Diario</p>
                   <p className="text-cream font-medium mt-0.5">{datos.racha} días consecutivos</p>
                 </div>
               </div>
               {datos.bloqueo_recurrente && (
                 <div className="bg-gold/10 border border-gold/20 rounded-xl p-3">
-                  <p className="text-[11px] text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
+                  <p className="text-sm text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
                   <p className="text-sm text-amber-200">{datos.bloqueo_recurrente}</p>
                 </div>
               )}
               {Array.isArray(datos.acciones_proxima_semana) && (
                 <div>
-                  <p className="text-[11px] text-cream/55 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
+                  <p className="text-sm text-cream/55 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
                   <ul className="space-y-1.5">
                     {datos.acciones_proxima_semana.map((accion: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-cream/80">
@@ -605,7 +605,7 @@ Devuelve SOLO este JSON:
                 }
                 return (
                   <div className="mb-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/55 mb-2">Tus últimos 14 días</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55 mb-2">Tus últimos 14 días</p>
                     <div className="flex items-end gap-1.5 h-12">
                       {dias.map((x, i2) => (
                         <div key={i2} className="flex-1 flex flex-col items-center gap-1">
@@ -642,13 +642,13 @@ Devuelve SOLO este JSON:
                         className={`rounded-xl border py-2.5 px-1 transition-all ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
                       >
                         <span className="block text-xl leading-none mb-1">{n.emoji}</span>
-                        <span className={`block text-[10px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
+                        <span className={`block text-xs font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
                       </button>
                     );
                   })}
                 </div>
                 {ayerEntry && (
-                  <p className="text-[11px] text-cream/45 mt-2 text-center">
+                  <p className="text-sm text-cream/45 mt-2 text-center">
                     Ayer tuviste <span className="text-success">{ayerEntry.energia}</span>
                     {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
                   </p>
@@ -666,7 +666,7 @@ Devuelve SOLO este JSON:
                     onClick={() => setLogro(`Hice mi sesión: ${sesionDeHoy}. `)}
                     className="w-full text-left rounded-xl border border-gold/25 bg-gold/[0.05] px-3 py-2 mb-2 hover:border-gold/50 transition-colors"
                   >
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gold">Hoy hiciste</span>
+                    <span className="text-sm font-bold uppercase tracking-wider text-gold">Hoy hiciste</span>
                     <span className="block text-sm text-cream/85">{sesionDeHoy} — toca para empezar por acá</span>
                   </button>
                 )}
@@ -678,7 +678,7 @@ Devuelve SOLO este JSON:
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
-                <p className="text-[11px] text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial</p>
+                <p className="text-sm text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial</p>
               </div>
 
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
@@ -798,7 +798,7 @@ Devuelve SOLO este JSON:
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
-              <p className="text-[11px] text-cream/45 text-center -mt-3">
+              <p className="text-sm text-cream/45 text-center -mt-3">
                 {racha > 0
                   ? `Llevas ${racha} ${racha === 1 ? 'día' : 'días'} seguidos. Esto es lo que tu Mentor va a recordar mañana.`
                   : 'Dos minutos. Esto es lo que tu Mentor va a recordar mañana.'}
@@ -843,12 +843,12 @@ Devuelve SOLO este JSON:
 
               {entrada.logro && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Logro</span>
+                  <span className="text-cream/45 uppercase tracking-wider text-sm">Logro</span>
                   <p className="text-cream/80 mt-0.5 text-sm">{entrada.logro}</p>
                 </div>
               )}
 
-              <div className="flex gap-3 text-[11px] text-cream/65">
+              <div className="flex gap-3 text-sm text-cream/65">
                 <span>Cuerpo {entrada.cuerpo}</span>
                 <span>Mente {entrada.mente}</span>
                 <span>Emociones {entrada.emociones}</span>
@@ -856,7 +856,7 @@ Devuelve SOLO este JSON:
 
               {entrada.bloqueo && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Bloqueo</span>
+                  <span className="text-cream/45 uppercase tracking-wider text-sm">Bloqueo</span>
                   <p className="text-cream/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
                 </div>
               )}
@@ -866,7 +866,7 @@ Devuelve SOLO este JSON:
                   {entrada.tareas.map((id) => {
                     const tag = TAREAS_TAGS.find((t) => t.id === id);
                     return tag ? (
-                      <span key={id} className="text-[11px] bg-gold/5 px-2 py-1 rounded-full text-cream/75">
+                      <span key={id} className="text-sm bg-gold/5 px-2 py-1 rounded-full text-cream/75">
                         {tag.label}
                       </span>
                     ) : null;

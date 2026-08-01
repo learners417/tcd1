@@ -117,7 +117,7 @@ export default function NumeroPanel({ userId }: Props) {
             ['Horas / semana', 'horas_semana'],
           ] as const).map(([label, key]) => (
             <label key={key} className="block">
-              <span className="text-[11px] uppercase tracking-wider text-cream/55">{label}</span>
+              <span className="text-sm uppercase tracking-wider text-cream/55">{label}</span>
               <input
                 type="number" inputMode="numeric" min={0}
                 value={(n[key] as number) || ''}
@@ -157,11 +157,11 @@ export default function NumeroPanel({ userId }: Props) {
             />
             <div className="grid grid-cols-2 gap-3 mt-4">
               <div className="rounded-xl bg-surface p-4 text-center">
-                <p className="text-[11px] uppercase tracking-wider text-cream/55">Al mes</p>
+                <p className="text-sm uppercase tracking-wider text-cream/55">Al mes</p>
                 <p className="text-xl font-semibold text-cream tabular-nums">+{money(gananciaMes)}</p>
               </div>
               <div className="rounded-xl bg-surface p-4 text-center">
-                <p className="text-[11px] uppercase tracking-wider text-cream/55">Al año</p>
+                <p className="text-sm uppercase tracking-wider text-cream/55">Al año</p>
                 <p className="text-xl font-semibold text-gold tabular-nums">+{money(gananciaAnio)}</p>
               </div>
             </div>
@@ -186,15 +186,15 @@ export default function NumeroPanel({ userId }: Props) {
             <div className="bg-panel px-5 py-3 flex items-center gap-2"><Sparkles className="w-4 h-4 text-gold" /><h2 className="text-base font-semibold text-cream">Antes / después</h2></div>
             <div className="bg-ink p-6 grid grid-cols-2 gap-4 items-center text-center">
               <div className="opacity-70">
-                <p className="text-[11px] uppercase tracking-wider text-cream/50">Tu hora, antes</p>
+                <p className="text-sm uppercase tracking-wider text-cream/50">Tu hora, antes</p>
                 <p className="text-2xl font-semibold text-cream/70 tabular-nums line-through decoration-danger/60">{money(n.phr)}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-gold/70">Tu precio, ahora</p>
+                <p className="text-sm uppercase tracking-wider text-gold/70">Tu precio, ahora</p>
                 <p className="text-3xl font-semibold text-gold tabular-nums">{money(precioNuevo)}</p>
               </div>
             </div>
-            <div className="bg-panel px-5 py-2.5 text-center text-[11px] text-cream/45">Sácale una captura y compártela. 🌱</div>
+            <div className="bg-panel px-5 py-2.5 text-center text-sm text-cream/45">Sácale una captura y compártela. 🌱</div>
           </section>
 
           {/* Generador de mensajes */}

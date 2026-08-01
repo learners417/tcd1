@@ -139,11 +139,11 @@ export default function TaskComments({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-sm font-bold text-cream/55 uppercase tracking-wider">
         <MessageSquare className="w-3.5 h-3.5" />
         Conversación
         {totalCount > 0 && (
-          <span className="text-[11px] bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
+          <span className="text-sm bg-gold/15 text-gold px-1.5 py-0.5 rounded-full normal-case tracking-normal font-semibold">
             {totalCount}
           </span>
         )}
@@ -167,7 +167,7 @@ export default function TaskComments({
                     <span className="text-xs font-bold truncate text-gold">
                       {currentUserNombre}
                     </span>
-                    <span className="text-[11px] text-gold/70">se enviará al crear la tarea</span>
+                    <span className="text-sm text-gold/70">se enviará al crear la tarea</span>
                   </div>
                   <button
                     type="button"
@@ -207,7 +207,7 @@ export default function TaskComments({
                     <span className={`text-xs font-bold truncate ${isMine ? 'text-gold' : 'text-cream/85'}`}>
                       {c.autor_nombre ?? 'Usuario'}
                     </span>
-                    <span className="text-[11px] text-cream/35">{formatRelative(c.created_at)}</span>
+                    <span className="text-sm text-cream/35">{formatRelative(c.created_at)}</span>
                   </div>
                   {isMine && (
                     <button

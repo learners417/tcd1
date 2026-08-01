@@ -34,7 +34,7 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
         <Timer className={`w-5 h-5 ${cumplido ? 'text-success' : 'text-gold'}`} />
         <span className="font-mono text-2xl text-white tabular-nums tracking-tight">{formatoCrono(ahora)}</span>
         {segundosObjetivo !== null && (
-          <span className="text-[11px] text-white/55">/ {formatoCrono(segundosObjetivo)}</span>
+          <span className="text-sm text-white/55">/ {formatoCrono(segundosObjetivo)}</span>
         )}
         <div className="flex-1" />
         {pausada ? (
@@ -64,10 +64,10 @@ export default function CronometroSesion({ sesion, segundosObjetivo, onSesionCha
         </div>
       )}
       {pausada && (
-        <p className="mt-1.5 text-[11px] text-white/55">Sesión pausada — el dojo te espera. Todo quedó guardado.</p>
+        <p className="mt-1.5 text-sm text-white/55">Sesión pausada — el dojo te espera. Todo quedó guardado.</p>
       )}
       {cumplido && !pausada && (
-        <p className="mt-1.5 text-[11px] text-success">El tiempo de hoy se cumplió. Lo que abriste, ciérralo: consolida la sesión. 🥋</p>
+        <p className="mt-1.5 text-sm text-success">El tiempo de hoy se cumplió. Lo que abriste, ciérralo: consolida la sesión. 🥋</p>
       )}
     </div>
   );
