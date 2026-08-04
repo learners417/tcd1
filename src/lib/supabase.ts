@@ -90,6 +90,8 @@ export interface Mensaje {
   tipo_archivo?: 'imagen' | 'audio';
   archivo_url?: string;
   created_at: string;
+  respondido_en?: string | null;
+  respondido_por?: string | null;
   emisor?: Profile;
 }
 

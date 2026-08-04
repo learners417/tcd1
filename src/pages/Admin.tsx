@@ -3,6 +3,7 @@ import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
 import AdnPermisosControl from '../components/admin/AdnPermisosControl';
+import BandejaEspera from '../components/admin/BandejaEspera';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
@@ -2862,8 +2863,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <GlobalChat canal={mensajesChannel} adminProfile={adminProfile} />
                 </div>
               ) : (
-                /* Privados: WhatsApp-style */
-                <div className="flex flex-1 min-h-0 overflow-hidden">
+                /* Privados: bandeja de espera arriba + conversación */
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <BandejaEspera
+                    onOpenCliente={(id) => { const c = clientes.find(x => x.id === id); if (c) { setChatCliente(c); void cargarChatMessages(c.id); } }}
+                    activeClienteId={chatCliente?.id}
+                  />
+                  {/* Conversaciones: WhatsApp-style */}
+                  <div className="flex flex-1 min-h-0 overflow-hidden">
                   {/* Left: client list */}
                   <div className="w-[280px] shrink-0 border-r border-gold/12 flex flex-col bg-black/20">
                     <div className="p-4 border-b border-gold/12">
@@ -2972,6 +2979,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               )}
             </div>
