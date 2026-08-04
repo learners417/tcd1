@@ -155,3 +155,5 @@ async function handler(req: any, res: any) {
     fallos,
   });
 }
+
+export default withSentry(handler);
