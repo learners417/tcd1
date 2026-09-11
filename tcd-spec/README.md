@@ -35,6 +35,7 @@ construcción sugerido.
 | `11-REVISION-FINAL.md` | Auditoría cruzada, decisiones y orden de construcción | ✅ |
 | `MIGRACION.md` | Qué tocar en el repo existente, en orden | ✅ |
 | `CHANGELOG.md` | Qué cambia respecto de lo que está en producción | ✅ |
+| `12-PARTE-DE-OBRA.md` | Hallazgos sobre el deploy actual, con orden de arreglo | ✅ |
 | `datos/roadmapSeed.ts` | Tipos, índices y helpers. Reemplaza el actual | ✅ |
 | `datos/validar.py` | Valida el paquete contra sí mismo. Sirve de CI | ✅ |
 | `diseno/tokens.css` · `tokens.ts` | Los tokens, listos para importar | ✅ |

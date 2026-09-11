@@ -816,7 +816,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario."
+      "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario.",
+      "paso_esencial": null
     },
     {
       "dia": 1,
@@ -868,7 +869,8 @@
       "cinturon": "10gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 6
     },
     {
       "dia": 2,
@@ -919,7 +921,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 6
     },
     {
       "dia": 3,
@@ -968,7 +971,8 @@
       "cinturon": "9gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Acá y solo acá: 'esto es entrenamiento para dirigir un negocio, no es terapia'."
+      "nota": "Acá y solo acá: 'esto es entrenamiento para dirigir un negocio, no es terapia'.",
+      "paso_esencial": 6
     },
     {
       "dia": 4,
@@ -1003,7 +1007,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Examen: día 18, la garantía."
+      "nota": "Examen: día 18, la garantía.",
+      "paso_esencial": 3
     },
     {
       "dia": 5,
@@ -1038,7 +1043,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Reproductor sin barra de avance los primeros 40 minutos. Se pausa, no se adelanta."
+      "nota": "Reproductor sin barra de avance los primeros 40 minutos. Se pausa, no se adelanta.",
+      "paso_esencial": 3
     },
     {
       "dia": 6,
@@ -1071,7 +1077,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Examen: día 43, el permiso."
+      "nota": "Examen: día 43, el permiso.",
+      "paso_esencial": 3
     },
     {
       "dia": 7,
@@ -1104,7 +1111,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Examen: día 10, los mensajes de subida de precio."
+      "nota": "Examen: día 10, los mensajes de subida de precio.",
+      "paso_esencial": 3
     },
     {
       "dia": 8,
@@ -1140,7 +1148,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Pantalla de arrastrar, no de escribir."
+      "nota": "Pantalla de arrastrar, no de escribir.",
+      "paso_esencial": 4
     },
     {
       "dia": 9,
@@ -1194,7 +1203,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 6
     },
     {
       "dia": 10,
@@ -1225,7 +1235,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 11,
@@ -1256,7 +1267,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 12,
@@ -1288,7 +1300,8 @@
       "cinturon": "8gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "No se sube captura: se detecta. Si el monto es menor, se registra sin otorgar el grado."
+      "nota": "No se sube captura: se detecta. Si el monto es menor, se registra sin otorgar el grado.",
+      "paso_esencial": 2
     },
     {
       "dia": 13,
@@ -1313,7 +1326,8 @@
         "Cerrá los cobros que quedaron en camino",
         "Leé La Clínica hasta CLI-1"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 14,
@@ -1338,7 +1352,8 @@
         "Cerrá los cobros que quedaron en camino",
         "Leé La Clínica hasta CLI-1"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 15,
@@ -1374,7 +1389,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 16,
@@ -1410,7 +1426,8 @@
       "cinturon": "7gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 17,
@@ -1447,7 +1464,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 18,
@@ -1482,7 +1500,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "El Espejo devuelve textual lo del día 4."
+      "nota": "El Espejo devuelve textual lo del día 4.",
+      "paso_esencial": 3
     },
     {
       "dia": 19,
@@ -1524,7 +1543,8 @@
       "cinturon": "6gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 20,
@@ -1556,7 +1576,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Examen: día 27, cuando diga el precio en cámara."
+      "nota": "Examen: día 27, cuando diga el precio en cámara.",
+      "paso_esencial": 2
     },
     {
       "dia": 21,
@@ -1589,7 +1610,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Si todavía sube el tono, devuelve 'repetí mañana' y no aprueba."
+      "nota": "Si todavía sube el tono, devuelve 'repetí mañana' y no aprueba.",
+      "paso_esencial": 3
     },
     {
       "dia": 22,
@@ -1623,7 +1645,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 23,
@@ -1660,7 +1683,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32."
+      "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.",
+      "paso_esencial": 4
     },
     {
       "dia": 24,
@@ -1695,7 +1719,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 25,
@@ -1736,7 +1761,8 @@
       "cinturon": "5gup",
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 26,
@@ -1777,7 +1803,8 @@
       "cinturon": null,
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": "Único día con dos agentes."
+      "nota": "Único día con dos agentes.",
+      "paso_esencial": 4
     },
     {
       "dia": 27,
@@ -1811,7 +1838,8 @@
       "cinturon": null,
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas."
+      "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.",
+      "paso_esencial": 4
     },
     {
       "dia": 28,
@@ -1855,7 +1883,8 @@
       "cinturon": "4gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 29,
@@ -1891,7 +1920,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 30,
@@ -1922,7 +1952,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 31,
@@ -1964,7 +1995,8 @@
       "cinturon": "3gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 32,
@@ -1989,7 +2021,8 @@
         "Terminá de cerrar la transición de cartera",
         "No abras el administrador de anuncios"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 33,
@@ -2027,7 +2060,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 34,
@@ -2052,7 +2086,8 @@
         "Contestá en menos de dos horas a cada agenda que entra",
         "Seguí cerrando la transición de cartera que quedó abierta"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 35,
@@ -2077,7 +2112,8 @@
         "Contestá en menos de dos horas a cada agenda que entra",
         "Seguí cerrando la transición de cartera que quedó abierta"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 36,
@@ -2119,7 +2155,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 37,
@@ -2144,7 +2181,8 @@
         "Contestá en menos de dos horas a cada agenda que entra",
         "Seguí cerrando la transición de cartera que quedó abierta"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 38,
@@ -2177,7 +2215,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 39,
@@ -2211,7 +2250,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 2
     },
     {
       "dia": 40,
@@ -2236,7 +2276,8 @@
         "Contestá en menos de dos horas a cada agenda que entra",
         "Seguí cerrando la transición de cartera que quedó abierta"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 41,
@@ -2261,7 +2302,8 @@
         "Contestá en menos de dos horas a cada agenda que entra",
         "Seguí cerrando la transición de cartera que quedó abierta"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 42,
@@ -2301,7 +2343,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 43,
@@ -2341,7 +2384,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 5
     },
     {
       "dia": 44,
@@ -2383,7 +2427,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 45,
@@ -2412,7 +2457,8 @@
       "cinturon": "2gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Si no llega, el camino no se frena. El grado queda en ventana."
+      "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
+      "paso_esencial": null
     },
     {
       "dia": 46,
@@ -2448,7 +2494,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar."
+      "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.",
+      "paso_esencial": 3
     },
     {
       "dia": 47,
@@ -2492,7 +2539,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 48,
@@ -2529,7 +2577,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 49,
@@ -2554,7 +2603,8 @@
         "Llamadas de la semana con tu W",
         "Lunes de números, si cae lunes"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 50,
@@ -2586,7 +2636,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 2
     },
     {
       "dia": 51,
@@ -2620,7 +2671,8 @@
       "cinturon": null,
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 52,
@@ -2654,7 +2706,8 @@
       "cinturon": null,
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 53,
@@ -2695,7 +2748,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 54,
@@ -2720,7 +2774,8 @@
         "Llamadas de la semana",
         "Tablero, dos minutos"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 55,
@@ -2755,7 +2810,8 @@
       "cinturon": "1gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 56,
@@ -2782,7 +2838,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 57,
@@ -2809,7 +2866,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 58,
@@ -2836,7 +2894,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 59,
@@ -2863,7 +2922,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 60,
@@ -2890,7 +2950,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 61,
@@ -2924,7 +2985,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 2
     },
     {
       "dia": 62,
@@ -2951,7 +3013,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 63,
@@ -2978,7 +3041,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 64,
@@ -3005,7 +3069,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 65,
@@ -3032,7 +3097,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 66,
@@ -3059,7 +3125,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 67,
@@ -3098,7 +3165,8 @@
       "cinturon": null,
       "jornada_larga": true,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 4
     },
     {
       "dia": 68,
@@ -3125,7 +3193,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 69,
@@ -3152,7 +3221,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 70,
@@ -3179,7 +3249,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 71,
@@ -3206,7 +3277,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 72,
@@ -3233,7 +3305,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 73,
@@ -3260,7 +3333,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 74,
@@ -3287,7 +3361,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 75,
@@ -3314,7 +3389,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 76,
@@ -3341,7 +3417,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 77,
@@ -3368,7 +3445,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 78,
@@ -3395,7 +3473,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 79,
@@ -3422,7 +3501,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 80,
@@ -3449,7 +3529,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 81,
@@ -3476,7 +3557,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 82,
@@ -3503,7 +3585,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 83,
@@ -3530,7 +3613,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 84,
@@ -3557,7 +3641,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 85,
@@ -3584,7 +3669,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 86,
@@ -3616,7 +3702,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 2
     },
     {
       "dia": 87,
@@ -3651,7 +3738,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 88,
@@ -3684,7 +3772,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": null
+      "nota": null,
+      "paso_esencial": 3
     },
     {
       "dia": 89,
@@ -3711,7 +3800,8 @@
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
-      "nota": null
+      "nota": null,
+      "paso_esencial": null
     },
     {
       "dia": 90,
@@ -3738,7 +3828,8 @@
       "cinturon": "1dan",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Si no llegó, el camino no se cierra: el ciclo queda abierto sin fecha."
+      "nota": "Si no llegó, el camino no se cierra: el ciclo queda abierto sin fecha.",
+      "paso_esencial": null
     }
   ]
 }

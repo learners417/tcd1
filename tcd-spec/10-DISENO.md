@@ -17,7 +17,7 @@ Tenga o no un diagnóstico, **esa es una cabeza con la atención fragmentada.**
 
 Lo que funciona para esa cabeza funciona para todas. Lo contrario no.
 
-### Las doce reglas
+### Las trece reglas
 
 **1 · Una sola cosa por pantalla.** La pantalla Hoy tiene un botón. No dos, no un
 menú de sesiones. Si hay que elegir, ya se perdió.
@@ -57,7 +57,12 @@ final de una lista es lo que permite calcular el esfuerzo.
 **11 · Piso de 15 píxeles.** Ningún texto de contenido por debajo. Contraste
 mínimo AA en todo.
 
-**12 · Una sola animación real en noventa días.** Los dos números del día 87,
+**12 · El día corto siempre está disponible.** Un interruptor de modo 15 minutos
+en cada jornada: muestra solo el paso que produce la evidencia. **La racha y el
+avance cuentan igual.** Bajar la energía de activación vale más que completar el
+día entero, porque un día corto sostiene la racha y un día cero la rompe.
+
+**13 · Una sola animación real en noventa días.** Los dos números del día 87,
 apareciendo juntos. Todo lo demás son transiciones de estado de 120 ms o menos.
 
 ---
@@ -138,6 +143,10 @@ Dos familias, roles separados y sin excepción.
 **Fraunces nunca escribe una frase larga.** Es de títulos. Un párrafo en serif
 display se lee peor, y acá leer peor es abandonar.
 
+**El único blanco de la app es el del texto adentro del botón oro.** Blanco sobre
+crema da 1,09:1 y no se lee. Y `--oro` no se usa para texto corrido: da 3,2:1.
+Para texto en oro va `--oro-d`, que da 4,9:1.
+
 **El piso son 15 píxeles.** La única excepción es la etiqueta del tab, a 14, y
 solo porque va acompañada de un ícono. **Si algo no entra en 15, el problema es
 el texto, no el tamaño.**
@@ -164,6 +173,13 @@ Ancho de línea: máximo 62 caracteres. En 430 px eso se da solo.
 **Ícono del Dojo:** el que hoy usa Mentor. **Ícono del Mando:** la casa/hexágono
 que hoy usa Clínica, y Clínica pasa al ícono de agenda. Es el cambio mínimo que
 mantiene el reconocimiento.
+
+### Dónde va la barra
+
+**Abajo en móvil, al costado en escritorio.** Punto de corte 900 px. Mismos cinco
+destinos, mismos nombres, mismo orden en los dos. El cliente abre la app entre
+consultante y consultante con el teléfono en una mano: los controles van en el
+tercio inferior.
 
 ### Reglas de la barra
 

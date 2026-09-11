@@ -132,7 +132,10 @@ def add(dia, tipo, titulo, **kw):
          "evidencias": kw.get("evidencias", []), "adn_escribe": kw.get("adn", []),
          "freno_activa": kw.get("activa", []), "freno_levanta": kw.get("levanta", []),
          "cinturon": kw.get("cinturon"), "jornada_larga": kw.get("larga", False),
-         "acciones_campo": kw.get("campo", []), "nota": kw.get("nota")}
+         "acciones_campo": kw.get("campo", []), "nota": kw.get("nota"),
+         # modo 15 minutos: el índice del paso que produce la evidencia.
+         # Por defecto el último; se puede fijar con esencial=N (base 1).
+         "paso_esencial": kw.get("esencial", len(kw.get("pasos", [])) or None)}
     J[dia] = j
 
 def ev(tipo, nombre, valida):

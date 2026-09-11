@@ -119,6 +119,8 @@ export interface Jornada {
   jornada_larga: boolean
   acciones_campo: string[]
   nota: string | null
+  /** Modo 15 minutos: qué paso produce la evidencia. Base 1. */
+  paso_esencial: number | null
 }
 
 export interface Roadmap {
@@ -209,6 +211,13 @@ export const minutosDe = (dia: number): number =>
 /** Las cuatro jornadas largas, para avisarlas con fecha desde la bienvenida. */
 export const jornadasLargas = (): Jornada[] =>
   roadmap.jornadas.filter(j => j.jornada_larga)
+
+/** El paso esencial de una jornada, para el modo 15 minutos. */
+export const pasoEsencialDe = (dia: number): string | undefined => {
+  const j = jornadaPorDia.get(dia)
+  if (!j || !j.paso_esencial) return undefined
+  return j.pasos[j.paso_esencial - 1]
+}
 
 /** Total de trabajo del cliente, en minutos. Verificado: 4265 ≈ 71 horas. */
 export const cargaTotal = (): number =>
