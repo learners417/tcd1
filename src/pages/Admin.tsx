@@ -120,7 +120,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 const STATUS_BADGE_COLOR: Record<string, string> = {
   ACTIVE:     '#22C55E',
-  PAUSED:     '#E8962E',
+  PAUSED:     '#B0822E',
   ONBOARDING: 'rgba(255,255,255,0.5)',
   CHURNED:    '#EF4444',
   COMPLETED:  '#22C55E',

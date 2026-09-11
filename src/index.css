@@ -5,15 +5,16 @@
   --color-ink: #080808;
   --color-panel: #111110;
   --color-surface: #1A1917;
-  --color-gold: #E8962E;
-  --color-goldhi: #F4B65C;
+  --color-gold: #B0822E;
+  --color-goldhi: #C79A45;
   --color-azure: #3B82F6;
   --color-success: #22C55E;
   --color-danger: #EF4444;
   --color-cream: #F2EFE9;
   /* CP2 · escala tipográfica mobile-first (gentle +1px) */
-  --text-xs: 0.8125rem;
-  --text-sm: 0.9375rem;
+  /* Piso tipografico V5: nada por debajo de 15px, instrucciones desde 17px. */
+  --text-xs: 0.9375rem;   /* 15px — solo metadatos, nunca instrucciones */
+  --text-sm: 1.0625rem;   /* 17px — el minimo de todo lo que se lee para hacer */
 }
 @plugin "@tailwindcss/typography";
 
@@ -24,22 +25,42 @@
 @source inline("border-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{15,20,25,30,35,60}");
 @source inline("shadow-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{10,15,20}");
 
-/* ─── Design Tokens V4 — Bright Tech Palette ──────────────────── */
+/* ─── Design Tokens V5 — alineados a las landings ─────────────────
+ *
+ * Tres cambios de fondo respecto de V4:
+ *
+ *   1. EL ORO ES MATE. El brillante (#E8962E) se ve barato porque ya lo
+ *      copiaron todos. Este es pan de oro: vive en lineas de 1px, en
+ *      versalitas y en numerales. Nunca relleno, nunca degrade, nunca glow.
+ *
+ *   2. EL NEGRO TIENE TEMPERATURA. El negro puro cansa en pantalla y
+ *      endurece todo lo que apoya encima. Este tiene tierra adentro.
+ *
+ *   3. EL PISO TIPOGRAFICO SUBE. Esta app se usa en el celular, caminando,
+ *      entre paciente y paciente. Si no entra en letra grande, no va.
+ *      --text-xs deja de ser 13px: el minimo legible es 15px, y las
+ *      instrucciones no bajan de 17px.
+ * ────────────────────────────────────────────────────────────────── */
 :root {
-  --bg-root: #080808;
-  --bg-card: #111110;
-  --bg-surface2: #1A1917;
-  --accent-gold: #E8962E;
-  --accent-gold-hover: #F4B65C;
+  --bg-root: #0F0E0D;
+  --bg-card: #17150F;
+  --bg-surface2: #211E17;
+  --accent-gold: #B0822E;
+  --accent-gold-hover: #C79A45;
   --accent-blue: #3B82F6;
-  --green-success: #22C55E;
-  --red-alert: #EF4444;
-  --text-cream: #F2EFE9;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --border-gold: rgba(232, 150, 46, 0.14);
-  --border-gold-strong: rgba(232, 150, 46, 0.30);
+  --green-success: #4E7C52;
+  --red-alert: #9C3626;
+  --text-cream: #F4EFE4;
+  --text-muted: rgba(244, 239, 228, 0.62);
+  --border-gold: rgba(176, 130, 46, 0.22);
+  --border-gold-strong: rgba(176, 130, 46, 0.45);
   --font-body: 'Sora', system-ui, sans-serif;
   --font-display: 'Fraunces', Georgia, serif;
+
+  /* Geometria calida: esquinas suaves, no vivas. */
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 24px;
 
   /* Matrix-specific tokens (preactivacion grid) so the table can
      theme cleanly without hardcoded hex inside inline styles. */
@@ -47,7 +68,7 @@
   /* Sereno Pro: la profundidad iOS — sombras en capas, no un solo blur */
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.50);
-  --shadow-gold: 0 8px 24px rgba(232, 150, 46, 0.22);
+  --shadow-gold: 0 8px 24px rgba(176, 130, 46, 0.14);
   --matrix-cell-divider: rgba(26, 28, 34, 0.35);
   --matrix-row-divider: rgba(255, 255, 255, 0.05);
   --matrix-header-text: rgba(255, 255, 255, 0.78);
@@ -107,10 +128,10 @@ h1, h2, h3 {
     padding: 0.625rem 1.25rem;
     border-radius: 0.75rem;
     transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px rgba(232, 150, 46, 0.4), 0 0 40px rgba(232, 150, 46, 0.1);
-      background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
+    /* V5: plano. Sin degrade y sin glow — el oro mate no brilla, se apoya. */
+    background: #B0822E;
     box-shadow: var(--shadow-gold);
-    border-radius: 14px;
+    border-radius: var(--radius);
   }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
@@ -363,7 +384,8 @@ h1, h2, h3 {
 [data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
 
 /* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
-[data-theme="light"] .text-\[\#E8962E\] { color: #B45309 !important; }
+[data-theme="light"] .text-\[\#E8962E\] { color: #8E6824 !important; }
+[data-theme="light"] .text-\[\#B0822E\] { color: #8E6824 !important; }
 
 /* ── Gold borders — bump alpha so they remain visible on white ───── */
 [data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
@@ -467,11 +489,11 @@ h1, h2, h3 {
 
 /* Botón primario con profundidad y respuesta táctil */
 .btn-ios-primary {
-  background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
-  color: #080808;
-  border-radius: 14px;
+  background: #B0822E;
+  color: #0F0E0D;
+  border-radius: var(--radius);
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(232, 150, 46, 0.30);
+  box-shadow: 0 2px 10px rgba(176, 130, 46, 0.18);
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 .btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(232, 150, 46, 0.42); }

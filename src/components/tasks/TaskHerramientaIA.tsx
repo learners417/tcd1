@@ -73,7 +73,7 @@ function abrirParaImprimir(titulo: string, texto: string) {
   w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${titulo}</title>
 <style>
   body{max-width:720px;margin:40px auto;padding:0 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;line-height:1.65;font-size:15px}
-  h1{font-size:22px;border-bottom:2px solid #E8962E;padding-bottom:8px}
+  h1{font-size:22px;border-bottom:2px solid #B0822E;padding-bottom:8px}
   pre{white-space:pre-wrap;font-family:inherit;font-size:inherit}
   @media print{body{margin:16px auto}}
 </style></head><body><h1>${titulo}</h1><pre>${safe}</pre>

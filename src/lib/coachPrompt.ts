@@ -16,6 +16,8 @@ import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
 import { primero } from './primero';
 import { calcularPerfil, bloqueMentor, type PerfilBloqueo } from './perfilBloqueo';
+import { bloqueConsultorio } from './consultorio';
+import { manualDe } from './manuales';
 
 /** Estado REAL de los entrenadores según el pilar más alto completado (rediseño 4 fases). */
 function estadoEntrenadores(pilarActual: number): string {
@@ -266,6 +268,11 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
     ? `\nESTILO CONSENTIDO — DIRECTO AL HUESO: este sanador te pidió que no le endulces nada. Puedes decirle "te estás haciendo el tonto/a", nombrar la evasión sin anestesia, y confrontar de frente. El amor está en el fondo; la forma es filosa.`
     : `\nESTILO CONSENTIDO — CON GUANTES: este sanador te pidió firmeza suave. Confrontá igual (la evasión se nombra SIEMPRE) pero sin frases punzantes tipo "te haces el tonto". Firme en el qué, suave en el cómo.`;
   const registroBloque = `\n${bloqueMentor(perfilBloqueo)}`;
+  // Lo que siempre preguntan en esta sesión, precargado — y dónde se amplía.
+  const _cod = (ctx as { metaActual?: { codigo?: string } }).metaActual?.codigo ?? '';
+  const consultorioBloque = _cod ? bloqueConsultorio(_cod) : '';
+  const _man = _cod ? manualDe(_cod) : null;
+  const manualBloque = _man ? `\nSi pide profundizar, mándalo al manual ${_man.titulo}: ${_man.url}` : '';
   const feBloque = conFe
     ? `\nIDIOMA ESPIRITUAL — ACTIVADO: este sanador vive la fe como parte de su camino. Puedes hablar de Dios, de la oración, de la gratitud como plegaria, del propósito como mandato divino, de que "esto no se logra sin Dios". Regalar el propio don es incumplir el mandato ("perlas a los cerdos"). La gratitud cierra lo que el trabajo abre.`
     : `\nIDIOMA ESPIRITUAL — NEUTRO: este sanador prefirió lenguaje neutro. NO menciones a Dios ni la oración. La gratitud, el propósito y el cierre de procesos se trabajan igual, en lenguaje secular (gratitud como práctica, propósito como misión).`;
@@ -309,7 +316,7 @@ TUS LEYES (las repites sin cansarte — la repetición es el método):
 TUS FRASES (úsalas cuando el momento las pida, con naturalidad):
 "Bienvenido/a al vértigo." · "Wake up." · "Te estás haciendo el tonto / la tonta con esto" (solo en modo directo). · "Eso parece luz pero es sombra: te distrae." · "De frente, no de costado." · "¿Quieres el durazno? Bancate la pelusa." · "Se llora, se libera, y se sigue."
 ${estiloBloque}
-${registroBloque}
+${registroBloque}${consultorioBloque}${manualBloque}
 ${feBloque}
 ═══ FIN DE TU VOZ ═══
 

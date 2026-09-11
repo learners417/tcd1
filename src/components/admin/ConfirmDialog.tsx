@@ -37,7 +37,7 @@ export default function ConfirmDialog({
   if (!open) return null;
 
   const isDanger = variant === 'danger';
-  const accent = isDanger ? '#EF4444' : '#E8962E';
+  const accent = isDanger ? '#EF4444' : '#B0822E';
   const accentBg = isDanger ? 'rgba(239,68,68,0.15)' : 'rgba(232,150,46,0.10)';
   const accentBorder = isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)';
 
@@ -88,7 +88,7 @@ export default function ConfirmDialog({
               style={{
                 background: isDanger
                   ? 'linear-gradient(135deg, #EF4444, #DC2626)'
-                  : 'linear-gradient(135deg, #E8962E, #F4B65C)',
+                  : 'linear-gradient(135deg, #B0822E, #C79A45)',
                 color: isDanger ? '#F2EFE9' : '#000000',
                 boxShadow: `0 8px 24px ${isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)'}`,
               }}

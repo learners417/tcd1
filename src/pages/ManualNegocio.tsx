@@ -345,7 +345,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
   const Icon = section.icon;
 
   return (
-    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#E8962E' }}>
+    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#B0822E' }}>
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between p-5 hover:bg-cream/[0.02] transition-colors"
@@ -535,7 +535,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${progressPct}%`,
-                backgroundColor: '#E8962E',
+                backgroundColor: '#B0822E',
               }}
             />
           </div>

@@ -2146,6 +2146,89 @@ Genera 3 versiones diferentes, cada una en su propio párrafo numerado. La oraci
     promptTemplate: (inputs) => inputs.carta,
   },
 
+  // ─── P7.5: Tus tres temas del trimestre ─────────────────────────────────────
+  {
+    id: 'H-MARCA.1',
+    grupo: 'C' as GrupoHerramienta,
+    titulo: 'Tus tres temas del trimestre',
+    descripcion: 'Los tres enfoques que vas a repetir tres meses. Salen de tu Matriz ABC.',
+    emoji: '🎯',
+    usa_ia: true,
+    adn_field: 'adn_temas_trimestre',
+    outputLabel: 'Tus 3 temas',
+    inputs: [
+      { id: 'dolores', label: '¿Qué tres cosas te repiten más quienes te consultan? Una por línea.', tipo: 'textarea', required: true },
+    ],
+    promptTemplate: (inputs) => `Convierte estos tres dolores en tres enfoques de contenido que FILTREN en vez de enseñar: cada uno tiene que atraer a quien sí y espantar a quien no. Dolores: ${inputs.dolores}`,
+  },
+
+  // ─── P7.7: Las doce semanas escritas ────────────────────────────────────────
+  {
+    id: 'H-MARCA.2',
+    grupo: 'C' as GrupoHerramienta,
+    titulo: 'Las doce semanas escritas',
+    descripcion: 'Tu trimestre completo: doce piezas con su gancho y su orden.',
+    emoji: '📅',
+    usa_ia: true,
+    adn_field: 'adn_plan_trimestral',
+    outputLabel: 'Tu plan trimestral',
+    inputs: [
+      { id: 'temas', label: 'Tus tres enfoques del trimestre.', tipo: 'textarea', required: true },
+      { id: 'formato', label: '¿En qué formato te sale más natural? (video corto, carrusel, texto)', tipo: 'text', required: true },
+    ],
+    promptTemplate: (inputs) => `Escribe doce piezas de contenido repartidas entre estos tres enfoques, una por semana. Cada una con su gancho de primera línea y qué dice. Formato: ${inputs.formato}. Enfoques: ${inputs.temas}. Nada de enseñar por enseñar: cada pieza filtra.`,
+  },
+
+  // ─── P7.10: El tablero de los cinco sistemas ────────────────────────────────
+  {
+    id: 'H-CIERRE.1',
+    grupo: 'D' as GrupoHerramienta,
+    titulo: 'El tablero de los cinco sistemas',
+    descripcion: 'Verde, amarillo o rojo contra evidencia. Aquí se verifica la garantía.',
+    emoji: '🚦',
+    usa_ia: true,
+    adn_field: 'adn_tablero_cinco',
+    outputLabel: 'Tu tablero',
+    inputs: [
+      { id: 'evidencia', label: 'Para cada sistema, ¿qué tienes hoy? 1) tu precio 2) tu oferta 3) tu campaña 4) tu app 5) tu trimestre', tipo: 'textarea', required: true },
+    ],
+    promptTemplate: (inputs) => `Evalúa los cinco sistemas contra esta evidencia y marca cada uno verde, amarillo o rojo. Verde solo si existe algo verificable, no una intención. Para cada amarillo o rojo, di exactamente qué falta y en qué sesión se arregla. Evidencia: ${inputs.evidencia}`,
+  },
+
+  // ─── P7.12: Tu plan de los próximos 180 días ────────────────────────────────
+  {
+    id: 'H-CIERRE.2',
+    grupo: 'D' as GrupoHerramienta,
+    titulo: 'Tu plan de 180 días',
+    descripcion: 'El mapa de tus próximos seis meses de marca, con tu nombre arriba.',
+    emoji: '🗺️',
+    usa_ia: true,
+    adn_field: 'adn_plan_180',
+    outputLabel: 'Tu plan de 180 días',
+    inputs: [
+      { id: 'donde_estas', label: '¿Dónde estás hoy? Cuántos atiendes, a qué precio, cuánto facturas.', tipo: 'textarea', required: true },
+      { id: 'a_donde', label: '¿Dónde quieres estar en seis meses?', tipo: 'textarea', required: true },
+    ],
+    promptTemplate: (inputs) => `Escribe un plan de seis meses para volverse referente en su nicho: qué publica, en qué orden, con qué medición y qué entra cada mes. Mes a mes, concreto. Hoy: ${inputs.donde_estas}. En seis meses: ${inputs.a_donde}`,
+  },
+
+  // ─── P6.6: Tu método adentro de tu app ──────────────────────────────────────
+  {
+    id: 'H-APP.1',
+    grupo: 'B' as GrupoHerramienta,
+    titulo: 'Tus etapas adentro de tu app',
+    descripcion: 'Tu método convertido en semanas, con lo que desbloquea cada una.',
+    emoji: '📱',
+    usa_ia: true,
+    adn_field: 'adn_etapas_app',
+    outputLabel: 'Tus etapas',
+    inputs: [
+      { id: 'semanas', label: '¿Cuántas semanas dura tu programa?', tipo: 'text', required: true },
+      { id: 'hitos', label: '¿Qué logra la persona en cada tramo? Uno por línea.', tipo: 'textarea', required: true },
+    ],
+    promptTemplate: (inputs) => `Convierte este método en las PRIMERAS CUATRO etapas de una app, no las ${inputs.semanas} semanas completas: lo que se aprende con la primera persona cambia el resto. Para cada etapa: qué ve, qué hace, qué entrega y qué desbloquea la siguiente. Hitos: ${inputs.hitos}`,
+  },
+
   // ─── P3.7: Transición de tu cartera ─────────────────────────────────────────
   {
     id: 'H-P3.7',

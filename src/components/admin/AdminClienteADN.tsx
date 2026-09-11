@@ -408,7 +408,7 @@ function TarjetaSeccion({
               <div
                 key={campo.codigo}
                 className="border-l-2 pl-4 py-2"
-                style={{ borderColor: completo ? '#E8962E' : 'rgba(255,255,255,0.1)' }}
+                style={{ borderColor: completo ? '#B0822E' : 'rgba(255,255,255,0.1)' }}
               >
                 <div className="flex items-center justify-between gap-3 mb-1">
                   <div className="flex items-center gap-2 min-w-0">

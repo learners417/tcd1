@@ -80,7 +80,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
 
         // Button background
         const btnX = (size - ctaActualWidth) / 2;
-        ctx.fillStyle = '#E8962E';
+        ctx.fillStyle = '#B0822E';
         roundRect(ctx, btnX, ctaY - 25, ctaActualWidth, 55, 12);
         ctx.fill();
 

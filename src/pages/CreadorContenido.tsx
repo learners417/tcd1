@@ -203,7 +203,7 @@ function CarruselPreview({ texto }: { texto: string }) {
               </p>
             </div>
             {s.n === slides.length && <p className="text-sm font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #B0822E, transparent)' }} />
           </div>
         ))}
       </div>

@@ -159,6 +159,19 @@ _falt = [p for p in _perf if f"'{p}'" not in _pb and f"  {p}:" not in _pb]
 check('los 5 perfiles de bloqueo tienen registro', not _falt, str(_falt))
 check('el Mentor lee el perfil de bloqueo', 'bloqueMentor' in todo.get('src/lib/coachPrompt.ts',''), '')
 
+_cons = todo.get('src/lib/consultorio.ts','')
+_nq = _cons.count("codigo: 'P")
+check('el Consultorio tiene al menos 40 preguntas', _nq >= 40, f'{_nq} preguntas')
+_man = todo.get('src/lib/manuales.ts','')
+_m4 = all(k in _man for k in ['liderazgo','clinica','camino','llamada'])
+check('los 4 manuales estan enlazados', _m4, '')
+check('el Mentor usa el Consultorio', 'bloqueConsultorio' in todo.get('src/lib/coachPrompt.ts',''), '')
+
+_css = todo.get('src/index.css','')
+_oro_viejo = sum(1 for f,src in todo.items() if ('E8962E' in src or 'F4B65C' in src) and 'EL ORO ES MATE' not in src)
+check('el oro mate reemplazo al brillante en todo el repo', _oro_viejo == 0, f'{_oro_viejo} archivos con el oro viejo')
+check('el boton primario no lleva degrade', 'linear-gradient(180deg, #F4B65C' not in _css, '')
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

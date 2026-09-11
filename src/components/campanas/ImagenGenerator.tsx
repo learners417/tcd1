@@ -612,7 +612,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
           const pct = Math.min(100, Math.round((totalBytes / MAX_REQUEST_PAYLOAD_BYTES) * 100));
           const danger = totalBytes > MAX_REQUEST_PAYLOAD_BYTES;
           const warn = !danger && pct >= 75;
-          const color = danger ? '#EF4444' : warn ? '#E8962E' : '#22C55E';
+          const color = danger ? '#EF4444' : warn ? '#B0822E' : '#22C55E';
           return (
             <div className="mb-2 flex items-center gap-2 text-sm">
               <span style={{ color }} className="font-semibold">

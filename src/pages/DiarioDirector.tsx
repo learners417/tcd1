@@ -160,7 +160,7 @@ function Escala10({
     <div className="flex gap-1">
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
         const activo = n <= valor;
-        const fill = color ? color(valor) : '#E8962E';
+        const fill = color ? color(valor) : '#B0822E';
         return (
           <button
             key={n}
@@ -609,7 +609,7 @@ Devuelve SOLO este JSON:
                     <div className="flex items-end gap-1.5 h-12">
                       {dias.map((x, i2) => (
                         <div key={i2} className="flex-1 flex flex-col items-center gap-1">
-                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#F4B65C' : '#E8962E', opacity: x.e === 0 ? 1 : 0.9 }} />
+                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#C79A45' : '#B0822E', opacity: x.e === 0 ? 1 : 0.9 }} />
                         </div>
                       ))}
                     </div>

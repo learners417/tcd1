@@ -234,7 +234,7 @@ export default function SesionGuiadaPlayer({
             </div>
             {(ses.pasoEsencialIdx ?? 0) < todos.length - 1 && (
               <label className="flex items-center gap-2.5 text-xs text-cream/55 px-1">
-                <input type="checkbox" checked={st.esencial} onChange={(e) => setSt((s) => ({ ...s, esencial: e.target.checked, idx: -1 }))} className="accent-[#E8962E]" />
+                <input type="checkbox" checked={st.esencial} onChange={(e) => setSt((s) => ({ ...s, esencial: e.target.checked, idx: -1 }))} className="accent-[#B0822E]" />
                 Hoy tengo poco tiempo — versión esencial (15 min)
               </label>
             )}

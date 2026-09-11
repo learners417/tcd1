@@ -320,13 +320,13 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   tratamiento: string;
 }> = {
   foto_real: {
-    paleta: '"#0F1419 fondo, #E8962E acento, #F2EFE9 texto"',
+    paleta: '"#0F1419 fondo, #B0822E acento, #F2EFE9 texto"',
     escena: '"primer plano editorial de mujer 35-45 con fondo warm desenfocado"',
     tipografia: '"sans-serif bold blanco con outline fino, alineacion izquierda"',
     tratamiento: '"fotografia editorial DSLR, luz natural, shallow depth of field, tono warm cinematografico"',
   },
   bold: {
-    paleta: '"#000000 fondo, #E8962E acento saturado, #F2EFE9 texto"',
+    paleta: '"#000000 fondo, #B0822E acento saturado, #F2EFE9 texto"',
     escena: '"composicion grafica con formas planas y tipografia oversized como protagonista, sin foto"',
     tipografia: '"sans-serif display ultra-bold, tamanos masivos, asimetrica"',
     tratamiento: '"diseño grafico flat vector, alto contraste, poster editorial Behance, sin fotografia"',
@@ -398,7 +398,7 @@ Ejemplos concretos para el estilo "${estiloInfo!.titulo}" (usa este vocabulario,
     : `
 
 Ejemplos genericos:
-- paleta: "#0F1419 fondo, #E8962E acento, #F2EFE9 texto"
+- paleta: "#0F1419 fondo, #B0822E acento, #F2EFE9 texto"
 - escena: "primer plano de mujer 35-45 con fondo neutro warm desenfocado"
 - tipografia: "sans-serif bold blanco con fino outline negro, alineacion izquierda"
 - tratamiento: "filtro warm cinematografico, blur de fondo, alto contraste, vineteado sutil"`;
@@ -555,7 +555,7 @@ export function buildImagePrompt(
             : [
                 '- El texto principal es lo primero que el ojo ve — tamano dominante, bold, maximo contraste',
                 ...(h2Trim ? ['- El texto secundario complementa al principal — menor tamano, puede ser lighter'] : []),
-                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #E8962E dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
+                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #B0822E dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
                 '- La jerarquia visual debe ser INMEDIATAMENTE clara en 1 segundo',
               ];
 

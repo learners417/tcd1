@@ -171,7 +171,7 @@ function TabProgreso({ userId }: { userId?: string }) {
               <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
               <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '12px' }} />
               <Line type="monotone" dataKey="esperado" stroke="#6B7280" strokeDasharray="5 5" strokeWidth={2} dot={false} name="Ritmo Esperado" />
-              <Line type="monotone" dataKey="real" stroke="#E8962E" strokeWidth={3} dot={{ r: 4, fill: '#E8962E', strokeWidth: 0 }} name="Progreso Real" />
+              <Line type="monotone" dataKey="real" stroke="#B0822E" strokeWidth={3} dot={{ r: 4, fill: '#B0822E', strokeWidth: 0 }} name="Progreso Real" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -507,13 +507,13 @@ function TabEmbudo({ userId }: { userId?: string }) {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#E8962E" stopOpacity={0.3} /><stop offset="95%" stopColor="#E8962E" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#B0822E" stopOpacity={0.3} /><stop offset="95%" stopColor="#B0822E" stopOpacity={0} /></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
                 <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
                 <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
                 <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
-                <Area type="monotone" dataKey="ingresos" stroke="#E8962E" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
+                <Area type="monotone" dataKey="ingresos" stroke="#B0822E" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
                 <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={0} />
               </AreaChart>
             </ResponsiveContainer>

@@ -38,7 +38,7 @@ interface ManualDraft {
 
 const PALETA_EJEMPLO: Swatch[] = [
   { hex: '#0F1419', rol: 'fondo profundo' },
-  { hex: '#E8962E', rol: 'acento dorado' },
+  { hex: '#B0822E', rol: 'acento dorado' },
   { hex: '#F2EFE9', rol: 'texto principal' },
   { hex: '#A8B5C4', rol: 'texto secundario' },
 ];
@@ -49,7 +49,7 @@ const TIPOGRAFIA_EJEMPLO =
 const REGLAS_EJEMPLO =
   [
     '- Nunca fondo blanco puro (usar siempre tonos calidos o profundos)',
-    '- El acento dorado #E8962E debe estar presente en cada pieza',
+    '- El acento dorado #B0822E debe estar presente en cada pieza',
     '- No usar rojo saturado — choca con la identidad aspiracional',
     '- Textos en MAYUSCULAS solo en titulares, jamas en parrafos',
     '- Fotos de personas: miradas reales, no poses de stock',
@@ -220,7 +220,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   const addSwatch = useCallback(() => {
     setDraft((d) => ({
       ...d,
-      swatches: [...d.swatches, { hex: '#E8962E', rol: '' }],
+      swatches: [...d.swatches, { hex: '#B0822E', rol: '' }],
     }));
   }, []);
 
@@ -459,7 +459,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <input
         ref={colorInputRef}
         type="color"
-        value={valido ? hexLocal : '#E8962E'}
+        value={valido ? hexLocal : '#B0822E'}
         onChange={(e) => {
           const val = e.target.value.toUpperCase();
           setHexLocal(val);

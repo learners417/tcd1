@@ -78,7 +78,7 @@ export const OBJETIVO_LABELS: Record<ObjetivoCampana, { titulo: string; descripc
 };
 
 export const ESTADO_COLORS: Record<EstadoCampana, string> = {
-  borrador: '#E8962E',
+  borrador: '#B0822E',
   configurada: '#3B82F6',
   activa: '#22C55E',
   pausada: '#EAB308',

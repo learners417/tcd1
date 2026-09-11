@@ -79,7 +79,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       items: [
         { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
         { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2, minPilar: 2 },
-        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minPilar: 5, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
+        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
         { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minPilar: 5 },
         { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minPilar: 4 },
         { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minPilar: 4 },
@@ -109,10 +109,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2" style={{ borderColor: 'rgba(232,150,46,0.45)', background: 'radial-gradient(circle at 30% 25%, rgba(244,182,92,0.22), rgba(232,150,46,0.06) 70%)' }}>
           {/* El brote: la semilla del método que crece — de Blanco a Negro */}
           <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none">
-            <path d="M12 20V11" stroke="#E8962E" strokeWidth="1.8" strokeLinecap="round" />
-            <path d="M12 12C12 8.5 9.5 6.5 6 6.5C6 10 8.5 12 12 12Z" fill="#E8962E" fillOpacity="0.85" />
-            <path d="M12 10C12 7 14.2 5 17.5 5C17.5 8.2 15.2 10.2 12 10Z" fill="#F4B65C" fillOpacity="0.9" />
-            <path d="M8 20h8" stroke="#E8962E" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.5" />
+            <path d="M12 20V11" stroke="#B0822E" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M12 12C12 8.5 9.5 6.5 6 6.5C6 10 8.5 12 12 12Z" fill="#B0822E" fillOpacity="0.85" />
+            <path d="M12 10C12 7 14.2 5 17.5 5C17.5 8.2 15.2 10.2 12 10Z" fill="#C79A45" fillOpacity="0.9" />
+            <path d="M8 20h8" stroke="#B0822E" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.5" />
           </svg>
         </div>
         {!collapsed && (
