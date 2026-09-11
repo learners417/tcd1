@@ -609,3 +609,33 @@ h1, h2, h3 {
 [data-theme="light"] .blur-3xl,
 [data-theme="light"] .blur-2xl         { display: none !important; }
 [data-theme="light"] .shadow-2xl       { box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 16px 40px rgba(42,33,24,.07) !important; }
+
+/* ─── V5 · las tres islas que quedaban ──────────────────────────────
+   1. card-ios usaba var(--surface) — una variable que NO existe en el
+      tema claro — asi que caia en su respaldo #111110 y quedaba negra.
+      Era la tarjeta del login.
+   2. La ceremonia de cinturon tiene el negro escrito a mano.
+   3. El aside del menu usa bg-ink/90 con desenfoque.
+*/
+[data-theme="light"] {
+  --surface: #FFFDF7;
+}
+[data-theme="light"] .card-ios,
+[data-theme="light"] .card-panel   { background: #FFFDF7 !important; border-color: rgba(176,130,46,.22) !important; box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 12px 32px rgba(42,33,24,.06) !important; }
+[data-theme="light"] .card-ios:hover { box-shadow: 0 2px 6px rgba(42,33,24,.06), 0 18px 44px rgba(42,33,24,.09) !important; }
+
+/* La ceremonia y los fondos oscuros escritos a mano. */
+[data-theme="light"] .bg-\[\#0D0C0B\],
+[data-theme="light"] .bg-\[\#0d0a06\],
+[data-theme="light"] .bg-\[\#0d0d0c\],
+[data-theme="light"] .bg-\[\#0d0d0d\],
+[data-theme="light"] .bg-\[\#0B0B0A\],
+[data-theme="light"] .bg-\[\#161310\]  { background-color: #FAF5EA !important; }
+[data-theme="light"] .bg-\[\#0d0a06\]\/95 { background-color: rgba(250,245,234,.96) !important; }
+
+/* El menu lateral. */
+[data-theme="light"] aside              { background-color: rgba(250,245,234,.96) !important; }
+[data-theme="light"] .btn-ios-primary   { color: #FFFDF7 !important; }
+[data-theme="light"] .input-field       { background: #FFFDF7 !important; color: #2A2118 !important; }
+[data-theme="light"] .custom-select     { background-color: #FFFDF7 !important; color: #2A2118 !important; }
+[data-theme="light"] .custom-select option { background: #FFFDF7 !important; color: #2A2118 !important; }

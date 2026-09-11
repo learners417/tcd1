@@ -207,6 +207,13 @@ _luz = _css[_i:_css.find('}', _i)] if _i >= 0 else ''
 _falta = [t for t in ['--color-ink','--color-cream','--color-panel','--color-gold'] if t not in _luz]
 check('el tema claro pisa los tokens de Tailwind, no solo los manuales', not _falta, str(_falta))
 
+try:
+    _c5 = open('src/index.css', encoding='utf-8').read()
+except Exception:
+    _c5 = ''
+_luz5 = _c5[_c5.find('[data-theme="light"]'):]
+check('card-ios no cae en su respaldo negro', '--surface: #FFFDF7' in _luz5, '')
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',
