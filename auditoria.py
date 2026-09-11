@@ -172,6 +172,16 @@ _oro_viejo = sum(1 for f,src in todo.items() if ('E8962E' in src or 'F4B65C' in 
 check('el oro mate reemplazo al brillante en todo el repo', _oro_viejo == 0, f'{_oro_viejo} archivos con el oro viejo')
 check('el boton primario no lleva degrade', 'linear-gradient(180deg, #F4B65C' not in _css, '')
 
+_pant = ['src/pages/Dashboard.tsx','src/pages/Roadmap.tsx','src/pages/ADN.tsx','src/pages/Biblioteca.tsx']
+_sinvoc = [f.split('/')[-1] for f in _pant if 'VOC' not in todo.get(f,'')]
+check('ninguna pantalla del cliente muestra tokens en crudo', not _sinvoc, str(_sinvoc))
+
+_sb = todo.get('src/components/Sidebar.tsx','')
+_nitems = _sb.count("as MenuItem,")
+check('el menu tiene 5 destinos o menos', 0 < _nitems <= 5, f'{_nitems} items')
+_viejos = [l for l in ['El Camino','Mi ADN','Lo que sigue','El Metodo','El Método','Entrenadores IA'] if f"label: '{l}'" in _sb]
+check('los nombres siguen el sistema Tu/Tus', not _viejos, str(_viejos))
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

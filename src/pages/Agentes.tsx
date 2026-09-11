@@ -56,6 +56,7 @@ import {
   buildAttachmentsFromDataTransfer,
   type ChatAttachment,
 } from '../lib/chatAttachments';
+import { VOC } from '../lib/vocabulario';
 import {
   AGENTES,
   type AgenteCategoria,
@@ -567,7 +568,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             })()}
             <div>
               <h2 className="text-sm font-medium text-gold flex items-center gap-2">
-                {agenteActivo.titulo}
+                {VOC(agenteActivo.titulo)}
                 {autonomoActivo && (
                   <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
                     <Trophy className="w-3 h-3" /> Autónoma
@@ -828,7 +829,7 @@ function AgenteCard({
                     : 'text-white/55'
               }`}
             >
-              {agente.titulo}
+              {VOC(agente.titulo)}
             </h3>
             {!unlocked && <Lock className="w-3.5 h-3.5 text-white/55" />}
             {autonomo && (
@@ -837,7 +838,7 @@ function AgenteCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-white/65 mt-0.5">{agente.subtitulo}</p>
+          <p className="text-xs text-white/65 mt-0.5">{VOC(agente.subtitulo)}</p>
         </div>
       </div>
 
@@ -903,7 +904,7 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
         <div className="flex items-center gap-3">
           <Lock className="w-5 h-5 text-gold" />
           <h3 className="text-base font-medium text-white">
-            {agente.titulo} está bloqueada
+            {VOC(agente.titulo)} está bloqueada
           </h3>
         </div>
         <p className="text-sm text-white/70 leading-relaxed">

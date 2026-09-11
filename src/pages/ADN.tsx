@@ -9,6 +9,7 @@ import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDAD
 import { Lock, ChevronRight } from 'lucide-react';
 import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, type PiezaADN } from '../lib/adnPiezas';
 import type { ProfileV2 } from '../lib/supabase';
+import { VOC } from '../lib/vocabulario';
 
 interface ADNProps {
   perfil?: Partial<ProfileV2>;
@@ -29,7 +30,7 @@ function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
           {sellada ? '🔒' : bloqueada ? <Lock className="w-4 h-4 text-cream/25" /> : '○'}
         </span>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${sellada ? 'text-cream' : bloqueada ? 'text-cream/45' : 'text-cream/85'}`}>{p.titulo}</p>
+          <p className={`text-sm font-semibold ${sellada ? 'text-cream' : bloqueada ? 'text-cream/45' : 'text-cream/85'}`}>{VOC(p.titulo)}</p>
           <p className={`text-xs mt-0.5 leading-relaxed ${sellada ? 'text-cream/60' : 'text-cream/40'}`}>{p.que}</p>
           {sellada ? (
             <p className="text-sm text-success mt-2">Sellado{fecha ? ' · ' + fecha : ''} — se cambia rehaciendo su sesión</p>
@@ -76,7 +77,7 @@ export default function ADN({ setCurrentPage }: ADNProps) {
         </div>
         <div className="flex gap-1">
           {PIEZAS_ADN.map((p) => (
-            <div key={p.id} title={p.titulo}
+            <div key={p.id} title={VOC(p.titulo)}
               className={`h-1.5 flex-1 rounded-full ${estadoPieza(p).sellada ? 'bg-gold' : 'bg-cream/15'}`} />
           ))}
         </div>

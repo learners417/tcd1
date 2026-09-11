@@ -24,6 +24,7 @@ const HERRAMIENTA_ICON_MAP: Record<string, React.ComponentType<{ className?: str
 import { toast } from 'sonner';
 import Markdown from 'react-markdown';
 import CustomSelect from '../components/CustomSelect';
+import { VOC } from '../lib/vocabulario';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -157,8 +158,8 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
               </span>
               <span className="text-sm text-cream/55">Grupo {herramienta.grupo}</span>
             </div>
-            <h1 className="text-lg font-light text-cream mt-0.5">{herramienta.titulo}</h1>
-            <p className="text-sm text-cream/75">{herramienta.descripcion}</p>
+            <h1 className="text-lg font-light text-cream mt-0.5">{VOC(herramienta.titulo)}</h1>
+            <p className="text-sm text-cream/75">{VOC(herramienta.descripcion)}</p>
           </div>
         </div>
 

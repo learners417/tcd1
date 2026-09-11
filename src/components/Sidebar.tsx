@@ -1,7 +1,7 @@
 import { planLimitado } from '../lib/adnPiezas';
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect } from 'react';
-import { Sparkles, LayoutDashboard, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Hexagon, BookOpen, Library, Bot, ChevronLeft, ChevronRight, Dna, Megaphone, PenLine, Trophy, Users, TrendingUp, Lock, Target } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Hexagon, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 
@@ -61,41 +61,43 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
     return () => clearInterval(interval);
   }, []);
 
+  /**
+   * MENU V5 — cinco destinos, y nada mas.
+   *
+   * La regla que ordena esto: si algo se usa en UN dia especifico del camino,
+   * no va aca — va en ese dia. El menu es solo para lo que se usa cualquier dia.
+   *
+   * Por eso salieron Campanas, Creador de Contenido y El Metodo: son
+   * herramientas de una sesion concreta, y tenerlas sueltas obliga al cliente a
+   * preguntarse "esto lo tengo que usar ahora?" noventa veces.
+   *
+   * Y salio "Lo que sigue": era Hoy con otro nombre, y dos nombres para la
+   * misma cosa hacen dudar cual mirar.
+   *
+   * Los nombres siguen un solo sistema: todo es suyo. Tu Camino, Tu ADN,
+   * Tu Mentor, Tu Clinica.
+   */
+  type MenuItem = {
+    id: string;
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    badge?: boolean;
+    minPilar?: number;
+    minCinturon?: number;
+    action?: () => void;
+  };
+
   const sections = [
     {
-      title: 'PRINCIPAL',
+      title: '',
       items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Hoy' },
-        { id: 'roadmap', icon: RoadmapIcon, label: 'El Camino', badge: data.hasPending },
-    { id: 'adn', icon: Sparkles, label: 'Mi ADN' },
-    ...(planPermitePilar(planActual(), 99) ? [] : ([{ id: 'camino-completo', icon: Lock, label: 'Lo que sigue', action: () => setCurrentPage('roadmap') }] as any[])),
-        // { id: 'metrics', icon: TrendingUp, label: 'Métricas' , minPilar: 4 }, // el embudo de KPIs va a MCD — el progreso vive en el Dashboard
-        { id: 'coach', icon: Sparkles, label: 'Tu Mentor' },
-        { id: 'mensajes', icon: MessageSquare, label: 'Soporte', badge: messageBadge > 0 },
+        { id: 'dashboard', icon: Sun, label: 'Hoy' } as MenuItem,
+        { id: 'roadmap', icon: RoadmapIcon, label: 'Tu Camino', badge: data.hasPending } as MenuItem,
+        { id: 'adn', icon: Sparkles, label: 'Tu ADN' } as MenuItem,
+        { id: 'coach', icon: MessageSquare, label: 'Tu Mentor' } as MenuItem,
+        { id: 'miclinica', icon: Hexagon, label: 'Tu Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as MenuItem,
       ]
     },
-    {
-      title: 'HERRAMIENTAS',
-      items: [
-        { id: 'diario', icon: BookOpen, label: 'Diario del Fundador', minCinturon: 2 },
-        { id: 'biblioteca', icon: Library, label: 'El Método', minCinturon: 2, minPilar: 2 },
-        { id: 'miclinica', icon: Hexagon, label: 'Mi Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as never,
-        { id: 'agentes', icon: Bot, label: 'Entrenadores IA', minPilar: 5 },
-        { id: 'creador', icon: PenLine, label: 'Creador de Contenido', minPilar: 4 },
-        { id: 'campanas', icon: Megaphone, label: 'Campañas & Creativos', minPilar: 4 },
-      ]
-    },
-    {
-      title: 'CUENTA',
-      items: [
-        { id: 'ajustes', icon: Settings, label: 'Ajustes', action: onOpenSettings },
-        { id: 'salir', icon: LogOut, label: 'Salir', action: () => {
-          if (window.confirm('¿Estás seguro de que quieres salir?')) {
-            onSignOut();
-          }
-        }},
-      ]
-    }
   ];
 
   const initial = data.profile.nombre.charAt(0).toUpperCase();
@@ -163,13 +165,13 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       <div className="flex-1 w-full space-y-6 overflow-y-auto scrollbar-hide">
         {sections.map((section, sidx) => (
           <div key={sidx} className="w-full">
-            {!collapsed && (
+            {!collapsed && section.title && (
               <h3 className="px-6 text-sm font-bold text-cream/25 uppercase tracking-[0.1em] mb-2">
                 {section.title}
               </h3>
             )}
             {collapsed && sidx > 0 && <div className="mx-3 border-t border-[rgba(232,150,46,0.1)] mb-2" />}
-            <nav className="space-y-0.5">
+            <nav className="space-y-1.5">
               {section.items.filter((item) => planPermitePilar(planActual(), (item as { minPilar?: number }).minPilar ?? 0)).map((item) => {
                 const isActive = currentPage === item.id;
                 const modulosOverride = ((data.profile as { modulos_activos?: string[] })?.modulos_activos) ?? [];
@@ -187,14 +189,14 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
                     }}
                     title={locked ? 'Se desbloquea con el Cinturón Verde (tu oferta aprobada)' : (collapsed ? item.label : undefined)}
                     className={`w-full flex items-center transition-all relative group ${
-                      collapsed ? 'justify-center px-0 py-2.5' : 'px-6 py-2.5'
+                      collapsed ? 'justify-center px-0 py-4' : 'px-5 py-4 mx-3 rounded-2xl'
                     } ${locked ? 'opacity-40 cursor-not-allowed' : ''} ${isActive ? 'bg-gold/15' : 'bg-transparent hover:bg-gold/5'}`}
                   >
                     {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gold rounded-r-full shadow-[0_0_10px_rgba(232,150,46,0.5)]" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-gold rounded-r-full" />
                     )}
                     <div className="relative">
-                      <item.icon className={`w-[18px] h-[18px] transition-colors ${
+                      <item.icon className={`w-[22px] h-[22px] transition-colors ${
                         isActive ? 'text-gold' : 'text-cream/55 group-hover:text-cream/75'
                       }`} />
                       {item.badge && (
@@ -202,7 +204,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
                       )}
                     </div>
                     {!collapsed && (
-                      <span className={`ml-3 text-[13px] tracking-wide ${
+                      <span className={`ml-4 text-[17px] tracking-wide ${
                         isActive ? 'text-cream font-semibold' : 'text-cream/75 font-medium group-hover:text-cream/80'
                       }`}>
                         {item.label}
@@ -210,7 +212,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
                     )}
                     {/* Tooltip on collapse */}
                     {collapsed && (
-                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-surface border border-[rgba(232,150,46,0.12)] text-xs text-cream rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-surface border border-[rgba(232,150,46,0.12)] text-[15px] text-cream rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                         {item.label}
                       </div>
                     )}

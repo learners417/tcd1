@@ -94,6 +94,7 @@ import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
+import { VOC } from '../lib/vocabulario';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -667,7 +668,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
         try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
-        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
+        setCelebracion(`✓ Micro-sesión completada: ${VOC(meta.titulo)} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
         setTimeout(() => setCelebracion(null), 5000);
       }
 
@@ -733,7 +734,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     if (meta.herramienta_id) {
       localStorage.setItem(`tcd_herramienta_${meta.herramienta_id}`, outputTexto);
     }
-    setCelebracion(`Documento guardado: ${meta.titulo}`);
+    setCelebracion(`Documento guardado: ${VOC(meta.titulo)}`);
     setTimeout(() => setCelebracion(null), 5000);
     // Sync to Supabase
     if (isSupabaseReady() && supabase && userId) {
@@ -791,7 +792,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
       try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
-        setCelebracion(`✓ Micro-sesión completada: ${meta.titulo} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
+        setCelebracion(`✓ Micro-sesión completada: ${VOC(meta.titulo)} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
       setTimeout(() => setCelebracion(null), 5000);
     }
     // Sync to Supabase
@@ -893,7 +894,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xl sm:text-2xl font-light text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{hoy.titulo}</p>
+                    <p className="text-xl sm:text-2xl font-light text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(hoy.titulo)}</p>
                     <p className="text-xs text-cream/45 mt-1">{hoy.codigo} · <span className="text-goldhi">{hoy.tiempo ?? '~20 min'}</span> · máximo poder en tiempo reducido</p>
                   </div>
                   <button
@@ -981,12 +982,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               <div className="flex items-center gap-3 px-1 mb-1">
                 <div className="flex-1">
                   <h2 className="text-lg font-bold uppercase tracking-wide text-cream/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
-                    {fase.titulo}
+                    {VOC(fase.titulo)}
                     {fase.metodo_letra && (
                       <span className="ml-2 text-gold text-base">· Método {fase.metodo_letra}</span>
                     )}
                   </h2>
-                  <p className="text-sm text-cream/55 mt-0.5">{fase.subtitulo} · {fase.dias}</p>
+                  <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)} · {fase.dias}</p>
                 </div>
               </div>
 
@@ -1011,7 +1012,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         if (pilar.estado === 'plan_bloqueado') {
                           const planNec = planParaPilar(pilar.numero);
                           const url = checkoutUrl(planNec);
-                          window.open(url || waLink(`Hola · Quiero abrir «${pilar.titulo}» (${NOMBRE_PLAN[planNec]} ${PRECIO_FUNDADOR[planNec]})`), '_blank');
+                          window.open(url || waLink(`Hola · Quiero abrir «${VOC(pilar.titulo)}» (${NOMBRE_PLAN[planNec]} ${PRECIO_FUNDADOR[planNec]})`), '_blank');
                           return;
                         }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
@@ -1052,7 +1053,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         Pilar {pilar.id.substring(1)}
                       </p>
                       <p className={`text-sm font-semibold mt-0.5 ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/45' : 'text-cream'}`}>
-                        {pilar.titulo}
+                        {VOC(pilar.titulo)}
                       </p>
 
                       {/* Mini barra de progreso */}
@@ -1105,8 +1106,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                     <p className="text-sm text-gold uppercase tracking-wider font-bold">
                       Pilar {pilar.id.substring(1)}
                     </p>
-                    <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{pilar.titulo}</h2>
-                    <p className="text-sm text-cream/75">{pilar.subtitulo}</p>
+                    <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(pilar.titulo)}</h2>
+                    <p className="text-sm text-cream/75">{VOC(pilar.subtitulo)}</p>
                   </div>
                 </div>
                 <button
@@ -1222,7 +1223,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           )}
                         </div>
                         <p className={`text-base font-medium ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
-                          {meta.titulo}
+                          {VOC(meta.titulo)}
                         </p>
                         {!isActive && (
                           <p className="text-sm text-cream/55 mt-1 leading-relaxed line-clamp-2">
@@ -1277,8 +1278,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           <SesionViva
                             metaKey={key}
                             metaCodigo={meta.codigo}
-                            metaTitulo={meta.titulo}
-                            descripcion={meta.descripcion}
+                            metaTitulo={VOC(meta.titulo)}
+                            descripcion={VOC(meta.descripcion)}
                             tiempoEstimado={meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}

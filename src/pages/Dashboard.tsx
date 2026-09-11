@@ -15,6 +15,7 @@ import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion 
 import ReporteDirector from '../components/ReporteDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
+import { VOC } from '../lib/vocabulario';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -507,7 +508,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-cream/90">{t.titulo}</p>
+                  <p className="text-sm font-medium text-cream/90">{VOC(t.titulo)}</p>
                   <p className="text-sm text-cream/55 mt-1">{t.pilarTitulo}</p>
                   <div className="flex flex-wrap items-center gap-3 mt-3">
                     <span className={`text-sm uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>

@@ -35,6 +35,7 @@ import {
   type VideoModulo,
 } from '../lib/videos';
 import HerramientaDetalle from './HerramientaDetalle';
+import { VOC } from '../lib/vocabulario';
 
 // ─── CLINICA Tab definitions ────────────────────────────────────────────────
 
@@ -231,7 +232,7 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
     return (
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
-        <p className="text-sm text-cream/75">{r.titulo}</p>
+        <p className="text-sm text-cream/75">{VOC(r.titulo)}</p>
                   {COMPLEMENTOS[r.id] && (
                     <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
                       <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
@@ -259,7 +260,7 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
       <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
         <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
-        <p className="text-sm text-cream/70">{r.titulo}</p>
+        <p className="text-sm text-cream/70">{VOC(r.titulo)}</p>
         <p className="text-sm text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
       </div>
     );
@@ -275,14 +276,14 @@ function RecursoVideoInApp({ r }: { r: RecursoADN }) {
     <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-gold/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
       <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-gold/5 transition-colors">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
-        <p className="text-sm text-cream/90 font-medium">{r.titulo}</p>
+        <p className="text-sm text-cream/90 font-medium">{VOC(r.titulo)}</p>
         <p className="text-sm text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
       </button>
       {abierto && (
         <div className="aspect-video w-full bg-black">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${r.youtubeId}?rel=0&modestbranding=1`}
-            title={r.titulo}
+            title={VOC(r.titulo)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="w-full h-full"
@@ -566,7 +567,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       {thumbUrl ? (
                         <img
                           src={thumbUrl}
-                          alt={v.titulo}
+                          alt={VOC(v.titulo)}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
@@ -595,10 +596,10 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                         </span>
                       </div>
                       <h3 className="text-sm font-semibold text-cream mb-1">
-                        {v.titulo}
+                        {VOC(v.titulo)}
                       </h3>
                       <p className="text-xs text-cream/75 leading-relaxed flex-1">
-                        {v.descripcion}
+                        {VOC(v.descripcion)}
                       </p>
                       {!isPlaceholder && (
                         <button
@@ -640,13 +641,13 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       </span>
                     </div>
                     <h3 className="text-sm font-semibold text-cream leading-snug">
-                      {h.titulo}
+                      {VOC(h.titulo)}
                     </h3>
                   </div>
                 </div>
 
                 <p className="text-xs text-cream/75 leading-relaxed mb-4 flex-1">
-                  {h.descripcion}
+                  {VOC(h.descripcion)}
                 </p>
 
                 <button
@@ -691,7 +692,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
           >
             <div className="flex items-center justify-between mb-3 px-1">
               <h3 className="text-cream font-medium text-sm truncate flex-1">
-                {videoActivo.titulo}
+                {VOC(videoActivo.titulo)}
               </h3>
               <button
                 onClick={() => setVideoActivo(null)}
@@ -703,7 +704,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[rgba(232,150,46,0.12)]">
               <iframe
                 src={getYoutubeEmbedUrl(videoActivo.youtubeUrl)}
-                title={videoActivo.titulo}
+                title={VOC(videoActivo.titulo)}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full"
