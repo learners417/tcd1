@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { PIEZAS_ADN, estadoPieza, resumenADN } from '../lib/adnPiezas';
+import { VOC } from '../lib/vocabulario';
 
 export default function CadenaADN({ onAbrir }: { onAbrir?: () => void }) {
   const alma = PIEZAS_ADN.filter((p) => p.grupo === 'alma');
@@ -26,7 +27,7 @@ export default function CadenaADN({ onAbrir }: { onAbrir?: () => void }) {
           return (
             <React.Fragment key={p.id}>
               {i > 0 && <div className={`h-px w-2 shrink-0 ${on && prevOn ? 'bg-gold/60' : 'bg-cream/15'}`} />}
-              <div className="shrink-0 text-center" title={p.titulo}>
+              <div className="shrink-0 text-center" title={VOC(p.titulo)}>
                 <div className={`w-3 h-3 rounded-full mx-auto ${on ? 'bg-gold ring-2 ring-gold/25' : 'bg-cream/15'}`} />
                 <p className={`text-xs mt-1 whitespace-nowrap ${on ? 'text-cream/75' : 'text-cream/35'}`}>
                   {p.titulo.replace('Tu ', '').replace('Tus ', '')}

@@ -7,6 +7,7 @@
 import React from 'react';
 import { waLink } from '../lib/planes';
 import { PIEZAS_ADN, estadoPieza, planLimitado } from '../lib/adnPiezas';
+import { VOC } from '../lib/vocabulario';
 
 function completadas(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]); } catch { return new Set(); }
@@ -37,7 +38,7 @@ export default function GraduacionSemanaBlanca() {
             return (
               <div key={p.id} className={`flex items-start gap-2.5 ${on ? '' : 'opacity-45'}`}>
                 <span className={`text-sm mt-0.5 ${on ? 'text-success' : 'text-cream/30'}`}>{on ? '✓' : '○'}</span>
-                <p className="text-sm text-cream/85 flex-1">{p.titulo} <span className="text-cream/45">— {p.que}</span></p>
+                <p className="text-sm text-cream/85 flex-1">{VOC(p.titulo)} <span className="text-cream/45">— {p.que}</span></p>
               </div>
             );
           })}
@@ -50,7 +51,7 @@ export default function GraduacionSemanaBlanca() {
           {faltan.map((p) => (
             <div key={p.id} className="flex items-start gap-2.5">
               <span className="text-cream/30 text-sm mt-0.5">🔒</span>
-              <p className="text-sm text-cream/55 flex-1">{p.titulo} <span className="text-cream/35">— {p.que}</span></p>
+              <p className="text-sm text-cream/55 flex-1">{VOC(p.titulo)} <span className="text-cream/35">— {p.que}</span></p>
             </div>
           ))}
         </div>

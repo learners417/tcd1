@@ -9,6 +9,7 @@
 import React from 'react';
 import { PIEZAS_ADN, estadoPieza } from '../lib/adnPiezas';
 import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR, checkoutUrl, waLink } from '../lib/planes';
+import { VOC } from '../lib/vocabulario';
 
 export default function PuertaSiguienteNivel() {
   const plan = planActual();
@@ -46,7 +47,7 @@ export default function PuertaSiguienteNivel() {
         {faltan.map((p) => (
           <div key={p.id} className="flex items-baseline gap-2 text-sm">
             <span className="text-cream/30">🔒</span>
-            <span className="text-cream/75 flex-1">{p.titulo}</span>
+            <span className="text-cream/75 flex-1">{VOC(p.titulo)}</span>
             <span className="text-sm text-cream/40 text-right">{p.sesion}</span>
           </div>
         ))}

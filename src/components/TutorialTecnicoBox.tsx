@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { getTutoriales, getTutorial, type TutorialTecnico } from '../lib/tutorialesTecnicos';
+import { VOC } from '../lib/vocabulario';
 
 export default function TutorialTecnicoBox(
   { codigo, clave }: { codigo?: string; clave?: string },
@@ -19,9 +20,9 @@ export default function TutorialTecnicoBox(
   return (
     <div className="space-y-2">
       {tutoriales.map((t) => (
-        <details key={t.titulo} className="rounded-xl border border-gold/20 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
+        <details key={VOC(t.titulo)} className="rounded-xl border border-gold/20 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
           <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">
-            🛠️ Paso a paso: {t.titulo}
+            🛠️ Paso a paso: {VOC(t.titulo)}
           </summary>
           <div className="mt-3 space-y-3">
             <p className="text-sm text-cream/75 leading-relaxed">{t.intro}</p>

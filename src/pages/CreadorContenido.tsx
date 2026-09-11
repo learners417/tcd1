@@ -47,6 +47,7 @@ import { supabase, isSupabaseReady } from '../lib/supabase';
 import { generateText } from '../lib/aiProvider';
 import { getCompletadas, isPilarCompletado } from '../lib/agents/unlock';
 import { primero } from '../lib/primero';
+import { VOC } from '../lib/vocabulario';
 
 interface CreadorContenidoProps {
   userId?: string;
@@ -418,7 +419,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                     {meta.label}
                   </p>
                   <p className="text-xs text-cream/65 mt-1 leading-relaxed">
-                    {meta.descripcion}
+                    {VOC(meta.descripcion)}
                   </p>
                 </button>
               );
@@ -455,7 +456,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                     {meta.label}
                   </p>
                   <p className="text-xs text-cream/65 mt-1 leading-relaxed">
-                    {meta.descripcion}
+                    {VOC(meta.descripcion)}
                   </p>
                 </button>
               );

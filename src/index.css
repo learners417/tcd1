@@ -259,6 +259,18 @@ h1, h2, h3 {
      so row/card hover feedback still works in light mode.
 */
 [data-theme="light"] {
+  /* LOS TOKENS DE TAILWIND. Sin esto, cada clase text-cream, bg-ink y
+     bg-panel sigue resolviendo a los valores del tema oscuro: texto casi
+     blanco sobre crema. Era la causa del lavado. */
+  --color-ink: #FAF5EA;
+  --color-panel: #FFFDF7;
+  --color-surface: #F5EFE1;
+  --color-cream: #2A2118;
+  --color-gold: #B0822E;
+  --color-goldhi: #8E6824;
+  --color-success: #2F5638;
+  --color-danger: #9C3626;
+
   --bg-root: #FAF5EA;
   --bg-card: #FFFDF7;
   --bg-surface2: #F5EFE1;

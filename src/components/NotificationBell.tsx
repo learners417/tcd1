@@ -12,6 +12,7 @@ import {
 } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { playNotificationSound } from '../lib/notificationSound';
+import { VOC } from '../lib/vocabulario';
 
 const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
   hito: Trophy,
@@ -227,13 +228,13 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2">
-                        <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
+                        <p className="text-sm font-medium text-cream/90 mb-0.5">{VOC(notif.titulo)}</p>
                         {!notif.leida && (
                           <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
                         )}
                       </div>
                       {notif.descripcion && (
-                        <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
+                        <p className="text-xs text-cream/65 line-clamp-2">{VOC(notif.descripcion)}</p>
                       )}
                       <p className="text-sm text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                     </div>

@@ -491,7 +491,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                   className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
                 >
                   <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
-                  <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{data.tareasHoy[0].titulo}</p>
+                  <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(data.tareasHoy[0].titulo)}</p>
                   <p className="text-xs text-cream/65 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
                   <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">COMENZAR →</span>
                 </button>

@@ -327,7 +327,7 @@ export default function TaskHerramientaIA({
     setRegenIdx(idx);
     try {
       const b = bloques[idx];
-      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${b.titulo}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${VOC(b.titulo)}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
       const arr = parseJsonArray<FaseBloque>(out ?? '');
       if (arr?.[0]) setBloques((prev) => prev.map((x, i) => (i === idx ? arr[0] : x)));
     } catch { /* noop */ }
@@ -336,7 +336,7 @@ export default function TaskHerramientaIA({
 
   const sellarADN = async () => {
     if (!herramienta || !eleccion) return;
-    const texto = `# ${eleccion.titulo}\n${eleccion.significado}\n\n` + bloques.map((b) => `## ${b.titulo}\n${b.contenido}`).join('\n\n');
+    const texto = `# ${VOC(eleccion.titulo)}\n${eleccion.significado}\n\n` + bloques.map((b) => `## ${VOC(b.titulo)}\n${b.contenido}`).join('\n\n');
     const sello: SelloADN = { fecha: new Date().toISOString().split('T')[0], eleccion, bloques, texto };
     guardarSelloLocal(herramienta.id, sello);
     setSelloExistente(sello);
@@ -345,7 +345,7 @@ export default function TaskHerramientaIA({
     if (campos) {
       const patch: Record<string, string> = {};
       if (campos.principal) patch[campos.principal] = eleccion.titulo;
-      if (campos.bloques) patch[campos.bloques] = bloques.map((b) => `${b.titulo}: ${b.contenido}`).join('\n');
+      if (campos.bloques) patch[campos.bloques] = bloques.map((b) => `${VOC(b.titulo)}: ${b.contenido}`).join('\n');
       try {
         const raw = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
         localStorage.setItem('tcd_profile', JSON.stringify({ ...raw, ...patch }));
@@ -578,7 +578,7 @@ export default function TaskHerramientaIA({
             {opciones.map((op, i2) => (
               <button key={i2} type="button" onClick={() => setEleccion(op)}
                 className={`w-full text-left rounded-2xl border p-4 transition-all ${eleccion?.titulo === op.titulo ? 'border-gold bg-gold/10 ring-1 ring-gold/40' : 'border-cream/10 bg-surface/30 hover:border-gold/30'}`}>
-                <p className="text-base font-semibold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{op.titulo}</p>
+                <p className="text-base font-semibold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{VOC(op.titulo)}</p>
                 <p className="text-xs text-cream/60 mt-1 leading-relaxed">{op.significado}</p>
               </button>
             ))}
@@ -598,14 +598,14 @@ export default function TaskHerramientaIA({
         <div className="space-y-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus piezas — edita lo que quieras</p>
-            <h3 className="text-lg font-bold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{eleccion.titulo}</h3>
+            <h3 className="text-lg font-bold text-cream" style={{ fontFamily: 'var(--font-display)' }}>{VOC(eleccion.titulo)}</h3>
             <p className="text-xs text-cream/55 mt-1">✏️ edita con tus palabras · 🔄 regenera solo esa pieza · 🎤 habla en vez de escribir</p>
           </div>
           <div className="space-y-2.5">
             {bloques.map((b, i2) => (
               <div key={i2} className="rounded-2xl border border-cream/10 bg-surface/30 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-cream flex-1">{b.titulo}</p>
+                  <p className="text-sm font-semibold text-cream flex-1">{VOC(b.titulo)}</p>
                   <div className="flex gap-1.5 shrink-0">
                     <button type="button" onClick={() => setEditIdx(editIdx === i2 ? null : i2)} title="Editar"
                       className="text-xs px-2 py-1 rounded-lg border border-cream/15 text-cream/65 hover:text-cream hover:border-gold/40">✏️</button>
@@ -639,12 +639,12 @@ export default function TaskHerramientaIA({
       {modo === 'revisionc' && eleccion && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.06] to-transparent p-5">
-            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{eleccion.titulo}</p>
+            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(eleccion.titulo)}</p>
             <p className="text-xs text-cream/60 mt-1">{eleccion.significado}</p>
             <div className="mt-4 space-y-3">
               {bloques.map((b, i2) => (
                 <div key={i2}>
-                  <p className="text-sm font-semibold text-cream/90">{b.titulo}</p>
+                  <p className="text-sm font-semibold text-cream/90">{VOC(b.titulo)}</p>
                   <p className="text-sm text-cream/70 leading-relaxed whitespace-pre-wrap">{b.contenido}</p>
                 </div>
               ))}
@@ -652,7 +652,7 @@ export default function TaskHerramientaIA({
           </div>
           <VeredictoCriticoPanel
             codigo={meta.codigo}
-            texto={bloques.map((b) => `${b.titulo}: ${b.contenido}`).join('\n\n')}
+            texto={bloques.map((b) => `${VOC(b.titulo)}: ${b.contenido}`).join('\n\n')}
             onVeredicto={setVeredicto}
           />
           <div className="rounded-xl border border-gold/40 bg-gold/[0.06] px-4 py-3">
@@ -675,11 +675,11 @@ export default function TaskHerramientaIA({
         <div className="space-y-4">
           <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent p-5">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">🔒 Sellado en tu ADN{(selloExistente?.fecha) ? ` · ${selloExistente.fecha}` : ''}</p>
-            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{eleccion.titulo}</p>
+            <p className="text-xl font-semibold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(eleccion.titulo)}</p>
             <div className="mt-4 space-y-3">
               {bloques.map((b, i2) => (
                 <div key={i2}>
-                  <p className="text-sm font-semibold text-cream/90">{b.titulo}</p>
+                  <p className="text-sm font-semibold text-cream/90">{VOC(b.titulo)}</p>
                   <p className="text-sm text-cream/70 leading-relaxed whitespace-pre-wrap">{b.contenido}</p>
                 </div>
               ))}

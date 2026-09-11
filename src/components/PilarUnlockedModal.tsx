@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Trophy, ChevronRight, Sparkles, Star, Award } from 'lucide-react';
+import { VOC } from '../lib/vocabulario';
 
 export interface NivelAlcanzado {
   numero: 1 | 2 | 3 | 4 | 5;
@@ -214,7 +215,7 @@ export default function PilarUnlockedModal({
                   </div>
                   <p className="text-lg font-medium text-cream mb-1">{nivelAlcanzado.nombre}</p>
                   <p className="text-xs text-cream/75 leading-relaxed">
-                    {nivelAlcanzado.descripcion}
+                    {VOC(nivelAlcanzado.descripcion)}
                   </p>
                 </div>
               )}
@@ -291,7 +292,7 @@ export default function PilarUnlockedModal({
               {/* Dynamic message based on rating */}
               {ratingConfig && (
                 <div className="text-left mb-4 transition-all duration-300">
-                  <p className="text-sm font-semibold text-cream mb-1">{ratingConfig.titulo}</p>
+                  <p className="text-sm font-semibold text-cream mb-1">{VOC(ratingConfig.titulo)}</p>
                   <p className="text-sm text-cream/75 leading-relaxed mb-3">
                     {ratingConfig.mensaje}
                   </p>

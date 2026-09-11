@@ -3,6 +3,7 @@
  * Tres números por semana. Un diagnóstico. Una acción.
  */
 import React, { useState } from 'react';
+import { VOC } from '../lib/vocabulario';
 import {
   cadenaPara, metaSemanal, semanaActual, registrarSemana, ventasTotales,
   diagnosticar, META_PACIENTES,
@@ -66,7 +67,7 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
 
       {dx && (
         <div className={`mt-4 rounded-xl border px-4 py-3 ${dx.cuello === 'ninguno' ? 'border-success/30 bg-success/[0.05]' : 'border-gold/30 bg-gold/[0.05]'}`}>
-          <p className={`text-sm font-semibold ${dx.cuello === 'ninguno' ? 'text-success' : 'text-gold'}`}>{dx.titulo}</p>
+          <p className={`text-sm font-semibold ${dx.cuello === 'ninguno' ? 'text-success' : 'text-gold'}`}>{VOC(dx.titulo)}</p>
           <p className="text-xs text-cream/70 mt-1 leading-relaxed">{dx.detalle}</p>
           <p className="text-xs text-cream/85 mt-2 leading-relaxed"><strong>Esta semana:</strong> {dx.accion}</p>
         </div>

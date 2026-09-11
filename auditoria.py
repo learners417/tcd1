@@ -187,13 +187,25 @@ try:
 except Exception:
     _html = ''
 check('la app abre en el tema de la marca', 'data-theme="light"' in _html, '')
-_css = todo.get('src/index.css','')
+try:
+    _css = open('src/index.css', encoding='utf-8').read()
+except Exception:
+    _css = ''
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
 
 _bt = todo.get('src/components/BottomTabBar.tsx','')
 _ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt))
 _ids_sb = set(re.findall(r"id: '([a-z]+)', icon", todo.get('src/components/Sidebar.tsx','')))
 check('la barra de abajo y el menu lateral llevan a lo mismo', _ids_bt == _ids_sb, f'abajo {sorted(_ids_bt)} / lateral {sorted(_ids_sb)}')
+
+try:
+    _css = open('src/index.css', encoding='utf-8').read()
+except Exception:
+    _css = ''
+_i = _css.find('[data-theme="light"] {')
+_luz = _css[_i:_css.find('}', _i)] if _i >= 0 else ''
+_falta = [t for t in ['--color-ink','--color-cream','--color-panel','--color-gold'] if t not in _luz]
+check('el tema claro pisa los tokens de Tailwind, no solo los manuales', not _falta, str(_falta))
 
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f

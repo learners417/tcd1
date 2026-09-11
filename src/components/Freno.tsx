@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, Eye, ShieldAlert } from 'lucide-react';
 import { puedeSeguir, type Freno as FrenoDef } from '../lib/frenos';
+import { VOC } from '../lib/vocabulario';
 
 /**
  * EL DIÁLOGO QUE FRENA.
@@ -37,7 +38,7 @@ export default function Freno({
                 preguntar si está seguro no informa nada. */}
             <p className="text-base text-cream leading-snug"
               style={{ fontFamily: 'var(--font-display)' }}>
-              {freno.titulo}
+              {VOC(freno.titulo)}
             </p>
             <p className="text-sm text-cream/70 mt-2 leading-relaxed">{freno.detalle}</p>
             {freno.queda && (
