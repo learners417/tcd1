@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El camino · revisión integral</title>
+<style>
+:root{
+  --paper:#FBFAF7;--ink:#1A1815;--ink-soft:#585149;--rule:#E2DCD0;
+  --gold:#9A8249;--gold-dark:#7E6A3B;--gold-soft:#F6F1E4;
+  --tacha:#A6392E;--tilde:#3F6B4A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);
+  font-family:"Avenir Next","Nunito Sans",Avenir,"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:19px;line-height:1.5;padding:46px 20px 120px}
+.wrap{max-width:820px;margin:0 auto}
+
+header{margin-bottom:38px}
+.kicker{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:12px}
+h1{font-size:52px;line-height:1.04;font-weight:700;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--gold-dark)}
+.bajada{font-size:21px;color:var(--ink-soft);margin-top:16px;max-width:36em}
+
+.reloj{display:flex;flex-wrap:wrap;margin-top:26px;border:1px solid var(--rule);border-radius:18px;overflow:hidden;background:#fff}
+.reloj div{flex:1 1 140px;padding:18px 16px;border-right:1px solid var(--rule)}
+.reloj div:last-child{border-right:0}
+.reloj b{display:block;font-size:29px;font-weight:700;line-height:1.1}
+.reloj span{font-size:16px;color:var(--ink-soft)}
+
+.caja{margin:34px 0;border:1px solid var(--rule);border-radius:20px;background:#fff;padding:26px}
+.caja.oro{border-color:var(--gold);background:var(--gold-soft)}
+.caja h2{font-size:28px;margin-bottom:14px;line-height:1.2}
+.caja h3{font-size:21px;margin:20px 0 8px}
+.caja p{font-size:19px;color:var(--ink-soft);margin-bottom:12px}
+.caja p:last-child{margin-bottom:0}
+.caja b{color:var(--ink)}
+.caja.oro p b{color:var(--ink)}
+
+.riesgo{border-left:2px solid var(--tacha);padding:4px 0 4px 16px;margin:16px 0}
+.riesgo .rt{font-size:20px;font-weight:700;color:var(--tacha)}
+.riesgo p{margin:6px 0 0}
+.freno{margin-top:8px;font-size:18.5px;color:var(--tilde)}
+.freno b{color:var(--tilde)}
+
+.entrega{border-top:1px solid var(--rule);padding-top:16px;margin-top:18px}
+.entrega:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.entrega .et{font-size:22px;font-weight:700}
+.entrega .eu{font-size:17px;color:var(--gold);margin:2px 0 8px}
+.entrega p{font-size:18.5px}
+
+/* mes / semana */
+.mes{margin:62px 0 18px;padding-top:22px;border-top:1px solid var(--gold)}
+.mes .mn{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em}
+.mes .mt{font-size:34px;font-weight:700;line-height:1.15;margin-top:6px}
+.mes .md{font-size:19px;color:var(--ink-soft);margin-top:10px;max-width:36em}
+
+.sem{margin:34px 0 12px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule);padding-bottom:8px}
+.sem .sn{font-size:22px;font-weight:700;color:var(--gold-dark)}
+.sem .sh{font-size:17px;color:var(--ink-soft)}
+
+.d{background:#fff;border:1px solid var(--rule);border-radius:18px;padding:18px 20px;margin:12px 0}
+.d.larga{border-color:var(--gold);border-width:2px}
+.dh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.dn{font-size:17px;font-weight:700;color:var(--gold);min-width:56px}
+.dt{font-size:23px;font-weight:700;line-height:1.2;flex:1 1 200px}
+.dm{font-size:15px;color:var(--ink-soft);border:1px solid var(--rule);border-radius:20px;padding:2px 10px}
+.fila{margin-top:10px;font-size:18px;display:flex;gap:10px}
+.fila .k{color:var(--gold);font-variant:small-caps;letter-spacing:.05em;min-width:82px;flex:none;font-size:16px;padding-top:2px}
+.fila .v{color:var(--ink-soft)}
+.fila .v b{color:var(--ink)}
+.fila.ev .k{color:var(--tilde)}
+.fila.ev .v{color:var(--tilde)}
+.fila.ac .k{color:var(--tacha)}
+.fila.ac .v b{color:var(--tacha)}
+
+.cint{margin-top:12px;padding:12px 16px;border:1px solid var(--gold);border-radius:14px;background:var(--gold-soft);font-size:18.5px}
+.cint b{color:var(--gold-dark)}
+
+.campo{background:transparent;border:1px dashed var(--rule);border-radius:18px;padding:16px 20px;margin:12px 0}
+.campo .ct{font-size:19px;font-weight:700;color:var(--ink-soft)}
+.campo ul{list-style:none;margin-top:8px}
+.campo li{font-size:18px;color:var(--ink-soft);padding-left:18px;position:relative;margin-bottom:4px}
+.campo li::before{content:"";position:absolute;left:0;top:12px;width:8px;height:1px;background:var(--gold)}
+
+@media(max-width:640px){
+  body{font-size:18px;padding:30px 15px 90px}
+  h1{font-size:36px}
+  .mes .mt{font-size:27px}
+  .dt{font-size:21px}
+  .caja,.d,.campo{padding:17px 15px}
+  .fila{flex-direction:column;gap:2px}
+  .fila .k{padding-top:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Revisión integral · el camino completo</div>
+  <h1>Ochenta horas <em>en noventa días.</em></h1>
+  <p class="bajada">Día por día: qué mira, qué hace, qué acceso recibe, cuánto le lleva y qué evidencia entrega. Con las dos jornadas de rodaje, las tres entregas del sistema y los nueve cinturones.</p>
+
+  <div class="reloj">
+    <div><b>64</b><span>días con trabajo</span></div>
+    <div><b>45 min</b><span>la sesión típica</span></div>
+    <div><b>4</b><span>jornadas largas</span></div>
+    <div><b>9</b><span>evidencias de cinturón</span></div>
+  </div>
+</header>
+
+<!-- ═══ VEREDICTO ═══ -->
+<div class="caja oro">
+  <h2>El veredicto sobre los tiempos</h2>
+  <p><b>La promesa honesta es esta:</b> una sesión por día de lunes a viernes, entre treinta y noventa minutos, y cuatro jornadas largas avisadas con semanas de anticipación. Sábados y domingos, el dojo descansa. Eso da alrededor de ochenta horas repartidas en noventa días, y es una carga que un profesional con agenda llena sostiene.</p>
+  <p><b>Lo que no se puede prometer</b> es que todos los días sean iguales. Hay cuatro días que rompen el promedio y hay que nombrarlos desde la bienvenida, con fecha: el día que publica su página, el día que graba, el día que enciende y el día que carga su app. Si esos cuatro aparecen de sorpresa, abandona.</p>
+
+  <h3>Las cuatro jornadas largas</h3>
+  <p><b>Día 25 · su página.</b> Dos horas. <b>Día 27 · rodaje A.</b> Cuatro horas: el VSL, los tres anuncios y el video de preparación, todo del mismo día. <b>Día 51 y 52 · su app.</b> Cuatro horas entre cargar las etapas y el rodaje B. <b>Día 67 · su trimestre.</b> Hora y media para escribir las doce semanas.</p>
+
+  <h3>La aritmética de los diez</h3>
+  <p>Los diez no salen todos de la campaña, y decirlo cambia el resultado. <b>Tres a cinco salen de su propia cartera</b> entre las semanas 2 y 6: los que suben de precio y los que esos traen. <b>Cinco a siete salen del sistema</b> entre el día 45 y el 90, que son los días reales de campaña con datos.</p>
+  <p>Ese reparto es diseño del camino, no un promedio medido. El número propio aparece el día 33, cuando lee su tablero por primera vez: <b>desde ahí la aritmética deja de ser la nuestra y pasa a ser la suya.</b></p>
+</div>
+
+<!-- ═══ DÓNDE SE ROMPE ═══ -->
+<div class="caja">
+  <h2>Los cuatro lugares donde esto se rompe</h2>
+
+  <div class="riesgo">
+    <div class="rt">La semana 4 se convierte en un mes.</div>
+    <p>Circuito, decisión de tráfico, perfil, página y guion de VSL en cinco días. Es la semana más densa y es donde el perfeccionismo se disfraza de responsabilidad.</p>
+    <p class="freno"><b>Freno:</b> la página se publica el día 25 aunque esté fea, y el día 26 no empieza hasta que el enlace esté vivo. La app no abre el día 26 sin el enlace cargado.</p>
+  </div>
+
+  <div class="riesgo">
+    <div class="rt">El día de rodaje se posterga.</div>
+    <p>Es el único día que le pide exponerse en cámara, y el que más se corre de fecha con excusas razonables.</p>
+    <p class="freno"><b>Freno:</b> la fecha del rodaje se fija el día 19, con hora, y el día 26 entero es preproducción con la entrenadora de cámara. Se llega al rodaje con el guion leído en voz alta tres veces y el set ya armado.</p>
+  </div>
+
+  <div class="riesgo">
+    <div class="rt">Toca la campaña antes de los catorce días.</div>
+    <p>Al tercer día sin agendas va a querer cambiar algo. Es el momento donde la mayoría rompe su propio aprendizaje.</p>
+    <p class="freno"><b>Freno:</b> la sesión de escalar y apagar está bloqueada hasta el día 46. Y los días 34 a 45 tienen tarjeta de campo con tres acciones concretas, para que tenga dónde poner las manos.</p>
+  </div>
+
+  <div class="riesgo">
+    <div class="rt">El mes 3 queda vacío y abandona en el día 70.</div>
+    <p>Solo hay cuatro sesiones en treinta días. Eso es correcto: en el mes 3 vende, no aprende. Pero un camino sin nada que abrir se siente terminado.</p>
+    <p class="freno"><b>Freno:</b> el ciclo de la semana. Cinco tarjetas fijas que se repiten cada semana del mes 3, con su acción y su número. Está detallado abajo.</p>
+  </div>
+</div>
+
+<!-- ═══ ACCESOS ═══ -->
+<div class="caja">
+  <h2>Las tres entregas del sistema</h2>
+  <p>El sistema completo el día 1 es la forma más rápida de que se pierda adentro. <b>Se entrega por partes, y cada parte llega el día que la necesita.</b> La subcuenta existe desde el día 0; lo que se abre por etapas son los permisos.</p>
+
+  <div class="entrega">
+    <div class="et">Entrega 1 · día 9</div>
+    <div class="eu">Pagos y calendario</div>
+    <p>Se abre para que cobre a su cartera al precio nuevo. Dos módulos y nada más: pagos y calendarios. <b>Todavía no hay página, ni contactos, ni conversaciones.</b></p>
+  </div>
+
+  <div class="entrega">
+    <div class="et">Entrega 2 · día 22</div>
+    <div class="eu">Sitios, formularios y contactos</div>
+    <p>Se abre el día que entiende el circuito, para que tenga dónde poner la página, el video, el formulario y la agenda de dos pasos.</p>
+  </div>
+
+  <div class="entrega">
+    <div class="et">Entrega 3 · día 29</div>
+    <div class="eu">Conversaciones, automatizaciones, reportes y Meta</div>
+    <p>Lo último, y solo cuando ya hay algo que recibir. Acá entra el número nuevo de WhatsApp, la bandeja, las respuestas automáticas y la conexión con la cuenta publicitaria.</p>
+  </div>
+
+  <p style="margin-top:20px"><b>Regla del número:</b> el WhatsApp del sistema es un número nuevo, nunca el personal ni el del consultorio. Se compra el día 0 y se entrega conectado el día 29.</p>
+</div>
+
+<!-- ═══════════ DÍA 0 ═══════════ -->
+<div class="mes">
+  <div class="mn">Antes de empezar</div>
+  <div class="mt">Día 0 · la entrega técnica.</div>
+  <div class="md">Lo hace el equipo, no él. Tiene que estar cerrado antes de que vea la bienvenida.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 0</span><span class="dt">Entrega técnica y llamada de bienvenida</span><span class="dm">Lupe · 20 min con él</span></div>
+  <div class="fila"><span class="k">Se prepara</span><span class="v">Subcuenta creada en <b>sistema.tuclinica.digital</b> · número nuevo de WhatsApp comprado · usuario de la app del camino · usuario de Mi Clínica · carpeta de entregables · su ficha en el tablero interno</span></div>
+  <div class="fila"><span class="k">La llamada</span><span class="v">Veinte minutos: cómo entra, dónde entrega evidencias, cómo pide ayuda y en qué horario. <b>Nada de contenido.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Ingresó a la app y a Mi Clínica con su clave nueva</span></div>
+</div>
+
+<!-- ═══════════ MES 1 ═══════════ -->
+<div class="mes">
+  <div class="mn">Mes 1 · días 1 a 30</div>
+  <div class="mt">Ordenar, cobrar, construir y encender.</div>
+  <div class="md">El mes más cargado y el que decide si factura. Termina con campaña activa y con dinero nuevo ya cobrado.</div>
+</div>
+
+<div class="sem"><span class="sn">Semana 1</span><span class="sh">El punto de partida · 4 h 30</span></div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 1</span><span class="dt">Entrar y abrir el búnker</span><span class="dm">50 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>01</b> Bienvenida · 5 min · <b>02</b> El Búnker de Luz · 4 min</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-01 · Tu primer ingreso a la plataforma</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Elige su lugar y su hora fija. Escribe en el cuaderno por qué empezó. Firma el pacto y lo publica.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Foto del búnker armado y captura del pacto publicado</span></div>
+  <div class="cint"><b>Cinturón blanco</b> — entró, firmó y tiene dónde trabajar.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 2</span><span class="dt">Cargar su clínica</span><span class="dm">90 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>03</b> Tu clínica de hoy, adentro · 6 min</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-02 · Cargar consultantes, agenda y cobros en Mi Clínica</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Carga a todos sus consultantes activos, su agenda de la semana y los ingresos de los últimos tres meses. <b>Sin ordenar nada todavía: solo que todo entre.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura del panel con sus consultantes cargados</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 3</span><span class="dt">Su número</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>04</b> Tu hora real neta · 6 min · pizarra</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Con lo que cargó ayer: ingresos netos divididos por todas las horas, incluidas administración, mensajes y seguimientos. Escribe el número en el cuaderno y lo tapa.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El número, escrito a mano, fotografiado</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 4</span><span class="dt">Abrir el cuarto</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>05</b> Por qué el dinero se sana primero · 6 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe las tres frases sobre el dinero que escuchó en su casa antes de los doce años. Arranca el protocolo de siete días.</span></div>
+  <div class="fila ac"><span class="k">Carril</span><span class="v"><b>Del día 4 al 10 corre el protocolo en paralelo:</b> veinte minutos al final del día, además de la sesión</span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 5</span><span class="dt">El dinero en el cuerpo</span><span class="dm">60 min · solo audio</span></div>
+  <div class="fila"><span class="k">Escucha</span><span class="v"><b>06</b> El dinero en el cuerpo · 45 min · con los ojos cerrados</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Nada mientras escucha. Después, escribe lo que apareció, sin editarlo.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">La página del cuaderno, fotografiada</span></div>
+</div>
+
+<div class="campo">
+  <div class="ct">Días 6 y 7 · campo</div>
+  <ul>
+    <li>Ejercicios 2 y 3 del protocolo, veinte minutos cada uno</li>
+    <li>Terminar de cargar lo que quedó afuera de Mi Clínica</li>
+    <li>Nada más. El dojo descansa.</li>
+  </ul>
+</div>
+
+<div class="sem"><span class="sn">Semana 2</span><span class="sh">La transición y el precio · 5 h</span></div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 8</span><span class="dt">Los tres grupos</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>07</b> La transición de tu cartera · 8 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Sobre la lista que cargó el día 2, pone a cada persona en una de tres columnas: sube de precio, termina su proceso, se deriva. Con nombre y apellido.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Las tres columnas completas, con la cuenta de cada una</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 9</span><span class="dt">El precio nuevo y el link</span><span class="dm">75 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>08</b> Tu precio digno · 6 min · pizarra</span></div>
+  <div class="fila ac"><span class="k">Acceso</span><span class="v"><b>Entrega 1 del sistema</b> — pagos y calendario</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-03 · Tu link de pago · L-04 · Facturar y llevar la cuenta</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe el número nuevo y no lo toca más. Crea su link de pago con ese número.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El link de pago funcionando, probado por él</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 10</span><span class="dt">Los que suben</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Manda el mensaje del grupo uno. <b>Todos el mismo día</b>, no de a uno por semana.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Capturas de tres mensajes enviados</span></div>
+  <div class="cint"><b>Cinturón amarillo</b> — protocolo del dinero completo, su número a la vista y su cartera separada.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 11</span><span class="dt">Los que terminan y los que se derivan</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Mensaje del grupo dos con fecha de cierre escrita. Mensaje del grupo tres con nombre de colega, nunca con una lista.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Las fechas de cierre cargadas en su agenda de Mi Clínica</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 12</span><span class="dt">El primer cobro al precio nuevo</span><span class="dm">30 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>09</b> Tu primer cobro al precio nuevo · 4 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Cobra. Y escribe al lado del número quién viene después, para no bajarlo.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura del cobro</span></div>
+  <div class="cint"><b>Cinturón naranja</b> — cobró al precio nuevo antes de gastar un peso en publicidad.</div>
+</div>
+
+<div class="campo">
+  <div class="ct">Días 13 y 14 · campo</div>
+  <ul>
+    <li>Contestar a quienes respondieron los mensajes de la transición</li>
+    <li>Cerrar los cobros que quedaron en camino</li>
+    <li>Leer el manual La Clínica hasta CLI-1, que arranca el lunes</li>
+  </ul>
+</div>
+
+<div class="sem"><span class="sn">Semana 3</span><span class="sh">El programa · 4 h 15</span></div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 15</span><span class="dt">Tu método propio</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>10</b> Tu método propio · 6 min · pizarra · CLI-1</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe las etapas como camino y les pone nombre con siglas. Sale de lo que ya hace, no de lo que debería hacer.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su método con nombre y sus letras desarrolladas</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 16</span><span class="dt">La prueba del método</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>11</b> La prueba de tu método · 6 min · CLI-1B</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Pasa su método por los tres exámenes y lo corrige. Que se pueda medir, que el orden importe, que no sea un curso disfrazado.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Método corregido y enviado al Crítico</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 17</span><span class="dt">Tu oferta</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>12</b> La oferta que se vende sola · 7 min · pizarra · CLI-2</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Las cuatro cajas escritas: promesa con resultado, plazo, entregables que la persona recibe, y el precio, igual o mayor al que selló el día 9.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">La oferta en una sola página</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 18</span><span class="dt">Tu garantía</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>13</b> Tu garantía de extensión · 6 min · CLI-2B</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Garantía en una frase y los tres compromisos debajo, en la misma hoja de la oferta.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Garantía y compromisos escritos</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 19</span><span class="dt">Tu escalera · y la fecha del rodaje</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>14</b> Tu escalera de cinco niveles · 6 min · CLI-3</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Diseña cinco, marca el tercero. <b>Y agenda su día de rodaje con hora:</b> es el día 27 y se bloquea hoy en su calendario real.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Escalera completa y el bloque de rodaje agendado</span></div>
+  <div class="cint"><b>Cinturón verde</b> — tiene qué vender: método probado, oferta, garantía y escalera.</div>
+</div>
+
+<div class="sem"><span class="sn">Semana 4</span><span class="sh">Las piezas · 6 h 30 · la semana que se estira</span></div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 22</span><span class="dt">El circuito</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>15</b> Apertura del circuito · 1 min · <b>16</b> El circuito completo · 7 min</span></div>
+  <div class="fila ac"><span class="k">Acceso</span><span class="v"><b>Entrega 2 del sistema</b> — sitios, formularios y contactos</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Dibuja su propio circuito con las cinco piezas y marca cuáles ya tiene.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El circuito dibujado a mano</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 23</span><span class="dt">Frío o tibio</span><span class="dm">30 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>17</b> Frío o tibio — tu camino · 5 min · pizarra</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Cuenta su audiencia real: seguidores activos más contactos de consultantes pasados más lista de correo. Elige rama.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El número contado y la rama elegida</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 24</span><span class="dt">Su perfil, cuatro cosas</span><span class="dm">30 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>18</b> Tu perfil en veinte minutos · 3 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Foto legible en miniatura, nombre buscable, bio con su promesa, enlace a su página. <b>Y cierra.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura del perfil</span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 25</span><span class="dt">Su página, publicada</span><span class="dm">120 min · jornada larga</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>19</b> Crear tu página con Claude · 10 min</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-05 · Subir tu página · L-06 · Tu subdominio</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Página escrita, subida y publicada en su subdominio. Fea está bien. Publicada es obligatorio.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El enlace vivo, pegado en la app</span></div>
+  <div class="fila ac"><span class="k">Freno</span><span class="v"><b>El día 26 no abre sin este enlace cargado.</b></span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 26</span><span class="dt">Preproducción</span><span class="dm">90 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>20</b> Cómo se arma tu VSL · 8 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe el guion del VSL y los tres anuncios. Arma el set: lugar, luz, ropa, micrófono. <b>Sube fotos del lugar a la entrenadora de cámara y corrige lo que le marque.</b> Lee el guion en voz alta tres veces.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Guion escrito y foto del set armado</span></div>
+</div>
+
+<div class="sem"><span class="sn">Semana 5</span><span class="sh">Rodaje y encendido · 9 h · la semana más pesada</span></div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 27</span><span class="dt">Jornada de rodaje A</span><span class="dm">4 h · jornada larga</span></div>
+  <div class="fila"><span class="k">Graba</span><span class="v">El VSL · los tres anuncios · el video de la página de preparación</span></div>
+  <div class="fila"><span class="k">Orden</span><span class="v"><b>Los anuncios primero</b>, que son cortos y le calientan la voz. El VSL después, de corrido y sin leer, tres tomas. El de preparación al final, que es el más relajado.</span></div>
+  <div class="fila"><span class="k">Reglas</span><span class="v">Misma ropa todo el día · plano de pecho para arriba, cámara a la altura de los ojos · luz de ventana de costado, techo apagado · teléfono en modo avión sobre la mesa · número de pieza en voz alta y una palmada antes de cada toma · <b>tres tomas y se pasa a la siguiente</b></v></span></div>
+  <div class="fila ac"><span class="k">Lo que arruina el día</span><span class="v">Mirar las tomas mientras graba. <b>No se revisa nada hasta que termina todo.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Cinco archivos subidos a su carpeta</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 28</span><span class="dt">El filtro</span><span class="dm">90 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>21</b> Intro · antes del formulario · 90 seg</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-07 · Subir tu video a la página · L-08 · Tu formulario · L-09 · Tu calendario en dos pasos · L-10 · Tu página de preparación</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Sube el VSL a su página. Arma formulario, calendario y página de preparación. <b>Y se agenda a sí mismo, de punta a punta, desde el teléfono.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su propia agenda de prueba, completada y recibida</span></div>
+  <div class="cint"><b>Cinturón azul</b> — su circuito está vivo: página, video, formulario y agenda.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 29</span><span class="dt">Los cuatro de Meta</span><span class="dm">90 min</span></div>
+  <div class="fila ac"><span class="k">Acceso</span><span class="v"><b>Entrega 3 del sistema</b> — conversaciones, automatizaciones, reportes, y su número nuevo de WhatsApp conectado</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-11 a L-14 · página y perfil profesional · Business · cuenta publicitaria · pixel</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Pixel disparando en su página, verificado</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 30</span><span class="dt">Los tres anuncios listos</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Edita corto, pone subtítulos y sube los tres a la biblioteca. Sin música, sin intro, sin logo animado.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Los tres anuncios cargados</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 31</span><span class="dt">Encender</span><span class="dm">90 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>22</b> ENCIENDE · 7 min · pizarra · <b>23</b> Crear tu campaña en Meta · 7 min</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-15 · Evento de agenda calificada · L-16 · Público de retargeting</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Un conjunto, presupuesto entero, tres anuncios adentro, con el público de la rama que eligió el día 23.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura de la campaña activa con fecha y hora</span></div>
+  <div class="cint"><b>Cinturón violeta</b> — puso dinero. Desde hoy el negocio corre solo catorce días.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 33</span><span class="dt">Leer su tablero</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>24</b> Leer tu tablero · 8 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas, costo por agenda.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura de su tablero con las cuatro columnas</span></div>
+</div>
+
+<!-- ═══════════ MES 2 ═══════════ -->
+<div class="mes">
+  <div class="mn">Mes 2 · días 34 a 60</div>
+  <div class="mt">Vender, cobrar y entregar.</div>
+  <div class="md">Acá se define si repite. La campaña ya corre sola: el trabajo se muda a la llamada y a lo que pasa después del sí.</div>
+</div>
+
+<div class="campo">
+  <div class="ct">Días 34 a 45 · los catorce sin tocar</div>
+  <ul>
+    <li>Mirar el tablero una vez por día, dos minutos, sin cambiar nada</li>
+    <li>Contestar en menos de dos horas a cada agenda que entra</li>
+    <li>Seguir cerrando la transición de cartera que quedó abierta</li>
+  </ul>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 36</span><span class="dt">La llamada dibujada</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>25</b> Anatomía de la llamada — la W · 8 min · pizarra</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe su guion de llamada con el minuto del precio marcado.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su W completa, con sus preguntas</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 38</span><span class="dt">Antes de la llamada</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>26</b> La venta empieza en la agenda · 5 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe su mensaje previo y su criterio para cancelar a quien no califica.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">El mensaje previo escrito y cargado como plantilla</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 39</span><span class="dt">Grabar las llamadas</span><span class="dm">30 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>27</b> Intro · antes de grabar llamadas · 90 seg</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-17 · Grabar tus llamadas</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Grabación activada</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 42</span><span class="dt">La autopsia</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>28</b> La autopsia de tu llamada · 5 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escucha su primera llamada entera y anota los cuatro números.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Los cuatro números de su primera llamada</span></div>
+  <div class="cint"><b>Cinturón marrón</b> — está teniendo llamadas del sistema y las está midiendo.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 44</span><span class="dt">Su recuperador</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>29</b> Tu recuperador · 5 min</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-18 · Tu bandeja y tu embudo · L-19 · Respuestas automáticas</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Bandeja con sus conversaciones clasificadas</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 45</span><span class="dt">Su primer consultante nuevo</span><span class="dm">30 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>30</b> Tu primer consultante nuevo · 5 min</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura del cobro y la fecha anotada</span></div>
+  <div class="cint"><b>Cinturón rojo</b> — alguien que no lo conocía le pagó su precio digno.</div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 46</span><span class="dt">Escalar o apagar</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>31</b> Cuándo escalar y cuándo apagar · 7 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Primera decisión sobre la campaña, catorce días después. <b>Y vuelve a esta sesión cada lunes del mes 3.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">La decisión escrita con su costo por agenda al lado</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 47</span><span class="dt">La cinta</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>32</b> Entregar sin quemarte — la cinta · 7 min · CLI-4</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Parte su programa en dos columnas: lo que va grabado y lo que va en vivo.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Las dos columnas</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 48</span><span class="dt">El alta</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>33</b> El alta — siete pasos y tres límites · 6 min · CLI-5</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe su mensaje de bienvenida y sus tres límites.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Mensaje y límites escritos</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 50</span><span class="dt">Su app con su marca</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>34</b> Tu app con tu marca · 5 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Carga su marca: nombre, color, logo. Nada más.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura de su app con su marca arriba</span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 51</span><span class="dt">Sus etapas</span><span class="dm">90 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>35</b> Traer tu método y armar tus etapas · 7 min</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Trae su protocolo con un botón, lo revisa, y arma <b>cuatro semanas, no doce.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Cuatro etapas cargadas con lo que desbloquea cada una</span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 52</span><span class="dt">Jornada de rodaje B</span><span class="dm">3 h · jornada larga</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>36</b> Subir tus videos y materiales · 6 min</span></div>
+  <div class="fila"><span class="k">Graba</span><span class="v">Los videos de sus cuatro primeras etapas. <b>Solo lo que ya repite cuarenta veces por semana</b>, nunca lo que le parece lindo.</span></div>
+  <div class="fila"><span class="k">Reglas</span><span class="v">Grabación de pantalla o cámara del teléfono · uno por etapa · entre tres y siete minutos cada uno · <b>una sola toma por video</b>, porque esto lo ve alguien que ya le pagó y no necesita perfección</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Cuatro videos subidos y asignados a su etapa</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 53</span><span class="dt">Invitar al primero</span><span class="dm">60 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>37</b> Invitar a tu primer consultante · 6 min · CLI-6</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v"><b>La compra de prueba:</b> se compra a sí mismo desde el teléfono con una tarjeta real. Recién después invita.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Captura desde el celular de su consultante, adentro</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 55</span><span class="dt">La máquina de 10</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>38</b> Apertura · 1 min · <b>39</b> La máquina de 10 por mes · 6 min · pizarra</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe su cadena en números y la traduce a lo que tiene que pasar cada semana.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su cadena con sus propios números del tablero</span></div>
+</div>
+
+<!-- ═══════════ MES 3 ═══════════ -->
+<div class="mes">
+  <div class="mn">Mes 3 · días 61 a 90</div>
+  <div class="mt">Repetir, y el puente.</div>
+  <div class="md">Cuatro sesiones en treinta días, y un ciclo semanal que se repite. En el mes 3 vende, no aprende.</div>
+</div>
+
+<div class="caja">
+  <h2>El ciclo de la semana</h2>
+  <p>Las cinco tarjetas que se repiten cada semana del mes 3. Se tildan igual que una sesión, y cada una pide un número.</p>
+  <p><b>Lunes · los números.</b> Costo por agenda de la semana pasada, y la decisión de escalar, sostener o apagar.</p>
+  <p><b>Martes · las llamadas.</b> Las de la semana, con su W adelante.</p>
+  <p><b>Miércoles · el recuperador.</b> Volver sobre quienes dijeron que no y a quienes les tocaba fecha.</p>
+  <p><b>Jueves · la entrega.</b> Sus consultantes adentro de su app, y una estación nueva grabada si hace falta.</p>
+  <p><b>Viernes · la autopsia.</b> Una llamada escuchada, cuatro números anotados.</p>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 61</span><span class="dt">Por qué la marca va última</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>40</b> Por qué la marca va última · 6 min · montaña</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Saca sus tres enfoques de la Matriz ABC.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Los tres enfoques escritos</span></div>
+</div>
+
+<div class="d larga">
+  <div class="dh"><span class="dn">Día 67</span><span class="dt">Las doce semanas escritas</span><span class="dm">90 min · jornada larga</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>41</b> Las doce semanas escritas · 5 min · pizarra</span></div>
+  <div class="fila"><span class="k">Tutorial</span><span class="v">L-20 · Grabar y editar con el celular · L-21 · Programar tu contenido del mes</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe las doce semanas completas. <b>No graba nada todavía: eso es del programa que sigue.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su plan trimestral, doce semanas con sus ganchos</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 87</span><span class="dt">Su foto de llegada</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>42</b> Tu foto de llegada · 2 min · montaña</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Contesta las mismas preguntas del día 3 y recalcula su hora real neta con los datos de Mi Clínica. <b>Recién después destapa el número del día 3.</b></span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Los dos números, lado a lado</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 88</span><span class="dt">Qué sigue</span><span class="dm">45 min</span></div>
+  <div class="fila"><span class="k">Mira</span><span class="v"><b>43</b> Qué sigue — a Desafío Matrix · 7 min · lago</span></div>
+  <div class="fila"><span class="k">Hace</span><span class="v">Escribe su plan de 180 días. Se lo lleva lo tome o no lo tome.</span></div>
+  <div class="fila ev"><span class="k">Evidencia</span><span class="v">Su plan de 180 escrito</span></div>
+</div>
+
+<div class="d">
+  <div class="dh"><span class="dn">Día 90</span><span class="dt">El cierre</span><span class="dm">—</span></div>
+  <div class="cint"><b>Cinturón negro</b> — diez consultantes a su precio digno, con su sistema andando y su método adentro de su app. Nadie se lo regaló.</div>
+</div>
+
+<!-- ═══ CINTURONES ═══ -->
+<div class="caja oro">
+  <h2>Los nueve cinturones y su evidencia exacta</h2>
+  <p><b>Blanco · día 1.</b> Foto del búnker y captura del pacto publicado.</p>
+  <p><b>Amarillo · día 10.</b> Protocolo del dinero completo y su hora real neta escrita.</p>
+  <p><b>Naranja · día 12.</b> Captura del primer cobro al precio nuevo.</p>
+  <p><b>Verde · día 19.</b> Método aprobado, oferta, garantía con compromisos y escalera.</p>
+  <p><b>Azul · día 28.</b> Su propia agenda de prueba, completada de punta a punta.</p>
+  <p><b>Violeta · día 31.</b> Campaña activa, con fecha y hora.</p>
+  <p><b>Marrón · día 42.</b> Los cuatro números de su primera llamada del sistema.</p>
+  <p><b>Rojo · día 45.</b> Cobro de alguien que no lo conocía treinta días atrás.</p>
+  <p><b>Negro · día 90.</b> Diez consultantes a su precio digno.</p>
+  <p style="margin-top:18px">Ninguna de las nueve se valida con una tarea tildada. <b>Las nueve piden una captura, una foto o un número.</b> Esa es la diferencia entre un camino y un curso.</p>
+</div>
+
+</div>
+</body>
+</html>
