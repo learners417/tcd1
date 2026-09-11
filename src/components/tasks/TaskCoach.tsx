@@ -12,6 +12,7 @@ import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import TaskChecklist from './TaskChecklist';
 import BotonAudio from '../sesion/BotonAudio';
+import { VOC } from '../../lib/vocabulario';
 
 interface TaskCoachProps {
   meta: RoadmapMeta;
@@ -108,14 +109,14 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
           )}
         </div>
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          {meta.titulo}
+          {VOC(meta.titulo)}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
-              title={`Tutorial: ${meta.titulo}`}
+              title={`Tutorial: ${VOC(meta.titulo)}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 w-full h-full"
@@ -151,7 +152,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {playerAbierto && guionVivo && (
           <SesionGuiadaPlayer
             codigo={meta.codigo}
-            titulo={meta.titulo}
+            titulo={VOC(meta.titulo)}
             onClose={() => setPlayerAbierto(false)}
             onFinish={(texto) => {
               setNota(texto);
@@ -203,7 +204,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
             <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
               {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
             </p>
-            <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            <p className="text-sm text-cream/75 leading-relaxed mb-3">{VOC(meta.evidencia_requerida.descripcion)}</p>
             {!isCompleted && (
               <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidencias > 0 ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-gold text-black hover:bg-goldhi'}`}>
                 {subiendo ? 'Subiendo…' : evidencias > 0 ? `✓ ${evidencias} subida${evidencias > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}

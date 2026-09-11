@@ -394,7 +394,7 @@ export type MetaCodigo =
   | 'P2.6' | 'P2.6'
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
-  | 'P3.4b'
+  | 'P3.4b' | 'P3.7'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
   | 'P4.1' | 'P4.2' | 'P4.2b'
   | 'P4.2c'
@@ -419,13 +419,12 @@ export type MetaCodigo =
   | 'P10.1' | 'P10.2' | 'P10.3'
   // P11 · Análisis (sin cambios)
   | 'P11.1' | 'P11.2'
-  | 'P3.5'
   | 'P3.6'
   | 'P4.3b'
   | 'P4.3c'
   | 'P4.3d'
-  | 'P4.5b'
-  | 'P5.5'
+  | 'P4.5b' | 'P4.2e' | 'P4.3e' | 'P4.9'
+  | 'P5.5' | 'P5.6'
   | 'P6.4';
 
 /** @deprecated Usar MetaCodigo (V3). Mantener para migración de datos existentes. */

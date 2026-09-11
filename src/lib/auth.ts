@@ -1,4 +1,5 @@
 import { supabase, isSupabaseReady, type Profile } from './supabase';
+import { setFamiliaActual } from './vocabulario';
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
@@ -90,6 +91,10 @@ export function syncProfileToLocalStorage(profile: Profile): void {
   // que autocompleta desde el ADN (el Constructor de anuncios, entre otras)
   // lee undefined y muestra un formulario vacio aunque el cliente lo haya
   // sellado. El id va tambien: lo necesita el cobro de creditos.
+  // El Camino se escribe con tokens: aqui se fija con que palabra se leen.
+  // Un coach no tiene pacientes; un entrenador tampoco.
+  setFamiliaActual(profile.especialidad);
+
   const v2 = profile as unknown as Record<string, unknown>;
   localStorage.setItem('tcd_profile', JSON.stringify({
     id: profile.id,

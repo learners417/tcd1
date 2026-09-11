@@ -133,6 +133,32 @@ for f, src in todo.items():
         if pal in src: restos.append(f.split('/')[-1] + ':' + pal)
 check('sin restos del sistema de anuncios viejo', not restos, str(sorted(set(restos))[:6]))
 
+# ─── Cirugía 1 y 2: el embudo y el vocabulario no vuelven atrás ───
+seed_txt = todo.get('src/lib/roadmapSeed.ts','')
+tuto_txt = todo.get('src/lib/tutorialesTecnicos.ts','')
+_emb = [p for p in ['costo por mensaje','mensajes más baratos','compras lo barato','llave de tu campaña']
+        if p in seed_txt or p in tuto_txt]
+check('el camino ensena UN solo embudo (VSL, no mensajes)', not _emb, str(_emb))
+
+_voc = []
+for _f in ['src/lib/roadmapSeed.ts','src/lib/herramientas.ts','src/lib/sesionesGuiadas.ts']:
+    for _m in re.finditer(r'(?i)\bpacientes?\b', todo.get(_f,'')):
+        _ctx = todo[_f][max(0,_m.start()-3):_m.end()+3]
+        if '{{' not in _ctx and '_' not in _ctx:
+            _voc.append(_f.split('/')[-1])
+check('ningun "paciente" escrito a mano en el contenido', not _voc, str(sorted(set(_voc))))
+
+_rub = todo.get('src/lib/rubricas.ts','')
+_criticas = ['P3.2','P1.5','P4.2','P4.3e','P4.2e','P5.2','P3.7']
+_sin = [c for c in _criticas if f"codigo: '{c}'" not in _rub]
+check('las 7 piezas que deciden la venta tienen rubrica', not _sin, str(_sin))
+
+_pb = todo.get('src/lib/perfilBloqueo.ts','')
+_perf = ['sabe_demasiado','da_todo','quemado','ya_pago','recien_empieza']
+_falt = [p for p in _perf if f"'{p}'" not in _pb and f"  {p}:" not in _pb]
+check('los 5 perfiles de bloqueo tienen registro', not _falt, str(_falt))
+check('el Mentor lee el perfil de bloqueo', 'bloqueMentor' in todo.get('src/lib/coachPrompt.ts',''), '')
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

@@ -15,6 +15,7 @@ import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funne
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
 import { primero } from './primero';
+import { calcularPerfil, bloqueMentor, type PerfilBloqueo } from './perfilBloqueo';
 
 /** Estado REAL de los entrenadores según el pilar más alto completado (rediseño 4 fases). */
 function estadoEntrenadores(pilarActual: number): string {
@@ -226,12 +227,24 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
   // ─── La voz de Javo: estilo consentido + idioma de fe (T3) ─────────────────
   let estiloMentor: 'hueso' | 'guantes' = 'hueso';
   let conFe = false;
+  let perfilBloqueo: PerfilBloqueo = 'recien_empieza';
   try {
     const dxLocal = (perfil as { diagnostico?: Record<string, unknown> }).diagnostico ?? {};
     const e = (dxLocal['estilo_mentor'] as string) || localStorage.getItem('tcd_estilo_mentor') || 'hueso';
     const f = (dxLocal['trabajo_espiritual'] as string) || localStorage.getItem('tcd_fe') || 'no';
     estiloMentor = e === 'guantes' ? 'guantes' : 'hueso';
     conFe = f === 'si';
+    // El registro no es solo dureza: el que sabe demasiado necesita espejo y
+    // el quemado necesita brevedad. Dos ejes, no uno.
+    perfilBloqueo = calcularPerfil({
+      anos_atendiendo: Number(dxLocal['anos_atendiendo']) || null,
+      horas_semana: Number(dxLocal['horas_semana']) || null,
+      agenda_llena: dxLocal['agenda_llena'] === true || dxLocal['agenda_llena'] === 'si',
+      formacion_negocios: dxLocal['formacion_negocios'] === true || dxLocal['formacion_negocios'] === 'si',
+      invirtio_antes_sin_resultado: dxLocal['inversion_previa_sin_resultado'] === true,
+      personas_mes: Number(dxLocal['personas_mes']) || null,
+      precio_sesion: Number(dxLocal['precio_sesion']) || null,
+    });
   } catch { /* noop */ }
 
   // ─── Compromisos de la última Sesión Viva — el Mentor los recuerda ─────────
@@ -252,6 +265,7 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
   const estiloBloque = estiloMentor === 'hueso'
     ? `\nESTILO CONSENTIDO — DIRECTO AL HUESO: este sanador te pidió que no le endulces nada. Puedes decirle "te estás haciendo el tonto/a", nombrar la evasión sin anestesia, y confrontar de frente. El amor está en el fondo; la forma es filosa.`
     : `\nESTILO CONSENTIDO — CON GUANTES: este sanador te pidió firmeza suave. Confrontá igual (la evasión se nombra SIEMPRE) pero sin frases punzantes tipo "te haces el tonto". Firme en el qué, suave en el cómo.`;
+  const registroBloque = `\n${bloqueMentor(perfilBloqueo)}`;
   const feBloque = conFe
     ? `\nIDIOMA ESPIRITUAL — ACTIVADO: este sanador vive la fe como parte de su camino. Puedes hablar de Dios, de la oración, de la gratitud como plegaria, del propósito como mandato divino, de que "esto no se logra sin Dios". Regalar el propio don es incumplir el mandato ("perlas a los cerdos"). La gratitud cierra lo que el trabajo abre.`
     : `\nIDIOMA ESPIRITUAL — NEUTRO: este sanador prefirió lenguaje neutro. NO menciones a Dios ni la oración. La gratitud, el propósito y el cierre de procesos se trabajan igual, en lenguaje secular (gratitud como práctica, propósito como misión).`;
@@ -295,6 +309,7 @@ TUS LEYES (las repites sin cansarte — la repetición es el método):
 TUS FRASES (úsalas cuando el momento las pida, con naturalidad):
 "Bienvenido/a al vértigo." · "Wake up." · "Te estás haciendo el tonto / la tonta con esto" (solo en modo directo). · "Eso parece luz pero es sombra: te distrae." · "De frente, no de costado." · "¿Quieres el durazno? Bancate la pelusa." · "Se llora, se libera, y se sigue."
 ${estiloBloque}
+${registroBloque}
 ${feBloque}
 ═══ FIN DE TU VOZ ═══
 
@@ -373,7 +388,7 @@ Conoces su ADN completo (campos completados con herramientas IA), sus métricas 
     const alertas = diagnosticos.filter(d => d.nivel === 'alerta');
     EMBUDO_SECTION = `
 === MÉTRICAS DEL EMBUDO (última semana) ===
-Gasto ads: $${ctx.metricasEmbudoV2.gasto_ads} | Mensajes: ${ctx.metricasEmbudoV2.mensajes_recibidos} | Formularios: ${ctx.metricasEmbudoV2.formularios_completados}
+Gasto ads: $${ctx.metricasEmbudoV2.gasto_ads} | Visitas a la página: ${ctx.metricasEmbudoV2.mensajes_recibidos} | Formularios: ${ctx.metricasEmbudoV2.formularios_completados}
 Agendados: ${ctx.metricasEmbudoV2.agendados} | Shows: ${ctx.metricasEmbudoV2.shows} | Llamadas: ${ctx.metricasEmbudoV2.llamadas_tomadas}
 Ventas: ${ctx.metricasEmbudoV2.ventas_cerradas} | Ingresos: $${ctx.metricasEmbudoV2.ingresos_cobrados} | Horas/sem: ${ctx.metricasEmbudoV2.horas_trabajadas_semana}
 KPIs: Tasa cierre=${kpis.tasa_cierre !== null ? (kpis.tasa_cierre * 100).toFixed(1) + '%' : '—'} | CPV=${kpis.cpv !== null ? '$' + kpis.cpv.toFixed(0) : '—'} | PHR=${kpis.phr !== null ? '$' + kpis.phr.toFixed(0) : '—'}

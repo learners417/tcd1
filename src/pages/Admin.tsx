@@ -2857,7 +2857,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 <div key={i} className="p-5 rounded-2xl bg-panel border border-gold/10 flex items-center justify-between mb-3">
                                   <span className="text-sm font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
                                   <div className="flex gap-8">
-                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-sm text-cream/55 font-bold uppercase">leads</p></div>
+                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-sm text-cream/55 font-bold uppercase">visitas</p></div>
                                     <div className="text-center"><p className="text-cream text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-sm text-cream/55 font-bold uppercase">llamadas</p></div>
                                     <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-sm text-success/50 font-bold uppercase">ventas</p></div>
                                   </div>

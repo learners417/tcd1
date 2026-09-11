@@ -8,8 +8,10 @@ import type { MetricaSemanaV2 } from './supabase';
 // ─── 8 KPIs calculados ─────────────────────────────────────────────────────
 
 export interface FunnelKPIs {
-  costo_por_mensaje: number | null;
-  pct_dm_formulario: number | null;
+  /** Costo por visita a la página. El campo de datos sigue llamándose mensajes_recibidos
+   *  por compatibilidad con las semanas ya cargadas: hoy guarda VISITAS A LA PÁGINA. */
+  costo_por_visita: number | null;
+  pct_visita_formulario: number | null;
   pct_formulario_agenda: number | null;
   pct_show: number | null;
   tasa_cierre: number | null;
@@ -21,8 +23,8 @@ export interface FunnelKPIs {
 export function calcularFunnelKPIs(m: MetricaSemanaV2, ticketPromedio?: number): FunnelKPIs {
   const safe = (num: number, den: number) => den > 0 ? num / den : null;
 
-  const costo_por_mensaje = safe(m.gasto_ads, m.mensajes_recibidos);
-  const pct_dm_formulario = safe(m.formularios_completados, m.mensajes_recibidos);
+  const costo_por_visita = safe(m.gasto_ads, m.mensajes_recibidos);
+  const pct_visita_formulario = safe(m.formularios_completados, m.mensajes_recibidos);
   const pct_formulario_agenda = safe(m.agendados, m.formularios_completados);
   const pct_show = safe(m.shows, m.agendados);
   const tasa_cierre = safe(m.ventas_cerradas, m.llamadas_tomadas);
@@ -33,8 +35,8 @@ export function calcularFunnelKPIs(m: MetricaSemanaV2, ticketPromedio?: number):
   const proyeccion_mensual = m.ventas_cerradas * 4.33 * ticket;
 
   return {
-    costo_por_mensaje,
-    pct_dm_formulario,
+    costo_por_visita,
+    pct_visita_formulario,
     pct_formulario_agenda,
     pct_show,
     tasa_cierre,
@@ -60,37 +62,37 @@ export interface Diagnostico {
 export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
   const diagnosticos: Diagnostico[] = [];
 
-  // 1. Costo por mensaje
-  if (kpis.costo_por_mensaje !== null) {
+  // 1. Costo por visita a tu página
+  if (kpis.costo_por_visita !== null) {
     const nivel: DiagnosticoNivel =
-      kpis.costo_por_mensaje <= 1.5 ? 'ok' :
-      kpis.costo_por_mensaje <= 3 ? 'alerta' : 'critico';
+      kpis.costo_por_visita <= 1.2 ? 'ok' :
+      kpis.costo_por_visita <= 2.5 ? 'alerta' : 'critico';
     diagnosticos.push({
-      etapa: 'Costo por Mensaje',
-      mensaje: nivel === 'ok' ? 'Buen costo de adquisición de mensajes'
-        : nivel === 'alerta' ? 'El costo por mensaje está subiendo. Revisa tus creativos.'
-        : 'Costo por mensaje muy alto. Pausa y revisa la segmentación.',
+      etapa: 'Costo por visita a tu página',
+      mensaje: nivel === 'ok' ? 'Tu anuncio está trayendo personas a buen costo'
+        : nivel === 'alerta' ? 'Te está costando más caro traer a cada persona. El problema está en el anuncio, no en la página.'
+        : 'Muy caro traer a cada persona. Revisa el gancho de tus 3 anuncios antes de tocar el presupuesto.',
       nivel,
-      valor: kpis.costo_por_mensaje,
-      umbral_ok: 1.5,
-      umbral_alerta: 3,
+      valor: kpis.costo_por_visita,
+      umbral_ok: 1.2,
+      umbral_alerta: 2.5,
     });
   }
 
-  // 2. DM → Formulario
-  if (kpis.pct_dm_formulario !== null) {
-    const pct = kpis.pct_dm_formulario * 100;
+  // 2. Visita → Formulario
+  if (kpis.pct_visita_formulario !== null) {
+    const pct = kpis.pct_visita_formulario * 100;
     const nivel: DiagnosticoNivel =
-      pct >= 40 ? 'ok' : pct >= 20 ? 'alerta' : 'critico';
+      pct >= 8 ? 'ok' : pct >= 3 ? 'alerta' : 'critico';
     diagnosticos.push({
-      etapa: 'DM → Formulario',
-      mensaje: nivel === 'ok' ? 'Buena conversión de mensajes a formularios'
-        : nivel === 'alerta' ? 'Pocos completan el formulario. Revisa el copy del mensaje automático.'
-        : 'Muy pocos pasan a formulario. El mensaje inicial no engancha.',
+      etapa: 'Visita → Formulario',
+      mensaje: nivel === 'ok' ? 'Tu página y tu video están haciendo su trabajo'
+        : nivel === 'alerta' ? 'Entran y no completan. El problema está en tu video o en tu oferta, no en el anuncio.'
+        : 'Casi nadie completa. Mira los primeros 30 segundos de tu video: ahí se están yendo.',
       nivel,
       valor: pct,
-      umbral_ok: 40,
-      umbral_alerta: 20,
+      umbral_ok: 8,
+      umbral_alerta: 3,
     });
   }
 
@@ -240,7 +242,7 @@ export interface EmbudoV3KPIs {
   costo_por_lead: number | null;
   phr: number | null; // ingresos / horas
   posts_totales: number;
-  pct_dm_formulario: number | null; // %
+  pct_visita_formulario: number | null; // %
   proyeccion_mes: number | null;
   // KPIs clave adicionales
   ticket_promedio: number | null;      // ingresos / ventas
@@ -274,7 +276,7 @@ export function calcularEmbudoV3KPIs(m: MetricaSemanaV2): EmbudoV3KPIs {
   const pct_show = pct(m.shows, m.agendados);
   const costo_por_lead = safe(m.gasto_ads, m.mensajes_recibidos);
   const phr = safe(m.ingresos_cobrados, m.horas_trabajadas_semana);
-  const pct_dm_formulario = pct(m.formularios_completados, m.mensajes_recibidos);
+  const pct_visita_formulario = pct(m.formularios_completados, m.mensajes_recibidos);
 
   const dias = diasDelPeriodo(m);
   const proyeccion_mes = dias > 0 ? m.ingresos_cobrados * (30 / dias) : null;
@@ -292,7 +294,7 @@ export function calcularEmbudoV3KPIs(m: MetricaSemanaV2): EmbudoV3KPIs {
     costo_por_lead,
     phr,
     posts_totales: totalPosts,
-    pct_dm_formulario,
+    pct_visita_formulario,
     proyeccion_mes,
     ticket_promedio,
     cpv,

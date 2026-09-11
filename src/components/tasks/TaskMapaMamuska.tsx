@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Grid3X3, CheckCircle2, Save, Plus, Trash2, AlertCircle } from 'lucide-react';
 import type { AdnMapeoObstaculos, ProfileV2 } from '../../lib/supabase';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import { VOC } from '../../lib/vocabulario';
 
 type MamuskaFila = Required<Pick<AdnMapeoObstaculos, 'obstaculo' | 'paso_metodo'>> &
   Pick<AdnMapeoObstaculos, 'oferta' | 'nivel_conciencia' | 'nota'>;
@@ -183,9 +184,9 @@ export default function TaskMapaMamuska({
           className="text-lg font-medium text-cream"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
         >
-          {meta.titulo}
+          {VOC(meta.titulo)}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
       </div>
 
       {gaps.length > 0 && (

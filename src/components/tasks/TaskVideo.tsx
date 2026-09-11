@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { getGuion } from '../../lib/guionesVideos';
 import { Play, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import { VOC } from '../../lib/vocabulario';
 
 interface TaskVideoProps {
   meta: RoadmapMeta;
@@ -40,9 +41,9 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
           )}
         </div>
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          {meta.titulo}
+          {VOC(meta.titulo)}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
         <TutorialTecnicoBox codigo={meta.codigo} />
       </div>
 
@@ -51,7 +52,7 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
         {videoId ? (
           <iframe
             src={getYoutubeEmbedUrl(videoId)}
-            title={meta.titulo}
+            title={VOC(meta.titulo)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 w-full h-full"

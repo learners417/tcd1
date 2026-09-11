@@ -48,7 +48,7 @@ const CANDADOS: Candado[] = [
     accion: 'anuncios' },
   { id: 'palabra', titulo: 'Tu PALABRA configurada y PROBADA',
     detalle: 'Comentaste desde otra cuenta y te llegó el mensaje. Si no la probaste, no está lista.',
-    sesion: 'Tu PALABRA — la llave de tu campaña' },
+    sesion: 'Tu PALABRA — tu recuperador' },
   { id: 'dm', titulo: 'Tu DM con su pregunta + el seguimiento',
     detalle: 'La respuesta automática entra en menos de un minuto y hace UNA sola pregunta.',
     tutorial: 'P4.5-dm', sesion: 'Tu DM automático — el link y UNA pregunta' },

@@ -130,7 +130,7 @@ export function armarPaquete(f: FuentesPaquete): Paquete {
     id: 'palabra',
     titulo: 'Tu palabra clave',
     contenido: palabra,
-    donde: 'Se define en la sesión «Tu PALABRA — la llave de tu campaña».',
+    donde: 'Se define en la sesión «Tu PALABRA — tu recuperador».',
     obligatoria: true,
     estado: palabra ? 'listo' : 'falta',
     aviso: palabra ? undefined : 'Es lo que dispara el mensaje automático cuando alguien comenta.',

@@ -433,7 +433,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
             {!sinAds && (
               <>
                 <NumField label="Gasto en ads ($)" prefix="$" value={vals.gasto_ads || ''} onChange={(v) => setVal('gasto_ads', v)} />
-                <NumField label="Mensajes / leads" value={vals.mensajes_recibidos || ''} onChange={(v) => setVal('mensajes_recibidos', v)} />
+                <NumField label="Visitas a tu página" value={vals.mensajes_recibidos || ''} onChange={(v) => setVal('mensajes_recibidos', v)} />
                 <NumField label="Formularios completados" value={vals.formularios_completados || ''} onChange={(v) => setVal('formularios_completados', v)} />
                 <NumField label="Llamadas agendadas" value={vals.agendados || ''} onChange={(v) => setVal('agendados', v)} />
                 <NumField label="Shows (se presentaron)" value={vals.shows || ''} onChange={(v) => setVal('shows', v)} />
@@ -460,7 +460,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
             <KPICard label="Proyección mes" value={kpis.proyeccion_mes !== null ? formatCurrency(kpis.proyeccion_mes) : '—'} highlight />
             <KPICard label="Posts totales" value={String(kpis.posts_totales)} />
             <KPICard label="Posts / día" value={kpis.posts_por_dia !== null ? kpis.posts_por_dia.toFixed(1) : '—'} />
-            <KPICard label="% DM→Formulario" value={formatPct(kpis.pct_dm_formulario)} />
+            <KPICard label="% Visita→Formulario" value={formatPct(kpis.pct_visita_formulario)} />
             <KPICard label="% Formulario→Agenda" value={formatPct(kpis.pct_formulario_agenda)} />
           </div>
         </div>

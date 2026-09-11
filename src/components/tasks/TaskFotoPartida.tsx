@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { Camera, CheckCircle2, Save } from 'lucide-react';
 import { DIMENSIONES_FOTO_PARTIDA } from '../../lib/adnSchema';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
+import { VOC } from '../../lib/vocabulario';
 
 interface TaskFotoPartidaProps {
   meta: RoadmapMeta;
@@ -117,9 +118,9 @@ export default function TaskFotoPartida({
           className="text-lg font-medium text-cream"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
         >
-          {meta.titulo}
+          {VOC(meta.titulo)}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
       </div>
 
       <div className="card-panel p-5 border border-gold/15 bg-gold/[0.03]">

@@ -20,6 +20,10 @@ import TaskChecklist from './TaskChecklist';
 import { generateText } from '../../lib/aiProvider';
 import { toast } from 'sonner';
 import Markdown from 'react-markdown';
+import { VOC } from '../../lib/vocabulario';
+import VeredictoCriticoPanel from '../VeredictoCriticoPanel';
+import { puedeAvanzar } from '../../lib/criticoRubrica';
+import type { VeredictoRubrica } from '../../lib/criticoRubrica';
 
 /**
  * Fallback v8 · construye un prompt genérico cuando la herramienta de la tarea
@@ -44,10 +48,10 @@ function buildPromptGenerico(meta: RoadmapMeta, perfil: Partial<ProfileV2>): str
 
   return `Genera el output requerido para esta tarea del programa de 90 días para sanadores.
 
-TAREA: ${meta.codigo} · ${meta.titulo}
+TAREA: ${meta.codigo} · ${VOC(meta.titulo)}
 
 DESCRIPCIÓN / INSTRUCCIONES:
-${meta.descripcion}
+${VOC(meta.descripcion)}
 
 CONTEXTO DEL PROFESIONAL (su ADN):
 ${contexto || '(ADN aún incompleto · genera algo útil con la información disponible)'}
@@ -153,6 +157,7 @@ export default function TaskHerramientaIA({
   const [modo, setModo] = useState<Modo>(
     isCompleted && outputExistente ? 'guardado' : 'form'
   );
+  const [veredicto, setVeredicto] = useState<VeredictoRubrica | null>(null);
   // ── S9: el Constructor (opciones → bloques → revisión → sello) ──
   const [opciones, setOpciones] = React.useState<FaseOpcion[]>([]);
   const [eleccion, setEleccion] = React.useState<FaseOpcion | null>(null);
@@ -417,15 +422,15 @@ export default function TaskHerramientaIA({
           )}
         </div>
         <h3 className="text-lg font-medium text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-          {meta.titulo}
+          {VOC(meta.titulo)}
         </h3>
-        <p className="text-sm text-cream/75 mt-1">{meta.descripcion}</p>
+        <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
         <TutorialTecnicoBox codigo={meta.codigo} />
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
-              title={`Tutorial: ${meta.titulo}`}
+              title={`Tutorial: ${VOC(meta.titulo)}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 w-full h-full"
@@ -437,7 +442,7 @@ export default function TaskHerramientaIA({
             <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
               {evidCount > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida para completar'}
             </p>
-            <p className="text-sm text-cream/75 leading-relaxed mb-3">{meta.evidencia_requerida.descripcion}</p>
+            <p className="text-sm text-cream/75 leading-relaxed mb-3">{VOC(meta.evidencia_requerida.descripcion)}</p>
             {!isCompleted && (
               <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${evidCount > 0 ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-gold text-black hover:bg-goldhi'}`}>
                 {evidSubiendo ? 'Subiendo…' : evidCount > 0 ? `✓ ${evidCount} subida${evidCount > 1 ? 's' : ''} · agregar otra` : 'Subir mi evidencia'}
@@ -645,12 +650,22 @@ export default function TaskHerramientaIA({
               ))}
             </div>
           </div>
+          <VeredictoCriticoPanel
+            codigo={meta.codigo}
+            texto={bloques.map((b) => `${b.titulo}: ${b.contenido}`).join('\n\n')}
+            onVeredicto={setVeredicto}
+          />
           <div className="rounded-xl border border-gold/40 bg-gold/[0.06] px-4 py-3">
             <p className="text-xs text-cream/85"><strong className="text-gold">Revísalo bien.</strong> Al grabar en tu ADN, queda grabado — sobre esto se construye todo lo que sigue.</p>
           </div>
           <div className="flex gap-3">
             <button type="button" onClick={() => setModo('bloques')} className="px-4 py-3 rounded-xl text-xs font-bold text-cream/55 hover:text-cream">← Volver a ajustar</button>
-            <button type="button" onClick={sellarADN} className="flex-1 btn-primary py-3.5 rounded-xl text-sm font-bold">🧬 GRABAR EN MI ADN</button>
+            <button
+              type="button"
+              onClick={sellarADN}
+              disabled={!puedeAvanzar(meta.codigo, veredicto)}
+              className="flex-1 btn-primary py-3.5 rounded-xl text-sm font-bold disabled:opacity-40"
+            >🧬 GRABAR EN MI ADN</button>
           </div>
         </div>
       )}
