@@ -18,7 +18,7 @@ function readStoredTheme(): Theme {
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
     if (saved === 'light' || saved === 'dark') return saved;
   } catch { /* noop */ }
-  return 'dark';
+  return 'light';
 }
 
 function writeStoredTheme(theme: Theme): void {
@@ -32,14 +32,16 @@ function applyToRoot(theme: Theme): void {
 }
 
 function clearFromRoot(): void {
-  document.documentElement.removeAttribute('data-theme');
+  // V5: el cliente vive en claro, igual que la landing de la que viene.
+  // Al salir del Admin no se vuelve a oscuro: se vuelve al tema de la marca.
+  document.documentElement.setAttribute('data-theme', 'light');
 }
 
 /**
  * Hook for views that opt in to the theme system (currently only Admin).
  * - Persists the chosen theme in localStorage.
  * - Sets `data-theme` on <html> while the view is mounted.
- * - Clears `data-theme` on unmount so other views remain dark.
+ * - Al desmontar vuelve al claro de la marca, no a oscuro.
  */
 export function useAdminTheme(): [Theme, (next: Theme) => void] {
   const [theme, setTheme] = useState<Theme>(() => readStoredTheme());

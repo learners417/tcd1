@@ -182,6 +182,19 @@ check('el menu tiene 5 destinos o menos', 0 < _nitems <= 5, f'{_nitems} items')
 _viejos = [l for l in ['El Camino','Mi ADN','Lo que sigue','El Metodo','El Método','Entrenadores IA'] if f"label: '{l}'" in _sb]
 check('los nombres siguen el sistema Tu/Tus', not _viejos, str(_viejos))
 
+try:
+    _html = open('index.html', encoding='utf-8').read()
+except Exception:
+    _html = ''
+check('la app abre en el tema de la marca', 'data-theme="light"' in _html, '')
+_css = todo.get('src/index.css','')
+check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
+
+_bt = todo.get('src/components/BottomTabBar.tsx','')
+_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt))
+_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", todo.get('src/components/Sidebar.tsx','')))
+check('la barra de abajo y el menu lateral llevan a lo mismo', _ids_bt == _ids_sb, f'abajo {sorted(_ids_bt)} / lateral {sorted(_ids_sb)}')
+
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',

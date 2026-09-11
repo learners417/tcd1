@@ -243,38 +243,39 @@ h1, h2, h3 {
 }
 
 /* ─── Light theme overrides ─────────────────────────────────────────
-   Activated via [data-theme="light"] on <html>. Currently used only
-   in the admin view — see src/lib/theme.ts. The selectors target the
+   V5: repintado a la paleta de la marca — crema, tinta calida y oro mate.
+   Es el tema POR DEFECTO del cliente: viene de una landing en crema y
+   aterriza en la app; que cambie de mundo al entrar rompe la promesa. The selectors target the
    hardcoded Tailwind arbitrary-value classes that fill Admin.tsx so we
    can flip the palette without rewriting thousands of lines of JSX.
 
    Strategy:
-   - Light palette in the surface scale: #F3F5F8 (root) / #F2EFE9 (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
-   - Text scale: #0F172A primary, rgba(15,23,42,X) for opacity variants.
+   - Light palette in the surface scale: #FAF5EA (root) / #FFFDF7 (cards) / #F5EFE1 (surface2) / #F3EAD6 (hover).
+   - Text scale: #2A2118 primary, rgba(42,33,24,X) for opacity variants.
    - Gold accent stays #E8962E for fills (gold-on-anything works) but
-     gold-as-text drops to #B45309 (amber-700) for AA contrast on white.
+     gold-as-text drops to #8E6824 (amber-700) for AA contrast on white.
    - Borders bump alpha so they read on white.
    - Hover variants (`hover:`, `group-hover:`) get their own selectors
      so row/card hover feedback still works in light mode.
 */
 [data-theme="light"] {
-  --bg-root: #E8ECF1;
-  --bg-card: #F2EFE9;
-  --bg-surface2: #EAEDF2;
-  --accent-gold: #D97706;
-  --accent-gold-hover: #B45309;
-  --text-cream: #0F172A;
-  --text-muted: rgba(15, 23, 42, 0.7);
-  --border-gold: rgba(217, 119, 6, 0.4);
-  --border-gold-strong: rgba(217, 119, 6, 0.65);
+  --bg-root: #FAF5EA;
+  --bg-card: #FFFDF7;
+  --bg-surface2: #F5EFE1;
+  --accent-gold: #B0822E;
+  --accent-gold-hover: #8E6824;
+  --text-cream: #2A2118;
+  --text-muted: rgba(42, 33, 24, 0.7);
+  --border-gold: rgba(176, 130, 46, 0.4);
+  --border-gold-strong: rgba(176, 130, 46, 0.65);
 
-  --matrix-section-divider: rgba(217, 119, 6, 0.2);
-  --matrix-cell-divider: rgba(15, 23, 42, 0.06);
-  --matrix-row-divider: rgba(15, 23, 42, 0.08);
-  --matrix-header-text: rgba(15, 23, 42, 0.78);
-  --matrix-subtitle-text: rgba(15, 23, 42, 0.6);
-  --matrix-pct-text: rgba(15, 23, 42, 0.72);
-  --matrix-checkbox-off: rgba(15, 23, 42, 0.28);
+  --matrix-section-divider: rgba(176, 130, 46, 0.2);
+  --matrix-cell-divider: rgba(42, 33, 24, 0.06);
+  --matrix-row-divider: rgba(42, 33, 24, 0.08);
+  --matrix-header-text: rgba(42, 33, 24, 0.78);
+  --matrix-subtitle-text: rgba(42, 33, 24, 0.6);
+  --matrix-pct-text: rgba(42, 33, 24, 0.72);
+  --matrix-checkbox-off: rgba(42, 33, 24, 0.28);
 
   color-scheme: light;
 }
@@ -287,56 +288,56 @@ h1, h2, h3 {
 }
 
 /* ── Surface hierarchy ────────────────────────────────────────────
-   Body (root)        → #E8ECF1 (slate-100ish)
-   Sidebar/columns    → #F2EFE9   (sticky, max contrast against body)
-   Panel wrappers     → #F8FAFC   (subtle slate-50 — sits between body and cards)
-   Cards/popovers     → #F2EFE9   (pop on panel)
-   Surface2 (settings sidebar etc.) → #EEF1F5
+   Body (root)        → #FAF5EA (slate-100ish)
+   Sidebar/columns    → #FFFDF7   (sticky, max contrast against body)
+   Panel wrappers     → #FFFDF7   (subtle slate-50 — sits between body and cards)
+   Cards/popovers     → #FFFDF7   (pop on panel)
+   Surface2 (settings sidebar etc.) → #F5EFE1
 */
-[data-theme="light"] .bg-\[\#080808\]    { background-color: #E8ECF1 !important; }
-[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #F2EFE9 !important; }
+[data-theme="light"] .bg-\[\#080808\]    { background-color: #FAF5EA !important; }
+[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #FFFDF7 !important; }
 [data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
-[data-theme="light"] .bg-\[\#111110\]    { background-color: #F8FAFC !important; }
+[data-theme="light"] .bg-\[\#111110\]    { background-color: #FFFDF7 !important; }
 [data-theme="light"] .bg-\[\#111110\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
-[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #F5EFE1 !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/20 { background-color: rgba(232, 150, 46, 0.06) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/30 { background-color: rgba(232, 150, 46, 0.09) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
-[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #F5EFE1 !important; }
 
 /* ── Surface backgrounds — Tailwind standard `white` token ───────── */
-[data-theme="light"] .bg-white\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-white\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .bg-white\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .bg-white\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .bg-white\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
 
 /* ── Surface backgrounds — rgba shorthand variants ───────────────── */
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(42, 33, 24, 0.04) !important; }
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(42, 33, 24, 0.05) !important; }
 
 /* ── Hover-variant backgrounds — restore feedback in light mode ──── */
-[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #F5EFE1 !important; }
 [data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
 [data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFDF7\]\/5:hover     { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFDF7\]\/10:hover    { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #F5EFE1 !important; }
 
 /* ── Light scrim overlays inside content (not modal backdrops) ───── */
-[data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .bg-black\/20 { background-color: rgba(42, 33, 24, 0.04) !important; }
+[data-theme="light"] .bg-black\/30 { background-color: rgba(42, 33, 24, 0.06) !important; }
+[data-theme="light"] .bg-black\/40 { background-color: rgba(42, 33, 24, 0.08) !important; }
 /* Modal scrims (bg-black/60/70/80) stay dark intentionally so modals
    keep clear separation from the page underneath. */
 
 /* ── White-on-content overlays → invert to dark overlays ─────────── */
-[data-theme="light"] .bg-\[\#F2EFE9\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/8  { background-color: rgba(42, 33, 24, 0.06) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
 
 /* ── Text scale ─────────────────────────────────────────────────────
    White-on-dark and slate-on-light are not symmetric perceptually:
@@ -345,90 +346,90 @@ h1, h2, h3 {
    `/60` on white becomes ~0.6 slate, not 0.72. This keeps icons and
    muted UI feeling soft instead of stamped. Mid range still hits AA.
 */
-[data-theme="light"] .text-white       { color: #0F172A !important; }
-[data-theme="light"] .text-white\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-white\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-white\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-white\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-white\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-white\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-white\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+[data-theme="light"] .text-white       { color: #2A2118 !important; }
+[data-theme="light"] .text-white\/90   { color: rgba(42, 33, 24, 0.9) !important; }
+[data-theme="light"] .text-white\/80   { color: rgba(42, 33, 24, 0.82) !important; }
+[data-theme="light"] .text-white\/70   { color: rgba(42, 33, 24, 0.72) !important; }
+[data-theme="light"] .text-white\/60   { color: rgba(42, 33, 24, 0.62) !important; }
+[data-theme="light"] .text-white\/50   { color: rgba(42, 33, 24, 0.58) !important; }
+[data-theme="light"] .text-white\/40   { color: rgba(42, 33, 24, 0.55) !important; }
+[data-theme="light"] .text-white\/30   { color: rgba(42, 33, 24, 0.48) !important; }
 
-[data-theme="light"] .text-\[\#F2EFE9\]       { color: #0F172A !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]       { color: #2A2118 !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/90   { color: rgba(42, 33, 24, 0.9) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/85   { color: rgba(42, 33, 24, 0.86) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/80   { color: rgba(42, 33, 24, 0.82) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/70   { color: rgba(42, 33, 24, 0.72) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/65   { color: rgba(42, 33, 24, 0.68) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/60   { color: rgba(42, 33, 24, 0.62) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/55   { color: rgba(42, 33, 24, 0.6) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/50   { color: rgba(42, 33, 24, 0.58) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/45   { color: rgba(42, 33, 24, 0.56) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/40   { color: rgba(42, 33, 24, 0.55) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/30   { color: rgba(42, 33, 24, 0.48) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/25   { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/20   { color: rgba(42, 33, 24, 0.4) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/15   { color: rgba(42, 33, 24, 0.36) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/5    { color: rgba(42, 33, 24, 0.22) !important; }
 
 /* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-\[\#F2EFE9\]:hover     { color: #0F172A !important; }
-[data-theme="light"] .hover\:text-white:hover            { color: #0F172A !important; }
-[data-theme="light"] .group:hover .group-hover\:text-\[\#F2EFE9\] { color: #0F172A !important; }
+[data-theme="light"] .hover\:text-\[\#FFFDF7\]:hover     { color: #2A2118 !important; }
+[data-theme="light"] .hover\:text-white:hover            { color: #2A2118 !important; }
+[data-theme="light"] .group:hover .group-hover\:text-\[\#FFFDF7\] { color: #2A2118 !important; }
 
 /* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/50::placeholder { color: rgba(42, 33, 24, 0.6) !important; }
+[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
 
 /* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
 [data-theme="light"] .text-\[\#E8962E\] { color: #8E6824 !important; }
 [data-theme="light"] .text-\[\#B0822E\] { color: #8E6824 !important; }
 
 /* ── Gold borders — bump alpha so they remain visible on white ───── */
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(217, 119, 6, 0.3) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(217, 119, 6, 0.32) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(217, 119, 6, 0.38) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(217, 119, 6, 0.42) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(217, 119, 6, 0.5) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(217, 119, 6, 0.6) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(217, 119, 6, 0.7) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(176, 130, 46, 0.28) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(176, 130, 46, 0.3) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(176, 130, 46, 0.32) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(176, 130, 46, 0.38) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(176, 130, 46, 0.42) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(176, 130, 46, 0.5) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(176, 130, 46, 0.6) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(176, 130, 46, 0.7) !important; }
 
 /* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-\[\#F2EFE9\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-white\/5           { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-white\/10          { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-white\/20          { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(15, 23, 42, 0.1) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(15, 23, 42, 0.22) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/5    { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/10   { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/20   { border-color: rgba(42, 33, 24, 0.18) !important; }
+[data-theme="light"] .border-white\/5           { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-white\/10          { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-white\/20          { border-color: rgba(42, 33, 24, 0.18) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(42, 33, 24, 0.1) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(42, 33, 24, 0.22) !important; }
 
 /* ── Inline-style fallback ───────────────────────────────────────────
-   React serializes `color: '#F2EFE9'` to `color: rgb(255, 255, 255)`
+   React serializes `color: '#FFFDF7'` to `color: rgb(255, 255, 255)`
    in the DOM style attribute, so we match both forms.            */
-[data-theme="light"] [style*="color: #F2EFE9"],
-[data-theme="light"] [style*="color:#F2EFE9"],
+[data-theme="light"] [style*="color: #FFFDF7"],
+[data-theme="light"] [style*="color:#FFFDF7"],
 [data-theme="light"] [style*="color: rgb(255, 255, 255)"],
 [data-theme="light"] [style*="color:rgb(255,255,255)"] {
-  color: #0F172A !important;
+  color: #2A2118 !important;
 }
 
 /* ── Shadow — soften the heavy black shadows on white surfaces ───── */
 [data-theme="light"] .shadow-2xl {
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 12px 40px rgba(42, 33, 24, 0.12), 0 4px 16px rgba(42, 33, 24, 0.08) !important;
 }
 [data-theme="light"] .shadow-xl {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 0 8px 24px rgba(42, 33, 24, 0.1), 0 2px 8px rgba(42, 33, 24, 0.06) !important;
 }
 [data-theme="light"] .shadow-black\/50 {
-  --tw-shadow-color: rgba(15, 23, 42, 0.15) !important;
+  --tw-shadow-color: rgba(42, 33, 24, 0.15) !important;
 }
 
 /* ── Tailwind Typography `prose-invert` ──────────────────────────────
@@ -439,22 +440,22 @@ h1, h2, h3 {
    etc.) keeps readable contrast without changing the className.
 */
 [data-theme="light"] .prose-invert {
-  --tw-prose-invert-body: #0F172A;
-  --tw-prose-invert-headings: #0F172A;
-  --tw-prose-invert-lead: rgba(15, 23, 42, 0.78);
-  --tw-prose-invert-links: #B45309;
-  --tw-prose-invert-bold: #0F172A;
-  --tw-prose-invert-counters: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-bullets: rgba(15, 23, 42, 0.4);
-  --tw-prose-invert-hr: rgba(15, 23, 42, 0.15);
-  --tw-prose-invert-quotes: rgba(15, 23, 42, 0.85);
-  --tw-prose-invert-quote-borders: rgba(217, 119, 6, 0.4);
-  --tw-prose-invert-captions: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-code: #0F172A;
-  --tw-prose-invert-pre-code: #0F172A;
-  --tw-prose-invert-pre-bg: rgba(15, 23, 42, 0.05);
-  --tw-prose-invert-th-borders: rgba(15, 23, 42, 0.2);
-  --tw-prose-invert-td-borders: rgba(15, 23, 42, 0.1);
+  --tw-prose-invert-body: #2A2118;
+  --tw-prose-invert-headings: #2A2118;
+  --tw-prose-invert-lead: rgba(42, 33, 24, 0.78);
+  --tw-prose-invert-links: #8E6824;
+  --tw-prose-invert-bold: #2A2118;
+  --tw-prose-invert-counters: rgba(42, 33, 24, 0.6);
+  --tw-prose-invert-bullets: rgba(42, 33, 24, 0.4);
+  --tw-prose-invert-hr: rgba(42, 33, 24, 0.15);
+  --tw-prose-invert-quotes: rgba(42, 33, 24, 0.85);
+  --tw-prose-invert-quote-borders: rgba(176, 130, 46, 0.4);
+  --tw-prose-invert-captions: rgba(42, 33, 24, 0.6);
+  --tw-prose-invert-code: #2A2118;
+  --tw-prose-invert-pre-code: #2A2118;
+  --tw-prose-invert-pre-bg: rgba(42, 33, 24, 0.05);
+  --tw-prose-invert-th-borders: rgba(42, 33, 24, 0.2);
+  --tw-prose-invert-td-borders: rgba(42, 33, 24, 0.1);
 }
 
 
