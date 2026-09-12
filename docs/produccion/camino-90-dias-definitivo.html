@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El camino · versión definitiva</title>
+<style>
+:root{
+  --paper:#FBFAF7;
+  --ink:#1A1815;
+  --ink-soft:#585149;
+  --rule:#E2DCD0;
+  --gold:#9A8249;
+  --gold-dark:#7E6A3B;
+  --gold-soft:#F6F1E4;
+  --tacha:#A6392E;
+  --tilde:#3F6B4A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:"Avenir Next","Nunito Sans",Avenir,"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:19px;line-height:1.5;padding:46px 20px 120px;
+}
+.wrap{max-width:800px;margin:0 auto}
+
+header{margin-bottom:40px}
+.kicker{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:12px}
+h1{font-size:52px;line-height:1.04;font-weight:700;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--gold-dark)}
+.bajada{font-size:21px;color:var(--ink-soft);margin-top:16px;max-width:36em}
+
+/* cambios */
+.cambios{margin:34px 0 10px;border:1px solid var(--gold);border-radius:20px;background:var(--gold-soft);padding:26px}
+.cambios h2{font-size:26px;margin-bottom:16px}
+.cambios .c{margin-bottom:18px;font-size:19px;line-height:1.5}
+.cambios .c:last-child{margin-bottom:0}
+.cambios .c b{display:block;font-size:21px;margin-bottom:4px}
+
+/* bifurcación */
+.dos{margin:34px 0;border:1px solid var(--rule);border-radius:20px;background:#fff;padding:26px}
+.dos h2{font-size:28px;margin-bottom:8px}
+.dos .preg{font-size:21px;color:var(--ink);margin:14px 0 18px;padding-left:16px;border-left:2px solid var(--gold)}
+.via{border-top:1px solid var(--rule);padding-top:16px;margin-top:16px}
+.via .vt{font-size:22px;font-weight:700}
+.via .vu{font-size:17px;color:var(--gold);margin:2px 0 8px}
+.via p{font-size:18.5px;color:var(--ink-soft)}
+.via p b{color:var(--ink)}
+.fija{margin-top:20px;padding:16px 18px;border:1px solid var(--gold);border-radius:14px;font-size:19px}
+
+/* sistemas */
+.sis{margin:60px 0 20px;padding-top:22px;border-top:1px solid var(--gold)}
+.sis .sn{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em}
+.sis .st{font-size:34px;font-weight:700;line-height:1.15;margin-top:6px}
+.sis .sd{font-size:19px;color:var(--ink-soft);margin-top:10px;max-width:36em}
+
+.sem{margin:32px 0 14px;font-size:21px;color:var(--gold-dark);font-weight:700;border-bottom:1px solid var(--rule);padding-bottom:8px}
+
+.p{background:#fff;border:1px solid var(--rule);border-radius:20px;padding:20px 22px;margin:14px 0}
+.ph{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.dia{font-size:17px;color:var(--gold);font-weight:700;min-width:58px}
+.pt{font-size:25px;font-weight:700;line-height:1.2;flex:1 1 220px}
+.est{font-size:14px;letter-spacing:.08em;font-variant:small-caps;border-radius:20px;padding:2px 10px;border:1px solid}
+.e-n{color:var(--tacha);border-color:var(--tacha)}
+.e-r{color:var(--gold-dark);border-color:var(--gold)}
+.e-m{color:var(--tilde);border-color:var(--tilde)}
+.meta{font-size:16.5px;color:var(--ink-soft);margin-top:8px}
+.meta b{color:var(--gold-dark)}
+.p p.q{font-size:18.5px;color:var(--ink-soft);margin-top:10px}
+.p p.q b{color:var(--ink)}
+.p .lupe{margin-top:10px;font-size:17px;color:var(--ink-soft);padding-left:14px;border-left:1px dotted var(--gold)}
+.p.sella{border-color:var(--gold)}
+.sellado{margin-top:10px;font-size:17px;color:var(--gold-dark);font-weight:700}
+
+.cierre{margin-top:56px;padding:26px;border:1px solid var(--gold);border-radius:20px;background:var(--gold-soft)}
+.cierre h2{font-size:26px;margin-bottom:12px}
+.cierre p{font-size:19px;color:var(--ink-soft);margin-bottom:10px}
+.cierre p:last-child{margin-bottom:0}
+.cierre b{color:var(--ink)}
+
+@media(max-width:640px){
+  body{font-size:18px;padding:30px 15px 90px}
+  h1{font-size:37px}
+  .sis .st{font-size:28px}
+  .pt{font-size:22px}
+  .p,.dos,.cambios{padding:18px 16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">El camino · versión definitiva para grabar</div>
+  <h1>Su clínica se ordena <em>el día dos.</em></h1>
+  <p class="bajada">El recorrido completo de los noventa días, reordenado. Cuarenta y dos piezas tuyas, cada una con su día, su set, su duración y su estado. Esto es lo que se graba. Lo que no está acá, no se graba.</p>
+</header>
+
+<div class="cambios">
+  <h2>Los cuatro cambios</h2>
+  <div class="c"><b>Mi Clínica entra el día 2, no el día 45.</b> Carga sus pacientes actuales, su agenda y sus números reales en la primera semana. Sin eso, arranca a construir con la cabeza ocupada en el desorden que ya tiene.</div>
+  <div class="c"><b>La primera plata sale de su propia cartera, no de la pauta.</b> La transición de cartera y la subida de precio se mueven del día 18 a la semana 2. Cobra al precio nuevo antes de poner un peso en publicidad, y esa plata financia la campaña.</div>
+  <div class="c"><b>El embudo se bifurca por audiencia, no por gusto.</b> Una sola pregunta con número decide si arranca por frío o por tibio. La página, el video y el formulario son los mismos en los dos casos.</div>
+  <div class="c"><b>El perfil se achica a cuatro cosas.</b> Tres minutos de video, veinte minutos de trabajo. Todo lo demás de redes vive en el mes 3 y solo como plan escrito.</div>
+</div>
+
+<div class="dos">
+  <h2>Los dos caminos</h2>
+  <p class="preg">¿Cuántas personas pueden recibir hoy un mensaje tuyo y saber quién eres? Súmalas: seguidores activos, contactos de WhatsApp de consultantes que ya pasaron por ti, y tu lista de correo si tienes.</p>
+
+  <div class="via">
+    <div class="vt">Menos de quinientas</div>
+    <div class="vu">Camino frío</div>
+    <p>Anuncio a público amplio, sin intereses. Un solo conjunto, presupuesto entero adentro, catorce días sin tocar. El anuncio hace todo el filtro. <b>Es el único camino cuando todavía no hay nadie a quien volver.</b></p>
+  </div>
+
+  <div class="via">
+    <div class="vt">Quinientas o más</div>
+    <div class="vu">Camino tibio</div>
+    <p>Los primeros catorce días, el presupuesto va a quien ya lo sigue y a quien ya vio sus videos, más un mensaje directo a sus contactos. Convierte más barato y le valida la oferta antes de pagar por que lo descubran. <b>Recién el día 15, con datos propios, abre el conjunto frío.</b></p>
+  </div>
+
+  <div class="fija">Lo que no cambia en ninguno de los dos: una página, un video, un formulario, un calendario. Lo único que cambia es a quién se le muestra el anuncio.</div>
+</div>
+
+<!-- ═════════ SISTEMA 1 ═════════ -->
+<div class="sis">
+  <div class="sn">Sistema 1 · Tú</div>
+  <div class="st">El director y su consultorio.</div>
+  <div class="sd">Semanas 1 y 2. Sale del día 1 con su clínica cargada y sale del día 12 con dinero nuevo entrando, sin haber gastado un peso en publicidad.</div>
+</div>
+
+<div class="sem">Semana 1 · el punto de partida</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 1</span><span class="pt">Bienvenida: de profesional a director</span><span class="est e-n">regrabar de cero</span></div>
+  <div class="meta"><b>P0.0</b> · montaña · 5 min · Manual El Liderazgo</div>
+  <p class="q">El dojo, los cinturones, el cuaderno y la garantía en una frase. <b>Los cinco sistemas nombrados uno por uno.</b> Y la promesa nueva: hoy mismo empieza a ordenar lo que ya tiene. Fuera la frase de los cuarenta y cinco minutos por día y fuera las siete etapas.</p>
+  <div class="lupe">L-01 · Tu primer ingreso a la plataforma</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 1</span><span class="pt">El Búnker de Luz</span><span class="est e-n">regrabar</span></div>
+  <div class="meta"><b>P0.3</b> · oficina · 4 min · Manual El Liderazgo</div>
+  <p class="q">Hoy vive metido adentro del video de la app y dura treinta segundos. Va solo, con la rama para quien no es de rituales.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 2</span><span class="pt">Tu clínica de hoy, adentro</span><span class="est e-n">nuevo</span></div>
+  <div class="meta">pantalla · 6 min · reemplaza «Cómo usar tu app»</div>
+  <p class="q">Las dos llaves en sesenta segundos: el camino y Mi Clínica. Después, lo que importa: <b>por qué carga hoy a sus consultantes actuales y no dentro de cuarenta días.</b> Cuando todo lo que hoy tiene disperso entra a un solo lugar, la cabeza se le libera para construir. Cierra con el pacto público.</p>
+  <div class="lupe">L-02 · Cargar consultantes, agenda y cobros en Mi Clínica</div>
+  <div class="sellado">Sella: tu clínica cargada</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 3</span><span class="pt">Tu hora real neta</span><span class="est e-n">nuevo</span></div>
+  <div class="meta">pizarra · 6 min · sella tu Foto de partida</div>
+  <p class="q">El número, dibujado: ingresos netos divididos por todas las horas que trabaja, incluidos WhatsApp, administración y seguimientos. <b>Con los datos que acaba de cargar ayer, le sale en dos minutos.</b> Ese número es la foto de partida y es el que va a volver a mirar el día 87.</p>
+  <div class="sellado">Sella: tu Foto de partida</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 4</span><span class="pt">Por qué el dinero se sana primero</span><span class="est e-m">se mantiene</span></div>
+  <div class="meta"><b>P1.1</b> · oficina · 6 min · Manual El Liderazgo</div>
+  <p class="q">El guion sirve entero. Se regraba por escenario y para nombrar el manual. <b>Recorte:</b> la autobiografía baja a dos frases y sale la lista de herramientas. Los tres sabotajes quedan tal cual, y ahora caen mejor porque ayer vio su número.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 5</span><span class="pt">El dinero en el cuerpo</span><span class="est e-m">existe</span></div>
+  <div class="meta"><b>P1.4</b> · solo voz · 45 min · guion en el repositorio</div>
+  <p class="q">Se graba, no se escribe. Abre el protocolo de siete días.</p>
+</div>
+
+<div class="sem">Semana 2 · la transición y el precio</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 8</span><span class="pt">La transición de tu cartera</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P3.7</b> · oficina · 8 min · sella tu Transición · <b>era el día 18</b></div>
+  <p class="q">Los tres grupos, con nombre y apellido, sobre la lista que cargó el día 2. Quienes suben de precio, quienes terminan su proceso, quienes se derivan. <b>Y los tres mensajes dichos enteros en cámara</b>, uno por grupo. Que esto no es abandonar a nadie: es darles un final.</p>
+  <div class="sellado">Sella: tu Transición</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 9</span><span class="pt">Tu precio digno</span><span class="est e-n">nuevo</span></div>
+  <div class="meta">pizarra · 6 min · sella tu Precio</div>
+  <p class="q">Cómo se sube el precio a quien ya está adentro: con cuánta anticipación se avisa, qué cambia a cambio, y por qué no se pide permiso. El número se escribe hoy y no se toca más. <b>De acá salen las primeras ventas del camino, semanas antes de la primera campaña.</b></p>
+  <div class="lupe">L-03 · Tu link de pago · L-04 · Facturar y llevar la cuenta</div>
+  <div class="sellado">Sella: tu Precio</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 12</span><span class="pt">Tu primer cobro al precio nuevo</span><span class="est e-n">nuevo</span></div>
+  <div class="meta">oficina · 4 min · cinturón amarillo</div>
+  <p class="q">Corto y bajo. Alguien que ya lo conocía aceptó el número nuevo. Eso es la primera prueba y llega el día 12, no el 44. <b>La advertencia: el que viene después no entra más barato.</b></p>
+</div>
+
+<!-- ═════════ SISTEMA 2 ═════════ -->
+<div class="sis">
+  <div class="sn">Sistema 2 · Tu programa</div>
+  <div class="st">Método, oferta, garantía.</div>
+  <div class="sd">Semana 3. Cinco piezas, cuatro sellos. Acá deja de vender sesiones.</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 15</span><span class="pt">Tu método propio</span><span class="est e-m">se mantiene</span></div>
+  <div class="meta"><b>P2.1</b> · pizarra · 6 min · La Clínica · CLI-1</div>
+  <p class="q">El guion sirve. Se regraba en pizarra con las etapas dibujadas como camino. <b>Recorte:</b> fuera el repaso de la semana anterior, arranca en «nadie compra sesiones».</p>
+  <div class="sellado">Sella: tu Método</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 16</span><span class="pt">La prueba de tu método</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P2.4b</b> · pizarra · 6 min · La Clínica · CLI-1B</div>
+  <p class="q">Está escrito completo en el manual: transcríbelo. Los tres exámenes, la regla del QUÉ y el CÓMO, que se pueda medir, y que el orden importe.</p>
+  <div class="sellado">Sella: método aprobado</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 17</span><span class="pt">La oferta que se vende sola</span><span class="est e-r">regrabar sin la garantía</span></div>
+  <div class="meta"><b>P3.1</b> · pizarra · 7 min · La Clínica · CLI-2</div>
+  <p class="q">Promesa, entregables, precio, <b>y la ecuación de valor dibujada</b>, que es lo mejor que tienes grabado hoy. La metáfora de la agencia de viajes queda. <b>La garantía sale de acá</b> y se va al día 18, para no decirla dos veces.</p>
+  <div class="sellado">Sella: tu Oferta</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 18</span><span class="pt">Tu garantía de extensión</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P3.2b</b> · oficina · 6 min · La Clínica · CLI-2B</div>
+  <p class="q">Por qué extensión y nunca devolución, los compromisos que el consultante firma al lado, y qué pasa si no los cumplió. <b>Esto último es lo que el video actual no tiene.</b></p>
+  <div class="sellado">Sella: garantía y compromisos</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 19</span><span class="pt">Tu escalera de cinco niveles</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P3.3b</b> · pizarra · 6 min · La Clínica · CLI-3</div>
+  <p class="q">Diseña cinco, vende uno: el tercero. Para qué sirven los otros cuatro si hoy no los vende.</p>
+  <div class="sellado">Sella: tu Escalera</div>
+</div>
+
+<!-- ═════════ SISTEMA 3 ═════════ -->
+<div class="sis">
+  <div class="sn">Sistema 3 · Tu sistema de venta</div>
+  <div class="st">El circuito, la página y la campaña.</div>
+  <div class="sd">Semanas 4 y 5. Es la mitad del programa y es donde se define si factura.</div>
+</div>
+
+<div class="sem">Semana 4 · las piezas</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 22</span><span class="pt">Apertura del circuito</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.1a</b> · lago · 1 min</div>
+  <p class="q">Grabas el gancho afuera, cortas y sigues en pizarra. «Antes de explicarte nada, mira lo que te pasó a ti.»</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 22</span><span class="pt">El circuito completo</span><span class="est e-n">regrabar de cero</span></div>
+  <div class="meta"><b>P4.1</b> · pizarra · 7 min · Manual El Camino</div>
+  <p class="q"><b>El único error activo del camino.</b> La versión en vivo enseña anuncio → WhatsApp → bot → página, y hoy vendes anuncio → página → video → formulario → agenda. Las cinco piezas dibujadas, cada una con un solo trabajo, y por qué el formulario va antes del calendario. <b>Se rescata entero:</b> el ochenta por ciento de la energía en el anuncio, preproducción contra grabación, perfeccionismo contra iteración, y que no persigue a nadie sino que abre cupos.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 23</span><span class="pt">Frío o tibio — tu camino</span><span class="est e-n">nuevo</span></div>
+  <div class="meta">pizarra · 5 min · sella tu Camino de tráfico</div>
+  <p class="q">La pregunta con número, contestada en cámara, y las dos ramas dibujadas al lado. Deja clarísimo que <b>la página, el video y el formulario son los mismos en los dos casos</b>: lo único que cambia es a quién se le muestra el anuncio.</p>
+  <div class="sellado">Sella: tu Camino de tráfico</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 24</span><span class="pt">Tu perfil en veinte minutos</span><span class="est e-n">nuevo · reemplaza el de 6 min</span></div>
+  <div class="meta"><b>P4.2b</b> · pantalla · 3 min</div>
+  <p class="q">Cuatro cosas y se cierra: foto legible en miniatura, nombre buscable, bio con su promesa, enlace a su página. <b>Y lo que se dice en voz alta: esto no es marca personal y hoy no se hace nada más.</b> Las destacadas, el contenido y el plan de redes viven en el mes 3.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 25</span><span class="pt">Crear tu página con Claude</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.2d</b> · pantalla · 10 min · sella tu Página</div>
+  <p class="q">Lo que ningún competidor enseña. Con un caso real, el pedido inicial leído entero, cómo se pide un cambio, un error a propósito corregido en cámara, y cuándo parar.</p>
+  <div class="lupe">L-05 · Subir tu página · L-06 · Tu subdominio</div>
+  <div class="sellado">Sella: tu Página</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 26</span><span class="pt">Cómo se arma tu VSL</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.3e</b> · pantalla · 8 min · sella tu VSL</div>
+  <p class="q">La pieza que más pesa en la conversión y hoy no tiene sesión. Los primeros treinta segundos, su historia sacada del ADN, el vacío, el precio antes de la agenda, y cómo se graba: de corrido, sin leer, tres tomas.</p>
+  <div class="lupe">L-07 · Subir tu video a la página</div>
+  <div class="sellado">Sella: tu VSL</div>
+</div>
+
+<div class="sem">Semana 5 · encender</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 29</span><span class="pt">Intro · antes del formulario</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.2e-i</b> · oficina · 90 seg</div>
+  <p class="q">«Este formulario va a bajar tus agendas. Eso no es un error: es el objetivo.»</p>
+  <div class="lupe">L-08 · Tu formulario de filtro · L-09 · Tu calendario en dos pasos · L-10 · Tu página de preparación</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 30</span><span class="pt">Los cuatro de Meta</span><span class="est e-m">Lupe</span></div>
+  <div class="meta">L-11 a L-14 · 22 min · página y perfil profesional, Business, cuenta publicitaria, pixel</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 31</span><span class="pt">ENCIENDE — tu campaña única</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.4</b> · pizarra · 7 min · Manual El Camino</div>
+  <p class="q">Un solo conjunto dibujado con los tres anuncios adentro, <b>y arriba la rama que le tocó el día 23.</b> Objetivo a la página, nunca a mensajes. Catorce días sin tocar, contados como película: día uno nada, día dos uno que no agenda, día tres las ganas de cambiar todo.</p>
+  <div class="sellado">Sella: campaña encendida</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 32</span><span class="pt">Crear tu campaña en Meta</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.4b</b> · pantalla · 7 min</div>
+  <p class="q">El paso a paso aplicado, con los dos públicos armados en pantalla. Va tuyo y no de Lupe porque cada decisión de esa pantalla es criterio. Dónde está el botón que no se toca por catorce días.</p>
+  <div class="lupe">L-15 · Tu evento de agenda calificada · L-16 · Tu público de retargeting</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 33</span><span class="pt">Leer tu tablero</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.7</b> · pantalla · 8 min · Manual El Camino</div>
+  <p class="q">Con dos días de campaña ya hay datos. Los cuatro números y nada más: gasto, entradas, agendas, costo por agenda. Los tres cuellos y dónde se arregla cada uno. Muestra tus números reales.</p>
+</div>
+
+<!-- ═════════ MES 2 ═════════ -->
+<div class="sis">
+  <div class="sn">Mes 2 · días 36 a 60</div>
+  <div class="st">Vender, cobrar y entregar.</div>
+  <div class="sd">Acá se define si repite. Sistema 3 termina, y arranca lo de adentro.</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 36</span><span class="pt">Anatomía de la llamada — la W</span><span class="est e-r">regrabar unificado</span></div>
+  <div class="meta"><b>P5.1</b> · pizarra · 8 min · Manual La Llamada</div>
+  <p class="q">Hoy nombras la W y no la muestras. Es la misma pieza: <b>la W dibujada de principio a fin</b>, el minuto del precio marcado, cuántas preguntas antes de presentar, y el silencio después del número dibujado como espacio en blanco.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 38</span><span class="pt">La venta empieza en la agenda</span><span class="est e-m">se mantiene</span></div>
+  <div class="meta"><b>P5.2</b> · pantalla · 5 min · Manual La Llamada</div>
+  <p class="q">Lo mejor del video de venta que ya tienes, arrancando directo en «la venta no empieza en la llamada». Revisar el formulario, cancelar a quien no califica, los puntos de contacto previos, <b>y el por qué ahora como única palanca del cierre.</b> Fuera los dos minutos de repaso de los tres pilares.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 39</span><span class="pt">Intro · antes de grabar llamadas</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P5.4-i</b> · oficina · 90 seg</div>
+  <p class="q">«Tu llamada mejora escuchándote.»</p>
+  <div class="lupe">L-17 · Grabar tus llamadas</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 42</span><span class="pt">La autopsia de tu llamada</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P5.6</b> · pizarra · 5 min · Manual La Llamada</div>
+  <p class="q">La sesión que más te reemplaza en ventas. Los cuatro números escritos uno debajo del otro: minuto del precio, preguntas antes de presentar, segundos de silencio, si pidió la decisión.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 44</span><span class="pt">Tu recuperador</span><span class="est e-r">regrabar</span></div>
+  <div class="meta"><b>P4.5</b> · pantalla · 5 min · Manual El Camino</div>
+  <p class="q">Con un comentario real y el mensaje que sale. Desde el primer segundo: esto no es su sistema de venta. Los tres que se escapan, que los devuelve a su página, y que se enciende después de la campaña.</p>
+  <div class="lupe">L-18 · Tu bandeja y tu embudo · L-19 · Tus respuestas automáticas</div>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 45</span><span class="pt">Tu primer consultante nuevo</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P6.3</b> · oficina · 5 min · cinturón rojo</div>
+  <p class="q">Alguien que hace treinta días no sabía que existía acaba de pagarle. Silencios largos, ritmo bajo. <b>La advertencia: no baja el precio con el segundo.</b></p>
+  <div class="sellado">Sella: primera venta del sistema</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 46</span><span class="pt">Cuándo escalar y cuándo apagar</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P4.4c</b> · pantalla · 7 min · Manual El Camino</div>
+  <p class="q">Se desbloquea cuando pasaron los catorce días y lo vuelve a ver cada semana. Cuándo sube el presupuesto y de a cuánto, cuándo apaga, cuándo graba creatividades nuevas. Todo medido por costo por agenda.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 47</span><span class="pt">Entregar sin quemarte — la cinta</span><span class="est e-n">regrabar de cero</span></div>
+  <div class="meta"><b>P6.1</b> · oficina · 7 min · La Clínica · CLI-4</div>
+  <p class="q">El actual es casi todo mentalidad ya dicha. Va entero a lo concreto: el error de compensar dando el triple, la cinta con sus estaciones, qué se graba una vez y qué va en vivo, la línea base, y la prueba de que atender a diez cueste lo mismo que atender a uno.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 48</span><span class="pt">El alta — siete pasos y tres límites</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P6.2</b> · oficina · 6 min · La Clínica · CLI-5</div>
+  <p class="q">Los siete pasos en orden, los tres límites que evitan que se queme, el mensaje de bienvenida leído entero, y la línea base tomada del triage.</p>
+  <div class="sellado">Sella: tu Protocolo de alta</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 50</span><span class="pt">Tu app con tu marca</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P8.1</b> · pantalla · 5 min · La Clínica · CLI-4</div>
+  <p class="q"><b>El encuadre cambia entero:</b> Mi Clínica la usa desde el día 2 para su consultorio. Lo que llega ahora es el espacio con su marca donde entra quien le compró. Qué resuelve: deja de repetir lo mismo por WhatsApp cuarenta veces por semana. Qué no resuelve: no vende ni consigue consultantes.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 51</span><span class="pt">Traer tu método y armar tus etapas</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P8.2</b> · pantalla · 7 min</div>
+  <p class="q">El botón que trae su protocolo, su avatar y su catálogo. Antes y después. Que cargue cuatro semanas, no doce.</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 52</span><span class="pt">Subir tus videos y materiales</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P8.4</b> · pantalla · 6 min</div>
+  <p class="q">Qué grabar primero: lo que ya repite cuarenta veces por semana.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 53</span><span class="pt">Invitar a tu primer consultante</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P8.5</b> · pantalla · 6 min · La Clínica · CLI-6 · cinturón</div>
+  <p class="q">Qué ve él, mostrado desde un celular. <b>La compra de prueba:</b> que se compre a sí mismo con una tarjeta real antes de invitar a nadie. Y la frase exacta con la que lo invita.</p>
+  <div class="sellado">Sella: tu app abierta</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 55</span><span class="pt">Apertura de la máquina de 10</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P7.1a</b> · montaña · 1 min</div>
+  <p class="q">«Llegaste hasta acá probando si esto funcionaba. Ya sabes que funciona. Lo que viene no es descubrir: es repetir.»</p>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 55</span><span class="pt">La máquina de 10 por mes</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P7.1</b> · pizarra · 6 min · Manual El Camino</div>
+  <p class="q">La cadena completa en números, escrita de arriba abajo, y qué significa eso por semana en su caso.</p>
+</div>
+
+<!-- ═════════ MES 3 ═════════ -->
+<div class="sis">
+  <div class="sn">Mes 3 · días 61 a 90</div>
+  <div class="st">Repetir, y el puente.</div>
+  <div class="sd">Cuatro piezas tuyas. En el mes 3 vende, no aprende, y eso es correcto.</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 61</span><span class="pt">Por qué la marca va última</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P9.1</b> · montaña · 6 min · Sistema 5</div>
+  <p class="q">El más contraintuitivo. La negación de entrada: lleva sesenta días y todavía no le pediste que suba nada. <b>Acá se explica por qué el día 24 solo tocó cuatro cosas del perfil.</b> El contenido que trae consultantes filtra. En estos noventa días solo escribe el plan.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 67</span><span class="pt">Las doce semanas escritas</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P9.4</b> · pizarra · 5 min · sella tu Plan Trimestral</div>
+  <p class="q">Los tres enfoques del trimestre repartidos en doce semanas. Lo escribe todo hoy y lo graba en un solo día.</p>
+  <div class="lupe">L-20 · Grabar y editar con el celular · L-21 · Programar tu contenido del mes</div>
+  <div class="sellado">Sella: tu Plan Trimestral</div>
+</div>
+
+<div class="p">
+  <div class="ph"><span class="dia">Día 87</span><span class="pt">Tu foto de llegada</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P10.2</b> · montaña · 2 min</div>
+  <p class="q">Vuelve a contestar las mismas preguntas del día 3 y recalcula su hora real neta con los datos de Mi Clínica. Que no mire la foto de partida hasta haber contestado.</p>
+</div>
+
+<div class="p sella">
+  <div class="ph"><span class="dia">Día 88</span><span class="pt">Qué sigue — a Desafío Matrix</span><span class="est e-n">nuevo</span></div>
+  <div class="meta"><b>P10.3</b> · lago · 7 min · sella tu Plan de 180</div>
+  <p class="q">La bisagra comercial. Los cinco sistemas nombrados con lo que construyó de cada uno, el techo nuevo, y la invitación una sola vez y al final, sin urgencia ni descuento. Se lleva su plan de 180 días lo tome o no lo tome.</p>
+  <div class="sellado">Sella: tu Plan de 180</div>
+</div>
+
+<div class="cierre">
+  <h2>Lo que sale del camino</h2>
+  <p><b>«Cómo usar tu app» tal como está.</b> Manda a cargar pacientes el día 1 y explica clics que son de Lupe. Lo reemplaza «Tu clínica de hoy, adentro».</p>
+  <p><b>El circuito viejo entero.</b> Anuncio, WhatsApp, bot y página ya no es lo que vendes.</p>
+  <p><b>La garantía dentro del video de la oferta.</b> Pasa a su propia pieza el día 18.</p>
+  <p><b>El perfil de seis minutos con destacadas y marca personal.</b> Queda en tres minutos y cuatro cosas.</p>
+  <p><b>Y de todos:</b> la felicitación de apertura, el repaso de la semana anterior, el recorrido por los tres pilares y el cierre de «te deseo muchos éxitos, nos vemos en el próximo». Entre sesenta y noventa segundos por pieza. <b>En cuarenta y dos piezas, cerca de una hora del camino.</b></p>
+</div>
+
+</div>
+</body>
+</html>

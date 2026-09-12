@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oficina · hoja de rodaje</title>
+<style>
+:root{
+  --paper:#FBFAF7;
+  --ink:#1A1815;
+  --ink-soft:#585149;
+  --rule:#E2DCD0;
+  --gold:#9A8249;
+  --gold-soft:#F6F1E4;
+  --tacha:#A6392E;
+  --tilde:#3F6B4A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Avenir Next","Nunito Sans",Avenir,"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:19px;
+  line-height:1.5;
+  padding:46px 20px 120px;
+}
+.wrap{max-width:760px;margin:0 auto}
+
+/* ── cabecera ── */
+header{margin-bottom:44px}
+.kicker{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:12px}
+h1{font-size:52px;line-height:1.04;font-weight:700;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--gold-dark,#7E6A3B)}
+.bajada{font-size:21px;color:var(--ink-soft);margin-top:16px;max-width:36em}
+
+.reloj{display:flex;flex-wrap:wrap;gap:0;margin-top:28px;border:1px solid var(--rule);border-radius:18px;overflow:hidden;background:#fff}
+.reloj div{flex:1 1 130px;padding:18px 16px;border-right:1px solid var(--rule)}
+.reloj div:last-child{border-right:0}
+.reloj b{display:block;font-size:30px;font-weight:700;line-height:1.1}
+.reloj span{font-size:16px;color:var(--ink-soft)}
+
+/* ── set ── */
+.set{margin:40px 0;background:#fff;border:1px solid var(--rule);border-radius:20px;padding:26px 26px 22px}
+.set h2{font-size:26px;margin-bottom:14px}
+.set p{font-size:18.5px;color:var(--ink-soft);margin-bottom:12px}
+.set p:last-child{margin-bottom:0}
+.set b{color:var(--ink)}
+
+/* ── bloques de jornada ── */
+.bloque{margin:56px 0 22px;padding-top:22px;border-top:1px solid var(--gold)}
+.bloque .bn{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em}
+.bloque .bt{font-size:34px;font-weight:700;line-height:1.15;margin-top:6px}
+.bloque .bd{font-size:19px;color:var(--ink-soft);margin-top:10px;max-width:36em}
+
+/* ── pieza ── */
+.pieza{background:#fff;border:1px solid var(--rule);border-radius:22px;padding:26px 26px 24px;margin:22px 0}
+.ph{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ph input{width:22px;height:22px;accent-color:var(--tilde);flex:none;position:relative;top:3px}
+.pn{font-size:19px;color:var(--gold);font-weight:700;min-width:34px}
+.pt{font-size:28px;font-weight:700;line-height:1.2;flex:1 1 240px}
+.meta{font-size:16.5px;color:var(--ink-soft);margin:10px 0 0 34px}
+.meta b{color:var(--gold)}
+.body{margin-left:34px}
+
+.dice{margin-top:20px;padding:18px 20px;border-left:2px solid var(--gold);background:var(--gold-soft);border-radius:0 14px 14px 0}
+.dice .lb{font-size:16px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:8px}
+.dice p{font-size:21px;line-height:1.52;margin-bottom:13px}
+.dice p:last-child{margin-bottom:0}
+
+h3.sec{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin:22px 0 10px}
+ol.mapa{list-style:none;counter-reset:m}
+ol.mapa li{counter-increment:m;position:relative;padding-left:38px;margin-bottom:14px;font-size:18.5px;line-height:1.5}
+ol.mapa li::before{content:counter(m);position:absolute;left:0;top:0;width:25px;height:25px;border:1px solid var(--gold);border-radius:50%;color:var(--gold);font-size:14px;display:flex;align-items:center;justify-content:center}
+ol.mapa b{font-weight:700}
+ol.mapa q{display:block;margin-top:6px;font-size:19px;color:var(--ink);quotes:"«" "»"}
+ol.mapa q::before{content:open-quote}
+ol.mapa q::after{content:close-quote}
+
+.queda{margin-top:20px;padding:16px 20px;border:1px solid var(--gold);border-radius:16px;font-size:20px;line-height:1.45}
+.queda span{color:var(--gold);font-variant:small-caps;letter-spacing:.06em;font-size:16px;display:block;margin-bottom:6px}
+
+.accion{margin-top:14px;font-size:19px;color:var(--tilde)}
+.accion b{font-weight:700}
+
+.fuera{margin-top:14px;font-size:18px;color:var(--tacha)}
+.fuera b{font-weight:700}
+
+.nota{margin-top:14px;font-size:18px;color:var(--ink-soft)}
+
+.cierre{margin-top:60px;padding:26px;border:1px solid var(--gold);border-radius:20px;background:var(--gold-soft)}
+.cierre h2{font-size:26px;margin-bottom:12px}
+.cierre p{font-size:19px;color:var(--ink-soft);margin-bottom:10px}
+.cierre p:last-child{margin-bottom:0}
+.cierre b{color:var(--ink)}
+
+@media(max-width:640px){
+  body{font-size:18px;padding:30px 15px 90px}
+  h1{font-size:38px}
+  .bloque .bt{font-size:28px}
+  .pt{font-size:24px}
+  .pieza,.set{padding:20px 18px}
+  .meta,.body{margin-left:0}
+  .dice p{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Jornada de oficina · las doce íntimas</div>
+  <h1>Cuarenta y seis minutos <em>de material.</em></h1>
+  <p class="bajada">Once videos y un audio. Todo se graba en el mismo lugar, con la misma ropa, en un día. Cada pieza tiene acá su primera frase escrita, su mapa hablado y su frase de cierre.</p>
+
+  <div class="reloj">
+    <div><b>4</b><span>intros de 90 segundos</span></div>
+    <div><b>7</b><span>sesiones de 4 a 7 minutos</span></div>
+    <div><b>1</b><span>audio de 45 minutos</span></div>
+    <div><b>3 h</b><span>de rodaje real</span></div>
+  </div>
+</header>
+
+<div class="set">
+  <h2>El set, una sola vez</h2>
+  <p><b>Encuadre.</b> Plano de pecho para arriba. Cámara a la altura de tus ojos, nunca desde abajo. Fondo limpio con algo de profundidad detrás: pared lisa a un metro y medio, no pegada a tu espalda.</p>
+  <p><b>Luz.</b> Ventana de costado, a cuarenta y cinco grados. Sin luz de techo prendida. Si el día se nubla a la mitad, parás y esperás: media jornada con luz distinta se nota más que un día perdido.</p>
+  <p><b>Sonido.</b> Micrófono de solapa fuera de cuadro. Ventanas cerradas. Teléfono en modo avión, arriba de la mesa y a la vista.</p>
+  <p><b>Ropa.</b> La misma en las doce. Color liso y medio, sin líneas finas ni logos. Distinta a la de pizarra, pantalla y montaña.</p>
+  <p><b>Ritmo de toma.</b> Antes de cada toma decís el número de pieza en voz alta y das una palmada. Eso te ordena la edición sin marcar nada. <b>Tres tomas por pieza como máximo.</b> Si a la tercera no sale, cambiás la primera frase y dejás el resto igual: casi siempre el problema está en la entrada.</p>
+  <p><b>Arranque y cierre.</b> Sin saludo y sin presentación. Primera frase al hueso, segunda nombra el manual donde se amplía. Y cada video termina moviendo: la acción del día, dicha como acción, no como sugerencia.</p>
+</div>
+
+<!-- ══════════ BLOQUE A ══════════ -->
+<div class="bloque">
+  <div class="bn">Bloque A · primeras dos horas de voz</div>
+  <div class="bt">Las cuatro intros.</div>
+  <div class="bd">Seis minutos de material en total. Van primero porque te calientan la voz y porque son las más fáciles de repetir. Cada una va pegada delante de un tutorial de Lupe: vos das el porqué, ella muestra el cómo. Estas cuatro están escritas palabra por palabra. Leelas dos veces y decilas sin leer.</div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">16</span><span class="pt">Antes del formulario</span></div>
+  <div class="meta"><b>P4.2e-i</b> · Sistema 3 · día 28 · 90 seg · va delante de L-11 y L-12</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Lo que decís</div>
+      <p>Antes de que Lupe te muestre cómo se arma el formulario, necesitas entender qué hace. Si no lo entiendes, lo vas a querer sacar en la primera semana.</p>
+      <p>Este formulario va a bajar tus agendas. Eso no es un error: es el objetivo.</p>
+      <p>Una llamada con alguien que no puede pagar tu programa te cuesta exactamente lo mismo que una con alguien que sí. La misma hora, la misma energía, el mismo desgaste. La diferencia es que una termina en un cliente y la otra termina en un «lo voy a pensar» que nunca vuelve.</p>
+      <p>El formulario hace una sola cosa: pone una puerta antes de tu calendario. Cinco preguntas. Quien no las contesta, no llega a tu agenda. Y quien no contesta cinco preguntas tampoco iba a hacer el trabajo de tu programa.</p>
+      <p>Vas a ver menos agendas y más ventas. Esos dos números se mueven al mismo tiempo, en direcciones distintas. El segundo es el que te paga.</p>
+      <p>Ahora sí, Lupe te muestra dónde se arma.</p>
+    </div>
+    <div class="queda"><span>La frase que queda</span>Menos agendas y más ventas es la señal de que el filtro está haciendo su trabajo.</div>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">22</span><span class="pt">Antes de la bandeja</span></div>
+  <div class="meta"><b>P5.5-i</b> · Sistema 3 · día 33 · 90 seg · va delante de L-20 y L-21</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Lo que decís</div>
+      <p>Lo que vas a armar ahora es tu bandeja: el lugar donde queda cada conversación que empezó y todavía no terminó en una venta.</p>
+      <p>Antes de entrar quiero cambiarte una idea, porque de eso depende si lo usas o lo abandonas.</p>
+      <p>Un «no» es una fecha. Quien te dijo que no ahora ya hizo el trabajo más difícil: te encontró, entendió qué haces, reservó una hora de su vida y te escuchó hasta el final. Eso ya está hecho y no se deshace. Lo único que no le cerró fue el momento.</p>
+      <p>La mayoría de esas personas compra algo parecido a lo tuyo dentro de los seis meses. La única pregunta es a quién.</p>
+      <p>Tu bandeja existe para que eso deje de depender de tu memoria. Cada conversación queda con un estado y con una fecha de vuelta. Vuelves cuando el momento cambió, y llegas primero.</p>
+      <p>Lupe te muestra cómo se arma.</p>
+    </div>
+    <div class="queda"><span>La frase que queda</span>Un no es una fecha. Tu bandeja es donde vive esa fecha.</div>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">23</span><span class="pt">Antes de grabar llamadas</span></div>
+  <div class="meta"><b>P5.4-i</b> · Sistema 3 · día 37 · 90 seg · va delante de L-22</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Lo que decís</div>
+      <p>Ahora vas a dejar tus llamadas grabadas. Antes, para qué.</p>
+      <p>Tu llamada mejora escuchándote.</p>
+      <p>Cuando termina una llamada que salió mal, tu cabeza te cuenta una versión, y casi siempre es la misma: no tenía el dinero. Cuando escuchas la grabación aparece otra cosa. Que hablaste catorce minutos seguidos sin hacer una sola pregunta. Que dijiste el precio en el minuto cuarenta, cuando ya no quedaba aire. Que después del número seguiste hablando para tapar el silencio.</p>
+      <p>Eso no se recuerda. Eso se escucha.</p>
+      <p>Dos cosas prácticas. Avisas que grabas, al principio y en una frase: es para revisar el caso. Nadie se va por eso. Y guardas las llamadas aunque esta semana no las abras, porque el día treinta y nueve vamos a abrir una juntos y vamos a medir cuatro números adentro.</p>
+      <p>Lupe te muestra cómo se activa.</p>
+    </div>
+    <div class="queda"><span>La frase que queda</span>Tu llamada mejora escuchándote.</div>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">26</span><span class="pt">Antes del link de pago</span></div>
+  <div class="meta"><b>P6.2-i</b> · Sistema 3 · día 40 · 90 seg · va delante de L-23 y L-24</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Lo que decís</div>
+      <p>Vas a armar tu link de pago. Antes, por qué este es uno de los tutoriales que más dinero te va a devolver.</p>
+      <p>El sí de las cuatro de la tarde es un «déjame pensarlo» a las nueve de la noche.</p>
+      <p>No porque la persona mienta. Porque en el medio pasó su día. Habló con alguien. Le llegó una cuenta. Se le enfrió lo que sintió mientras te escuchaba.</p>
+      <p>El link de pago achica ese espacio. La persona dice que sí, tú lo mandas ahí mismo, dentro de la llamada, y esperas en línea. No cortas y lo envías después. No dices «te lo paso más tarde». Se paga mientras la decisión está caliente.</p>
+      <p>Y eso también te cuida a ti: dejas de perseguir un cobro por WhatsApp durante dos semanas.</p>
+      <p>Una sola regla cuando lo armes: un link, un precio. Quien elige entre tres opciones, elige postergar.</p>
+      <p>Lupe te muestra cómo se arma.</p>
+    </div>
+    <div class="queda"><span>La frase que queda</span>Se cobra mientras la decisión está caliente.</div>
+  </div>
+</div>
+
+<!-- ══════════ BLOQUE B ══════════ -->
+<div class="bloque">
+  <div class="bn">Bloque B · el centro de la jornada</div>
+  <div class="bt">Las cuatro de estructura.</div>
+  <div class="bd">Veintitrés minutos de material. Son las que enseñan a armar algo, y las cuatro tienen su desarrollo escrito en los manuales. No las escribas de cero: abrí el manual, leé el panel y contalo. Acá tenés la entrada, el orden de los bloques y la salida.</div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">08</span><span class="pt">Tu garantía de extensión</span></div>
+  <div class="meta"><b>P3.2b</b> · Sistema 2 · día 16 · 6 min · La Clínica · CLI-2B · sella garantía y compromisos</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>De todo lo que armaste hasta acá, esto es lo que más miedo da y lo que más te protege. Está desarrollado completo en el manual La Clínica, en el panel CLI-2B.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>Por qué un resultado no se garantiza.</b> El resultado depende de que la otra persona haga el trabajo, y eso no lo controlas. Lo que prometes sin controlar, tarde o temprano te lo reclaman.<q>Garantizas lo que depende de ti.</q></li>
+      <li><b>Qué garantizas entonces.</b> Tu presencia y el proceso completo. Que nadie se queda a mitad de camino.</li>
+      <li><b>Por qué extensión.</b> Si la persona hizo todo lo que acordaron y todavía no llegó, sigues con ella sin costo hasta que llegue. Devolver el dinero enseña que salirse es una opción, y la mitad del trabajo de un proceso serio es justamente no salirse.<q>No te devuelvo el dinero: te devuelvo el tiempo, que es más caro.</q></li>
+      <li><b>Los compromisos que firma al lado.</b> Tres o cuatro, medibles, escritos junto a la garantía: asistir a las sesiones, entregar el trabajo antes de tal día, avisar con tantas horas. Una garantía viva es una garantía con compromisos escritos.</li>
+      <li><b>Qué pasa si no los cumplió.</b> Se vuelve al papel, no a la discusión. Ahí no hay conflicto: hay un documento que los dos leyeron el primer día.</li>
+      <li><b>Por qué tranquiliza a los dos.</b> Quien compra escucha que no se va a quedar solo. Tú escuchas que tu promesa está hecha de algo que depende de ti.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>Tu garantía dice una sola cosa: nadie se queda a mitad de camino.</div>
+    <p class="accion"><b>Acción del día:</b> escribe tu garantía en una frase y los tres compromisos debajo. Va dentro de tu oferta, en la misma hoja.</p>
+    <p class="fuera"><b>Fuera de cámara:</b> ejemplos de porcentajes de devolución, comparaciones con otros programas del mercado y cualquier cosa que suene a consejo legal.</p>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">27</span><span class="pt">El alta — siete pasos y tres límites</span></div>
+  <div class="meta"><b>P6.2</b> · Sistema 4 · día 43 · 6 min · La Clínica · CLI-5 · sella tu Protocolo</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>El día que alguien te paga empieza el trabajo que define si vas a poder repetirlo diez veces. Esto está en La Clínica, en el panel CLI-5.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>Qué es el alta.</b> Todo lo que pasa entre el pago y la primera sesión. Improvisar ahí es lo que hace que cada cliente nuevo cueste el doble que el anterior.</li>
+      <li><b>Los siete pasos, en orden.</b> Leelos tal como están en CLI-5 y mostralos como una lista corta: confirmación y factura, mensaje de bienvenida, acceso a su espacio, línea base, primera sesión agendada en el mismo mensaje, los tres límites por escrito, y un solo canal de contacto.</li>
+      <li><b>Los tres límites.</b> Un canal, un horario de respuesta, y qué entra y qué no entra en el programa. Son lo que evita que termine regalando su vida entera.<q>Un límite dicho el primer día es un acuerdo. El mismo límite dicho en la semana seis es un reclamo.</q></li>
+      <li><b>El mensaje de bienvenida.</b> Se escribe una vez y se usa siempre. Leé el tuyo en cámara, entero, para que tengan un modelo y no una descripción.</li>
+      <li><b>La línea base.</b> Sale del triage que ya hizo, no se vuelve a preguntar. Se mide el primer día para poder medir al final, y es lo que después convierte un testimonio en un número.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>El alta es lo que hace que tu cliente número diez reciba lo mismo que el número uno.</div>
+    <p class="accion"><b>Acción del día:</b> escribe tu mensaje de bienvenida y tus tres límites. Quince minutos hoy, noventa días tranquilos después.</p>
+    <p class="nota">Este video es un modelo a copiar: cuanto más muestres tus propios textos, menos preguntas te llegan.</p>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">25</span><span class="pt">Entregar sin quemarte — la cinta</span></div>
+  <div class="meta"><b>P6.1</b> · Sistema 4 · día 40 · 7 min · La Clínica · CLI-4 · regrabar</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>El error grande no llega cuando no vendes. Llega justo después de la primera venta buena. Está en La Clínica, en CLI-4.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>El error.</b> Cobraste bien, te dio culpa, y decidiste compensar dando el triple. Más sesiones, más audios, más disponibilidad. En dos meses tienes un programa que no puedes repetir.<q>Cobrar más y entregar el triple es el camino corto a odiar tu propio programa.</q></li>
+      <li><b>La cinta.</b> Tu entrega deja de ser sesiones sueltas y pasa a ser una línea con estaciones. Todas las personas entran por el mismo lugar y pasan por las mismas estaciones. Lo que cambia es la persona, no el recorrido.</li>
+      <li><b>Qué se graba una vez y qué va en vivo.</b> Lo que dices igual a todas las personas, se graba. Lo que solo puedes decir mirando a esa persona, va en vivo.<q>Si lo repetiste tres veces esta semana, grábalo.</q></li>
+      <li><b>Las estaciones, nombradas.</b> Contalas en orden y con nombre propio, aunque acá no haya pizarra. Que se escuchen como una lista cerrada, no como un ejemplo.</li>
+      <li><b>La línea base.</b> Qué mides el primer día para poder mostrar el cambio al final.</li>
+      <li><b>La prueba.</b> Atender a diez personas tiene que costarte por persona lo mismo que atender a una. Si atender a diez te cuesta diez veces más, tienes diez trabajos.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>Atender a diez tiene que costarte lo mismo que atender a uno.</div>
+    <p class="accion"><b>Acción del día:</b> parte tu programa en dos columnas. Lo que va grabado, y lo que va en vivo.</p>
+    <p class="nota">Esta ya existe. Se regraba por la cinta, que está escrita en el manual y hoy falta en el video.</p>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">02</span><span class="pt">El Búnker de Luz</span></div>
+  <div class="meta"><b>P0.3</b> · Sistema 1 · día 1 · 4 min · El Liderazgo · regrabar</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>Hoy, antes de construir cualquier cosa afuera, armas un lugar. Se llama el Búnker de Luz y está en el manual El Liderazgo.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>Qué es.</b> Un espacio chico y propio donde se toman las decisiones del negocio. Una mesa, un cuaderno, una hora fija.</li>
+      <li><b>Por qué el primer día.</b> Todo lo que viene son decisiones, y las decisiones tomadas entre consultante y consultante salen mal.</li>
+      <li><b>Qué va adentro.</b> Sus números, su promesa escrita, sus compromisos y el cuaderno. El teléfono queda afuera.</li>
+      <li><b>Cuándo se abre.</b> Mismo lugar, misma hora. Hoy mismo, quince minutos.</li>
+      <li><b>La rama para quien no es de rituales.</b> Este es el bloque que decide si el escéptico sigue o se va, y el escéptico es el que más paga. Decilo entero y sin ironía: «Si esto te suena a ritual y los rituales te expulsan, quédate igual y llámalo bloque de trabajo. No necesitas creer en nada. Necesitas un lugar donde nadie te interrumpa y una hora que no se negocia. Lo que hace efecto es que sea siempre el mismo lugar y la misma hora.»</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>El negocio se construye afuera. Las decisiones se toman siempre en el mismo lugar.</div>
+    <p class="accion"><b>Acción del día:</b> abre el tuyo hoy, quince minutos, y escribe una sola cosa: por qué empezaste.</p>
+    <p class="nota">Hoy comparte video con «Cómo usar tu app» y necesita el suyo. Grabalo corto y cerrado: cuatro minutos alcanzan.</p>
+  </div>
+</div>
+
+<!-- ══════════ BLOQUE C ══════════ -->
+<div class="bloque">
+  <div class="bn">Bloque C · con la voz ya baja</div>
+  <div class="bt">Las tres íntimas.</div>
+  <div class="bd">Diecisiete minutos de material, y las tres piezas que más te van a reenviar. Van al final de la tarde a propósito: acá el ritmo es lento, los silencios son largos y la cámara está más cerca. Si venís acelerado del bloque anterior, parás diez minutos antes de empezar.</div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">03</span><span class="pt">Por qué el dinero se sana primero</span></div>
+  <div class="meta"><b>P1.1</b> · Sistema 1 · día 2 · 6 min · El Liderazgo · regrabar por escenario</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>Antes de tu método, antes de tu precio y mucho antes de cualquier anuncio, vamos por tu relación con el dinero. Está en el manual El Liderazgo, en la primera parte.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>Por qué esto va primero.</b> El precio se escribe con la mano, pero se sostiene con la cabeza. Quien no trabajó esto baja el número en la primera objeción y después culpa al mercado.</li>
+      <li><b>De dónde viene.</b> Tu familia de sanadores, contada corta. La línea que une ayudar con sacrificarse, aprendida mirando.</li>
+      <li><b>Las tres creencias que aparecen siempre.</b> Cobrar bien es aprovecharse. Si es vocación no se cobra. Quien más me necesita es quien menos puede pagar.</li>
+      <li><b>Qué le hace cada una a su precio.</b> Una por una, con la consecuencia concreta: el descuento que no pidieron, la sesión regalada, el programa que se estira sin cobrar.</li>
+      <li><b>Qué hace los próximos siete días.</b> El protocolo, nombrado día por día, para que sepa que esto tiene forma y termina.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>Tu precio se sostiene con lo que crees que vale tu trabajo.</div>
+    <p class="accion"><b>Acción del día:</b> escribe las tres frases sobre el dinero que escuchaste en tu casa antes de los doce años.</p>
+    <p class="nota">El guion que ya tenés está bien. Lo único que cambia es el escenario y que la segunda frase nombre el manual.</p>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">10</span><span class="pt">La transición de tu cartera</span></div>
+  <div class="meta"><b>P3.7</b> · Sistema 2 · día 18 · 6 min · sella tu Transición · nuevo</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>Vas a vender un programa de tres meses y te vas a encontrar con un problema que nadie te nombra: tu agenda ya está llena de personas que pagan otra cosa.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>El problema, nombrado despacio.</b> No hay hueco donde meter a quien entre nuevo, y quien ya está adentro paga la tarifa vieja. Sin resolver esto, el programa se vende y no entra.</li>
+      <li><b>Los tres grupos.</b> Una hoja, tres columnas, y cada persona de su agenda con nombre y apellido en una sola columna. Quienes suben de precio. Quienes terminan su proceso. Quienes se derivan.</li>
+      <li><b>Quienes suben.</b> Ya están listas para el programa y muchas veces ahí están las dos primeras ventas. Se les ofrece antes que a cualquier desconocido.</li>
+      <li><b>Quienes terminan.</b> Están en la mitad de un proceso. Se les pone fecha de cierre y se les cuenta el plan. Terminar con fecha es distinto de cortar.</li>
+      <li><b>Quienes se derivan.</b> Necesitan otra cosa. Se derivan con nombre de colega, no con una lista.</li>
+      <li><b>El mensaje para cada grupo.</b> Deciles qué va adentro del mensaje y en qué orden: lo que cambia, desde cuándo, qué pasa con ellos, y una sola pregunta al final.</li>
+      <li><b>El tiempo.</b> Cuatro a seis semanas, por capas, para que el ingreso no se caiga en el medio.</li>
+      <li><b>Lo que más le pesa.</b> Que esto no es abandonar a nadie.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>No los estás dejando. Les estás dando un final, que es lo que tiene todo proceso serio.</div>
+    <p class="accion"><b>Acción del día:</b> abre una hoja con tres columnas y pon a cada persona de tu agenda en una. Hoy, con nombre.</p>
+    <p class="nota">La que más falta de todo el camino. Es el bloqueo de la mitad de tus clientes: venden el programa y no tienen dónde meterlo. Grabala sin apuro.</p>
+  </div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">28</span><span class="pt">Tu primer pago</span></div>
+  <div class="meta"><b>P6.3</b> · cinturón rojo · día 44 · 5 min · nuevo</div>
+  <div class="body">
+    <div class="dice">
+      <div class="lb">Primera frase</div>
+      <p>Si estás viendo esto es porque te acaban de pagar. Para un minuto.</p>
+    </div>
+    <h3 class="sec">El mapa</h3>
+    <ol class="mapa">
+      <li><b>Lo que acaba de pasar, dicho despacio.</b> Alguien que hace treinta días no sabía que existías te encontró, te escuchó y te transfirió su dinero por un resultado que todavía no tiene. Eso es confianza, y se paga trabajando.</li>
+      <li><b>La fecha.</b> Guarda el día de hoy. Es el día en que dejaste de vender tu hora.</li>
+      <li><b>Qué cambia.</b> Ya no estás probando si esto funciona. Funciona. Lo que viene es repetirlo.</li>
+      <li><b>La advertencia.</b> No bajes el precio con el segundo. El primero da miedo; el segundo es donde la mayoría se negocia sola.<q>Si el segundo entra más barato que el primero, la excepción se te vuelve la regla.</q></li>
+      <li><b>Qué viene mañana.</b> Empieza su app, y por qué la hiciste esperar cuarenta y cuatro días: una app sin nadie adentro es una carpeta vacía.</li>
+    </ol>
+    <div class="queda"><span>La frase que queda</span>Guarda esta fecha: es el día en que dejaste de vender tu hora.</div>
+    <p class="accion"><b>Acción del día:</b> anota la fecha, y avísale a quien te sostuvo mientras construías esto.</p>
+    <p class="nota">La más emocional de las treinta y nueve y la que más te van a mandar por WhatsApp. Plano más cerrado que el resto, silencios de tres segundos, sin música. Dejá correr la cámara después de la última frase.</p>
+  </div>
+</div>
+
+<!-- ══════════ BLOQUE D ══════════ -->
+<div class="bloque">
+  <div class="bn">Bloque D · al final, con la luz baja</div>
+  <div class="bt">El audio de cuarenta y cinco.</div>
+  <div class="bd">No es video. Es la única pieza del camino que se escucha con los ojos cerrados.</div>
+</div>
+
+<div class="pieza">
+  <div class="ph"><input type="checkbox"><span class="pn">04</span><span class="pt">El dinero en el cuerpo</span></div>
+  <div class="meta"><b>P1.4</b> · Sistema 1 · día 8 · 45 min · El Liderazgo · solo voz</div>
+  <div class="body">
+    <p class="nota" style="margin-top:0">El guion ya está escrito completo en el repositorio. Acá no se improvisa nada: se lee.</p>
+    <h3 class="sec">Cómo se graba</h3>
+    <ol class="mapa">
+      <li><b>Una sola toma.</b> Si te trabás, parás tres segundos en silencio y repetís la frase entera desde el principio. Se corta después.</li>
+      <li><b>Micrófono cerca y voz baja.</b> Más cerca de lo que te parece correcto. La distancia es la que hace que suene íntimo.</li>
+      <li><b>Las pausas son parte del ejercicio.</b> Cinco a ocho segundos reales donde el guion las marca. No las acortes en edición: quien escucha las está usando.</li>
+      <li><b>Sin música.</b> Se agrega después, o no se agrega.</li>
+      <li><b>Luz baja y de pie o sentado, como estés cómodo.</b> Nadie te ve. Lo único que importa es que no se escuche el esfuerzo.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="cierre">
+  <h2>Lo que tenés que tener a mano antes de prender la cámara</h2>
+  <p><b>Los tres manuales abiertos:</b> El Liderazgo para las piezas 02, 03 y 04. La Clínica, paneles CLI-2B, CLI-4 y CLI-5, para 08, 25 y 27.</p>
+  <p><b>Tus propios textos:</b> tu mensaje de bienvenida y tus tres límites, para leerlos en cámara en la pieza 27. Si no existen todavía, escribilos antes de empezar el día: son quince minutos y sin eso esa pieza se vuelve una descripción en lugar de un modelo.</p>
+  <p><b>Una cosa que no va en este set:</b> nada que necesite pantalla, pizarra o paisaje. Si sentís que una pieza pide dibujar algo, es que estaba mal ubicada: anotala y seguí.</p>
+  <p><b>Y el idioma:</b> todo hablado en neutro, de tú. Estas piezas las ven en Ecuador, Panamá, Chile y Venezuela.</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Dojo · revisión total</title>
+<style>
+:root{
+  --paper:#FBFAF7;--ink:#1A1815;--ink-soft:#585149;--rule:#E2DCD0;
+  --gold:#9A8249;--gold-dark:#7E6A3B;--gold-soft:#F6F1E4;
+  --tacha:#A6392E;--tilde:#3F6B4A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);
+  font-family:"Avenir Next","Nunito Sans",Avenir,"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:19px;line-height:1.5;padding:46px 20px 120px}
+.wrap{max-width:820px;margin:0 auto}
+
+header{margin-bottom:40px}
+.kicker{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:12px}
+h1{font-size:52px;line-height:1.04;font-weight:700;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--gold-dark)}
+.bajada{font-size:21px;color:var(--ink-soft);margin-top:16px;max-width:36em}
+
+.sec{margin:62px 0 20px;padding-top:22px;border-top:1px solid var(--gold)}
+.sec .sn{font-size:17px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em}
+.sec .st{font-size:34px;font-weight:700;line-height:1.15;margin-top:6px}
+.sec .sd{font-size:19px;color:var(--ink-soft);margin-top:10px;max-width:36em}
+
+.caja{margin:20px 0;border:1px solid var(--rule);border-radius:20px;background:#fff;padding:24px}
+.caja.oro{border-color:var(--gold);background:var(--gold-soft)}
+.caja h3{font-size:24px;margin-bottom:10px;line-height:1.2}
+.caja p{font-size:19px;color:var(--ink-soft);margin-bottom:12px}
+.caja p:last-child{margin-bottom:0}
+.caja b{color:var(--ink)}
+
+/* salas */
+.sala{border-top:1px solid var(--rule);padding-top:18px;margin-top:18px}
+.sala:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.sala .verbo{font-size:16px;color:var(--gold);font-variant:small-caps;letter-spacing:.07em}
+.sala .nom{font-size:27px;font-weight:700;line-height:1.15;margin:2px 0 8px}
+.sala p{font-size:18.5px;color:var(--ink-soft)}
+.sala p b{color:var(--ink)}
+
+/* jornada */
+.jor{display:flex;flex-wrap:wrap;margin:18px 0;border:1px solid var(--rule);border-radius:18px;overflow:hidden;background:#fff}
+.jor div{flex:1 1 170px;padding:18px;border-right:1px solid var(--rule)}
+.jor div:last-child{border-right:0}
+.jor b{display:block;font-size:24px;font-weight:700;line-height:1.15}
+.jor span{font-size:17px;color:var(--ink-soft);display:block;margin-top:6px}
+.jor .h{font-size:15px;color:var(--gold);font-variant:small-caps;letter-spacing:.06em;margin-bottom:6px}
+
+/* sesión de protocolo */
+.ses{background:#fff;border:1px solid var(--rule);border-radius:20px;padding:22px;margin:14px 0}
+.ses.ancla{border-color:var(--gold);border-width:2px}
+.sh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sd2{font-size:17px;font-weight:700;color:var(--gold);min-width:58px}
+.stt{font-size:25px;font-weight:700;line-height:1.2;flex:1 1 220px}
+.fuente{font-size:15px;color:var(--ink-soft);border:1px solid var(--rule);border-radius:20px;padding:2px 11px}
+.f{margin-top:12px;font-size:18.5px;display:flex;gap:10px}
+.f .k{color:var(--gold);font-variant:small-caps;letter-spacing:.05em;min-width:92px;flex:none;font-size:16px;padding-top:2px}
+.f .v{color:var(--ink-soft)}
+.f .v b{color:var(--ink)}
+.f.ex .k{color:var(--tilde)}
+.f.ex .v{color:var(--tilde)}
+
+/* agentes */
+.ag{background:#fff;border:1px solid var(--rule);border-radius:18px;padding:20px;margin:12px 0}
+.agh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.agn{font-size:25px;font-weight:700;flex:1 1 200px}
+.agd{font-size:16px;color:var(--gold);font-weight:700}
+.ag p{font-size:18.5px;color:var(--ink-soft);margin-top:8px}
+.ag p b{color:var(--ink)}
+.llave{margin-top:10px;font-size:18px;color:var(--tilde)}
+.llave b{color:var(--tilde);font-weight:700}
+
+/* cinturones */
+.cin{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.cin:last-child{border-bottom:0}
+.tira{flex:none;width:54px;height:16px;border-radius:9px;border:1px solid rgba(0,0,0,.16);margin-top:6px;position:relative;overflow:hidden}
+.tira i{position:absolute;right:0;top:0;bottom:0;width:16px}
+.cd{font-size:16px;color:var(--gold);font-weight:700}
+.cn{font-size:23px;font-weight:700;line-height:1.2}
+.cm{font-size:18px;color:var(--ink-soft);margin-top:4px}
+.cm b{color:var(--ink)}
+.cf{font-size:18px;color:var(--tilde);margin-top:6px}
+
+@media(max-width:640px){
+  body{font-size:18px;padding:30px 15px 90px}
+  h1{font-size:36px}
+  .sec .st{font-size:27px}
+  .stt,.agn{font-size:22px}
+  .caja,.ses,.ag{padding:18px 16px}
+  .f{flex-direction:column;gap:2px}
+  .f .k{padding-top:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Revisión total · el Dojo, el protocolo y la progresión</div>
+  <h1>No vino a aprender. <em>Vino a entrenar.</em></h1>
+  <p class="bajada">Tres salas en vez de una app. El protocolo interior repartido en tres aperturas en vez de una semana. Ocho agentes que se ganan. Y los once cinturones reales del taekwondo, con la forma que hay que ejecutar en cada uno.</p>
+</header>
+
+<!-- ═══ LAS TRES SALAS ═══ -->
+<div class="sec">
+  <div class="sn">El cambio de arquitectura</div>
+  <div class="st">El Dojo no es la app. Es una sala adentro.</div>
+  <div class="sd">Hoy «dojo» nombra todo, y por eso no nombra nada. Partido en tres salas con tres verbos distintos, el cliente sabe siempre dónde está parado y para qué entró.</div>
+</div>
+
+<div class="caja">
+  <div class="sala">
+    <div class="verbo">Recorrer</div>
+    <div class="nom">El Camino</div>
+    <p>Los noventa días en orden. Sesiones, tareas, evidencias y cinturones. <b>Acá avanza.</b> Se abre una puerta por día y no se saltea.</p>
+  </div>
+  <div class="sala">
+    <div class="verbo">Entrenar</div>
+    <div class="nom">El Dojo</div>
+    <p>Donde están los agentes. No se mira: se entra y se practica contra alguien que responde. Su método contra el Crítico, su llamada contra el Sparring, su voz contra la Cámara. <b>Acá se equivoca gratis, todas las veces que quiera, antes de equivocarse con una persona real adelante.</b></p>
+  </div>
+  <div class="sala">
+    <div class="verbo">Dirigir</div>
+    <div class="nom">Mi Clínica</div>
+    <p>Sus consultantes, su agenda, sus cobros, sus números. <b>Acá dirige</b>, desde el día 2 y para siempre. Es la única sala que le queda cuando terminan los noventa días.</p>
+  </div>
+</div>
+
+<div class="caja oro">
+  <h3>Por qué esto cambia el producto</h3>
+  <p>Un curso entrega videos. <b>Un dojo entrega repeticiones.</b> La diferencia comercial es enorme: cualquiera puede copiar tus videos, nadie puede copiar un lugar donde su método sea juzgado y su llamada sea respondida.</p>
+  <p>Y le saca el peso al video. El video deja de tener que enseñarlo todo, porque lo que enseña se practica al lado. <b>Por eso tus piezas pueden durar cinco minutos y no veinte.</b></p>
+</div>
+
+<!-- ═══ LA JORNADA ═══ -->
+<div class="sec">
+  <div class="sn">La promesa, en horas</div>
+  <div class="st">Cuatro horas por día, de lunes a viernes.</div>
+  <div class="sd">La jornada del director no llega al final de los noventa días: se ensaya desde el día 1. El camino no se hace además de su día. El camino es su día futuro, practicado antes de tenerlo.</div>
+</div>
+
+<div class="jor">
+  <div><div class="h">Bloque 1 · 2 horas</div><b>Atender</b><span>Sus consultantes. Es lo que ya hace bien y lo único que no cambia.</span></div>
+  <div><div class="h">Bloque 2 · 1 hora</div><b>Construir</b><span>La sesión del camino y su tarea. Acá vive el entrenamiento.</span></div>
+  <div><div class="h">Bloque 3 · 1 hora</div><b>Dirigir</b><span>Llamadas, mensajes, números. Al principio está casi vacío. Al día 90 es lo que sostiene todo.</span></div>
+</div>
+
+<div class="caja">
+  <h3>La aritmética, dicha sin vueltas</h3>
+  <p>Diez personas al año a su precio digno no son diez trabajos. <b>Diez protocolos de doce semanas ocupan cerca de dos horas por día de atención real</b>, porque lo que antes eran cuarenta sesiones sueltas ahora es un recorrido con estaciones y una parte grabada.</p>
+  <p>Eso deja dos horas: una para construir y una para dirigir. <b>Ahí está el cambio completo</b> — de facturar dos mil dando todo el día, a facturar diez mil en cuatro horas. No es trabajar más. Es que la misma cantidad de horas deje de estar repartida entre cuarenta personas que pagan poco.</p>
+  <p>Los fines de semana el dojo cierra. Las únicas excepciones son las cuatro jornadas largas, avisadas con fecha desde la bienvenida.</p>
+</div>
+
+<!-- ═══ EL PRINCIPIO ═══ -->
+<div class="sec">
+  <div class="sn">Por qué taekwondo y no gimnasio</div>
+  <div class="st">La fuerza que ya viene.</div>
+  <div class="sd">La elección del arte marcial no es estética. Un arte marcial no agrega fuerza: redirige la que ya está en movimiento. Todo el camino está diseñado sobre esa idea, y conviene decirlo en la bienvenida.</div>
+</div>
+
+<div class="caja">
+  <h3>Las cuatro fuerzas que ya tiene</h3>
+  <p><b>Su cartera.</b> Ya le pagan. La primera plata del camino sale de ahí, en la semana 2, no de la publicidad.</p>
+  <p><b>Su método.</b> Ya existe, hace años, sin nombre. No se inventa: se nombra y se ordena.</p>
+  <p><b>Su agenda llena.</b> La vive como condena y es la prueba de que hay demanda. Lo que falta no es demanda: es precio.</p>
+  <p><b>Su formación.</b> Ya la pagó, en años y en dinero. La autoridad está comprada; lo que falta es usarla.</p>
+  <p style="margin-top:16px">Nada de esto pide esfuerzo nuevo. <b>Pide reorientar lo que ya empuja.</b> Por eso los noventa días no se sienten como una carga agregada: se sienten como acomodarse.</p>
+</div>
+
+<!-- ═══ EL PROTOCOLO ═══ -->
+<div class="sec">
+  <div class="sn">El cambio más importante de esta revisión</div>
+  <div class="st">El protocolo deja de ser una semana.</div>
+  <div class="sd">Hoy el trabajo interior es un bloque de siete días en la semana 1. Cuando llega la prueba real — decir el precio en cámara el día 27, decirlo en una llamada el día 36, sostenerlo con el segundo el día 45 — ese trabajo tiene treinta días de viejo y se evaporó.</div>
+</div>
+
+<div class="caja oro">
+  <h3>Tres aperturas y un cierre</h3>
+  <p><b>Cada apertura cae inmediatamente antes de su examen.</b> Nunca más de dos días entre el ejercicio y la situación real que lo pone a prueba. Eso es lo que produce más resultado en menos tiempo: no más ejercicios, sino los mismos puestos donde duelen.</p>
+  <p>Y cada sesión tiene una salida observable. Una frase escrita, un audio grabado, una lista tachada. <b>Si no deja rastro, no ocurrió.</b></p>
+</div>
+
+<div class="sec" style="border-top:0;margin-top:34px;padding-top:0">
+  <div class="sn">Apertura 1 · días 3 a 7</div>
+  <div class="st">El cuarto.</div>
+  <div class="sd">Antes de poner precio. Cinco sesiones de veinte minutos, una por día, encima de la sesión del camino.</div>
+</div>
+
+<div class="ses ancla">
+  <div class="sh"><span class="sd2">Día 3</span><span class="stt">El número</span><span class="fuente">medición</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Calcula su hora real neta con los datos que cargó ayer. Y antes de anotarla, se queda diez segundos con el número y escribe <b>dónde lo sintió en el cuerpo.</b></span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">El número a mano, y una palabra al lado: pecho, garganta, estómago.</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 9, cuando escriba el precio nuevo</span></div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 4</span><span class="stt">Para qué te sirve cobrar poco</span><span class="fuente">el síntoma como solución</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Cobrar poco no es un error: es una solución que encontró para no tener que hacer otra cosa. <b>Mientras cobre poco, hay cosas que no le van a pedir.</b></span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Completa tres veces: «Mientras cobre poco, no tengo que…». No exponerme. No garantizar nada. No que me envidien. No hacerme cargo del resultado.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">Las tres frases completas, en su letra</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 18, cuando escriba su garantía — que es exactamente hacerse cargo del resultado</span></div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 5</span><span class="stt">El dinero en el cuerpo</span><span class="fuente">bodyset · 45 min de audio</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Escucha con los ojos cerrados, sin hacer nada. Después escribe lo que apareció, sin corregirlo.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">La página del cuaderno, fotografiada</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 21, cuando ancle el precio en el cuerpo</span></div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 6</span><span class="stt">Los tres que te formaron</span><span class="fuente">deseo heredado</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Antes de decidir qué vale su trabajo, alguien ya se lo dijo. Casi siempre tres personas, casi siempre en su casa o en su primer trabajo.</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Nombra tres personas que le enseñaron qué es trabajar bien, y escribe <b>la frase exacta que cada una decía sobre el dinero.</b> Después marca cuál de las tres frases todavía usa.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">Tres nombres, tres frases, una marcada</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 43, cuando trabaje el permiso</span></div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 7</span><span class="stt">El que te parece un vendehumo</span><span class="fuente">sombra</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Lo que más le molesta del que cobra caro suele ser una capacidad que él no se permite. <b>La molestia marca el lugar exacto donde le falta algo</b>, no donde el otro sobra.</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Escribe tres profesionales de su rubro que le parecen exagerados. Al lado de cada uno, una cosa que ese hace y él no. Después elige una y la practica esta semana.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">Tres nombres y una capacidad elegida</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 10, cuando mande los mensajes de subida de precio</span></div>
+</div>
+
+<div class="sec" style="border-top:0;margin-top:40px;padding-top:0">
+  <div class="sn">Apertura 2 · días 20 y 21</div>
+  <div class="st">El cuerpo.</div>
+  <div class="sd">Antes del rodaje y antes de la primera llamada. Es la única apertura que trabaja voz y postura, y por eso cae pegada al día en que se expone.</div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 20</span><span class="stt">Cobrar libera al otro</span><span class="fuente">el pan de la vergüenza</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Quien recibe algo valioso y no da nada a cambio queda en deuda, y esa deuda pesa. <b>El precio es lo que libera a su consultante de deberle la vida.</b> El que regala sanación deja al otro obligado para siempre.</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Escribe qué recibe su consultante a cambio del dinero, y después qué se libera <b>él</b> al pagar. Dos columnas.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">Las dos columnas escritas</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 27, cuando diga el precio en cámara en su VSL</span></div>
+</div>
+
+<div class="ses ancla">
+  <div class="sh"><span class="sd2">Día 21</span><span class="stt">El ancla del precio</span><span class="fuente">bodyset · trabajo de voz</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">El precio no se sostiene con argumentos: se sostiene con una voz que no cambia. <b>Y la voz se entrena por repetición, como una patada.</b></span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Se graba diciendo su número veinte veces seguidas, en voz alta, con el mismo gesto físico antes de cada una. Después escucha la uno y la veinte.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v"><b>El audio donde la vez veinte suena igual que la uno.</b> Si todavía sube el tono o acelera, repite mañana.</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 36, en la W, en el minuto del precio y en el silencio que sigue</span></div>
+</div>
+
+<div class="sec" style="border-top:0;margin-top:40px;padding-top:0">
+  <div class="sn">Apertura 3 · días 43 y 44</div>
+  <div class="st">El permiso.</div>
+  <div class="sd">Antes del segundo cobro, que es donde la mayoría se negocia sola. Acá se trabaja lo que ningún competidor toca: las lealtades familiares.</div>
+</div>
+
+<div class="ses ancla">
+  <div class="sh"><span class="sd2">Día 43</span><span class="stt">A quién traicionarías ganando más</span><span class="fuente">lealtades invisibles</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Muchos profesionales de salud vienen de familias que trabajaron toda la vida sin cobrar lo que valían. <b>Ganar diez mil puede sentirse como dejar atrás a alguien</b>, y eso frena más que cualquier objeción de un consultante. Es el nudo específico de tu avatar y hoy el camino no lo toca.</p></span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Nombra a la persona. Escribe qué hizo esa persona por él. Y escribe el permiso en primera persona, con nombre adentro, y lo dice en voz alta una vez.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">El permiso escrito y dicho</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El segundo cobro, donde el precio no baja</span></div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 44</span><span class="stt">Soltar lo que te deben</span><span class="fuente">perdón como liberación</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">Todo profesional de salud arrastra una lista: consultantes que no pagaron, colegas que se llevaron su trabajo, formaciones que prometieron y no cumplieron. <b>Esa lista se cobra sola, en desconfianza, con quien entra hoy.</b></span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Escribe la lista completa de lo que le deben, en tiempo, dinero y reconocimiento. Al lado de cada uno, qué le cuesta a él seguir cobrándola. Después la tacha en rojo, una por una.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">La lista tachada, fotografiada</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">Su bandeja del día 44: volver sobre quien dijo que no, sin resentimiento</span></div>
+</div>
+
+<div class="sec" style="border-top:0;margin-top:40px;padding-top:0">
+  <div class="sn">Cierre · día 86</div>
+  <div class="st">El recipiente.</div>
+</div>
+
+<div class="ses">
+  <div class="sh"><span class="sd2">Día 86</span><span class="stt">Agrandar el vaso</span><span class="fuente">capacidad de recibir</span></div>
+  <div class="f"><span class="k">La idea</span><span class="v">El ingreso no crece más que el recipiente que lo sostiene. <b>Quien no puede imaginar con detalle el ingreso siguiente, lo devuelve sin darse cuenta</b> — con descuentos, con horas regaladas, con clientes que no cobra.</span></div>
+  <div class="f"><span class="k">Hace</span><span class="v">Escribe su día completo con el ingreso siguiente, en detalle físico: a qué hora se levanta, a quién atiende, qué dejó de hacer, qué paga.</span></div>
+  <div class="f"><span class="k">Salida</span><span class="v">Su día siguiente escrito, en presente</span></div>
+  <div class="f ex"><span class="k">Su examen</span><span class="v">El día 88, cuando escriba su plan de 180</span></div>
+</div>
+
+<!-- ═══ FUENTES ═══ -->
+<div class="sec">
+  <div class="sn">La regla que protege todo esto</div>
+  <div class="st">Las fuentes se usan. No se nombran.</div>
+  <div class="sd">Adentro del mismo programa hay médicos, psicólogos, coaches, nutricionistas, terapeutas y entrenadores. Lo que a uno le da profundidad, a otro le hace cerrar la app.</div>
+</div>
+
+<div class="caja">
+  <p>Un traumatólogo abandona si le aparece la palabra kabalá. Un psicólogo lacaniano se ofende si le explican mal a Lacan. Un coach ya escuchó veinte veces la palabra sombra y dejó de escucharla. <b>Y los tres hacen el mismo ejercicio sin problema si está escrito en castellano común.</b></p>
+  <p>Entonces: cada sesión toma una sola operación de una sola tradición, y la dice en la lengua de todos los días. «El síntoma es una solución» se convierte en «para qué te sirve cobrar poco». «Recibir para compartir» se convierte en «cobrar libera al otro». El ejercicio es el mismo, la profundidad es la misma, y no se pierde a nadie por el envase.</p>
+  <p><b>Lo que sí se nombra:</b> que cada ejercicio viene de un linaje serio y que ninguno se inventó para esta app. Eso le da peso sin abrir una discusión de escuelas.</p>
+  <p><b>Y lo que se dice una sola vez, el día 3:</b> esto no es terapia y no la reemplaza. Es entrenamiento para dirigir un negocio. Tus clientes son clínicos — si la app parece consultorio, pierde autoridad y gana un problema.</p>
+</div>
+
+<!-- ═══ AGENTES ═══ -->
+<div class="sec">
+  <div class="sn">El Dojo por dentro</div>
+  <div class="st">Ocho agentes que se ganan.</div>
+  <div class="sd">Ninguno está disponible el día 1. Cada uno se abre con una evidencia, y esa evidencia es exactamente lo que el agente necesita para servir de algo. El Escriba sin oferta escribe basura; el Sparring sin precio no puede objetar nada.</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Espejo</span><span class="agd">día 3</span></div>
+  <p>El compañero de las tres aperturas. Devuelve preguntas, nunca interpretaciones. Guarda lo que va saliendo y se lo trae de vuelta el día del examen: <b>«el día 4 escribiste esto; hoy vas a escribir tu garantía».</b></p>
+  <div class="llave"><b>Se abre con:</b> su hora real neta cargada</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Crítico</span><span class="agd">día 15</span></div>
+  <p>Juzga su método contra los tres exámenes y no aprueba por simpatía. Devuelve qué falta, en una lista corta. <b>Es el primero que le dice que no.</b></p>
+  <div class="llave"><b>Se abre con:</b> su método escrito con nombre y etapas</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Escriba</span><span class="agd">día 22</span></div>
+  <p>Escribe con él la página, el VSL y los tres anuncios, cargado con su ADN y con la rama de tráfico que eligió. No escribe por él: le devuelve tres versiones y le pregunta cuál suena a su voz.</p>
+  <div class="llave"><b>Se abre con:</b> oferta, garantía y escalera selladas</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">La Cámara</span><span class="agd">día 24</span></div>
+  <p>Le arma el set con las fotos de su casa, le corrige luz, encuadre y ropa, y le devuelve su guion leído con las pausas marcadas. <b>Existe para que el día 27 no se posponga.</b></p>
+  <div class="llave"><b>Se abre con:</b> su perfil cerrado, las cuatro cosas</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Sparring</span><span class="agd">día 28</span></div>
+  <p>El más importante de los ocho y el único que pega de vuelta. Actúa a su consultante, objeta, duda, pide descuento, y al final le devuelve los cuatro números de su llamada. <b>Acá se pierde la primera venta sin que le cueste una venta.</b></p>
+  <div class="llave"><b>Se abre con:</b> su propia agenda de prueba completada de punta a punta</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Tablero</span><span class="agd">día 33</span></div>
+  <p>Lee sus cuatro números y le dice cuál de los tres cuellos tiene. Nada de gráficos: una frase y una acción. <b>Y hasta el día 46 le contesta lo mismo ante cualquier pregunta de cambiar algo: todavía no.</b></p>
+  <div class="llave"><b>Se abre con:</b> campaña activa</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Arquitecto</span><span class="agd">día 47</span></div>
+  <p>Arma con él la cinta: qué se graba una vez, qué va en vivo, cómo quedan las estaciones y qué mide en la línea base. Le devuelve sus cuatro etapas listas para cargar.</p>
+  <div class="llave"><b>Se abre con:</b> su primer cobro del sistema</div>
+</div>
+
+<div class="ag">
+  <div class="agh"><span class="agn">El Estratega</span><span class="agd">día 61</span></div>
+  <p>El último. Saca sus tres enfoques de la Matriz ABC y escribe con él las doce semanas. <b>Solo escribe: no le deja grabar nada dentro de los noventa días.</b></p>
+  <div class="llave"><b>Se abre con:</b> cinturón rojo</div>
+</div>
+
+<!-- ═══ CINTURONES ═══ -->
+<div class="sec">
+  <div class="sn">La progresión real</div>
+  <div class="st">Once grados, con sus colores verdaderos.</div>
+  <div class="sd">En taekwondo el color no decora: cuenta una historia de una semilla que se vuelve árbol. Esa historia es exactamente la del camino, y conviene usarla entera en vez de inventar nueve niveles. Cada grado tiene su forma: una secuencia que se ejecuta, no que se explica.</div>
+</div>
+
+<div class="caja">
+
+  <div class="cin">
+    <div class="tira" style="background:#FFFFFF"></div>
+    <div>
+      <div class="cd">10.º gup · día 1</div>
+      <div class="cn">Blanco</div>
+      <div class="cm">La semilla bajo la nieve. No sabe nada de negocios y eso es el punto de partida correcto.</div>
+      <div class="cf">Su forma: el búnker abierto y el pacto publicado.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#FFFFFF"><i style="background:#E8C24A"></i></div>
+    <div>
+      <div class="cd">9.º gup · día 3</div>
+      <div class="cn">Blanco punta amarilla</div>
+      <div class="cm">La semilla toca la tierra. Ya tiene un número propio y ya no puede decir que no sabía.</div>
+      <div class="cf">Su forma: su hora real neta, escrita a mano.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#E8C24A"></div>
+    <div>
+      <div class="cd">8.º gup · día 12</div>
+      <div class="cn">Amarillo</div>
+      <div class="cm">La tierra. <b>Cobró al precio nuevo antes de gastar un peso en publicidad.</b></div>
+      <div class="cf">Su forma: la captura del primer cobro a su propia cartera.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#E8C24A"><i style="background:#4E8C57"></i></div>
+    <div>
+      <div class="cd">7.º gup · día 16</div>
+      <div class="cn">Amarillo punta verde</div>
+      <div class="cm">Asoma el tallo. Su método pasó los tres exámenes y dejó de ser una intuición.</div>
+      <div class="cf">Su forma: el método aprobado por el Crítico.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#4E8C57"></div>
+    <div>
+      <div class="cd">6.º gup · día 19</div>
+      <div class="cn">Verde</div>
+      <div class="cm">La planta en pie. Tiene qué vender: oferta, garantía con compromisos y escalera.</div>
+      <div class="cf">Su forma: la oferta completa en una sola página.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#4E8C57"><i style="background:#3A6EA5"></i></div>
+    <div>
+      <div class="cd">5.º gup · día 25</div>
+      <div class="cn">Verde punta azul</div>
+      <div class="cm">La planta busca el cielo. Su página existe en internet, con su nombre.</div>
+      <div class="cf">Su forma: el enlace vivo.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#3A6EA5"></div>
+    <div>
+      <div class="cd">4.º gup · día 28</div>
+      <div class="cn">Azul</div>
+      <div class="cm">El cielo. Circuito completo y andando: página, video, formulario y agenda.</div>
+      <div class="cf">Su forma: agendarse a sí mismo de punta a punta desde el teléfono.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#3A6EA5"><i style="background:#A6392E"></i></div>
+    <div>
+      <div class="cd">3.º gup · día 31</div>
+      <div class="cn">Azul punta roja</div>
+      <div class="cm">Puso dinero. Desde hoy corre catorce días sin tocar nada.</div>
+      <div class="cf">Su forma: la campaña activa, con fecha y hora.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#A6392E"></div>
+    <div>
+      <div class="cd">2.º gup · día 45</div>
+      <div class="cn">Rojo</div>
+      <div class="cm">El sol, y también el aviso de peligro. <b>Alguien que no lo conocía le pagó su precio digno — y acá es donde la mayoría lo baja con el segundo.</b></div>
+      <div class="cf">Su forma: el cobro, y el permiso escrito del día 43 al lado.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#A6392E"><i style="background:#1A1815"></i></div>
+    <div>
+      <div class="cd">1.º gup · día 55</div>
+      <div class="cn">Rojo punta negra</div>
+      <div class="cm">Controla la fuerza. Su app abierta con un consultante adentro y su máquina escrita con sus propios números.</div>
+      <div class="cf">Su forma: la captura desde el celular de su consultante.</div>
+    </div>
+  </div>
+
+  <div class="cin">
+    <div class="tira" style="background:#1A1815"></div>
+    <div>
+      <div class="cd">1.<sup>er</sup> Dan · día 90</div>
+      <div class="cn">Negro</div>
+      <div class="cm">Lo contrario del blanco, y el color que ya no se altera. Diez consultantes a su precio digno, su sistema andando y su método adentro de su app.</div>
+      <div class="cf">Su forma: los dos números lado a lado — el del día 3 y el de hoy.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="caja oro">
+  <h3>Lo que sostiene toda la metáfora</h3>
+  <p>En taekwondo el cinturón negro no es el final: es el primer Dan, el punto donde empieza el aprendizaje real. <b>Eso te resuelve el día 88 sin que suene a venta.</b></p>
+  <p>No tiene que convencerlo de seguir. Tiene que decirle lo que cualquiera que entrenó sabe: el negro es donde arranca. Y lo que sigue ya no es construir, es que lo conozcan.</p>
+</div>
+
+</div>
+</body>
+</html>

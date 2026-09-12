@@ -1,0 +1,82 @@
+/* diseno/tokens.css — sistema visual TCD
+   Los valores salen de la app que ya existe. No se rediseña: se documenta.
+   Regla que atraviesa todo: piso de 15px, un solo oro, sin modo oscuro. */
+
+:root{
+  /* ── superficie ── */
+  --bg:        #FAF5EA;
+  --card:      #FFFDF7;
+  --card2:     #F5EFE1;
+
+  /* ── líneas ── */
+  --line:      #EBE1CF;
+  --line2:     #DFD3BC;
+
+  /* ── tinta ── */
+  --ink:       #2A2118;
+  --ink2:      #6E6252;
+  --ink3:      #9A8C78;   /* nunca por debajo de 15px */
+
+  /* ── oro · uno solo, mate, sin degradé ── */
+  --oro:       #B0822E;
+  --oro-d:     #8E6824;
+  --oro-soft:  #F3EAD6;
+
+  /* ── semántico ── */
+  --tilde:     #4A7C59;   /* aprobado, tildado, entregado */
+  --tacha:     #A33A2A;   /* tachado, retirado, freno */
+  --ventana:   #7A6FA3;   /* grado esperando a que alguien pague */
+
+  /* ── cinturones ── */
+  --cint-blanco:   #FFFFFF;
+  --cint-amarillo: #E8C24A;
+  --cint-verde:    #4E8C57;
+  --cint-azul:     #3A6EA5;
+  --cint-rojo:     #A6392E;
+  --cint-negro:    #1A1815;
+
+  /* ── tipografía ── */
+  --fd: 'Fraunces', Georgia, serif;      /* SOLO títulos */
+  --fb: 'Sora', system-ui, -apple-system, sans-serif;
+
+  --t-titulo:     33px;   /* Fraunces 400 */
+  --t-seccion:    26px;   /* Fraunces 400 */
+  --t-cuerpo:     17.5px;
+  --t-boton:      18px;
+  --t-chip:       15px;   /* piso de contenido */
+  --t-kicker:     14px;   /* versalita, letter-spacing .2em */
+  --t-tab:        14px;   /* única excepción al piso, va con ícono */
+
+  /* ── forma ── */
+  --r:  20px;
+  --r2: 26px;
+  --r3: 99px;
+
+  /* ── sombra · doble y muy suave, nunca gris genérico ── */
+  --sombra: 0 1px 2px rgba(42,33,24,.03), 0 12px 32px rgba(42,33,24,.05);
+
+  /* ── movimiento · cinco transiciones en toda la app ── */
+  --m-paso:     120ms;
+  --m-tarjeta:  180ms;
+  --m-cinturon: 400ms;
+  --m-llegada:  1200ms;   /* única animación real, día 87 */
+}
+
+/* El grano. Da superficie sin dar decoración y baja la fatiga de mirar crema
+   plana. No se toca. */
+.grain{
+  position:fixed; inset:-120px; z-index:0; pointer-events:none;
+  opacity:.045; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Foco visible siempre. */
+:focus-visible{ outline:2px solid var(--oro); outline-offset:2px; }
+
+/* Las cinco transiciones se apagan juntas. La app funciona igual sin ninguna. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    transition-duration:.01ms !important;
+  }
+}
