@@ -5,6 +5,7 @@
 // el JSON a mano.
 
 import seed from './roadmap.seed.json'
+import type { PilarId } from './supabase'
 
 // ── primitivas ──────────────────────────────────────────────────────────────
 
@@ -77,6 +78,12 @@ export interface Cinturon {
   forma: string
   /** true = depende de que alguien pague. Se otorga cuando ocurre, no por fecha */
   en_ventana: boolean
+  /** Derivados al cargar — no viven en el JSON, salen de su posición y su color. */
+  orden: number
+  metafora: string
+  emoji: string
+  /** El nombre viejo, derivado: 'Amarillo punta verde' -> 'amarillo_punta_verde'. */
+  slug: string
 }
 
 export interface Agente {
@@ -139,7 +146,31 @@ export interface Roadmap {
 
 // ── export ──────────────────────────────────────────────────────────────────
 
-export const roadmap = seed as unknown as Roadmap
+type CinturonCrudo = Omit<Cinturon, 'orden' | 'metafora' | 'emoji' | 'slug'>
+type RoadmapCrudo = Omit<Roadmap, 'cinturones'> & { cinturones: CinturonCrudo[] }
+
+const crudo = seed as unknown as RoadmapCrudo
+
+/** El emoji sale del color base del cinturón — no hay tabla que mantener. */
+const EMOJI_POR_COLOR: Record<string, string> = {
+  '#FFFFFF': '\u{1F90D}',
+  '#E8C24A': '\u{1F49B}',
+  '#4E8C57': '\u{1F49A}',
+  '#3A6EA5': '\u{1F499}',
+  '#A6392E': '\u{2764}\u{FE0F}',
+  '#1A1815': '\u{1F5A4}',
+}
+
+export const roadmap: Roadmap = {
+  ...crudo,
+  cinturones: crudo.cinturones.map((c, i) => ({
+    ...c,
+    orden: i,
+    metafora: c.significado,
+    emoji: EMOJI_POR_COLOR[c.color.toUpperCase()] ?? '\u{1F94B}',
+    slug: c.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_'),
+  })),
+}
 
 // ── índices, para no recorrer el array en cada render ────────────────────────
 
@@ -222,3 +253,199 @@ export const pasoEsencialDe = (dia: number): string | undefined => {
 /** Total de trabajo del cliente, en minutos. Verificado: 4265 ≈ 71 horas. */
 export const cargaTotal = (): number =>
   roadmap.jornadas.reduce((s, j) => s + j.minutos, 0)
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CAPA DE COMPATIBILIDAD — el vocabulario viejo, derivado del JSON nuevo.
+
+   No duplica un solo dato: todo sale de `roadmap`. Los pilares se derivan del
+   prefijo del código de cada pieza (P4.2 → pilar P4), las metas son las piezas
+   enriquecidas con lo que declara su jornada, y las fases son los sistemas.
+   Por eso aguanta que se reordene el camino: deriva de la FORMA, no del
+   contenido. Cuando los componentes hablen el idioma nuevo, este bloque se
+   borra entero y no queda nada colgando.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+export interface RoadmapMeta {
+  codigo: string
+  titulo: string
+  descripcion: string
+  tipo: 'VIDEO' | 'HERRAMIENTA' | 'COACH'
+  orden: number
+  dia_asignado: number
+  tiempo_estimado: string
+  es_estrella: boolean
+  usa_ia: boolean
+  adn_field?: string
+  video_youtube_id?: string
+  herramienta_id?: string
+  evidencia_requerida?: { descripcion: string; tipo: TipoEvidencia; valida: string }
+  checklist: string[]
+  coach_instruccion?: string
+  requiere_datos_de?: string[]
+  icon: string
+  set: SetGrabacion
+  estado: EstadoPieza
+  sistema: number
+}
+
+export interface RoadmapPilar {
+  id: PilarId
+  numero: number
+  numero_orden: number
+  titulo: string
+  subtitulo: string
+  fase: number
+  icon: string
+  metas: RoadmapMeta[]
+  desbloqueo?: string
+  es_hito: boolean
+  hito_tipo?: string
+  hito_mensaje?: string
+  mentor_pregunta?: string
+  estrellas_requeridas: number
+}
+
+export interface FaseRoadmap {
+  fase: number
+  titulo: string
+  subtitulo: string
+  dias: string
+  metodo_letra: string | null
+}
+
+/** La jornada donde vive cada pieza — una sola pasada, no una búsqueda por meta. */
+const jornadaDePieza = new Map<string, Jornada>()
+for (const j of roadmap.jornadas) {
+  for (const cod of j.piezas) if (!jornadaDePieza.has(cod)) jornadaDePieza.set(cod, j)
+}
+
+/** Los sistemas reales del JSON. Lo que cae afuera va a la fase de cierre. */
+const SISTEMAS_VALIDOS = new Set(roadmap.sistemas.map((s) => s.n as number))
+const FASE_CIERRE = Math.max(...roadmap.sistemas.map((s) => s.n)) + 1
+const HAY_PIEZAS_SUELTAS = roadmap.piezas.some((p) => !SISTEMAS_VALIDOS.has(p.sistema))
+
+function faseDePieza(p: Pieza): number {
+  return SISTEMAS_VALIDOS.has(p.sistema) ? p.sistema : FASE_CIERRE
+}
+
+function tipoDeMeta(j: Jornada | undefined): 'VIDEO' | 'HERRAMIENTA' | 'COACH' {
+  if (!j) return 'VIDEO'
+  if (j.acceso || j.manual) return 'HERRAMIENTA'
+  if (j.agente) return 'COACH'
+  return 'VIDEO'
+}
+
+function metaDePieza(p: Pieza, orden: number): RoadmapMeta {
+  const j = jornadaDePieza.get(p.codigo)
+  return {
+    codigo: p.codigo,
+    titulo: p.titulo,
+    descripcion: j?.titulo ?? p.titulo,
+    tipo: tipoDeMeta(j),
+    orden,
+    dia_asignado: p.dia,
+    tiempo_estimado: `${p.minutos} min`,
+    es_estrella: Boolean(j?.cinturon),
+    usa_ia: Boolean(j?.agente),
+    adn_field: j?.adn_escribe[0],
+    video_youtube_id: undefined,
+    herramienta_id: j?.acceso ?? undefined,
+    evidencia_requerida: j?.evidencias[0]
+      ? { descripcion: j.evidencias[0].valida, tipo: j.evidencias[0].tipo, valida: j.evidencias[0].valida }
+      : undefined,
+    checklist: j?.pasos ?? [],
+    coach_instruccion: j?.nota ?? undefined,
+    icon: 'Circle',
+    set: p.set,
+    estado: p.estado,
+    sistema: p.sistema,
+  }
+}
+
+/** Pilares derivados del prefijo del código: P4.2 y P4.3 caen en el pilar P4. */
+function derivarPilares(): RoadmapPilar[] {
+  const porPilar = new Map<string, Pieza[]>()
+  for (const p of roadmap.piezas) {
+    const id = p.codigo.split('.')[0]
+    const lista = porPilar.get(id)
+    if (lista) lista.push(p)
+    else porPilar.set(id, [p])
+  }
+
+  const pilares: RoadmapPilar[] = []
+  for (const [id, piezas] of porPilar) {
+    const ordenadas = [...piezas].sort((a, b) => a.dia - b.dia || a.codigo.localeCompare(b.codigo))
+    const metas = ordenadas.map(metaDePieza)
+    const primera = ordenadas[0]
+    const sistema = roadmap.sistemas.find((s) => s.n === primera.sistema)
+    const cinturonDelPilar = ordenadas
+      .map((p) => jornadaDePieza.get(p.codigo)?.cinturon)
+      .find((c): c is CinturonId => Boolean(c))
+
+    pilares.push({
+      id: id as PilarId,
+      numero: Number(id.replace(/\D/g, '')) || 0,
+      numero_orden: Number(id.replace(/\D/g, '')) || 0,
+      titulo: jornadaDePieza.get(primera.codigo)?.titulo ?? primera.titulo,
+      subtitulo: sistema?.nombre ?? '',
+      fase: faseDePieza(primera),
+      icon: 'Circle',
+      metas,
+      desbloqueo: undefined,
+      es_hito: Boolean(cinturonDelPilar),
+      hito_tipo: cinturonDelPilar ? 'cinturon' : undefined,
+      hito_mensaje: cinturonDelPilar
+        ? roadmap.cinturones.find((c) => c.id === cinturonDelPilar)?.forma
+        : undefined,
+      mentor_pregunta: undefined,
+      estrellas_requeridas: metas.filter((m) => m.es_estrella).length,
+    })
+  }
+
+  return pilares.sort((a, b) => a.numero - b.numero)
+}
+
+export const SEED_ROADMAP_V2: RoadmapPilar[] = derivarPilares()
+export const SEED_ROADMAP_V3: RoadmapPilar[] = SEED_ROADMAP_V2
+export const TOTAL_METAS: number = SEED_ROADMAP_V2.reduce((a, p) => a + p.metas.length, 0)
+
+export const FASES_ROADMAP: FaseRoadmap[] = [
+  ...roadmap.sistemas.map((s) => ({
+    fase: s.n as number,
+    titulo: s.nombre,
+    subtitulo: `Sistema ${s.n}`,
+    dias: `Días ${s.dias}`,
+    metodo_letra: null,
+  })),
+  ...(HAY_PIEZAS_SUELTAS
+    ? [{
+        fase: FASE_CIERRE,
+        titulo: 'El cierre',
+        subtitulo: 'Lo que queda instalado',
+        dias: (() => {
+          const dias = roadmap.piezas.filter((p) => !SISTEMAS_VALIDOS.has(p.sistema)).map((p) => p.dia)
+          return `Días ${Math.min(...dias)}-${Math.max(...dias)}`
+        })(),
+        metodo_letra: null,
+      }]
+    : []),
+]
+
+export const CINTURONES: Cinturon[] = roadmap.cinturones
+
+/** El cinturón que corresponde a un pilar, por su id o por su número. */
+export function calcularCinturon(pilar: string | number): Cinturon {
+  const id = typeof pilar === 'number' ? `P${pilar}` : pilar
+  const objetivo = SEED_ROADMAP_V2.find((p) => p.id === id)
+  const cod = objetivo?.metas
+    .map((m) => jornadaDePieza.get(m.codigo)?.cinturon)
+    .find((c): c is CinturonId => Boolean(c))
+  return (cod && roadmap.cinturones.find((c) => c.id === cod)) || roadmap.cinturones[0]
+}
+
+/** Nivel 1-5 según hasta qué pilar llegó. Se deriva del reparto de sistemas. */
+export function calcularNivel(pilarMasAltoCompletado: number): 1 | 2 | 3 | 4 | 5 {
+  const pilar = SEED_ROADMAP_V2.find((p) => p.numero === pilarMasAltoCompletado)
+  const fase = pilar?.fase ?? 1
+  return Math.min(5, Math.max(1, fase)) as 1 | 2 | 3 | 4 | 5
+}

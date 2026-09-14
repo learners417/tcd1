@@ -376,7 +376,7 @@ export interface AdnValidacionOrganica {
 // ─── Tipos V3 — Versión Final Definitiva ─────────────────────────────────────
 
 export type PilarId =
-  | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8'
+  | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8' | 'P9'
   | 'P9A' | 'P9B' | 'P9C' | 'P10' | 'P11';
 
 /** Tipos de tarea permitidos en el roadmap (v7 Regla #2: solo 3 tipos, en este orden). */

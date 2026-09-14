@@ -33,6 +33,10 @@ const FIJOS: CoachQuickReply[] = [
 ];
 
 const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
+  P9: [
+    { id: 'p9_instalar', label: 'Instalemos el sistema' },
+    { id: 'p9_revisar', label: 'Revisemos lo que ya monté' },
+  ],
   P0: [
     { id: 'p0_objetivo', label: 'Definamos mi objetivo' },
     { id: 'p0_punto_partida', label: 'Ver mi punto de partida real' },
