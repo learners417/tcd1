@@ -89,19 +89,25 @@ CINTURONES = [
  ("1dan","Negro","#1A1815",None,90,"Lo que ya no se altera","Los dos números lado a lado",True),
 ]
 
+# Nueve entrenadores. Ocho son los que ya existen como código en src/lib/agents
+# (diego, sofi, vera, mateo, caro, bruno, lucas, ramiro) y el Espejo, que no
+# tiene equivalente y sostiene once jornadas del trabajo interno.
+# El día es ESTIMACIÓN. Lo que abre al entrenador es "se_abre_con".
 AGENTES = [
- ("espejo","El Espejo",3,"hora_real_neta_cargada"),
- ("critico","El Crítico",15,"metodo_escrito"),
- ("escriba","El Escriba",22,"oferta_sellada"),
- ("camara","La Cámara",24,"perfil_cerrado"),
- ("sparring","El Sparring",28,"agenda_de_prueba"),
- ("tablero","El Tablero",33,"campana_activa"),
- ("arquitecto","El Arquitecto",47,"primer_cobro_sistema"),
- ("estratega","El Estratega",61,"cinturon_2gup"),
+ ("espejo","El Espejo","el trabajo interno",3,"hora_real_neta_cargada"),
+ ("vera","Vera","tu precio",9,"precio_digno_sellado"),
+ ("sofi","Sofi","tus mensajes",14,"veinte_mensajes_enviados"),
+ ("diego","Diego","tu producto",15,"metodo_escrito"),
+ ("mateo","Mateo","tu contenido",22,"oferta_sellada"),
+ ("caro","Caro","tu cámara",24,"perfil_cerrado"),
+ ("lucas","Lucas","tus llamadas",36,"w_dibujada"),
+ ("ramiro","Ramiro","tu embudo",33,"campana_activa"),
+ ("bruno","Bruno","tu entrega",47,"primer_cobro_sistema"),
 ]
 
 FRENOS = [
- ("F-ORDEN","No se abre una sesión sin cerrar la anterior","evidencia_anterior_aprobada",
+ ("F-ORDEN","No se abre una sesión sin cerrar la anterior, salvo que su evidencia dependa de que otro pague",
+  "evidencia_anterior_aprobada or anterior.avanza_sin_evidencia",
   "El orden es el método. Terminá la de ayer."),
  ("F-PAGINA","El día 26 no abre sin el enlace de la página","adn.sistema.url_pagina",
   "Sin página publicada, el guion del video no tiene dónde vivir."),
@@ -116,6 +122,9 @@ FRENOS = [
   "Tu oferta no puede valer menos que lo que ya cobrás."),
  ("F-ADN","Ningún agente arranca con campos requeridos vacíos","adn.campos_requeridos",
   "{agente} necesita {campo}. Volvé al día {dia}."),
+ ("F-GRADO-ESPERA","El grado que depende de que otro pague queda pendiente y visible; el camino sigue",
+  "cinturon.en_ventana",
+  "Sigues en {grado_actual}. Te falta {lo_que_falta} para el siguiente. Mientras tanto, el paso de hoy es este."),
  ("F-ORGANICO","No se graba contenido de marca dentro de los 90 días","dia>90",
   "Hoy escribís las doce. Se graban en un solo día, después del 90."),
 ]
@@ -136,10 +145,15 @@ def add(dia, tipo, titulo, **kw):
          # modo 15 minutos: el índice del paso que produce la evidencia.
          # Por defecto el último; se puede fijar con esencial=N (base 1).
          "paso_esencial": kw.get("esencial", len(kw.get("pasos", [])) or None)}
+    # Si TODA la evidencia depende de que otro pague, el paso se puede dar igual
+    # y lo que queda pendiente es el grado, no el camino.
+    evs = j["evidencias"]
+    j["avanza_sin_evidencia"] = bool(evs) and all(e.get("del_mercado") for e in evs)
     J[dia] = j
 
-def ev(tipo, nombre, valida):
-    return {"tipo": tipo, "nombre": nombre, "valida": valida}
+def ev(tipo, nombre, valida, mercado=False):
+    """mercado=True: la evidencia depende de que otro pague. No traba el camino."""
+    return {"tipo": tipo, "nombre": nombre, "valida": valida, "del_mercado": mercado}
 
 add(0,"entrega_tecnica","Entrega técnica y llamada de bienvenida",minutos=20,
     evidencias=[ev("evento","Primer ingreso","alta en TCD y MCD registrada")],
@@ -154,7 +168,7 @@ add(1,"sesion","Entrar y abrir el búnker",sistema=1,minutos=50,
                 ev("texto","El por qué","mínimo 8 palabras, primera persona")],
     adn=["identidad","historia.por_que_empezo"],cinturon="10gup")
 
-add(2,"sesion","Cargar tu clínica",sistema=4,minutos=90,piezas=["P0.4"],tutoriales=["L-02"],
+add(2,"sesion","Cargar tu clínica",sistema=4,minutos=90,piezas=["P0.4","P1.2"],tutoriales=["L-02"],
     pasos=["Abrí MCD desde el tab Clínica","Cargá todos tus consultantes activos",
            "Cargá tu agenda de esta semana","Cargá los ingresos de los últimos tres meses",
            "Cargá tus gastos fijos","No ordenes nada: hoy solo entra información"],
@@ -163,7 +177,7 @@ add(2,"sesion","Cargar tu clínica",sistema=4,minutos=90,piezas=["P0.4"],tutoria
                 ev("numero","Ingreso promedio 3 meses","> 0")],
     adn=["numeros.ingreso_mensual_actual","numeros.precio_viejo"])
 
-add(3,"sesion","Tu número",sistema=1,minutos=45,piezas=["P1.0"],agente="espejo",
+add(3,"sesion","Tu número",sistema=1,minutos=45,piezas=["P1.0","P1.2b"],agente="espejo",
     pasos=["La app trae los datos del día 2","Sumá tus horas reales de la semana",
            "La app calcula tu hora real neta","Quedate diez segundos con el número",
            "Escribí dónde lo sentiste","Escribilo a mano y tapalo"],
@@ -173,7 +187,7 @@ add(3,"sesion","Tu número",sistema=1,minutos=45,piezas=["P1.0"],agente="espejo"
     adn=["numeros.hora_real_neta_inicial","cuaderno"],cinturon="9gup",
     nota="Acá y solo acá: 'esto es entrenamiento para dirigir un negocio, no es terapia'.")
 
-add(4,"sesion","Para qué te sirve cobrar poco",sistema=1,minutos=45,piezas=["P1.1"],
+add(4,"sesion","Para qué te sirve cobrar poco",sistema=1,minutos=45,piezas=["P1.1","P1.3"],
     agente="espejo",manual="LID-2",
     pasos=["Completá tres veces: mientras cobre poco, no tengo que…",
            "Elegí la que más te incomodó y escribí dos líneas",
@@ -194,7 +208,7 @@ add(6,"protocolo","Los tres que te formaron",sistema=1,minutos=20,agente="espejo
     evidencias=[ev("texto","Tres nombres y tres frases","una marcada")],
     adn=["historia.los_tres_que_formaron"],nota="Examen: día 43, el permiso.")
 
-add(7,"protocolo","El que te parece un vendehumo",sistema=1,minutos=20,agente="espejo",
+add(7,"protocolo","El que te parece un vendehumo",sistema=1,minutos=20,piezas=["P1.6"],agente="espejo",
     pasos=["Escribí tres profesionales que te parecen exagerados",
            "Al lado de cada uno, una cosa que hace y vos no",
            "Elegí una capacidad y practicala esta semana"],
@@ -208,8 +222,8 @@ add(8,"sesion","Los tres grupos",sistema=1,minutos=60,piezas=["P3.7"],
     evidencias=[ev("texto","Las tres listas","suma igual a la cantidad del día 2")],
     adn=["transicion"],nota="Pantalla de arrastrar, no de escribir.")
 
-add(9,"sesion","El precio nuevo y el link",sistema=1,minutos=75,piezas=["P3.8"],
-    tutoriales=["L-03","L-04"],acceso="Entrega 1 del Sistema — pagos y calendario",
+add(9,"sesion","El precio nuevo y el link",sistema=1,minutos=75,piezas=["P3.8","P1.5"],
+    agente="vera",tutoriales=["L-03","L-04"],acceso="Entrega 1 del Sistema — pagos y calendario",
     pasos=["Mirá tu hora real neta y tu precio viejo","Escribí el precio nuevo",
            "La app te muestra qué hora real neta te daría","Confirmá: el número queda sellado",
            "Creá tu link de pago","Cobrate un peso para probarlo"],
@@ -231,27 +245,42 @@ add(11,"sesion","Los que terminan y los que se derivan",sistema=1,minutos=45,
 
 add(12,"sesion","El primer cobro al precio nuevo",sistema=1,minutos=30,piezas=["P3.9"],
     pasos=["Cobrá","Escribí al lado del número quién viene después"],
-    evidencias=[ev("evento","Cobro al precio nuevo","monto >= precio_digno")],
-    cinturon="8gup",nota="No se sube captura: se detecta. Si el monto es menor, se registra sin otorgar el grado.")
+    evidencias=[ev("evento","Cobro al precio nuevo","monto >= precio_digno",mercado=True)],
+    cinturon="8gup",
+    nota="No se sube captura: se detecta. El camino sigue igual: lo que espera es el grado, no el paso. Mientras tanto la app dice cuánto falta.")
 
-add(13,"campo","Campo",campo=["Contestá a quienes respondieron los mensajes de la transición",
-    "Cerrá los cobros que quedaron en camino","Leé La Clínica hasta CLI-1"])
-add(14,"campo","Campo",campo=["Contestá a quienes respondieron los mensajes de la transición",
-    "Cerrá los cobros que quedaron en camino","Leé La Clínica hasta CLI-1"])
+add(13,"sesion","Tu plan de caza",sistema=1,minutos=60,piezas=["P7.2"],
+    pasos=["La red no es tu cartera: colegas, egresados, contactos del rubro",
+           "Escribí sesenta nombres con apellido y por dónde le escribís a cada uno",
+           "Ordenalos por quién te contesta más fácil",
+           "Los diez primeros son los de mañana"],
+    evidencias=[ev("texto","Los sesenta nombres","sesenta filas con nombre y canal"),
+                ev("numero","Tamaño de la red",">= 20")],
+    adn=["trafico.red_propia"],
+    nota="Sale del campo red_propia del formulario. Si declaró menos de veinte, la app se lo dice acá.")
 
-add(15,"sesion","Tu método propio",sistema=2,minutos=60,piezas=["P2.1"],agente="critico",manual="CLI-1",
+add(14,"sesion","Los primeros veinte mensajes",sistema=1,minutos=60,agente="sofi",
+    pasos=["Editá la plantilla con tu voz: no vende, pide veinte minutos",
+           "Mandá veinte, hoy, empezando por los más fáciles",
+           "Marcá en la app a quién le escribiste"],
+    evidencias=[ev("imagen","Veinte mensajes enviados","capturas legibles"),
+                ev("numero","Mensajes enviados",">= 20")],
+    adn=["trafico.mensajes_enviados"],
+    nota="Desde hoy son dos por día, sostenidos. Deja de ser tarea y pasa a ser estado.")
+
+add(15,"sesion","Tu método propio",sistema=2,minutos=60,piezas=["P2.1"],agente="diego",manual="CLI-1",
     pasos=["Escribí las etapas de lo que ya hacés, en orden","Definí punto inicial y punto final",
            "Definí cómo se mide","Armá las siglas: una letra por etapa"],
     evidencias=[ev("texto","Método con nombre, siglas y etapas","el Crítico devuelve faltantes")],
     adn=["metodo"])
 
-add(16,"sesion","La prueba de tu método",sistema=2,minutos=45,piezas=["P2.4b"],agente="critico",manual="CLI-1B",
+add(16,"sesion","La prueba de tu método",sistema=2,minutos=45,piezas=["P2.4b","P2.5"],agente="diego",manual="CLI-1B",
     pasos=["Examen 1: ¿se puede medir?","Examen 2: la regla del QUÉ y el CÓMO",
            "Examen 3: ¿importa el orden?","Corregí y volvé a presentar"],
     evidencias=[ev("texto","Método aprobado","veredicto aprobado en los tres exámenes")],
     adn=["metodo.aprobado_por_critico"],cinturon="7gup")
 
-add(17,"sesion","Tu oferta",sistema=2,minutos=60,piezas=["P3.1"],manual="CLI-2",
+add(17,"sesion","Tu oferta",sistema=2,minutos=60,piezas=["P3.1","P3.3"],agente="vera",manual="CLI-2",
     pasos=["Promesa: un resultado, no una actividad","Plazo escrito",
            "Entregables que la persona recibe","Precio con número",
            "La ecuación de valor aplicada: una acción por cada palanca"],
@@ -265,7 +294,7 @@ add(18,"sesion","Tu garantía",sistema=2,minutos=45,piezas=["P3.2b"],manual="CLI
     evidencias=[ev("texto","Garantía y compromisos","no promete resultado; compromisos con verbo y número")],
     adn=["garantia"],nota="El Espejo devuelve textual lo del día 4.")
 
-add(19,"sesion","Tu escalera y la fecha del rodaje",sistema=2,minutos=45,piezas=["P3.3b"],manual="CLI-3",
+add(19,"sesion","Tu escalera y la fecha del rodaje",sistema=2,minutos=45,piezas=["P3.3b","P3.4"],manual="CLI-3",
     pasos=["Diseñá los cinco niveles","Marcá el tercero: es el único que vendés hoy",
            "Elegí la fecha y la hora de tu rodaje: es el día 27"],
     evidencias=[ev("texto","Los cinco niveles","el tercero marcado"),
@@ -285,7 +314,7 @@ add(21,"protocolo","El ancla del precio",sistema=1,minutos=20,agente="espejo",
     evidencias=[ev("archivo","Audio del ancla","compara tono y velocidad de la primera y la última")],
     adn=["cuaderno"],nota="Si todavía sube el tono, devuelve 'repetí mañana' y no aprueba.")
 
-add(22,"sesion","El circuito",sistema=3,minutos=60,piezas=["P4.1a","P4.1"],agente="escriba",
+add(22,"sesion","El circuito",sistema=3,minutos=60,piezas=["P4.1a","P4.1"],agente="mateo",
     manual="CAM-1",acceso="Entrega 2 del Sistema — sitios, formularios y contactos",
     pasos=["Dibujá tu circuito con las cinco piezas","Marcá cuáles ya tenés",
            "Si trabajás con una agencia, hacele las tres preguntas"],
@@ -298,13 +327,13 @@ add(23,"sesion","Frío o tibio",sistema=3,minutos=30,piezas=["P4.1c"],
     adn=["trafico.audiencia_contada","trafico.rama"],
     nota="Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.")
 
-add(24,"sesion","Tu perfil, cuatro cosas",sistema=3,minutos=30,piezas=["P4.2b"],agente="camara",
+add(24,"sesion","Tu perfil, cuatro cosas",sistema=3,minutos=30,piezas=["P4.2b"],agente="caro",
     pasos=["Foto: cara, fondo limpio, legible en miniatura","Nombre buscable",
            "Bio con tu promesa, no con tu título","Enlace a tu página","Cerrá"],
     evidencias=[ev("imagen","Captura del perfil","los cuatro elementos presentes")])
 
 add(25,"sesion","Tu página, publicada",sistema=3,minutos=120,piezas=["P4.2d"],
-    tutoriales=["L-05","L-06"],agente="escriba",larga=True,
+    tutoriales=["L-05","L-06"],agente="mateo",larga=True,
     pasos=["Revisá que tengas promesa, cinco filas, garantía y precio",
            "El Escriba arma el pedido inicial: leelo entero antes de mandarlo",
            "Pedí los tres cambios: celular, letra grande, aviso legal",
@@ -312,7 +341,7 @@ add(25,"sesion","Tu página, publicada",sistema=3,minutos=120,piezas=["P4.2d"],
     evidencias=[ev("url","El enlace vivo","200, contiene la promesa, botón de agenda, carga en móvil")],
     adn=["sistema.url_pagina"],cinturon="5gup",activa=["F-PAGINA"])
 
-add(26,"sesion","Preproducción",sistema=3,minutos=90,piezas=["P4.3e"],agente="camara",larga=True,
+add(26,"sesion","Preproducción",sistema=3,minutos=90,piezas=["P4.3e","P4.3"],agente="caro",larga=True,
     pasos=["El Escriba arma el guion del VSL con tu ADN",
            "El Escriba arma los tres anuncios según tu rama",
            "Subí fotos del lugar: la Cámara corrige luz, fondo y altura",
@@ -329,7 +358,7 @@ add(27,"rodaje","Jornada de rodaje A",sistema=3,minutos=240,larga=True,
     nota="Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.")
 
 add(28,"sesion","El filtro",sistema=3,minutos=90,piezas=["P4.2e-i"],
-    tutoriales=["L-07","L-08","L-09","L-10"],agente="sparring",
+    tutoriales=["L-07","L-08","L-09","L-10"],agente="lucas",
     pasos=["Subí el VSL a tu página","Armá el formulario con las cinco preguntas",
            "Armá el calendario en dos pasos","Armá la página de preparación",
            "Agendate a vos mismo de punta a punta desde el teléfono"],
@@ -347,7 +376,7 @@ add(30,"sesion","Los tres anuncios listos",sistema=3,minutos=60,
            "Subilos al banco de creativos y marcalos como listos"],
     evidencias=[ev("archivo","Tres anuncios","estado listo en el banco")])
 
-add(31,"sesion","Encender",sistema=3,minutos=90,piezas=["P4.4","P4.4b"],tutoriales=["L-15","L-16"],
+add(31,"sesion","Encender",sistema=3,minutos=90,piezas=["P4.4","P4.4b","P4.8"],tutoriales=["L-15","L-16"],
     pasos=["Un conjunto, uno solo","Presupuesto entero adentro","Los tres anuncios adentro",
            "El público de tu rama","Objetivo a la página, nunca a mensajes"],
     evidencias=[ev("evento","Campaña activa","detectada por la conexión con Meta")],
@@ -356,19 +385,19 @@ add(31,"sesion","Encender",sistema=3,minutos=90,piezas=["P4.4","P4.4b"],tutorial
 add(32,"campo","Campo",campo=["Contestá en menos de dos horas cualquier agenda que entre",
     "Terminá de cerrar la transición de cartera","No abras el administrador de anuncios"])
 
-add(33,"sesion","Leer tu tablero",sistema=3,minutos=45,piezas=["P4.7"],agente="tablero",
+add(33,"sesion","Leer tu tablero",sistema=3,minutos=45,piezas=["P4.7"],agente="ramiro",
     pasos=["Armá la vista con cuatro columnas y nada más","Anotá tu costo por agenda de hoy",
            "Leé los tres cuellos y marcá cuál tenés"],
     evidencias=[ev("imagen","Tablero con cuatro columnas","gasto, entradas, agendas, costo por agenda"),
                 ev("numero","Costo por agenda","> 0")])
 
-for d in (34,35,37,40,41):
+for d in (34,35,40,41):
     add(d,"campo","Los catorce sin tocar",
-        campo=["Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-               "Contestá en menos de dos horas a cada agenda que entra",
-               "Seguí cerrando la transición de cartera que quedó abierta"])
+        campo=["Dos mensajes nuevos a tu red",
+               "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
+               "Contestá en menos de dos horas a cada agenda que entra"])
 
-add(36,"sesion","La llamada dibujada",sistema=3,minutos=60,piezas=["P5.1"],agente="sparring",manual="LLA-1",
+add(36,"sesion","La llamada dibujada",sistema=3,minutos=60,piezas=["P5.1"],agente="lucas",manual="LLA-1",
     pasos=["Dibujá tu W sobre la plantilla","Escribí tus preguntas de cada tramo",
            "Marcá el minuto del precio","Escribí qué hacés después del número: nada",
            "Practicá una llamada completa con el Sparring"],
@@ -376,7 +405,14 @@ add(36,"sesion","La llamada dibujada",sistema=3,minutos=60,piezas=["P5.1"],agent
                 ev("evento","Sesión de sparring","completada")],
     adn=["voz.frases_propias"])
 
-add(38,"sesion","Antes de la llamada",sistema=3,minutos=45,piezas=["P5.2"],
+add(37,"sesion","Tu primera llamada real",sistema=3,minutos=60,piezas=["P5.4"],agente="lucas",
+    pasos=["Elegí a quién de tu red le ofreciste y todavía no cerraste",
+           "Repasá tu W una vez, no más","Hacé la llamada","Escribí qué objeción apareció"],
+    evidencias=[ev("texto","La primera objeción real","textual, con las palabras de la persona")],
+    adn=["voz.objeciones_reales"],
+    nota="Esa objeción vale más que veinte sesiones de teoría. Alimenta el día 42.")
+
+add(38,"sesion","Antes de la llamada",sistema=3,minutos=45,piezas=["P5.2"],agente="sofi",
     pasos=["Escribí tu mensaje previo","Escribí tu criterio de cancelación",
            "Cargá las dos cosas como plantillas en el Sistema"],
     evidencias=[ev("texto","Mensaje previo y criterio","el criterio con dos condiciones objetivas")])
@@ -385,7 +421,7 @@ add(39,"sesion","Grabar las llamadas",sistema=3,minutos=30,piezas=["P5.4-i"],tut
     pasos=["Activá la grabación en el Sistema","Escribí la frase con la que avisás"],
     evidencias=[ev("evento","Grabación activada","en el Sistema")])
 
-add(42,"sesion","La autopsia",sistema=3,minutos=60,piezas=["P5.6"],agente="sparring",manual="LLA-4",
+add(42,"sesion","La autopsia",sistema=3,minutos=60,piezas=["P5.6"],agente="lucas",manual="LLA-4",
     pasos=["Subí o elegí una llamada real","Escuchala entera: la app no deja saltar",
            "Anotá los cuatro números","Compará con los que midió el Sparring",
            "Elegí una sola cosa para cambiar"],
@@ -409,18 +445,18 @@ add(44,"sesion","Tu recuperador",sistema=3,minutos=60,piezas=["P4.5"],tutoriales
                 ev("imagen","La lista tachada","tachado visible")])
 
 add(45,"sesion","Tu primer consultante nuevo",sistema=3,minutos=30,piezas=["P6.3"],
-    evidencias=[ev("evento","Cobro del sistema","contacto con origen campaña")],
+    evidencias=[ev("evento","Cobro del sistema","contacto con origen campaña",mercado=True)],
     cinturon="2gup",
     nota="Si no llega, el camino no se frena. El grado queda en ventana.")
 
-add(46,"sesion","Escalar o apagar",sistema=3,minutos=45,piezas=["P4.4c"],agente="tablero",
+add(46,"sesion","Escalar o apagar",sistema=3,minutos=45,piezas=["P4.4c"],agente="ramiro",
     pasos=["Mirá tu costo por agenda de los catorce días",
            "La app habilita un solo botón según tu número","Escribí la decisión y el número que la justifica"],
     evidencias=[ev("texto","La decisión","con el costo por agenda al lado")],
     levanta=["F-14DIAS","F-TABLERO"],
     nota="Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.")
 
-add(47,"sesion","La cinta",sistema=4,minutos=45,piezas=["P6.1"],agente="arquitecto",manual="CLI-4",
+add(47,"sesion","La cinta",sistema=4,minutos=45,piezas=["P6.1"],agente="bruno",manual="CLI-4",
     pasos=["Partí tu programa en dos columnas: grabado y en vivo",
            "Nombrá tus estaciones, en orden","Definí tu línea base",
            "Hacé la cuenta: horas para uno, horas para diez"],
@@ -441,7 +477,7 @@ add(50,"sesion","Tu app con tu marca",sistema=4,minutos=45,piezas=["P8.1"],
     pasos=["Cargá nombre, color y logo. Nada más","Mirá cómo se ve desde un celular"],
     evidencias=[ev("imagen","Tu app con tu marca","logo y color visibles")])
 
-add(51,"sesion","Tus etapas",sistema=4,minutos=90,piezas=["P8.2"],agente="arquitecto",larga=True,
+add(51,"sesion","Tus etapas",sistema=4,minutos=90,piezas=["P8.2"],agente="bruno",larga=True,
     pasos=["Apretá el botón que trae todo desde tu ADN","Revisá que haya llegado bien y corregí",
            "Armá cuatro semanas con lo que desbloquea cada una","Cargá cuatro, no doce"],
     evidencias=[ev("evento","Cuatro etapas cargadas","con contenido asignado")])
@@ -469,7 +505,8 @@ add(55,"sesion","La máquina de 10",sistema=3,minutos=45,piezas=["P7.1a","P7.1"]
     evidencias=[ev("texto","Tu cadena con tus números","los cuatro escalones")],
     cinturon="1gup")
 
-CICLO = ["Lunes · los números: costo por agenda y la decisión",
+CICLO = ["Todos los días · dos mensajes nuevos a tu red",
+         "Lunes · los números: costo por agenda y la decisión",
          "Martes · las llamadas, con tu W adelante",
          "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
          "Jueves · la entrega: tus consultantes en tu app",
@@ -478,15 +515,15 @@ CICLO = ["Lunes · los números: costo por agenda y la decisión",
 for d in range(56,91):
     if d in J: continue
     if d == 61:
-        add(61,"sesion","Por qué la marca va última",sistema=5,minutos=45,piezas=["P9.1"],
-            agente="estratega",manual="CAM-9",
+        add(61,"sesion","Por qué la marca va última",sistema=5,minutos=45,piezas=["P9.1","P2.3"],
+            agente="mateo",manual="CAM-9",
             pasos=["Sacá tus tres enfoques de la Matriz ABC",
                    "Para cada enfoque, escribí a quién filtra y a quién atrae"],
             evidencias=[ev("texto","Los tres enfoques","con su filtro")],
             adn=["avatar.matriz_abc"])
     elif d == 67:
         add(67,"sesion","Las doce semanas escritas",sistema=5,minutos=90,piezas=["P9.4"],
-            tutoriales=["L-20","L-21"],agente="estratega",larga=True,
+            tutoriales=["L-20","L-21"],agente="mateo",larga=True,
             pasos=["Repartí tus tres enfoques en doce semanas",
                    "Para cada semana, el gancho y el ángulo",
                    "Marcá cuáles son de filtro y cuáles de autoridad","No grabes nada todavía"],
@@ -509,9 +546,14 @@ for d in range(56,91):
             pasos=["La app arma el borrador de tu plan de 180",
                    "Editalo, aprobalo y descargalo","Te lo llevás lo tomes o no lo tomes"],
             evidencias=[ev("texto","Plan de 180 aprobado","doce semanas + tres meses")])
+    elif d == 89:
+        add(89,"sesion","La última recta",sistema=0,minutos=45,piezas=["P7.3"],
+            pasos=["Mirá cuántas ventas tenés y cuántas te faltan",
+                   "Escribí qué podés cerrar esta semana con lo que ya está en la bandeja"],
+            evidencias=[ev("texto","Lo que se puede cerrar","con nombres")])
     elif d == 90:
         add(90,"cierre","El cierre",sistema=0,minutos=0,
-            evidencias=[ev("evento","Diez consultantes","contados desde MCD, todos al precio digno")],
+            evidencias=[ev("evento","Diez consultantes","contados desde MCD, todos al precio digno",mercado=True)],
             cinturon="1dan",
             nota="Si no llegó, el camino no se cierra: el ciclo queda abierto sin fecha.")
     else:
@@ -534,9 +576,14 @@ out = {
             for c,t,d,s,st,m,e in PIEZAS],
   "tutoriales":[{"codigo":c,"titulo":t,"dia":d,"minutos":m,"donde":w}
                 for c,t,d,m,w in TUTORIALES],
-  "cinturones":[{"id":i,"nombre":n,"color":c,"punta":p,"dia":d,"significado":s,"forma":f,"en_ventana":v}
+  # El día es ESTIMACIÓN, nunca la razón del otorgamiento. Lo que otorga es
+  # "se_gana_con": la evidencia. Ningún grado se da por fecha.
+  "cinturones":[{"id":i,"nombre":n,"color":c,"punta":p,"dia":d,"dia_estimado":d,
+                 "significado":s,"forma":f,"se_gana_con":f,"por_evidencia":True,
+                 "en_ventana":v}
                 for i,n,c,p,d,s,f,v in CINTURONES],
-  "agentes":[{"id":i,"nombre":n,"dia":d,"se_abre_con":k} for i,n,d,k in AGENTES],
+  "agentes":[{"id":i,"nombre":n,"rol":r,"dia_estimado":d,"se_abre_con":k}
+             for i,n,r,d,k in AGENTES],
   "frenos":[{"id":i,"regla":r,"apertura":a,"mensaje":m} for i,r,a,m in FRENOS],
   "jornadas":[J[d] for d in sorted(J)]
 }

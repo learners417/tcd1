@@ -14,7 +14,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
+type Step = 'password' | 'profile' | 'situacion' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -27,7 +27,9 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
+
+import PasoSituacion, { SITUACION_VACIA, situacionCompleta, type Situacion } from './onboarding/PasoSituacion';
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStepRaw] = useState<Step>(() => {
@@ -61,6 +63,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [ogPorque, setOgPorque] = useState('');
   const [ogHerida, setOgHerida] = useState('');
   const [ogPaciente, setOgPaciente] = useState('');
+  const [situacion, setSituacion] = useState<Situacion>(SITUACION_VACIA);
+  const [savingSit, setSavingSit] = useState(false);
   const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
   const [pqIni, setPqIni] = useState('');
 
@@ -89,6 +93,33 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     setDxSaving(false);
     setStep(getOrigen().porque ? 'welcome' : 'origen'); // nada se pregunta dos veces
   };
+  /**
+   * Guarda la situación. Va dentro del JSON `diagnostico`, que ya existe: así no
+   * hace falta migración y no se rompe nada si el servidor todavía no tiene las
+   * columnas nuevas. Cuando se corra la migración, esto se mueve a sus campos.
+   */
+  const guardarSituacion = async () => {
+    setSavingSit(true);
+    try {
+      try { localStorage.setItem('tcd_situacion', JSON.stringify(situacion)); } catch { /* noop */ }
+      if (supabase) {
+        // Mismo paracaídas móvil que el diagnóstico: con señal floja no se cuelga.
+        await Promise.race([
+          new Promise((res) => setTimeout(res, 8000)),
+          supabase.from('profiles').update({
+            diagnostico: {
+              freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo,
+              estilo_mentor: dxEstilo, trabajo_espiritual: dxFe,
+              situacion,
+            },
+          }).eq('id', profile.id),
+        ]);
+      }
+    } catch { /* no bloqueamos el flujo */ }
+    setSavingSit(false);
+    setStep('diagnostico');
+  };
+
   // ── El Pacto (F3) ──
   const [pactoTexto, setPactoTexto] = useState('');
   const [pactoFirma, setPactoFirma] = useState('');
@@ -414,6 +445,33 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         )}
 
         {/* ── STEP 3: WELCOME ── */}
+        {step === 'situacion' && (
+          <div>
+            <PasoSituacion valor={situacion} onChange={setSituacion} />
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setStep('diagnostico')}
+                className="px-5 py-3 rounded-xl text-sm text-cream/55 hover:text-cream/80 transition-colors"
+              >
+                Saltar
+              </button>
+              <button
+                onClick={guardarSituacion}
+                disabled={savingSit}
+                className="flex-1 py-3 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-gold/20"
+              >
+                {savingSit ? 'Guardando…' : 'Seguir'}
+              </button>
+            </div>
+            {!situacionCompleta(situacion) && (
+              <p className="text-xs text-cream/45 mt-3 text-center">
+                Puedes seguir sin completar todo. Lo que falte lo cerramos en tus
+                primeros diez días.
+              </p>
+            )}
+          </div>
+        )}
+
         {step === 'diagnostico' && (
           <div className="space-y-6 fade-rise">
             <div>

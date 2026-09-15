@@ -11,6 +11,9 @@ import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, Mess
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
+import EnMarcha, { type EstadoEnMarcha } from '../components/EnMarcha';
+import { hechoHoy, racha, anguloDelDia } from '../lib/sostenido';
+import { carriles } from '../lib/carriles';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
 import ReporteDirector from '../components/ReporteDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
@@ -363,6 +366,23 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             </div>
           </div>
         );
+      })()}
+
+      {/* ─── EN MARCHA ─── lo que ya está vivo. Estado, no tareas. */}
+      {(() => {
+        const diaProg = proximoHito?.diaPrograma ?? 1;
+        if (diaProg < 11) return null;
+        // Lo sostenido sale del mismo set de progreso que ya se sincroniza.
+        // "sinResponder" todavía no tiene fuente: se omite en vez de mentir.
+        const est: EstadoEnMarcha = {
+          mensajesHoy: hechoHoy('mensajes') ? 2 : 0,
+          rachaMensajes: racha('mensajes'),
+          publicoHoy: hechoHoy('publicar'),
+          // El carril de límites apaga la prueba social: con colegio profesional
+          // no la va a tener nunca, y en el primer mes todavía no vendió.
+          anguloHoy: anguloDelDia(diaProg, carriles().conLimites, diaProg >= 76),
+        };
+        return <EnMarcha dia={diaProg} estado={est} onIr={setCurrentPage} />;
       })()}
 
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}

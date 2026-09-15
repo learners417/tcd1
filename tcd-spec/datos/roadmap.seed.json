@@ -579,8 +579,11 @@
       "color": "#FFFFFF",
       "punta": null,
       "dia": 1,
+      "dia_estimado": 1,
       "significado": "La semilla bajo la nieve",
       "forma": "Búnker abierto y pacto publicado",
+      "se_gana_con": "Búnker abierto y pacto publicado",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -589,8 +592,11 @@
       "color": "#FFFFFF",
       "punta": "#E8C24A",
       "dia": 3,
+      "dia_estimado": 3,
       "significado": "La semilla toca la tierra",
       "forma": "Su hora real neta escrita a mano",
+      "se_gana_con": "Su hora real neta escrita a mano",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -599,8 +605,11 @@
       "color": "#E8C24A",
       "punta": null,
       "dia": 12,
+      "dia_estimado": 12,
       "significado": "La tierra",
       "forma": "Primer cobro a su cartera al precio nuevo",
+      "se_gana_con": "Primer cobro a su cartera al precio nuevo",
+      "por_evidencia": true,
       "en_ventana": true
     },
     {
@@ -609,8 +618,11 @@
       "color": "#E8C24A",
       "punta": "#4E8C57",
       "dia": 16,
+      "dia_estimado": 16,
       "significado": "Asoma el tallo",
       "forma": "Método aprobado por el Crítico",
+      "se_gana_con": "Método aprobado por el Crítico",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -619,8 +631,11 @@
       "color": "#4E8C57",
       "punta": null,
       "dia": 19,
+      "dia_estimado": 19,
       "significado": "La planta en pie",
       "forma": "Oferta completa en una página",
+      "se_gana_con": "Oferta completa en una página",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -629,8 +644,11 @@
       "color": "#4E8C57",
       "punta": "#3A6EA5",
       "dia": 25,
+      "dia_estimado": 25,
       "significado": "La planta busca el cielo",
       "forma": "El enlace vivo de su página",
+      "se_gana_con": "El enlace vivo de su página",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -639,8 +657,11 @@
       "color": "#3A6EA5",
       "punta": null,
       "dia": 28,
+      "dia_estimado": 28,
       "significado": "El cielo",
       "forma": "Agendarse a sí mismo de punta a punta",
+      "se_gana_con": "Agendarse a sí mismo de punta a punta",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -649,8 +670,11 @@
       "color": "#3A6EA5",
       "punta": "#A6392E",
       "dia": 31,
+      "dia_estimado": 31,
       "significado": "Se acerca el peligro",
       "forma": "Campaña activa, con fecha y hora",
+      "se_gana_con": "Campaña activa, con fecha y hora",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -659,8 +683,11 @@
       "color": "#A6392E",
       "punta": null,
       "dia": 45,
+      "dia_estimado": 45,
       "significado": "El sol, y el aviso",
       "forma": "Cobro de alguien que no lo conocía",
+      "se_gana_con": "Cobro de alguien que no lo conocía",
+      "por_evidencia": true,
       "en_ventana": true
     },
     {
@@ -669,8 +696,11 @@
       "color": "#A6392E",
       "punta": "#1A1815",
       "dia": 55,
+      "dia_estimado": 55,
       "significado": "Controla la fuerza",
       "forma": "Captura desde el celular de su consultante",
+      "se_gana_con": "Captura desde el celular de su consultante",
+      "por_evidencia": true,
       "en_ventana": false
     },
     {
@@ -679,8 +709,11 @@
       "color": "#1A1815",
       "punta": null,
       "dia": 90,
+      "dia_estimado": 90,
       "significado": "Lo que ya no se altera",
       "forma": "Los dos números lado a lado",
+      "se_gana_con": "Los dos números lado a lado",
+      "por_evidencia": true,
       "en_ventana": true
     }
   ],
@@ -688,57 +721,72 @@
     {
       "id": "espejo",
       "nombre": "El Espejo",
-      "dia": 3,
+      "rol": "el trabajo interno",
+      "dia_estimado": 3,
       "se_abre_con": "hora_real_neta_cargada"
     },
     {
-      "id": "critico",
-      "nombre": "El Crítico",
-      "dia": 15,
+      "id": "vera",
+      "nombre": "Vera",
+      "rol": "tu precio",
+      "dia_estimado": 9,
+      "se_abre_con": "precio_digno_sellado"
+    },
+    {
+      "id": "sofi",
+      "nombre": "Sofi",
+      "rol": "tus mensajes",
+      "dia_estimado": 14,
+      "se_abre_con": "veinte_mensajes_enviados"
+    },
+    {
+      "id": "diego",
+      "nombre": "Diego",
+      "rol": "tu producto",
+      "dia_estimado": 15,
       "se_abre_con": "metodo_escrito"
     },
     {
-      "id": "escriba",
-      "nombre": "El Escriba",
-      "dia": 22,
+      "id": "mateo",
+      "nombre": "Mateo",
+      "rol": "tu contenido",
+      "dia_estimado": 22,
       "se_abre_con": "oferta_sellada"
     },
     {
-      "id": "camara",
-      "nombre": "La Cámara",
-      "dia": 24,
+      "id": "caro",
+      "nombre": "Caro",
+      "rol": "tu cámara",
+      "dia_estimado": 24,
       "se_abre_con": "perfil_cerrado"
     },
     {
-      "id": "sparring",
-      "nombre": "El Sparring",
-      "dia": 28,
-      "se_abre_con": "agenda_de_prueba"
+      "id": "lucas",
+      "nombre": "Lucas",
+      "rol": "tus llamadas",
+      "dia_estimado": 36,
+      "se_abre_con": "w_dibujada"
     },
     {
-      "id": "tablero",
-      "nombre": "El Tablero",
-      "dia": 33,
+      "id": "ramiro",
+      "nombre": "Ramiro",
+      "rol": "tu embudo",
+      "dia_estimado": 33,
       "se_abre_con": "campana_activa"
     },
     {
-      "id": "arquitecto",
-      "nombre": "El Arquitecto",
-      "dia": 47,
+      "id": "bruno",
+      "nombre": "Bruno",
+      "rol": "tu entrega",
+      "dia_estimado": 47,
       "se_abre_con": "primer_cobro_sistema"
-    },
-    {
-      "id": "estratega",
-      "nombre": "El Estratega",
-      "dia": 61,
-      "se_abre_con": "cinturon_2gup"
     }
   ],
   "frenos": [
     {
       "id": "F-ORDEN",
-      "regla": "No se abre una sesión sin cerrar la anterior",
-      "apertura": "evidencia_anterior_aprobada",
+      "regla": "No se abre una sesión sin cerrar la anterior, salvo que su evidencia dependa de que otro pague",
+      "apertura": "evidencia_anterior_aprobada or anterior.avanza_sin_evidencia",
       "mensaje": "El orden es el método. Terminá la de ayer."
     },
     {
@@ -784,6 +832,12 @@
       "mensaje": "{agente} necesita {campo}. Volvé al día {dia}."
     },
     {
+      "id": "F-GRADO-ESPERA",
+      "regla": "El grado que depende de que otro pague queda pendiente y visible; el camino sigue",
+      "apertura": "cinturon.en_ventana",
+      "mensaje": "Sigues en {grado_actual}. Te falta {lo_que_falta} para el siguiente. Mientras tanto, el paso de hoy es este."
+    },
+    {
       "id": "F-ORGANICO",
       "regla": "No se graba contenido de marca dentro de los 90 días",
       "apertura": "dia>90",
@@ -807,7 +861,8 @@
         {
           "tipo": "evento",
           "nombre": "Primer ingreso",
-          "valida": "alta en TCD y MCD registrada"
+          "valida": "alta en TCD y MCD registrada",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -817,7 +872,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario.",
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 1,
@@ -847,17 +903,20 @@
         {
           "tipo": "imagen",
           "nombre": "Foto del búnker",
-          "valida": "mesa, cuaderno visible, sin pantalla encendida"
+          "valida": "mesa, cuaderno visible, sin pantalla encendida",
+          "del_mercado": false
         },
         {
           "tipo": "imagen",
           "nombre": "Pacto publicado",
-          "valida": "se lee nombre y fecha"
+          "valida": "se lee nombre y fecha",
+          "del_mercado": false
         },
         {
           "tipo": "texto",
           "nombre": "El por qué",
-          "valida": "mínimo 8 palabras, primera persona"
+          "valida": "mínimo 8 palabras, primera persona",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -870,7 +929,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6
+      "paso_esencial": 6,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 2,
@@ -879,7 +939,8 @@
       "sistema": 4,
       "minutos": 90,
       "piezas": [
-        "P0.4"
+        "P0.4",
+        "P1.2"
       ],
       "tutoriales": [
         "L-02"
@@ -899,17 +960,20 @@
         {
           "tipo": "imagen",
           "nombre": "Panel con consultantes",
-          "valida": "al menos 5 filas con nombre y monto"
+          "valida": "al menos 5 filas con nombre y monto",
+          "del_mercado": false
         },
         {
           "tipo": "numero",
           "nombre": "Consultantes activos",
-          "valida": "entero > 0"
+          "valida": "entero > 0",
+          "del_mercado": false
         },
         {
           "tipo": "numero",
           "nombre": "Ingreso promedio 3 meses",
-          "valida": "> 0"
+          "valida": "> 0",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -922,7 +986,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6
+      "paso_esencial": 6,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 3,
@@ -931,7 +996,8 @@
       "sistema": 1,
       "minutos": 45,
       "piezas": [
-        "P1.0"
+        "P1.0",
+        "P1.2b"
       ],
       "tutoriales": [],
       "agente": "espejo",
@@ -949,17 +1015,20 @@
         {
           "tipo": "numero",
           "nombre": "Hora real neta",
-          "valida": "0 < x < 500, coherente ±20% con día 2"
+          "valida": "0 < x < 500, coherente ±20% con día 2",
+          "del_mercado": false
         },
         {
           "tipo": "imagen",
           "nombre": "El número a mano",
-          "valida": "se lee un número manuscrito"
+          "valida": "se lee un número manuscrito",
+          "del_mercado": false
         },
         {
           "tipo": "texto",
           "nombre": "La palabra del cuerpo",
-          "valida": "una palabra"
+          "valida": "una palabra",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -972,7 +1041,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Acá y solo acá: 'esto es entrenamiento para dirigir un negocio, no es terapia'.",
-      "paso_esencial": 6
+      "paso_esencial": 6,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 4,
@@ -981,7 +1051,8 @@
       "sistema": 1,
       "minutos": 45,
       "piezas": [
-        "P1.1"
+        "P1.1",
+        "P1.3"
       ],
       "tutoriales": [],
       "agente": "espejo",
@@ -996,7 +1067,8 @@
         {
           "tipo": "texto",
           "nombre": "Las tres frases",
-          "valida": "primera persona, sin generalidades"
+          "valida": "primera persona, sin generalidades",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1008,7 +1080,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Examen: día 18, la garantía.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 5,
@@ -1032,7 +1105,8 @@
         {
           "tipo": "imagen",
           "nombre": "La página del cuaderno",
-          "valida": "foto legible"
+          "valida": "foto legible",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1044,7 +1118,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Reproductor sin barra de avance los primeros 40 minutos. Se pausa, no se adelanta.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 6,
@@ -1066,7 +1141,8 @@
         {
           "tipo": "texto",
           "nombre": "Tres nombres y tres frases",
-          "valida": "una marcada"
+          "valida": "una marcada",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1078,7 +1154,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Examen: día 43, el permiso.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 7,
@@ -1086,7 +1163,9 @@
       "titulo": "El que te parece un vendehumo",
       "sistema": 1,
       "minutos": 20,
-      "piezas": [],
+      "piezas": [
+        "P1.6"
+      ],
       "tutoriales": [],
       "agente": "espejo",
       "manual": null,
@@ -1100,7 +1179,8 @@
         {
           "tipo": "texto",
           "nombre": "Tres nombres y una capacidad",
-          "valida": "capacidad en infinitivo"
+          "valida": "capacidad en infinitivo",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1112,7 +1192,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Examen: día 10, los mensajes de subida de precio.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 8,
@@ -1137,7 +1218,8 @@
         {
           "tipo": "texto",
           "nombre": "Las tres listas",
-          "valida": "suma igual a la cantidad del día 2"
+          "valida": "suma igual a la cantidad del día 2",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1149,7 +1231,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Pantalla de arrastrar, no de escribir.",
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 9,
@@ -1158,13 +1241,14 @@
       "sistema": 1,
       "minutos": 75,
       "piezas": [
-        "P3.8"
+        "P3.8",
+        "P1.5"
       ],
       "tutoriales": [
         "L-03",
         "L-04"
       ],
-      "agente": null,
+      "agente": "vera",
       "manual": null,
       "acceso": "Entrega 1 del Sistema — pagos y calendario",
       "pasos": [
@@ -1179,17 +1263,20 @@
         {
           "tipo": "numero",
           "nombre": "Precio digno",
-          "valida": "> precio_viejo"
+          "valida": "> precio_viejo",
+          "del_mercado": false
         },
         {
           "tipo": "url",
           "nombre": "Link de pago",
-          "valida": "responde 200 y muestra el monto"
+          "valida": "responde 200 y muestra el monto",
+          "del_mercado": false
         },
         {
           "tipo": "evento",
           "nombre": "Cobro de prueba",
-          "valida": "registrado en el Sistema"
+          "valida": "registrado en el Sistema",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1204,7 +1291,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6
+      "paso_esencial": 6,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 10,
@@ -1226,7 +1314,8 @@
         {
           "tipo": "imagen",
           "nombre": "Tres mensajes enviados",
-          "valida": "capturas legibles"
+          "valida": "capturas legibles",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1236,7 +1325,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 11,
@@ -1258,7 +1348,8 @@
         {
           "tipo": "imagen",
           "nombre": "Agenda con fechas de cierre",
-          "valida": "al menos una fecha cargada"
+          "valida": "al menos una fecha cargada",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1268,7 +1359,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 12,
@@ -1291,7 +1383,8 @@
         {
           "tipo": "evento",
           "nombre": "Cobro al precio nuevo",
-          "valida": "monto >= precio_digno"
+          "valida": "monto >= precio_digno",
+          "del_mercado": true
         }
       ],
       "adn_escribe": [],
@@ -1300,60 +1393,96 @@
       "cinturon": "8gup",
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "No se sube captura: se detecta. Si el monto es menor, se registra sin otorgar el grado.",
-      "paso_esencial": 2
+      "nota": "No se sube captura: se detecta. El camino sigue igual: lo que espera es el grado, no el paso. Mientras tanto la app dice cuánto falta.",
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": true
     },
     {
       "dia": 13,
-      "tipo": "campo",
-      "titulo": "Campo",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
+      "tipo": "sesion",
+      "titulo": "Tu plan de caza",
+      "sistema": 1,
+      "minutos": 60,
+      "piezas": [
+        "P7.2"
+      ],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "La red no es tu cartera: colegas, egresados, contactos del rubro",
+        "Escribí sesenta nombres con apellido y por dónde le escribís a cada uno",
+        "Ordenalos por quién te contesta más fácil",
+        "Los diez primeros son los de mañana"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Los sesenta nombres",
+          "valida": "sesenta filas con nombre y canal",
+          "del_mercado": false
+        },
+        {
+          "tipo": "numero",
+          "nombre": "Tamaño de la red",
+          "valida": ">= 20",
+          "del_mercado": false
+        }
+      ],
+      "adn_escribe": [
+        "trafico.red_propia"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [
-        "Contestá a quienes respondieron los mensajes de la transición",
-        "Cerrá los cobros que quedaron en camino",
-        "Leé La Clínica hasta CLI-1"
-      ],
-      "nota": null,
-      "paso_esencial": null
+      "acciones_campo": [],
+      "nota": "Sale del campo red_propia del formulario. Si declaró menos de veinte, la app se lo dice acá.",
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 14,
-      "tipo": "campo",
-      "titulo": "Campo",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Los primeros veinte mensajes",
+      "sistema": 1,
+      "minutos": 60,
       "piezas": [],
       "tutoriales": [],
-      "agente": null,
+      "agente": "sofi",
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Editá la plantilla con tu voz: no vende, pide veinte minutos",
+        "Mandá veinte, hoy, empezando por los más fáciles",
+        "Marcá en la app a quién le escribiste"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Veinte mensajes enviados",
+          "valida": "capturas legibles",
+          "del_mercado": false
+        },
+        {
+          "tipo": "numero",
+          "nombre": "Mensajes enviados",
+          "valida": ">= 20",
+          "del_mercado": false
+        }
+      ],
+      "adn_escribe": [
+        "trafico.mensajes_enviados"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [
-        "Contestá a quienes respondieron los mensajes de la transición",
-        "Cerrá los cobros que quedaron en camino",
-        "Leé La Clínica hasta CLI-1"
-      ],
-      "nota": null,
-      "paso_esencial": null
+      "acciones_campo": [],
+      "nota": "Desde hoy son dos por día, sostenidos. Deja de ser tarea y pasa a ser estado.",
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 15,
@@ -1365,7 +1494,7 @@
         "P2.1"
       ],
       "tutoriales": [],
-      "agente": "critico",
+      "agente": "diego",
       "manual": "CLI-1",
       "acceso": null,
       "pasos": [
@@ -1378,7 +1507,8 @@
         {
           "tipo": "texto",
           "nombre": "Método con nombre, siglas y etapas",
-          "valida": "el Crítico devuelve faltantes"
+          "valida": "el Crítico devuelve faltantes",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1390,7 +1520,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 16,
@@ -1399,10 +1530,11 @@
       "sistema": 2,
       "minutos": 45,
       "piezas": [
-        "P2.4b"
+        "P2.4b",
+        "P2.5"
       ],
       "tutoriales": [],
-      "agente": "critico",
+      "agente": "diego",
       "manual": "CLI-1B",
       "acceso": null,
       "pasos": [
@@ -1415,7 +1547,8 @@
         {
           "tipo": "texto",
           "nombre": "Método aprobado",
-          "valida": "veredicto aprobado en los tres exámenes"
+          "valida": "veredicto aprobado en los tres exámenes",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1427,7 +1560,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 17,
@@ -1436,10 +1570,11 @@
       "sistema": 2,
       "minutos": 60,
       "piezas": [
-        "P3.1"
+        "P3.1",
+        "P3.3"
       ],
       "tutoriales": [],
-      "agente": null,
+      "agente": "vera",
       "manual": "CLI-2",
       "acceso": null,
       "pasos": [
@@ -1453,7 +1588,8 @@
         {
           "tipo": "texto",
           "nombre": "La oferta en una página",
-          "valida": "precio >= precio_digno"
+          "valida": "precio >= precio_digno",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1465,7 +1601,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 18,
@@ -1489,7 +1626,8 @@
         {
           "tipo": "texto",
           "nombre": "Garantía y compromisos",
-          "valida": "no promete resultado; compromisos con verbo y número"
+          "valida": "no promete resultado; compromisos con verbo y número",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1501,7 +1639,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "El Espejo devuelve textual lo del día 4.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 19,
@@ -1510,7 +1649,8 @@
       "sistema": 2,
       "minutos": 45,
       "piezas": [
-        "P3.3b"
+        "P3.3b",
+        "P3.4"
       ],
       "tutoriales": [],
       "agente": null,
@@ -1525,12 +1665,14 @@
         {
           "tipo": "texto",
           "nombre": "Los cinco niveles",
-          "valida": "el tercero marcado"
+          "valida": "el tercero marcado",
+          "del_mercado": false
         },
         {
           "tipo": "evento",
           "nombre": "Rodaje agendado",
-          "valida": "fecha y hora bloqueadas"
+          "valida": "fecha y hora bloqueadas",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1544,7 +1686,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 20,
@@ -1565,7 +1708,8 @@
         {
           "tipo": "texto",
           "nombre": "Dos columnas",
-          "valida": "ambas completas"
+          "valida": "ambas completas",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1577,7 +1721,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Examen: día 27, cuando diga el precio en cámara.",
-      "paso_esencial": 2
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 21,
@@ -1599,7 +1744,8 @@
         {
           "tipo": "archivo",
           "nombre": "Audio del ancla",
-          "valida": "compara tono y velocidad de la primera y la última"
+          "valida": "compara tono y velocidad de la primera y la última",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1611,7 +1757,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Si todavía sube el tono, devuelve 'repetí mañana' y no aprueba.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 22,
@@ -1624,7 +1771,7 @@
         "P4.1"
       ],
       "tutoriales": [],
-      "agente": "escriba",
+      "agente": "mateo",
       "manual": "CAM-1",
       "acceso": "Entrega 2 del Sistema — sitios, formularios y contactos",
       "pasos": [
@@ -1636,7 +1783,8 @@
         {
           "tipo": "imagen",
           "nombre": "El circuito dibujado",
-          "valida": "cinco piezas unidas"
+          "valida": "cinco piezas unidas",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1646,7 +1794,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 23,
@@ -1671,7 +1820,8 @@
         {
           "tipo": "numero",
           "nombre": "Audiencia contada",
-          "valida": ">= 0"
+          "valida": ">= 0",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1684,7 +1834,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.",
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 24,
@@ -1696,7 +1847,7 @@
         "P4.2b"
       ],
       "tutoriales": [],
-      "agente": "camara",
+      "agente": "caro",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -1710,7 +1861,8 @@
         {
           "tipo": "imagen",
           "nombre": "Captura del perfil",
-          "valida": "los cuatro elementos presentes"
+          "valida": "los cuatro elementos presentes",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1720,7 +1872,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 25,
@@ -1735,7 +1888,7 @@
         "L-05",
         "L-06"
       ],
-      "agente": "escriba",
+      "agente": "mateo",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -1748,7 +1901,8 @@
         {
           "tipo": "url",
           "nombre": "El enlace vivo",
-          "valida": "200, contiene la promesa, botón de agenda, carga en móvil"
+          "valida": "200, contiene la promesa, botón de agenda, carga en móvil",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1762,7 +1916,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 26,
@@ -1771,10 +1926,11 @@
       "sistema": 3,
       "minutos": 90,
       "piezas": [
-        "P4.3e"
+        "P4.3e",
+        "P4.3"
       ],
       "tutoriales": [],
-      "agente": "camara",
+      "agente": "caro",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -1787,12 +1943,14 @@
         {
           "tipo": "texto",
           "nombre": "Guion del VSL y tres anuncios",
-          "valida": "completos"
+          "valida": "completos",
+          "del_mercado": false
         },
         {
           "tipo": "imagen",
           "nombre": "Set armado",
-          "valida": "aprobado por la Cámara"
+          "valida": "aprobado por la Cámara",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1804,7 +1962,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": "Único día con dos agentes.",
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 27,
@@ -1827,7 +1986,8 @@
         {
           "tipo": "archivo",
           "nombre": "Cinco archivos",
-          "valida": "duración mínima por pieza, audio presente"
+          "valida": "duración mínima por pieza, audio presente",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1839,7 +1999,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.",
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 28,
@@ -1856,7 +2017,7 @@
         "L-09",
         "L-10"
       ],
-      "agente": "sparring",
+      "agente": "lucas",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -1870,7 +2031,8 @@
         {
           "tipo": "evento",
           "nombre": "Agenda de prueba",
-          "valida": "formulario + calendario + confirmación del mismo contacto"
+          "valida": "formulario + calendario + confirmación del mismo contacto",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1884,7 +2046,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 29,
@@ -1907,7 +2070,8 @@
         {
           "tipo": "evento",
           "nombre": "Pixel disparando",
-          "valida": "verificado desde la app"
+          "valida": "verificado desde la app",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -1921,7 +2085,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 30,
@@ -1943,7 +2108,8 @@
         {
           "tipo": "archivo",
           "nombre": "Tres anuncios",
-          "valida": "estado listo en el banco"
+          "valida": "estado listo en el banco",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1953,7 +2119,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 31,
@@ -1963,7 +2130,8 @@
       "minutos": 90,
       "piezas": [
         "P4.4",
-        "P4.4b"
+        "P4.4b",
+        "P4.8"
       ],
       "tutoriales": [
         "L-15",
@@ -1983,7 +2151,8 @@
         {
           "tipo": "evento",
           "nombre": "Campaña activa",
-          "valida": "detectada por la conexión con Meta"
+          "valida": "detectada por la conexión con Meta",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -1996,7 +2165,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 32,
@@ -2022,7 +2192,8 @@
         "No abras el administrador de anuncios"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 33,
@@ -2034,7 +2205,7 @@
         "P4.7"
       ],
       "tutoriales": [],
-      "agente": "tablero",
+      "agente": "ramiro",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -2046,12 +2217,14 @@
         {
           "tipo": "imagen",
           "nombre": "Tablero con cuatro columnas",
-          "valida": "gasto, entradas, agendas, costo por agenda"
+          "valida": "gasto, entradas, agendas, costo por agenda",
+          "del_mercado": false
         },
         {
           "tipo": "numero",
           "nombre": "Costo por agenda",
-          "valida": "> 0"
+          "valida": "> 0",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2061,7 +2234,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 34,
@@ -2082,12 +2256,13 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Dos mensajes nuevos a tu red",
         "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra",
-        "Seguí cerrando la transición de cartera que quedó abierta"
+        "Contestá en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 35,
@@ -2108,12 +2283,13 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Dos mensajes nuevos a tu red",
         "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra",
-        "Seguí cerrando la transición de cartera que quedó abierta"
+        "Contestá en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 36,
@@ -2125,7 +2301,7 @@
         "P5.1"
       ],
       "tutoriales": [],
-      "agente": "sparring",
+      "agente": "lucas",
       "manual": "LLA-1",
       "acceso": null,
       "pasos": [
@@ -2139,12 +2315,14 @@
         {
           "tipo": "texto",
           "nombre": "Tu W con tus preguntas",
-          "valida": "los siete tramos"
+          "valida": "los siete tramos",
+          "del_mercado": false
         },
         {
           "tipo": "evento",
           "nombre": "Sesión de sparring",
-          "valida": "completada"
+          "valida": "completada",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -2156,33 +2334,47 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 37,
-      "tipo": "campo",
-      "titulo": "Los catorce sin tocar",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
+      "tipo": "sesion",
+      "titulo": "Tu primera llamada real",
+      "sistema": 3,
+      "minutos": 60,
+      "piezas": [
+        "P5.4"
+      ],
       "tutoriales": [],
-      "agente": null,
+      "agente": "lucas",
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Elegí a quién de tu red le ofreciste y todavía no cerraste",
+        "Repasá tu W una vez, no más",
+        "Hacé la llamada",
+        "Escribí qué objeción apareció"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "La primera objeción real",
+          "valida": "textual, con las palabras de la persona",
+          "del_mercado": false
+        }
+      ],
+      "adn_escribe": [
+        "voz.objeciones_reales"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [
-        "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra",
-        "Seguí cerrando la transición de cartera que quedó abierta"
-      ],
-      "nota": null,
-      "paso_esencial": null
+      "acciones_campo": [],
+      "nota": "Esa objeción vale más que veinte sesiones de teoría. Alimenta el día 42.",
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 38,
@@ -2194,7 +2386,7 @@
         "P5.2"
       ],
       "tutoriales": [],
-      "agente": null,
+      "agente": "sofi",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -2206,7 +2398,8 @@
         {
           "tipo": "texto",
           "nombre": "Mensaje previo y criterio",
-          "valida": "el criterio con dos condiciones objetivas"
+          "valida": "el criterio con dos condiciones objetivas",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2216,7 +2409,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 39,
@@ -2241,7 +2435,8 @@
         {
           "tipo": "evento",
           "nombre": "Grabación activada",
-          "valida": "en el Sistema"
+          "valida": "en el Sistema",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2251,7 +2446,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 2
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 40,
@@ -2272,12 +2468,13 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Dos mensajes nuevos a tu red",
         "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra",
-        "Seguí cerrando la transición de cartera que quedó abierta"
+        "Contestá en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 41,
@@ -2298,12 +2495,13 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Dos mensajes nuevos a tu red",
         "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra",
-        "Seguí cerrando la transición de cartera que quedó abierta"
+        "Contestá en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 42,
@@ -2315,7 +2513,7 @@
         "P5.6"
       ],
       "tutoriales": [],
-      "agente": "sparring",
+      "agente": "lucas",
       "manual": "LLA-4",
       "acceso": null,
       "pasos": [
@@ -2329,12 +2527,14 @@
         {
           "tipo": "numero",
           "nombre": "Los cuatro números",
-          "valida": "minuto, preguntas, silencio, pidió decisión"
+          "valida": "minuto, preguntas, silencio, pidió decisión",
+          "del_mercado": false
         },
         {
           "tipo": "texto",
           "nombre": "La cosa que cambia",
-          "valida": "una sola"
+          "valida": "una sola",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2344,7 +2544,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 43,
@@ -2368,12 +2569,14 @@
         {
           "tipo": "texto",
           "nombre": "El permiso escrito",
-          "valida": "contiene un nombre propio"
+          "valida": "contiene un nombre propio",
+          "del_mercado": false
         },
         {
           "tipo": "archivo",
           "nombre": "El permiso dicho",
-          "valida": "audio"
+          "valida": "audio",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -2385,7 +2588,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 5
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 44,
@@ -2413,12 +2617,14 @@
         {
           "tipo": "evento",
           "nombre": "Bandeja clasificada",
-          "valida": "al menos cinco conversaciones con estado y fecha"
+          "valida": "al menos cinco conversaciones con estado y fecha",
+          "del_mercado": false
         },
         {
           "tipo": "imagen",
           "nombre": "La lista tachada",
-          "valida": "tachado visible"
+          "valida": "tachado visible",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2428,7 +2634,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 45,
@@ -2448,7 +2655,8 @@
         {
           "tipo": "evento",
           "nombre": "Cobro del sistema",
-          "valida": "contacto con origen campaña"
+          "valida": "contacto con origen campaña",
+          "del_mercado": true
         }
       ],
       "adn_escribe": [],
@@ -2458,7 +2666,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": true
     },
     {
       "dia": 46,
@@ -2470,7 +2679,7 @@
         "P4.4c"
       ],
       "tutoriales": [],
-      "agente": "tablero",
+      "agente": "ramiro",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -2482,7 +2691,8 @@
         {
           "tipo": "texto",
           "nombre": "La decisión",
-          "valida": "con el costo por agenda al lado"
+          "valida": "con el costo por agenda al lado",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2495,7 +2705,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.",
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 47,
@@ -2507,7 +2718,7 @@
         "P6.1"
       ],
       "tutoriales": [],
-      "agente": "arquitecto",
+      "agente": "bruno",
       "manual": "CLI-4",
       "acceso": null,
       "pasos": [
@@ -2520,12 +2731,14 @@
         {
           "tipo": "texto",
           "nombre": "Dos columnas, estaciones y línea base",
-          "valida": "completas"
+          "valida": "completas",
+          "del_mercado": false
         },
         {
           "tipo": "numero",
           "nombre": "Horas por consultante al mes",
-          "valida": "> 0"
+          "valida": "> 0",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -2540,7 +2753,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 48,
@@ -2565,7 +2779,8 @@
         {
           "tipo": "texto",
           "nombre": "Bienvenida, tres límites y siete pasos",
-          "valida": "completos"
+          "valida": "completos",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -2578,7 +2793,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 49,
@@ -2604,7 +2820,8 @@
         "Lunes de números, si cae lunes"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 50,
@@ -2627,7 +2844,8 @@
         {
           "tipo": "imagen",
           "nombre": "Tu app con tu marca",
-          "valida": "logo y color visibles"
+          "valida": "logo y color visibles",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2637,7 +2855,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 2
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 51,
@@ -2649,7 +2868,7 @@
         "P8.2"
       ],
       "tutoriales": [],
-      "agente": "arquitecto",
+      "agente": "bruno",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -2662,7 +2881,8 @@
         {
           "tipo": "evento",
           "nombre": "Cuatro etapas cargadas",
-          "valida": "con contenido asignado"
+          "valida": "con contenido asignado",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2672,7 +2892,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 52,
@@ -2697,7 +2918,8 @@
         {
           "tipo": "archivo",
           "nombre": "Cuatro videos",
-          "valida": "subidos y asignados a su etapa"
+          "valida": "subidos y asignados a su etapa",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2707,7 +2929,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 53,
@@ -2732,12 +2955,14 @@
         {
           "tipo": "evento",
           "nombre": "Compra de prueba",
-          "valida": "pago propio registrado"
+          "valida": "pago propio registrado",
+          "del_mercado": false
         },
         {
           "tipo": "imagen",
           "nombre": "Consultante adentro",
-          "valida": "captura desde celular con tu marca"
+          "valida": "captura desde celular con tu marca",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2749,7 +2974,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 54,
@@ -2775,7 +3001,8 @@
         "Tablero, dos minutos"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 55,
@@ -2801,7 +3028,8 @@
         {
           "tipo": "texto",
           "nombre": "Tu cadena con tus números",
-          "valida": "los cuatro escalones"
+          "valida": "los cuatro escalones",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -2811,7 +3039,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 56,
@@ -2832,6 +3061,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -2839,7 +3069,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 57,
@@ -2860,6 +3091,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -2867,7 +3099,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 58,
@@ -2888,6 +3121,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -2895,7 +3129,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 59,
@@ -2916,6 +3151,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -2923,7 +3159,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 60,
@@ -2944,6 +3181,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -2951,7 +3189,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 61,
@@ -2960,10 +3199,11 @@
       "sistema": 5,
       "minutos": 45,
       "piezas": [
-        "P9.1"
+        "P9.1",
+        "P2.3"
       ],
       "tutoriales": [],
-      "agente": "estratega",
+      "agente": "mateo",
       "manual": "CAM-9",
       "acceso": null,
       "pasos": [
@@ -2974,7 +3214,8 @@
         {
           "tipo": "texto",
           "nombre": "Los tres enfoques",
-          "valida": "con su filtro"
+          "valida": "con su filtro",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -2986,7 +3227,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 2
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 62,
@@ -3007,6 +3249,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3014,7 +3257,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 63,
@@ -3035,6 +3279,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3042,7 +3287,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 64,
@@ -3063,6 +3309,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3070,7 +3317,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 65,
@@ -3091,6 +3339,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3098,7 +3347,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 66,
@@ -3119,6 +3369,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3126,7 +3377,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 67,
@@ -3141,7 +3393,7 @@
         "L-20",
         "L-21"
       ],
-      "agente": "estratega",
+      "agente": "mateo",
       "manual": null,
       "acceso": null,
       "pasos": [
@@ -3154,7 +3406,8 @@
         {
           "tipo": "texto",
           "nombre": "Doce semanas con sus ganchos",
-          "valida": "doce filas"
+          "valida": "doce filas",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -3166,7 +3419,8 @@
       "jornada_larga": true,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 68,
@@ -3187,6 +3441,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3194,7 +3449,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 69,
@@ -3215,6 +3471,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3222,7 +3479,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 70,
@@ -3243,6 +3501,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3250,7 +3509,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 71,
@@ -3271,6 +3531,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3278,7 +3539,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 72,
@@ -3299,6 +3561,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3306,7 +3569,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 73,
@@ -3327,6 +3591,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3334,7 +3599,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 74,
@@ -3355,6 +3621,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3362,7 +3629,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 75,
@@ -3383,6 +3651,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3390,7 +3659,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 76,
@@ -3411,6 +3681,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3418,7 +3689,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 77,
@@ -3439,6 +3711,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3446,7 +3719,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 78,
@@ -3467,6 +3741,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3474,7 +3749,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 79,
@@ -3495,6 +3771,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3502,7 +3779,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 80,
@@ -3523,6 +3801,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3530,7 +3809,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 81,
@@ -3551,6 +3831,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3558,7 +3839,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 82,
@@ -3579,6 +3861,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3586,7 +3869,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 83,
@@ -3607,6 +3891,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3614,7 +3899,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 84,
@@ -3635,6 +3921,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3642,7 +3929,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 85,
@@ -3663,6 +3951,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
         "Martes · las llamadas, con tu W adelante",
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
@@ -3670,7 +3959,8 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 86,
@@ -3691,7 +3981,8 @@
         {
           "tipo": "texto",
           "nombre": "Tu día siguiente",
-          "valida": "en presente"
+          "valida": "en presente",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -3703,7 +3994,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 2
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 87,
@@ -3727,7 +4019,8 @@
         {
           "tipo": "numero",
           "nombre": "Hora real neta final",
-          "valida": "> 0"
+          "valida": "> 0",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [
@@ -3739,7 +4032,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 88,
@@ -3763,7 +4057,8 @@
         {
           "tipo": "texto",
           "nombre": "Plan de 180 aprobado",
-          "valida": "doce semanas + tres meses"
+          "valida": "doce semanas + tres meses",
+          "del_mercado": false
         }
       ],
       "adn_escribe": [],
@@ -3773,35 +4068,43 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 3
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 89,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
+      "tipo": "sesion",
+      "titulo": "La última recta",
+      "sistema": 0,
       "minutos": 45,
-      "piezas": [],
+      "piezas": [
+        "P7.3"
+      ],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Mirá cuántas ventas tenés y cuántas te faltan",
+        "Escribí qué podés cerrar esta semana con lo que ya está en la bandeja"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Lo que se puede cerrar",
+          "valida": "con nombres",
+          "del_mercado": false
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false
     },
     {
       "dia": 90,
@@ -3819,7 +4122,8 @@
         {
           "tipo": "evento",
           "nombre": "Diez consultantes",
-          "valida": "contados desde MCD, todos al precio digno"
+          "valida": "contados desde MCD, todos al precio digno",
+          "del_mercado": true
         }
       ],
       "adn_escribe": [],
@@ -3829,7 +4133,8 @@
       "jornada_larga": false,
       "acciones_campo": [],
       "nota": "Si no llegó, el camino no se cierra: el ciclo queda abierto sin fecha.",
-      "paso_esencial": null
+      "paso_esencial": null,
+      "avanza_sin_evidencia": true
     }
   ]
 }

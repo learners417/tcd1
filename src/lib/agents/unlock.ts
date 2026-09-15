@@ -1,4 +1,5 @@
 import type { PilarId, ProfileV2 } from '../supabase';
+import { claveDesbloqueoAgente } from '../roadmapSeed';
 import { SEED_ROADMAP_V2 } from '../roadmapSeed';
 import type { ConfigAgente } from './types';
 
@@ -91,10 +92,20 @@ export function checkAgentUnlock(
   if (activos.includes('todos')) return { unlocked: true };
   if (activos.some((a) => a.length >= 3 && agente.id.includes(a))) return { unlocked: true };
 
-  const todosCompletos = pilaresDesbloqueo(agente).every((p) =>
-    isPilarCompletado(p, completadas),
-  );
-  if (!todosCompletos) return { unlocked: false, reason: agente.unlockReason };
+  // Desbloqueo por evidencia: se abre al cerrar la jornada donde aparece por
+  // primera vez, que es la que exige su evidencia. Sale del seed, no de un mapa
+  // a mano. Si el seed no lo conoce, cae al criterio viejo por pilares.
+  const clave = claveDesbloqueoAgente(agente.id);
+  if (clave) {
+    if (!completadas.has(clave)) {
+      return { unlocked: false, reason: agente.unlockReason };
+    }
+  } else {
+    const todosCompletos = pilaresDesbloqueo(agente).every((p) =>
+      isPilarCompletado(p, completadas),
+    );
+    if (!todosCompletos) return { unlocked: false, reason: agente.unlockReason };
+  }
 
   if (agente.unlockExtraCheck && !agente.unlockExtraCheck(perfil, ctx)) {
     return { unlocked: false, reason: agente.unlockReason };

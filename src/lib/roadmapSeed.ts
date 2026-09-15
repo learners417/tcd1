@@ -98,6 +98,8 @@ export interface Freno {
 }
 
 export interface Evidencia {
+  /** true = depende de que otro pague. No traba el camino: espera el grado. */
+  del_mercado?: boolean
   tipo: TipoEvidencia
   nombre: string
   valida: string
@@ -121,6 +123,11 @@ export interface Jornada {
   freno_levanta: FrenoId[]
   cinturon: CinturonId | null
   jornada_larga: boolean
+  /**
+   * true = toda su evidencia depende de que otro pague. El paso se puede dar
+   * igual y lo que queda pendiente es el grado, no el camino.
+   */
+  avanza_sin_evidencia?: boolean
   acciones_campo: string[]
   nota: string | null
   /** Modo 15 minutos: qué paso produce la evidencia. Base 1. */
@@ -273,6 +280,8 @@ export interface RoadmapMeta {
   usa_ia: boolean
   cinturon: CinturonId | null
   es_estrella: boolean
+  /** El paso se cierra aunque la evidencia no llegue: la espera es del grado. */
+  avanza_sin_evidencia: boolean
   adn_field: string | null
   adn_fields: string[]
   evidencia_requerida: Evidencia & { descripcion: string }
@@ -358,6 +367,7 @@ const comoMeta = (
   usa_ia: j.agente !== null,
   cinturon: j.cinturon,
   es_estrella: j.cinturon !== null || j.jornada_larga,
+  avanza_sin_evidencia: j.avanza_sin_evidencia === true,
   adn_field: j.adn_escribe[0] ?? null,
   adn_fields: j.adn_escribe,
   evidencia_requerida: {
@@ -440,4 +450,33 @@ export const calcularCinturon = (pilar: number | PilarId): CinturonConOrden => {
   const i = typeof pilar === 'number' ? pilar : PILAR_ORDER.indexOf(pilar)
   const idx = Math.max(0, Math.min(CINTURONES.length - 1, i))
   return CINTURONES[idx]
+}
+
+/**
+ * La primera jornada de cada entrenador. Es lo que lo desbloquea: cerrar esa
+ * jornada exige su evidencia, así que el entrenador se abre por lo que el
+ * cliente hizo, no por la fecha. Si alguien cierra su método el día 8, Diego
+ * está el día 8.
+ */
+export const PRIMERA_META_POR_AGENTE: Record<string, { pilar: number; codigo: string; dia: number }> =
+  (() => {
+    const m: Record<string, { pilar: number; codigo: string; dia: number }> = {}
+    for (const p of SEED_ROADMAP_V3) {
+      for (const meta of p.metas) {
+        if (!meta.agente) continue
+        const prev = m[meta.agente]
+        if (!prev || meta.dia_asignado < prev.dia) {
+          m[meta.agente] = { pilar: p.numero, codigo: meta.codigo, dia: meta.dia_asignado }
+        }
+      }
+    }
+    return m
+  })()
+
+/** La clave de progreso de la jornada que abre a un entrenador. */
+export const claveDesbloqueoAgente = (agenteId: string): string | null => {
+  for (const [id, m] of Object.entries(PRIMERA_META_POR_AGENTE)) {
+    if (agenteId.includes(id)) return `${m.pilar}-${m.codigo}`
+  }
+  return null
 }
