@@ -1,0 +1,23 @@
+PAQUETE · app compila · 14 sep 2026
+Rama: mejoras · repo learners417/tcd1
+
+src/lib/roadmapSeed.ts   →  src/lib/roadmapSeed.ts        (reemplaza)
+src/lib/cinturones.ts    →  src/lib/cinturones.ts         (reemplaza)
+auditoria.py             →  auditoria.py (raíz del repo)  (reemplaza)
+
+VERIFICADO EN ESTE CONTENEDOR
+  npm install           OK
+  npx tsc --noEmit      0 errores (venía de 198)
+  npm run build         OK
+  python3 auditoria.py  19 de 20 en verde
+
+PROBADO EN EJECUCIÓN, NO SOLO EN TIPOS
+  91 jornadas repartidas en 11 tramos de grado
+  0 colisiones de clave de progreso
+  11 grados distintos, uno por tramo
+  pantallas: 42 tarea · 26 herramienta · 19 video · 4 coach
+
+EL FALLO QUE QUEDA NO ES DE CÓDIGO
+  14 de las 20 sesiones guiadas están escritas y no son alcanzables
+  desde ninguna jornada. Se resuelve regenerando el seed con
+  generar_seed.py, no tocando estos archivos.

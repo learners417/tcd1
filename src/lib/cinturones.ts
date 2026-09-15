@@ -20,16 +20,13 @@ export type { Cinturon };
 export { CINTURONES, calcularCinturon };
 
 /** Mapeo pilar → cinturón (espejo del seed, para registro en DB). */
-const CINTURON_POR_PILAR: Record<string, string> = {
-  P0: 'blanco',
-  P1: 'amarillo',
-  P2: 'amarillo_punta_verde',
-  P3: 'verde',
-  P4: 'verde_punta_azul',
-  P5: 'azul',
-  P6: 'rojo',
-  P7: 'negro',
-};
+/**
+ * Pilar → cinturón. Antes era un mapa a mano con ocho nombres que el seed ya no
+ * usa: escribía en la base ids inexistentes. Ahora sale del mismo seed.
+ */
+const CINTURON_POR_PILAR: Record<string, string> = Object.fromEntries(
+  SEED_ROADMAP_V2.map((p) => [p.id, calcularCinturon(p.id).id]),
+);
 
 /** Pilares cuyo hito requiere comprobante visual (validado con el Coach). */
 const HITOS_CON_COMPROBANTE: Record<string, string> = {
@@ -118,8 +115,8 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
   }
 
   // La punta amarilla: la quema (P1.3) o EL NÚMERO (P1.5) completados, sin P1 cerrado todavía.
-  if (masAlto.slug === 'blanco' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
-    const punta = CINTURONES.find((c) => c.slug === 'blanco_punta_amarilla');
+  if (masAlto.id === '10gup' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
+    const punta = CINTURONES.find((c) => c.id === '9gup');
     if (punta) masAlto = punta;
   }
 

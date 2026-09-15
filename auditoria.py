@@ -1220,7 +1220,11 @@ for _f, _s in _TODO33.items():
 
 # TODA SESIÓN CON GUION TIENE QUE ESTAR EN EL CAMINO. Si no, está escrita y
 # nadie llega nunca — le pasó a P4.8, la Prueba de Fuego.
-_cam33 = set(_re33.findall(r"codigo: '([A-Z][0-9]+\.[0-9]+[a-z]?)'", rd('src/lib/roadmapSeed.ts')))
+# Los códigos ya no se escriben a mano en roadmapSeed.ts: viven en el JSON, y
+# alcanzable = referenciado por alguna jornada, no solo existir como pieza.
+import json as _json33
+_seed33 = _json33.loads(rd('src/lib/roadmap.seed.json'))
+_cam33 = {c for _j33 in _seed33['jornadas'] for c in _j33['piezas']}
 _gui33 = set(_re33.findall(r"^  '([A-Z][0-9]+\.[0-9]+[a-z]?)': \{", rd('src/lib/sesionesGuiadas.ts'), _re33.M))
 for _x in _gui33 - _cam33:
     _malos33.append(f'sesión {_x} tiene guion y NO está en el Camino')
