@@ -61,7 +61,7 @@ export default function GanadoresView({ creativos, onSelectCreativo }: Props) {
                 {ANGULO_LABELS[c.angulo].titulo}
               </div>
               <div className="text-sm font-semibold text-cream mb-2 line-clamp-2">
-                {c.titulo || c.nombre || 'Sin titulo'}
+                {c.titulo || c.nombre || 'Sin título'}
               </div>
               <div className="flex gap-3 text-sm text-cream/45">
                 <span>

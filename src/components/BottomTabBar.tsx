@@ -34,7 +34,7 @@ interface Props {
 export default function BottomTabBar({ currentPage, setCurrentPage }: Props) {
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gold/20 bg-[var(--bg-root)]/95 backdrop-blur-xl"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[var(--line,rgba(176,130,46,0.2))] bg-[var(--bg-root)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Navegación principal"
     >
@@ -52,12 +52,12 @@ export default function BottomTabBar({ currentPage, setCurrentPage }: Props) {
                 setCurrentPage(tab.id);
               }}
               aria-current={active ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center gap-1.5 flex-1 min-h-[4rem] pt-2.5 pb-2 transition-colors ${
-                active ? 'text-gold' : 'text-cream/65 hover:text-cream/80'
-              }`}
+              // 10-DISENO §4: el activo cambia el trazo del ícono a oro y el peso
+              // de la etiqueta a 700. Nada más: sin fondo, sin píldora.
+              className="flex flex-col items-center justify-center gap-1.5 flex-1 min-h-[4rem] pt-2.5 pb-2 text-cream/70"
             >
-              <Icon className="w-[25px] h-[25px]" strokeWidth={active ? 2.2 : 1.7} />
-              <span className="text-[12.5px] font-medium leading-none tracking-tight">{tab.label}</span>
+              <Icon className={`w-[25px] h-[25px] ${active ? 'text-gold' : ''}`} strokeWidth={active ? 2.2 : 1.7} />
+              <span className={`text-[14px] leading-none ${active ? 'font-bold text-cream' : 'font-normal'}`}>{tab.label}</span>
             </button>
           );
         })}

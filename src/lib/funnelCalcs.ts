@@ -138,7 +138,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Tasa de Cierre',
       mensaje: nivel === 'ok' ? 'Buen cierre de ventas'
-        : nivel === 'alerta' ? 'Cierras pocas llamadas. Practicá con el Simulador de Ventas.'
+        : nivel === 'alerta' ? 'Cierras pocas llamadas. Practica con el Simulador de Ventas.'
         : 'Tasa de cierre muy baja. Revisa tu script y el manejo de objeciones.',
       nivel,
       valor: pct,

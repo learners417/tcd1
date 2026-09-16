@@ -196,7 +196,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       '«Si estás donde yo estaba…» + CTA: «Comenta [PALABRA]».',
     ],
     caption: '«Esta historia es mía. Pero el camino se puede repetir. Comenta [PALABRA].»',
-    ejemplo: '«Encontré una nota en mi agenda de [AÑO]. Decía: “no puedo más”. La escribí yo.»',
+    ejemplo: '«Encontré una nota en mi agenda de [AÑO]. Decía: “no puedo más”. La escribí yo.»', // primera persona, no voseo
     errorComun: 'Inventarla o adornarla. Se nota, y una historia falsa descubierta destruye la marca completa. Si no hay historia real, usa otra fórmula — hay 17 más.',
   },
   {
@@ -472,7 +472,7 @@ export const UMBRALES: Record<ObjetivoCampana, UmbralObjetivo> = {
     unidad: 'conversacion',
     sano: [1.20, 2.50],
     alarma: 3.00,
-    nota: 'Publico chico y caro: la conversacion cuesta mas, pero una venta paga muchas.',
+    nota: 'Público chico y caro: la conversación cuesta mas, pero una venta paga muchas.',
   },
 };
 
@@ -486,10 +486,10 @@ export const METRICAS_REGLAS = {
   minConversacionAAgenda: 0.25,
   /** Refrescar el creativo del ganador cada N semanas (mismo esqueleto, otro hook). */
   semanasRefresh: [2, 4] as [number, number],
-  primaria: 'Costo por conversacion iniciada (comentario con la palabra o DM). Es lo unico que la campana controla.',
+  primaria: 'Costo por conversación iniciada (comentario con la palabra o DM). Es lo único que la campana controla.',
   negocio: 'Conversaciones → reservas calificadas o ventas. Se mira por semana, no por dia.',
-  alarma: 'Muchas conversaciones y cero reservas = el problema NO es el anuncio — es la pagina o el DM. No se toca el anuncio hasta revisar los otros dos.',
-  continuidad: 'El ganador queda corriendo; los otros dos se apagan. Gana el de menor costo por conversacion QUE ADEMAS genera reservas.',
+  alarma: 'Muchas conversaciones y cero reservas = el problema NO es el anuncio — es la página o el DM. No se toca el anuncio hasta revisar los otros dos.',
+  continuidad: 'El ganador queda corriendo; los otros dos se apagan. Gana el de menor costo por conversación QUE ADEMAS genera reservas.',
 };
 
 /**
@@ -525,7 +525,7 @@ export function veredictoAnuncio(
   if (conversaciones >= 5 && agendas === 0) {
     return {
       estado: 'amarillo',
-      texto: 'Conversaciones si, agendas no — el problema NO es el anuncio: revisa tu pagina y tu DM antes de tocar nada.',
+      texto: 'Conversaciones si, agendas no — el problema NO es el anuncio: revisa tu página y tu DM antes de tocar nada.',
     };
   }
   if (conversaciones >= 8 && agendas / conversaciones < METRICAS_REGLAS.minConversacionAAgenda) {
@@ -537,7 +537,7 @@ export function veredictoAnuncio(
   if (conversaciones > 0 && agendas > 0) {
     return {
       estado: 'verde',
-      texto: `$${(gasto / conversaciones).toFixed(2)} por conversacion y agenda. Este queda.`,
+      texto: `$${(gasto / conversaciones).toFixed(2)} por conversación y agenda. Este queda.`,
     };
   }
   return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };

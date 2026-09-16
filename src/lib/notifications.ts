@@ -214,7 +214,7 @@ export async function notificarEnergiBaja(
     usuario_id: userId,
     tipo: 'sistema',
     titulo: 'Tu energia ha estado baja',
-    descripcion: `Tu promedio de energia en los ultimos 7 dias es ${promedio.toFixed(1)}/10. Revisa tu modulo energetico.`,
+    descripcion: `Tu promedio de energia en los ultimos 7 días es ${promedio.toFixed(1)}/10. Revisa tu modulo energetico.`,
     accion_url: '/diario',
   });
 }
@@ -243,7 +243,7 @@ export async function notificarClienteInactivo(
     usuario_id: adminId,
     tipo: 'admin',
     titulo: 'Cliente inactivo',
-    descripcion: `${clienteNombre} lleva ${diasInactivo} dias sin actividad.`,
+    descripcion: `${clienteNombre} lleva ${diasInactivo} días sin actividad.`,
     accion_url: '/admin/clientes',
   });
 }

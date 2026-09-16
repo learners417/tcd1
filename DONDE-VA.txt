@@ -1,23 +1,52 @@
-PAQUETE · app compila · 14 sep 2026
+PAQUETE · Toda la app (cliente y Admin) al nivel del sistema visual · 16 sep 2026
 Rama: mejoras · repo learners417/tcd1
+Se descomprime en la RAÍZ del repo: cada archivo ya trae su carpeta.
+Incluye también la tanda anterior (día único y vocabulario): se aplica sobre
+la rama tal como está hoy.
 
-src/lib/roadmapSeed.ts   →  src/lib/roadmapSeed.ts        (reemplaza)
-src/lib/cinturones.ts    →  src/lib/cinturones.ts         (reemplaza)
-auditoria.py             →  auditoria.py (raíz del repo)  (reemplaza)
+NUEVOS
+  src/components/camino/EncabezadoCamino.tsx   anillo, grado y ritmo del Camino
+  src/components/camino/TarjetaDeHoy.tsx       la tarjeta de hoy (Hoy y Camino)
+  src/lib/diaPrograma.ts                       día, atraso, paso del cliente, apertura de pilares
+  tcd-spec/datos/tuteo.py                      voseo → tú para el seed
+  scripts/medir-app.py                         toda la app contra 10-DISENO (Chromium)
+  scripts/prueba-movil.py                      El Camino a 360/390 px (Chromium)
+  scripts/prueba-dia-vocabulario.ts            día, pilares y vocabulario
+  scripts/visor/camino.html + camino.tsx       visor para la prueba móvil
+  scripts/visor/admin.html + admin.tsx         visor del Admin para el medidor
 
-VERIFICADO EN ESTE CONTENEDOR
-  npm install           OK
-  npx tsc --noEmit      0 errores (venía de 198)
-  npm run build         OK
-  python3 auditoria.py  19 de 20 en verde
+REEMPLAZAN
+  package.json + package-lock.json   fuentes Sora y Fraunces dentro de la app
+  index.html                         sin Google Fonts
+  src/main.tsx                       importa las fuentes
+  src/index.css                      capa 10-DISEÑO para toda la app
+  src/pages/Roadmap.tsx              encabezado nuevo, pilares que abren, mapa de fases
+  src/pages/Dashboard.tsx            Hoy: tarjeta arriba, mismo ritmo, solo pasos del cliente
+  src/components/CadenaADN.tsx       las nueve piezas a la vista, sin desplazamiento
+  src/components/EnMarcha.tsx        título en la letra de cuerpo
+  Coach · Metrics · Biblioteca · DiarioDirector · Agentes · ManualNegocio ·
+  ConstructorAnuncios · ChatAttachmentsBar · Topbar   contraste, tamaños y cortes
+  unos 60 archivos con tildes corregidas en textos visibles (ver lista de git)
+  Admin.tsx · NotificationBell · TableroPlata · TasksPipeline · TaskFiltersBar ·
+  NuevaCampanaChat · DiagnosticoView · CopiesView   Admin y pestañas internas
+  src/components/CeremoniaCinturon.tsx  tarjeta abajo, 11 grados, sin pantalla completa
+  src/components/CintaCinturon.tsx   color real del grado
+  src/components/BottomTabBar.tsx    etiquetas a 14 px
+  src/components/Topbar.tsx          título en Fraunces
+  src/components/Dia45Banner.tsx     aviso de Fase 4 en positivo
+  src/lib/roadmap.seed.json          seed tuteado (solo cambian textos)
+  tcd-spec/datos/generar_seed.py     tutea antes de escribir
+  tcd-spec/datos/roadmap.seed.json   igual al de la app
+  src/App.tsx · Admin.tsx · Metrics.tsx · Coach.tsx ·
+  DiarioDirector.tsx · Biblioteca.tsx · Sidebar.tsx · herramientas.ts ·
+  sesionesGuiadas.ts · vocabulario.ts · roadmapSeed.ts · adnSchema.ts
+  y los archivos con voseo corregido (ver lista de git)
+  auditoria.py · COMO-FUNCIONA.md · DONDE-VA.txt
 
-PROBADO EN EJECUCIÓN, NO SOLO EN TIPOS
-  91 jornadas repartidas en 11 tramos de grado
-  0 colisiones de clave de progreso
-  11 grados distintos, uno por tramo
-  pantallas: 42 tarea · 26 herramienta · 19 video · 4 coach
-
-EL FALLO QUE QUEDA NO ES DE CÓDIGO
-  14 de las 20 sesiones guiadas están escritas y no son alcanzables
-  desde ninguna jornada. Se resuelve regenerando el seed con
-  generar_seed.py, no tocando estos archivos.
+COMANDOS
+  unzip -o tcd-camino-visual-15sep.zip -d .
+  npm install
+  pip install playwright --break-system-packages
+  python3 -m playwright install chromium
+  python3 auditoria.py
+  git add -A && git commit -m "App completa al nivel 10-DISENO: 38 vistas en cero faltas" && git push

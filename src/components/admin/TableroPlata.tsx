@@ -201,7 +201,7 @@ export default function TableroPlata({
                   <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${PUNTO[i.estado]}`} />
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between gap-2 items-baseline">
-                      <span className="text-[13px] text-cream/80 truncate">{i.label}</span>
+                      <span className="text-[15px] text-cream/80">{i.label}</span>
                       <span className={`text-sm font-semibold shrink-0 ${COLOR[i.estado]}`}>
                         {formatear(i.valor, i.formato)}
                       </span>

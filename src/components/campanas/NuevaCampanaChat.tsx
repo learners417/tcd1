@@ -283,7 +283,8 @@ REGLAS:
 
       {/* Phase progress bar */}
       <div className="card-panel p-3 mb-4">
-        <div className="flex">
+        {/* En el teléfono, los pasos en dos filas: en una sola no entran. */}
+        <div className="grid grid-cols-3 gap-y-2 sm:flex">
           {PHASES.map((phase, i) => {
             const Icon = PHASE_ICONS[phase.id];
             const isDone = completedPhases.has(phase.id);
@@ -294,8 +295,8 @@ REGLAS:
               <div
                 key={phase.id}
                 className={`flex-1 flex flex-col items-center py-2 px-1 cursor-pointer transition-all rounded-lg ${
-                  i < PHASES.length - 1 ? 'border-r border-[rgba(232,150,46,0.1)]' : ''
-                } ${isDone ? 'bg-success/5' : isActive ? 'bg-gold/10' : 'opacity-35'}`}
+                  i < PHASES.length - 1 ? 'sm:border-r border-[rgba(232,150,46,0.1)]' : ''
+                } ${isDone ? 'bg-success/5' : isActive ? 'bg-gold/10' : ''}`}
                 onClick={() => {
                   if (isDone || isActive) setCurrentPhase(phase.id);
                 }}
@@ -311,7 +312,7 @@ REGLAS:
                 </div>
                 <span className={`text-sm font-semibold text-center ${
                   isDone ? 'text-success' :
-                  isActive ? 'text-gold' : 'text-cream/20'
+                  isActive ? 'text-gold' : 'text-cream/60'
                 }`}>
                   {phase.label}
                 </span>
@@ -427,7 +428,7 @@ REGLAS:
                     {[
                       { label: 'Cliente', value: campaignData.nombre },
                       { label: 'Especialidad', value: campaignData.rubro },
-                      { label: 'Pais', value: campaignData.ubicacion },
+                      { label: 'País', value: campaignData.ubicacion },
                       { label: 'Ticket', value: campaignData.ticket },
                       { label: 'Presupuesto', value: campaignData.presupuesto },
                       { label: 'Objetivo', value: campaignData.objetivo },
@@ -456,7 +457,7 @@ REGLAS:
                   <div className="card-panel overflow-hidden">
                     <div className="bg-gold/10 border-b border-[rgba(232,150,46,0.1)] px-3 py-2 flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                      <span className="text-sm font-bold text-gold">Ultima generacion</span>
+                      <span className="text-sm font-bold text-gold">Última generación</span>
                     </div>
                     <div className="p-3 text-sm text-cream/70 leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap">
                       {aiOutput.slice(0, 500)}{aiOutput.length > 500 ? '...' : ''}
@@ -465,7 +466,7 @@ REGLAS:
                 ) : (
                   <div className="text-center py-8 text-cream/20">
                     <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">La salida de IA aparecera aqui cuando KAI genere contenido.</p>
+                    <p className="text-sm">La salida de IA aparecera aquí cuando KAI genere contenido.</p>
                   </div>
                 )}
               </div>
@@ -481,7 +482,7 @@ REGLAS:
                   { n: 1, title: 'Cliente', tip: 'El ticket es lo mas importante. Define si conviene trafico frio, VSL o agenda directa.' },
                   { n: 2, title: 'Estrategia', tip: 'Con ticket <$100: leads baratos. Con ticket >$500: VSL + agenda o DFY.' },
                   { n: 3, title: 'Audiencias', tip: 'Para salud, los intereses de comportamiento superan a los demograficos puro.' },
-                  { n: 4, title: 'Copies', tip: 'La primera linea para el scroll. Si no para el dedo, el resto no importa.' },
+                  { n: 4, title: 'Copies', tip: 'La primera línea para el scroll. Si no para el dedo, el resto no importa.' },
                   { n: 5, title: 'Creativos', tip: 'El creativo es el 80% del resultado. El copy es el 20%. No al reves.' },
                   { n: 6, title: 'Montaje', tip: 'No tocar nada en las primeras 48-72h. La fase de aprendizaje necesita tiempo.' },
                 ].map((t) => (

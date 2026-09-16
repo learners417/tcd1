@@ -45,14 +45,13 @@ import {
   type CoachQuickReplyContext,
 } from '../lib/coachQuickReplies';
 import { AGENTES, NIVEL_NOMBRE } from '../lib/agents';
+import { semanaDelPrograma } from '../lib/diaPrograma';
 
 type Message = CoachConversationMessage;
 
 function buildInitialMessage(): Message {
   const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
-  const dInicio = profile.fecha_inicio ? new Date(profile.fecha_inicio) : new Date();
-  const diff = Math.floor((Date.now() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
-  const semanaActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+  const semanaActual = semanaDelPrograma(profile.fecha_inicio, 13);
   const nombre = profile.nombre || 'Fundadora';
 
   const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
@@ -485,7 +484,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
+          className="w-11 h-11 rounded-full hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -508,7 +507,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               }`}
             >
               {msg.role === 'assistant' ? (
-                <span className="text-[13px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
+                <span className="text-[17px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
               ) : avatarUrl ? (
                 <img loading="lazy" src={avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -521,7 +520,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
                   <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
-                    <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
+                    <div className="prose prose-invert prose-sm max-w-none text-[17px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
                       <Markdown>{parte}</Markdown>
                     </div>
                   </div>
@@ -536,11 +535,11 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               }`}
             >
               {msg.role === 'user' ? (
-                <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
+                <p className="text-[17px] leading-relaxed whitespace-pre-wrap">
                   {msg.content}
                 </p>
               ) : (
-                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
+                <div className="text-[17px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
                   {msg.content ? (
                     <Markdown>{msg.content}</Markdown>
                   ) : (
@@ -615,7 +614,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 ? 'Tu coach está conectando ideas...'
                 : 'Cuéntale dónde estás — tu Mentor conoce tu camino...'
             }
-            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
+            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -625,7 +624,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               cargandoEstado ||
               uploadingAttachment
             }
-            className="absolute right-2 w-9 h-9 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-50 flex items-center justify-center text-ink transition-colors"
+            aria-label="Enviar" className="absolute right-1 w-11 h-11 rounded-full bg-[var(--oro-d,#8E6824)] disabled:opacity-50 flex items-center justify-center text-[#FFFDF7] transition-colors"
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

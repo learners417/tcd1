@@ -12,7 +12,7 @@ import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 
 const TIPOS: { value: TipoCreativo; label: string }[] = [
-  { value: 'imagen_single', label: 'Imagen unica' },
+  { value: 'imagen_single', label: 'Imagen única' },
   { value: 'carrusel', label: 'Carrusel' },
 ];
 
@@ -212,7 +212,7 @@ REGLAS:
 
           <div>
             <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
-              Pais / ciudad
+              País / ciudad
             </label>
             <input
               className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"

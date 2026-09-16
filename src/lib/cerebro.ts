@@ -266,8 +266,8 @@ export function titularDelDia(tareas: TareaOrdenada[]): string {
   }
   if (soporte > 0) {
     return soporte === 1
-      ? 'Hay alguien esperando respuesta. Empezá por ahí.'
-      : `Hay ${soporte} personas esperando respuesta. Empezá por ahí.`;
+      ? 'Hay alguien esperando respuesta. Empieza por ahí.'
+      : `Hay ${soporte} personas esperando respuesta. Empieza por ahí.`;
   }
   return tareas.length === 1
     ? 'Hay una cuenta que necesita que entres hoy.'

@@ -277,3 +277,73 @@ llegan la primera vez**, y verifica dos cosas: que no explote, y que dibuje
 algo. Una pantalla que dibuja treinta caracteres está muda aunque no falle.
 
 Si agregas una pantalla, agrégala ahí. Es una línea.
+
+### El teléfono de verdad
+
+Montar no alcanza: jsdom no calcula tamaños. Una pantalla puede montar
+perfecta y tener la mitad del texto fuera de la pantalla. Así llegó "Día 71
+de 90 · vas 59 días atrás" cortado a la derecha (15 sep 2026).
+
+```bash
+python3 scripts/prueba-movil.py
+```
+
+Levanta el visor `scripts/visor/camino.html`, que monta El Camino real con un
+cliente armado a mano, y lo mide en Chromium a 360 y 390 px: nada fuera de la
+pantalla, nada fuera de su tarjeta, ninguna palabra corta partida, ningún
+`{{token}}`, el día dicho de una sola forma y los avisos en positivo.
+
+Necesita el Chromium de Playwright:
+`pip install playwright --break-system-packages && python3 -m playwright install chromium`.
+Si no está, `auditoria.py` lo avisa con **⚠ SIN MEDIR** y el cierre lo dice.
+
+### Las dos reglas que salieron de las capturas
+
+- **El día sale de `src/lib/diaPrograma.ts` y de nada más.** La columna
+  `profiles.dia_programa` solo la mueve un trigger al completar metas: se
+  congela. `App.tsx` la recalcula al cargar el perfil.
+- **El vocabulario se aplica al leer el catálogo.** `getHerramienta` y
+  `sesionGuiadaDe` devuelven todo traducido, incluidos los prompts. Una
+  pantalla nunca importa `HERRAMIENTAS`, `HERRAMIENTAS_V3` ni `SESIONES_GUIADAS`.
+
+### Toda la app contra el sistema visual
+
+```bash
+python3 scripts/medir-app.py            # tabla por pantalla + capturas en /tmp
+python3 scripts/medir-app.py --estricto # falla si una pantalla ya rediseñada tiene faltas
+```
+
+Abre la app real a 390 px y cuenta, pantalla por pantalla, lo que
+`docs/tcd-spec/10-DISENO.md` prohíbe y se puede medir: letra por debajo de 15 px,
+botones de menos de 44 px, degradés, brillos dorados, mayúsculas espaciadas de
+más, insignias rojas, `{{tokens}}`, desplazamiento de costado, contraste por
+debajo de AA contra el fondo real, textos recortados, textos que se salen de su
+caja y palabras frecuentes sin tilde.
+
+Con `--admin` también abre las 18 pestañas del Admin (visor
+`scripts/visor/admin.html`, rol de dirección, sin base de datos), y siempre toca
+las pestañas internas del cliente que están en `INTERNAS` (Mi Sistema, Historial,
+las pestañas de Campañas…). Si agregas una pestaña, agrégala ahí: es una línea.
+Detecta además el texto apilado letra por letra en cajas angostas.
+
+Hoy se miden **38 vistas**. Solo el primer estado de cada una, sin datos reales:
+las listas llenas, las ventanas y los formularios a medio completar todavía no.
+
+Desde el 16 sep **todas** las pantallas del cliente están en la lista estricta:
+cualquier falta nueva pone la auditoría en rojo.
+
+Las correcciones de fondo viven en la capa 10-DISEÑO al final de
+`src/index.css` (contraste, oro de texto, opacidades, botones de 44 px,
+rótulos en mayúsculas, sombras). Si una pantalla nueva se ve mal, se mide
+primero y se corrige en su archivo: la capa es para lo que se repite.
+
+
+### El castellano del Camino
+
+El texto de las jornadas vive en `tcd-spec/datos/generar_seed.py`. Antes de
+escribir el JSON pasa por `tcd-spec/datos/tuteo.py`, que lo lleva de voseo a tú.
+Si agregas una forma nueva de voseo, va al diccionario de ese archivo: la
+auditoría lo usa para revisar el seed y el código.
+
+`python3 auditoria.py` ahora también **ejecuta**: corre todas las
+`scripts/prueba-*.ts`, la de pantallas y la del teléfono.

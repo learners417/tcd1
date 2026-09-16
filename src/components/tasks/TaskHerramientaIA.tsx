@@ -327,7 +327,7 @@ export default function TaskHerramientaIA({
     setRegenIdx(idx);
     try {
       const b = bloques[idx];
-      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${VOC(b.titulo)}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"titulo":"...","contenido":"..."}]` });
+      const out = await generateText({ feature: 'sesion', tarea: 'chat', prompt: herramienta.constructorFases.promptBloques(eleccion, formValues, perfil ?? {}) + `\n\nIMPORTANTE: regenera SOLO esta pieza, distinta y mejor: "${VOC(b.titulo)}". Mantén coherencia con las demás: ${bloques.filter((_, i) => i !== idx).map((x) => x.titulo).join(' · ')}. Responde SOLO un JSON array con UN objeto: [{"título":"...","contenido":"..."}]` });
       const arr = parseJsonArray<FaseBloque>(out ?? '');
       if (arr?.[0]) setBloques((prev) => prev.map((x, i) => (i === idx ? arr[0] : x)));
     } catch { /* noop */ }

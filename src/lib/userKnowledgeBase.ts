@@ -183,7 +183,7 @@ async function fromProfileAdn(userId: string): Promise<KnowledgeEntry[]> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'historia_300, historia_150, historia_50, proposito, legado, nicho, posicionamiento, por_que_oficial, matriz_a, matriz_b, matriz_c, metodo_nombre, metodo_pasos, oferta_high, oferta_mid, oferta_low, lead_magnet, identidad_colores, identidad_tipografia, identidad_logo, identidad_tono',
+      'historia_300, historia_150, historia_50, propósito, legado, nicho, posicionamiento, por_que_oficial, matriz_a, matriz_b, matriz_c, metodo_nombre, metodo_pasos, oferta_high, oferta_mid, oferta_low, lead_magnet, identidad_colores, identidad_tipografia, identidad_logo, identidad_tono',
     )
     .eq('id', userId)
     .maybeSingle();

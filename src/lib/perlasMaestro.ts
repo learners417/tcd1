@@ -41,7 +41,7 @@ export const PERLAS: Record<string, Perla> = {
   },
   'P6.3': {
     titulo: 'El primer $1.000',
-    texto: 'Guardá este comprobante. Es la prueba física de que el sistema funciona. El fruto maduro.',
+    texto: 'Guarda este comprobante. Es la prueba física de que el sistema funciona. El fruto maduro.',
     audioUrl: '',
   },
   'P7.3': {

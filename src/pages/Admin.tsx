@@ -6,7 +6,8 @@ import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
-import { esDiaDescanso, calcularRachaDesdeFechas } from '../lib/racha';
+import { calcularRachaDesdeFechas } from '../lib/racha';
+import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso } from '../lib/diaPrograma';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
@@ -83,7 +84,7 @@ interface ClienteConEstado extends Profile {
   racha_diario: number;
   ventas_count: number;
   estado_garantia: 'en_camino' | 'en_riesgo' | 'activada';
-  cinturon: { emoji: string; nombre: string; orden: number; metafora: string };
+  cinturon: { emoji: string; nombre: string; orden: number; metafora: string; color: string; punta: string | null };
   dias_atraso: number;
   progreso_porcentaje: number;
   quema_hecha: boolean;
@@ -165,9 +166,7 @@ const PILAR_TO_GRUPO: Record<string, string> = {
 };
 
 function calcDias(fecha_inicio: string): { dia: number; semana: number } {
-  const diff = Math.floor((new Date().getTime() - new Date(fecha_inicio).getTime()) / (1000 * 60 * 60 * 24));
-  const dia = Math.max(1, Math.min(90, diff + 1));
-  return { dia, semana: Math.max(1, Math.min(12, Math.floor(diff / 7) + 1)) };
+  return { dia: diaDelPrograma(fecha_inicio) ?? 1, semana: semanaDelPrograma(fecha_inicio, 12) };
 }
 
 function derivePilarFromProgress(tareas_completadas: number): PilarId {
@@ -803,7 +802,7 @@ Este es el output que generó con la IA:
 ${outputText.slice(0, 2000)}
 ---
 
-Escribí un resumen de 2-3 oraciones en español para el equipo que explique:
+Escribe un resumen de 2-3 oraciones en español para el equipo que explique:
 1. Qué definió o produjo el cliente en esta tarea
 2. Una observación relevante para guiarlo mejor en la próxima sesión
 
@@ -1017,10 +1016,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
             if (!completadasSet.has(`${pil.numero}-${mm.codigo}`)) { diaEsperado = mm.dia_asignado ?? null; break outer; }
           }
         }
-        let dias_atraso = 0;
-        if (diaEsperado !== null && dia > diaEsperado) {
-          for (let d = diaEsperado + 1; d <= dia; d++) if (!esDiaDescanso(d)) dias_atraso++;
-        }
+        // Cada día se mira por su fecha real (antes contaba según si HOY era fin de semana).
+        const dias_atraso = diasHabilesDeAtraso(p.fecha_inicio, diaEsperado, dia);
         let semaforo: ClienteConEstado['semaforo'] = 'gris';
         if (tareas.length > 0 || completadasSet.size > 0) {
           semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
@@ -1028,7 +1025,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         // Cinturón: pilar más alto con TODAS sus metas completas
         // Cinturón: LA MISMA función que el cliente (una sola fuente de verdad).
         const cint = cinturonDesdeProgreso(completadasSet);
-        const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora };
+        const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora, color: cint.color, punta: cint.punta };
 
         const entradas = diarioRes.data ?? [];
         // Racha = LA MISMA definición que el cliente (sesiones, lu-vi, gracia),
@@ -1867,7 +1864,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <Stethoscope className="w-5 h-5 text-cream" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
-              <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clinica Digital</h1>
+              <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clínica Digital</h1>
               <p className="text-sm text-gold uppercase tracking-widest font-bold">Admin</p>
             </div>
           </div>
@@ -1963,12 +1960,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         <header className="h-16 border-b border-gold/10 flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
             aria-label="Abrir menú"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h2 className="text-lg font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F2EFE9' }}>
+          <h2 className="text-[20px] leading-tight truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-cream)' }}>
             {headerTitles[mainTab]}
           </h2>
           <div className="ml-auto flex items-center gap-2">
@@ -2886,7 +2883,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               value={notaInput}
                               onChange={e => setNotaInput(e.target.value)}
                               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) agregarNota(); }}
-                              placeholder="Escribí una nota interna... (Ctrl+Enter para guardar)"
+                              placeholder="Escribe una nota interna... (Ctrl+Enter para guardar)"
                               rows={3}
                               className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
                             />
@@ -3789,7 +3786,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-semibold text-white tracking-tight">Agregar Miembro</h3>
-                        <p className="text-sm text-white/55 mt-1">Creá una cuenta para un nuevo miembro del equipo</p>
+                        <p className="text-sm text-white/55 mt-1">Crea una cuenta para un nuevo miembro del equipo</p>
                       </div>
                       <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-white/75 hover:text-white hover:bg-gold/10 transition-colors">
                         <X className="w-4 h-4" />
@@ -4233,7 +4230,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               </div>
               <div className="bg-gold/5 border border-gold/20 rounded-xl px-3 py-2">
                 <p className="text-sm text-gold/80">
-                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si quieres que la cambie, mandá "Enviar reset" después.
+                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si quieres que la cambie, manda "Enviar reset" después.
                 </p>
               </div>
               <div className="flex gap-2 pt-2">

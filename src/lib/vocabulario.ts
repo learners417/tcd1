@@ -99,3 +99,55 @@ export function getFamiliaActual(): FamiliaProfesional {
 export function VOC(texto?: string | null): string {
   return texto ? aplicarVocabulario(texto, familiaActual) : '';
 }
+
+// ─── El vocabulario en la SALIDA del dato ───────────────────────────────────
+// Antes cada pantalla tenía que acordarse de llamar VOC() en cada campo, y
+// alcanza con que una se olvide para que el cliente lea "{{tu_consultante}}"
+// (pasó con `etiquetaOpciones` en el Constructor). Ahora los accesores
+// (getHerramienta, sesionGuiadaDe) devuelven el dato ya traducido: TODO texto,
+// en cualquier profundidad, y también lo que devuelven sus funciones de prompt
+// (así la IA tampoco recibe tokens crudos).
+
+const cachePorFamilia = new Map<FamiliaProfesional, WeakMap<object, unknown>>();
+
+function traducirProfundo(valor: unknown, familia: FamiliaProfesional, cache: WeakMap<object, unknown>): unknown {
+  if (typeof valor === 'string') return valor.includes('{{') ? aplicarVocabulario(valor, familia) : valor;
+  if (typeof valor === 'function') {
+    const hit = cache.get(valor);
+    if (hit) return hit;
+    const f = valor as (...args: unknown[]) => unknown;
+    const envuelta = (...args: unknown[]) => traducirProfundo(f(...args), familia, cache);
+    cache.set(valor, envuelta);
+    return envuelta;
+  }
+  if (valor && typeof valor === 'object') {
+    const hit = cache.get(valor);
+    if (hit) return hit;
+    let copia: unknown;
+    if (Array.isArray(valor)) {
+      copia = valor.map((v) => traducirProfundo(v, familia, cache));
+    } else {
+      const o: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(valor as Record<string, unknown>)) o[k] = traducirProfundo(v, familia, cache);
+      copia = o;
+    }
+    cache.set(valor, copia);
+    return copia;
+  }
+  return valor;
+}
+
+/**
+ * Devuelve el dato con todos sus textos traducidos a la familia en curso.
+ * Misma referencia de entrada + misma familia = misma referencia de salida
+ * (no dispara re-renders ni efectos en bucle).
+ */
+export function vocabularizar<T>(valor: T, familia: FamiliaProfesional = familiaActual): T {
+  if (valor === null || valor === undefined) return valor;
+  let cache = cachePorFamilia.get(familia);
+  if (!cache) { cache = new WeakMap(); cachePorFamilia.set(familia, cache); }
+  return traducirProfundo(valor, familia, cache) as T;
+}
+
+/** Para pruebas y auditoría: ¿quedó algún token sin traducir en este texto? */
+export const TOKEN_CRUDO = /\{\{\s*[A-Za-z_]+\s*\}\}/;

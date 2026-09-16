@@ -257,6 +257,37 @@ for _f, _src in todo.items():
     for _w in re.findall(r'\b(?:vos|sos|contame|decime|escribime|acordate|fijate|pasame|mandame|mostrame|compartilo|agendate)\b', _src, re.I):
         _vos.append(f"{_f.split('/')[-1]}:{_w.lower()}")
 check('voseo = 0 en TODO el repo (prompts incluidos)', not _vos, '; '.join(sorted(set(_vos))[:5]))
+# 6.4b · La lente de arriba solo ve -ás/-és/-ís: se le escapaban los
+# imperativos ("Escribí", "Mirá", "Recordá") y no miraba el seed, que es
+# texto que el cliente lee. El diccionario vive en tcd-spec/datos/tuteo.py.
+import sys as _sys64, json as _json64
+_sys64.path.insert(0, 'tcd-spec/datos')
+from tuteo import PROHIBIDAS as _PROH, tutear_todo as _tt
+_imp = []
+for _f, _src in todo.items():
+    if _f.endswith('vozLocalizada.ts'):
+        continue
+    for _i, _l in enumerate(_src.split('\n'), 1):
+        if 'primera persona' in _l:
+            continue
+        for _m in _PROH.finditer(_l):
+            if _m.group(0).lower() == 'vos':
+                continue
+            _imp.append(f"{_f.split('/')[-1]}:{_i} {_m.group(0)}")
+check('sin imperativos de voseo en el código', not _imp, '; '.join(_imp[:5]))
+_seed64 = rd('src/lib/roadmap.seed.json')
+_en_seed = _PROH.findall(_seed64)
+check('el seed del Camino está en tú (cero formas de voseo)', not _en_seed, str(sorted(set(_en_seed))[:6]))
+check('el generador tutea antes de escribir el seed', 'tutear_todo(out)' in rd('tcd-spec/datos/generar_seed.py'))
+# Se REGENERA en una copia y se compara: comparar solo los dos archivos no ve
+# un seed que quedó atrás de su generador (pasó el 15 sep con el tuteo).
+import tempfile as _tf64, shutil as _sh64
+with _tf64.TemporaryDirectory() as _tmp64:
+    _sh64.copytree('tcd-spec', f'{_tmp64}/spec')
+    _g = subprocess.run([sys.executable, 'datos/generar_seed.py'], cwd=f'{_tmp64}/spec', capture_output=True, text=True)
+    _regen = open(f'{_tmp64}/spec/datos/roadmap.seed.json', encoding='utf-8').read() if _g.returncode == 0 else ''
+check('el seed de la app es exactamente el que genera hoy generar_seed.py',
+      _g.returncode == 0 and _regen == rd('src/lib/roadmap.seed.json'), (_g.stderr or 'difiere: correr generar_seed.py y copiar')[-160:])
 
 # ── 6.5 · Todo endpoint de IA pasa por el enrutador ────────────────────
 # Antes había una cadena copiada en cada endpoint: DeepSeek→Claude escrita
@@ -2474,8 +2505,99 @@ for _f, _src in todo.items():
             _pr.append(f"{_f.split('/')[-1]}:{_i}")
 check('sin promesas de datos sin condicional que las respalde', not _pr, '; '.join(_pr[:4]))
 
+
+print('══ 9) EL DÍA Y EL VOCABULARIO (capturas del 15 sep 2026) ══')
+# Una sola fuente del día. La columna dia_programa se congela (solo la mueve
+# un trigger al completar metas) y había 9 cálculos sueltos.
+_dia_suelto = []
+for _f, _src in todo.items():
+    # Solo archivos que trabajan con la fecha de inicio DEL PROGRAMA
+    # (planes.ts calcula la semana del año, que es otra cosa).
+    if _f.endswith('diaPrograma.ts') or not re.search(r'fecha_inicio|fechaInicio', _src):
+        continue
+    for _i, _l in enumerate(_src.split('\n'), 1):
+        if re.search(r'86400000|1000 \* 60 \* 60 \* 24', _l) and re.search(r'inicio|dInicio', _l, re.I):
+            _dia_suelto.append(f"{_f.split('/')[-1]}:{_i}")
+check('el día del programa se calcula en un solo lugar (diaPrograma.ts)', not _dia_suelto, '; '.join(_dia_suelto[:4]))
+# esDiaDescanso(d) ignora d: usarlo en un bucle cuenta según el día de HOY.
+_bucle = [f.split('/')[-1] for f, src in todo.items()
+          if re.search(r'for\s*\([^)]*\)\s*(?:\{[^}]*)?if\s*\(\s*!?\s*esDiaDescanso\(\s*\w', src)]
+check('el atraso no se cuenta con esDiaDescanso dentro de un bucle', not _bucle, str(_bucle))
+_app = todo.get('src/App.tsx', '')
+check('el perfil llega con el día recalculado del calendario',
+      'diaDelPrograma(' in _app and re.search(r'dia_programa\s*=\s*diaReal', _app) is not None)
+_pan = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx') and re.search(r'\{\s*perfil\??\.dia_programa', src)]
+check('ninguna pantalla muestra la columna dia_programa directo', not _pan, str(_pan))
+_rm = todo.get('src/pages/Roadmap.tsx', '')
+check('la Fase Autonomía se decide por el paso, no por la fecha', 'estaEnFaseAutonomia(diaEsperado' in _rm)
+_db = todo.get('src/pages/Dashboard.tsx', '')
+check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)', 'esPasoDelCliente(meta)' in _db)
+check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
+      0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
+check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+check('Hoy y El Camino usan el mismo mensaje de ritmo', 'mensajeDeRitmo(' in _db and 'mensajeDeRitmo(' in _rm and 'por recuperar' not in _db)
+check('el candado de la Fase 4 se decide por el paso, no por la fecha', re.search(r'validarADNDia45\([^)]*diaEsperado', _rm) is not None)
+check('los títulos de fase no llevan una letra inventada', 'metodo_letra' not in _rm and 'metodo_letra' not in todo.get('src/lib/roadmapSeed.ts', ''))
+# Copy en positivo en los avisos de ritmo y de ADN.
+_neg = []
+for _f, _src in todo.items():
+    if not _f.endswith('.tsx'):
+        continue
+    for _i, _l in enumerate(_src.split('\n'), 1):
+        if _l.lstrip().startswith(('*', '//', '/*', '{/*')):
+            continue
+        if re.search(r'd[íi]as atr[aá]s|quemar plata|punto de no retorno', _l, re.I):
+            _neg.append(f"{_f.split('/')[-1]}:{_i}")
+check('sin "días atrás", "quemar plata" ni "punto de no retorno" en pantalla', not _neg, '; '.join(_neg[:4]))
+# El vocabulario se aplica en la salida del dato, no en cada pantalla.
+_h = todo.get('src/lib/herramientas.ts', ''); _sg = todo.get('src/lib/sesionesGuiadas.ts', '')
+check('getHerramienta devuelve el texto ya traducido', re.search(r'function getHerramienta[\s\S]{0,400}vocabularizar\(', _h) is not None)
+check('sesionGuiadaDe devuelve el texto ya traducido', re.search(r'function sesionGuiadaDe[\s\S]{0,300}vocabularizar\(', _sg) is not None)
+_crudo = [f.split('/')[-1] for f, src in todo.items()
+          if (f.startswith('src/components') or f.startswith('src/pages'))
+          and re.search(r'import\s*\{[^}]*\b(HERRAMIENTAS_V3|HERRAMIENTAS|SESIONES_GUIADAS)\b[^}]*\}\s*from', src)]
+check('ninguna pantalla lee el catálogo crudo (con tokens sin traducir)', not _crudo, str(_crudo))
+
+print('══ 10) EJECUCIÓN (lo que el texto no ve) ══')
+# Hasta el 15 sep esta batería solo LEÍA archivos: ninguna prueba se corría.
+import os as _os10, shutil as _sh10
+_pruebas = sorted(glob.glob('scripts/prueba-*.ts'))
+_rojas = []
+for _p in _pruebas:
+    _r = subprocess.run(['npx', 'tsx', _p], capture_output=True, text=True)
+    if _r.returncode != 0:
+        _rojas.append(_p.split('/')[-1])
+check(f'las {len(_pruebas)} pruebas de escenario corren en verde', not _rojas, ', '.join(_rojas))
+if _os10.path.exists('scripts/prueba-pantallas.tsx'):
+    _r = subprocess.run(['npx', 'tsx', '--import', './scripts/entorno-navegador.mjs', 'scripts/prueba-pantallas.tsx'], capture_output=True, text=True)
+    check('las pantallas montan y dibujan', _r.returncode == 0, (_r.stdout + _r.stderr).strip().split('\n')[-1][:120])
+SIN_MEDIR_MOVIL = False
+_nav = _os10.environ.get('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
+try:
+    import playwright  # noqa: F401
+    _hay_nav = _os10.path.isdir(_nav) or _os10.path.isdir(_os10.path.expanduser('~/.cache/ms-playwright'))
+except ImportError:
+    _hay_nav = False
+if _hay_nav:
+    _r = subprocess.run([sys.executable, 'scripts/prueba-movil.py'], capture_output=True, text=True)
+    _malas = [l.strip() for l in _r.stdout.split('\n') if l.strip().startswith('✗')]
+    check('El Camino se lee entero en 360 y 390 px (Chromium real)', _r.returncode == 0, '; '.join(_malas[:3]) or _r.stderr[-200:])
+    # Toda la app contra 10-DISENO. Las pantallas de ESTRICTAS no pueden tener
+    # ni una falta; el total del resto se informa y tiene que ir bajando.
+    _r = subprocess.run([sys.executable, 'scripts/medir-app.py', '--estricto', '--admin'], capture_output=True, text=True)
+    _tot = re.search(r'TOTAL de faltas: (\d+)', _r.stdout)
+    check('las 38 vistas (cliente, pestañas internas y Admin) cumplen 10-DISENO', _r.returncode == 0, _r.stdout.strip().split('\n')[-1][:160])
+    if _tot:
+        print(f'  · faltas de diseño en toda la app: {_tot.group(1)}')
+else:
+    SIN_MEDIR_MOVIL = True
+    print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')
+    print('    pip install playwright --break-system-packages && python3 -m playwright install chromium')
+
 print()
-if F == 0:
+if F == 0 and SIN_MEDIR_MOVIL:
+    print('════ BATERÍA EN VERDE — PERO EL TELÉFONO QUEDÓ SIN MEDIR (ver ⚠ arriba) ════')
+elif F == 0:
     print('════ BATERÍA EN VERDE — el ZIP puede salir ════')
 else:
     print(f'════ {F} FALLOS — NO EMPAQUETAR ════'); sys.exit(1)

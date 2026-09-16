@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Circle,
   Lock,
+  Check,
   ChevronUp,
   Star,
   Trophy,
@@ -54,6 +55,7 @@ import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { HojaDeRutaItem, VentaRegistrada, ProfileV2 } from '../lib/supabase';
 import {
   SEED_ROADMAP_V2,
+  roadmap,
   FASES_ROADMAP,
   calcularNivel,
   TOTAL_METAS,
@@ -73,7 +75,9 @@ import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import { planDe, planPermitePilar, NOMBRE_PLAN, waLink, planParaPilar, checkoutUrl, PRECIO_FUNDADOR } from '../lib/planes';
 import Graduacion from '../components/Graduacion';
-import { registrarSesionCompletada, esDiaDescanso } from '../lib/racha';
+import { registrarSesionCompletada } from '../lib/racha';
+import { diaDelPrograma, diasHabilesDeAtraso, estaEnFaseAutonomia, mensajeDeRitmo, esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar } from '../lib/diaPrograma';
+import EncabezadoCamino, { type SistemaAvance, type PasoDeHoy } from '../components/camino/EncabezadoCamino';
 import CintaCinturon from '../components/CintaCinturon';
 
 // Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
@@ -468,37 +472,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   // ─── Lógica de desbloqueo ───────────────────────────────────────────────
   const calcularEstadoPilar = useCallback(
-    (pilar: RoadmapPilar, pilares: RoadmapPilar[]): EstadoPilar => {
+    (pilar: RoadmapPilar, _pilares: RoadmapPilar[], diaDelPaso: number | null): EstadoPilar => {
       const completadasPilar = pilar.metas.filter((m) =>
         completadas.has(`${pilar.numero}-${m.codigo}`),
       ).length;
       const totalMetas = pilar.metas.length;
 
-      // Verificar si está desbloqueado
-      let desbloqueado = false;
-      switch (pilar.desbloqueo) {
-        case 'auto':
-          desbloqueado = true;
-          break;
-        case 'completar_anterior': {
-          const anterior = pilares.find((p) => p.numero === pilar.numero - 1);
-          if (!anterior) { desbloqueado = true; break; }
-          const totalEstrellasPrevias = anterior.metas.filter((m) => m.es_estrella).length;
-          const estrellasPreviasCompletadas = anterior.metas.filter(
-            (m) => m.es_estrella && completadas.has(`${anterior.numero}-${m.codigo}`),
-          ).length;
-          // Requiere todas las ★ del pilar anterior (o el mínimo configurado, el que sea menor)
-          const requeridas = Math.min(pilar.estrellas_requeridas ?? totalEstrellasPrevias, totalEstrellasPrevias);
-          desbloqueado = estrellasPreviasCompletadas >= requeridas;
-          break;
-        }
-        case 'venta_real':
-          desbloqueado = ventas.length > 0;
-          break;
-        case 'qa_verde':
-          desbloqueado = qaVerde;
-          break;
-      }
+      // Se abre cuando el cliente llega a su primer paso (ver pilarAlcanzado).
+      let desbloqueado = pilarAlcanzado(pilar.metas, completadasPilar, diaDelPaso);
       // Plan EL NÚMERO: su tramo es P0-P1; lo demás se ve pero no se abre.
       // Esa vista bloqueada ES el mapa del camino completo (la venta interna).
       if (planLimitado && pilar.numero > 1) desbloqueado = false;
@@ -508,17 +489,65 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       if (completadasPilar >= totalMetas) return 'completado';
       return 'en_progreso';
     },
-    [completadas, ventas, qaVerde],
+    [completadas, planLimitado],
   );
 
   // ─── Validación Día 45 (Regla #6 v8) ────────────────────────────────────
-  const diaActual = perfil?.dia_programa ?? 1;
-  const validacionDia45 = validarADNDia45(perfil ?? {}, diaActual);
+  // El día sale del calendario, nunca de la columna dia_programa (se congela
+  // cuando el cliente deja de completar metas).
+  const diaActual = diaDelPrograma(perfil?.fecha_inicio) ?? perfil?.dia_programa ?? 1;
+  // El paso en el que va: el primero sin completar, en el orden del Camino.
+  let diaEsperado: number | null = null;
+  let pasoDeHoy: (PasoDeHoy & { pilar: number; sistema: number | null }) | null = null;
+  buscarPaso: for (const pil of seedConVideos) {
+    for (const m of pil.metas ?? []) {
+      if (!esPasoDelCliente(m)) continue;
+      if (!completadas.has(`${pil.numero}-${m.codigo}`)) {
+        diaEsperado = m.dia_asignado ?? null;
+        pasoDeHoy = {
+          pilar: pil.numero,
+          sistema: m.sistema === 0 ? roadmap.sistemas.length + 2 : (m.sistema ?? roadmap.sistemas.length + 1),
+          codigo: m.codigo,
+          titulo: m.titulo,
+          descripcion: m.descripcion,
+          tiempo: m.tiempo_estimado,
+          salesCon: m.evidencia_requerida?.nombre ?? null,
+        };
+        break buscarPaso;
+      }
+    }
+  }
+  // El anillo: cuántos pasos del cliente van hechos en cada sistema.
+  // Las jornadas sin sistema (campo, ciclo, cierre) van en un último tramo,
+  // "La operación", para que el anillo cuente los mismos pasos que el Camino.
+  // Y las del final (sistema 0, días 87 a 90) en "El cierre".
+  const TRAMO_OPERACION = roadmap.sistemas.length + 1;
+  const TRAMO_CIERRE = roadmap.sistemas.length + 2;
+  const tramoDe = (m: { sistema?: number | null }) =>
+    m.sistema === 0 ? TRAMO_CIERRE : (m.sistema ?? TRAMO_OPERACION);
+  const sistemasAvance: SistemaAvance[] = [
+    ...roadmap.sistemas.map((sis) => ({ n: sis.n, nombre: sis.nombre, esSistema: true })),
+    { n: TRAMO_OPERACION, nombre: 'La operación', esSistema: false },
+    { n: TRAMO_CIERRE, nombre: 'El cierre', esSistema: false },
+  ].map((t) => {
+    let hechas = 0, total = 0;
+    for (const pil of seedConVideos) for (const m of pil.metas ?? []) {
+      if (tramoDe(m) !== t.n || !esPasoDelCliente(m)) continue;
+      total++;
+      if (completadas.has(`${pil.numero}-${m.codigo}`)) hechas++;
+    }
+    return { ...t, hechas, total };
+  }).filter((t) => t.total > 0);
+  const cinturonCamino = cinturonDesdeProgreso(completadas);
+  // El candado de la Fase 4 mira el PASO, no el calendario: a quien va por el
+  // día 15 no le corresponde todavía hablar de la Fase 4. Camino terminado
+  // (sin paso pendiente) no tiene nada que bloquear.
+  const validacionDia45 = validarADNDia45(perfil ?? {}, diaEsperado ?? undefined);
   const comparacionDia45 = compararFotoPartida(perfil ?? {});
 
   // ─── Enriquecer pilares con estado ─────────────────────────────────────
   const pilaresConEstado: PilarConEstado[] = seedConVideos.map((pilar) => {
-    let estado = calcularEstadoPilar(pilar, seedConVideos);
+    let estado = calcularEstadoPilar(pilar, seedConVideos, diaEsperado);
     // Día 45 con ADN incompleto → forzar bloqueo de Fase 4 (Regla #5 v7)
     if (validacionDia45.debeBloquearFase4 && pilar.fase === 4 && estado !== 'completado') {
       estado = 'bloqueado';
@@ -631,24 +660,11 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const cinturonActual = calcularCinturon(pilarMasAltoCompletado);
 
   // Banner de ritmo: día real del programa vs el día asignado de la próxima tarea pendiente
-  const diaPrograma = perfil?.fecha_inicio
-    ? Math.max(1, Math.min(90, Math.floor((Date.now() - new Date(perfil.fecha_inicio).getTime()) / 86400000) + 1))
-    : 1;
-  let diaEsperado: number | null = null;
-  outer: for (const pil of pilaresConEstado) {
-    for (const m of pil.metas ?? []) {
-      if (!completadas.has(`${pil.numero}-${m.codigo}`)) {
-        diaEsperado = m.dia_asignado ?? null;
-        break outer;
-      }
-    }
-  }
-  const diasAtraso = (() => {
-    if (diaEsperado === null) return 0;
-    let habiles = 0;
-    for (let d = diaEsperado + 1; d <= diaPrograma; d++) if (!esDiaDescanso(d)) habiles++;
-    return habiles;
-  })();
+  const diaPrograma = diaActual;
+  const diasAtraso = diasHabilesDeAtraso(perfil?.fecha_inicio, diaEsperado, diaPrograma);
+  const ritmo = mensajeDeRitmo(diaPrograma, diaEsperado, diasAtraso);
+  // Fase Autonomía: por dónde está en el Camino (o si lo terminó), no por fecha.
+  const faseAutonomia = estaEnFaseAutonomia(diaEsperado, totalCompletadas > 0 && totalCompletadas >= TOTAL_METAS);
 
   // ─── Toggle completar meta ─────────────────────────────────────────────
   const toggleMeta = useCallback(
@@ -826,129 +842,24 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         </div>
       )}
 
-      {/* ── Header ── */}
-      <div className="card-panel p-6 rounded-2xl space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl text-cream flex items-center gap-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-              <MapIcon className="w-7 h-7 text-gold" /> El Camino
-            </h1>
-        {(() => { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); const c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); return <div className="mt-3 max-w-sm"><CintaCinturon cinturon={c} variante="linea" /></div>; } catch { return null; } })()}
-            <p className="text-base text-cream/75 mt-1">
-              Método CLINICA · 7 etapas · 90 días · Objetivo: $10.000 USD
-            </p>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-xs text-cream/55 uppercase tracking-wider">Nivel actual</p>
-            <p className="text-sm font-medium text-gold mt-0.5">{cinturonActual.emoji} Cinturón {cinturonActual.nombre} · <span className="italic text-gold/70">{cinturonActual.metafora}</span></p>
-            <p className="text-xs mt-1.5">
-              {diasAtraso <= 0 ? (
-                <span className="text-success">Día {diaPrograma} de 90 · vas al día ✓</span>
-              ) : diasAtraso <= 3 ? (
-                <span className="text-gold">Día {diaPrograma} de 90 · tu próxima tarea era del día {diaEsperado} — estás a {diasAtraso} día{diasAtraso > 1 ? 's' : ''} de tu ritmo. Hoy se recupera.</span>
-              ) : (
-                <span className="text-danger">Día {diaPrograma} de 90 · vas {diasAtraso} días atrás de tu plan — habla con tu Mentor hoy: juntos lo reacomodan.</span>
-              )}
-            </p>
-            <p className="text-xs text-cream/55">Nivel {nivel} de 5</p>
-          </div>
-        </div>
-
-        {/* ─── LA FASE AUTONOMÍA (D50+): la semana tipo, nunca vacía ─── */}
-        {(() => {
-          try {
-            const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
-            if (!p?.fecha_inicio) return null;
-            const dia = Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1;
-            if (dia < 50) return null;
-            return (
-              <div className="card-ios p-5 mb-6" style={{ borderColor: 'rgba(90,145,112,0.35)', background: 'linear-gradient(135deg, rgba(61,107,79,0.12), transparent)' }}>
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#5A9170] mb-2">Fase Autonomía · tu semana tipo</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm text-cream/70">
-                  <div className="rounded-lg bg-black/20 px-3 py-2">📞 Llamadas con interesados</div>
-                  <div className="rounded-lg bg-black/20 px-3 py-2">🩺 Entrega con tu protocolo</div>
-                  <div className="rounded-lg bg-black/20 px-3 py-2">📊 Métricas y ajuste de campaña</div>
-                  <div className="rounded-lg bg-black/20 px-3 py-2">🗓 Tu revisión semanal (20 min)</div>
-                </div>
-                <p className="text-sm text-cream/55 mt-2 italic">La máquina ya está construida — ahora se opera. Cada paciente nuevo se enciende en tu tablero.</p>
-              </div>
-            );
-          } catch { return null; }
-        })()}
-
-        {/* ─── TU SESIÓN DE HOY · la tarjeta que grita ─── */}
-        {(() => {
-          try {
-            const saved = localStorage.getItem('tcd_hoja_ruta_v2');
-            const done = new Set<string>(saved ? JSON.parse(saved) : []);
-            let hoy: { pilar: number; codigo: string; titulo: string; tiempo?: string } | null = null;
-            outer: for (const pil of SEED_ROADMAP_V2) {
-              for (const m of pil.metas) {
-                if (!done.has(`${pil.numero}-${m.codigo}`)) { hoy = { pilar: pil.numero, codigo: m.codigo, titulo: m.titulo, tiempo: (m as { tiempo_estimado?: string }).tiempo_estimado }; break outer; }
-              }
-            }
-            if (!hoy) return null;
-            const esFinde = [0, 6].includes(new Date().getDay());
-            return (
-              <div className="card-ios p-5 sm:p-6 mb-6" style={{ borderColor: 'rgba(232,150,46,0.35)', background: 'linear-gradient(135deg, rgba(232,150,46,0.10), rgba(232,150,46,0.02))' }}>
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">{esFinde ? 'El dojo respira 🌿 · tu próxima micro-sesión' : 'Tu micro-sesión de hoy'}</p>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xl sm:text-2xl font-light text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(hoy.titulo)}</p>
-                    <p className="text-xs text-cream/45 mt-1">{hoy.codigo} · <span className="text-goldhi">{hoy.tiempo ?? '~20 min'}</span> · máximo poder en tiempo reducido</p>
-                  </div>
-                  <button
-                    onClick={() => { setPilarAbierto(hoy!.pilar); setActiveMeta(hoy!.codigo); setTimeout(() => document.getElementById(`meta-${hoy!.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); }}
-                    className="btn-ios-primary px-7 py-3.5 text-sm shrink-0 w-full sm:w-auto"
-                  >
-                    COMENZAR →
-                  </button>
-                </div>
-              </div>
-            );
-          } catch { return null; }
-        })()}
-
-        {/* Barra de progreso global */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-cream/75">
-            <span>Progreso global</span>
-            <span>{progresoPct}% — {totalCompletadas} de {TOTAL_METAS} metas</span>
-          </div>
-          <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-gold to-goldhi rounded-full transition-all duration-1000"
-              style={{ width: `${progresoPct}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Indicadores rápidos */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-surface/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-cream">{perfil?.dia_programa ?? 1}</p>
-            <p className="text-sm text-cream/55 uppercase tracking-wider">Día de prog.</p>
-          </div>
-          <div className="bg-surface/50 rounded-xl p-3 text-center relative">
-            <p className="text-lg font-light text-cream">
-              {ventas.length}<span className="text-cream/35 text-sm">/10</span>
-            </p>
-            <p className="text-sm text-cream/55 uppercase tracking-wider">Pacientes</p>
-            <button
-              onClick={() => setVentaModal(true)}
-              className="mt-1.5 text-sm font-semibold text-gold hover:text-goldhi transition-colors"
-            >
-              🎉 Registrar venta
-            </button>
-          </div>
-          <div className="bg-surface/50 rounded-xl p-3 text-center">
-            <p className="text-lg font-light text-cream">
-              {pilaresConEstado.filter((p) => p.estado === 'completado').length}
-            </p>
-            <p className="text-sm text-cream/55 uppercase tracking-wider">Pilares completados</p>
-          </div>
-        </div>
-      </div>
+      {/* ── Encabezado: dónde estás y qué hacer hoy (10-DISENO) ── */}
+      <EncabezadoCamino
+        cinturon={cinturonCamino}
+        sistemas={sistemasAvance}
+        sistemaActual={pasoDeHoy?.sistema ?? null}
+        ritmo={ritmo}
+        hoy={pasoDeHoy}
+        esFinde={[0, 6].includes(new Date().getDay())}
+        faseAutonomia={faseAutonomia}
+        ventas={ventas.length}
+        onEmpezar={() => {
+          if (!pasoDeHoy) return;
+          setPilarAbierto(pasoDeHoy.pilar);
+          setActiveMeta(pasoDeHoy.codigo);
+          setTimeout(() => document.getElementById(`meta-${pasoDeHoy.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+        }}
+        onRegistrarVenta={() => setVentaModal(true)}
+      />
 
       {/* ── Banner Día 45 (Regla #6 v8) ── */}
       {validacionDia45.debeBloquearFase4 && (
@@ -981,28 +892,15 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               {/* Encabezado de fase */}
               <div className="flex items-center gap-3 px-1 mb-1">
                 <div className="flex-1">
-                  <h2 className="text-lg font-bold uppercase tracking-wide text-cream/90" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>
+                  <h2 className="text-[22px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
                     {VOC(fase.titulo)}
-                    {fase.metodo_letra && (
-                      <span className="ml-2 text-gold text-base">· Método {fase.metodo_letra}</span>
-                    )}
                   </h2>
-                  <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)} · {fase.dias}</p>
+                  <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
                 </div>
               </div>
 
-              {/* Banner de hito Día 45 (antes de Fase 4) */}
-              {fase.fase === 4 && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-gold/10 border border-gold/25">
-                  <Trophy className="w-4 h-4 text-gold shrink-0" />
-                  <p className="text-xs text-gold font-medium">
-                    Punto de no retorno — Día 45 max. Sin el ADN base completo, los $10,000 USD/mes no son un objetivo realista.
-                  </p>
-                </div>
-              )}
-
               {/* Grid de pilares de la fase */}
-              <div className={`grid gap-3 ${pilaresEnFase.length === 1 ? 'grid-cols-1' : pilaresEnFase.length === 2 ? 'grid-cols-2' : pilaresEnFase.length === 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+              <div className={`grid gap-3 ${pilaresEnFase.length === 1 ? 'grid-cols-1' : pilaresEnFase.length === 3 || pilaresEnFase.length > 4 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>
                 {pilaresEnFase.map((pilar) => {
                   const isSelected = pilarAbierto === pilar.numero;
                   return (
@@ -1022,37 +920,34 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         }
                       }}
                       disabled={pilar.estado === 'bloqueado'}
-                      className={`relative text-left p-5 rounded-2xl border transition-all duration-300 ${
+                      className={`relative text-left p-4 sm:p-5 min-w-0 rounded-2xl border transition-all duration-300 ${
                         pilar.estado === 'bloqueado'
-                          ? 'bg-surface/50 border-[rgba(232,150,46,0.08)] cursor-not-allowed opacity-40'
+                          ? 'bg-transparent border-[var(--line,#EBE1CF)] cursor-not-allowed'
                           : pilar.estado === 'plan_bloqueado'
-                          ? 'bg-surface/60 border-[rgba(232,150,46,0.18)] opacity-70 hover:opacity-90 hover:border-gold/40'
+                          ? 'bg-transparent border-[var(--line,#EBE1CF)]'
                           : isSelected
-                          ? 'bg-gold/15 border-gold/50 shadow-lg shadow-gold/15 scale-[1.02]'
+                          ? 'bg-[var(--card,#FFFDF7)] border-gold'
                           : pilar.estado === 'completado'
-                          ? 'bg-success/8 border-success/25 hover:bg-success/12'
-                          : 'bg-gold/5 border-[rgba(232,150,46,0.12)] hover:bg-gold/10 hover:border-gold/35'
+                          ? 'bg-[var(--card,#FFFDF7)] border-[var(--tilde,#4A7C59)]/40'
+                          : 'bg-[var(--card,#FFFDF7)] border-[var(--line2,#DFD3BC)]'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-6 h-6 text-gold" /> : null; })()}
                         <div className="flex items-center gap-1">
-                          {pilar.es_hito && (
-                            <Trophy className="w-3 h-3 text-gold" />
-                          )}
                           {(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? (
-                            <Lock className="w-3.5 h-3.5 text-cream/45" />
+                            <Lock className="w-4 h-4 text-cream/45" />
                           ) : pilar.estado === 'completado' ? (
-                            <Trophy className="w-3.5 h-3.5 text-yellow-400" />
+                            <Check className="w-4 h-4" style={{ color: 'var(--tilde, #4A7C59)' }} />
                           ) : (
-                            <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                            <Zap className="w-4 h-4 text-gold" />
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-cream/55 font-medium uppercase tracking-wider">
+                      <p className="text-[15px] text-cream/60">
                         Pilar {pilar.id.substring(1)}
                       </p>
-                      <p className={`text-sm font-semibold mt-0.5 ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/45' : 'text-cream'}`}>
+                      <p lang="es" className={`text-[17px] leading-snug font-semibold mt-0.5 hyphens-auto [overflow-wrap:anywhere] ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/55' : 'text-cream'}`}>
                         {VOC(pilar.titulo)}
                       </p>
 
@@ -1069,8 +964,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
                         <p className="text-sm text-cream/45 mt-1.5 leading-tight">
-                          {pilar.desbloqueo === 'venta_real' && 'Requiere 1 venta real'}
-                          {pilar.desbloqueo === 'qa_verde' && 'Requiere QA 24/24 ✓'}
+                          {primerDiaDelPilar(pilar.metas) !== null ? `Se abre el día ${primerDiaDelPilar(pilar.metas)}` : ''}
                         </p>
                       )}
                       {pilar.estado === 'plan_bloqueado' && (() => {
@@ -1112,7 +1006,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 </div>
                 <button
                   onClick={() => setPilarAbierto(null)}
-                  className="text-cream/55 hover:text-cream transition-colors p-1"
+                  aria-label="Cerrar el pilar"
+                  className="w-11 h-11 -mr-2 flex items-center justify-center text-cream/55 hover:text-cream transition-colors"
                 >
                   <ChevronUp className="w-5 h-5" />
                 </button>

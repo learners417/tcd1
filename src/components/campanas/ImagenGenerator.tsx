@@ -144,14 +144,14 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
 
     const remaining = MAX_REFS - current.length;
     if (remaining <= 0) {
-      toast.error(`Maximo ${MAX_REFS} imagenes`);
+      toast.error(`Máximo ${MAX_REFS} imagenes`);
       e.target.value = '';
       return;
     }
 
     const toProcess = files.slice(0, remaining);
     if (files.length > remaining) {
-      toast.error(`Solo se agregaron ${remaining} de ${files.length} (maximo ${MAX_REFS})`);
+      toast.error(`Solo se agregaron ${remaining} de ${files.length} (máximo ${MAX_REFS})`);
     }
 
     const newRefs: ReferenceImage[] = [];
@@ -232,14 +232,14 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
     // Validate custom text for single image: solo H1 obligatorio
     if (!isCarousel && genMode === 'texto_personalizado') {
       if (!customText.h1.trim()) {
-        toast.error('Completa al menos el H1 (titulo principal)'); return;
+        toast.error('Completa al menos el H1 (título principal)'); return;
       }
     }
     if (isCarousel) {
       const invalid = slideConfigs.findIndex(
         cfg => cfg.textSource === 'personalizado' && !cfg.customText?.h1?.trim()
       );
-      if (invalid >= 0) { toast.error(`Completa al menos el H1 (titulo) en slide ${invalid + 1}`); return; }
+      if (invalid >= 0) { toast.error(`Completa al menos el H1 (título) en slide ${invalid + 1}`); return; }
 
       // Carrusel con IA: sin tema + sin copies = 10 slides identicos.
       // Forzamos tema escrito o copies explicitos para que cada slide sea distinto.
@@ -587,7 +587,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
       {/* ─── Tema / contexto del contenido (input principal) ─── */}
       <div>
         <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
-          Tema o contexto del contenido <span className="text-cream/25 normal-case font-normal tracking-normal">— opcional, no se usa como descripcion literal</span>
+          Tema o contexto del contenido <span className="text-cream/25 normal-case font-normal tracking-normal">— opcional, no se usa como descripción literal</span>
         </label>
         <textarea
           value={userPrompt}
@@ -602,7 +602,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
       <div>
         <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
           Imagenes de referencia (opcional — hasta {MAX_REFS} por tipo)
-          <span className="text-cream/25 normal-case font-normal tracking-normal"> — se comprimen automaticamente al subirlas</span>
+          <span className="text-cream/25 normal-case font-normal tracking-normal"> — se comprimen automáticamente al subirlas</span>
         </label>
         {(() => {
           const totalBytes =
@@ -789,7 +789,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
                 <Sparkles className={`w-3.5 h-3.5 ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream/55'}`} />
                 <span className={`text-sm font-semibold ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream'}`}>IA Completa</span>
               </div>
-              <p className="text-sm text-cream/45 leading-tight">La IA elige el texto segun tu prompt y angulo</p>
+              <p className="text-sm text-cream/45 leading-tight">La IA elige el texto según tu prompt y angulo</p>
             </button>
             <button onClick={() => setGenMode('texto_personalizado')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'texto_personalizado' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
@@ -803,7 +803,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
                 <Pencil className={`w-3.5 h-3.5 ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream/55'}`} />
                 <span className={`text-sm font-semibold ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream'}`}>Solo fondo</span>
               </div>
-              <p className="text-sm text-cream/45 leading-tight">Sin texto — lo agregas tú despues</p>
+              <p className="text-sm text-cream/45 leading-tight">Sin texto — lo agregas tú después</p>
             </button>
           </div>
           {isCarousel && genMode === 'texto_personalizado' && (
@@ -836,8 +836,8 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
       {!isCarousel && genMode === 'texto_personalizado' && (
         <div className="space-y-2.5 p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
           <div>
-            <label className="text-sm font-bold text-gold uppercase tracking-wider">H1 — Titulo *</label>
-            <input type="text" value={customText.h1} onChange={(e) => setCustomText(prev => ({ ...prev, h1: e.target.value }))} placeholder="Tu titulo principal..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
+            <label className="text-sm font-bold text-gold uppercase tracking-wider">H1 — Título *</label>
+            <input type="text" value={customText.h1} onChange={(e) => setCustomText(prev => ({ ...prev, h1: e.target.value }))} placeholder="Tu título principal..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
             <label className="text-sm font-bold text-cream/65 uppercase tracking-wider">H2 — Subtitulo (opcional)</label>
@@ -892,7 +892,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
               <div className="space-y-2">
                 <div>
                   <label className="text-sm font-bold text-gold uppercase tracking-wider">H1 *</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h1 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h1', e.target.value)} placeholder="Titulo del slide..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-sm focus:border-gold/50 placeholder-cream/20" />
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h1 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h1', e.target.value)} placeholder="Título del slide..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-sm focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-cream/65 uppercase tracking-wider">H2 (opcional)</label>
@@ -904,7 +904,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
                 </div>
                 <div>
                   <label className="text-sm font-bold text-gold uppercase tracking-wider">CTA (opcional)</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.cta ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'cta', e.target.value)} placeholder="Boton de accion..." className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2 text-gold text-sm font-semibold focus:border-gold/50 placeholder-gold/20" />
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.cta ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'cta', e.target.value)} placeholder="Boton de acción..." className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2 text-gold text-sm font-semibold focus:border-gold/50 placeholder-gold/20" />
                 </div>
               </div>
             )}
@@ -936,7 +936,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
           <button
             onClick={() => generate()}
             disabled={generating}
-            title="Reemplaza la version actual con una nueva generacion"
+            title="Reemplaza la version actual con una nueva generación"
             className="btn-secondary flex items-center justify-center gap-2 disabled:opacity-40"
           >
             <RotateCcw className="w-4 h-4" /> Regenerar

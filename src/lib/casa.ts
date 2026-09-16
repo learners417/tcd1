@@ -280,7 +280,7 @@ export const HISTORIA: CapituloDeLaHistoria[] = [
   {
     titulo: 'Empecé liderando antes de saber qué era liderar',
     texto:
-      'A los quince ya coordinaba gente en la secundaria. A los dieciocho abrí un '
+      'A los quince ya coordinaba gente en la secundaria. A los dieciocho abrí un ' // primera persona, no voseo
       + 'centro cultural a tres cuadras del Obelisco. No sabía nada de gestión: '
       + 'aprendí porque no había otra opción.',
   },

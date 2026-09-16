@@ -46,7 +46,7 @@ const RATING_CONFIG: Record<number, { titulo: string; mensaje: string; placehold
   },
   2: {
     titulo: 'Necesita mejorar',
-    mensaje: 'Lamentamos que este pilar no haya cumplido tus expectativas. Tu opinión es muy valiosa para nosotros, contanos qué estuvo mal.',
+    mensaje: 'Lamentamos que este pilar no haya cumplido tus expectativas. Tu opinión es muy valiosa para nosotros, cuéntanos qué estuvo mal.',
     placeholder: '¿Qué no funcionó en este pilar? Tu opinión nos ayuda mucho.',
   },
   1: {

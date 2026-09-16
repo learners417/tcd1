@@ -144,7 +144,7 @@ export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
 
   const persistAsNewCreativo = useCallback(async () => {
     if (!result || !baseImage) return;
-    if (!userId) { toast.error('Sesion sin usuario — no se puede guardar'); return; }
+    if (!userId) { toast.error('Sesión sin usuario — no se puede guardar'); return; }
 
     setSaving(true);
     try {
@@ -356,7 +356,7 @@ export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
           onChange={(e) => setEditInstruction(e.target.value)}
           rows={4}
           aria-label="Indicaciones de cambio"
-          placeholder="Ej: Cambia el titulo principal a 'NUEVO TITULO'. Reemplaza al personaje por la persona de la referencia. Cambia el fondo a azul oscuro manteniendo todo lo demas igual."
+          placeholder="Ej: Cambia el título principal a 'NUEVO TITULO'. Reemplaza al personaje por la persona de la referencia. Cambia el fondo a azul oscuro manteniendo todo lo demas igual."
           className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
           disabled={editing}
         />

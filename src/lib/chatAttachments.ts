@@ -21,7 +21,7 @@ import {
   formatBytes,
 } from './imageUploadUtils';
 
-const VISION_INSTRUCTION = `Describi en detalle lo que ves en esta imagen o captura de pantalla. Si es una captura de pantalla incluye: la pantalla/herramienta que se ve, textos visibles (transcribi literalmente todo lo legible), botones, metricas o numeros, layout general y cualquier dato relevante. Si es una foto incluye personas, objetos, contexto y detalles visuales. Devolve la respuesta como texto plano en espanol, sin saltos de linea innecesarios, lo mas completo posible (max 500 palabras).`;
+const VISION_INSTRUCTION = `Describi en detalle lo que ves en esta imagen o captura de pantalla. Si es una captura de pantalla incluye: la pantalla/herramienta que se ve, textos visibles (transcribi literalmente todo lo legible), botones, metricas o numeros, layout general y cualquier dato relevante. Si es una foto incluye personas, objetos, contexto y detalles visuales. Devolve la respuesta como texto plano en espanol, sin saltos de línea innecesarios, lo mas completo posible (max 500 palabras).`;
 
 const TEXT_FILE_MAX_BYTES = 200 * 1024; // 200KB
 const TEXT_CONTEXT_MAX_CHARS = 30_000;

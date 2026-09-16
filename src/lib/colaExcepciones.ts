@@ -91,7 +91,7 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
   },
   frecuencia: {
     accion: 'Ampliar el público o sumar otro país.',
-    como: 'Mensaje: «Tu público ya vio el anuncio más de tres veces esta semana: se agotó. NO es que el creativo dejó de servir — el público es muy chico. Ampliá la edad o sumá otro país.»',
+    como: 'Mensaje: «Tu público ya vio el anuncio más de tres veces esta semana: se agotó. NO es que el creativo dejó de servir — el público es muy chico. Ampliá la edad o suma otro país.»',
   },
   costo_agenda: {
     accion: 'Revisar a quién le está hablando el anuncio.',

@@ -66,12 +66,12 @@ const SECTIONS: readonly SectionDef[] = [
     pillars: 'P1-P3',
     icon: Heart,
     fields: [
-      { key: 'adn_linea_tiempo', label: 'Linea de tiempo vital', type: 'string' },
+      { key: 'adn_linea_tiempo', label: 'Línea de tiempo vital', type: 'string' },
       { key: 'historia_300', label: 'Historia -- version larga', type: 'string' },
       { key: 'historia_150', label: 'Historia -- version media', type: 'string' },
       { key: 'historia_50', label: 'Historia -- version corta', type: 'string' },
       { key: 'adn_cinco_por_que', label: 'Los 5 por que', type: 'array' },
-      { key: 'proposito', label: 'Proposito', type: 'string' },
+      { key: 'proposito', label: 'Propósito', type: 'string' },
       { key: 'adn_carta_futuro', label: 'Carta al yo del futuro', type: 'string' },
       { key: 'legado', label: 'Legado', type: 'string' },
     ],
@@ -79,11 +79,11 @@ const SECTIONS: readonly SectionDef[] = [
   {
     id: 'liberacion',
     letter: 'L',
-    name: 'Liberacion',
+    name: 'Liberación',
     pillars: 'P4',
     icon: Unlock,
     fields: [
-      { key: 'adn_pacientes_reales', label: 'Analisis de 3 pacientes reales', type: 'string' },
+      { key: 'adn_pacientes_reales', label: 'Análisis de 3 pacientes reales', type: 'string' },
     ],
   },
   {
@@ -95,13 +95,13 @@ const SECTIONS: readonly SectionDef[] = [
     fields: [
       { key: 'adn_avatar', label: 'Avatar del Paciente Ideal', type: 'object' },
       { key: 'adn_nicho', label: 'Nicho', type: 'string' },
-      { key: 'adn_usp', label: 'Propuesta Unica de Venta', type: 'string' },
+      { key: 'adn_usp', label: 'Propuesta Única de Venta', type: 'string' },
       { key: 'adn_transformaciones', label: 'Transformaciones reales', type: 'string' },
       { key: 'matriz_a', label: 'Matriz A -- El Infierno', type: 'string' },
       { key: 'matriz_b', label: 'Matriz B -- Los Obstaculos', type: 'string' },
       { key: 'matriz_c', label: 'Matriz C -- El Cielo', type: 'string' },
-      { key: 'metodo_nombre', label: 'Metodo Propio (nombre)', type: 'string' },
-      { key: 'metodo_pasos', label: 'Metodo Propio (pasos)', type: 'string' },
+      { key: 'metodo_nombre', label: 'Método Propio (nombre)', type: 'string' },
+      { key: 'metodo_pasos', label: 'Método Propio (pasos)', type: 'string' },
     ],
   },
   {
@@ -132,7 +132,7 @@ const SECTIONS: readonly SectionDef[] = [
   {
     id: 'captacion',
     letter: 'C',
-    name: 'Captacion',
+    name: 'Captación',
     pillars: 'P9B-P9C',
     icon: Users,
     fields: [
@@ -143,7 +143,7 @@ const SECTIONS: readonly SectionDef[] = [
   {
     id: 'autonomia',
     letter: 'A',
-    name: 'Autonomia',
+    name: 'Autonomía',
     pillars: 'P10',
     icon: Crown,
     fields: [
@@ -355,24 +355,16 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
             <Icon className="w-4.5 h-4.5 text-gold" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-gold font-bold text-base" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                {section.letter}
-              </span>
-              <span className="text-sm text-cream/45 font-medium tracking-wider uppercase">
-                {section.pillars}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-cream mt-0.5 truncate">
+            <p className="text-[17px] font-semibold text-cream">
               {section.name}
+            </p>
+            <p className="text-[15px] text-cream/60 mt-0.5">
+              {completed} de {total} completados
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 ml-4">
-          <span className="px-2.5 py-1 rounded-full text-sm font-semibold border border-[rgba(232,150,46,0.12)] bg-gold/10 text-gold">
-            {completed}/{total} completados
-          </span>
+        <div className="flex items-center shrink-0 ml-3">
           {isExpanded
             ? <ChevronUp className="w-4 h-4 text-cream/45" />
             : <ChevronDown className="w-4 h-4 text-cream/45" />}
@@ -424,13 +416,13 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
         .update({ pais: nuevo })
         .eq('id', userId);
       if (error) throw error;
-      toast.success('Pais guardado · la IA va a adaptar el contenido al tono local');
+      toast.success('País guardado · la IA va a adaptar el contenido al tono local');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '';
       toast.error(
         msg.includes('column') && msg.includes('pais')
-          ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN pais text'
-          : 'No se pudo guardar el pais · pruébalo de nuevo',
+          ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN país text'
+          : 'No se pudo guardar el país · pruébalo de nuevo',
       );
     } finally {
       setSavingPais(false);
@@ -518,7 +510,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
           ADN del Negocio
         </h1>
         <p className="text-sm text-cream/55 mt-1">
-          Tu estrategia completa documentada con el metodo CLINICA
+          Tu estrategia completa documentada con el método CLINICA
         </p>
 
         <div className="mt-5">
@@ -545,16 +537,16 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       {/* Pais del profesional — afecta el tono del contenido publicable */}
       <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
         <div className="mb-3 min-w-0">
-          <p className="text-sm font-semibold text-cream">Pais del profesional</p>
+          <p className="text-sm font-semibold text-cream">País del profesional</p>
           <p className="text-xs text-cream/65 mt-1 leading-relaxed">
             La IA adapta el tono de las respuestas y de tu contenido (landing, anuncios, copies,
-            guiones) a la forma de hablar de tu pais. La voz del Mentor hacia ti no cambia.
+            guiones) a la forma de hablar de tu país. La voz del Mentor hacia ti no cambia.
           </p>
         </div>
         <CustomSelect
           value={paisLocal}
           onChange={guardarPais}
-          placeholder={savingPais ? 'Guardando…' : 'Elige tu pais'}
+          placeholder={savingPais ? 'Guardando…' : 'Elige tu país'}
           options={PAISES.map((p) => ({ value: p.codigo, label: p.nombre }))}
           className="w-full"
         />

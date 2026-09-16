@@ -131,7 +131,7 @@ export default function EnMarcha({
   return (
     <section className="card-panel p-6 sm:p-7 border border-gold/15" aria-label="En marcha">
       <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-gold">En marcha</h2>
+        <h2 className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi" style={{ fontFamily: 'var(--font-body)' }}>En marcha</h2>
         <p className="text-sm text-cream/60">
           {pendientes === 0 ? 'Todo al día' : `${pendientes} sin cerrar hoy`}
         </p>

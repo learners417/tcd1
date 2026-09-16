@@ -19,6 +19,7 @@ import { primero } from '../../lib/primero';
 import { armarPaquete } from '../../lib/paqueteCampana';
 import { revisarPieza, type VeredictoCritico } from '../../lib/criticoPieza';
 import { guardarTrabajoDeCampanas } from '../../lib/tableroSync';
+import { VOC } from '../../lib/vocabulario';
 
 /* ── El brief: 7 insumos, autocompletados desde lo sellado ── */
 
@@ -57,11 +58,11 @@ function limpiarNota(v: unknown): string {
 /** Que sesion sella cada campo — para poder decirle al cliente que le falta
  *  en vez de mostrarle un formulario vacio prometiendo que lo trajimos. */
 const ORIGEN: Record<string, string> = {
-  avatar: 'Tu Avatar (P2.3)',
-  piedras: 'La Quema (P0.3)',
-  frases: 'Las palabras de tu paciente (P2.3b)',
-  metodo: 'Genera tu metodo (nombre + pasos)',
-  oferta: 'Disena tu oferta principal',
+  avatar: 'Tu avatar',
+  piedras: 'La quema',
+  frases: 'Las palabras de {{tu_consultante}}',
+  metodo: 'Genera tu método (nombre + pasos)',
+  oferta: 'Diseña tu oferta principal',
 };
 
 /** Mejor esfuerzo: junta lo que la app ya sabe. Todo queda editable. */
@@ -305,7 +306,7 @@ CAPTION: …`;
             </p>
             <ul className="space-y-1">
               {faltantes.map((k) => (
-                <li key={k} className="text-sm text-gold">· {ORIGEN[k]}</li>
+                <li key={k} className="text-sm text-gold">· {VOC(ORIGEN[k])}</li>
               ))}
             </ul>
             <p className="text-sm text-cream/50 mt-2">
@@ -573,7 +574,7 @@ CAPTION: …`;
               {rev?.correcciones && rev.correcciones.length > 0 && (
                 <div className="mt-3 space-y-2">
                   <p className="text-sm text-cream/55">
-                    Escribí lo que faltaba. Míralo y agrégalo si te suena tuyo:
+                    Escribe lo que faltaba. Míralo y agrégalo si te suena tuyo:
                   </p>
                   {rev.correcciones.map((c) => (
                     <div key={c.ingrediente} className="rounded-lg border border-cream/12 p-3">

@@ -339,7 +339,7 @@ export async function describeCharacter(
     throw new Error(parsed?.error || `HTTP ${resp.status}: ${text.slice(0, 200)}`);
   }
   const data = await resp.json() as { description?: string; error?: string };
-  if (!data.description) throw new Error(data.error || 'Descripcion vacia');
+  if (!data.description) throw new Error(data.error || 'Descripción vacia');
   return data.description;
 }
 

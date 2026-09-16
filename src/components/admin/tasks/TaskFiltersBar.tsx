@@ -62,7 +62,7 @@ const PRIORIDAD_CHIP_COLORS: Record<AdminTareaPrioridad, { active: string; idle:
   },
 };
 
-const CHIP_BASE = 'h-7 inline-flex items-center gap-1.5 px-2.5 rounded-md text-xs font-semibold border transition-all whitespace-nowrap';
+const CHIP_BASE = 'h-11 inline-flex items-center gap-1.5 px-2.5 rounded-md text-xs font-semibold border transition-all whitespace-nowrap';
 
 function Divider() {
   return <span className="w-px h-5 bg-cream/10 mx-0.5" aria-hidden />;

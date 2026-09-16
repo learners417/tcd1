@@ -75,10 +75,10 @@ export function AttachButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={disabled}
-        title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
+        aria-label="Adjuntar" title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
         className={
           className ??
-          'shrink-0 w-10 h-10 rounded-xl bg-gold/10 hover:bg-gold/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
+          'shrink-0 w-11 h-11 rounded-full bg-gold/10 hover:bg-gold/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
         }
       >
         <Paperclip className="w-4 h-4" />

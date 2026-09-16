@@ -66,14 +66,14 @@ const TABS: TabConfig[] = [
     slideCount: 1,
     lockFormat: false,
     eyebrow: 'Generador de imagen',
-    descripcion: 'Crea una imagen unica para feed, story o anuncio.',
+    descripcion: 'Crea una imagen única para feed, story o anuncio.',
   },
   {
     id: 'edicion',
     label: 'Edicion',
     icon: Wand2,
     eyebrow: 'Edicion de imagen',
-    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamano y formato original.',
+    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamaño y formato original.',
   },
   {
     id: 'carrusel',
@@ -434,7 +434,7 @@ export default function CreativosView({ userId, perfil }: Props) {
                 {saving ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Guardando en historial…</span></>
                 ) : saved ? (
-                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automaticamente en historial</span></>
+                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automáticamente en historial</span></>
                 ) : (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Preparando…</span></>
                 )}

@@ -14,29 +14,29 @@ export default function CadenaADN({ onAbrir }: { onAbrir?: () => void }) {
 
   return (
     <button onClick={onAbrir} disabled={!onAbrir} className="card-panel px-5 py-4 w-full text-left disabled:cursor-default">
-      <div className="flex items-baseline justify-between mb-2.5">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">🧬 Tu ADN</p>
-        <p className="text-sm font-bold text-gold">
+      <div className="flex items-baseline justify-between gap-3 mb-3">
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-cream/60">Tu ADN</p>
+        <p className="text-[17px] font-semibold text-goldhi">
           {completo ? 'Completo — listo para grabar y lanzar' : `${selladas} de ${total} sellados`}
         </p>
       </div>
-      <div className="flex items-center gap-1 overflow-x-auto pb-1">
-        {alma.map((p, i) => {
+      {/* Las nueve piezas a la vista, sin desplazamiento: la lista termina. */}
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
+        {alma.map((p) => {
           const on = estadoPieza(p).sellada;
-          const prevOn = i > 0 ? estadoPieza(alma[i - 1]).sellada : false;
           return (
-            <React.Fragment key={p.id}>
-              {i > 0 && <div className={`h-px w-2 shrink-0 ${on && prevOn ? 'bg-gold/60' : 'bg-cream/15'}`} />}
-              <div className="shrink-0 text-center" title={VOC(p.titulo)}>
-                <div className={`w-3 h-3 rounded-full mx-auto ${on ? 'bg-gold ring-2 ring-gold/25' : 'bg-cream/15'}`} />
-                <p className={`text-xs mt-1 whitespace-nowrap ${on ? 'text-cream/75' : 'text-cream/35'}`}>
-                  {p.titulo.replace('Tu ', '').replace('Tus ', '')}
-                </p>
-              </div>
-            </React.Fragment>
+            <li key={p.id} className="flex items-center gap-2 min-w-0" title={VOC(p.titulo)}>
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: on ? 'var(--tilde, #4A7C59)' : 'var(--line2, #DFD3BC)' }}
+              />
+              <span className={`text-[15px] leading-tight ${on ? 'text-cream' : 'text-cream/55'}`}>
+                {p.titulo.replace('Tu ', '').replace('Tus ', '')}
+              </span>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </button>
   );
 }

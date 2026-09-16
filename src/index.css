@@ -2,6 +2,9 @@
 
 /* @theme · Tokens de marca como utilidades Tailwind (CP1). Mismos valores que la paleta original. */
 @theme {
+  /* La letra de la casa también para la clase font-sans y el valor por defecto. */
+  --font-sans: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', 'Fraunces', Georgia, serif;
   --color-ink: #080808;
   --color-panel: #111110;
   --color-surface: #1A1917;
@@ -54,8 +57,8 @@
   --text-muted: rgba(244, 239, 228, 0.62);
   --border-gold: rgba(176, 130, 46, 0.22);
   --border-gold-strong: rgba(176, 130, 46, 0.45);
-  --font-body: 'Sora', system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
 
   /* Geometria calida: esquinas suaves, no vivas. */
   --radius-sm: 12px;
@@ -473,7 +476,6 @@ h1, h2, h3 {
 
 /* ═══ DOJO PREMIUM (E2): la cinta y el tilde ceremonial ═══ */
 @keyframes cinta-seda { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
-.cinta-brillo { animation: cinta-seda 9s ease-in-out infinite; }
 @keyframes tilde-ceremonial { 0% { transform: scale(0.6); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .tilde-ceremonial { animation: tilde-ceremonial 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
 @media (prefers-reduced-motion: reduce) { .cinta-brillo, .tilde-ceremonial { animation: none; } }
@@ -639,3 +641,197 @@ h1, h2, h3 {
 [data-theme="light"] .input-field       { background: #FFFDF7 !important; color: #2A2118 !important; }
 [data-theme="light"] .custom-select     { background-color: #FFFDF7 !important; color: #2A2118 !important; }
 [data-theme="light"] .custom-select option { background: #FFFDF7 !important; color: #2A2118 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPA 10-DISEÑO · 15 sep 2026
+   Aplica docs/tcd-spec/10-DISENO.md a TODA la app de una vez, por encima
+   de lo que cada pantalla escribió. Lo mide scripts/medir-app.py.
+   Reglas: nunca degradé · nunca brillo dorado · versalitas a .16em ·
+   foco oro de 2 px · movimiento de 120 ms o nada · fuentes de la casa.
+   ═══════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --ink: #2A2118;  --ink2: #6E6252;  --ink3: #9A8C78;
+  --oro: #B0822E;  --oro-d: #8E6824; --oro-soft: #F3EAD6;
+  --tilde: #4A7C59; --tacha: #A33A2A; --ventana: #7A6FA3;
+  --card: #FFFDF7; --card2: #F5EFE1; --line: #EBE1CF; --line2: #DFD3BC;
+  --r: 20px; --r2: 26px; --r3: 99px;
+  --sombra: 0 1px 2px rgba(42, 33, 24, 0.04), 0 6px 20px rgba(42, 33, 24, 0.05);
+}
+
+/* Fraunces en su versión suave: la letra cálida y redonda de la casa. */
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3,
+[data-theme="light"] [style*="font-display"] {
+  font-variation-settings: "SOFT" 100;
+}
+/* Títulos derechos. La regla global de cursiva no está en ninguna capa y le
+   ganaba a cada `not-italic`. La cursiva queda solo donde se pide en línea. */
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3 {
+  font-style: normal;
+}
+
+/* 1 · Nunca degradé. Los degradés de Tailwind quedan planos en su primer color. */
+[data-theme="light"] #root [class*="bg-gradient-to-"] {
+  --tw-gradient-via: var(--tw-gradient-from) !important;
+  --tw-gradient-to: var(--tw-gradient-from) !important;
+}
+
+/* 2 · Nunca brillo dorado: ni sombras de oro ni manchas difuminadas de fondo. */
+[data-theme="light"] #root [class*="shadow-gold"],
+[data-theme="light"] #root [class*="shadow-[0_0_"] {
+  box-shadow: var(--sombra) !important;
+}
+[data-theme="light"] #root [class*="blur-[1"][class*="rounded-full"],
+[data-theme="light"] #root [class*="blur-3xl"][class*="rounded-full"] {
+  display: none !important;
+}
+
+/* 3 · Versalitas: el kicker de la especificación, no más espaciado que eso. */
+[data-theme="light"] #root [class*="tracking-[0.2"],
+[data-theme="light"] #root [class*="tracking-[0.3"],
+[data-theme="light"] #root [class*="tracking-[0.4"] {
+  letter-spacing: 0.16em !important;
+}
+
+/* 4 · Tarjeta y botón de la casa. */
+[data-theme="light"] .card-ios,
+[data-theme="light"] .card-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  box-shadow: var(--sombra);
+}
+[data-theme="light"] .card-ios:hover { transform: none; box-shadow: var(--sombra); }
+[data-theme="light"] .btn-ios-primary {
+  background: var(--oro);
+  color: #FFFDF7 !important;
+  min-height: 52px;
+  border-radius: var(--r);
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+}
+[data-theme="light"] .btn-ios-primary:hover { filter: none; background: var(--oro-d); box-shadow: none; }
+
+/* 5 · Foco visible: contorno oro de 2 px. */
+[data-theme="light"] :focus-visible {
+  outline: 2px solid var(--oro) !important;
+  outline-offset: 2px;
+}
+
+/* 6 · Movimiento: nada de entradas deslizadas ni pulsos. Estado en 120 ms. */
+[data-theme="light"] #root .animate-pulse { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="light"] #root *,
+  [data-theme="light"] #root *::before,
+  [data-theme="light"] #root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 7 · Contraste AA (10-DISENO §9), medido por scripts/medir-app.py.
+   - El blanco sobre --oro da 3,4:1: el botón primario va sobre --oro-d (5:1).
+   - La tinta con transparencia (cream/35…/65) cae por debajo de 4,5:1 sobre
+     crema: pasa a --ink2, el gris cálido de la especificación.
+   - El oro como color de TEXTO da 3,2:1: el texto en oro va en --oro-d. */
+[data-theme="light"] .btn-ios-primary { background: var(--oro-d); }
+[data-theme="light"] .btn-ios-primary:hover { background: #7A5A1F; }
+[data-theme="light"] #root [class*="text-cream/3"],
+[data-theme="light"] #root [class*="text-cream/4"],
+[data-theme="light"] #root [class*="text-cream/5"],
+[data-theme="light"] #root [class*="text-cream/6"],
+[data-theme="light"] #root [class*="text-white/3"],
+[data-theme="light"] #root [class*="text-white/4"],
+[data-theme="light"] #root [class*="text-white/5"],
+[data-theme="light"] #root [class*="text-white/6"] {
+  color: var(--ink2) !important;
+}
+[data-theme="light"] #root [class~="text-gold"],
+[data-theme="light"] #root [class*="text-gold/"],
+[data-theme="light"] #root [class~="text-goldhi"] {
+  color: var(--oro-d) !important;
+}
+
+/* 8 · El estado se marca con color y tilde, no apagando el texto.
+   Una tarjeta al 40% de opacidad deja su texto en 2,3:1: ilegible.
+   --ink2 baja un tono respecto de la especificación (#6E6252 → #5E5244)
+   para pasar AA también sobre --card2. */
+[data-theme="light"] { --ink2: #5E5244; }
+[data-theme="light"] #root [class~="opacity-40"],
+[data-theme="light"] #root [class~="opacity-50"],
+[data-theme="light"] #root [class~="opacity-60"],
+[data-theme="light"] #root [class~="opacity-70"],
+[data-theme="light"] #root [class~="opacity-75"] {
+  opacity: 1 !important;
+}
+[data-theme="light"] #root [class*="text-cream/7"] { color: var(--ink2) !important; }
+[data-theme="light"] #root [class*="text-cream/1"],
+[data-theme="light"] #root [class*="text-cream/2"],
+[data-theme="light"] #root [class*="text-white/1"],
+[data-theme="light"] #root [class*="text-white/2"] { color: var(--ink2) !important; }
+[data-theme="light"] #root [class*="text-white/7"],
+[data-theme="light"] #root [class*="text-white/8"],
+[data-theme="light"] #root [class*="text-white/9"] { color: var(--ink2) !important; }
+/* El amarillo sobre crema no se lee (1,6:1): pasa a oro oscuro. */
+[data-theme="light"] #root [class*="text-yellow-"],
+[data-theme="light"] #root [class*="text-amber-"] { color: var(--oro-d) !important; }
+[data-theme="light"] #root [class*="fill-yellow-"] { fill: var(--oro-d) !important; }
+
+/* 9 · Objetivo táctil de 44 px (10-DISENO §9). Los botones con alto propio
+   (íconos chicos con h-*) se corrigen en su archivo. */
+[data-theme="light"] #root main button:not([class*=" h-"]):not([class^="h-"]) {
+  min-height: 44px;
+}
+/* El otro botón primario de la app, igual al de la casa. */
+[data-theme="light"] .btn-primary {
+  background: var(--oro-d) !important;
+  color: #FFFDF7 !important;
+  font-size: 17px;
+  min-height: 48px;
+  border-radius: var(--r);
+  box-shadow: none !important;
+}
+/* El oro de TEXTO va un tono más oscuro que el del botón: así también pasa AA
+   sobre los fondos tintados en oro (pestañas activas, chips). */
+[data-theme="light"] { --oro-t: #74551C; }
+[data-theme="light"] #root [class~="text-gold"],
+[data-theme="light"] #root [class*="text-gold/"],
+[data-theme="light"] #root [class~="text-goldhi"] { color: var(--oro-t) !important; }
+[data-theme="light"] #root [class*="bg-cream/"] { background-color: var(--card2) !important; }
+[data-theme="light"] #root .prose strong,
+[data-theme="light"] #root .prose b { color: var(--oro-t) !important; }
+[data-theme="light"] #root main [class*="bg-black/1"],
+[data-theme="light"] #root main [class*="bg-black/2"],
+[data-theme="light"] #root main [class*="bg-black/3"] { background-color: var(--card2) !important; }
+
+/* 10 · Los títulos en mayúsculas son rótulos: van en la letra de cuerpo.
+   En Fraunces quedaban pesados ("MENTOR IA", "VELOCIDAD DE AVANCE"). */
+[data-theme="light"] #root :is(h1, h2, h3, h4)[class~="uppercase"] {
+  font-family: var(--font-body) !important;
+  font-style: normal !important;
+  letter-spacing: 0.14em;
+}
+/* 11 · Sombras: una sola, muy suave (10-DISENO §5). */
+[data-theme="light"] #root :is([class~="shadow-md"], [class~="shadow-lg"], [class~="shadow-xl"], [class~="shadow-2xl"]) {
+  box-shadow: var(--sombra) !important;
+}
+
+/* 12 · Nada cortado ni apretado (medido también en el Admin, 16 sep).
+   - `truncate` corta el texto con puntos suspensivos: pasa a dos líneas.
+   - Los rótulos en mayúsculas parten la palabra antes que salirse de su caja.
+   - El fondo oro con texto blanco va en oro oscuro (5:1).
+   - Las opacidades bajas que quedaban (20–35) también se sacan. */
+[data-theme="light"] #root .truncate {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+[data-theme="light"] #root [class~="uppercase"] { overflow-wrap: anywhere; }
+[data-theme="light"] #root [class~="tracking-widest"] { letter-spacing: 0.08em !important; }
+[data-theme="light"] #root [class~="bg-gold"] { background-color: var(--oro-d) !important; }
+[data-theme="light"] #root :is([class~="opacity-20"], [class~="opacity-25"], [class~="opacity-30"], [class~="opacity-35"]) {
+  opacity: 1 !important;
+}
+[data-theme="light"] #root [class~="bg-gold"] { color: #FFFDF7 !important; }
+/* En una tabla no se parte la palabra: la tabla se desplaza dentro de su caja. */
+[data-theme="light"] #root table [class~="uppercase"],
+[data-theme="light"] #root th { overflow-wrap: normal !important; word-break: normal !important; }

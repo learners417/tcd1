@@ -30,6 +30,7 @@ import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
+import { diaDelPrograma } from '../lib/diaPrograma';
 import {
   TAREAS_TAGS,
   CHECKEOS_CHIPS,
@@ -98,9 +99,7 @@ function getCurrentDay(): number {
     const parsed = JSON.parse(profile);
     const fechaInicio = parsed.fecha_inicio;
     if (!fechaInicio) return 1;
-    const inicio = new Date(fechaInicio + 'T00:00:00');
-    const ahora = new Date();
-    return Math.floor((ahora.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return diaDelPrograma(fechaInicio) ?? 1;
   } catch {
     return 1;
   }
@@ -457,8 +456,8 @@ Devuelve SOLO este JSON:
           </p>
           <p className="text-sm text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
           <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
-            <span className="text-[13px]">⏱</span>
-            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
+            <span className="text-[15px]">⏱</span>
+            <span className={`text-[15px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
             <span className="text-sm text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
           </button>
         </div>
@@ -631,7 +630,7 @@ Devuelve SOLO este JSON:
                 <p className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2 mb-3">
                   <Zap className="w-4 h-4 text-yellow-400" /> ¿Cómo estuvo tu energía hoy?
                 </p>
-                <div className="grid grid-cols-5 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                   {NIVELES_ENERGIA.map((n) => {
                     const activo = energia === n.valor;
                     return (
@@ -639,10 +638,10 @@ Devuelve SOLO este JSON:
                         key={n.valor}
                         type="button"
                         onClick={() => setEnergia(n.valor)}
-                        className={`rounded-xl border py-2.5 px-1 transition-all ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
+                        className={`rounded-xl border py-2.5 px-3 flex sm:flex-col items-center gap-2 sm:gap-1 transition-colors ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
                       >
-                        <span className="block text-xl leading-none mb-1">{n.emoji}</span>
-                        <span className={`block text-xs font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
+                        <span className="block text-xl leading-none">{n.emoji}</span>
+                        <span className={`block text-[15px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
                       </button>
                     );
                   })}
@@ -683,7 +682,7 @@ Devuelve SOLO este JSON:
 
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
               <div>
-                <button type="button" onClick={() => setMasDetalle((v) => !v)} className="text-[12px] text-gold/70 hover:text-gold transition-colors">
+                <button type="button" onClick={() => setMasDetalle((v) => !v)} className="min-h-[44px] text-[15px] text-gold hover:text-goldhi transition-colors text-left">
                   {masDetalle ? '− menos detalle' : '+ más detalle (opcional): dimensiones · actividades · checkeos'}
                 </button>
                 {masDetalle && (

@@ -173,7 +173,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             { key: 'leads' as const, label: 'Leads / Resultados', placeholder: '0', sub: 'conversiones', step: undefined },
             { key: 'ctr' as const, label: 'CTR (%)', placeholder: '0.00', sub: 'click-through rate', step: '0.01' },
             { key: 'impresiones' as const, label: 'Impresiones', placeholder: '0', sub: 'veces mostrado', step: undefined },
-            { key: 'dias' as const, label: 'Dias activa', placeholder: '0', sub: 'dias corriendo', step: undefined },
+            { key: 'dias' as const, label: 'Días activa', placeholder: '0', sub: 'días corriendo', step: undefined },
           ]).map((m) => (
             <div key={m.key} className="card-panel p-3 text-center">
               <span className="block text-sm font-bold tracking-wider uppercase text-cream/45 mb-2">

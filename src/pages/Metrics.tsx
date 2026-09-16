@@ -6,6 +6,7 @@ import { supabase, isSupabaseReady, type MetricaSemanaV2, guardarFila } from '..
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_METAS } from '../lib/roadmapSeed';
+import { semanaDelPrograma } from '../lib/diaPrograma';
 import {
   calcularEmbudoV3KPIs,
   formatPct,
@@ -70,7 +71,7 @@ function saveMetricsLocal(data: MetricaSemanaV2[]) {
 function KPICard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
     <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-gold/30' : 'border-[rgba(232,150,46,0.1)]'}`}>
-      <p className="text-sm text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere]">{label}</p>
       <p className={`text-2xl font-light tracking-tight ${highlight ? 'text-gold' : 'text-cream'}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
@@ -81,7 +82,7 @@ function KPICard({ label, value, sub, highlight }: { label: string; value: strin
 function KPICardTone({ label, value, tone, sub }: { label: string; value: string; tone: DiagnosticoNivel; sub?: string }) {
   return (
     <div className="card-panel p-4 rounded-2xl border-[rgba(232,150,46,0.1)]">
-      <p className="text-sm text-cream/55 uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
+      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere]">{label}</p>
       <p className={`text-2xl font-light tracking-tight ${nivelColor(tone)}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
@@ -115,9 +116,7 @@ function TabProgreso({ userId }: { userId?: string }) {
 
   useEffect(() => {
     let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
-    const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
-    const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
-    const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+    const semActual = semanaDelPrograma(p.fecha_inicio, 13);
 
     let tot = 0, comp = 0, hitosComp = 0;
     try {
@@ -167,8 +166,8 @@ function TabProgreso({ userId }: { userId?: string }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-              <XAxis dataKey="semana" stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
-              <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 11, fill: 'rgba(240,234,216,0.5)' }} />
+              <XAxis dataKey="semana" stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 15, fill: '#5E5244' }} />
+              <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 15, fill: '#5E5244' }} />
               <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '12px' }} />
               <Line type="monotone" dataKey="esperado" stroke="#6B7280" strokeDasharray="5 5" strokeWidth={2} dot={false} name="Ritmo Esperado" />
               <Line type="monotone" dataKey="real" stroke="#B0822E" strokeWidth={3} dot={{ r: 4, fill: '#B0822E', strokeWidth: 0 }} name="Progreso Real" />
@@ -483,8 +482,8 @@ function TabEmbudo({ userId }: { userId?: string }) {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} allowDecimals={false} />
+                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
+                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} allowDecimals={false} />
                 <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
                 <Bar dataKey="posts" fill="#22C55E" radius={[4, 4, 0, 0]} name="Posts" />
               </BarChart>
@@ -510,8 +509,8 @@ function TabEmbudo({ userId }: { userId?: string }) {
                   <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#B0822E" stopOpacity={0.3} /><stop offset="95%" stopColor="#B0822E" stopOpacity={0} /></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
-                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: 'rgba(240,234,216,0.5)', fontSize: 11 }} />
+                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
+                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
                 <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
                 <Area type="monotone" dataKey="ingresos" stroke="#B0822E" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
                 <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={0} />

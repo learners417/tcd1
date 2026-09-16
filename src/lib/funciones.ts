@@ -244,7 +244,7 @@ function leer(
       }
       if (subio) {
         return {
-          lectura: `Subió ${pct}% y esta función tiene que reducirse. Mirá qué se repite: eso es lo que hay que absorber.`,
+          lectura: `Subió ${pct}% y esta función tiene que reducirse. Mira qué se repite: eso es lo que hay que absorber.`,
           alerta: true,
         };
       }
@@ -325,7 +325,7 @@ export function deudaPorCliente(
       } else if (permitidos === 0) {
         lectura = `Un cliente de este ticket debería costar cero. Estos ${exceso} minutos son deuda que absorber tiene que pagar.`;
       } else {
-        lectura = `${exceso} minutos más de lo que su ticket permite. Mirá qué se repite con él.`;
+        lectura = `${exceso} minutos más de lo que su ticket permite. Mira qué se repite con él.`;
       }
       return { clienteId: c.id, nombre: c.nombre, ticket: c.ticket, minutos: c.minutos, permitidos, exceso, lectura };
     })

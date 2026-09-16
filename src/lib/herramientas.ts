@@ -2,6 +2,7 @@
  * herramientas.ts — Catálogo de herramientas IA de la Biblioteca
  * Grupos A–E del Método CLÍNICA
  */
+import { vocabularizar } from './vocabulario';
 import type { ProfileV2 } from './supabase';
 import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
 import { primero } from './primero';
@@ -1942,8 +1943,15 @@ export const GRUPOS_INFO: Record<GrupoHerramienta, { titulo: string; descripcion
 };
 
 export function getHerramienta(id: string): Herramienta | undefined {
-  // Buscar primero en V3, luego en legacy
-  return HERRAMIENTAS_V3.find((h) => h.id === id) ?? HERRAMIENTAS.find((h) => h.id === id);
+  // Buscar primero en V3, luego en legacy. Sale YA TRADUCIDA al vocabulario
+  // del cliente: ninguna pantalla tiene que acordarse de llamar VOC().
+  const h = HERRAMIENTAS_V3.find((x) => x.id === id) ?? HERRAMIENTAS.find((x) => x.id === id);
+  return h ? vocabularizar(h) : undefined;
+}
+
+/** Las herramientas V3 ya traducidas (para listados). */
+export function herramientasV3(): HerramientaV3[] {
+  return vocabularizar(HERRAMIENTAS_V3);
 }
 
 // ─── V3: Herramientas del PDF Definitivo (22 herramientas) ──────────────────
@@ -2399,7 +2407,7 @@ TAREA: dejarla lista para usar. Responde SOLO un JSON array válido (sin texto a
     },
     grupo: 'B' as GrupoHerramienta,
     titulo: 'Definidor de Nicho y PUV',
-    descripcion: 'Define tu nicho y creá tu propuesta de valor única.',
+    descripcion: 'Define tu nicho y crea tu propuesta de valor única.',
     emoji: '💡',
     usa_ia: true,
     adn_field: 'adn_nicho',

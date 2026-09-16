@@ -19,6 +19,9 @@ import ReporteDirector from '../components/ReporteDirector';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import { VOC } from '../lib/vocabulario';
+import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
+import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
+import CintaCinturon from '../components/CintaCinturon';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -92,9 +95,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   useEffect(() => {
     async function loadData() {
       let p: { fecha_inicio?: string; nombre?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* perfil corrupto: usar vacío */ }
-      const dInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date();
-      const diff = Math.floor((new Date().getTime() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
-      const semActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+      const semActual = semanaDelPrograma(p.fecha_inicio, 13);
 
       // Lote 4 · EL PUENTE MCD: el Rojo automático. Si MCD verificó un cobro
       // de este email, el Cinturón Rojo llega solo (un cobro allá = el hito acá).
@@ -158,14 +159,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
         if (tareasHoy.length < 1) {
           for (const meta of metasPilar) {
-            if (!completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 1) {
+            if (esPasoDelCliente(meta) && !completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 1) {
               tareasHoy.push({ ...meta, pilarNumero: pil.numero, pilarTitulo: pil.titulo });
             }
           }
         }
       }
 
-      const diaPrograma = Math.max(1, diff + 1);
+      const diaPrograma = diaDelPrograma(p.fecha_inicio) ?? 1;
 
       let hito: ProximoHito | null = null;
       for (const pil of SEED_ROADMAP_V2) {
@@ -256,7 +257,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 metasCompletadas: completadasPilar,
                 hitoMensaje: (pil as any).hito_mensaje,
                 tareasRestantes: pendientes,
-                diaPrograma: Math.max(1, diff + 1),
+                diaPrograma,
               };
               break;
             }
@@ -285,7 +286,50 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   const nombreDisplay = data.profile.nombre || 'bienvenida';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto space-y-4 pb-12">
+
+      {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
+      {(() => {
+        let c = null as ReturnType<typeof cinturonDesdeProgreso> | null;
+        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
+        let fechaInicio = (perfil as { fecha_inicio?: string } | undefined)?.fecha_inicio;
+        if (!fechaInicio) { try { fechaInicio = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.fecha_inicio; } catch { /* noop */ } }
+        const diaProg = diaDelPrograma(fechaInicio) ?? 1;
+        const diaPaso = data.tareasHoy[0]?.dia_asignado ?? null;
+        const ritmo = mensajeDeRitmo(diaProg, data.tareasHoy.length ? diaPaso : null, diasHabilesDeAtraso(fechaInicio, diaPaso, diaProg));
+        const hora = new Date().getHours();
+        const saludo = hora < 13 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
+        return (
+          <section className="card-panel p-5 sm:p-6" aria-label="Tu día">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                {saludo}, {nombreDisplay}.
+              </h1>
+              {c && <CintaCinturon cinturon={c} variante="tira" />}
+            </div>
+            {c && <p className="mt-1 text-[17px] text-cream/70">Cinturón {c.nombre} · {c.metafora}</p>}
+            <p data-ritmo={ritmo.tono} className="mt-2 text-[17px] leading-snug"
+               style={{ color: ritmo.tono === 'al_dia' ? 'var(--tilde, #4A7C59)' : 'var(--oro-d, #8E6824)' }}>
+              {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
+            </p>
+          </section>
+        );
+      })()}
+
+      {/* ── La única acción importante de la pantalla (10-DISENO regla 1) ── */}
+      {data.tareasHoy[0] && (
+        <TarjetaDeHoy
+          hoy={{
+            codigo: data.tareasHoy[0].codigo,
+            titulo: data.tareasHoy[0].titulo,
+            descripcion: data.tareasHoy[0].descripcion,
+            tiempo: data.tareasHoy[0].tiempo_estimado,
+            salesCon: data.tareasHoy[0].evidencia_requerida?.nombre ?? null,
+          }}
+          esFinde={[0, 6].includes(new Date().getDay())}
+          onEmpezar={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
+        />
+      )}
 
       {/* ── EL PACTO ──
           El sanador lo escribe y lo FIRMA en la bienvenida, y hasta ahora se
@@ -343,35 +387,13 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         );
       })()}
 
-      {/* ─── EL DOJO ─── día · cinturón · estado. Nada más. */}
-      {(() => {
-        let c; try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
-        const diaProg = proximoHito?.diaPrograma ?? 1;
-        const diaTarea = data.tareasHoy[0]?.dia_asignado;
-        const delta = typeof diaTarea === 'number' ? diaProg - diaTarea : 0;
-        const estado = delta > 0
-          ? { txt: `${delta} ${delta === 1 ? 'día' : 'días'} por recuperar — hoy te pones al día`, cls: 'text-goldhi' }
-          : delta < 0
-            ? { txt: `Adelantado ${Math.abs(delta)} ${Math.abs(delta) === 1 ? 'día' : 'días'}`, cls: 'text-success' }
-            : { txt: 'Al día', cls: 'text-success' };
-        return (
-          <div className="card-panel p-6 sm:p-7 border border-gold/15">
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <p className="text-2xl font-light text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Buenos días, {nombreDisplay}.</p>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Día {diaProg} de 90</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-              {c && <p className="text-sm text-cream/80">{c.emoji} Cinturón <strong className="text-cream">{c.nombre}</strong></p>}
-              <p className={`text-sm font-medium ${estado.cls}`}>{estado.txt}</p>
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ─── EN MARCHA ─── lo que ya está vivo. Estado, no tareas. */}
       {(() => {
         const diaProg = proximoHito?.diaPrograma ?? 1;
-        if (diaProg < 11) return null;
+        // Lo sostenido aparece cuando el cliente CERRÓ las jornadas que lo abren
+        // (el plan de caza), no por fecha: el paso pendiente ya es posterior al 11.
+        const pasoPendiente = data.tareasHoy[0]?.dia_asignado ?? null;
+        if (pasoPendiente !== null && pasoPendiente <= 11) return null;
         // Lo sostenido sale del mismo set de progreso que ya se sincroniza.
         // "sinResponder" todavía no tiene fuente: se omite en vez de mentir.
         const est: EstadoEnMarcha = {
@@ -441,32 +463,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           return null;
         })()}
 
-        {/* Foco de Hoy (60%) */}
-        <div className="card-panel p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-sm font-bold text-cream tracking-widest uppercase">Tu sesión de hoy</h2>
-            <button onClick={() => setCurrentPage('roadmap')} className="text-sm text-cream/55 hover:text-gold uppercase font-bold tracking-wider transition-colors">
-              Ir a tareas →
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {(() => {
-              // Día de descanso del programa: el dojo respira
-              const diaProg = (() => { try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); if (p?.fecha_inicio) return Math.max(1, Math.floor((Date.now() - new Date(p.fecha_inicio).getTime()) / 86400000) + 1); } catch { /* noop */ } return 1; })();
-              if (esDiaDescanso(diaProg) && data.tareasHoy.length > 0) {
-                return (
-                  <div className="py-12 text-center border border-success/20 rounded-2xl bg-gradient-to-b from-success/[0.06] to-transparent">
-                    <p className="text-4xl mb-3">🌿</p>
-                    <p className="text-base text-cream/85 font-medium">Día de descanso — el dojo también respira</p>
-                    <p className="text-xs text-cream/45 mt-2">Tu racha está protegida 🛡️ · Si quieres adelantar, El Camino está abierto — pero descansar también es entrenar.</p>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-            {data.tareasHoy.length === 0 ? (
-              (() => {
+        {/* Sin paso pendiente: el día de campo o el día libre. */}
+        {data.tareasHoy.length === 0 && (
+          <div className="card-panel p-6">
+              {(() => {
                 let sv = false;
                 try {
                   const saved = JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[];
@@ -501,54 +501,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                     </button>
                   </div>
                 );
-              })()
-            ) : (
-              <>
-              {/* LA SESIÓN DE HOY — el hero del dojo */}
-              {data.tareasHoy[0] && (
-                <button
-                  onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
-                  className="w-full text-left rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/[0.10] to-transparent p-6 hover:border-gold/70 hover:shadow-[0_0_30px_rgba(232,150,46,0.10)] transition-all group"
-                >
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">▶ Tu sesión de hoy</p>
-                  <p className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(data.tareasHoy[0].titulo)}</p>
-                  <p className="text-xs text-cream/65 mb-4">{data.tareasHoy[0].tiempo_estimado} · {data.tareasHoy[0].tipo === 'VIDEO' ? 'Contenido' : data.tareasHoy[0].tipo === 'HERRAMIENTA' ? 'Producción' : 'Sesión de trabajo'}</p>
-                  <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-black text-sm font-bold group-hover:bg-goldhi transition-colors">COMENZAR →</span>
-                </button>
-              )}
-              {data.tareasHoy.slice(1).map((t, idx) => (
-              <div
-                key={idx}
-                className="group flex items-start gap-4 p-4 rounded-xl bg-surface/30 border border-[rgba(232,150,46,0.1)] hover:bg-surface/60 hover:border-[rgba(232,150,46,0.14)] transition-all cursor-pointer"
-                onClick={() => { try { localStorage.setItem('tcd_abrir_pilar', String(t.pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}
-              >
-                <div className="shrink-0 mt-0.5">
-                  <div className="w-5 h-5 rounded-full border border-cream/20 group-hover:border-gold transition-colors flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-transparent group-hover:bg-gold rounded-full" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-cream/90">{VOC(t.titulo)}</p>
-                  <p className="text-sm text-cream/55 mt-1">{t.pilarTitulo}</p>
-                  <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <span className={`text-sm uppercase font-bold px-2 py-0.5 rounded-full border tracking-wider ${getTypeBadge(t.tipo)}`}>
-                      {t.tipo || `Pilar ${t.pilarNumero}`}
-                    </span>
-                    <span className="text-sm text-cream/55 flex items-center gap-1 font-medium">
-                      <Clock className="w-3 h-3" /> {t.tiempo_estimado || '15–30 min'}
-                    </span>
-                    {t.herramienta_id && (
-                      <span className="text-sm text-gold font-bold uppercase tracking-wider">Ver herramienta →</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-              </>
-            )}
+              })()}
           </div>
-        </div>
-
+        )}
 
         {(() => {
           const dow = new Date().getDay();

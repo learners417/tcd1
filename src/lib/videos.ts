@@ -2,7 +2,7 @@
  * videos.ts — Catálogo de módulos de video del Método CLÍNICA
  *
  * Para agregar un video:
- * 1. Copiá la URL del video de YouTube (ej: https://youtu.be/dQw4w9WgXcQ)
+ * 1. Copia la URL del video de YouTube (ej: https://youtu.be/dQw4w9WgXcQ)
  *    o el código de embed que da YouTube (iframe src="...embed/VIDEO_ID...")
  * 2. Agrega un nuevo objeto al array VIDEOS con el grupo correspondiente
  *

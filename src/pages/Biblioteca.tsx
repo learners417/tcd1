@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
-import { getHerramienta, HERRAMIENTAS_V3, EMOJI_TO_ICON } from '../lib/herramientas';
+import { getHerramienta, herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
 import type { HerramientaV3 } from '../lib/herramientas';
 
 const BIB_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -154,7 +154,7 @@ function isTabUnlocked(
 /** Get herramientas V3 for a set of pilarIds */
 function getHerramientasForPilars(pilarIds: readonly PilarId[]): HerramientaV3[] {
   const prefixes = pilarIds.map((pid) => `H-${pid}.`);
-  return HERRAMIENTAS_V3.filter((h) =>
+  return herramientasV3().filter((h) =>
     prefixes.some((prefix) => h.id.startsWith(prefix))
   );
 }
@@ -451,7 +451,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         {canScrollLeft && (
           <button
             onClick={() => scrollTabs('left')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
+            className="shrink-0 w-11 h-11 rounded-full border border-[var(--line2,#DFD3BC)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -468,7 +468,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                 key={tab.id}
                 onClick={() => unlocked && setActiveTabId(tab.id)}
                 disabled={!unlocked}
-                className={`flex flex-col items-center px-5 py-3 rounded-xl transition-all border min-w-[80px] ${
+                className={`shrink-0 flex flex-col items-center px-4 py-3 rounded-2xl transition-colors border min-w-[96px] ${
                   !unlocked
                     ? 'bg-surface/40 border-[rgba(232,150,46,0.05)] text-cream/20 cursor-not-allowed'
                     : isActive
@@ -486,7 +486,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                     {tab.letter}
                   </span>
                 )}
-                <span className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap">
+                <span className="text-[15px] font-semibold whitespace-nowrap">
                   {tab.label}
                 </span>
               </button>
@@ -496,7 +496,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         {canScrollRight && (
           <button
             onClick={() => scrollTabs('right')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
+            className="shrink-0 w-11 h-11 rounded-full border border-[var(--line2,#DFD3BC)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

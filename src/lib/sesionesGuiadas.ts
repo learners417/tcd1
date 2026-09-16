@@ -8,6 +8,8 @@
  * T4 agrega el resto del camino a este mismo catálogo — el motor no cambia.
  */
 
+import { vocabularizar } from './vocabulario';
+
 export type PasoGuiado =
   | { tipo: 'intro'; titulo: string; texto: string; nota?: string }
   | { tipo: 'opciones'; id: string; pregunta: string; opciones: string[]; multiple?: boolean; permiteOtra?: boolean }
@@ -226,5 +228,7 @@ export const SESIONES_GUIADAS: Record<string, SesionGuiada> = {
 };
 
 export function sesionGuiadaDe(codigo: string): SesionGuiada | null {
-  return SESIONES_GUIADAS[codigo] ?? null;
+  // Sale YA TRADUCIDA al vocabulario del cliente (textos y prompts).
+  const s = SESIONES_GUIADAS[codigo];
+  return s ? vocabularizar(s) : null;
 }

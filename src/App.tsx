@@ -34,6 +34,7 @@ import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
 import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
+import { diaDelPrograma } from './lib/diaPrograma';
 
 type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
 
@@ -278,6 +279,10 @@ export default function App() {
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (!error && data) {
+        // dia_programa se recalcula del calendario: la columna solo la mueve un
+        // trigger al completar metas y se congela si el cliente se frena.
+        const diaReal = diaDelPrograma((data as { fecha_inicio?: string }).fecha_inicio);
+        if (diaReal !== null) (data as { dia_programa?: number }).dia_programa = diaReal;
         setSupabaseProfile(data as SupabaseProfile);
         try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
         syncProfileToLocalStorage(data as SupabaseProfile);
@@ -422,7 +427,7 @@ export default function App() {
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
                 onChange={(e) => setRecoveryPassword2(e.target.value)}
-                placeholder="Repetí la contraseña"
+                placeholder="Repite la contraseña"
                 required
                 disabled={recoveryLoading}
                 className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"

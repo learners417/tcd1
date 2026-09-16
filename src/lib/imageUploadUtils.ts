@@ -222,7 +222,7 @@ export function validateImageFile(file: File): string | null {
     return `${file.name}: solo se admiten imagenes`;
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    return `${file.name}: maximo 10MB`;
+    return `${file.name}: máximo 10MB`;
   }
   return null;
 }

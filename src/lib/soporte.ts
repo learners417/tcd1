@@ -43,7 +43,7 @@ export const COMPROMISO: Record<TipoDeMensaje, CompromisoDeRespuesta> = {
   },
   roto: {
     tipo: 'roto', horas: 4, vaA: 'absorber',
-    loQueSeDice: 'Si algo se rompió lo miramos hoy. Contanos qué estabas haciendo cuando pasó.',
+    loQueSeDice: 'Si algo se rompió lo miramos hoy. Cuéntanos qué estabas haciendo cuando pasó.',
   },
 };
 

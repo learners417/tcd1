@@ -1,14 +1,14 @@
 /**
  * Dia45Banner.tsx — Banner del Día 45 (Regla #5 v7)
  *
- * Se muestra cuando el usuario ya pasó el día 45 y tiene campos críticos del ADN
+ * Se muestra cuando el PASO en el que va ya es de la Fase 4 (día 45 o más del Camino) y tiene campos críticos del ADN
  * incompletos. Bloquea visualmente el avance a Fase 4 y lista los campos
  * faltantes agrupados por pilar, con un link para volver a cada uno.
  */
 
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import type { ValidacionDia45 } from '../lib/diaValidator';
-import { agruparFaltantesPorPilar, DIA_PUNTO_DE_NO_RETORNO } from '../lib/diaValidator';
+import { agruparFaltantesPorPilar } from '../lib/diaValidator';
 
 interface Dia45BannerProps {
   validacion: ValidacionDia45;
@@ -16,37 +16,34 @@ interface Dia45BannerProps {
   onIrAPilar?: (pilarId: string) => void;
 }
 
-export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45BannerProps) {
+export default function Dia45Banner({ validacion, onIrAPilar }: Dia45BannerProps) {
   if (!validacion.debeBloquearFase4) return null;
 
   const grupos = agruparFaltantesPorPilar(validacion.camposFaltantes);
-  const diasDespues = diaActual - DIA_PUNTO_DE_NO_RETORNO;
+  const n = validacion.camposFaltantes.length;
 
+  // En positivo y en oro: es lo que falta completar, no una falta.
   return (
-    <div className="rounded-2xl border-2 border-[#ff5e5e]/60 bg-[#ff5e5e]/5 p-5 space-y-4">
+    <div className="rounded-2xl border border-gold/40 bg-gold/5 p-5 space-y-4">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#ff5e5e]/15 border border-[#ff5e5e]/30 flex items-center justify-center flex-shrink-0">
-          <AlertTriangle className="w-5 h-5 text-[#ff5e5e]" />
+        <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+          <Lock className="w-5 h-5 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#ff5e5e] mb-1">
-            Día {diaActual} · punto de no retorno {diasDespues >= 0 ? `+${diasDespues}` : diasDespues}
-          </p>
           <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
-            Tu ADN está incompleto para activar Fase 4
+            La Fase 4 se abre con tu ADN completo
           </h3>
-          <p className="text-sm text-cream/75">
-            Faltan <span className="text-cream font-semibold">{validacion.camposFaltantes.length}</span>{' '}
-            campos críticos ({validacion.porcentajeCompleto}% completo). Gastar en ads con ADN incompleto
-            es quemar plata. Vuelve a los pilares de abajo antes de seguir.
+          <p className="text-base text-cream/75">
+            Te {n === 1 ? 'falta' : 'faltan'} <span className="text-cream font-semibold">{n}</span> {n === 1 ? 'dato clave' : 'datos clave'}.
+            Con ellos tus anuncios salen escritos desde tu historia. Tócalos y los completas en su pilar.
           </p>
         </div>
       </div>
 
       {/* Barra de progreso */}
-      <div className="h-1.5 bg-[#ff5e5e]/10 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-gold/10 rounded-full overflow-hidden">
         <div
-          className="h-full bg-[#ff5e5e] rounded-full transition-all"
+          className="h-full bg-gold rounded-full transition-all"
           style={{ width: `${validacion.porcentajeCompleto}%` }}
         />
       </div>
@@ -58,9 +55,9 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
             key={pilar}
             type="button"
             onClick={() => onIrAPilar?.(pilar)}
-            className="w-full text-left rounded-xl border border-[#ff5e5e]/20 bg-surface/40 hover:bg-[#ff5e5e]/5 hover:border-[#ff5e5e]/40 transition-colors p-3 flex items-center gap-3 group"
+            className="w-full text-left rounded-xl border border-gold/20 bg-surface/40 hover:bg-gold/5 hover:border-gold/40 transition-colors p-3 flex items-center gap-3 group"
           >
-            <span className="text-xs font-mono text-[#ff5e5e] font-semibold flex-shrink-0">
+            <span className="text-sm text-gold font-semibold flex-shrink-0">
               {pilar}
             </span>
             <div className="flex-1 min-w-0">
@@ -68,7 +65,7 @@ export default function Dia45Banner({ validacion, diaActual, onIrAPilar }: Dia45
                 {campos.map((c) => c.label).join(' · ')}
               </p>
             </div>
-            <ArrowRight className="w-4 h-4 text-cream/55 group-hover:text-[#ff5e5e] transition-colors flex-shrink-0" />
+            <ArrowRight className="w-4 h-4 text-cream/55 group-hover:text-gold transition-colors flex-shrink-0" />
           </button>
         ))}
       </div>

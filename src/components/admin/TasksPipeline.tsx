@@ -307,7 +307,7 @@ export default function TasksPipeline({
           <button
             onClick={cargar}
             title="Refrescar"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
+            className="w-11 h-11 rounded-full flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
           </button>

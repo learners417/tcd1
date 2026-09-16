@@ -117,7 +117,7 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
       { codigo: 'IRR.matriz_b_obstaculos', label: 'Matriz B · los obstáculos', pilarOrigen: 'P2.3', profileKey: 'matriz_b' },
       { codigo: 'IRR.matriz_c_cielo', label: 'Matriz C · el cielo', pilarOrigen: 'P2.3', profileKey: 'matriz_c', criticoDia45: true },
       { codigo: 'IRR.metodo_nombre', label: 'Nombre del método propio', pilarOrigen: 'P2.4', profileKey: 'metodo_nombre', criticoDia45: true },
-      { codigo: 'IRR.metodo_pasos', label: 'Pasos del método (3-7 · con nivel_oferta por paso)', pilarOrigen: 'P2.4', profileKey: 'metodo_pasos', criticoDia45: true },
+      { codigo: 'IRR.metodo_pasos', label: 'Pasos del método (de 3 a 7, cada uno con su nivel de oferta)', pilarOrigen: 'P2.4', profileKey: 'metodo_pasos', criticoDia45: true },
       { codigo: 'IRR.metodo_mapeo_obstaculos', label: 'Mapeo Obstáculos B → Pasos del método', pilarOrigen: 'P2.4', profileKey: 'adn_metodo_mapeo_obstaculos' },
     ],
   },

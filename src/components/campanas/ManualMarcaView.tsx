@@ -44,14 +44,14 @@ const PALETA_EJEMPLO: Swatch[] = [
 ];
 
 const TIPOGRAFIA_EJEMPLO =
-  'Inter bold para titulares grandes, Inter regular para cuerpo, DM Serif Display italic para acentos aspiracionales. Maximo 3 pesos en la misma pieza.';
+  'Inter bold para titulares grandes, Inter regular para cuerpo, DM Serif Display italic para acentos aspiracionales. Máximo 3 pesos en la misma pieza.';
 
 const REGLAS_EJEMPLO =
   [
     '- Nunca fondo blanco puro (usar siempre tonos calidos o profundos)',
     '- El acento dorado #B0822E debe estar presente en cada pieza',
     '- No usar rojo saturado — choca con la identidad aspiracional',
-    '- Textos en MAYUSCULAS solo en titulares, jamas en parrafos',
+    '- Textos en MAYUSCULAS solo en titulares, jamas en párrafos',
     '- Fotos de personas: miradas reales, no poses de stock',
   ].join('\n');
 

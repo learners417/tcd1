@@ -170,7 +170,7 @@ function PersonColumn({
       >
         {tareas.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-cream/15 text-xs px-3 text-center">
-            Sin tareas asignadas. Arrastrá una acá para reasignar.
+            Sin tareas asignadas. Arrastra una acá para reasignar.
           </div>
         ) : (
           BUCKET_ORDER.map(bucket => {

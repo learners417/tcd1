@@ -69,7 +69,7 @@ async function getAuthToken(): Promise<string> {
   if (!supabase) throw new Error('Supabase no configurado');
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error('No hay sesion activa');
+  if (!token) throw new Error('No hay sesión activa');
   return token;
 }
 

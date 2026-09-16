@@ -588,6 +588,10 @@ out = {
   "jornadas":[J[d] for d in sorted(J)]
 }
 
+# Castellano neutro (tú): la app se usa en toda Latinoamérica y España.
+from tuteo import tutear_todo
+out = tutear_todo(out)
+
 with open("datos/roadmap.seed.json","w",encoding="utf-8") as f:
     json.dump(out,f,ensure_ascii=False,indent=2)
 

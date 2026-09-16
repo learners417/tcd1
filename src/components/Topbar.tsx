@@ -22,7 +22,7 @@ const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
   mensajes: 'Soporte', adn: 'Mi ADN', diario: 'Diario del Fundador',
   biblioteca: 'El Método', agentes: 'Entrenadores IA', creador: 'Creador de Contenido',
-  campanas: 'Campañas & Creativos', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
+  campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
 
 /** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
@@ -244,7 +244,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               <Menu className="w-5 h-5" />
             </button>
           )}
-          <h1 className="text-base font-semibold text-cream truncate not-italic" style={{ fontFamily: 'var(--font-body)' }}>
+          <h1 className="text-[20px] leading-tight text-cream truncate not-italic" style={{ fontFamily: 'var(--font-display)' }}>
             {(currentPage && PAGE_TITLES[currentPage]) || ''}
           </h1>
         </div>

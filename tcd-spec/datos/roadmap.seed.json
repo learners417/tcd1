@@ -787,7 +787,7 @@
       "id": "F-ORDEN",
       "regla": "No se abre una sesión sin cerrar la anterior, salvo que su evidencia dependa de que otro pague",
       "apertura": "evidencia_anterior_aprobada or anterior.avanza_sin_evidencia",
-      "mensaje": "El orden es el método. Terminá la de ayer."
+      "mensaje": "El orden es el método. Termina la de ayer."
     },
     {
       "id": "F-PAGINA",
@@ -799,7 +799,7 @@
       "id": "F-RODAJE",
       "regla": "La fecha de rodaje se elige el día 19",
       "apertura": "evento.rodaje_agendado",
-      "mensaje": "Elegí el día. El rodaje que no tiene fecha no ocurre."
+      "mensaje": "Elige el día. El rodaje que no tiene fecha no ocurre."
     },
     {
       "id": "F-14DIAS",
@@ -817,19 +817,19 @@
       "id": "F-COMPRA",
       "regla": "No invita sin hacer la compra de prueba",
       "apertura": "evento.compra_de_prueba",
-      "mensaje": "Comprate a vos mismo antes de invitar a nadie."
+      "mensaje": "Cómprate a ti mismo antes de invitar a nadie."
     },
     {
       "id": "F-PRECIO",
       "regla": "El precio del día 17 no puede ser menor al del día 9",
       "apertura": "oferta.precio>=numeros.precio_digno",
-      "mensaje": "Tu oferta no puede valer menos que lo que ya cobrás."
+      "mensaje": "Tu oferta no puede valer menos que lo que ya cobras."
     },
     {
       "id": "F-ADN",
       "regla": "Ningún agente arranca con campos requeridos vacíos",
       "apertura": "adn.campos_requeridos",
-      "mensaje": "{agente} necesita {campo}. Volvé al día {dia}."
+      "mensaje": "{agente} necesita {campo}. Vuelve al día {dia}."
     },
     {
       "id": "F-GRADO-ESPERA",
@@ -841,7 +841,7 @@
       "id": "F-ORGANICO",
       "regla": "No se graba contenido de marca dentro de los 90 días",
       "apertura": "dia>90",
-      "mensaje": "Hoy escribís las doce. Se graban en un solo día, después del 90."
+      "mensaje": "Hoy escribes las doce. Se graban en un solo día, después del 90."
     }
   ],
   "jornadas": [
@@ -892,12 +892,12 @@
       "manual": "LID-1",
       "acceso": null,
       "pasos": [
-        "Elegí el lugar físico",
-        "Elegí la hora fija",
-        "Sacá la foto del lugar con el cuaderno",
-        "Escribí a mano por qué empezaste",
-        "Firmá el pacto",
-        "Publicá el pacto"
+        "Elige el lugar físico",
+        "Elige la hora fija",
+        "Saca la foto del lugar con el cuaderno",
+        "Escribe a mano por qué empezaste",
+        "Firma el pacto",
+        "Publica el pacto"
       ],
       "evidencias": [
         {
@@ -949,11 +949,11 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Abrí MCD desde el tab Clínica",
-        "Cargá todos tus consultantes activos",
-        "Cargá tu agenda de esta semana",
-        "Cargá los ingresos de los últimos tres meses",
-        "Cargá tus gastos fijos",
+        "Abre MCD desde el tab Clínica",
+        "Carga todos tus consultantes activos",
+        "Carga tu agenda de esta semana",
+        "Carga los ingresos de los últimos tres meses",
+        "Carga tus gastos fijos",
         "No ordenes nada: hoy solo entra información"
       ],
       "evidencias": [
@@ -1005,11 +1005,11 @@
       "acceso": null,
       "pasos": [
         "La app trae los datos del día 2",
-        "Sumá tus horas reales de la semana",
+        "Suma tus horas reales de la semana",
         "La app calcula tu hora real neta",
-        "Quedate diez segundos con el número",
-        "Escribí dónde lo sentiste",
-        "Escribilo a mano y tapalo"
+        "Quédate diez segundos con el número",
+        "Escribe dónde lo sentiste",
+        "Escríbelo a mano y tápalo"
       ],
       "evidencias": [
         {
@@ -1059,9 +1059,9 @@
       "manual": "LID-2",
       "acceso": null,
       "pasos": [
-        "Completá tres veces: mientras cobre poco, no tengo que…",
-        "Elegí la que más te incomodó y escribí dos líneas",
-        "Escribí las tres frases sobre el dinero de tu casa antes de los doce"
+        "Completa tres veces: mientras cobre poco, no tengo que…",
+        "Elige la que más te incomodó y escribe dos líneas",
+        "Escribe las tres frases sobre el dinero de tu casa antes de los doce"
       ],
       "evidencias": [
         {
@@ -1098,8 +1098,8 @@
       "acceso": null,
       "pasos": [
         "Auriculares, luz baja, ojos cerrados",
-        "No escribas mientras escuchás",
-        "Al terminar, escribí lo que apareció sin corregirlo"
+        "No escribas mientras escuchas",
+        "Al terminar, escribe lo que apareció sin corregirlo"
       ],
       "evidencias": [
         {
@@ -1133,9 +1133,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Nombrá tres personas que te enseñaron qué es trabajar bien",
-        "Escribí la frase exacta que cada una decía sobre el dinero",
-        "Marcá cuál de las tres todavía usás"
+        "Nombra tres personas que te enseñaron qué es trabajar bien",
+        "Escribe la frase exacta que cada una decía sobre el dinero",
+        "Marca cuál de las tres todavía usas"
       ],
       "evidencias": [
         {
@@ -1171,9 +1171,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Escribí tres profesionales que te parecen exagerados",
-        "Al lado de cada uno, una cosa que hace y vos no",
-        "Elegí una capacidad y practicala esta semana"
+        "Escribe tres profesionales que te parecen exagerados",
+        "Al lado de cada uno, una cosa que hace y tú no",
+        "Elige una capacidad y practícala esta semana"
       ],
       "evidencias": [
         {
@@ -1210,9 +1210,9 @@
       "acceso": null,
       "pasos": [
         "La app trae tu lista del día 2 en tres columnas vacías",
-        "Arrastrá a cada persona a su columna",
+        "Arrastra a cada persona a su columna",
         "Ninguna persona queda sin columna",
-        "Contá cuántos hay en cada una"
+        "Cuenta cuántos hay en cada una"
       ],
       "evidencias": [
         {
@@ -1252,12 +1252,12 @@
       "manual": null,
       "acceso": "Entrega 1 del Sistema — pagos y calendario",
       "pasos": [
-        "Mirá tu hora real neta y tu precio viejo",
-        "Escribí el precio nuevo",
+        "Mira tu hora real neta y tu precio viejo",
+        "Escribe el precio nuevo",
         "La app te muestra qué hora real neta te daría",
-        "Confirmá: el número queda sellado",
-        "Creá tu link de pago",
-        "Cobrate un peso para probarlo"
+        "Confirma: el número queda sellado",
+        "Crea tu link de pago",
+        "Cóbrate un peso para probarlo"
       ],
       "evidencias": [
         {
@@ -1306,9 +1306,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Abrí la plantilla del grupo uno y editala con tu voz",
-        "Mandala a todos los del grupo, el mismo día",
-        "Marcá en la app quién recibió"
+        "Abre la plantilla del grupo uno y edítala con tu voz",
+        "Mándala a todos los del grupo, el mismo día",
+        "Marca en la app quién recibió"
       ],
       "evidencias": [
         {
@@ -1341,7 +1341,7 @@
       "acceso": null,
       "pasos": [
         "Mensaje del grupo dos con fecha de cierre para cada persona",
-        "Cargá esas fechas en la agenda de MCD",
+        "Carga esas fechas en la agenda de MCD",
         "Mensaje del grupo tres con nombre de colega, nunca una lista"
       ],
       "evidencias": [
@@ -1376,8 +1376,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Cobrá",
-        "Escribí al lado del número quién viene después"
+        "Cobra",
+        "Escribe al lado del número quién viene después"
       ],
       "evidencias": [
         {
@@ -1412,8 +1412,8 @@
       "acceso": null,
       "pasos": [
         "La red no es tu cartera: colegas, egresados, contactos del rubro",
-        "Escribí sesenta nombres con apellido y por dónde le escribís a cada uno",
-        "Ordenalos por quién te contesta más fácil",
+        "Escribe sesenta nombres con apellido y por dónde le escribes a cada uno",
+        "Ordénalos por quién te contesta más fácil",
         "Los diez primeros son los de mañana"
       ],
       "evidencias": [
@@ -1454,9 +1454,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Editá la plantilla con tu voz: no vende, pide veinte minutos",
-        "Mandá veinte, hoy, empezando por los más fáciles",
-        "Marcá en la app a quién le escribiste"
+        "Edita la plantilla con tu voz: no vende, pide veinte minutos",
+        "Manda veinte, hoy, empezando por los más fáciles",
+        "Marca en la app a quién le escribiste"
       ],
       "evidencias": [
         {
@@ -1498,10 +1498,10 @@
       "manual": "CLI-1",
       "acceso": null,
       "pasos": [
-        "Escribí las etapas de lo que ya hacés, en orden",
-        "Definí punto inicial y punto final",
-        "Definí cómo se mide",
-        "Armá las siglas: una letra por etapa"
+        "Escribe las etapas de lo que ya haces, en orden",
+        "Define punto inicial y punto final",
+        "Define cómo se mide",
+        "Arma las siglas: una letra por etapa"
       ],
       "evidencias": [
         {
@@ -1541,7 +1541,7 @@
         "Examen 1: ¿se puede medir?",
         "Examen 2: la regla del QUÉ y el CÓMO",
         "Examen 3: ¿importa el orden?",
-        "Corregí y volvé a presentar"
+        "Corrige y vuelve a presentar"
       ],
       "evidencias": [
         {
@@ -1618,9 +1618,9 @@
       "manual": "CLI-2B",
       "acceso": null,
       "pasos": [
-        "Escribí la garantía en una frase, en positivo",
-        "Escribí los tres compromisos que firma al lado, medibles",
-        "Escribí qué pasa si no los cumplió"
+        "Escribe la garantía en una frase, en positivo",
+        "Escribe los tres compromisos que firma al lado, medibles",
+        "Escribe qué pasa si no los cumplió"
       ],
       "evidencias": [
         {
@@ -1657,9 +1657,9 @@
       "manual": "CLI-3",
       "acceso": null,
       "pasos": [
-        "Diseñá los cinco niveles",
-        "Marcá el tercero: es el único que vendés hoy",
-        "Elegí la fecha y la hora de tu rodaje: es el día 27"
+        "Diseña los cinco niveles",
+        "Marca el tercero: es el único que vendes hoy",
+        "Elige la fecha y la hora de tu rodaje: es el día 27"
       ],
       "evidencias": [
         {
@@ -1701,8 +1701,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Escribí qué recibe tu consultante a cambio del dinero",
-        "Escribí qué se libera él al pagar"
+        "Escribe qué recibe tu consultante a cambio del dinero",
+        "Escribe qué se libera él al pagar"
       ],
       "evidencias": [
         {
@@ -1736,9 +1736,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Elegí un gesto físico chico y repetible",
-        "Grabate diciendo tu número veinte veces, con el gesto antes de cada una",
-        "Escuchá la uno y la veinte"
+        "Elige un gesto físico chico y repetible",
+        "Grábate diciendo tu número veinte veces, con el gesto antes de cada una",
+        "Escucha la uno y la veinte"
       ],
       "evidencias": [
         {
@@ -1756,7 +1756,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [],
-      "nota": "Si todavía sube el tono, devuelve 'repetí mañana' y no aprueba.",
+      "nota": "Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.",
       "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
@@ -1775,9 +1775,9 @@
       "manual": "CAM-1",
       "acceso": "Entrega 2 del Sistema — sitios, formularios y contactos",
       "pasos": [
-        "Dibujá tu circuito con las cinco piezas",
-        "Marcá cuáles ya tenés",
-        "Si trabajás con una agencia, hacele las tres preguntas"
+        "Dibuja tu circuito con las cinco piezas",
+        "Marca cuáles ya tienes",
+        "Si trabajas con una agencia, hazle las tres preguntas"
       ],
       "evidencias": [
         {
@@ -1811,9 +1811,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Contá seguidores activos",
-        "Sumá contactos de consultantes pasados",
-        "Sumá tu lista de correo",
+        "Cuenta seguidores activos",
+        "Suma contactos de consultantes pasados",
+        "Suma tu lista de correo",
         "La app te muestra tu rama"
       ],
       "evidencias": [
@@ -1855,7 +1855,7 @@
         "Nombre buscable",
         "Bio con tu promesa, no con tu título",
         "Enlace a tu página",
-        "Cerrá"
+        "Cierra"
       ],
       "evidencias": [
         {
@@ -1892,10 +1892,10 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Revisá que tengas promesa, cinco filas, garantía y precio",
+        "Revisa que tengas promesa, cinco filas, garantía y precio",
         "El Escriba arma el pedido inicial: leelo entero antes de mandarlo",
-        "Pedí los tres cambios: celular, letra grande, aviso legal",
-        "Subí y publicá en tu subdominio"
+        "Pide los tres cambios: celular, letra grande, aviso legal",
+        "Sube y publica en tu subdominio"
       ],
       "evidencias": [
         {
@@ -1936,8 +1936,8 @@
       "pasos": [
         "El Escriba arma el guion del VSL con tu ADN",
         "El Escriba arma los tres anuncios según tu rama",
-        "Subí fotos del lugar: la Cámara corrige luz, fondo y altura",
-        "Leé el guion en voz alta tres veces"
+        "Sube fotos del lugar: la Cámara corrige luz, fondo y altura",
+        "Lee el guion en voz alta tres veces"
       ],
       "evidencias": [
         {
@@ -2021,11 +2021,11 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Subí el VSL a tu página",
-        "Armá el formulario con las cinco preguntas",
-        "Armá el calendario en dos pasos",
-        "Armá la página de preparación",
-        "Agendate a vos mismo de punta a punta desde el teléfono"
+        "Sube el VSL a tu página",
+        "Arma el formulario con las cinco preguntas",
+        "Arma el calendario en dos pasos",
+        "Arma la página de preparación",
+        "Agéndate a ti mismo de punta a punta desde el teléfono"
       ],
       "evidencias": [
         {
@@ -2100,9 +2100,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Editá corto: sin música, sin intro, sin logo animado",
+        "Edita corto: sin música, sin intro, sin logo animado",
         "Subtítulos quemados",
-        "Subilos al banco de creativos y marcalos como listos"
+        "Súbelos al banco de creativos y márcalos como listos"
       ],
       "evidencias": [
         {
@@ -2187,8 +2187,8 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
-        "Contestá en menos de dos horas cualquier agenda que entre",
-        "Terminá de cerrar la transición de cartera",
+        "Contesta en menos de dos horas cualquier agenda que entre",
+        "Termina de cerrar la transición de cartera",
         "No abras el administrador de anuncios"
       ],
       "nota": null,
@@ -2209,9 +2209,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Armá la vista con cuatro columnas y nada más",
-        "Anotá tu costo por agenda de hoy",
-        "Leé los tres cuellos y marcá cuál tenés"
+        "Arma la vista con cuatro columnas y nada más",
+        "Anota tu costo por agenda de hoy",
+        "Lee los tres cuellos y marca cuál tienes"
       ],
       "evidencias": [
         {
@@ -2257,8 +2257,8 @@
       "jornada_larga": false,
       "acciones_campo": [
         "Dos mensajes nuevos a tu red",
-        "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra"
+        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
+        "Contesta en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -2284,8 +2284,8 @@
       "jornada_larga": false,
       "acciones_campo": [
         "Dos mensajes nuevos a tu red",
-        "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra"
+        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
+        "Contesta en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -2305,11 +2305,11 @@
       "manual": "LLA-1",
       "acceso": null,
       "pasos": [
-        "Dibujá tu W sobre la plantilla",
-        "Escribí tus preguntas de cada tramo",
-        "Marcá el minuto del precio",
-        "Escribí qué hacés después del número: nada",
-        "Practicá una llamada completa con el Sparring"
+        "Dibuja tu W sobre la plantilla",
+        "Escribe tus preguntas de cada tramo",
+        "Marca el minuto del precio",
+        "Escribe qué haces después del número: nada",
+        "Practica una llamada completa con el Sparring"
       ],
       "evidencias": [
         {
@@ -2351,10 +2351,10 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Elegí a quién de tu red le ofreciste y todavía no cerraste",
-        "Repasá tu W una vez, no más",
-        "Hacé la llamada",
-        "Escribí qué objeción apareció"
+        "Elige a quién de tu red le ofreciste y todavía no cerraste",
+        "Repasa tu W una vez, no más",
+        "Haz la llamada",
+        "Escribe qué objeción apareció"
       ],
       "evidencias": [
         {
@@ -2390,9 +2390,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Escribí tu mensaje previo",
-        "Escribí tu criterio de cancelación",
-        "Cargá las dos cosas como plantillas en el Sistema"
+        "Escribe tu mensaje previo",
+        "Escribe tu criterio de cancelación",
+        "Carga las dos cosas como plantillas en el Sistema"
       ],
       "evidencias": [
         {
@@ -2428,8 +2428,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Activá la grabación en el Sistema",
-        "Escribí la frase con la que avisás"
+        "Activa la grabación en el Sistema",
+        "Escribe la frase con la que avisas"
       ],
       "evidencias": [
         {
@@ -2469,8 +2469,8 @@
       "jornada_larga": false,
       "acciones_campo": [
         "Dos mensajes nuevos a tu red",
-        "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra"
+        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
+        "Contesta en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -2496,8 +2496,8 @@
       "jornada_larga": false,
       "acciones_campo": [
         "Dos mensajes nuevos a tu red",
-        "Mirá el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contestá en menos de dos horas a cada agenda que entra"
+        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
+        "Contesta en menos de dos horas a cada agenda que entra"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -2517,11 +2517,11 @@
       "manual": "LLA-4",
       "acceso": null,
       "pasos": [
-        "Subí o elegí una llamada real",
-        "Escuchala entera: la app no deja saltar",
-        "Anotá los cuatro números",
-        "Compará con los que midió el Sparring",
-        "Elegí una sola cosa para cambiar"
+        "Sube o elige una llamada real",
+        "Escúchala entera: la app no deja saltar",
+        "Anota los cuatro números",
+        "Compara con los que midió el Sparring",
+        "Elige una sola cosa para cambiar"
       ],
       "evidencias": [
         {
@@ -2560,10 +2560,10 @@
       "acceso": null,
       "pasos": [
         "El Espejo te devuelve lo del día 6",
-        "Nombrá a la persona",
-        "Escribí qué hizo por vos",
-        "Escribí el permiso en primera persona con su nombre",
-        "Decilo en voz alta y grabalo"
+        "Nombra a la persona",
+        "Escribe qué hizo por ti",
+        "Escribe el permiso en primera persona con su nombre",
+        "Dilo en voz alta y grábalo"
       ],
       "evidencias": [
         {
@@ -2608,10 +2608,10 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Armá tu bandeja con los cuatro estados",
-        "A cada 'no ahora' ponele fecha de vuelta",
-        "Armá las respuestas automáticas",
-        "Protocolo: escribí la lista de lo que te deben y tachala"
+        "Arma tu bandeja con los cuatro estados",
+        "A cada 'no ahora' ponle fecha de vuelta",
+        "Arma las respuestas automáticas",
+        "Protocolo: escribe la lista de lo que te deben y táchala"
       ],
       "evidencias": [
         {
@@ -2683,9 +2683,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Mirá tu costo por agenda de los catorce días",
+        "Mira tu costo por agenda de los catorce días",
         "La app habilita un solo botón según tu número",
-        "Escribí la decisión y el número que la justifica"
+        "Escribe la decisión y el número que la justifica"
       ],
       "evidencias": [
         {
@@ -2722,10 +2722,10 @@
       "manual": "CLI-4",
       "acceso": null,
       "pasos": [
-        "Partí tu programa en dos columnas: grabado y en vivo",
-        "Nombrá tus estaciones, en orden",
-        "Definí tu línea base",
-        "Hacé la cuenta: horas para uno, horas para diez"
+        "Parte tu programa en dos columnas: grabado y en vivo",
+        "Nombra tus estaciones, en orden",
+        "Define tu línea base",
+        "Haz la cuenta: horas para uno, horas para diez"
       ],
       "evidencias": [
         {
@@ -2770,10 +2770,10 @@
       "manual": "CLI-5",
       "acceso": null,
       "pasos": [
-        "Escribí tu mensaje de bienvenida",
-        "Escribí tus tres límites",
-        "Ordená tus siete pasos del alta",
-        "Conectá la línea base al triage"
+        "Escribe tu mensaje de bienvenida",
+        "Escribe tus tres límites",
+        "Ordena tus siete pasos del alta",
+        "Conecta la línea base al triage"
       ],
       "evidencias": [
         {
@@ -2815,7 +2815,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
-        "Aplicá el alta completa a quien haya entrado",
+        "Aplica el alta completa a quien haya entrado",
         "Llamadas de la semana con tu W",
         "Lunes de números, si cae lunes"
       ],
@@ -2837,8 +2837,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Cargá nombre, color y logo. Nada más",
-        "Mirá cómo se ve desde un celular"
+        "Carga nombre, color y logo. Nada más",
+        "Mira cómo se ve desde un celular"
       ],
       "evidencias": [
         {
@@ -2872,10 +2872,10 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Apretá el botón que trae todo desde tu ADN",
-        "Revisá que haya llegado bien y corregí",
-        "Armá cuatro semanas con lo que desbloquea cada una",
-        "Cargá cuatro, no doce"
+        "Aprieta el botón que trae todo desde tu ADN",
+        "Revisa que haya llegado bien y corrige",
+        "Arma cuatro semanas con lo que desbloquea cada una",
+        "Carga cuatro, no doce"
       ],
       "evidencias": [
         {
@@ -2909,7 +2909,7 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Elegí de tu columna 'va grabado' del día 47",
+        "Elige de tu columna 'va grabado' del día 47",
         "Uno por etapa, de tres a siete minutos",
         "Una sola toma por video",
         "Sin edición: se sube como salió"
@@ -2946,10 +2946,10 @@
       "manual": "CLI-6",
       "acceso": null,
       "pasos": [
-        "Compra de prueba: comprate a vos mismo con una tarjeta real",
-        "Recorré lo que recorre tu consultante",
-        "Invitá a tu primer consultante",
-        "Mandale la frase exacta del video"
+        "Compra de prueba: cómprate a ti mismo con una tarjeta real",
+        "Recorre lo que recorre tu consultante",
+        "Invita a tu primer consultante",
+        "Mándale la frase exacta del video"
       ],
       "evidencias": [
         {
@@ -2996,7 +2996,7 @@
       "cinturon": null,
       "jornada_larga": false,
       "acciones_campo": [
-        "Acompañá a tu primer consultante en su etapa 1",
+        "Acompaña a tu primer consultante en su etapa 1",
         "Llamadas de la semana",
         "Tablero, dos minutos"
       ],
@@ -3020,9 +3020,9 @@
       "acceso": null,
       "pasos": [
         "La app trae tus números reales del tablero",
-        "Escribí la cadena: conversaciones, agendas, llamadas, ventas",
-        "Traducilo a lo que tiene que pasar cada semana",
-        "Marcá cuál de los tres cuellos tenés"
+        "Escribe la cadena: conversaciones, agendas, llamadas, ventas",
+        "Tradúcelo a lo que tiene que pasar cada semana",
+        "Marca cuál de los tres cuellos tienes"
       ],
       "evidencias": [
         {
@@ -3207,8 +3207,8 @@
       "manual": "CAM-9",
       "acceso": null,
       "pasos": [
-        "Sacá tus tres enfoques de la Matriz ABC",
-        "Para cada enfoque, escribí a quién filtra y a quién atrae"
+        "Saca tus tres enfoques de la Matriz ABC",
+        "Para cada enfoque, escribe a quién filtra y a quién atrae"
       ],
       "evidencias": [
         {
@@ -3397,9 +3397,9 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Repartí tus tres enfoques en doce semanas",
+        "Reparte tus tres enfoques en doce semanas",
         "Para cada semana, el gancho y el ángulo",
-        "Marcá cuáles son de filtro y cuáles de autoridad",
+        "Marca cuáles son de filtro y cuáles de autoridad",
         "No grabes nada todavía"
       ],
       "evidencias": [
@@ -3974,7 +3974,7 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Escribí tu día completo con el ingreso siguiente, en detalle físico",
+        "Escribe tu día completo con el ingreso siguiente, en detalle físico",
         "En presente, no en condicional"
       ],
       "evidencias": [
@@ -4011,8 +4011,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Contestá las mismas preguntas del día 3",
-        "Recalculá tu hora real neta con los datos de Mi Clínica",
+        "Contesta las mismas preguntas del día 3",
+        "Recalcula tu hora real neta con los datos de Mi Clínica",
         "Recién ahí la app destapa el número del día 3"
       ],
       "evidencias": [
@@ -4050,8 +4050,8 @@
       "acceso": null,
       "pasos": [
         "La app arma el borrador de tu plan de 180",
-        "Editalo, aprobalo y descargalo",
-        "Te lo llevás lo tomes o no lo tomes"
+        "Edítalo, apruébalo y descárgalo",
+        "Te lo llevas lo tomes o no lo tomes"
       ],
       "evidencias": [
         {
@@ -4085,8 +4085,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Mirá cuántas ventas tenés y cuántas te faltan",
-        "Escribí qué podés cerrar esta semana con lo que ya está en la bandeja"
+        "Mira cuántas ventas tienes y cuántas te faltan",
+        "Escribe qué puedes cerrar esta semana con lo que ya está en la bandeja"
       ],
       "evidencias": [
         {

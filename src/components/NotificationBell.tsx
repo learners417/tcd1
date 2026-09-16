@@ -154,7 +154,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
     setUnread(0);
   }
 
-  const buttonSize = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
+  const buttonSize = size === 'sm' ? 'w-11 h-11' : 'w-12 h-12';
   const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
   const hasUnread = unread > 0;
 

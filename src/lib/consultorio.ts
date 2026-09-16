@@ -72,7 +72,7 @@ export const CONSULTORIO: Pregunta[] = [
   { codigo: 'P4.2d', p: '¿Pongo el precio en la página o no?',
     r: 'Ponlo. El precio no espanta al que puede pagarlo: espanta al que no, y eso es exactamente lo que quieres que pase ahí y no en tu llamada de cuarenta y cinco minutos.' },
   { codigo: 'P4.3e', p: 'Me da vergüenza grabarme en video.',
-    r: 'A todos. Y la primera toma siempre sale mal, así que graba tres y quedate con la tercera. Lo que la persona busca en tu video no es producción: es ver si entiendes lo que le pasa.' },
+    r: 'A todos. Y la primera toma siempre sale mal, así que graba tres y quédate con la tercera. Lo que la persona busca en tu video no es producción: es ver si entiendes lo que le pasa.' },
   { codigo: 'P4.3e', p: 'Si cuento todo mi método en el video, ¿para qué me van a contratar?',
     r: 'Porque el que entiende el mapa completo es el que más quiere que alguien lo camine con él. El que se guarda la información genera desconfianza, no deseo.' },
   { codigo: 'P4.2e', p: 'Desde que puse el formulario bajaron las agendas.',

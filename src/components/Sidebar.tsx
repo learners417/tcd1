@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Hexagon, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
+import { diaDelPrograma, semanaDelPrograma } from '../lib/diaPrograma';
 
 interface SidebarProps {
   currentPage: string;
@@ -44,9 +45,8 @@ function getSidebarData() {
     cinturon = cinturonDesdeProgreso(completadasSet);
   } catch { /* noop */ }
 
-  const diff = Math.floor((new Date().getTime() - new Date(profile.fecha_inicio).getTime()) / (1000 * 60 * 60 * 24));
-  const semana = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
-  const diaPrograma = Math.max(1, Math.min(90, diff + 1));
+  const semana = semanaDelPrograma(profile.fecha_inicio, 13);
+  const diaPrograma = diaDelPrograma(profile.fecha_inicio) ?? 1;
 
   return { profile, progress, hasPending, semana, diaPrograma, cinturon };
 }

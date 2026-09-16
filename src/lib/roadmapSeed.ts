@@ -424,7 +424,6 @@ export const FASES_ROADMAP = roadmap.sistemas.map(s => ({
   nombre: s.nombre,
   titulo: s.nombre,
   subtitulo: `Días ${s.dias}`,
-  metodo_letra: s.nombre.charAt(0).toUpperCase(),
   dias: s.dias,
   pilares: SEED_ROADMAP_V3
     .filter(p => p.metas.some(m => m.sistema === s.n))
