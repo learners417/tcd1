@@ -57,7 +57,8 @@ export interface SesionEnCurso {
   metaKey: string; // `${pilarNumero}-${metaCodigo}` — misma clave que hoja de ruta
   metaCodigo: string;
   metaTitulo: string;
-  checkinEmocion: EmocionSesion;
+  /** null desde la C2: nadie declara cómo llega para poder empezar. */
+  checkinEmocion: EmocionSesion | null;
   checkinObjetivo: string;
   /** Segundos acumulados de trabajo (se congela al pausar). */
   segundosAcumulados: number;
@@ -155,7 +156,7 @@ export function reanudarSesion(s: SesionEnCurso): SesionEnCurso {
 export async function abrirSessionLog(
   userId: string,
   meta: { codigo: string; titulo: string },
-  checkin: { emocion: EmocionSesion; objetivo: string },
+  checkin: { emocion: EmocionSesion | null; objetivo: string },
 ): Promise<string | undefined> {
   if (!supabase || !userId) return undefined;
   try {
@@ -185,7 +186,7 @@ export async function abrirSessionLog(
 export async function cerrarSessionLog(
   logId: string | undefined,
   datos: {
-    checkout_emocion: EmocionSesion;
+    checkout_emocion: EmocionSesion | null;
     compromisos: string[];
     duracion_seg: number;
     pausas: number;

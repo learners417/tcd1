@@ -36,6 +36,7 @@ import {
 } from '../lib/videos';
 import HerramientaDetalle from './HerramientaDetalle';
 import { VOC } from '../lib/vocabulario';
+import { COMPLEMENTOS as VIDEOS_COMPLEMENTO, idDeYoutube } from '../lib/videosCargados';
 
 // ─── CLINICA Tab definitions ────────────────────────────────────────────────
 
@@ -300,6 +301,48 @@ interface BibliotecaProps {
   userId?: string;
 }
 
+/**
+ * Lo que suma y no está en el Camino: se mira cuando el cliente quiere.
+ * Una jornada tiene un video; acá va el resto, por tema.
+ */
+function Complementos() {
+  const temas = [...new Set(VIDEOS_COMPLEMENTO.map((c) => c.tema))];
+  return (
+    <section className="card-panel p-5 space-y-4">
+      <div>
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Para ver cuando quieras</p>
+        <p className="mt-1 text-[17px] text-cream/70">No hace falta para avanzar. Suma cuando el tema te toca.</p>
+      </div>
+      {temas.map((tema) => (
+        <div key={tema} className="space-y-2">
+          <p className="text-[17px] font-semibold text-cream">{tema}</p>
+          {VIDEOS_COMPLEMENTO.filter((c) => c.tema === tema).map((c) => {
+            const id = idDeYoutube(c.url);
+            return (
+              <details key={c.url} className="rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 py-3">
+                <summary className="cursor-pointer list-none min-h-[44px] flex items-center text-[17px] text-cream">
+                  {c.titulo}
+                </summary>
+                {id && (
+                  <div className="relative mt-3 w-full aspect-video rounded-xl overflow-hidden border border-[var(--line,#EBE1CF)]">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                      title={c.titulo}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
+                )}
+              </details>
+            );
+          })}
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default function Biblioteca({ userId }: BibliotecaProps) {
   const VALID_TABS: ClinicaTabId[] = ['O', 'C1', 'L', 'I1', 'N', 'I2', 'C2', 'A'];
   const [activeTabId, setActiveTabId] = usePersistedState<ClinicaTabId>(
@@ -445,6 +488,8 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
           Videos y herramientas IA del Método C·L·I·N·I·C·A.
         </p>
       </div>
+
+      <Complementos />
 
       {/* CLINICA tabs */}
       <div className="relative flex items-center gap-1">

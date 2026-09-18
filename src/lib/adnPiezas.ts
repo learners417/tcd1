@@ -101,3 +101,56 @@ export function resumenADN(): { selladas: number; total: number; disponibles: nu
     disponibles: estados.filter((e) => !e.bloqueada).length,
   };
 }
+
+/**
+ * Lo que dice una pieza sellada, para poder leerlo en su tarjeta.
+ *
+ * Antes la tarjeta solo decía "Sellado": el cliente tenía que ir a buscar su
+ * propio texto a la sesión donde lo escribió. Ver lo sellado no lo edita: para
+ * cambiarlo se rehace su sesión, como siempre.
+ */
+export function contenidoDePieza(p: PiezaADN): string {
+  const origen = leerJSON<Record<string, string>>('tcd_origen_v1', {});
+  const perfil = leerJSON<Record<string, unknown>>('tcd_profile', {});
+  const salidas = leerJSON<Record<string, { output?: string; texto?: string }>>('tcd_adn_sellos_v1', {});
+
+  if (p.chequeo.origen) {
+    const v = String(origen[p.chequeo.origen] ?? '').trim();
+    if (v) return v;
+  }
+  if (p.chequeo.campo) {
+    const v = perfil[p.chequeo.campo];
+    if (typeof v === 'string' && v.trim()) return v.trim();
+    if (v && typeof v === 'object') {
+      const texto = Object.values(v as Record<string, unknown>)
+        .filter((x) => typeof x === 'string' && String(x).trim())
+        .join(' · ');
+      if (texto) return texto;
+    }
+  }
+  if (p.chequeo.sello) {
+    const s = salidas[p.chequeo.sello];
+    const v = (s?.output ?? s?.texto ?? '').trim();
+    if (v) return v;
+  }
+  return '';
+}
+
+/**
+ * Las piezas que el cliente puede escribir con sus palabras desde su tarjeta:
+ * las del origen (historia, herida, dones). El resto sale de su sesión.
+ */
+export function esEscribibleAqui(p: PiezaADN): boolean {
+  return Boolean(p.chequeo.origen);
+}
+
+/** Guarda una pieza del origen escrita desde su tarjeta. */
+export function guardarOrigen(p: PiezaADN, texto: string): boolean {
+  if (!esEscribibleAqui(p) || !p.chequeo.origen) return false;
+  try {
+    const origen = leerJSON<Record<string, string>>('tcd_origen_v1', {});
+    origen[p.chequeo.origen] = texto.trim();
+    localStorage.setItem('tcd_origen_v1', JSON.stringify(origen));
+    return true;
+  } catch { return false; }
+}

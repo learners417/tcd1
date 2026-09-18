@@ -157,9 +157,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         comp += completadasPilar;
         if (completadasPilar >= metasPilar.length && metasPilar.length > 0) pilaresComp++;
 
-        if (tareasHoy.length < 1) {
+        // El de hoy y el de mañana: la pantalla cierra diciendo qué sigue.
+        if (tareasHoy.length < 2) {
           for (const meta of metasPilar) {
-            if (esPasoDelCliente(meta) && !completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 1) {
+            if (esPasoDelCliente(meta) && !completadasSet.has(`${pil.numero}-${meta.codigo}`) && tareasHoy.length < 2) {
               tareasHoy.push({ ...meta, pilarNumero: pil.numero, pilarTitulo: pil.titulo });
             }
           }
@@ -232,9 +233,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             sComp += completadasPilar;
             if (completadasPilar >= metasPilar.length && metasPilar.length > 0) sPilaresComp++;
 
-            if (sTareasHoy.length < 3) {
+            // El de hoy y el de mañana, y solo pasos del cliente.
+            if (sTareasHoy.length < 2) {
               for (const meta of metasPilar) {
-                if (!sbSet.has(`${pil.numero}-${meta.codigo}`) && sTareasHoy.length < 3) {
+                if (esPasoDelCliente(meta) && !sbSet.has(`${pil.numero}-${meta.codigo}`) && sTareasHoy.length < 2) {
                   sTareasHoy.push({ ...meta, pilarNumero: pil.numero, pilarTitulo: pil.titulo });
                 }
               }
@@ -527,7 +529,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           return (
             <>
             <div className="card-panel p-5">
-              <p className="text-sm font-bold uppercase tracking-widest text-cream/60 mb-3">Tu día, en orden</p>
+              <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Tu jornada de hoy</p>
+              <p className="mt-1 mb-3 text-[17px] text-cream/70">Cuatro horas: dos de atender, una de construir y una de dirigir.</p>
               <div className="space-y-2">
                 <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — el dojo te vio hoy' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
                 {sistemaVivo && (
@@ -539,6 +542,15 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               </div>
             </div>
             {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}
+            {data.tareasHoy[1] && (
+              <div className="card-panel p-5">
+                <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Mañana</p>
+                <p className="mt-2 text-[19px] leading-snug text-cream">{VOC(data.tareasHoy[1].titulo)}</p>
+                <p className="mt-1 text-[17px] text-cream/70">
+                  {data.tareasHoy[1].tiempo_estimado} · hoy no hace falta pensarlo.
+                </p>
+              </div>
+            )}
             </>
           );
         })()}

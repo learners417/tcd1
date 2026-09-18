@@ -3,7 +3,7 @@
  * Fija abajo, SOLO mobile (md:hidden). Respeta el safe-area del iPhone.
  * Los 5 destinos principales siempre visibles; "Más" abre el drawer con el resto.
  */
-import { Sun, Map, Dna, MessageSquare, Hexagon } from 'lucide-react';
+import { Sun, Map, Dna, Megaphone, Hexagon } from 'lucide-react';
 
 interface Tab {
   id: string;
@@ -19,8 +19,8 @@ interface Tab {
 const TABS: Tab[] = [
   { id: 'dashboard', label: 'Hoy', icon: Sun },
   { id: 'roadmap', label: 'Camino', icon: Map },
-  { id: 'adn', label: 'ADN', icon: Dna },
-  { id: 'coach', label: 'Mentor', icon: MessageSquare },
+  { id: 'entrenadores', label: 'Entrenadores', icon: Dna },
+  { id: 'campanas', label: 'Campañas', icon: Megaphone },
   { id: 'miclinica', label: 'Clínica', icon: Hexagon },
 ];
 
@@ -38,7 +38,7 @@ export default function BottomTabBar({ currentPage, setCurrentPage }: Props) {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Navegación principal"
     >
-      <div className="flex items-stretch justify-around px-1">
+      <div className="flex items-stretch justify-between gap-1 px-2">
         {TABS.map((tab) => {
           const active = currentPage === tab.id;
           const Icon = tab.icon;
@@ -54,10 +54,12 @@ export default function BottomTabBar({ currentPage, setCurrentPage }: Props) {
               aria-current={active ? 'page' : undefined}
               // 10-DISENO §4: el activo cambia el trazo del ícono a oro y el peso
               // de la etiqueta a 700. Nada más: sin fondo, sin píldora.
-              className="flex flex-col items-center justify-center gap-1.5 flex-1 min-h-[4rem] pt-2.5 pb-2 text-cream/70"
+              // "Entrenadores" es la palabra más larga: se le da más ancho para que entre
+              // en una línea, en vez de partirla.
+              className={`flex flex-col items-center justify-center gap-1 min-w-0 min-h-[4rem] pt-2.5 pb-2 text-cream/70 ${tab.id === 'entrenadores' ? 'flex-[1.45]' : 'flex-1'}`}
             >
               <Icon className={`w-[25px] h-[25px] ${active ? 'text-gold' : ''}`} strokeWidth={active ? 2.2 : 1.7} />
-              <span className={`text-[14px] leading-none ${active ? 'font-bold text-cream' : 'font-normal'}`}>{tab.label}</span>
+              <span className={`text-[14px] leading-none text-center whitespace-nowrap tracking-tight ${active ? 'font-bold text-cream' : 'font-normal'}`}>{tab.label}</span>
             </button>
           );
         })}

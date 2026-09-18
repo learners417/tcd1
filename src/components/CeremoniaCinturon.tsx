@@ -23,7 +23,7 @@ export const KEY_ULTIMO = 'tcd_ultimo_cinturon_visto';
 export const GANADO_CON: Record<string, string> = {
   '9gup': 'Tu hora real neta, escrita a mano',
   '8gup': 'Tu primer cobro al precio nuevo',
-  '7gup': 'Tu método, aprobado por el Crítico',
+  '7gup': 'Tu método, aprobado por Diego',
   '6gup': 'Tu oferta completa en una página',
   '5gup': 'El enlace vivo de tu página',
   '4gup': 'Agendarte a ti mismo, de punta a punta',

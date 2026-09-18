@@ -1,36 +1,28 @@
 /**
- * SESIÓN VIVA — el orquestador (Cirugía T2).
+ * SESIÓN VIVA — cinco pantallas, una idea por pantalla (C2 del plan definitivo).
  *
- * Envuelve el panel de trabajo de una meta con la liturgia de Javo:
- *   CHECK-IN (emoción + objetivo, cronómetro arranca)
- *   → TRABAJO (el componente de siempre, con cronómetro y pausa)
- *   → CHECK-OUT (emoción + compromisos, al completar la meta)
- *   → "HOY PRODUJISTE ESTO" (el cierre que consolida).
+ *   Te llevas · Mira · Haz · Sube · Listo
  *
- * Decisión de diseño: aplica a metas COACH y HERRAMIENTA (trabajo real).
- * Las VIDEO (5-8 min) van directas — un check-in para un video corto es
- * fricción sin valor. La sesión en curso sobrevive a cerrar la app
- * (localStorage) y se retoma donde quedó.
+ * Reemplaza la versión con check-in de emoción y cronómetro a la vista:
+ *   - Nadie declara cómo llega para poder empezar. La emoción queda para los
+ *     días de protocolo, que la piden por su cuenta.
+ *   - Un reloj corriendo apura y no ayuda: el tiempo se dice una vez, al inicio.
+ *   - Sin video, la pantalla "Mira" no existe: no se anuncia lo que falta.
+ *
+ * La sesión queda registrada igual y sobrevive a cerrar la app.
  */
-import React, { useEffect, useState } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
-import CheckInPanel from './CheckInPanel';
-import CheckOutPanel from './CheckOutPanel';
-import CronometroSesion from './CronometroSesion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Check, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
-  type EmocionSesion, type SesionEnCurso,
+  type SesionEnCurso,
   getSesionEnCurso, setSesionEnCurso, segundosDeSesion,
-  parseTiempoEstimado, formatoCrono,
   abrirSessionLog, cerrarSessionLog,
-  EMOCIONES_ENTRADA, EMOCIONES_SALIDA,
 } from '../../lib/sessionLog';
 
-/** El Mentor lee esto para retomar los compromisos en la próxima conversación. */
 const KEY_ULTIMA = 'tcd_ultima_sesion_v1';
 export interface UltimaSesion {
   metaCodigo: string;
   metaTitulo: string;
-  checkoutEmocion: EmocionSesion;
   compromisos: string[];
   fecha: string;
 }
@@ -38,168 +30,207 @@ export function getUltimaSesion(): UltimaSesion | null {
   try {
     const raw = localStorage.getItem(KEY_ULTIMA);
     return raw ? (JSON.parse(raw) as UltimaSesion) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-type Fase = 'checkin' | 'trabajo' | 'checkout' | 'cerrada';
+export type PantallaSesion = 'llevas' | 'mira' | 'haz' | 'sube' | 'listo';
 
 interface Props {
-  metaKey: string; // `${pilarNumero}-${codigo}` — la misma clave del progreso
+  metaKey: string;
   metaCodigo: string;
   metaTitulo: string;
-  descripcion?: string;
+  teLlevas?: string;
+  pasos?: string[];
+  pide?: string;
+  seAbre?: string;
   tiempoEstimado?: string | null;
   isCompleted: boolean;
   userId?: string;
-  children: React.ReactNode; // el panel de trabajo de siempre
+  children: React.ReactNode;
+  video?: React.ReactNode;
+  evidencia?: React.ReactNode;
 }
 
+const ROTULO: Record<PantallaSesion, string> = {
+  llevas: 'Te llevas', mira: 'Mira', haz: 'Haz', sube: 'Sube', listo: 'Listo',
+};
+
 export default function SesionViva({
-  metaKey, metaCodigo, metaTitulo, descripcion, tiempoEstimado, isCompleted, userId, children,
+  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre,
+  tiempoEstimado, isCompleted, userId, children, video, evidencia,
 }: Props) {
+  const orden = useMemo<PantallaSesion[]>(
+    () => ['llevas', ...(video ? (['mira'] as PantallaSesion[]) : []), 'haz', 'sube', 'listo'],
+    [video],
+  );
+  const [pantalla, setPantalla] = useState<PantallaSesion>(() => {
+    const s = getSesionEnCurso();
+    return s && s.metaKey === metaKey ? 'haz' : 'llevas';
+  });
   const [sesion, setSesion] = useState<SesionEnCurso | null>(() => {
     const s = getSesionEnCurso();
     return s && s.metaKey === metaKey ? s : null;
   });
-  const [fase, setFase] = useState<Fase>(() => {
-    if (isCompleted) return 'cerrada';
-    const s = getSesionEnCurso();
-    return s && s.metaKey === metaKey ? 'trabajo' : 'checkin';
-  });
-  const [cierre, setCierre] = useState<{
-    emocionIn: EmocionSesion | null; emocionOut: EmocionSesion; compromisos: string[]; duracion: number;
-  } | null>(null);
-  const [cerrando, setCerrando] = useState(false);
+  const [hechos, setHechos] = useState<Set<number>>(new Set());
 
-  const segundosObjetivo = parseTiempoEstimado(tiempoEstimado);
-
-  // Al completarse la meta durante la sesión → pasar al check-out.
   useEffect(() => {
-    if (isCompleted && fase === 'trabajo') setFase('checkout');
-  }, [isCompleted, fase]);
+    if (isCompleted && pantalla !== 'listo') setPantalla('listo');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCompleted]);
 
-  const abrirSesion = async (checkin: { emocion: EmocionSesion; objetivo: string }) => {
+  const abrir = async () => {
+    setPantalla(orden[1] ?? 'haz');
+    if (sesion) return;
     const nueva: SesionEnCurso = {
       metaKey, metaCodigo, metaTitulo,
-      checkinEmocion: checkin.emocion,
-      checkinObjetivo: checkin.objetivo,
-      segundosAcumulados: 0,
-      corriendoDesde: Date.now(),
-      pausas: 0,
+      checkinEmocion: null, checkinObjetivo: '',
+      segundosAcumulados: 0, corriendoDesde: Date.now(), pausas: 0,
       iniciadaEn: new Date().toISOString(),
     };
-    setSesionEnCurso(nueva);
-    setSesion(nueva);
-    setFase('trabajo');
+    setSesionEnCurso(nueva); setSesion(nueva);
     if (userId) {
-      const logId = await abrirSessionLog(userId, { codigo: metaCodigo, titulo: metaTitulo }, checkin);
-      if (logId) {
-        const conLog = { ...nueva, logId };
-        setSesionEnCurso(conLog);
-        setSesion(conLog);
-      }
+      const logId = await abrirSessionLog(userId, { codigo: metaCodigo, titulo: metaTitulo }, { emocion: null, objetivo: '' });
+      if (logId) { const conLog = { ...nueva, logId }; setSesionEnCurso(conLog); setSesion(conLog); }
     }
   };
 
-  const cerrarSesion = async (checkout: { emocion: EmocionSesion; compromisos: string[] }) => {
-    if (!sesion) return;
-    setCerrando(true);
-    const duracion = segundosDeSesion(sesion);
-    await cerrarSessionLog(sesion.logId, {
-      checkout_emocion: checkout.emocion,
-      compromisos: checkout.compromisos,
-      duracion_seg: duracion,
-      pausas: sesion.pausas,
-    });
-    try {
-      const ultima: UltimaSesion = {
-        metaCodigo, metaTitulo,
-        checkoutEmocion: checkout.emocion,
-        compromisos: checkout.compromisos,
-        fecha: new Date().toISOString(),
-      };
-      localStorage.setItem(KEY_ULTIMA, JSON.stringify(ultima));
-    } catch { /* noop */ }
-    setCierre({
-      emocionIn: sesion.checkinEmocion, emocionOut: checkout.emocion,
-      compromisos: checkout.compromisos, duracion,
-    });
-    setSesionEnCurso(null);
-    setSesion(null);
-    setCerrando(false);
-    setFase('cerrada');
+  useEffect(() => {
+    if (pantalla !== 'listo' || !sesion) return;
+    const s = sesion;
+    void (async () => {
+      await cerrarSessionLog(s.logId, {
+        checkout_emocion: null, compromisos: [],
+        duracion_seg: segundosDeSesion(s), pausas: s.pausas,
+      });
+      try {
+        localStorage.setItem(KEY_ULTIMA, JSON.stringify({
+          metaCodigo, metaTitulo, compromisos: [], fecha: new Date().toISOString(),
+        } as UltimaSesion));
+      } catch { /* noop */ }
+      setSesionEnCurso(null); setSesion(null);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pantalla]);
+
+  const i = Math.max(0, orden.indexOf(pantalla));
+  const ir = (delta: number) => {
+    const n = orden[i + delta];
+    if (n) { setPantalla(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  // Meta ya completada de antes (revisión) o sin usuario: panel directo.
-  if (isCompleted && !cierre) return <>{children}</>;
-
-  if (fase === 'checkin') {
-    return (
-      <CheckInPanel
-        metaTitulo={metaTitulo}
-        objetivoSugerido={descripcion?.split('.')[0]?.trim() || `Completar: ${metaTitulo}`}
-        tiempoEstimado={tiempoEstimado}
-        onAbrir={abrirSesion}
-      />
-    );
-  }
-
-  if (fase === 'trabajo' && sesion) {
-    return (
-      <div className="space-y-4">
-        <CronometroSesion sesion={sesion} segundosObjetivo={segundosObjetivo} onSesionChange={setSesion} />
-        {children}
-      </div>
-    );
-  }
-
-  if (fase === 'checkout' && sesion) {
-    return (
-      <CheckOutPanel
-        metaTitulo={metaTitulo}
-        duracionSeg={segundosDeSesion(sesion)}
-        emocionEntrada={sesion.checkinEmocion}
-        onCerrar={cerrarSesion}
-        cerrando={cerrando}
-      />
-    );
-  }
-
-  // fase 'cerrada' con cierre reciente: "Hoy produjiste esto".
-  if (cierre) {
-    const inE = EMOCIONES_ENTRADA.find((e) => e.id === cierre.emocionIn);
-    const outE = EMOCIONES_SALIDA.find((e) => e.id === cierre.emocionOut);
-    return (
-      <div className="rounded-2xl border border-success/25 bg-success/5 p-5 space-y-3">
-        <p className="text-sm font-bold uppercase tracking-widest text-success flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5" /> Sesión consolidada
+  return (
+    <div className="space-y-4">
+      <div aria-label={`Paso ${i + 1} de ${orden.length}`}>
+        <div className="flex items-center gap-2">
+          {orden.map((p, n) => (
+            <div key={p} className="flex-1 h-1.5 rounded-full"
+              style={{ background: n <= i ? 'var(--oro-d, #8E6824)' : 'var(--line, #EBE1CF)' }} />
+          ))}
+        </div>
+        <p className="mt-2 text-[15px] font-semibold text-cream">
+          {ROTULO[pantalla]} · paso {i + 1} de {orden.length}
         </p>
-        <h4 className="text-white font-bold">Hoy produjiste esto</h4>
-        <div className="text-sm text-white/70 space-y-1.5">
-          <p>✅ <span className="text-white">{metaTitulo}</span> — {formatoCrono(cierre.duracion)} de trabajo real.</p>
-          {inE && outE && (
-            <p>
-              {inE.emoji} Llegaste {inE.label.toLowerCase()} <ArrowRight className="w-3 h-3 inline mx-1 text-white/55" />
-              {outE.emoji} te vas {outE.label.toLowerCase()}.
-            </p>
-          )}
-          {cierre.compromisos.length > 0 && (
-            <div>
-              <p className="text-white/65 text-xs mt-2 mb-1">Tus compromisos (tu mentor los recuerda):</p>
-              <ul className="space-y-0.5">
-                {cierre.compromisos.map((c, i) => (
-                  <li key={i} className="text-white/80">• {c}</li>
-                ))}
+      </div>
+
+      {pantalla === 'llevas' && (
+        <section className="card-panel p-5 sm:p-6">
+          <h2 className="text-[28px] leading-[1.15] text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+            {metaTitulo}
+          </h2>
+          {teLlevas && <p className="mt-3 text-[19px] leading-relaxed text-cream">Te llevas: {teLlevas}</p>}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {tiempoEstimado && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line2,#DFD3BC)] px-3 py-1.5 text-[15px] text-cream/80">
+                <Clock className="w-4 h-4" /> {tiempoEstimado}
+              </span>
+            )}
+          </div>
+          <button type="button" onClick={abrir} className="btn-ios-primary mt-5 w-full">
+            {video ? 'Ver el video' : 'Empezar'}
+          </button>
+        </section>
+      )}
+
+      {pantalla === 'mira' && video && (
+        <section className="card-panel p-5 sm:p-6 space-y-4">
+          {video}
+          <button type="button" onClick={() => ir(1)} className="btn-ios-primary w-full">
+            Ya lo vi, vamos a hacerlo
+          </button>
+        </section>
+      )}
+
+      {pantalla === 'haz' && (
+        <section className="space-y-4">
+          {pasos && pasos.length > 0 && (
+            <div className="card-panel p-5 sm:p-6">
+              <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso</p>
+              <ul className="mt-3 space-y-1">
+                {pasos.map((paso, n) => {
+                  const hecho = hechos.has(n);
+                  return (
+                    <li key={n}>
+                      <button
+                        type="button"
+                        aria-pressed={hecho}
+                        onClick={() => setHechos((prev) => {
+                          const s = new Set(prev);
+                          if (s.has(n)) s.delete(n); else s.add(n);
+                          return s;
+                        })}
+                        className="w-full min-h-[52px] flex items-start gap-3 py-2 text-left"
+                      >
+                        <span
+                          className="mt-0.5 w-7 h-7 shrink-0 rounded-full grid place-items-center border"
+                          style={hecho
+                            ? { background: 'var(--tilde, #4A7C59)', borderColor: 'var(--tilde, #4A7C59)' }
+                            : { borderColor: 'var(--line2, #DFD3BC)' }}
+                        >
+                          {hecho && <Check className="w-4 h-4" style={{ color: '#FFFDF7' }} />}
+                        </span>
+                        <span className={`text-[17px] leading-snug ${hecho ? 'text-cream/60' : 'text-cream'}`}>{paso}</span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
-        </div>
-        <p className="text-sm text-white/55">El registro quedó en tu historial. El Camino sigue mañana. 🥋</p>
-      </div>
-    );
-  }
+          {children}
+        </section>
+      )}
 
-  return <>{children}</>;
+      {pantalla === 'sube' && (
+        <section className="card-panel p-5 sm:p-6 space-y-4">
+          <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Terminaste cuando</p>
+          <p className="text-[19px] leading-relaxed text-cream">{pide ?? 'Subes lo que hiciste hoy.'}</p>
+          {evidencia}
+        </section>
+      )}
+
+      {pantalla === 'listo' && (
+        <section className="card-panel p-5 sm:p-6">
+          <p className="text-[15px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--tilde, #4A7C59)' }}>Listo</p>
+          <h2 className="mt-2 text-[26px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+            {metaTitulo}
+          </h2>
+          {seAbre && <p className="mt-2 text-[19px] leading-relaxed text-cream">{seAbre}</p>}
+          <p className="mt-2 text-[17px] text-cream/70">Queda registrado en tu Camino. Mañana sigue el paso que toca.</p>
+        </section>
+      )}
+
+      {pantalla !== 'llevas' && (
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={() => ir(-1)} disabled={i === 0}
+            className="min-h-[52px] rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] font-semibold text-cream disabled:opacity-40">
+            <ArrowLeft className="w-4 h-4 inline mr-1" /> Anterior
+          </button>
+          <button type="button" onClick={() => ir(1)} disabled={i >= orden.length - 1}
+            className="min-h-[52px] rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] font-semibold text-cream disabled:opacity-40">
+            Siguiente <ArrowRight className="w-4 h-4 inline ml-1" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }

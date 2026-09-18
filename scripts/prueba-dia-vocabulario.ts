@@ -13,6 +13,8 @@ import {
   esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar,
 } from '../src/lib/diaPrograma';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
+import { opcionesDePartida, jornadasHasta, resumenDePartida, diaDeLaOpcion } from '../src/lib/puntoDePartida';
+import { cinturonDesdeProgreso } from '../src/lib/cinturones';
 import { HERRAMIENTAS, HERRAMIENTAS_V3, getHerramienta, herramientasV3 } from '../src/lib/herramientas';
 import { SESIONES_GUIADAS, sesionGuiadaDe } from '../src/lib/sesionesGuiadas';
 import { setFamiliaActual, getFamiliaActual, TOKEN_CRUDO, vocabularizar } from '../src/lib/vocabulario';
@@ -83,6 +85,25 @@ ok(pilarAlcanzado(primerPaso.p.metas, 0, primerPaso.m.dia_asignado ?? 0), `el pi
 // El error de fondo: ningún pilar del seed tiene una regla que el código reconozca.
 const reglasViejas = new Set(['auto', 'completar_anterior', 'venta_real', 'qa_verde']);
 ok(SEED_ROADMAP_V2.every((p) => !reglasViejas.has(p.desbloqueo)), 'control: el seed ya no usa las reglas viejas (por eso hacía falta la nueva)');
+
+console.log('\n── el punto de partida del cliente que ya venía andando ──');
+const ops = opcionesDePartida();
+ok(ops.length === 10, `hay ${ops.length} opciones, una por grado ganable`);
+ok(ops.every((o) => o.loQueYaTienes && !/cintur/i.test(o.loQueYaTienes)), 'cada opción dice lo que YA TIENE, no el nombre del grado');
+const campana = ops.find((o) => o.id === '3gup')!;
+ok(campana.dia === 31, `«${campana.loQueYaTienes}» entra en el día ${campana.dia}`);
+const marcadas = jornadasHasta(SEED_ROADMAP_V2, campana.dia);
+ok(marcadas.length > 0 && marcadas.length < 90, `marca ${marcadas.length} jornadas, no las 90`);
+const codigos = new Set(marcadas.map((m) => m.codigo));
+const todas = SEED_ROADMAP_V2.flatMap((p) => p.metas.map((m) => ({ p, m })));
+ok(!codigos.has('P0.d0'), 'no marca la entrega técnica: es del equipo');
+ok(todas.filter(({ m }) => codigos.has(m.codigo)).every(({ m }) => (m.dia_asignado ?? 0) <= 31), 'no marca nada posterior al día elegido');
+ok(!todas.some(({ m }) => codigos.has(m.codigo) && m.evidencia_requerida?.del_mercado), 'no marca lo que depende de que otro pague: eso se gana');
+const grado = cinturonDesdeProgreso(new Set(marcadas.map((m) => m.clave)));
+ok(grado.id === '3gup', `con eso marcado, el cinturón queda en ${grado.nombre}`);
+ok(diaDeLaOpcion('inventado') === null && resumenDePartida(SEED_ROADMAP_V2, 'inventado') === null, 'una opción inventada no rompe nada');
+const cero = jornadasHasta(SEED_ROADMAP_V2, 0);
+ok(cero.length === 0, 'el que empieza de cero no arrastra nada');
 
 // ── 2. El vocabulario ─────────────────────────────────────────────────────
 console.log('\n── ningún token crudo sale del catálogo ──');

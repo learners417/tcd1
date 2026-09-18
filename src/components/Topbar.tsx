@@ -22,6 +22,7 @@ const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
   mensajes: 'Soporte', adn: 'Mi ADN', diario: 'Diario del Fundador',
   biblioteca: 'El Método', agentes: 'Entrenadores IA', creador: 'Creador de Contenido',
+  entrenadores: 'Entrenadores',
   campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
 
@@ -261,6 +262,18 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
         </div>
 
         <div className="flex items-center gap-4">
+          {/* El Mentor está en todas las pantallas: es un botón, no una pestaña. */}
+          {currentPage !== 'coach' && setCurrentPage && (
+            <button
+              type="button"
+              onClick={() => setCurrentPage('coach')}
+              aria-label="Hablar con tu Mentor"
+              className="min-h-[44px] px-4 rounded-full text-[17px] font-semibold flex items-center gap-2"
+              style={{ background: '#6E5019', color: '#FFFDF7' }}
+            >
+              <MessageSquare className="w-5 h-5" /> <span className="hidden sm:inline">Mentor</span>
+            </button>
+          )}
           {/* Credits balance · click → modal de compra · oculto via flag mientras el sistema esta apagado */}
           {CREDITS_ENABLED && <CreditsBadge userId={userId} variant="expanded" />}
 

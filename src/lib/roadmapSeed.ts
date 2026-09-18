@@ -102,7 +102,10 @@ export interface Evidencia {
   del_mercado?: boolean
   tipo: TipoEvidencia
   nombre: string
+  /** La regla con la que el sistema revisa. NUNCA se le muestra al cliente. */
   valida: string
+  /** Lo que la app le pide al cliente, en sus palabras. */
+  pide: string
 }
 
 export interface Jornada {
@@ -265,6 +268,8 @@ export interface RoadmapMeta {
   codigo: string
   titulo: string
   descripcion: string
+  /** La nota del equipo. No se le muestra al cliente. */
+  nota_equipo?: string
   orden: number
   dia_asignado: number
   tiempo_estimado: string
@@ -349,7 +354,8 @@ const comoMeta = (
     return `${pilar}.d${j.dia}`
   })(),
   titulo: j.titulo,
-  descripcion: j.nota ?? '',
+  descripcion: '',
+  nota_equipo: j.nota ?? '',
   orden: i + 1,
   dia_asignado: j.dia,
   tiempo_estimado: `${j.minutos} min`,
@@ -371,8 +377,9 @@ const comoMeta = (
   adn_field: j.adn_escribe[0] ?? null,
   adn_fields: j.adn_escribe,
   evidencia_requerida: {
-    ...(j.evidencias[0] ?? { tipo: 'texto' as TipoEvidencia, nombre: '', valida: '' }),
-    descripcion: j.evidencias[0]?.valida ?? '',
+    ...(j.evidencias[0] ?? { tipo: 'texto' as TipoEvidencia, nombre: '', valida: '', pide: '' }),
+    // Al cliente se le muestra `pide`. `valida` queda para el sistema.
+    descripcion: j.evidencias[0]?.pide ?? '',
   },
   evidencias: j.evidencias,
   coach_instruccion: j.manual ?? '',

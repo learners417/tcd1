@@ -1,7 +1,7 @@
 import { planLimitado } from '../lib/adnPiezas';
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Hexagon, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Hexagon, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun, Megaphone } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 import { diaDelPrograma, semanaDelPrograma } from '../lib/diaPrograma';
@@ -92,10 +92,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
       title: '',
       items: [
         { id: 'dashboard', icon: Sun, label: 'Hoy' } as MenuItem,
-        { id: 'roadmap', icon: RoadmapIcon, label: 'Tu Camino', badge: data.hasPending } as MenuItem,
-        { id: 'adn', icon: Sparkles, label: 'Tu ADN' } as MenuItem,
-        { id: 'coach', icon: MessageSquare, label: 'Tu Mentor' } as MenuItem,
-        { id: 'miclinica', icon: Hexagon, label: 'Tu Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as MenuItem,
+        { id: 'roadmap', icon: RoadmapIcon, label: 'Camino', badge: data.hasPending } as MenuItem,
+        { id: 'entrenadores', icon: Sparkles, label: 'Entrenadores' } as MenuItem,
+        { id: 'campanas', icon: Megaphone, label: 'Campañas' } as MenuItem,
+        { id: 'miclinica', icon: Hexagon, label: 'Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as MenuItem,
       ]
     },
   ];
@@ -139,7 +139,7 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
 
           <div className="bg-surface/60 border border-[rgba(232,150,46,0.10)] rounded-xl p-3 relative group">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-cream/65 font-medium tracking-wide">{data.cinturon.emoji} {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
+              <span className="text-sm text-cream/65 font-medium tracking-wide">Cinturón {data.cinturon.nombre} · Día {data.diaPrograma} de 90</span>
               <span className="text-sm text-cream font-medium">{data.progress}%</span>
             </div>
             <div className="h-1 bg-cream/10 rounded-full overflow-hidden">

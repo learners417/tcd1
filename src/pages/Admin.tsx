@@ -60,6 +60,7 @@ import { createClient } from '@supabase/supabase-js';
 import Campanas from './Campanas';
 import CreativosView from '../components/campanas/CreativosView';
 import Markdown from 'react-markdown';
+import TableroGrabacion from '../components/admin/TableroGrabacion';
 
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
@@ -3596,6 +3597,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'videos' && (
             <div className="max-w-5xl mx-auto space-y-6">
+              <TableroGrabacion />
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>

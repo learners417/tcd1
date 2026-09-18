@@ -4,10 +4,10 @@
  * forma de cambiarla. Lo bloqueado se ve con su nombre y su resultado:
  * esa vista es la puerta al camino completo.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR } from '../lib/planes';
-import { Lock, ChevronRight } from 'lucide-react';
-import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, type PiezaADN } from '../lib/adnPiezas';
+import { Lock, ChevronRight, Check, Circle } from 'lucide-react';
+import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, contenidoDePieza, esEscribibleAqui, guardarOrigen, type PiezaADN } from '../lib/adnPiezas';
 import type { ProfileV2 } from '../lib/supabase';
 import { VOC } from '../lib/vocabulario';
 
@@ -20,34 +20,91 @@ interface ADNProps {
 
 function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
   const { sellada, fecha, bloqueada } = estadoPieza(p);
+  const [abierta, setAbierta] = useState(false);
+  const [texto, setTexto] = useState(() => contenidoDePieza(p));
+  const [editando, setEditando] = useState(false);
+  const [borrador, setBorrador] = useState('');
+  const puedeEscribir = esEscribibleAqui(p) && !bloqueada;
+
+  const guardar = () => {
+    if (guardarOrigen(p, borrador)) setTexto(borrador.trim());
+    setEditando(false);
+  };
+
   return (
-    <div className={`rounded-2xl border p-4 transition-colors ${
-      sellada ? 'border-gold/30 bg-gold/[0.05]'
-      : bloqueada ? 'border-cream/10 bg-surface/20'
-      : 'border-[rgba(232,150,46,0.14)] bg-surface/30'}`}>
-      <div className="flex items-start gap-3">
-        <span className="text-base mt-0.5 shrink-0">
-          {sellada ? '🔒' : bloqueada ? <Lock className="w-4 h-4 text-cream/25" /> : '○'}
+    <div className={`rounded-2xl border p-4 ${
+      sellada ? 'border-gold/40 bg-[var(--card,#FFFDF7)]'
+      : bloqueada ? 'border-[var(--line,#EBE1CF)]'
+      : 'border-[var(--line2,#DFD3BC)]'}`}>
+      <button
+        type="button"
+        onClick={() => setAbierta((v) => !v)}
+        aria-expanded={abierta}
+        className="w-full min-h-[52px] flex items-start gap-3 text-left"
+      >
+        <span className="mt-0.5 shrink-0">
+          {sellada ? <Check className="w-5 h-5" style={{ color: 'var(--tilde, #4A7C59)' }} />
+            : bloqueada ? <Lock className="w-5 h-5 text-cream/45" />
+            : <Circle className="w-5 h-5 text-cream/45" />}
         </span>
-        <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${sellada ? 'text-cream' : bloqueada ? 'text-cream/45' : 'text-cream/85'}`}>{VOC(p.titulo)}</p>
-          <p className={`text-xs mt-0.5 leading-relaxed ${sellada ? 'text-cream/60' : 'text-cream/40'}`}>{p.que}</p>
-          {sellada ? (
-            <p className="text-sm text-success mt-2">Sellado{fecha ? ' · ' + fecha : ''} — se cambia rehaciendo su sesión</p>
-          ) : bloqueada ? (
-            <p className="text-sm text-cream/35 mt-2">Se abre con el camino completo</p>
-          ) : (
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <p className="text-sm text-cream/55">Se completa en: <span className="text-gold font-medium">{p.sesion}</span></p>
-              {onIr && (
-                <button onClick={onIr} className="shrink-0 inline-flex items-center gap-1 text-sm font-bold text-gold hover:text-goldhi">
-                  Ir <ChevronRight className="w-3 h-3" />
+        <span className="flex-1 min-w-0">
+          <span className="block text-[17px] font-semibold text-cream">{VOC(p.titulo)}</span>
+          <span className="block text-[15px] text-cream/70 leading-snug">{p.que}</span>
+        </span>
+        <ChevronRight className={`w-5 h-5 shrink-0 mt-1 text-cream/55 transition-transform ${abierta ? 'rotate-90' : ''}`} />
+      </button>
+
+      {abierta && (
+        <div className="mt-3 space-y-3">
+          {texto && !editando && (
+            <p className="text-[17px] leading-relaxed text-cream whitespace-pre-line">{texto}</p>
+          )}
+          {editando && (
+            <div className="space-y-2">
+              <textarea
+                value={borrador}
+                onChange={(e) => setBorrador(e.target.value)}
+                rows={4}
+                className="w-full rounded-xl border border-[var(--line2,#DFD3BC)] bg-transparent p-3 text-[17px] text-cream"
+                placeholder="Escríbelo con tus palabras"
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={guardar} className="btn-ios-primary flex-1">Guardar</button>
+                <button type="button" onClick={() => setEditando(false)}
+                  className="min-h-[52px] px-4 rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] text-cream">
+                  Cancelar
                 </button>
-              )}
+              </div>
             </div>
           )}
+          {!editando && (
+            sellada ? (
+              <p className="text-[15px] text-cream/70">
+                Sellado{fecha ? ' · ' + fecha : ''}. Para cambiarlo, rehaces su sesión: {p.sesion}.
+              </p>
+            ) : bloqueada ? (
+              <p className="text-[15px] text-cream/70">Se abre con el camino completo.</p>
+            ) : puedeEscribir ? (
+              <button
+                type="button"
+                onClick={() => { setBorrador(texto); setEditando(true); }}
+                className="min-h-[44px] text-[17px] font-semibold text-goldhi"
+              >
+                {texto ? 'Cambiar lo que escribiste' : 'Escribirlo ahora'}
+              </button>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[15px] text-cream/70">Se completa en: {p.sesion}</p>
+                {onIr && (
+                  <button onClick={onIr} className="shrink-0 min-h-[44px] text-[17px] font-semibold text-goldhi">
+                    Ir al Camino
+                  </button>
+                )}
+              </div>
+            )
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -84,13 +141,13 @@ export default function ADN({ setCurrentPage }: ADNProps) {
       </div>
 
       <div>
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">El alma — quién eres</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Quién eres</p>
         <p className="text-xs text-cream/45 mb-3">En orden: tu historia trae tus dones, tus dones señalan a quién sirves, y de ahí nace tu oferta. Nunca al revés.</p>
         <div className="space-y-2">{alma.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 
       <div>
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Los activos — lo que opera</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Lo que usas todos los días</p>
         <div className="space-y-2">{activos.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 

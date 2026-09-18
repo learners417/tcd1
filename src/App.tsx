@@ -35,6 +35,8 @@ import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
 import { diaDelPrograma } from './lib/diaPrograma';
+import Entrenadores from './pages/Entrenadores';
+import { MessageSquare } from 'lucide-react';
 
 type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
 
@@ -57,7 +59,7 @@ function loadProfile(): Profile {
 
 // Páginas válidas — fuente de verdad para validar lo guardado en localStorage
 const VALID_PAGES = [
-  'dashboard', 'roadmap', 'coach', 'metrics',
+  'dashboard', 'roadmap', 'entrenadores', 'coach', 'metrics',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
   'campanas',
 ] as const;
@@ -142,8 +144,12 @@ export default function App() {
   const pageHistoryRef = useRef<string[]>([]);
   /** Puerta única: ninguna navegación entra a una sección que su plan no compró. */
   const setCurrentPage = useCallback((page: string) => {
+    // Las cinco pestañas del plan definitivo. Las rutas viejas llevan a su
+    // lugar nuevo para que ningún aviso ni enlace quede sin destino.
+    const ALIAS: Record<string, string> = { adn: 'entrenadores', agentes: 'entrenadores', manualNegocio: 'entrenadores' };
+    page = ALIAS[page] ?? page;
     const PAGINA_PILAR: Record<string, number> = {
-      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, agentes: 5, miclinica: 5,
+      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, miclinica: 5,
     };
     const pilarNec = PAGINA_PILAR[page];
     let destino = pilarNec !== undefined && !planActualPermite(pilarNec) ? 'roadmap' : page;
@@ -543,6 +549,14 @@ export default function App() {
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
+              />
+            )}
+            {currentPage === 'entrenadores' && (
+              <Entrenadores
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                setCurrentPage={setCurrentPage}
+                onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)}
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}

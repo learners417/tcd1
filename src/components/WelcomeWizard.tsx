@@ -30,6 +30,7 @@ const ESPECIALIDADES = [
 const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
 
 import PasoSituacion, { SITUACION_VACIA, situacionCompleta, type Situacion } from './onboarding/PasoSituacion';
+import { VOC } from '../lib/vocabulario';
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStepRaw] = useState<Step>(() => {
@@ -540,7 +541,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             {dxAvatar && (
-              <p className="text-xs text-cream/45 italic">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold not-italic">10 pacientes a tu precio digno y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
+              <p className="text-xs text-cream/45 italic">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold not-italic">{VOC('10 {{consultantes}} a tu precio digno')} y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
             )}
 
             <button
@@ -563,8 +564,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
             {[
               { v: ogPorque, set: setOgPorque, q: '1 · ¿Por qué elegiste esta profesión?', ph: 'Lo que te trajo hasta acá…' },
-              { v: ogHerida, set: setOgHerida, q: '2 · ¿Qué herida propia sanaste (o sigues sanando)?', ph: 'Casi siempre, tu paciente ideal es tu yo del pasado…' },
-              { v: ogPaciente, set: setOgPaciente, q: '3 · ¿Qué paciente no te olvidas, y por qué?', ph: 'Esa historia es tu prueba de que tu trabajo transforma…' },
+              { v: ogHerida, set: setOgHerida, q: '2 · ¿Qué herida propia sanaste (o sigues sanando)?', ph: 'Casi siempre, ' + VOC('tu {{consultante}} ideal') + ' es tu yo del pasado…' },
+              { v: ogPaciente, set: setOgPaciente, q: VOC('3 · ¿De qué {{consultante}} no te olvidas, y por qué?'), ph: 'Esa historia es tu prueba de que tu trabajo transforma…' },
             ].map((item, i) => (
               <div key={i}>
                 <p className="text-sm font-medium text-cream/85 mb-2">{item.q}</p>
@@ -688,7 +689,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </p>
               <p className="text-sm text-cream/80 leading-relaxed mt-3">
                 <strong className="text-cream">A los tuyos:</strong> a quienes te formaron y a quienes dependen de ti.{' '}
-                <strong className="text-cream">A tus pacientes:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
+                <strong className="text-cream">A tus {VOC('{{consultantes}}')}:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
                 <strong className="text-cream">Y a ti:</strong> al profesional que hoy decide dejar de sobrevivir.
               </p>
               <p className="text-sm text-gold/90 leading-relaxed mt-3 font-medium">

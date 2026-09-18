@@ -99,6 +99,8 @@ import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
 import { VOC } from '../lib/vocabulario';
+import PuntoDePartida, { KEY_PARTIDA } from '../components/PuntoDePartida';
+import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -249,6 +251,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
   // T2/T3 · registrar venta + graduación (rediseño 4 fases)
+  const [, setPartidaResuelta] = useState(false);
   const [ventaModal, setVentaModal] = useState(false);
   const [ventaMonto, setVentaMonto] = useState('');
   const [ventaGuardando, setVentaGuardando] = useState(false);
@@ -312,7 +315,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       ? localStorage.getItem('tcd_espejo_identidad_mostrado') === '1'
       : false,
   );
-  const [videosPorPilar, setVideosPorPilar] = useState<Record<string, string>>({});
+  const [videosPorPilar, setVideosPorPilar] = useState<Record<string, string>>(() => mapaDeVideos());
   const prevCompletadasRef = useRef<Set<string>>(new Set());
   const detalleRef = useRef<HTMLDivElement>(null);
   const taskRef = useRef<HTMLDivElement>(null);
@@ -329,15 +332,15 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const seedConVideos: RoadmapPilar[] = useMemo(() => {
     if (Object.keys(videosPorPilar).length === 0) return SEED_ROADMAP_V2;
     return SEED_ROADMAP_V2.map(pilar => {
-      const ytId = videosPorPilar[pilar.id];
-      if (!ytId) return pilar;
+      const delPilar = videosPorPilar[pilar.id];
       return {
         ...pilar,
-        metas: pilar.metas.map(meta =>
-          meta.tipo === 'VIDEO'
-            ? { ...meta, video_youtube_id: ytId }
-            : meta,
-        ),
+        // El enlace se busca primero por la jornada (P1.0) y después por el
+        // pilar: así cada video cae en el día que le toca.
+        metas: pilar.metas.map(meta => {
+          const ytId = videosPorPilar[meta.codigo] ?? (meta.tipo === 'VIDEO' ? delPilar : undefined);
+          return ytId ? { ...meta, video_youtube_id: ytId } : meta;
+        }),
       };
     });
   }, [videosPorPilar]);
@@ -382,13 +385,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       if (vts) setVentas(vts as VentaRegistrada[]);
 
       if (vids) {
-        const map: Record<string, string> = {};
+        // Lo cargado en el tablero pisa a lo que viene por archivo.
+        const map: Record<string, string> = mapaDeVideos();
         for (const v of vids as { pilar_id: string | null; youtube_url: string }[]) {
           if (!v.pilar_id || !v.youtube_url) continue;
-          if (!map[v.pilar_id]) {
-            const ytId = getYoutubeVideoId(v.youtube_url);
-            if (ytId) map[v.pilar_id] = ytId;
-          }
+          const ytId = getYoutubeVideoId(v.youtube_url);
+          if (ytId) map[v.pilar_id] = ytId;
         }
         setVideosPorPilar(map);
       }
@@ -802,6 +804,69 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   }, [userId, onProfileFieldUpdate]);
 
   // ─── Complete a task (VIDEO, COACH) ───────────────────────────────────
+  /** Punto de partida: marca de una vez lo que el cliente ya traía hecho. */
+  const marcarPartida = useCallback((jornadas: Array<{ pilarNumero: number; codigo: string; esEstrella: boolean }>, fechaInicio: string) => {
+    // La fecha de inicio acompaña al día donde entra: si no, la app le dice
+    // que va atrasado por algo que ya tenía hecho.
+    onProfileFieldUpdate?.({ fecha_inicio: fechaInicio });
+    try {
+      const perfilLocal = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...perfilLocal, fecha_inicio: fechaInicio }));
+    } catch { /* noop */ }
+    if (isSupabaseReady() && supabase && userId) {
+      void supabase.from('profiles').update({ fecha_inicio: fechaInicio }).eq('id', userId);
+    }
+    setCompletadas((prev) => {
+      const next = new Set(prev);
+      for (const j of jornadas) next.add(`${j.pilarNumero}-${j.codigo}`);
+      return next;
+    });
+    if (isSupabaseReady() && supabase && userId) {
+      const hoy = new Date().toISOString().split('T')[0];
+      for (const j of jornadas) {
+        void guardarFila('hoja_de_ruta', {
+          usuario_id: userId,
+          pilar_numero: j.pilarNumero,
+          meta_codigo: j.codigo,
+          completada: true,
+          es_estrella: j.esEstrella,
+          fecha_completada: hoy,
+        }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
+      }
+    }
+  }, [userId, onProfileFieldUpdate]);
+
+  /** El tutorial de Lupe del día, si ya tiene enlace cargado. */
+  const tutorialDelDia = useCallback((dia: number | null | undefined) => {
+    if (dia === null || dia === undefined) return null;
+    const t = roadmap.tutoriales.find((x) => x.dia === dia && (videosPorPilar[x.codigo] || PDFS_POR_TUTORIAL[x.codigo]));
+    if (!t) return null;
+    const pdf = PDFS_POR_TUTORIAL[t.codigo];
+    return (
+      <div className="space-y-2">
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso en pantalla</p>
+        <p className="text-[17px] text-cream">{VOC(t.titulo)} · {t.minutos} min</p>
+        {videosPorPilar[t.codigo] && (
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-[var(--line2,#DFD3BC)]">
+          <iframe
+            src={`https://www.youtube.com/embed/${videosPorPilar[t.codigo]}?rel=0&modestbranding=1`}
+            title={VOC(t.titulo)}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+        )}
+        {pdf && (
+          <a href={pdf} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-2 min-h-[44px] text-[17px] font-semibold text-goldhi">
+            El mismo paso a paso, en PDF
+          </a>
+        )}
+      </div>
+    );
+  }, [videosPorPilar]);
+
   const handleCompleteTask = useCallback((pilarNum: number, meta: RoadmapMeta) => {
     registrarSesionCompletada(); // racha de sesiones (F2)
     const key = `${pilarNum}-${meta.codigo}`;
@@ -841,6 +906,20 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           {celebracion}
         </div>
       )}
+
+      {/* ── Punto de partida: una sola vez, para el que ya venía andando ── */}
+      {(() => {
+        let yaEligio = true;
+        try { yaEligio = Boolean(localStorage.getItem(KEY_PARTIDA)); } catch { yaEligio = true; }
+        if (yaEligio || completadas.size > 0) return null;
+        return (
+          <PuntoDePartida
+            pilares={seedConVideos}
+            onMarcar={marcarPartida}
+            onCerrar={() => setPartidaResuelta(true)}
+          />
+        );
+      })()}
 
       {/* ── Encabezado: dónde estás y qué hacer hoy (10-DISENO) ── */}
       <EncabezadoCamino
@@ -1103,13 +1182,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="text-sm font-mono text-cream/55 bg-gold/5 px-2 py-0.5 rounded">
-                            {meta.codigo}
-                          </span>
-                          {/* Type badge */}
-                          <span className={`text-sm uppercase font-bold px-1.5 py-0.5 rounded-full border ${badge.bg} ${badge.color} flex items-center gap-1`}>
-                            <BadgeIcon className="w-3 h-3" /> {badge.label}
-                          </span>
+                          {/* El código y el tipo son del equipo: el cliente ve el día. */}
+                          <span className="text-[15px] text-cream/60">Día {meta.dia_asignado}</span>
                           {meta.es_estrella && (
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                           )}
@@ -1155,18 +1229,46 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                     {isActive && unlocked && (
                       <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(232,150,46,0.12)] animate-in fade-in slide-in-from-top-2 duration-300">
                         {meta.tipo === 'VIDEO' && (
-                          <TaskVideo
-                            meta={meta}
-                            onComplete={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
+                          <SesionViva
+                            metaKey={key}
+                            metaCodigo={meta.codigo}
+                            metaTitulo={VOC(meta.titulo)}
+                            teLlevas={VOC(meta.evidencia_requerida?.nombre ?? '')}
+                            pasos={(meta.pasos ?? []).map((p) => VOC(p))}
+                            pide={VOC(meta.evidencia_requerida?.pide ?? '')}
+                            seAbre={meta.cinturon ? 'Ganaste un grado nuevo. Mira tu cinturón en el Camino.' : undefined}
+                            tiempoEstimado={meta.tiempo_estimado}
                             isCompleted={estaCompletada}
-                          />
+                            userId={userId}
+                            video={(() => {
+                              const tuto = tutorialDelDia(meta.dia_asignado);
+                              const suyo = meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') ? (
+                                <TaskVideo
+                                  meta={meta}
+                                  onComplete={() => handleCompleteTask(pilar.numero, meta)}
+                                  isCompleted={estaCompletada}
+                                />
+                              ) : null;
+                              if (!suyo && !tuto) return undefined;
+                              return <div className="space-y-5">{suyo}{tuto}</div>;
+                            })()}
+                            evidencia={<EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => { const yaEstaba = estaCompletada; handleCompleteTask(pilar.numero, meta); if (!yaEstaba) setActiveMeta(null); }}
+                              className="btn-ios-primary w-full"
+                            >
+                              {estaCompletada ? 'Hecho' : 'Marcar como hecho'}
+                            </button>
+                          </SesionViva>
                         )}
                         {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
                           <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#0d0a06]">
                             <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
                               <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
                               <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
-                              <span className="text-xs text-cream/40">{meta.codigo}</span>
+                              <span className="text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
                             </div>
                             <div className="max-w-2xl mx-auto px-4 py-6">
 
@@ -1174,10 +1276,15 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             metaKey={key}
                             metaCodigo={meta.codigo}
                             metaTitulo={VOC(meta.titulo)}
-                            descripcion={VOC(meta.descripcion)}
+                            teLlevas={VOC(meta.evidencia_requerida?.nombre ?? '')}
+                            pasos={(meta.pasos ?? []).map((p) => VOC(p))}
+                            pide={VOC(meta.evidencia_requerida?.pide ?? '')}
+                            seAbre={meta.cinturon ? 'Ganaste un grado nuevo. Mira tu cinturón en el Camino.' : undefined}
                             tiempoEstimado={meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
+                            video={tutorialDelDia(meta.dia_asignado) ?? undefined}
+                            evidencia={<EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />}
                           >
                         {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P0.2' && (
                           <TaskFotoPartida
@@ -1224,7 +1331,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           </div>
                         )}
                       
-                        <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
+                        {meta.tipo !== 'HERRAMIENTA' && meta.tipo !== 'COACH' && (
+                          <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
+                        )}
                       </div>
                     )}
                   </div>

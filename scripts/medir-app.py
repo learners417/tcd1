@@ -30,7 +30,7 @@ import json, os, socket, subprocess, sys, time, urllib.request
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
 from playwright.sync_api import sync_playwright
 
-PANTALLAS = ['dashboard', 'roadmap', 'adn', 'coach', 'miclinica', 'metrics',
+PANTALLAS = ['dashboard', 'roadmap', 'entrenadores', 'adn', 'coach', 'miclinica', 'metrics',
              'biblioteca', 'diario', 'agentes', 'creador', 'numero', 'manualNegocio', 'campanas']
 # Las pantallas ya llevadas al nivel de la especificación. Crece turno a turno.
 # Las pestañas internas del cliente: (nombre, pantalla, texto del botón a tocar).
