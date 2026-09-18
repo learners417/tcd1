@@ -195,10 +195,10 @@ El camino termina. El cliente se queda con:
 | Sus cuatro manuales en PDF | Descargados |
 | Su cuaderno completo | Descargado |
 | Su plan de 180 días | Descargado |
-| El Camino, el Dojo y sus cinturones | **Acceso de lectura** |
+| El Camino, Entrenadores y sus cinturones | **Acceso de lectura** |
 
 **Los agentes siguen disponibles**, porque son lo que hace que renueve. El
-Tablero cada lunes, el Sparring antes de cada llamada, el Escriba para cada
+Tablero cada lunes, Lucas antes de cada llamada, Mateo para cada
 anuncio nuevo. **Esa es la razón por la que este producto se puede cobrar todos
 los meses y no una sola vez.**
 

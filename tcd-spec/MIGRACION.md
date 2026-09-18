@@ -38,12 +38,12 @@ python3 datos/validar.py     # tiene que decir "el paquete cierra"
 |---|---|
 | Hoy | Se queda. Cambia el contenido en la etapa 2 |
 | Camino | Se queda. Pasa a mostrar 5 sistemas con las jornadas adentro |
-| **ADN** | **Deja de ser tab.** Pasa al encabezado del Dojo |
-| **Mentor** | **Se convierte en Dojo**, con ocho agentes en vez de uno |
-| **—** | **Se agrega Mando**, con tres solapas |
+| **ADN** | **Deja de ser tab.** Pasa al encabezado de Entrenadores |
+| **Mentor** | **Se convierte en Entrenadores**, con nueve entrenadores en vez de uno |
+| **—** | **Se agrega Campañas**, con tres solapas |
 | Clínica | Se queda. Cambia de ícono |
 
-**Íconos.** Dojo toma el que hoy usa Mentor. Mando toma el hexágono que hoy usa
+**Íconos.** Entrenadores toma el que hoy usa Mentor. Campañas toma el hexágono que hoy usa
 Clínica. Clínica pasa al ícono de agenda. Es el cambio mínimo que conserva el
 reconocimiento de quien ya venía usando la app.
 
@@ -91,7 +91,7 @@ ya tengan; quien no tenga evidencias arranca en blanco.
 
 ## Etapa 4 · los agentes
 
-**Primero el Crítico y el Sparring.** Son los dos que más cambian el resultado del
+**Primero Diego y Lucas.** Son los dos que más cambian el resultado del
 cliente y los dos que más reemplazan tu tiempo.
 
 **Después el Espejo**, que es el más delicado: tiene el límite de derivación y las
@@ -107,17 +107,17 @@ se pegan en el código: así se corrigen sin desplegar.
 | Agente | Lo que no es prompt |
 |---|---|
 | El Espejo | Guardado en Cuaderno · las cuatro devoluciones por fecha |
-| El Crítico | Estado `aprobado` que escribe al ADN y otorga 7.º gup |
-| El Escriba | Tres versiones, selección, guardado de frases propias |
-| La Cámara | Visión sobre la foto del set · generador del checklist de rodaje |
-| El Sparring | Medición de los cuatro números · el Ring |
-| El Tablero | Lectura de Meta · la regla de los catorce días |
-| El Arquitecto | Escritura de `entrega.*` |
-| El Estratega | Bloqueo de grabación dentro de los 90 días |
+| Diego | Estado `aprobado` que escribe al ADN y otorga 7.º gup |
+| Mateo | Tres versiones, selección, guardado de frases propias |
+| Caro | Visión sobre la foto del set · generador del checklist de rodaje |
+| Lucas | Medición de los cuatro números · el Ring |
+| Ramiro | Lectura de Meta · la regla de los catorce días |
+| Bruno | Escritura de `entrega.*` |
+| Mateo | Bloqueo de grabación dentro de los 90 días |
 
 ---
 
-## Etapa 5 · el Mando
+## Etapa 5 · Campañas
 
 **Creativos primero**, porque se necesita el día 26 y Campañas recién el 31.
 
@@ -171,7 +171,7 @@ evidencia igual. El video es la mitad de la sesión, no toda.
 | La garantía dentro del video de la oferta | Se dice dos veces |
 | El perfil de seis minutos | Queda en tres y cuatro cosas |
 | Los nueve cinturones viejos | Pasan a los once del taekwondo |
-| Tab ADN | Sube al Dojo |
+| Tab ADN | Sube al Entrenadores |
 | Cualquier día sin contenido | Ya no existe: los 91 tienen algo |
 
 ---
@@ -182,7 +182,7 @@ evidencia igual. El video es la mitad de la sesión, no toda.
 [ ] python3 datos/validar.py dice "el paquete cierra"
 [ ] roadmapSeed.ts reemplazado y el proyecto compila
 [ ] tokens.css cargado y el tamaño del tab subido a 14px
-[ ] cinco tabs con Dojo y Mando
+[ ] cinco tabs con Entrenadores y Campañas
 [ ] redirección de /adn a /dojo#adn
 [ ] pantalla Hoy con tira de cinturón, jornada y estados campo/ciclo
 [ ] tabla evidencia con los seis tipos

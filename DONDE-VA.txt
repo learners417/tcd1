@@ -1,10 +1,14 @@
-PAQUETE · Toda la app (cliente y Admin) al nivel del sistema visual · 16 sep 2026
+PAQUETE · C1 estructura + C2 sesión + C3 partida y tablero de grabación · 17 sep 2026
 Rama: mejoras · repo learners417/tcd1
 Se descomprime en la RAÍZ del repo: cada archivo ya trae su carpeta.
 Incluye también la tanda anterior (día único y vocabulario): se aplica sobre
 la rama tal como está hoy.
 
 NUEVOS
+  src/lib/puntoDePartida.ts             el cliente que ya viene andando entra en su día
+  src/components/PuntoDePartida.tsx     la pregunta, una sola vez
+  src/pages/Entrenadores.tsx            el ADN y los nueve, en una pestaña
+  src/components/admin/TableroGrabacion.tsx  donde se pegan los enlaces de YouTube
   src/components/camino/EncabezadoCamino.tsx   anillo, grado y ritmo del Camino
   src/components/camino/TarjetaDeHoy.tsx       la tarjeta de hoy (Hoy y Camino)
   src/lib/diaPrograma.ts                       día, atraso, paso del cliente, apertura de pilares
@@ -42,6 +46,12 @@ REEMPLAZAN
   sesionesGuiadas.ts · vocabulario.ts · roadmapSeed.ts · adnSchema.ts
   y los archivos con voseo corregido (ver lista de git)
   auditoria.py · COMO-FUNCIONA.md · DONDE-VA.txt
+
+SE BORRAN (la sesión ya no pide emoción ni muestra reloj)
+  src/components/sesion/CheckInPanel.tsx
+  src/components/sesion/CheckOutPanel.tsx
+  src/components/sesion/CronometroSesion.tsx
+  git rm src/components/sesion/CheckInPanel.tsx src/components/sesion/CheckOutPanel.tsx src/components/sesion/CronometroSesion.tsx
 
 COMANDOS
   unzip -o tcd-camino-visual-15sep.zip -d .

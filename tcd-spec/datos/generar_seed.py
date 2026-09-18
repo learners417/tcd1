@@ -79,7 +79,7 @@ CINTURONES = [
  ("10gup","Blanco","#FFFFFF",None,1,"La semilla bajo la nieve","Búnker abierto y pacto publicado",False),
  ("9gup","Blanco punta amarilla","#FFFFFF","#E8C24A",3,"La semilla toca la tierra","Su hora real neta escrita a mano",False),
  ("8gup","Amarillo","#E8C24A",None,12,"La tierra","Primer cobro a su cartera al precio nuevo",True),
- ("7gup","Amarillo punta verde","#E8C24A","#4E8C57",16,"Asoma el tallo","Método aprobado por el Crítico",False),
+ ("7gup","Amarillo punta verde","#E8C24A","#4E8C57",16,"Asoma el tallo","Método aprobado por Diego",False),
  ("6gup","Verde","#4E8C57",None,19,"La planta en pie","Oferta completa en una página",False),
  ("5gup","Verde punta azul","#4E8C57","#3A6EA5",25,"La planta busca el cielo","El enlace vivo de su página",False),
  ("4gup","Azul","#3A6EA5",None,28,"El cielo","Agendarse a sí mismo de punta a punta",False),
@@ -115,7 +115,7 @@ FRENOS = [
   "Elegí el día. El rodaje que no tiene fecha no ocurre."),
  ("F-14DIAS","Escalar o apagar queda cerrado del 31 al 45","dia>=46",
   "Faltan {n} días. Tu campaña está aprendiendo."),
- ("F-TABLERO","El Tablero responde 'todavía no' del 31 al 45","dia>=46",None),
+ ("F-TABLERO","Ramiro responde 'todavía no' del 31 al 45","dia>=46",None),
  ("F-COMPRA","No invita sin hacer la compra de prueba","evento.compra_de_prueba",
   "Comprate a vos mismo antes de invitar a nadie."),
  ("F-PRECIO","El precio del día 17 no puede ser menor al del día 9","oferta.precio>=numeros.precio_digno",
@@ -151,9 +151,30 @@ def add(dia, tipo, titulo, **kw):
     j["avanza_sin_evidencia"] = bool(evs) and all(e.get("del_mercado") for e in evs)
     J[dia] = j
 
-def ev(tipo, nombre, valida, mercado=False):
+def pedido(tipo, nombre):
+    """Lo que la app le PIDE al cliente, en sus palabras. `valida` es la regla
+    con la que el sistema revisa, y nunca se le muestra a él."""
+    n = nombre[0].lower() + nombre[1:] if nombre[:2] != nombre[:2].upper() else nombre
+    ya_es_imagen = n.startswith(("foto", "captura", "pantallazo", "imagen"))
+    return {
+        "imagen": f"Sube {n}." if ya_es_imagen else f"Sube una foto de {n}.",
+        "captura": f"Sube {n}." if ya_es_imagen else f"Sube la captura de {n}.",
+        "numero": f"Escribe el número: {n}.",
+        "texto": f"Escribe {n}.",
+        "url": f"Pega el enlace: {n}.",
+        "enlace": f"Pega el enlace: {n}.",
+        "archivo": f"Sube el archivo: {n}.",
+        "audio": f"Sube el audio: {n}.",
+        "video": f"Sube el video: {n}.",
+        "evento": f"Se marca solo: {n}.",
+        "cobro": f"Sube el comprobante: {n}.",
+    }.get(tipo, f"Sube {n}.")
+
+
+def ev(tipo, nombre, valida, mercado=False, pide=None):
     """mercado=True: la evidencia depende de que otro pague. No traba el camino."""
-    return {"tipo": tipo, "nombre": nombre, "valida": valida, "del_mercado": mercado}
+    return {"tipo": tipo, "nombre": nombre, "valida": valida, "del_mercado": mercado,
+            "pide": pide or pedido(tipo, nombre)}
 
 add(0,"entrega_tecnica","Entrega técnica y llamada de bienvenida",minutos=20,
     evidencias=[ev("evento","Primer ingreso","alta en TCD y MCD registrada")],
@@ -215,14 +236,7 @@ add(7,"protocolo","El que te parece un vendehumo",sistema=1,minutos=20,piezas=["
     evidencias=[ev("texto","Tres nombres y una capacidad","capacidad en infinitivo")],
     adn=["cuaderno"],nota="Examen: día 10, los mensajes de subida de precio.")
 
-add(8,"sesion","Los tres grupos",sistema=1,minutos=60,piezas=["P3.7"],
-    pasos=["La app trae tu lista del día 2 en tres columnas vacías",
-           "Arrastrá a cada persona a su columna","Ninguna persona queda sin columna",
-           "Contá cuántos hay en cada una"],
-    evidencias=[ev("texto","Las tres listas","suma igual a la cantidad del día 2")],
-    adn=["transicion"],nota="Pantalla de arrastrar, no de escribir.")
-
-add(9,"sesion","El precio nuevo y el link",sistema=1,minutos=75,piezas=["P3.8","P1.5"],
+add(8,"sesion","El precio nuevo y el link",sistema=1,minutos=75,piezas=["P3.8","P1.5"],
     agente="vera",tutoriales=["L-03","L-04"],acceso="Entrega 1 del Sistema — pagos y calendario",
     pasos=["Mirá tu hora real neta y tu precio viejo","Escribí el precio nuevo",
            "La app te muestra qué hora real neta te daría","Confirmá: el número queda sellado",
@@ -231,6 +245,13 @@ add(9,"sesion","El precio nuevo y el link",sistema=1,minutos=75,piezas=["P3.8","
                 ev("url","Link de pago","responde 200 y muestra el monto"),
                 ev("evento","Cobro de prueba","registrado en el Sistema")],
     adn=["numeros.precio_digno","sistema.link_pago"],activa=["F-PRECIO"])
+
+add(9,"sesion","Los tres grupos",sistema=1,minutos=60,piezas=["P3.7"],
+    pasos=["La app trae tu lista del día 2 en tres columnas vacías",
+           "Arrastrá a cada persona a su columna","Ninguna persona queda sin columna",
+           "Contá cuántos hay en cada una"],
+    evidencias=[ev("texto","Las tres listas","suma igual a la cantidad del día 2")],
+    adn=["transicion"],nota="Pantalla de arrastrar, no de escribir. Va después del precio: primero se sella el número, después se ordena la cartera.")
 
 add(10,"sesion","Los que suben",sistema=1,minutos=45,
     pasos=["Abrí la plantilla del grupo uno y editala con tu voz",
@@ -271,7 +292,7 @@ add(14,"sesion","Los primeros veinte mensajes",sistema=1,minutos=60,agente="sofi
 add(15,"sesion","Tu método propio",sistema=2,minutos=60,piezas=["P2.1"],agente="diego",manual="CLI-1",
     pasos=["Escribí las etapas de lo que ya hacés, en orden","Definí punto inicial y punto final",
            "Definí cómo se mide","Armá las siglas: una letra por etapa"],
-    evidencias=[ev("texto","Método con nombre, siglas y etapas","el Crítico devuelve faltantes")],
+    evidencias=[ev("texto","Método con nombre, siglas y etapas","Diego devuelve lo que falta")],
     adn=["metodo"])
 
 add(16,"sesion","La prueba de tu método",sistema=2,minutos=45,piezas=["P2.4b","P2.5"],agente="diego",manual="CLI-1B",
@@ -335,15 +356,15 @@ add(24,"sesion","Tu perfil, cuatro cosas",sistema=3,minutos=30,piezas=["P4.2b"],
 add(25,"sesion","Tu página, publicada",sistema=3,minutos=120,piezas=["P4.2d"],
     tutoriales=["L-05","L-06"],agente="mateo",larga=True,
     pasos=["Revisá que tengas promesa, cinco filas, garantía y precio",
-           "El Escriba arma el pedido inicial: leelo entero antes de mandarlo",
+           "Mateo arma el pedido inicial: léelo entero antes de mandarlo",
            "Pedí los tres cambios: celular, letra grande, aviso legal",
            "Subí y publicá en tu subdominio"],
     evidencias=[ev("url","El enlace vivo","200, contiene la promesa, botón de agenda, carga en móvil")],
     adn=["sistema.url_pagina"],cinturon="5gup",activa=["F-PAGINA"])
 
 add(26,"sesion","Preproducción",sistema=3,minutos=90,piezas=["P4.3e","P4.3"],agente="caro",larga=True,
-    pasos=["El Escriba arma el guion del VSL con tu ADN",
-           "El Escriba arma los tres anuncios según tu rama",
+    pasos=["Mateo arma el guion del video de tu página con tu ADN",
+           "Mateo arma los tres anuncios según tu rama",
            "Subí fotos del lugar: la Cámara corrige luz, fondo y altura",
            "Leé el guion en voz alta tres veces"],
     evidencias=[ev("texto","Guion del VSL y tres anuncios","completos"),
@@ -400,7 +421,7 @@ for d in (34,35,40,41):
 add(36,"sesion","La llamada dibujada",sistema=3,minutos=60,piezas=["P5.1"],agente="lucas",manual="LLA-1",
     pasos=["Dibujá tu W sobre la plantilla","Escribí tus preguntas de cada tramo",
            "Marcá el minuto del precio","Escribí qué hacés después del número: nada",
-           "Practicá una llamada completa con el Sparring"],
+           "Practica una llamada completa con Lucas"],
     evidencias=[ev("texto","Tu W con tus preguntas","los siete tramos"),
                 ev("evento","Sesión de sparring","completada")],
     adn=["voz.frases_propias"])
@@ -423,7 +444,7 @@ add(39,"sesion","Grabar las llamadas",sistema=3,minutos=30,piezas=["P5.4-i"],tut
 
 add(42,"sesion","La autopsia",sistema=3,minutos=60,piezas=["P5.6"],agente="lucas",manual="LLA-4",
     pasos=["Subí o elegí una llamada real","Escuchala entera: la app no deja saltar",
-           "Anotá los cuatro números","Compará con los que midió el Sparring",
+           "Anotá los cuatro números","Compara con los que midió Lucas",
            "Elegí una sola cosa para cambiar"],
     evidencias=[ev("numero","Los cuatro números","minuto, preguntas, silencio, pidió decisión"),
                 ev("texto","La cosa que cambia","una sola")])

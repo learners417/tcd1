@@ -1,6 +1,6 @@
-# Mando · Creativos
+# Campañas · Creativos
 
-Primera solapa del tab Mando. Se abre el día 26, cuando el Escriba escribe el
+Primera solapa del tab Campañas. Se abre el día 26, cuando Mateo escribe el
 primer guion, y no se cierra nunca más.
 
 **Qué resuelve.** Hoy el cliente escribe guiones en notas del teléfono, graba en
@@ -22,13 +22,13 @@ idea → guion → aprobado → grabado → editado → listo → activo → gan
 | Estado | Qué significa | Quién lo mueve |
 |---|---|---|
 | `idea` | Un gancho suelto, una frase, una nota de voz | El cliente |
-| `guion` | Escrito, sin revisar | El Escriba |
-| `aprobado` | Revisado y con las pausas marcadas | La Cámara |
+| `guion` | Escrito, sin revisar | Mateo |
+| `aprobado` | Revisado y con las pausas marcadas | Caro |
 | `grabado` | Archivo crudo subido | El cliente |
 | `editado` | Con subtítulos y sin cola | El cliente |
 | `listo` | En la biblioteca de Meta | Automático al subir |
 | `activo` | Corriendo en una campaña | Meta |
-| `ganador` | Costo por agenda por debajo de su promedio | El Tablero |
+| `ganador` | Costo por agenda por debajo de su promedio | Ramiro |
 | `retirado` | Apagado, con el motivo escrito | El cliente o el Tablero |
 
 **Regla:** una pieza `retirada` nunca se borra. Su guion queda, y con el motivo
@@ -104,7 +104,7 @@ APRENDIZAJE
 
 ## Las fórmulas
 
-El Escriba escribe desde estructuras, no desde cero. La app trae un banco de
+Mateo escribe desde estructuras, no desde cero. La app trae un banco de
 fórmulas con su nombre, su forma y un ejemplo.
 
 **Decisión tomada:** entra al producto la parte del manual de anuncios que sirve
@@ -133,7 +133,7 @@ Se activa el día del rodaje y toma la pantalla completa.
 **Qué hace**
 - Una pieza por pantalla, en el orden de grabación que definió
 - El guion en letra grande, avanzable con el pulgar
-- Las marcas de la Cámara visibles: pausas y frase que queda
+- Las marcas de Caro visibles: pausas y frase que queda
 - Contador de tomas: **a la tercera, la app le dice que cambie la primera frase y
   deje el resto igual**
 - Botón de una sola función: marcar como grabado y pasar a la siguiente
@@ -167,7 +167,7 @@ nunca termina de cargar su app.
 
 ## La señal de fatiga
 
-El Tablero avisa acá, no en Campañas, porque la acción es grabar.
+Ramiro avisa acá, no en Campañas, porque la acción es grabar.
 
 **Cuándo aparece:** cuando el costo por agenda de una pieza `activo` sube más de
 un tercio respecto de su mejor semana, sostenido tres días.
@@ -176,7 +176,7 @@ un tercio respecto de su mejor semana, sostenido tres días.
 > *Tu anuncio 2 está cansado. Su costo por agenda pasó de $X a $Y en cinco días.
 > Grabá una variante esta semana: mismo guion, gancho nuevo.*
 
-**Qué ofrece:** el Escriba con el guion de esa pieza cargado y tres ganchos
+**Qué ofrece:** Mateo con el guion de esa pieza cargado y tres ganchos
 nuevos para el mismo cuerpo.
 
 **Lo que no hace:** apagar solo. La decisión es del cliente, el lunes, en el panel

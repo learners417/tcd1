@@ -620,8 +620,8 @@
       "dia": 16,
       "dia_estimado": 16,
       "significado": "Asoma el tallo",
-      "forma": "Método aprobado por el Crítico",
-      "se_gana_con": "Método aprobado por el Crítico",
+      "forma": "Método aprobado por Diego",
+      "se_gana_con": "Método aprobado por Diego",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -809,7 +809,7 @@
     },
     {
       "id": "F-TABLERO",
-      "regla": "El Tablero responde 'todavía no' del 31 al 45",
+      "regla": "Ramiro responde 'todavía no' del 31 al 45",
       "apertura": "dia>=46",
       "mensaje": null
     },
@@ -862,7 +862,8 @@
           "tipo": "evento",
           "nombre": "Primer ingreso",
           "valida": "alta en TCD y MCD registrada",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: primer ingreso."
         }
       ],
       "adn_escribe": [],
@@ -904,19 +905,22 @@
           "tipo": "imagen",
           "nombre": "Foto del búnker",
           "valida": "mesa, cuaderno visible, sin pantalla encendida",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube foto del búnker."
         },
         {
           "tipo": "imagen",
           "nombre": "Pacto publicado",
           "valida": "se lee nombre y fecha",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de pacto publicado."
         },
         {
           "tipo": "texto",
           "nombre": "El por qué",
           "valida": "mínimo 8 palabras, primera persona",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el por qué."
         }
       ],
       "adn_escribe": [
@@ -961,19 +965,22 @@
           "tipo": "imagen",
           "nombre": "Panel con consultantes",
           "valida": "al menos 5 filas con nombre y monto",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de panel con consultantes."
         },
         {
           "tipo": "numero",
           "nombre": "Consultantes activos",
           "valida": "entero > 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: consultantes activos."
         },
         {
           "tipo": "numero",
           "nombre": "Ingreso promedio 3 meses",
           "valida": "> 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: ingreso promedio 3 meses."
         }
       ],
       "adn_escribe": [
@@ -1016,19 +1023,22 @@
           "tipo": "numero",
           "nombre": "Hora real neta",
           "valida": "0 < x < 500, coherente ±20% con día 2",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: hora real neta."
         },
         {
           "tipo": "imagen",
           "nombre": "El número a mano",
           "valida": "se lee un número manuscrito",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de el número a mano."
         },
         {
           "tipo": "texto",
           "nombre": "La palabra del cuerpo",
           "valida": "una palabra",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe la palabra del cuerpo."
         }
       ],
       "adn_escribe": [
@@ -1068,7 +1078,8 @@
           "tipo": "texto",
           "nombre": "Las tres frases",
           "valida": "primera persona, sin generalidades",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe las tres frases."
         }
       ],
       "adn_escribe": [
@@ -1106,7 +1117,8 @@
           "tipo": "imagen",
           "nombre": "La página del cuaderno",
           "valida": "foto legible",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de la página del cuaderno."
         }
       ],
       "adn_escribe": [
@@ -1142,7 +1154,8 @@
           "tipo": "texto",
           "nombre": "Tres nombres y tres frases",
           "valida": "una marcada",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe tres nombres y tres frases."
         }
       ],
       "adn_escribe": [
@@ -1180,7 +1193,8 @@
           "tipo": "texto",
           "nombre": "Tres nombres y una capacidad",
           "valida": "capacidad en infinitivo",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe tres nombres y una capacidad."
         }
       ],
       "adn_escribe": [
@@ -1197,45 +1211,6 @@
     },
     {
       "dia": 8,
-      "tipo": "sesion",
-      "titulo": "Los tres grupos",
-      "sistema": 1,
-      "minutos": 60,
-      "piezas": [
-        "P3.7"
-      ],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "La app trae tu lista del día 2 en tres columnas vacías",
-        "Arrastra a cada persona a su columna",
-        "Ninguna persona queda sin columna",
-        "Cuenta cuántos hay en cada una"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Las tres listas",
-          "valida": "suma igual a la cantidad del día 2",
-          "del_mercado": false
-        }
-      ],
-      "adn_escribe": [
-        "transicion"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Pantalla de arrastrar, no de escribir.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 9,
       "tipo": "sesion",
       "titulo": "El precio nuevo y el link",
       "sistema": 1,
@@ -1264,19 +1239,22 @@
           "tipo": "numero",
           "nombre": "Precio digno",
           "valida": "> precio_viejo",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: precio digno."
         },
         {
           "tipo": "url",
           "nombre": "Link de pago",
           "valida": "responde 200 y muestra el monto",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Pega el enlace: link de pago."
         },
         {
           "tipo": "evento",
           "nombre": "Cobro de prueba",
           "valida": "registrado en el Sistema",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: cobro de prueba."
         }
       ],
       "adn_escribe": [
@@ -1292,6 +1270,46 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 6,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 9,
+      "tipo": "sesion",
+      "titulo": "Los tres grupos",
+      "sistema": 1,
+      "minutos": 60,
+      "piezas": [
+        "P3.7"
+      ],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "La app trae tu lista del día 2 en tres columnas vacías",
+        "Arrastra a cada persona a su columna",
+        "Ninguna persona queda sin columna",
+        "Cuenta cuántos hay en cada una"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Las tres listas",
+          "valida": "suma igual a la cantidad del día 2",
+          "del_mercado": false,
+          "pide": "Escribe las tres listas."
+        }
+      ],
+      "adn_escribe": [
+        "transicion"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "acciones_campo": [],
+      "nota": "Pantalla de arrastrar, no de escribir. Va después del precio: primero se sella el número, después se ordena la cartera.",
+      "paso_esencial": 4,
       "avanza_sin_evidencia": false
     },
     {
@@ -1315,7 +1333,8 @@
           "tipo": "imagen",
           "nombre": "Tres mensajes enviados",
           "valida": "capturas legibles",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de tres mensajes enviados."
         }
       ],
       "adn_escribe": [],
@@ -1349,7 +1368,8 @@
           "tipo": "imagen",
           "nombre": "Agenda con fechas de cierre",
           "valida": "al menos una fecha cargada",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de agenda con fechas de cierre."
         }
       ],
       "adn_escribe": [],
@@ -1384,7 +1404,8 @@
           "tipo": "evento",
           "nombre": "Cobro al precio nuevo",
           "valida": "monto >= precio_digno",
-          "del_mercado": true
+          "del_mercado": true,
+          "pide": "Se marca solo: cobro al precio nuevo."
         }
       ],
       "adn_escribe": [],
@@ -1421,13 +1442,15 @@
           "tipo": "texto",
           "nombre": "Los sesenta nombres",
           "valida": "sesenta filas con nombre y canal",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe los sesenta nombres."
         },
         {
           "tipo": "numero",
           "nombre": "Tamaño de la red",
           "valida": ">= 20",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: tamaño de la red."
         }
       ],
       "adn_escribe": [
@@ -1463,13 +1486,15 @@
           "tipo": "imagen",
           "nombre": "Veinte mensajes enviados",
           "valida": "capturas legibles",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de veinte mensajes enviados."
         },
         {
           "tipo": "numero",
           "nombre": "Mensajes enviados",
           "valida": ">= 20",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: mensajes enviados."
         }
       ],
       "adn_escribe": [
@@ -1507,8 +1532,9 @@
         {
           "tipo": "texto",
           "nombre": "Método con nombre, siglas y etapas",
-          "valida": "el Crítico devuelve faltantes",
-          "del_mercado": false
+          "valida": "Diego devuelve lo que falta",
+          "del_mercado": false,
+          "pide": "Escribe método con nombre, siglas y etapas."
         }
       ],
       "adn_escribe": [
@@ -1548,7 +1574,8 @@
           "tipo": "texto",
           "nombre": "Método aprobado",
           "valida": "veredicto aprobado en los tres exámenes",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe método aprobado."
         }
       ],
       "adn_escribe": [
@@ -1589,7 +1616,8 @@
           "tipo": "texto",
           "nombre": "La oferta en una página",
           "valida": "precio >= precio_digno",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe la oferta en una página."
         }
       ],
       "adn_escribe": [
@@ -1627,7 +1655,8 @@
           "tipo": "texto",
           "nombre": "Garantía y compromisos",
           "valida": "no promete resultado; compromisos con verbo y número",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe garantía y compromisos."
         }
       ],
       "adn_escribe": [
@@ -1666,13 +1695,15 @@
           "tipo": "texto",
           "nombre": "Los cinco niveles",
           "valida": "el tercero marcado",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe los cinco niveles."
         },
         {
           "tipo": "evento",
           "nombre": "Rodaje agendado",
           "valida": "fecha y hora bloqueadas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: rodaje agendado."
         }
       ],
       "adn_escribe": [
@@ -1709,7 +1740,8 @@
           "tipo": "texto",
           "nombre": "Dos columnas",
           "valida": "ambas completas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe dos columnas."
         }
       ],
       "adn_escribe": [
@@ -1745,7 +1777,8 @@
           "tipo": "archivo",
           "nombre": "Audio del ancla",
           "valida": "compara tono y velocidad de la primera y la última",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube el archivo: audio del ancla."
         }
       ],
       "adn_escribe": [
@@ -1784,7 +1817,8 @@
           "tipo": "imagen",
           "nombre": "El circuito dibujado",
           "valida": "cinco piezas unidas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de el circuito dibujado."
         }
       ],
       "adn_escribe": [],
@@ -1821,7 +1855,8 @@
           "tipo": "numero",
           "nombre": "Audiencia contada",
           "valida": ">= 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: audiencia contada."
         }
       ],
       "adn_escribe": [
@@ -1862,7 +1897,8 @@
           "tipo": "imagen",
           "nombre": "Captura del perfil",
           "valida": "los cuatro elementos presentes",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube captura del perfil."
         }
       ],
       "adn_escribe": [],
@@ -1893,7 +1929,7 @@
       "acceso": null,
       "pasos": [
         "Revisa que tengas promesa, cinco filas, garantía y precio",
-        "El Escriba arma el pedido inicial: leelo entero antes de mandarlo",
+        "Mateo arma el pedido inicial: léelo entero antes de mandarlo",
         "Pide los tres cambios: celular, letra grande, aviso legal",
         "Sube y publica en tu subdominio"
       ],
@@ -1902,7 +1938,8 @@
           "tipo": "url",
           "nombre": "El enlace vivo",
           "valida": "200, contiene la promesa, botón de agenda, carga en móvil",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Pega el enlace: el enlace vivo."
         }
       ],
       "adn_escribe": [
@@ -1934,8 +1971,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "El Escriba arma el guion del VSL con tu ADN",
-        "El Escriba arma los tres anuncios según tu rama",
+        "Mateo arma el guion del video de tu página con tu ADN",
+        "Mateo arma los tres anuncios según tu rama",
         "Sube fotos del lugar: la Cámara corrige luz, fondo y altura",
         "Lee el guion en voz alta tres veces"
       ],
@@ -1944,13 +1981,15 @@
           "tipo": "texto",
           "nombre": "Guion del VSL y tres anuncios",
           "valida": "completos",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe guion del VSL y tres anuncios."
         },
         {
           "tipo": "imagen",
           "nombre": "Set armado",
           "valida": "aprobado por la Cámara",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de set armado."
         }
       ],
       "adn_escribe": [],
@@ -1987,7 +2026,8 @@
           "tipo": "archivo",
           "nombre": "Cinco archivos",
           "valida": "duración mínima por pieza, audio presente",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube el archivo: cinco archivos."
         }
       ],
       "adn_escribe": [],
@@ -2032,7 +2072,8 @@
           "tipo": "evento",
           "nombre": "Agenda de prueba",
           "valida": "formulario + calendario + confirmación del mismo contacto",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: agenda de prueba."
         }
       ],
       "adn_escribe": [
@@ -2071,7 +2112,8 @@
           "tipo": "evento",
           "nombre": "Pixel disparando",
           "valida": "verificado desde la app",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: pixel disparando."
         }
       ],
       "adn_escribe": [
@@ -2109,7 +2151,8 @@
           "tipo": "archivo",
           "nombre": "Tres anuncios",
           "valida": "estado listo en el banco",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube el archivo: tres anuncios."
         }
       ],
       "adn_escribe": [],
@@ -2152,7 +2195,8 @@
           "tipo": "evento",
           "nombre": "Campaña activa",
           "valida": "detectada por la conexión con Meta",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: campaña activa."
         }
       ],
       "adn_escribe": [],
@@ -2218,13 +2262,15 @@
           "tipo": "imagen",
           "nombre": "Tablero con cuatro columnas",
           "valida": "gasto, entradas, agendas, costo por agenda",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de tablero con cuatro columnas."
         },
         {
           "tipo": "numero",
           "nombre": "Costo por agenda",
           "valida": "> 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: costo por agenda."
         }
       ],
       "adn_escribe": [],
@@ -2309,20 +2355,22 @@
         "Escribe tus preguntas de cada tramo",
         "Marca el minuto del precio",
         "Escribe qué haces después del número: nada",
-        "Practica una llamada completa con el Sparring"
+        "Practica una llamada completa con Lucas"
       ],
       "evidencias": [
         {
           "tipo": "texto",
           "nombre": "Tu W con tus preguntas",
           "valida": "los siete tramos",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe tu W con tus preguntas."
         },
         {
           "tipo": "evento",
           "nombre": "Sesión de sparring",
           "valida": "completada",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: sesión de sparring."
         }
       ],
       "adn_escribe": [
@@ -2361,7 +2409,8 @@
           "tipo": "texto",
           "nombre": "La primera objeción real",
           "valida": "textual, con las palabras de la persona",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe la primera objeción real."
         }
       ],
       "adn_escribe": [
@@ -2399,7 +2448,8 @@
           "tipo": "texto",
           "nombre": "Mensaje previo y criterio",
           "valida": "el criterio con dos condiciones objetivas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe mensaje previo y criterio."
         }
       ],
       "adn_escribe": [],
@@ -2436,7 +2486,8 @@
           "tipo": "evento",
           "nombre": "Grabación activada",
           "valida": "en el Sistema",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: grabación activada."
         }
       ],
       "adn_escribe": [],
@@ -2520,7 +2571,7 @@
         "Sube o elige una llamada real",
         "Escúchala entera: la app no deja saltar",
         "Anota los cuatro números",
-        "Compara con los que midió el Sparring",
+        "Compara con los que midió Lucas",
         "Elige una sola cosa para cambiar"
       ],
       "evidencias": [
@@ -2528,13 +2579,15 @@
           "tipo": "numero",
           "nombre": "Los cuatro números",
           "valida": "minuto, preguntas, silencio, pidió decisión",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: los cuatro números."
         },
         {
           "tipo": "texto",
           "nombre": "La cosa que cambia",
           "valida": "una sola",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe la cosa que cambia."
         }
       ],
       "adn_escribe": [],
@@ -2570,13 +2623,15 @@
           "tipo": "texto",
           "nombre": "El permiso escrito",
           "valida": "contiene un nombre propio",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el permiso escrito."
         },
         {
           "tipo": "archivo",
           "nombre": "El permiso dicho",
           "valida": "audio",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube el archivo: el permiso dicho."
         }
       ],
       "adn_escribe": [
@@ -2618,13 +2673,15 @@
           "tipo": "evento",
           "nombre": "Bandeja clasificada",
           "valida": "al menos cinco conversaciones con estado y fecha",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: bandeja clasificada."
         },
         {
           "tipo": "imagen",
           "nombre": "La lista tachada",
           "valida": "tachado visible",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de la lista tachada."
         }
       ],
       "adn_escribe": [],
@@ -2656,7 +2713,8 @@
           "tipo": "evento",
           "nombre": "Cobro del sistema",
           "valida": "contacto con origen campaña",
-          "del_mercado": true
+          "del_mercado": true,
+          "pide": "Se marca solo: cobro del sistema."
         }
       ],
       "adn_escribe": [],
@@ -2692,7 +2750,8 @@
           "tipo": "texto",
           "nombre": "La decisión",
           "valida": "con el costo por agenda al lado",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe la decisión."
         }
       ],
       "adn_escribe": [],
@@ -2732,13 +2791,15 @@
           "tipo": "texto",
           "nombre": "Dos columnas, estaciones y línea base",
           "valida": "completas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe dos columnas, estaciones y línea base."
         },
         {
           "tipo": "numero",
           "nombre": "Horas por consultante al mes",
           "valida": "> 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: horas por consultante al mes."
         }
       ],
       "adn_escribe": [
@@ -2780,7 +2841,8 @@
           "tipo": "texto",
           "nombre": "Bienvenida, tres límites y siete pasos",
           "valida": "completos",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe bienvenida, tres límites y siete pasos."
         }
       ],
       "adn_escribe": [
@@ -2845,7 +2907,8 @@
           "tipo": "imagen",
           "nombre": "Tu app con tu marca",
           "valida": "logo y color visibles",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de tu app con tu marca."
         }
       ],
       "adn_escribe": [],
@@ -2882,7 +2945,8 @@
           "tipo": "evento",
           "nombre": "Cuatro etapas cargadas",
           "valida": "con contenido asignado",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: cuatro etapas cargadas."
         }
       ],
       "adn_escribe": [],
@@ -2919,7 +2983,8 @@
           "tipo": "archivo",
           "nombre": "Cuatro videos",
           "valida": "subidos y asignados a su etapa",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube el archivo: cuatro videos."
         }
       ],
       "adn_escribe": [],
@@ -2956,13 +3021,15 @@
           "tipo": "evento",
           "nombre": "Compra de prueba",
           "valida": "pago propio registrado",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Se marca solo: compra de prueba."
         },
         {
           "tipo": "imagen",
           "nombre": "Consultante adentro",
           "valida": "captura desde celular con tu marca",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Sube una foto de consultante adentro."
         }
       ],
       "adn_escribe": [],
@@ -3029,7 +3096,8 @@
           "tipo": "texto",
           "nombre": "Tu cadena con tus números",
           "valida": "los cuatro escalones",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe tu cadena con tus números."
         }
       ],
       "adn_escribe": [],
@@ -3215,7 +3283,8 @@
           "tipo": "texto",
           "nombre": "Los tres enfoques",
           "valida": "con su filtro",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe los tres enfoques."
         }
       ],
       "adn_escribe": [
@@ -3407,7 +3476,8 @@
           "tipo": "texto",
           "nombre": "Doce semanas con sus ganchos",
           "valida": "doce filas",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe doce semanas con sus ganchos."
         }
       ],
       "adn_escribe": [],
@@ -3982,7 +4052,8 @@
           "tipo": "texto",
           "nombre": "Tu día siguiente",
           "valida": "en presente",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe tu día siguiente."
         }
       ],
       "adn_escribe": [
@@ -4020,7 +4091,8 @@
           "tipo": "numero",
           "nombre": "Hora real neta final",
           "valida": "> 0",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe el número: hora real neta final."
         }
       ],
       "adn_escribe": [
@@ -4058,7 +4130,8 @@
           "tipo": "texto",
           "nombre": "Plan de 180 aprobado",
           "valida": "doce semanas + tres meses",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe plan de 180 aprobado."
         }
       ],
       "adn_escribe": [],
@@ -4093,7 +4166,8 @@
           "tipo": "texto",
           "nombre": "Lo que se puede cerrar",
           "valida": "con nombres",
-          "del_mercado": false
+          "del_mercado": false,
+          "pide": "Escribe lo que se puede cerrar."
         }
       ],
       "adn_escribe": [],
@@ -4123,7 +4197,8 @@
           "tipo": "evento",
           "nombre": "Diez consultantes",
           "valida": "contados desde MCD, todos al precio digno",
-          "del_mercado": true
+          "del_mercado": true,
+          "pide": "Se marca solo: diez consultantes."
         }
       ],
       "adn_escribe": [],

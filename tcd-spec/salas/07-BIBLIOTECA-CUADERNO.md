@@ -10,7 +10,7 @@ que hoy el cliente escribe a Javo.
 |---|---|---|
 | La Biblioteca | "¿Dónde estaba esto que explicaste?" | Camino |
 | El Cuaderno | "Perdí lo que escribí en la semana 1" | Camino |
-| El Ring | "¿Estoy mejorando o no?" | Dojo |
+| El Ring | "¿Estoy mejorando o no?" | Entrenadores |
 | El Reloj | "No me alcanza el tiempo" | Hoy |
 | SOS | "Estoy trabado" | Flotante |
 
@@ -105,7 +105,7 @@ recuerda por qué empezó.
 
 # 3 · El Ring
 
-Historial de sparring. Vive dentro del Dojo, debajo del agente Sparring.
+Historial de sparring. Vive dentro de Entrenadores, debajo del agente Sparring.
 
 **Qué resuelve.** Después de dos llamadas perdidas, el cliente concluye que no
 sabe vender y abandona. El Ring le muestra que sus cuatro números se están
@@ -220,11 +220,11 @@ Cada motivo por el que hoy te escriben, y dónde se resuelve solo.
 |---|---|
 | "¿Cómo era esto que explicaste?" | La Biblioteca, desde el video |
 | "¿Qué hago hoy?" | Hoy, siempre hay una sola cosa |
-| "No me sale el método" | El Crítico |
-| "No sé qué escribir" | El Escriba |
-| "Me da miedo grabar" | La Cámara |
-| "Se me cayó la llamada" | El Sparring y el Ring |
-| "No me funciona la campaña" | El Tablero, con su cuello |
+| "No me sale el método" | Diego |
+| "No sé qué escribir" | Mateo |
+| "Me da miedo grabar" | Caro |
+| "Se me cayó la llamada" | Lucas y el Ring |
+| "No me funciona la campaña" | Ramiro, con su cuello |
 | "¿Está bien así?" | La evidencia, con validación automática |
 | "¿Estoy avanzando?" | El cinturón y el Ring |
 | "Perdí lo que escribí" | El Cuaderno |

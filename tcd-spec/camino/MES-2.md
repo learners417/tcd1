@@ -34,7 +34,7 @@ la mayoría rompe:
 
 `MANUAL` La Llamada · panel LLA-1
 
-`DOJO` El Sparring, primera sesión guiada.
+`DOJO` Lucas, primera sesión guiada.
 
 `HACE`
 1. Dibuja su propia W sobre la plantilla: apertura, situación, problema,
@@ -42,7 +42,7 @@ la mayoría rompe:
 2. Escribe sus preguntas de cada tramo, con sus palabras.
 3. **Marca el minuto del precio** dentro de su W.
 4. Escribe qué hace después de decir el número. La respuesta correcta es: nada.
-5. Practica una llamada completa con el Sparring.
+5. Practica una llamada completa con Lucas.
 
 `EVIDENCIA` · `texto` estructurado · su W con sus preguntas
 + `evento` · una sesión de sparring completada
@@ -106,7 +106,7 @@ urgencia que la persona ya declaró.
 
 `MANUAL` La Llamada · panel LLA-4
 
-`DOJO` El Sparring, en modo autopsia: recibe la grabación y devuelve los cuatro
+`DOJO` Lucas, en modo autopsia: recibe la grabación y devuelve los cuatro
 números medidos.
 
 `HACE`
@@ -114,7 +114,7 @@ números medidos.
 2. La escucha entera. La app no deja saltar.
 3. Anota los cuatro números: **minuto del precio · preguntas antes de presentar ·
    segundos de silencio después del número · si pidió la decisión**.
-4. Compara con los que midió el Sparring.
+4. Compara con los que midió Lucas.
 5. Elige **una sola** cosa para cambiar en la próxima.
 
 `EVIDENCIA` · `numero` × 4 + `texto` · la cosa que cambia
@@ -128,7 +128,7 @@ nada. Lo que significa algo es la tercera."*
 ---
 
 ## Días 43 y 44 · Apertura 3 · el permiso
-**20 min cada uno, sin video, en el Dojo con el Espejo. Carril paralelo.**
+**20 min cada uno, sin video, en Entrenadores con el Espejo. Carril paralelo.**
 
 ### Día 43 · A quién traicionarías ganando más
 
@@ -237,7 +237,7 @@ te cuesta una agenda buena, no escalás: apostás."*
 
 `MANUAL` La Clínica · panel CLI-4
 
-`DOJO` **Se abre El Arquitecto.**
+`DOJO` **Se abre Bruno.**
 
 `HACE`
 1. Parte su programa en dos columnas: **lo que va grabado · lo que va en vivo**.
@@ -309,7 +309,7 @@ consigue consultantes, no reemplaza sesiones).
 
 `MIRA` **P8.2 · Traer tu método y armar tus etapas** · 7 min · pantalla · NUEVO
 
-`DOJO` El Arquitecto, en modo etapas.
+`DOJO` Bruno, en modo etapas.
 
 `HACE`
 1. Aprieta el botón que trae todo: su protocolo, su avatar y su catálogo desde

@@ -86,7 +86,7 @@ el día 12. Esa plata financia la campaña del día 31.
 video y formulario son los mismos en las dos ramas. Lo único que cambia es a
 quién se le muestra el anuncio.
 
-**4 · El Dojo es una sala, no la app.** Recorrer, entrenar, dirigir: tres verbos,
+**4 · Entrenadores es una sala, no la app.** Recorrer, entrenar, dirigir: tres verbos,
 tres lugares.
 
 **5 · Ocho agentes que se ganan.** Cada uno se abre con la evidencia que necesita
@@ -141,11 +141,11 @@ recorrer el camino completo sin agentes.**
 **Etapa 2 · evidencias.** Los seis tipos, la validación por regla, los estados de
 rechazo. Los cinturones. Acá el producto empieza a ser un dojo y no un curso.
 
-**Etapa 3 · los agentes.** Primero el Crítico y el Sparring, que son los dos que
+**Etapa 3 · los agentes.** Primero Diego y Lucas, que son los dos que
 más cambian el resultado. Después el Espejo, que es el más delicado. El resto en
 orden de día.
 
-**Etapa 4 · el Mando.** Creativos, Campañas y Números. Conexión con Meta de
+**Etapa 4 · Campañas.** Creativos, Campañas y Números. Conexión con Meta de
 lectura primero, las tres acciones de escritura después.
 
 **Etapa 5 · las salas de apoyo.** Biblioteca, Cuaderno, Ring, Reloj, SOS.

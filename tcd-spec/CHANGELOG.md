@@ -12,7 +12,7 @@ Reemplaza toda versión anterior del camino, los cinturones y el roadmap.
   mueven del día 18 a la semana 2. Cobra al precio nuevo el día 12.
 - **El embudo se bifurca por audiencia**, con una pregunta con número el día 23.
   Página, video y formulario son los mismos en las dos ramas.
-- **El Dojo deja de ser la app entera** y pasa a ser la sala de los ocho agentes.
+- **Entrenadores deja de ser la app entera** y pasa a ser la sala de los nueve entrenadores.
 - **El protocolo interior se reparte en tres aperturas** en vez de una semana
   bloque, siempre a menos de dos días de su examen real.
 - **Los cinturones pasan de nueve inventados a los once del taekwondo.**
@@ -29,7 +29,7 @@ Reemplaza toda versión anterior del camino, los cinturones y el roadmap.
 
 ### Producto
 
-- Cinco tabs: Hoy · Camino · Dojo · Mando · Clínica
+- Cinco tabs: Hoy · Camino · Entrenadores · Campañas · Clínica
 - Se agregan cinco salas de apoyo: Biblioteca, Cuaderno, Ring, Reloj, SOS
 - Motor de frenos con nueve reglas duras
 - 69 evidencias, ninguna validada con una tarea tildada

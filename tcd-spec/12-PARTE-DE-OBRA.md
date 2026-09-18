@@ -23,7 +23,7 @@ La prueba está en la propia pantalla:
 | La Matriz ABC como sesión propia | Sale de **P9.1**, día 61 |
 | Cinturón **Amarillo** en el día 67 | **Rojo punta negra**, otorgado el día 55 |
 | 20% de avance en el día 67 | 74% del calendario |
-| Cinco tabs: Hoy · Camino · ADN · Mentor · Clínica | Hoy · Camino · **Dojo** · **Mando** · Clínica |
+| Cinco tabs: Hoy · Camino · ADN · Mentor · Clínica | Hoy · Camino · **Entrenadores** · **Campañas** · Clínica |
 | Un solo Mentor | **Ocho agentes** |
 
 **Hasta que no se reemplace `roadmapSeed.ts` y se siembre `roadmap.seed.json`,
@@ -134,13 +134,13 @@ desaparece. Arriba, barra lateral y la inferior desaparece.
 |---|---|
 | Hoy | Hoy |
 | Tu Camino | Tu Camino |
-| **Tu ADN** | **Tu Dojo** — el ADN sube a su encabezado |
-| **Tu Mentor** | *(se disuelve adentro del Dojo, con los ocho agentes)* |
-| — | **Tu Mando** — Creativos · Campañas · Números |
+| **Tu ADN** | **Tu Entrenadores** — el ADN sube a su encabezado |
+| **Tu Mentor** | *(se disuelve adentro de Entrenadores, con los nueve entrenadores)* |
+| — | **Tu Campañas** — Creativos · Tu campaña · Números |
 | Tu Clínica | Tu Clínica |
 
 **Cerrado cuando:** en un teléfono de 430 px la barra está abajo, son cinco, y
-dicen Hoy · Tu Camino · Tu Dojo · Tu Mando · Tu Clínica.
+dicen Hoy · Tu Camino · Tu Entrenadores · Tu Campañas · Tu Clínica.
 
 ---
 
@@ -156,7 +156,7 @@ ninguno consuela ni nombra culpa. Alguien que volvió después de una pausa es
 alguien que ya estaba por irse: la primera frase que lee no puede ser sobre la
 pausa.
 
-**Qué hacer.** El Mentor se reemplaza por el Dojo con los ocho agentes, cada uno
+**Qué hacer.** El Mentor se reemplaza por Entrenadores con los nueve entrenadores, cada uno
 con el prompt de `agentes/prompts/`. Mientras eso llega, el Mentor actual arranca
 en el trabajo:
 
@@ -283,7 +283,7 @@ porcentaje solo.
 3  B3 · ADN editable en su tarjeta
 4  G1 · barra inferior en móvil + los cinco destinos nuevos
 5  G3 · placeholders de video
-6  G2 · el Dojo con los ocho agentes
+6  G2 · Entrenadores con los nueve entrenadores
 7  E1 a E5 · experiencia
 ```
 

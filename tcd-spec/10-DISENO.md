@@ -132,7 +132,7 @@ Dos familias, roles separados y sin excepción.
 | Rol | Familia | Tamaño | Peso | Dónde |
 |---|---|---|---|---|
 | Título de sesión | Fraunces | 33 / 28 | 400 | Tarjeta de hoy, encabezados |
-| Título de sección | Fraunces | 26 / 22 | 400 | Camino, Dojo, Mando |
+| Título de sección | Fraunces | 26 / 22 | 400 | Camino, Entrenadores, Campañas |
 | Cuerpo | Sora | 17,5 | 400 | Descripciones, pasos |
 | Cuerpo fuerte | Sora | 17,5 | 600 | Lo que no se puede saltear |
 | Botón | Sora | 18 | 700 | Primario |
@@ -158,19 +158,19 @@ Ancho de línea: máximo 62 caracteres. En 430 px eso se da solo.
 ## 4 · Los cinco tabs
 
 ```
-[ Hoy ]   [ Camino ]   [ Dojo ]   [ Mando ]   [ Clínica ]
+[ Hoy ]   [ Camino ]   [ Entrenadores ]   [ Campañas ]   [ Clínica ]
 ```
 
 ### Lo que cambia respecto de la app actual
 
 | Antes | Ahora | Por qué |
 |---|---|---|
-| ADN | **Dojo** | El ADN sube al encabezado del Dojo. Deja de ser un destino y pasa a ser lo que los agentes leen |
-| Mentor | **Dojo** | El Mentor era un agente suelto. Ahora son ocho, y viven juntos |
-| — | **Mando** | Creativos, Campañas y Números, con solapas |
+| ADN | **Entrenadores** | El ADN sube al encabezado de Entrenadores. Deja de ser un destino y pasa a ser lo que los agentes leen |
+| Mentor | **Entrenadores** | El Mentor era un agente suelto. Ahora son ocho, y viven juntos |
+| — | **Campañas** | Creativos, Campañas y Números, con solapas |
 | Hoy, Camino, Clínica | Igual | No se tocan |
 
-**Ícono del Dojo:** el que hoy usa Mentor. **Ícono del Mando:** la casa/hexágono
+**Ícono de Entrenadores:** el que hoy usa Mentor. **Ícono del Campañas:** la casa/hexágono
 que hoy usa Clínica, y Clínica pasa al ícono de agenda. Es el cambio mínimo que
 mantiene el reconocimiento.
 
@@ -316,10 +316,10 @@ Cada uno es una invitación a hacer, nunca una disculpa.
 
 | Pantalla | Cuándo | Qué dice |
 |---|---|---|
-| Mando · Campañas | Antes del día 31 | La lista de control de lo que falta para encender, con enlace a cada sesión |
-| Mando · Creativos | Antes del día 26 | "Tu primera pieza se escribe el día 26 con el Escriba." |
-| Dojo | Día 1 y 2 | "El Espejo se abre mañana, cuando tengas tu número." |
-| Ring | Antes del día 28 | "Acá van a quedar tus llamadas. La primera es contra el Sparring." |
+| Campañas · Campañas | Antes del día 31 | La lista de control de lo que falta para encender, con enlace a cada sesión |
+| Campañas · Creativos | Antes del día 26 | "Tu primera pieza se escribe el día 26 con Mateo." |
+| Entrenadores | Día 1 y 2 | "El Espejo se abre mañana, cuando tengas tu número." |
+| Ring | Antes del día 28 | "Acá van a quedar tus llamadas. La primera es contra Lucas." |
 | Cuaderno | Día 1 y 2 | "Esto es tuyo y no lo ve nadie. La primera entrada es tu número." |
 | Bloque Dirigir | Semana 1 | "Todavía no hay nada acá, y está bien." |
 
@@ -361,9 +361,9 @@ Lista puntual contra la versión que está hoy.
 |---|---|---|
 | Etiqueta de tab | 12,5 px | 14 px |
 | Kicker HOY | 13 px | 14 px |
-| Tab ADN | Existe | Pasa al encabezado del Dojo |
-| Tab Mentor | Existe | Se convierte en Dojo, con ocho agentes |
-| Tab Mando | No existe | Se agrega |
+| Tab ADN | Existe | Pasa al encabezado de Entrenadores |
+| Tab Mentor | Existe | Se convierte en Entrenadores, con nueve entrenadores |
+| Tab Campañas | No existe | Se agrega |
 | "3 de 5" en la barra | Cuenta sistemas | Bien, se queda |
 | "75 sesiones" | En la nota | Son **91 jornadas**: 42 sesiones, 6 de protocolo, 2 rodajes, 10 de campo, 29 de ciclo |
 | "Tu app · se abre cuando cobres" | Día 53 | **Día 50**, y el texto cambia: Mi Clínica ya la usa desde el día 2 |

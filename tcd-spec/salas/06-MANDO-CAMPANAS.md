@@ -1,6 +1,6 @@
-# Mando · Campañas
+# Campañas · Campañas
 
-Segunda solapa del Mando. Se abre el día 31, cuando enciende. Antes de eso
+Segunda solapa del Campañas. Se abre el día 31, cuando enciende. Antes de eso
 muestra una sola pantalla: qué falta para poder encender.
 
 **Qué resuelve.** El administrador de anuncios de Meta tiene cientos de columnas
@@ -71,7 +71,7 @@ habilitado**.
 |---|---|---|
 | Costo por agenda por debajo de su objetivo, sostenido 7 días | **Subir un escalón** | +20% del presupuesto. Nunca más |
 | Dentro de su objetivo, sin tendencia clara | **Sostener** | No toca nada. Vuelve el lunes |
-| Por encima de su objetivo, sostenido 7 días | **Apagar y cambiar creatividad** | Pausa el anuncio peor y abre el Escriba |
+| Por encima de su objetivo, sostenido 7 días | **Apagar y cambiar creatividad** | Pausa el anuncio peor y abre Mateo |
 
 **Debajo del botón, siempre, el número que lo justifica.** El cliente escribe la
 decisión antes de ejecutarla: la app pide una línea.

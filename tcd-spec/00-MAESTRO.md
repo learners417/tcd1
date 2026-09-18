@@ -41,19 +41,19 @@ El cliente tiene que saber siempre en qué sala está y qué verbo le toca.
 | Sala | Verbo | Qué contiene |
 |---|---|---|
 | **El Camino** | Recorrer | Los 90 días, las evidencias, los cinturones, los manuales, el cuaderno |
-| **El Dojo** | Entrenar | El ADN y los ocho agentes. Se practica contra algo que responde |
+| **Entrenadores** | Entrenar | El ADN y los nueve entrenadores. Se practica contra algo que responde |
 | **Mi Clínica** | Dirigir | Consultantes, agenda, cobros, números (abre MCD) |
 
 ### Barra inferior · cinco tabs, nunca seis
 
 ```
-[ Hoy ]  [ Camino ]  [ Dojo ]  [ Mando ]  [ Clínica ]
+[ Hoy ]  [ Camino ]  [ Entrenadores ]  [ Campañas ]  [ Clínica ]
 ```
 
 **Hoy** — la sesión del día, la jornada de cuatro horas, el marcador y el freno activo.
 **Camino** — los cinco sistemas, los 90 días, evidencias, cinturón, biblioteca, cuaderno.
-**Dojo** — el ADN arriba, los ocho agentes abajo, el Ring con el historial de sparring.
-**Mando** — tres solapas: Creativos · Campañas · Números.
+**Entrenadores** — el ADN arriba, los nueve entrenadores abajo, el Ring con el historial de sparring.
+**Campañas** — tres solapas: Creativos · Tu campaña · Números.
 **Clínica** — abre MCD en ventana propia.
 
 **Regla de navegación:** desde cualquier pantalla, dos toques para llegar a
@@ -154,10 +154,10 @@ sugerencias. Cada freno tiene motivo visible y fecha o condición de apertura.
 | `F-PAGINA` | El día 26 no abre sin el enlace de la página cargado | Campo `url_pagina` con http | "Sin página publicada, el guion del video no tiene dónde vivir." |
 | `F-RODAJE` | La fecha de rodaje se bloquea en el día 19 | Fecha y hora elegidas | "Elegí el día. El rodaje que no tiene fecha no ocurre." |
 | `F-14DIAS` | La sesión de escalar y apagar queda cerrada del 31 al 45 | Día 46 | "Faltan N días. Tu campaña está aprendiendo." |
-| `F-TABLERO` | El Tablero responde "todavía no" a cualquier cambio entre el 31 y el 45 | Día 46 | — |
+| `F-TABLERO` | Ramiro responde "todavía no" a cualquier cambio entre el 31 y el 45 | Día 46 | — |
 | `F-COMPRA` | No puede invitar a un consultante sin hacer la compra de prueba | Evidencia de compra propia | "Comprate a vos mismo antes de invitar a nadie." |
 | `F-PRECIO` | El precio del día 17 no puede ser menor al del día 9 | Validación numérica | "Tu oferta no puede valer menos que lo que ya cobrás." |
-| `F-ADN` | Ningún agente arranca con el ADN vacío en los campos que necesita | Campos requeridos del agente | "El Escriba necesita tu oferta. Volvé al día 17." |
+| `F-ADN` | Ningún agente arranca con el ADN vacío en los campos que necesita | Campos requeridos del agente | "Mateo necesita tu oferta. Volvé al día 17." |
 
 ---
 
@@ -183,13 +183,13 @@ tildada: todas piden una captura, un archivo, un número o un texto.
 
 **El rechazo nunca es genérico.** Devuelve qué falta, en una lista de como mucho
 tres puntos, y qué sesión repasar. La tercera corrección seguida en la misma
-evidencia abre un aviso: "esto lo resolvés más rápido en el Dojo con [agente]".
+evidencia abre un aviso: "esto lo resolvés más rápido en Entrenadores con [agente]".
 
 ---
 
 ## 7. El ADN · fuente única de verdad
 
-Vive arriba del Dojo. Todos los agentes lo leen. Se completa solo, sesión a
+Vive arriba de Entrenadores. Todos los agentes lo leen. Se completa solo, sesión a
 sesión: el cliente nunca lo llena de una vez.
 
 ```
@@ -220,23 +220,28 @@ escribe ninguno, sobra.
 
 ---
 
-## 8. Los ocho agentes del Dojo
+## 8. Los nueve entrenadores
 
-Ninguno está disponible el día 1. Cada uno se abre con una evidencia, y esa
-evidencia es exactamente lo que el agente necesita para servir de algo.
+Viven en la pestaña **Entrenadores**, debajo del ADN. Ninguno está disponible el
+día 1: cada uno se abre al cerrar la jornada donde aparece por primera vez, y
+esa evidencia es lo que necesita para servir de algo. El día es estimado.
 
-| Agente | Día | Se abre con | Qué hace |
+| Entrenador | Te entrena en | Día estimado | Se abre con |
 |---|---|---|---|
-| El Espejo | 3 | Hora real neta cargada | Acompaña las tres aperturas del protocolo. Pregunta, no interpreta |
-| El Crítico | 15 | Método escrito | Juzga contra los tres exámenes. Puede reprobar |
-| El Escriba | 22 | Oferta, garantía y escalera selladas | Escribe página, VSL y anuncios con su voz |
-| La Cámara | 24 | Perfil cerrado | Arma el set, corrige luz y encuadre, marca las pausas del guion |
-| El Sparring | 28 | Agenda de prueba completada | Actúa al consultante, objeta, devuelve los cuatro números |
-| El Tablero | 33 | Campaña activa | Lee sus cuatro números, dice el cuello y la acción |
-| El Arquitecto | 47 | Primer cobro del sistema | Arma la cinta, las estaciones y la línea base |
-| El Estratega | 61 | Cinturón rojo | Matriz ABC y las doce semanas. Solo escribe |
+| El Espejo | el trabajo interno | 3 | tu hora real neta cargada |
+| Vera | tu precio | 9 | tu precio digno sellado |
+| Sofi | tus mensajes | 14 | veinte mensajes enviados |
+| Diego | tu producto (aprueba tu método) | 15 | tu método escrito |
+| Mateo | tu contenido (página, video, anuncios, plan de marca) | 22 | tu oferta sellada |
+| Caro | tu cámara | 24 | tu perfil cerrado |
+| Ramiro | tu embudo (lee tus números) | 33 | tu campaña activa |
+| Lucas | tus llamadas (actúa de consultante) | 36 | tu llamada dibujada |
+| Bruno | tu entrega | 47 | tu primer cobro del sistema |
 
-Detalle completo, prompts y límites: `agentes/02-AGENTES.md`.
+**El Mentor** no es un entrenador: es el botón fijo que está en todas las
+pantallas. Conoce tu camino entero y te manda con el entrenador que corresponde.
+
+Fuente de verdad: `datos/roadmap.seed.json` → `agentes`.
 
 ---
 
@@ -250,7 +255,7 @@ vuelve árbol, y esa es exactamente la historia del camino.
 | 10.º gup | Blanco | 1 | Búnker abierto y pacto publicado |
 | 9.º gup | Blanco punta amarilla | 3 | Su hora real neta escrita a mano |
 | 8.º gup | Amarillo | 12 | Captura del primer cobro a su cartera |
-| 7.º gup | Amarillo punta verde | 16 | Método aprobado por el Crítico |
+| 7.º gup | Amarillo punta verde | 16 | Método aprobado por Diego |
 | 6.º gup | Verde | 19 | Oferta completa en una página |
 | 5.º gup | Verde punta azul | 25 | El enlace vivo de su página |
 | 4.º gup | Azul | 28 | Agendarse a sí mismo de punta a punta |
@@ -280,7 +285,7 @@ el permiso, el audio del ancla. El Espejo se lo devuelve el día del examen.
 **El Ring.** Historial de sparring: cada llamada practicada con sus cuatro
 números, en línea de tiempo. Es lo que hace visible que está mejorando.
 
-**El Mando.** Creativos, Campañas y Números en un solo lugar, con solapas.
+**El Campañas.** Creativos, Campañas y Números en un solo lugar, con solapas.
 
 **El Reloj.** La jornada de cuatro horas con sus tres bloques, en la pantalla Hoy.
 

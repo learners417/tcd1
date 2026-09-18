@@ -16,7 +16,7 @@ evidencia.
 | 10.º gup | Blanco | 1 | La semilla bajo la nieve | Búnker abierto y pacto publicado |
 | 9.º gup | Blanco punta amarilla | 3 | La semilla toca la tierra | Su hora real neta escrita a mano |
 | 8.º gup | Amarillo | 12 | La tierra | Primer cobro a su cartera al precio nuevo |
-| 7.º gup | Amarillo punta verde | 16 | Asoma el tallo | Método aprobado por el Crítico |
+| 7.º gup | Amarillo punta verde | 16 | Asoma el tallo | Método aprobado por Diego |
 | 6.º gup | Verde | 19 | La planta en pie | Oferta completa en una página |
 | 5.º gup | Verde punta azul | 25 | La planta busca el cielo | El enlace vivo de su página |
 | 4.º gup | Azul | 28 | El cielo | Agendarse a sí mismo de punta a punta |
@@ -102,7 +102,7 @@ primero que se gana con dinero real.
 **Desbloquea:** el día 17.
 
 **Puede reprobar las veces que haga falta.** A la tercera reprobación, la app
-sugiere: *"El Crítico te marcó lo mismo tres veces. Volvé al panel CLI-1 de La
+sugiere: *"Diego te marcó lo mismo tres veces. Volvé al panel CLI-1 de La
 Clínica antes de presentar de nuevo."*
 
 ---
@@ -116,7 +116,7 @@ Clínica antes de presentar de nuevo."*
 | Escalera de 5 | `texto` | Cinco niveles con el tercero marcado |
 | Rodaje agendado | `evento` | Fecha y hora bloqueadas |
 
-**Desbloquea:** El Escriba y el sistema 3 completo.
+**Desbloquea:** Mateo y el sistema 3 completo.
 
 ---
 
@@ -136,7 +136,7 @@ Clínica antes de presentar de nuevo."*
 |---|---|---|
 | Agenda de prueba | `evento` | Formulario respondido + calendario reservado + confirmación enviada, todo del mismo contacto |
 
-**Desbloquea:** El Sparring.
+**Desbloquea:** Lucas.
 
 **Es el grado que más se disfruta**, porque la evidencia es que su circuito
 funcionó con él adentro.
@@ -149,7 +149,7 @@ funcionó con él adentro.
 |---|---|---|
 | Campaña activa | `evento` | Conexión con Meta: campaña en estado activo, un conjunto, tres anuncios |
 
-**Desbloquea:** El Tablero (día 33).
+**Desbloquea:** Ramiro (día 33).
 **Activa:** `F-14DIAS` y `F-TABLERO`.
 
 ---
@@ -160,7 +160,7 @@ funcionó con él adentro.
 |---|---|---|
 | Cobro del sistema | `evento` | Pago recibido de un contacto cuyo origen es la campaña |
 
-**Desbloquea:** El Arquitecto (día 47).
+**Desbloquea:** Bruno (día 47).
 
 **El color rojo es el sol y también el aviso de peligro, y acá se usan los dos
 sentidos.** Al otorgarlo, la app muestra el permiso del día 43 arriba de todo:
@@ -178,7 +178,7 @@ sentidos.** Al otorgarlo, la app muestra el permiso del día 43 arriba de todo:
 | Consultante adentro | `imagen` | Captura desde el celular: su marca + una etapa visible |
 | Su cadena | `texto` | Los cuatro números de la máquina, con datos propios del tablero |
 
-**Desbloquea:** El Estratega (día 61).
+**Desbloquea:** Mateo (día 61).
 
 ---
 

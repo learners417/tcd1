@@ -259,7 +259,7 @@ personas moverse de columna es la mitad del trabajo emocional.
 
 ## Día 10 · Los que suben · 45 min
 
-`DOJO` El Escriba todavía no existe. **El mensaje sale del video del día 8**, con
+`DOJO` Mateo todavía no existe. **El mensaje sale del video del día 8**, con
 una plantilla editable dentro de la app.
 
 `HACE`
@@ -321,7 +321,7 @@ barato. El cinturón amarillo espera al primero al precio nuevo."*
 
 `MIRA` **P2.1 · Tu método propio** · 6 min · pizarra · SE MANTIENE con recorte
 
-`DOJO` **Se abre El Crítico** (queda en modo lectura hasta que haya método escrito).
+`DOJO` **Se abre Diego** (queda en modo lectura hasta que haya método escrito).
 
 `MANUAL` La Clínica · panel CLI-1
 
@@ -332,7 +332,7 @@ barato. El cinturón amarillo espera al primero al precio nuevo."*
 4. Arma las siglas. Una letra por etapa.
 
 `EVIDENCIA` · `texto` estructurado · método con nombre, siglas y etapas
-→ el Crítico lo lee y devuelve faltantes
+→ Diego lo lee y devuelve faltantes
 
 `ADN` · `metodo.*`
 
@@ -343,7 +343,7 @@ barato. El cinturón amarillo espera al primero al precio nuevo."*
 `MIRA` **P2.4b · La prueba de tu método** · 6 min · pizarra · NUEVO
 *(transcribir de La Clínica · CLI-1B, no escribir de cero)*
 
-`DOJO` **El Crítico juzga.**
+`DOJO` **Diego juzga.**
 
 `HACE`
 1. Examen 1 · ¿se puede medir? Si no, no es método, es intención.
@@ -431,7 +431,7 @@ Hoy estás escribiendo de qué te hacés cargo."*
 ---
 
 ## Días 20 y 21 · Apertura 2 · el cuerpo
-**20 min cada uno, sin video, en el Dojo con el Espejo**
+**20 min cada uno, sin video, en Entrenadores con el Espejo**
 
 ### Día 20 · Cobrar libera al otro
 1. Escribe qué recibe su consultante a cambio del dinero.
@@ -463,7 +463,7 @@ tono y velocidad de la primera y la última. Si todavía sube el tono, devuelve
 
 `ACCESO` **Entrega 2 del Sistema** — sitios, formularios y contactos.
 
-`DOJO` **Se abre El Escriba.**
+`DOJO` **Se abre Mateo.**
 
 `MANUAL` El Camino · panel CAM-1
 
@@ -494,7 +494,7 @@ regraba primero.
 `ADN` · `trafico.audiencia_contada` · `trafico.rama`
 
 `EFECTO` La rama cambia lo que muestran los días 31 y 32, y cambia el pedido que
-el Escriba le hace para los anuncios. **Nada más cambia.** Página, video y
+Mateo le hace para los anuncios. **Nada más cambia.** Página, video y
 formulario son los mismos en los dos casos.
 
 ---
@@ -504,7 +504,7 @@ formulario son los mismos en los dos casos.
 `MIRA` **P4.2b · Tu perfil en veinte minutos** · 3 min · pantalla · NUEVO
 *(reemplaza el de 6 min con destacadas y marca personal)*
 
-`DOJO` **Se abre La Cámara.**
+`DOJO` **Se abre Caro.**
 
 `HACE`
 1. Foto: cara, fondo limpio, legible en miniatura.
@@ -521,13 +521,13 @@ formulario son los mismos en los dos casos.
 
 `MIRA` **P4.2d · Crear tu página con Claude** · 10 min · pantalla · NUEVO
 
-`DOJO` El Escriba, en modo página.
+`DOJO` Mateo, en modo página.
 
 `TUTORIAL` L-05 · Subir tu página · 4 min · L-06 · Tu subdominio · 3 min
 
 `HACE`
 1. Revisa que tenga a mano: promesa, cinco filas, garantía, precio. **Si falta algo, no empieza.**
-2. El Escriba arma el pedido inicial con su ADN. Él lo lee entero antes de mandarlo.
+2. Mateo arma el pedido inicial con su ADN. Él lo lee entero antes de mandarlo.
 3. Recibe la página. Pide tres cambios: celular, letra grande, aviso legal al pie.
 4. Sube y publica en su subdominio.
 
@@ -550,18 +550,18 @@ Publicala hoy fea y arreglala el sábado."*
 
 `MIRA` **P4.3e · Cómo se arma tu VSL** · 8 min · pantalla · NUEVO
 
-`DOJO` La Cámara + El Escriba, juntos. **Único día con dos agentes.**
+`DOJO` Caro + Mateo, juntos. **Único día con dos agentes.**
 
 `HACE`
-1. El Escriba arma el guion del VSL con su ADN y su historia.
-2. El Escriba arma los tres anuncios, según su rama.
-3. Sube fotos del lugar donde va a grabar. La Cámara corrige luz, fondo, altura
+1. Mateo arma el guion del VSL con su ADN y su historia.
+2. Mateo arma los tres anuncios, según su rama.
+3. Sube fotos del lugar donde va a grabar. Caro corrige luz, fondo, altura
    y ropa.
-4. Lee el guion en voz alta tres veces. La Cámara le marca las pausas.
+4. Lee el guion en voz alta tres veces. Caro le marca las pausas.
 
 `EVIDENCIA`
 - `texto` · guion del VSL y los tres anuncios
-- `imagen` · foto del set armado, aprobada por La Cámara
+- `imagen` · foto del set armado, aprobada por Caro
 
 `NOTA` Esto sale directo de su propio video: 80% preproducción, 20% grabar. La
 mayoría lo hace al revés.
@@ -606,7 +606,7 @@ grande, avanzable con el pulgar.
 filtro · 6 min · L-09 · Tu calendario en dos pasos · 5 min · L-10 · Tu página de
 preparación · 4 min
 
-`DOJO` **Se abre El Sparring** (al completar la evidencia).
+`DOJO` **Se abre Lucas** (al completar la evidencia).
 
 `HACE`
 1. Sube el VSL a su página.
@@ -695,7 +695,7 @@ el día 33 para mirar números, y el 46 para decidir."*
 
 `MIRA` **P4.7 · Leer tu tablero** · 8 min · pantalla · NUEVO
 
-`DOJO` **Se abre El Tablero.**
+`DOJO` **Se abre Ramiro.**
 
 `MANDO` Tab Campañas · vista de números.
 

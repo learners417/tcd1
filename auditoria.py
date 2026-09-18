@@ -2535,6 +2535,88 @@ check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+# ── Migrar y primer ingreso (C3) ─────────────────────────────────────
+_pp2 = rd('src/lib/puntoDePartida.ts'); _rm5 = todo.get('src/pages/Roadmap.tsx', '')
+check('al migrar, la fecha de inicio acompaña al día donde entra',
+      'fechaInicioParaDia' in _pp2 and 'fecha_inicio: fechaInicio' in _rm5)
+_ww = todo.get('src/components/WelcomeWizard.tsx', '')
+check('el primer ingreso habla con el vocabulario del cliente',
+      'VOC(' in _ww and 'pacientes:' not in _ww)
+
+# ── Los videos ya grabados (C3) ──────────────────────────────────────
+_vc = rd('src/lib/videosCargados.ts')
+_n_vids = _vc.count("': 'https://")
+check(f'hay {_n_vids} videos atados a su jornada', _n_vids >= 25)
+_bloque_videos = _vc.split('VIDEOS_POR_JORNADA')[1].split('};')[0] if 'VIDEOS_POR_JORNADA' in _vc else ''
+_cods_video = re.findall(r"^\s*'([\w.\-]+)': 'http", _bloque_videos, re.M)
+check('un video por jornada: ningún código repetido',
+      len(_cods_video) == len(set(_cods_video)),
+      str([c for c in _cods_video if _cods_video.count(c) > 1])) 
+_codigos_reales = set(re.findall(r'"codigo":\s*"([^"]+)"', rd('src/lib/roadmap.seed.json')))
+_mapeados = set(_cods_video)
+_huerfanos = [c for c in _mapeados if c not in _codigos_reales and not c.startswith('L-') and not c.startswith('P')]
+check('ningún video apunta a un código que no existe', not _huerfanos, str(_huerfanos))
+check('el precio se sella antes de ordenar la cartera',
+      _json64.loads(rd('src/lib/roadmap.seed.json')) and
+      next(j['dia'] for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] if j['titulo'] == 'El precio nuevo y el link')
+      < next(j['dia'] for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] if j['titulo'] == 'Los tres grupos'))
+check('cada tutorial con PDF lo ofrece al lado de su video',
+      'PDFS_POR_TUTORIAL' in _vc and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
+check('lo complementario vive en la Biblioteca, no en el Camino',
+      'COMPLEMENTOS' in _vc and 'VIDEOS_COMPLEMENTO' in todo.get('src/pages/Biblioteca.tsx', ''))
+check('el tablero del Admin pisa lo que viene por archivo',
+      'VIDEOS_POR_JORNADA' in rd('src/components/admin/TableroGrabacion.tsx'))
+
+# ── Hoy completo (C3) ───────────────────────────────────────────────
+_db3 = todo.get('src/pages/Dashboard.tsx', '')
+check('Hoy enmarca la jornada de cuatro horas', 'Tu jornada de hoy' in _db3 and 'dos de atender' in _db3)
+check('Hoy cierra diciendo qué toca mañana', 'Mañana' in _db3 and 'tareasHoy[1]' in _db3)
+check('el paso de mañana también es del cliente', _db3.count('esPasoDelCliente(meta)') >= 2)
+
+# ── El ADN se lee en su tarjeta (C3) ─────────────────────────────────
+_ap = rd('src/lib/adnPiezas.ts'); _adn = todo.get('src/pages/ADN.tsx', '')
+check('cada pieza del ADN muestra lo que dice', 'contenidoDePieza' in _ap and 'contenidoDePieza' in _adn)
+check('lo sellado se lee pero no se edita por fuera', 'rehaces su sesión' in _adn)
+check('las piezas del origen se pueden escribir desde su tarjeta', 'guardarOrigen' in _ap and 'guardarOrigen' in _adn)
+check('el ADN usa los nombres congelados', 'El alma' not in _adn and 'Quién eres' in _adn)
+
+# ── El tablero de grabación (C3) ─────────────────────────────────────
+_tg = rd('src/components/admin/TableroGrabacion.tsx')
+_adm = todo.get('src/pages/Admin.tsx', '')
+check('el tablero de grabación está en el Admin', 'TableroGrabacion' in _adm and 'programa_videos' in _tg)
+check('el tablero lista las piezas y los tutoriales', 'roadmap.piezas' in _tg and 'roadmap.tutoriales' in _tg)
+_rmv = todo.get('src/pages/Roadmap.tsx', '')
+check('el video se busca primero por jornada y después por pilar', 'videosPorPilar[meta.codigo]' in _rmv)
+check('el tutorial del día aparece en su sesión cuando tiene enlace', 'tutorialDelDia' in _rmv)
+
+# ── El punto de partida (C3) ──────────────────────────────────────────
+_pp = rd('src/lib/puntoDePartida.ts')
+_rmp = todo.get('src/pages/Roadmap.tsx', '')
+check('existe la entrada por situación para migrar clientes', 'opcionesDePartida' in _pp and 'PuntoDePartida' in _rmp)
+check('el punto de partida no marca lo del equipo ni lo que depende de que otro pague',
+      'esPasoDelCliente(m)' in _pp and 'del_mercado' in _pp)
+check('se pregunta una sola vez', 'KEY_PARTIDA' in _pp.replace('KEY_PARTIDA', 'KEY_PARTIDA') or 'KEY_PARTIDA' in rd('src/components/PuntoDePartida.tsx'))
+check('lo marcado también se guarda en la base', 'marcarPartida' in _rmp and "guardarFila('hoja_de_ruta'" in _rmp)
+
+# ── La sesión en cinco pantallas (C2) ─────────────────────────────────
+_sv = todo.get('src/components/sesion/SesionViva.tsx', '')
+check('la sesión tiene las cinco pantallas', all(x in _sv for x in ["'llevas'", "'mira'", "'haz'", "'sube'", "'listo'"]))
+check('la sesión no pide emoción ni muestra un reloj corriendo',
+      'CheckInPanel' not in _sv and 'CronometroSesion' not in _sv)
+check('sin video, la pantalla Mira no existe', "...(video ? (['mira']" in _sv)
+_rm2 = todo.get('src/pages/Roadmap.tsx', '')
+check('la sesión no muestra el código interno de la jornada', '{meta.codigo}</span>' not in _rm2)
+check('al cliente se le pide con palabras, no con la regla de validación',
+      'pide={' in _rm2 and '.valida' not in _rm2)
+_seed_evs = _json64.loads(rd('src/lib/roadmap.seed.json'))
+_evs = [e for j in _seed_evs['jornadas'] for e in j.get('evidencias', [])]
+check(f'las {len(_evs)} evidencias tienen su frase para el cliente',
+      _evs and all(e.get('pide') for e in _evs))
+check('ninguna frase de evidencia tiene símbolos técnicos',
+      not [e for e in _evs if re.search(r'[<>±=]|\bx\b', e['pide'])])
+check('la nota del equipo no viaja como descripción del cliente',
+      "nota_equipo: j.nota" in rd('src/lib/roadmapSeed.ts') and "descripcion: j.nota" not in rd('src/lib/roadmapSeed.ts'))
+
 check('Hoy y El Camino usan el mismo mensaje de ritmo', 'mensajeDeRitmo(' in _db and 'mensajeDeRitmo(' in _rm and 'por recuperar' not in _db)
 check('el candado de la Fase 4 se decide por el paso, no por la fecha', re.search(r'validarADNDia45\([^)]*diaEsperado', _rm) is not None)
 check('los títulos de fase no llevan una letra inventada', 'metodo_letra' not in _rm and 'metodo_letra' not in todo.get('src/lib/roadmapSeed.ts', ''))

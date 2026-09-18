@@ -78,7 +78,7 @@ Cuatro cambios de fondo respecto de lo que está hoy en vivo:
    nuevo el día 12.
 3. **El embudo se bifurca por audiencia**, con una pregunta con número. Página,
    video y formulario son los mismos en las dos ramas.
-4. **El Dojo deja de ser la app entera** y pasa a ser la sala de los agentes.
+4. **Entrenadores deja de ser la app entera** y pasa a ser la sala de los agentes.
 
 
 ---

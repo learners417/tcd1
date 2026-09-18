@@ -37,12 +37,12 @@ donde estaban."*
 
 `MIRA` **P9.1 · Por qué la marca va última** · 6 min · montaña · NUEVO
 
-`DOJO` **Se abre El Estratega.**
+`DOJO` **Se abre Mateo.**
 
 `MANUAL` El Camino · panel CAM-9
 
 `HACE`
-1. Saca sus tres enfoques de la Matriz ABC con el Estratega.
+1. Saca sus tres enfoques de la Matriz ABC con Mateo.
 2. Escribe, para cada enfoque, a quién filtra y a quién atrae.
 
 `EVIDENCIA` · `texto` · los tres enfoques con su filtro
@@ -70,7 +70,7 @@ estos noventa días **solo escribe el plan**, y por qué eso es lo correcto.
 
 `MIRA` **P9.4 · Las doce semanas escritas** · 5 min · pizarra · NUEVO
 
-`DOJO` El Estratega, en modo plan.
+`DOJO` Mateo, en modo plan.
 
 `TUTORIAL` L-20 · Grabar y editar con el celular · 5 min · L-21 · Programar tu
 contenido del mes · 5 min
