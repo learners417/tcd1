@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual operativo · Tu Clínica Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#080808; --panel:#111110; --surface:#1A1917;
+  --gold:#E8962E; --goldhi:#F4B65C; --cream:#F2EFE9;
+  --success:#22C55E; --danger:#EF4444;
+  --line:rgba(242,239,233,.12);
+  --display:'Fraunces',Georgia,serif; --body:'Sora',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--cream);font-family:var(--body);font-weight:300;
+  line-height:1.65;font-size:17px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:clamp(24px,5vw,64px)}
+
+/* ── Portada ── */
+.hero{padding:clamp(40px,9vw,110px) 0 clamp(32px,6vw,64px);border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);
+  font-weight:600;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(38px,7.5vw,76px);
+  line-height:1.04;letter-spacing:-.02em;text-wrap:balance}
+h1 em{font-style:italic;color:var(--goldhi)}
+.lede{font-size:clamp(17px,2.2vw,21px);color:rgba(242,239,233,.72);max-width:60ch;margin-top:26px}
+
+/* ── El pulso de la semana: la pieza firma ── */
+.pulso{margin:clamp(32px,6vw,56px) 0;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.pulso-head{padding:18px 22px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+.pulso-head strong{font-family:var(--display);font-size:20px;font-weight:400}
+.pulso-head span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,239,233,.45)}
+.dias{display:grid;grid-template-columns:repeat(5,1fr)}
+.dia{padding:20px 16px;border-right:1px solid var(--line);min-height:190px}
+.dia:last-child{border-right:none}
+.dia h4{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  font-weight:700;margin-bottom:14px}
+.dia ul{list-style:none;font-size:13.5px;line-height:1.5;color:rgba(242,239,233,.78)}
+.dia li{margin-bottom:11px;padding-left:12px;position:relative}
+.dia li::before{content:'';position:absolute;left:0;top:8px;width:4px;height:4px;
+  border-radius:50%;background:var(--gold);opacity:.55}
+.dia li b{font-weight:600;color:var(--cream)}
+
+/* ── Secciones ── */
+section{padding:clamp(38px,7vw,72px) 0;border-bottom:1px solid var(--line)}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(27px,4.4vw,42px);
+  line-height:1.12;letter-spacing:-.015em;margin-bottom:12px;text-wrap:balance}
+.sub{color:rgba(242,239,233,.6);font-size:16px;max-width:62ch;margin-bottom:34px}
+h3{font-family:var(--display);font-weight:400;font-size:22px;margin:34px 0 14px}
+p{margin-bottom:16px;max-width:68ch}
+strong{font-weight:600;color:#fff}
+.gold{color:var(--goldhi)}
+
+/* ── Bloques ── */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:24px 26px;margin-bottom:16px}
+.card h4{font-family:var(--display);font-size:19px;font-weight:400;margin-bottom:8px}
+.card p{font-size:15px;color:rgba(242,239,233,.75);margin-bottom:0}
+.card p+p{margin-top:10px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* ── Tablas ── */
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14.5px}
+th{text-align:left;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line)}
+td{padding:13px 14px;border-bottom:1px solid rgba(242,239,233,.07);
+  color:rgba(242,239,233,.82);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td b{color:#fff;font-weight:600}
+
+/* ── Etiquetas ── */
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:700;padding:4px 9px;border-radius:99px;white-space:nowrap}
+.t-cliente{background:rgba(232,150,46,.15);color:var(--goldhi);border:1px solid rgba(232,150,46,.35)}
+.t-equipo{background:rgba(59,130,246,.13);color:#93BBFC;border:1px solid rgba(59,130,246,.3)}
+.t-app{background:rgba(34,197,94,.13);color:#6EE7A0;border:1px solid rgba(34,197,94,.3)}
+
+/* ── Números grandes ── */
+.pasos{counter-reset:p;list-style:none;margin-top:8px}
+.pasos li{counter-increment:p;position:relative;padding-left:56px;margin-bottom:26px}
+.pasos li::before{content:counter(p);position:absolute;left:0;top:-4px;
+  font-family:var(--display);font-size:34px;color:var(--gold);opacity:.45;line-height:1}
+.pasos b{display:block;font-size:17px;color:#fff;font-weight:600;margin-bottom:4px}
+.pasos span{font-size:15px;color:rgba(242,239,233,.72)}
+
+/* ── Aviso ── */
+.nota{border-left:3px solid var(--gold);background:rgba(232,150,46,.06);
+  padding:18px 22px;border-radius:0 12px 12px 0;margin:22px 0}
+.nota p{font-size:15px;margin-bottom:0;color:rgba(242,239,233,.85)}
+.nota p+p{margin-top:10px}
+
+/* ── Semáforo ── */
+.sem{display:flex;gap:10px;align-items:flex-start;padding:14px 0;
+  border-bottom:1px solid rgba(242,239,233,.07)}
+.sem:last-child{border-bottom:none}
+.punto{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.verde{background:var(--success)} .amarillo{background:var(--gold)} .rojo{background:var(--danger)}
+.sem div{font-size:15px;color:rgba(242,239,233,.8)}
+.sem b{color:#fff;font-weight:600}
+
+footer{padding:44px 0 64px;color:rgba(242,239,233,.4);font-size:13px;text-align:center}
+
+@media(max-width:760px){
+  .dias{grid-template-columns:1fr}
+  .dia{border-right:none;border-bottom:1px solid var(--line);min-height:0}
+  .grid2,.grid3{grid-template-columns:1fr}
+  body{font-size:16px}
+  table{font-size:13.5px} th,td{padding:10px 8px}
+}
+@media print{
+  body{background:#fff;color:#111}
+  .dia,.card,section{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Tu Clínica Digital · Manual operativo</div>
+  <h1>Once cuentas,<br>tres personas,<br><em>un solo ritmo.</em></h1>
+  <p class="lede">Cómo lanzamos a un cliente, qué hace cada uno una vez encendida la campaña,
+  y cómo llegan los números para decidir. Todo lo que está acá ya existe en la app o se
+  carga a mano hasta que se conecte solo.</p>
+</header>
+
+<!-- ══ EL PULSO ══ -->
+<div class="pulso">
+  <div class="pulso-head">
+    <strong>El pulso de la semana</strong>
+    <span>Presenciales: lunes · miércoles · viernes</span>
+  </div>
+  <div class="dias">
+    <div class="dia">
+      <h4>Lunes</h4>
+      <ul>
+        <li><b>9:30</b> Mesa de números. Los cinco números de cada cuenta. Se eligen las 3 en foco.</li>
+        <li><b>11:30</b> Bloque de creativos y carga de campañas.</li>
+      </ul>
+    </div>
+    <div class="dia">
+      <h4>Martes</h4>
+      <ul>
+        <li><b>Mañana</b> Grabación.</li>
+        <li><b>Tarde</b> Edición y montaje · 1‑1 con los clientes marcados.</li>
+      </ul>
+    </div>
+    <div class="dia">
+      <h4>Miércoles</h4>
+      <ul>
+        <li><b>11:00</b> Mentoría de producto: los que están cerrando método.</li>
+        <li><b>16:00</b> Sala de Creativos con todos. 60 minutos.</li>
+      </ul>
+    </div>
+    <div class="dia">
+      <h4>Jueves</h4>
+      <ul>
+        <li><b>Todo el día</b> Pauta, DMs y llamadas. Sin reuniones.</li>
+        <li><b>Tarde</b> 1‑1 restantes · bloque de sistemas.</li>
+      </ul>
+    </div>
+    <div class="dia">
+      <h4>Viernes</h4>
+      <ul>
+        <li><b>9:30</b> Mesa de plata: qué entró y qué se rompió camino al cobro.</li>
+        <li><b>11:00</b> Carga semanal de números.</li>
+        <li><b>16:00</b> Qué se pauta el fin de semana.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 1 · LANZAR ══ -->
+<section>
+  <h2>1 · Cómo lanzamos a un cliente</h2>
+  <p class="sub">No hay que inventar el checklist: ya está en la app, en
+  <strong>Admin → Preactivación</strong>. Son 14 bloques y 62 ítems, cada uno con
+  responsable y cuatro estados.</p>
+
+  <table>
+    <tr><th>Bloque</th><th>Qué se verifica</th><th>Quién</th></tr>
+    <tr><td><b>1 · Perfil de Instagram</b></td><td>Foto, nombre, biografía con el link, destacadas, posts fijados y el carrusel «Mi historia» con la palabra clave andando</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>2 · Método</b></td><td>Nombre propio, construcción, herramientas creadas y editadas</td><td><span class="tag t-cliente">Ambos</span></td></tr>
+    <tr><td><b>3 · Landing y dominio</b></td><td>Página de venta publicada, dominio y píxel</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>4 · Go High Level</b></td><td>Subcuenta, calendario y formularios</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>5 · Meta Business</b></td><td>Portafolio, fan page y WhatsApp vinculado</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>6 · Automatizaciones</b></td><td>Palabra clave, DM automático, respuesta en menos de un minuto</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>7 · Cobro</b></td><td>Links de pago y checkout probados</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>8 · Guiones</b></td><td>Los tres anuncios, el DM y el guion de llamada</td><td><span class="tag t-cliente">Ambos</span></td></tr>
+    <tr><td><b>9 · Edición de piezas</b></td><td>Banco de piezas grabadas y editadas</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>10 · Anuncios</b></td><td>Campaña montada, sin encender</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>11 · Herramientas de venta</b></td><td>Lo que el cliente usa para cerrar</td><td><span class="tag t-cliente">Cliente</span></td></tr>
+    <tr><td><b>12 · Pre-activación</b></td><td>La prueba de cadena completa</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>13 · Lanzamiento</b></td><td>Encendido</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+    <tr><td><b>14 · Post-lanzamiento</b></td><td>Las primeras 48 horas</td><td><span class="tag t-equipo">Equipo</span></td></tr>
+  </table>
+
+  <div class="nota">
+    <p><strong>La única regla que no se negocia:</strong> del bloque 12 no se sale sin el
+    <span class="gold">cobro de prueba real</span>. Comentario → mensaje → link → checkout → cobrado.
+    Si no se cobró un peso de prueba, no se enciende. Se corre la fecha.</p>
+    <p>El que no pasó la prueba de cadena el lunes 3, no activa el martes 4.</p>
+  </div>
+</section>
+
+<!-- ══ 2 · DESPUÉS DE ENCENDER ══ -->
+<section>
+  <h2>2 · Encendida la campaña, ¿qué hace cada uno?</h2>
+  <p class="sub">Esto es lo que se revisa. Si algo de acá no pasa, aparece solo en la lista
+  de atender del día.</p>
+
+  <h3>El cliente, todos los días</h3>
+  <table>
+    <tr><th>Qué</th><th>Cuánto</th><th>Se rompe cuando</th></tr>
+    <tr><td><b>Sube historias</b></td><td>3 por día</td><td>Dos días seguidos sin subir</td></tr>
+    <tr><td><b>Contesta los DMs</b></td><td>Menos de 1 hora</td><td>Pasa de una hora, o no contesta</td></tr>
+    <tr><td><b>Carga un número</b></td><td>30 segundos: conversaciones nuevas de hoy</td><td>Dos días sin cargar</td></tr>
+    <tr><td><b>Publica lo acordado</b></td><td>Las piezas de la semana</td><td>No publicó lo que se editó</td></tr>
+    <tr><td><b>Toma las llamadas</b></td><td>Las que se agendaron</td><td>No se presenta o no confirma</td></tr>
+  </table>
+
+  <h3>El cliente, una vez por semana</h3>
+  <table>
+    <tr><th>Qué</th><th>Cuándo</th></tr>
+    <tr><td><b>Graba la tanda</b> — con guion cerrado, nunca improvisando</td><td>El día que se le asignó</td></tr>
+    <tr><td><b>Carga los números del viernes</b> — gasto, conversaciones y agendas por anuncio</td><td>Viernes</td></tr>
+    <tr><td><b>Mantiene el banco en 6 piezas o más</b></td><td>Se revisa el lunes</td></tr>
+  </table>
+
+  <h3>El equipo</h3>
+  <div class="grid3">
+    <div class="card">
+      <h4>Operador de cuentas</h4>
+      <p>Trabaja la lista de atender del día. <strong>No ve a los once por igual:</strong>
+      ve a los que están en amarillo o rojo.</p>
+      <p>1‑1 solo con los marcados. Que se publique lo acordado. Carga de los números
+      que todavía no entran solos.</p>
+    </div>
+    <div class="card">
+      <h4>Instalador de sistemas</h4>
+      <p>Conexiones, bot, dominios, cobros. Su entregable no es conectar cliente por
+      cliente: es <strong>una plantilla de GHL</strong> que se aplica a cada cuenta nueva.</p>
+      <p>Cuando una campaña queda sin entrega o un número se restringe, entra él.</p>
+    </div>
+    <div class="card">
+      <h4>Dueño del criterio</h4>
+      <p>Decide creativo, precio y cuándo se apaga. <strong>Entra solo por la lista</strong>,
+      no cuenta por cuenta.</p>
+      <p>Su criterio ya está en la app: las fórmulas, los ingredientes y los topes deciden
+      lo que se puede decidir sin él.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3 · LOS NÚMEROS ══ -->
+<section>
+  <h2>3 · Cómo llegan los números</h2>
+  <p class="sub">En tres etapas. La primera arranca el lunes y no necesita que nadie
+  conecte nada.</p>
+
+  <ol class="pasos">
+    <li>
+      <b>Hoy — a mano, cinco números por cuenta</b>
+      <span>El viernes, con Meta Business abierto: gasto, alcance, conversaciones,
+      agendas y ventas. Por anuncio. <strong>Dos minutos por cliente.</strong>
+      Once cuentas son veinte minutos, una vez por semana. Con eso ya decide la app.</span>
+    </li>
+    <li>
+      <b>Puente — el reporte programado de Meta</b>
+      <span>Ads Manager puede mandar un reporte por mail solo, con las columnas y la
+      frecuencia que uno elija. Se configura una vez por cuenta, sin programar nada.
+      <strong>Esto conviene hacerlo antes que la API</strong>, porque saca la parte más
+      aburrida sin depender de nadie.</span>
+    </li>
+    <li>
+      <b>Después — la conexión directa</b>
+      <span>La API de Meta trae los números sola. Requiere permisos de socio en cada
+      portafolio y un token de sistema: es trabajo del instalador, no de una tarde.
+      <strong>Hasta que esté, los pasos 1 y 2 alcanzan.</strong></span>
+    </li>
+  </ol>
+
+  <div class="nota">
+    <p><strong>Lo que decide con esos números:</strong> la app ahora pregunta qué compra
+    la campaña y usa el tope que corresponde. No es lo mismo comprar visitas al perfil
+    que conversaciones.</p>
+    <p>Visitas al perfil: hasta <span class="gold">$0,07</span>. Mensajes en Latinoamérica:
+    sano entre <span class="gold">$0,25 y $0,70</span> por conversación, se apaga arriba de
+    <span class="gold">$1,50</span>. Ticket alto: hasta <span class="gold">$3</span>.</p>
+  </div>
+
+  <h3>Los tres veredictos</h3>
+  <div class="sem"><div class="punto rojo"></div><div><b>Rojo — la conversación cuesta de más.</b> Se apaga ese anuncio y se refresca el creativo con otro hook. El problema es la pieza.</div></div>
+  <div class="sem"><div class="punto amarillo"></div><div><b>Amarillo — hay conversaciones y no hay agendas.</b> No se toca el anuncio: el problema es la página o el DM. Menos de una agenda cada cuatro conversaciones ya enciende esta luz.</div></div>
+  <div class="sem"><div class="punto verde"></div><div><b>Verde — conversaciones y agendas.</b> Queda corriendo y se refresca cada dos a cuatro semanas.</div></div>
+
+  <p style="margin-top:22px"><strong>Y antes de todo eso: no se opina, se mide.</strong>
+  Con presupuesto chico son catorce días sin tocar nada. Desde 25 dólares por día bajan a
+  diez, y desde 50 a siete. La app lleva la cuenta y avisa cuándo se puede decidir.</p>
+</section>
+
+<!-- ══ 4 · LO QUE CAMBIÓ ══ -->
+<section>
+  <h2>4 · Lo que cambió en la app</h2>
+  <p class="sub">Para mostrar el lunes.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>El brief trae el ADN de verdad</h4>
+      <p>Antes prometía «lo trajimos de tu ADN» y llegaba vacío para todos.
+      Ahora trae lo sellado y, si falta algo, <strong>nombra la sesión que lo cierra</strong>
+      en vez de mostrar un formulario en blanco.</p>
+    </div>
+    <div class="card">
+      <h4>Cada plan ve lo suyo</h4>
+      <p>La escalera de planes estaba abierta: cualquier comprador entraba a todo.
+      Ya no.</p>
+    </div>
+    <div class="card">
+      <h4>Topes de uso</h4>
+      <p>Las herramientas de producción consumen crédito. El Mentor, el ADN y el Camino
+      siguen <strong>gratis</strong>: racionar el acompañamiento sería cobrarle por hacer
+      el programa que ya pagó.</p>
+      <p>Máximo tres campañas, una viva a la vez, y no se cierra antes del día 15.</p>
+    </div>
+    <div class="card">
+      <h4>Todo en tú</h4>
+      <p>La app entera y los ocho entrenadores hablan en castellano neutro.
+      Antes les hablaban en argentino a clientes de toda Latinoamérica.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 5 · LO QUE FALTA ══ -->
+<section style="border-bottom:none">
+  <h2>5 · Lo que todavía no está</h2>
+  <p class="sub">Dicho de frente, para que nadie lo descubra el martes.</p>
+
+  <div class="card">
+    <h4>La Sala de Mando</h4>
+    <p>La especificación está cerrada y verificada contra el código, pero la tab
+    <strong>todavía no está construida</strong>. Hasta que esté, la Preactivación y las
+    tabs de Campañas y Tareas del Admin cubren el día a día.</p>
+  </div>
+  <div class="card">
+    <h4>La conexión con Meta</h4>
+    <p>Los números se cargan a mano. Es lo primero a resolver, y el reporte programado
+    de Meta es el atajo mientras tanto.</p>
+  </div>
+  <div class="card">
+    <h4>Mi Clínica Digital</h4>
+    <p>Hoy es solo un enlace en el menú: no comparte datos con esta app.
+    <strong>El progreso real de cada cliente vive acá</strong>, no allá. Cuando MCD tenga
+    contenido propio, se conecta; antes no hay nada que traer.</p>
+  </div>
+</section>
+
+<footer>Tu Clínica Digital · documento interno · julio 2026</footer>
+
+</div>
+</body>
+</html>

@@ -13,6 +13,23 @@
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/ai/generate.ts": {
+      "maxDuration": 90
+    },
+    "api/ai/stream.ts": {
+      "maxDuration": 90
+    },
+    "api/ai/image.ts": {
+      "maxDuration": 120
+    },
+    "api/ai/describe-image.ts": {
+      "maxDuration": 60
+    }
+  }
 }

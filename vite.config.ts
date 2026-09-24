@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 import react from '@vitejs/plugin-react';
 import {sentryVitePlugin} from '@sentry/vite-plugin';
 import path from 'path';
@@ -18,6 +19,28 @@ export default defineConfig(({mode}) => {
     plugins: [
       react(),
       tailwindcss(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+        manifest: {
+          name: 'Tu Clínica Digital',
+          short_name: 'TCD',
+          description: 'Tu clínica digital — el camino de 90 días.',
+          theme_color: '#080808',
+          background_color: '#080808',
+          display: 'standalone',
+          orientation: 'portrait',
+          start_url: '/',
+          icons: [
+            { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        },
+      }),
       ...(enableSentryUpload ? [sentryVitePlugin({
         org: sentryOrg,
         project: sentryProject,
@@ -50,6 +73,18 @@ export default defineConfig(({mode}) => {
       // Generar source maps (necesario para que Sentry los pueda subir).
       // Despues del upload, el plugin los borra del bundle (filesToDeleteAfterUpload).
       sourcemap: true,
+      // Optimización: separar las librerías grandes en chunks propios.
+      // Reduce el bundle inicial → la app carga más rápido en la primera visita.
+      chunkSizeWarningLimit: 900,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'charts': ['recharts'],
+            'sentry': ['@sentry/react'],
+          },
+        },
+      },
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
