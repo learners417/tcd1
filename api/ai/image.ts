@@ -36,8 +36,10 @@ import {
   extractJwt,
   getUserIdFromJwt,
   consumeCreditServer,
+  devolverCreditoServer,
 } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
+import { conTope } from '../_lib/tope.js';
 
 // Vercel function config · maxDuration aplica solo si tu plan lo soporta.
 // Hobby = max 60s · Pro = hasta 300s · Enterprise = hasta 900s.
@@ -142,6 +144,10 @@ async function handleImageRequest(req: any, res: any) {
   const hasRefs = refs.length > 0;
 
   // ─── Autenticacion + consumo de credito ─────────────────────────────────────
+  let cobrado = false;
+  /** Se guarda acá y no dentro del bloque: las salidas de error que tienen
+   *  que devolver el crédito viven más afuera, y sin esto no lo alcanzan. */
+  let quienPaga: string | null = null;
   let creditsRemaining: number | null = null;
 
   if (CREDITS_ENABLED) {
@@ -151,6 +157,7 @@ async function handleImageRequest(req: any, res: any) {
     }
 
     const userId = await getUserIdFromJwt(jwt);
+    quienPaga = userId;
     if (!userId) {
       return res.status(401).json({ error: 'UNAUTHORIZED', code: 'UNAUTHORIZED' });
     }
@@ -163,21 +170,32 @@ async function handleImageRequest(req: any, res: any) {
         hasRefs,
       });
       creditsRemaining = result.monthlyRemaining + result.topup;
+      // Desde acá el crédito YA SE COBRÓ: cualquier salida sin
+      // imagen tiene que devolverlo. El archivo decía «TODO: si
+      // quisiéramos auto-refund…» y esa deuda es la que dejó sin
+      // créditos a dos clientas.
+      cobrado = true;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('INSUFFICIENT_CREDITS')) {
+        if (cobrado && quienPaga) await devolverCreditoServer(quienPaga, 'no se entregó la imagen');
         return res.status(402).json({
           error: 'No tenes creditos suficientes. Compra un pack o espera al reseteo mensual.',
           code: 'INSUFFICIENT_CREDITS',
         });
       }
       console.error('[/api/ai/image] consumeCreditServer failed', { msg, userId });
+      if (cobrado && quienPaga) await devolverCreditoServer(quienPaga, 'no se entregó la imagen');
       return res.status(500).json({ error: `Credit check failed: ${msg}` });
     }
   }
 
   // ─── Generacion de imagen en OpenAI ─────────────────────────────────────────
   try {
+    // Generar una imagen tarda MÁS que generar texto: sin tope, la
+    // plataforma mata la función y la devolución de arriba no llega a correr.
+    const tope = conTope();
+
     let openaiRes: Response;
 
     if (hasRefs) {
@@ -197,6 +215,7 @@ async function handleImageRequest(req: any, res: any) {
       });
 
       openaiRes = await fetch('https://api.openai.com/v1/images/edits', {
+        signal: tope.signal,
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}` },
         body: form,
@@ -204,6 +223,7 @@ async function handleImageRequest(req: any, res: any) {
     } else {
       // /v1/images/generations — JSON body.
       openaiRes = await fetch('https://api.openai.com/v1/images/generations', {
+        signal: tope.signal,
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -240,6 +260,7 @@ async function handleImageRequest(req: any, res: any) {
     };
     const b64 = data?.data?.[0]?.b64_json;
     if (!b64) {
+      if (cobrado && quienPaga) await devolverCreditoServer(quienPaga, 'no se entregó la imagen');
       return res.status(502).json({ error: 'OpenAI response missing b64_json' });
     }
 
@@ -254,6 +275,7 @@ async function handleImageRequest(req: any, res: any) {
     const stack = err instanceof Error ? err.stack : undefined;
     console.error('[/api/ai/image] OpenAI fetch threw', { msg, stack });
     Sentry.captureException(err);
+    if (cobrado && quienPaga) await devolverCreditoServer(quienPaga, 'no se entregó la imagen');
     return res.status(500).json({ error: `Image generation failed: ${msg}` });
   }
 }

@@ -155,3 +155,45 @@ export async function refundPayPalOrder(args: {
     .eq('id', args.paypalOrderId);
   if (orderError) throw new Error(`refund update failed: ${orderError.message}`);
 }
+
+
+/**
+ * Devuelve un crédito que se cobró y no entregó nada.
+ *
+ * El guardián cobra ANTES de llamar al modelo, porque es la única forma de
+ * que dos pedidos simultáneos no gasten el mismo saldo. La contra es que si
+ * después la cadena entera falla, el cliente pagó por aire. Esto lo compensa.
+ *
+ * NUNCA lanza: si la devolución falla, queda escrita en el log y en la tabla
+ * de movimientos para conciliarla a mano. Un problema al devolver no puede
+ * convertirse además en un error en la cara del cliente, que ya se quedó sin
+ * su resultado.
+ */
+export async function devolverCreditoServer(
+  userId: string,
+  motivo: string,
+): Promise<boolean> {
+  const admin = getAdminClient();
+  try {
+    const { error } = await admin.rpc('devolver_credito', {
+      p_user_id: userId,
+      p_motivo: motivo,
+    });
+    if (!error) return true;
+    console.warn('[creditos] devolver_credito no disponible:', error.message);
+  } catch (err) {
+    console.warn('[creditos] devolver_credito falló:', err instanceof Error ? err.message : err);
+  }
+
+  // Red de seguridad: aunque la RPC no exista todavía, queda el movimiento
+  // anotado para que nadie pierda un crédito en silencio.
+  try {
+    await admin.from('credit_transactions').insert({
+      user_id: userId, delta: 1, source: 'devolucion', reason: motivo,
+    });
+    console.warn('[creditos] devolución anotada como movimiento, revisar a mano:', { userId, motivo });
+  } catch (err) {
+    console.error('[creditos] NO SE PUDO DEVOLVER NI ANOTAR:', { userId, motivo }, err);
+  }
+  return false;
+}

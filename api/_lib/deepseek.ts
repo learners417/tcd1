@@ -5,7 +5,7 @@
  * La API de DeepSeek es OpenAI-compatible · no requiere SDK propio · solo
  * fetch directo contra https://api.deepseek.com/v1/chat/completions.
  *
- * Modelo default: deepseek-chat (apunta a la version estable mas reciente
+ * Modelo default: deepseek-v4-pro (apunta a la version estable mas reciente
  * publicada por DeepSeek · al momento de escribir esto suele ser V3.x).
  * Si DeepSeek lanza un V4 con id distinto · override via env var
  * DEEPSEEK_MODEL sin necesidad de redeploy.
@@ -19,8 +19,10 @@
  *     inicio de la lista (formato OpenAI · no top-level como Anthropic).
  */
 
+import { conTope } from './tope.js';
+
 const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/v1/chat/completions';
-const DEFAULT_MODEL = 'deepseek-chat';
+const DEFAULT_MODEL = 'deepseek-v4-pro';
 const DEFAULT_MAX_TOKENS = 8192;
 
 export interface DeepSeekMessage {
@@ -37,6 +39,8 @@ export interface DeepSeekCallOptions {
   maxTokens?: number;
   /** Default: 0.7 · valores bajos = mas determinista. */
   temperature?: number;
+  /** Modelo explícito. Lo manda el enrutador por tarea; si falta, el default. */
+  model?: string;
 }
 
 export interface DeepSeekResult {
@@ -74,7 +78,7 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
     throw new Error('DEEPSEEK_API_KEY not configured');
   }
 
-  const model = process.env.DEEPSEEK_MODEL || DEFAULT_MODEL;
+  const model = options.model || process.env.DEEPSEEK_MODEL || DEFAULT_MODEL;
   const maxTokens = options.maxTokens
     ?? (process.env.DEEPSEEK_MAX_TOKENS ? Number(process.env.DEEPSEEK_MAX_TOKENS) : DEFAULT_MAX_TOKENS);
 
@@ -86,7 +90,13 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
     payloadMessages.push({ role: normalizeRole(m.role), content: m.content });
   }
 
+  // El tope propio evita que Vercel mate la función a mitad de camino: si la
+  // mata, `deshacerCobro` nunca corre y el cliente pierde el crédito por una
+  // llamada que nunca respondió. Es preferible cortar antes y devolverlo.
+  const { signal, limpiar } = conTope();
+
   const response = await fetch(DEEPSEEK_ENDPOINT, {
+    signal,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -100,6 +110,8 @@ export async function callDeepSeek(options: DeepSeekCallOptions): Promise<DeepSe
       stream: false,
     }),
   });
+
+  limpiar();
 
   if (!response.ok) {
     const detail = await safeReadText(response);

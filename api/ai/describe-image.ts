@@ -19,6 +19,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { withSentry, Sentry } from '../_lib/sentry.js';
+import { TOPE_MS } from '../_lib/tope.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 1500;
@@ -56,7 +57,9 @@ async function handler(req: any, res: any) {
     : DEFAULT_INSTRUCTION;
 
   try {
-    const client = new Anthropic({ apiKey });
+    // Con tope, como todos: describir una imagen no es más rápido que generar
+    // texto, y sin él la función muere sin devolver el crédito.
+    const client = new Anthropic({ apiKey, timeout: TOPE_MS, maxRetries: 0 });
 
     const response = await client.messages.create({
       model: MODEL,

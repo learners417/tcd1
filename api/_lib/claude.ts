@@ -9,6 +9,7 @@
  * puedan tratarlos simetricamente.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { TOPE_MS } from './tope.js';
 
 const DEFAULT_MODEL = 'claude-sonnet-4-6';
 const DEFAULT_MAX_TOKENS = 16384;
@@ -21,6 +22,10 @@ export interface ClaudeCallOptions {
   messages: Array<{ role: string; content: string }>;
   /** Default: CLAUDE_MAX_TOKENS env var o 16384. */
   maxTokens?: number;
+  /** Modelo explícito. Lo manda el enrutador por tarea; si falta, el default. */
+  model?: string;
+  /** 0 = determinista. Para clasificar y auditar conviene bajo. */
+  temperature?: number;
 }
 
 export interface ClaudeResult {
@@ -54,11 +59,22 @@ export async function callClaude(options: ClaudeCallOptions): Promise<ClaudeResu
     throw new Error('ANTHROPIC_API_KEY not configured');
   }
 
-  const model = process.env.CLAUDE_MODEL || DEFAULT_MODEL;
+  const model = options.model || process.env.CLAUDE_MODEL || DEFAULT_MODEL;
   const maxTokens = options.maxTokens
     ?? (process.env.CLAUDE_MAX_TOKENS ? Number(process.env.CLAUDE_MAX_TOKENS) : DEFAULT_MAX_TOKENS);
 
-  const client = new Anthropic({ apiKey });
+  // El SDK sin tope propio deja que la plataforma mate la función a mitad de
+  // camino, y ahí `deshacerCobro` no llega a correr: el cliente pierde el
+  // crédito por una llamada que nunca respondió. Le pasó a una clienta con la
+  // generación de texto y le estaba pasando a otra con el Mentor.
+  //
+  // El tope va POR INTENTO y hay hasta tres, así que se divide: sumados nunca
+  // pasan del tope total, y la función siempre llega a responder.
+  const client = new Anthropic({
+    apiKey,
+    timeout: Math.floor(TOPE_MS / (MAX_RETRIES + 1)),
+    maxRetries: 0,  // los reintentos los maneja el bucle de abajo, con su espera
+  });
 
   const claudeMessages: Anthropic.MessageParam[] = options.messages.map((m) => ({
     role: normalizeRole(m.role),
@@ -72,6 +88,7 @@ export async function callClaude(options: ClaudeCallOptions): Promise<ClaudeResu
         model,
         max_tokens: maxTokens,
         ...(options.system ? { system: options.system } : {}),
+        ...(typeof options.temperature === 'number' ? { temperature: options.temperature } : {}),
         messages: claudeMessages,
       });
 
