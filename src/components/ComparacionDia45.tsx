@@ -29,16 +29,15 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
           <Camera className="w-5 h-5 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-1">
-            Día {diaActual} · Foto de Partida vs ADN real
+          <p className="text-sm font-bold uppercase tracking-widest text-gold mb-1">
+            Día {diaActual} · cómo te veías al empezar y cómo estás hoy
           </p>
           <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
-            Mira cuánto cambió tu percepción
+            Mira cuánto cambió tu mirada
           </h3>
           <p className="text-sm text-cream/75">
-            El día 1 te autoevaluaste sin saber lo que no sabías. Hoy, con el ADN
-            real adelante, vas a ver cómo se mueven los puntajes. Donde más bajó
-            es donde más aprendiste.
+            El día 1 te pusiste una nota sin saber lo que no sabías. Hoy, con tu ADN
+            adelante, la nota cambia. Donde más bajó es donde más aprendiste.
           </p>
         </div>
       </div>
@@ -48,7 +47,7 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
         <Stat label="Día 1 · promedio" valor={promedioDia1.toFixed(1)} suffix="/ 5" />
         <Stat label={`Día ${diaActual} · promedio`} valor={promedioDia45.toFixed(1)} suffix="/ 5" />
         <Stat
-          label="Delta"
+          label="Cuánto se movió"
           valor={`${deltaPromedio >= 0 ? '+' : ''}${deltaPromedio.toFixed(1)}`}
           tono={deltaPromedio > 0 ? 'verde' : deltaPromedio < 0 ? 'amarillo' : 'neutro'}
         />
@@ -62,8 +61,7 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
       </div>
 
       <p className="text-xs text-cream/55 italic pt-2 border-t border-gold/10">
-        Los puntajes del día actual se derivan automáticamente del estado de tu ADN.
-        Completa los pilares pendientes para mejorarlos.
+        Los puntajes de hoy salen de cómo está tu ADN. Cada pieza que sellas los mueve.
       </p>
     </div>
   );
@@ -86,7 +84,7 @@ function Stat({ label, valor, suffix, tono = 'neutro' }: StatProps) {
       : 'text-gold';
   return (
     <div className="card-panel p-3 border border-[rgba(232,150,46,0.10)] bg-surface/30 text-center">
-      <p className="text-[11px] uppercase tracking-widest text-cream/55 font-semibold mb-1">
+      <p className="text-sm uppercase tracking-widest text-cream/55 font-semibold mb-1">
         {label}
       </p>
       <p className={`text-2xl font-bold ${color} leading-none`}>
@@ -149,7 +147,7 @@ function ScorePill({ score, label, highlight }: ScorePillProps) {
       >
         {score}
       </span>
-      <span className="text-[11px] uppercase tracking-widest text-cream/45 font-semibold mt-0.5">
+      <span className="text-sm uppercase tracking-widest text-cream/45 font-semibold mt-0.5">
         {label}
       </span>
     </div>

@@ -14,7 +14,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
+type Step = 'password' | 'profile' | 'situacion' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -27,7 +27,10 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
+
+import PasoSituacion, { SITUACION_VACIA, situacionCompleta, type Situacion } from './onboarding/PasoSituacion';
+import { VOC } from '../lib/vocabulario';
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStepRaw] = useState<Step>(() => {
@@ -61,29 +64,70 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [ogPorque, setOgPorque] = useState('');
   const [ogHerida, setOgHerida] = useState('');
   const [ogPaciente, setOgPaciente] = useState('');
+  const [situacion, setSituacion] = useState<Situacion>(SITUACION_VACIA);
+  const [savingSit, setSavingSit] = useState(false);
   const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
   const [pqIni, setPqIni] = useState('');
+
+  // Las tres bases que faltaban: de dónde llegan hoy, qué entrega entre
+  // sesiones y dónde publica. Con esto el Camino arranca con sus datos y no
+  // le vuelve a preguntar lo mismo el día 22, el 47 y el 61.
+  const [dxLlegan, setDxLlegan] = useState('');
+  const [dxEntrega, setDxEntrega] = useState('');
+  const [dxPublica, setDxPublica] = useState('');
 
   const guardarDiagnostico = async () => {
     if (!dxAvatar) return;
     setDxSaving(true);
     try {
       localStorage.setItem('tcd_avatar', dxAvatar);
-      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo }));
+      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica }));
       localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
       localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
       if (supabase) {
-        await supabase.from('profiles').update({
+        // Paracaídas móvil: con señal floja, el guardado no puede colgar el botón.
+        // 8 segundos y avanzamos igual — lo local ya quedó, el servidor se sincroniza después.
+        await Promise.race([
+          new Promise((res) => setTimeout(res, 8000)),
+          supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
-          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe },
+          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica },
           ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
-        }).eq('id', profile.id);
+        }).eq('id', profile.id),
+        ]);
       }
     } catch { /* no bloqueamos el flujo */ }
     setDxSaving(false);
     setStep(getOrigen().porque ? 'welcome' : 'origen'); // nada se pregunta dos veces
   };
+  /**
+   * Guarda la situación. Va dentro del JSON `diagnostico`, que ya existe: así no
+   * hace falta migración y no se rompe nada si el servidor todavía no tiene las
+   * columnas nuevas. Cuando se corra la migración, esto se mueve a sus campos.
+   */
+  const guardarSituacion = async () => {
+    setSavingSit(true);
+    try {
+      try { localStorage.setItem('tcd_situacion', JSON.stringify(situacion)); } catch { /* noop */ }
+      if (supabase) {
+        // Mismo paracaídas móvil que el diagnóstico: con señal floja no se cuelga.
+        await Promise.race([
+          new Promise((res) => setTimeout(res, 8000)),
+          supabase.from('profiles').update({
+            diagnostico: {
+              freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo,
+              estilo_mentor: dxEstilo, trabajo_espiritual: dxFe,
+              situacion,
+            },
+          }).eq('id', profile.id),
+        ]);
+      }
+    } catch { /* no bloqueamos el flujo */ }
+    setSavingSit(false);
+    setStep('diagnostico');
+  };
+
   // ── El Pacto (F3) ──
   const [pactoTexto, setPactoTexto] = useState('');
   const [pactoFirma, setPactoFirma] = useState('');
@@ -103,6 +147,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [frustracion, setFrustracion] = useState('');
   const [energia, setEnergia] = useState(5);
   const [savingProfile, setSavingProfile] = useState(false);
+  // Cada nivel entra a SU camino: los 5 días o los 90.
+  const esCincoDias = String((profile as { plan?: string })?.plan ?? '') === 'ELNUMERO';
 
   async function handlePasswordSubmit() {
     if (newPassword.length < 8) {
@@ -256,7 +302,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                     <div key={i} className={`h-1 w-8 rounded-full transition-colors ${newPassword.length >= i * 4 ? 'bg-success' : 'bg-gold/10'}`} />
                   ))}
                 </div>
-                <span className="text-[11px] text-cream/55">
+                <span className="text-sm text-cream/55">
                   {newPassword.length < 4 ? 'Muy corta' : newPassword.length < 8 ? 'Casi...' : <span className="flex items-center gap-0.5">Lista <CheckCircle2 className="w-3 h-3 text-success inline" /></span>}
                 </span>
               </div>
@@ -357,18 +403,18 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <textarea
                   value={frustracion}
                   onChange={e => setFrustracion(e.target.value)}
-                  placeholder="Ej: No sé cómo conseguir pacientes nuevos sin depender de referidos, siento que trabajo mucho y gano poco..."
+                  placeholder="Ej: No sé cómo conseguir consultantes nuevos sin depender de referidos, siento que trabajo mucho y gano poco..."
                   rows={3}
                   className="w-full bg-black/40 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
-                <p className="text-[11px] text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
+                <p className="text-sm text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Ingresos mensuales (USD)</label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={ingresosMensuales}
                     onChange={e => setIngresosMensuales(e.target.value)}
                     placeholder="Ej: 2000"
@@ -378,7 +424,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div>
                   <label className="block text-xs font-semibold text-cream/75 uppercase tracking-wider mb-2">Horas/semana</label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={horasSemana}
                     onChange={e => setHorasSemana(e.target.value)}
                     placeholder="Ej: 40"
@@ -407,16 +453,43 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         )}
 
         {/* ── STEP 3: WELCOME ── */}
+        {step === 'situacion' && (
+          <div>
+            <PasoSituacion valor={situacion} onChange={setSituacion} />
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setStep('diagnostico')}
+                className="px-5 py-3 rounded-xl text-sm text-cream/55 hover:text-cream/80 transition-colors"
+              >
+                Saltar
+              </button>
+              <button
+                onClick={guardarSituacion}
+                disabled={savingSit}
+                className="flex-1 py-3 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-gold/20"
+              >
+                {savingSit ? 'Guardando…' : 'Seguir'}
+              </button>
+            </div>
+            {!situacionCompleta(situacion) && (
+              <p className="text-xs text-cream/45 mt-3 text-center">
+                Puedes seguir sin completar todo. Lo que falte lo cerramos en tus
+                primeros diez días.
+              </p>
+            )}
+          </div>
+        )}
+
         {step === 'diagnostico' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Siete preguntas — la semilla de tu ADN</h2>
               <p className="text-sm text-cream/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">1 · ¿Ya tienes una forma propia de trabajar con tus pacientes — un método, aunque no tenga nombre?</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">1 · ¿Ya tienes una forma propia de trabajar con quienes atiendes — un método, aunque no tenga nombre?</p>
               <div className="space-y-2">
                 {([['B','Sí. Tengo mi manera de hacer las cosas — la uso hace años.'],['A','No, o no lo tengo claro. Trabajo caso por caso.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxAvatar(v)} className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxAvatar === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>
@@ -427,14 +500,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div>
               <p className="text-sm font-medium text-cream/85 mb-2">2 · ¿Qué te frena más hoy?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {['No sé conseguir pacientes online','Me cuesta cobrar lo que valgo','No tengo tiempo — todo depende de mí','Un poco de todo'].map((o) => (
+                {['No sé conseguir consultantes online','Me cuesta cobrar lo que valgo','No tengo tiempo — todo depende de mí','Un poco de todo'].map((o) => (
                   <button key={o} onClick={() => setDxFreno(o)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFreno === o ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{o}</button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">3 · ¿A quién ayudas mejor? (tu paciente típico, en una frase)</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">3 · ¿A quién ayudas mejor? (la persona que mejor atiendes, en una frase)</p>
               <input value={dxNicho} onChange={(e) => setDxNicho(e.target.value)} placeholder="Ej: mujeres de 40-55 con problemas digestivos crónicos" className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50" />
             </div>
 
@@ -457,7 +530,43 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">6 · ¿Cómo quieres que te hable tu Mentor?</p>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">{VOC('6 · ¿De dónde llegan hoy tus {{consultantes}}?')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['Me los recomiendan','De mis redes','De anuncios que pago','De un lugar donde atiendo'].map((o) => (
+                  <button key={o} onClick={() => setDxLlegan(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxLlegan === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">7 · Entre sesión y sesión, ¿qué le das hoy?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['Nada, hasta la próxima sesión','Mensajes cuando me escriben','Ejercicios o material que mando','Ya tengo una plataforma'].map((o) => (
+                  <button key={o} onClick={() => setDxEntrega(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxEntrega === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">8 · ¿Cada cuánto publicas hoy?</p>
+              <div className="grid grid-cols-2 gap-2">
+                {['Casi nunca','Cuando me acuerdo','Una vez por semana','Varias por semana'].map((o) => (
+                  <button key={o} onClick={() => setDxPublica(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxPublica === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">9 · ¿Cómo quieres que te hable tu Mentor?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {([['hueso', 'Directo al hueso. Sin vueltas, aunque incomode.'], ['guantes', 'Con guantes. Firme, pero más suave.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxEstilo(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxEstilo === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>
@@ -466,7 +575,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">7 · ¿El trabajo espiritual es parte de tu vida?</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">10 · ¿El trabajo espiritual es parte de tu vida?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {([['si', 'Sí — la fe, la oración o la gratitud son parte de mi camino.'], ['no', 'No — prefiero un lenguaje neutro.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxFe(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFe === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>
@@ -475,7 +584,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             {dxAvatar && (
-              <p className="text-xs text-cream/45 italic">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold not-italic">10 pacientes a tu precio digno y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
+              <p className="text-xs text-cream/45 italic">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold not-italic">{VOC('10 {{consultantes}} a tu precio digno')} y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
             )}
 
             <button
@@ -492,14 +601,14 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'origen' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tres preguntas — de aquí nace todo</h2>
               <p className="text-sm text-cream/55 mt-1">Tu historia contiene tus dones, y tus dones señalan a quién vienes a servir. Puedes responder hablando.</p>
             </div>
             {[
               { v: ogPorque, set: setOgPorque, q: '1 · ¿Por qué elegiste esta profesión?', ph: 'Lo que te trajo hasta acá…' },
-              { v: ogHerida, set: setOgHerida, q: '2 · ¿Qué herida propia sanaste (o sigues sanando)?', ph: 'Casi siempre, tu paciente ideal es tu yo del pasado…' },
-              { v: ogPaciente, set: setOgPaciente, q: '3 · ¿Qué paciente no te olvidas, y por qué?', ph: 'Esa historia es tu prueba de que tu trabajo transforma…' },
+              { v: ogHerida, set: setOgHerida, q: '2 · ¿Qué herida propia sanaste (o sigues sanando)?', ph: 'Casi siempre, ' + VOC('tu {{consultante}} ideal') + ' es tu yo del pasado…' },
+              { v: ogPaciente, set: setOgPaciente, q: VOC('3 · ¿De qué {{consultante}} no te olvidas, y por qué?'), ph: 'Esa historia es tu prueba de que tu trabajo transforma…' },
             ].map((item, i) => (
               <div key={i}>
                 <p className="text-sm font-medium text-cream/85 mb-2">{item.q}</p>
@@ -509,7 +618,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
             ))}
             <button
-              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep('rueda'); }}
+              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep(((profile as { plan?: string })?.plan === 'ELNUMERO') ? 'welcome' : 'rueda'); }}
               className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
             >
               Grabar en mi ADN y seguir →
@@ -521,7 +630,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         {step === 'rueda' && (
           <div className="space-y-6 fade-rise">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
               <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Rueda de la Vida — el día 90 la vas a mirar</h2>
               <p className="text-sm text-cream/55 mt-1">Un toque por dimensión: ¿cómo está hoy tu vida, del 1 al 10? No viniste solo a hacer dinero.</p>
             </div>
@@ -532,7 +641,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   <div key={d.id}>
                     <div className="flex items-baseline justify-between mb-1">
                       <p className="text-xs text-cream/80">{d.emoji} {d.label}</p>
-                      <p className="text-[11px] text-cream/50">{typeof v === 'number' ? v + '/10' : '—'}</p>
+                      <p className="text-sm text-cream/50">{typeof v === 'number' ? v + '/10' : '—'}</p>
                     </div>
                     <div className="flex gap-1">
                       {Array.from({ length: 10 }).map((_, i) => (
@@ -575,8 +684,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               Ya diste el primer paso más difícil: decidir que tu trabajo vale lo suficiente como para invertir en él. Eso mismo — cobrar con dignidad — es lo que vas a aprender a hacer con cada paciente.
             </p>
             <p className="text-sm text-cream/70 leading-relaxed mb-2">
-              Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
-            </p>
+              {esCincoDias ? <>Estás por empezar <strong className="text-cream/90">tus 5 días</strong>: una micro-sesión guiada por día — 30 minutos, un paso por pantalla. El viernes nos vemos en vivo y el lunes cobras tu precio nuevo.</> : <>Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">10 pacientes de $1.000</strong>.
+            </>}</p>
             <p className="text-sm text-cream/80 leading-relaxed mb-6">
               <span className="text-gold font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
             </p>
@@ -590,7 +699,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div key={item.label} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-4">
                   <div className="mb-2"><item.icon className="w-6 h-6 text-gold" /></div>
                   <p className="text-xs font-semibold text-cream mb-1">{item.label}</p>
-                  <p className="text-[11px] text-cream/55">{item.desc}</p>
+                  <p className="text-sm text-cream/55">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -611,7 +720,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <div className="text-center mb-6">
               <p className="text-4xl mb-3">🥋</p>
               <h1 className="text-2xl font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>El Pacto</h1>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-gold font-bold">En el dojo, la palabra empeñada es el primer cinturón</p>
             </div>
 
             <div className="rounded-2xl border border-cream/10 bg-[#0F0F0F] p-5 mb-5">
@@ -623,15 +732,15 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </p>
               <p className="text-sm text-cream/80 leading-relaxed mt-3">
                 <strong className="text-cream">A los tuyos:</strong> a quienes te formaron y a quienes dependen de ti.{' '}
-                <strong className="text-cream">A tus pacientes:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
+                <strong className="text-cream">A tus {VOC('{{consultantes}}')}:</strong> a los que ya ayudaste y a los diez que todavía no te encontraron.{' '}
                 <strong className="text-cream">Y a ti:</strong> al profesional que hoy decide dejar de sobrevivir.
               </p>
               <p className="text-sm text-gold/90 leading-relaxed mt-3 font-medium">
-                Mi primer compromiso: llegar al Cinturón Amarillo — sanar mi relación con el dinero — antes del día 10.
+                {esCincoDias ? 'Mi primer compromiso: hacer mis 5 días completos y llegar a mi sesión del viernes con mi precio sellado.' : 'Mi primer compromiso: llegar al Cinturón Amarillo — sanar mi relación con el dinero — antes del día 10.'}
               </p>
             </div>
 
-            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Escribe tu pacto con tus palabras (por qué haces esto, por quién)</label>
             <textarea
               value={pactoTexto}
               onChange={(e) => setPactoTexto(e.target.value)}
@@ -639,7 +748,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               placeholder="Hago este camino porque…"
               className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none resize-none"
             />
-            <label className="text-[11px] uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
             <input
               value={pactoFirma}
               onChange={(e) => setPactoFirma(e.target.value)}
@@ -660,7 +769,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             >
               FIRMO MI PACTO
             </button>
-            <p className="text-[11px] text-cream/45 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
+            <p className="text-sm text-cream/45 text-center mt-3">Tu pacto queda guardado. Lo vas a volver a leer el día de tu graduación.</p>
           </div>
         )}
 
@@ -681,7 +790,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   num: '1',
                   icon: Map,
                   title: 'Abre El Camino',
-                  desc: 'Tu sesión de hoy te espera: el Día 1 completo — tu Foto de Partida. Una sesión por día, todo se hace ahí.',
+                  desc: esCincoDias ? 'Tu Día 1 te espera: entras a tu micro-sesión y sales con tu número. 30 minutos.' : 'Tu sesión de hoy te espera: el Día 1 completo — tu Foto de Partida. Una sesión por día, todo se hace ahí.',
                   styles: {
                     card: 'bg-gold/5 border-gold/20 hover:bg-gold/10',
                     icon: 'bg-gold/20',
@@ -733,7 +842,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       <item.icon className={`w-4 h-4 ${item.styles.iconColor}`} />
                     </div>
                     <div className="flex-1">
-                      <span className={`text-[11px] font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
+                      <span className={`text-sm font-bold uppercase tracking-wider ${item.styles.step}`}>Paso {item.num}</span>
                       <p className={`text-sm font-semibold mb-0.5 mt-0.5 ${item.styles.title}`}>{item.title}</p>
                       <p className="text-xs text-cream/55 leading-relaxed">{item.desc}</p>
                     </div>
