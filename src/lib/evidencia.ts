@@ -11,7 +11,7 @@ const BUCKET = 'task-attachments';
 export interface Evidencia {
   name: string;
   path: string;
-  created_at?: string;
+  created_at?: string | null;
 }
 
 function carpeta(userId: string, metaCodigo: string): string {

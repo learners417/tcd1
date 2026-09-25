@@ -19,7 +19,7 @@ Campos disponibles (todos opcionales):
 - oferta_high: descripción del programa o servicio premium
 - oferta_mid: descripción del programa o servicio estándar
 - oferta_low: descripción del programa o servicio de entrada
-- lead_magnet: descripción del lead magnet o recurso gratuito
+- lead_magnet: descripción del recurso de entrada
 - identidad_colores: paleta de colores de marca
 - identidad_tipografia: tipografías o fuentes de marca
 - identidad_logo: descripción del logo o identidad visual
@@ -65,7 +65,7 @@ function normalizeExtracted(raw: unknown): ExtractedProfile {
 export async function extractFromText(texto: string): Promise<ExtractedProfile> {
   // Usa el wrapper de IA: Claude (Vercel serverless) con fallback transparente
   // a DeepSeek server-side si la cuenta Anthropic se queda sin credito o cae.
-  const text = await generateText({
+  const text = await generateText({ tarea: 'estructura',
     systemInstruction: SYSTEM_PROMPT,
     prompt: `Extrae la información de negocio de este texto y devuelve SOLO JSON:\n\n${texto}`,
   });

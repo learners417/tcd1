@@ -119,10 +119,10 @@ RESUMEN ACTUALIZADO:`;
 
   let summary: string;
   try {
-    summary = (await generateText({
+    summary = (await generateText({ tarea: 'estructura',
       prompt,
       systemInstruction:
-        'Sos un asistente que resume conversaciones largas en bullets cortos · sin perder contexto emocional ni decisiones.',
+        'Eres un asistente que resume conversaciones largas en bullets cortos · sin perder contexto emocional ni decisiones.',
     })) ?? '';
   } catch {
     return null;

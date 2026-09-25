@@ -10,7 +10,6 @@
  * Si OpenAI falla, degradamos a la cascada Gemini existente. El consumidor
  * no se entera de que cambio el proveedor — solo ve modelName en progress.
  */
-import { GoogleGenAI } from '@google/genai';
 import type { ImageFormat, ImageQuality } from './campanasTypes';
 import { OPENAI_IMAGE_SIZE, IMAGE_QUALITY_DEFAULT, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
 import { resizeBase64ToExact } from './imageUploadUtils';
@@ -19,7 +18,7 @@ import { supabase } from './supabase';
 // Error tipado para que la UI muestre el modal de "comprar creditos"
 export class InsufficientCreditsError extends Error {
   code = 'INSUFFICIENT_CREDITS' as const;
-  constructor(msg = 'No tenes creditos suficientes') {
+  constructor(msg = 'No tienes créditos suficientes') {
     super(msg);
     this.name = 'InsufficientCreditsError';
   }
@@ -79,7 +78,6 @@ export interface ReferenceImages {
 }
 
 export interface ImageGenOptions {
-  geminiKey?: string;
   format?: ImageFormat;
   quality?: ImageQuality;
 }
@@ -113,8 +111,8 @@ function classifyImageError(
     const reqIdMatch = rawText.match(/[a-z0-9]+::([a-z0-9-]+)/i);
     const reqId = reqIdMatch?.[1];
     return reqId
-      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs · req ${reqId}`
-      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisá Vercel Logs.';
+      ? `El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs · req ${reqId}`
+      : 'El servidor cortó la generación antes de responder (crash o timeout). Revisa Vercel Logs.';
   }
 
   if (status === 413) {
@@ -122,11 +120,11 @@ function classifyImageError(
   }
 
   if (status === 429) {
-    return 'Demasiados pedidos a OpenAI (rate-limit). Esperá 30s y volvé a probar.';
+    return 'Demasiados pedidos a OpenAI (rate-limit). Espera 30 s y vuelve a probar.';
   }
 
   if (status === 401) {
-    return 'Sesión vencida — refrescá la página y volvé a entrar.';
+    return 'Sesión vencida — refresca la página y vuelve a entrar.';
   }
 
   // Errores con body JSON estructurado del endpoint
@@ -210,89 +208,6 @@ async function tryOpenAI(
 
 // ─── Gemini (fallback cascada) ───────────────────────────────────────────────
 
-async function tryGemini(
-  apiKey: string,
-  prompt: string,
-  referenceImages: ReferenceImages | undefined,
-  onProgress: ((progress: ImageGenProgress) => void) | undefined,
-  modelAttemptOffset: number, // para numerar attempts correctamente (2, 3, 4)
-): Promise<ImageGenResult> {
-  const ai = new GoogleGenAI({ apiKey });
-
-  const parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] = [
-    { text: prompt },
-  ];
-  for (const ref of referenceImages?.characterRefs ?? []) {
-    parts.push({ inlineData: { mimeType: ref.mimeType, data: ref.base64 } });
-  }
-  for (const ref of referenceImages?.styleRefs ?? []) {
-    parts.push({ inlineData: { mimeType: ref.mimeType, data: ref.base64 } });
-  }
-
-  let lastError: Error | null = null;
-
-  for (let i = 0; i < GEMINI_MODELS.length; i++) {
-    const model = GEMINI_MODELS[i];
-    const attempt = modelAttemptOffset + i;
-
-    onProgress?.({
-      modelName: model.name,
-      attempt,
-      total: TOTAL_MODELS,
-      status: 'trying',
-    });
-
-    try {
-      const response = await withTimeout(
-        ai.models.generateContent({
-          model: model.id,
-          contents: [{ role: 'user', parts: parts as never[] }],
-          config: { responseModalities: ['TEXT', 'IMAGE'] },
-        }),
-        MODEL_TIMEOUT_MS,
-        model.name,
-      );
-
-      const responseParts = response.candidates?.[0]?.content?.parts;
-      if (!responseParts) throw new Error('No response parts');
-
-      const imagePart = responseParts.find(
-        (p: Record<string, unknown>) => p.inlineData && typeof p.inlineData === 'object',
-      );
-
-      if (!imagePart || !imagePart.inlineData) {
-        throw new Error('No image in response');
-      }
-
-      const { data, mimeType } = imagePart.inlineData as { data: string; mimeType: string };
-
-      onProgress?.({
-        modelName: model.name,
-        attempt,
-        total: TOTAL_MODELS,
-        status: 'success',
-      });
-
-      return {
-        imageBase64: data,
-        mimeType: mimeType || 'image/png',
-        modelUsed: model.id,
-        modelName: model.name as ImageModelName,
-      };
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      onProgress?.({
-        modelName: model.name,
-        attempt,
-        total: TOTAL_MODELS,
-        status: 'failed',
-        error: lastError.message,
-      });
-    }
-  }
-
-  throw lastError ?? new Error('Todos los modelos Gemini fallaron');
-}
 
 // ─── Normalizacion de tamano final ───────────────────────────────────────────
 
@@ -337,7 +252,7 @@ async function normalizeToFormat(
  * Intenta OpenAI gpt-image-2 primero; si falla, cae a la cascada Gemini.
  *
  * @param options - format (para mapear size de OpenAI), quality (low/med/high/auto),
- *                  geminiKey (fallback). Si ambos proveedores fallan, tira error.
+ *                  undefined (fallback). Si ambos proveedores fallan, tira error.
  */
 export async function generateImageWithFallback(
   prompt: string,
@@ -389,31 +304,16 @@ export async function generateImageWithFallback(
     });
   }
 
-  // ── 2) Cascada Gemini ──────────────────────────────────────────────────────
-  if (!options.geminiKey) {
-    throw new Error(
-      `OpenAI fallo y no hay Gemini key configurada como fallback. Error: ${openaiError.message}`,
-    );
-  }
-
-  try {
-    const result = await tryGemini(
-      options.geminiKey,
-      prompt,
-      referenceImages,
-      onProgress,
-      /* attemptOffset */ 2,
-    );
-    return await normalizeToFormat(result, format);
-  } catch (geminiError) {
-    // Gemini queda como fallback silencioso. Si tambien falla, el usuario solo
-    // ve el error de OpenAI (que es el flujo primario) · el de Gemini va a la consola.
-    if (typeof console !== 'undefined') {
-      const gMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
-      console.error('[campanasImageGen] Fallback Gemini tambien fallo:', gMsg);
-    }
-    throw new Error(openaiError.message);
-  }
+  // ─── El respaldo de Gemini se sacó del navegador ───
+  //
+  // Antes, si OpenAI fallaba, se llamaba a Google desde acá con
+  // `VITE_GEMINI_API_KEY`. Todo lo que lleva ese prefijo se empaqueta DENTRO
+  // del bundle: cualquiera que abriera la app podía leer esa clave y gastarla.
+  //
+  // Tener un respaldo silencioso no vale exponer una cuenta de Google al
+  // mundo entero. Si hace falta recuperarlo, va del lado del servidor
+  // —dentro de api/ai/image.ts—, nunca acá.
+  throw new Error(openaiError.message);
 }
 
 // ─── Edicion sutil de imagen existente ───────────────────────────────────────
@@ -439,7 +339,7 @@ export async function describeCharacter(
     throw new Error(parsed?.error || `HTTP ${resp.status}: ${text.slice(0, 200)}`);
   }
   const data = await resp.json() as { description?: string; error?: string };
-  if (!data.description) throw new Error(data.error || 'Descripcion vacia');
+  if (!data.description) throw new Error(data.error || 'Descripción vacia');
   return data.description;
 }
 

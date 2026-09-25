@@ -117,7 +117,7 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
       { codigo: 'IRR.matriz_b_obstaculos', label: 'Matriz B · los obstáculos', pilarOrigen: 'P2.3', profileKey: 'matriz_b' },
       { codigo: 'IRR.matriz_c_cielo', label: 'Matriz C · el cielo', pilarOrigen: 'P2.3', profileKey: 'matriz_c', criticoDia45: true },
       { codigo: 'IRR.metodo_nombre', label: 'Nombre del método propio', pilarOrigen: 'P2.4', profileKey: 'metodo_nombre', criticoDia45: true },
-      { codigo: 'IRR.metodo_pasos', label: 'Pasos del método (3-7 · con nivel_oferta por paso)', pilarOrigen: 'P2.4', profileKey: 'metodo_pasos', criticoDia45: true },
+      { codigo: 'IRR.metodo_pasos', label: 'Pasos del método (de 3 a 7, cada uno con su nivel de oferta)', pilarOrigen: 'P2.4', profileKey: 'metodo_pasos', criticoDia45: true },
       { codigo: 'IRR.metodo_mapeo_obstaculos', label: 'Mapeo Obstáculos B → Pasos del método', pilarOrigen: 'P2.4', profileKey: 'adn_metodo_mapeo_obstaculos' },
     ],
   },
@@ -149,7 +149,7 @@ export const ADN_SCHEMA_V8: ADNSeccion[] = [
       { codigo: 'INF.landing_copy_completo', label: 'Copy completo de landing', pilarOrigen: 'P4.5b', profileKey: 'adn_landing_copy' },
       { codigo: 'INF.vsl_script', label: 'Script del VSL', pilarOrigen: 'P5.2', profileKey: 'adn_vsl_script' },
       { codigo: 'INF.perfil_ig_optimizado', label: 'Perfil de IG optimizado (bio + destacadas + link)', pilarOrigen: 'P4.2b', profileKey: 'adn_perfil_ig' },
-      { codigo: 'INF.anuncio_followme', label: 'Anuncio follow-me (seguidores correctos)', pilarOrigen: 'P4.6', profileKey: 'adn_anuncio_followme' },
+      { codigo: 'INF.anuncio_followme', label: 'El montaje de campaña (los 8 candados)', pilarOrigen: 'P4.6', profileKey: 'adn_anuncio_followme' },
       { codigo: 'INF.anuncios_meta_6_creativos', label: 'Anuncios Meta · 6 creativos N1/N2/N3', pilarOrigen: 'P4.3', profileKey: 'adn_anuncios' },
       { codigo: 'INF.validacion_organica', label: 'Validación orgánica (mínimo 3 piezas)', pilarOrigen: 'P4.3d', profileKey: 'adn_validacion_organica' },
       { codigo: 'INF.meta_config', label: 'Configuración Meta Ads', pilarOrigen: 'P9A.5', profileKey: 'adn_meta_config' },
@@ -271,7 +271,7 @@ export const DIMENSIONES_FOTO_PARTIDA = [
   { key: 'metodo_nombrado',  label: 'Tu método con nombre propio',          refCampo: 'IRR.metodo_nombre' },
   { key: 'escalera_ofertas', label: 'Tu escalera de ofertas armada',        refCampo: 'NEG.oferta_mid' },
   { key: 'contenido_nivel',  label: 'Tu contenido por nivel de awareness',  refCampo: 'INF.anuncios_meta_6_creativos' },
-  { key: 'sistema_autonomo', label: 'Tu sistema funcionando sin vos',       refCampo: 'CAP.retargeting_config' },
+  { key: 'sistema_autonomo', label: 'Tu sistema funcionando sin ti',       refCampo: 'CAP.retargeting_config' },
 ] as const;
 
 export type DimensionFotoPartida = (typeof DIMENSIONES_FOTO_PARTIDA)[number]['key'];

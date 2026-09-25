@@ -4,7 +4,8 @@
  * Persiste en Supabase (tabla `el_numero`) con respaldo en localStorage
  * para que funcione al instante y sea resiliente si falla la red.
  */
-import { supabase } from './supabase';
+import { supabase, guardarFila } from './supabase';
+import { claveDelDia } from './roadmapSeed';
 
 export interface ElNumero {
   precio_sesion: number;
@@ -15,7 +16,8 @@ export interface ElNumero {
   fecha_cambio: string | null;
 }
 
-const LS_KEY = 'tcd_el_numero';
+/** Donde vive su número. Lo lee también la preventa del día 24. */
+export const LS_KEY = 'tcd_el_numero';
 
 export function calcPHR(precioSesion: number, pacientesSemana: number, horasSemana: number): number {
   if (!horasSemana) return 0;
@@ -63,7 +65,7 @@ export async function saveElNumero(userId: string | undefined, n: ElNumero): Pro
   // Supabase si se puede
   try {
     if (supabase && userId) {
-      await supabase.from('el_numero').upsert({ usuario_id: userId, ...n }, { onConflict: 'usuario_id' });
+      await guardarFila('el_numero', { usuario_id: userId, ...n }, ['usuario_id']);
     }
   } catch { /* el local ya guardó */ }
 }
@@ -94,27 +96,23 @@ export async function marcarNumeroEnElCamino(userId?: string | null): Promise<vo
   try {
     const raw = localStorage.getItem('tcd_hoja_ruta_v2');
     const arr: string[] = raw ? JSON.parse(raw) : [];
-    if (!arr.includes('1-P1.5')) {
-      arr.push('1-P1.5');
+    if (!arr.includes(claveDelDia(1))) {
+      arr.push(claveDelDia(1));
       localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(arr));
     }
   } catch { /* noop */ }
 
   if (!supabase || !userId) return;
   try {
-    await supabase.from('hoja_de_ruta').upsert(
-      {
+    await guardarFila('hoja_de_ruta', {
         usuario_id: userId,
         pilar_numero: 1,
         meta_codigo: 'P1.5',
         completada: true,
         es_estrella: false,
         fecha_completada: new Date().toISOString().split('T')[0],
-      },
-      { onConflict: 'usuario_id,pilar_numero,meta_codigo' },
-    );
-    await supabase.from('hitos_cinturon').upsert(
-      [{
+      }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
+    await supabase.from('hitos_cinturon').insert([{
         usuario_id: userId,
         cinturon: 'blanco_punta_amarilla',
         fase: 1,
@@ -123,9 +121,7 @@ export async function marcarNumeroEnElCamino(userId?: string | null): Promise<vo
         agente: 'coach',
         feedback_agente: 'EL NÚMERO completado: precio digno definido.',
         aprobado_at: new Date().toISOString(),
-      }],
-      { onConflict: 'usuario_id,cinturon', ignoreDuplicates: true },
-    );
+      }]); // duplicados: se ignoran
     const { data: prof } = await supabase.from('profiles').select('cinturon').eq('id', userId).single();
     if (!prof?.cinturon || prof.cinturon === 'blanco') {
       await supabase.from('profiles').update({ cinturon: 'blanco_punta_amarilla' }).eq('id', userId);

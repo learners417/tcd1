@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+/**
+ * Las variables llegan de Vite dentro del navegador. Fuera de él
+ * `import.meta.env` no existe, y leerlo directo hacía que el módulo REVENTARA
+ * al cargarse — lo que volvía imposible montar cualquier pantalla en una
+ * prueba, que es la única forma de saber si una pantalla no explota al
+ * abrirse. Con la guarda, el módulo carga y el aviso de abajo hace su trabajo.
+ */
+const entorno = (import.meta.env ?? process.env ?? {}) as Record<string, string | undefined>;
+
+const supabaseUrl = entorno.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = entorno.VITE_SUPABASE_ANON_KEY as string;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('[Supabase] Variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY no configuradas. El modo offline (localStorage) está activo.');
@@ -10,6 +19,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
+
+/**
+ * El cliente de Supabase, garantizado.
+ *
+ * `supabase` es null cuando faltan las variables de entorno. Sin comprobación
+ * de nulos activada, decenas de llamadas lo usaban directo: si el despliegue
+ * sale sin esas variables, la app no avisa — revienta con "cannot read
+ * properties of null" en la primera consulta.
+ *
+ * Esto falla con una frase que se entiende, en el mismo lugar donde está el
+ * problema de verdad.
+ */
+export function db() {
+  if (!supabase) {
+    throw new Error(
+      'La app no está conectada a su base de datos. Faltan las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.',
+    );
+  }
+  return supabase;
+}
 
 export const isSupabaseReady = () => supabase !== null;
 
@@ -23,6 +52,16 @@ export interface Profile {
   email: string;
   especialidad?: string;
   fecha_inicio: string; // date as string YYYY-MM-DD
+
+  // ── La ventana de acceso (24 sep) ──
+  /** 'treinta' | 'noventa' | 'cuotas'. Se carga por cliente. */
+  acceso_tipo?: string;
+  /** Las cuotas, cuando pagó así: [{ vence, pagada }]. */
+  acceso_cuotas?: Array<{ vence: string; pagada: boolean }>;
+  /** Días que estuvo cerrado esperando un pago y se le devolvieron. */
+  acceso_dias_devueltos?: number;
+  /** El día que entregó cada jornada, para medir el atraso. */
+  entregas?: Record<string, string>;
   plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';
   rol: 'cliente' | 'admin';
   created_at: string;
@@ -347,7 +386,7 @@ export interface AdnValidacionOrganica {
 // ─── Tipos V3 — Versión Final Definitiva ─────────────────────────────────────
 
 export type PilarId =
-  | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8'
+  | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6' | 'P7' | 'P8' | 'P9'
   | 'P9A' | 'P9B' | 'P9C' | 'P10' | 'P11';
 
 /** Tipos de tarea permitidos en el roadmap (v7 Regla #2: solo 3 tipos, en este orden). */
@@ -357,21 +396,28 @@ export type MetaCodigo =
   // P0 · Onboarding (v8 · 5 tareas)
   | 'P0.0' | 'P0.1' | 'P0.2' | 'P0.3' | 'P0.4'
   // P1 · Sanar el Dinero (rediseño 4 fases · protocolo de 7 días)
-  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4' | 'P1.5' | 'P1.6'
+  | 'P1.1' | 'P1.2' | 'P1.2b' | 'P1.3' | 'P1.4' | 'P1.5'
+  | 'P1.5b' | 'P1.6'
   // P2 · Propósito (v8 · 6 tareas, agrega P2.4/P2.5, COACH a P2.6)
-  | 'P2.1' | 'P2.2' | 'P2.3' | 'P2.4' | 'P2.5' | 'P2.6'
+  | 'P2.1' | 'P2.2' | 'P2.3'
+  | 'P2.3b' | 'P2.4' | 'P2.5'
+  | 'P2.6' | 'P2.6'
   // P3 · Legado (sin cambios estructurales · Espejo Identidad es pantalla, no tarea)
   | 'P3.1' | 'P3.2' | 'P3.3' | 'P3.4'
+  | 'P3.4b' | 'P3.7'
   // P4 · Avatar (v8 · 5 tareas, agrega P4.4 conexión, COACH a P4.5)
   | 'P4.1' | 'P4.2' | 'P4.2b'
   | 'P4.2c'
   | 'P4.2d' | 'P4.3' | 'P4.4' | 'P4.5' | 'P4.6'
+  | 'P4.7'
+  | 'P4.8'
   // P5 · Nicho + PUV (v8 · 4 tareas, separa PUV en P5.3, COACH a P5.4)
   | 'P5.1' | 'P5.2' | 'P5.3' | 'P5.4'
   // P6 · Matriz ABC (sin cambios)
   | 'P6.1' | 'P6.2' | 'P6.3' | 'P6.4'
   // P7 · Método (v8 · 5 tareas, agrega P7.4 mapeo, COACH a P7.5)
-  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.C1' | 'P7.C2' | 'P7.C3' | 'P7.C4' | 'P7.C5' | 'P7.4' | 'P7.5'
+  | 'P7.1' | 'P7.2' | 'P7.3' | 'P7.4' | 'P7.5' | 'P7.6' | 'P7.7' | 'P7.8' | 'P7.9'
+  | 'P7.10' | 'P7.11' | 'P7.12' | 'P7.13' | 'P7.C1' | 'P7.C2' | 'P7.C3' | 'P7.C4' | 'P7.C5' | 'P7.4' | 'P7.5'
   // P8 · Escalera Ofertas (v8 · 9 tareas, agrega Ultra Low + Mamuska + separa ofertas)
   | 'P8.1' | 'P8.2' | 'P8.3' | 'P8.4' | 'P8.5' | 'P8.6' | 'P8.7' | 'P8.8' | 'P8.9'
   // P9A · Infraestructura (v8 · 6 tareas, agrega Validación orgánica + Meta Config)
@@ -384,14 +430,13 @@ export type MetaCodigo =
   | 'P10.1' | 'P10.2' | 'P10.3'
   // P11 · Análisis (sin cambios)
   | 'P11.1' | 'P11.2'
-  | 'P3.5'
   | 'P3.6'
   | 'P4.3b'
   | 'P4.3c'
   | 'P4.3d'
-  | 'P4.5b'
-  | 'P5.5'
-  | 'P6.4';
+  | 'P4.5b' | 'P4.2e' | 'P4.3e' | 'P4.9'
+  | 'P5.5' | 'P5.6'
+  | 'P6.4' | 'P6.5' | 'P6.6' | 'P6.7' | 'P6.8' | 'P6.9';
 
 /** @deprecated Usar MetaCodigo (V3). Mantener para migración de datos existentes. */
 export type MetaCodigoV2 =
@@ -539,7 +584,7 @@ export const NIVEL_METADATA: Record<1 | 2 | 3 | 4 | 5, NivelMeta> = {
   2: {
     nombre: 'Sanador Narrado',
     triggerPilar: 'P3',
-    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué vos?" en 30 segundos.',
+    descripcion: 'Tiene historia, propósito y legado documentados. Puede responder "¿por qué tú?" en 30 segundos.',
   },
   3: {
     nombre: 'Sanador Posicionado',
@@ -685,17 +730,12 @@ export const agentConversationsRepo = {
     messages: AgentConversationMessage[],
   ): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('agent_conversations')
-      .upsert(
-        {
+    await guardarFila('agent_conversations', {
           user_id: userId,
           agent_id: agentId,
           messages,
           last_message_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,agent_id' },
-      );
+        }, ['user_id', 'agent_id']);
   },
 
   async reset(userId: string, agentId: string): Promise<void> {
@@ -748,10 +788,7 @@ export const agentSkillProgressRepo = {
     next: { practice_count: number; scores: number[]; current_level: 1 | 2 | 3 | 4 },
   ): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('agent_skill_progress')
-      .upsert(
-        {
+    await guardarFila('agent_skill_progress', {
           user_id: userId,
           agent_id: agentId,
           practice_count: next.practice_count,
@@ -759,9 +796,7 @@ export const agentSkillProgressRepo = {
           current_level: next.current_level,
           last_practice_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,agent_id' },
-      );
+        }, ['user_id', 'agent_id']);
   },
 
   async reset(userId: string, agentId: string): Promise<void> {
@@ -803,17 +838,12 @@ export const coachConversationsRepo = {
 
   async saveMessages(userId: string, messages: CoachConversationMessage[]): Promise<void> {
     if (!supabase) return;
-    await supabase
-      .from('coach_conversations')
-      .upsert(
-        {
+    await guardarFila('coach_conversations', {
           user_id: userId,
           messages,
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      );
+        }, ['user_id']);
   },
 
   async updateSummary(
@@ -863,4 +893,30 @@ export async function fetchProfileV2(userId: string): Promise<ProfileV2 | null> 
   if (error || !data) return null;
   const profile = (data as ProfileV2[]).find((p) => p.id === userId);
   return profile ?? null;
+}
+
+
+/* ══════════════ GUARDADO RESILIENTE ══════════════
+ * Un upsert falla con 42P10 cuando la tabla no tiene la restricción única que
+ * el código asume ("no unique or exclusion constraint matching the ON CONFLICT").
+ * Eso tumbaba guardados enteros (el diario, el precio sellado). Esta función
+ * intenta el camino rápido y, si la restricción no existe, actualiza por claves
+ * y recién inserta si no había fila — sin duplicar nunca.
+ */
+export async function guardarFila<T extends Record<string, unknown>>(
+  tabla: string,
+  payload: T,
+  claves: string[],
+): Promise<{ data: unknown; error: unknown }> {
+  if (!supabase) return { data: null, error: null };
+  const cli = supabase;
+  const rapido = await cli.from(tabla).upsert(payload as never, { onConflict: claves.join(',') }).select().maybeSingle();
+  if (!rapido.error) return rapido;
+  const señal = `${(rapido.error as { code?: string }).code ?? ''} ${(rapido.error as { message?: string }).message ?? ''}`;
+  if (!/42P10|no unique|exclusion constraint/i.test(señal)) return rapido;
+  let q = cli.from(tabla).update(payload as never);
+  for (const k of claves) q = q.eq(k, payload[k] as never);
+  const upd = await q.select().maybeSingle();
+  if (!upd.error && upd.data) return upd;
+  return await cli.from(tabla).insert(payload as never).select().maybeSingle();
 }

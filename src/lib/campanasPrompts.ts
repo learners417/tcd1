@@ -5,6 +5,7 @@ import type { ProfileV2 } from './supabase';
 import type { CampanaFormState, AnguloCreativo, TipoCreativo, ObjetivoCampana, EstiloVisual, ImageMode, CustomText, ImageFormat } from './campanasTypes';
 import { ESTILO_VISUAL_OPTIONS, IMAGE_FORMAT_OPTIONS, SAFE_ZONE_BY_FORMAT } from './campanasTypes';
 import { instruccionesDialecto, getPaisInfo } from './vozLocalizada';
+import { primero } from './primero';
 
 // ─── Contexto ADN del profesional ────────────────────────────────────────────
 
@@ -19,45 +20,45 @@ export function adnContext(perfil: Partial<ProfileV2>): string {
   - SUENOS: ${avatar.suenos?.join(', ') || 'no definidos'}
   - OBJECIONES: ${avatar.objeciones?.join(', ') || 'no definidas'}
   - LENGUAJE que usa: ${avatar.lenguaje?.join(', ') || 'no definido'}`
-    : perfil.avatar_cliente ?? 'no definido';
+    : primero(perfil.avatar_cliente) || 'no definido';
 
   const paisInfo = getPaisInfo(perfil.pais);
   const paisLinea = paisInfo
-    ? `- Pais del profesional: ${paisInfo.nombre} (dialecto del contenido: ${paisInfo.dialecto})`
-    : '- Pais del profesional: no especificado (usar tuteo / espanol neutro)';
+    ? `- País del profesional: ${paisInfo.nombre} (dialecto del contenido: ${paisInfo.dialecto})`
+    : '- País del profesional: no especificado (usar tuteo / espanol neutro)';
 
   return `
 === CONTEXTO DEL SANADOR ===
-- Nombre: ${perfil.nombre ?? 'Sanador'}
-- Especialidad: ${perfil.especialidad ?? 'salud'}
+- Nombre: ${primero(perfil.nombre) || 'Sanador'}
+- Especialidad: ${primero(perfil.especialidad) || 'salud'}
 ${paisLinea}
-- Nicho: ${perfil.nicho ?? perfil.adn_nicho ?? 'no definido'}
-- PUV: ${perfil.adn_usp ?? 'no definido'}
-- Posicionamiento: ${perfil.posicionamiento ?? 'no definido'}
+- Nicho: ${primero(perfil.nicho, perfil.adn_nicho) || 'no definido'}
+- PUV: ${primero(perfil.adn_usp) || 'no definido'}
+- Posicionamiento: ${primero(perfil.posicionamiento) || 'no definido'}
 
 === AVATAR DEL CLIENTE IDEAL ===
 ${avatarStr}
 
 === MATRIZ DE TRANSFORMACION ===
-- Punto A (El Infierno — dolores actuales): ${perfil.matriz_a ?? 'no definido'}
-- Punto B (Los Obstaculos — por que no avanzan): ${perfil.matriz_b ?? 'no definido'}
-- Punto C (El Cielo — resultado deseado): ${perfil.matriz_c ?? 'no definido'}
+- Punto A (El Infierno — dolores actuales): ${primero(perfil.matriz_a) || 'no definido'}
+- Punto B (Los Obstaculos — por que no avanzan): ${primero(perfil.matriz_b) || 'no definido'}
+- Punto C (El Cielo — resultado deseado): ${primero(perfil.matriz_c) || 'no definido'}
 
 === METODO Y OFERTA ===
-- Metodo: ${perfil.metodo_nombre ?? 'no definido'}
-- Pasos del metodo: ${perfil.metodo_pasos ?? 'no definido'}
-- Oferta High Ticket: ${perfil.oferta_high ?? 'no definida'}
-- Oferta Mid Ticket: ${perfil.oferta_mid ?? 'no definida'}
-- Oferta Low / Lead Magnet: ${perfil.oferta_low ?? perfil.lead_magnet ?? 'no definido'}
+- Metodo: ${primero(perfil.metodo_nombre) || 'no definido'}
+- Pasos del metodo: ${primero(perfil.metodo_pasos) || 'no definido'}
+- Oferta High Ticket: ${primero(perfil.oferta_high) || 'no definida'}
+- Oferta Mid Ticket: ${primero(perfil.oferta_mid) || 'no definida'}
+- Oferta Low / Lead Magnet: ${primero(perfil.oferta_low, perfil.lead_magnet) || 'no definido'}
 
 === HISTORIA ===
-- Historia 50 palabras: ${perfil.historia_50 ?? 'no cargada'}
-- Historia 150 palabras: ${perfil.historia_150 ?? 'no cargada'}
+- Historia 50 palabras: ${primero(perfil.historia_50) || 'no cargada'}
+- Historia 150 palabras: ${primero(perfil.historia_150) || 'no cargada'}
 
 === IDENTIDAD VISUAL ===
-- Colores: ${perfil.identidad_colores ?? 'no definidos'}
-- Tipografia: ${perfil.identidad_tipografia ?? 'no definida'}
-- Tono de comunicacion: ${perfil.identidad_tono ?? 'no definido'}
+- Colores: ${primero(perfil.identidad_colores) || 'no definidos'}
+- Tipografia: ${primero(perfil.identidad_tipografia) || 'no definida'}
+- Tono de comunicacion: ${primero(perfil.identidad_tono) || 'no definido'}
 
 ${instruccionesDialecto(perfil.pais)}
 `.trim();
@@ -180,7 +181,7 @@ El hook debe generar disonancia cognitiva inmediata.`,
   directo: `ANGULO DIRECTO:
 Ve al grano. Beneficio claro desde la primera linea.
 Sin rodeos, sin historias largas. Resultado concreto + CTA fuerte.
-Estructura: "[Resultado especifico] en [tiempo]. Sin [objecion comun]."
+Estructura: "[Resultado especifico] en [tiempo]. Sin [objecion común]."
 Ideal para audiencias calientes o retargeting.`,
 
   emocional: `ANGULO EMOCIONAL:
@@ -200,7 +201,7 @@ Usa numeros especificos y detalles intrigantes.`,
 Posicionate como EL experto. Menciona tu metodo propio, anos de experiencia, resultados.
 Usa prueba social: numero de pacientes/clientes, resultados medibles, credenciales.
 El tono es seguro, experto, pero no arrogante.
-Estructura: "Despues de [experiencia], desarrolle [metodo] que [resultado]. Ahora [CTA]."`,
+Estructura: "Después de [experiencia], desarrolle [método] que [resultado]. Ahora [CTA]."`,
 
   dolor: `ANGULO DOLOR:
 Apunta DIRECTO al punto de dolor mas agudo del avatar.
@@ -213,7 +214,7 @@ Estructura: "Si [dolor especifico], entonces [lo que necesitas saber]..."`,
 Pinta la VISION ASPIRACIONAL del resultado final.
 Como se ve, se siente, se vive la transformacion completa.
 El avatar debe verse reflejado en ese futuro.
-Estructura: "Imaginate [escena del resultado ideal]. Eso es exactamente lo que [metodo/oferta] te da."`,
+Estructura: "Imaginate [escena del resultado ideal]. Eso es exactamente lo que [método/oferta] te da."`,
 };
 
 export function buildCopyPrompt(
@@ -224,9 +225,9 @@ export function buildCopyPrompt(
   slideCount?: number,
 ): string {
   const ctaByObjetivo: Record<ObjetivoCampana, string> = {
-    trafico_perfil: 'CTA: Invitar a comentar una PALABRA CLAVE o enviar DM para recibir un recurso gratuito. Ejemplo: "Comenta [PALABRA] y te envio [recurso] gratis"',
-    mensajes_retargeting: 'CTA: Invitar a enviar mensaje directo para continuar la conversacion. Tono de recordatorio amigable.',
-    clientes_potenciales: 'CTA: Invitar a hacer clic para ver la masterclass/VSL y agendar su llamada estrategica gratuita.',
+    trafico_perfil: 'CTA: Invitar a comentar una PALABRA CLAVE o enviar DM para recibir un recurso gratuito. Ejemplo: "Comenta [PALABRA] y te envío [recurso] gratis"',
+    mensajes_retargeting: 'CTA: Invitar a enviar mensaje directo para continuar la conversación. Tono de recordatorio amigable.',
+    clientes_potenciales: 'CTA: Invitar a hacer clic para ver la masterclass/VSL y agendar su llamada estratégica gratuita.',
   };
 
   const formatoOutput = tipo === 'yt_thumbnail'
@@ -258,9 +259,9 @@ Responde con un JSON array: [{ slide1 }, { slide2 }, ...]`
     : `Genera UNA imagen unica con su copy para Meta Ads.
 Responde con un JSON:
 {
-  "texto_principal": "El texto largo del anuncio (2-4 parrafos, maximo 300 palabras). Incluye hook, desarrollo y CTA.",
-  "titulo": "Titulo corto y potente (maximo 40 caracteres)",
-  "descripcion": "Descripcion del enlace (maximo 90 caracteres)",
+  "texto_principal": "El texto largo del anuncio (2-4 párrafos, máximo 300 palabras). Incluye hook, desarrollo y CTA.",
+  "titulo": "Título corto y potente (máximo 40 caracteres)",
+  "descripcion": "Descripción del enlace (máximo 90 caracteres)",
   "cta_texto": "Texto del boton CTA (2-4 palabras)"
 }`;
 
@@ -319,13 +320,13 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   tratamiento: string;
 }> = {
   foto_real: {
-    paleta: '"#0F1419 fondo, #E8962E acento, #F2EFE9 texto"',
+    paleta: '"#0F1419 fondo, #B0822E acento, #F2EFE9 texto"',
     escena: '"primer plano editorial de mujer 35-45 con fondo warm desenfocado"',
     tipografia: '"sans-serif bold blanco con outline fino, alineacion izquierda"',
     tratamiento: '"fotografia editorial DSLR, luz natural, shallow depth of field, tono warm cinematografico"',
   },
   bold: {
-    paleta: '"#000000 fondo, #E8962E acento saturado, #F2EFE9 texto"',
+    paleta: '"#000000 fondo, #B0822E acento saturado, #F2EFE9 texto"',
     escena: '"composicion grafica con formas planas y tipografia oversized como protagonista, sin foto"',
     tipografia: '"sans-serif display ultra-bold, tamanos masivos, asimetrica"',
     tratamiento: '"diseño grafico flat vector, alto contraste, poster editorial Behance, sin fotografia"',
@@ -344,7 +345,7 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   },
   comic: {
     paleta: '"primarios saturados tipo comic (#E63946, #1D3557, #F1FAEE, negro tinta)"',
-    escena: '"personaje en pose dinamica accion comic con lineas de velocidad, sin fotografia"',
+    escena: '"personaje en pose dinamica acción comic con lineas de velocidad, sin fotografia"',
     tipografia: '"display comic bold con outline grueso, mayusculas, onomatopeyas estilo Marvel/DC"',
     tratamiento: '"ilustracion comic book americano, tinta gruesa, halftone Ben-Day dots, cross-hatching, panel dinamico"',
   },
@@ -362,9 +363,9 @@ const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   },
   twitter: {
     paleta: '"dark mode #15202B fondo, texto #F2EFE9, handle/timestamp gris #71767B, azul verificado #1D9BF0"',
-    escena: '"screenshot organico de un post real en la app de X/Twitter, card unica del tweet visible"',
+    escena: '"screenshot organico de un post real en la app de X/Twitter, card única del tweet visible"',
     tipografia: '"system font (Segoe UI / SF Pro) tamanos REALES de la app — display name ~16px bold, post body ~15-16px regular, handle ~14px gris. JAMAS texto display gigante"',
-    tratamiento: '"replica pixel-perfect de un screenshot autentico de X/Twitter, texto a tamano de lectura normal (no de poster), sin efectos, sin gradientes, sin tipografia decorativa — debe parecer captura real"',
+    tratamiento: '"replica pixel-perfect de un screenshot autentico de X/Twitter, texto a tamaño de lectura normal (no de poster), sin efectos, sin gradientes, sin tipografia decorativa — debe parecer captura real"',
   },
 };
 
@@ -397,14 +398,14 @@ Ejemplos concretos para el estilo "${estiloInfo!.titulo}" (usa este vocabulario,
     : `
 
 Ejemplos genericos:
-- paleta: "#0F1419 fondo, #E8962E acento, #F2EFE9 texto"
+- paleta: "#0F1419 fondo, #B0822E acento, #F2EFE9 texto"
 - escena: "primer plano de mujer 35-45 con fondo neutro warm desenfocado"
 - tipografia: "sans-serif bold blanco con fino outline negro, alineacion izquierda"
 - tratamiento: "filtro warm cinematografico, blur de fondo, alto contraste, vineteado sutil"`;
 
   const brandPaleta = perfil.identidad_colores?.trim();
   const brandBrief = brandPaleta
-    ? `\n=== MANUAL DE MARCA (PALETA OBLIGATORIA) ===\nEl profesional ya definio una paleta de marca: ${brandPaleta}. Al construir "concepto_visual.paleta" usa EXACTAMENTE estos colores (no inventes otros). El estilo visual aporta la tecnica/estetica, pero los colores son los del manual.\n`
+    ? `\n=== MANUAL DE MARCA (PALETA OBLIGATORIA) ===\nEl profesional ya definio una paleta de marca: ${brandPaleta}. Al construir "concepto_visual.paleta" usa EXACTAMENTE estos colores (no inventes otros). El estilo visual aporta la técnica/estetica, pero los colores son los del manual.\n`
     : '';
 
   return `Eres un copywriter senior + director creativo especializado en carruseles de Instagram para profesionales de la salud.
@@ -418,7 +419,7 @@ ${estiloBlock}${brandBrief}
 === BRIEF DEL USUARIO (intencion del carrusel) ===
 ${brief.trim().length > 0
   ? brief
-  : `(sin brief explicito — inventa una historia coherente al nicho "${perfil.nicho ?? perfil.adn_nicho ?? perfil.especialidad ?? 'salud y bienestar'}" y al angulo elegido. Asegurate de que cada slide avance el argumento: Slide 1 = hook fuerte distinto al resto, slides intermedios = una idea concreta diferente cada uno, slide final = CTA accionable.)`}
+  : `(sin brief explicito — inventa una historia coherente al nicho "${primero(perfil.nicho, perfil.adn_nicho, perfil.especialidad) || 'salud y bienestar'}" y al angulo elegido. Asegurate de que cada slide avance el argumento: Slide 1 = hook fuerte distinto al resto, slides intermedios = una idea concreta diferente cada uno, slide final = CTA accionable.)`}
 
 === TAREA ===
 1) Crea ${totalSlides} titulares encadenados que se LEAN como una sola historia de izquierda a derecha.
@@ -460,7 +461,7 @@ Responde SOLO con este JSON, sin markdown, sin texto adicional:
     "tratamiento": "..."
   },
   "slides": [
-    { "titulo": "...", "subtitulo": "...", "escena": "variacion de escena concreta para ESTA slide — plano/angulo/accion/elementos distintos a las otras slides, pero dentro del mismo universo visual" }
+    { "titulo": "...", "subtitulo": "...", "escena": "variacion de escena concreta para ESTA slide — plano/angulo/acción/elementos distintos a las otras slides, pero dentro del mismo universo visual" }
   ]
 }
 
@@ -499,9 +500,9 @@ export function buildImagePrompt(
     };
   },
 ): string {
-  const nicho = perfil.nicho ?? perfil.adn_nicho ?? perfil.especialidad ?? 'salud y bienestar';
-  const colores = perfil.identidad_colores ?? 'tonos profesionales, dorado y oscuro';
-  const tono = perfil.identidad_tono ?? 'profesional y cercano';
+  const nicho = primero(perfil.nicho, perfil.adn_nicho, perfil.especialidad) || 'salud y bienestar';
+  const colores = primero(perfil.identidad_colores) || 'tonos profesionales, dorado y oscuro';
+  const tono = primero(perfil.identidad_tono) || 'profesional y cercano';
   const mode = options?.mode ?? 'completa';
   const estilo = options?.estilo;
 
@@ -512,10 +513,10 @@ export function buildImagePrompt(
   const hasBrand = Boolean(brandPaleta || brandTipografia || brandReglas);
 
   const anguloVisual: Record<AnguloCreativo, string> = {
-    contraintuitivo: 'Visual impactante, colores contrastantes, elemento de sorpresa visual. Diseno bold y disruptivo.',
+    contraintuitivo: 'Visual impactante, colores contrastantes, elemento de sorpresa visual. Diseño bold y disruptivo.',
     directo: 'Limpio, profesional, sin distracciones. El mensaje es protagonista. Fondo simple.',
     emocional: 'Imagenes que evocan emocion, luz calida, tonos humanos. Rostros o escenas empaticas.',
-    curiosidad: 'Visual intrigante, parcialmente oculto, genera pregunta. Diseno misterioso pero profesional.',
+    curiosidad: 'Visual intrigante, parcialmente oculto, genera pregunta. Diseño misterioso pero profesional.',
     autoridad: 'Elegante, premium, con elementos de credibilidad. Tonos oscuros con acentos dorados.',
     dolor: 'Visual que refleja la frustracion o el problema. Tonos frios o grises con contraste.',
     deseo: 'Luminoso, aspiracional, resultado ideal. Colores vibrantes, sensacion de logro.',
@@ -541,20 +542,20 @@ export function buildImagePrompt(
 
         const jerarquia = estilo === 'twitter'
           ? [
-              '- El texto principal es el body del tweet — tamano de lectura NORMAL (~15-16px equivalente), regular weight, system font, alineado a la izquierda',
+              '- El texto principal es el body del tweet — tamaño de lectura NORMAL (~15-16px equivalente), regular weight, system font, alineado a la izquierda',
               '- PROHIBIDO texto display gigante o poster style — debe verse organico dentro del card del tweet',
             ]
           : estilo === 'noticias'
             ? [
                 '- El texto principal es el TITULAR del post viral — sans-serif condensed bold UPPERCASE, ocupa el tercio inferior sobre gradient negro',
                 '- Si hay un dato/cifra (porcentaje, ranking), destacarlo en color amarillo o acento',
-                ...(h2Trim ? ['- El texto secundario complementa el titular en menor tamano'] : []),
+                ...(h2Trim ? ['- El texto secundario complementa el titular en menor tamaño'] : []),
                 ...(ctaTrim ? ['- El CTA aparece como badge tipo "VIRAL" / "ULTIMO MOMENTO" en sans-serif bold mayusculas'] : []),
               ]
             : [
-                '- El texto principal es lo primero que el ojo ve — tamano dominante, bold, maximo contraste',
-                ...(h2Trim ? ['- El texto secundario complementa al principal — menor tamano, puede ser lighter'] : []),
-                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #E8962E dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
+                '- El texto principal es lo primero que el ojo ve — tamaño dominante, bold, máximo contraste',
+                ...(h2Trim ? ['- El texto secundario complementa al principal — menor tamaño, puede ser lighter'] : []),
+                ...(ctaTrim ? ['- El boton CTA debe parecer un BOTON real — fondo de color solido que contraste (ej: #B0822E dorado), bordes redondeados, texto oscuro sobre fondo claro. Debe gritar "HAZ CLIC"'] : []),
                 '- La jerarquia visual debe ser INMEDIATAMENTE clara en 1 segundo',
               ];
 
@@ -564,7 +565,7 @@ export function buildImagePrompt(
             ? '\n\nIMPORTANTE: NO incluir CTA ni botones — el usuario eligio no incluirlos.'
             : '';
 
-        return `TEXTOS A RENDERIZAR EN LA IMAGEN (renderizar SOLO el contenido entre comillas, NUNCA las etiquetas "Texto principal", "secundario", "terciario", "boton CTA" ni similares — esos son nombres internos):\n${lines.join('\n')}\n\nJERARQUIA TIPOGRAFICA CRITICA:\n${jerarquia.join('\n')}${restriction}\n\nPROHIBIDO ABSOLUTO: NO renderizar las palabras "H1", "H2", "H3", "CTA", "Titulo", "Subtitulo", "Texto principal", "Texto secundario", "Texto terciario" ni ninguna etiqueta de campo. SOLO el contenido textual real entre comillas.`;
+        return `TEXTOS A RENDERIZAR EN LA IMAGEN (renderizar SOLO el contenido entre comillas, NUNCA las etiquetas "Texto principal", "secundario", "terciario", "boton CTA" ni similares — esos son nombres internos):\n${lines.join('\n')}\n\nJERARQUIA TIPOGRAFICA CRITICA:\n${jerarquia.join('\n')}${restriction}\n\nPROHIBIDO ABSOLUTO: NO renderizar las palabras "H1", "H2", "H3", "CTA", "Título", "Subtitulo", "Texto principal", "Texto secundario", "Texto terciario" ni ninguna etiqueta de campo. SOLO el contenido textual real entre comillas.`;
       })()
     : null;
 
@@ -617,7 +618,7 @@ ${tipografiaBlock}`
 ${tipografiaBlock}`;
 
   const textoSection = mode === 'fondo'
-    ? `IMPORTANTE: NO incluir NINGUN texto, letras, palabras, numeros ni tipografia en la imagen. Solo imagen visual pura. La imagen sera usada como fondo y el texto se agrega despues.`
+    ? `IMPORTANTE: NO incluir NINGUN texto, letras, palabras, numeros ni tipografia en la imagen. Solo imagen visual pura. La imagen sera usada como fondo y el texto se agrega después.`
     : customTextSection
       ? customTextSection
       : hasRealTexto
@@ -630,7 +631,7 @@ ${tipografiaBlock}`
   const userPromptSection = options?.userPrompt?.trim()
     ? hasStyleRef
       ? `\nTEMA / CONTEXTO DEL CONTENIDO (orienta el angulo del mensaje, NO la estetica — la estetica viene de la referencia visual adjunta):\n${options.userPrompt.trim()}\n`
-      : `\nTEMA / CONTEXTO DEL CONTENIDO (orienta el angulo del mensaje, NO descripcion literal de que dibujar):\n${options.userPrompt.trim()}\n`
+      : `\nTEMA / CONTEXTO DEL CONTENIDO (orienta el angulo del mensaje, NO descripción literal de que dibujar):\n${options.userPrompt.trim()}\n`
     : '';
 
   const instruccionesCustom = options?.instrucciones
@@ -712,9 +713,9 @@ El resultado debe verse como si el MISMO diseñador hubiera creado ambas piezas.
   const sR = Math.round(safeZone.rightPct * 100);
   const marginParts: string[] = [];
   if (sT > 0) marginParts.push(`primer ${sT}% del alto`);
-  if (sB > 0) marginParts.push(`ultimo ${sB}% del alto`);
+  if (sB > 0) marginParts.push(`último ${sB}% del alto`);
   if (sL > 0) marginParts.push(`primer ${sL}% del ancho`);
-  if (sR > 0) marginParts.push(`ultimo ${sR}% del ancho`);
+  if (sR > 0) marginParts.push(`último ${sR}% del ancho`);
   const marginLine = marginParts.length === 0
     ? ''
     : `MARGEN OBLIGATORIO: dejar VACIO (solo fondo o atmosfera, sin texto, sin CTAs, sin botones, sin rostros, sin manos, sin badges) el ${marginParts.join(' y el ')} de la imagen. Todo el contenido importante va al CENTRO. Si tocas los bordes con texto o CTA, la pieza queda INUTILIZABLE.`;
@@ -744,7 +745,7 @@ REGLA DE CONTINUIDAD (CRITICA — leer con atencion):
 - LO QUE DEBE VARIAR en CADA slide (escena): plano (close-up/medium/wide/detalle), angulo y encuadre (frontal/lateral/picado/contrapicado/over-the-shoulder), accion o gesto, expresion del personaje, elementos y props visibles, composicion puntual.
 - NO es una plantilla donde solo cambia el texto — cada slide es un FRAME distinto del mismo universo visual. Pensalo como storyboard frames: mismo set, mismo art direction, pero cada frame muestra algo distinto.
 - Si el personaje aparece en varias slides, es la MISMA persona (misma identidad/rostro/ropa) pero en DISTINTA pose/accion/encuadre en cada slide.
-- PROHIBIDO: generar esta slide clonando la composicion de la referencia o de las otras slides con solo el texto cambiado. Si sentis la tentacion de repetir el mismo plano/accion, cambialos.${estilo && estilo !== 'foto_real' ? `\n\nREGLA DE ESTILO (NO NEGOCIABLE): La tecnica de render es "${ESTILO_VISUAL_OPTIONS[estilo].titulo}". Si el LENGUAJE VISUAL arriba contiene palabras tipo "fotografia", "DSLR", "cinematografico", "lente", "warm filter", IGNORALAS — el estilo base manda. Usa solo la PALETA, UNIVERSO y TIPOGRAFIA del concepto, pero RENDERIZA siempre en "${ESTILO_VISUAL_OPTIONS[estilo].titulo}".` : ''}\n`
+- PROHIBIDO: generar esta slide clonando la composicion de la referencia o de las otras slides con solo el texto cambiado. Si sentis la tentacion de repetir el mismo plano/accion, cambialos.${estilo && estilo !== 'foto_real' ? `\n\nREGLA DE ESTILO (NO NEGOCIABLE): La técnica de render es "${ESTILO_VISUAL_OPTIONS[estilo].titulo}". Si el LENGUAJE VISUAL arriba contiene palabras tipo "fotografia", "DSLR", "cinematografico", "lente", "warm filter", IGNORALAS — el estilo base manda. Usa solo la PALETA, UNIVERSO y TIPOGRAFIA del concepto, pero RENDERIZA siempre en "${ESTILO_VISUAL_OPTIONS[estilo].titulo}".` : ''}\n`
     : '';
 
   const hasEstiloOverride = estilo && nc?.conceptoVisual;
@@ -782,7 +783,7 @@ ${hasEstiloOverride
       ? 'DIRECCION VISUAL: Seguir la referencia de estilo adjunta (ver instrucciones abajo)'
       : `DIRECCION VISUAL: ${estiloPrompt}`}
 ${shouldSuppressAnguloVisual
-  ? `ANGULO COMUNICACIONAL (aplicar SOLO como guia emocional/narrativa, NO como direccion fotografica — la tecnica de render de arriba manda): ${anguloVisual[angulo].replace(/foto|fotografia|cinematografic[oa]|DSLR|lente|warm|filtro/gi, '').trim() || 'guiar la emocion y el enfasis de la composicion'}`
+  ? `ANGULO COMUNICACIONAL (aplicar SOLO como guia emocional/narrativa, NO como direccion fotografica — la técnica de render de arriba manda): ${anguloVisual[angulo].replace(/foto|fotografia|cinematografic[oa]|DSLR|lente|warm|filtro/gi, '').trim() || 'guiar la emocion y el enfasis de la composicion'}`
   : `ANGULO COMUNICACIONAL: ${anguloVisual[angulo]}`}
 ${brandPaleta
   ? 'COLORES: Usar la PALETA DE MARCA del bloque "MANUAL DE MARCA" — tiene prioridad sobre concepto visual, estilo y referencia.'
@@ -791,7 +792,7 @@ TONO: ${tono}
 ${userPromptSection}${narrativeBlock}${characterRefPrompt}${styleRefPrompt}${instruccionesCustom}${brandBlock}
 ${textoSection}
 
-${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, accion, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
+${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, acción, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
 ${marginLine ? marginLine + '\n' : ''}
 REQUISITOS CRITICOS:
 - ${marginLine || 'Composicion centrada'}

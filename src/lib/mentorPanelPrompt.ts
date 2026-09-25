@@ -1,3 +1,4 @@
+import { codigoDelDia } from './roadmapSeed';
 /**
  * mentorPanelPrompt.ts — T4 · Plan Maestro.
  * El cerebro del panel lateral del Episodio. Dos personalidades, un lugar:
@@ -7,9 +8,9 @@
  */
 
 /** Metas donde el terreno es técnico: acá se guía click a click, sin filosofía. */
-const CODIGOS_TECNICOS = new Set([
-  'P2.2', 'P4.5', 'P4.5b', 'P4.4', 'P4.6', 'P4.3c', 'P4.3d', 'P5.5',
-]);
+// Las jornadas técnicas de hoy, por su día: pixel, anuncios, campañas,
+// página y agenda, y la app con su marca.
+const CODIGOS_TECNICOS = new Set([16, 17, 29, 30, 31, 38, 44].map(codigoDelDia));
 const PALABRAS_TECNICAS = /business manager|meta|píxel|pixel|dominio|dns|campaña|whatsapp business|subir|editar|publicar|conectar|configurar/i;
 
 export function esMetaTecnica(codigo: string, titulo?: string): boolean {

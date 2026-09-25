@@ -5,7 +5,7 @@
  * TCD escribe en la tabla compartida `clinica_artefactos`; MCD (mismo proyecto
  * Supabase, misma identidad) la lee. Todo degrada: sin tabla, no rompe.
  */
-import { supabase, isSupabaseReady } from './supabase';
+import { supabase, isSupabaseReady, guardarFila } from './supabase';
 import type { ProfileV2 } from './supabase';
 
 export interface PacienteIdealArtefacto {
@@ -89,17 +89,14 @@ export async function sincronizarArtefactos(
   if (!hayArtefactos(perfil)) return false;
   const a = construirArtefactos(perfil);
   try {
-    const { error } = await supabase.from('clinica_artefactos').upsert(
-      {
+    const { error } = await guardarFila('clinica_artefactos', {
         user_id: userId,
         metodo_nombre: a.metodo_nombre ?? null,
         protocolo: a.protocolo ?? null,
         paciente_ideal: a.paciente_ideal ?? null,
         catalogo: a.catalogo,
         actualizado_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' },
-    );
+      }, ['user_id']);
     return !error;
   } catch {
     return false;
