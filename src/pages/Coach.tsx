@@ -32,6 +32,7 @@ import {
   type PilarId,
   type HojaDeRutaItem,
 } from '../lib/supabase';
+import { mensajeDeFalla } from '../lib/conexion';
 import {
   loadCoachState,
   saveCoachMessages,
@@ -44,14 +45,13 @@ import {
   type CoachQuickReplyContext,
 } from '../lib/coachQuickReplies';
 import { AGENTES, NIVEL_NOMBRE } from '../lib/agents';
+import { semanaDelPrograma } from '../lib/diaPrograma';
 
 type Message = CoachConversationMessage;
 
 function buildInitialMessage(): Message {
   const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
-  const dInicio = profile.fecha_inicio ? new Date(profile.fecha_inicio) : new Date();
-  const diff = Math.floor((Date.now() - dInicio.getTime()) / (1000 * 60 * 60 * 24));
-  const semanaActual = Math.max(1, Math.min(13, Math.floor(diff / 7) + 1));
+  const semanaActual = semanaDelPrograma(profile.fecha_inicio, 13);
   const nombre = profile.nombre || 'Fundadora';
 
   const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
@@ -63,7 +63,7 @@ function buildInitialMessage(): Message {
   if (semanaActual === 1 && freno) {
     return {
       role: 'assistant',
-      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que pensás.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
+      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
     } as Message;
   }
   let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
@@ -286,7 +286,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
       const hasAttachments = attachments.length > 0;
       if ((!text.trim() && !hasAttachments) || isTyping) return;
 
-      // ═══ El tope de la Semana Blanca: 30 mensajes, cierre elegante ═══
+      // ═══ El tope de los 5 días: 30 mensajes, cierre elegante ═══
       // ─── La escasez que enseña: 10 preguntas de maestro por semana (planes del camino) ───
       if (planDe(perfil) !== 'blanco') {
         if (usosSemana('mentor') >= TOPE_MENTOR_SEMANAL) {
@@ -305,7 +305,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         if (usados >= TOPE_MENTOR_BLANCO) {
           setMessages((prev) => [...prev, {
             role: 'assistant' as const,
-            content: 'Llegamos al límite de conversaciones de tu Semana Blanca. No es un adiós: tu Mentor completo — sin límites, con todo tu historial — te espera del otro lado. En tu Dashboard está el botón para continuar tu camino: un toque y seguimos exactamente donde quedamos.',
+            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
           }]);
           return;
         }
@@ -372,7 +372,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         }) + resumenRuedaParaMentor() + resumenOrigenParaMentor();
 
         let fullResponse = '';
-        for await (const chunk of streamText({
+        for await (const chunk of streamText({ feature: 'mentor', tarea: 'chat',
           systemInstruction: systemPrompt,
           messages: aiMessages,
         })) {
@@ -390,13 +390,19 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         ];
         await persist(finales);
         await intentarRotarSummary(finales);
-      } catch {
-        toast.error('El Mentor no pudo responder. Vuelve a intentarlo en un momento.');
+      } catch (err) {
+        // ANTES DECÍA «hubo un error de red» PARA CUALQUIER FALLA.
+        //
+        // Y eso le impide al cliente hacer lo único que ayudaría: si se quedó
+        // sin créditos, reintentar no sirve; si tardó de más, sí. Decirle mal
+        // la causa lo deja probando lo que no funciona.
+        const causa = mensajeDeFalla(err, 'responderte');
+        toast.error(causa);
         setMessages((prev) => {
           const next = [...prev];
           next[next.length - 1] = {
             ...next[next.length - 1],
-            content: 'Hubo un error de red. ¿Podrías repetirme eso?',
+            content: causa,
           };
           return next;
         });
@@ -469,7 +475,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
               Mentor IA
             </h2>
-            <p className="text-[11px] text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <p className="text-sm text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-success" /> Tu guía del camino · conoce tu ADN completo
               {guardadoOk && <span className="text-success normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
             </p>
@@ -478,7 +484,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         <button
           onClick={resetConversation}
           title="Reiniciar conversación"
-          className="w-8 h-8 rounded-lg hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
+          className="w-11 h-11 rounded-full hover:bg-gold/10 flex items-center justify-center text-white/55 hover:text-white transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -501,7 +507,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               }`}
             >
               {msg.role === 'assistant' ? (
-                <span className="text-[13px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
+                <span className="text-[17px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
               ) : avatarUrl ? (
                 <img loading="lazy" src={avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -514,7 +520,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
                   <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
-                    <div className="prose prose-invert prose-sm max-w-none text-[13px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
+                    <div className="prose prose-invert prose-sm max-w-none text-[17px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
                       <Markdown>{parte}</Markdown>
                     </div>
                   </div>
@@ -529,11 +535,11 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               }`}
             >
               {msg.role === 'user' ? (
-                <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
+                <p className="text-[17px] leading-relaxed whitespace-pre-wrap">
                   {msg.content}
                 </p>
               ) : (
-                <div className="text-[13px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
+                <div className="text-[17px] leading-relaxed prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-li:my-1 prose-a:text-gold">
                   {msg.content ? (
                     <Markdown>{msg.content}</Markdown>
                   ) : (
@@ -570,7 +576,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 disabled={isTyping}
                 className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-gold/10 to-transparent hover:from-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
-                <span className="text-[11px]">{qr.icon}</span>
+                {qr.icon && <span className="text-sm">{qr.icon}</span>}
                 {qr.label}
               </button>
             ))}
@@ -606,9 +612,9 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             placeholder={
               isTyping
                 ? 'Tu coach está conectando ideas...'
-                : 'Menciona tu duda · bloqueo · pega una captura (Ctrl+V)...'
+                : 'Cuéntale dónde estás — tu Mentor conoce tu camino...'
             }
-            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-12 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
+            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -618,7 +624,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               cargandoEstado ||
               uploadingAttachment
             }
-            className="absolute right-2 w-9 h-9 rounded-lg bg-gold hover:bg-goldhi disabled:opacity-50 flex items-center justify-center text-ink transition-colors"
+            aria-label="Enviar" className="absolute right-1 w-11 h-11 rounded-full bg-[var(--oro-d,#8E6824)] disabled:opacity-50 flex items-center justify-center text-[#FFFDF7] transition-colors"
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

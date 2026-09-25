@@ -6,10 +6,29 @@ import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
-import { esDiaDescanso, calcularRachaDesdeFechas } from '../lib/racha';
+import { calcularRachaDesdeFechas } from '../lib/racha';
+import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso } from '../lib/diaPrograma';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
+import TableroPlata from '../components/admin/TableroPlata';
+import PanelMotorIA from '../components/admin/PanelMotorIA';
+import Supervision from '../components/admin/Supervision';
+import SalaDeMando from '../components/admin/SalaDeMando';
+import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
+import MiRol from '../components/admin/MiRol';
+import CargarSesion from '../components/admin/CargarSesion';
+import LaSemana from '../components/admin/LaSemana';
+import LaCasa from '../components/admin/LaCasa';
+import ListaDeHoy from '../components/admin/ListaDeHoy';
+import BandejaSoporte from '../components/admin/BandejaSoporte';
+import type { AperturaDeTarea } from '../lib/cerebro';
+import CuadroDelCliente from '../components/admin/CuadroDelCliente';
+import JornadaPanel from '../components/admin/Jornada';
+import { jornadasRecientes } from '../lib/jornadaStorage';
+import { comparativaSemana } from '../lib/mesaPlataStorage';
+import type { Jornada as JornadaTipo } from '../lib/jornada';
+import { rolDe as rolPermisos } from '../lib/permisos';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
   Stethoscope, CheckCircle2, Circle, LogOut,
@@ -19,16 +38,16 @@ import {
   CheckCheck, AlertTriangle, Image, Mic, Settings, Camera,
   Video, Trash2, Youtube, Play, ChevronDown, FileText,
   Globe, Flame, Star, DollarSign, Pencil,
-  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle,
+  Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass, CalendarDays,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
-  Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck,
+  Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck, Cpu,
   Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
   Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
 };
-import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, type UserStatus, type PilarId, isSupabaseReady, PILAR_ORDER, fetchProfileV2 } from '../lib/supabase';
+import { supabase, type Profile, type ProfileV2, type Mensaje, type AdminNote, type UserStatus, type PilarId, isSupabaseReady, PILAR_ORDER, fetchProfileV2, db } from '../lib/supabase';
 import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
@@ -41,11 +60,13 @@ import { createClient } from '@supabase/supabase-js';
 import Campanas from './Campanas';
 import CreativosView from '../components/campanas/CreativosView';
 import Markdown from 'react-markdown';
+import TableroGrabacion from '../components/admin/TableroGrabacion';
+import { claveDelDia } from '../lib/roadmapSeed';
 
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
 type AdminRol = 'owner' | 'manager' | 'staff';
-type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas';
+type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana' | 'casa';
 type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
@@ -65,7 +86,7 @@ interface ClienteConEstado extends Profile {
   racha_diario: number;
   ventas_count: number;
   estado_garantia: 'en_camino' | 'en_riesgo' | 'activada';
-  cinturon: { emoji: string; nombre: string; orden: number; metafora: string };
+  cinturon: { emoji: string; nombre: string; orden: number; metafora: string; color: string; punta: string | null };
   dias_atraso: number;
   progreso_porcentaje: number;
   quema_hecha: boolean;
@@ -102,7 +123,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 const STATUS_BADGE_COLOR: Record<string, string> = {
   ACTIVE:     '#22C55E',
-  PAUSED:     '#E8962E',
+  PAUSED:     '#B0822E',
   ONBOARDING: 'rgba(255,255,255,0.5)',
   CHURNED:    '#EF4444',
   COMPLETED:  '#22C55E',
@@ -147,9 +168,7 @@ const PILAR_TO_GRUPO: Record<string, string> = {
 };
 
 function calcDias(fecha_inicio: string): { dia: number; semana: number } {
-  const diff = Math.floor((new Date().getTime() - new Date(fecha_inicio).getTime()) / (1000 * 60 * 60 * 24));
-  const dia = Math.max(1, Math.min(90, diff + 1));
-  return { dia, semana: Math.max(1, Math.min(12, Math.floor(diff / 7) + 1)) };
+  return { dia: diaDelPrograma(fecha_inicio) ?? 1, semana: semanaDelPrograma(fecha_inicio, 12) };
 }
 
 function derivePilarFromProgress(tareas_completadas: number): PilarId {
@@ -204,7 +223,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
     if (!supabase || !input.trim()) return;
     setEnviando(true);
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal, emisor_id: adminProfile.id, contenido: input.trim()
       });
       if (error) throw error;
@@ -222,15 +241,15 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
     try {
       const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'mp3');
       const path = `admin/${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage.from('mensajes-archivos').upload(path, file);
+      const { data, error } = await db().storage.from('mensajes-archivos').upload(path, file);
       if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('mensajes-archivos').getPublicUrl(data.path);
-      const { error: msgErr } = await supabase.from('mensajes').insert({
+      const { data: { publicUrl } } = db().storage.from('mensajes-archivos').getPublicUrl(data.path);
+      const { error: msgErr } = await db().from('mensajes').insert({
         canal, emisor_id: adminProfile.id, contenido: '', tipo_archivo: tipo, archivo_url: publicUrl
       });
       if (msgErr) throw msgErr;
     } catch {
-      toast.error('Error subiendo archivo. Verificá que el bucket exista en Supabase.');
+      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
     } finally {
       setUploading(false);
     }
@@ -250,7 +269,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare className="w-12 h-12 text-gray-800 mb-4" />
-            <p className="text-cream/55">Este canal está en silencio. Rompelo vos.</p>
+            <p className="text-cream/55">Este canal está en silencio. Rompelo tú.</p>
           </div>
         ) : (
           messages.map((m) => {
@@ -265,7 +284,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                     <img loading="lazy" src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border ${
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 border ${
                     isAdmin ? 'bg-gold/20 border-gold/30 text-gold'
                              : 'bg-gold/10 border-gold/12 text-cream'
                   }`}>
@@ -273,7 +292,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                   </div>
                 )}
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[11px] font-semibold px-1 ${isAdmin ? 'text-gold' : 'text-cream/55'} ${isMe ? 'text-right' : ''}`}>
+                  <span className={`text-sm font-semibold px-1 ${isAdmin ? 'text-gold' : 'text-cream/55'} ${isMe ? 'text-right' : ''}`}>
                     {senderName}{isAdmin ? ' · Coach' : ''}
                   </span>
                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
@@ -289,7 +308,7 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
                       <audio controls src={m.archivo_url} className="w-full mb-2 rounded-lg" />
                     )}
                     {m.contenido && <p>{m.contenido}</p>}
-                    <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                    <p className={`text-sm mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                       {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -341,12 +360,31 @@ function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Prof
 
 export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const adminRol: AdminRol = (adminProfile as any).admin_rol ?? 'owner';
-  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas'];
+
+
+  /**
+   * El ROL, no el permiso. Decide qué ve, en qué orden, y qué no le toca.
+   * Los tres nombres viejos siguen en la base y se traducen acá.
+   */
+  const rol = rolDe((adminProfile as any).admin_rol);
+  const defRol = ROLES[rol];
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa'];
   const [mainTab, setMainTab] = usePersistedState<MainTab>(
     'tcd_admin_main_tab',
     'clientes',
     { validate: (v) => VALID_MAIN_TABS.includes(v) },
   );
+  // Las tabs de dueño no pueden dejar a un manager mirando una pantalla vacía:
+  // el título se dibuja igual pero el cuerpo está detrás de una guarda de rol.
+  // Pasa cuando la tab quedó guardada de una sesión anterior o llegó por URL.
+  const TABS_SOLO_DUENO: MainTab[] = ['equipo', 'plata', 'motor', 'sala'];
+  useEffect(() => {
+    if (adminRol !== 'owner' && adminRol && TABS_SOLO_DUENO.includes(mainTab)) {
+      setMainTab('clientes');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminRol, mainTab]);
+
   // ID de tarea pendiente de abrir vía notificación. Se setea desde el
   // handler de NotificationBell y se limpia cuando TasksPipeline abre el modal.
   const [pendingTareaId, setPendingTareaId] = useState<string | null>(null);
@@ -364,6 +402,28 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
+
+  /**
+   * Lleva a donde se resuelve la tarea.
+   *
+   * El cerebro declara QUÉ hay que abrir; esta función sabe CÓMO. Así el día
+   * que una pantalla cambia de nombre, se corrige acá y no en veinte lugares.
+   */
+  const abrirDestino = (a: AperturaDeTarea) => {
+    if (a.clienteId) {
+      const c = clientes.find((x) => x.id === a.clienteId);
+      if (c) setSelectedCliente(c as never);
+    }
+    switch (a.tab) {
+      case 'mensajes':  setMainTab('mensajes'); break;
+      case 'campanas':  setMainTab('campanas'); break;
+      case 'creador':   setMainTab('creativos'); break;
+      case 'clientes':
+        setMainTab(a.seccion === 'numeros' ? 'plata' : 'clientes');
+        break;
+      default: setMainTab('hoy');
+    }
+  };
   const VALID_DETALLE_TABS: DetalleTab[] = ['resumen', 'diario', 'evidencias', 'mentor', 'sesiones', 'metricas', 'mensajes', 'notas', 'adn'];
   const [empujonListo, setEmpujonListo] = useState<string | null>(null);
   const [detalleSesiones, setDetalleSesiones] = useState<Array<Record<string, unknown>>>([]);
@@ -382,9 +442,9 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     setConvsLoading(true);
     try {
       const [agRes, coRes] = await Promise.all([
-        supabase.from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
+        db().from('agent_conversations').select('agent_id, messages, last_message_at').eq('user_id', clienteId)
         .order('last_message_at', { ascending: false }),
-        supabase.from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
+        db().from('coach_conversations').select('*').eq('user_id', clienteId).limit(1),
       ]);
       // El Mentor (coach_conversations) + los 8 entrenadores (agent_conversations), juntos.
       const coachRow = (coRes.data ?? [])[0] as { messages?: unknown; updated_at?: string } | undefined;
@@ -408,11 +468,11 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     setEvidenciasLoading(true);
     try {
       const base = `evidencias/${clienteId}`;
-      const { data: carpetas } = await supabase.storage.from('task-attachments').list(base, { limit: 60 });
+      const { data: carpetas } = await db().storage.from('task-attachments').list(base, { limit: 60 });
       const resultado: { meta: string; archivos: { name: string; path: string }[] }[] = [];
       for (const c of carpetas ?? []) {
         if (!c.name || c.name.startsWith('.')) continue;
-        const { data: archivos } = await supabase.storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
+        const { data: archivos } = await db().storage.from('task-attachments').list(`${base}/${c.name}`, { limit: 20 });
         const files = (archivos ?? []).filter((f) => f.name && !f.name.startsWith('.')).map((f) => ({ name: f.name, path: `${base}/${c.name}/${f.name}` }));
         if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
       }
@@ -423,19 +483,64 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   }, []);
   const abrirEvidencia = async (path: string) => {
     if (!supabase) return;
-    const { data } = await supabase.storage.from('task-attachments').createSignedUrl(path, 3600);
+    const { data } = await db().storage.from('task-attachments').createSignedUrl(path, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
   const [clientSearch, setClientSearch] = useState('');
-  const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ALL');
+  // Arranca en ACTIVE: los pausados e inactivos no deben inflar la cuenta.
+  const [filtroStatus, setFiltroStatus] = useState<UserStatus | 'ALL'>('ACTIVE');
   const [filtroPlan, setFiltroPlan] = useState<string>('ALL');
 
   // Campanas — cliente seleccionado
+  /** Las jornadas del equipo y los números de la semana, para La Semana. */
+  const [jornadasEquipo, setJornadasEquipo] = useState<JornadaTipo[]>([]);
+  const [semanaClientes, setSemanaClientes] = useState<{
+    vendieron: number; facturado: number;
+    frenadas: Array<{ clienteId: string; nombre: string; cuello: string; semanasIgual: number; enRiesgo: number }>;
+  }>({ vendieron: 0, facturado: 0, frenadas: [] });
+
   const [campanasClienteId, setCampanasClienteId] = usePersistedState<string | null>(
     'tcd_admin_campanas_cliente',
     null,
     { validate: (v) => v === null || typeof v === 'string' },
   );
+
+  /**
+   * Las jornadas del equipo y la comparativa de la semana.
+   *
+   * Se cargan cuando se abre Hoy o La Semana, no al entrar al Admin: son dos
+   * consultas que no le sirven a nadie que esté mirando otra cosa.
+   */
+  useEffect(() => {
+    if (mainTab !== 'semana' && mainTab !== 'hoy') return;
+    let vivo = true;
+    void (async () => {
+      try {
+        const [js, comp] = await Promise.all([
+          jornadasRecientes(7),
+          comparativaSemana(clientes.map((c) => c.id)),
+        ]);
+        if (!vivo) return;
+        setJornadasEquipo(js);
+        const nombre = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? 'Cliente';
+        setSemanaClientes({
+          vendieron: comp.filter((f) => (f.ventas ?? 0) > 0).length,
+          facturado: comp.reduce((t, f) => t + (f.facturado || 0), 0),
+          frenadas: comp
+            .filter((f) => f.sinCargar || (f.domino?.indicador?.brecha ?? 0) > 0.5)
+            .map((f) => ({
+              clienteId: f.clienteId,
+              nombre: nombre(f.clienteId),
+              cuello: f.domino?.titulo ?? 'Sin diagnóstico',
+              semanasIgual: 0,
+              enRiesgo: Math.round(f.facturado * Math.min(f.urgencia, 5)),
+            })),
+        });
+      } catch { /* La Semana funciona igual con lo que haya */ }
+    })();
+    return () => { vivo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainTab, clientes.length]);
   const [campanasClientePerfil, setCampanasClientePerfil] = useState<ProfileV2 | null>(null);
   const [campanasPerfilLoading, setCampanasPerfilLoading] = useState(false);
 
@@ -615,7 +720,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
         async (payload) => {
           if (!supabase) return;
           if (payload.new.emisor_id === adminProfile.id) return;
-          const { data } = await supabase.from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
+          const { data } = await db().from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
           if (data && data.canal === 'privado' && (data.emisor_id === chatCliente.id || data.receptor_id === chatCliente.id)) {
             setChatMessages(prev => {
               if (prev.find(m => m.id === data.id)) return prev;
@@ -624,7 +729,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
           }
         }
       ).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db().removeChannel(channel); };
   }, [chatCliente, mainTab, mensajesChannel, adminProfile.id]);
 
   useEffect(() => {
@@ -639,7 +744,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes' },
         async (payload) => {
           if (payload.new.emisor_id === adminProfile.id) return;
-          const { data } = await supabase.from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
+          const { data } = await db().from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
           if (data && data.canal === 'privado' && (data.emisor_id === selectedCliente.id || data.receptor_id === selectedCliente.id)) {
             setDetalleMensajes(prev => {
               if (prev.find(m => m.id === data.id)) return prev;
@@ -648,7 +753,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
           }
         }
       ).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db().removeChannel(channel); };
   }, [selectedCliente, mainTab, adminProfile.id]);
 
   useEffect(() => {
@@ -691,7 +796,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     if (!outputText || outputText.length < 20) return;
     setTareaResumenLoading(true);
     try {
-      const prompt = `Sos asistente del equipo de coaching que acompaña a profesionales de la salud.
+      const prompt = `Eres asistente del equipo de coaching que acompaña a profesionales de la salud.
 El cliente "${clienteNombre}" completó la tarea "${meta.titulo}" del programa Tu Clínica Digital.
 
 Este es el output que generó con la IA:
@@ -699,12 +804,12 @@ Este es el output que generó con la IA:
 ${outputText.slice(0, 2000)}
 ---
 
-Escribí un resumen de 2-3 oraciones en español para el equipo que explique:
+Escribe un resumen de 2-3 oraciones en español para el equipo que explique:
 1. Qué definió o produjo el cliente en esta tarea
 2. Una observación relevante para guiarlo mejor en la próxima sesión
 
 Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emojis.`;
-      const resumen = await generateText({ prompt });
+      const resumen = await generateText({ tarea: 'estructura', prompt });
       setTareaResumen(resumen);
     } catch {
       // resumen is optional
@@ -718,8 +823,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     setMetricasTareasLoading(true);
     try {
       const [tareasRes, outputsRes] = await Promise.all([
-        supabase.from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
-        supabase.from('herramienta_outputs').select('*').eq('usuario_id', clientId),
+        db().from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
+        db().from('herramienta_outputs').select('*').eq('usuario_id', clientId),
       ]);
       setMetricasTareas(tareasRes.data ?? []);
       setMetricasOutputs(outputsRes.data ?? []);
@@ -734,7 +839,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setMetricasLoading(true);
     try {
-      const { data } = await supabase.rpc('get_metricas_globales');
+      const { data } = await db().rpc('get_metricas_globales');
       setMetricasGlobales(data ?? {});
     } catch {
       toast.error('Error cargando métricas globales');
@@ -745,7 +850,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
 
   async function cargarSatisfaccionGlobal() {
     if (!supabase) return;
-    const { data } = await supabase.from('pilar_satisfaction_ratings').select('rating');
+    const { data } = await db().from('pilar_satisfaction_ratings').select('rating');
     if (data && data.length > 0) {
       const avg = data.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / data.length;
       setSatisfaccionGlobal(Math.round(avg * 10) / 10);
@@ -841,11 +946,11 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setLoading(true);
     try {
-      const { data: profiles, error } = await supabase.rpc('get_all_profiles');
+      const { data: profiles, error } = await db().rpc('get_all_profiles');
       if (error || !profiles) { setLoading(false); return; }
       // ═══ Blindaje: el RPC puede no traer las columnas del plan — las mergeamos directo ═══
       try {
-        const { data: planes } = await supabase.from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
+        const { data: planes } = await db().from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
         if (planes) {
           const porId = new Map(planes.map((x) => [x.id, x]));
           for (const p of profiles as Array<{ id: string; plan_comercial?: string; plan_reservado?: string | null; acceso_hasta?: string | null }>) {
@@ -878,18 +983,20 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
         const [tareasRes, metricasRes, diarioRes] = await Promise.all([
-          supabase.rpc('get_user_tasks', { target_user_id: p.id }),
-          supabase.rpc('get_user_metrics', { target_user_id: p.id }),
-          supabase.rpc('get_user_diary', { target_user_id: p.id }),
+          db().rpc('get_user_tasks', { target_user_id: p.id }),
+          db().rpc('get_user_metrics', { target_user_id: p.id }),
+          db().rpc('get_user_diary', { target_user_id: p.id }),
         ]);
 
         let tareas = tareasRes.data ?? [];
         // FIX progreso: el Camino escribe SIEMPRE en hoja_de_ruta (columna `completada`).
-        const { data: hrRows } = await supabase
+        const { data: hrRows } = await db()
           .from('hoja_de_ruta')
           .select('pilar_numero, meta_codigo, completada, es_estrella, fecha_completada')
           .eq('usuario_id', p.id);
-        if (tareas.length === 0) {
+        // hoja_de_ruta es la fuente de verdad: el Camino escribe SIEMPRE ahí.
+        // (Antes se prefería get_user_tasks y el progreso se quedaba viejo.)
+        {
           if (hrRows && hrRows.length > 0) {
             tareas = hrRows.map((r: any) => ({
               ...r,
@@ -911,10 +1018,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
             if (!completadasSet.has(`${pil.numero}-${mm.codigo}`)) { diaEsperado = mm.dia_asignado ?? null; break outer; }
           }
         }
-        let dias_atraso = 0;
-        if (diaEsperado !== null && dia > diaEsperado) {
-          for (let d = diaEsperado + 1; d <= dia; d++) if (!esDiaDescanso(d)) dias_atraso++;
-        }
+        // Cada día se mira por su fecha real (antes contaba según si HOY era fin de semana).
+        const dias_atraso = diasHabilesDeAtraso(p.fecha_inicio, diaEsperado, dia);
         let semaforo: ClienteConEstado['semaforo'] = 'gris';
         if (tareas.length > 0 || completadasSet.size > 0) {
           semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
@@ -922,7 +1027,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         // Cinturón: pilar más alto con TODAS sus metas completas
         // Cinturón: LA MISMA función que el cliente (una sola fuente de verdad).
         const cint = cinturonDesdeProgreso(completadasSet);
-        const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora };
+        const cinturon = { emoji: cint.emoji, nombre: cint.nombre, orden: cint.orden, metafora: cint.metafora, color: cint.color, punta: cint.punta };
 
         const entradas = diarioRes.data ?? [];
         // Racha = LA MISMA definición que el cliente (sesiones, lu-vi, gracia),
@@ -932,7 +1037,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           .map((r: any) => String(r.fecha_completada));
         const rachaActual = calcularRachaDesdeFechas(fechasSesiones);
 
-        const ventasRes = await supabase.rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
+        const ventasRes = await db().rpc('get_user_ventas', { target_user_id: p.id }).then(r => r, () => ({ data: [] }));
         const ventas_count = (ventasRes.data ?? []).length;
 
         const tareasEstrella = tareas.filter((t: any) => t.es_estrella && t.completada).length;
@@ -975,7 +1080,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           ventas_count,
           estado_garantia,
           progreso_porcentaje: (p as any).progreso_porcentaje ?? 0,
-          quema_hecha: completadasSet.has('1-P1.3'),
+          quema_hecha: completadasSet.has(claveDelDia(1)),
           traba_sesion: (() => { const t = trabasPorUser.get(p.id); return t && t.horas >= 48 ? { titulo: t.titulo, dias: Math.floor(t.horas / 24) } : null; })(),
           dias_sin_sesion: (() => { const u = ultimaSesionPorUser.get(p.id); return u !== undefined ? Math.floor((Date.now() - u) / 86400000) : null; })(),
         } as ClienteConEstado;
@@ -995,13 +1100,13 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     try {
       if (detalleTab === 'resumen') {
         const [t, d, m] = await Promise.all([
-          supabase.rpc('get_user_tasks', { target_user_id: userId }),
-          supabase.rpc('get_user_diary', { target_user_id: userId }),
-          supabase.rpc('get_user_metrics', { target_user_id: userId }),
+          db().rpc('get_user_tasks', { target_user_id: userId }),
+          db().rpc('get_user_diary', { target_user_id: userId }),
+          db().rpc('get_user_metrics', { target_user_id: userId }),
         ]);
         let tareasDetalle = t.data ?? [];
         if (tareasDetalle.length === 0) {
-          const { data: hrRows } = await supabase
+          const { data: hrRows } = await db()
             .from('hoja_de_ruta')
             .select('pilar_numero, meta_codigo, completada, es_estrella')
             .eq('usuario_id', userId);
@@ -1028,13 +1133,13 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       } else if (detalleTab === 'evidencias') {
         if (selectedCliente) cargarEvidenciasCliente(selectedCliente.id);
       } else if (detalleTab === 'diario') {
-        const { data } = await supabase.rpc('get_user_diary', { target_user_id: userId });
+        const { data } = await db().rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
       } else if (detalleTab === 'metricas') {
         const [metricsRes, tareasRes, outputsRes] = await Promise.all([
-          supabase.rpc('get_user_metrics', { target_user_id: userId }),
-          supabase.from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
-          supabase.from('herramienta_outputs').select('*').eq('usuario_id', userId),
+          db().rpc('get_user_metrics', { target_user_id: userId }),
+          db().from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
+          db().from('herramienta_outputs').select('*').eq('usuario_id', userId),
         ]);
         setDetalleMetricas(metricsRes.data ?? []);
         setMetricasTareas(tareasRes.data ?? []);
@@ -1071,7 +1176,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         ? `Cómo se sintió: "${lastDiary.q1 || '—'}". Lo que lo frenó: "${lastDiary.q2 || '—'}". Energía: ${lastDiary.q3 || '—'}/10. Acción tomada: "${lastDiary.q4 || '—'}". Plan para mañana: "${lastDiary.q7 || '—'}".`
         : 'Sin entradas de diario recientes.';
 
-      const prompt = `Sos el sistema de inteligencia de coaching del programa "Sanar OS" para profesionales de la salud. Tu rol es asistir al DIRECTOR/COACH humano dándole un briefing claro sobre el estado de un cliente específico y recomendaciones accionables para su próxima intervención.
+      const prompt = `Eres el sistema de inteligencia de coaching del programa "Sanar OS" para profesionales de la salud. Tu rol es asistir al DIRECTOR/COACH humano dándole un briefing claro sobre el estado de un cliente específico y recomendaciones accionables para su próxima intervención.
 
 CLIENTE: ${selectedCliente.nombre} (${selectedCliente.especialidad || 'especialidad no indicada'})
 PLAN: ${selectedCliente.plan} · Día ${selectedCliente.dia_programa} de 90 · Semana ${selectedCliente.semana_programa} de 12
@@ -1088,7 +1193,7 @@ Generá un briefing para el coach en 3 partes:
 
 Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
-      const recomendacion = await generateText({ prompt });
+      const recomendacion = await generateText({ tarea: 'estructura', prompt });
       setIaRecomendacion(recomendacion);
     } catch {
       toast.error('Error generando recomendación IA');
@@ -1113,7 +1218,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setDetalleMensajes(prev => [...prev, optimisticMsg]);
     setMensajeInput('');
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: selectedCliente.id, contenido: texto
       });
       if (error) throw error;
@@ -1155,7 +1260,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setChatMessages(prev => [...prev, optimistic]);
     setChatInput('');
     try {
-      const { error } = await supabase.from('mensajes').insert({
+      const { error } = await db().from('mensajes').insert({
         canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto
       });
       if (error) throw error;
@@ -1197,7 +1302,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   async function saveAdminVideo(v: Omit<AdminVideo, 'id'> & { id?: string }) {
     if (!supabase) return;
     if (!v.pilar_id) {
-      toast.error('Elegí un pilar antes de guardar el video.');
+      toast.error('Elige un pilar antes de guardar el video.');
       return;
     }
     try {
@@ -1286,7 +1391,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     const texto = notaInput.trim();
     setNotaInput('');
     try {
-      const { error } = await supabase.from('admin_notes').insert({
+      const { error } = await db().from('admin_notes').insert({
         client_id: selectedCliente.id,
         author_id: adminProfile.id,
         content: texto,
@@ -1303,7 +1408,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     setStatusCambiando(true);
     try {
-      await supabase.rpc('update_client_status', {
+      await db().rpc('update_client_status', {
         target_user_id: selectedCliente.id,
         new_status: nuevoStatus,
       });
@@ -1328,7 +1433,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     const newEmail = newEmailInput.trim().toLowerCase();
     if (!newEmail || !newEmail.includes('@')) {
-      toast.error('Ingresá un email válido');
+      toast.error('Ingresa un email válido');
       return;
     }
     if (newEmail === selectedCliente.email?.toLowerCase()) {
@@ -1337,7 +1442,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     }
     setChangingEmail(true);
     try {
-      const { error } = await supabase.rpc('admin_change_client_email', {
+      const { error } = await db().rpc('admin_change_client_email', {
         target_user_id: selectedCliente.id,
         new_email: newEmail,
       });
@@ -1361,7 +1466,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setSendingReset(true);
     try {
       const redirectTo = `${window.location.origin}${window.location.pathname}`;
-      const { error } = await supabase.auth.resetPasswordForEmail(selectedCliente.email, { redirectTo });
+      const { error } = await db().auth.resetPasswordForEmail(selectedCliente.email, { redirectTo });
       if (error) throw error;
       toast.success(`Mail de recuperación enviado a ${selectedCliente.email}`);
     } catch (e: unknown) {
@@ -1376,7 +1481,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !selectedCliente) return;
     const newVal = !selectedCliente.full_agent_access;
     try {
-      const { error } = await supabase.rpc('toggle_full_agent_access', {
+      const { error } = await db().rpc('toggle_full_agent_access', {
         target_user_id: selectedCliente.id,
         new_value: newVal,
       });
@@ -1396,7 +1501,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setGuardandoAdmin(true);
     try {
       if (supabase) {
-        await supabase.from('profiles').update({
+        await db().from('profiles').update({
           nombre: adminDraft.nombre,
           especialidad: adminDraft.cargo,
         }).eq('id', adminProfile.id);
@@ -1435,7 +1540,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         auth: {
           persistSession: false,
           storageKey: 'temp_auth',
-          storage: { getItem: () => null, setItem: () => null, removeItem: () => null }
+          storage: { getItem: () => null, setItem: () => { /* no persiste */ }, removeItem: () => { /* no persiste */ } }
         }
       });
 
@@ -1450,7 +1555,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
       if (signUpData.user && supabase) {
         await new Promise(r => setTimeout(r, 1500));
-        await supabase.from('profiles').update({
+        await db().from('profiles').update({
           especialidad: nuevoForm.especialidad.trim() || null,
           plan: nuevoForm.plan,
           fecha_inicio: nuevoForm.fecha_inicio,
@@ -1476,7 +1581,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     try {
       // RPC SECURITY DEFINER — la RLS de profiles solo deja ver el propio
       // profile, por eso un SELECT directo devuelve 1 solo miembro.
-      const { data, error } = await supabase.rpc('get_team_members');
+      const { data, error } = await db().rpc('get_team_members');
       if (error) throw error;
       setTeamMembers(data ?? []);
     } catch {
@@ -1493,7 +1598,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       const url = import.meta.env.VITE_SUPABASE_URL;
       const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
       const tempClient = createClient(url, key, {
-        auth: { persistSession: false, storageKey: 'temp_auth_team', storage: { getItem: () => null, setItem: () => null, removeItem: () => null } }
+        auth: { persistSession: false, storageKey: 'temp_auth_team', storage: { getItem: () => null, setItem: () => { /* no persiste */ }, removeItem: () => { /* no persiste */ } } }
       });
       const { data: signUpData, error } = await tempClient.auth.signUp({
         email: teamForm.email.trim(),
@@ -1510,7 +1615,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         let lastErr: string | null = null;
         for (let attempt = 0; attempt < 4 && !promoted; attempt++) {
           await new Promise(r => setTimeout(r, attempt === 0 ? 1500 : 1000));
-          const { error: rpcErr } = await supabase.rpc('promover_a_admin', {
+          const { error: rpcErr } = await db().rpc('promover_a_admin', {
             p_user_id: signUpData.user.id,
             p_admin_rol: teamForm.admin_rol,
           });
@@ -1541,7 +1646,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       // UPDATE directo no funciona por RLS (auth.uid() != target.id). Usamos la
       // misma RPC promover_a_admin — es idempotente: si ya es admin, solo
       // actualiza admin_rol.
-      const { error } = await supabase.rpc('promover_a_admin', {
+      const { error } = await db().rpc('promover_a_admin', {
         p_user_id: targetId,
         p_admin_rol: newRol,
       });
@@ -1558,7 +1663,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !clienteAEliminar) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.rpc('admin_delete_cliente', { p_user_id: clienteAEliminar.id });
+      const { error } = await db().rpc('admin_delete_cliente', { p_user_id: clienteAEliminar.id });
       if (error) throw error;
       const deletedId = clienteAEliminar.id;
       setClientes(prev => prev.filter(c => c.id !== deletedId));
@@ -1579,7 +1684,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     if (!supabase || !miembroAEliminar) return;
     setEliminando(true);
     try {
-      const { error } = await supabase.rpc('admin_delete_team_member', { p_user_id: miembroAEliminar.id });
+      const { error } = await db().rpc('admin_delete_team_member', { p_user_id: miembroAEliminar.id });
       if (error) throw error;
       const deletedId = miembroAEliminar.id;
       setTeamMembers(prev => prev.filter(m => m.id !== deletedId));
@@ -1654,17 +1759,69 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
   // ─── SIDEBAR NAV CONFIG ───────────────────────────────────────────────────────
 
+  /**
+   * EL MENÚ SON CUATRO MOMENTOS, NO DIECISIETE TABS.
+   *
+   * Están ordenados por CUÁNDO se usan, no por lo que son. El problema de un
+   * equipo no es encontrar información: es saber qué hacer ahora.
+   *
+   *   · Hoy        — todos los días, al empezar y al cerrar
+   *   · La Semana  — una vez por semana, mismo día y hora
+   *   · Clientes   — cuando entras a un cliente
+   *   · El Negocio — cuando quieres saber cómo va todo (solo dirección)
+   *
+   * Lo de adentro no desapareció: vive dentro del momento donde se usa, y se
+   * llega con las pestañas de arriba. Antes eran diecisiete entradas planas
+   * y nadie sabía cuál abrir primero.
+   */
   const sidebarItems: { id: MainTab; label: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
-    { id: 'clientes',  label: 'Clientes',  icon: Users },
-    { id: 'pipeline',  label: 'Activación', icon: ClipboardCheck },
-    { id: 'mensajes',  label: 'Mensajes',  icon: MessageSquare },
-    { id: 'metricas',  label: 'Métricas',  icon: BarChart2 },
-    { id: 'videos',    label: 'Videos',    icon: Video },
-    { id: 'equipo',    label: 'Equipo',    icon: UsersRound, ownerOnly: true },
-    { id: 'campanas',  label: 'Campañas',  icon: Megaphone },
-    { id: 'creativos', label: 'Creativos', icon: Image },
-    { id: 'tareas',    label: 'Tareas',    icon: ClipboardCheck },
+    { id: 'hoy',      label: 'Hoy',        icon: Sunrise },
+    { id: 'semana',   label: 'La Semana',  icon: CalendarDays },
+    { id: 'clientes', label: 'Clientes',   icon: Users },
+    { id: 'sala',     label: 'El Negocio', icon: Compass, ownerOnly: true },
   ];
+
+  /**
+   * Lo que vive adentro de cada momento. Se dibuja como pestañas arriba del
+   * contenido, no como entradas del menú lateral.
+   */
+  const DENTRO_DE: Partial<Record<MainTab, { id: MainTab; label: string; ownerOnly?: boolean }[]>> = {
+    hoy: [
+      { id: 'hoy',      label: 'Mi día' },
+      { id: 'tareas',   label: 'Tareas' },
+      { id: 'mensajes', label: 'Mensajes' },
+      { id: 'mirol',    label: 'Mi rol' },
+      { id: 'casa',     label: 'La casa' },
+    ],
+    clientes: [
+      { id: 'clientes',    label: 'Todos' },
+      // «De un vistazo» ahora incluye el detalle de cada cliente: se toca una
+      // fila y se abre su cadena ahí mismo. La Mesa de plata salió del menú
+      // porque mostraba lo mismo en otra tab.
+      { id: 'supervision', label: 'De un vistazo' },
+      { id: 'pipeline',    label: 'Activación' },
+      { id: 'campanas',    label: 'Campañas' },
+      { id: 'creativos',   label: 'Creativos' },
+      { id: 'sesiones',    label: 'Cargar sesión' },
+    ],
+    sala: [
+      { id: 'sala',     label: 'Mi motor' },
+      { id: 'motor',    label: 'Motor IA' },
+      { id: 'equipo',   label: 'Equipo' },
+      { id: 'metricas', label: 'Métricas' },
+      { id: 'videos',   label: 'Videos' },
+    ],
+  };
+
+  /** A qué momento pertenece cada pantalla, para saber cuál marcar. */
+  const MOMENTO_DE: Partial<Record<MainTab, MainTab>> = Object.fromEntries(
+    Object.entries(DENTRO_DE).flatMap(([momento, hijas]) =>
+      (hijas ?? []).map((h) => [h.id, momento as MainTab])),
+  ) as Partial<Record<MainTab, MainTab>>;
+
+  const momentoActual = MOMENTO_DE[mainTab] ?? mainTab;
+  const pestanasDelMomento = (DENTRO_DE[momentoActual] ?? [])
+    .filter((h) => !h.ownerOnly || adminRol === 'owner' || !adminRol);
 
   const headerTitles: Record<MainTab, string> = {
     clientes: 'Panel de Control — Clientes',
@@ -1676,6 +1833,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     campanas: 'Campañas & Creativos',
     creativos: 'Generador de Creativos',
     tareas: 'Pipeline de Tareas Internas',
+    hoy: 'Hoy — lo que hay que atender',
+    semana: 'La Semana — el marcador, las trabas y lo frenado',
+    casa: 'La casa — qué prometemos, cómo se decide, y tus primeros 3 días',
+    supervision: 'Supervisión — todas las cuentas a la vez',
+    sala: 'Sala de Mando — qué está frenado y quién lo destraba',
+    mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
+    sesiones: 'Cargar sesión — que lo que se dijo lo herede el equipo',
+    plata: 'Mesa de plata — la cadena de cada cuenta',
+    motor: 'Motor de IA — qué se usa, qué cuesta, qué falla',
   };
 
   // ─── RENDER ───────────────────────────────────────────────────────────────────
@@ -1700,8 +1866,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <Stethoscope className="w-5 h-5 text-cream" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
-              <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clinica Digital</h1>
-              <p className="text-[11px] text-gold uppercase tracking-widest font-bold">Admin</p>
+              <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clínica Digital</h1>
+              <p className="text-sm text-gold uppercase tracking-widest font-bold">Admin</p>
             </div>
           </div>
 
@@ -1717,6 +1883,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <nav className="space-y-0.5">
             {sidebarItems
               .filter(item => !item.ownerOnly || adminRol === 'owner' || !adminRol)
+              // Ya no se ordenan por rol: son cuatro y su orden es el del día.
               .map(item => {
                 const totalUnread = item.id === 'mensajes'
                   ? (channelUnread['comunidad'] ?? 0) + (channelUnread['victorias'] ?? 0) + (channelUnread['consultas'] ?? 0)
@@ -1733,12 +1900,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     }}
                     title={sidebarCollapsed ? item.label : undefined}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative ${sidebarCollapsed ? 'md:justify-center md:px-0 md:gap-0' : ''} ${
-                      mainTab === item.id
+                      momentoActual === item.id
                         ? 'bg-gold/10 text-gold'
                         : 'text-cream/75 hover:bg-gold/10 hover:text-cream'
                     }`}
                   >
-                    {mainTab === item.id && (
+                    {momentoActual === item.id && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gold rounded-r-full" />
                     )}
                     <span className="relative shrink-0">
@@ -1749,7 +1916,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
                     {totalUnread > 0 && (
-                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center`}>
+                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-sm font-bold flex items-center justify-center`}>
                         {totalUnread}
                       </span>
                     )}
@@ -1769,7 +1936,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className={`flex-1 min-w-0 ${sidebarCollapsed ? 'md:hidden' : ''}`}>
               <p className="text-sm font-medium text-cream truncate">{adminProfile.nombre}</p>
-              <p className="text-[11px] text-cream/55 truncate">{adminProfile.especialidad || 'Director'}</p>
+              <p className="text-sm text-cream/55 truncate">{adminProfile.especialidad || 'Director'}</p>
             </div>
             <button
               onClick={() => { setAdminDraft({ nombre: adminProfile.nombre, cargo: adminProfile.especialidad || 'Director' }); setShowAdminSettings(true); }}
@@ -1782,7 +1949,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           <button
             onClick={onSignOut}
             title={sidebarCollapsed ? 'Salir del sistema' : undefined}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-cream/75 hover:bg-gold/5 hover:text-cream transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-cream/75 hover:bg-gold/5 hover:text-cream transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>Salir del sistema</span>
@@ -1795,12 +1962,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         <header className="h-16 border-b border-gold/10 flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
             aria-label="Abrir menú"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h2 className="text-lg font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F2EFE9' }}>
+          <h2 className="text-[20px] leading-tight truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-cream)' }}>
             {headerTitles[mainTab]}
           </h2>
           <div className="ml-auto flex items-center gap-2">
@@ -1830,10 +1997,25 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'pipeline' && (
             <>
+              {/* Qué le falta instalar SEGÚN LO QUE PAGÓ. Estuvo construido y
+                  suelto hasta que existió el puente plan ↔ ticket: sin él la
+                  app no sabía que un cliente «verde» es uno de $5.000, y el de
+                  ticket alto no recibía nada distinto acá adentro. */}
+              {selectedCliente && (
+                <div className="mb-6">
+                  <p className="text-sm font-bold uppercase tracking-widest text-cream/45 mb-3">
+                    {selectedCliente.nombre} — qué le falta según su plan
+                  </p>
+                  <CuadroDelCliente
+                    plan={(selectedCliente as { plan_comercial?: string | null }).plan_comercial}
+                  />
+                </div>
+              )}
+
               {/* G4 · El proceso de activación — la guía operativa de Lupe */}
               <div className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.05] to-transparent p-5 mb-4 mx-1">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
-                <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-cream/70 list-decimal list-inside">
+                <p className="text-sm font-bold uppercase tracking-widest text-gold mb-3">📋 El proceso de activación (cliente nuevo, paso a paso)</p>
+                <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-sm text-cream/70 list-decimal list-inside">
                   <li>Crear su subcuenta GHL desde el snapshot maestro</li>
                   <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
                   <li>Alta en MiClínica Digital (misma identidad)</li>
@@ -1922,10 +2104,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <thead>
                       <tr className="border-b border-gold/10">
                         {['Nombre', 'Email', 'Plan', 'Inicio', 'Días', 'Cinturón', 'Pacientes', 'Pilar', 'Estado', 'Progreso'].map(h => (
-                          <th key={h} className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">{h}</th>
+                          <th key={h} className="text-left px-4 py-3 text-sm font-bold uppercase tracking-widest text-cream/55">{h}</th>
                         ))}
                         {adminRol === 'owner' && (
-                          <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">Acciones</th>
+                          <th className="text-right px-4 py-3 text-sm font-bold uppercase tracking-widest text-cream/55">Acciones</th>
                         )}
                       </tr>
                     </thead>
@@ -1947,33 +2129,33 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gold/10 border border-gold/12 flex items-center justify-center text-xs font-bold text-cream shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-gold/10 border border-gold/12 flex items-center justify-center text-sm font-bold text-cream shrink-0">
                                   {c.nombre.charAt(0).toUpperCase()}
                                 </div>
                                 <span className="text-sm font-medium text-cream group-hover:text-gold transition-colors truncate max-w-[140px]">{c.nombre}</span>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-xs text-cream/65 truncate max-w-[160px]">{c.email}</td>
+                            <td className="px-4 py-3 text-sm text-cream/65 truncate max-w-[160px]">{c.email}</td>
                             <td className="px-4 py-3">
-                              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">{c.plan}</span>
+                              <span className="text-sm font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">{c.plan}</span>
                             </td>
-                            <td className="px-4 py-3 text-xs text-cream/65">{c.fecha_inicio}</td>
-                            <td className="px-4 py-3 text-xs text-cream/75 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-[11px]`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
+                            <td className="px-4 py-3 text-sm text-cream/65">{c.fecha_inicio}</td>
+                            <td className="px-4 py-3 text-sm text-cream/75 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-sm`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
                     {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
                       const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
                       const [l, col] = map[p] ?? [p, '#F2EFE9'];
-                      return <span className="ml-2 text-[11px] font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
+                      return <span className="ml-2 text-sm font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
                     {(c as { plan_comercial?: string }).plan_comercial === 'blanco' && (
-                      <span className={`ml-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${c.quema_hecha ? 'text-gold border-gold/40 bg-gold/10' : 'text-cream/45 border-[rgba(242,239,233,0.1)]'}`} title={c.quema_hecha ? 'LA QUEMA completada — lead calificado' : 'Aún sin LA QUEMA'}>
+                      <span className={`ml-1.5 text-sm font-semibold px-2 py-0.5 rounded-full border ${c.quema_hecha ? 'text-gold border-gold/40 bg-gold/10' : 'text-cream/45 border-[rgba(242,239,233,0.1)]'}`} title={c.quema_hecha ? 'LA QUEMA completada — lead calificado' : 'Aún sin LA QUEMA'}>
                         {c.quema_hecha ? '🔥 QUEMA' : '· sin QUEMA'}
                       </span>
                     )}</td>
-                            <td className="px-4 py-3 text-xs" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-cream/65">{c.cinturon.nombre}</span></td>
-                            <td className="px-4 py-3 text-xs text-cream/75">{c.ventas_count}/10</td>
-                            <td className="px-4 py-3 text-xs text-gold font-medium">{pilar}</td>
+                            <td className="px-4 py-3 text-sm" title={`Cinturón ${c.cinturon.nombre}`}>{c.cinturon.emoji} <span className="text-cream/65">{c.cinturon.nombre}</span></td>
+                            <td className="px-4 py-3 text-sm text-cream/75">{c.ventas_count}/10</td>
+                            <td className="px-4 py-3 text-sm text-gold font-medium">{pilar}</td>
                             <td className="px-4 py-3">
                               <span
-                                className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider"
+                                className="text-sm font-bold px-2 py-1 rounded-md uppercase tracking-wider"
                                 style={{
                                   color: STATUS_BADGE_COLOR[st] ?? '#F2EFE9',
                                   backgroundColor: `${STATUS_BADGE_COLOR[st] ?? '#F2EFE9'}15`,
@@ -1991,7 +2173,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="text-[11px] text-cream/65 w-8 text-right">{pct}%</span>
+                                <span className="text-sm text-cream/65 w-8 text-right">{pct}%</span>
                               </div>
                             </td>
                             {adminRol === 'owner' && (
@@ -2024,7 +2206,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="w-[240px] shrink-0 flex flex-col">
                 <button
                   onClick={() => setSelectedCliente(null)}
-                  className="flex items-center gap-2 text-xs text-cream/55 hover:text-cream transition-colors mb-3"
+                  className="flex items-center gap-2 text-sm text-cream/55 hover:text-cream transition-colors mb-3"
                 >
                   <ChevronRight className="w-3 h-3 rotate-180" /> Volver a la tabla
                 </button>
@@ -2043,12 +2225,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-cream truncate">{c.nombre}</p>
-                          <p className="text-[11px] text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
+                          <p className="text-sm text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                           {c.traba_sesion && (
-                            <p className="text-[11px] text-gold mt-0.5">🟡 trabado en: {c.traba_sesion.titulo.slice(0, 34)} (hace {c.traba_sesion.dias}d)</p>
+                            <p className="text-sm text-gold mt-0.5">🟡 trabado en: {c.traba_sesion.titulo.slice(0, 34)} (hace {c.traba_sesion.dias}d)</p>
                           )}
                           {!c.traba_sesion && c.dias_sin_sesion !== null && c.dias_sin_sesion >= 4 && (
-                            <p className="text-[11px] text-red-400 mt-0.5">🔴 sin sesiones hace {c.dias_sin_sesion}d</p>
+                            <p className="text-sm text-red-400 mt-0.5">🔴 sin sesiones hace {c.dias_sin_sesion}d</p>
                           )}
                         </div>
                       </div>
@@ -2078,17 +2260,17 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           onClick={() => {
                             const nombre = selectedCliente.nombre.split(' ')[0];
                             const msj = selectedCliente.traba_sesion
-                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Contame y lo destrabamos juntos. De frente, no de costado. 🥋`
-                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escribime y retomamos hoy, aunque sea 20 minutos. 🥋`;
+                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado. 🥋`
+                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos. 🥋`;
                             try { navigator.clipboard?.writeText(msj); } catch { /* noop */ }
                             setDetalleTab('mensajes');
                             setEmpujonListo(msj);
                           }}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition-colors"
+                          className="px-2.5 py-1 rounded-lg text-sm font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition-colors"
                           title="Copia el mensaje de empujón (en la voz de Javo) y abre el chat"
                         >⚡ Empujón</button>
                       )}
-                      <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-gold/20 text-gold border border-gold/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-success/20 text-success border border-success/30' : 'bg-gold/20 text-gold border border-gold/30'}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-sm font-bold uppercase tracking-wider ${selectedCliente.plan === 'DFY' ? 'bg-gold/20 text-gold border border-gold/30' : selectedCliente.plan === 'IMPLEMENTACION' ? 'bg-success/20 text-success border border-success/30' : 'bg-gold/20 text-gold border border-gold/30'}`}>
                         {selectedCliente.plan}
                       </span>
                       {/* Status badge + quick change */}
@@ -2104,7 +2286,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* Toggle acceso completo agentes */}
                       <button
                         onClick={toggleFullAgentAccess}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-bold transition-all border ${
                           selectedCliente.full_agent_access
                             ? 'bg-success/15 text-success border-success/30 hover:bg-success/25'
                             : 'bg-gold/10 text-gold border-gold/30 hover:bg-gold/20'
@@ -2116,7 +2298,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* Cambiar email */}
                       <button
                         onClick={() => { setNewEmailInput(''); setShowChangeEmailModal(true); }}
-                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-gold/10 text-gold border-gold/30 hover:bg-gold/20"
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-bold transition-all border bg-gold/10 text-gold border-gold/30 hover:bg-gold/20"
                       >
                         <Mail className="w-4 h-4" />
                         Cambiar email
@@ -2125,13 +2307,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <button
                         onClick={handleSendReset}
                         disabled={sendingReset}
-                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all border bg-cream/5 text-cream/70 border-cream/10 hover:bg-cream/10 disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-bold transition-all border bg-cream/5 text-cream/70 border-cream/10 hover:bg-cream/10 disabled:opacity-50"
                       >
                         {sendingReset ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Enviar reset
                       </button>
                     </div>
-                    <p className="text-xs text-cream/75 flex items-center gap-2">
+                    <p className="text-sm text-cream/75 flex items-center gap-2">
                       <Lock className="w-3 h-3 text-cream/45" /> {selectedCliente.email}
                       {selectedCliente.especialidad && <><span>·</span> {selectedCliente.especialidad}</>}
                     </p>
@@ -2144,7 +2326,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <button
                       key={tab.id}
                       onClick={() => setDetalleTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-4 text-xs font-semibold uppercase tracking-wider transition-all relative ${
+                      className={`flex items-center gap-2 px-4 py-4 text-sm font-semibold uppercase tracking-wider transition-all relative ${
                         detalleTab === tab.id
                           ? 'text-gold'
                           : 'text-cream/55 hover:text-cream/80'
@@ -2170,7 +2352,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className="space-y-6">
                           {/* ═══ El plan comercial: activar el pago con un click ═══ */}
                           <div className="bg-panel border border-gold/15 rounded-2xl p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
+                            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
                             <div className="flex flex-wrap gap-2">
                               {([['blanco','🥋 Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
@@ -2178,31 +2360,31 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     if (!supabase) return;
                                     const dias = p === 'blanco' ? 7 : p === 'amarillo' ? 45 : (p === 'verde' || p === 'negro') ? 90 : null;
                                     const hasta = dias ? new Date(Date.now() + dias * 86400000).toISOString() : null;
-                                    const { error } = await supabase.from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
+                                    const { error } = await db().from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
                                     if (error) toast.error('No se pudo cambiar el plan');
                                     else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
                                   }}
-                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
+                                  className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
                                   {label}
                                 </button>
                               ))}
                             </div>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
+                            <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
                             <div className="flex flex-wrap gap-2">
                               {([['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['','Sin reserva']] as const).map(([p, label]) => (
                                 <button key={p || 'ninguno'}
                                   onClick={async () => {
                                     if (!supabase) return;
-                                    const { error } = await supabase.from('profiles').update({ plan_reservado: p || null }).eq('id', selectedCliente.id);
+                                    const { error } = await db().from('profiles').update({ plan_reservado: p || null }).eq('id', selectedCliente.id);
                                     if (error) toast.error('No se pudo guardar la reserva');
                                     else { toast.success(p ? `Reserva: ${label}` : 'Reserva quitada'); void cargarClientes(); }
                                   }}
-                                  className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${(((selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '') === p) ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
+                                  className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${(((selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '') === p) ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
                                   {label}
                                 </button>
                               ))}
                             </div>
-                            <p className="text-[11px] text-cream/35 mt-2">Al confirmar un comprobante: un click en el plan pagado y el acceso se extiende solo.</p>
+                            <p className="text-sm text-cream/35 mt-2">Al confirmar un comprobante: un click en el plan pagado y el acceso se extiende solo.</p>
                           </div>
                           <AdnPermisosControl
                             clienteId={selectedCliente.id}
@@ -2225,22 +2407,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       if (!window.confirm(`${b.t} para ${selectedCliente.nombre}: el programa se corre ${b.d} días hacia adelante. ¿Confirmar?`)) return;
                                       const nueva = new Date(selectedCliente.fecha_inicio);
                                       nueva.setDate(nueva.getDate() + b.d);
-                                      const { error } = await supabase.from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
+                                      const { error } = await db().from('profiles').update({ fecha_inicio: nueva.toISOString().split('T')[0] }).eq('id', selectedCliente.id);
                                       if (!error) { alert(`${b.t} aplicada. Recarga la lista para ver el día nuevo.`); }
                                     }}
-                                    className="px-2 py-1 rounded-md bg-gold/10 border border-gold/25 text-[11px] font-semibold text-gold hover:bg-gold/20 transition-colors"
+                                    className="px-2 py-1 rounded-md bg-gold/10 border border-gold/25 text-sm font-semibold text-gold hover:bg-gold/20 transition-colors"
                                   >{b.l}</button>
                                 ))}
                               </div>
-                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Día / 90</p>
+                              <p className="text-sm text-cream/55 uppercase tracking-wider mt-1">Día / 90</p>
                             </div>
                             <div className="bg-panel border border-gold/10 rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-gold flex items-center justify-center gap-1"><Flame className="w-5 h-5" /> {selectedCliente.racha_diario}</p>
-                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Racha diario</p>
+                              <p className="text-sm text-cream/55 uppercase tracking-wider mt-1">Racha diario</p>
                             </div>
                             <div className="bg-panel border border-gold/10 rounded-2xl p-4 text-center">
                               <p className="text-2xl font-light text-success">{selectedCliente.ventas_count}</p>
-                              <p className="text-[11px] text-cream/55 uppercase tracking-wider mt-1">Ventas reales</p>
+                              <p className="text-sm text-cream/55 uppercase tracking-wider mt-1">Ventas reales</p>
                             </div>
                             <div className={`rounded-2xl p-4 text-center border ${
                               selectedCliente.estado_garantia === 'activada' ? 'bg-danger/10 border-danger/30' :
@@ -2251,7 +2433,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 selectedCliente.estado_garantia === 'activada' ? 'text-danger' :
                                 selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/45'
                               }`} />
-                              <p className={`text-[11px] uppercase tracking-wider font-bold ${
+                              <p className={`text-sm uppercase tracking-wider font-bold ${
                                 selectedCliente.estado_garantia === 'activada' ? 'text-danger' :
                                 selectedCliente.estado_garantia === 'en_riesgo' ? 'text-gold' : 'text-cream/55'
                               }`}>{selectedCliente.estado_garantia === 'activada' ? 'Garantía' : selectedCliente.estado_garantia === 'en_riesgo' ? 'En riesgo' : 'En camino'}</p>
@@ -2265,7 +2447,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const activeIdx = rawIdx === -1 ? 0 : rawIdx;
                             return (
                               <div className="bg-panel border border-gold/10 rounded-2xl p-5">
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-5">Pipeline del Programa</p>
+                                <p className="text-sm font-bold uppercase tracking-widest text-cream/55 mb-5">Pipeline del Programa</p>
                                 <div className="flex items-start">
                                   {PIPELINE_STAGES.map((stage, i) => {
                                     const isActive = i === activeIdx;
@@ -2284,14 +2466,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               ? <Check className="w-3.5 h-3.5 text-success" />
                                               : isActive
                                               ? <span className="w-2.5 h-2.5 bg-ink rounded-full block" />
-                                              : <span className={`text-[11px] font-bold ${isActive ? 'text-ink' : 'text-cream/20'}`}>{i + 1}</span>
+                                              : <span className={`text-sm font-bold ${isActive ? 'text-ink' : 'text-cream/20'}`}>{i + 1}</span>
                                             }
                                           </div>
                                           <div className="text-center px-1">
-                                            <p className={`text-[11px] font-semibold leading-tight ${
+                                            <p className={`text-sm font-semibold leading-tight ${
                                               isActive ? 'text-gold' : isDone ? 'text-success/70' : 'text-cream/25'
                                             }`}>{stage.label}</p>
-                                            <p className={`text-[11px] mt-0.5 ${isActive ? 'text-gold/60' : 'text-cream/15'}`}>{stage.sub}</p>
+                                            <p className={`text-sm mt-0.5 ${isActive ? 'text-gold/60' : 'text-cream/15'}`}>{stage.sub}</p>
                                           </div>
                                         </div>
                                         {i < PIPELINE_STAGES.length - 1 && (
@@ -2309,7 +2491,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-panel border border-gold/10 rounded-2xl p-5">
-                              <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
+                              <p className="text-sm text-cream/55 uppercase tracking-widest mb-1 font-bold">Progreso de Tareas</p>
                               <div className="flex items-end gap-2 mb-3">
                                 <p className="text-3xl font-light text-cream">{selectedCliente.tareas_completadas}</p>
                                 <p className="text-sm text-cream/55 mb-1">/ {selectedCliente.tareas_total}</p>
@@ -2319,7 +2501,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               </div>
                             </div>
                             <div className="bg-panel border border-gold/10 rounded-2xl p-5">
-                              <p className="text-[11px] text-cream/55 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
+                              <p className="text-sm text-cream/55 uppercase tracking-widest mb-2 font-bold">Último Diario</p>
                               {detalleDiario[0] ? (() => {
                                 const d0 = detalleDiario[0];
                                 const energia = d0.energia_nivel ?? d0.respuestas?.q3;
@@ -2328,34 +2510,34 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 return (
                                   <>
                                     <div className="flex items-center justify-between mb-2">
-                                      <p className="text-xs text-cream/55">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                      <p className="text-sm text-cream/55">{new Date(d0.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                                       {d0.diario_score != null && (
-                                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{d0.diario_score}/100</span>
+                                        <span className="text-sm font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{d0.diario_score}/100</span>
                                       )}
                                     </div>
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5 mb-2">
-                                        <span className="text-[11px] text-cream/55 uppercase font-bold">Energía</span>
+                                        <span className="text-sm text-cream/55 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, i) => (
                                             <div key={i} className={`w-2 h-2 rounded-sm ${i < Number(energia) ? 'bg-gold' : 'bg-gold/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[11px] text-gold font-bold">{energia}/10</span>
+                                        <span className="text-sm text-gold font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                     {(d0.diario_cuerpo != null) && (
-                                      <p className="text-[11px] text-cream/65 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
+                                      <p className="text-sm text-cream/65 mb-1">Cuerpo {d0.diario_cuerpo} · Mente {d0.diario_mente} · Emociones {d0.diario_emociones}</p>
                                     )}
                                     {logro && (
-                                      <p className="text-xs text-cream/80 line-clamp-2"><span className="text-success font-bold">Logro: </span>{logro}</p>
+                                      <p className="text-sm text-cream/80 line-clamp-2"><span className="text-success font-bold">Logro: </span>{logro}</p>
                                     )}
                                     {freno && (
-                                      <p className="text-xs text-cream/75 mt-1 line-clamp-1"><span className="text-gold font-bold">Freno: </span>{freno}</p>
+                                      <p className="text-sm text-cream/75 mt-1 line-clamp-1"><span className="text-gold font-bold">Freno: </span>{freno}</p>
                                     )}
                                   </>
                                 );
-                              })() : <p className="text-xs text-cream/45">Sin entradas de diario aún</p>}
+                              })() : <p className="text-sm text-cream/45">Sin entradas de diario aún</p>}
                             </div>
                           </div>
 
@@ -2367,11 +2549,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   <div className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center">
                                     <Bot className="w-4 h-4 text-gold" />
                                   </div>
-                                  <p className="text-xs font-bold uppercase tracking-widest text-gold">Coach AI Assistant</p>
+                                  <p className="text-sm font-bold uppercase tracking-widest text-gold">Coach AI Assistant</p>
                                 </div>
                                 <button
                                   onClick={generarRecomendacion} disabled={iaLoading}
-                                  className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-lg shadow-gold/20"
+                                  className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-lg shadow-gold/20"
                                 >
                                   {iaLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                                   Analizar y Sugerir
@@ -2384,7 +2566,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-xs text-cream/55">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
+                                <p className="text-sm text-cream/55">Haz clic en Analizar para que la IA escanee el perfil, métricas diarias y tareas pendientes de este cliente para crear recomendaciones proactivas de coaching.</p>
                               )}
                             </div>
                           </div>
@@ -2394,24 +2576,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── DIARIO ── */}
                       {detalleTab === 'mentor' && (
                 <div className="space-y-5">
-                  <p className="text-xs text-cream/65">Todo lo que este cliente habló con el Mentor y sus entrenadores — sus respuestas, sus trabas, sus miedos. <strong className="text-gold">Acá ves dónde intervenir.</strong></p>
+                  <p className="text-sm text-cream/65">Todo lo que este cliente habló con el Mentor y sus entrenadores — sus respuestas, sus trabas, sus miedos. <strong className="text-gold">Acá ves dónde intervenir.</strong></p>
                   {convsLoading ? (
                     <p className="text-sm text-cream/55">Trayendo sus conversaciones…</p>
                   ) : convsCliente.length === 0 ? (
                     <div className="py-8 text-center border border-dashed border-gold/12 rounded-xl">
                       <p className="text-sm text-cream/65">Todavía no habló con el Mentor.</p>
-                      <p className="text-xs text-cream/45 mt-1">La primera conversación llega con la Sesión 1.</p>
+                      <p className="text-sm text-cream/45 mt-1">La primera conversación llega con la Sesión 1.</p>
                     </div>
                   ) : (
                     convsCliente.map((c) => (
                       <details key={c.agente} className="rounded-xl border border-gold/12 bg-panel overflow-hidden">
                         <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-cream/85 hover:bg-gold/5 transition-colors">
-                          💬 {c.agente} <span className="text-[11px] text-cream/35 ml-2">{c.mensajes.length} mensajes</span>
+                          💬 {c.agente} <span className="text-sm text-cream/35 ml-2">{c.mensajes.length} mensajes</span>
                         </summary>
                         <div className="max-h-96 overflow-y-auto px-4 pb-4 space-y-2">
                           {c.mensajes.map((msg, i) => (
-                            <div key={i} className={`text-xs leading-relaxed p-2.5 rounded-lg ${msg.role === 'user' ? 'bg-gold/8 text-cream/90 ml-6' : 'bg-cream/4 text-cream/75 mr-6'}`}>
-                              <span className="text-[11px] font-bold uppercase tracking-wider opacity-50 block mb-0.5">{msg.role === 'user' ? 'Cliente' : c.agente}</span>
+                            <div key={i} className={`text-sm leading-relaxed p-2.5 rounded-lg ${msg.role === 'user' ? 'bg-gold/8 text-cream/90 ml-6' : 'bg-cream/4 text-cream/75 mr-6'}`}>
+                              <span className="text-sm font-bold uppercase tracking-wider opacity-50 block mb-0.5">{msg.role === 'user' ? 'Cliente' : c.agente}</span>
                               {msg.content}
                             </div>
                           ))}
@@ -2439,22 +2621,22 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-white truncate">{String(sl.meta_titulo ?? sl.meta_codigo)}</p>
-                            <p className="text-[11px] text-white/55 mt-0.5">
+                            <p className="text-sm text-white/55 mt-0.5">
                               {fecha} · {durTxt} de trabajo{pausas > 0 ? ` · ${pausas} pausa${pausas === 1 ? '' : 's'}` : ''}{abierta ? ' · 🟡 EN CURSO / PAUSADA' : ''}
                             </p>
                           </div>
                           <div className="shrink-0 text-lg" title={`${String(sl.checkin_emocion ?? '')} → ${String(sl.checkout_emocion ?? '')}`}>
-                            {emo[String(sl.checkin_emocion)] ?? '·'} <span className="text-white/45 text-xs">→</span> {emo[String(sl.checkout_emocion)] ?? '·'}
+                            {emo[String(sl.checkin_emocion)] ?? '·'} <span className="text-white/45 text-sm">→</span> {emo[String(sl.checkout_emocion)] ?? '·'}
                           </div>
                         </div>
-                        {sl.checkin_objetivo ? <p className="text-xs text-white/55 mt-2">Objetivo: {String(sl.checkin_objetivo)}</p> : null}
+                        {sl.checkin_objetivo ? <p className="text-sm text-white/55 mt-2">Objetivo: {String(sl.checkin_objetivo)}</p> : null}
                         {compromisos.length > 0 && (
                           <div className="mt-2 space-y-0.5">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-success">Compromisos</p>
-                            {compromisos.map((c, i) => <p key={i} className="text-xs text-white/70">• {c}</p>)}
+                            <p className="text-sm font-bold uppercase tracking-wider text-success">Compromisos</p>
+                            {compromisos.map((c, i) => <p key={i} className="text-sm text-white/70">• {c}</p>)}
                           </div>
                         )}
-                        {sl.resumen_consolidado ? <p className="text-xs text-white/65 mt-2 italic line-clamp-3">{String(sl.resumen_consolidado)}</p> : null}
+                        {sl.resumen_consolidado ? <p className="text-sm text-white/65 mt-2 italic line-clamp-3">{String(sl.resumen_consolidado)}</p> : null}
                       </div>
                     );
                   })}
@@ -2462,21 +2644,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               )}
               {detalleTab === 'evidencias' && (
                 <div className="space-y-4">
-                  <p className="text-xs text-cream/65">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-gold">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
+                  <p className="text-sm text-cream/65">Las pruebas que subió el cliente en cada sesión-hito: la foto de la quema, el audio de su precio, la captura de la campaña, el comprobante del pago. <strong className="text-gold">El comprobante del primer pago es la evidencia de la garantía.</strong></p>
                   {evidenciasLoading ? (
                     <p className="text-sm text-cream/55">Buscando las evidencias del camino…</p>
                   ) : evidenciasCliente.length === 0 ? (
                     <div className="py-8 text-center border border-dashed border-gold/10 rounded-xl">
                       <p className="text-sm text-cream/65">Todavía no subió evidencias.</p>
-                      <p className="text-xs text-cream/45 mt-1">La primera llega con LA QUEMA (día 4).</p>
+                      <p className="text-sm text-cream/45 mt-1">La primera llega con LA QUEMA (día 4).</p>
                     </div>
                   ) : (
                     evidenciasCliente.map((g) => (
                       <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
+                        <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
                         <div className="flex flex-wrap gap-2">
                           {g.archivos.map((f) => (
-                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-xs text-gold hover:bg-gold/20 transition-colors">
+                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-sm text-gold hover:bg-gold/20 transition-colors">
                               📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
                             </button>
                           ))}
@@ -2505,17 +2687,17 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   </p>
                                   <div className="flex items-center gap-2">
                                     {entrada.diario_score != null && (
-                                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{entrada.diario_score}/100</span>
+                                      <span className="text-sm font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold">{entrada.diario_score}/100</span>
                                     )}
                                     {energia != null && (
                                       <div className="flex items-center gap-1.5">
-                                        <span className="text-[11px] text-cream/55 uppercase font-bold">Energía</span>
+                                        <span className="text-sm text-cream/55 uppercase font-bold">Energía</span>
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: 10 }).map((_, idx) => (
                                             <div key={idx} className={`w-2 h-2 rounded-sm ${idx < Number(energia) ? 'bg-gold' : 'bg-gold/10'}`} />
                                           ))}
                                         </div>
-                                        <span className="text-[11px] text-gold font-bold">{energia}/10</span>
+                                        <span className="text-sm text-gold font-bold">{energia}/10</span>
                                       </div>
                                     )}
                                   </div>
@@ -2523,30 +2705,30 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 {esV3 ? (
                                   <div className="space-y-3">
                                     {entrada.diario_cuerpo != null && (
-                                      <div className="flex gap-6 text-xs">
+                                      <div className="flex gap-6 text-sm">
                                         <span className="text-cream/75">Cuerpo <b className="text-cream">{entrada.diario_cuerpo}</b></span>
                                         <span className="text-cream/75">Mente <b className="text-cream">{entrada.diario_mente}</b></span>
                                         <span className="text-cream/75">Emociones <b className="text-cream">{entrada.diario_emociones}</b></span>
                                       </div>
                                     )}
-                                    {entrada.diario_logro && <div><p className="text-[11px] uppercase font-bold text-success/70 mb-1">Logro</p><p className="text-xs text-cream/80">{entrada.diario_logro}</p></div>}
-                                    {entrada.diario_bloqueo && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Bloqueo</p><p className="text-xs text-cream/80">{entrada.diario_bloqueo}</p></div>}
+                                    {entrada.diario_logro && <div><p className="text-sm uppercase font-bold text-success/70 mb-1">Logro</p><p className="text-sm text-cream/80">{entrada.diario_logro}</p></div>}
+                                    {entrada.diario_bloqueo && <div><p className="text-sm uppercase font-bold text-gold/70 mb-1">Bloqueo</p><p className="text-sm text-cream/80">{entrada.diario_bloqueo}</p></div>}
                                     {tagLabels.length > 0 && (
                                       <div className="flex flex-wrap gap-1.5">
                                         {tagLabels.map((l: string, idx: number) => (
-                                          <span key={idx} className="text-[11px] bg-gold/5 px-2 py-1 rounded-full text-cream/75">{l}</span>
+                                          <span key={idx} className="text-sm bg-gold/5 px-2 py-1 rounded-full text-cream/75">{l}</span>
                                         ))}
                                       </div>
                                     )}
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 gap-4">
-                                    {r.q1 && <div className="col-span-2"><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Cómo se sintió</p><p className="text-xs text-cream/80">{r.q1}</p></div>}
-                                    {r.q4 && <div><p className="text-[11px] uppercase font-bold text-success/70 mb-1">Acción tomada</p><p className="text-xs text-cream/80">{r.q4}</p></div>}
-                                    {r.q5 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Pensamiento dominante</p><p className="text-xs text-cream/80">{r.q5}</p></div>}
-                                    {r.q2 && <div className="col-span-2"><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Lo que lo frenó</p><p className="text-xs text-cream/80">{r.q2}</p></div>}
-                                    {r.q6 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Emoción predominante</p><p className="text-xs text-cream/80">{r.q6}</p></div>}
-                                    {r.q7 && <div><p className="text-[11px] uppercase font-bold text-gold/70 mb-1">Plan para mañana</p><p className="text-xs text-cream/80">{r.q7}</p></div>}
+                                    {r.q1 && <div className="col-span-2"><p className="text-sm uppercase font-bold text-gold/70 mb-1">Cómo se sintió</p><p className="text-sm text-cream/80">{r.q1}</p></div>}
+                                    {r.q4 && <div><p className="text-sm uppercase font-bold text-success/70 mb-1">Acción tomada</p><p className="text-sm text-cream/80">{r.q4}</p></div>}
+                                    {r.q5 && <div><p className="text-sm uppercase font-bold text-gold/70 mb-1">Pensamiento dominante</p><p className="text-sm text-cream/80">{r.q5}</p></div>}
+                                    {r.q2 && <div className="col-span-2"><p className="text-sm uppercase font-bold text-gold/70 mb-1">Lo que lo frenó</p><p className="text-sm text-cream/80">{r.q2}</p></div>}
+                                    {r.q6 && <div><p className="text-sm uppercase font-bold text-gold/70 mb-1">Emoción predominante</p><p className="text-sm text-cream/80">{r.q6}</p></div>}
+                                    {r.q7 && <div><p className="text-sm uppercase font-bold text-gold/70 mb-1">Plan para mañana</p><p className="text-sm text-cream/80">{r.q7}</p></div>}
                                   </div>
                                 )}
                               </div>
@@ -2560,7 +2742,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <div className="space-y-5">
                           <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                              <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
+                              <h3 className="text-sm font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                                 <BarChart2 className="w-3.5 h-3.5 text-gold" /> Progreso por Pilar
                               </h3>
                               {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-gold animate-spin" />}
@@ -2582,11 +2764,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       }`}
                                     >
                                       {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-gold shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
-                                      <span className="text-xs text-cream/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
+                                      <span className="text-sm text-cream/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
                                       <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                       </div>
-                                      <span className="text-xs text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                      <span className="text-sm text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                       {completadasReales > 0 && (
                                         <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-gold ${expandido ? 'rotate-180' : ''}`} />
                                       )}
@@ -2612,10 +2794,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                 <CheckCircle2 className="w-4 h-4 shrink-0 text-gold" />
                                                 <div className="flex-1 min-w-0">
                                                   <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
+                                                    <span className="text-sm font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
                                                     {meta.es_estrella && <Star className="w-3 h-3 text-gold fill-gold" />}
                                                     {tareaData.fecha_completada && (
-                                                      <span className="text-[11px] text-cream/45">
+                                                      <span className="text-sm text-cream/45">
                                                         {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                       </span>
                                                     )}
@@ -2624,7 +2806,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
                                                   {hasOutput && (
-                                                    <span className="text-[11px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                    <span className="text-sm text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
                                                   )}
                                                   <ChevronRight className="w-3.5 h-3.5 text-cream/45 group-hover:text-cream/75 transition-colors" />
                                                 </div>
@@ -2633,7 +2815,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                           );
                                         })}
                                         {tareasCompletadasPilar.length === 0 && (
-                                          <p className="text-xs text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
+                                          <p className="text-sm text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                         )}
                                       </div>
                                     )}
@@ -2643,7 +2825,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-[11px] font-bold uppercase tracking-widest text-cream/75 mb-3">Métricas de Negocio Semanales</h3>
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-cream/75 mb-3">Métricas de Negocio Semanales</h3>
                             {detalleMetricas.length === 0 ? (
                               <div className="bg-panel border border-gold/10 rounded-2xl p-6 text-center">
                                 <p className="text-sm text-cream/55">El cliente aún no cargó métricas semanales.</p>
@@ -2660,23 +2842,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   : m.semana;
                                 return (
                                   <div key={i} className="p-5 rounded-2xl bg-panel border border-gold/10 flex items-center justify-between mb-3">
-                                    <span className="text-xs font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{periodo}</span>
+                                    <span className="text-sm font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{periodo}</span>
                                     <div className="flex gap-7">
-                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-success' : 'text-danger'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-[11px] text-cream/55 font-bold uppercase">ROAS</p></div>
-                                      <div className="text-center"><p className="text-cream text-lg font-light">{postsTotales(m)}</p><p className="text-[11px] text-cream/55 font-bold uppercase">posts</p></div>
-                                      <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-[11px] text-success/50 font-bold uppercase">ventas</p></div>
-                                      <div className="text-center"><p className="text-cream text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-[11px] text-cream/55 font-bold uppercase">ingresos</p></div>
+                                      <div className="text-center"><p className={`text-lg font-bold ${roas != null && roas >= 2 ? 'text-success' : 'text-danger'}`}>{roas != null ? `${Number(roas).toFixed(1)}×` : '—'}</p><p className="text-sm text-cream/55 font-bold uppercase">ROAS</p></div>
+                                      <div className="text-center"><p className="text-cream text-lg font-light">{postsTotales(m)}</p><p className="text-sm text-cream/55 font-bold uppercase">posts</p></div>
+                                      <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas_cerradas ?? 0}</p><p className="text-sm text-success/50 font-bold uppercase">ventas</p></div>
+                                      <div className="text-center"><p className="text-cream text-lg font-light">${Number(m.ingresos_cobrados ?? 0).toLocaleString('es-AR')}</p><p className="text-sm text-cream/55 font-bold uppercase">ingresos</p></div>
                                     </div>
                                   </div>
                                 );
                               }
                               return (
                                 <div key={i} className="p-5 rounded-2xl bg-panel border border-gold/10 flex items-center justify-between mb-3">
-                                  <span className="text-xs font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
+                                  <span className="text-sm font-semibold text-cream/75 bg-gold/5 px-2.5 py-1 rounded-lg">{m.semana}</span>
                                   <div className="flex gap-8">
-                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-[11px] text-cream/55 font-bold uppercase">leads</p></div>
-                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-[11px] text-cream/55 font-bold uppercase">llamadas</p></div>
-                                    <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-[11px] text-success/50 font-bold uppercase">ventas</p></div>
+                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.leads ?? m.mensajes_recibidos ?? 0}</p><p className="text-sm text-cream/55 font-bold uppercase">visitas</p></div>
+                                    <div className="text-center"><p className="text-cream text-lg font-light">{m.conversaciones ?? m.llamadas_tomadas ?? 0}</p><p className="text-sm text-cream/55 font-bold uppercase">llamadas</p></div>
+                                    <div className="text-center"><p className="text-success text-lg font-bold">{m.ventas ?? m.ventas_cerradas ?? 0}</p><p className="text-sm text-success/50 font-bold uppercase">ventas</p></div>
                                   </div>
                                 </div>
                               );
@@ -2697,13 +2879,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── NOTAS INTERNAS ── */}
                       {detalleTab === 'notas' && (
                         <div className="space-y-4">
-                          <p className="text-[11px] text-cream/45 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
+                          <p className="text-sm text-cream/45 uppercase tracking-wider font-bold">Solo visible para admins -- No la ve el cliente</p>
                           <div className="flex gap-2">
                             <textarea
                               value={notaInput}
                               onChange={e => setNotaInput(e.target.value)}
                               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) agregarNota(); }}
-                              placeholder="Escribí una nota interna... (Ctrl+Enter para guardar)"
+                              placeholder="Escribe una nota interna... (Ctrl+Enter para guardar)"
                               rows={3}
                               className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
                             />
@@ -2720,12 +2902,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           ) : detalleNotas.length === 0 ? (
                             <div className="text-center py-12">
                               <BookOpen className="w-8 h-8 text-gray-800 mx-auto mb-3" />
-                              <p className="text-cream/55 text-sm">Sin notas aún. Usá esto para documentar contexto importante del cliente.</p>
+                              <p className="text-cream/55 text-sm">Sin notas aún. Usa esto para documentar contexto importante del cliente.</p>
                             </div>
                           ) : detalleNotas.map(nota => (
                             <div key={nota.id} className="bg-panel border border-gold/12 rounded-xl p-4">
                               <p className="text-sm text-cream/90 leading-relaxed whitespace-pre-wrap">{nota.content}</p>
-                              <p className="text-[11px] text-cream/45 mt-2">
+                              <p className="text-sm text-cream/45 mt-2">
                                 {new Date(nota.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
@@ -2738,8 +2920,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <>
                 {empujonListo && (
                   <div className="mb-3 rounded-xl border border-gold/30 bg-gold/8 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si querés</p>
-                    <p className="text-xs text-white/70 italic">{empujonListo}</p>
+                    <p className="text-sm font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si quieres</p>
+                    <p className="text-sm text-white/70 italic">{empujonListo}</p>
                   </div>
                 )}
                 </>
@@ -2757,19 +2939,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const initial = senderName.charAt(0).toUpperCase();
                             return (
                               <div key={m.id} className={`flex gap-2.5 items-end max-w-[88%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/10 border-gold/12 text-cream'}`}>
+                                <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-sm font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30 text-gold' : 'bg-gold/10 border-gold/12 text-cream'}`}>
                                   {isMe
                                     ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5" />)
                                     : initial}
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <span className={`text-[11px] font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                  <span className={`text-sm font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                   <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                     isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
                                          : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                                   }`}>
                                     {m.contenido && <p>{m.contenido}</p>}
-                                    <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                                    <p className={`text-sm mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                                       {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                   </div>
@@ -2845,7 +3027,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <ch.icon className="w-4 h-4" />
                     {ch.label}
                     {(channelUnread[ch.id] ?? 0) > 0 && (
-                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-gold text-cream text-[11px] font-bold flex items-center justify-center">
+                      <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-gold text-cream text-sm font-bold flex items-center justify-center">
                         {channelUnread[ch.id]}
                       </span>
                     )}
@@ -2867,7 +3049,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   {/* Left: client list */}
                   <div className="w-[280px] shrink-0 border-r border-gold/12 flex flex-col bg-black/20">
                     <div className="p-4 border-b border-gold/12">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55">Conversaciones ({clientes.length})</p>
+                      <p className="text-sm font-bold uppercase tracking-widest text-cream/55">Conversaciones ({clientes.length})</p>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-hide">
                       {loading ? (
@@ -2887,7 +3069,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-cream truncate">{c.nombre}</p>
-                            <p className="text-[11px] text-cream/55 truncate">{c.especialidad || 'Sin especialidad'}</p>
+                            <p className="text-sm text-cream/55 truncate">{c.especialidad || 'Sin especialidad'}</p>
                           </div>
                           <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                         </button>
@@ -2904,7 +3086,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-cream">{chatCliente.nombre}</p>
-                          <p className="text-[11px] text-cream/55">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
+                          <p className="text-sm text-cream/55">{chatCliente.especialidad || 'Día ' + chatCliente.dia_programa + '/90'}</p>
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto p-5 scrollbar-hide space-y-3">
@@ -2920,20 +3102,20 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           const senderName = isMe ? adminProfile.nombre : chatCliente.nombre;
                           return (
                             <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30' : 'bg-gold/10 border-gold/12'}`}>
+                              <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-sm font-bold border overflow-hidden ${isMe ? 'bg-gold/20 border-gold/30' : 'bg-gold/10 border-gold/12'}`}>
                                 {isMe
                                   ? (adminAvatar ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" /> : <Shield className="w-3.5 h-3.5 text-gold" />)
                                   : senderName.charAt(0).toUpperCase()
                                 }
                               </div>
                               <div className="flex flex-col gap-1">
-                                <span className={`text-[11px] font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
+                                <span className={`text-sm font-semibold text-cream/55 px-1 ${isMe ? 'text-right' : ''}`}>{senderName}</span>
                                 <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                   isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
                                        : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                                 }`}>
                                   <p>{m.contenido}</p>
-                                  <p className={`text-[11px] mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
+                                  <p className={`text-sm mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                                     {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 </div>
@@ -3010,7 +3192,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ))}
                 <button
                   onClick={() => { setMetricasGlobales(null); cargarMetricasGlobales(); cargarSatisfaccionGlobal(); cargarRatingsPorPilar(); cargarClientes(); }}
-                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface/50 border border-gold/14 text-xs text-cream/55 hover:text-cream transition-colors"
+                  className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface/50 border border-gold/14 text-sm text-cream/55 hover:text-cream transition-colors"
                 >
                   <Loader2 className="w-3.5 h-3.5" /> Actualizar
                 </button>
@@ -3022,15 +3204,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {[
                       { label: 'Profesionales activos', value: clientes.length, icon: Users, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
-                      { label: 'En ritmo', value: clientes.filter(c => c.semaforo === 'verde').length, icon: CheckCheck, color: 'text-success', border: 'border-success/20', bg: 'bg-success/5' },
-                      { label: 'Necesitan atención', value: clientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
+                      { label: 'En ritmo', value: filteredClientes.filter(c => c.semaforo === 'verde').length, icon: CheckCheck, color: 'text-success', border: 'border-success/20', bg: 'bg-success/5' },
+                      { label: 'Necesitan atención', value: filteredClientes.filter(c => c.semaforo === 'rojo' || c.semaforo === 'amarillo').length, icon: AlertTriangle, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                       { label: 'Progreso promedio', value: clientes.length ? `${Math.round(clientes.reduce((a, c) => a + (c.tareas_total > 0 ? (c.tareas_completadas / c.tareas_total) * 100 : (c.progreso_porcentaje ?? 0)), 0) / clientes.length)}%` : '—', icon: TrendingUp, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                       { label: 'Satisfacción promedio', value: satisfaccionGlobal !== null ? `${satisfaccionGlobal.toFixed(1)} / 5` : '—', icon: Star, color: 'text-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
                     ].map((s, i) => (
                       <div key={i} className={`${s.bg} border ${s.border} rounded-2xl p-5`}>
                         <s.icon className={`w-5 h-5 ${s.color} mb-3`} />
                         <p className={`text-3xl font-light ${s.color} mb-1`}>{s.value}</p>
-                        <p className="text-xs text-cream/55 font-semibold uppercase tracking-wider">{s.label}</p>
+                        <p className="text-sm text-cream/55 font-semibold uppercase tracking-wider">{s.label}</p>
                       </div>
                     ))}
                   </div>
@@ -3038,7 +3220,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   {/* Progress table */}
                   <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                     <div className="px-6 py-4 border-b border-gold/10 flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                         <BarChart2 className="w-3.5 h-3.5 text-gold" /> Progreso individual
                       </h3>
                     </div>
@@ -3058,20 +3240,20 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <div className={`w-2 h-2 rounded-full shrink-0 ${SEMAFORO_CONFIG[c.semaforo].class}`} />
                             <div className="w-32 shrink-0">
                               <p className="text-sm font-semibold text-cream group-hover:text-gold transition-colors truncate">{c.nombre}</p>
-                              <p className="text-[11px] text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
+                              <p className="text-sm text-cream/55">{c.cinturon.emoji} {c.cinturon.nombre} · Día {c.dia_programa}/90 · {c.ventas_count}/10 🎉</p>
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-[11px] text-cream/55">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
-                                <span className="text-xs font-bold text-cream">{pct}%</span>
+                                <span className="text-sm text-cream/55">Pilar {derivePilarFromProgress(c.tareas_completadas)}</span>
+                                <span className="text-sm font-bold text-cream">{pct}%</span>
                               </div>
                               <div className="h-2 bg-gold/5 rounded-full overflow-hidden">
                                 <div className="h-full rounded-full bg-gold transition-all" style={{ width: `${pct}%` }} />
                               </div>
                             </div>
                             <div className="flex items-center gap-5 shrink-0">
-                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-gold flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-[11px] text-cream/45 uppercase">Racha</p></div>}
-                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-success' : 'text-cream/45'}`}>{c.ventas_count}</p><p className="text-[11px] text-cream/45 uppercase">Ventas</p></div>
+                              {c.racha_diario > 0 && <div className="text-center"><p className="text-sm font-bold text-gold flex items-center gap-0.5"><Flame className="w-3.5 h-3.5" /> {c.racha_diario}</p><p className="text-sm text-cream/45 uppercase">Racha</p></div>}
+                              <div className="text-center"><p className={`text-sm font-bold ${c.ventas_count > 0 ? 'text-success' : 'text-cream/45'}`}>{c.ventas_count}</p><p className="text-sm text-cream/45 uppercase">Ventas</p></div>
                               <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-gold transition-colors" />
                             </div>
                           </button>
@@ -3083,10 +3265,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   {/* Valoraciones por pilar (agregado global) */}
                   <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                     <div className="px-6 py-4 border-b border-gold/10 flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                         <Star className="w-3.5 h-3.5 text-gold" /> Valoraciones por pilar
                       </h3>
-                      <span className="text-[11px] text-cream/55">
+                      <span className="text-sm text-cream/55">
                         {ratingsPorPilar.reduce((a, p) => a + p.count, 0)} reseñas totales · {ratingsPorPilar.length} pilares con datos
                       </span>
                     </div>
@@ -3107,12 +3289,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 onClick={() => setPilarRatingExpandido(prev => ({ ...prev, [p.pilar_numero]: !expandido }))}
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-surface transition-colors text-left"
                               >
-                                <div className="w-7 h-7 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-xs font-bold text-gold shrink-0">
+                                <div className="w-7 h-7 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-sm font-bold text-gold shrink-0">
                                   {p.pilar_numero}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-semibold text-cream truncate">{titulo}</p>
-                                  <p className="text-[11px] text-cream/55 mt-0.5">
+                                  <p className="text-sm text-cream/55 mt-0.5">
                                     {p.count} valoración{p.count === 1 ? '' : 'es'} · {conComentarios.length} con reseña
                                   </p>
                                 </div>
@@ -3133,13 +3315,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-gold/5">
                                   {/* Distribución 5→1 */}
                                   <div className="space-y-1.5">
-                                    <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">Distribución</p>
+                                    <p className="text-sm font-bold uppercase tracking-widest text-cream/55 mb-2">Distribución</p>
                                     {([5, 4, 3, 2, 1] as const).map(level => {
                                       const cnt = p.distribucion[level];
                                       const pct = (cnt / maxDist) * 100;
                                       return (
                                         <div key={level} className="flex items-center gap-3">
-                                          <span className="text-[11px] text-cream/65 w-3">{level}</span>
+                                          <span className="text-sm text-cream/65 w-3">{level}</span>
                                           <Star className="w-3 h-3 text-gold fill-gold shrink-0" />
                                           <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                             <div
@@ -3147,18 +3329,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                               style={{ width: `${pct}%` }}
                                             />
                                           </div>
-                                          <span className="text-[11px] text-cream/55 w-8 text-right">{cnt}</span>
+                                          <span className="text-sm text-cream/55 w-8 text-right">{cnt}</span>
                                         </div>
                                       );
                                     })}
                                   </div>
                                   {/* Reseñas con comentario */}
                                   <div>
-                                    <p className="text-[11px] font-bold uppercase tracking-widest text-cream/55 mb-2">
+                                    <p className="text-sm font-bold uppercase tracking-widest text-cream/55 mb-2">
                                       Reseñas {conComentarios.length > 0 ? `(${conComentarios.length})` : ''}
                                     </p>
                                     {conComentarios.length === 0 ? (
-                                      <p className="text-xs text-cream/45 italic">Sin comentarios escritos en este pilar.</p>
+                                      <p className="text-sm text-cream/45 italic">Sin comentarios escritos en este pilar.</p>
                                     ) : (
                                       <div className="space-y-2">
                                         {conComentarios.map((r, idx) => {
@@ -3177,11 +3359,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                   <button
                                                     type="button"
                                                     onClick={() => setFiltroMetricasId(r.usuario_id)}
-                                                    className="text-xs font-semibold text-cream hover:text-gold transition-colors truncate"
+                                                    className="text-sm font-semibold text-cream hover:text-gold transition-colors truncate"
                                                   >
                                                     {nombre}
                                                   </button>
-                                                  {fecha && <span className="text-[11px] text-cream/45">· {fecha}</span>}
+                                                  {fecha && <span className="text-sm text-cream/45">· {fecha}</span>}
                                                 </div>
                                                 <div className="flex items-center gap-0.5 shrink-0">
                                                   {[1, 2, 3, 4, 5].map(s => (
@@ -3192,7 +3374,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                                   ))}
                                                 </div>
                                               </div>
-                                              <p className="text-xs text-cream/65 italic leading-relaxed">"{r.comentario}"</p>
+                                              <p className="text-sm text-cream/65 italic leading-relaxed">"{r.comentario}"</p>
                                             </div>
                                           );
                                         })}
@@ -3219,7 +3401,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <s.IconComp className={`w-8 h-8 ${s.color}`} />
                         <div>
                           <p className={`text-3xl font-light ${s.color} mb-0.5`}>{s.count}</p>
-                          <p className="text-xs text-cream/75 font-medium">{s.label}</p>
+                          <p className="text-sm text-cream/75 font-medium">{s.label}</p>
                         </div>
                       </div>
                     ))}
@@ -3258,14 +3440,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         ].map((s, i) => (
                           <div key={i} className="bg-panel border border-gold/14 rounded-2xl p-4">
                             <p className={`text-2xl font-light ${s.color} mb-1`}>{s.value}</p>
-                            <p className="text-[11px] text-cream/55 uppercase tracking-wider font-semibold">{s.label}</p>
+                            <p className="text-sm text-cream/55 uppercase tracking-wider font-semibold">{s.label}</p>
                           </div>
                         ))}
                       </div>
 
                       <div className="bg-panel border border-gold/12 rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <p className="text-xs font-bold uppercase tracking-widest text-cream/75">Progreso en el programa</p>
+                          <p className="text-sm font-bold uppercase tracking-widest text-cream/75">Progreso en el programa</p>
                           <p className="text-2xl font-light text-cream">{pct}%</p>
                         </div>
                         <div className="h-3 bg-gold/5 rounded-full overflow-hidden mb-2">
@@ -3275,11 +3457,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
                       {/* Satisfaction ratings per pilar */}
                       <div className="bg-panel border border-gold/12 rounded-2xl p-5">
-                        <p className="text-xs font-bold uppercase tracking-widest text-cream/75 mb-3 flex items-center gap-2">
+                        <p className="text-sm font-bold uppercase tracking-widest text-cream/75 mb-3 flex items-center gap-2">
                           <Star className="w-3.5 h-3.5 text-gold" /> Valoraciones por pilar
                         </p>
                         {clienteRatings.length === 0 ? (
-                          <p className="text-xs text-cream/45">Sin valoraciones registradas aún.</p>
+                          <p className="text-sm text-cream/45">Sin valoraciones registradas aún.</p>
                         ) : (
                           <div className="space-y-3">
                             {clienteRatings.map((r) => (
@@ -3295,11 +3477,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         className={`w-3.5 h-3.5 ${s <= r.rating ? 'text-gold fill-gold' : 'text-cream/15'}`}
                                       />
                                     ))}
-                                    <span className="text-xs text-cream/55 ml-1">{r.rating}/5</span>
+                                    <span className="text-sm text-cream/55 ml-1">{r.rating}/5</span>
                                   </div>
                                 </div>
                                 {r.comentario && (
-                                  <p className="text-xs text-cream/45 italic bg-cream/3 rounded-lg px-3 py-2 border border-[rgba(255,255,255,0.05)]">
+                                  <p className="text-sm text-cream/45 italic bg-cream/3 rounded-lg px-3 py-2 border border-[rgba(255,255,255,0.05)]">
                                     "{r.comentario}"
                                   </p>
                                 )}
@@ -3312,7 +3494,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* Pilar accordion */}
                       <div className="card-panel border border-gold/12 rounded-2xl overflow-hidden">
                         <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-cream/75 flex items-center gap-2">
                             <BarChart2 className="w-3.5 h-3.5 text-gold" /> Estimación por pilar
                           </h3>
                           {metricasTareasLoading && <Loader2 className="w-3.5 h-3.5 text-gold animate-spin" />}
@@ -3336,11 +3518,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   }`}
                                 >
                                   {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-5 h-5 text-gold shrink-0" /> : <span className="w-5 h-5 shrink-0" />; })()}
-                                  <span className="text-xs text-cream/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
+                                  <span className="text-sm text-cream/80 w-36 truncate shrink-0 font-medium">{pilar.titulo}</span>
                                   <div className="flex-1 h-1.5 bg-gold/5 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${pctPilar}%` }} />
                                   </div>
-                                  <span className="text-xs text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
+                                  <span className="text-sm text-cream/55 w-10 text-right shrink-0">{completadasReales}/{metasPilar}</span>
                                   {completadasReales > 0 && (
                                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform text-gold ${expandido ? 'rotate-180' : ''}`} />
                                   )}
@@ -3367,10 +3549,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                             <CheckCircle2 className="w-4 h-4 shrink-0 text-gold" />
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
+                                                <span className="text-sm font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/10 text-gold">{meta.codigo}</span>
                                                 {meta.es_estrella && <Star className="w-3 h-3 text-gold fill-gold" />}
                                                 {tareaData.fecha_completada && (
-                                                  <span className="text-[11px] text-cream/45">
+                                                  <span className="text-sm text-cream/45">
                                                     {new Date(tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
                                                   </span>
                                                 )}
@@ -3379,7 +3561,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
                                               {hasOutput && (
-                                                <span className="text-[11px] text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
+                                                <span className="text-sm text-gold bg-gold/10 px-2 py-0.5 rounded-full">Con output</span>
                                               )}
                                               <ChevronRight className="w-3.5 h-3.5 text-cream/45 group-hover:text-cream/75 transition-colors" />
                                             </div>
@@ -3388,7 +3570,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                       );
                                     })}
                                     {tareasCompletadasPilar.length === 0 && (
-                                      <p className="text-xs text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
+                                      <p className="text-sm text-cream/45 py-2">Los datos llegan caminando — este cliente recién arranca.</p>
                                     )}
                                   </div>
                                 )}
@@ -3416,10 +3598,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'videos' && (
             <div className="max-w-5xl mx-auto space-y-6">
+              <TableroGrabacion />
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Videos del Programa</h2>
-                  <p className="text-sm text-cream/55 mt-1">Agregá videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
+                  <p className="text-sm text-cream/55 mt-1">Agrega videos de YouTube por pilar. Se muestran automáticamente en la Biblioteca de tus clientes.</p>
                 </div>
                 <button
                   onClick={() => { setVideoForm({ pilar_id: '', titulo: '', descripcion: '', youtubeUrl: '', duracion: '' }); setShowAddVideo(true); }}
@@ -3441,9 +3624,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <div className="flex items-center gap-2">
                         {(() => { const IC = ADMIN_PILAR_ICON_MAP[pilar.icon]; return IC ? <IC className="w-4 h-4 text-gold" /> : null; })()}
                         <p className="text-sm font-semibold text-cream">{pilar.id} — {pilar.titulo}</p>
-                        {videoTask && <span className="text-[11px] text-cream/45 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
+                        {videoTask && <span className="text-sm text-cream/45 ml-2 truncate max-w-[200px]">{videoTask.titulo}</span>}
                       </div>
-                      <span className="text-[11px] bg-gold/5 px-2 py-0.5 rounded-full text-cream/55">{vids.length} videos</span>
+                      <span className="text-sm bg-gold/5 px-2 py-0.5 rounded-full text-cream/55">{vids.length} videos</span>
                     </div>
                     {videosLoading ? (
                       <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
@@ -3464,10 +3647,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-cream truncate">{v.titulo}</p>
-                                <p className="text-xs text-cream/55 truncate">{v.descripcion}</p>
+                                <p className="text-sm text-cream/55 truncate">{v.descripcion}</p>
                               </div>
-                              <span className="text-[11px] text-gold font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
-                              {v.duracion && <span className="text-[11px] text-cream/55 shrink-0">{v.duracion}</span>}
+                              <span className="text-sm text-gold font-medium shrink-0">{v.pilar_id ?? v.grupo}</span>
+                              {v.duracion && <span className="text-sm text-cream/55 shrink-0">{v.duracion}</span>}
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => {
@@ -3526,16 +3709,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ) : teamMembers.length === 0 ? (
                   <div className="text-center py-16">
                     <UsersRound className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-                    <p className="text-cream/55 text-sm">El equipo se arma acá — agregá al primero.</p>
+                    <p className="text-cream/55 text-sm">El equipo se arma acá — agrega al primero.</p>
                   </div>
                 ) : (
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gold/10">
                         {['Nombre', 'Rol', 'Estado'].map(h => (
-                          <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">{h}</th>
+                          <th key={h} className="text-left px-5 py-3 text-sm font-bold uppercase tracking-widest text-cream/55">{h}</th>
                         ))}
-                        <th className="text-right px-5 py-3 text-[11px] font-bold uppercase tracking-widest text-cream/55">Acciones</th>
+                        <th className="text-right px-5 py-3 text-sm font-bold uppercase tracking-widest text-cream/55">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -3550,13 +3733,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-cream">{member.nombre}</p>
-                                  <p className="text-[11px] text-cream/55">{member.email}</p>
+                                  <p className="text-sm text-cream/55">{member.email}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="px-5 py-4">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-gold/20 text-gold border border-gold/30">
+                                <span className="text-sm font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-gold/20 text-gold border border-gold/30">
                                   {memberRol}
                                 </span>
                               ) : (
@@ -3573,13 +3756,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               )}
                             </td>
                             <td className="px-5 py-4">
-                              <span className="text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-success/10 text-success border border-success/20">
+                              <span className="text-sm font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-success/10 text-success border border-success/20">
                                 Activo
                               </span>
                             </td>
                             <td className="px-5 py-4 text-right">
                               {member.id === adminProfile.id ? (
-                                <span className="text-[11px] text-cream/45 italic">Vos</span>
+                                <span className="text-sm text-cream/45 italic">Tú</span>
                               ) : (
                                 <button
                                   type="button"
@@ -3606,7 +3789,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h3 className="text-xl font-semibold text-white tracking-tight">Agregar Miembro</h3>
-                        <p className="text-xs text-white/55 mt-1">Creá una cuenta para un nuevo miembro del equipo</p>
+                        <p className="text-sm text-white/55 mt-1">Crea una cuenta para un nuevo miembro del equipo</p>
                       </div>
                       <button onClick={() => setShowAddTeamMember(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-white/75 hover:text-white hover:bg-gold/10 transition-colors">
                         <X className="w-4 h-4" />
@@ -3614,19 +3797,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Nombre completo *</label>
+                        <label className="block text-sm font-bold uppercase tracking-wider text-white/75 mb-2">Nombre completo *</label>
                         <input type="text" value={teamForm.nombre} onChange={e => setTeamForm({ ...teamForm, nombre: e.target.value })} placeholder="Ej: María García" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Email *</label>
+                        <label className="block text-sm font-bold uppercase tracking-wider text-white/75 mb-2">Email *</label>
                         <input type="email" value={teamForm.email} onChange={e => setTeamForm({ ...teamForm, email: e.target.value })} placeholder="nombre@ejemplo.com" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
+                        <label className="block text-sm font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
                         <input type="text" value={teamForm.password} onChange={e => setTeamForm({ ...teamForm, password: e.target.value })} placeholder="Ej: Equipo123!" className="w-full bg-success/5 border border-success/20 rounded-lg px-4 py-3 text-sm text-success placeholder-success/30 focus:outline-none focus:border-success/50 transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-white/75 mb-2">Rol en el equipo *</label>
+                        <label className="block text-sm font-bold uppercase tracking-wider text-white/75 mb-2">Rol en el equipo *</label>
                         <CustomSelect value={teamForm.admin_rol} onChange={(val) => setTeamForm({ ...teamForm, admin_rol: val as AdminRol })} options={[{ value: 'owner', label: 'Owner — Acceso total' }, { value: 'manager', label: 'Manager — Gestión de clientes' }, { value: 'staff', label: 'Staff — Acceso limitado' }]} className="w-full" />
                       </div>
                     </div>
@@ -3649,7 +3832,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+                <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3661,12 +3844,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/55">
+                  <div className="flex items-center gap-2 mt-2 text-sm text-cream/55">
                     <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
                 {campanasClientePerfil && !campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-success">
+                  <div className="flex items-center gap-2 mt-2 text-sm text-success">
                     <Check className="w-3 h-3" />
                     Trabajando con: {campanasClientePerfil.nombre}
                     {campanasClientePerfil.adn_avatar ? ' (ADN completo)' : ' (ADN parcial)'}
@@ -3680,7 +3863,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   key={campanasClienteId}
                   userId={campanasClienteId}
                   perfil={campanasClientePerfil}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
@@ -3700,7 +3882,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="max-w-6xl mx-auto">
               {/* Selector de cliente (reusa el state de campanas) */}
               <div className="mb-6 card-panel p-4">
-                <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+                <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
                   Seleccionar cliente
                 </label>
                 <CustomSelect
@@ -3712,12 +3894,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   }))}
                 />
                 {campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-cream/55">
+                  <div className="flex items-center gap-2 mt-2 text-sm text-cream/55">
                     <Loader2 className="w-3 h-3 animate-spin" /> Trayendo su historia completa…
                   </div>
                 )}
                 {campanasClientePerfil && !campanasPerfilLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-success">
+                  <div className="flex items-center gap-2 mt-2 text-sm text-success">
                     <Check className="w-3 h-3" />
                     Trabajando con: {campanasClientePerfil.nombre}
                   </div>
@@ -3729,7 +3911,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   key={campanasClienteId}
                   userId={campanasClienteId}
                   perfil={campanasClientePerfil}
-                  geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 />
               ) : !campanasPerfilLoading && (
                 <div className="card-panel p-10 text-center">
@@ -3745,6 +3926,151 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {/* ═══════════════════════════════════════════════════════════════
               TAB: TAREAS INTERNAS
               ═══════════════════════════════════════════════════════════════ */}
+          {/* Lo que vive adentro del momento. Nada quedó inalcanzable: lo que
+              antes era una entrada del menú ahora es una pestaña de acá. */}
+          {pestanasDelMomento.length > 1 && (
+            <div className="flex gap-2 flex-wrap mb-5">
+              {pestanasDelMomento.map((h) => (
+                <button key={h.id} onClick={() => setMainTab(h.id)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                    mainTab === h.id
+                      ? 'bg-gold/20 border border-gold/50 text-gold'
+                      : 'border border-cream/15 text-cream/60 hover:text-cream/85'}`}>
+                  {h.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {mainTab === 'hoy' && (
+            <JornadaPanel
+              personaId={(adminProfile as { id?: string }).id ?? ''}
+              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              items={[]}
+              jornadasDelEquipo={jornadasEquipo.filter(
+                (j) => j.personaId !== (adminProfile as { id?: string }).id)}
+            >
+            {/* Arriba de todo: alguien esperando respuesta manda sobre
+                cualquier cuello. Una cuenta rota se destraba mañana; una
+                persona esperando se va hoy. */}
+            <BandejaSoporte
+              onAbrirConversacion={(id) => abrirDestino({
+                tab: 'mensajes', clienteId: id, seccion: 'conversacion',
+              })}
+            />
+
+            <ListaDeHoy
+              personaId={(adminProfile as { id?: string }).id ?? ''}
+              onAbrir={abrirDestino}
+              clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))}
+            />
+
+            {/* La cola vieja SE FUE de acá.
+
+                Estaban las dos apiladas: la lista nueva y esta, que mostraba
+                lo mismo con un botón que decía «Mandárselo en la app» y NO
+                mandaba nada. Quien lo tocaba creía que el mensaje había
+                salido.
+
+                Agregué la nueva y no saqué la vieja — que es exactamente el
+                error que esta app existe para evitar. */}
+            </JornadaPanel>
+          )}
+
+          {mainTab === 'supervision' && (
+            <Supervision
+              quienCarga={(adminProfile as { id?: string }).id}
+              nombreQuienCarga={(adminProfile as { nombre?: string }).nombre}
+              clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              campana_desde: (c as { campana_desde?: string | null }).campana_desde ?? null,
+              campana_pausada: (c as { campana_pausada?: boolean }).campana_pausada ?? false,
+            }))} />
+          )}
+
+          {mainTab === 'semana' && (
+            <LaSemana
+              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              jornadas={jornadasEquipo}
+              clientesActivos={clientes.filter((c) =>
+                ((c as { estado?: string }).estado ?? 'ACTIVE') === 'ACTIVE').length}
+              clientesQueVendieron={semanaClientes.vendieron}
+              cuentasFrenadas={semanaClientes.frenadas}
+              facturadoClientes={semanaClientes.facturado}
+            />
+          )}
+
+          {mainTab === 'sesiones' && (
+            <div className="max-w-3xl mx-auto space-y-5">
+              <div className="card-panel p-4">
+                <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+                  De qué cliente fue la sesión
+                </label>
+                <CustomSelect
+                  value={campanasClienteId ?? ''}
+                  onChange={(val) => setCampanasClienteId(val || null)}
+                  options={clientes.map(c => ({ value: c.id, label: c.nombre }))}
+                />
+              </div>
+              {campanasClienteId ? (
+                <CargarSesion
+                  clienteId={campanasClienteId}
+                  nombreCliente={clientes.find((c) => c.id === campanasClienteId)?.nombre ?? 'el cliente'}
+                  quienLaDio={(adminProfile as { nombre?: string }).nombre ?? 'tu equipo'}
+                />
+              ) : (
+                <p className="text-sm text-cream/45">Elige un cliente para cargar su sesión.</p>
+              )}
+            </div>
+          )}
+
+          {mainTab === 'casa' && <LaCasa />}
+
+          {mainTab === 'mirol' && (
+            <MiRol rol={rol}
+              enInstalacion={clientes.filter((c) =>
+                ((c as { etapa_actual?: number | null }).etapa_actual ?? 0) < 5).length} />
+          )}
+
+          {mainTab === 'sala' && (adminRol === 'owner' || !adminRol) && (
+            <SalaDeMando clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              etapa_actual: (c as { etapa_actual?: number | null }).etapa_actual ?? null,
+              etapa_desde: (c as { etapa_desde?: string | null }).etapa_desde ?? null,
+              fecha_venta: (c as { fecha_venta?: string | null }).fecha_venta ?? null,
+            }))} />
+          )}
+
+          {mainTab === 'motor' && (adminRol === 'owner' || !adminRol) && (
+            <PanelMotorIA />
+          )}
+
+          {mainTab === 'plata' && (adminRol === 'owner' || !adminRol) && (
+            <div className="max-w-6xl mx-auto space-y-5">
+              {/* Sin selector propio, esta tab decía "elige un cliente arriba"
+                  y arriba no había nada que elegir. */}
+              <div className="card-panel p-4">
+                <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+                  De qué cliente
+                </label>
+                <CustomSelect
+                  value={campanasClienteId ?? ''}
+                  onChange={(val) => setCampanasClienteId(val || null)}
+                  options={clientes.map(c => ({
+                    value: c.id,
+                    label: `${c.nombre} — ${c.especialidad ?? 'Sin especialidad'}`,
+                  }))}
+                />
+              </div>
+            <TableroPlata
+              clienteId={campanasClienteId ?? undefined}
+              nombreCliente={
+                clientes.find((c) => c.id === campanasClienteId)?.nombre ?? undefined
+              }
+            />
+            </div>
+          )}
+
           {mainTab === 'tareas' && (
             <TasksPipeline
               currentAdminId={adminProfile?.id ?? ''}
@@ -3788,12 +4114,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   <Camera className="w-6 h-6 text-cream" />
                 </div>
               </button>
-              <p className="text-xs text-cream/55">Clic para cambiar foto</p>
+              <p className="text-sm text-cream/55">Clic para cambiar foto</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo</label>
                 <input
                   type="text"
                   value={adminDraft.nombre}
@@ -3802,7 +4128,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Cargo / Título</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Cargo / Título</label>
                 <input
                   type="text"
                   value={adminDraft.cargo}
@@ -3812,7 +4138,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Apariencia</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Apariencia</label>
                 <div role="radiogroup" aria-label="Tema visual" className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -3843,7 +4169,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     Claro
                   </button>
                 </div>
-                <p className="text-[11px] text-cream/55 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
+                <p className="text-sm text-cream/55 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
               </div>
             </div>
 
@@ -3879,7 +4205,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="flex items-center justify-between px-5 py-4 border-b border-gold/10">
               <div>
                 <h3 className="text-sm font-semibold text-cream">Cambiar email</h3>
-                <p className="text-[11px] text-cream/65 mt-0.5">{selectedCliente.nombre}</p>
+                <p className="text-sm text-cream/65 mt-0.5">{selectedCliente.nombre}</p>
               </div>
               <button
                 onClick={() => setShowChangeEmailModal(false)}
@@ -3890,11 +4216,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email actual</label>
+                <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email actual</label>
                 <p className="text-sm text-cream/75 px-3 py-2 bg-black/20 rounded-lg border border-gold/10">{selectedCliente.email ?? '—'}</p>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nuevo email *</label>
+                <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nuevo email *</label>
                 <input
                   type="email"
                   value={newEmailInput}
@@ -3906,8 +4232,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div className="bg-gold/5 border border-gold/20 rounded-xl px-3 py-2">
-                <p className="text-[11px] text-gold/80">
-                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si querés que la cambie, mandá "Enviar reset" después.
+                <p className="text-sm text-gold/80">
+                  El cliente usará este email para hacer login. La contraseña actual se mantiene — si quieres que la cambie, manda "Enviar reset" después.
                 </p>
               </div>
               <div className="flex gap-2 pt-2">
@@ -3939,7 +4265,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-xl font-semibold text-cream tracking-tight">Nuevo Estudiante</h3>
-                <p className="text-xs text-cream/55 mt-1">Ingresa sus datos para la academia</p>
+                <p className="text-sm text-cream/55 mt-1">Ingresa sus datos para la academia</p>
               </div>
               <button onClick={() => setShowNuevoCliente(false)} className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors">
                 <X className="w-4 h-4" />
@@ -3948,24 +4274,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Nombre completo *</label>
                 <input type="text" value={nuevoForm.nombre} onChange={e => setNuevoForm({ ...nuevoForm, nombre: e.target.value })} placeholder="Ej: Dra. María González" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Email *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Email *</label>
                 <input type="email" value={nuevoForm.email} onChange={e => setNuevoForm({ ...nuevoForm, email: e.target.value })} placeholder="maria@ejemplo.com" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-success/80 mb-2">Contraseña inicial *</label>
                 <input type="text" value={nuevoForm.password} onChange={e => setNuevoForm({ ...nuevoForm, password: e.target.value })} placeholder="Ej: Maria123!" className="w-full bg-success/5 border border-success/20 rounded-lg px-4 py-3 text-sm text-success placeholder-success/30 focus:outline-none focus:border-success/50 transition-colors" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Especialidad</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Especialidad</label>
                 <input type="text" value={nuevoForm.especialidad} onChange={e => setNuevoForm({ ...nuevoForm, especialidad: e.target.value })} placeholder="Ej: Nutricionista" className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Plan</label>
+                  <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Plan</label>
                   <CustomSelect
                     value={nuevoForm.plan}
                     onChange={(val) => setNuevoForm({ ...nuevoForm, plan: val as 'DWY' | 'DFY' | 'IMPLEMENTACION' })}
@@ -3977,12 +4303,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Inicio</label>
+                  <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Inicio</label>
                   <input type="date" value={nuevoForm.fecha_inicio} onChange={e => setNuevoForm({ ...nuevoForm, fecha_inicio: e.target.value })} className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors" />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Estado inicial</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Estado inicial</label>
                 <CustomSelect
                   value={nuevoForm.status}
                   onChange={(val) => setNuevoForm({ ...nuevoForm, status: val as UserStatus })}
@@ -4017,7 +4343,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">URL de YouTube *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">URL de YouTube *</label>
                 <input
                   type="text"
                   value={videoForm.youtubeUrl}
@@ -4034,18 +4360,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 )}
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Pilar *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Pilar *</label>
                 <CustomSelect
                   value={videoForm.pilar_id}
                   onChange={(val) => setVideoForm({ ...videoForm, pilar_id: val as PilarId | '' })}
                   options={[
-                    { value: '', label: 'Elegí un pilar…' },
+                    { value: '', label: 'Elige un pilar…' },
                     ...PILAR_OPTIONS.map(p => ({ value: p.id, label: p.label })),
                   ]}
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Título *</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Título *</label>
                 <input
                   type="text"
                   value={videoForm.titulo}
@@ -4055,7 +4381,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Descripción</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Descripción</label>
                 <input
                   type="text"
                   value={videoForm.descripcion}
@@ -4065,7 +4391,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-cream/75 mb-2">Duración (opcional)</label>
+                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Duración (opcional)</label>
                 <input
                   type="text"
                   value={videoForm.duracion}
@@ -4116,18 +4442,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="flex items-start gap-4 p-6 border-b border-gold/12">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                  <span className="text-sm font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                     {tareaModal.meta.codigo}
                   </span>
                   {tareaModal.meta.es_estrella && <span className="text-gold text-sm flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-gold" /> Tarea estrella</span>}
                   {tareaModal.tareaData?.fecha_completada && (
-                    <span className="text-[11px] text-cream/55">
+                    <span className="text-sm text-cream/55">
                       Completada el {new Date(tareaModal.tareaData.fecha_completada).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                   )}
                 </div>
                 <h2 className="text-lg font-semibold text-cream">{tareaModal.meta.titulo}</h2>
-                <p className="text-xs text-cream/55 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
+                <p className="text-sm text-cream/55 mt-1 leading-relaxed">{tareaModal.meta.descripcion}</p>
               </div>
               <button
                 onClick={() => setTareaModal(null)}
@@ -4141,7 +4467,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="bg-gold/5 border border-gold/20 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Bot className="w-4 h-4 text-gold" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gold">Resumen para el equipo</span>
+                  <span className="text-sm font-bold uppercase tracking-wider text-gold">Resumen para el equipo</span>
                 </div>
                 {tareaResumenLoading ? (
                   <div className="flex items-center gap-2 py-2">
@@ -4161,7 +4487,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <FileText className="w-3.5 h-3.5 text-cream/55" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-cream/55">Output generado por el cliente</span>
+                    <span className="text-sm font-bold uppercase tracking-wider text-cream/55">Output generado por el cliente</span>
                   </div>
                   <div className="bg-black/30 border border-gold/12 rounded-2xl p-5">
                     <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-headings:text-cream prose-headings:font-semibold prose-strong:text-gold prose-li:text-cream/80">
@@ -4173,7 +4499,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Circle className="w-8 h-8 text-gray-700 mb-3" />
                   <p className="text-sm text-cream/55">Sin output guardado</p>
-                  <p className="text-xs text-gray-700 mt-1">El cliente completó esta tarea pero no hay contenido generado por IA asociado.</p>
+                  <p className="text-sm text-gray-700 mt-1">El cliente completó esta tarea pero no hay contenido generado por IA asociado.</p>
                 </div>
               )}
             </div>
@@ -4201,9 +4527,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <p className="text-sm text-white">
                 <span className="text-white/65">Cliente:</span> <span className="font-semibold">{clienteAEliminar.nombre}</span>
               </p>
-              <p className="text-xs text-white/65 truncate">{clienteAEliminar.email}</p>
+              <p className="text-sm text-white/65 truncate">{clienteAEliminar.email}</p>
             </div>
-            <p className="text-xs text-white/65 mb-6 leading-relaxed">
+            <p className="text-sm text-white/65 mb-6 leading-relaxed">
               Se eliminará la cuenta, el profile, diario, métricas, tareas, mensajes, notas, ratings, campañas y creativos asociados. El email quedará libre para reutilizarse.
             </p>
             <div className="flex gap-3">
@@ -4248,9 +4574,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <p className="text-sm text-white">
                 <span className="text-white/65">Miembro:</span> <span className="font-semibold">{miembroAEliminar.nombre}</span>
               </p>
-              {miembroAEliminar.email && <p className="text-xs text-white/65 truncate">{miembroAEliminar.email}</p>}
+              {miembroAEliminar.email && <p className="text-sm text-white/65 truncate">{miembroAEliminar.email}</p>}
             </div>
-            <p className="text-xs text-white/65 mb-6 leading-relaxed">
+            <p className="text-sm text-white/65 mb-6 leading-relaxed">
               Se revocará el acceso y se eliminará la cuenta del equipo. Las tareas que tuviera asignadas quedarán sin responsable.
             </p>
             <div className="flex gap-3">
@@ -4302,10 +4628,10 @@ function ManagerChecklist({
     <div className="card-panel border border-gold/12 rounded-2xl p-5 space-y-4">
       <div className="flex items-center gap-2">
         <ClipboardList className="w-4 h-4 text-gold" />
-        <h3 className="text-xs font-bold uppercase tracking-widest text-gold">Checklist</h3>
+        <h3 className="text-sm font-bold uppercase tracking-widest text-gold">Checklist</h3>
       </div>
       {diarias.length > 0 && (
-        <p className="text-[11px] text-cream/55 font-medium">
+        <p className="text-sm text-cream/55 font-medium">
           {completadasDiarias}/{diarias.length} tareas del día
         </p>
       )}
@@ -4313,14 +4639,14 @@ function ManagerChecklist({
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-gold animate-spin" /></div>
       ) : items.length === 0 ? (
-        <p className="text-xs text-cream/45">Sin tareas asignadas</p>
+        <p className="text-sm text-cream/45">Sin tareas asignadas</p>
       ) : (
         categorias.map(cat => {
           const catItems = items.filter(i => i.categoria === cat.key);
           if (catItems.length === 0) return null;
           return (
             <div key={cat.key}>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-cream/55 mb-2">{cat.label}</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-cream/55 mb-2">{cat.label}</p>
               <div className="space-y-1.5">
                 {catItems.map(item => (
                   <label
@@ -4338,7 +4664,7 @@ function ManagerChecklist({
                     >
                       <Check className="w-3 h-3" />
                     </button>
-                    <span className={`text-xs ${item.completada ? 'text-cream/45 line-through' : 'text-cream/80'}`}>
+                    <span className={`text-sm ${item.completada ? 'text-cream/45 line-through' : 'text-cream/80'}`}>
                       {item.titulo}
                     </span>
                   </label>

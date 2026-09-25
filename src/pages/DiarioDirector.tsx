@@ -1,5 +1,4 @@
-import RuedaVida from '../components/RuedaVida';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   BookOpen,
   Loader2,
@@ -26,11 +25,12 @@ import {
   CloudRain,
   UserX,
 } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
+import { diaDelPrograma } from '../lib/diaPrograma';
 import {
   TAREAS_TAGS,
   CHECKEOS_CHIPS,
@@ -99,9 +99,7 @@ function getCurrentDay(): number {
     const parsed = JSON.parse(profile);
     const fechaInicio = parsed.fecha_inicio;
     if (!fechaInicio) return 1;
-    const inicio = new Date(fechaInicio + 'T00:00:00');
-    const ahora = new Date();
-    return Math.floor((ahora.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return diaDelPrograma(fechaInicio) ?? 1;
   } catch {
     return 1;
   }
@@ -139,6 +137,15 @@ function mapRow(d: any): EntradaDiario {
 
 // ─── Escala 1–10 interactiva ───────────────────────────────────────────────────
 
+/** Cinco toques con palabra — nadie sabe qué es un 7 sobre 10. */
+const NIVELES_ENERGIA = [
+  { valor: 2, emoji: '🪫', palabra: 'En cero' },
+  { valor: 4, emoji: '😮‍💨', palabra: 'Bajo' },
+  { valor: 6, emoji: '😐', palabra: 'Normal' },
+  { valor: 8, emoji: '💪', palabra: 'Bien' },
+  { valor: 10, emoji: '⚡', palabra: 'Encendido' },
+];
+
 function Escala10({
   valor,
   onChange,
@@ -152,7 +159,7 @@ function Escala10({
     <div className="flex gap-1">
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
         const activo = n <= valor;
-        const fill = color ? color(valor) : '#E8962E';
+        const fill = color ? color(valor) : '#B0822E';
         return (
           <button
             key={n}
@@ -191,10 +198,10 @@ function KpiCard({
     <div className="card-panel p-4 rounded-2xl border border-[rgba(232,150,46,0.12)]">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-gold/60" />
-        <p className="text-[11px] text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
+        <p className="text-sm text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
       </div>
       <p className={`text-xl font-medium ${valColor}`}>{value}</p>
-      {delta && <p className="text-[11px] text-cream/55 mt-0.5">{delta}</p>}
+      {delta && <p className="text-sm text-cream/55 mt-0.5">{delta}</p>}
     </div>
   );
 }
@@ -203,10 +210,8 @@ function KpiCard({
 
 export default function DiarioDirector({
   userId,
-  geminiKey,
 }: {
   userId?: string;
-  geminiKey?: string;
 }) {
   const [entries, setEntries] = useState<EntradaDiario[]>([]);
   const [cronoSegundos, setCronoSegundos] = useState(180);
@@ -247,6 +252,15 @@ export default function DiarioDirector({
 
   const historicas = entries.map(toHistorica);
   const racha = rachaActiva(historicas, hoy);
+  /** Lo que cerró hoy en su Camino — para no arrancar de una hoja en blanco. */
+  const sesionDeHoy = useMemo(() => {
+    try {
+      const ult = JSON.parse(localStorage.getItem('tcd_ultima_sesion_v1') ?? 'null') as { titulo?: string; fecha?: string } | null;
+      const hoyISO = new Date().toISOString().slice(0, 10);
+      if (ult?.titulo && (!ult.fecha || ult.fecha.slice(0, 10) === hoyISO)) return ult.titulo;
+    } catch { /* noop */ }
+    return null;
+  }, []);
   const esDomingo = hoy.getDay() === 0;
   const energiaPromedio = energiaPromedio7d(historicas);
 
@@ -296,13 +310,10 @@ export default function DiarioDirector({
 
   const handleGuardar = async () => {
     if (!logro.trim()) {
-      toast.error('Cuéntanos tu logro de hoy — queda en tu historial para siempre.');
+      toast.error('Cuéntanos tu logro de hoy — queda guardado en tu historial.');
       return;
     }
-    if (tareas.length === 0) {
-      toast.error('Marca al menos una cosa en la que estuviste hoy.');
-      return;
-    }
+    // Las actividades son opcionales — con la energía y el logro alcanza.
 
     setSaving(true);
     try {
@@ -320,10 +331,7 @@ export default function DiarioDirector({
       };
 
       if (isSupabaseReady() && supabase && userId) {
-        const { data: saved, error } = await supabase
-          .from('diario_entradas')
-          .upsert(
-            {
+        const payload = {
               user_id: userId,
               fecha: todayStr,
               energia_nivel: energia,
@@ -339,14 +347,11 @@ export default function DiarioDirector({
               // el diario v3 ya no la usa, pero hay que mandar un valor no-null.
               respuestas: {},
               pensamiento_dominante: logro.trim(),
-            },
-            { onConflict: 'user_id,fecha' },
-          )
-          .select()
-          .single();
-        if (error) throw error;
+            };
+        const { data: filaCruda } = await guardarFila('diario_entradas', payload, ['user_id', 'fecha']);
+        const saved = filaCruda as { id?: string | number; diario_score?: number } | null;
         if (saved) {
-          entradaLocal.id = String(saved.id);
+          if (saved.id != null) entradaLocal.id = String(saved.id);
           entradaLocal.score = saved.diario_score ?? scoreLocal; // score autoritativo del server
         }
       }
@@ -373,7 +378,7 @@ export default function DiarioDirector({
   // ─── Resumen semanal (domingo) ────────────────────────────────────────────
   const generarResumenSemana = useCallback(
     async (todasEntradas: EntradaDiario[]) => {
-      if (!import.meta.env.VITE_GEMINI_API_KEY) return;
+      
 
       const ahora = new Date();
       const lunes = new Date(ahora);
@@ -401,17 +406,14 @@ Devuelve SOLO este JSON:
   "acciones_proxima_semana": ["<acción 1>", "<acción 2>", "<acción 3>"]
 }`;
 
-        const texto = await generateText({ prompt });
+        const texto = await generateText({ tarea: 'guion', prompt });
         const jsonMatch = texto.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('No JSON');
         const resumenTexto = JSON.stringify(JSON.parse(jsonMatch[0]));
 
         if (isSupabaseReady() && supabase && userId) {
           const semanaInicio = toFechaStr(lunes);
-          await supabase.from('diario_resumen').upsert(
-            { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto },
-            { onConflict: 'user_id,semana_inicio' },
-          );
+          await guardarFila('diario_resumen', { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto }, ['user_id', 'semana_inicio']);
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
         toast.success('Resumen de la semana generado por el Coach.');
@@ -421,7 +423,7 @@ Devuelve SOLO este JSON:
         setGenerandoResumen(false);
       }
     },
-    [geminiKey, userId],
+    [userId],
   );
 
   // ─── KPIs (se muestran DESPUÉS de guardar) ────────────────────────────────
@@ -452,11 +454,11 @@ Devuelve SOLO este JSON:
             {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
             <span className="text-gold/80 font-medium">· Día {getCurrentDay()} de 90</span>
           </p>
-          <p className="text-[11px] text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
+          <p className="text-sm text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
           <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
-            <span className="text-[13px]">⏱</span>
-            <span className={`text-[13px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
-            <span className="text-[11px] text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca y arranca · 3 min y listo'}</span>
+            <span className="text-[15px]">⏱</span>
+            <span className={`text-[15px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
+            <span className="text-sm text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
           </button>
         </div>
         <div className="flex items-center gap-3">
@@ -468,7 +470,7 @@ Devuelve SOLO este JSON:
             }`}>
               <Zap className="w-3.5 h-3.5" />
               <span className="text-sm font-bold">{energiaPromedio}</span>
-              <span className="text-[11px] opacity-60">7d</span>
+              <span className="text-sm opacity-60">7d</span>
             </div>
           )}
           {racha > 0 && (
@@ -505,23 +507,23 @@ Devuelve SOLO este JSON:
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Energía promedio</p>
+                  <p className="text-cream/55 uppercase tracking-wider text-sm">Energía promedio</p>
                   <p className="text-cream font-medium mt-0.5">{datos.energia_promedio}/10 — {datos.tendencia_energia}</p>
                 </div>
                 <div className="bg-surface/50 rounded-xl p-3">
-                  <p className="text-cream/55 uppercase tracking-wider text-[11px]">Racha del Diario</p>
+                  <p className="text-cream/55 uppercase tracking-wider text-sm">Racha del Diario</p>
                   <p className="text-cream font-medium mt-0.5">{datos.racha} días consecutivos</p>
                 </div>
               </div>
               {datos.bloqueo_recurrente && (
                 <div className="bg-gold/10 border border-gold/20 rounded-xl p-3">
-                  <p className="text-[11px] text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
+                  <p className="text-sm text-gold uppercase tracking-wider mb-1">Bloqueo recurrente detectado</p>
                   <p className="text-sm text-amber-200">{datos.bloqueo_recurrente}</p>
                 </div>
               )}
               {Array.isArray(datos.acciones_proxima_semana) && (
                 <div>
-                  <p className="text-[11px] text-cream/55 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
+                  <p className="text-sm text-cream/55 uppercase tracking-wider mb-2">3 acciones para la próxima semana</p>
                   <ul className="space-y-1.5">
                     {datos.acciones_proxima_semana.map((accion: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-cream/80">
@@ -538,7 +540,6 @@ Devuelve SOLO este JSON:
       })()}
 
       {/* S5 — La Rueda de la Vida: el registro del fin, no solo del medio */}
-      <RuedaVida />
 
 
       {/* ── Vista: Formulario ── */}
@@ -603,11 +604,11 @@ Devuelve SOLO este JSON:
                 }
                 return (
                   <div className="mb-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/55 mb-2">Tus últimos 14 días</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55 mb-2">Tus últimos 14 días</p>
                     <div className="flex items-end gap-1.5 h-12">
                       {dias.map((x, i2) => (
                         <div key={i2} className="flex-1 flex flex-col items-center gap-1">
-                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#F4B65C' : '#E8962E', opacity: x.e === 0 ? 1 : 0.9 }} />
+                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#C79A45' : '#B0822E', opacity: x.e === 0 ? 1 : 0.9 }} />
                         </div>
                       ))}
                     </div>
@@ -619,22 +620,34 @@ Devuelve SOLO este JSON:
                   <BookOpen className="w-5 h-5 text-gold" />
                 </div>
                 <div>
-                  <h2 className="text-base font-medium text-cream">¿Cómo fue hoy?</h2>
-                  <p className="text-xs text-cream/75">Tu cierre diario · 5 minutos</p>
+                  <h2 className="text-base font-medium text-cream">Tu cierre de hoy</h2>
+                  <p className="text-xs text-cream/75">Dos toques y una línea. Nada más.</p>
                 </div>
               </div>
 
               {/* Energía general */}
               <div className="bg-surface/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-yellow-400" /> Energía general del día
-                  </span>
-                  <span className="text-sm font-bold text-gold">{energia} · {etiquetaEnergia(energia)}</span>
+                <p className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2 mb-3">
+                  <Zap className="w-4 h-4 text-yellow-400" /> ¿Cómo estuvo tu energía hoy?
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {NIVELES_ENERGIA.map((n) => {
+                    const activo = energia === n.valor;
+                    return (
+                      <button
+                        key={n.valor}
+                        type="button"
+                        onClick={() => setEnergia(n.valor)}
+                        className={`rounded-xl border py-2.5 px-3 flex sm:flex-col items-center gap-2 sm:gap-1 transition-colors ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
+                      >
+                        <span className="block text-xl leading-none">{n.emoji}</span>
+                        <span className={`block text-[15px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <Escala10 valor={energia} onChange={setEnergia} />
                 {ayerEntry && (
-                  <p className="text-[11px] text-cream/45 mt-2 text-center">
+                  <p className="text-sm text-cream/45 mt-2 text-center">
                     Ayer tuviste <span className="text-success">{ayerEntry.energia}</span>
                     {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
                   </p>
@@ -644,8 +657,18 @@ Devuelve SOLO este JSON:
               {/* Logro */}
               <div>
                 <label className="block text-xs font-medium text-cream/80 mb-2 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-gold" /> Tu logro de hoy — ¿qué avance te enorgullece?
+                  <Award className="w-4 h-4 text-gold" /> Tu victoria de hoy
                 </label>
+                {sesionDeHoy && !logro.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => setLogro(`Hice mi sesión: ${sesionDeHoy}. `)}
+                    className="w-full text-left rounded-xl border border-gold/25 bg-gold/[0.05] px-3 py-2 mb-2 hover:border-gold/50 transition-colors"
+                  >
+                    <span className="text-sm font-bold uppercase tracking-wider text-gold">Hoy hiciste</span>
+                    <span className="block text-sm text-cream/85">{sesionDeHoy} — toca para empezar por acá</span>
+                  </button>
+                )}
                 <textarea
                   rows={2}
                   maxLength={LOGRO_MAX_CHARS}
@@ -654,12 +677,12 @@ Devuelve SOLO este JSON:
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
-                <p className="text-[11px] text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial para siempre</p>
+                <p className="text-sm text-cream/45 mt-1 text-right">{logro.length}/{LOGRO_MAX_CHARS} · queda en tu historial</p>
               </div>
 
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
               <div>
-                <button type="button" onClick={() => setMasDetalle((v) => !v)} className="text-[12px] text-gold/70 hover:text-gold transition-colors">
+                <button type="button" onClick={() => setMasDetalle((v) => !v)} className="min-h-[44px] text-[15px] text-gold hover:text-goldhi transition-colors text-left">
                   {masDetalle ? '− menos detalle' : '+ más detalle (opcional): dimensiones · actividades · checkeos'}
                 </button>
                 {masDetalle && (
@@ -774,8 +797,10 @@ Devuelve SOLO este JSON:
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
-              <p className="text-[11px] text-cream/45 text-center -mt-3">
-                El score se calcula y se muestra después de guardar.
+              <p className="text-sm text-cream/45 text-center -mt-3">
+                {racha > 0
+                  ? `Llevas ${racha} ${racha === 1 ? 'día' : 'días'} seguidos. Esto es lo que tu Mentor va a recordar mañana.`
+                  : 'Dos minutos. Esto es lo que tu Mentor va a recordar mañana.'}
               </p>
             </div>
           )}
@@ -817,12 +842,12 @@ Devuelve SOLO este JSON:
 
               {entrada.logro && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Logro</span>
+                  <span className="text-cream/45 uppercase tracking-wider text-sm">Logro</span>
                   <p className="text-cream/80 mt-0.5 text-sm">{entrada.logro}</p>
                 </div>
               )}
 
-              <div className="flex gap-3 text-[11px] text-cream/65">
+              <div className="flex gap-3 text-sm text-cream/65">
                 <span>Cuerpo {entrada.cuerpo}</span>
                 <span>Mente {entrada.mente}</span>
                 <span>Emociones {entrada.emociones}</span>
@@ -830,7 +855,7 @@ Devuelve SOLO este JSON:
 
               {entrada.bloqueo && (
                 <div>
-                  <span className="text-cream/45 uppercase tracking-wider text-[11px]">Bloqueo</span>
+                  <span className="text-cream/45 uppercase tracking-wider text-sm">Bloqueo</span>
                   <p className="text-cream/70 mt-0.5 text-sm">{entrada.bloqueo}</p>
                 </div>
               )}
@@ -840,7 +865,7 @@ Devuelve SOLO este JSON:
                   {entrada.tareas.map((id) => {
                     const tag = TAREAS_TAGS.find((t) => t.id === id);
                     return tag ? (
-                      <span key={id} className="text-[11px] bg-gold/5 px-2 py-1 rounded-full text-cream/75">
+                      <span key={id} className="text-sm bg-gold/5 px-2 py-1 rounded-full text-cream/75">
                         {tag.label}
                       </span>
                     ) : null;

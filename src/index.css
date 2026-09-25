@@ -2,18 +2,22 @@
 
 /* @theme · Tokens de marca como utilidades Tailwind (CP1). Mismos valores que la paleta original. */
 @theme {
+  /* La letra de la casa también para la clase font-sans y el valor por defecto. */
+  --font-sans: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', 'Fraunces', Georgia, serif;
   --color-ink: #080808;
   --color-panel: #111110;
   --color-surface: #1A1917;
-  --color-gold: #E8962E;
-  --color-goldhi: #F4B65C;
+  --color-gold: #B0822E;
+  --color-goldhi: #C79A45;
   --color-azure: #3B82F6;
   --color-success: #22C55E;
   --color-danger: #EF4444;
   --color-cream: #F2EFE9;
   /* CP2 · escala tipográfica mobile-first (gentle +1px) */
-  --text-xs: 0.8125rem;
-  --text-sm: 0.9375rem;
+  /* Piso tipografico V5: nada por debajo de 15px, instrucciones desde 17px. */
+  --text-xs: 0.9375rem;   /* 15px — solo metadatos, nunca instrucciones */
+  --text-sm: 1.0625rem;   /* 17px — el minimo de todo lo que se lee para hacer */
 }
 @plugin "@tailwindcss/typography";
 
@@ -24,22 +28,42 @@
 @source inline("border-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{15,20,25,30,35,60}");
 @source inline("shadow-{emerald,violet,blue,indigo,cyan,sky,amber,orange,rose}-500/{10,15,20}");
 
-/* ─── Design Tokens V4 — Bright Tech Palette ──────────────────── */
+/* ─── Design Tokens V5 — alineados a las landings ─────────────────
+ *
+ * Tres cambios de fondo respecto de V4:
+ *
+ *   1. EL ORO ES MATE. El brillante (#E8962E) se ve barato porque ya lo
+ *      copiaron todos. Este es pan de oro: vive en lineas de 1px, en
+ *      versalitas y en numerales. Nunca relleno, nunca degrade, nunca glow.
+ *
+ *   2. EL NEGRO TIENE TEMPERATURA. El negro puro cansa en pantalla y
+ *      endurece todo lo que apoya encima. Este tiene tierra adentro.
+ *
+ *   3. EL PISO TIPOGRAFICO SUBE. Esta app se usa en el celular, caminando,
+ *      entre paciente y paciente. Si no entra en letra grande, no va.
+ *      --text-xs deja de ser 13px: el minimo legible es 15px, y las
+ *      instrucciones no bajan de 17px.
+ * ────────────────────────────────────────────────────────────────── */
 :root {
-  --bg-root: #080808;
-  --bg-card: #111110;
-  --bg-surface2: #1A1917;
-  --accent-gold: #E8962E;
-  --accent-gold-hover: #F4B65C;
+  --bg-root: #0F0E0D;
+  --bg-card: #17150F;
+  --bg-surface2: #211E17;
+  --accent-gold: #B0822E;
+  --accent-gold-hover: #C79A45;
   --accent-blue: #3B82F6;
-  --green-success: #22C55E;
-  --red-alert: #EF4444;
-  --text-cream: #F2EFE9;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --border-gold: rgba(232, 150, 46, 0.14);
-  --border-gold-strong: rgba(232, 150, 46, 0.30);
-  --font-body: 'Sora', system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, serif;
+  --green-success: #4E7C52;
+  --red-alert: #9C3626;
+  --text-cream: #F4EFE4;
+  --text-muted: rgba(244, 239, 228, 0.62);
+  --border-gold: rgba(176, 130, 46, 0.22);
+  --border-gold-strong: rgba(176, 130, 46, 0.45);
+  --font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+
+  /* Geometria calida: esquinas suaves, no vivas. */
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 24px;
 
   /* Matrix-specific tokens (preactivacion grid) so the table can
      theme cleanly without hardcoded hex inside inline styles. */
@@ -47,7 +71,7 @@
   /* Sereno Pro: la profundidad iOS — sombras en capas, no un solo blur */
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.50);
-  --shadow-gold: 0 8px 24px rgba(232, 150, 46, 0.22);
+  --shadow-gold: 0 8px 24px rgba(176, 130, 46, 0.14);
   --matrix-cell-divider: rgba(26, 28, 34, 0.35);
   --matrix-row-divider: rgba(255, 255, 255, 0.05);
   --matrix-header-text: rgba(255, 255, 255, 0.78);
@@ -107,10 +131,10 @@ h1, h2, h3 {
     padding: 0.625rem 1.25rem;
     border-radius: 0.75rem;
     transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px rgba(232, 150, 46, 0.4), 0 0 40px rgba(232, 150, 46, 0.1);
-      background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
+    /* V5: plano. Sin degrade y sin glow — el oro mate no brilla, se apoya. */
+    background: #B0822E;
     box-shadow: var(--shadow-gold);
-    border-radius: 14px;
+    border-radius: var(--radius);
   }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
@@ -222,38 +246,51 @@ h1, h2, h3 {
 }
 
 /* ─── Light theme overrides ─────────────────────────────────────────
-   Activated via [data-theme="light"] on <html>. Currently used only
-   in the admin view — see src/lib/theme.ts. The selectors target the
+   V5: repintado a la paleta de la marca — crema, tinta calida y oro mate.
+   Es el tema POR DEFECTO del cliente: viene de una landing en crema y
+   aterriza en la app; que cambie de mundo al entrar rompe la promesa. The selectors target the
    hardcoded Tailwind arbitrary-value classes that fill Admin.tsx so we
    can flip the palette without rewriting thousands of lines of JSX.
 
    Strategy:
-   - Light palette in the surface scale: #F3F5F8 (root) / #F2EFE9 (cards) / #F1F3F6 (surface2) / #EDEFF2 (hover).
-   - Text scale: #0F172A primary, rgba(15,23,42,X) for opacity variants.
+   - Light palette in the surface scale: #FAF5EA (root) / #FFFDF7 (cards) / #F5EFE1 (surface2) / #F3EAD6 (hover).
+   - Text scale: #2A2118 primary, rgba(42,33,24,X) for opacity variants.
    - Gold accent stays #E8962E for fills (gold-on-anything works) but
-     gold-as-text drops to #B45309 (amber-700) for AA contrast on white.
+     gold-as-text drops to #8E6824 (amber-700) for AA contrast on white.
    - Borders bump alpha so they read on white.
    - Hover variants (`hover:`, `group-hover:`) get their own selectors
      so row/card hover feedback still works in light mode.
 */
 [data-theme="light"] {
-  --bg-root: #E8ECF1;
-  --bg-card: #F2EFE9;
-  --bg-surface2: #EAEDF2;
-  --accent-gold: #D97706;
-  --accent-gold-hover: #B45309;
-  --text-cream: #0F172A;
-  --text-muted: rgba(15, 23, 42, 0.7);
-  --border-gold: rgba(217, 119, 6, 0.4);
-  --border-gold-strong: rgba(217, 119, 6, 0.65);
+  /* LOS TOKENS DE TAILWIND. Sin esto, cada clase text-cream, bg-ink y
+     bg-panel sigue resolviendo a los valores del tema oscuro: texto casi
+     blanco sobre crema. Era la causa del lavado. */
+  --color-ink: #FAF5EA;
+  --color-panel: #FFFDF7;
+  --color-surface: #F5EFE1;
+  --color-cream: #2A2118;
+  --color-gold: #B0822E;
+  --color-goldhi: #8E6824;
+  --color-success: #2F5638;
+  --color-danger: #9C3626;
 
-  --matrix-section-divider: rgba(217, 119, 6, 0.2);
-  --matrix-cell-divider: rgba(15, 23, 42, 0.06);
-  --matrix-row-divider: rgba(15, 23, 42, 0.08);
-  --matrix-header-text: rgba(15, 23, 42, 0.78);
-  --matrix-subtitle-text: rgba(15, 23, 42, 0.6);
-  --matrix-pct-text: rgba(15, 23, 42, 0.72);
-  --matrix-checkbox-off: rgba(15, 23, 42, 0.28);
+  --bg-root: #FAF5EA;
+  --bg-card: #FFFDF7;
+  --bg-surface2: #F5EFE1;
+  --accent-gold: #B0822E;
+  --accent-gold-hover: #8E6824;
+  --text-cream: #2A2118;
+  --text-muted: rgba(42, 33, 24, 0.7);
+  --border-gold: rgba(176, 130, 46, 0.4);
+  --border-gold-strong: rgba(176, 130, 46, 0.65);
+
+  --matrix-section-divider: rgba(176, 130, 46, 0.2);
+  --matrix-cell-divider: rgba(42, 33, 24, 0.06);
+  --matrix-row-divider: rgba(42, 33, 24, 0.08);
+  --matrix-header-text: rgba(42, 33, 24, 0.78);
+  --matrix-subtitle-text: rgba(42, 33, 24, 0.6);
+  --matrix-pct-text: rgba(42, 33, 24, 0.72);
+  --matrix-checkbox-off: rgba(42, 33, 24, 0.28);
 
   color-scheme: light;
 }
@@ -266,56 +303,56 @@ h1, h2, h3 {
 }
 
 /* ── Surface hierarchy ────────────────────────────────────────────
-   Body (root)        → #E8ECF1 (slate-100ish)
-   Sidebar/columns    → #F2EFE9   (sticky, max contrast against body)
-   Panel wrappers     → #F8FAFC   (subtle slate-50 — sits between body and cards)
-   Cards/popovers     → #F2EFE9   (pop on panel)
-   Surface2 (settings sidebar etc.) → #EEF1F5
+   Body (root)        → #FAF5EA (slate-100ish)
+   Sidebar/columns    → #FFFDF7   (sticky, max contrast against body)
+   Panel wrappers     → #FFFDF7   (subtle slate-50 — sits between body and cards)
+   Cards/popovers     → #FFFDF7   (pop on panel)
+   Surface2 (settings sidebar etc.) → #F5EFE1
 */
-[data-theme="light"] .bg-\[\#080808\]    { background-color: #E8ECF1 !important; }
-[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #F2EFE9 !important; }
+[data-theme="light"] .bg-\[\#080808\]    { background-color: #FAF5EA !important; }
+[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: #FFFDF7 !important; }
 [data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
-[data-theme="light"] .bg-\[\#111110\]    { background-color: #F8FAFC !important; }
+[data-theme="light"] .bg-\[\#111110\]    { background-color: #FFFDF7 !important; }
 [data-theme="light"] .bg-\[\#111110\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
-[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#1A1917\]    { background-color: #F5EFE1 !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/20 { background-color: rgba(232, 150, 46, 0.06) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/30 { background-color: rgba(232, 150, 46, 0.09) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
 [data-theme="light"] .bg-\[\#1A1917\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
-[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #F2EFE9 !important; }
-[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #EEF1F5 !important; }
+[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: #F5EFE1 !important; }
 
 /* ── Surface backgrounds — Tailwind standard `white` token ───────── */
-[data-theme="light"] .bg-white\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-white\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .bg-white\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .bg-white\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .bg-white\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
 
 /* ── Surface backgrounds — rgba shorthand variants ───────────────── */
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(15, 23, 42, 0.05) !important; }
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(42, 33, 24, 0.04) !important; }
+[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(42, 33, 24, 0.05) !important; }
 
 /* ── Hover-variant backgrounds — restore feedback in light mode ──── */
-[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: #F5EFE1 !important; }
 [data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
 [data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/5:hover     { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .hover\:bg-\[\#F2EFE9\]\/10:hover    { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #EAEDF2 !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFDF7\]\/5:hover     { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .hover\:bg-\[\#FFFDF7\]\/10:hover    { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: #F5EFE1 !important; }
 
 /* ── Light scrim overlays inside content (not modal backdrops) ───── */
-[data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.04) !important; }
-[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.08) !important; }
+[data-theme="light"] .bg-black\/20 { background-color: rgba(42, 33, 24, 0.04) !important; }
+[data-theme="light"] .bg-black\/30 { background-color: rgba(42, 33, 24, 0.06) !important; }
+[data-theme="light"] .bg-black\/40 { background-color: rgba(42, 33, 24, 0.08) !important; }
 /* Modal scrims (bg-black/60/70/80) stay dark intentionally so modals
    keep clear separation from the page underneath. */
 
 /* ── White-on-content overlays → invert to dark overlays ─────────── */
-[data-theme="light"] .bg-\[\#F2EFE9\]\/5  { background-color: rgba(15, 23, 42, 0.05) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/8  { background-color: rgba(15, 23, 42, 0.06) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .bg-\[\#F2EFE9\]\/20 { background-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/8  { background-color: rgba(42, 33, 24, 0.06) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .bg-\[\#FFFDF7\]\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
 
 /* ── Text scale ─────────────────────────────────────────────────────
    White-on-dark and slate-on-light are not symmetric perceptually:
@@ -324,89 +361,90 @@ h1, h2, h3 {
    `/60` on white becomes ~0.6 slate, not 0.72. This keeps icons and
    muted UI feeling soft instead of stamped. Mid range still hits AA.
 */
-[data-theme="light"] .text-white       { color: #0F172A !important; }
-[data-theme="light"] .text-white\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-white\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-white\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-white\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-white\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-white\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-white\/30   { color: rgba(15, 23, 42, 0.48) !important; }
+[data-theme="light"] .text-white       { color: #2A2118 !important; }
+[data-theme="light"] .text-white\/90   { color: rgba(42, 33, 24, 0.9) !important; }
+[data-theme="light"] .text-white\/80   { color: rgba(42, 33, 24, 0.82) !important; }
+[data-theme="light"] .text-white\/70   { color: rgba(42, 33, 24, 0.72) !important; }
+[data-theme="light"] .text-white\/60   { color: rgba(42, 33, 24, 0.62) !important; }
+[data-theme="light"] .text-white\/50   { color: rgba(42, 33, 24, 0.58) !important; }
+[data-theme="light"] .text-white\/40   { color: rgba(42, 33, 24, 0.55) !important; }
+[data-theme="light"] .text-white\/30   { color: rgba(42, 33, 24, 0.48) !important; }
 
-[data-theme="light"] .text-\[\#F2EFE9\]       { color: #0F172A !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/90   { color: rgba(15, 23, 42, 0.9) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/85   { color: rgba(15, 23, 42, 0.86) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/80   { color: rgba(15, 23, 42, 0.82) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/70   { color: rgba(15, 23, 42, 0.72) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/65   { color: rgba(15, 23, 42, 0.68) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/60   { color: rgba(15, 23, 42, 0.62) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/55   { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/50   { color: rgba(15, 23, 42, 0.58) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/45   { color: rgba(15, 23, 42, 0.56) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/40   { color: rgba(15, 23, 42, 0.55) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/30   { color: rgba(15, 23, 42, 0.48) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/25   { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/20   { color: rgba(15, 23, 42, 0.4) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/15   { color: rgba(15, 23, 42, 0.36) !important; }
-[data-theme="light"] .text-\[\#F2EFE9\]\/5    { color: rgba(15, 23, 42, 0.22) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]       { color: #2A2118 !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/90   { color: rgba(42, 33, 24, 0.9) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/85   { color: rgba(42, 33, 24, 0.86) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/80   { color: rgba(42, 33, 24, 0.82) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/70   { color: rgba(42, 33, 24, 0.72) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/65   { color: rgba(42, 33, 24, 0.68) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/60   { color: rgba(42, 33, 24, 0.62) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/55   { color: rgba(42, 33, 24, 0.6) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/50   { color: rgba(42, 33, 24, 0.58) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/45   { color: rgba(42, 33, 24, 0.56) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/40   { color: rgba(42, 33, 24, 0.55) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/30   { color: rgba(42, 33, 24, 0.48) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/25   { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/20   { color: rgba(42, 33, 24, 0.4) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/15   { color: rgba(42, 33, 24, 0.36) !important; }
+[data-theme="light"] .text-\[\#FFFDF7\]\/5    { color: rgba(42, 33, 24, 0.22) !important; }
 
 /* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-\[\#F2EFE9\]:hover     { color: #0F172A !important; }
-[data-theme="light"] .hover\:text-white:hover            { color: #0F172A !important; }
-[data-theme="light"] .group:hover .group-hover\:text-\[\#F2EFE9\] { color: #0F172A !important; }
+[data-theme="light"] .hover\:text-\[\#FFFDF7\]:hover     { color: #2A2118 !important; }
+[data-theme="light"] .hover\:text-white:hover            { color: #2A2118 !important; }
+[data-theme="light"] .group:hover .group-hover\:text-\[\#FFFDF7\] { color: #2A2118 !important; }
 
 /* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
-[data-theme="light"] .placeholder-\[\#F2EFE9\]\/50::placeholder { color: rgba(15, 23, 42, 0.6) !important; }
-[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(15, 23, 42, 0.45) !important; }
-[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(15, 23, 42, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
+[data-theme="light"] .placeholder-\[\#FFFDF7\]\/50::placeholder { color: rgba(42, 33, 24, 0.6) !important; }
+[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
+[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
 
 /* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
-[data-theme="light"] .text-\[\#E8962E\] { color: #B45309 !important; }
+[data-theme="light"] .text-\[\#E8962E\] { color: #8E6824 !important; }
+[data-theme="light"] .text-\[\#B0822E\] { color: #8E6824 !important; }
 
 /* ── Gold borders — bump alpha so they remain visible on white ───── */
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(217, 119, 6, 0.28) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(217, 119, 6, 0.3) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(217, 119, 6, 0.32) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(217, 119, 6, 0.38) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(217, 119, 6, 0.42) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(217, 119, 6, 0.5) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(217, 119, 6, 0.6) !important; }
-[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(217, 119, 6, 0.7) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.1\)\]  { border-color: rgba(176, 130, 46, 0.28) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.12\)\] { border-color: rgba(176, 130, 46, 0.3) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.15\)\] { border-color: rgba(176, 130, 46, 0.32) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.2\)\]  { border-color: rgba(176, 130, 46, 0.38) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.25\)\] { border-color: rgba(176, 130, 46, 0.42) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.3\)\]  { border-color: rgba(176, 130, 46, 0.5) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.4\)\]  { border-color: rgba(176, 130, 46, 0.6) !important; }
+[data-theme="light"] .border-\[rgba\(245\,166\,35\,0\.5\)\]  { border-color: rgba(176, 130, 46, 0.7) !important; }
 
 /* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-\[\#F2EFE9\]\/5    { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/10   { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[\#F2EFE9\]\/20   { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-white\/5           { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-white\/10          { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-white\/20          { border-color: rgba(15, 23, 42, 0.18) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(15, 23, 42, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(15, 23, 42, 0.1) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(15, 23, 42, 0.12) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(15, 23, 42, 0.22) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/5    { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/10   { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-\[\#FFFDF7\]\/20   { border-color: rgba(42, 33, 24, 0.18) !important; }
+[data-theme="light"] .border-white\/5           { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-white\/10          { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-white\/20          { border-color: rgba(42, 33, 24, 0.18) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(42, 33, 24, 0.1) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(42, 33, 24, 0.12) !important; }
+[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(42, 33, 24, 0.22) !important; }
 
 /* ── Inline-style fallback ───────────────────────────────────────────
-   React serializes `color: '#F2EFE9'` to `color: rgb(255, 255, 255)`
+   React serializes `color: '#FFFDF7'` to `color: rgb(255, 255, 255)`
    in the DOM style attribute, so we match both forms.            */
-[data-theme="light"] [style*="color: #F2EFE9"],
-[data-theme="light"] [style*="color:#F2EFE9"],
+[data-theme="light"] [style*="color: #FFFDF7"],
+[data-theme="light"] [style*="color:#FFFDF7"],
 [data-theme="light"] [style*="color: rgb(255, 255, 255)"],
 [data-theme="light"] [style*="color:rgb(255,255,255)"] {
-  color: #0F172A !important;
+  color: #2A2118 !important;
 }
 
 /* ── Shadow — soften the heavy black shadows on white surfaces ───── */
 [data-theme="light"] .shadow-2xl {
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 12px 40px rgba(42, 33, 24, 0.12), 0 4px 16px rgba(42, 33, 24, 0.08) !important;
 }
 [data-theme="light"] .shadow-xl {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 0 8px 24px rgba(42, 33, 24, 0.1), 0 2px 8px rgba(42, 33, 24, 0.06) !important;
 }
 [data-theme="light"] .shadow-black\/50 {
-  --tw-shadow-color: rgba(15, 23, 42, 0.15) !important;
+  --tw-shadow-color: rgba(42, 33, 24, 0.15) !important;
 }
 
 /* ── Tailwind Typography `prose-invert` ──────────────────────────────
@@ -417,28 +455,27 @@ h1, h2, h3 {
    etc.) keeps readable contrast without changing the className.
 */
 [data-theme="light"] .prose-invert {
-  --tw-prose-invert-body: #0F172A;
-  --tw-prose-invert-headings: #0F172A;
-  --tw-prose-invert-lead: rgba(15, 23, 42, 0.78);
-  --tw-prose-invert-links: #B45309;
-  --tw-prose-invert-bold: #0F172A;
-  --tw-prose-invert-counters: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-bullets: rgba(15, 23, 42, 0.4);
-  --tw-prose-invert-hr: rgba(15, 23, 42, 0.15);
-  --tw-prose-invert-quotes: rgba(15, 23, 42, 0.85);
-  --tw-prose-invert-quote-borders: rgba(217, 119, 6, 0.4);
-  --tw-prose-invert-captions: rgba(15, 23, 42, 0.6);
-  --tw-prose-invert-code: #0F172A;
-  --tw-prose-invert-pre-code: #0F172A;
-  --tw-prose-invert-pre-bg: rgba(15, 23, 42, 0.05);
-  --tw-prose-invert-th-borders: rgba(15, 23, 42, 0.2);
-  --tw-prose-invert-td-borders: rgba(15, 23, 42, 0.1);
+  --tw-prose-invert-body: #2A2118;
+  --tw-prose-invert-headings: #2A2118;
+  --tw-prose-invert-lead: rgba(42, 33, 24, 0.78);
+  --tw-prose-invert-links: #8E6824;
+  --tw-prose-invert-bold: #2A2118;
+  --tw-prose-invert-counters: rgba(42, 33, 24, 0.6);
+  --tw-prose-invert-bullets: rgba(42, 33, 24, 0.4);
+  --tw-prose-invert-hr: rgba(42, 33, 24, 0.15);
+  --tw-prose-invert-quotes: rgba(42, 33, 24, 0.85);
+  --tw-prose-invert-quote-borders: rgba(176, 130, 46, 0.4);
+  --tw-prose-invert-captions: rgba(42, 33, 24, 0.6);
+  --tw-prose-invert-code: #2A2118;
+  --tw-prose-invert-pre-code: #2A2118;
+  --tw-prose-invert-pre-bg: rgba(42, 33, 24, 0.05);
+  --tw-prose-invert-th-borders: rgba(42, 33, 24, 0.2);
+  --tw-prose-invert-td-borders: rgba(42, 33, 24, 0.1);
 }
 
 
 /* ═══ DOJO PREMIUM (E2): la cinta y el tilde ceremonial ═══ */
 @keyframes cinta-seda { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
-.cinta-brillo { animation: cinta-seda 9s ease-in-out infinite; }
 @keyframes tilde-ceremonial { 0% { transform: scale(0.6); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .tilde-ceremonial { animation: tilde-ceremonial 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
 @media (prefers-reduced-motion: reduce) { .cinta-brillo, .tilde-ceremonial { animation: none; } }
@@ -467,11 +504,11 @@ h1, h2, h3 {
 
 /* Botón primario con profundidad y respuesta táctil */
 .btn-ios-primary {
-  background: linear-gradient(180deg, #F4B65C 0%, #E8962E 100%);
-  color: #080808;
-  border-radius: 14px;
+  background: #B0822E;
+  color: #0F0E0D;
+  border-radius: var(--radius);
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(232, 150, 46, 0.30);
+  box-shadow: 0 2px 10px rgba(176, 130, 46, 0.18);
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 .btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(232, 150, 46, 0.42); }
@@ -529,3 +566,272 @@ h1, h2, h3 {
   }
   .btn-icon:hover { background: color-mix(in oklab, var(--color-gold) 12%, transparent); }
 }
+
+/* ─── V5 · las clases semánticas en tema claro ──────────────────────
+   Tailwind compila bg-panel, bg-ink y text-cream a valores literales,
+   asi que pisar la variable no alcanza: hay que pisar la clase. Las 98
+   reglas de arriba hacen esto mismo para los hex escritos a mano; esto
+   completa el juego con los nombres semanticos que usa el cliente.
+*/
+[data-theme="light"] .bg-ink       { background-color: #FAF5EA !important; }
+[data-theme="light"] .bg-panel     { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-surface   { background-color: #F5EFE1 !important; }
+[data-theme="light"] .bg-ink\/90,
+[data-theme="light"] .bg-ink\/95,
+[data-theme="light"] .bg-ink\/80   { background-color: rgba(250, 245, 234, .95) !important; }
+[data-theme="light"] .bg-panel\/90,
+[data-theme="light"] .bg-panel\/80,
+[data-theme="light"] .bg-panel\/60,
+[data-theme="light"] .bg-panel\/50 { background-color: rgba(255, 253, 247, .92) !important; }
+
+[data-theme="light"] .text-cream       { color: #2A2118 !important; }
+[data-theme="light"] .text-cream\/90   { color: rgba(42, 33, 24, .92) !important; }
+[data-theme="light"] .text-cream\/85   { color: rgba(42, 33, 24, .88) !important; }
+[data-theme="light"] .text-cream\/80   { color: rgba(42, 33, 24, .84) !important; }
+[data-theme="light"] .text-cream\/75   { color: rgba(42, 33, 24, .78) !important; }
+[data-theme="light"] .text-cream\/70   { color: rgba(42, 33, 24, .74) !important; }
+[data-theme="light"] .text-cream\/65   { color: rgba(42, 33, 24, .70) !important; }
+[data-theme="light"] .text-cream\/60   { color: rgba(42, 33, 24, .66) !important; }
+[data-theme="light"] .text-cream\/55   { color: rgba(42, 33, 24, .62) !important; }
+[data-theme="light"] .text-cream\/50   { color: rgba(42, 33, 24, .58) !important; }
+[data-theme="light"] .text-cream\/45   { color: rgba(42, 33, 24, .54) !important; }
+[data-theme="light"] .text-cream\/40   { color: rgba(42, 33, 24, .48) !important; }
+[data-theme="light"] .text-cream\/35,
+[data-theme="light"] .text-cream\/30,
+[data-theme="light"] .text-cream\/25   { color: rgba(42, 33, 24, .42) !important; }
+
+/* El oro como TEXTO baja de tono para contrastar sobre crema. */
+[data-theme="light"] .text-gold        { color: #8E6824 !important; }
+[data-theme="light"] .text-goldhi      { color: #8E6824 !important; }
+/* El oro como RELLENO se queda: sobre crema lee perfecto. */
+[data-theme="light"] .bg-gold          { background-color: #B0822E !important; }
+[data-theme="light"] .text-black       { color: #FFFDF7 !important; }
+
+/* Sin resplandores: el oro mate no brilla, se apoya. */
+[data-theme="light"] .blur-3xl,
+[data-theme="light"] .blur-2xl         { display: none !important; }
+[data-theme="light"] .shadow-2xl       { box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 16px 40px rgba(42,33,24,.07) !important; }
+
+/* ─── V5 · las tres islas que quedaban ──────────────────────────────
+   1. card-ios usaba var(--surface) — una variable que NO existe en el
+      tema claro — asi que caia en su respaldo #111110 y quedaba negra.
+      Era la tarjeta del login.
+   2. La ceremonia de cinturon tiene el negro escrito a mano.
+   3. El aside del menu usa bg-ink/90 con desenfoque.
+*/
+[data-theme="light"] {
+  --surface: #FFFDF7;
+}
+[data-theme="light"] .card-ios,
+[data-theme="light"] .card-panel   { background: #FFFDF7 !important; border-color: rgba(176,130,46,.22) !important; box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 12px 32px rgba(42,33,24,.06) !important; }
+[data-theme="light"] .card-ios:hover { box-shadow: 0 2px 6px rgba(42,33,24,.06), 0 18px 44px rgba(42,33,24,.09) !important; }
+
+/* La ceremonia y los fondos oscuros escritos a mano. */
+[data-theme="light"] .bg-\[\#0D0C0B\],
+[data-theme="light"] .bg-\[\#0d0a06\],
+[data-theme="light"] .bg-\[\#0d0d0c\],
+[data-theme="light"] .bg-\[\#0d0d0d\],
+[data-theme="light"] .bg-\[\#0B0B0A\],
+[data-theme="light"] .bg-\[\#161310\]  { background-color: #FAF5EA !important; }
+[data-theme="light"] .bg-\[\#0d0a06\]\/95 { background-color: rgba(250,245,234,.96) !important; }
+
+/* El menu lateral. */
+[data-theme="light"] aside              { background-color: rgba(250,245,234,.96) !important; }
+[data-theme="light"] .btn-ios-primary   { color: #FFFDF7 !important; }
+[data-theme="light"] .input-field       { background: #FFFDF7 !important; color: #2A2118 !important; }
+[data-theme="light"] .custom-select     { background-color: #FFFDF7 !important; color: #2A2118 !important; }
+[data-theme="light"] .custom-select option { background: #FFFDF7 !important; color: #2A2118 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPA 10-DISEÑO · 15 sep 2026
+   Aplica docs/tcd-spec/10-DISENO.md a TODA la app de una vez, por encima
+   de lo que cada pantalla escribió. Lo mide scripts/medir-app.py.
+   Reglas: nunca degradé · nunca brillo dorado · versalitas a .16em ·
+   foco oro de 2 px · movimiento de 120 ms o nada · fuentes de la casa.
+   ═══════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --ink: #2A2118;  --ink2: #6E6252;  --ink3: #9A8C78;
+  --oro: #B0822E;  --oro-d: #8E6824; --oro-soft: #F3EAD6;
+  --tilde: #4A7C59; --tacha: #A33A2A; --ventana: #7A6FA3;
+  --card: #FFFDF7; --card2: #F5EFE1; --line: #EBE1CF; --line2: #DFD3BC;
+  --r: 20px; --r2: 26px; --r3: 99px;
+  --sombra: 0 1px 2px rgba(42, 33, 24, 0.04), 0 6px 20px rgba(42, 33, 24, 0.05);
+}
+
+/* Fraunces en su versión suave: la letra cálida y redonda de la casa. */
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3,
+[data-theme="light"] [style*="font-display"] {
+  font-variation-settings: "SOFT" 100;
+}
+/* Títulos derechos. La regla global de cursiva no está en ninguna capa y le
+   ganaba a cada `not-italic`. La cursiva queda solo donde se pide en línea. */
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3 {
+  font-style: normal;
+}
+
+/* 1 · Nunca degradé. Los degradés de Tailwind quedan planos en su primer color. */
+[data-theme="light"] #root [class*="bg-gradient-to-"] {
+  --tw-gradient-via: var(--tw-gradient-from) !important;
+  --tw-gradient-to: var(--tw-gradient-from) !important;
+}
+
+/* 2 · Nunca brillo dorado: ni sombras de oro ni manchas difuminadas de fondo. */
+[data-theme="light"] #root [class*="shadow-gold"],
+[data-theme="light"] #root [class*="shadow-[0_0_"] {
+  box-shadow: var(--sombra) !important;
+}
+[data-theme="light"] #root [class*="blur-[1"][class*="rounded-full"],
+[data-theme="light"] #root [class*="blur-3xl"][class*="rounded-full"] {
+  display: none !important;
+}
+
+/* 3 · Versalitas: el kicker de la especificación, no más espaciado que eso. */
+[data-theme="light"] #root [class*="tracking-[0.2"],
+[data-theme="light"] #root [class*="tracking-[0.3"],
+[data-theme="light"] #root [class*="tracking-[0.4"] {
+  letter-spacing: 0.16em !important;
+}
+
+/* 4 · Tarjeta y botón de la casa. */
+[data-theme="light"] .card-ios,
+[data-theme="light"] .card-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  box-shadow: var(--sombra);
+}
+[data-theme="light"] .card-ios:hover { transform: none; box-shadow: var(--sombra); }
+[data-theme="light"] .btn-ios-primary {
+  background: var(--oro);
+  color: #FFFDF7 !important;
+  min-height: 52px;
+  border-radius: var(--r);
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+}
+[data-theme="light"] .btn-ios-primary:hover { filter: none; background: var(--oro-d); box-shadow: none; }
+
+/* 5 · Foco visible: contorno oro de 2 px. */
+[data-theme="light"] :focus-visible {
+  outline: 2px solid var(--oro) !important;
+  outline-offset: 2px;
+}
+
+/* 6 · Movimiento: nada de entradas deslizadas ni pulsos. Estado en 120 ms. */
+[data-theme="light"] #root .animate-pulse { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="light"] #root *,
+  [data-theme="light"] #root *::before,
+  [data-theme="light"] #root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 7 · Contraste AA (10-DISENO §9), medido por scripts/medir-app.py.
+   - El blanco sobre --oro da 3,4:1: el botón primario va sobre --oro-d (5:1).
+   - La tinta con transparencia (cream/35…/65) cae por debajo de 4,5:1 sobre
+     crema: pasa a --ink2, el gris cálido de la especificación.
+   - El oro como color de TEXTO da 3,2:1: el texto en oro va en --oro-d. */
+[data-theme="light"] .btn-ios-primary { background: var(--oro-d); }
+[data-theme="light"] .btn-ios-primary:hover { background: #7A5A1F; }
+[data-theme="light"] #root [class*="text-cream/3"],
+[data-theme="light"] #root [class*="text-cream/4"],
+[data-theme="light"] #root [class*="text-cream/5"],
+[data-theme="light"] #root [class*="text-cream/6"],
+[data-theme="light"] #root [class*="text-white/3"],
+[data-theme="light"] #root [class*="text-white/4"],
+[data-theme="light"] #root [class*="text-white/5"],
+[data-theme="light"] #root [class*="text-white/6"] {
+  color: var(--ink2) !important;
+}
+[data-theme="light"] #root [class~="text-gold"],
+[data-theme="light"] #root [class*="text-gold/"],
+[data-theme="light"] #root [class~="text-goldhi"] {
+  color: var(--oro-d) !important;
+}
+
+/* 8 · El estado se marca con color y tilde, no apagando el texto.
+   Una tarjeta al 40% de opacidad deja su texto en 2,3:1: ilegible.
+   --ink2 baja un tono respecto de la especificación (#6E6252 → #5E5244)
+   para pasar AA también sobre --card2. */
+[data-theme="light"] { --ink2: #5E5244; }
+[data-theme="light"] #root [class~="opacity-40"],
+[data-theme="light"] #root [class~="opacity-50"],
+[data-theme="light"] #root [class~="opacity-60"],
+[data-theme="light"] #root [class~="opacity-70"],
+[data-theme="light"] #root [class~="opacity-75"] {
+  opacity: 1 !important;
+}
+[data-theme="light"] #root [class*="text-cream/7"] { color: var(--ink2) !important; }
+[data-theme="light"] #root [class*="text-cream/1"],
+[data-theme="light"] #root [class*="text-cream/2"],
+[data-theme="light"] #root [class*="text-white/1"],
+[data-theme="light"] #root [class*="text-white/2"] { color: var(--ink2) !important; }
+[data-theme="light"] #root [class*="text-white/7"],
+[data-theme="light"] #root [class*="text-white/8"],
+[data-theme="light"] #root [class*="text-white/9"] { color: var(--ink2) !important; }
+/* El amarillo sobre crema no se lee (1,6:1): pasa a oro oscuro. */
+[data-theme="light"] #root [class*="text-yellow-"],
+[data-theme="light"] #root [class*="text-amber-"] { color: var(--oro-d) !important; }
+[data-theme="light"] #root [class*="fill-yellow-"] { fill: var(--oro-d) !important; }
+
+/* 9 · Objetivo táctil de 44 px (10-DISENO §9). Los botones con alto propio
+   (íconos chicos con h-*) se corrigen en su archivo. */
+[data-theme="light"] #root main button:not([class*=" h-"]):not([class^="h-"]) {
+  min-height: 44px;
+}
+/* El otro botón primario de la app, igual al de la casa. */
+[data-theme="light"] .btn-primary {
+  background: var(--oro-d) !important;
+  color: #FFFDF7 !important;
+  font-size: 17px;
+  min-height: 48px;
+  border-radius: var(--r);
+  box-shadow: none !important;
+}
+/* El oro de TEXTO va un tono más oscuro que el del botón: así también pasa AA
+   sobre los fondos tintados en oro (pestañas activas, chips). */
+[data-theme="light"] { --oro-t: #74551C; }
+[data-theme="light"] #root [class~="text-gold"],
+[data-theme="light"] #root [class*="text-gold/"],
+[data-theme="light"] #root [class~="text-goldhi"] { color: var(--oro-t) !important; }
+[data-theme="light"] #root [class*="bg-cream/"] { background-color: var(--card2) !important; }
+[data-theme="light"] #root .prose strong,
+[data-theme="light"] #root .prose b { color: var(--oro-t) !important; }
+[data-theme="light"] #root main [class*="bg-black/1"],
+[data-theme="light"] #root main [class*="bg-black/2"],
+[data-theme="light"] #root main [class*="bg-black/3"] { background-color: var(--card2) !important; }
+
+/* 10 · Los títulos en mayúsculas son rótulos: van en la letra de cuerpo.
+   En Fraunces quedaban pesados ("MENTOR IA", "VELOCIDAD DE AVANCE"). */
+[data-theme="light"] #root :is(h1, h2, h3, h4)[class~="uppercase"] {
+  font-family: var(--font-body) !important;
+  font-style: normal !important;
+  letter-spacing: 0.14em;
+}
+/* 11 · Sombras: una sola, muy suave (10-DISENO §5). */
+[data-theme="light"] #root :is([class~="shadow-md"], [class~="shadow-lg"], [class~="shadow-xl"], [class~="shadow-2xl"]) {
+  box-shadow: var(--sombra) !important;
+}
+
+/* 12 · Nada cortado ni apretado (medido también en el Admin, 16 sep).
+   - `truncate` corta el texto con puntos suspensivos: pasa a dos líneas.
+   - Los rótulos en mayúsculas parten la palabra antes que salirse de su caja.
+   - El fondo oro con texto blanco va en oro oscuro (5:1).
+   - Las opacidades bajas que quedaban (20–35) también se sacan. */
+[data-theme="light"] #root .truncate {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+[data-theme="light"] #root [class~="uppercase"] { overflow-wrap: anywhere; }
+[data-theme="light"] #root [class~="tracking-widest"] { letter-spacing: 0.08em !important; }
+[data-theme="light"] #root [class~="bg-gold"] { background-color: var(--oro-d) !important; }
+[data-theme="light"] #root :is([class~="opacity-20"], [class~="opacity-25"], [class~="opacity-30"], [class~="opacity-35"]) {
+  opacity: 1 !important;
+}
+[data-theme="light"] #root [class~="bg-gold"] { color: #FFFDF7 !important; }
+/* En una tabla no se parte la palabra: la tabla se desplaza dentro de su caja. */
+[data-theme="light"] #root table [class~="uppercase"],
+[data-theme="light"] #root th { overflow-wrap: normal !important; word-break: normal !important; }

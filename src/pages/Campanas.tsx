@@ -5,11 +5,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CampanasSubNav from '../components/campanas/CampanasSubNav';
+import ConstructorAnuncios from '../components/campanas/ConstructorAnuncios';
 import CampanasHome from '../components/campanas/CampanasHome';
 import CopiesView from '../components/campanas/CopiesView';
 import DiagnosticoView from '../components/campanas/DiagnosticoView';
 import NuevaCampanaChat from '../components/campanas/NuevaCampanaChat';
 import MontajeView from '../components/campanas/MontajeView';
+import MontajeCupos from '../components/campanas/MontajeCupos';
 import HistorialView from '../components/campanas/HistorialView';
 import GanadoresView from '../components/campanas/GanadoresView';
 import CreativoStudio from '../components/campanas/CreativoStudio';
@@ -21,11 +23,10 @@ import type { ProfileV2 } from '../lib/supabase';
 interface CampanasProps {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
 }
 
-export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
-  const [view, setView] = useState<CampanasView>('home');
+export default function Campanas({ userId, perfil }: CampanasProps) {
+  const [view, setView] = useState<CampanasView>('anuncios');
   const [previousView, setPreviousView] = useState<CampanasView>('home');
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [creativos, setCreativos] = useState<Creativo[]>([]);
@@ -118,9 +119,10 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
       <div ref={topRef} />
 
       {/* El header ceremonial (Lote 5 · la piel) */}
-      {view === 'home' && (
+      {view === 'anuncios' && <ConstructorAnuncios clienteId={userId} />}
+        {view === 'home' && (
         <div className="mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
           <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
           <p className="text-sm text-cream/65 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
         </div>
@@ -168,9 +170,7 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
         <DiagnosticoView perfil={perfil ?? {}} />
       )}
 
-      {view === 'montaje' && (
-        <MontajeView perfil={perfil ?? {}} />
-      )}
+      {view === 'montaje' && <MontajeCupos clienteId={userId} onIrAnuncios={() => setView('anuncios')} />}
 
       {view === 'historial' && (
         <HistorialView
@@ -192,7 +192,6 @@ export default function Campanas({ userId, perfil, geminiKey }: CampanasProps) {
           campana={selectedCampana}
           userId={userId}
           perfil={perfil}
-          geminiKey={geminiKey}
           onBack={handleBack}
           onSaved={handleCreativoSaved}
         />

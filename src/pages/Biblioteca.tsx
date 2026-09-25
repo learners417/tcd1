@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
-import { getHerramienta, HERRAMIENTAS_V3, EMOJI_TO_ICON } from '../lib/herramientas';
+import { getHerramienta, herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
 import type { HerramientaV3 } from '../lib/herramientas';
 
 const BIB_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -35,6 +35,8 @@ import {
   type VideoModulo,
 } from '../lib/videos';
 import HerramientaDetalle from './HerramientaDetalle';
+import { VOC } from '../lib/vocabulario';
+import { COMPLEMENTOS as VIDEOS_COMPLEMENTO, idDeYoutube } from '../lib/videosCargados';
 
 // ─── CLINICA Tab definitions ────────────────────────────────────────────────
 
@@ -54,56 +56,56 @@ const CLINICA_TABS: readonly ClinicaTab[] = [
     letter: 'O',
     label: 'Onboarding',
     pilarIds: ['P0'],
-    color: '#F4B65C',
+    color: '#C79A45',
   },
   {
     id: 'C1',
     letter: 'C',
     label: 'Conciencia',
     pilarIds: ['P1'],
-    color: '#E8962E',
+    color: '#B0822E',
   },
   {
     id: 'L',
     letter: 'L',
     label: 'Liberación',
     pilarIds: ['P1'],
-    color: '#F4B65C',
+    color: '#C79A45',
   },
   {
     id: 'I1',
     letter: 'Í',
     label: 'Identidad',
     pilarIds: ['P2'],
-    color: '#E8962E',
+    color: '#B0822E',
   },
   {
     id: 'N',
     letter: 'N',
     label: 'Narrativa',
     pilarIds: ['P3'],
-    color: '#F4B65C',
+    color: '#C79A45',
   },
   {
     id: 'I2',
     letter: 'I',
     label: 'Instalación',
     pilarIds: ['P4'],
-    color: '#E8962E',
+    color: '#B0822E',
   },
   {
     id: 'C2',
     letter: 'C',
     label: 'Cobro',
     pilarIds: ['P5', 'P6'],
-    color: '#F4B65C',
+    color: '#C79A45',
   },
   {
     id: 'A',
     letter: 'A',
     label: 'Autonomía',
     pilarIds: ['P7'],
-    color: '#E8962E',
+    color: '#B0822E',
   },
 ] as const;
 
@@ -153,7 +155,7 @@ function isTabUnlocked(
 /** Get herramientas V3 for a set of pilarIds */
 function getHerramientasForPilars(pilarIds: readonly PilarId[]): HerramientaV3[] {
   const prefixes = pilarIds.map((pid) => `H-${pid}.`);
-  return HERRAMIENTAS_V3.filter((h) =>
+  return herramientasV3().filter((h) =>
     prefixes.some((prefix) => h.id.startsWith(prefix))
   );
 }
@@ -230,11 +232,11 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
   if (!r.youtubeId) {
     return (
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
-        <p className="text-sm text-cream/75">{r.titulo}</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
+        <p className="text-sm text-cream/75">{VOC(r.titulo)}</p>
                   {COMPLEMENTOS[r.id] && (
                     <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
-                      <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
+                      <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
                       <div className="mt-3 space-y-3">
                         <p className="text-sm text-cream/80 leading-relaxed">{COMPLEMENTOS[r.id].resumen}</p>
                         <ul className="space-y-1.5">
@@ -258,9 +260,9 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
     return (
       <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
         <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
-        <p className="text-sm text-cream/70">{r.titulo}</p>
-        <p className="text-[11px] text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
+        <p className="text-sm text-cream/70">{VOC(r.titulo)}</p>
+        <p className="text-sm text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
       </div>
     );
   }
@@ -274,15 +276,15 @@ function RecursoVideoInApp({ r }: { r: RecursoADN }) {
   return (
     <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-gold/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
       <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-gold/5 transition-colors">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
-        <p className="text-sm text-cream/90 font-medium">{r.titulo}</p>
-        <p className="text-[11px] text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
+        <p className="text-sm text-cream/90 font-medium">{VOC(r.titulo)}</p>
+        <p className="text-sm text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
       </button>
       {abierto && (
         <div className="aspect-video w-full bg-black">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${r.youtubeId}?rel=0&modestbranding=1`}
-            title={r.titulo}
+            title={VOC(r.titulo)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="w-full h-full"
@@ -297,6 +299,48 @@ function RecursoVideoInApp({ r }: { r: RecursoADN }) {
 
 interface BibliotecaProps {
   userId?: string;
+}
+
+/**
+ * Lo que suma y no está en el Camino: se mira cuando el cliente quiere.
+ * Una jornada tiene un video; acá va el resto, por tema.
+ */
+function Complementos() {
+  const temas = [...new Set(VIDEOS_COMPLEMENTO.map((c) => c.tema))];
+  return (
+    <section className="card-panel p-5 space-y-4">
+      <div>
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Para ver cuando quieras</p>
+        <p className="mt-1 text-[17px] text-cream/70">No hace falta para avanzar. Suma cuando el tema te toca.</p>
+      </div>
+      {temas.map((tema) => (
+        <div key={tema} className="space-y-2">
+          <p className="text-[17px] font-semibold text-cream">{tema}</p>
+          {VIDEOS_COMPLEMENTO.filter((c) => c.tema === tema).map((c) => {
+            const id = idDeYoutube(c.url);
+            return (
+              <details key={c.url} className="rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 py-3">
+                <summary className="cursor-pointer list-none min-h-[44px] flex items-center text-[17px] text-cream">
+                  {c.titulo}
+                </summary>
+                {id && (
+                  <div className="relative mt-3 w-full aspect-video rounded-xl overflow-hidden border border-[var(--line,#EBE1CF)]">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                      title={c.titulo}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
+                )}
+              </details>
+            );
+          })}
+        </div>
+      ))}
+    </section>
+  );
 }
 
 export default function Biblioteca({ userId }: BibliotecaProps) {
@@ -314,7 +358,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
   const [videosLoading, setVideosLoading] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+  
   const completadas = useMemo(() => getCompletadas(), []);
 
   const activeTab = CLINICA_TABS.find((t) => t.id === activeTabId) ?? CLINICA_TABS[0];
@@ -425,7 +469,6 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         <HerramientaDetalle
           herramientaId={herramientaActivaId}
           userId={userId}
-          geminiKey={geminiKey}
           onVolver={() => setHerramientaActivaId(null)}
         />
       </div>
@@ -446,12 +489,14 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         </p>
       </div>
 
+      <Complementos />
+
       {/* CLINICA tabs */}
       <div className="relative flex items-center gap-1">
         {canScrollLeft && (
           <button
             onClick={() => scrollTabs('left')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
+            className="shrink-0 w-11 h-11 rounded-full border border-[var(--line2,#DFD3BC)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -468,7 +513,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                 key={tab.id}
                 onClick={() => unlocked && setActiveTabId(tab.id)}
                 disabled={!unlocked}
-                className={`flex flex-col items-center px-5 py-3 rounded-xl transition-all border min-w-[80px] ${
+                className={`shrink-0 flex flex-col items-center px-4 py-3 rounded-2xl transition-colors border min-w-[96px] ${
                   !unlocked
                     ? 'bg-surface/40 border-[rgba(232,150,46,0.05)] text-cream/20 cursor-not-allowed'
                     : isActive
@@ -486,7 +531,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                     {tab.letter}
                   </span>
                 )}
-                <span className="text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap">
+                <span className="text-[15px] font-semibold whitespace-nowrap">
                   {tab.label}
                 </span>
               </button>
@@ -496,7 +541,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
         {canScrollRight && (
           <button
             onClick={() => scrollTabs('right')}
-            className="shrink-0 w-8 h-8 rounded-lg bg-gold/5 hover:bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
+            className="shrink-0 w-11 h-11 rounded-full border border-[var(--line2,#DFD3BC)] flex items-center justify-center text-cream/75 hover:text-cream transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -567,7 +612,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                       {thumbUrl ? (
                         <img
                           src={thumbUrl}
-                          alt={v.titulo}
+                          alt={VOC(v.titulo)}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
@@ -583,7 +628,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                         </div>
                       )}
                       {v.duracion && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-[11px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-sm font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
                           
                         </div>
                       )}
@@ -591,20 +636,20 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
 
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                        <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                           {v.pilar_id ?? v.id}
                         </span>
                       </div>
                       <h3 className="text-sm font-semibold text-cream mb-1">
-                        {v.titulo}
+                        {VOC(v.titulo)}
                       </h3>
                       <p className="text-xs text-cream/75 leading-relaxed flex-1">
-                        {v.descripcion}
+                        {VOC(v.descripcion)}
                       </p>
                       {!isPlaceholder && (
                         <button
                           onClick={() => setVideoActivo(v)}
-                          className="mt-3 w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-gold/80 hover:bg-gold text-cream transition-all flex items-center justify-center gap-2"
+                          className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest bg-gold/80 hover:bg-gold text-cream transition-all flex items-center justify-center gap-2"
                         >
                           <Play className="w-3.5 h-3.5 fill-white" /> Ver Video
                         </button>
@@ -625,18 +670,6 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             <Sparkles className="w-4 h-4 text-gold" /> Herramientas IA
           </h2>
 
-          {!geminiKey && (
-            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4">
-              <Lock className="w-4 h-4 text-gold shrink-0" />
-              <p className="text-sm text-amber-300">
-                Configura la variable{' '}
-                <code className="bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-mono text-xs">
-                  VITE_GEMINI_API_KEY
-                </code>{' '}
-                para activar las herramientas IA.
-              </p>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {herramientas.map((h) => (
@@ -648,31 +681,29 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
                   {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-gold shrink-0" /> : <Sparkles className="w-6 h-6 text-gold shrink-0" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                      <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
                         {h.id}
                       </span>
                     </div>
                     <h3 className="text-sm font-semibold text-cream leading-snug">
-                      {h.titulo}
+                      {VOC(h.titulo)}
                     </h3>
                   </div>
                 </div>
 
                 <p className="text-xs text-cream/75 leading-relaxed mb-4 flex-1">
-                  {h.descripcion}
+                  {VOC(h.descripcion)}
                 </p>
 
                 <button
                   onClick={() => setHerramientaActivaId(h.id)}
-                  disabled={!geminiKey}
-                  className={`w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                    geminiKey
-                      ? 'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
-                      : 'bg-gold/5 text-cream/45 cursor-not-allowed border border-[rgba(232,150,46,0.1)]'
+
+                  className={`w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  {geminiKey ? 'Abrir Herramienta' : 'Sin API Key'}
+                  Abrir Herramienta
                 </button>
               </div>
             ))}
@@ -706,7 +737,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
           >
             <div className="flex items-center justify-between mb-3 px-1">
               <h3 className="text-cream font-medium text-sm truncate flex-1">
-                {videoActivo.titulo}
+                {VOC(videoActivo.titulo)}
               </h3>
               <button
                 onClick={() => setVideoActivo(null)}
@@ -718,7 +749,7 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[rgba(232,150,46,0.12)]">
               <iframe
                 src={getYoutubeEmbedUrl(videoActivo.youtubeUrl)}
-                title={videoActivo.titulo}
+                title={VOC(videoActivo.titulo)}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full"

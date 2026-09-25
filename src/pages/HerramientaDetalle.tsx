@@ -10,7 +10,7 @@ import {
   Bot, Globe, Phone, Megaphone, Triangle, Cog, Building2, Handshake,
   Palette, BarChart3, Sunrise, UserCircle,
 } from 'lucide-react';
-import { supabase, isSupabaseReady } from '../lib/supabase';
+import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { ProfileV2 } from '../lib/supabase';
 import { getHerramienta, EMOJI_TO_ICON, type CampoInput } from '../lib/herramientas';
 import { streamText } from '../lib/aiProvider';
@@ -24,6 +24,7 @@ const HERRAMIENTA_ICON_MAP: Record<string, React.ComponentType<{ className?: str
 import { toast } from 'sonner';
 import Markdown from 'react-markdown';
 import CustomSelect from '../components/CustomSelect';
+import { VOC } from '../lib/vocabulario';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -31,11 +32,10 @@ interface Props {
   herramientaId: string;
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   onVolver: () => void;
 }
 
-export default function HerramientaDetalle({ herramientaId, userId, perfil, geminiKey, onVolver }: Props) {
+export default function HerramientaDetalle({ herramientaId, userId, perfil, onVolver }: Props) {
   const herramienta = getHerramienta(herramientaId);
 
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
@@ -86,7 +86,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
     try {
       const prompt = herramienta.promptTemplate(inputs, perfil ?? {});
       let textoCompleto = '';
-      for await (const chunk of streamText({ prompt })) {
+      for await (const chunk of streamText({ feature: 'sesion', tarea: 'chat', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
       }
@@ -97,7 +97,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
     } finally {
       setGenerando(false);
     }
-  }, [camposCompletos, geminiKey, herramienta, inputs, perfil]);
+  }, [camposCompletos, herramienta, inputs, perfil]);
 
   // ─── Guardar en Supabase ───────────────────────────────────────────────────
   const handleGuardar = useCallback(async () => {
@@ -107,15 +107,12 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
       const outputData = { texto: output, inputs, generado_en: new Date().toISOString() };
 
       if (isSupabaseReady() && supabase) {
-        await supabase.from('herramientas_outputs').upsert(
-          {
+        await guardarFila('herramientas_outputs', {
             usuario_id: userId,
             herramienta_id: herramientaId,
             output: outputData,
             version: 1,
-          },
-          { onConflict: 'usuario_id,herramienta_id' },
-        );
+          }, ['usuario_id', 'herramienta_id']);
       }
 
       // Siempre guardamos en localStorage como backup
@@ -156,13 +153,13 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
           {(() => { const iconName = EMOJI_TO_ICON[herramienta.emoji]; const IC = iconName ? HERRAMIENTA_ICON_MAP[iconName] : null; return IC ? <IC className="w-8 h-8 text-gold" /> : null; })()}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] bg-gold/10 text-cream/75 px-2 py-0.5 rounded font-mono">
+              <span className="text-sm bg-gold/10 text-cream/75 px-2 py-0.5 rounded font-mono">
                 {herramienta.id}
               </span>
-              <span className="text-[11px] text-cream/55">Grupo {herramienta.grupo}</span>
+              <span className="text-sm text-cream/55">Grupo {herramienta.grupo}</span>
             </div>
-            <h1 className="text-lg font-light text-cream mt-0.5">{herramienta.titulo}</h1>
-            <p className="text-sm text-cream/75">{herramienta.descripcion}</p>
+            <h1 className="text-lg font-light text-cream mt-0.5">{VOC(herramienta.titulo)}</h1>
+            <p className="text-sm text-cream/75">{VOC(herramienta.descripcion)}</p>
           </div>
         </div>
 
@@ -185,7 +182,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, gemi
               {campo.label}
               {campo.required && <span className="text-red-400 ml-1">*</span>}
               {campo.precargar && inputs[campo.id] && (
-                <span className="ml-2 text-[11px] text-success normal-case tracking-normal">
+                <span className="ml-2 text-sm text-success normal-case tracking-normal">
                   (precargado de tu perfil)
                 </span>
               )}

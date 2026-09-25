@@ -2,6 +2,10 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Toaster} from 'sonner';
 import App from './App.tsx';
+// Fuentes empaquetadas con la app: se ven igual sin conexión y sin depender de Google.
+import '@fontsource-variable/sora';
+import '@fontsource-variable/fraunces/soft.css';
+import '@fontsource-variable/fraunces/soft-italic.css';
 import './index.css';
 import {initSentry, Sentry} from './lib/sentry';
 import {installDomTranslationGuard} from './lib/domTranslationGuard';

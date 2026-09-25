@@ -17,7 +17,7 @@
  *
  * Inputs del usuario:
  *  - Tipo de pieza
- *  - Nivel de awareness del avatar (N1 toma de conciencia · N2 lead magnet · N3 venta directa)
+ *  - Nivel de awareness del avatar (N1 toma de conciencia · N2 protocolo de entrada · N3 venta directa)
  *  - Tema concreto (qué objeción, dolor o aspecto del método quiere abordar)
  *
  * Inputs implícitos (desde ADN):
@@ -46,6 +46,8 @@ import type { ProfileV2 } from '../lib/supabase';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { generateText } from '../lib/aiProvider';
 import { getCompletadas, isPilarCompletado } from '../lib/agents/unlock';
+import { primero } from '../lib/primero';
+import { VOC } from '../lib/vocabulario';
 
 interface CreadorContenidoProps {
   userId?: string;
@@ -81,7 +83,7 @@ const NIVEL_META: Record<NivelAwareness, { label: string; descripcion: string }>
   },
   N2: {
     label: 'N2 · Lead magnet',
-    descripcion: 'El avatar está en B (sabe pero no avanza). Ofrece tu lead magnet para activar conversación.',
+    descripcion: 'El avatar está en B (sabe pero no avanza). Ofrece tu protocolo de entrada para activar conversación.',
   },
   N3: {
     label: 'N3 · Venta directa',
@@ -96,7 +98,7 @@ function buildPrompt(
   perfil: Partial<ProfileV2>,
 ): string {
   const contexto = [
-    `Profesión: ${perfil.especialidad ?? 'profesional de la salud'}`,
+    `Profesión: ${primero(perfil.especialidad) || 'profesional de la salud'}`,
     perfil.metodo_nombre ? `Método propio: ${perfil.metodo_nombre}` : '',
     perfil.metodo_pasos ? `Pasos del método: ${perfil.metodo_pasos}` : '',
     perfil.matriz_a ? `Matriz A (dolores del avatar): ${perfil.matriz_a}` : '',
@@ -191,22 +193,22 @@ function CarruselPreview({ texto }: { texto: string }) {
   if (slides.length < 3) return null;
   return (
     <div className="mb-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
+      <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
       <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
         {slides.map((s) => (
           <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
-            <span className="absolute top-3 right-3 text-[11px] font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
+            <span className="absolute top-3 right-3 text-sm font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
             <div className="flex-1 flex items-center">
               <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
                 {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
               </p>
             </div>
-            {s.n === slides.length && <p className="text-[11px] font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #E8962E, transparent)' }} />
+            {s.n === slides.length && <p className="text-sm font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #B0822E, transparent)' }} />
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+      <p className="text-sm text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
     </div>
   );
 }
@@ -285,7 +287,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     setOutput('');
     try {
       const prompt = buildPrompt(tipo, nivel, tema, perfil ?? {});
-      const result = await generateText({
+      const result = await generateText({ feature: 'creativo', tarea: 'guion',
         prompt,
         systemInstruction:
           'Eres un copywriter especialista en marketing de profesionales de la salud. Tu trabajo es generar contenido auténtico, en la voz del profesional, basado en su método propio y su ADN. Sin promesas exageradas, sin lenguaje marketinero genérico. Empatía primero.',
@@ -326,7 +328,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
         <div className="space-y-3">
-          <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+          <p className="text-sm text-gold uppercase tracking-widest font-semibold">
             v8 · Herramienta nueva
           </p>
           <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
@@ -345,7 +347,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
           </div>
           <div>
             <p className="text-lg font-medium text-cream">
-              Necesitás completar P6 (Matriz A→B→C) para desbloquear el Creador
+              Necesitas completar P6 (Matriz A→B→C) para desbloquear el Creador
             </p>
             <p className="text-sm text-cream/75 mt-2 max-w-md mx-auto">
               Sin la matriz no podemos generar contenido que conecte con el avatar.
@@ -370,7 +372,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <p className="text-[11px] text-gold uppercase tracking-widest font-semibold">
+        <p className="text-sm text-gold uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
         <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
@@ -385,7 +387,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de tipo */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           1 · ¿Qué quieres generar?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -417,7 +419,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                     {meta.label}
                   </p>
                   <p className="text-xs text-cream/65 mt-1 leading-relaxed">
-                    {meta.descripcion}
+                    {VOC(meta.descripcion)}
                   </p>
                 </button>
               );
@@ -428,7 +430,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Selector de nivel */}
       <div className="card-panel p-5 space-y-4">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           2 · ¿Para qué nivel de awareness?
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -454,7 +456,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                     {meta.label}
                   </p>
                   <p className="text-xs text-cream/65 mt-1 leading-relaxed">
-                    {meta.descripcion}
+                    {VOC(meta.descripcion)}
                   </p>
                 </button>
               );
@@ -465,7 +467,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Tema */}
       <div className="card-panel p-5 space-y-3">
-        <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+        <p className="text-sm uppercase tracking-widest text-gold font-bold">
           3 · Tema · ángulo · objeción a abordar
         </p>
         <textarea
@@ -501,7 +503,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       {output && (
         <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-[11px] uppercase tracking-widest text-gold font-bold">
+            <p className="text-sm uppercase tracking-widest text-gold font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
             </p>
             <div className="flex items-center gap-2">

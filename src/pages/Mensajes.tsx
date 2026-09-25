@@ -4,6 +4,7 @@
  *   👤 SOPORTE HUMANO: le escribes al equipo; llega SÍ O SÍ al Admin (canal Consultas Generales).
  * Reemplaza a la vieja página de Mensajes multicanal.
  */
+import { notificarAdminsMensaje } from '../lib/notifications';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Bot, Users, Send, Loader2 } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -82,7 +83,7 @@ function SoporteIA() {
     setMsgs(nuevos);
     setCargando(true);
     try {
-      const out = await generateText({
+      const out = await generateText({ tarea: 'chat',
         systemInstruction: PROMPT_SOPORTE,
         messages: nuevos.slice(-8).map((m) => ({ role: m.role, content: m.content })),
       });
@@ -116,7 +117,7 @@ function SoporteIA() {
           className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
         <button onClick={enviar} disabled={!input.trim() || cargando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]"><Send className="w-4 h-4" /></button>
       </div>
-      <p className="text-[11px] text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
+      <p className="text-sm text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
     </div>
   );
 }
@@ -126,24 +127,29 @@ function SoporteHumano({ userId }: { userId?: string }) {
   const [msgs, setMsgs] = useState<MsgHumano[]>([]);
   const [input, setInput] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const cargar = useCallback(async () => {
     if (!isSupabaseReady() || !supabase) return;
     const { data } = await supabase.from('mensajes').select('id, emisor_id, contenido, created_at')
-      .eq('canal', CANAL_HUMANO).order('created_at', { ascending: true }).limit(80);
+      .or(`canal.eq."${CANAL_HUMANO}",and(canal.eq.privado,receptor_id.eq.${userId})`).order('created_at', { ascending: true }).limit(80);
     if (data) setMsgs(data as MsgHumano[]);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     void cargar();
     if (!supabase) return;
     const ch = supabase.channel('soporte-humano')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes', filter: `canal=eq.${CANAL_HUMANO}` },
-        (payload) => setMsgs((p) => [...p, payload.new as MsgHumano]))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes' },
+        (payload) => {
+          const m = payload.new as MsgHumano & { canal?: string; receptor_id?: string };
+          const mio = m.canal === CANAL_HUMANO || (m.canal === 'privado' && m.receptor_id === userId);
+          if (mio) setMsgs((p) => (p.some((x) => x.id === m.id) ? p : [...p, m]));
+        })
       .subscribe();
     return () => { void supabase?.removeChannel(ch); };
-  }, [cargar]);
+  }, [cargar, userId]);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 99999 }); }, [msgs]);
 
@@ -152,19 +158,30 @@ function SoporteHumano({ userId }: { userId?: string }) {
     if (!texto || enviando || !userId || !supabase) return;
     setEnviando(true);
     const { error } = await supabase.from('mensajes').insert({ canal: CANAL_HUMANO, emisor_id: userId, receptor_id: null, contenido: texto });
-    if (!error) setInput('');
+    if (!error) {
+      setInput('');
+      setFallo(null);
+      // Que el equipo se entere: sin esto el mensaje queda esperando a que alguien mire.
+      try {
+        const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as { nombre?: string };
+        void notificarAdminsMensaje(p?.nombre ?? 'Un cliente');
+      } catch { /* noop */ }
+    } else {
+      setFallo('No pudimos enviarlo. Reintenta — o escríbenos por WhatsApp y te respondemos igual.');
+    }
     setEnviando(false);
   }, [input, enviando, userId]);
 
   return (
     <div className="card-panel p-4 sm:p-5">
       <p className="text-xs text-cream/55 mb-3">Le escribes al equipo de Tu Clínica Digital. <strong className="text-cream/75">Tu mensaje llega directo</strong> — te respondemos aquí mismo.</p>
+      {fallo && <p className="text-xs text-danger mb-2">{fallo}</p>}
       <div ref={scrollRef} className="h-[42vh] overflow-y-auto space-y-3 mb-4 pr-1">
         {msgs.length === 0 && <p className="text-sm text-cream/45 text-center py-10">Todavía no hay mensajes. Escribe el primero.</p>}
         {msgs.map((m) => (
           <div key={m.id} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.emisor_id === userId ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
             {m.contenido}
-            <p className="text-[10px] text-cream/35 mt-1">{new Date(m.created_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+            <p className="text-xs text-cream/35 mt-1">{new Date(m.created_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
           </div>
         ))}
       </div>

@@ -159,7 +159,7 @@ export default function Login({ onLogin }: LoginProps) {
                 Te enviaremos un mail con un link para que puedas fijar una nueva contraseña.
               </p>
               <div>
-                <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email</label>
+                <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Email</label>
                 <input
                   type="email"
                   value={resetEmail}

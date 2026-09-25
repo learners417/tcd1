@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import type { ProfileV2, AgentSkillProgressRow } from '../lib/supabase';
+import { bloqueDeDerivacion, type Entrenador } from '../lib/microPasos';
 import {
   agentConversationsRepo,
   agentSkillProgressRepo,
@@ -55,6 +56,7 @@ import {
   buildAttachmentsFromDataTransfer,
   type ChatAttachment,
 } from '../lib/chatAttachments';
+import { VOC } from '../lib/vocabulario';
 import {
   AGENTES,
   type AgenteCategoria,
@@ -83,7 +85,7 @@ El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
 · Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
 · Fase 4 — Servicio y Escala (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
 El progreso se mide en CINTURONES (taekwondo/planta): Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
-EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · los anuncios CTWA (P4.3-P4.4) · el anuncio follow-me (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
+EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · tus 3 anuncios y la campaña única (P4.3-P4.4) · el montaje de campaña (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
 TRATO: espejá el voseo o tuteo del usuario.
 === FIN DEL CONTEXTO VIGENTE ===`;
 
@@ -119,7 +121,6 @@ const CATEGORIA_ORDEN: AgenteCategoria[] = [
 interface AgentesProps {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   setCurrentPage?: (page: string) => void;
 }
 
@@ -333,9 +334,21 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           : '';
 
         const snapshot = obtenerSnapshot(agenteActivo);
-        const respuesta = await generateText({
+        const respuesta = await generateText({ feature: 'agentes', tarea: 'chat',
           prompt: `${baseConocimiento}\n\n---HISTORIAL---\n${historial}\n\nAgente:`,
-          systemInstruction: CONTEXTO_REDISENO + '\n\n' + agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
+          systemInstruction: [
+            CONTEXTO_REDISENO,
+            agenteActivo.sistemPrompt(perfil ?? {}, snapshot),
+            // El mismo mapa que agrupa la cola le enseña a derivar. Antes cada
+            // uno tenía su lista escrita a mano, desparejas, y Diego no tenía
+            // ninguna: contestaba de todo sin decir que no era lo suyo.
+            bloqueDeDerivacion(entrenadorDe(agenteActivo.id)),
+            // Y si viene con un diagnóstico, abre sabiendo. El que no sabe qué
+            // preguntar es justamente el que más ayuda necesita.
+            // El briefing entra cuando el cliente llega desde su tablero con
+            // un cuello señalado. Vacío mientras no venga de ahí.
+            '',
+          ].filter(Boolean).join('\n\n'),
         });
 
         const respuestaTexto = respuesta || 'Sin respuesta del agente.';
@@ -442,7 +455,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
 
   const copiarConversacion = useCallback(() => {
     const texto = mensajes
-      .map((m) => `${m.rol === 'agente' ? 'ENTRENADOR' : 'VOS'}: ${m.contenido}`)
+      .map((m) => `${m.rol === 'agente' ? 'ENTRENADOR' : 'TÚ'}: ${m.contenido}`)
       .join('\n\n');
     navigator.clipboard.writeText(texto);
     setCopiado(true);
@@ -464,7 +477,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           </h1>
           <p className="text-sm text-white/75 mt-1">
             Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
-            cuando avanzás en El Camino.
+            cuando avanzas en El Camino.
           </p>
         </div>
 
@@ -555,15 +568,15 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             })()}
             <div>
               <h2 className="text-sm font-medium text-gold flex items-center gap-2">
-                {agenteActivo.titulo}
+                {VOC(agenteActivo.titulo)}
                 {autonomoActivo && (
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
                     <Trophy className="w-3 h-3" /> Autónoma
                   </span>
                 )}
               </h2>
               {identidadDe(agenteActivo.id) && (
-                <p className="text-[11px] text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
+                <p className="text-sm text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
               )}
               <p className="text-xs text-white/65">
                 Nivel {snapshotActivo.current_level} · {NIVEL_NOMBRE[snapshotActivo.current_level]} ·{' '}
@@ -664,7 +677,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 <span className="text-base shrink-0 mt-0.5">{qr.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium">{qr.label}</div>
-                  <div className="text-[11px] text-white/55 mt-0.5 leading-snug">
+                  <div className="text-sm text-white/55 mt-0.5 leading-snug">
                     {qr.subtitle}
                   </div>
                 </div>
@@ -734,7 +747,7 @@ interface AgenteCardProps {
 // Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
 // 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
 const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: string }> = {
-  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con pacientes sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
+  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
   caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'rgba(232,150,46,0.45)' },
   vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(232,150,46,0.45)' },
   ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, escalamos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },
@@ -743,6 +756,17 @@ const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: stri
   diego:  { inicial: 'D', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(244,182,92,0.50)' },
   mateo:  { inicial: 'M', frase: 'Guiones y contenido que suenan a ti — cero humo, cero plantillas.', anillo: 'rgba(244,182,92,0.50)' },
 };
+/**
+ * Del id del agente a la clave del entrenador.
+ *
+ * Los ids son largos ('agente-diego-producto') y el mapa usa nombres cortos.
+ * Si no se reconoce, cae en el de números: es el más neutro, y devolver algo
+ * es mejor que dejar al entrenador sin regla de derivación.
+ */
+const ENTRENADORES: Entrenador[] = ['sofi', 'lucas', 'vera', 'diego', 'mateo', 'caro', 'ramiro', 'bruno'];
+const entrenadorDe = (agenteId: string): Entrenador =>
+  ENTRENADORES.find((e) => agenteId.includes(e)) ?? 'ramiro';
+
 const identidadDe = (agenteId: string) => {
   const key = Object.keys(IDENTIDADES).find((k) => agenteId.includes(k));
   return key ? IDENTIDADES[key] : null;
@@ -805,16 +829,16 @@ function AgenteCard({
                     : 'text-white/55'
               }`}
             >
-              {agente.titulo}
+              {VOC(agente.titulo)}
             </h3>
             {!unlocked && <Lock className="w-3.5 h-3.5 text-white/55" />}
             {autonomo && (
-              <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 Autónoma
               </span>
             )}
           </div>
-          <p className="text-xs text-white/65 mt-0.5">{agente.subtitulo}</p>
+          <p className="text-xs text-white/65 mt-0.5">{VOC(agente.subtitulo)}</p>
         </div>
       </div>
 
@@ -823,7 +847,7 @@ function AgenteCard({
       </p>
 
       <div
-        className={`mt-3 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider ${
+        className={`mt-3 flex items-center justify-between text-sm font-medium uppercase tracking-wider ${
           autonomo
             ? 'text-emerald-300'
             : unlocked
@@ -880,7 +904,7 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
         <div className="flex items-center gap-3">
           <Lock className="w-5 h-5 text-gold" />
           <h3 className="text-base font-medium text-white">
-            {agente.titulo} está bloqueada
+            {VOC(agente.titulo)} está bloqueada
           </h3>
         </div>
         <p className="text-sm text-white/70 leading-relaxed">

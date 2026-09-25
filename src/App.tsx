@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
@@ -23,7 +24,7 @@ import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
 import { cinturonDesdeProgreso } from './lib/cinturones';
-import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink } from './lib/planes';
+import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, checkoutUrl, planActualPermite } from './lib/planes';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -33,6 +34,13 @@ import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
 import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
+import { diaDelPrograma } from './lib/diaPrograma';
+import Entrenadores from './pages/Entrenadores';
+import { MessageSquare } from 'lucide-react';
+import { setFamiliaActual } from './lib/vocabulario';
+import { claveDelDia } from './lib/roadmapSeed';
+import CierreDelCamino from './components/CierreDelCamino';
+import { accesoDelPerfil, estadoDeAcceso } from './lib/ventanaDeAcceso';
 
 type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
 
@@ -55,7 +63,7 @@ function loadProfile(): Profile {
 
 // Páginas válidas — fuente de verdad para validar lo guardado en localStorage
 const VALID_PAGES = [
-  'dashboard', 'roadmap', 'coach', 'metrics',
+  'dashboard', 'roadmap', 'entrenadores', 'coach', 'metrics',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
   'campanas',
 ] as const;
@@ -78,7 +86,8 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   let quemas = 0; let racha = 0;
   try {
     const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-    quemas = set.has('1-P1.3') ? 1 : 0;
+    // Su historia queda sellada el día 1 del Camino de hoy.
+    quemas = set.has(claveDelDia(1)) ? 1 : 0;
     racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
   } catch { /* noop */ }
   const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
@@ -86,33 +95,32 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-3">Tu Semana Blanca está completa</p>
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
         <p className="text-sm text-cream/75 mb-5 leading-relaxed">
-          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados 30 días, esperándote.
+          {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados, esperándote.
         </p>
         {nombreRes && (
           <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
         )}
         <div className="text-left mb-5 space-y-2">
           {([
-            ['🟡', 'Tu Base', '$147', 'La Fase 1 completa: tu relación con el dinero sanada + tu Mentor sin límite.'],
-            ['🟢', 'Tu Sistema', '$497', 'Hasta la Fase 3: tu oferta construida, tu método con nombre y tus primeros entrenadores.'],
-            ['⬛', 'Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
+            ['🟢', 'Tu Sistema', '$497', 'Tu método con nombre, tu oferta construida, tu página y tu primera campaña encendida.'],
+            ['⚫', 'El Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
           ] as const).map(([e, n, p, d]) => (
             <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
               <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
-              <p className="text-[11px] text-cream/55 mt-0.5">{d}</p>
+              <p className="text-sm text-cream/55 mt-0.5">{d}</p>
             </div>
           ))}
         </div>
-        <a href={waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+        <a href={(planReservado && checkoutUrl(planReservado as 'verde' | 'negro')) || waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
-        <p className="text-[11px] text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+        <p className="text-sm text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
       </div>
     </div>
   );
@@ -134,15 +142,32 @@ export default function App() {
   useEffect(() => {
     try {
       const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
-      if (plan === 'ELNUMERO') setCurrentPageRaw('numero');
+    // Todos aterrizan en HOY: ahí vive el director del día (mapa, su viernes, la sesión).
     } catch { /* noop */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const pageHistoryRef = useRef<string[]>([]);
+  /** Puerta única: ninguna navegación entra a una sección que su plan no compró. */
   const setCurrentPage = useCallback((page: string) => {
+    // Las cinco pestañas del plan definitivo. Las rutas viejas llevan a su
+    // lugar nuevo para que ningún aviso ni enlace quede sin destino.
+    const ALIAS: Record<string, string> = { agentes: 'entrenadores', manualNegocio: 'adn' };
+    page = ALIAS[page] ?? page;
+    const PAGINA_PILAR: Record<string, number> = {
+      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, miclinica: 5,
+    };
+    const pilarNec = PAGINA_PILAR[page];
+    let destino = pilarNec !== undefined && !planActualPermite(pilarNec) ? 'roadmap' : page;
+    // Diario y El Método se ganan terminando Sanar el Dinero (cinturón 2) — igual que el menú.
+    if ((page === 'diario' || page === 'biblioteca') && destino === page) {
+      try {
+        const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+        if (cinturonDesdeProgreso(hechas).orden < 2) destino = 'roadmap';
+      } catch { /* noop */ }
+    }
     setCurrentPageRaw((prev) => {
-      if (page !== prev) pageHistoryRef.current.push(prev);
-      return page;
+      if (destino !== prev) pageHistoryRef.current.push(prev);
+      return destino;
     });
   }, []);
   const goBack = useCallback(() => {
@@ -158,6 +183,37 @@ export default function App() {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const [profileLoading, setProfileLoading] = useState(false);
   const [supabaseProfile, setSupabaseProfile] = useState<SupabaseProfile | null>(null);
+
+  // Con qué palabra lee cada cliente: un coach no tiene pacientes. Se fija
+  // cada vez que el perfil cambia, venga de la base o del navegador.
+  useEffect(() => {
+    let especialidad = supabaseProfile?.especialidad as string | undefined;
+    if (!especialidad) {
+      try { especialidad = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.especialidad; } catch { /* noop */ }
+    }
+    setFamiliaActual(especialidad ?? null);
+  }, [supabaseProfile?.especialidad]);
+
+  // El avance vive en la base: sin esto, un cliente migrado (o recién logueado en
+  // otro teléfono) arranca con el set vacío → cinturón blanco → todo cerrado.
+  useEffect(() => {
+    const uid = supabaseProfile?.id;
+    if (!uid || !supabase) return;
+    let vivo = true;
+    void (async () => {
+      const { data } = await supabase.from('hoja_de_ruta').select('pilar_numero, meta_codigo, completada').eq('usuario_id', uid);
+      if (!vivo || !data) return;
+      try {
+        const locales = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+        (data as Array<{ pilar_numero: number; meta_codigo: string; completada: boolean }>)
+          .filter((r) => r.completada)
+          .forEach((r) => locales.add(`${r.pilar_numero}-${r.meta_codigo}`));
+        localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...locales]));
+      } catch { /* noop */ }
+    })();
+    return () => { vivo = false; };
+  }, [supabaseProfile?.id]);
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
@@ -244,6 +300,10 @@ export default function App() {
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (!error && data) {
+        // dia_programa se recalcula del calendario: la columna solo la mueve un
+        // trigger al completar metas y se congela si el cliente se frena.
+        const diaReal = diaDelPrograma((data as { fecha_inicio?: string }).fecha_inicio);
+        if (diaReal !== null) (data as { dia_programa?: number }).dia_programa = diaReal;
         setSupabaseProfile(data as SupabaseProfile);
         try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
         syncProfileToLocalStorage(data as SupabaseProfile);
@@ -353,11 +413,11 @@ export default function App() {
       <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
         <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
-          <p className="text-[11px] text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
+          <p className="text-sm text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
         </div>
         <form onSubmit={handleRecoverySubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Nueva contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
@@ -381,14 +441,14 @@ export default function App() {
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
+            <label className="block text-sm font-bold text-cream/55 uppercase tracking-wider mb-1.5">Confirmar contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/55" />
               <input
                 type={recoveryShowPwd ? 'text' : 'password'}
                 value={recoveryPassword2}
                 onChange={(e) => setRecoveryPassword2(e.target.value)}
-                placeholder="Repetí la contraseña"
+                placeholder="Repite la contraseña"
                 required
                 disabled={recoveryLoading}
                 className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
@@ -464,6 +524,27 @@ export default function App() {
     return <SemanaCompleta nombre={supabaseProfile.nombre ?? undefined} planReservado={supabaseProfile.plan_reservado} />;
   }
 
+  // ══ Su ventana se cerró: el cierre de cuentas, con su trabajo a la vista ══
+  {
+    const acceso = accesoDelPerfil(supabaseProfile);
+    const estado = acceso ? estadoDeAcceso(acceso) : null;
+    if (estado && !estado.abierto) {
+      let completadas = new Set<string>();
+      try { completadas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]')); } catch { /* noop */ }
+      return (
+        <CierreDelCamino
+          nombre={supabaseProfile?.nombre ?? undefined}
+          motivo={estado.motivo}
+          desde={estado.desde}
+          completadas={completadas}
+          fechaInicio={supabaseProfile?.fecha_inicio}
+          entregas={supabaseProfile?.entregas}
+          waLink={waLink('Terminé mi Camino y quiero hablar de lo que sigue')}
+        />
+      );
+    }
+  }
+
   return (
     <div className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
       {/* Background Glow */}
@@ -494,16 +575,24 @@ export default function App() {
         <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
           <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+            <CeremoniaCinturon />
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}
-            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} geminiKey={import.meta.env.VITE_GEMINI_API_KEY} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
+            {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
             {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
+              />
+            )}
+            {currentPage === 'entrenadores' && (
+              <Entrenadores
+                userId={supabaseProfile?.id}
+                perfil={supabaseProfile ?? undefined}
+                setCurrentPage={setCurrentPage}
+                onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)}
               />
             )}
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
@@ -514,27 +603,25 @@ export default function App() {
               <Agentes
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
                 setCurrentPage={setCurrentPage}
               />
             )}
             {currentPage === 'campanas' && (() => {
               try {
                 const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="Campañas & Creativos" />;
+                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
               } catch { /* noop */ }
               return null;
             })() || currentPage === 'campanas' && (
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
-                geminiKey={import.meta.env.VITE_GEMINI_API_KEY}
               />
             )}
             {currentPage === 'creador' && (() => {
               try {
                 const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                if (cinturonDesdeProgreso(set).orden < 5) return <PaginaBloqueada nombre="El Creador de Contenido" />;
+                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
               } catch { /* noop */ }
               return null;
             })() || currentPage === 'creador' && (
