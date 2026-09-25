@@ -7,9 +7,11 @@
  */
 import { supabase, isSupabaseReady } from './supabase';
 import { listarEvidencias, urlEvidencia, type Evidencia } from './evidencia';
+import { codigoDelDia } from './roadmapSeed';
 
 /** Los hitos donde vive el comprobante de pago (primer $1.000 y los 10). */
-const CODIGOS_COMPROBANTE = ['P6.3', 'P6.4', 'P7.3'];
+// Las jornadas que piden comprobante de dinero en el Camino de hoy.
+const CODIGOS_COMPROBANTE = [26, 45, 90].map(codigoDelDia);
 
 export interface Comprobante extends Evidencia {
   url?: string;

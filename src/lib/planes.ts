@@ -34,10 +34,13 @@ export const PRECIO_FUNDADOR: Record<string, string> = {
  * redeploy. Con la URL vacía, el candado cae al WhatsApp de siempre
  * (degradación elegante) hasta que la configures.
  */
+// Fuera del navegador (pruebas, scripts) estas variables no existen: se leen
+// con cuidado para que importar este archivo nunca rompa nada.
+const env = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
 export const CHECKOUT_URL: Record<'amarillo' | 'verde' | 'negro', string> = {
-  amarillo: import.meta.env.VITE_CHECKOUT_AMARILLO || '', // Tu Base $147
-  verde: import.meta.env.VITE_CHECKOUT_VERDE || '',       // Tu Sistema $497
-  negro: import.meta.env.VITE_CHECKOUT_NEGRO || '',       // El Completo $997
+  amarillo: env.VITE_CHECKOUT_AMARILLO || '', // Tu Base $147
+  verde: env.VITE_CHECKOUT_VERDE || '',       // Tu Sistema $497
+  negro: env.VITE_CHECKOUT_NEGRO || '',       // El Completo $997
 };
 
 /** El plan mínimo (comprable) que desbloquea ese pilar. */

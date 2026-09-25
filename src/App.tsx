@@ -37,6 +37,10 @@ import { toast } from 'sonner';
 import { diaDelPrograma } from './lib/diaPrograma';
 import Entrenadores from './pages/Entrenadores';
 import { MessageSquare } from 'lucide-react';
+import { setFamiliaActual } from './lib/vocabulario';
+import { claveDelDia } from './lib/roadmapSeed';
+import CierreDelCamino from './components/CierreDelCamino';
+import { accesoDelPerfil, estadoDeAcceso } from './lib/ventanaDeAcceso';
 
 type SettingsTab = 'perfil' | 'notificaciones' | 'seguridad' | 'facturacion';
 
@@ -82,7 +86,8 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   let quemas = 0; let racha = 0;
   try {
     const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-    quemas = set.has('1-P1.3') ? 1 : 0;
+    // Su historia queda sellada el día 1 del Camino de hoy.
+    quemas = set.has(claveDelDia(1)) ? 1 : 0;
     racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
   } catch { /* noop */ }
   const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
@@ -146,7 +151,7 @@ export default function App() {
   const setCurrentPage = useCallback((page: string) => {
     // Las cinco pestañas del plan definitivo. Las rutas viejas llevan a su
     // lugar nuevo para que ningún aviso ni enlace quede sin destino.
-    const ALIAS: Record<string, string> = { adn: 'entrenadores', agentes: 'entrenadores', manualNegocio: 'entrenadores' };
+    const ALIAS: Record<string, string> = { agentes: 'entrenadores', manualNegocio: 'adn' };
     page = ALIAS[page] ?? page;
     const PAGINA_PILAR: Record<string, number> = {
       biblioteca: 2, metrics: 4, campanas: 4, creador: 4, miclinica: 5,
@@ -178,6 +183,16 @@ export default function App() {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const [profileLoading, setProfileLoading] = useState(false);
   const [supabaseProfile, setSupabaseProfile] = useState<SupabaseProfile | null>(null);
+
+  // Con qué palabra lee cada cliente: un coach no tiene pacientes. Se fija
+  // cada vez que el perfil cambia, venga de la base o del navegador.
+  useEffect(() => {
+    let especialidad = supabaseProfile?.especialidad as string | undefined;
+    if (!especialidad) {
+      try { especialidad = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.especialidad; } catch { /* noop */ }
+    }
+    setFamiliaActual(especialidad ?? null);
+  }, [supabaseProfile?.especialidad]);
 
   // El avance vive en la base: sin esto, un cliente migrado (o recién logueado en
   // otro teléfono) arranca con el set vacío → cinturón blanco → todo cerrado.
@@ -507,6 +522,27 @@ export default function App() {
   // ═══ La Semana Blanca vencida: modo lectura digno (nada se borra) ═══
   if (supabaseProfile && accesoVencido(supabaseProfile)) {
     return <SemanaCompleta nombre={supabaseProfile.nombre ?? undefined} planReservado={supabaseProfile.plan_reservado} />;
+  }
+
+  // ══ Su ventana se cerró: el cierre de cuentas, con su trabajo a la vista ══
+  {
+    const acceso = accesoDelPerfil(supabaseProfile);
+    const estado = acceso ? estadoDeAcceso(acceso) : null;
+    if (estado && !estado.abierto) {
+      let completadas = new Set<string>();
+      try { completadas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]')); } catch { /* noop */ }
+      return (
+        <CierreDelCamino
+          nombre={supabaseProfile?.nombre ?? undefined}
+          motivo={estado.motivo}
+          desde={estado.desde}
+          completadas={completadas}
+          fechaInicio={supabaseProfile?.fecha_inicio}
+          entregas={supabaseProfile?.entregas}
+          waLink={waLink('Terminé mi Camino y quiero hablar de lo que sigue')}
+        />
+      );
+    }
   }
 
   return (

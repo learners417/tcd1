@@ -17,7 +17,7 @@ import { MessageSquare, Send, Megaphone, PenLine } from 'lucide-react';
  */
 
 export interface EstadoEnMarcha {
-  /** Mensajes nuevos enviados hoy a su red. Se sostiene desde el día 14. */
+  /** Mensajes nuevos enviados hoy a su red. Se sostiene desde el día 18. */
   mensajesHoy?: number;
   /** Racha de días seguidos cumpliendo los dos mensajes. */
   rachaMensajes?: number;

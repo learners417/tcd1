@@ -1,61 +1,62 @@
 /**
- * PuntoDePartida — la primera pregunta para el cliente que ya viene andando.
+ * PuntoDePartida — "¿qué ya tienes andando?".
  *
- * Aparece una sola vez, cuando el Camino está en cero: "¿ya vienes con cosas
- * hechas?". Elige lo último que ya logró y el Camino lo deja en ese día.
- * Si empieza de cero, se cierra y no vuelve a aparecer.
+ * Aparece una sola vez, cuando el Camino está en cero. Él marca lo que ya
+ * tiene hecho y esas jornadas pasan a revisión: las hace igual, más cortas y
+ * con el Crítico midiendo lo que trae.
+ *
+ * Nadie se salta el Camino. El que llega con la agenda llena y el que empieza
+ * de cero recorren lo mismo: es el recorrido el que los convierte en directores
+ * de su clínica. Antes esta pantalla daba ochenta jornadas por hechas.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Check } from 'lucide-react';
-import type { RoadmapPilar } from '../lib/roadmapSeed';
-import { opcionesDePartida, resumenDePartida, jornadasHasta, diaDeLaOpcion, fechaInicioParaDia } from '../lib/puntoDePartida';
+import { YA_TIENES, KEY_YA_TIENES } from '../lib/yaTienes';
+import { VOC } from '../lib/vocabulario';
 
 export const KEY_PARTIDA = 'tcd_punto_de_partida_v1';
 
 interface Props {
-  pilares: RoadmapPilar[];
-  /** Marca las jornadas elegidas (guarda progreso local y en la base). */
-  onMarcar: (jornadas: Array<{ pilarNumero: number; codigo: string; esEstrella: boolean }>, fechaInicio: string) => void;
+  /** Guarda lo que ya tiene, local y en la base. */
+  onGuardar: (ids: string[]) => void;
   onCerrar: () => void;
 }
 
-export default function PuntoDePartida({ pilares, onMarcar, onCerrar }: Props) {
-  const opciones = useMemo(() => opcionesDePartida(), []);
-  const [elegida, setElegida] = useState<string | null>(null);
-  const resumen = elegida ? resumenDePartida(pilares, elegida) : null;
+export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
+  const [elegidas, setElegidas] = useState<string[]>([]);
+
+  const alternar = (id: string) =>
+    setElegidas((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const confirmar = () => {
-    if (!elegida) return;
-    const dia = diaDeLaOpcion(elegida);
-    if (dia !== null) onMarcar(jornadasHasta(pilares, dia), fechaInicioParaDia(dia));
-    try { localStorage.setItem(KEY_PARTIDA, elegida); } catch { /* noop */ }
-    onCerrar();
-  };
-
-  const empezarDeCero = () => {
-    try { localStorage.setItem(KEY_PARTIDA, 'cero'); } catch { /* noop */ }
+    try {
+      localStorage.setItem(KEY_YA_TIENES, JSON.stringify(elegidas));
+      localStorage.setItem(KEY_PARTIDA, elegidas.length ? 'con-base' : 'cero');
+    } catch { /* noop */ }
+    onGuardar(elegidas);
     onCerrar();
   };
 
   return (
-    <section className="card-panel p-5 sm:p-6" aria-label="Tu punto de partida">
+    <section className="card-panel p-5 sm:p-6" aria-label="Lo que ya tienes">
       <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Antes de empezar</p>
       <h2 className="mt-2 text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-        ¿Ya vienes con cosas hechas?
+        ¿Qué ya tienes andando?
       </h2>
       <p className="mt-2 text-[17px] text-cream/70">
-        Elige lo último que ya tienes listo. El Camino te deja en ese día, con tu cinturón ganado.
+        Marca todo lo que ya está hecho. Esos días los haces igual, más cortos: en vez de
+        construir, revisas lo que traes y corriges lo que falte.
       </p>
 
       <ul className="mt-4 space-y-2">
-        {opciones.map((o) => {
-          const activa = elegida === o.id;
+        {YA_TIENES.map((o) => {
+          const activa = elegidas.includes(o.id);
           return (
             <li key={o.id}>
               <button
                 type="button"
                 aria-pressed={activa}
-                onClick={() => setElegida(activa ? null : o.id)}
+                onClick={() => alternar(o.id)}
                 className={`w-full min-h-[56px] flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
                   activa ? 'border-gold bg-[var(--card,#FFFDF7)]' : 'border-[var(--line2,#DFD3BC)]'
                 }`}
@@ -68,34 +69,26 @@ export default function PuntoDePartida({ pilares, onMarcar, onCerrar }: Props) {
                 >
                   {activa && <Check className="w-4 h-4" style={{ color: '#FFFDF7' }} />}
                 </span>
-                <span className="text-[17px] leading-snug text-cream">{o.loQueYaTienes}</span>
+                <span className="text-[17px] leading-snug text-cream">{VOC(o.loQueTiene)}</span>
               </button>
             </li>
           );
         })}
       </ul>
 
-      {resumen && (
-        <p className="mt-4 text-[17px] text-cream">
-          Entras en el <span className="font-semibold">día {resumen.dia}</span>, con el cinturón{' '}
-          <span className="font-semibold">{resumen.nombreGrado}</span> y {resumen.jornadas} jornadas dadas por hechas.
-        </p>
-      )}
+      <p className="mt-4 text-[17px] text-cream">
+        {elegidas.length === 0
+          ? 'Empiezas desde el día 1, con todo por construir.'
+          : `Empiezas desde el día 1. ${elegidas.length} ${elegidas.length === 1 ? 'jornada va' : 'jornadas van'} en modo revisión.`}
+      </p>
 
-      {/* Apagado por color, no por opacidad: un botón al 40% no se lee. */}
       <button
         type="button"
         onClick={confirmar}
-        disabled={!elegida}
         className="mt-4 w-full min-h-[52px] rounded-[20px] text-[18px] font-semibold"
-        style={elegida
-          ? { background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }
-          : { background: 'var(--card2, #F5EFE1)', color: 'var(--ink2, #5E5244)' }}
+        style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
       >
-        Entrar en ese día
-      </button>
-      <button type="button" onClick={empezarDeCero} className="mt-3 w-full min-h-[52px] text-[17px] font-semibold text-goldhi">
-        Empiezo desde el día 1
+        Empezar el día 1
       </button>
     </section>
   );

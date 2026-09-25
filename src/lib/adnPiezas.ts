@@ -9,6 +9,7 @@
  */
 
 import { planActualPermite } from './planes';
+import { SEED_ROADMAP_V2 } from './roadmapSeed';
 
 export type GrupoPieza = 'alma' | 'activo';
 export type PlanPieza = 'elnumero' | 'completo';
@@ -25,41 +26,52 @@ export interface PiezaADN {
   /** Pilar del Camino donde se sella — el plan decide si está a su alcance. */
   pilar: number;
   /** Cómo saber si ya está sellada. */
-  chequeo: { origen?: 'porque' | 'herida' | 'paciente'; sello?: string; campo?: string; progreso?: string };
+  chequeo: {
+    origen?: 'porque' | 'herida' | 'paciente';
+    sello?: string;
+    campo?: string;
+    progreso?: string;
+    /**
+     * La clave que escribe el Camino (`adn_escribe`). Es el chequeo que manda:
+     * los códigos viejos quedaron obsoletos cuando cambió el Camino y el ADN
+     * dejaba de sellarse aunque el cliente hiciera todo.
+     */
+    clave?: string;
+  };
 }
 
 export const PIEZAS_ADN: PiezaADN[] = [
   // ─────────── EL ALMA (9) — el orden causal del ikigai ───────────
   { id: 'historia', titulo: 'Tu Historia', que: 'de dónde vienes y por qué esta profesión',
-    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'porque', sello: 'H-P1.3' } },
+    sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: {origen: 'porque', clave: 'historia.por_que_empezo' } },
   { id: 'herida', titulo: 'Tu Herida Sanada', que: 'lo que atravesaste y hoy sabes curar',
     sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'herida' } },
   { id: 'dones', titulo: 'Tus Dones', que: 'lo que haces distinto sin darte cuenta',
     sesion: 'Tu origen · el primer día', grupo: 'alma', plan: 'elnumero', pilar: 0, chequeo: { origen: 'paciente' } },
   { id: 'precio', titulo: 'Tu Precio Digno', que: 'el número que sale de tu meta, no de tu miedo',
-    sesion: 'Día 5 · EL NÚMERO', grupo: 'alma', plan: 'elnumero', pilar: 1, chequeo: { progreso: '1-P1.5' } },
+    sesion: 'Día 5 · EL NÚMERO', grupo: 'alma', plan: 'elnumero', pilar: 1, chequeo: {clave: 'numeros.precio_digno' } },
   { id: 'proposito', titulo: 'Tu Propósito', que: 'lo que sostiene el precio cuando tiemblas',
-    sesion: 'Tu creencia nueva y el Estandarte', grupo: 'alma', plan: 'completo', pilar: 1, chequeo: { progreso: '1-P1.6', campo: 'proposito' } },
-  { id: 'avatar', titulo: 'A Quién Sirves', que: 'el paciente exacto que paga sin dudar',
-    sesion: 'Tu paciente ideal · los 3 mejores', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'avatar_cliente', progreso: '2-P2.3' } },
+    sesion: 'Tu creencia nueva y el Estandarte', grupo: 'alma', plan: 'completo', pilar: 1, chequeo: {campo: 'proposito', clave: 'identidad' } },
+  { id: 'avatar', titulo: 'A Quién Sirves', que: 'el {{consultante}} exacto que paga sin dudar',
+    sesion: 'Tu paciente ideal · los 3 mejores', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: {campo: 'avatar_cliente', clave: 'avatar.matriz_abc' } },
   { id: 'puv', titulo: 'Tu PUV', que: 'la frase que te separa de todos los demás',
-    sesion: 'Tu PUV · la frase que te define', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'posicionamiento', sello: 'H-P5.2' } },
+    sesion: 'Tu PUV · la frase que te define', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'posicionamiento' } },
   { id: 'metodo', titulo: 'Tu Método', que: 'tu proceso con nombre — dejas de vender horas',
-    sesion: 'Genera tu método · nombre + pasos', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: { campo: 'metodo_nombre', sello: 'H-P7.3' } },
+    sesion: 'Genera tu método · nombre + pasos', grupo: 'alma', plan: 'completo', pilar: 2, chequeo: {campo: 'metodo_nombre', clave: 'metodo.aprobado_por_critico' } },
   { id: 'oferta', titulo: 'Tu Oferta', que: 'el programa completo que se cobra en miles',
-    sesion: 'Diseña tu oferta principal', grupo: 'alma', plan: 'completo', pilar: 3, chequeo: { campo: 'oferta_mid', sello: 'H-P8.2' } },
+    sesion: 'Diseña tu oferta principal', grupo: 'alma', plan: 'completo', pilar: 3, chequeo: {campo: 'oferta_mid', clave: 'oferta' } },
 
   // ─────────── LOS ACTIVOS (5) — lo que opera todos los días ───────────
   { id: 'guardian', titulo: 'Tu Guardián del Precio', que: 'las 10 respuestas para cuando cuestionen tu número',
-    sesion: 'Día 5 · El Guardián del Precio', grupo: 'activo', plan: 'elnumero', pilar: 1, chequeo: { sello: 'H-P1.5b', progreso: '1-P1.5b' } },
+    sesion: 'Día 5 · El Guardián del Precio', grupo: 'activo', plan: 'elnumero', pilar: 1, chequeo: {clave: 'garantia' } },
   { id: 'matriz', titulo: 'Tu Matriz ABC', que: 'el dolor, lo que falló y la transformación — en sus palabras',
-    sesion: 'Tu Matriz ABC', grupo: 'activo', plan: 'completo', pilar: 2, chequeo: { sello: 'H-P6.3', progreso: '2-P2.3b' } },
-  { id: 'mensaje', titulo: 'Tu Mensaje', que: 'el gancho que atrae a tu paciente ideal',
-    sesion: 'El mensaje que atrae a TU paciente', grupo: 'activo', plan: 'completo', pilar: 4, chequeo: { progreso: '4-P4.2' } },
+    sesion: 'Tu Matriz ABC', grupo: 'activo', plan: 'completo', pilar: 2, chequeo: {clave: 'avatar.matriz_abc' } },
+  { id: 'mensaje', titulo: 'Tu Mensaje', que: 'el gancho que atrae a tu {{consultante}} ideal',
+    sesion: 'El mensaje que atrae a TU paciente', grupo: 'activo', plan: 'completo', pilar: 4, chequeo: {clave: 'trafico.recurso' } },
   { id: 'script', titulo: 'Tu Script de Ventas', que: 'la conversación que cierra sin empujar',
-    sesion: 'Tu script de ventas propio', grupo: 'activo', plan: 'completo', pilar: 5, chequeo: { progreso: '5-P5.2' } },
+    sesion: 'Tu script de ventas propio', grupo: 'activo', plan: 'completo', pilar: 5, chequeo: {clave: 'voz.objeciones_reales' } },
   { id: 'protocolo', titulo: 'Tu Protocolo de Entrega', que: 'cómo entregas sin quemarte',
-    sesion: 'Tu protocolo de entrega', grupo: 'activo', plan: 'completo', pilar: 6, chequeo: { progreso: '6-P6.2' } },
+    sesion: 'Tu protocolo de entrega', grupo: 'activo', plan: 'completo', pilar: 6, chequeo: {clave: 'entrega.estaciones' } },
 ];
 
 /* ══════════ Lectura del estado (local-first, sin red) ══════════ */
@@ -76,6 +88,22 @@ export function planLimitado(): boolean {
 }
 
 /** ¿Está sellada esta pieza? Con la fecha del sello si la hay. */
+/**
+ * Las claves del ADN que ya quedaron escritas: salen de las jornadas completadas.
+ * Una sola fuente, la del propio Camino, para que nunca más se desincronicen.
+ */
+export function clavesEscritas(): Set<string> {
+  const hechas = new Set(leerJSON<string[]>('tcd_hoja_ruta_v2', []));
+  const out = new Set<string>();
+  for (const pilar of SEED_ROADMAP_V2) {
+    for (const m of pilar.metas) {
+      if (!hechas.has(`${pilar.numero}-${m.codigo}`)) continue;
+      for (const k of m.adn_fields ?? []) out.add(k);
+    }
+  }
+  return out;
+}
+
 export function estadoPieza(p: PiezaADN): { sellada: boolean; fecha?: string; bloqueada: boolean } {
   const bloqueada = !planActualPermite(p.pilar);
   const origen = leerJSON<Record<string, string>>('tcd_origen_v1', {});
@@ -89,6 +117,7 @@ export function estadoPieza(p: PiezaADN): { sellada: boolean; fecha?: string; bl
   if (p.chequeo.sello && sellos[p.chequeo.sello]) { sellada = true; fecha = sellos[p.chequeo.sello]?.fecha; }
   if (p.chequeo.campo && String(perfil[p.chequeo.campo] ?? '').trim()) sellada = true;
   if (p.chequeo.progreso && Array.isArray(hechas) && hechas.includes(p.chequeo.progreso)) sellada = true;
+  if (p.chequeo.clave && clavesEscritas().has(p.chequeo.clave)) sellada = true;
 
   return { sellada, fecha, bloqueada };
 }
@@ -98,8 +127,7 @@ export function resumenADN(): { selladas: number; total: number; disponibles: nu
   return {
     selladas: estados.filter((e) => e.sellada).length,
     total: PIEZAS_ADN.length,
-    disponibles: estados.filter((e) => !e.bloqueada).length,
-  };
+    disponibles: estados.filter((e) => !e.bloqueada).length };
 }
 
 /**

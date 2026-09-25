@@ -117,8 +117,20 @@ export function mensajeDeRitmo(diaHoy: number, diaDelPaso: number | null, atraso
  * de él. La entrega técnica del día 0 se le mostraba como su sesión.
  */
 export const JORNADAS_DEL_EQUIPO = new Set(['entrega_tecnica']);
-export function esPasoDelCliente(meta: { tipo_jornada?: string | null }): boolean {
-  return !JORNADAS_DEL_EQUIPO.has(meta.tipo_jornada ?? '');
+
+/**
+ * Un paso del cliente es una jornada que él hace.
+ *
+ * Los días de campo y los fines de semana no se completan: son para atender y
+ * descansar. Contarlos hacía que el Camino dijera "1 de 90 pasos" cuando las
+ * jornadas con trabajo son cincuenta, y esos noventa no se alcanzaban nunca.
+ */
+export function esPasoDelCliente(
+  meta: { tipo_jornada?: string | null; tiempo_estimado?: string | null; cinturon?: string | null },
+): boolean {
+  if (JORNADAS_DEL_EQUIPO.has(meta.tipo_jornada ?? '')) return false;
+  const minutos = parseInt(meta.tiempo_estimado ?? '0', 10) || 0;
+  return minutos > 0 || Boolean(meta.cinturon);
 }
 
 /**

@@ -747,7 +747,7 @@ interface AgenteCardProps {
 // Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
 // 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
 const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: string }> = {
-  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con pacientes sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
+  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
   caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'rgba(232,150,46,0.45)' },
   vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(232,150,46,0.45)' },
   ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, escalamos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },

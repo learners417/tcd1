@@ -69,12 +69,19 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
   const [pqIni, setPqIni] = useState('');
 
+  // Las tres bases que faltaban: de dónde llegan hoy, qué entrega entre
+  // sesiones y dónde publica. Con esto el Camino arranca con sus datos y no
+  // le vuelve a preguntar lo mismo el día 22, el 47 y el 61.
+  const [dxLlegan, setDxLlegan] = useState('');
+  const [dxEntrega, setDxEntrega] = useState('');
+  const [dxPublica, setDxPublica] = useState('');
+
   const guardarDiagnostico = async () => {
     if (!dxAvatar) return;
     setDxSaving(true);
     try {
       localStorage.setItem('tcd_avatar', dxAvatar);
-      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo }));
+      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica }));
       localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
       localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
       if (supabase) {
@@ -84,7 +91,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           new Promise((res) => setTimeout(res, 8000)),
           supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
-          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe },
+          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica },
           ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
         }).eq('id', profile.id),
@@ -523,7 +530,43 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">6 · ¿Cómo quieres que te hable tu Mentor?</p>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">{VOC('6 · ¿De dónde llegan hoy tus {{consultantes}}?')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['Me los recomiendan','De mis redes','De anuncios que pago','De un lugar donde atiendo'].map((o) => (
+                  <button key={o} onClick={() => setDxLlegan(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxLlegan === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">7 · Entre sesión y sesión, ¿qué le das hoy?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {['Nada, hasta la próxima sesión','Mensajes cuando me escriben','Ejercicios o material que mando','Ya tengo una plataforma'].map((o) => (
+                  <button key={o} onClick={() => setDxEntrega(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxEntrega === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[17px] font-medium text-cream/85 mb-2">8 · ¿Cada cuánto publicas hoy?</p>
+              <div className="grid grid-cols-2 gap-2">
+                {['Casi nunca','Cuando me acuerdo','Una vez por semana','Varias por semana'].map((o) => (
+                  <button key={o} onClick={() => setDxPublica(o)}
+                    className={`text-left px-4 py-3 rounded-xl border text-[17px] min-h-[52px] transition-all ${dxPublica === o ? 'border-gold bg-gold/10 text-cream' : 'border-[var(--line2,#DFD3BC)] text-cream/70'}`}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">9 · ¿Cómo quieres que te hable tu Mentor?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {([['hueso', 'Directo al hueso. Sin vueltas, aunque incomode.'], ['guantes', 'Con guantes. Firme, pero más suave.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxEstilo(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxEstilo === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>
@@ -532,7 +575,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             </div>
 
             <div>
-              <p className="text-sm font-medium text-cream/85 mb-2">7 · ¿El trabajo espiritual es parte de tu vida?</p>
+              <p className="text-sm font-medium text-cream/85 mb-2">10 · ¿El trabajo espiritual es parte de tu vida?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {([['si', 'Sí — la fe, la oración o la gratitud son parte de mi camino.'], ['no', 'No — prefiero un lenguaje neutro.']] as const).map(([v, l]) => (
                   <button key={v} onClick={() => setDxFe(v)} className={`text-left px-4 py-3 rounded-xl border text-sm transition-all ${dxFe === v ? 'border-gold bg-gold/10 text-cream' : 'border-[rgba(232,150,46,0.14)] bg-black/20 text-cream/70 hover:border-gold/40'}`}>{l}</button>

@@ -10,28 +10,28 @@
   "sistemas": [
     {
       "n": 1,
-      "nombre": "Tú",
-      "dias": "1-12"
+      "nombre": "Tu reset",
+      "dias": "1-5"
     },
     {
       "n": 2,
-      "nombre": "Tu programa",
-      "dias": "15-19"
+      "nombre": "Tu programa de alto impacto",
+      "dias": "8-12"
     },
     {
       "n": 3,
-      "nombre": "Tu sistema de venta",
-      "dias": "22-46"
+      "nombre": "Tu captación automática",
+      "dias": "15-33"
     },
     {
       "n": 4,
-      "nombre": "Tu clínica adentro",
-      "dias": "2 y 47-53"
+      "nombre": "Tu propia app",
+      "dias": "36-44"
     },
     {
       "n": 5,
-      "nombre": "Tu plan de marca",
-      "dias": "61-67"
+      "nombre": "Tu ecosistema circular",
+      "dias": "85-86"
     }
   ],
   "piezas": [
@@ -581,8 +581,8 @@
       "dia": 1,
       "dia_estimado": 1,
       "significado": "La semilla bajo la nieve",
-      "forma": "Búnker abierto y pacto publicado",
-      "se_gana_con": "Búnker abierto y pacto publicado",
+      "forma": "Tus diez números de entrada",
+      "se_gana_con": "Tus diez números de entrada",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -591,11 +591,11 @@
       "nombre": "Blanco punta amarilla",
       "color": "#FFFFFF",
       "punta": "#E8C24A",
-      "dia": 3,
-      "dia_estimado": 3,
+      "dia": 5,
+      "dia_estimado": 5,
       "significado": "La semilla toca la tierra",
-      "forma": "Su hora real neta escrita a mano",
-      "se_gana_con": "Su hora real neta escrita a mano",
+      "forma": "Precio digno",
+      "se_gana_con": "Precio digno",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -607,8 +607,8 @@
       "dia": 12,
       "dia_estimado": 12,
       "significado": "La tierra",
-      "forma": "Primer cobro a su cartera al precio nuevo",
-      "se_gana_con": "Primer cobro a su cartera al precio nuevo",
+      "forma": "Método aprobado",
+      "se_gana_con": "Método aprobado",
       "por_evidencia": true,
       "en_ventana": true
     },
@@ -620,8 +620,8 @@
       "dia": 16,
       "dia_estimado": 16,
       "significado": "Asoma el tallo",
-      "forma": "Método aprobado por Diego",
-      "se_gana_con": "Método aprobado por Diego",
+      "forma": "Captura del perfil",
+      "se_gana_con": "Captura del perfil",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -633,8 +633,8 @@
       "dia": 19,
       "dia_estimado": 19,
       "significado": "La planta en pie",
-      "forma": "Oferta completa en una página",
-      "se_gana_con": "Oferta completa en una página",
+      "forma": "Audio del ancla",
+      "se_gana_con": "Audio del ancla",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -643,11 +643,11 @@
       "nombre": "Verde punta azul",
       "color": "#4E8C57",
       "punta": "#3A6EA5",
-      "dia": 25,
-      "dia_estimado": 25,
+      "dia": 26,
+      "dia_estimado": 26,
       "significado": "La planta busca el cielo",
-      "forma": "El enlace vivo de su página",
-      "se_gana_con": "El enlace vivo de su página",
+      "forma": "Cobro al precio nuevo",
+      "se_gana_con": "Cobro al precio nuevo",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -656,11 +656,11 @@
       "nombre": "Azul",
       "color": "#3A6EA5",
       "punta": null,
-      "dia": 28,
-      "dia_estimado": 28,
+      "dia": 31,
+      "dia_estimado": 31,
       "significado": "El cielo",
-      "forma": "Agendarse a sí mismo de punta a punta",
-      "se_gana_con": "Agendarse a sí mismo de punta a punta",
+      "forma": "Campaña activa",
+      "se_gana_con": "Campaña activa",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -669,11 +669,11 @@
       "nombre": "Azul punta roja",
       "color": "#3A6EA5",
       "punta": "#A6392E",
-      "dia": 31,
-      "dia_estimado": 31,
+      "dia": 38,
+      "dia_estimado": 38,
       "significado": "Se acerca el peligro",
-      "forma": "Campaña activa, con fecha y hora",
-      "se_gana_con": "Campaña activa, con fecha y hora",
+      "forma": "Tu app con tu marca",
+      "se_gana_con": "Tu app con tu marca",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -685,8 +685,8 @@
       "dia": 45,
       "dia_estimado": 45,
       "significado": "El sol, y el aviso",
-      "forma": "Cobro de alguien que no lo conocía",
-      "se_gana_con": "Cobro de alguien que no lo conocía",
+      "forma": "Cobro del sistema",
+      "se_gana_con": "Cobro del sistema",
       "por_evidencia": true,
       "en_ventana": true
     },
@@ -695,11 +695,11 @@
       "nombre": "Rojo punta negra",
       "color": "#A6392E",
       "punta": "#1A1815",
-      "dia": 55,
-      "dia_estimado": 55,
+      "dia": 47,
+      "dia_estimado": 47,
       "significado": "Controla la fuerza",
-      "forma": "Captura desde el celular de su consultante",
-      "se_gana_con": "Captura desde el celular de su consultante",
+      "forma": "Tu cadena con tus números",
+      "se_gana_con": "Tu cadena con tus números",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -711,8 +711,8 @@
       "dia": 90,
       "dia_estimado": 90,
       "significado": "Lo que ya no se altera",
-      "forma": "Los dos números lado a lado",
-      "se_gana_con": "Los dos números lado a lado",
+      "forma": "Tus noventa días",
+      "se_gana_con": "Tus noventa días",
       "por_evidencia": true,
       "en_ventana": true
     }
@@ -722,63 +722,63 @@
       "id": "espejo",
       "nombre": "El Espejo",
       "rol": "el trabajo interno",
-      "dia_estimado": 3,
+      "dia_estimado": 1,
       "se_abre_con": "hora_real_neta_cargada"
     },
     {
       "id": "vera",
       "nombre": "Vera",
       "rol": "tu precio",
-      "dia_estimado": 9,
+      "dia_estimado": 5,
       "se_abre_con": "precio_digno_sellado"
     },
     {
       "id": "sofi",
       "nombre": "Sofi",
       "rol": "tus mensajes",
-      "dia_estimado": 14,
+      "dia_estimado": 18,
       "se_abre_con": "veinte_mensajes_enviados"
     },
     {
       "id": "diego",
       "nombre": "Diego",
       "rol": "tu producto",
-      "dia_estimado": 15,
+      "dia_estimado": 9,
       "se_abre_con": "metodo_escrito"
     },
     {
       "id": "mateo",
       "nombre": "Mateo",
       "rol": "tu contenido",
-      "dia_estimado": 22,
+      "dia_estimado": 11,
       "se_abre_con": "oferta_sellada"
     },
     {
       "id": "caro",
       "nombre": "Caro",
       "rol": "tu cámara",
-      "dia_estimado": 24,
+      "dia_estimado": 16,
       "se_abre_con": "perfil_cerrado"
     },
     {
       "id": "lucas",
       "nombre": "Lucas",
       "rol": "tus llamadas",
-      "dia_estimado": 36,
+      "dia_estimado": 17,
       "se_abre_con": "w_dibujada"
     },
     {
       "id": "ramiro",
       "nombre": "Ramiro",
       "rol": "tu embudo",
-      "dia_estimado": 33,
+      "dia_estimado": 26,
       "se_abre_con": "campana_activa"
     },
     {
       "id": "bruno",
       "nombre": "Bruno",
       "rol": "tu entrega",
-      "dia_estimado": 47,
+      "dia_estimado": 36,
       "se_abre_con": "primer_cobro_sistema"
     }
   ],
@@ -871,233 +871,141 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "",
+      "veredicto": "",
       "acciones_campo": [],
       "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario.",
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": []
     },
     {
       "dia": 1,
       "tipo": "sesion",
-      "titulo": "Entrar y abrir el búnker",
+      "titulo": "Tu punto de partida",
       "sistema": 1,
-      "minutos": 50,
+      "minutos": 75,
       "piezas": [
         "P0.0",
-        "P0.3"
+        "P0.3",
+        "P1.0",
+        "P1.2b"
       ],
       "tutoriales": [
         "L-01"
       ],
-      "agente": null,
+      "agente": "espejo",
       "manual": "LID-1",
       "acceso": null,
       "pasos": [
-        "Elige el lugar físico",
-        "Elige la hora fija",
-        "Saca la foto del lugar con el cuaderno",
-        "Escribe a mano por qué empezaste",
-        "Firma el pacto",
-        "Publica el pacto"
+        "Contesta las diez preguntas de tu medición de entrada",
+        "Elige dónde y a qué hora vas a construir esto cada día",
+        "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
+        "Divide: esa es tu hora real neta",
+        "Escríbela donde la veas"
       ],
       "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus diez números de entrada",
+          "valida": "las diez respuestas, 1 a 10",
+          "del_mercado": false,
+          "pide": "Contesta las diez preguntas. Quedan guardadas hasta el día 87."
+        },
         {
           "tipo": "imagen",
           "nombre": "Foto del búnker",
           "valida": "mesa, cuaderno visible, sin pantalla encendida",
           "del_mercado": false,
-          "pide": "Sube foto del búnker."
+          "pide": "Sube la foto de tu lugar, con el cuaderno sobre la mesa."
         },
         {
           "tipo": "imagen",
           "nombre": "Pacto publicado",
           "valida": "se lee nombre y fecha",
           "del_mercado": false,
-          "pide": "Sube una foto de pacto publicado."
+          "pide": "Sube la captura de tu pacto publicado, donde se lea tu nombre y la fecha."
         },
         {
           "tipo": "texto",
-          "nombre": "El por qué",
-          "valida": "mínimo 8 palabras, primera persona",
+          "nombre": "Dónde lo sentiste",
+          "valida": "una palabra",
           "del_mercado": false,
-          "pide": "Escribe el por qué."
+          "pide": "Escribe en una palabra dónde lo sentiste."
         }
       ],
       "adn_escribe": [
         "identidad",
-        "historia.por_que_empezo"
+        "historia.por_que_empezo",
+        "reset.medicion_entrada",
+        "numeros.hora_real_neta"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": "10gup",
       "jornada_larga": false,
+      "lleva": "Tu medición de entrada y tu hora real neta, escritas.",
+      "veredicto": "Ya sabes de dónde partes. El día 87 lo vuelves a medir.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Contesta las diez preguntas de tu medición de entrada",
+        "Elige dónde y a qué hora vas a construir esto cada día",
+        "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
+        "Divide: esa es tu hora real neta",
+        "Escríbela donde la veas"
+      ]
     },
     {
       "dia": 2,
       "tipo": "sesion",
-      "titulo": "Cargar tu clínica",
-      "sistema": 4,
-      "minutos": 90,
+      "titulo": "Tu árbol y el dinero",
+      "sistema": 1,
+      "minutos": 75,
       "piezas": [
-        "P0.4",
-        "P1.2"
+        "P1.3"
       ],
-      "tutoriales": [
-        "L-02"
-      ],
-      "agente": null,
+      "tutoriales": [],
+      "agente": "espejo",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Abre MCD desde el tab Clínica",
-        "Carga todos tus consultantes activos",
-        "Carga tu agenda de esta semana",
-        "Carga los ingresos de los últimos tres meses",
-        "Carga tus gastos fijos",
-        "No ordenes nada: hoy solo entra información"
+        "Escribe las frases sobre el dinero que escuchaste en tu casa",
+        "Arma tu árbol: padres y abuelos, y cómo vivió cada uno el dinero",
+        "Marca el techo: lo máximo que ganó alguien de tu familia",
+        "Contesta: si te fuera muy bien, ¿a quién sentirías que traicionas?",
+        "Escribe tu permiso: gano más y sigo siendo de mi familia"
       ],
       "evidencias": [
         {
-          "tipo": "imagen",
-          "nombre": "Panel con consultantes",
-          "valida": "al menos 5 filas con nombre y monto",
+          "tipo": "texto",
+          "nombre": "Tu permiso escrito",
+          "valida": "nombra a alguien concreto y está escrito en primera persona",
           "del_mercado": false,
-          "pide": "Sube una foto de panel con consultantes."
-        },
-        {
-          "tipo": "numero",
-          "nombre": "Consultantes activos",
-          "valida": "entero > 0",
-          "del_mercado": false,
-          "pide": "Escribe el número: consultantes activos."
-        },
-        {
-          "tipo": "numero",
-          "nombre": "Ingreso promedio 3 meses",
-          "valida": "> 0",
-          "del_mercado": false,
-          "pide": "Escribe el número: ingreso promedio 3 meses."
+          "pide": "Pega tu permiso escrito."
         }
       ],
       "adn_escribe": [
-        "numeros.ingreso_mensual_actual",
-        "numeros.precio_viejo"
+        "linaje",
+        "reset.permiso"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu linaje del dinero en una página y tu permiso escrito.",
+      "veredicto": "Lo que heredaste ya tiene nombre. Desde hoy es una decisión, no un destino.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6,
+      "paso_esencial": 5,
       "avanza_sin_evidencia": false
     },
     {
       "dia": 3,
       "tipo": "sesion",
-      "titulo": "Tu número",
-      "sistema": 1,
-      "minutos": 45,
-      "piezas": [
-        "P1.0",
-        "P1.2b"
-      ],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "La app trae los datos del día 2",
-        "Suma tus horas reales de la semana",
-        "La app calcula tu hora real neta",
-        "Quédate diez segundos con el número",
-        "Escribe dónde lo sentiste",
-        "Escríbelo a mano y tápalo"
-      ],
-      "evidencias": [
-        {
-          "tipo": "numero",
-          "nombre": "Hora real neta",
-          "valida": "0 < x < 500, coherente ±20% con día 2",
-          "del_mercado": false,
-          "pide": "Escribe el número: hora real neta."
-        },
-        {
-          "tipo": "imagen",
-          "nombre": "El número a mano",
-          "valida": "se lee un número manuscrito",
-          "del_mercado": false,
-          "pide": "Sube una foto de el número a mano."
-        },
-        {
-          "tipo": "texto",
-          "nombre": "La palabra del cuerpo",
-          "valida": "una palabra",
-          "del_mercado": false,
-          "pide": "Escribe la palabra del cuerpo."
-        }
-      ],
-      "adn_escribe": [
-        "numeros.hora_real_neta_inicial",
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": "9gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Acá y solo acá: 'esto es entrenamiento para dirigir un negocio, no es terapia'.",
-      "paso_esencial": 6,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 4,
-      "tipo": "sesion",
-      "titulo": "Para qué te sirve cobrar poco",
-      "sistema": 1,
-      "minutos": 45,
-      "piezas": [
-        "P1.1",
-        "P1.3"
-      ],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": "LID-2",
-      "acceso": null,
-      "pasos": [
-        "Completa tres veces: mientras cobre poco, no tengo que…",
-        "Elige la que más te incomodó y escribe dos líneas",
-        "Escribe las tres frases sobre el dinero de tu casa antes de los doce"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Las tres frases",
-          "valida": "primera persona, sin generalidades",
-          "del_mercado": false,
-          "pide": "Escribe las tres frases."
-        }
-      ],
-      "adn_escribe": [
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Examen: día 18, la garantía.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 5,
-      "tipo": "sesion",
-      "titulo": "El dinero en el cuerpo",
+      "titulo": "Cómo te frenas y cómo te empujas",
       "sistema": 1,
       "minutos": 60,
       "piezas": [
@@ -1108,74 +1016,42 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Auriculares, luz baja, ojos cerrados",
-        "No escribas mientras escuchas",
-        "Al terminar, escribe lo que apareció sin corregirlo"
-      ],
-      "evidencias": [
-        {
-          "tipo": "imagen",
-          "nombre": "La página del cuaderno",
-          "valida": "foto legible",
-          "del_mercado": false,
-          "pide": "Sube una foto de la página del cuaderno."
-        }
-      ],
-      "adn_escribe": [
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Reproductor sin barra de avance los primeros 40 minutos. Se pausa, no se adelanta.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 6,
-      "tipo": "protocolo",
-      "titulo": "Los tres que te formaron",
-      "sistema": 1,
-      "minutos": 20,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Nombra tres personas que te enseñaron qué es trabajar bien",
-        "Escribe la frase exacta que cada una decía sobre el dinero",
-        "Marca cuál de las tres todavía usas"
+        "Contesta el test y mira tu tipo",
+        "Lee cómo se ve tu tipo cuando estás entero y cuando estás cansado",
+        "Anota tres situaciones de tu semana que te sacan de eje",
+        "Escribe qué haces hoy en cada una",
+        "Marca dónde lo sientes en el cuerpo"
       ],
       "evidencias": [
         {
           "tipo": "texto",
-          "nombre": "Tres nombres y tres frases",
-          "valida": "una marcada",
+          "nombre": "Tus tres disparadores",
+          "valida": "tres situaciones concretas, con qué hace hoy en cada una",
           "del_mercado": false,
-          "pide": "Escribe tres nombres y tres frases."
+          "pide": "Escribe tus tres disparadores."
         }
       ],
       "adn_escribe": [
-        "historia.los_tres_que_formaron"
+        "eneagrama",
+        "reset.disparadores"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu tipo, tus tres disparadores y dónde los sientes.",
+      "veredicto": "Ya sabes qué te saca de eje. Mañana escribes qué haces cuando pasa.",
       "acciones_campo": [],
-      "nota": "Examen: día 43, el permiso.",
-      "paso_esencial": 3,
+      "nota": null,
+      "paso_esencial": 5,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 7,
+      "dia": 4,
       "tipo": "protocolo",
-      "titulo": "El que te parece un vendehumo",
+      "titulo": "Tu protocolo, escrito por ti",
       "sistema": 1,
-      "minutos": 20,
+      "minutos": 45,
       "piezas": [
         "P1.6"
       ],
@@ -1184,247 +1060,188 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Escribe tres profesionales que te parecen exagerados",
-        "Al lado de cada uno, una cosa que hace y tú no",
-        "Elige una capacidad y practícala esta semana"
+        "Para cada disparador de ayer, elige un reemplazo que ya te guste. Ejemplo: en vez del postre, salgo a caminar veinte minutos",
+        "Que el reemplazo se pueda hacer en menos de cinco minutos y no dependa de nadie",
+        "Elige un gesto físico chico que lo arranque. Ejemplo: apoyar las dos manos en la mesa y respirar hondo una vez",
+        "Escribe tu protocolo en tres líneas: si pasa X, hago Y, y empiezo con este gesto",
+        "Pégalo donde trabajas y pruébalo esta semana"
       ],
       "evidencias": [
         {
-          "tipo": "texto",
-          "nombre": "Tres nombres y una capacidad",
-          "valida": "capacidad en infinitivo",
+          "tipo": "imagen",
+          "nombre": "Tu protocolo pegado",
+          "valida": "tres reemplazos escritos, con su gesto",
           "del_mercado": false,
-          "pide": "Escribe tres nombres y una capacidad."
+          "pide": "Sube la foto de tu protocolo pegado donde trabajas."
+        },
+        {
+          "tipo": "texto",
+          "nombre": "Tus tres reemplazos",
+          "valida": "tres pares disparador-reemplazo",
+          "del_mercado": false,
+          "pide": "Escribe tus tres reemplazos, uno por disparador."
         }
       ],
       "adn_escribe": [
-        "cuaderno"
+        "reset.protocolo"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu protocolo: si pasa esto, hago esto otro. Con tu gesto para arrancarlo.",
+      "veredicto": "Ese es tu reset y es tuyo: nadie te va a decir qué comer ni a qué hora levantarte. Lo pruebas esta semana y lo corriges el día 32.",
       "acciones_campo": [],
-      "nota": "Examen: día 10, los mensajes de subida de precio.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Para cada disparador de ayer, elige un reemplazo que ya te guste. Ejemplo: en vez del postre, salgo a caminar veinte minutos",
+        "Que el reemplazo se pueda hacer en menos de cinco minutos y no dependa de nadie",
+        "Elige un gesto físico chico que lo arranque. Ejemplo: apoyar las dos manos en la mesa y respirar hondo una vez",
+        "Escribe tu protocolo en tres líneas: si pasa X, hago Y, y empiezo con este gesto",
+        "Pégalo donde trabajas y pruébalo esta semana"
+      ]
     },
     {
-      "dia": 8,
+      "dia": 5,
       "tipo": "sesion",
-      "titulo": "El precio nuevo y el link",
+      "titulo": "Tu precio nuevo y lo que sueltas",
       "sistema": 1,
       "minutos": 75,
       "piezas": [
         "P3.8",
-        "P1.5"
+        "P1.5",
+        "P3.7"
       ],
-      "tutoriales": [
-        "L-03",
-        "L-04"
-      ],
+      "tutoriales": [],
       "agente": "vera",
-      "manual": null,
-      "acceso": "Entrega 1 del Sistema — pagos y calendario",
+      "manual": "LID-3",
+      "acceso": null,
       "pasos": [
-        "Mira tu hora real neta y tu precio viejo",
-        "Escribe el precio nuevo",
-        "La app te muestra qué hora real neta te daría",
-        "Confirma: el número queda sellado",
-        "Crea tu link de pago",
-        "Cóbrate un peso para probarlo"
+        "Pon lado a lado tu hora real neta y tu precio de hoy",
+        "Escribe tu precio nuevo y dilo tres veces en voz alta",
+        "Sella el precio y crea tu link de pago",
+        "Ordena a quienes atiendes en tres grupos: siguen, suben, sueltas",
+        "Si recién empiezas: escribe a quién no vas a atender"
       ],
       "evidencias": [
         {
           "tipo": "numero",
           "nombre": "Precio digno",
-          "valida": "> precio_viejo",
+          "valida": "> precio_viejo, hora real neta objetivo alcanzable",
           "del_mercado": false,
-          "pide": "Escribe el número: precio digno."
+          "pide": "Escribe tu precio nuevo."
         },
         {
           "tipo": "url",
           "nombre": "Link de pago",
-          "valida": "responde 200 y muestra el monto",
+          "valida": "enlace que abre el cobro",
           "del_mercado": false,
-          "pide": "Pega el enlace: link de pago."
+          "pide": "Pega el enlace de pago que creaste."
         },
         {
           "tipo": "evento",
           "nombre": "Cobro de prueba",
           "valida": "registrado en el Sistema",
           "del_mercado": false,
-          "pide": "Se marca solo: cobro de prueba."
+          "pide": "Se marca solo cuando entre tu cobro de prueba."
+        },
+        {
+          "tipo": "imagen",
+          "nombre": "Las tres listas",
+          "valida": "cada consultante activo en un grupo, con monto",
+          "del_mercado": false,
+          "pide": "Sube la captura de tus tres grupos, con el monto de cada persona."
         }
       ],
       "adn_escribe": [
         "numeros.precio_digno",
-        "sistema.link_pago"
+        "sistema.link_pago",
+        "cartera.grupos"
       ],
       "freno_activa": [
         "F-PRECIO"
       ],
       "freno_levanta": [],
-      "cinturon": null,
+      "cinturon": "9gup",
       "jornada_larga": false,
+      "lleva": "Tu precio sellado, tu link de pago y tu cartera en tres grupos.",
+      "veredicto": "Primero el número, después la cartera. Ya está hecho en ese orden.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 6,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Pon lado a lado tu hora real neta y tu precio de hoy",
+        "Escribe tu precio nuevo y dilo tres veces en voz alta",
+        "Sella el precio y crea tu link de pago",
+        "Ordena a quienes atiendes en tres grupos: siguen, suben, sueltas",
+        "Si recién empiezas: escribe a quién no vas a atender"
+      ]
     },
     {
-      "dia": 9,
-      "tipo": "sesion",
-      "titulo": "Los tres grupos",
-      "sistema": 1,
-      "minutos": 60,
-      "piezas": [
-        "P3.7"
-      ],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "La app trae tu lista del día 2 en tres columnas vacías",
-        "Arrastra a cada persona a su columna",
-        "Ninguna persona queda sin columna",
-        "Cuenta cuántos hay en cada una"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Las tres listas",
-          "valida": "suma igual a la cantidad del día 2",
-          "del_mercado": false,
-          "pide": "Escribe las tres listas."
-        }
-      ],
-      "adn_escribe": [
-        "transicion"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Pantalla de arrastrar, no de escribir. Va después del precio: primero se sella el número, después se ordena la cartera.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 10,
-      "tipo": "sesion",
-      "titulo": "Los que suben",
-      "sistema": 1,
-      "minutos": 45,
+      "dia": 6,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [
-        "Abre la plantilla del grupo uno y edítala con tu voz",
-        "Mándala a todos los del grupo, el mismo día",
-        "Marca en la app quién recibió"
-      ],
-      "evidencias": [
-        {
-          "tipo": "imagen",
-          "nombre": "Tres mensajes enviados",
-          "valida": "capturas legibles",
-          "del_mercado": false,
-          "pide": "Sube una foto de tres mensajes enviados."
-        }
-      ],
+      "pasos": [],
+      "evidencias": [],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [],
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
       "nota": null,
-      "paso_esencial": 3,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 11,
-      "tipo": "sesion",
-      "titulo": "Los que terminan y los que se derivan",
-      "sistema": 1,
-      "minutos": 45,
+      "dia": 7,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [
-        "Mensaje del grupo dos con fecha de cierre para cada persona",
-        "Carga esas fechas en la agenda de MCD",
-        "Mensaje del grupo tres con nombre de colega, nunca una lista"
-      ],
-      "evidencias": [
-        {
-          "tipo": "imagen",
-          "nombre": "Agenda con fechas de cierre",
-          "valida": "al menos una fecha cargada",
-          "del_mercado": false,
-          "pide": "Sube una foto de agenda con fechas de cierre."
-        }
-      ],
+      "pasos": [],
+      "evidencias": [],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [],
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
       "nota": null,
-      "paso_esencial": 3,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 12,
+      "dia": 8,
       "tipo": "sesion",
-      "titulo": "El primer cobro al precio nuevo",
-      "sistema": 1,
-      "minutos": 30,
-      "piezas": [
-        "P3.9"
-      ],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Cobra",
-        "Escribe al lado del número quién viene después"
-      ],
-      "evidencias": [
-        {
-          "tipo": "evento",
-          "nombre": "Cobro al precio nuevo",
-          "valida": "monto >= precio_digno",
-          "del_mercado": true,
-          "pide": "Se marca solo: cobro al precio nuevo."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": "8gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "No se sube captura: se detecta. El camino sigue igual: lo que espera es el grado, no el paso. Mientras tanto la app dice cuánto falta.",
-      "paso_esencial": 2,
-      "avanza_sin_evidencia": true
-    },
-    {
-      "dia": 13,
-      "tipo": "sesion",
-      "titulo": "Tu plan de caza",
-      "sistema": 1,
+      "titulo": "A quién le hablas",
+      "sistema": 2,
       "minutos": 60,
       "piezas": [
+        "P4.1c",
         "P7.2"
       ],
       "tutoriales": [],
@@ -1432,87 +1249,55 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "La red no es tu cartera: colegas, egresados, contactos del rubro",
-        "Escribe sesenta nombres con apellido y por dónde le escribes a cada uno",
-        "Ordénalos por quién te contesta más fácil",
-        "Los diez primeros son los de mañana"
+        "Elige al consultante que mejor te salió",
+        "Escribe su dolor con sus palabras, como te lo dijo",
+        "Escribe qué quería lograr y qué ya había probado",
+        "Arma tu lista de veinte: nombres, no categorías",
+        "Al lado de cada nombre, su canal"
       ],
       "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Audiencia contada",
+          "valida": ">= 0",
+          "del_mercado": false,
+          "pide": "Escribe el total de tu audiencia."
+        },
         {
           "tipo": "texto",
           "nombre": "Los sesenta nombres",
           "valida": "sesenta filas con nombre y canal",
           "del_mercado": false,
-          "pide": "Escribe los sesenta nombres."
-        },
-        {
-          "tipo": "numero",
-          "nombre": "Tamaño de la red",
-          "valida": ">= 20",
-          "del_mercado": false,
-          "pide": "Escribe el número: tamaño de la red."
+          "pide": "Escribe tu lista, con el canal de cada uno."
         }
       ],
       "adn_escribe": [
+        "trafico.audiencia_contada",
+        "trafico.rama",
         "trafico.red_propia"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu avatar con sus palabras y tu lista de veinte.",
+      "veredicto": "Ya no le hablas a todos. Le hablas a una persona, y tienes veinte nombres.",
       "acciones_campo": [],
-      "nota": "Sale del campo red_propia del formulario. Si declaró menos de veinte, la app se lo dice acá.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.",
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Elige al consultante que mejor te salió",
+        "Escribe su dolor con sus palabras, como te lo dijo",
+        "Escribe qué quería lograr y qué ya había probado",
+        "Arma tu lista de veinte: nombres, no categorías",
+        "Al lado de cada nombre, su canal"
+      ]
     },
     {
-      "dia": 14,
+      "dia": 9,
       "tipo": "sesion",
-      "titulo": "Los primeros veinte mensajes",
-      "sistema": 1,
-      "minutos": 60,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": "sofi",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Edita la plantilla con tu voz: no vende, pide veinte minutos",
-        "Manda veinte, hoy, empezando por los más fáciles",
-        "Marca en la app a quién le escribiste"
-      ],
-      "evidencias": [
-        {
-          "tipo": "imagen",
-          "nombre": "Veinte mensajes enviados",
-          "valida": "capturas legibles",
-          "del_mercado": false,
-          "pide": "Sube una foto de veinte mensajes enviados."
-        },
-        {
-          "tipo": "numero",
-          "nombre": "Mensajes enviados",
-          "valida": ">= 20",
-          "del_mercado": false,
-          "pide": "Escribe el número: mensajes enviados."
-        }
-      ],
-      "adn_escribe": [
-        "trafico.mensajes_enviados"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Desde hoy son dos por día, sostenidos. Deja de ser tarea y pasa a ser estado.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 15,
-      "tipo": "sesion",
-      "titulo": "Tu método propio",
+      "titulo": "Tu método, escrito con sus etapas",
       "sistema": 2,
       "minutos": 60,
       "piezas": [
@@ -1523,10 +1308,10 @@
       "manual": "CLI-1",
       "acceso": null,
       "pasos": [
-        "Escribe las etapas de lo que ya haces, en orden",
-        "Define punto inicial y punto final",
-        "Define cómo se mide",
-        "Arma las siglas: una letra por etapa"
+        "Escribe las etapas de lo que ya haces, en orden. Ejemplo: entrevista, medición, devolución",
+        "Define con qué entra la persona y con qué sale",
+        "Define cómo se mide: qué número miras al empezar y al terminar",
+        "Arma las siglas con una letra por etapa y ponle nombre"
       ],
       "evidencias": [
         {
@@ -1534,7 +1319,7 @@
           "nombre": "Método con nombre, siglas y etapas",
           "valida": "Diego devuelve lo que falta",
           "del_mercado": false,
-          "pide": "Escribe método con nombre, siglas y etapas."
+          "pide": "Escribe tu método: nombre, etapas en orden y cómo se mide."
         }
       ],
       "adn_escribe": [
@@ -1544,15 +1329,138 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu forma de trabajar, con etapas en orden y un nombre.",
+      "veredicto": "Eso que ya hacías ahora se puede explicar, vender y repetir sin ti adelante.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Escribe las etapas de lo que ya haces, en orden. Ejemplo: entrevista, medición, devolución",
+        "Define con qué entra la persona y con qué sale",
+        "Define cómo se mide: qué número miras al empezar y al terminar",
+        "Arma las siglas con una letra por etapa y ponle nombre"
+      ]
     },
     {
-      "dia": 16,
+      "dia": 10,
       "tipo": "sesion",
-      "titulo": "La prueba de tu método",
+      "titulo": "Tu programa de 1.000 USD",
+      "sistema": 2,
+      "minutos": 75,
+      "piezas": [
+        "P3.1",
+        "P3.3",
+        "P3.2b"
+      ],
+      "tutoriales": [],
+      "agente": "vera",
+      "manual": "CLI-2",
+      "acceso": null,
+      "pasos": [
+        "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
+        "Plazo, con fecha de cierre",
+        "Entregables: lo que la persona recibe, no lo que tú haces",
+        "Precio con número, nunca menor al que sellaste el día 8",
+        "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "La oferta en una página",
+          "valida": "precio >= precio_digno",
+          "del_mercado": false,
+          "pide": "Escribe tu oferta completa, en una página."
+        }
+      ],
+      "adn_escribe": [
+        "oferta",
+        "garantia"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu oferta en una página, con su garantía.",
+      "veredicto": "Dejaste de vender horas. Desde hoy vendes un resultado con plazo y precio.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
+        "Plazo, con fecha de cierre",
+        "Entregables: lo que la persona recibe, no lo que tú haces",
+        "Precio con número, nunca menor al que sellaste el día 8",
+        "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
+      ]
+    },
+    {
+      "dia": 11,
+      "tipo": "sesion",
+      "titulo": "Tus guiones",
+      "sistema": 3,
+      "minutos": 90,
+      "piezas": [
+        "P4.1a",
+        "P4.1",
+        "P4.3e",
+        "P4.3"
+      ],
+      "tutoriales": [],
+      "agente": "mateo",
+      "manual": "CAM-1",
+      "acceso": "Entrega 2 del Sistema — sitios, formularios y contactos",
+      "pasos": [
+        "Escribe el guion del video de tu página",
+        "Escribe tres piezas que abren distinto y terminan igual",
+        "Escribe el mensaje para tu entorno",
+        "Dibuja la W de tu llamada",
+        "Arma la lista de lo que grabas el lunes"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Tu embudo dibujado",
+          "valida": "dos ramas: recurso y video de venta",
+          "del_mercado": false,
+          "pide": "Sube la foto de tu embudo, con las dos ramas."
+        },
+        {
+          "tipo": "texto",
+          "nombre": "Tu recurso elegido",
+          "valida": "masterclass, guía o diagnóstico",
+          "del_mercado": false,
+          "pide": "Escribe cuál de los tres recursos eliges."
+        }
+      ],
+      "adn_escribe": [
+        "trafico.recurso"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [
+        "F-PAGINA"
+      ],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Todos los guiones que grabas el lunes, escritos.",
+      "veredicto": "El lunes no improvisas: grabas lo que ya está escrito.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Escribe el guion del video de tu página",
+        "Escribe tres piezas que abren distinto y terminan igual",
+        "Escribe el mensaje para tu entorno",
+        "Dibuja la W de tu llamada",
+        "Arma la lista de lo que grabas el lunes"
+      ]
+    },
+    {
+      "dia": 12,
+      "tipo": "sesion",
+      "titulo": "Tu método aprobado y todo listo",
       "sistema": 2,
       "minutos": 45,
       "piezas": [
@@ -1564,10 +1472,11 @@
       "manual": "CLI-1B",
       "acceso": null,
       "pasos": [
-        "Examen 1: ¿se puede medir?",
-        "Examen 2: la regla del QUÉ y el CÓMO",
-        "Examen 3: ¿importa el orden?",
-        "Corrige y vuelve a presentar"
+        "Presenta tu método a Diego",
+        "Examen 1: ¿se puede medir? Si no hay número al principio y al final, no es método",
+        "Examen 2: el qué y el cómo, separados",
+        "Examen 3: ¿importa el orden de las etapas?",
+        "Corrige lo que te devuelva y vuelve a presentarlo. Puedes reprobar las veces que haga falta"
       ],
       "evidencias": [
         {
@@ -1575,7 +1484,7 @@
           "nombre": "Método aprobado",
           "valida": "veredicto aprobado en los tres exámenes",
           "del_mercado": false,
-          "pide": "Escribe método aprobado."
+          "pide": "Se marca solo cuando Diego apruebe tu método."
         }
       ],
       "adn_escribe": [
@@ -1583,314 +1492,147 @@
       ],
       "freno_activa": [],
       "freno_levanta": [],
-      "cinturon": "7gup",
+      "cinturon": "8gup",
       "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 17,
-      "tipo": "sesion",
-      "titulo": "Tu oferta",
-      "sistema": 2,
-      "minutos": 60,
-      "piezas": [
-        "P3.1",
-        "P3.3"
-      ],
-      "tutoriales": [],
-      "agente": "vera",
-      "manual": "CLI-2",
-      "acceso": null,
-      "pasos": [
-        "Promesa: un resultado, no una actividad",
-        "Plazo escrito",
-        "Entregables que la persona recibe",
-        "Precio con número",
-        "La ecuación de valor aplicada: una acción por cada palanca"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "La oferta en una página",
-          "valida": "precio >= precio_digno",
-          "del_mercado": false,
-          "pide": "Escribe la oferta en una página."
-        }
-      ],
-      "adn_escribe": [
-        "oferta"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
+      "lleva": "Tu método pasado por los tres exámenes de Diego.",
+      "veredicto": "Aprobado. Lo que aprobó Diego es lo que vas a poder cobrar sin justificarte.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Presenta tu método a Diego",
+        "Examen 1: ¿se puede medir? Si no hay número al principio y al final, no es método",
+        "Examen 2: el qué y el cómo, separados",
+        "Examen 3: ¿importa el orden de las etapas?",
+        "Corrige lo que te devuelva y vuelve a presentarlo. Puedes reprobar las veces que haga falta"
+      ]
     },
     {
-      "dia": 18,
-      "tipo": "sesion",
-      "titulo": "Tu garantía",
-      "sistema": 2,
-      "minutos": 45,
-      "piezas": [
-        "P3.2b"
-      ],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": "CLI-2B",
-      "acceso": null,
-      "pasos": [
-        "Escribe la garantía en una frase, en positivo",
-        "Escribe los tres compromisos que firma al lado, medibles",
-        "Escribe qué pasa si no los cumplió"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Garantía y compromisos",
-          "valida": "no promete resultado; compromisos con verbo y número",
-          "del_mercado": false,
-          "pide": "Escribe garantía y compromisos."
-        }
-      ],
-      "adn_escribe": [
-        "garantia"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "El Espejo devuelve textual lo del día 4.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 19,
-      "tipo": "sesion",
-      "titulo": "Tu escalera y la fecha del rodaje",
-      "sistema": 2,
-      "minutos": 45,
-      "piezas": [
-        "P3.3b",
-        "P3.4"
-      ],
+      "dia": 13,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
       "tutoriales": [],
       "agente": null,
-      "manual": "CLI-3",
-      "acceso": null,
-      "pasos": [
-        "Diseña los cinco niveles",
-        "Marca el tercero: es el único que vendes hoy",
-        "Elige la fecha y la hora de tu rodaje: es el día 27"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Los cinco niveles",
-          "valida": "el tercero marcado",
-          "del_mercado": false,
-          "pide": "Escribe los cinco niveles."
-        },
-        {
-          "tipo": "evento",
-          "nombre": "Rodaje agendado",
-          "valida": "fecha y hora bloqueadas",
-          "del_mercado": false,
-          "pide": "Se marca solo: rodaje agendado."
-        }
-      ],
-      "adn_escribe": [
-        "oferta.escalera"
-      ],
-      "freno_activa": [
-        "F-RODAJE"
-      ],
-      "freno_levanta": [],
-      "cinturon": "6gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 20,
-      "tipo": "protocolo",
-      "titulo": "Cobrar libera al otro",
-      "sistema": 1,
-      "minutos": 20,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": "espejo",
       "manual": null,
       "acceso": null,
-      "pasos": [
-        "Escribe qué recibe tu consultante a cambio del dinero",
-        "Escribe qué se libera él al pagar"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Dos columnas",
-          "valida": "ambas completas",
-          "del_mercado": false,
-          "pide": "Escribe dos columnas."
-        }
-      ],
-      "adn_escribe": [
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Examen: día 27, cuando diga el precio en cámara.",
-      "paso_esencial": 2,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 21,
-      "tipo": "protocolo",
-      "titulo": "El ancla del precio",
-      "sistema": 1,
-      "minutos": 20,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Elige un gesto físico chico y repetible",
-        "Grábate diciendo tu número veinte veces, con el gesto antes de cada una",
-        "Escucha la uno y la veinte"
-      ],
-      "evidencias": [
-        {
-          "tipo": "archivo",
-          "nombre": "Audio del ancla",
-          "valida": "compara tono y velocidad de la primera y la última",
-          "del_mercado": false,
-          "pide": "Sube el archivo: audio del ancla."
-        }
-      ],
-      "adn_escribe": [
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.",
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 22,
-      "tipo": "sesion",
-      "titulo": "El circuito",
-      "sistema": 3,
-      "minutos": 60,
-      "piezas": [
-        "P4.1a",
-        "P4.1"
-      ],
-      "tutoriales": [],
-      "agente": "mateo",
-      "manual": "CAM-1",
-      "acceso": "Entrega 2 del Sistema — sitios, formularios y contactos",
-      "pasos": [
-        "Dibuja tu circuito con las cinco piezas",
-        "Marca cuáles ya tienes",
-        "Si trabajas con una agencia, hazle las tres preguntas"
-      ],
-      "evidencias": [
-        {
-          "tipo": "imagen",
-          "nombre": "El circuito dibujado",
-          "valida": "cinco piezas unidas",
-          "del_mercado": false,
-          "pide": "Sube una foto de el circuito dibujado."
-        }
-      ],
+      "pasos": [],
+      "evidencias": [],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [],
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
       "nota": null,
-      "paso_esencial": 3,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 23,
-      "tipo": "sesion",
-      "titulo": "Frío o tibio",
-      "sistema": 3,
-      "minutos": 30,
-      "piezas": [
-        "P4.1c"
+      "dia": 14,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
       ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 15,
+      "tipo": "rodaje",
+      "titulo": "Tu día de rodaje",
+      "sistema": 3,
+      "minutos": 210,
+      "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Cuenta seguidores activos",
-        "Suma contactos de consultantes pasados",
-        "Suma tu lista de correo",
-        "La app te muestra tu rama"
+        "Graba primero los tres anuncios, uno detrás del otro",
+        "Después el video de tu página, de corrido y sin leer. Tres tomas y sigues",
+        "Al final, el de preparación para la llamada",
+        "No revises nada hasta terminar el día: mirar en el medio es la forma más eficiente de no grabar el resto",
+        "Sube los cinco archivos"
       ],
       "evidencias": [
         {
-          "tipo": "numero",
-          "nombre": "Audiencia contada",
-          "valida": ">= 0",
+          "tipo": "archivo",
+          "nombre": "Cinco archivos",
+          "valida": "duración mínima por pieza, audio presente",
           "del_mercado": false,
-          "pide": "Escribe el número: audiencia contada."
+          "pide": "Sube los cinco archivos que grabaste."
         }
       ],
-      "adn_escribe": [
-        "trafico.audiencia_contada",
-        "trafico.rama"
-      ],
+      "adn_escribe": [],
       "freno_activa": [],
-      "freno_levanta": [],
+      "freno_levanta": [
+        "F-RODAJE"
+      ],
       "cinturon": null,
-      "jornada_larga": false,
+      "jornada_larga": true,
+      "lleva": "Cinco piezas grabadas en un solo día.",
+      "veredicto": "Un día de grabación, un mes de contenido. Así se hace siempre.",
       "acciones_campo": [],
-      "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.",
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Graba primero los tres anuncios, uno detrás del otro",
+        "Después el video de tu página, de corrido y sin leer. Tres tomas y sigues",
+        "Al final, el de preparación para la llamada",
+        "No revises nada hasta terminar el día: mirar en el medio es la forma más eficiente de no grabar el resto",
+        "Sube los cinco archivos"
+      ]
     },
     {
-      "dia": 24,
+      "dia": 16,
       "tipo": "sesion",
-      "titulo": "Tu perfil, cuatro cosas",
+      "titulo": "Tu perfil y tu página, publicados",
       "sistema": 3,
-      "minutos": 30,
+      "minutos": 90,
       "piezas": [
-        "P4.2b"
+        "P4.2b",
+        "P4.2d"
       ],
-      "tutoriales": [],
+      "tutoriales": [
+        "L-05",
+        "L-06"
+      ],
       "agente": "caro",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Foto: cara, fondo limpio, legible en miniatura",
-        "Nombre buscable",
-        "Bio con tu promesa, no con tu título",
+        "Foto: tu cara, fondo limpio, que se entienda en miniatura",
+        "Nombre buscable: cómo te buscarían, no tu título completo",
+        "Frase: tu promesa, no tu profesión. Ejemplo: ayudo a X a lograr Y",
         "Enlace a tu página",
-        "Cierra"
+        "Cierra y no toques nada más hoy"
       ],
       "evidencias": [
         {
@@ -1898,48 +1640,14 @@
           "nombre": "Captura del perfil",
           "valida": "los cuatro elementos presentes",
           "del_mercado": false,
-          "pide": "Sube captura del perfil."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 5,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 25,
-      "tipo": "sesion",
-      "titulo": "Tu página, publicada",
-      "sistema": 3,
-      "minutos": 120,
-      "piezas": [
-        "P4.2d"
-      ],
-      "tutoriales": [
-        "L-05",
-        "L-06"
-      ],
-      "agente": "mateo",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Revisa que tengas promesa, cinco filas, garantía y precio",
-        "Mateo arma el pedido inicial: léelo entero antes de mandarlo",
-        "Pide los tres cambios: celular, letra grande, aviso legal",
-        "Sube y publica en tu subdominio"
-      ],
-      "evidencias": [
+          "pide": "Sube la captura de tu perfil con las cuatro cosas."
+        },
         {
           "tipo": "url",
           "nombre": "El enlace vivo",
           "valida": "200, contiene la promesa, botón de agenda, carga en móvil",
           "del_mercado": false,
-          "pide": "Pega el enlace: el enlace vivo."
+          "pide": "Pega el enlace de tu página publicada."
         }
       ],
       "adn_escribe": [
@@ -1949,123 +1657,49 @@
         "F-PAGINA"
       ],
       "freno_levanta": [],
-      "cinturon": "5gup",
-      "jornada_larga": true,
+      "cinturon": "7gup",
+      "jornada_larga": false,
+      "lleva": "Tu perfil con foto, nombre, frase y enlace.",
+      "veredicto": "Con esas cuatro alcanza. El resto de tu perfil se trabaja el día 85, con tu ecosistema.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Foto: tu cara, fondo limpio, que se entienda en miniatura",
+        "Nombre buscable: cómo te buscarían, no tu título completo",
+        "Frase: tu promesa, no tu profesión. Ejemplo: ayudo a X a lograr Y",
+        "Enlace a tu página",
+        "Cierra y no toques nada más hoy"
+      ]
     },
     {
-      "dia": 26,
+      "dia": 17,
       "tipo": "sesion",
-      "titulo": "Preproducción",
+      "titulo": "Tu agenda y tu cobro, andando",
       "sistema": 3,
-      "minutos": 90,
+      "minutos": 75,
       "piezas": [
-        "P4.3e",
-        "P4.3"
-      ],
-      "tutoriales": [],
-      "agente": "caro",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Mateo arma el guion del video de tu página con tu ADN",
-        "Mateo arma los tres anuncios según tu rama",
-        "Sube fotos del lugar: la Cámara corrige luz, fondo y altura",
-        "Lee el guion en voz alta tres veces"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Guion del VSL y tres anuncios",
-          "valida": "completos",
-          "del_mercado": false,
-          "pide": "Escribe guion del VSL y tres anuncios."
-        },
-        {
-          "tipo": "imagen",
-          "nombre": "Set armado",
-          "valida": "aprobado por la Cámara",
-          "del_mercado": false,
-          "pide": "Sube una foto de set armado."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [
-        "F-PAGINA"
-      ],
-      "cinturon": null,
-      "jornada_larga": true,
-      "acciones_campo": [],
-      "nota": "Único día con dos agentes.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 27,
-      "tipo": "rodaje",
-      "titulo": "Jornada de rodaje A",
-      "sistema": 3,
-      "minutos": 240,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Los tres anuncios primero",
-        "El VSL después, de corrido y sin leer, tres tomas",
-        "El de preparación al final",
-        "No revises nada hasta terminar el día"
-      ],
-      "evidencias": [
-        {
-          "tipo": "archivo",
-          "nombre": "Cinco archivos",
-          "valida": "duración mínima por pieza, audio presente",
-          "del_mercado": false,
-          "pide": "Sube el archivo: cinco archivos."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [
-        "F-RODAJE"
-      ],
-      "cinturon": null,
-      "jornada_larga": true,
-      "acciones_campo": [],
-      "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 28,
-      "tipo": "sesion",
-      "titulo": "El filtro",
-      "sistema": 3,
-      "minutos": 90,
-      "piezas": [
-        "P4.2e-i"
+        "P4.2e-i",
+        "P0.4",
+        "P1.2"
       ],
       "tutoriales": [
         "L-07",
         "L-08",
         "L-09",
-        "L-10"
+        "L-10",
+        "L-02"
       ],
       "agente": "lucas",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Sube el VSL a tu página",
-        "Arma el formulario con las cinco preguntas",
-        "Arma el calendario en dos pasos",
-        "Arma la página de preparación",
-        "Agéndate a ti mismo de punta a punta desde el teléfono"
+        "Sube el video a tu página",
+        "Arma el formulario con las cinco preguntas que filtran",
+        "Arma el calendario en dos pasos y conéctalo a tu correo",
+        "Arma la página de preparación que ve después de agendar",
+        "Agéndate a ti mismo desde el teléfono, de punta a punta, como si fueras un desconocido"
       ],
       "evidencias": [
         {
@@ -2073,326 +1707,217 @@
           "nombre": "Agenda de prueba",
           "valida": "formulario + calendario + confirmación del mismo contacto",
           "del_mercado": false,
-          "pide": "Se marca solo: agenda de prueba."
+          "pide": "Se marca solo cuando entre tu propia agenda de prueba."
+        },
+        {
+          "tipo": "imagen",
+          "nombre": "Panel con consultantes",
+          "valida": "al menos 5 filas con nombre y monto",
+          "del_mercado": false,
+          "pide": "Sube la captura de tu panel con tus consultantes cargados."
         }
       ],
       "adn_escribe": [
         "sistema.url_vsl",
         "sistema.url_formulario",
-        "sistema.url_agenda"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": "4gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 5,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 29,
-      "tipo": "sesion",
-      "titulo": "Los cuatro de Meta",
-      "sistema": 3,
-      "minutos": 90,
-      "piezas": [],
-      "tutoriales": [
-        "L-11",
-        "L-12",
-        "L-13",
-        "L-14"
-      ],
-      "agente": null,
-      "manual": null,
-      "acceso": "Entrega 3 del Sistema — conversaciones, automatizaciones, reportes y WhatsApp",
-      "pasos": [],
-      "evidencias": [
-        {
-          "tipo": "evento",
-          "nombre": "Pixel disparando",
-          "valida": "verificado desde la app",
-          "del_mercado": false,
-          "pide": "Se marca solo: pixel disparando."
-        }
-      ],
-      "adn_escribe": [
-        "sistema.pixel_id",
-        "sistema.cuenta_ads",
-        "sistema.whatsapp"
+        "numeros.ingreso_mensual_actual",
+        "numeros.precio_viejo"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu circuito probado de punta a punta: formulario, agenda y confirmación.",
+      "veredicto": "Te agendaste a ti mismo y funcionó. Desde ahora alguien puede llegar sin que tú hagas nada.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Sube el video a tu página",
+        "Arma el formulario con las cinco preguntas que filtran",
+        "Arma el calendario en dos pasos y conéctalo a tu correo",
+        "Arma la página de preparación que ve después de agendar",
+        "Agéndate a ti mismo desde el teléfono, de punta a punta, como si fueras un desconocido"
+      ]
     },
     {
-      "dia": 30,
+      "dia": 18,
       "tipo": "sesion",
-      "titulo": "Los tres anuncios listos",
+      "titulo": "Le avisas a tu entorno",
       "sistema": 3,
       "minutos": 60,
       "piezas": [],
       "tutoriales": [],
-      "agente": null,
+      "agente": "sofi",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Edita corto: sin música, sin intro, sin logo animado",
-        "Subtítulos quemados",
-        "Súbelos al banco de creativos y márcalos como listos"
-      ],
-      "evidencias": [
-        {
-          "tipo": "archivo",
-          "nombre": "Tres anuncios",
-          "valida": "estado listo en el banco",
-          "del_mercado": false,
-          "pide": "Sube el archivo: tres anuncios."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 31,
-      "tipo": "sesion",
-      "titulo": "Encender",
-      "sistema": 3,
-      "minutos": 90,
-      "piezas": [
-        "P4.4",
-        "P4.4b",
-        "P4.8"
-      ],
-      "tutoriales": [
-        "L-15",
-        "L-16"
-      ],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Un conjunto, uno solo",
-        "Presupuesto entero adentro",
-        "Los tres anuncios adentro",
-        "El público de tu rama",
-        "Objetivo a la página, nunca a mensajes"
-      ],
-      "evidencias": [
-        {
-          "tipo": "evento",
-          "nombre": "Campaña activa",
-          "valida": "detectada por la conexión con Meta",
-          "del_mercado": false,
-          "pide": "Se marca solo: campaña activa."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [
-        "F-14DIAS",
-        "F-TABLERO"
-      ],
-      "freno_levanta": [],
-      "cinturon": "3gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 5,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 32,
-      "tipo": "campo",
-      "titulo": "Campo",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Contesta en menos de dos horas cualquier agenda que entre",
-        "Termina de cerrar la transición de cartera",
-        "No abras el administrador de anuncios"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 33,
-      "tipo": "sesion",
-      "titulo": "Leer tu tablero",
-      "sistema": 3,
-      "minutos": 45,
-      "piezas": [
-        "P4.7"
-      ],
-      "tutoriales": [],
-      "agente": "ramiro",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Arma la vista con cuatro columnas y nada más",
-        "Anota tu costo por agenda de hoy",
-        "Lee los tres cuellos y marca cuál tienes"
+        "Edita la plantilla con tu voz: no vende, pide veinte minutos",
+        "Manda veinte hoy, empezando por los más fáciles",
+        "Marca en la app a quién le escribiste",
+        "Abre la plantilla del grupo uno y escríbela con tu voz",
+        "Escribe desde cuándo rige el precio nuevo. Ejemplo: desde el 1 del mes que viene"
       ],
       "evidencias": [
         {
           "tipo": "imagen",
-          "nombre": "Tablero con cuatro columnas",
-          "valida": "gasto, entradas, agendas, costo por agenda",
+          "nombre": "Veinte mensajes enviados",
+          "valida": "capturas legibles",
           "del_mercado": false,
-          "pide": "Sube una foto de tablero con cuatro columnas."
+          "pide": "Sube las capturas de los mensajes enviados."
         },
         {
           "tipo": "numero",
-          "nombre": "Costo por agenda",
-          "valida": "> 0",
+          "nombre": "Mensajes enviados",
+          "valida": ">= 20",
           "del_mercado": false,
-          "pide": "Escribe el número: costo por agenda."
+          "pide": "Escribe cuántos mandaste hoy."
         }
       ],
-      "adn_escribe": [],
+      "adn_escribe": [
+        "trafico.mensajes_enviados",
+        "cartera.avisados"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tus primeros veinte mensajes enviados y tu primera pieza publicada.",
+      "veredicto": "Ya estás vendiendo. Sin pauta y con tu nombre.",
       "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "nota": "Desde hoy son dos por día, sostenidos. Deja de ser tarea y pasa a ser estado.",
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Edita la plantilla con tu voz: no vende, pide veinte minutos",
+        "Manda veinte hoy, empezando por los más fáciles",
+        "Marca en la app a quién le escribiste",
+        "Abre la plantilla del grupo uno y escríbela con tu voz",
+        "Escribe desde cuándo rige el precio nuevo. Ejemplo: desde el 1 del mes que viene"
+      ]
     },
     {
-      "dia": 34,
-      "tipo": "campo",
-      "titulo": "Los catorce sin tocar",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Dos mensajes nuevos a tu red",
-        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contesta en menos de dos horas a cada agenda que entra"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 35,
-      "tipo": "campo",
-      "titulo": "Los catorce sin tocar",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Dos mensajes nuevos a tu red",
-        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contesta en menos de dos horas a cada agenda que entra"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 36,
-      "tipo": "sesion",
-      "titulo": "La llamada dibujada",
+      "dia": 19,
+      "tipo": "protocolo",
+      "titulo": "Tu número y tu llamada",
       "sistema": 3,
       "minutos": 60,
       "piezas": [
         "P5.1"
       ],
       "tutoriales": [],
-      "agente": "lucas",
+      "agente": "espejo",
       "manual": "LLA-1",
       "acceso": null,
       "pasos": [
+        "Elige un gesto físico chico y repetible. Ejemplo: apoyar la mano en la mesa",
+        "Grábate diciendo tu número veinte veces, con el gesto antes de cada una",
+        "Escucha la primera y la veinte, una después de la otra",
         "Dibuja tu W sobre la plantilla",
-        "Escribe tus preguntas de cada tramo",
-        "Marca el minuto del precio",
-        "Escribe qué haces después del número: nada",
-        "Practica una llamada completa con Lucas"
+        "Escribe tus preguntas de cada tramo"
       ],
       "evidencias": [
+        {
+          "tipo": "archivo",
+          "nombre": "Audio del ancla",
+          "valida": "compara tono y velocidad de la primera y la última",
+          "del_mercado": false,
+          "pide": "Sube el audio de las veinte repeticiones."
+        },
         {
           "tipo": "texto",
           "nombre": "Tu W con tus preguntas",
           "valida": "los siete tramos",
           "del_mercado": false,
           "pide": "Escribe tu W con tus preguntas."
-        },
-        {
-          "tipo": "evento",
-          "nombre": "Sesión de sparring",
-          "valida": "completada",
-          "del_mercado": false,
-          "pide": "Se marca solo: sesión de sparring."
         }
       ],
       "adn_escribe": [
+        "cuaderno",
         "voz.frases_propias"
       ],
       "freno_activa": [],
       "freno_levanta": [],
+      "cinturon": "6gup",
+      "jornada_larga": false,
+      "lleva": "Tu precio dicho sin que tiemble y tu llamada ensayada.",
+      "veredicto": "Escucha la primera y la última: ahí se oye si el precio ya es tuyo.",
+      "acciones_campo": [],
+      "nota": "Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.",
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Elige un gesto físico chico y repetible. Ejemplo: apoyar la mano en la mesa",
+        "Grábate diciendo tu número veinte veces, con el gesto antes de cada una",
+        "Escucha la primera y la veinte, una después de la otra",
+        "Dibuja tu W sobre la plantilla",
+        "Escribe tus preguntas de cada tramo"
+      ]
+    },
+    {
+      "dia": 20,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [],
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
       "nota": null,
-      "paso_esencial": 5,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 37,
+      "dia": 21,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 22,
       "tipo": "sesion",
-      "titulo": "Tu primera llamada real",
+      "titulo": "Tus primeras llamadas",
       "sistema": 3,
       "minutos": 60,
       "piezas": [
-        "P5.4"
+        "P5.4",
+        "P5.2"
       ],
       "tutoriales": [],
       "agente": "lucas",
@@ -2402,7 +1927,8 @@
         "Elige a quién de tu red le ofreciste y todavía no cerraste",
         "Repasa tu W una vez, no más",
         "Haz la llamada",
-        "Escribe qué objeción apareció"
+        "Escribe qué objeción apareció",
+        "Escribe tu mensaje previo"
       ],
       "evidencias": [
         {
@@ -2420,66 +1946,42 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "La primera objeción real, dicha por alguien, no imaginada.",
+      "veredicto": "Esa objeción vale más que un mes de pensar la oferta. Aparece después de ofrecer, nunca antes.",
       "acciones_campo": [],
       "nota": "Esa objeción vale más que veinte sesiones de teoría. Alimenta el día 42.",
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Elige a quién de tu red le ofreciste y todavía no cerraste",
+        "Repasa tu W una vez, no más",
+        "Haz la llamada",
+        "Escribe qué objeción apareció",
+        "Escribe tu mensaje previo"
+      ]
     },
     {
-      "dia": 38,
+      "dia": 23,
       "tipo": "sesion",
-      "titulo": "Antes de la llamada",
-      "sistema": 3,
-      "minutos": 45,
-      "piezas": [
-        "P5.2"
-      ],
-      "tutoriales": [],
-      "agente": "sofi",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Escribe tu mensaje previo",
-        "Escribe tu criterio de cancelación",
-        "Carga las dos cosas como plantillas en el Sistema"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Mensaje previo y criterio",
-          "valida": "el criterio con dos condiciones objetivas",
-          "del_mercado": false,
-          "pide": "Escribe mensaje previo y criterio."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 3,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 39,
-      "tipo": "sesion",
-      "titulo": "Grabar las llamadas",
+      "titulo": "Grabar y revisar tus llamadas",
       "sistema": 3,
       "minutos": 30,
       "piezas": [
-        "P5.4-i"
+        "P5.4-i",
+        "P5.6"
       ],
       "tutoriales": [
         "L-17"
       ],
-      "agente": null,
-      "manual": null,
+      "agente": "lucas",
+      "manual": "LLA-4",
       "acceso": null,
       "pasos": [
         "Activa la grabación en el Sistema",
-        "Escribe la frase con la que avisas"
+        "Escribe la frase con la que avisas",
+        "Sube o elige una llamada real",
+        "Escúchala entera: la app no deja saltar",
+        "Anota los cuatro números"
       ],
       "evidencias": [
         {
@@ -2488,106 +1990,13 @@
           "valida": "en el Sistema",
           "del_mercado": false,
           "pide": "Se marca solo: grabación activada."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 2,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 40,
-      "tipo": "campo",
-      "titulo": "Los catorce sin tocar",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Dos mensajes nuevos a tu red",
-        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contesta en menos de dos horas a cada agenda que entra"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 41,
-      "tipo": "campo",
-      "titulo": "Los catorce sin tocar",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Dos mensajes nuevos a tu red",
-        "Mira el tablero una vez por día, dos minutos, sin cambiar nada",
-        "Contesta en menos de dos horas a cada agenda que entra"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 42,
-      "tipo": "sesion",
-      "titulo": "La autopsia",
-      "sistema": 3,
-      "minutos": 60,
-      "piezas": [
-        "P5.6"
-      ],
-      "tutoriales": [],
-      "agente": "lucas",
-      "manual": "LLA-4",
-      "acceso": null,
-      "pasos": [
-        "Sube o elige una llamada real",
-        "Escúchala entera: la app no deja saltar",
-        "Anota los cuatro números",
-        "Compara con los que midió Lucas",
-        "Elige una sola cosa para cambiar"
-      ],
-      "evidencias": [
+        },
         {
           "tipo": "numero",
           "nombre": "Los cuatro números",
           "valida": "minuto, preguntas, silencio, pidió decisión",
           "del_mercado": false,
           "pide": "Escribe el número: los cuatro números."
-        },
-        {
-          "tipo": "texto",
-          "nombre": "La cosa que cambia",
-          "valida": "una sola",
-          "del_mercado": false,
-          "pide": "Escribe la cosa que cambia."
         }
       ],
       "adn_escribe": [],
@@ -2595,59 +2004,63 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tus llamadas grabadas desde hoy, con tu aviso escrito.",
+      "veredicto": "Tu llamada mejora escuchándote. Desde hoy tienes con qué.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Activa la grabación en el Sistema",
+        "Escribe la frase con la que avisas",
+        "Sube o elige una llamada real",
+        "Escúchala entera: la app no deja saltar",
+        "Anota los cuatro números"
+      ]
     },
     {
-      "dia": 43,
-      "tipo": "protocolo",
-      "titulo": "A quién traicionarías ganando más",
-      "sistema": 1,
-      "minutos": 20,
+      "dia": 24,
+      "tipo": "sesion",
+      "titulo": "Tu preventa: los tres primeros",
+      "sistema": 2,
+      "minutos": 60,
       "piezas": [],
       "tutoriales": [],
-      "agente": "espejo",
+      "agente": "vera",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "El Espejo te devuelve lo del día 6",
-        "Nombra a la persona",
-        "Escribe qué hizo por ti",
-        "Escribe el permiso en primera persona con su nombre",
-        "Dilo en voz alta y grábalo"
+        "Elige dos bonos del menú para los tres primeros",
+        "Al mismo precio que el resto",
+        "Escribe el mensaje de preventa con esos dos bonos adentro",
+        "Envíalo a quienes ya te dijeron que sí o casi",
+        "Anota a quién le escribiste y qué te contestó"
       ],
       "evidencias": [
         {
           "tipo": "texto",
-          "nombre": "El permiso escrito",
-          "valida": "contiene un nombre propio",
+          "nombre": "Tu mensaje de preventa",
+          "valida": "nombra los dos bonos elegidos y el precio completo",
           "del_mercado": false,
-          "pide": "Escribe el permiso escrito."
-        },
-        {
-          "tipo": "archivo",
-          "nombre": "El permiso dicho",
-          "valida": "audio",
-          "del_mercado": false,
-          "pide": "Sube el archivo: el permiso dicho."
+          "pide": "Pega tu mensaje de preventa."
         }
       ],
       "adn_escribe": [
-        "historia.el_permiso"
+        "oferta.bonos_preventa"
       ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu preventa escrita y enviada.",
+      "veredicto": "Los tres primeros compran lo mismo que el resto, y construyen contigo lo que viene.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 44,
+      "dia": 25,
       "tipo": "sesion",
       "titulo": "Tu recuperador",
       "sistema": 3,
@@ -2689,86 +2102,447 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu bandeja clasificada y el recuperador andando.",
+      "veredicto": "El que comentó y no avanzó vuelve solo. Deja de depender de tu memoria.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Arma tu bandeja con los cuatro estados",
+        "A cada 'no ahora' ponle fecha de vuelta",
+        "Arma las respuestas automáticas",
+        "Protocolo: escribe la lista de lo que te deben y táchala"
+      ]
     },
     {
-      "dia": 45,
+      "dia": 26,
       "tipo": "sesion",
-      "titulo": "Tu primer consultante nuevo",
-      "sistema": 3,
-      "minutos": 30,
-      "piezas": [
-        "P6.3"
-      ],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [
-        {
-          "tipo": "evento",
-          "nombre": "Cobro del sistema",
-          "valida": "contacto con origen campaña",
-          "del_mercado": true,
-          "pide": "Se marca solo: cobro del sistema."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": "2gup",
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
-      "paso_esencial": null,
-      "avanza_sin_evidencia": true
-    },
-    {
-      "dia": 46,
-      "tipo": "sesion",
-      "titulo": "Escalar o apagar",
+      "titulo": "Tu primera venta y tus números",
       "sistema": 3,
       "minutos": 45,
       "piezas": [
-        "P4.4c"
+        "P3.9",
+        "P4.7"
       ],
       "tutoriales": [],
       "agente": "ramiro",
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Mira tu costo por agenda de los catorce días",
-        "La app habilita un solo botón según tu número",
-        "Escribe la decisión y el número que la justifica"
+        "Manda el link a quien ya dijo que sí",
+        "Cuando entre el cobro, sube el comprobante",
+        "Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes",
+        "Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas y costo por agenda",
+        "Anota tu costo por agenda de hoy"
       ],
       "evidencias": [
         {
-          "tipo": "texto",
-          "nombre": "La decisión",
-          "valida": "con el costo por agenda al lado",
+          "tipo": "imagen",
+          "nombre": "Cobro al precio nuevo",
+          "valida": "monto >= precio digno, comprobante visible",
           "del_mercado": false,
-          "pide": "Escribe la decisión."
+          "pide": "Sube el comprobante del cobro, donde se lea el monto."
+        },
+        {
+          "tipo": "texto",
+          "nombre": "Quién viene después",
+          "valida": "nombre y fecha",
+          "del_mercado": false,
+          "pide": "Escribe quién viene después, con nombre y fecha."
+        },
+        {
+          "tipo": "numero",
+          "nombre": "Costo por agenda",
+          "valida": "> 0",
+          "del_mercado": false,
+          "pide": "Escribe tu costo por agenda de hoy."
+        }
+      ],
+      "adn_escribe": [
+        "numeros.primer_cobro_precio_nuevo"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": "5gup",
+      "jornada_larga": false,
+      "lleva": "Un cobro entrado a tu precio digno, con su comprobante.",
+      "veredicto": "Cobraste tu precio antes de gastar un peso en publicidad. Ese es el orden correcto.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Manda el link a quien ya dijo que sí",
+        "Cuando entre el cobro, sube el comprobante",
+        "Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes",
+        "Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas y costo por agenda",
+        "Anota tu costo por agenda de hoy"
+      ]
+    },
+    {
+      "dia": 27,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 28,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 29,
+      "tipo": "sesion",
+      "titulo": "Meta conectado y tu pixel midiendo",
+      "sistema": 3,
+      "minutos": 90,
+      "piezas": [],
+      "tutoriales": [
+        "L-11",
+        "L-12",
+        "L-13",
+        "L-14"
+      ],
+      "agente": null,
+      "manual": null,
+      "acceso": "Entrega 3 del Sistema — conversaciones, automatizaciones, reportes y WhatsApp",
+      "pasos": [
+        "Conecta tu página y tu perfil profesional",
+        "Crea tu cuenta publicitaria dentro de tu business",
+        "Carga tu forma de pago",
+        "Instala el pixel en tu página y pruébalo abriéndola desde el teléfono"
+      ],
+      "evidencias": [
+        {
+          "tipo": "evento",
+          "nombre": "Pixel disparando",
+          "valida": "verificado desde la app",
+          "del_mercado": false,
+          "pide": "Se marca solo cuando la app vea tu pixel disparar."
+        }
+      ],
+      "adn_escribe": [
+        "sistema.pixel_id",
+        "sistema.cuenta_ads",
+        "sistema.whatsapp"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu cuenta publicitaria, tu forma de pago y tu pixel disparando.",
+      "veredicto": "Tu pixel ya le avisa a Meta quién sirve y quién no. Sin eso, la plataforma te trae a cualquiera.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Conecta tu página y tu perfil profesional",
+        "Crea tu cuenta publicitaria dentro de tu business",
+        "Carga tu forma de pago",
+        "Instala el pixel en tu página y pruébalo abriéndola desde el teléfono"
+      ]
+    },
+    {
+      "dia": 30,
+      "tipo": "sesion",
+      "titulo": "Tus tres anuncios, listos para salir",
+      "sistema": 3,
+      "minutos": 60,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Edita corto: sin música, sin intro y sin logo animado",
+        "Ponles subtítulos quemados: la mayoría los mira sin sonido",
+        "Súbelos al banco de creativos y márcalos como listos"
+      ],
+      "evidencias": [
+        {
+          "tipo": "archivo",
+          "nombre": "Tres anuncios",
+          "valida": "estado listo en el banco",
+          "del_mercado": false,
+          "pide": "Sube los tres anuncios editados."
         }
       ],
       "adn_escribe": [],
       "freno_activa": [],
-      "freno_levanta": [
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Los tres anuncios editados y cargados, listos para encender.",
+      "veredicto": "Tres anuncios distintos compitiendo entre sí. El que gane lo decide el número, no tu gusto.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Edita corto: sin música, sin intro y sin logo animado",
+        "Ponles subtítulos quemados: la mayoría los mira sin sonido",
+        "Súbelos al banco de creativos y márcalos como listos"
+      ]
+    },
+    {
+      "dia": 31,
+      "tipo": "sesion",
+      "titulo": "Encender tus dos campañas",
+      "sistema": 3,
+      "minutos": 90,
+      "piezas": [
+        "P4.4",
+        "P4.4b",
+        "P4.8"
+      ],
+      "tutoriales": [
+        "L-15",
+        "L-16"
+      ],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
+        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Reparte el presupuesto mitad y mitad",
+        "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
+        "Enciende y anota la fecha y la hora"
+      ],
+      "evidencias": [
+        {
+          "tipo": "evento",
+          "nombre": "Campaña activa",
+          "valida": "detectada por la conexión con Meta",
+          "del_mercado": false,
+          "pide": "Se marca solo cuando la app vea tus campañas activas."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [
         "F-14DIAS",
         "F-TABLERO"
       ],
+      "freno_levanta": [],
+      "cinturon": "4gup",
+      "jornada_larga": false,
+      "lleva": "Tus dos campañas corriendo: la que atrae y la que vende.",
+      "veredicto": "Están encendidas. Ahora vienen catorce días sin tocar nada: al tercero vas a querer cambiar algo, y por eso a la mayoría no le funciona.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
+        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Reparte el presupuesto mitad y mitad",
+        "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
+        "Enciende y anota la fecha y la hora"
+      ]
+    },
+    {
+      "dia": 32,
+      "tipo": "sesion",
+      "titulo": "Cerrar y derivar sin culpa",
+      "sistema": 1,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": "espejo",
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "A quien termina, escríbele cuándo cierra su proceso y qué se lleva",
+        "A quien se deriva, pásale un nombre concreto y preséntalos",
+        "Carga las fechas de cierre en tu agenda",
+        "Escribe qué recibe tu consultante a cambio del dinero",
+        "Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Agenda con fechas de cierre",
+          "valida": "al menos una fecha por persona del grupo",
+          "del_mercado": false,
+          "pide": "Sube la captura de tu agenda con las fechas de cierre cargadas."
+        },
+        {
+          "tipo": "texto",
+          "nombre": "Dos columnas",
+          "valida": "ambas completas",
+          "del_mercado": false,
+          "pide": "Escribe las dos columnas."
+        }
+      ],
+      "adn_escribe": [
+        "cartera.cierres",
+        "cuaderno"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Cada proceso que termina, con su fecha de alta.",
+      "veredicto": "Nadie queda a medias. Eso también es parte de tu trabajo.",
       "acciones_campo": [],
-      "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.",
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "A quien termina, escríbele cuándo cierra su proceso y qué se lleva",
+        "A quien se deriva, pásale un nombre concreto y preséntalos",
+        "Carga las fechas de cierre en tu agenda",
+        "Escribe qué recibe tu consultante a cambio del dinero",
+        "Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar"
+      ]
+    },
+    {
+      "dia": 33,
+      "tipo": "espera",
+      "titulo": "Mientras la pauta aprende",
+      "sistema": 3,
+      "minutos": 20,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Mira tu tablero una vez. Anota el costo por agenda de hoy",
+        "No toques nada de la campaña. Al tercer día vas a querer: por eso a la mayoría no le funciona",
+        "Sigue escribiendo a tu red: dos mensajes nuevos"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Costo por agenda de hoy",
+          "valida": "un número por día de espera",
+          "del_mercado": false,
+          "pide": "Escribe el costo por agenda de hoy."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día más de datos, sin tocar nada.",
+      "veredicto": "Catorce días juntos valen más que catorce cambios sueltos. Falta menos.",
+      "acciones_campo": [
+        "Mira los números una vez al día",
+        "No toques la campaña",
+        "Sigue con tus conversaciones"
+      ],
+      "nota": null,
       "paso_esencial": 3,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Mira tu tablero una vez. Anota el costo por agenda de hoy",
+        "No toques nada de la campaña. Al tercer día vas a querer: por eso a la mayoría no le funciona",
+        "Sigue escribiendo a tu red: dos mensajes nuevos"
+      ]
+    },
+    {
+      "dia": 34,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 47,
+      "dia": 35,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 36,
       "tipo": "sesion",
       "titulo": "La cinta",
       "sistema": 4,
@@ -2812,13 +2586,21 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tus dos columnas, tus estaciones y tu línea base.",
+      "veredicto": "Ya sabes qué se graba y qué va en vivo. Eso es lo que te deja atender diez sin quemarte.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Parte tu programa en dos columnas: grabado y en vivo",
+        "Nombra tus estaciones, en orden",
+        "Define tu línea base",
+        "Haz la cuenta: horas para uno, horas para diez"
+      ]
     },
     {
-      "dia": 48,
+      "dia": 37,
       "tipo": "sesion",
       "titulo": "El alta",
       "sistema": 4,
@@ -2853,42 +2635,23 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu bienvenida, tus tres límites y tus siete pasos del alta.",
+      "veredicto": "Un límite dicho el primer día es un acuerdo. El mismo límite en la semana seis es un reclamo.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Escribe tu mensaje de bienvenida",
+        "Escribe tus tres límites",
+        "Ordena tus siete pasos del alta",
+        "Conecta la línea base al triage"
+      ]
     },
     {
-      "dia": 49,
-      "tipo": "campo",
-      "titulo": "Campo",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Aplica el alta completa a quien haya entrado",
-        "Llamadas de la semana con tu W",
-        "Lunes de números, si cae lunes"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 50,
+      "dia": 38,
       "tipo": "sesion",
-      "titulo": "Tu app con tu marca",
+      "titulo": "Tu app, con tu marca",
       "sistema": 4,
       "minutos": 45,
       "piezas": [
@@ -2899,8 +2662,10 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Carga nombre, color y logo. Nada más",
-        "Mira cómo se ve desde un celular"
+        "Carga tu nombre, tu color y tu logo. Nada más por hoy",
+        "La app se publica sola en tu dirección",
+        "Ábrela desde tu teléfono y mírala como la va a ver tu consultante",
+        "Guarda tus dos accesos: el del código y el de la publicación"
       ],
       "evidencias": [
         {
@@ -2908,23 +2673,41 @@
           "nombre": "Tu app con tu marca",
           "valida": "logo y color visibles",
           "del_mercado": false,
-          "pide": "Sube una foto de tu app con tu marca."
+          "pide": "Sube la captura de tu app con tu marca."
+        },
+        {
+          "tipo": "url",
+          "nombre": "La dirección de tu app",
+          "valida": "abre en el teléfono",
+          "del_mercado": false,
+          "pide": "Pega la dirección de tu app."
         }
       ],
-      "adn_escribe": [],
+      "adn_escribe": [
+        "app.url",
+        "app.marca"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
-      "cinturon": null,
+      "cinturon": "3gup",
       "jornada_larga": false,
+      "lleva": "Tu app publicada, con tu nombre, tu color y tu logo.",
+      "veredicto": "Es tuya: el repositorio y la cuenta están a tu nombre. Puedes llevártela cuando quieras.",
       "acciones_campo": [],
       "nota": null,
-      "paso_esencial": 2,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Carga tu nombre, tu color y tu logo. Nada más por hoy",
+        "La app se publica sola en tu dirección",
+        "Ábrela desde tu teléfono y mírala como la va a ver tu consultante",
+        "Guarda tus dos accesos: el del código y el de la publicación"
+      ]
     },
     {
-      "dia": 51,
+      "dia": 39,
       "tipo": "sesion",
-      "titulo": "Tus etapas",
+      "titulo": "Tus etapas, con lo que pidieron los tres",
       "sistema": 4,
       "minutos": 90,
       "piezas": [
@@ -2954,17 +2737,181 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": true,
+      "lleva": "Tus cuatro etapas cargadas, en orden.",
+      "veredicto": "Tu método entró a tu app. Lo que enseñas ya no se repite: se abre.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Aprieta el botón que trae todo desde tu ADN",
+        "Revisa que haya llegado bien y corrige",
+        "Arma cuatro semanas con lo que desbloquea cada una",
+        "Carga cuatro, no doce"
+      ]
+    },
+    {
+      "dia": 40,
+      "tipo": "sesion",
+      "titulo": "Invitar al primero y tocar algo tú",
+      "sistema": 4,
+      "minutos": 60,
+      "piezas": [
+        "P8.5"
+      ],
+      "tutoriales": [],
+      "agente": null,
+      "manual": "CLI-6",
+      "acceso": null,
+      "pasos": [
+        "Cómprate a ti mismo con una tarjeta real y recorre lo que recorre tu consultante",
+        "Invita a tu primer consultante y mándale la frase exacta",
+        "Cambia un texto de tu app con Claude: pídeselo en una línea y publica",
+        "Sácale captura a lo que cambiaste"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Captura desde el celular de tu consultante",
+          "valida": "se ve tu marca y su etapa 1",
+          "del_mercado": false,
+          "pide": "Sube la captura de cómo la ve tu consultante."
+        },
+        {
+          "tipo": "imagen",
+          "nombre": "Tu primer cambio publicado",
+          "valida": "el texto nuevo, en vivo",
+          "del_mercado": false,
+          "pide": "Sube la captura del cambio que hiciste tú."
+        }
+      ],
+      "adn_escribe": [
+        "app.primer_consultante"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu primer consultante adentro, y un cambio hecho por ti en la app.",
+      "veredicto": "Ya entregas por tu app y ya sabes cambiarle algo. Eso es no depender de nadie.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Cómprate a ti mismo con una tarjeta real y recorre lo que recorre tu consultante",
+        "Invita a tu primer consultante y mándale la frase exacta",
+        "Cambia un texto de tu app con Claude: pídeselo en una línea y publica",
+        "Sácale captura a lo que cambiaste"
+      ]
+    },
+    {
+      "dia": 41,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
       "avanza_sin_evidencia": false
     },
     {
-      "dia": 52,
+      "dia": 42,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 43,
+      "tipo": "sesion",
+      "titulo": "Escalar o apagar",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [
+        "P4.4c"
+      ],
+      "tutoriales": [],
+      "agente": "ramiro",
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Mira tu costo por agenda de los catorce días",
+        "La app habilita un solo botón según tu número",
+        "Escribe la decisión y el número que la justifica"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "La decisión",
+          "valida": "con el costo por agenda al lado",
+          "del_mercado": false,
+          "pide": "Escribe la decisión."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [
+        "F-14DIAS",
+        "F-TABLERO"
+      ],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu decisión escrita: qué sigue, qué se apaga y con cuánto.",
+      "veredicto": "Decidiste con el número, no con la sensación. Así se sube el presupuesto sin miedo.",
+      "acciones_campo": [],
+      "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.",
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Mira tu costo por agenda de los catorce días",
+        "La app habilita un solo botón según tu número",
+        "Escribe la decisión y el número que la justifica"
+      ]
+    },
+    {
+      "dia": 44,
       "tipo": "rodaje",
-      "titulo": "Jornada de rodaje B",
+      "titulo": "Rodaje de tu app",
       "sistema": 4,
-      "minutos": 180,
+      "minutos": 150,
       "piezas": [
         "P8.4"
       ],
@@ -2992,87 +2939,113 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": true,
+      "lleva": "Tus cuatro videos de entrega grabados.",
+      "veredicto": "Un día de rodaje, un mes tranquilo. Eso que grabaste hoy lo vas a usar con cada consultante.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Elige de tu columna 'va grabado' del día 47",
+        "Uno por etapa, de tres a siete minutos",
+        "Una sola toma por video",
+        "Sin edición: se sube como salió"
+      ]
     },
     {
-      "dia": 53,
+      "dia": 45,
       "tipo": "sesion",
-      "titulo": "Invitar al primero",
-      "sistema": 4,
-      "minutos": 60,
+      "titulo": "Tu primer consultante nuevo",
+      "sistema": 3,
+      "minutos": 30,
       "piezas": [
-        "P8.5"
+        "P6.3"
       ],
-      "tutoriales": [],
-      "agente": null,
-      "manual": "CLI-6",
-      "acceso": null,
-      "pasos": [
-        "Compra de prueba: cómprate a ti mismo con una tarjeta real",
-        "Recorre lo que recorre tu consultante",
-        "Invita a tu primer consultante",
-        "Mándale la frase exacta del video"
-      ],
-      "evidencias": [
-        {
-          "tipo": "evento",
-          "nombre": "Compra de prueba",
-          "valida": "pago propio registrado",
-          "del_mercado": false,
-          "pide": "Se marca solo: compra de prueba."
-        },
-        {
-          "tipo": "imagen",
-          "nombre": "Consultante adentro",
-          "valida": "captura desde celular con tu marca",
-          "del_mercado": false,
-          "pide": "Sube una foto de consultante adentro."
-        }
-      ],
-      "adn_escribe": [],
-      "freno_activa": [
-        "F-COMPRA"
-      ],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 54,
-      "tipo": "campo",
-      "titulo": "Campo",
-      "sistema": null,
-      "minutos": 0,
-      "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
       "pasos": [],
-      "evidencias": [],
+      "evidencias": [
+        {
+          "tipo": "evento",
+          "nombre": "Cobro del sistema",
+          "valida": "contacto con origen campaña",
+          "del_mercado": true,
+          "pide": "Se marca solo: cobro del sistema."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
-      "cinturon": null,
+      "cinturon": "2gup",
       "jornada_larga": false,
-      "acciones_campo": [
-        "Acompaña a tu primer consultante en su etapa 1",
-        "Llamadas de la semana",
-        "Tablero, dos minutos"
-      ],
-      "nota": null,
+      "lleva": "El cobro de alguien que no te conocía, con su origen.",
+      "veredicto": "La máquina camina: alguien pagó sin conocerte. Eso ya no depende de tu agenda.",
+      "acciones_campo": [],
+      "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": true,
+      "checklist": []
     },
     {
-      "dia": 55,
+      "dia": 46,
+      "tipo": "sesion",
+      "titulo": "Tus cinco niveles",
+      "sistema": 2,
+      "minutos": 45,
+      "piezas": [
+        "P3.3b",
+        "P3.4"
+      ],
+      "tutoriales": [],
+      "agente": null,
+      "manual": "CLI-3",
+      "acceso": null,
+      "pasos": [
+        "Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo",
+        "Marca el tercero: es el único que vendes hoy",
+        "Elige qué nivel ofreces primero después de tu programa"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Los cinco niveles",
+          "valida": "el tercero marcado",
+          "del_mercado": false,
+          "pide": "Escribe tus cinco niveles y marca el tercero."
+        },
+        {
+          "tipo": "evento",
+          "nombre": "Rodaje agendado",
+          "valida": "fecha y hora bloqueadas",
+          "del_mercado": false,
+          "pide": "Se marca solo cuando bloquees la fecha del rodaje."
+        }
+      ],
+      "adn_escribe": [
+        "oferta.escalera"
+      ],
+      "freno_activa": [
+        "F-RODAJE"
+      ],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu escalera de cinco niveles, con el tercero marcado, y tu rodaje agendado.",
+      "veredicto": "Vendes uno solo: el tercero. Los otros existen para que ese se entienda.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo",
+        "Marca el tercero: es el único que vendes hoy",
+        "Elige qué nivel ofreces primero después de tu programa"
+      ]
+    },
+    {
+      "dia": 47,
       "tipo": "sesion",
       "titulo": "La máquina de 10",
       "sistema": 3,
@@ -3105,17 +3078,25 @@
       "freno_levanta": [],
       "cinturon": "1gup",
       "jornada_larga": false,
+      "lleva": "Tu cadena con tus números: conversaciones, agendas, llamadas y ventas.",
+      "veredicto": "Ahí está tu cuello. Se arregla uno a la vez, y siempre el de más arriba.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "La app trae tus números reales del tablero",
+        "Escribe la cadena: conversaciones, agendas, llamadas, ventas",
+        "Tradúcelo a lo que tiene que pasar cada semana",
+        "Marca cuál de los tres cuellos tienes"
+      ]
     },
     {
-      "dia": 56,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
+      "dia": 48,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
       "sistema": null,
-      "minutos": 45,
+      "minutos": 0,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
@@ -3128,6 +3109,76 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 49,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 50,
+      "tipo": "ciclo",
+      "titulo": "Tu semana 8",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus cuatro números de la semana",
+          "valida": "conversaciones, agendas, llamadas y ventas, con la semana anterior al lado",
+          "del_mercado": false,
+          "pide": "Carga tus cuatro números de esta semana."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Una semana cerrada, con sus cuatro números.",
+      "veredicto": "Ahí está tu cuello de esta semana. Se arregla uno a la vez, y siempre el de más arriba.",
       "acciones_campo": [
         "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
@@ -3135,6 +3186,185 @@
         "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
         "Jueves · la entrega: tus consultantes en tu app",
         "Viernes · la autopsia: una llamada, cuatro números"
+      ],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ]
+    },
+    {
+      "dia": 51,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 52,
+      "tipo": "sesion",
+      "titulo": "Tu entrega, revisada con los primeros",
+      "sistema": 4,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Pregúntale a cada uno qué le sirvió y qué le faltó",
+        "Anota lo que se repite",
+        "Cambia una cosa de tu entrega esta semana"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Lo que cambiaste",
+          "valida": "un cambio concreto, con el pedido que lo originó",
+          "del_mercado": false,
+          "pide": "Escribe qué cambiaste y por qué."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Una mejora real en tu entrega.",
+      "veredicto": "Tu producto ahora tiene la forma que pidieron los que pagaron.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 53,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 54,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 55,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 56,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -3143,21 +3373,37 @@
     {
       "dia": 57,
       "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
+      "titulo": "Tu semana 9",
+      "sistema": 3,
       "minutos": 45,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus cuatro números de la semana",
+          "valida": "conversaciones, agendas, llamadas y ventas, con la semana anterior al lado",
+          "del_mercado": false,
+          "pide": "Carga tus cuatro números de esta semana."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Una semana cerrada, con sus cuatro números.",
+      "veredicto": "Ahí está tu cuello de esta semana. Se arregla uno a la vez, y siempre el de más arriba.",
       "acciones_campo": [
         "Todos los días · dos mensajes nuevos a tu red",
         "Lunes · los números: costo por agenda y la decisión",
@@ -3167,15 +3413,22 @@
         "Viernes · la autopsia: una llamada, cuatro números"
       ],
       "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ]
     },
     {
       "dia": 58,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
+      "tipo": "campo",
+      "titulo": "Día de atender",
       "sistema": null,
-      "minutos": 45,
+      "minutos": 0,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
@@ -3188,13 +3441,10 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
       "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
+        "Hoy atiendes. La app no te pide nada"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -3202,40 +3452,47 @@
     },
     {
       "dia": 59,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
+      "tipo": "sesion",
+      "titulo": "Tus ejercicios en la app",
+      "sistema": 4,
       "minutos": 45,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Elige los tres ejercicios que más te piden",
+        "Súbelos a tu app con sus instrucciones",
+        "Pídeles a tus consultantes que los prueben esta semana"
+      ],
+      "evidencias": [
+        {
+          "tipo": "captura",
+          "nombre": "Tus ejercicios cargados",
+          "valida": "se ven los tres adentro de su app",
+          "del_mercado": false,
+          "pide": "Sube la captura de tus tres ejercicios cargados."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
+      "lleva": "Tres ejercicios tuyos, adentro de tu app.",
+      "veredicto": "Lo que antes explicabas en cada sesión ahora vive en tu app.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
       "dia": 60,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
+      "tipo": "campo",
+      "titulo": "Día de atender",
       "sistema": null,
-      "minutos": 45,
+      "minutos": 0,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
@@ -3248,13 +3505,10 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
       "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
+        "Hoy atiendes. La app no te pide nada"
       ],
       "nota": null,
       "paso_esencial": null,
@@ -3262,8 +3516,774 @@
     },
     {
       "dia": 61,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 62,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 63,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 64,
+      "tipo": "ciclo",
+      "titulo": "Tu semana 10",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus cuatro números de la semana",
+          "valida": "conversaciones, agendas, llamadas y ventas, con la semana anterior al lado",
+          "del_mercado": false,
+          "pide": "Carga tus cuatro números de esta semana."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Una semana cerrada, con sus cuatro números.",
+      "veredicto": "Ahí está tu cuello de esta semana. Se arregla uno a la vez, y siempre el de más arriba.",
+      "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
+        "Lunes · los números: costo por agenda y la decisión",
+        "Martes · las llamadas, con tu W adelante",
+        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
+        "Jueves · la entrega: tus consultantes en tu app",
+        "Viernes · la autopsia: una llamada, cuatro números"
+      ],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ]
+    },
+    {
+      "dia": 65,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 66,
+      "tipo": "protocolo",
+      "titulo": "Agrandar el vaso",
+      "sistema": 1,
+      "minutos": 30,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": "espejo",
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Escribe tu día completo con el ingreso siguiente, en detalle físico",
+        "En presente, no en condicional"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Tu día siguiente",
+          "valida": "en presente",
+          "del_mercado": false,
+          "pide": "Escribe tu día siguiente."
+        }
+      ],
+      "adn_escribe": [
+        "cuaderno"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu día siguiente escrito, con lo que sostiene el ritmo.",
+      "veredicto": "Lo que aguanta no es la motivación: es el tamaño del vaso que construiste.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 2,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Escribe tu día completo con el ingreso siguiente, en detalle físico",
+        "En presente, no en condicional"
+      ]
+    },
+    {
+      "dia": 67,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 68,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 69,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 70,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 71,
+      "tipo": "ciclo",
+      "titulo": "Tu semana 11",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus cuatro números de la semana",
+          "valida": "conversaciones, agendas, llamadas y ventas, con la semana anterior al lado",
+          "del_mercado": false,
+          "pide": "Carga tus cuatro números de esta semana."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Una semana cerrada, con sus cuatro números.",
+      "veredicto": "Ahí está tu cuello de esta semana. Se arregla uno a la vez, y siempre el de más arriba.",
+      "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
+        "Lunes · los números: costo por agenda y la decisión",
+        "Martes · las llamadas, con tu W adelante",
+        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
+        "Jueves · la entrega: tus consultantes en tu app",
+        "Viernes · la autopsia: una llamada, cuatro números"
+      ],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ]
+    },
+    {
+      "dia": 72,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 73,
       "tipo": "sesion",
-      "titulo": "Por qué la marca va última",
+      "titulo": "Sus resultados, contados por ellos",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Pídele a cada uno su resultado en una frase",
+        "Pide permiso por escrito para usarlo",
+        "Guárdalo en tu ADN, con su nombre y su fecha"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Tres resultados con permiso",
+          "valida": "tres frases de tres personas, con permiso escrito",
+          "del_mercado": false,
+          "pide": "Pega los tres resultados."
+        }
+      ],
+      "adn_escribe": [
+        "prueba.testimonios"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tres resultados con permiso para usarlos.",
+      "veredicto": "Desde hoy tu oferta la cuentan ellos, no solo tú.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 3,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 74,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 75,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 76,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 77,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 78,
+      "tipo": "ciclo",
+      "titulo": "Tu semana 12",
+      "sistema": 3,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tus cuatro números de la semana",
+          "valida": "conversaciones, agendas, llamadas y ventas, con la semana anterior al lado",
+          "del_mercado": false,
+          "pide": "Carga tus cuatro números de esta semana."
+        }
+      ],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Una semana cerrada, con sus cuatro números.",
+      "veredicto": "Ahí está tu cuello de esta semana. Se arregla uno a la vez, y siempre el de más arriba.",
+      "acciones_campo": [
+        "Todos los días · dos mensajes nuevos a tu red",
+        "Lunes · los números: costo por agenda y la decisión",
+        "Martes · las llamadas, con tu W adelante",
+        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
+        "Jueves · la entrega: tus consultantes en tu app",
+        "Viernes · la autopsia: una llamada, cuatro números"
+      ],
+      "nota": null,
+      "paso_esencial": 5,
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
+        "Contesta a todos los que escribieron, cada uno con una pregunta",
+        "Da las llamadas de la semana con tu W adelante",
+        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
+        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
+      ]
+    },
+    {
+      "dia": 79,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 80,
+      "tipo": "sesion",
+      "titulo": "Tu control de 7.000 USD",
+      "sistema": 1,
+      "minutos": 45,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": "ramiro",
+      "manual": null,
+      "acceso": null,
+      "pasos": [
+        "Suma todo lo que vendiste desde el día 1",
+        "Cuenta cuántas horas recuperaste por semana",
+        "Si pasaste los 7.000, tu ecosistema se abre el día 85",
+        "Si todavía no, elige qué corriges: anuncios, VSL, oferta, triage o perfil"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tu total vendido",
+          "valida": "la suma de todo lo cobrado desde el día 1",
+          "del_mercado": false,
+          "pide": "Escribe cuánto vendiste en total."
+        }
+      ],
+      "adn_escribe": [
+        "numeros.total_vendido"
+      ],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Tu número vendido y tus horas recuperadas.",
+      "veredicto": "Con ese número se abre tu ecosistema, o se ve exactamente qué corregir antes.",
+      "acciones_campo": [],
+      "nota": null,
+      "paso_esencial": 4,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 81,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 82,
+      "tipo": "campo",
+      "titulo": "Día de atender",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un día de consulta, sin tarea de app.",
+      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
+      "acciones_campo": [
+        "Hoy atiendes. La app no te pide nada"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 83,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 84,
+      "tipo": "campo",
+      "titulo": "Fin de semana",
+      "sistema": null,
+      "minutos": 0,
+      "piezas": [],
+      "tutoriales": [],
+      "agente": null,
+      "manual": null,
+      "acceso": null,
+      "pasos": [],
+      "evidencias": [],
+      "adn_escribe": [],
+      "freno_activa": [],
+      "freno_levanta": [],
+      "cinturon": null,
+      "jornada_larga": false,
+      "lleva": "Un fin de semana tuyo.",
+      "veredicto": "El descanso también construye. El lunes retomas donde quedaste.",
+      "acciones_campo": [
+        "Hoy descansas. El lunes sigue tu camino"
+      ],
+      "nota": null,
+      "paso_esencial": null,
+      "avanza_sin_evidencia": false
+    },
+    {
+      "dia": 85,
+      "tipo": "sesion",
+      "titulo": "Tu ecosistema circular",
       "sistema": 5,
       "minutos": 45,
       "piezas": [
@@ -3294,163 +4314,19 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tus tres enfoques de marca, con a quién filtra cada uno.",
+      "veredicto": "Sesenta días sin publicar fue a propósito. Ahora tienes qué vender y cómo venderlo: recién ahora el contenido rinde.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 2,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Saca tus tres enfoques de la Matriz ABC",
+        "Para cada enfoque, escribe a quién filtra y a quién atrae"
+      ]
     },
     {
-      "dia": 62,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 63,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 64,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 65,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 66,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 67,
+      "dia": 86,
       "tipo": "sesion",
       "titulo": "Las doce semanas escritas",
       "sistema": 5,
@@ -3487,586 +4363,18 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": true,
+      "lleva": "Tus doce semanas escritas, con su gancho y su ángulo.",
+      "veredicto": "Lo escribiste todo hoy. Se graba en un solo día y te deja un mes tranquilo.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 68,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 69,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 70,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 71,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 72,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 73,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 74,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 75,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 76,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 77,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 78,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 79,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 80,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 81,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 82,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 83,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 84,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 85,
-      "tipo": "ciclo",
-      "titulo": "Ciclo de la semana",
-      "sistema": null,
-      "minutos": 45,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": null,
-      "manual": null,
-      "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [
-        "Todos los días · dos mensajes nuevos a tu red",
-        "Lunes · los números: costo por agenda y la decisión",
-        "Martes · las llamadas, con tu W adelante",
-        "Miércoles · el recuperador: los 'no ahora' con fecha vencida",
-        "Jueves · la entrega: tus consultantes en tu app",
-        "Viernes · la autopsia: una llamada, cuatro números"
-      ],
-      "nota": null,
-      "paso_esencial": null,
-      "avanza_sin_evidencia": false
-    },
-    {
-      "dia": 86,
-      "tipo": "protocolo",
-      "titulo": "Agrandar el vaso",
-      "sistema": 1,
-      "minutos": 30,
-      "piezas": [],
-      "tutoriales": [],
-      "agente": "espejo",
-      "manual": null,
-      "acceso": null,
-      "pasos": [
-        "Escribe tu día completo con el ingreso siguiente, en detalle físico",
-        "En presente, no en condicional"
-      ],
-      "evidencias": [
-        {
-          "tipo": "texto",
-          "nombre": "Tu día siguiente",
-          "valida": "en presente",
-          "del_mercado": false,
-          "pide": "Escribe tu día siguiente."
-        }
-      ],
-      "adn_escribe": [
-        "cuaderno"
-      ],
-      "freno_activa": [],
-      "freno_levanta": [],
-      "cinturon": null,
-      "jornada_larga": false,
-      "acciones_campo": [],
-      "nota": null,
-      "paso_esencial": 2,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Reparte tus tres enfoques en doce semanas",
+        "Para cada semana, el gancho y el ángulo",
+        "Marca cuáles son de filtro y cuáles de autoridad",
+        "No grabes nada todavía"
+      ]
     },
     {
       "dia": 87,
@@ -4102,15 +4410,22 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tus dos números lado a lado: el del día 3 y el de hoy.",
+      "veredicto": "Ese es el cambio, medido. No te lo cuenta nadie: lo ves.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Contesta las mismas preguntas del día 3",
+        "Recalcula tu hora real neta con los datos de Mi Clínica",
+        "Recién ahí la app destapa el número del día 3"
+      ]
     },
     {
       "dia": 88,
       "tipo": "sesion",
-      "titulo": "Qué sigue",
+      "titulo": "Tu plan de 180 días",
       "sistema": 0,
       "minutos": 45,
       "piezas": [
@@ -4139,15 +4454,22 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Tu plan de 180 días, tuyo, lo uses con nosotros o solo.",
+      "veredicto": "Tienes la máquina andando. Lo que sigue es que te conozcan más personas, y eso es otro trabajo.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "La app arma el borrador de tu plan de 180",
+        "Edítalo, apruébalo y descárgalo",
+        "Te lo llevas lo tomes o no lo tomes"
+      ]
     },
     {
       "dia": 89,
       "tipo": "sesion",
-      "titulo": "La última recta",
+      "titulo": "El cierre",
       "sistema": 0,
       "minutos": 45,
       "piezas": [
@@ -4175,15 +4497,21 @@
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
+      "lleva": "Lo que se puede cerrar antes de que termine, con nombre y fecha.",
+      "veredicto": "Los últimos días valen: hay ventas que solo se cierran cuando hay fecha.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 2,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "checklist": [
+        "Mira cuántas ventas tienes y cuántas te faltan",
+        "Escribe qué puedes cerrar esta semana con lo que ya está en la bandeja"
+      ]
     },
     {
       "dia": 90,
       "tipo": "cierre",
-      "titulo": "El cierre",
+      "titulo": "Tu graduación",
       "sistema": 0,
       "minutos": 0,
       "piezas": [],
@@ -4191,14 +4519,16 @@
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
+      "pasos": [
+        "Mira tu medición de entrada y la de llegada, una al lado de la otra"
+      ],
       "evidencias": [
         {
           "tipo": "evento",
-          "nombre": "Diez consultantes",
-          "valida": "contados desde MCD, todos al precio digno",
-          "del_mercado": true,
-          "pide": "Se marca solo: diez consultantes."
+          "nombre": "Tus noventa días",
+          "valida": "medición de entrada y de llegada, las dos cargadas",
+          "del_mercado": false,
+          "pide": "Se marca sola cuando cierras el día 89."
         }
       ],
       "adn_escribe": [],
@@ -4206,10 +4536,12 @@
       "freno_levanta": [],
       "cinturon": "1dan",
       "jornada_larga": false,
+      "lleva": "Tus noventa días cerrados, con tus dos números lado a lado.",
+      "veredicto": "Terminaste. Tienes número, precio, método, oferta, embudo, app y tu ecosistema andando.",
       "acciones_campo": [],
-      "nota": "Si no llegó, el camino no se cierra: el ciclo queda abierto sin fecha.",
-      "paso_esencial": null,
-      "avanza_sin_evidencia": true
+      "nota": null,
+      "paso_esencial": 1,
+      "avanza_sin_evidencia": false
     }
   ]
 }

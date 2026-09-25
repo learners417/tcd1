@@ -8,13 +8,14 @@ import React from 'react';
 import { waLink } from '../lib/planes';
 import { PIEZAS_ADN, estadoPieza, planLimitado } from '../lib/adnPiezas';
 import { VOC } from '../lib/vocabulario';
+import { claveDelDia } from '../lib/roadmapSeed';
 
 function completadas(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]); } catch { return new Set(); }
 }
 
 export default function GraduacionSemanaBlanca() {
-  if (!planLimitado() || !completadas().has('1-P1.5')) return null;
+  if (!planLimitado() || !completadas().has(claveDelDia(12))) return null;
 
   const suyas = PIEZAS_ADN.filter((p) => p.pilar <= 1);
   const faltan = PIEZAS_ADN.filter((p) => p.pilar > 1);
@@ -74,7 +75,9 @@ export default function GraduacionSemanaBlanca() {
         onClick={() => {
           if (!window.confirm('¿Repetir tus 5 días desde el principio? Tu ADN sellado se conserva — solo se reabren las sesiones.')) return;
           try {
-            const CODS = ['0-P0.0', '0-P0.2', '0-P0.3', '0-P0.4', '1-P1.1', '1-P1.2', '1-P1.2b', '1-P1.3', '1-P1.5', '1-P1.5b'];
+            // Los doce primeros días del Camino de hoy. Antes eran códigos del Camino
+            // viejo y la graduación no se mostraba nunca.
+            const CODS = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12].map(claveDelDia);
             const hechas = (JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]).filter((c) => !CODS.includes(c));
             localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(hechas));
             localStorage.removeItem('tcd_sesion_pasos_v1');

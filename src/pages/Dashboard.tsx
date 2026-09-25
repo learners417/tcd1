@@ -22,6 +22,7 @@ import { VOC } from '../lib/vocabulario';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import CintaCinturon from '../components/CintaCinturon';
+import { claveDelDia } from '../lib/roadmapSeed';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -108,8 +109,8 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             if (j?.cobro_verificado) {
               const saved = localStorage.getItem('tcd_hoja_ruta_v2');
               const set = new Set<string>(saved ? JSON.parse(saved) : []);
-              if (!set.has('6-P6.3')) {
-                set.add('6-P6.3');
+              if (!set.has(claveDelDia(45))) {
+                set.add(claveDelDia(45));
                 localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...set]));
                 if (isSupabaseReady() && supabase && userId) {
                   await guardarFila('hoja_de_ruta', { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
@@ -472,7 +473,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                 let sv = false;
                 try {
                   const saved = JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[];
-                  sv = saved.includes('4-P4.5b') || saved.includes('4-P4.4');
+                  sv = saved.includes(claveDelDia(31));
                 } catch { /* noop */ }
                 if (!sv) return (
                   <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
@@ -512,7 +513,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           if (dow === 0 || dow === 6) return null; // el finde tiene sus propias cartas
           let set = setDB ?? new Set<string>();
           if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
-          const sistemaVivo = set.has('4-P4.5b') || set.has('4-P4.4');
+          const sistemaVivo = set.has(claveDelDia(31));
           const sesionHecha = data.tareasHoy.length === 0;
           const mentorRestantes = Math.max(0, TOPE_MENTOR_SEMANAL - usosSemana('mentor'));
           const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
@@ -566,11 +567,11 @@ function DescansoInput({ onGuardar }: { onGuardar: (t: string) => void }) {
   const [ok, setOk] = React.useState(false);
   if (ok) return <p className="text-sm text-success">Guardado. Que siga el buen día. ✓</p>;
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Hoy… (una línea alcanza)"
-        className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+        className="flex-1 min-w-[180px] bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[15px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
       <button disabled={!t.trim()} onClick={() => { onGuardar(t.trim()); setOk(true); }}
-        className="btn-primary text-sm font-bold px-4 rounded-xl disabled:opacity-40 min-h-[44px]">Guardar</button>
+        className="btn-primary text-[15px] font-bold px-4 rounded-xl disabled:opacity-40 min-h-[44px] shrink-0">Guardar</button>
     </div>
   );
 }

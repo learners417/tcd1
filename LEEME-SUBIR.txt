@@ -1,0 +1,15 @@
+PARA SUBIR ESTOS 35 ARCHIVOS (rama mejoras)
+
+1. Descomprime este ZIP. Queda una carpeta "src" con solo 35 archivos adentro.
+2. En GitHub, rama mejoras, botón "Add file" → "Upload files".
+3. Arrastra la carpeta "src" entera. Son 35: entra de una.
+   GitHub reemplaza los que ya existen y agrega los nuevos. No borra nada más.
+4. Commit.
+
+DESPUÉS, BORRAR ESTOS CUATRO A MANO (ya no se usan):
+   src/components/tasks/TaskChecklist.tsx
+   src/components/sesion/CheckInPanel.tsx
+   src/components/sesion/CheckOutPanel.tsx
+   src/components/sesion/CronometroSesion.tsx
+
+Con eso la rama mejoras queda igual al paquete: 546 archivos.

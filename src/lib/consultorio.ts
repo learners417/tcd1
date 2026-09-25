@@ -1,3 +1,4 @@
+import { roadmap, diaDelCodigo } from './roadmapSeed';
 /**
  * consultorio.ts — Lo que siempre preguntan.
  *
@@ -10,7 +11,7 @@
 
 export interface Pregunta {
   /** Sesión donde aparece. */
-  codigo: string;
+  codigo: string | number;
   /** Como la hacen ellos, no como la haría un manual. */
   p: string;
   /** Dos a cinco líneas. */
@@ -18,18 +19,84 @@ export interface Pregunta {
 }
 
 export const CONSULTORIO: Pregunta[] = [
+
+  // ─── Las jornadas nuevas de la Hoja de Ruta ────────────────────────
+  { codigo: 2, p: 'Mi familia nunca habló de dinero.',
+    r: 'Ese silencio también es una frase. Escribe cómo se notaba: quién pagaba, qué cara ponían cuando faltaba, qué se compraba sin pensar y qué no.' },
+  { codigo: 2, p: '¿Y si me da bronca hacer esto?',
+    r: 'Es la señal de que estás en el lugar correcto. La bronca es con lo que te tocó, no con ellos. Escríbela y sigue.' },
+  { codigo: 3, p: 'Me salieron dos tipos parecidos en el test.',
+    r: 'Contesta las tres preguntas de desempate que te muestra la app. Y si sigue empatado, elige el que te incomoda más: casi siempre es ese.' },
+  { codigo: 12, p: 'Diego me devolvió el método con correcciones.',
+    r: 'Bien: eso es que lo leyó de verdad. Corrige y vuelve a mandarlo hoy. El lunes grabas, y grabas el método aprobado.' },
+  { codigo: 24, p: '¿Por qué no hago descuento a los tres primeros?',
+    r: 'Lo que descuentas se ancla: el que entró con descuento no renueva al precio entero, y se lo cuenta al siguiente. Por eso das más, no cobras menos.' },
+  { codigo: 24, p: 'No tengo a quién mandarle la preventa.',
+    r: 'Sí tienes: tu lista de veinte del día 8 y los que ya conversaron contigo esta semana. Empieza por los que te dijeron "avísame cuando abras".' },
+  { codigo: 52, p: 'Mis consultantes me dicen que está todo bien.',
+    r: 'Pregunta distinto: qué parte volverías a hacer y cuál te costó. Ahí sale lo que hay que cambiar.' },
+  { codigo: 73, p: 'Me da vergüenza pedirles un testimonio.',
+    r: 'No pidas un testimonio: pide su resultado en una frase. Es más fácil de dar y más fuerte de leer.' },
+  { codigo: 66, p: 'Ya estoy lleno y no me entran más consultantes.',
+    r: 'Esa es la jornada de hoy. El vaso se agranda de tres formas: subes el precio, acortas la entrega o pasas parte a tu app. Elige una esta semana.' },
+  { codigo: 80, p: 'No llegué a los 7.000.',
+    r: 'Entonces el ecosistema espera, y esta semana corriges lo que te frena: anuncios, VSL, oferta, triage o perfil. Tu cadena del día 47 te dice en qué eslabón se corta.' },
+
+  // ─── Preguntas del Camino de 90 días ───────────────────────────────
+  { codigo: 1, p: 'No tengo los números exactos que me pide el día 1.',
+    r: 'Pon el número aproximado y sigue. La medición de entrada no se aprueba: se repite el día 87. Lo importante es que hoy quede algo escrito para comparar.' },
+  { codigo: 'P1.2', p: '¿Tengo que cargar a todos mis consultantes?',
+    r: 'Carga los que estás atendiendo ahora. Los de hace dos años no cambian ninguna decisión de estas semanas.' },
+  { codigo: 4, p: '¿Y si mi protocolo no me sale natural?',
+    r: 'No tiene que salirte natural: tiene que estar pegado donde trabajas. La primera semana se lee, la tercera ya no hace falta.' },
+  { codigo: 18, p: 'Me da miedo que se vayan cuando les diga el precio nuevo.',
+    r: 'Algunos se van. Ese es el punto: el cálculo del día 3 te mostró que con menos personas al precio correcto ganas más y trabajas menos. Y a los que se van los derivas bien, no los abandonas.' },
+  { codigo: 26, p: 'Todavía no cobré a nadie al precio nuevo.',
+    r: 'La jornada espera. No la marques hasta tener el comprobante: es la primera prueba de que el número funciona afuera y no solo en tu cabeza.' },
+  { codigo: 18, p: '¿Qué les escribo a los veinte?',
+    r: 'Nada de venta. Preguntas cómo están y qué pasó con lo que trabajaron juntos. La conversación se abre sola cuando hay algo real para decir.' },
+  { codigo: 9, p: 'Mi trabajo es distinto con cada persona, no tengo un método.',
+    r: 'Sí lo tienes. Toma tus últimos tres consultantes y mira el camino que hicieron los tres: eso que se repite es tu método. Lo que cambia es el ritmo, no las etapas.' },
+  { codigo: 10, p: '¿Está bien poner el precio en la página de la oferta?',
+    r: 'Sí. El precio filtra antes de la llamada y te deja hablar con quien ya sabe cuánto cuesta.' },
+  { codigo: 10, p: '¿Devuelvo el dinero si alguien no avanza?',
+    r: 'Tu garantía cubre tu trabajo, no el esfuerzo del otro. Por eso van los tres compromisos: si él los cumple y no pasa lo que prometiste, respondes.' },
+  { codigo: 19, p: 'Me tiembla la voz cuando digo el número.',
+    r: 'Por eso son veinte repeticiones grabadas. No es teatro: es que la primera vez que lo digas frente a alguien no sea la primera vez que lo dices.' },
+  { codigo: 8, p: 'Tengo poca audiencia, ¿sirve igual?',
+    r: 'Sirve. Con audiencia chica se cierra por conversación, no por alcance. El número lo escribes para saber de dónde partes, no para compararte.' },
+  { codigo: 16, p: 'Mi página no quedó linda.',
+    r: 'No tiene que quedar linda: tiene que estar publicada y decir qué haces, para quién y cuál es el paso siguiente. Se mejora cuando ya esté trayendo personas.' },
+  { codigo: 15, p: 'Me da vergüenza grabarme.',
+    r: 'Es normal y se pasa grabando. Por eso el día de rodaje es uno solo y con todo listo del día anterior: no hay lugar para pensarlo demasiado.' },
+  { codigo: 30, p: '¿Los tres anuncios tienen que ser muy distintos?',
+    r: 'Distintos en la apertura, iguales en el paso siguiente. Así sabes qué gancho funciona sin cambiar dos cosas a la vez.' },
+  { codigo: 33, p: 'Llevo días con las campañas y no llega nadie.',
+    r: 'Son catorce días de espera y hay una sola pantalla para eso. Antes de tocar nada, mira el costo por agenda: si todavía no hay datos suficientes, cambiar el anuncio solo borra lo aprendido.' },
+  { codigo: 'P5.4-i', p: '¿Tengo que avisar que grabo la llamada?',
+    r: 'Sí, siempre, al principio y con una frase simple. La grabación es para que puedas revisar tu llamada después, no para otra cosa.' },
+  { codigo: 'P5.4-i', p: 'Me fue mal en las primeras llamadas.',
+    r: 'Para eso está la autopsia. No se revisa cómo te sentiste: se revisan los cuatro números y en qué tramo de la W se cortó la conversación.' },
+  { codigo: 'P8.1', p: '¿Por qué clono la app en vez de construirla yo?',
+    r: 'Primero la tienes andando con tu marca, con consultantes adentro. Después, el día 40, la modificas tú. Construirla de cero antes de tener a alguien usándola te deja tres meses sin producto.' },
+  { codigo: 40, p: 'No sé programar, ¿cómo la modifico?',
+    r: 'Le pides los cambios en castellano y los revisas. Lo que necesitas saber no es programar: es qué quieres que vea tu consultante cuando entra.' },
+  { codigo: 50, p: '¿Cargo los cuatro números aunque la semana haya sido mala?',
+    r: 'Sobre todo si fue mala. La semana que no se mide es la que se repite.' },
+  { codigo: 87, p: 'Mi número del día 87 es parecido al del día 1.',
+    r: 'Entonces ya sabes dónde mirar: la cadena del día 47 te dice en qué eslabón se te corta. Un número que no se movió es información, no un fracaso.' },
   // ─── Sistema 1 · el recipiente ───────────────────────────────────────────
   { codigo: 'P1.2b', p: '¿Y si mis consultantes actuales se van cuando suba el precio?',
     r: 'Algunos se van. Eso es parte del plan, no un accidente. El día 18 vas a repartirlos en tres grupos y vas a tener el mensaje de cada uno. Nadie queda a la deriva: los que no siguen contigo terminan su proceso o los derivas bien.' },
-  { codigo: 'P1.5', p: '¿Mil dólares no es mucho para mi país?',
+  { codigo: 5, p: '¿Mil dólares no es mucho para mi país?',
     r: 'El precio no lo pone tu país: lo pone el problema que resuelves. Hay quien paga eso en Quito, en Lima y en Caracas, y quien no lo paga en Madrid. Tu trabajo no es bajar el precio: es encontrar a quien ese resultado le vale más que ese número.' },
-  { codigo: 'P1.5', p: '¿Y si nadie paga eso?',
+  { codigo: 5, p: '¿Y si nadie paga eso?',
     r: 'Hoy no lo sabes, lo supones. Lo vas a saber el día 38, cuando tengas tu primera llamada real. Hasta entonces es una hipótesis, y las hipótesis no se discuten: se prueban.' },
-  { codigo: 'P1.5', p: 'Me da vergüenza cobrarle más a alguien que ya atiendo.',
+  { codigo: 5, p: 'Me da vergüenza cobrarle más a alguien que ya atiendo.',
     r: 'No le estás cobrando más por lo mismo. Le estás ofreciendo otra cosa: un programa con etapas, medición y garantía. Si le ofreces exactamente lo mismo a más precio, la vergüenza tiene razón. Por eso primero armas el programa.' },
   { codigo: 'P1.5b', p: '¿Puedo hacer excepciones con alguien que lo necesita mucho?',
-    r: 'Para eso está tu Puerta Chica, que armas el día 21. Un tramo corto de tu método, con precio de entrada, que se acredita si toma el programa completo. Eso es una puerta, no un descuento.' },
-  { codigo: 'P1.3', p: 'No me sale esto de quemar cartas, me parece raro.',
+    r: 'Para eso está tu Puerta Chica, que armas el día 46. Un tramo corto de tu método, con precio de entrada, que se acredita si toma el programa completo. Eso es una puerta, no un descuento.' },
+  { codigo: 2, p: 'No me sale esto de quemar cartas, me parece raro.',
     r: 'Entonces no lo hagas así. Escribe lo que tengas que escribir y ciérralo como te salga: tirarlo, guardarlo, leerlo en voz alta una vez. Lo que importa es nombrarlo y soltarlo, no la ceremonia.' },
   { codigo: 'P1.1', p: '¿Por qué no empezamos directamente con el marketing?',
     r: 'Porque el mejor anuncio del mundo te trae una llamada donde vas a decir tu precio. Si en esa llamada no lo sostienes, todo lo anterior no sirvió. Es una semana, y es la que hace que las otras once rindan.' },
@@ -43,7 +110,7 @@ export const CONSULTORIO: Pregunta[] = [
     r: 'Lo que vendes no es el final del camino: es un tramo con un resultado claro. Después puede venir otro. Un programa de doce semanas con un logro concreto vende mejor que un acompañamiento sin final, y además le da a la persona una razón para quedarse.' },
   { codigo: 'P2.4', p: '¿Y si mi método no es tan original?',
     r: 'Ninguno lo es. Lo que lo vuelve tuyo es el orden en que haces las cosas y para quién. Dos nutricionistas con la misma formación tienen métodos distintos porque atienden a personas distintas.' },
-  { codigo: 'P2.4b', p: '¿Cómo mido algo que es emocional?',
+  { codigo: 12, p: '¿Cómo mido algo que es emocional?',
     r: 'Con lo que la persona hace, no con lo que siente. No midas "está mejor": mide cuántas noches durmió de corrido, cuántas veces comió sin culpa, cuántos días fue al gimnasio. Lo observable se mide.' },
   { codigo: 'P2.3b', p: '¿Y si no tengo tres buenos casos para la matriz?',
     r: 'Con uno alcanza para empezar. Y si no tienes ninguno, usa el caso que más te gustaría atender: tu avatar puede salir del deseo, pero después se corrige con la realidad.' },
@@ -95,9 +162,9 @@ export const CONSULTORIO: Pregunta[] = [
     r: 'Eso se resuelve antes, no después: tu formulario pregunta quién decide, y si decide con alguien, esa persona tiene que estar en la llamada. Si ya pasó, ofrece una segunda llamada con los dos.' },
   { codigo: 'P5.2', p: '¿Hago descuento para cerrar la primera?',
     r: 'No. El primero siempre da miedo, y el descuento calma ese miedo a cambio de que el segundo también lo tengas que hacer. Si alguien no puede, tienes tu Puerta Chica.' },
-  { codigo: 'P5.4', p: 'Me fue muy mal en mi primera llamada.',
+  { codigo: 22, p: 'Me fue muy mal en mi primera llamada.',
     r: 'A todos. Por eso el día 39 la revisamos con números y no con recuerdos. Saca una sola cosa para cambiar en la próxima, no diez.' },
-  { codigo: 'P5.4', p: '¿Puedo mandar la propuesta por escrito después?',
+  { codigo: 22, p: '¿Puedo mandar la propuesta por escrito después?',
     r: 'La decisión se toma en la llamada. Una propuesta por escrito es una venta que se enfría con buenos modales. Si necesitas tiempo, es que faltó preguntar algo antes.' },
   { codigo: 'P6.2', p: 'Cerré la venta, ¿ahora cómo le cobro?',
     r: 'El link de pago tiene que estar hecho antes de tu primera llamada, no después. Se manda mientras siguen hablando: el sí de las cuatro de la tarde es un "déjame pensarlo" a las nueve de la noche.' },
@@ -129,7 +196,16 @@ export const CONSULTORIO: Pregunta[] = [
 
 /** Las preguntas de una sesión, para precargar al Mentor. */
 export function preguntasDe(codigo: string): Pregunta[] {
-  return CONSULTORIO.filter((q) => q.codigo === codigo);
+  // Indexadas por DÍA, que no cambia cuando el Camino se reordena. Si no hay,
+  // se buscan por las piezas de esa jornada.
+  const directas = CONSULTORIO.filter((q) => q.codigo === codigo);
+  if (directas.length) return directas;
+  const d = diaDelCodigo(codigo);
+  const porDia = CONSULTORIO.filter((q) => q.codigo === d);
+  if (porDia.length) return porDia;
+  const jornada = roadmap.jornadas.find((j) => j.dia === d);
+  const piezas = new Set(jornada?.piezas ?? []);
+  return CONSULTORIO.filter((q) => typeof q.codigo === 'string' && piezas.has(q.codigo));
 }
 
 /** Bloque que se inyecta en el prompt del Mentor. */

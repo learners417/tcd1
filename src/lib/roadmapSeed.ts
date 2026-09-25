@@ -86,7 +86,11 @@ export interface Cinturon {
 export interface Agente {
   id: AgenteId
   nombre: string
-  dia: number
+  /** En qué entrena. */
+  rol?: string
+  dia?: number
+  /** El día en que suele abrirse. El que abre de verdad es su evidencia. */
+  dia_estimado: number
   se_abre_con: string
 }
 
@@ -133,6 +137,10 @@ export interface Jornada {
   avanza_sin_evidencia?: boolean
   acciones_campo: string[]
   nota: string | null
+  /** Lo que se lleva, en una línea. */
+  lleva?: string | null
+  /** La lectura que devuelve la app al subir la evidencia. */
+  veredicto?: string | null
   /** Modo 15 minutos: qué paso produce la evidencia. Base 1. */
   paso_esencial: number | null
 }
@@ -222,7 +230,7 @@ export const cinturonDeDia = (dia: number): Cinturon | undefined => {
 
 /** Agentes abiertos a un día dado. El desbloqueo real lo valida la evidencia. */
 export const agentesHasta = (dia: number): Agente[] =>
-  roadmap.agentes.filter(a => a.dia <= dia)
+  roadmap.agentes.filter(a => (a.dia ?? a.dia_estimado) <= dia)
 
 /** Frenos activos a un día dado, según lo que activa y levanta cada jornada. */
 export const frenosActivos = (dia: number): FrenoId[] => {
@@ -270,6 +278,8 @@ export interface RoadmapMeta {
   descripcion: string
   /** La nota del equipo. No se le muestra al cliente. */
   nota_equipo?: string
+  /** La lectura que devuelve la app al subir la evidencia. */
+  veredicto?: string
   orden: number
   dia_asignado: number
   tiempo_estimado: string
@@ -354,13 +364,18 @@ const comoMeta = (
     return `${pilar}.d${j.dia}`
   })(),
   titulo: j.titulo,
-  descripcion: '',
+  descripcion: j.lleva ?? '',
   nota_equipo: j.nota ?? '',
+  veredicto: j.veredicto ?? '',
   orden: i + 1,
   dia_asignado: j.dia,
   tiempo_estimado: `${j.minutos} min`,
+  // Una jornada con entrenador se practica CON ÉL (COACH). Antes se marcaba
+  // como HERRAMIENTA y se le pasaba el id del entrenador al catálogo de
+  // herramientas: ninguna existía con ese id, así que el panel quedaba vacío
+  // en las 31 jornadas con entrenador.
   tipo:
-    j.agente !== null ? 'HERRAMIENTA'
+    j.agente !== null ? 'COACH'
     : j.piezas.length > 0 ? 'VIDEO'
     : j.tipo === 'sesion' ? 'COACH'
     : 'TAREA',
@@ -369,7 +384,8 @@ const comoMeta = (
   pasos: j.pasos,
   checklist: j.pasos,
   agente: j.agente,
-  herramienta_id: j.agente ?? undefined,
+  // Ninguna jornada del Camino usa el catálogo viejo de herramientas.
+  herramienta_id: undefined,
   usa_ia: j.agente !== null,
   cinturon: j.cinturon,
   es_estrella: j.cinturon !== null || j.jornada_larga,
@@ -396,14 +412,19 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = (() => {
     const metas = js.map((j, i) => comoMeta(j, id, i, usados))
     const conGrado = metas.find(m => m.cinturon !== null)
     const grado = conGrado ? cinturonPorId.get(conGrado.cinturon!) : undefined
-    const nombre = js[0]?.titulo ?? id
+    // El grupo se nombra por sus días, no por su primera jornada: si no, el
+    // título del grupo y el de la jornada se repiten en la misma pantalla.
+    const primera = js[0]
+    const sistemaNum = js.find(j => j.sistema !== null && j.sistema !== undefined)?.sistema
+    const sistema = roadmap.sistemas.find(x => x.n === sistemaNum)
+    const nombre = primera ? `Días ${primera.dia} a ${js[js.length - 1].dia}` : id
     return {
       numero: n,
       numero_orden: n,
       id,
       nombre,
       titulo: nombre,
-      subtitulo: js.length ? `Días ${js[0].dia}-${js[js.length - 1].dia}` : '',
+      subtitulo: sistema ? `Sistema ${sistema.n} · ${sistema.nombre}` : '',
       icon: '',
       fase: metas.find(m => m.sistema !== null)?.sistema ?? null,
       metas,
@@ -464,6 +485,40 @@ export const calcularCinturon = (pilar: number | PilarId): CinturonConOrden => {
  * cliente hizo, no por la fecha. Si alguien cierra su método el día 8, Diego
  * está el día 8.
  */
+/**
+ * El código de una jornada por su DÍA.
+ *
+ * Los códigos llevan el día adentro ('P2.d8'), así que cada vez que el Camino
+ * se reordena cambian todos. Cualquier parte de la app que necesite señalar
+ * una jornada la pide por su día y no por su código escrito a mano: el 19 de
+ * septiembre había catorce referencias apuntando al vacío por esto.
+ */
+export function codigoDelDia(dia: number): string {
+  for (const p of SEED_ROADMAP_V2) {
+    const m = p.metas.find(x => x.dia_asignado === dia)
+    if (m) return m.codigo
+  }
+  return ''
+}
+
+/** El día de una jornada, a partir de su código. */
+export function diaDelCodigo(codigo: string): number | null {
+  for (const p of SEED_ROADMAP_V2) {
+    const m = p.metas.find(x => x.codigo === codigo)
+    if (m) return m.dia_asignado ?? null
+  }
+  return null
+}
+
+/** La clave de progreso ('2-P2.d8') de la jornada de ese día. */
+export function claveDelDia(dia: number): string {
+  for (const p of SEED_ROADMAP_V2) {
+    const m = p.metas.find(x => x.dia_asignado === dia)
+    if (m) return `${p.numero}-${m.codigo}`
+  }
+  return ''
+}
+
 export const PRIMERA_META_POR_AGENTE: Record<string, { pilar: number; codigo: string; dia: number }> =
   (() => {
     const m: Record<string, { pilar: number; codigo: string; dia: number }> = {}

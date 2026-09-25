@@ -221,7 +221,7 @@ export const SESIONES_GUIADAS: Record<string, SesionGuiada> = {
 
   /* D85 · El cierre del camino */
   'P7.3': { codigo: 'P7.3', pasoEsencialIdx: 1, pasos: [
-    { tipo: 'intro', titulo: 'La última recta', texto: 'Día 85. Cinco días para el cierre formal. Hoy se ordena la cosecha: cuántos de los 10 están, cuáles faltan, y qué se hace con los días que quedan. Y una verdad de director: el día 90 no es un final — es la mudanza definitiva a tu clínica permanente.' },
+    { tipo: 'intro', titulo: 'La última recta', texto: 'Día 89. Mañana cierras. Hoy se ordena la cosecha: cuántos de los 10 están, cuáles faltan, y qué se hace con los días que quedan. Y una verdad de director: el día 90 no es un final — es la mudanza definitiva a tu clínica permanente.' },
     { tipo: 'abierta', id: 'cosecha', pregunta: 'La cosecha real: ¿cuántos {{consultantes}} de $1.000 cerraste hasta hoy, y qué te falta para los 10?', minChars: 40, placeholder: 'Llevo … {{consultantes}}. Me faltan…' },
     { tipo: 'artefacto', id: 'cierre', tituloArtefacto: 'El acta de la última recta', promptIA: 'Con su cosecha, redacta el acta (máx 140 palabras): si llegó o superó los 10 — la consagración: director con máquina propia, la graduación lo espera. Si está cerca — el plan de los 5 días finales: llamadas agendadas, seguimientos calientes, sin inventar nada nuevo. Si está lejos — la verdad con amor: el día 90 se revisa el sistema con el equipo, la garantía existe por contrato, y lo construido no se pierde: la máquina sigue el día 91. Cierre: mires donde mires, ya no eres la Foto de Partida.', campoAdn: 'ultima_recta' },
   ]},

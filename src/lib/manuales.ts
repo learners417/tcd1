@@ -56,11 +56,9 @@ const POR_PILAR: Record<string, string> = {
 
 /** Excepciones: sesiones que se amplían en otro manual que el de su pilar. */
 const POR_SESION: Record<string, string> = {
-  'P6.4': 'liderazgo',   // el ritmo de la semana es liderazgo, no entrega
   'P4.2b': 'camino',
   'P3.7': 'clinica',
   'P5.6': 'llamada',
-  'P7.10': 'liderazgo',  // el tablero de los cinco es revisión, no marketing
 };
 
 export function manualDe(codigoSesion: string): Manual | null {

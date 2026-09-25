@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { planLimitado } from '../lib/adnPiezas';
+import { claveDelDia } from '../lib/roadmapSeed';
 
 const DIAS = [
   { d: 'Día 1', t: 'Tu número', s: 'lo calculas hoy mismo, en minutos' },
@@ -17,7 +18,7 @@ const DIAS = [
 
 export default function MapaCincoDias() {
   let hecho = false;
-  try { hecho = (JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]).includes('1-P1.5'); } catch { /* noop */ }
+  try { hecho = (JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]') as string[]).includes(claveDelDia(1)); } catch { /* noop */ }
   if (!planLimitado() || hecho) return null;
 
   return (

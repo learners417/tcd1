@@ -30,15 +30,15 @@ export interface OpcionDePartida {
 /** Lo que ya tiene, en palabras del cliente. Sale de la forma de cada grado. */
 const EN_SU_IDIOMA: Record<string, string> = {
   '10gup': 'Tengo mi lugar y mi hora fija de trabajo',
-  '9gup': 'Sé cuánto gano por hora, de verdad',
-  '8gup': 'Ya cobré a mi precio nuevo',
-  '7gup': 'Tengo mi método escrito, con sus pasos',
-  '6gup': 'Tengo mi oferta completa en una página',
-  '5gup': 'Mi página está publicada y se puede visitar',
-  '4gup': 'Tengo mi agenda andando de punta a punta',
-  '3gup': 'Tengo una campaña corriendo',
+  '9gup': 'Ya decidí mi precio nuevo y lo digo completo',
+  '8gup': 'Tengo mi método escrito, con sus etapas',
+  '7gup': 'Mi página y mi perfil están publicados',
+  '6gup': 'Tengo mi llamada de venta armada',
+  '5gup': 'Ya cobré a mi precio nuevo',
+  '4gup': 'Tengo una campaña corriendo',
+  '3gup': 'Mis consultantes ya entran a mi app',
   '2gup': 'Ya me pagó alguien que no me conocía',
-  '1gup': 'Mis consultantes ya entran a mi app',
+  '1gup': 'Tengo mi cadena de diez con mis números',
   '1dan': 'Terminé el camino completo',
 };
 

@@ -49,7 +49,7 @@ function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
         </span>
         <span className="flex-1 min-w-0">
           <span className="block text-[17px] font-semibold text-cream">{VOC(p.titulo)}</span>
-          <span className="block text-[15px] text-cream/70 leading-snug">{p.que}</span>
+          <span className="block text-[15px] text-cream/70 leading-snug">{VOC(p.que)}</span>
         </span>
         <ChevronRight className={`w-5 h-5 shrink-0 mt-1 text-cream/55 transition-transform ${abierta ? 'rotate-90' : ''}`} />
       </button>

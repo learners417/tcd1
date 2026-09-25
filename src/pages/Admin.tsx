@@ -61,6 +61,7 @@ import Campanas from './Campanas';
 import CreativosView from '../components/campanas/CreativosView';
 import Markdown from 'react-markdown';
 import TableroGrabacion from '../components/admin/TableroGrabacion';
+import { claveDelDia } from '../lib/roadmapSeed';
 
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
@@ -1079,7 +1080,7 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           ventas_count,
           estado_garantia,
           progreso_porcentaje: (p as any).progreso_porcentaje ?? 0,
-          quema_hecha: completadasSet.has('1-P1.3'),
+          quema_hecha: completadasSet.has(claveDelDia(1)),
           traba_sesion: (() => { const t = trabasPorUser.get(p.id); return t && t.horas >= 48 ? { titulo: t.titulo, dias: Math.floor(t.horas / 24) } : null; })(),
           dias_sin_sesion: (() => { const u = ultimaSesionPorUser.get(p.id); return u !== undefined ? Math.floor((Date.now() - u) / 86400000) : null; })(),
         } as ClienteConEstado;

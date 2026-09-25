@@ -5,6 +5,7 @@
  * para que funcione al instante y sea resiliente si falla la red.
  */
 import { supabase, guardarFila } from './supabase';
+import { claveDelDia } from './roadmapSeed';
 
 export interface ElNumero {
   precio_sesion: number;
@@ -15,7 +16,8 @@ export interface ElNumero {
   fecha_cambio: string | null;
 }
 
-const LS_KEY = 'tcd_el_numero';
+/** Donde vive su número. Lo lee también la preventa del día 24. */
+export const LS_KEY = 'tcd_el_numero';
 
 export function calcPHR(precioSesion: number, pacientesSemana: number, horasSemana: number): number {
   if (!horasSemana) return 0;
@@ -94,8 +96,8 @@ export async function marcarNumeroEnElCamino(userId?: string | null): Promise<vo
   try {
     const raw = localStorage.getItem('tcd_hoja_ruta_v2');
     const arr: string[] = raw ? JSON.parse(raw) : [];
-    if (!arr.includes('1-P1.5')) {
-      arr.push('1-P1.5');
+    if (!arr.includes(claveDelDia(1))) {
+      arr.push(claveDelDia(1));
       localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(arr));
     }
   } catch { /* noop */ }

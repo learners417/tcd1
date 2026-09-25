@@ -52,6 +52,16 @@ export interface Profile {
   email: string;
   especialidad?: string;
   fecha_inicio: string; // date as string YYYY-MM-DD
+
+  // ── La ventana de acceso (24 sep) ──
+  /** 'treinta' | 'noventa' | 'cuotas'. Se carga por cliente. */
+  acceso_tipo?: string;
+  /** Las cuotas, cuando pagó así: [{ vence, pagada }]. */
+  acceso_cuotas?: Array<{ vence: string; pagada: boolean }>;
+  /** Días que estuvo cerrado esperando un pago y se le devolvieron. */
+  acceso_dias_devueltos?: number;
+  /** El día que entregó cada jornada, para medir el atraso. */
+  entregas?: Record<string, string>;
   plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';
   rol: 'cliente' | 'admin';
   created_at: string;

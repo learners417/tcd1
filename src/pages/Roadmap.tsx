@@ -65,7 +65,6 @@ import {
 import { getYoutubeVideoId } from '../lib/videos';
 import { NIVEL_NOMBRES, NIVEL_METADATA } from '../lib/supabase';
 import TaskVideo from '../components/tasks/TaskVideo';
-import TaskHerramientaIA from '../components/tasks/TaskHerramientaIA';
 import TaskCoach from '../components/tasks/TaskCoach';
 import SesionViva from '../components/sesion/SesionViva';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
@@ -81,18 +80,6 @@ import EncabezadoCamino, { type SistemaAvance, type PasoDeHoy } from '../compone
 import CintaCinturon from '../components/CintaCinturon';
 
 // Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
-function encuadrarPorAvatar(codigo: string, texto: string): string {
-  let avatar = 'A';
-  try { avatar = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ }
-  if (avatar !== 'B') return texto;
-  // Avatar B (Establecido): las sesiones de método hablan de ORDENAR lo que ya tiene, no crear
-  const ajustes: Record<string, string> = {
-    'P2.1': 'Ya tienes un método — lo usas hace años, aunque nunca lo sacaste de tu cabeza. En esta fase le ponemos nombre, orden y estructura a lo que YA haces. Es tu activo más valioso, enterrado.',
-    'P2.2': 'Documenta el proceso que ya sigues con tus pacientes — ese orden que tienes intuitivo. Solo hay que ordenarlo y ponerlo por escrito.',
-    'P2.4': 'Vamos a ponerle nombre al método que ya tienes. No inventamos nada: ordenamos y bautizamos tu forma de trabajar de años.',
-  };
-  return ajustes[codigo] ?? texto;
-}
 import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
 import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
@@ -101,6 +88,16 @@ import { usePersistedState } from '../lib/usePersistedState';
 import { VOC } from '../lib/vocabulario';
 import PuntoDePartida, { KEY_PARTIDA } from '../components/PuntoDePartida';
 import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
+import { baseDeOnboarding } from '../lib/onboardingBase';
+import VeredictoCriticoPanel from '../components/VeredictoCriticoPanel';
+import { codigoDelDia } from '../lib/roadmapSeed';
+import { codigosEnRevision, revisionDelDia, pasosDeRevision, proximoLunes, YA_TIENES } from '../lib/yaTienes';
+import TestEneagrama from '../components/tasks/TestEneagrama';
+import { tipo as tipoEneagrama } from '../lib/eneagrama';
+import PreventaPanel from '../components/tasks/PreventaPanel';
+import { precioSellado } from '../lib/bonosPreventa';
+import HojaDeRuta from '../components/camino/HojaDeRuta';
+import { sellarDia, desactualizados, avisoDe } from '../lib/adnCoincidente';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -183,9 +180,10 @@ function isTaskUnlocked(
     }
   }
 
-  // v8 Regla #7 · No se corre publicidad a contenido no validado orgánicamente.
-  // P9A.5 (Config Meta Ads) requiere P9A.4 con ≥3 piezas validadas.
-  if (meta.codigo === 'P9A.5' && contarPiezasValidacionOrganica(perfil) < 3) {
+  // No se enciende publicidad sin las piezas grabadas: el día 31 depende del
+  // rodaje del 27. (Antes esta regla apuntaba a P9A.5, del Camino viejo, así
+  // que no frenaba nada.)
+  if (meta.codigo === codigoDelDia(31) && contarPiezasValidacionOrganica(perfil) < 3) {
     return false;
   }
 
@@ -197,10 +195,10 @@ function motivoBloqueo(
   meta: RoadmapMeta,
   perfil?: { adn_validacion_organica?: unknown },
 ): string | null {
-  if (meta.codigo === 'P9A.5') {
+  if (meta.codigo === codigoDelDia(31)) {
     const count = contarPiezasValidacionOrganica(perfil);
     if (count < 3) {
-      return `Regla Video 9: no se corre publicidad a contenido no validado. Completa P9A.4 con ≥3 piezas (tienes ${count}).`;
+      return `Se enciende con tus tres anuncios grabados. Tienes ${count} de 3.`;
     }
   }
   return null;
@@ -804,36 +802,50 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   }, [userId, onProfileFieldUpdate]);
 
   // ─── Complete a task (VIDEO, COACH) ───────────────────────────────────
-  /** Punto de partida: marca de una vez lo que el cliente ya traía hecho. */
-  const marcarPartida = useCallback((jornadas: Array<{ pilarNumero: number; codigo: string; esEstrella: boolean }>, fechaInicio: string) => {
-    // La fecha de inicio acompaña al día donde entra: si no, la app le dice
-    // que va atrasado por algo que ya tenía hecho.
-    onProfileFieldUpdate?.({ fecha_inicio: fechaInicio });
+  /**
+   * Punto de partida: guarda lo que el cliente ya trae hecho y fija el lunes
+   * de arranque. No marca ninguna jornada: esas pasan a revisión, no a hechas.
+   */
+  const [desfasajes, setDesfasajes] = useState(() => desactualizados());
+  const [rutaAbierta, setRutaAbierta] = useState(false);
+  const [enRevision, setEnRevision] = useState<Set<string>>(() => codigosEnRevision());
+
+  /**
+   * Los pasos de hoy. Si el cliente ya traía eso hecho, la jornada es de
+   * revisión: mira lo que tiene, lo mide contra los criterios y corrige.
+   */
+  /** El recuadro de contexto: lo que dijo al entrar, o que hoy revisa lo suyo. */
+  const baseDeHoy = useCallback((meta: RoadmapMeta) => {
+    const cosa = enRevision.has(meta.codigo) ? revisionDelDia(meta.dia_asignado ?? -1) : null;
+    if (cosa) {
+      return {
+        etiqueta: 'Esto ya lo tienes',
+        valor: VOC(`Hoy no lo construyes: revisas ${cosa.revisa} contra la vara y corriges lo que falte.`),
+      };
+    }
+    return baseDeOnboarding(meta.dia_asignado);
+  }, [enRevision]);
+
+  const pasosDeHoy = useCallback((meta: RoadmapMeta) => {
+    if (enRevision.has(meta.codigo)) {
+      const cosa = revisionDelDia(meta.dia_asignado ?? -1);
+      if (cosa) return pasosDeRevision(cosa).map((p) => VOC(p));
+    }
+    return (meta.pasos ?? []).map((p) => VOC(p));
+  }, [enRevision]);
+
+  const marcarPartida = useCallback((ids: string[]) => {
+    const fechaInicio = proximoLunes();
+    onProfileFieldUpdate?.({ fecha_inicio: fechaInicio, ya_tiene: ids });
     try {
       const perfilLocal = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
-      localStorage.setItem('tcd_profile', JSON.stringify({ ...perfilLocal, fecha_inicio: fechaInicio }));
+      localStorage.setItem('tcd_profile',
+        JSON.stringify({ ...perfilLocal, fecha_inicio: fechaInicio, ya_tiene: ids }));
     } catch { /* noop */ }
     if (isSupabaseReady() && supabase && userId) {
       void supabase.from('profiles').update({ fecha_inicio: fechaInicio }).eq('id', userId);
     }
-    setCompletadas((prev) => {
-      const next = new Set(prev);
-      for (const j of jornadas) next.add(`${j.pilarNumero}-${j.codigo}`);
-      return next;
-    });
-    if (isSupabaseReady() && supabase && userId) {
-      const hoy = new Date().toISOString().split('T')[0];
-      for (const j of jornadas) {
-        void guardarFila('hoja_de_ruta', {
-          usuario_id: userId,
-          pilar_numero: j.pilarNumero,
-          meta_codigo: j.codigo,
-          completada: true,
-          es_estrella: j.esEstrella,
-          fecha_completada: hoy,
-        }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
-      }
-    }
+    setEnRevision(codigosEnRevision(ids));
   }, [userId, onProfileFieldUpdate]);
 
   /** El tutorial de Lupe del día, si ya tiene enlace cargado. */
@@ -869,6 +881,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   const handleCompleteTask = useCallback((pilarNum: number, meta: RoadmapMeta) => {
     registrarSesionCompletada(); // racha de sesiones (F2)
+    // Queda la hora de esta versión: si después cambia su avatar, su método,
+    // su oferta o su precio, la app sabe qué quedó viejo.
+    if (meta.dia_asignado) { sellarDia(meta.dia_asignado); setDesfasajes(desactualizados()); }
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
@@ -914,12 +929,55 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         if (yaEligio || completadas.size > 0) return null;
         return (
           <PuntoDePartida
-            pilares={seedConVideos}
-            onMarcar={marcarPartida}
+            onGuardar={marcarPartida}
             onCerrar={() => setPartidaResuelta(true)}
           />
         );
       })()}
+
+      {/* Lo que quedó viejo cuando cambió una pieza de su ADN. */}
+      {desfasajes.length > 0 && (
+        <section className="card-panel p-5" aria-label="Para que todo diga lo mismo">
+          <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Para que todo diga lo mismo</p>
+          <ul className="mt-3 space-y-3">
+            {desfasajes.map((d) => (
+              <li key={d.dia} className="text-[17px] text-cream">
+                {VOC(avisoDe(d))}
+                <span className="block text-[15px] text-cream/60">Está en el día {d.dia}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Su Hoja de Ruta: los noventa días a la vista desde el primer día. */}
+      {rutaAbierta ? (
+        <HojaDeRuta
+          fechaInicio={perfil?.fecha_inicio}
+          completadas={completadas}
+          diaDeHoy={diaActual}
+          onCerrar={() => setRutaAbierta(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setRutaAbierta(true)}
+          className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between"
+        >
+          <span className="text-[17px] font-semibold text-cream">Tu Hoja de Ruta</span>
+          <span className="text-[15px] text-cream/70">tus noventa días ›</span>
+        </button>
+      )}
+
+      {/* El ADN vive acá: es lo que vas sellando en el Camino. */}
+      <button
+        type="button"
+        onClick={() => onNavigate?.('adn')}
+        className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between text-left"
+      >
+        <span className="text-[17px] font-semibold text-cream">Tu ADN</span>
+        <span className="text-[15px] text-cream/70">lo que ya sellaste ›</span>
+      </button>
 
       {/* ── Encabezado: dónde estás y qué hacer hoy (10-DISENO) ── */}
       <EncabezadoCamino
@@ -963,8 +1021,18 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       {/* ── Mapa visual por fases ── */}
       <div className="space-y-6">
         {FASES_ROADMAP.map((fase) => {
-          const pilaresEnFase = pilaresConEstado.filter((p) => p.fase === fase.fase);
+          // Los grupos vacíos no se muestran, y el nombre del sistema aparece
+          // una sola vez: cuando cambia. Antes se repetía cuatro veces seguidas.
+          const pilaresEnFase = pilaresConEstado
+            .filter((p) => p.fase === fase.fase)
+            .filter((p) => p.metas.length > 0);
           if (pilaresEnFase.length === 0) return null;
+          const ordenados = [...pilaresConEstado].filter((p) => p.metas.length > 0);
+          const abreSistema = new Set(
+            ordenados
+              .filter((p, i) => i === 0 || ordenados[i - 1].subtitulo !== p.subtitulo)
+              .map((p) => p.numero),
+          );
 
           return (
             <div key={fase.fase} className="space-y-2">
@@ -1023,9 +1091,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           )}
                         </div>
                       </div>
-                      <p className="text-[15px] text-cream/60">
-                        Pilar {pilar.id.substring(1)}
-                      </p>
+                      {/* El cliente no cuenta pilares: ve su sistema, y solo cuando cambia. */}
+                      {abreSistema.has(pilar.numero) && (
+                        <p className="text-[15px] text-cream/60">
+                          {VOC(pilar.subtitulo)}
+                        </p>
+                      )}
                       <p lang="es" className={`text-[17px] leading-snug font-semibold mt-0.5 hyphens-auto [overflow-wrap:anywhere] ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/55' : 'text-cream'}`}>
                         {VOC(pilar.titulo)}
                       </p>
@@ -1076,11 +1147,11 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 <div className="flex items-center gap-3">
                   {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-gold" /> : null; })()}
                   <div>
-                    <p className="text-sm text-gold uppercase tracking-wider font-bold">
-                      Pilar {pilar.id.substring(1)}
+                    <p className="text-[15px] text-gold uppercase tracking-wider font-bold">
+                      {VOC(pilar.subtitulo)}
                     </p>
                     <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(pilar.titulo)}</h2>
-                    <p className="text-sm text-cream/75">{VOC(pilar.subtitulo)}</p>
+
                   </div>
                 </div>
                 <button
@@ -1191,14 +1262,13 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             <FileText className="w-3 h-3 text-success" />
                           )}
                         </div>
-                        <p className={`text-base font-medium ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
-                          {VOC(meta.titulo)}
-                        </p>
+                        {/* Con la sesión abierta el título ya está adentro: no se repite. */}
                         {!isActive && (
-                          <p className="text-sm text-cream/55 mt-1 leading-relaxed line-clamp-2">
-                            {encuadrarPorAvatar(meta.codigo, meta.descripcion)}
+                          <p className={`text-base font-medium ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
+                            {VOC(meta.titulo)}
                           </p>
                         )}
+                        {/* Lo que se lleva se dice una sola vez, dentro de la sesión. */}
                         <div className="flex items-center gap-3 mt-2">
                           <span className="text-xs text-cream/45 font-medium">
                             {meta.tiempo_estimado}
@@ -1233,11 +1303,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             metaKey={key}
                             metaCodigo={meta.codigo}
                             metaTitulo={VOC(meta.titulo)}
-                            teLlevas={VOC(meta.evidencia_requerida?.nombre ?? '')}
-                            pasos={(meta.pasos ?? []).map((p) => VOC(p))}
+                            teLlevas={VOC(meta.descripcion || meta.evidencia_requerida?.nombre || '')}
+                            pasos={pasosDeHoy(meta)}
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
-                            seAbre={meta.cinturon ? 'Ganaste un grado nuevo. Mira tu cinturón en el Camino.' : undefined}
-                            tiempoEstimado={meta.tiempo_estimado}
+                            seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
+                            base={baseDeHoy(meta)}
+                            tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
                             video={(() => {
@@ -1252,7 +1323,13 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                               if (!suyo && !tuto) return undefined;
                               return <div className="space-y-5">{suyo}{tuto}</div>;
                             })()}
-                            evidencia={<EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />}
+                            evidencia={(
+                              <>
+                                <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
+                                {/* El Crítico mide lo escrito contra la rúbrica de esa jornada. */}
+                                <VeredictoCriticoPanel codigo={meta.codigo} texto={taskOutputs.get(key) ?? ''} />
+                              </>
+                            )}
                           >
                             <button
                               type="button"
@@ -1276,17 +1353,42 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             metaKey={key}
                             metaCodigo={meta.codigo}
                             metaTitulo={VOC(meta.titulo)}
-                            teLlevas={VOC(meta.evidencia_requerida?.nombre ?? '')}
-                            pasos={(meta.pasos ?? []).map((p) => VOC(p))}
+                            teLlevas={VOC(meta.descripcion || meta.evidencia_requerida?.nombre || '')}
+                            pasos={pasosDeHoy(meta)}
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
-                            seAbre={meta.cinturon ? 'Ganaste un grado nuevo. Mira tu cinturón en el Camino.' : undefined}
-                            tiempoEstimado={meta.tiempo_estimado}
+                            seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
+                            base={baseDeHoy(meta)}
+                            tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
                             video={tutorialDelDia(meta.dia_asignado) ?? undefined}
-                            evidencia={<EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />}
+                            evidencia={(
+                              <>
+                                <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
+                                {/* El Crítico mide lo escrito contra la rúbrica de esa jornada. */}
+                                <VeredictoCriticoPanel codigo={meta.codigo} texto={taskOutputs.get(key) ?? ''} />
+                              </>
+                            )}
                           >
-                        {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P0.2' && (
+                        {/* La preventa a los tres primeros: la del día 24. */}
+                        {meta.codigo === codigoDelDia(24) && (
+                          <PreventaPanel
+                            precio={precioSellado()}
+                            onElegir={(ids) => onProfileFieldUpdate?.({ adn_bonos_preventa: ids })}
+                          />
+                        )}
+
+                        {/* El test del eneagrama: la herramienta del día 3. */}
+                        {meta.codigo === codigoDelDia(3) && (
+                          <TestEneagrama
+                            onResultado={(tipoId) => {
+                              const t = tipoEneagrama(tipoId);
+                              if (t) onProfileFieldUpdate?.({ adn_eneagrama: t.nombre });
+                            }}
+                          />
+                        )}
+
+                        {meta.codigo === codigoDelDia(1) && (
                           <TaskFotoPartida
                             meta={meta}
                             valorExistente={perfil?.adn_autoevaluacion_dia1}
@@ -1297,7 +1399,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {meta.tipo === 'HERRAMIENTA' && meta.codigo === 'P8.8' && (
+                        {meta.codigo === codigoDelDia(9) && (
                           <TaskMapaMamuska
                             meta={meta}
                             perfil={perfil}
@@ -1309,15 +1411,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             isCompleted={estaCompletada}
                           />
                         )}
-                        {meta.tipo === 'HERRAMIENTA' && meta.codigo !== 'P0.2' && meta.codigo !== 'P8.8' && (
-                          <TaskHerramientaIA
-                            meta={meta}
-                            perfil={perfil}
-                            outputExistente={taskOutputs.get(key)}
-                            onSaveADN={(output) => handleSaveADN(pilar.numero, meta, output)}
-                            isCompleted={estaCompletada}
-                          />
-                        )}
+                        {/* El catálogo viejo de herramientas ya no se abre desde el Camino. */}
                         {meta.tipo === 'COACH' && (
                           <TaskCoach
                             meta={meta}
@@ -1371,7 +1465,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             <h3 className="text-lg font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               🎉 Registrar una venta
             </h3>
-            <p className="text-xs text-cream/65 mb-4">Un paciente más cobrado con tu precio digno. El contador avanza contigo.</p>
+            <p className="text-xs text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
             <label className="text-sm uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
             <input
               type="number" inputMode="decimal"
