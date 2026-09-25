@@ -1,3 +1,4 @@
+import { codigoDelDia, diaDelCodigo } from './roadmapSeed';
 /**
  * VIDEOS CARGADOS — los enlaces que ya existen, atados a su jornada.
  *
@@ -16,39 +17,35 @@ export function idDeYoutube(url: string): string | null {
 }
 
 /** código de jornada o de tutorial → enlace. */
-export const VIDEOS_POR_JORNADA: Record<string, string> = {
+export const VIDEOS_POR_JORNADA: Record<string | number, string> = {
   // ── Javo ──
-  'P0.0': 'https://youtu.be/v154pbAd3Hw',        // día 1 · Bienvenida
-  'P1.0': 'https://youtu.be/8Is3XXuk3e8',        // día 3 · El valor real de tu hora
-  'P2.d8': 'https://youtu.be/_YSWo_1PNcE',       // día 8 · El precio nuevo (desbloquearte para subir precios)
-  'P2.d9': 'https://youtu.be/Jm_IlRlPGWA',       // día 9 · Los tres grupos (limpieza de agenda)
-  'P3.d13': 'https://www.youtube.com/watch?v=qqWnptyFIsQ', // día 13 · Tu plan de caza (embudo orgánico)
-  'P3.d15': 'https://youtu.be/3QVjYzWNM7M',      // día 15 · Tu método propio
-  'P4.d17': 'https://youtu.be/_UjQtE4lNtk',      // día 17 · Tu oferta
-  'P4.d19': 'https://youtu.be/ck2IVA9ZTzU',      // día 19 · Tu escalera (infraestructura N1-N2-N3)
-  'P5.d20': 'https://youtu.be/xzrQXG7iaJc',      // día 20 · Cobrar libera al otro (ventas, intro)
-  'P5.d21': 'https://www.youtube.com/watch?v=rMC2bW-avsU', // día 21 · El ancla del precio (ventas conscientes)
-  'P5.d22': 'https://youtu.be/Olpfve1sj-Q',      // día 22 · El circuito (embudo VSL)
-  'P7.d30': 'https://youtu.be/6C_Qyk-_GCw',      // día 30 · Los tres anuncios listos (matriz A-B-C)
-  'P8.d36': 'https://youtu.be/FqGR_oRyI70',      // día 36 · La llamada dibujada (sistema W)
-  'P8.d38': 'https://www.youtube.com/watch?v=2LbHYaP6HSw', // día 38 · Antes de la llamada (curva de la W)
-  'P9A.d47': 'https://youtu.be/CQXN4Vt_nng',     // día 47 · La cinta (servicio)
+  1: 'https://youtu.be/v154pbAd3Hw',                       // día 1 · Bienvenida
+  5: 'https://youtu.be/_YSWo_1PNcE',                      // día 5 · El precio nuevo (desbloquearte para subir precios)
+  8: 'https://www.youtube.com/watch?v=qqWnptyFIsQ',       // día 8 · Tu plan de caza (embudo orgánico)
+  9: 'https://youtu.be/3QVjYzWNM7M',                       // día 9 · Tu método propio
+  10: 'https://youtu.be/_UjQtE4lNtk',                     // día 10 · Tu oferta
+  46: 'https://youtu.be/ck2IVA9ZTzU',                    // día 46 · Tu escalera (infraestructura N1-N2-N3)
+  32: 'https://youtu.be/xzrQXG7iaJc',                     // día 32 · Cobrar libera al otro (ventas, intro)
+  19: 'https://www.youtube.com/watch?v=rMC2bW-avsU',      // día 19 · El ancla del precio (ventas conscientes)
+  11: 'https://youtu.be/Olpfve1sj-Q',                     // día 11 · El circuito (embudo VSL)
+  30: 'https://youtu.be/6C_Qyk-_GCw',                     // día 30 · Los tres anuncios listos (matriz A-B-C)
+  22: 'https://www.youtube.com/watch?v=2LbHYaP6HSw',        // día 22 · Antes de la llamada (curva de la W)
+  36: 'https://youtu.be/CQXN4Vt_nng',                     // día 36 · La cinta (servicio)
 
   // ── Ron, el filmaker: los días de rodaje ──
-  'P6.d26': 'https://youtu.be/eai08tzbVPU',      // día 26 · Preproducción (grabar tu video en interior)
-  'P6.d27': 'https://youtu.be/N3l1Vh-kJnw',      // día 27 · Jornada de rodaje A (en exterior)
-  'P9A.d52': 'https://youtu.be/2V0ArlT4dZc',     // día 52 · Jornada de rodaje B (anuncios y reels)
+  15: 'https://youtu.be/N3l1Vh-kJnw',                     // día 15 · Jornada de rodaje A (en exterior)
+  44: 'https://youtu.be/2V0ArlT4dZc',                       // día 44 · Jornada de rodaje B (anuncios y reels)
 
   // ── Lupe, paso a paso en pantalla ──
   'L-01': 'https://youtu.be/5R5JDKEDaY0',        // día 1 · Tu primer ingreso a la plataforma
-  'L-06': 'https://youtu.be/rK87Gb40ykU',        // día 25 · Tu subdominio (dominio y DNS)
-  'L-07': 'https://youtu.be/LzU5fRc4IgE',        // día 28 · Subir tu video a la página
+  'L-06': 'https://youtu.be/rK87Gb40ykU',        // día 16 · Tu subdominio (dominio y DNS)
+  'L-07': 'https://youtu.be/LzU5fRc4IgE',        // día 17 · Subir tu video a la página
   'L-11': 'https://youtu.be/OFlWSTL8f-w',        // día 29 · Tu página y perfil profesional
   'L-12': 'https://youtu.be/Ei5x-_sXKhc',        // día 29 · Business y cuenta publicitaria
   'L-13': 'https://youtu.be/M8R3ysymXrE',        // día 29 · Tarjeta o PayPal
   'L-14': 'https://youtu.be/cIaUuk2X_p4',        // día 29 · Tu pixel
   'L-16': 'https://youtu.be/6AZpNd0eh0s',        // día 31 · Tu público de retargeting
-  'L-09': 'https://youtu.be/N95WnnX7Z2k',        // día 28 · Tu calendario en dos pasos (calendario y correo)
+  'L-09': 'https://youtu.be/N95WnnX7Z2k',        // día 17 · Tu calendario en dos pasos (calendario y correo)
 };
 
 export interface VideoComplemento {
@@ -63,6 +60,10 @@ export interface VideoComplemento {
  * cliente quiere, no cuando la app lo empuja.
  */
 export const COMPLEMENTOS: VideoComplemento[] = [
+  { titulo: 'El valor real de tu hora', url: 'https://youtu.be/8Is3XXuk3e8', tema: 'Del Camino' },
+  { titulo: 'Los tres grupos', url: 'https://youtu.be/Jm_IlRlPGWA', tema: 'Del Camino' },
+  { titulo: 'La llamada dibujada', url: 'https://youtu.be/FqGR_oRyI70', tema: 'Del Camino' },
+  { titulo: 'Preproducción', url: 'https://youtu.be/eai08tzbVPU', tema: 'Del Camino' },
   { titulo: 'Tu historia', url: 'https://youtu.be/ZClgkkUs2QI', tema: 'Quién eres' },
   { titulo: 'Tu propósito', url: 'https://youtu.be/A9bWp0nVTQI', tema: 'Quién eres' },
   { titulo: 'Tu legado', url: 'https://youtu.be/BiZLzUGs2Wo', tema: 'Quién eres' },
@@ -70,14 +71,27 @@ export const COMPLEMENTOS: VideoComplemento[] = [
   { titulo: 'Tu frase que te separa', url: 'https://youtu.be/nTWKGyvBbvY', tema: 'Tu programa' },
 ];
 
-/** El mapa listo para la app: código → id de YouTube. */
+/**
+ * El mapa listo para la app: código de jornada → id de YouTube.
+ *
+ * Adentro los videos se guardan por DÍA, que es lo único que no cambia cuando
+ * el Camino se reordena. Acá se traducen al código de hoy.
+ */
 export function mapaDeVideos(): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const [codigo, url] of Object.entries(VIDEOS_POR_JORNADA)) {
+  for (const [clave, url] of Object.entries(VIDEOS_POR_JORNADA)) {
     const id = idDeYoutube(url);
-    if (id) out[codigo] = id;
+    if (!id) continue;
+    const codigo = /^\d+$/.test(clave) ? codigoDelDia(Number(clave)) : clave;
+    if (codigo) out[codigo] = id;
   }
   return out;
+}
+
+/** El video de una jornada, por su código. */
+export function videoDeJornada(codigo: string): string | undefined {
+  const d = diaDelCodigo(codigo);
+  return (d !== null && VIDEOS_POR_JORNADA[d]) || VIDEOS_POR_JORNADA[codigo];
 }
 
 /**
@@ -93,4 +107,5 @@ export const PDFS_POR_TUTORIAL: Record<string, string> = {
   'L-06': 'https://drive.google.com/file/d/1vhg4voXTWUGCwNSOZvTplAQ_cFp-tXoP/view',
   'L-07': 'https://drive.google.com/file/d/19ShSjX2PWngiDkdMP_yojSyFVw5tKmBl/view',
   'L-16': 'https://drive.google.com/file/d/1NGbr0D4U5q9M1TViteAJWzlUdEOH5rTM/view',
+  'L-09': 'https://drive.google.com/file/d/1_ebK50NSQVNd9wbqnxSaVQzAlNhVHB_I/view',
 };

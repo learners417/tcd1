@@ -215,7 +215,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
 export const lucas: ConfigAgente = {
   id: 'agente-lucas-consulta',
   titulo: 'Lucas · Entrenador de Consulta de Venta',
-  subtitulo: 'Simulo pacientes en video-llamada · entreno la W de Javo',
+  subtitulo: 'Simulo {{consultantes}} en video-llamada · entreno la W de Javo',
   icon: 'Phone',
   accentOpacity: '60',
   categoria: 'vender-medir',

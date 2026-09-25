@@ -219,14 +219,14 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
 
 export const sofi: ConfigAgente = {
   id: 'agente-sofi-setter',
-  titulo: 'Sofi · Entrenadora de Filtrado de Pacientes',
-  subtitulo: 'Te entreno a manejar pacientes que te escriben sin convencer',
+  titulo: 'Sofi · Entrenadora de Filtrado de {{consultantes}}',
+  subtitulo: 'Te entreno a manejar {{consultantes}} que te escriben sin convencer',
   icon: 'MessageCircle',
   accentOpacity: '60',
   categoria: 'vender-medir',
   unlockPilares: ['P8'],
   unlockReason:
-    'Completa el Pilar 8 (Oferta y regalo gratuito) para entrenar con Sofi. Sin oferta y regalo armados · no hay nada que filtrar.',
+    'Se abre cuando tengas tu oferta lista. Sin oferta no hay a qué invitar.',
   descripcion:
     'Simula pacientes potenciales que te escriben por DM o WhatsApp. Te entrena a filtrar · no convencer. En 20-30 leads practicados filtras sin pensarlo.',
   adnFieldsNeeded: ADN_FIELDS,
@@ -236,7 +236,7 @@ export const sofi: ConfigAgente = {
     const nombre = getNombreSanador(perfil);
     const nivel = skill?.current_level ?? 1;
     const practicas = skill?.practice_count ?? 0;
-    return `Hola ${nombre} · soy Sofi · te entreno a manejar pacientes que te escriben.
+    return `Hola ${nombre} · soy Sofi · te entreno a manejar {{consultantes}} que te escriben.
 
 El objetivo no es convencer · es filtrar. Si está lista · agenda. Si no · le pasamos el regalo gratuito y queda para más adelante.
 

@@ -272,7 +272,7 @@ export const mateo: ConfigAgente = {
   categoria: 'producir-comunicar',
   unlockPilares: ['P9A'],
   unlockReason:
-    'Completa el Pilar 9A (Infraestructura · validación orgánica) para entrenar con Mateo. Recién con la oferta y el regalo gratuito listos tiene sentido crear contenido que traiga pacientes.',
+    'Se abre con tu oferta sellada. El contenido sale de lo que vendes.',
   descripcion:
     'No genera desde la nada · trabaja con referencias reales (la regla de los 300). Cada guión sale con los 8 campos completos: tipo · setup de producción · referencia · cuerpo · guión línea a línea · música · texto del posteo · palabra clave. Listo para grabar · editar y publicar.',
   adnFieldsNeeded: ADN_FIELDS,

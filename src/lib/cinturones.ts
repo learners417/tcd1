@@ -9,6 +9,8 @@
  */
 import { supabase } from './supabase';
 import type { PilarId } from './supabase';
+import { claveDelDia } from './roadmapSeed';
+import { esPasoDelCliente } from './diaPrograma';
 import {
   CINTURONES,
   SEED_ROADMAP_V2,
@@ -105,7 +107,9 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
   let masAlto: Cinturon = CINTURONES[0];
 
   for (const pilar of SEED_ROADMAP_V2) {
-    const metas = pilar.metas ?? [];
+    // Solo los pasos que el cliente hace: los días de campo y los fines de
+    // semana no se completan, y exigirlos dejaba el grado trabado para siempre.
+    const metas = (pilar.metas ?? []).filter(esPasoDelCliente);
     if (metas.length === 0) continue;
     const completo = metas.every((m) => completadas.has(`${pilar.numero}-${m.codigo}`));
     if (completo) {
@@ -115,7 +119,7 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
   }
 
   // La punta amarilla: la quema (P1.3) o EL NÚMERO (P1.5) completados, sin P1 cerrado todavía.
-  if (masAlto.id === '10gup' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
+  if (masAlto.id === '10gup' && (completadas.has(claveDelDia(1)) || completadas.has(claveDelDia(5)))) {
     const punta = CINTURONES.find((c) => c.id === '9gup');
     if (punta) masAlto = punta;
   }

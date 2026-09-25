@@ -184,7 +184,7 @@ export const ramiro: ConfigAgente = {
   unlockPilares: ['P9A'],
   unlockExtraCheck: (_perfil, ctx) => ctx.metricasCount >= 1,
   unlockReason:
-    'Completa el Pilar 9A (Infraestructura) y carga al menos 1 semana de métricas para entrenar con Ramiro. Sin datos · te tiraría adivinanzas.',
+    'Se abre cuando tengas tu campaña activa y una semana de números cargados. Sin números no hay nada que leer.',
   descripcion:
     'Te entrena a leer tu propio embudo: costo por mil · form · agenda · show · cierre · adquisición · hora real · proyección. En 3-4 meses miras tus números sin él.',
   adnFieldsNeeded: ADN_FIELDS,

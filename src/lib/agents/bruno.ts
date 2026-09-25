@@ -194,7 +194,7 @@ export const bruno: ConfigAgente = {
   categoria: 'operar-clientes',
   unlockPilares: ['P9B', 'P9C'],
   unlockReason:
-    'Completa los Pilares 9B y 9C (Captación) para entrenar con Bruno. Hasta que no hayas vendido y operado clientes · no hay casos reales para entrenar.',
+    'Se abre con tu primer cobro del sistema. La entrega se entrena con alguien adentro.',
   descripcion:
     'Simula clientes ya comprados en los 4 momentos del ciclo: onboarding · primera sesión · checkpoint · cierre. Te entrena a sostener sin regalar.',
   adnFieldsNeeded: ADN_FIELDS,

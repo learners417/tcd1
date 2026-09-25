@@ -193,7 +193,7 @@ export const vera: ConfigAgente = {
   categoria: 'vender-medir',
   unlockPilares: ['P8'],
   unlockReason:
-    'Completa el Pilar 8 (Oferta · escalera Low-Mid-High) para entrenar con Vera. Trabajar pricing sin la oferta armada es discutir el precio de algo que todavía no terminaste de construir.',
+    'Se abre con tu precio sellado. El precio se defiende después de decidirlo.',
   descripcion:
     'Te entrena a pensar como diseñadora de ofertas: los 7 componentes que justifican precio · bonos palanca vs relleno · landings · pricing por valor vs por hora.',
   adnFieldsNeeded: ADN_FIELDS,

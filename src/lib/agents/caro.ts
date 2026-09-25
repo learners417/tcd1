@@ -174,7 +174,7 @@ export const caro: ConfigAgente = {
   categoria: 'producir-comunicar',
   unlockPilares: ['P1', 'P2', 'P3'],
   unlockReason:
-    'Completa los Pilares 1 · 2 y 3 (Identidad: historia · propósito · legado) para entrenar con Caro. Sin identidad clara · grabarías reels sin tu voz auténtica.',
+    'Se abre cuando selles tu historia, tu propósito y tu legado. La cámara sin eso no tiene qué decir.',
   descripcion:
     'Te entrena cámara · presencia · gancho · llamada a la acción. Sube selfies o videos y te corrige luz · encuadre · postura. En 4-6 semanas de práctica regular dejas de necesitarla.',
   adnFieldsNeeded: ADN_FIELDS,
