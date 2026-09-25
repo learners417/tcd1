@@ -68,8 +68,12 @@ ok(casos[0].texto.includes('día 12') && casos[0].texto.includes('Día 71'), 'el
 ok(casos.every((c) => c.texto.length <= 110), 'cada mensaje entra en tres líneas de teléfono (≤110 caracteres)');
 
 console.log('\n── los pilares se abren por el camino, no quedan todos cerrados ──');
-ok(!esPasoDelCliente({ tipo_jornada: 'entrega_tecnica' }) && esPasoDelCliente({ tipo_jornada: 'sesion' }) && esPasoDelCliente({}), 'la entrega técnica es del equipo; el resto, del cliente');
-const p0 = [{ dia_asignado: 0, tipo_jornada: 'entrega_tecnica' }, { dia_asignado: 1, tipo_jornada: 'sesion' }];
+ok(!esPasoDelCliente({ tipo_jornada: 'entrega_tecnica', tiempo_estimado: '20 min' })
+   && esPasoDelCliente({ tipo_jornada: 'sesion', tiempo_estimado: '60 min' })
+   && !esPasoDelCliente({ tipo_jornada: 'campo', tiempo_estimado: '0 min' })
+   && esPasoDelCliente({ tipo_jornada: 'cierre', tiempo_estimado: '0 min', cinturon: '1dan' }),
+   'la entrega técnica y los días de campo no son pasos del cliente; la graduación sí');
+const p0 = [{ dia_asignado: 0, tipo_jornada: 'entrega_tecnica', tiempo_estimado: '20 min' }, { dia_asignado: 1, tipo_jornada: 'sesion', tiempo_estimado: '75 min' }];
 ok(primerDiaDelPilar(p0) === 1, 'el primer día de un pilar ignora el paso del equipo');
 ok(pilarAlcanzado(p0, 0, 1), 'el día 1, el pilar del día 1 está abierto');
 ok(!pilarAlcanzado([{ dia_asignado: 22 }], 0, 15), 'yendo por el día 15, el pilar del día 22 sigue cerrado');
@@ -90,7 +94,7 @@ console.log('\n── el punto de partida del cliente que ya venía andando ─�
 const ops = opcionesDePartida();
 ok(ops.length === 10, `hay ${ops.length} opciones, una por grado ganable`);
 ok(ops.every((o) => o.loQueYaTienes && !/cintur/i.test(o.loQueYaTienes)), 'cada opción dice lo que YA TIENE, no el nombre del grado');
-const campana = ops.find((o) => o.id === '3gup')!;
+const campana = ops.find((o) => o.id === '4gup')!;
 ok(campana.dia === 31, `«${campana.loQueYaTienes}» entra en el día ${campana.dia}`);
 const marcadas = jornadasHasta(SEED_ROADMAP_V2, campana.dia);
 ok(marcadas.length > 0 && marcadas.length < 90, `marca ${marcadas.length} jornadas, no las 90`);
@@ -100,7 +104,7 @@ ok(!codigos.has('P0.d0'), 'no marca la entrega técnica: es del equipo');
 ok(todas.filter(({ m }) => codigos.has(m.codigo)).every(({ m }) => (m.dia_asignado ?? 0) <= 31), 'no marca nada posterior al día elegido');
 ok(!todas.some(({ m }) => codigos.has(m.codigo) && m.evidencia_requerida?.del_mercado), 'no marca lo que depende de que otro pague: eso se gana');
 const grado = cinturonDesdeProgreso(new Set(marcadas.map((m) => m.clave)));
-ok(grado.id === '3gup', `con eso marcado, el cinturón queda en ${grado.nombre}`);
+ok(grado.id === '4gup', `con eso marcado, el cinturón queda en ${grado.nombre}`);
 ok(diaDeLaOpcion('inventado') === null && resumenDePartida(SEED_ROADMAP_V2, 'inventado') === null, 'una opción inventada no rompe nada');
 const cero = jornadasHasta(SEED_ROADMAP_V2, 0);
 ok(cero.length === 0, 'el que empieza de cero no arrastra nada');
