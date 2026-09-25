@@ -82,7 +82,7 @@ function briefDesdeADN(): Brief {
 }
 
 const CAMPOS: { k: keyof Brief; label: string; ayuda: string }[] = [
-  { k: 'avatar', label: 'Tu cliente, por CONDUCTA', ayuda: 'Qué hace un día normal, cómo cobra, qué persigue hoy. Sin nombrar profesiones.' },
+  { k: 'avatar', label: 'A quién le hablas', ayuda: 'Qué hace un día normal, cómo cobra, qué persigue hoy. Sin nombrar profesiones.' },
   { k: 'piedras', label: 'Las 3 tácticas que ya intentó', ayuda: 'Lo que probó y no le funcionó — lo que quemaste en tu QUEMA sirve acá.' },
   { k: 'frases', label: 'Frases TEXTUALES de tus clientes', ayuda: '2-3 frases exactas que dicen al llegar. Su lenguaje interno.' },
   { k: 'prueba', label: 'Una prueba real (con permiso)', ayuda: 'Un resultado o testimonio de un cliente tuyo. Si aún no tienes, déjalo vacío.' },
@@ -282,14 +282,37 @@ CAPTION: …`;
 
   const listas = FAMILIAS.every((f) => piezas[elegidas[f]]?.texto);
 
+  // Tres pantallas, una idea por pantalla: el brief, las piezas, el paquete.
+  // Antes era un solo scroll enorme: nadie sabía dónde estaba parado.
+  const PANTALLAS = [
+    { id: 'brief' as const, label: 'Tu brief' },
+    { id: 'piezas' as const, label: 'Tus 3 anuncios' },
+    { id: 'paquete' as const, label: 'Para encender' },
+  ];
+  const [pantalla, setPantalla] = useState<'brief' | 'piezas' | 'paquete'>('brief');
+  const iPantalla = PANTALLAS.findIndex((x) => x.id === pantalla);
+
   return (
     <div className="space-y-6">
       <div>
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">El Constructor</p>
-        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 3 anuncios</h2>
+        <h2 className="text-[26px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 3 anuncios</h2>
         <p className="text-sm text-cream/60 mt-1">Tres fórmulas que atacan distinto, completadas con TU caso. La regla: una de piedras, una de dolor o historia, una de resultado.</p>
       </div>
 
+      <div>
+        <div className="flex items-center gap-2">
+          {PANTALLAS.map((x, n) => (
+            <div key={x.id} className="flex-1 h-1.5 rounded-full"
+              style={{ background: n <= iPantalla ? 'var(--oro-d, #8E6824)' : 'var(--line, #EBE1CF)' }} />
+          ))}
+        </div>
+        <p className="mt-2 text-[15px] font-semibold text-cream">
+          {PANTALLAS[iPantalla]?.label} · paso {iPantalla + 1} de {PANTALLAS.length}
+        </p>
+      </div>
+
+      {pantalla === 'brief' && (<>
       {/* EL BRIEF */}
       <div className="card-panel p-5">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
@@ -330,15 +353,15 @@ CAPTION: …`;
         </div>
       </div>
 
+      </>)}
+
+      {pantalla === 'piezas' && (<>
       {/* LO QUE LA APP ELIGIÓ POR TI */}
       <div className="card-panel p-5">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60 mb-1">
           2 · Tus 3 anuncios
         </p>
-        <p className="text-sm text-cream/55 mb-4">
-          Elegidas con lo que ya sellaste. Una ataca lo que tu paciente probó, otra su dolor
-          y otra tu resultado: si las tres dijeran lo mismo, no sabrías cuál funcionó.
-        </p>
+        <p className="text-sm text-cream/55 mb-4">{VOC('Elegidas con lo que ya sellaste. Una ataca lo que tu {{consultante}} probó, otra su dolor y otra tu resultado: si las tres dijeran lo mismo, no sabrías cuál funcionó.')}</p>
 
         <div className="space-y-2.5">
           {FAMILIAS.map((fam) => {
@@ -617,6 +640,9 @@ CAPTION: …`;
         <p className="text-sm text-cream/55 text-center">Tus 3 anuncios están listos. El paso que sigue vive en tu Camino: grabarlos y montar tu campaña.</p>
       )}
 
+      </>)}
+
+      {pantalla === 'paquete' && (<>
       {/* EL PAQUETE — todo junto, listo para encender */}
       {paquete.piezas.some((x) => x.contenido) && (
         <div className="card-panel p-5">
@@ -679,7 +705,27 @@ CAPTION: …`;
           </div>
         </div>
       )}
+      </>)}
 
+      {/* Anterior y siguiente: el constructor se recorre */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => setPantalla(PANTALLAS[Math.max(0, iPantalla - 1)].id)}
+          disabled={iPantalla === 0}
+          className="min-h-[52px] rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] font-semibold text-cream disabled:opacity-40"
+        >
+          ‹ Anterior
+        </button>
+        <button
+          type="button"
+          onClick={() => setPantalla(PANTALLAS[Math.min(PANTALLAS.length - 1, iPantalla + 1)].id)}
+          disabled={iPantalla >= PANTALLAS.length - 1}
+          className="min-h-[52px] rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] font-semibold text-cream disabled:opacity-40"
+        >
+          Siguiente ›
+        </button>
+      </div>
     </div>
   );
 }

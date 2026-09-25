@@ -10,7 +10,6 @@ import { notificarAdminsEvidencia } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
 import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
-import TaskChecklist from './TaskChecklist';
 import BotonAudio from '../sesion/BotonAudio';
 import { VOC } from '../../lib/vocabulario';
 
@@ -222,9 +221,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
             )}
           </div>
         )}
-        {meta.checklist && meta.checklist.length > 0 && (
-          <TaskChecklist codigo={meta.codigo} items={meta.checklist} />
-        )}
+        {/* El paso a paso vive en la pantalla "Haz" de la sesión. */}
       </div>
 
       {/* Confirmation — prominent completion button */}

@@ -43,6 +43,8 @@ interface Props {
   pasos?: string[];
   pide?: string;
   seAbre?: string;
+  /** Lo que ya contestó en el onboarding para esta jornada. */
+  base?: { etiqueta: string; valor: string } | null;
   tiempoEstimado?: string | null;
   isCompleted: boolean;
   userId?: string;
@@ -56,7 +58,7 @@ const ROTULO: Record<PantallaSesion, string> = {
 };
 
 export default function SesionViva({
-  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre,
+  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre, base,
   tiempoEstimado, isCompleted, userId, children, video, evidencia,
 }: Props) {
   const orden = useMemo<PantallaSesion[]>(
@@ -138,6 +140,11 @@ export default function SesionViva({
             {metaTitulo}
           </h2>
           {teLlevas && <p className="mt-3 text-[19px] leading-relaxed text-cream">Te llevas: {teLlevas}</p>}
+          {base && (
+            <p className="mt-3 text-[17px] leading-relaxed text-cream/75">
+              {base.etiqueta}: <span className="text-cream font-semibold">{base.valor}</span>. Hoy lo trabajamos desde ahí.
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             {tiempoEstimado && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line2,#DFD3BC)] px-3 py-1.5 text-[15px] text-cream/80">
