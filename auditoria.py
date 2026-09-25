@@ -2535,6 +2535,192 @@ check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+# ── Los pilotos, listos para entrar (24 sep) ───────────────────────
+check('existe el plan de migración de los pilotos',
+      _os64.path.exists('scripts/migrar-pilotos.ts'))
+_mp = rd('scripts/migrar-pilotos.ts')
+check('la migración verifica lo que carga antes de cargarlo',
+      'diasEnRevision' in _mp and 'estadoDeAcceso' in _mp)
+check('los pilotos arrancan un lunes, como todos', 'proximoLunes' in _mp)
+
+# ── El paso a paso donde más se traba (24 sep) ─────────────────────
+_tt = rd('src/lib/tutorialesTecnicos.ts')
+check('los tutoriales técnicos se buscan por día', 'diaDelCodigo' in _tt and _tt.count('dia: ') >= 10)
+check('están los cinco que faltaban',
+      all(k in _tt for k in ['perfil-y-pagina', 'agenda-y-cobro', 'pixel-y-cuenta',
+                             'encender-campanas', 'app-con-tu-marca']))
+check('cada uno dice qué hacer si algo falla', _tt.count('siFalla:') >= 10)
+check('existe la prueba de los tutoriales', _os64.path.exists('scripts/prueba-tutoriales.ts'))
+
+# ── La ventana de acceso y el cierre de cuentas (24 sep) ───────────
+_va = rd('src/lib/ventanaDeAcceso.ts'); _cc = rd('src/lib/cierreDeCuentas.ts')
+_app_va = rd('src/App.tsx'); _pc = rd('src/components/CierreDelCamino.tsx')
+check('el acceso se carga por cliente: treinta, noventa o cuotas',
+      "'treinta'" in _va and "'cuotas'" in _va)
+check('la cuota impaga cierra y el pago reabre con los días devueltos',
+      'reabrirConPago' in _va and 'diasDevueltos' in _va)
+check('el cierre de cuentas mide entregas y atraso',
+      'sinEvidencia' in _cc and 'atrasoMayor' in _cc)
+check('la vara de la garantía son siete días', 'DIAS_DE_TOLERANCIA = 7' in _cc)
+check('la app muestra el cierre cuando la ventana se cierra',
+      'CierreDelCamino' in _app_va and 'estadoDeAcceso' in _app_va)
+check('el cierre dice que nada se borra', 'Todo tu trabajo queda acá' in _pc)
+check('existe la prueba del acceso', _os64.path.exists('scripts/prueba-acceso.ts'))
+
+# ── El ADN coincidente (24 sep) ────────────────────────────────────
+_ac = rd('src/lib/adnCoincidente.ts'); _rm_ac = rd('src/pages/Roadmap.tsx')
+check('el mapa de fuentes y derivados existe', _ac.count('derivados: [') == 4)
+check('cada jornada terminada queda sellada', 'sellarDia(meta.dia_asignado)' in _rm_ac)
+check('la app avisa qué quedó viejo', 'Para que todo diga lo mismo' in _rm_ac)
+check('el aviso dice en qué día se arregla', 'Está en el día' in _rm_ac)
+check('existe la prueba del ADN coincidente', _os64.path.exists('scripts/prueba-adn-coincidente.ts'))
+
+# ── La Hoja de Ruta adentro de la app (24 sep) ─────────────────────
+_hr = rd('src/lib/hojaDeRuta.ts'); _hrv = rd('src/components/camino/HojaDeRuta.tsx')
+_rm_hr = rd('src/pages/Roadmap.tsx')
+check('las trece semanas tienen nombre', len(re.findall(r'^\s*\d+: .+,$', _hr, re.M)) >= 28)
+check('los hitos están escritos', _hr.count('Tu ') >= 10)
+check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and 'tus noventa días' in _rm_hr)
+check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
+check('existe la prueba de la Hoja de Ruta', _os64.path.exists('scripts/prueba-hoja-de-ruta.ts'))
+
+# ── La preventa a los tres primeros (24 sep) ───────────────────────
+_bp = rd('src/lib/bonosPreventa.ts'); _rm_pv = rd('src/pages/Roadmap.tsx')
+check('hay cinco bonos para elegir dos', _bp.count("id: '") == 5)
+_bloque_bonos = _bp.split('export const BONOS')[1].split('export const KEY_BONOS')[0]
+check('ninguno es un descuento', 'descuento' not in _bloque_bonos.lower())
+check('la preventa se abre en la jornada del día 24',
+      'PreventaPanel' in _rm_pv and 'codigoDelDia(24)' in _rm_pv)
+check('el mensaje sale con el precio completo', 'mismo que va a pagar el resto' in _bp)
+check('existe la prueba de la preventa', _os64.path.exists('scripts/prueba-preventa.ts'))
+
+# ── El test del eneagrama (24 sep) ─────────────────────────────────
+_en = rd('src/lib/eneagrama.ts'); _rm_en = rd('src/pages/Roadmap.tsx')
+check('el test del eneagrama vive en la app', _en.count('{ tipo: ') == 45)
+check('cada tipo dice cómo se ve entero, cansado y con el dinero',
+      _en.count('entero:') >= 10 and _en.count('conElDinero:') >= 10)
+check('el test se abre en la jornada del día 3',
+      'TestEneagrama' in _rm_en and 'codigoDelDia(3)' in _rm_en)
+check('el tipo queda en su ADN', 'adn_eneagrama' in _rm_en)
+check('existe la prueba del eneagrama', _os64.path.exists('scripts/prueba-eneagrama.ts'))
+
+# ── El punto de partida personaliza, no saltea (24 sep) ─────────────
+_yt = rd('src/lib/yaTienes.ts'); _pp = rd('src/components/PuntoDePartida.tsx')
+_rm24 = rd('src/pages/Roadmap.tsx')
+check('existe el catálogo de lo que el cliente ya trae hecho', bool(_yt))
+check('la pantalla de partida ya no da jornadas por hechas',
+      'jornadasHasta' not in _pp and 'onMarcar' not in _rm24)
+check('todos arrancan el día 1', 'Empezar el día 1' in _pp)
+check('lo que ya tiene pasa a modo revisión, con su vara',
+      'codigosEnRevision' in _rm24 and 'pasosDeRevision' in _rm24)
+check('la revisión se nota en la sesión', 'Esto ya lo tienes' in _rm24)
+check('el Camino arranca el lunes siguiente', 'proximoLunes' in _yt and 'proximoLunes' in _rm24)
+check('existe la prueba del punto de partida', _os64.path.exists('scripts/prueba-ya-tienes.ts'))
+
+# ── El Crítico y el Mentor llegan con criterio (20 sep) ─────────────
+_rub = rd('src/lib/rubricas.ts'); _con = rd('src/lib/consultorio.ts')
+check('el Crítico se ve en la sesión, no solo en el catálogo',
+      'VeredictoCriticoPanel' in rd('src/pages/Roadmap.tsx'))
+check('hay rúbricas escritas para el Camino de 90 días', _rub.count("criterios:") >= 23)
+# Cada rúbrica trae su destino: un bloqueo sin salida es un muro.
+check('las rúbricas dicen dónde se arregla lo que no sale',
+      _rub.count('donde_se_arregla:') - 1 == _rub.count('criterios: ['))  # -1: la interfaz
+check('el Mentor tiene preguntas cargadas del Camino nuevo',
+      _con.count('{ codigo: ') >= 50)
+
+# ── Ningún código apunta al vacío (19 sep) ──────────────────────────
+check('existe la caza de códigos rotos', _os64.path.exists('scripts/prueba-codigos.ts'))
+_rm9 = todo.get('src/pages/Roadmap.tsx', '')
+check('ninguna jornada abre el catálogo viejo de herramientas',
+      'herramienta_id: undefined' in rd('src/lib/roadmapSeed.ts'))
+check('las jornadas con entrenador se practican con él',
+      "j.agente !== null ? 'COACH'" in rd('src/lib/roadmapSeed.ts'))
+check('el consultorio responde por jornada o por pieza',
+      'diaDelCodigo' in rd('src/lib/consultorio.ts'))
+check('el cliente no ve la palabra Pilar en su Camino', 'Pilar {pilar' not in _rm9)
+
+# ── El ADN se llena con el Camino ────────────────────────────────────
+_ap2 = rd('src/lib/adnPiezas.ts')
+check('el ADN se sella con las claves que escribe el Camino de hoy',
+      'clavesEscritas' in _ap2 and _ap2.count('clave:') >= 10)
+_claves_seed = {k for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] for k in j.get('adn_escribe', [])}
+_apuntadas = set(re.findall(r"clave: '([\w.]+)'", _ap2))
+check('ninguna pieza del ADN apunta a una clave que no existe',
+      _apuntadas <= _claves_seed, str(sorted(_apuntadas - _claves_seed)))
+check('importar los planes no depende del navegador', 'const env = (import.meta' in rd('src/lib/planes.ts'))
+
+# ── El recorrido completo (C6) ───────────────────────────────────────
+check('existe la prueba del recorrido del día 1 al 90', _os64.path.exists('scripts/prueba-recorrido.ts'))
+_seed_rec = _json64.loads(rd('src/lib/roadmap.seed.json'))
+_dias = {j['dia'] for j in _seed_rec['jornadas']}
+check('los noventa días existen', all(d in _dias for d in range(1, 91)))
+_app = [j for j in _seed_rec['jornadas'] if 'app.url' in j.get('adn_escribe', [])]
+check('la app del cliente se publica con su marca y es suya', bool(_app))
+check('y después él le cambia algo con Claude',
+      any('con Claude' in ' '.join(j.get('pasos', [])) for j in _seed_rec['jornadas']))
+
+# ── El onboarding deja la base de los cinco sistemas (C4) ────────────
+_ww2 = todo.get('src/components/WelcomeWizard.tsx', '')
+check('el onboarding pregunta de dónde llegan, qué entrega y dónde publica',
+      all(x in _ww2 for x in ['dxLlegan', 'dxEntrega', 'dxPublica']))
+check('esas tres respuestas se guardan con el resto del diagnóstico',
+      'llegan: dxLlegan' in _ww2 and 'publica: dxPublica' in _ww2)
+_ob = rd('src/lib/onboardingBase.ts')
+check('el Camino usa lo que ya contestó, no vuelve a preguntar',
+      'baseDeOnboarding' in _ob and 'baseDeOnboarding' in todo.get('src/pages/Roadmap.tsx', ''))
+check('la sesión le muestra su propia respuesta',
+      'base.etiqueta' in rd('src/components/sesion/SesionViva.tsx'))
+
+# ── La app cumple la promesa de la landing (C4) ──────────────────────
+_seed_land = _json64.loads(rd('src/lib/roadmap.seed.json'))
+_nombres = [x['nombre'] for x in _seed_land['sistemas']]
+check('los cinco sistemas se llaman igual que en la landing',
+      _nombres == ['Tu reset', 'Tu programa de alto impacto', 'Tu captación automática',
+                   'Tu propia app', 'Tu ecosistema circular'], str(_nombres))
+_j1 = [j for j in _seed_land['jornadas'] if j['dia'] == 1][0]
+check('el día 1 toma la medición de entrada',
+      'reset.medicion_entrada' in _j1.get('adn_escribe', []))
+_reset = [j for j in _seed_land['jornadas'] if 'reset.protocolo' in j.get('adn_escribe', [])]
+check('el cliente escribe su propio protocolo de reemplazos', len(_reset) == 1)
+check('el protocolo no impone hábitos: los elige él',
+      _reset and 'elige un reemplazo que ya te guste' in ' '.join(_reset[0]['pasos']))
+_emb = [j for j in _seed_land['jornadas'] if 'trafico.recurso' in j.get('adn_escribe', [])]
+check('el embudo es de dos piezas: recurso y video de venta',
+      bool(_emb) and any('video de venta' in ' '.join(j['pasos']) for j in _seed_land['jornadas']))
+
+# ── La redacción del mes 1 (C4) ──────────────────────────────────────
+_seed_m1 = _json64.loads(rd('src/lib/roadmap.seed.json'))
+_m1 = [j for j in _seed_m1['jornadas'] if j['dia'] <= 33 and j['tipo'] in ('sesion', 'protocolo', 'rodaje')]
+check(f'las {len(_m1)} jornadas del mes 1 dicen qué te llevas', all(j.get('lleva') for j in _m1),
+      str([j['dia'] for j in _m1 if not j.get('lleva')]))
+check('cada jornada del mes 1 devuelve una lectura al terminar', all(j.get('veredicto') for j in _m1),
+      str([j['dia'] for j in _m1 if not j.get('veredicto')]))
+check('ninguna jornada del mes 1 pasa de cinco pasos', all(len(j.get('pasos', [])) <= 5 for j in _m1),
+      str([j['dia'] for j in _m1 if len(j.get('pasos', [])) > 5]))
+check('toda evidencia del mes 1 se pide con palabras',
+      all(e.get('pide') for j in _m1 for e in j.get('evidencias', [])))
+check('el veredicto se le muestra al cliente al terminar', 'meta.veredicto' in todo.get('src/pages/Roadmap.tsx', ''))
+
+# ── Revisión integral de septiembre ──────────────────────────────────
+_agentes_txt = ''.join(rd(f) for f in glob.glob('src/lib/agents/*.ts'))
+check('ningún entrenador habla de pilares ni de siglas internas',
+      'Completa el Pilar' not in _agentes_txt and 'Completa los Pilares' not in _agentes_txt)
+check('los entrenadores usan el vocabulario de cada cliente',
+      'Filtrado de {{consultantes}}' in _agentes_txt)
+check('la familia profesional se fija con cada perfil, venga de donde venga',
+      'setFamiliaActual' in todo.get('src/App.tsx', ''))
+check('el paso a paso no se muestra dos veces',
+      'TaskChecklist' not in todo.get('src/components/tasks/TaskHerramientaIA.tsx', '')
+      and 'TaskChecklist' not in todo.get('src/components/tasks/TaskCoach.tsx', ''))
+check('el grupo de jornadas no se llama igual que su primera jornada',
+      'Días ${primera.dia} a' in rd('src/lib/roadmapSeed.ts'))
+check('el constructor de anuncios está paginado',
+      "pantalla === 'brief'" in rd('src/components/campanas/ConstructorAnuncios.tsx'))
+check('el ADN vive en el Camino, no dentro de Entrenadores',
+      "onNavigate?.('adn')" in todo.get('src/pages/Roadmap.tsx', '')
+      and 'ADN' not in rd('src/pages/Entrenadores.tsx').split('export default')[1])
+check('nada dice "Delta" sin explicar', 'Delta' not in rd('src/components/ComparacionDia45.tsx'))
+
 # ── Migrar y primer ingreso (C3) ─────────────────────────────────────
 _pp2 = rd('src/lib/puntoDePartida.ts'); _rm5 = todo.get('src/pages/Roadmap.tsx', '')
 check('al migrar, la fecha de inicio acompaña al día donde entra',
@@ -2545,21 +2731,30 @@ check('el primer ingreso habla con el vocabulario del cliente',
 
 # ── Los videos ya grabados (C3) ──────────────────────────────────────
 _vc = rd('src/lib/videosCargados.ts')
-_n_vids = _vc.count("': 'https://")
-check(f'hay {_n_vids} videos atados a su jornada', _n_vids >= 25)
+# Los videos se guardan por DÍA: el código cambia cada vez que el Camino se
+# reordena, el día no.
+_n_vids = _vc.count("': 'https://") + len(re.findall(r"^\s*\d+: 'https://", _vc, re.M))
+check(f'hay {_n_vids} videos cargados', _n_vids >= 20)
 _bloque_videos = _vc.split('VIDEOS_POR_JORNADA')[1].split('};')[0] if 'VIDEOS_POR_JORNADA' in _vc else ''
-_cods_video = re.findall(r"^\s*'([\w.\-]+)': 'http", _bloque_videos, re.M)
+_cods_video = re.findall(r"^\s*'?([\w.\-]+)'?: 'http", _bloque_videos, re.M)
 check('un video por jornada: ningún código repetido',
       len(_cods_video) == len(set(_cods_video)),
       str([c for c in _cods_video if _cods_video.count(c) > 1])) 
 _codigos_reales = set(re.findall(r'"codigo":\s*"([^"]+)"', rd('src/lib/roadmap.seed.json')))
 _mapeados = set(_cods_video)
-_huerfanos = [c for c in _mapeados if c not in _codigos_reales and not c.startswith('L-') and not c.startswith('P')]
+_huerfanos = [c for c in _mapeados if c not in _codigos_reales and not c.startswith('L-') and not c.isdigit()]
 check('ningún video apunta a un código que no existe', not _huerfanos, str(_huerfanos))
+_jor = _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas']
+_dia_precio = next((j['dia'] for j in _jor if 'numeros.precio_digno' in j.get('adn_escribe', [])), None)
+_dia_cartera = next((j['dia'] for j in _jor if 'cartera.grupos' in j.get('adn_escribe', [])), None)
+_j_precio = next((j for j in _jor if 'numeros.precio_digno' in j.get('adn_escribe', [])), None)
+_pasos_precio = ' | '.join(_j_precio['pasos']) if _j_precio else ''
 check('el precio se sella antes de ordenar la cartera',
-      _json64.loads(rd('src/lib/roadmap.seed.json')) and
-      next(j['dia'] for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] if j['titulo'] == 'El precio nuevo y el link')
-      < next(j['dia'] for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] if j['titulo'] == 'Los tres grupos'))
+      _dia_precio is not None and _dia_cartera is not None and (
+          _dia_precio < _dia_cartera or
+          (_dia_precio == _dia_cartera and
+           _pasos_precio.find('precio nuevo') < _pasos_precio.find('tres grupos'))),
+      f'precio día {_dia_precio} · cartera día {_dia_cartera}')
 check('cada tutorial con PDF lo ofrece al lado de su video',
       'PDFS_POR_TUTORIAL' in _vc and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
 check('lo complementario vive en la Biblioteca, no en el Camino',
