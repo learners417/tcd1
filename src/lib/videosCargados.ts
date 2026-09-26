@@ -46,6 +46,10 @@ export const VIDEOS_POR_JORNADA: Record<string | number, string> = {
   'L-14': 'https://youtu.be/cIaUuk2X_p4',        // día 29 · Tu pixel
   'L-16': 'https://youtu.be/6AZpNd0eh0s',        // día 31 · Tu público de retargeting
   'L-09': 'https://youtu.be/N95WnnX7Z2k',        // día 17 · Tu calendario en dos pasos (calendario y correo)
+  'L-08': 'https://youtu.be/B0RmylnND9M',        // día 17 · Cómo calendarizar tu semana
+  'L-10': 'https://youtu.be/v8V29ZOBBqI',        // día 17 · Optimizar tu calendario
+  'L-15': 'https://youtu.be/HDiuvy7BHlE',        // día 31 · Responder solo a quien comenta o escribe
+  'L-17': 'https://youtu.be/fiSk_TQpESk',        // día 23 · Grabar y transcribir tus llamadas con Fathom
 };
 
 export interface VideoComplemento {
@@ -108,4 +112,8 @@ export const PDFS_POR_TUTORIAL: Record<string, string> = {
   'L-07': 'https://drive.google.com/file/d/19ShSjX2PWngiDkdMP_yojSyFVw5tKmBl/view',
   'L-16': 'https://drive.google.com/file/d/1NGbr0D4U5q9M1TViteAJWzlUdEOH5rTM/view',
   'L-09': 'https://drive.google.com/file/d/1_ebK50NSQVNd9wbqnxSaVQzAlNhVHB_I/view',
+  'L-08': 'https://drive.google.com/file/d/19EuHUslFZBKVrow8LrMPEQ7tOEQebtdk/view',
+  'L-10': 'https://drive.google.com/file/d/1OY0Lg6OXJC7VFTQ5Dt9RH9SoboiW8QiT/view',
+  'L-15': 'https://drive.google.com/file/d/1lYLkSvU0iCP5DZs5Oi32CQ-hHbI9hwGs/view',
+  'L-17': 'https://drive.google.com/file/d/1qwpHQ5hE0QwwD0wDQ_NfYm1Qn9yzwjc2/view',
 };

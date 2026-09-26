@@ -98,6 +98,7 @@ import PreventaPanel from '../components/tasks/PreventaPanel';
 import { precioSellado } from '../lib/bonosPreventa';
 import HojaDeRuta from '../components/camino/HojaDeRuta';
 import { sellarDia, desactualizados, avisoDe } from '../lib/adnCoincidente';
+import TusNumeros from '../components/TusNumeros';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -172,9 +173,12 @@ function isTaskUnlocked(
   perfil?: { adn_validacion_organica?: unknown },
 ): boolean {
   if (meta.orden > 1) {
-    // All tasks with lower orden must be completed
+    // Las jornadas anteriores tienen que estar hechas, con dos excepciones:
+    // la entrega técnica es del equipo y los días de campo no se completan.
+    // Sin esto, el cliente entraba el día 1 y encontraba su primera jornada
+    // trabada esperando algo que hace otro.
     for (const m of pilar.metas) {
-      if (m.orden < meta.orden && !completadas.has(`${pilar.numero}-${m.codigo}`)) {
+      if (m.orden < meta.orden && esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)) {
         return false;
       }
     }
@@ -808,6 +812,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
    */
   const [desfasajes, setDesfasajes] = useState(() => desactualizados());
   const [rutaAbierta, setRutaAbierta] = useState(false);
+  const [numerosAbiertos, setNumerosAbiertos] = useState(false);
   const [enRevision, setEnRevision] = useState<Set<string>>(() => codigosEnRevision());
 
   /**
@@ -948,6 +953,24 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             ))}
           </ul>
         </section>
+      )}
+
+      {/* Sus números: su meta, lo que lleva cobrado y sus horas. */}
+      {numerosAbiertos ? (
+        <TusNumeros
+          cobros={ventas.map((v) => ({ fecha: v.fecha, monto: v.monto ?? 0 }))}
+          onRegistrarCobro={() => setVentaModal(true)}
+          onCerrar={() => setNumerosAbiertos(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setNumerosAbiertos(true)}
+          className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between"
+        >
+          <span className="text-[17px] font-semibold text-cream">Tus números</span>
+          <span className="text-[15px] text-cream/70">tu meta y tus cobros ›</span>
+        </button>
       )}
 
       {/* Su Hoja de Ruta: los noventa días a la vista desde el primer día. */}
@@ -1166,7 +1189,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               {/* Progreso del pilar */}
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs text-cream/55">
-                  <span>{pilar.metasCompletadas} de {pilar.totalMetas} metas</span>
+                  <span>{pilar.metasCompletadas} de {pilar.totalMetas} jornadas</span>
                   <span className="flex items-center gap-1">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline" /> completadas</span>
                 </div>
                 <div className="h-1.5 bg-gold/5 rounded-full overflow-hidden">
@@ -1448,8 +1471,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       : 'bg-surface/50 border-[rgba(232,150,46,0.08)] text-cream/55'
                   }`}>
                     {todasCompletas
-                      ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success inline shrink-0" /> Pilar {siguienteLabel} desbloqueado — todas las metas completadas</span>
-                      : <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline shrink-0" /> Completa {pilar.metas.filter((m) => m.es_estrella).length - pilar.estrellas_completadas} metas más para desbloquear el Pilar {siguienteLabel}</span>}
+                      ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-success inline shrink-0" /> Terminaste este tramo. El siguiente ya está abierto.</span>
+                      : <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-yellow-400 fill-yellow-400 inline shrink-0" /> Te falta {pilar.metas.filter((m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)).length === 1 ? 'una jornada' : `${pilar.metas.filter((m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)).length} jornadas`} para cerrar este tramo.</span>}
                   </div>
                 </div>
               );

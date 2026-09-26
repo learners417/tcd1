@@ -2535,6 +2535,18 @@ check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+# ── Tus números: meta, cobros y horas (26 sep) ─────────────────────
+_tn = rd('src/lib/tusNumeros.ts'); _tnv = rd('src/components/TusNumeros.tsx')
+_rm_tn = rd('src/pages/Roadmap.tsx')
+check('la meta la escribe el cliente, en dinero', "meta: number | null" in _tn)
+check('lo que se lleva el estado se descuenta solo', 'retencion' in _tn and 'neto' in _tn)
+check('las horas se anotan por semana', 'anotarHoras' in _tn and 'lunesDe' in _tn)
+check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in _tn)
+check('se abre desde el Camino', 'TusNumeros' in _rm_tn and 'tu meta y tus cobros' in _rm_tn)
+check('sin letra chica en la pantalla de números',
+      not re.search(r'text-\[1[0-4]px\]|text-xs|text-sm', _tnv))
+check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros.ts'))
+
 # ── Los pilotos, listos para entrar (24 sep) ───────────────────────
 check('existe el plan de migración de los pilotos',
       _os64.path.exists('scripts/migrar-pilotos.ts'))
