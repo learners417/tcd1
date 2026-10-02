@@ -69,3 +69,26 @@ export async function getActiveDaysThisWeek(userId: string): Promise<number> {
     return 0;
   }
 }
+
+/**
+ * La última vez que cada cliente abrió la app.
+ *
+ * Una sola consulta para todos: el semáforo la necesita por fila y de a uno
+ * serían veinte viajes a la base cada mañana.
+ */
+export async function ultimosIngresos(userIds: string[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  if (!supabase || userIds.length === 0) return out;
+  try {
+    const { data, error } = await supabase
+      .from('user_activity')
+      .select('user_id, fecha')
+      .in('user_id', userIds)
+      .order('fecha', { ascending: false });
+    if (error || !data) return out;
+    for (const fila of data as Array<{ user_id: string; fecha: string }>) {
+      if (!out[fila.user_id]) out[fila.user_id] = fila.fecha;   // la primera es la más reciente
+    }
+  } catch { /* si la base no contesta, el semáforo se arma sin este dato */ }
+  return out;
+}

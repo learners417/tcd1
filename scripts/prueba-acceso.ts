@@ -37,7 +37,7 @@ ok(cierreDeLaVentana(reabierto) > cierreDeLaVentana(cuotas), 'y le corre la fech
 
 console.log('\n── el cierre de cuentas ──');
 const todas = jornadasCerradas(new Set(), inicio);
-ok(todas.length === 50, `mide las ${todas.length} jornadas con trabajo`);
+ok(todas.length === 51, `mide las ${todas.length} jornadas con trabajo`);
 ok(todas.every((j) => j.dia >= 1), 'ninguna es un día de campo');
 
 const completo = new Set(todas.filter((j) => j.pedia).map((j) => j.clave));

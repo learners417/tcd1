@@ -2535,6 +2535,93 @@ check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+# ── La pausa global del Camino (30 sep) ────────────────────────────
+_pg  = rd('src/lib/pausaGlobal.ts');  _pd  = rd('src/lib/pausasDatos.ts')
+_pgv = rd('src/components/admin/PausaGlobalPanel.tsx')
+_pgc = rd('src/components/CaminoEnPausa.tsx')
+_dia_pg = rd('src/lib/diaPrograma.ts'); _sem_pg = rd('src/lib/semaforo.ts')
+_adm_pg = rd('src/pages/Admin.tsx'); _app_pg = rd('src/App.tsx')
+_dash_pg = rd('src/pages/Dashboard.tsx'); _vent_pg = rd('src/lib/ventanaDeAcceso.ts')
+check('la regla de la pausa se prueba sola (no toca la base)',
+      "from './supabase'" not in _pg and 'diasDeCorrimiento' in _pg)
+check('la pausa se mide en semanas enteras',
+      'Math.ceil(diasPedidos(p) / 7) * 7' in _pg)
+check('el día del programa descuenta lo que estuvo parado',
+      'corrimientoActual' in _dia_pg)
+check('el semáforo calla durante la pausa',
+      'pausaActiva(hoy)' in _sem_pg and 'jornadaAtrasada: null' in _sem_pg)
+check('salvo la cuota impaga, que no depende de la pausa',
+      'if (parado && !cerradoPorPago)' in _sem_pg)
+check('la ventana de acceso se corre los días parados',
+      'cierreCorrido' in _vent_pg)
+check('el interruptor está en el Admin', 'PausaGlobalPanel' in _adm_pg)
+check('avisa qué va a pasar antes de confirmar', 'loQueVaAPasar' in _pgv)
+check('se puede levantar antes de tiempo', 'levantarPausa' in _pgv)
+check('el cliente ve cuándo retoma en su pantalla de inicio',
+      'CaminoEnPausa' in _dash_pg and 'El Camino retoma el' in _pg)
+check('y su fecha de cierre nueva', 'Tu Camino ahora cierra el' in _pg)
+check('la app carga las pausas al abrir', 'cargarPausas' in _app_pg)
+check('sin letra chica en la pausa',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _pgv + _pgc))
+check('existe la prueba de la pausa', _os64.path.exists('scripts/prueba-pausa.ts'))
+
+# ── La medición de entrada y salida (29 sep) ───────────────────────
+_med = rd('src/lib/medicion.ts'); _ww = rd('src/components/WelcomeWizard.tsx')
+_ayd = rd('src/components/tasks/AntesYDespues.tsx'); _rm_med = rd('src/pages/Roadmap.tsx')
+_seed_med = _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas']
+check('son seis números, con su unidad y su sentido', _med.count("id: '") == 6)
+check('la entrada es obligatoria antes de armar el ADN',
+      "'numeros'" in _ww and 'estaCompleta(medicionEntrada)' in _ww)
+check('la salida se pide en la jornada del día 82',
+      'AntesYDespues' in _rm_med and 'codigoDelDia(82)' in _rm_med)
+check('el día 82 cae en día hábil', (82 - 1) % 7 < 5)
+check('la jornada del día 82 existe y tiene tiempo',
+      any(j['dia'] == 82 and (j['minutos'] or 0) > 0 for j in _seed_med))
+check('el antes y después muestra los seis pares', 'comparar(' in _ayd)
+check('sin letra chica en el antes y después',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _ayd))
+check('existe la prueba de la medición', _os64.path.exists('scripts/prueba-medicion.ts'))
+
+# ── Lo que hizo afuera y la pieza madre (29 sep) ───────────────────
+_ha = rd('src/lib/hechoAfuera.ts'); _hap = rd('src/components/admin/HechoAfueraPanel.tsx')
+_adm_ha = rd('src/pages/Admin.tsx'); _rub_29 = rd('src/lib/rubricas.ts')
+_seed_29 = _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas']
+check('se puede cerrar una jornada que el cliente hizo afuera',
+      'marcarHechoAfuera' in _ha and 'HechoAfueraPanel' in _adm_ha)
+check('queda anotado quién la marcó', 'marcado_por' in _ha)
+check('y se puede volver atrás', 'desmarcarHechoAfuera' in _ha)
+check('el obstáculo va con las palabras del consultante',
+      'palabras de él' in _rub_29)
+check('la historia pide una imagen concreta', 'imagen concreta' in _rub_29)
+check('la presentación de treinta segundos sale del día 11',
+      any('treinta segundos' in ' '.join(j['pasos']) for j in _seed_29 if j['dia'] == 11))
+
+# ── El semáforo de clientes (29 sep) ───────────────────────────────
+_sm = rd('src/lib/semaforo.ts'); _smv = rd('src/components/admin/SemaforoClientes.tsx')
+_adm_sm = rd('src/pages/Admin.tsx')
+check('las varas del semáforo están en un solo lugar',
+      'ATRASO_AMARILLO = 3' in _sm and 'ATRASO_ROJO = 7' in _sm and 'DIAS_SIN_ENTRAR_ROJO = 5' in _sm)
+check('el rojo mira atraso, ausencia y cuota vencida',
+      'esperando el pago' in _sm and 'DIAS_SIN_ENTRAR_ROJO' in _sm)
+check('el atraso se cuenta en días hábiles', 'diasHabilesDeAtraso' in _sm)
+check('el Admin usa esa misma regla', 'filaDe({' in _adm_sm and 'semaforoDe(' in _adm_sm)
+check('la pantalla se abre en la pestaña de clientes', 'SemaforoClientes' in _adm_sm)
+check('sin letra chica en el semáforo',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _smv))
+check('existe la prueba del semáforo', _os64.path.exists('scripts/prueba-semaforo.ts'))
+
+# ── Tus números: meta, cobros y horas (26 sep) ─────────────────────
+_tn = rd('src/lib/tusNumeros.ts'); _tnv = rd('src/components/TusNumeros.tsx')
+_rm_tn = rd('src/pages/Roadmap.tsx')
+check('la meta la escribe el cliente, en dinero', "meta: number | null" in _tn)
+check('lo que se lleva el estado se descuenta solo', 'retencion' in _tn and 'neto' in _tn)
+check('las horas se anotan por semana', 'anotarHoras' in _tn and 'lunesDe' in _tn)
+check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in _tn)
+check('se abre desde el Camino', 'TusNumeros' in _rm_tn and 'tu meta y tus cobros' in _rm_tn)
+check('sin letra chica en la pantalla de números',
+      not re.search(r'text-\[1[0-4]px\]|text-xs|text-sm', _tnv))
+check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros.ts'))
+
 # ── Los pilotos, listos para entrar (24 sep) ───────────────────────
 check('existe el plan de migración de los pilotos',
       _os64.path.exists('scripts/migrar-pilotos.ts'))

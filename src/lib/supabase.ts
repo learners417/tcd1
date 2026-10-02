@@ -60,6 +60,10 @@ export interface Profile {
   acceso_cuotas?: Array<{ vence: string; pagada: boolean }>;
   /** Días que estuvo cerrado esperando un pago y se le devolvieron. */
   acceso_dias_devueltos?: number;
+  /** Los seis números del primer día y los del día 83. */
+  adn_medicion_entrada?: Record<string, number>;
+  adn_medicion_salida?: Record<string, number>;
+
   /** El día que entregó cada jornada, para medir el atraso. */
   entregas?: Record<string, string>;
   plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';

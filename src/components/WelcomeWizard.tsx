@@ -14,7 +14,7 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'situacion' | 'diagnostico' | 'origen' | 'rueda' | 'welcome' | 'pacto' | 'guide';
+type Step = 'password' | 'profile' | 'situacion' | 'diagnostico' | 'origen' | 'numeros' | 'rueda' | 'welcome' | 'pacto' | 'guide';
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -27,10 +27,11 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'rueda', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'numeros', 'rueda', 'welcome', 'pacto', 'guide'];
 
 import PasoSituacion, { SITUACION_VACIA, situacionCompleta, type Situacion } from './onboarding/PasoSituacion';
 import { VOC } from '../lib/vocabulario';
+import { CAMPOS, estaCompleta, loQueFalta, guardar, leer, KEY_ENTRADA, type Medicion } from '../lib/medicion';
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStepRaw] = useState<Step>(() => {
@@ -51,6 +52,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     try { localStorage.setItem('tcd_wizard_step_v1', siguiente); } catch { /* noop */ }
     setStepRaw(siguiente);
   };
+  // ── Tu medición de entrada: los seis números del primer día ──
+  const [medicionEntrada, setMedicionEntrada] = useState<Medicion>(() => leer(KEY_ENTRADA) ?? {});
+
   // ── El Diagnóstico (Lote 1 · la semilla del ADN) ──
   const [dxAvatar, setDxAvatar] = useState<'A' | 'B' | null>(null);
   const [dxFreno, setDxFreno] = useState('');
@@ -270,7 +274,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   <button
                     type="button"
                     onClick={() => setShowPwd(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/80 transition-colors"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center text-cream/55 hover:text-cream/80 transition-colors"
                   >
                     {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -311,7 +315,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             <button
               onClick={handlePasswordSubmit}
               disabled={savingPwd || newPassword.length < 8 || newPassword !== confirmPassword}
-              className="w-full mt-6 py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-gold/20"
+              className="w-full mt-6 min-h-[48px] py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-gold/20"
             >
               {savingPwd ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
             </button>
@@ -340,7 +344,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       key={esp}
                       type="button"
                       onClick={() => setEspecialidad(esp)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                      className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium transition-all ${
                         especialidad === esp
                           ? 'bg-gold/20 text-gold border border-gold/40'
                           : 'bg-panel text-cream/75 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)] hover:text-cream/90'
@@ -384,7 +388,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       key={n}
                       type="button"
                       onClick={() => setEnergia(n)}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
+                      className={`w-11 h-11 rounded-lg text-xs font-bold transition-all ${
                         n <= energia
                           ? 'bg-amber-500 text-ink shadow-sm shadow-amber-500/30'
                           : 'bg-panel text-cream/45 border border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'
@@ -618,10 +622,62 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
             ))}
             <button
-              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep(((profile as { plan?: string })?.plan === 'ELNUMERO') ? 'welcome' : 'rueda'); }}
+              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep('numeros'); }}
               className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
             >
               Grabar en mi ADN y seguir →
+            </button>
+          </div>
+        )}
+
+        {/* ── Tu medición de entrada: sin esto no hay con qué comparar al final ── */}
+        {step === 'numeros' && (
+          <div className="space-y-6 fade-rise">
+            <div>
+              <p className="text-[15px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
+              <h2 className="text-[26px] font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                Seis números de hoy
+              </h2>
+              <p className="text-[17px] text-cream/70 mt-1">
+                Los mismos seis se vuelven a medir al final. Ahí vas a ver, en números, qué cambió.
+                Pon lo que hay hoy, aunque no te guste: es tu punto de partida, no tu examen.
+              </p>
+            </div>
+
+            {CAMPOS.map((c) => (
+              <div key={c.id}>
+                <label htmlFor={`med-${c.id}`} className="block text-[17px] font-medium text-cream/90 mb-2">
+                  {VOC(c.pregunta)}
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    id={`med-${c.id}`}
+                    type="number"
+                    inputMode="decimal"
+                    value={medicionEntrada[c.id] ?? ''}
+                    onChange={(e) => setMedicionEntrada((prev) => ({
+                      ...prev,
+                      [c.id]: e.target.value === '' ? NaN : Number(e.target.value),
+                    }))}
+                    className="w-36 min-h-[52px] bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 text-[19px] text-cream"
+                  />
+                  <span className="text-[17px] text-cream/60">{c.unidad}</span>
+                </div>
+              </div>
+            ))}
+
+            <button
+              disabled={!estaCompleta(medicionEntrada)}
+              onClick={() => {
+                guardar(KEY_ENTRADA, medicionEntrada);
+                void supabase?.from('profiles').update({ adn_medicion_entrada: medicionEntrada }).eq('id', profile.id);
+                setStep(((profile as { plan?: string })?.plan === 'ELNUMERO') ? 'welcome' : 'rueda');
+              }}
+              className="w-full btn-primary font-bold py-3.5 rounded-xl text-[17px] disabled:opacity-40"
+            >
+              {estaCompleta(medicionEntrada)
+                ? 'Guardar mi punto de partida →'
+                : `Te faltan ${loQueFalta(medicionEntrada).length} de 6`}
             </button>
           </div>
         )}
@@ -646,8 +702,11 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                     <div className="flex gap-1">
                       {Array.from({ length: 10 }).map((_, i) => (
                         <button key={i} type="button" onClick={() => setRuedaIni((p) => ({ ...p, [d.id]: i + 1 }))}
-                          className={'h-4 flex-1 rounded transition-colors min-w-0 ' + (typeof v === 'number' && i < v ? 'bg-gold' : 'bg-cream/10 hover:bg-cream/20')}
-                          aria-label={d.label + ' ' + (i + 1)} />
+                          className="flex h-11 flex-1 items-center min-w-0"
+                          aria-label={d.label + ' ' + (i + 1)}>
+                          {/* La barra se dibuja fina; lo que se toca es toda la altura. */}
+                          <span className={'h-4 w-full rounded transition-colors ' + (typeof v === 'number' && i < v ? 'bg-gold' : 'bg-cream/10 hover:bg-cream/20')} />
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -690,7 +749,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               <span className="text-gold font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde el Chat.
             </p>
 
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-1 gap-3 mb-8 sm:grid-cols-3">
               {[
                 { icon: Map, label: 'El Camino', desc: 'Tu sesión de cada día. Todo pasa acá.' },
                 { icon: Bot, label: 'Mentor IA', desc: 'Te acompaña y destraba. No hace tu trabajo.' },

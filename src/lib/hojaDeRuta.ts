@@ -9,6 +9,7 @@
  * salen del Camino. Si mañana se reordena, esto lo acompaña.
  */
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
+import { corrimientoActual } from './pausaGlobal';
 
 export const SEMANAS: Record<number, string> = {
   1: 'En ti',
@@ -79,12 +80,15 @@ export function diasDeLaRuta(): DiaDeLaRuta[] {
   return out.sort((a, b) => a.dia - b.dia);
 }
 
-/** La fecha real de un día, contando desde el lunes de arranque. */
+/**
+ * La fecha real de un día, contando desde el lunes de arranque y sumando los
+ * días que el Camino estuvo parado para todos.
+ */
 export function fechaDelDia(fechaInicio: string | null | undefined, dia: number): Date | null {
   if (!fechaInicio) return null;
   const [y, m, d] = fechaInicio.split('-').map(Number);
   if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d + (dia - 1));
+  return new Date(y, m - 1, d + (dia - 1) + corrimientoActual());
 }
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];

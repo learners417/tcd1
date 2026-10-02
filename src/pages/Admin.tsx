@@ -62,6 +62,15 @@ import CreativosView from '../components/campanas/CreativosView';
 import Markdown from 'react-markdown';
 import TableroGrabacion from '../components/admin/TableroGrabacion';
 import { claveDelDia } from '../lib/roadmapSeed';
+import { filaDe, semaforoDe } from '../lib/semaforo';
+import { ultimosIngresos } from '../lib/activity';
+import SemaforoClientes from '../components/admin/SemaforoClientes';
+import PausaGlobalPanel from '../components/admin/PausaGlobalPanel';
+import { pausaVigente, type PausaGlobal } from '../lib/pausaGlobal';
+import { cargarPausas } from '../lib/pausasDatos';
+import HechoAfueraPanel from '../components/admin/HechoAfueraPanel';
+import { jornadasAbiertas } from '../lib/semaforo';
+import { hechasAfuera } from '../lib/hechoAfuera';
 
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
@@ -92,6 +101,10 @@ interface ClienteConEstado extends Profile {
   quema_hecha: boolean;
   traba_sesion: { titulo: string; dias: number } | null;
   dias_sin_sesion: number | null;
+  /** Lo que ya cerró, para el semáforo. */
+  completadas: Set<string>;
+  /** La última vez que abrió la app. */
+  ultimo_ingreso: string | null;
 }
 
 interface AdminVideo {
@@ -400,6 +413,9 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
 
   // Clientes
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
+  const [marcadasAfuera, setMarcadasAfuera] = useState<Set<string>>(new Set());
+  const [pausas, setPausas] = useState<PausaGlobal[]>([]);
+  useEffect(() => { void cargarPausas().then(setPausas); }, []);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
 
@@ -760,6 +776,14 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     if (selectedCliente && mainTab === 'clientes') cargarDetalleCliente(selectedCliente.id);
   }, [selectedCliente, detalleTab, mainTab]);
 
+  // Las jornadas que ya se cerraron como hechas afuera, para mostrarlas tildadas.
+  useEffect(() => {
+    if (!selectedCliente || mainTab !== 'clientes') return;
+    void hechasAfuera(selectedCliente.id).then((lista) => {
+      setMarcadasAfuera(new Set(lista.map((j) => j.clave)));
+    });
+  }, [selectedCliente, mainTab]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [detalleMensajes]);
@@ -980,6 +1004,10 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         }
       } catch { /* la tabla puede no existir aún: degrada sin romper */ }
 
+      // Una sola consulta para el último ingreso de todos: el semáforo lo
+      // necesita por fila, y de a uno serían veinte viajes cada mañana.
+      const ingresos = await ultimosIngresos(profiles.map((p: Profile) => p.id));
+
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
         const [tareasRes, metricasRes, diarioRes] = await Promise.all([
@@ -1020,9 +1048,16 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         }
         // Cada día se mira por su fecha real (antes contaba según si HOY era fin de semana).
         const dias_atraso = diasHabilesDeAtraso(p.fecha_inicio, diaEsperado, dia);
+        // El color sale de la misma regla que la pantalla del semáforo: atraso
+        // en días hábiles, días sin entrar y cuota vencida.
         let semaforo: ClienteConEstado['semaforo'] = 'gris';
         if (tareas.length > 0 || completadasSet.size > 0) {
-          semaforo = dias_atraso <= 0 ? 'verde' : dias_atraso <= 3 ? 'amarillo' : 'rojo';
+          semaforo = filaDe({
+            id: p.id, nombre: p.nombre ?? '', fecha_inicio: p.fecha_inicio,
+            acceso_tipo: p.acceso_tipo, acceso_cuotas: p.acceso_cuotas,
+            acceso_dias_devueltos: p.acceso_dias_devueltos,
+            completadas: completadasSet, ultimoIngreso: ingresos[p.id] ?? null,
+          }).color;
         }
         // Cinturón: pilar más alto con TODAS sus metas completas
         // Cinturón: LA MISMA función que el cliente (una sola fuente de verdad).
@@ -1070,6 +1105,8 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
           dia_programa: dia,
           semana_programa: semana,
           semaforo,
+          completadas: completadasSet,
+          ultimo_ingreso: ingresos[p.id] ?? null,
           cinturon,
           dias_atraso,
           tareas_completadas: tareasCompletadasFallback,
@@ -2035,6 +2072,45 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'clientes' && !selectedCliente && (
             <div className="max-w-6xl mx-auto space-y-5">
+              {/* Con el Camino parado, esto va primero: cambia cómo se lee todo lo demás. */}
+              {pausaVigente(pausas) ? (
+              <PausaGlobalPanel
+                pausas={pausas}
+                vigente={pausaVigente(pausas)}
+                cuantos={clientes.length}
+                quien={(adminProfile as { nombre?: string } | null)?.nombre ?? 'el equipo'}
+                onCambio={setPausas}
+              />
+              ) : null}
+              {/* La pantalla con la que se abre la mañana: a quién escribir hoy. */}
+              <SemaforoClientes
+                filas={semaforoDe(clientes.map((c) => ({
+                  id: c.id,
+                  nombre: c.nombre ?? 'Sin nombre',
+                  fecha_inicio: c.fecha_inicio,
+                  acceso_tipo: c.acceso_tipo,
+                  acceso_cuotas: c.acceso_cuotas,
+                  acceso_dias_devueltos: c.acceso_dias_devueltos,
+                  completadas: c.completadas,
+                  ultimoIngreso: c.ultimo_ingreso,
+                })))}
+                onAbrir={(id) => {
+                  const c = clientes.find((x) => x.id === id);
+                  if (c) setSelectedCliente(c);
+                }}
+              />
+
+              {/* Parar el Camino de todos: fiestas, mudanzas, lo que haga falta. */}
+              {pausaVigente(pausas) ? null : (
+              <PausaGlobalPanel
+                pausas={pausas}
+                vigente={pausaVigente(pausas)}
+                cuantos={clientes.length}
+                quien={(adminProfile as { nombre?: string } | null)?.nombre ?? 'el equipo'}
+                onCambio={setPausas}
+              />
+              )}
+
               {/* Header row */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1">
@@ -2350,6 +2426,27 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          {/* Para que el semáforo no marque en rojo a quien trabaja por fuera de la app. */}
+                          <HechoAfueraPanel
+                            usuarioId={selectedCliente.id}
+                            abiertas={jornadasAbiertas({
+                              id: selectedCliente.id,
+                              nombre: selectedCliente.nombre ?? '',
+                              fecha_inicio: selectedCliente.fecha_inicio,
+                              completadas: selectedCliente.completadas,
+                            })}
+                            yaMarcadas={marcadasAfuera}
+                            quien={(adminProfile as { nombre?: string }).nombre ?? 'el equipo'}
+                            onCambio={(clave, marcada) => {
+                              setMarcadasAfuera((prev) => {
+                                const next = new Set(prev);
+                                if (marcada) next.add(clave); else next.delete(clave);
+                                return next;
+                              });
+                              void cargarClientes();
+                            }}
+                          />
+
                           {/* ═══ El plan comercial: activar el pago con un click ═══ */}
                           <div className="bg-panel border border-gold/15 rounded-2xl p-4">
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>

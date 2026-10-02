@@ -14,6 +14,12 @@ const tab = new URLSearchParams(location.search).get('tab') ?? 'clientes';
 localStorage.clear();
 localStorage.setItem('tcd_admin_main_tab', JSON.stringify(tab));
 localStorage.setItem('sanar_admin_theme', 'light');
+if (new URLSearchParams(location.search).get('pausa')) {
+  const a = new Date(); a.setDate(a.getDate() - 2);
+  const b = new Date(); b.setDate(b.getDate() + 12);
+  const iso = (x: Date) => x.toISOString().slice(0, 10);
+  localStorage.setItem('tcd_pausas_globales_v1', JSON.stringify([{ desde: iso(a), hasta: iso(b), motivo: 'Fiestas de fin de año' }]));
+}
 
 const perfil = {
   id: 'admin-visor', nombre: 'Lupe', email: 'lupe@test', especialidad: '', plan: 'DWY',

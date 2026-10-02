@@ -5,6 +5,7 @@
 
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { cargarPausas } from './lib/pausasDatos';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
@@ -138,6 +139,12 @@ function PaginaBloqueada({ nombre }: { nombre: string }) {
 
 export default function App() {
   const [currentPage, setCurrentPageRaw] = useState<string>(loadCurrentPage);
+  // Las pausas del Camino se traen una sola vez y quedan a mano: de ahí sale
+  // el día del programa de todo el resto de la app. El estado no se usa para
+  // mostrar nada: está para que, cuando la respuesta llegue, las pantallas que
+  // ya se pintaron vuelvan a calcular su día con el corrimiento puesto.
+  const [pausasListas, setPausasListas] = useState(false);
+  useEffect(() => { void cargarPausas().then(() => setPausasListas(true)); }, []);
   // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
   useEffect(() => {
     try {
@@ -546,7 +553,8 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
+    <div data-pausas={pausasListas ? 'cargadas' : 'cargando'}
+         className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
       {/* Background Glow */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />

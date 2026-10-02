@@ -104,14 +104,16 @@ export const RUBRICAS: Record<string | number, Rubrica> = {
   // ─── Rúbricas del Camino de 90 días ────────────────────────────────
   // Solo las jornadas cuya evidencia es texto: el Crítico lee, no adivina.
   8: {
-    codigo: 8, pieza: 'tu lista de veinte',
+    codigo: 8, pieza: 'tu avatar y tu lista de veinte',
     criterios: [
+      { pregunta: '¿El obstáculo está con las palabras de él, no con tu diagnóstico?',
+        busca: 'Lo que el consultante diría en voz alta. Tu lectura profesional lo ofende antes de venderle.' },
       { pregunta: '¿Hay al menos veinte nombres?', busca: 'Nombres propios, no categorías.' },
       { pregunta: '¿Cada uno tiene su canal?', busca: 'WhatsApp, Instagram, correo. Sin canal no hay mensaje.' },
       { pregunta: '¿Son personas que ya lo conocen?', busca: 'Consultantes, ex consultantes, colegas, referidos. Los desconocidos son de otra semana.' },
     ],
-    descalificador: 'La lista es de tipos de persona y no de personas.',
-    donde_se_arregla: 'Abre tu WhatsApp y baja veinte nombres de los últimos seis meses.',
+    descalificador: 'El obstáculo está escrito como lo ve el profesional, no como lo vive el consultante.',
+    donde_se_arregla: 'Vuelve a tus sesiones grabadas y copia la frase textual con la que ellos lo dicen.',
     bloquea: true,
   },
   9: {
@@ -162,6 +164,12 @@ export const RUBRICAS: Record<string | number, Rubrica> = {
   11: {
     codigo: 11, pieza: 'tu guion y tus tres anuncios',
     criterios: [
+      { pregunta: '¿Tu presentación de treinta segundos entra en treinta segundos?',
+        busca: 'Se lee en voz alta y termina. Si hay que frenar el ascensor, sobra.' },
+      { pregunta: '¿Tu historia tiene una imagen concreta?',
+        busca: 'Un lugar y un objeto: la escalera, la manta, el auto. Es lo único que después van a recordar.' },
+      { pregunta: '¿Arranca por lo que viviste, antes de decir a qué te dedicas?',
+        busca: 'Primero la escena, después el oficio. Con el título adelante se apaga la tele.' },
       { pregunta: '¿Los tres anuncios abren distinto?', busca: 'Tres primeras líneas diferentes. Si abren igual, es un anuncio repetido.' },
       { pregunta: '¿Cada uno termina en la misma acción?', busca: 'El mismo paso siguiente en los tres.' },
       { pregunta: '¿El guion dice lo que se lleva quien mira?', busca: 'El resultado, en los primeros diez segundos.' },
