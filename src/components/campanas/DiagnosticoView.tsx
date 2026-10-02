@@ -9,6 +9,7 @@ import type { DiagnosticoInput } from '../../lib/campanasTypes';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { primero } from '../../lib/primero';
+import { guardarDiagnostico } from '../../lib/numerosDatos';
 
 interface Props {
   perfil: Partial<ProfileV2>;
@@ -98,6 +99,11 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
       for await (const chunk of streamText({ feature: 'campana_chat', tarea: 'chat', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
+      }
+      // Queda guardado en la semana que lo produjo: así se puede comparar una
+      // semana con otra, y quien acompaña lo ve sin pedirlo.
+      if (perfil.id && textoCompleto) {
+        void guardarDiagnostico(perfil.id, textoCompleto);
       }
     } catch {
       toast.error('Error al diagnosticar. Intenta de nuevo.');

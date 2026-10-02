@@ -66,6 +66,9 @@ import { filaDe, semaforoDe } from '../lib/semaforo';
 import { ultimosIngresos } from '../lib/activity';
 import SemaforoClientes from '../components/admin/SemaforoClientes';
 import PausaGlobalPanel from '../components/admin/PausaGlobalPanel';
+import NumerosDelCliente from '../components/admin/NumerosDelCliente';
+import { numerosDeVarios } from '../lib/numerosDatos';
+import type { SemanaDeNumeros } from '../lib/numerosDelCliente';
 import { pausaVigente, type PausaGlobal } from '../lib/pausaGlobal';
 import { cargarPausas } from '../lib/pausasDatos';
 import HechoAfueraPanel from '../components/admin/HechoAfueraPanel';
@@ -415,6 +418,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [marcadasAfuera, setMarcadasAfuera] = useState<Set<string>>(new Set());
   const [pausas, setPausas] = useState<PausaGlobal[]>([]);
+  const [numerosPorCliente, setNumerosPorCliente] = useState<Record<string, SemanaDeNumeros[]>>({});
   useEffect(() => { void cargarPausas().then(setPausas); }, []);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
@@ -1007,6 +1011,10 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       // Una sola consulta para el último ingreso de todos: el semáforo lo
       // necesita por fila, y de a uno serían veinte viajes cada mañana.
       const ingresos = await ultimosIngresos(profiles.map((p: Profile) => p.id));
+      // Los números de todos en una sola consulta: el semáforo los necesita
+      // para marcar a quien corre anuncios sin mirarlos.
+      const numeros = await numerosDeVarios(profiles.map((p: Profile) => p.id));
+      setNumerosPorCliente(numeros);
 
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
@@ -2093,6 +2101,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   acceso_dias_devueltos: c.acceso_dias_devueltos,
                   completadas: c.completadas,
                   ultimoIngreso: c.ultimo_ingreso,
+                  numeros: numerosPorCliente[c.id],
                 })))}
                 onAbrir={(id) => {
                   const c = clientes.find((x) => x.id === id);
@@ -2426,6 +2435,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          {/* Cómo le va con lo que ya puso a andar: la frase con la que se le escribe. */}
+                          <NumerosDelCliente
+                            nombre={selectedCliente.nombre ?? 'Este cliente'}
+                            filas={numerosPorCliente[selectedCliente.id] ?? []}
+                          />
                           {/* Para que el semáforo no marque en rojo a quien trabaja por fuera de la app. */}
                           <HechoAfueraPanel
                             usuarioId={selectedCliente.id}

@@ -1,32 +1,34 @@
 ══════════════════════════════════════════════════════════════════
-  TU CLÍNICA DIGITAL · paquete final, revisado entero
-  Semáforo + medición + "lo hizo afuera" + pausa global
-  Incluye lo del paquete anterior, que no llegó a GitHub.
+  TU CLÍNICA DIGITAL · los números del cliente a la vista del equipo
+  Para que Lupe vea cómo le va a cada uno con sus anuncios.
 ══════════════════════════════════════════════════════════════════
 
-Son 35 archivos. Todos van a la rama "mejoras".
-El orden no importa: ninguno depende de otro para subirse.
+Son 9 archivos. Van a la rama "mejoras", encima de lo que ya subiste.
+
+NO subas esto hasta que Ani y el resto estén adentro y andando.
+La app no se toca en la semana de un lanzamiento.
 
 
-1 · SUBIR ESTOS ARCHIVOS
+1 · SUBIR
 ──────────────────────────────────────────────────────────────────
-Respetando las carpetas tal como vienen en el ZIP:
-
   auditoria.py
-  scripts/              4 archivos (3 pruebas nuevas, 1 actualizada)
-  scripts/visor/        3 archivos
-  src/App.tsx
-  src/components/       3 archivos
-  src/components/admin/ 3 archivos
-  src/components/sesion/ 1 archivo
-  src/components/tasks/ 1 archivo
-  src/lib/              12 archivos
-  src/pages/            3 archivos
-  supabase/migrations/  2 archivos
-  tcd-spec/datos/       2 archivos
+  scripts/              1 archivo (prueba nueva)
+  src/components/admin/ 1 archivo (nuevo)
+  src/components/campanas/ 1 archivo
+  src/lib/              4 archivos (2 nuevos)
+  src/pages/Admin.tsx
+  supabase/migrations/  1 archivo (nuevo)
 
 
-2 · BORRAR ESTOS CINCO (quedaron sin usar)
+2 · CORRER LA MIGRACIÓN EN SUPABASE
+──────────────────────────────────────────────────────────────────
+  supabase/migrations/20261002_numeros_del_cliente.sql
+
+Sin esto no funciona nada de lo nuevo: hoy la base solo deja que cada
+cliente lea sus propias métricas, y por eso el equipo no veía ninguna.
+
+
+3 · LOS CINCO QUE SIGUEN SIN BORRAR
 ──────────────────────────────────────────────────────────────────
   LEEME-SUBIR.txt
   src/components/tasks/TaskChecklist.tsx
@@ -35,111 +37,60 @@ Respetando las carpetas tal como vienen en el ZIP:
   src/components/sesion/CheckOutPanel.tsx
   src/components/sesion/CronometroSesion.tsx
 
-Si no los borras, la app anda igual. Pero la auditoría los marca.
-
-Opcional: la carpeta tcd-spec/datos/__pycache__/ es basura que deja
-Python al correr. Se puede borrar; se regenera sola.
-
-
-3 · CORRER LAS MIGRACIONES EN SUPABASE
-──────────────────────────────────────────────────────────────────
-En Supabase → SQL Editor, pegar y ejecutar, en este orden:
-
-  supabase/migrations/20260926_hoja_de_ruta.sql   (si no la corriste)
-  supabase/migrations/20260929_hecho_afuera.sql
-  supabase/migrations/20260930_pausa_global.sql
-
-Sin la primera, los campos del acceso y la hoja de ruta no existen.
-Sin la segunda, no se puede marcar "lo hizo afuera".
-Sin la tercera, la pausa funciona solo en el navegador de quien la
-pone: no les llega a los clientes.
-
-
-4 · DESPUÉS
-──────────────────────────────────────────────────────────────────
-  · Verificar que Vercel esté publicando la rama "mejoras".
-  · Correr scripts/migrar-clientes.ts con los correos reales.
+La app anda igual con ellos, pero la auditoría marca dos fallas por
+su culpa: componentes que nadie abre, y el paso a paso duplicado.
 
 
 ══════════════════════════════════════════════════════════════════
-  QUÉ CAMBIA, EN CRIOLLO
+  QUÉ CAMBIA
 ══════════════════════════════════════════════════════════════════
 
-EL SEMÁFORO (pestaña Clientes)
-  Abre la mañana diciendo "2 para escribir · 1 para mirar · 1 en ritmo".
-  Rojo: cuota impaga, o más de 7 días hábiles de atraso, o 5 días sin
-  entrar. Amarillo: más de 3 días hábiles de atraso. Verde: al día.
-  Cada fila dice POR QUÉ está de ese color, cuándo entró por última vez
-  y cuántos días de acceso le quedan. Un toque abre su ficha.
+EN LA FICHA DEL CLIENTE · "Sus números"
+  Arriba de todo, la frase con la que se le escribe:
 
-LO HIZO AFUERA
-  En la ficha del cliente, sus jornadas abiertas con un toque para
-  cerrarlas. Para los que ya traían el método hecho en un Word y
-  aparecían todos en rojo sin deberlo. Queda anotado quién lo marcó,
-  y el cierre de cuentas lo sigue distinguiendo de lo hecho adentro.
+    "Por cada peso en anuncios le vuelven 6.7. Esto se sostiene y se sube."
+    "Agenda bien, pero solo aparece 30%. El problema está entre agendar
+     y la llamada."
+    "Tomó 8 llamadas y no cerró ninguna. El problema está en la llamada,
+     no en los anuncios."
+    "Cada venta le cuesta 1.500 USD y deja 1.000. Así pierde en cada una."
 
-LOS SEIS NÚMEROS
-  En el onboarding, antes de la rueda: facturación, precio por sesión,
-  consultantes, horas atendiendo, horas en WhatsApp y sistemas andando.
-  No se puede seguir sin los seis.
-  El día 82 vuelven a pedirse y la app muestra el antes y después, con
-  el valor real de su hora calculado.
+  Debajo, su embudo de la semana en una línea, y los cuatro números que
+  importan: cuánto le cuesta una agenda, cuánto una venta, cuántos de los
+  que agendan aparecen, y cuánto vuelve por cada peso.
 
-LA PAUSA GLOBAL
-  En la pestaña Clientes, abajo del semáforo. Dos fechas y un botón.
-  Antes de confirmar te dice exactamente qué va a pasar.
-  Durante la pausa: nadie avanza de día, nadie acumula atraso, nadie
-  aparece en rojo ni amarillo (salvo cuota impaga, que no depende de la
-  pausa), y el cliente ve en su pantalla de inicio cuándo retoma y su
-  fecha de cierre nueva.
-  Al terminar, las fechas de todos quedan corridas y el progreso intacto.
+  Después, si subió o bajó respecto de la semana pasada, su última lectura
+  de campaña guardada, y las cuatro semanas anteriores.
 
-  OJO CON ESTO: la pausa se mide en SEMANAS ENTERAS. Si pides del 15 de
-  diciembre al 15 de enero (32 días), se estira a 35 y el Camino retoma
-  el martes 19 de enero, no el 15.
-  Es a propósito: con un corrimiento suelto, el lunes de grabar caería
-  en viernes y el fin de semana libre quedaría en mitad de la semana.
-  Se redondea siempre hacia arriba, así que nadie pierde días: gana unos
-  pocos. El Admin te lo dice antes de confirmar.
-  Si prefieres que retome el 15 clavado, avísame y lo cambio.
+EN EL SEMÁFORO · una luz nueva
+  Quien ya pasó el día 26 (cuando el Camino le pide sus números) y hace
+  tres semanas que no carga, aparece en amarillo:
+
+    "Al día, pero hace 3 semanas que no carga sus números."
+    "Al día, pero todavía no cargó sus números ni una vez."
+
+  Antes del día 26 no se le reclama nada: todavía no tiene qué cargar.
+
+EN CAMPAÑAS · la lectura queda guardada
+  El diagnóstico de campaña se guarda en la semana que lo produjo. Antes
+  se leía una vez y se perdía; ahora se puede comparar, y el equipo lo ve
+  sin pedirlo.
 
 
 ══════════════════════════════════════════════════════════════════
-  LO QUE SE ARREGLÓ EN LA REVISIÓN FINAL
+  LO QUE NO CAMBIA, A PROPÓSITO
 ══════════════════════════════════════════════════════════════════
-
-1 · La migración de la pausa iba a fallar en Supabase.
-    Miraba una columna que no existe (es_admin). Ahora mira `rol`,
-    igual que todas las demás políticas de la base.
-
-2 · El día del Camino podía quedar mal al abrir la app en pausa.
-    Las pausas se cargan después de que la pantalla pinta; ahora la
-    pantalla vuelve a calcular su día cuando llegan.
-
-3 · Botones del onboarding por debajo del piso táctil.
-    Los chips de especialidad, la escala del 1 al 10, las barras de la
-    Rueda de la Vida, el ojito de la contraseña y el botón de Hablar:
-    todos estaban por debajo de 44 px. En el teléfono se fallaba el
-    toque. Ahora todos llegan al piso, sin que cambie cómo se ven.
-
-4 · Tres tarjetas que se partían en la pantalla de bienvenida.
-    En el teléfono iban en tres columnas y cortaban las palabras.
-    Ahora van una abajo de la otra, y en pantalla grande siguen en tres.
-
-5 · El onboarding no se podía medir: era el único punto ciego.
-    Se agregó un visor (scripts/visor/onboarding.html) para abrir
-    cualquiera de sus diez pasos y medirlo como el resto de la app.
+  · Los números los carga el cliente, en su pestaña de Métricas. El
+    equipo solo lee. Si Lupe cargara por ellos, el cliente nunca miraría
+    sus propios números, que es justo el hábito que se le enseña.
+  · No hay conexión automática con Meta. Todo es carga a mano.
 
 
 ══════════════════════════════════════════════════════════════════
   CÓMO QUEDÓ VERIFICADO
 ══════════════════════════════════════════════════════════════════
   · Tipos: limpio.
-  · 49 pruebas de escenario: todas en verde.
-  · Auditoría: 684 comprobaciones, 0 fallas.
-  · 38 pantallas medidas en navegador real: 0 faltas de diseño.
-  · Los 10 pasos del onboarding, medidos uno por uno: 0 faltas.
-  · Recorrido en Chromium como cliente nuevo del día 1 (Hoy, Camino,
-    Entrenadores, Campañas, Clínica): 0 faltas, 0 errores de consola.
-  · El semáforo con clientes de ejemplo, con y sin pausa: los colores,
-    los motivos y los días de acceso, mirados con los ojos.
+  · 50 pruebas de escenario: todas en verde (una nueva, con 36 casos).
+  · Auditoría: 695 comprobaciones, 0 fallas.
+  · 38 pantallas medidas en navegador real: 0 faltas.
+  · El panel nuevo, mirado en Chromium con datos de tres semanas.

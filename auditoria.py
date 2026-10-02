@@ -2535,6 +2535,30 @@ check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
+# ── Los números del cliente, a la vista del equipo (2 oct) ─────────
+_nc  = rd('src/lib/numerosDelCliente.ts'); _nd = rd('src/lib/numerosDatos.ts')
+_ncv = rd('src/components/admin/NumerosDelCliente.tsx')
+_adm_nc = rd('src/pages/Admin.tsx'); _sem_nc = rd('src/lib/semaforo.ts')
+_diag_nc = rd('src/components/campanas/DiagnosticoView.tsx')
+_mig_nc = rd('supabase/migrations/20261002_numeros_del_cliente.sql')
+check('los cruces se prueban solos (no tocan la base)',
+      "from './supabase'" not in _nc and 'costoPorAgenda' in _nc)
+check('sin denominador no se inventa un número', 'b > 0 ? a / b : null' in _nc)
+check('el equipo puede leer las métricas de todos',
+      "rol = 'admin'" in _mig_nc and 'for select' in _mig_nc)
+check('pero la carga sigue siendo del cliente',
+      'for insert' not in _mig_nc and 'for update' not in _mig_nc)
+check('se traen todos en una sola consulta', ".in('user_id', userIds)" in _nd)
+check('el panel está en la ficha del cliente', 'NumerosDelCliente' in _adm_nc)
+check('el semáforo marca a quien no mira sus números',
+      'SEMANAS_SIN_NUMEROS' in _sem_nc and 'DIA_EN_QUE_YA_MIDE' in _sem_nc)
+check('y no se lo reclama a quien todavía no llegó a medir',
+      'const yaDebeMedir = dia >= DIA_EN_QUE_YA_MIDE' in _sem_nc)
+check('la lectura de campaña queda guardada', 'guardarDiagnostico' in _diag_nc)
+check('sin letra chica en los números del cliente',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _ncv))
+check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros-admin.ts'))
+
 # ── La pausa global del Camino (30 sep) ────────────────────────────
 _pg  = rd('src/lib/pausaGlobal.ts');  _pd  = rd('src/lib/pausasDatos.ts')
 _pgv = rd('src/components/admin/PausaGlobalPanel.tsx')
