@@ -99,6 +99,7 @@ import { precioSellado } from '../lib/bonosPreventa';
 import HojaDeRuta from '../components/camino/HojaDeRuta';
 import { sellarDia, desactualizados, avisoDe } from '../lib/adnCoincidente';
 import TusNumeros from '../components/TusNumeros';
+import AntesYDespues from '../components/tasks/AntesYDespues';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -1398,6 +1399,13 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           <PreventaPanel
                             precio={precioSellado()}
                             onElegir={(ids) => onProfileFieldUpdate?.({ adn_bonos_preventa: ids })}
+                          />
+                        )}
+
+                        {/* Tu antes y después: la medición de salida, el día 82. */}
+                        {meta.codigo === codigoDelDia(82) && (
+                          <AntesYDespues
+                            onGuardar={(salida) => onProfileFieldUpdate?.({ adn_medicion_salida: salida })}
                           />
                         )}
 

@@ -1,0 +1,145 @@
+══════════════════════════════════════════════════════════════════
+  TU CLÍNICA DIGITAL · paquete final, revisado entero
+  Semáforo + medición + "lo hizo afuera" + pausa global
+  Incluye lo del paquete anterior, que no llegó a GitHub.
+══════════════════════════════════════════════════════════════════
+
+Son 35 archivos. Todos van a la rama "mejoras".
+El orden no importa: ninguno depende de otro para subirse.
+
+
+1 · SUBIR ESTOS ARCHIVOS
+──────────────────────────────────────────────────────────────────
+Respetando las carpetas tal como vienen en el ZIP:
+
+  auditoria.py
+  scripts/              4 archivos (3 pruebas nuevas, 1 actualizada)
+  scripts/visor/        3 archivos
+  src/App.tsx
+  src/components/       3 archivos
+  src/components/admin/ 3 archivos
+  src/components/sesion/ 1 archivo
+  src/components/tasks/ 1 archivo
+  src/lib/              12 archivos
+  src/pages/            3 archivos
+  supabase/migrations/  2 archivos
+  tcd-spec/datos/       2 archivos
+
+
+2 · BORRAR ESTOS CINCO (quedaron sin usar)
+──────────────────────────────────────────────────────────────────
+  LEEME-SUBIR.txt
+  src/components/tasks/TaskChecklist.tsx
+  src/components/tasks/TaskHerramientaIA.tsx
+  src/components/sesion/CheckInPanel.tsx
+  src/components/sesion/CheckOutPanel.tsx
+  src/components/sesion/CronometroSesion.tsx
+
+Si no los borras, la app anda igual. Pero la auditoría los marca.
+
+Opcional: la carpeta tcd-spec/datos/__pycache__/ es basura que deja
+Python al correr. Se puede borrar; se regenera sola.
+
+
+3 · CORRER LAS MIGRACIONES EN SUPABASE
+──────────────────────────────────────────────────────────────────
+En Supabase → SQL Editor, pegar y ejecutar, en este orden:
+
+  supabase/migrations/20260926_hoja_de_ruta.sql   (si no la corriste)
+  supabase/migrations/20260929_hecho_afuera.sql
+  supabase/migrations/20260930_pausa_global.sql
+
+Sin la primera, los campos del acceso y la hoja de ruta no existen.
+Sin la segunda, no se puede marcar "lo hizo afuera".
+Sin la tercera, la pausa funciona solo en el navegador de quien la
+pone: no les llega a los clientes.
+
+
+4 · DESPUÉS
+──────────────────────────────────────────────────────────────────
+  · Verificar que Vercel esté publicando la rama "mejoras".
+  · Correr scripts/migrar-clientes.ts con los correos reales.
+
+
+══════════════════════════════════════════════════════════════════
+  QUÉ CAMBIA, EN CRIOLLO
+══════════════════════════════════════════════════════════════════
+
+EL SEMÁFORO (pestaña Clientes)
+  Abre la mañana diciendo "2 para escribir · 1 para mirar · 1 en ritmo".
+  Rojo: cuota impaga, o más de 7 días hábiles de atraso, o 5 días sin
+  entrar. Amarillo: más de 3 días hábiles de atraso. Verde: al día.
+  Cada fila dice POR QUÉ está de ese color, cuándo entró por última vez
+  y cuántos días de acceso le quedan. Un toque abre su ficha.
+
+LO HIZO AFUERA
+  En la ficha del cliente, sus jornadas abiertas con un toque para
+  cerrarlas. Para los que ya traían el método hecho en un Word y
+  aparecían todos en rojo sin deberlo. Queda anotado quién lo marcó,
+  y el cierre de cuentas lo sigue distinguiendo de lo hecho adentro.
+
+LOS SEIS NÚMEROS
+  En el onboarding, antes de la rueda: facturación, precio por sesión,
+  consultantes, horas atendiendo, horas en WhatsApp y sistemas andando.
+  No se puede seguir sin los seis.
+  El día 82 vuelven a pedirse y la app muestra el antes y después, con
+  el valor real de su hora calculado.
+
+LA PAUSA GLOBAL
+  En la pestaña Clientes, abajo del semáforo. Dos fechas y un botón.
+  Antes de confirmar te dice exactamente qué va a pasar.
+  Durante la pausa: nadie avanza de día, nadie acumula atraso, nadie
+  aparece en rojo ni amarillo (salvo cuota impaga, que no depende de la
+  pausa), y el cliente ve en su pantalla de inicio cuándo retoma y su
+  fecha de cierre nueva.
+  Al terminar, las fechas de todos quedan corridas y el progreso intacto.
+
+  OJO CON ESTO: la pausa se mide en SEMANAS ENTERAS. Si pides del 15 de
+  diciembre al 15 de enero (32 días), se estira a 35 y el Camino retoma
+  el martes 19 de enero, no el 15.
+  Es a propósito: con un corrimiento suelto, el lunes de grabar caería
+  en viernes y el fin de semana libre quedaría en mitad de la semana.
+  Se redondea siempre hacia arriba, así que nadie pierde días: gana unos
+  pocos. El Admin te lo dice antes de confirmar.
+  Si prefieres que retome el 15 clavado, avísame y lo cambio.
+
+
+══════════════════════════════════════════════════════════════════
+  LO QUE SE ARREGLÓ EN LA REVISIÓN FINAL
+══════════════════════════════════════════════════════════════════
+
+1 · La migración de la pausa iba a fallar en Supabase.
+    Miraba una columna que no existe (es_admin). Ahora mira `rol`,
+    igual que todas las demás políticas de la base.
+
+2 · El día del Camino podía quedar mal al abrir la app en pausa.
+    Las pausas se cargan después de que la pantalla pinta; ahora la
+    pantalla vuelve a calcular su día cuando llegan.
+
+3 · Botones del onboarding por debajo del piso táctil.
+    Los chips de especialidad, la escala del 1 al 10, las barras de la
+    Rueda de la Vida, el ojito de la contraseña y el botón de Hablar:
+    todos estaban por debajo de 44 px. En el teléfono se fallaba el
+    toque. Ahora todos llegan al piso, sin que cambie cómo se ven.
+
+4 · Tres tarjetas que se partían en la pantalla de bienvenida.
+    En el teléfono iban en tres columnas y cortaban las palabras.
+    Ahora van una abajo de la otra, y en pantalla grande siguen en tres.
+
+5 · El onboarding no se podía medir: era el único punto ciego.
+    Se agregó un visor (scripts/visor/onboarding.html) para abrir
+    cualquiera de sus diez pasos y medirlo como el resto de la app.
+
+
+══════════════════════════════════════════════════════════════════
+  CÓMO QUEDÓ VERIFICADO
+══════════════════════════════════════════════════════════════════
+  · Tipos: limpio.
+  · 49 pruebas de escenario: todas en verde.
+  · Auditoría: 684 comprobaciones, 0 fallas.
+  · 38 pantallas medidas en navegador real: 0 faltas de diseño.
+  · Los 10 pasos del onboarding, medidos uno por uno: 0 faltas.
+  · Recorrido en Chromium como cliente nuevo del día 1 (Hoy, Camino,
+    Entrenadores, Campañas, Clínica): 0 faltas, 0 errores de consola.
+  · El semáforo con clientes de ejemplo, con y sin pausa: los colores,
+    los motivos y los días de acceso, mirados con los ojos.

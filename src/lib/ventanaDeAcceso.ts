@@ -13,6 +13,8 @@
  * qué le faltó y cuánto se atrasó.
  */
 
+import { cierreCorrido, pausasActuales } from './pausaGlobal';
+
 export type TipoDeAcceso = 'treinta' | 'noventa' | 'cuotas';
 
 export interface Cuota {
@@ -58,9 +60,14 @@ export function diasDeLaVentana(a: Acceso): number {
   return base + (a.diasDevueltos ?? 0);
 }
 
-/** El día en que cierra por su ventana (sin contar cuotas). */
-export function cierreDeLaVentana(a: Acceso): string {
-  return sumarDias(a.inicio, diasDeLaVentana(a) - 1);
+/**
+ * El día en que cierra por su ventana (sin contar cuotas), ya corrido por los
+ * días que el Camino estuvo parado para todos. Una pausa global no le come
+ * días de acceso a nadie.
+ */
+export function cierreDeLaVentana(a: Acceso, hoy: string = aISO(new Date())): string {
+  const cierre = sumarDias(a.inicio, diasDeLaVentana(a) - 1);
+  return cierreCorrido(cierre, pausasActuales(), hoy);
 }
 
 /** La primera cuota vencida sin pagar, si hay. */
@@ -75,7 +82,7 @@ export function estadoDeAcceso(a: Acceso, hoy: string = aISO(new Date())): Estad
   const impaga = cuotaVencida(a, hoy);
   if (impaga) return { abierto: false, motivo: 'esperando el pago de tu cuota', desde: impaga.vence };
 
-  const cierra = cierreDeLaVentana(a);
+  const cierra = cierreDeLaVentana(a, hoy);
   if (hoy > cierra) {
     const motivo = a.tipo === 'treinta' ? 'venció su ventana' : 'terminaron los noventa días';
     return { abierto: false, motivo, desde: cierra };
@@ -102,7 +109,7 @@ export function accesoDelPerfil(perfil?: {
   acceso_tipo?: string;
   acceso_cuotas?: Cuota[];
   acceso_dias_devueltos?: number;
-  fecha_inicio?: string;
+  fecha_inicio?: string | null;
 } | null): Acceso | null {
   if (!perfil?.fecha_inicio) return null;
   // Sin `??`: un campo vacío tiene que caer en noventa, igual que uno ausente.

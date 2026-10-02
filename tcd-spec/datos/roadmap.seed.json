@@ -1412,9 +1412,9 @@
       "manual": "CAM-1",
       "acceso": "Entrega 2 del Sistema — sitios, formularios y contactos",
       "pasos": [
-        "Escribe el guion del video de tu página",
+        "Escribe tu presentación de treinta segundos: lo que viviste, tu transformación, a quién ayudas, contra qué obstáculo y con qué método",
+        "Escribe el guion del video de tu página, que arranca con esa misma historia",
         "Escribe tres piezas que abren distinto y terminan igual",
-        "Escribe el mensaje para tu entorno",
         "Dibuja la W de tu llamada",
         "Arma la lista de lo que grabas el lunes"
       ],
@@ -1443,16 +1443,16 @@
       ],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Todos los guiones que grabas el lunes, escritos.",
+      "lleva": "Tu presentación de treinta segundos y todos los guiones que grabas el lunes.",
       "veredicto": "El lunes no improvisas: grabas lo que ya está escrito.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
       "checklist": [
-        "Escribe el guion del video de tu página",
+        "Escribe tu presentación de treinta segundos: lo que viviste, tu transformación, a quién ayudas, contra qué obstáculo y con qué método",
+        "Escribe el guion del video de tu página, que arranca con esa misma historia",
         "Escribe tres piezas que abren distinto y terminan igual",
-        "Escribe el mensaje para tu entorno",
         "Dibuja la W de tu llamada",
         "Arma la lista de lo que grabas el lunes"
       ]
@@ -4201,29 +4201,42 @@
     },
     {
       "dia": 82,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tus seis números de hoy",
+      "sistema": 0,
+      "minutos": 30,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Abre tu medición de entrada, la del primer día",
+        "Contesta los mismos seis números con lo que hay hoy",
+        "Mira los seis pares lado a lado",
+        "Escribe en una frase el cambio que más te sorprende"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tu facturación de este mes",
+          "valida": "los seis números de salida cargados",
+          "del_mercado": false,
+          "pide": "Escribe cuánto facturaste este mes."
+        }
+      ],
+      "adn_escribe": [
+        "numeros.medicion_salida"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tus seis números de salida, al lado de los del día 1.",
+      "veredicto": "Ahí está, en números, lo que cambió en noventa días.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 4,
       "avanza_sin_evidencia": false
     },
     {

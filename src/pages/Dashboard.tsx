@@ -22,6 +22,9 @@ import { VOC } from '../lib/vocabulario';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import CintaCinturon from '../components/CintaCinturon';
+import CaminoEnPausa from '../components/CaminoEnPausa';
+import { pausaActiva } from '../lib/pausaGlobal';
+import { accesoDelPerfil, cierreDeLaVentana, sumarDias } from '../lib/ventanaDeAcceso';
 import { claveDelDia } from '../lib/roadmapSeed';
 
 function getTypeBadge(tipo?: string) {
@@ -290,6 +293,17 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
+
+      {/* ── El Camino parado para todos: antes que nada, cuándo retoma. ── */}
+      {(() => {
+        const parado = pausaActiva();
+        if (!parado) return null;
+        const acc = accesoDelPerfil(perfil as Parameters<typeof accesoDelPerfil>[0]);
+        // La víspera: así el cierre que se le pasa todavía no trae el
+        // corrimiento de ESTA pausa, que el cartel suma una sola vez.
+        const vispera = sumarDias(parado.desde, -1);
+        return <CaminoEnPausa pausa={parado} cierreOriginal={acc ? cierreDeLaVentana(acc, vispera) : null} />;
+      })()}
 
       {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
       {(() => {
