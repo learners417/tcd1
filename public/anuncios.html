@@ -1,471 +1,762 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Anuncios que Agendan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,100&family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,100&family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: una pantalla por paso (TDAH): barra de pasos arriba, una columna de 680px, tarjetas solo donde hay algo que elegir o copiar. */
+/* Una pantalla = una acción. Barra de 4 pasos arriba, botón principal siempre visible abajo, letra grande. */
 :root{
-  --bg:#FFFFFF; --surface:#F6F4EF; --ink:#17150F; --muted:#5E574B; --line:#E5E0D6;
-  --gold:#9A7430; --gline:rgba(154,116,48,.45); --act:#1C3A2E; --act-ink:#FFFFFF;
-  --ok:#2E6B4F; --okbg:rgba(46,107,79,.09); --bad:#B23A30; --badbg:rgba(178,58,48,.08);
+  --bg:#FAF8F3; --card:#FFFFFF; --surface:#F2EEE5; --ink:#1A1813; --muted:#5C5548; --line:#E3DDD0;
+  --gold:#94702E; --gline:rgba(148,112,46,.42); --act:#1C3A2E; --act-ink:#FFFFFF; --act-soft:rgba(28,58,46,.08);
+  --ok:#2E6B4F; --okbg:rgba(46,107,79,.10); --warn:#9A6212; --warnbg:rgba(154,98,18,.10); --bad:#B23A30; --badbg:rgba(178,58,48,.08);
+  --g1:#94702E; --g1bg:rgba(148,112,46,.08); --g2:#2E6B4F; --g2bg:rgba(46,107,79,.08); --g3:#3D4A63; --g3bg:rgba(61,74,99,.07);
   --fs:"Fraunces",Georgia,"Times New Roman",serif; --fb:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:18px; --shadow:0 1px 2px rgba(26,24,19,.04),0 8px 24px rgba(26,24,19,.05);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121311; --surface:#1B1D1A; --ink:#EEEAE2; --muted:#A9A296; --line:#2E312C;
-  --gold:#CFAE6C; --gline:rgba(207,174,108,.45); --act:#2F5E49; --act-ink:#F4F1EA;
-  --ok:#78C59B; --okbg:rgba(120,197,155,.12); --bad:#E5837A; --badbg:rgba(229,131,122,.12); color-scheme:dark}}
+  --bg:#121311; --card:#191B18; --surface:#20231F; --ink:#EEEAE2; --muted:#ABA497; --line:#30332D;
+  --gold:#CFAE6C; --gline:rgba(207,174,108,.45); --act:#3A7158; --act-ink:#F7F4EE; --act-soft:rgba(120,197,155,.10);
+  --ok:#7CC79E; --okbg:rgba(124,199,158,.13); --warn:#E2B566; --warnbg:rgba(226,181,102,.13); --bad:#E8867D; --badbg:rgba(232,134,125,.13);
+  --g1:#CFAE6C; --g1bg:rgba(207,174,108,.10); --g2:#7CC79E; --g2bg:rgba(124,199,158,.09); --g3:#A9B6D3; --g3bg:rgba(169,182,211,.09);
+  --shadow:none; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#121311; --surface:#1B1D1A; --ink:#EEEAE2; --muted:#A9A296; --line:#2E312C;
-  --gold:#CFAE6C; --gline:rgba(207,174,108,.45); --act:#2F5E49; --act-ink:#F4F1EA;
-  --ok:#78C59B; --okbg:rgba(120,197,155,.12); --bad:#E5837A; --badbg:rgba(229,131,122,.12); color-scheme:dark}
+  --bg:#121311; --card:#191B18; --surface:#20231F; --ink:#EEEAE2; --muted:#ABA497; --line:#30332D;
+  --gold:#CFAE6C; --gline:rgba(207,174,108,.45); --act:#3A7158; --act-ink:#F7F4EE; --act-soft:rgba(120,197,155,.10);
+  --ok:#7CC79E; --okbg:rgba(124,199,158,.13); --warn:#E2B566; --warnbg:rgba(226,181,102,.13); --bad:#E8867D; --badbg:rgba(232,134,125,.13);
+  --g1:#CFAE6C; --g1bg:rgba(207,174,108,.10); --g2:#7CC79E; --g2bg:rgba(124,199,158,.09); --g3:#A9B6D3; --g3bg:rgba(169,182,211,.09);
+  --shadow:none; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:500 17px/1.55 var(--fb);margin:0}
-.wrap{max-width:680px;margin:0 auto;padding-inline:18px;padding-block:0 80px}
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .in{max-width:680px;margin:0 auto;padding:14px 18px 0}
-.brand{font-family:var(--fs);font-variation-settings:"SOFT" 100;font-weight:560;font-size:21px;letter-spacing:-.01em}
-.brand small{display:block;font:600 13px var(--fb);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-top:2px}
-nav.steps{display:flex;gap:4px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
-nav.steps::-webkit-scrollbar{display:none}
-.steps button{flex:none;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:700 15px var(--fb);padding:10px 10px 12px;cursor:pointer;white-space:nowrap}
-.steps button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold)}
-.steps button:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-section.pane{padding-top:30px}
-.kick{font:700 13px var(--fb);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
-h1,h2{font-family:var(--fs);font-variation-settings:"SOFT" 100;font-weight:560;letter-spacing:-.018em;text-wrap:balance;margin:8px 0 0}
-h1{font-size:clamp(32px,8vw,44px);line-height:1.08}
-h2{font-size:clamp(26px,6.4vw,32px);line-height:1.12}
-.lead{color:var(--muted);font-size:18px;margin:12px 0 0;max-width:58ch}
-.formula{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:0;border-top:1px solid var(--gline)}
-.formula li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:18px 0;border-bottom:1px solid var(--line)}
-.formula .n{font-family:var(--fs);font-size:30px;line-height:1;color:var(--gold)}
-.formula b{display:block;font-size:19px}
-.formula span{color:var(--muted)}
-.ejemplo{margin-top:28px;padding:22px 20px;border:1px solid var(--gline);border-radius:18px}
-.ejemplo .tit{font-family:var(--fs);font-size:23px;line-height:1.25;font-variation-settings:"SOFT" 100;font-weight:520}
-.ejemplo p{margin:10px 0 0;color:var(--muted)}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.tag{font-size:14px;font-weight:700;padding:5px 11px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
-.mal{margin-top:22px}
-.mal li{margin-top:8px}
-.prueba{margin-top:28px;padding:20px;border-radius:18px;background:var(--surface)}
-.prueba h3{margin:0;font-size:18px}
-.prueba ol{margin:10px 0 0;padding-left:22px}
-.prueba li{margin-top:6px}
-label.f{display:block;margin-top:22px;font-weight:700;font-size:16px}
-label.f span{display:block;font-weight:500;color:var(--muted);font-size:15px;margin-top:2px}
-textarea,input[type=text]{width:100%;margin-top:8px;font:500 17px/1.5 var(--fb);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;resize:vertical}
-textarea{min-height:84px}
-.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;align-items:center}
-.btn{appearance:none;border:0;border-radius:14px;background:var(--act);color:var(--act-ink);font:700 18px var(--fb);padding:16px 22px;cursor:pointer;min-height:52px}
-.btn[disabled]{opacity:.55;cursor:default}
-.ghost{appearance:none;background:none;border:1px solid var(--line);color:var(--ink);border-radius:14px;font:700 16px var(--fb);padding:13px 18px;cursor:pointer;min-height:48px}
-.note{color:var(--muted);font-size:15px}
-.status{margin-top:16px;font-weight:700;color:var(--muted);min-height:1.5em}
-.status.err{color:var(--bad)}
-.badge{display:inline-block;font:700 12px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gline);border-radius:99px;padding:4px 10px}
-.mom{display:grid;gap:12px;margin-top:22px}
-.mcard{display:grid;grid-template-columns:28px 1fr;gap:12px;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;color:var(--ink);font:inherit}
-.mcard[aria-pressed="true"]{border-color:var(--gold);background:var(--surface)}
-.mcard .tick{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--gline);display:flex;align-items:center;justify-content:center;margin-top:3px}
-.mcard[aria-pressed="true"] .tick{background:var(--gold);border-color:var(--gold)}
-.mcard[aria-pressed="true"] .tick::after{content:"";width:9px;height:5px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);transform:rotate(-45deg) translate(1px,-1px)}
-.mcard .esc{font-family:var(--fs);font-size:20px;line-height:1.3;font-variation-settings:"SOFT" 100;font-weight:520;min-width:0}
-.mcard dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:15px}
-.mcard dt{color:var(--gold);font-weight:700}
-.mcard dd{margin:0;color:var(--muted);min-width:0}
-.ad{margin-top:26px;border-top:1px solid var(--gline);padding-top:20px}
-.ad .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.blk{margin-top:16px}
-.blk .lab{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.blk .lab b{font:700 13px var(--fb);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
-.copy{appearance:none;background:none;border:1px solid var(--line);border-radius:10px;color:var(--ink);font:700 14px var(--fb);padding:8px 12px;cursor:pointer;min-height:40px}
-.txt{margin-top:8px;white-space:pre-wrap;padding:14px 16px;border-radius:14px;background:var(--surface);min-width:0;overflow-wrap:anywhere}
-.titulo .txt{font-family:var(--fs);font-size:21px;line-height:1.3;font-variation-settings:"SOFT" 100;font-weight:520}
-.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.ck{font-size:14px;font-weight:700;padding:6px 11px;border-radius:99px}
-.ck.ok{color:var(--ok);background:var(--okbg)}
-.ck.no{color:var(--bad);background:var(--badbg)}
-.diag{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
-.diag li{padding:14px 16px;border-radius:14px;border:1px solid var(--line)}
-.diag li b{display:block}
-.diag li.no b{color:var(--bad)}
-.diag li.ok b{color:var(--ok)}
-.verd{margin-top:20px;font-family:var(--fs);font-size:23px;line-height:1.3;font-variation-settings:"SOFT" 100}
-.empty{margin-top:22px;padding:22px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-</style>
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:500 18px/1.55 var(--fb);margin:0;min-height:100vh}
+button{font:inherit;color:inherit}
+svg{flex:none}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
 
+/* ── cabecera y pasos ── */
+header.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.top .in{max-width:720px;margin:0 auto;padding:12px 16px 0}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{background:none;border:0;padding:0;text-align:left;cursor:pointer;font-family:var(--fs);font-variation-settings:"SOFT" 100;font-weight:580;font-size:20px;letter-spacing:-.01em;line-height:1.15;white-space:nowrap}
+.hlinks{display:flex;gap:6px}
+.hl{background:none;border:1px solid var(--line);border-radius:99px;padding:7px 13px;white-space:nowrap;font-weight:700;font-size:16px;cursor:pointer;color:var(--muted);min-height:40px}
+.hl.q{width:40px;padding:0;font-family:var(--fs);font-size:20px}
+.hl[aria-current="true"]{color:var(--ink);border-color:var(--gold)}
+ol.stepper{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);position:relative}
+ol.stepper::before{content:"";position:absolute;left:12.5%;right:12.5%;top:19px;height:2px;background:var(--line)}
+.stepper li{position:relative;display:flex;justify-content:center}
+.stepper button{background:none;border:0;padding:0 2px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:100%;min-height:44px}
+.dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;background:var(--bg);border:2px solid var(--line);color:var(--muted);position:relative;z-index:1;transition:background .25s,border-color .25s,color .25s}
+.sl{font-weight:700;font-size:15px;letter-spacing:-.01em;color:var(--muted);white-space:nowrap}
+.stepper .done .dot{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.stepper .cur .dot{background:var(--act);border-color:var(--act);color:var(--act-ink)}
+.stepper .cur .sl{color:var(--ink)}
+.stepper .cur button::after{content:"";position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px;background:var(--gold)}
+
+/* ── pantallas ── */
+section.screen{padding:28px 0 32px;animation:enter .28s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kick{font:800 15px var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0}
+h1,h2,h3{font-family:var(--fs);font-variation-settings:"SOFT" 100;font-weight:560;letter-spacing:-.018em;text-wrap:balance;margin:8px 0 0}
+h1{font-size:clamp(32px,8.4vw,46px);line-height:1.08}
+h2{font-size:clamp(28px,7vw,36px);line-height:1.1}
+h3{font-size:24px;line-height:1.2}
+.lead{color:var(--muted);font-size:19px;margin:12px 0 0;max-width:56ch}
+.note{color:var(--muted);font-size:17px;margin:10px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+
+/* ── botones ── */
+.btn{appearance:none;border:0;border-radius:16px;background:var(--act);color:var(--act-ink);font:800 19px var(--fb);padding:16px 22px;cursor:pointer;min-height:58px;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s,opacity .2s}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.wide{width:100%}
+.ghost{appearance:none;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:16px;font:700 18px var(--fb);padding:13px 18px;cursor:pointer;min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.ghost[disabled]{opacity:.45;cursor:not-allowed}
+.ghost.danger{color:var(--bad)}
+.link{background:none;border:0;color:var(--gold);font-weight:800;font-size:17px;cursor:pointer;padding:10px 0;text-decoration:underline;text-underline-offset:4px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:10px}
+.dock{position:sticky;bottom:0;z-index:15;margin-top:26px;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,rgba(0,0,0,0),var(--bg) 18px)}
+.dock .in{display:flex;gap:10px;align-items:center}
+.dock .in .btn{flex:1}
+.dock .count{font-weight:800;font-size:17px;color:var(--muted);text-align:center;margin-bottom:8px}
+
+/* ── método ── */
+.rail{list-style:none;margin:26px 0 0;padding:0;position:relative}
+.rail li{display:grid;grid-template-columns:46px 1fr;gap:14px;padding:10px 0;position:relative}
+.rail li::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:2px;background:var(--line)}
+.rail li.gh::before{display:none}.rail li:first-child::before{top:50%}.rail li:last-child::before{bottom:50%}
+.num{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 18px var(--fb);position:relative;z-index:1;border:2px solid currentColor;background:var(--bg)}
+.g1{color:var(--g1)}.g2{color:var(--g2)}.g3{color:var(--g3)}
+.rail b{display:block;font-size:20px;color:var(--ink)}
+.rail span.d{color:var(--muted);font-size:17px}
+.grp{display:inline-block;font:800 15px var(--fb);letter-spacing:.14em;text-transform:uppercase;padding:5px 12px;border-radius:99px;margin:18px 0 4px}
+.grp.g1{background:var(--g1bg)}.grp.g2{background:var(--g2bg)}.grp.g3{background:var(--g3bg)}
+.ej{margin-top:26px;padding:22px 20px}
+.ej .q{font-family:var(--fs);font-size:25px;line-height:1.28;font-variation-settings:"SOFT" 100;font-weight:520;margin:12px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-size:16px;font-weight:700;padding:6px 12px;border-radius:99px;background:var(--surface);color:var(--muted)}
+details.more{margin-top:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+details.more summary{cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:19px;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"+";font-size:26px;color:var(--gold);font-weight:600}
+details.more[open] summary::after{content:"–"}
+details.more .body{padding:0 20px 18px;color:var(--muted)}
+details.more .body li{margin-top:8px}
+details.more .body a{color:var(--gold);font-weight:700}
+
+/* ── formulario ── */
+.pager{display:flex;gap:8px;margin-top:18px}
+.pager span{flex:1;height:6px;border-radius:6px;background:var(--line);transition:background .3s}
+.pager span.on{background:var(--gold)}
+.field{margin-top:24px}
+.field label{display:block;font-weight:800;font-size:20px;line-height:1.3}
+.field .h{display:block;color:var(--muted);font-size:17px;margin-top:4px}
+textarea,input[type=text]{width:100%;margin-top:10px;font:500 18px/1.5 var(--fb);color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;resize:vertical;transition:border-color .2s}
+textarea{min-height:110px}
+textarea:focus,input[type=text]:focus{border-color:var(--gold);outline:none}
+.field.err textarea,.field.err input{border-color:var(--bad)}
+.ferr{display:none;color:var(--bad);font-weight:700;font-size:17px;margin-top:6px}
+.field.err .ferr{display:block}
+.banner{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--surface);font-size:17px;color:var(--muted)}
+
+/* ── momentos ── */
+.moms{display:grid;gap:12px;margin-top:22px}
+.mcard{display:grid;grid-template-columns:34px 1fr;gap:14px;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:border-color .2s,background .2s,transform .12s;box-shadow:var(--shadow)}
+.mcard:active{transform:scale(.99)}
+.mcard[aria-pressed="true"]{border-color:var(--act);background:var(--act-soft)}
+.tick{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;margin-top:2px;color:transparent;transition:all .2s}
+.mcard[aria-pressed="true"] .tick{background:var(--act);border-color:var(--act);color:var(--act-ink)}
+.mcard .rank{font:800 15px var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.mcard .esc{display:block;font-family:var(--fs);font-size:22px;line-height:1.3;font-variation-settings:"SOFT" 100;font-weight:540;margin-top:4px}
+.mcard .why{display:block;margin-top:8px;color:var(--muted);font-size:17px}
+.mcard .why b{color:var(--ink)}
+
+/* ── progreso ── */
+.prog{margin-top:22px;padding:22px 20px}
+.prog .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.prog .ph b{font-size:21px}
+.prog .secs{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.prog ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:4px}
+.prog li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.prog li:first-child{border-top:0}
+.prog .st{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--line);color:var(--muted)}
+.prog li.run .st{border-color:var(--gold);border-top-color:transparent;animation:spin 1s linear infinite}
+.prog li.ok .st{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.prog li.warn .st{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}
+.prog li.err .st{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.prog .lbl{font-weight:800}
+.prog .sub{display:block;color:var(--muted);font-size:16px;font-weight:600}
+.prog li.wait .lbl{color:var(--muted)}
+.prog .bar{height:8px;border-radius:8px;background:var(--surface);margin-top:16px;overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:var(--gold);border-radius:8px;transition:width .5s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.errbox{margin-top:18px;padding:18px;border-radius:var(--r);background:var(--badbg);color:var(--bad);font-weight:700}
+.errbox .row{margin-top:12px}
+.msg{margin-top:12px;font-weight:700;color:var(--muted);min-height:1.4em}
+.msg.bad{color:var(--bad)}
+
+/* ── anuncios ── */
+.adtabs{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:8px;margin-top:22px}
+.adtab{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:12px 4px;cursor:pointer;text-align:center;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.adtab b{font-size:18px;white-space:nowrap}
+.adtab small{font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.adtab small.ok{color:var(--ok)}.adtab small.warn{color:var(--warn)}
+.adtab[aria-selected="true"]{border-color:var(--act);background:var(--act-soft)}
+.ad{margin-top:18px}
+.screen-text{padding:24px 20px;border-radius:var(--r);background:var(--act);color:var(--act-ink);font-family:var(--fs);font-variation-settings:"SOFT" 100;font-weight:560;font-size:clamp(26px,7vw,34px);line-height:1.18;text-wrap:balance}
+.screen-text small{display:block;font:800 15px var(--fb);letter-spacing:.16em;text-transform:uppercase;opacity:.8;margin-bottom:10px}
+.quality{display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 16px;border-radius:16px;font-weight:800;cursor:pointer;width:100%;text-align:left;border:0}
+.quality.ok{background:var(--okbg);color:var(--ok)}
+.quality.warn{background:var(--warnbg);color:var(--warn)}
+.quality .qi{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:currentColor}
+.quality .qi svg{color:var(--card)}
+.quality span.qt{flex:1}
+.quality span.qt small{display:block;font-weight:600;font-size:16px;opacity:.9}
+.cklist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.cklist li{display:flex;gap:10px;align-items:flex-start;font-size:17px;font-weight:600;padding:8px 12px;border-radius:12px}
+.cklist li.ok{color:var(--ok);background:var(--okbg)}
+.cklist li.no{color:var(--bad);background:var(--badbg)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:18px;padding:4px;border-radius:16px;background:var(--surface)}
+.seg button{background:none;border:0;border-radius:12px;padding:12px 6px;font-weight:800;font-size:17px;cursor:pointer;color:var(--muted);min-height:52px}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.parts{list-style:none;margin:18px 0 0;padding:0;position:relative}
+.parts li{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:6px 0 10px;position:relative}
+.parts li::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:2px;background:var(--line)}
+.parts li:first-child::before{top:22px}.parts li:last-child::before{bottom:calc(100% - 22px)}
+.parts .num{width:40px;height:40px;font-size:16px}
+.parts .pl{font:800 15px var(--fb);letter-spacing:.12em;text-transform:uppercase;margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.parts .same{font-size:15px;letter-spacing:.06em;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:99px}
+.parts .pt{margin-top:6px;padding:14px 16px;border-radius:14px;font-size:19px;line-height:1.5;color:var(--ink);overflow-wrap:anywhere}
+.parts li.g1 .pt{background:var(--g1bg)}.parts li.g2 .pt{background:var(--g2bg)}.parts li.g3 .pt{background:var(--g3bg)}
+.parts li.first .pt{font-family:var(--fs);font-size:23px;line-height:1.3;font-variation-settings:"SOFT" 100;font-weight:540}
+.meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-weight:700;font-size:17px}
+.meta span{display:inline-flex;gap:6px;align-items:center}
+.box{margin-top:16px;padding:18px;border-radius:var(--r);background:var(--card);border:1px solid var(--line)}
+.box .bl{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.box .bl b{font:800 15px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.box .bt{margin-top:10px;white-space:pre-wrap;font-size:19px;overflow-wrap:anywhere}
+.copy{appearance:none;background:var(--surface);border:0;border-radius:12px;font:800 16px var(--fb);padding:10px 14px;cursor:pointer;min-height:44px;display:inline-flex;gap:6px;align-items:center;color:var(--ink)}
+.copy.done{background:var(--okbg);color:var(--ok)}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.rowbtns > *{flex:1 1 200px}
+.empty{margin-top:22px;padding:26px 22px;border:2px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:18px}
+.empty .btn{margin-top:16px}
+
+/* ── VSL ── */
+.vsec{margin-top:12px}
+.vsec summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;padding:16px;min-height:72px}
+.vsec summary::-webkit-details-marker{display:none}
+.vsec .vt b{display:block;font-size:19px}
+.vsec .vt span{color:var(--muted);font-size:16px;font-weight:700}
+.vsec .chev{color:var(--gold);transition:transform .2s}
+.vsec[open] .chev{transform:rotate(180deg)}
+.vsec .vb{padding:0 16px 16px}
+.vsec .vb .bt{white-space:pre-wrap;font-size:19px;padding:16px;border-radius:14px;background:var(--surface);overflow-wrap:anywhere}
+.verd{margin-top:22px;font-family:var(--fs);font-size:25px;line-height:1.3;font-variation-settings:"SOFT" 100}
+@media (min-width:700px){.rail li{grid-template-columns:46px 1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
 <header class="top"><div class="in">
-  <div class="brand">Anuncios que Agendan<small>Método del momento exacto</small></div>
-  <nav class="steps" role="tablist" aria-label="Pasos">
-    <button role="tab" id="t-metodo" aria-selected="true" data-p="metodo">El método</button>
-    <button role="tab" id="t-cliente" aria-selected="false" data-p="cliente">1 · Cliente</button>
-    <button role="tab" id="t-momentos" aria-selected="false" data-p="momentos">2 · Momentos</button>
-    <button role="tab" id="t-anuncios" aria-selected="false" data-p="anuncios">3 · Anuncios</button>
-    <button role="tab" id="t-vsl" aria-selected="false" data-p="vsl">4 · VSL</button>
-    <button role="tab" id="t-revisar" aria-selected="false" data-p="revisar">Revisar uno</button>
-  </nav>
+  <div class="brandrow">
+    <button class="brand" type="button" data-nav="metodo">Anuncios que Agendan</button>
+    <div class="hlinks"><button class="hl q" type="button" data-nav="metodo" id="hl-metodo" aria-label="Cómo funciona el método">?</button><button class="hl" type="button" data-nav="revisar" id="hl-revisar">Revisar</button></div>
+  </div>
+  <ol class="stepper" aria-label="Pasos">
+    <li id="st-cliente"><button type="button" data-nav="cliente"><span class="dot">1</span><span class="sl">Cliente</span></button></li>
+    <li id="st-momentos"><button type="button" data-nav="momentos"><span class="dot">2</span><span class="sl">Momentos</span></button></li>
+    <li id="st-anuncios"><button type="button" data-nav="anuncios"><span class="dot">3</span><span class="sl">Anuncios</span></button></li>
+    <li id="st-vsl"><button type="button" data-nav="vsl"><span class="dot">4</span><span class="sl">VSL</span></button></li>
+  </ol>
 </div></header>
 
-<main class="wrap">
-
-<!-- ═══ EL MÉTODO ═══ -->
-<section class="pane" id="p-metodo">
-  <p class="kick">Por qué un anuncio agenda</p>
-  <h1>El que agenda nombra un avance de tu cliente y el obstáculo que aparece justo ahí.</h1>
-  <p class="lead">El dolor atrae a quien está hundido. Un logro con un obstáculo atrae a quien ya está avanzando: el que decide, invierte y se compromete. Ese agenda y compra.</p>
-  <ol class="formula">
-    <li><span class="n">1</span><div><b>Avance</b><span>El elogio que califica: algo que tu cliente ideal ya logró o ya decidió.</span></div></li>
-    <li><span class="n">2</span><div><b>Obstáculo</b><span>Lo que le aparece justo ahí y todavía no resolvió.</span></div></li>
-    <li><span class="n">3</span><div><b>Error principal</b><span>Lo que casi todos hacen para resolverlo, sin culparlo.</span></div></li>
-    <li><span class="n">4</span><div><b>Solución real</b><span>El camino que sí funciona, dicho en positivo.</span></div></li>
-    <li><span class="n">5</span><div><b>Autoridad</b><span>Años y personas acompañadas. Datos reales.</span></div></li>
-    <li><span class="n">6</span><div><b>Sistema</b><span>Qué incluye, en una sola frase. El cómo lo cuenta el video.</span></div></li>
-    <li><span class="n">7</span><div><b>Primer llamado</b><span>Toca el botón y mira el video completo.</span></div></li>
-    <li><span class="n">8</span><div><b>Exclusividad</b><span>Para quién es: conducta, resultados y decisión de invertir.</span></div></li>
-    <li><span class="n">9</span><div><b>Escasez</b><span>Lugares y fecha de cierre reales.</span></div></li>
-    <li><span class="n">10</span><div><b>Llamado final</b><span>Mira el video antes de que cierre.</span></div></li>
-  </ol>
-  <div class="ejemplo">
-    <span class="badge">Ejemplo real que agenda</span>
-    <p class="tit" style="color:var(--ink);margin-top:12px">Te ascendieron y por primera vez en años no sabes si vas a estar a la altura.</p>
-    <p>El cargo nuevo no te pide hacer más de lo que ya hacías. Te pide convertirte en alguien distinto. Por eso tantos buenos ejecutivos chocan justo después de subir.</p>
-    <div class="tags"><span class="tag">Avance: te ascendieron</span><span class="tag">Obstáculo: no sabes si vas a estar a la altura</span><span class="tag">Giro: no es hacer más, es ser otro</span><span class="tag">4 líneas</span></div>
-  </div>
-  <div class="mal">
-    <h2>Lo que trae curiosos</h2>
-    <ul>
-      <li>Mostrar dolor o miseria: trae a quien no puede invertir.</li>
-      <li>Explicar tu método o tus razones («no ofrezcas sesiones 1 a 1», ocho motivos).</li>
-      <li>Contar tu historia antes de que el cliente se sienta nombrado.</li>
-      <li>Un testimonio en frío: lo mira cualquiera que quiera un resultado.</li>
-      <li>Textos largos con listas, emojis o citas de autores.</li>
-    </ul>
-  </div>
-  <div class="prueba">
-    <h3>Cómo se prueba (no hay anuncio seguro, hay prueba ordenada)</h3>
-    <ol>
-      <li>Un solo conjunto en frío con 3 anuncios de momentos distintos. Más conjuntos o más anuncios reparten la plata y Meta no termina de aprender.</li>
-      <li>Déjalos correr al menos 4 días sin tocarlos: cada cambio grande reinicia el aprendizaje.</li>
-      <li>Primero decides con lo que llega rápido: apaga el de CTR menor a 1,5 % o el de visita más cara. Las agendas confirman al ganador.</li>
-      <li>Al ganador, grábale 3 variantes del mismo momento y súmalas al mismo conjunto.</li>
-    </ol>
-  </div>
-  <div class="prueba" style="background:none;border:1px solid var(--line)">
-    <h3>De dónde sale cada medida</h3>
-    <ul style="margin:10px 0 0;padding-left:20px">
-      <li style="margin-top:6px"><b>Texto principal 125 caracteres y titular 40</b>: lo que se ve en pantallas chicas antes de cortarse. <a href="https://www.facebook.com/business/help/908491205873167" target="_blank" rel="noopener">Meta, especificaciones de diseño</a>.</li>
-      <li style="margin-top:6px"><b>Lo importante en los primeros 3 segundos, subtítulos y texto grande en pantalla</b>: la mayoría mira sin sonido. <a href="https://www.facebook.com/business/help/188534925073536" target="_blank" rel="noopener">Meta, buenas prácticas de video</a>.</li>
-      <li style="margin-top:6px"><b>Versión corta de 15 segundos</b>: Meta dice que los videos cortos rinden mejor en el feed y que los de hasta 60 segundos sirven si se mira dónde abandonan. Por eso cada anuncio trae las dos. <a href="https://www.facebook.com/business/help/188534925073536" target="_blank" rel="noopener">Meta</a>.</li>
-      <li style="margin-top:6px"><b>Pruebas de al menos 4 días</b>: <a href="https://www.facebook.com/business/help/188534925073536" target="_blank" rel="noopener">Meta, buenas prácticas de video</a>. <b>Unas 50 agendas por semana para salir del aprendizaje</b> y menos conjuntos cuando no llegas: <a href="https://www.facebook.com/business/help/269269737396981" target="_blank" rel="noopener">Meta, aprendizaje limitado</a>.</li>
-      <li style="margin-top:6px"><b>Estimaciones propias, no datos de Meta</b>: 140 palabras por minuto para calcular los segundos, y CTR 1,5 % como piso (comparado con tus anuncios y los que ya agendan).</li>
-    </ul>
-  </div>
-  <div class="row"><button class="btn" type="button" data-go="cliente">Empezar con un cliente</button></div>
-</section>
-
-<!-- ═══ 1 · CLIENTE ═══ -->
-<section class="pane" id="p-cliente" hidden>
-  <p class="kick">Paso 1</p>
-  <h2>¿Para quién son los anuncios?</h2>
-  <p class="lead">Escribe como habla tu cliente, no como hablas tú. Lo guardado queda en este navegador.</p>
-  <p class="note" id="ej-note">Viene cargado con el ejemplo de Tu Clínica Digital.</p>
-  <label class="f" for="b-marca">Quién firma el anuncio<span>Nombre y marca</span></label>
-  <input type="text" id="b-marca">
-  <label class="f" for="b-cliente">Cliente ideal<span>Quién es y qué hace hoy (la conducta, no solo la profesión)</span></label>
-  <textarea id="b-cliente"></textarea>
-  <label class="f" for="b-palabras">Cómo habla tu cliente<span>Palabras y frases que usa de verdad</span></label>
-  <textarea id="b-palabras"></textarea>
-  <label class="f" for="b-promesa">Qué cambia con tu oferta<span>La promesa, en concreto</span></label>
-  <textarea id="b-promesa"></textarea>
-  <label class="f" for="b-creencias">Creencias equivocadas que conoces<span>Opcional: lo que cree y lo mantiene donde está</span></label>
-  <textarea id="b-creencias"></textarea>
-  <label class="f" for="b-escasez">Escasez real<span>Lugares que quedan y fecha de cierre. Solo si es verdad.</span></label>
-  <input type="text" id="b-escasez">
-  <label class="f" for="b-prueba">Prueba<span>A cuántas personas ya ayudaste, de dónde</span></label>
-  <input type="text" id="b-prueba">
-  <label class="f" for="b-destino">A dónde lleva el clic<span>Qué va a ver al tocar el botón</span></label>
-  <input type="text" id="b-destino">
-  <label class="f" for="b-prohibidas">Palabras prohibidas extra<span>Opcional, separadas por coma</span></label>
-  <input type="text" id="b-prohibidas">
-  <div class="row">
-    <button class="btn" type="button" id="go-momentos">Buscar momentos</button>
-    <button class="ghost" type="button" id="nuevo">Cliente nuevo (vaciar)</button>
-  </div>
-  <p class="status" id="st-cliente" role="status"></p>
-</section>
-
-<!-- ═══ 2 · MOMENTOS ═══ -->
-<section class="pane" id="p-momentos" hidden>
-  <p class="kick">Paso 2</p>
-  <h2>Elige hasta 3 momentos</h2>
-  <p class="lead">Quédate con los que tu cliente leería y pensaría «esto me pasó ayer».</p>
-  <p class="status" id="st-momentos" role="status"></p>
-  <div class="mom" id="momentos"></div>
-  <div class="row">
-    <button class="btn" type="button" id="go-anuncios">Escribir los anuncios</button>
-    <button class="ghost" type="button" id="otros">Buscar otros momentos</button>
-    <button class="ghost" type="button" id="stop1" hidden>Detener</button>
-  </div>
-</section>
-
-<!-- ═══ 3 · ANUNCIOS ═══ -->
-<section class="pane" id="p-anuncios" hidden>
-  <p class="kick">Paso 3</p>
-  <h2>Tus anuncios, listos para grabar</h2>
-  <p class="lead">Cada uno trae título, guion a cámara (unos 50 segundos) y texto del anuncio. Las marcas de abajo revisan las reglas solas.</p>
-  <p class="status" id="st-anuncios" role="status"></p>
-  <div id="anuncios"></div>
-  <div class="row"><button class="ghost" type="button" id="stop2" hidden>Detener</button></div>
-</section>
-
-<!-- ═══ 4 · VSL ═══ -->
-<section class="pane" id="p-vsl" hidden>
-  <p class="kick">Paso 4</p>
-  <h2>El VSL, con la misma fórmula</h2>
-  <p class="lead">Arranca con el avance y el obstáculo, nombra el obstáculo real, muestra el camino, filtra a quién es y cierra en el diagnóstico. Unos 8 minutos a cámara.</p>
-  <div class="row">
-    <button class="btn" type="button" id="hacer-vsl">Escribir el VSL</button>
-    <button class="ghost" type="button" id="copiar-vsl">Copiar todo</button>
-    <button class="ghost" type="button" id="stop4" hidden>Detener</button>
-  </div>
-  <p class="note">Usa el cliente del paso 1 y los momentos marcados en el paso 2. Pon en «Qué cambia con tu oferta» el mecanismo y la garantía.</p>
-  <p class="status" id="st-vsl" role="status"></p>
-  <div id="vsl"></div>
-</section>
-
-<!-- ═══ REVISAR ═══ -->
-<section class="pane" id="p-revisar" hidden>
-  <p class="kick">Antes de gastar en pauta</p>
-  <h2>Revisa un anuncio que ya tienes</h2>
-  <p class="lead">Pega el guion o el texto. Te digo qué regla rompe y te lo devuelvo reescrito con un momento. Usa el cliente del paso 1.</p>
-  <label class="f" for="r-texto">Tu anuncio</label>
-  <textarea id="r-texto" style="min-height:180px" placeholder="Pega aquí el guion o el texto del anuncio"></textarea>
-  <div class="row">
-    <button class="btn" type="button" id="revisar">Revisar</button>
-    <button class="ghost" type="button" id="stop3" hidden>Detener</button>
-  </div>
-  <p class="status" id="st-revisar" role="status"></p>
-  <div id="revision"></div>
-</section>
-
-</main>
+<main class="wrap" id="main"></main>
 
 <script>
 (function(){
 "use strict";
-var $=function(id){return document.getElementById(id)};
-var KEY="aqa.v5";
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||null}catch(e){return null}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
 
-var EJEMPLO={
+/* ═════════ utilidades ═════════ */
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function words(s){return String(s||"").trim().split(/\s+/).filter(Boolean).length}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+var ICO={
+ check:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ warn:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v6M12 17.5v.01"/></svg>',
+ x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ copy:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',
+ arrow:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ back:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+ clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ cam:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/></svg>',
+ redo:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>',
+ chev:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+};
+
+/* ═════════ datos de ejemplo (Tu Clínica Digital) ═════════ */
+var EJ_BRIEF={
   marca:"Javier Katz · Tu Clínica Digital",
   cliente:"Coaches, terapeutas, consultores, nutricionistas, entrenadores y médicos que atienden 1 a 1 hace años. Tienen la agenda llena, cobran por sesión y están agotados: ganan bien, pero les cuesta cada vez más.",
   palabras:"consultantes, turnos, agenda llena hasta diciembre, sesiones, guardias, audios de WhatsApp, terminar a las nueve de la noche",
-  promesa:"Convertir su trayectoria en una clínica digital que genere 10.000 USD al mes en 90 días: un programa de 1.000 USD, captación automática con video y una app propia.",
-  creencias:"Cobrar por hora es lo normal. Subir el precio es traicionar la vocación. Estar disponible a toda hora es parte de cuidar. Para vender hay que subir contenido todos los días.",
-  escasez:"Quedan 7 lugares para este año. Las inscripciones cierran en octubre.",
+  promesa:"Convertir su trayectoria en una clínica digital que genere 10.000 USD al mes en 90 días, con 5 sistemas instalados: reset de mindset, programa de alto valor, captación automática, app propia y marca.",
   prueba:"más de 50 profesionales de Latinoamérica, España y EE. UU., más de 6 años acompañando a profesionales de la salud",
   destino:"un video donde explico el método a detalle",
-  prohibidas:""
+  escasez:"Quedan 7 lugares para este año. Las inscripciones cierran en octubre.",
+  creencias:"Cobrar por hora es lo normal. Subir el precio es traicionar la vocación. Estar disponible a toda hora es parte de cuidar. Para vender hay que subir contenido todos los días.",
+  prohibidas:"",
+  historia:"Vengo de una familia de sanadores: mi abuelo era médico, mi tío es psiquiatra y mi mamá, psicoanalista. A los 8 años perdí a mi papá y vi a mi mamá trabajar y trabajar para sostener la casa. Ahí aprendí que el tiempo no vuelve.",
+  garantia:"Mentoría privada 1 a 1 de 90 días. Garantía: te vas con los 5 sistemas funcionando; si al día 90 alguno no está andando, sigo contigo sin costo hasta que funcione. La parte del cliente: venir a cada sesión, hacer las tareas de cada semana y grabar sus videos en las fechas acordadas."
 };
-var MOM_EJ=[{"escena": "Tienes lista de espera, ya subiste el precio… y la agenda sigue llena.", "siente": "¿Cómo sigo creciendo sin vivir en la consulta?", "creencia": "Subir otra vez el precio, sumar un colega o abrir los sábados.", "verdad": "Un programa de tres meses con precio por el resultado.", "filtro": "Solo lo vive quien ya subió el precio y sigue lleno.", "sel": true}, {"escena": "Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión.", "siente": "¿Lo mío se vende por internet?", "creencia": "Falló la foto, el texto o el presupuesto.", "verdad": "Anunciabas una sesión: quien busca sesión compara precios.", "filtro": "Solo lo vive quien ya invierte en su negocio.", "sel": true}, {"escena": "Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento.", "siente": "¿Cuánto cobro y a quién se lo ofrezco?", "creencia": "Empezar por las clases, el logo y la plataforma.", "verdad": "Primero el resultado, después etapas y precio; se vende antes de grabar.", "filtro": "Solo lo vive quien ya decidió dejar las sesiones sueltas.", "sel": true}];
-var ADS_EJ=[{"pantalla": "Subiste el precio y la agenda sigue llena", "titulo": "Tienes lista de espera, ya subiste el precio… y la agenda sigue llena.", "guion": "Tienes lista de espera, ya subiste el precio… y la agenda sigue llena.\n\nLlegaste a donde la mayoría de tus colegas quiere llegar. Pero ya no te quedan horas para crecer.\n\nLo que casi todos hacen ahora es subir otra vez el precio, sumar a un colega o abrir los sábados. Las tres cosas tienen el mismo techo: siguen vendiendo horas.\n\nLos que dan el salto convierten lo que ya logran en un programa de tres meses, con un resultado concreto y un precio por ese resultado. Atienden a menos personas y recuperan las tardes.\n\nLlevo más de seis años haciendo esto con profesionales de la salud: ya son más de cincuenta.\n\nEn noventa días te dejo instalados cinco sistemas: tu reset de mindset, tu programa de alto valor, tu captación automática, tu propia app y tu marca.\n\nToca el botón y mira el video completo.\n\nEs para quien atiende uno a uno hace años, tiene resultados y está listo para invertir en su negocio.\n\nMe quedan siete lugares para este año y cierro inscripciones en octubre. Si eres uno de ellos, toca el botón y mira el video antes de que cierre.", "corto": "Tienes lista de espera, ya subiste el precio y la agenda sigue llena. El techo no es el precio: es vender horas. Me quedan siete lugares este año. Mira el video completo.", "texto": "Tienes lista de espera, ya subiste el precio y la agenda sigue llena.\nSubir otra vez el precio o abrir los sábados tiene el mismo techo: sigues vendiendo horas.\nLos que dan el salto venden un programa de tres meses con un resultado concreto.\nMe quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales.", "titular": "Crece sin sumar horas de consulta", "momento": "Tienes lista de espera, ya subiste el precio… y la agenda sigue llena."}, {"pantalla": "Te escribieron 20. Diecinueve preguntaron el precio", "titulo": "Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión.", "guion": "Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión.\n\nDiste un paso que pocos colegas se animan a dar, y te quedó la duda de si lo tuyo se vende por internet.\n\nCasi todos cambian la foto, el texto o el presupuesto. Pero el anuncio no era el problema: anunciabas una sesión, y quien busca una sesión compara precios.\n\nCuando ofreces un programa con un resultado claro, el mismo anuncio trae personas que preguntan cómo empezar, no cuánto sale.\n\nLlevo más de seis años haciendo esto con profesionales de la salud: ya son más de cincuenta.\n\nEn noventa días te dejo instalados cinco sistemas: tu reset de mindset, tu programa de alto valor, tu captación automática, tu propia app y tu marca.\n\nToca el botón y mira el video completo.\n\nEs para quien atiende uno a uno hace años, tiene resultados y está listo para invertir en su negocio.\n\nMe quedan siete lugares para este año y cierro inscripciones en octubre. Si eres uno de ellos, toca el botón y mira el video antes de que cierre.", "corto": "Te escribieron veinte personas y diecinueve preguntaron cuánto sale la sesión. El anuncio no era el problema: lo que ofreces sí. Me quedan siete lugares este año. Mira el video completo.", "texto": "Te escribieron 20 personas por tu anuncio y 19 preguntaron cuánto sale la sesión.\nEl anuncio no era el problema: quien busca una sesión compara precios.\nCon un programa de resultado claro, preguntan cómo empezar, no cuánto sale.\nMe quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales.", "titular": "Que pregunten cómo empezar", "momento": "Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión."}, {"pantalla": "Tu programa lleva meses en un documento", "titulo": "Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento.", "guion": "Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento.\n\nYa decidiste dejar las sesiones sueltas. Lo que te frena es no saber cuánto cobrar ni a quién ofrecérselo.\n\nCasi todos empiezan por el contenido: las clases, el logo, la plataforma. Meses de trabajo sin una sola persona que lo compre.\n\nUn programa de alto valor se arma al revés: primero el resultado que ya consigues con tus consultantes, después las etapas, después el precio. Y se vende antes de grabar una sola clase.\n\nLlevo más de seis años haciendo esto con profesionales de la salud: ya son más de cincuenta.\n\nEn noventa días te dejo instalados cinco sistemas: tu reset de mindset, tu programa de alto valor, tu captación automática, tu propia app y tu marca.\n\nToca el botón y mira el video completo.\n\nEs para quien atiende uno a uno hace años, tiene resultados y está listo para invertir en su negocio.\n\nMe quedan siete lugares para este año y cierro inscripciones en octubre. Si eres uno de ellos, toca el botón y mira el video antes de que cierre.", "corto": "Tu programa lleva meses guardado en un documento. Se arma al revés: primero el resultado, después el precio, y se vende antes de grabar. Me quedan siete lugares este año. Mira el video completo.", "texto": "Ya le pusiste nombre a tu programa y lleva meses guardado en un documento.\nGrabar las clases y diseñar el logo antes de venderlo es el error más común.\nPrimero el resultado, después las etapas, después el precio. Y se vende antes de grabar.\nMe quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales.", "titular": "Vende tu programa antes de grabarlo", "momento": "Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento."}];
-var VSL_EJ=[{"parte": "Apertura: avance + obstáculo", "tiempo": "0:00", "texto": "Si atiendes uno a uno hace años, tu agenda está llena y ya decidiste que quieres dejar de vender horas, este video es para ti.\n\nSeguramente ya diste algún paso: pensaste en un programa, subiste el precio o corriste publicidad. Y apareció el mismo obstáculo: no sabes cómo convertir todo lo que sabes en algo que se venda sin que tengas que estar en cada sesión.\n\nEn los próximos minutos te muestro cómo lo resolvieron más de 50 profesionales de Latinoamérica, España y Estados Unidos, con los 5 sistemas que instalamos en 90 días."}, {"parte": "Quién soy", "tiempo": "0:40", "texto": "Soy Javier Katz. Vengo de una familia de sanadores: mi abuelo era médico, mi tío es psiquiatra y mi mamá, psicoanalista. A los 8 años perdí a mi papá y vi a mi mamá trabajar y trabajar para sostener la casa. Ahí aprendí que el tiempo no vuelve.\n\nHace más de seis años acompaño a profesionales de la salud a construir su clínica digital, para que quienes dedican su vida a cuidar a otros también tengan tiempo para la suya."}, {"parte": "El obstáculo real", "tiempo": "1:30", "texto": "Esto es lo más importante del video.\n\nEl obstáculo está en el modelo, no en la publicidad, el algoritmo o tus seguidores. Mientras vendas horas, tus ingresos tienen un techo, y ese techo es tu cuerpo.\n\nPor eso ves colegas con menos experiencia que tú facturando más. No saben más que tú. Dejaron de vender sesiones y empezaron a vender una transformación completa."}, {"parte": "Los 5 sistemas", "tiempo": "2:30", "texto": "Para eso instalamos 5 sistemas, en este orden.\n\nSistema 1, semana 1: tu reset de mindset y bodyset. Antes de cambiar el negocio, reseteamos tu sistema nervioso y las creencias sobre el tiempo y el dinero con las que trabajas hace años.\n\nSistema 2, semana 2: tu programa de 1.000 USD. Tomamos lo que ya logras con tus consultantes y lo convertimos en un programa con nombre, etapas y precio. Diez consultantes al mes en ese programa son 10.000 USD.\n\nSistema 3, semana 3: tu captación automática. Un video como este, anuncios y un calendario, para que personas que no te conocen te vean y agenden contigo. En la semana 3 ya estás vendiendo.\n\nSistema 4, semana 9: tu propia app. Tus videos, ejercicios y planes en el celular de cada consultante. Tu WhatsApp, libre.\n\nSistema 5, semana 11: tu ecosistema de marca. Tus videos de YouTube y guías gratuitas trayendo consultantes nuevos todos los meses.\n\nSin aprender tecnología ni IA: te la dejamos instalada. Sin bailar, hacer trends ni subir contenido todos los días. Y sin traicionar tu ética profesional."}, {"parte": "Prueba", "tiempo": "5:00", "texto": "Debajo de este video están algunos de mis clientes contando su experiencia con sus propias palabras: terapeutas, coaches, nutricionistas y médicos que atendían uno a uno hace años y hoy venden su programa."}, {"parte": "Cómo trabajamos y garantía", "tiempo": "5:30", "texto": "Trabajamos uno a uno durante 90 días. Es una mentoría privada: soy yo, contigo, instalando cada sistema en tu negocio.\n\nY te ofrezco una garantía: te vas con los 5 sistemas funcionando. Si al día 90 alguno todavía no está andando, sigo contigo uno a uno, sin costo, hasta que funcione.\n\nMi parte es acompañarte hasta que los 5 sistemas funcionen. Tu parte es venir a cada sesión, hacer las tareas de cada semana y grabar tus videos en las fechas que acordamos."}, {"parte": "Para quién es", "tiempo": "6:30", "texto": "Esta mentoría es para un profesional muy concreto.\n\nAtiendes uno a uno hace años y tienes resultados que puedes mostrar.\nYa decidiste dar el paso: quieres un programa propio y vivir de él.\nEstás listo para invertir en tu negocio con la misma seriedad con la que invertiste en tu formación.\nY cumples lo que te comprometes a hacer.\n\nTrabajo con pocos profesionales a la vez, porque cada uno tiene mi atención directa: me quedan siete lugares para este año y cerramos inscripciones en octubre. Por eso, antes de empezar, hacemos un diagnóstico."}, {"parte": "Llamado a la acción", "tiempo": "7:30", "texto": "El siguiente paso es un diagnóstico uno a uno conmigo, de 45 minutos y sin costo. Miramos tu situación y te muestro cómo se aplican los 5 sistemas a tu caso. Si encaja, te explico cómo trabajamos. Si no encaja, te lo digo.\n\nDebajo de este video está el calendario. Elige el día y la hora en que puedas estar presente, con cámara y buen sonido.\n\nTe espero del otro lado."}];
-var state=load()||{brief:EJEMPLO,momentos:MOM_EJ,anuncios:ADS_EJ,vsl:VSL_EJ,ejemplo:true};
-if(!state.vsl)state.vsl=[];
-var F=["marca","cliente","palabras","promesa","creencias","escasez","prueba","destino","prohibidas"];
-function fillBrief(){F.forEach(function(k){$("b-"+k).value=state.brief[k]||""});$("ej-note").hidden=!state.ejemplo}
-function readBrief(){var b={};F.forEach(function(k){b[k]=$("b-"+k).value.trim()});return b}
-F.forEach(function(k){$("b-"+k).addEventListener("input",function(){state.brief=readBrief();state.ejemplo=false;$("ej-note").hidden=true;save()})});
+var EJ_CIERRE={autoridad:"Llevo más de seis años haciendo esto con profesionales de la salud: ya son más de cincuenta.",sistema:"En noventa días te dejo instalados cinco sistemas: tu reset de mindset, tu programa de alto valor, tu captación automática, tu propia app y tu marca.",cta1:"Toca el botón y mira el video completo.",exclusividad:"Es para quien atiende uno a uno hace años, tiene resultados y está listo para invertir en su negocio.",escasez:"Me quedan siete lugares para este año y cierro inscripciones en octubre.",cta2:"Si eres uno de ellos, toca el botón y mira el video antes de que cierre."};
+var EJ_MOM=[
+ {escena:"Tienes lista de espera, ya subiste el precio… y la agenda sigue llena.",siente:"¿Cómo sigo creciendo sin vivir en la consulta?",creencia:"Subir otra vez el precio, sumar un colega o abrir los sábados.",verdad:"Un programa de tres meses con precio por el resultado.",filtro:"Solo lo vive quien ya subió el precio y sigue lleno.",sel:true},
+ {escena:"Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión.",siente:"¿Lo mío se vende por internet?",creencia:"Falló la foto, el texto o el presupuesto.",verdad:"Anunciabas una sesión: quien busca sesión compara precios.",filtro:"Solo lo vive quien ya invierte en su negocio.",sel:true},
+ {escena:"Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento.",siente:"¿Cuánto cobro y a quién se lo ofrezco?",creencia:"Empezar por las clases, el logo y la plataforma.",verdad:"Primero el resultado, después etapas y precio; se vende antes de grabar.",filtro:"Solo lo vive quien ya decidió dejar las sesiones sueltas.",sel:true}];
+function ejAd(o){var a={};for(var k in o)a[k]=o[k];for(var c in EJ_CIERRE)a[c]=EJ_CIERRE[c];return a}
+var EJ_ADS=[
+ ejAd({momento:EJ_MOM[0].escena,gancho:"Tienes lista de espera, ya subiste el precio… y la agenda sigue llena.",obstaculo:"Llegaste a donde la mayoría de tus colegas quiere llegar. Pero ya no te quedan horas para crecer.",error:"Lo que casi todos hacen ahora es subir otra vez el precio, sumar a un colega o abrir los sábados. Las tres cosas tienen el mismo techo: siguen vendiendo horas.",solucion:"Los que dan el salto convierten lo que ya logran en un programa de tres meses, con un resultado concreto y un precio por ese resultado. Atienden a menos personas y recuperan las tardes.",pantalla:"Subiste el precio y la agenda sigue llena",corto:"Tienes lista de espera, ya subiste el precio y la agenda sigue llena. El techo es vender horas: los que dan el salto venden un programa. Me quedan siete lugares este año. Mira el video completo.",texto:["Tienes lista de espera, ya subiste el precio y la agenda sigue llena.","Subir otra vez el precio o abrir los sábados tiene el mismo techo: sigues vendiendo horas.","Los que dan el salto venden un programa de tres meses con un resultado concreto.","Me quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales."],titular:"Crece sin sumar horas de consulta"}),
+ ejAd({momento:EJ_MOM[1].escena,gancho:"Invertiste en publicidad y te escribieron veinte personas. Diecinueve preguntaron cuánto sale la sesión.",obstaculo:"Diste un paso que pocos colegas se animan a dar, y te quedó la duda de si lo tuyo se vende por internet.",error:"Casi todos cambian la foto, el texto o el presupuesto. Pero el anuncio no era el problema: anunciabas una sesión, y quien busca una sesión compara precios.",solucion:"Cuando ofreces un programa con un resultado claro, el mismo anuncio trae personas que preguntan cómo empezar.",pantalla:"Te escribieron 20. Diecinueve preguntaron el precio",corto:"Te escribieron veinte personas y diecinueve preguntaron cuánto sale la sesión. Con un programa de resultado claro preguntan cómo empezar. Me quedan siete lugares este año. Mira el video completo.",texto:["Te escribieron 20 personas por tu anuncio y 19 preguntaron cuánto sale la sesión.","El anuncio no era el problema: quien busca una sesión compara precios.","Con un programa de resultado claro, preguntan cómo empezar.","Me quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales."],titular:"Que pregunten cómo empezar"}),
+ ejAd({momento:EJ_MOM[2].escena,gancho:"Ya le pusiste nombre a tu programa… y lleva meses guardado en un documento.",obstaculo:"Ya decidiste dejar las sesiones sueltas. Lo que te frena es no saber cuánto cobrar ni a quién ofrecérselo.",error:"Casi todos empiezan por el contenido: las clases, el logo, la plataforma. Meses de trabajo sin una sola persona que lo compre.",solucion:"Un programa de alto valor se arma al revés: primero el resultado que ya consigues con tus consultantes, después las etapas, después el precio. Y se vende antes de grabar una sola clase.",pantalla:"Tu programa lleva meses en un documento",corto:"Tu programa lleva meses guardado en un documento. Se arma al revés: primero el resultado, después el precio, y se vende antes de grabar. Me quedan siete lugares este año. Mira el video completo.",texto:["Ya le pusiste nombre a tu programa y lleva meses guardado en un documento.","Grabar las clases y diseñar el logo antes de venderlo es el error más común.","Primero el resultado, después las etapas, después el precio. Y se vende antes de grabar.","Me quedan 7 lugares este año. Mira el video donde te explico cómo lo hicieron más de 50 profesionales."],titular:"Vende tu programa antes de grabarlo"})];
+var EJ_VSL=[
+ {id:1,parte:"Apertura",texto:"Si atiendes uno a uno hace años, tu agenda está llena y ya decidiste que quieres dejar de vender horas, este video es para ti.\n\nSeguramente ya diste algún paso: pensaste en un programa, subiste el precio o corriste publicidad. Y apareció el mismo obstáculo: no sabes cómo convertir todo lo que sabes en algo que se venda sin que tengas que estar en cada sesión.\n\nEn los próximos minutos te muestro cómo lo resolvieron más de 50 profesionales de Latinoamérica, España y Estados Unidos, con los 5 sistemas que instalamos en 90 días."},
+ {id:2,parte:"Quién soy",texto:"Soy Javier Katz. Vengo de una familia de sanadores: mi abuelo era médico, mi tío es psiquiatra y mi mamá, psicoanalista. A los 8 años perdí a mi papá y vi a mi mamá trabajar y trabajar para sostener la casa. Ahí aprendí que el tiempo no vuelve.\n\nHace más de seis años acompaño a profesionales de la salud a construir su clínica digital, para que quienes dedican su vida a cuidar a otros también tengan tiempo para la suya."},
+ {id:3,parte:"El obstáculo real",texto:"Esto es lo más importante del video.\n\nEl obstáculo está en el modelo. Mientras vendas horas, tus ingresos tienen un techo, y ese techo es tu cuerpo.\n\nPor eso ves colegas con menos experiencia que tú facturando más. No saben más que tú. Dejaron de vender sesiones y empezaron a vender una transformación completa."},
+ {id:4,parte:"El camino",texto:"Para eso instalamos 5 sistemas, en este orden.\n\nSistema 1, semana 1: tu reset de mindset y bodyset. Antes de cambiar el negocio, reseteamos tu sistema nervioso y las creencias sobre el tiempo y el dinero con las que trabajas hace años.\n\nSistema 2, semana 2: tu programa de 1.000 USD. Tomamos lo que ya logras con tus consultantes y lo convertimos en un programa con nombre, etapas y precio. Diez consultantes al mes en ese programa son 10.000 USD.\n\nSistema 3, semana 3: tu captación automática. Un video como este, anuncios y un calendario, para que personas que no te conocen te vean y agenden contigo.\n\nSistema 4, semana 9: tu propia app. Tus videos, ejercicios y planes en el celular de cada consultante. Tu WhatsApp, libre.\n\nSistema 5, semana 11: tu ecosistema de marca. Tus videos de YouTube y guías gratuitas trayendo consultantes nuevos todos los meses.\n\nSin aprender tecnología ni IA: te la dejamos instalada. Sin bailar, hacer trends ni subir contenido todos los días. Y sin traicionar tu ética profesional."},
+ {id:5,parte:"Prueba",texto:"Debajo de este video están algunos de mis clientes contando su experiencia con sus propias palabras: terapeutas, coaches, nutricionistas y médicos que atendían uno a uno hace años y hoy venden su programa."},
+ {id:6,parte:"Cómo trabajamos y garantía",texto:"Trabajamos uno a uno durante 90 días. Es una mentoría privada: soy yo, contigo, instalando cada sistema en tu negocio.\n\nY te ofrezco una garantía: te vas con los 5 sistemas funcionando. Si al día 90 alguno todavía no está andando, sigo contigo uno a uno, sin costo, hasta que funcione.\n\nMi parte es acompañarte hasta que los 5 sistemas funcionen. Tu parte es venir a cada sesión, hacer las tareas de cada semana y grabar tus videos en las fechas que acordamos."},
+ {id:7,parte:"Para quién es",texto:"Esta mentoría es para un profesional muy concreto.\n\nAtiendes uno a uno hace años y tienes resultados que puedes mostrar. Ya decidiste dar el paso: quieres un programa propio y vivir de él. Estás listo para invertir en tu negocio con la misma seriedad con la que invertiste en tu formación. Y cumples lo que te comprometes a hacer.\n\nTrabajo con pocos profesionales a la vez: me quedan 7 lugares para este año y cerramos inscripciones en octubre."},
+ {id:8,parte:"Llamado a la acción",texto:"El siguiente paso es un diagnóstico uno a uno conmigo, de 45 minutos y sin costo. Miramos tu situación y te muestro cómo se aplican los 5 sistemas a tu caso. Si encaja, te explico cómo trabajamos.\n\nDebajo de este video está el calendario. Elige el día y la hora en que puedas estar presente, con cámara y buen sonido. Recuerda: quedan 7 lugares y las inscripciones cierran en octubre.\n\nTe espero del otro lado."}];
 
-/* pestañas */
-var tabs=[].slice.call(document.querySelectorAll(".steps button"));
-function show(p){tabs.forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.p===p))});
-  ["metodo","cliente","momentos","anuncios","vsl","revisar"].forEach(function(x){$("p-"+x).hidden=x!==p});
-  window.scrollTo(0,0)}
-tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.p)})});
-document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.go)})});
-var h=(location.hash||"").slice(1);if(["metodo","cliente","momentos","anuncios","vsl","revisar"].indexOf(h)>-1)show(h);
+/* ═════════ estado ═════════ */
+var KEY="aqa.v6";
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function fresh(){return {v:6,brief:JSON.parse(JSON.stringify(EJ_BRIEF)),momentos:JSON.parse(JSON.stringify(EJ_MOM)),cierre:null,anuncios:JSON.parse(JSON.stringify(EJ_ADS)),vsl:JSON.parse(JSON.stringify(EJ_VSL)),ejemplo:true,screen:"metodo",page:0,adTab:0,view:"grabar"}}
+var state;
+try{state=JSON.parse(lsGet(KEY))}catch(e){state=null}
+if(!state||state.v!==6){state=fresh();
+  try{var old=JSON.parse(lsGet("aqa.v5"));if(old&&old.brief&&!old.ejemplo){for(var k in old.brief)state.brief[k]=old.brief[k];state.momentos=old.momentos||[];state.anuncios=[];state.vsl=[];state.ejemplo=false;state.screen="cliente"}}catch(e){}}
+["momentos","anuncios","vsl"].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});
 
-/* reglas compartidas */
-function briefTxt(b){return "MARCA: "+b.marca+"\nCLIENTE IDEAL: "+b.cliente+"\nCÓMO HABLA EL CLIENTE: "+b.palabras+"\nPROMESA: "+b.promesa+"\nCREENCIAS EQUIVOCADAS CONOCIDAS: "+(b.creencias||"(no indicadas)")+"\nESCASEZ REAL: "+(b.escasez||"(no indicada: no inventes escasez)")+"\nAUTORIDAD Y PRUEBA: "+b.prueba+"\nDESTINO DEL CLIC: "+b.destino+(b.prohibidas?"\nPALABRAS PROHIBIDAS EXTRA: "+b.prohibidas:"")}
-var REGLAS=["Castellano neutro con «tú». Nunca voseo (nada de tenés, sabés, querés, vos).",
+/* ═════════ reglas compartidas ═════════ */
+var REGLAS=["Castellano neutro con «tú». Nunca voseo (nada de tenés, sabés, querés, vos, sos).",
 "Hablado y natural, como lo diría una persona en voz alta. Frases cortas. Sin poesía, sin metáforas rebuscadas, sin tono de marketing, sin pausas dramáticas, sin cierres inspiracionales.",
-"Arranca directo con la escena. Prohibido anunciar lo que viene («te cuento», «hoy te voy a», «descubre», «en este video»).",
-"Una sola creencia por anuncio.",
+"Arranca directo con la escena. Prohibido anunciar lo que viene («te cuento», «hoy te voy a», «descubre», «en este video», «presta atención»).",
+"Una sola idea central por anuncio.",
 "Nunca la palabra «gente»: usa «personas», «consultantes» o el término del cliente.",
-"Nunca señales de falta de dinero: el dolor es lo que le CUESTA ganar, nunca lo poco que gana.",
-"Sin listas, sin emojis, sin hashtags, sin citas de autores, sin signos de exclamación seguidos.",
+"Nunca señales de falta de dinero: el obstáculo es lo que le CUESTA crecer, nunca lo poco que gana.",
+"Sin listas, sin emojis, sin hashtags, sin citas de autores, sin signos de exclamación.",
 "No hablar de más: ninguna aclaración que abra una duda que no existía.",
-"La salida se dice en positivo: lo que sí es, no lo que no es.",
-"El cierre invita a ver el video del destino y menciona la prueba del brief.",
-"Escribe como alguien que hizo esto con decenas de profesionales: detalles concretos que solo conoce quien está adentro (lo que hizo, lo que le respondieron, cuánto lleva así), nunca frases genéricas que podría decir cualquiera.",
-"Describe la situación del negocio, nunca un atributo personal sensible del lector (salud, finanzas personales, edad u otros): lo exigen las políticas de Meta."].map(function(r,i){return (i+1)+". "+r}).join("\n");
+"En positivo: di lo que sí es, no lo que no es.",
+"Escribe como alguien que hizo esto con decenas de clientes: detalles concretos que solo conoce quien está adentro, nunca frases genéricas.",
+"Describe la situación del negocio, nunca un atributo personal sensible del lector (salud, finanzas personales, edad u otros): lo exigen las políticas de Meta.",
+"No inventes cifras, nombres, resultados ni plazos que no estén en el brief."].map(function(r,i){return (i+1)+". "+r}).join("\n");
+function briefTxt(b){var L=["MARCA: "+b.marca,"CLIENTE IDEAL: "+b.cliente,"CÓMO HABLA EL CLIENTE: "+(b.palabras||"(no indicado)"),"PROMESA Y QUÉ INCLUYE: "+b.promesa,"AUTORIDAD Y PRUEBA: "+b.prueba,"DESTINO DEL CLIC: "+b.destino,"ESCASEZ REAL: "+(b.escasez||"(no hay: no inventes escasez)"),"CREENCIAS EQUIVOCADAS CONOCIDAS: "+(b.creencias||"(no indicadas)")];
+  if(b.prohibidas)L.push("PALABRAS PROHIBIDAS EXTRA: "+b.prohibidas);return L.join("\n")}
 
-/* chequeo local, sin IA */
-var EMOJI=/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2705}\u{274C}]/u;
-function words(s){return (s||"").trim().split(/\s+/).filter(Boolean).length}
-function firstSentence(t){var m=String(t||"").trim().match(/^[^.!?…\n]+[.!?…]?/);return m?m[0]:""}
-function checks(ad){var b=state.brief||{},all=[ad.pantalla,ad.titulo,ad.guion,ad.corto,ad.texto,ad.titular].map(function(x){return x||""}).join("\n");
-  var extra=(b.prohibidas||"").split(",").map(function(x){return x.trim().toLowerCase()}).filter(Boolean);
-  var w=words(ad.guion),wc=words(ad.corto),wp=words(ad.pantalla),f1=words(firstSentence(ad.guion));
-  var linea1=((ad.texto||"").split("\n").filter(function(l){return l.trim()})[0]||"");
-  var lines=(ad.texto||"").split("\n").filter(function(l){return l.trim()}).length;
-  var tail=(ad.guion||"").slice(-260).toLowerCase(),low=all.toLowerCase(),tl=(ad.titular||"").length;
-  return [
-   {ok:wp>0&&wp<=8,t:"En pantalla: "+wp+" palabras"+(wp>8?" (máx. 8)":"")},
-   {ok:f1>0&&f1<=15,t:"Primera frase: "+f1+" palabras"+(f1>15?" (máx. 15)":"")},
-   {ok:w>=140&&w<=200,t:"Guion: "+w+" palabras ≈ "+Math.round(w/140*60)+" s"},
-   {ok:((ad.guion||"").toLowerCase().match(/video/g)||[]).length>=2,t:"Dos llamados al video"},
-   {ok:!(state.brief&&state.brief.escasez)||/lugar|cierr|cupo/i.test(ad.guion||""),t:"Escasez real"},
-   {ok:wc>=20&&wc<=45,t:"Versión corta: "+wc+" palabras ≈ "+Math.round(wc/140*60)+" s"},
-   {ok:linea1.length>0&&linea1.length<=125,t:"Línea 1 del texto: "+linea1.length+"/125"},
-   {ok:lines>=3&&lines<=6,t:"Texto de "+lines+" líneas"},
-   {ok:tl>0&&tl<=40,t:"Titular: "+tl+"/40"},
-   {ok:!/\bgente\b/i.test(all),t:"Sin «gente»"},
-   {ok:!/te cuento|te voy a contar|hoy te voy|descubre|en este video/i.test(all),t:"Sin gancho anunciado"},
-   {ok:!EMOJI.test(all)&&!/#\w/.test(all)&&!/^\s*[-•*]\s/m.test(all),t:"Sin emojis ni listas"},
-   {ok:!/(^|[^a-záéíóúñ])(tenés|sabés|querés|podés|hacés|decís|mirá|tocá|escribí|vos)(?=$|[^a-záéíóúñ])/i.test(all),t:"Sin voseo"},
-   {ok:/video/.test(tail)&&/video/.test((ad.corto||"").toLowerCase()),t:"Cierra con el video"},
-   {ok:!extra.some(function(x){return low.indexOf(x)>-1}),t:"Sin palabras prohibidas"}
-  ]}
-function chipsHTML(list){return list.map(function(c){return '<span class="ck '+(c.ok?"ok":"no")+'">'+(c.ok?"✓ ":"✕ ")+esc(c.t)+"</span>"}).join("")}
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+/* ═════════ limpieza automática (sin IA) ═════════ */
+var VOSEO=[["tenés","tienes"],["sabés","sabes"],["querés","quieres"],["podés","puedes"],["hacés","haces"],["decís","dices"],["sos","eres"],["mirá","mira"],["tocá","toca"],["escribí","escribe"],["vení","ven"],["fijate","fíjate"],["animate","anímate"],["necesitás","necesitas"],["empezá","empieza"],["agendá","agenda"],["entrá","entra"],["contame","cuéntame"],["dejá","deja"],["pensá","piensa"],["vos","tú"]];
+var EMOJI=/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2705}\u{274C}\u{FE0F}]/gu;
+function clean(s){s=String(s==null?"":s);
+  VOSEO.forEach(function(p){s=s.replace(new RegExp("(^|[^a-záéíóúñü])("+p[0]+")(?=$|[^a-záéíóúñü])","gi"),function(m,a,w){var r=p[1];if(w[0]===w[0].toUpperCase())r=r[0].toUpperCase()+r.slice(1);return a+r})});
+  s=s.replace(/\b(la|La) gente\b/g,function(m,a){return (a==="La"?"Las":"las")+" personas"}).replace(/\bgente\b/g,"personas").replace(/\bGente\b/g,"Personas");
+  s=s.replace(EMOJI,"").replace(/(^|\s)#[\wáéíóúñ]+/g,"").replace(/^\s*[-•*]\s+/gm,"").replace(/!+/g,".").replace(/¡/g,"").replace(/\.\.\./g,"…").replace(/[ \t]+/g," ").replace(/ +\n/g,"\n").replace(/\.\./g,".");
+  return s.trim()}
+function cleanLines(v){var arr=Array.isArray(v)?v:String(v||"").split(/\n+/);return arr.map(clean).filter(Boolean)}
 
-/* copiar */
-document.addEventListener("click",function(e){var b=e.target.closest(".copy");if(!b)return;
-  var el=document.getElementById(b.dataset.for);if(!el)return;var txt=el.textContent;
-  var done=function(){var o=b.textContent;b.textContent="Copiado";setTimeout(function(){b.textContent=o},1400)};
-  try{navigator.clipboard.writeText(txt).then(done,function(){sel(el)})}catch(err){sel(el)}});
-function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+/* ═════════ controles ═════════ */
+var NW={1:"un|uno|una",2:"dos",3:"tres",4:"cuatro",5:"cinco",6:"seis",7:"siete",8:"ocho",9:"nueve",10:"diez",11:"once",12:"doce",13:"trece",14:"catorce",15:"quince",16:"dieciséis",17:"diecisiete",18:"dieciocho",19:"diecinueve",20:"veinte",21:"veintiuno|veintiún",22:"veintidós",24:"veinticuatro",25:"veinticinco",30:"treinta",40:"cuarenta",45:"cuarenta y cinco",50:"cincuenta",60:"sesenta",70:"setenta",80:"ochenta",90:"noventa",100:"cien"};
+var MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function nums(s){return (String(s||"").match(/\d+/g)||[]).map(Number).filter(function(n){return n>0&&n<=100})}
+function hasNum(t,n){t=String(t||"").toLowerCase();if(new RegExp("(^|\\D)"+n+"(\\D|$)").test(t))return true;var w=NW[n];return !!w&&new RegExp("(^|[^a-záéíóúñ])("+w+")(?=$|[^a-záéíóúñ])").test(t)}
+function meses(s){var t=String(s||"").toLowerCase();return MESES.filter(function(m){return t.indexOf(m)>-1})}
+function firstSentence(t){var m=String(t||"").trim().match(/^[^.?…\n]+[.?…]?/);return m?m[0]:""}
+var RX_ANUNCIA=/te cuento|te voy a contar|hoy te voy|descubre|en este video|presta atención|quédate hasta el final/i;
+var RX_POBREZA=/no (me|te|le) alcanza|fin de mes|falta de (dinero|plata)|te falta (dinero|plata)|deudas|pagar las cuentas|ganas poco|no llegas/i;
+var RX_VOSEO=/(^|[^a-záéíóúñ])(tenés|sabés|querés|podés|hacés|decís|sos|mirá|tocá|escribí|vos)(?=$|[^a-záéíóúñ])/i;
+function prohibidas(){return (state.brief.prohibidas||"").split(",").map(function(x){return x.trim().toLowerCase()}).filter(Boolean)}
+function commonChecks(all,anuncia){var L=[],low=all.toLowerCase(),pro=prohibidas(),hit=pro.filter(function(x){return low.indexOf(x)>-1});
+  L.push({ok:!/\bgente\b/i.test(all),t:"Sin «gente»",fix:"Cambia «gente» por «personas» o el término del cliente."});
+  if(anuncia)L.push({ok:!RX_ANUNCIA.test(all),t:"Arranca directo, sin anunciar",fix:"Quita frases que anuncian lo que viene («te cuento», «en este video», «descubre»)."});
+  L.push({ok:!RX_VOSEO.test(all),t:"Castellano neutro, sin voseo",fix:"Pasa todo a «tú» neutro."});
+  L.push({ok:!RX_POBREZA.test(all),t:"Sin señales de falta de dinero",fix:"Quita toda referencia a que le falta dinero: el obstáculo es lo que le cuesta crecer."});
+  L.push({ok:!hit.length,t:"Sin palabras prohibidas",fix:"Quita estas palabras: "+hit.join(", ")+"."});
+  return L}
+var OPEN=["gancho","obstaculo","error","solucion"],CLOSE=["autoridad","sistema","cta1","exclusividad","escasez","cta2"],ALLP=OPEN.concat(CLOSE);
+function wOpen(a){return OPEN.reduce(function(n,k){return n+words(a[k])},0)}
+function wClose(a){return CLOSE.reduce(function(n,k){return n+words(a[k])},0)}
+function guion(a){return ALLP.map(function(k){return a[k]}).filter(function(x){return x&&String(x).trim()}).join("\n\n")}
+function escasezOk(t){var b=state.brief;if(!b.escasez)return !/\b(lugares|cupos)\b/i.test(t);
+  return nums(b.escasez).every(function(n){return hasNum(t,n)})&&meses(b.escasez).every(function(m){return t.toLowerCase().indexOf(m)>-1})}
+function autoridadOk(t){var n=nums(state.brief.prueba);return !n.length||n.some(function(x){return hasNum(t,x)})}
+function checksCierre(c){var b=state.brief,cw=wClose(c),all=CLOSE.map(function(k){return c[k]||""}).join("\n");
+  var vac=CLOSE.filter(function(k){return k==="escasez"?(b.escasez&&!String(c[k]||"").trim()):!String(c[k]||"").trim()});
+  var L=[{ok:!vac.length,t:"Cierre completo (partes 5 a 10)",fix:"Completa: "+vac.join(", ")+"."},
+   {ok:/video/i.test(c.cta1||"")&&/video/i.test(c.cta2||""),t:"Los dos llamados nombran el video",fix:"cta1 y cta2 tienen que invitar a mirar el video, con la palabra «video»."},
+   {ok:escasezOk(c.escasez||""),t:b.escasez?"Escasez exacta del brief":"Sin escasez inventada",fix:b.escasez?"La escasez tiene que decir exactamente esto del brief, con los mismos números y fechas: «"+b.escasez+"».":"El brief no trae escasez: deja escasez vacía y no menciones lugares ni cupos."},
+   {ok:autoridadOk(c.autoridad||""),t:"Autoridad con tus números reales",fix:"La autoridad tiene que usar los números de AUTORIDAD Y PRUEBA del brief: «"+b.prueba+"»."},
+   {ok:cw>=50&&cw<=110,t:"Cierre de "+cw+" palabras",fix:"El cierre tiene "+cw+" palabras: déjalo entre 65 y 95."}];
+  return L.concat(commonChecks(all,false))}
+function checksAd(a){var b=state.brief,ow=wOpen(a),cw=wClose(a),w=ow+cw,all=[guion(a),a.pantalla,a.corto,(a.texto||[]).join("\n"),a.titular].join("\n");
+  var lo=Math.max(45,140-cw),hi=200-cw,f1=words(firstSentence(a.gancho)),gw=words(a.gancho),wp=words(a.pantalla),wc=words(a.corto);
+  var tx=a.texto||[],l1=(tx[0]||"").length,last=tx[tx.length-1]||"",tl=(a.titular||"").length;
+  var vac=ALLP.filter(function(k){return k==="escasez"?(b.escasez&&!String(a[k]||"").trim()):!String(a[k]||"").trim()});
+  var L=[{ok:!vac.length,t:"Estructura completa: las 10 partes",fix:"Completa las partes vacías: "+vac.join(", ")+"."},
+   {ok:f1>0&&f1<=15&&gw<=24,t:"Gancho: primera frase de "+f1+" palabras",fix:"El gancho tiene que juntar avance y obstáculo en una primera frase de máximo 15 palabras (hoy tiene "+f1+"), y no pasar de 22 palabras en total."},
+   {ok:w>=140&&w<=200,t:"Guion de "+w+" palabras ≈ "+Math.round(w/140*60)+" s",fix:"Las partes 1 a 4 suman "+ow+" palabras: tienen que sumar entre "+lo+" y "+hi+". Ajusta obstaculo, error y solucion."},
+   {ok:/video/i.test(a.cta1||"")&&/video/i.test(a.cta2||""),t:"Dos llamados al video"},
+   {ok:escasezOk((a.escasez||"")+" "+(a.corto||"")+" "+tx.join(" ")),t:b.escasez?"Escasez exacta del brief":"Sin escasez inventada",fix:b.escasez?"La escasez del corto y del texto tiene que usar los mismos números y fechas del brief: «"+b.escasez+"».":"No menciones lugares ni cupos: el brief no trae escasez."},
+   {ok:wp>0&&wp<=8,t:"En pantalla: "+wp+" palabras",fix:"pantalla tiene "+wp+" palabras: máximo 8, con el avance y el obstáculo."},
+   {ok:wc>=20&&wc<=45&&/video/i.test(a.corto||""),t:"Versión de 15 s: "+wc+" palabras",fix:"corto tiene "+wc+" palabras: déjalo entre 25 y 40 y termina invitando a mirar el video."},
+   {ok:tx.length>=3&&tx.length<=5&&l1>0&&l1<=125&&/video/i.test(last),t:"Texto: "+tx.length+" líneas, la primera de "+l1+" caracteres",fix:"texto: 4 líneas; la primera de máximo 110 caracteres (hoy "+l1+") y la última invita a mirar el video."},
+   {ok:tl>0&&tl<=40,t:"Titular: "+tl+" de 40 caracteres",fix:"titular tiene "+tl+" caracteres: máximo 35."}];
+  return L.concat(commonChecks(all,true))}
+function checksVsl(secs){var b=state.brief,w=secs.reduce(function(n,s){return n+words(s.texto)},0),all=secs.map(function(s){return s.texto}).join("\n");
+  var s7=(secs[6]||{}).texto||"",s8=(secs[7]||{}).texto||"";
+  var L=[{ok:secs.length===8&&secs.every(function(s){return words(s.texto)>=25}),t:"Las 8 partes del VSL"},
+   {ok:w>=650&&w<=1450,t:w+" palabras ≈ "+Math.round(w/140)+" minutos"},
+   {ok:!b.escasez||(escasezOk(s7)&&escasezOk(s8)),t:b.escasez?"Escasez exacta en «Para quién es» y en el llamado":"Sin escasez inventada"},
+   {ok:/calendario|agenda/i.test(s8),t:"El llamado lleva al calendario"}];
+  return L.concat(commonChecks(all,false))}
+function fails(L){return L.filter(function(c){return !c.ok})}
 
-/* render momentos */
-function renderMom(){var box=$("momentos");box.innerHTML="";
-  if(!state.momentos||!state.momentos.length){box.innerHTML='<div class="empty">Todavía no hay momentos. Completa el paso 1 y toca «Buscar momentos».</div>';return}
-  state.momentos.forEach(function(m,i){var b=document.createElement("button");b.type="button";b.className="mcard";b.setAttribute("aria-pressed",String(!!m.sel));
-    b.innerHTML='<span class="tick" aria-hidden="true"></span><span style="min-width:0"><span class="esc">'+esc(m.escena)+'</span><dl><dt>Obstáculo</dt><dd>'+esc(m.siente)+'</dd><dt>Creen</dt><dd>'+esc(m.creencia)+'</dd><dt>Se resuelve</dt><dd>'+esc(m.verdad)+'</dd><dt>Filtra</dt><dd>'+esc(m.filtro)+'</dd></dl></span>';
-    b.addEventListener("click",function(){var n=state.momentos.filter(function(x){return x.sel}).length;
-      if(!m.sel&&n>=3){$("st-momentos").textContent="Máximo 3 por tanda: desmarca uno antes.";return}
-      m.sel=!m.sel;$("st-momentos").textContent="";save();renderMom()});
-    box.appendChild(b)})}
-
-/* render anuncios */
-function renderAds(){var box=$("anuncios");box.innerHTML="";
-  if(!state.anuncios||!state.anuncios.length){box.innerHTML='<div class="empty">Todavía no hay anuncios. Elige momentos en el paso 2 y toca «Escribir los anuncios».</div>';return}
-  state.anuncios.forEach(function(a,i){var d=document.createElement("article");d.className="ad";
-    d.innerHTML='<div class="hd"><span class="badge">Anuncio '+(i+1)+(state.ejemplo?" · ejemplo":"")+'</span></div>'+
-     adBlocks(a,"a"+i)+
-     '<div class="checks">'+chipsHTML(checks(a))+'</div>';
-    box.appendChild(d)})}
-function adBlocks(a,p){return blk("En pantalla · primeros 3 segundos",p+"p",a.pantalla,"titulo")+blk("Gancho · la primera frase",p+"t",a.titulo)+blk("Guion completo · a cámara",p+"g",a.guion)+blk("Versión corta · 15 segundos",p+"c",a.corto)+blk("Texto principal",p+"x",a.texto)+blk("Titular · máximo 40",p+"h",a.titular)}
-function blk(lab,id,txt,cls){return '<div class="blk '+(cls||"")+'"><div class="lab"><b>'+lab+'</b><button class="copy" type="button" data-for="'+id+'">Copiar</button></div><div class="txt" id="'+id+'">'+esc(txt)+'</div></div>'}
-
-/* Claude */
-var samplePromise=(window.claude&&window.claude.use)?window.claude.use("sample"):Promise.resolve(null);
-var MSG={not_granted:"Sin permiso para usar Claude en esta página. Actívalo desde el menú de permisos del artifact.",sampling_disabled:"Claude no está disponible para esta cuenta.",rate_limited:"Muchos pedidos seguidos o llegaste a tu límite de uso. Prueba en unos minutos.",session_expired:"Tu sesión venció: vuelve a iniciar sesión.",refused:"Claude no quiso responder a este pedido. Cambia el texto y prueba otra vez.",invalid_json:"La respuesta vino incompleta. Toca el botón otra vez.",empty_completion:"No llegó respuesta. Prueba otra vez.",prompt_too_large:"El texto es demasiado largo. Acórtalo."};
-function errMsg(e){return MSG[e&&e.code]||"Se cortó la conexión. Toca el botón otra vez."}
-function parseJson(t){t=String(t||"");try{return JSON.parse(t)}catch(e){}
+/* ═════════ conexión con la IA ═════════ */
+var samplePromise=(window.claude&&window.claude.use)?window.claude.use("sample").catch(function(){return null}):Promise.resolve(null);
+var MSG={not_granted:"Esta página no tiene permiso para usar Claude. Actívalo en el menú de permisos.",sampling_disabled:"Claude no está disponible para esta cuenta.",rate_limited:"Hubo muchos pedidos seguidos. Espera un minuto y toca «Intentar otra vez».",session_expired:"Tu sesión venció. Vuelve a entrar y toca «Intentar otra vez».",refused:"La IA no quiso responder este pedido. Revisa el texto del paso 1.",invalid_json:"La respuesta llegó incompleta.",empty_completion:"No llegó respuesta.",prompt_too_large:"El texto del paso 1 es demasiado largo. Acórtalo.",timeout:"La IA tardó demasiado.",offline:"No hay conexión a internet.",no_ai:"Abre esta página desde la app o desde Claude para generar."};
+function errMsg(e){if(e&&e.code&&MSG[e.code])return MSG[e.code];if(e&&e.message&&e.code!=="upstream_error")return e.message;return "Se cortó la conexión con la IA."}
+function parseJson(t){if(t&&typeof t==="object")return t;t=String(t||"");try{return JSON.parse(t)}catch(e){}
   var m=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(m){try{return JSON.parse(m[1])}catch(e){}}
   var i=t.indexOf("{"),j=t.lastIndexOf("}");if(i>-1&&j>i){try{return JSON.parse(t.slice(i,j+1))}catch(e){}}
   throw {code:"invalid_json"}}
-/* Fuera de Claude (por ejemplo dentro de la app de TCD) usa el servidor de IA de la app. */
-async function apiJson(prompt,signal){var uid;try{uid=JSON.parse(localStorage.getItem("tcd_profile")||"{}").id}catch(e){}
-  var res=await fetch("/api/ai/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
-    body:JSON.stringify({prompt:prompt+"\n\nResponde SOLO con el JSON, sin texto antes ni después.",tarea:"guion",userId:uid||undefined})});
+async function apiJson(prompt,signal){var uid;try{uid=JSON.parse(lsGet("tcd_profile")||"{}").id}catch(e){}
+  var res;try{res=await fetch("/api/ai/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
+    body:JSON.stringify({prompt:prompt+"\n\nResponde SOLO con el JSON, sin texto antes ni después.",tarea:"guion",userId:uid||undefined})})}
+  catch(e){if(e&&e.name==="AbortError")throw e;throw {code:navigator.onLine===false?"offline":"upstream_error"}}
   if(!res.ok){var msg="";try{msg=(await res.json()).message||""}catch(e){}
-    throw {code:res.status===429?"rate_limited":"upstream_error",message:msg}}
-  var d=await res.json();return parseJson(d&&d.text)}
-async function ask(prompt,stEl,btns,stopBtn,label){
-  var sample=await samplePromise;var web=/^https?:$/.test(location.protocol);
-  if(!sample&&!web){stEl.className="status err";stEl.textContent="Abre esta página desde la app o desde Claude para generar.";return null}
-  var ctl=new AbortController();stopBtn.hidden=false;stopBtn.onclick=function(){ctl.abort()};
-  var pre=label?label+" · ":"";
-  btns.forEach(function(b){b.disabled=true});stEl.className="status";stEl.textContent=pre+"Pensando…";
-  var t0=Date.now(),iv=setInterval(function(){stEl.textContent=pre+"Pensando… "+Math.round((Date.now()-t0)/1000)+" s"},1000);
-  try{var r=sample?await sample.json(prompt,{signal:ctl.signal,modelTier:"complex",cache:false}):await apiJson(prompt,ctl.signal);stEl.textContent="";return r}
-  catch(e){if((e&&e.code==="cancelled")||(e&&e.name==="AbortError")){stEl.textContent="Detenido."}else{stEl.className="status err";stEl.textContent=(e&&e.message&&e.code!=="upstream_error"?e.message:"")||errMsg(e)}return null}
-  finally{clearInterval(iv);stopBtn.hidden=true;btns.forEach(function(b){b.disabled=false})}}
+    throw {code:res.status===429?"rate_limited":(res.status===401||res.status===403)?"session_expired":"upstream_error",message:msg}}
+  var d;try{d=await res.json()}catch(e){throw {code:"invalid_json"}}
+  if(!d||!d.text)throw {code:"empty_completion"};return parseJson(d.text)}
+var RUN=null;
+var RETRY={invalid_json:1,upstream_error:1,timeout:1,empty_completion:1,rate_limited:1,offline:1};
+async function ai(prompt){var sample=await samplePromise,web=/^https?:$/.test(location.protocol);
+  if(!sample&&!web)throw {code:"no_ai"};
+  for(var att=0;att<3;att++){
+    if(RUN&&RUN.stop)throw {code:"cancelled"};
+    var ctl=new AbortController(),timedOut=false,t=setTimeout(function(){timedOut=true;ctl.abort()},window.__AQA_TMO||85000);
+    if(RUN)RUN.ctl=ctl;
+    try{var r=sample?await sample.json(prompt,{signal:ctl.signal,modelTier:"complex",cache:false}):await apiJson(prompt,ctl.signal);clearTimeout(t);return parseJson(r)}
+    catch(e){clearTimeout(t);
+      if(RUN&&RUN.stop)throw {code:"cancelled"};
+      if(timedOut)e={code:"timeout"};else if(e&&(e.name==="AbortError"||e.code==="cancelled"))throw {code:"cancelled"};
+      if(att<2&&e&&RETRY[e.code]){await sleep(e.code==="rate_limited"?8000:1500*(att+1));continue}
+      throw e}}}
 
-async function buscarMomentos(){
-  state.brief=readBrief();save();
-  if(!state.brief.cliente||!state.brief.promesa){$("st-cliente").className="status err";$("st-cliente").textContent="Completa al menos «Cliente ideal» y «Qué cambia con tu oferta».";return}
-  show("momentos");
-  var previos=(state.momentos||[]).map(function(m){return "- "+m.escena}).join("\n");
+/* ═════════ panel de progreso ═════════ */
+function startRun(boxId,title,labels){if(RUN)return null;
+  RUN={stop:false,ctl:null,t0:Date.now(),steps:labels.map(function(l){return {l:l,s:"wait",sub:""}}),title:title,box:boxId};
+  setBusy(true);drawRun();RUN.iv=setInterval(drawSecs,1000);return RUN}
+function step(i,s,sub){if(!RUN)return;RUN.steps[i].s=s;if(sub!=null)RUN.steps[i].sub=sub;drawRun()}
+function drawSecs(){var e=document.querySelector(".prog .secs");if(e&&RUN)e.textContent=Math.round((Date.now()-RUN.t0)/1000)+" s"}
+function drawRun(){if(!RUN)return;var box=$(RUN.box);if(!box)return;
+  var done=RUN.steps.filter(function(s){return s.s==="ok"||s.s==="warn"}).length,pct=Math.round((done+.35*RUN.steps.filter(function(s){return s.s==="run"}).length)/RUN.steps.length*100);
+  box.innerHTML='<div class="card prog" role="status" aria-live="polite"><div class="ph"><b>'+esc(RUN.title)+'</b><span class="secs">'+Math.round((Date.now()-RUN.t0)/1000)+' s</span></div>'+
+   '<div class="bar"><i style="width:'+pct+'%"></i></div><ul>'+RUN.steps.map(function(s){
+     var ic=s.s==="ok"?ICO.check:s.s==="warn"?ICO.warn:s.s==="err"?ICO.x:"";
+     return '<li class="'+s.s+'"><span class="st">'+ic+'</span><span><span class="lbl">'+esc(s.l)+'</span>'+(s.sub?'<span class="sub">'+esc(s.sub)+'</span>':"")+'</span></li>'}).join("")+
+   '</ul><div class="rowbtns"><button class="ghost" type="button" id="stopRun">Detener</button></div><p class="note">Puede tardar entre 20 segundos y 2 minutos. Cada pieza se revisa sola y, si algo falla, se corrige antes de mostrártela.</p></div>'}
+function endRun(){if(!RUN)return;clearInterval(RUN.iv);var b=$(RUN.box);RUN=null;setBusy(false);if(b)b.innerHTML=""}
+document.addEventListener("click",function(e){if(e.target.closest("#stopRun")&&RUN){RUN.stop=true;if(RUN.ctl)RUN.ctl.abort();e.target.closest("#stopRun").disabled=true;e.target.closest("#stopRun").textContent="Deteniendo…"}});
+function setBusy(on){document.querySelectorAll("[data-run]").forEach(function(b){b.disabled=on})}
+var LAST=null;
+function showErr(boxId,e,retry){var box=$(boxId);if(!box)return;
+  if(e&&e.code==="cancelled"){box.innerHTML='<div class="banner">Detenido. Lo que ya estaba listo quedó guardado.</div>';return}
+  LAST=retry;box.innerHTML='<div class="errbox" role="alert">'+esc(errMsg(e))+'<div class="row"><button class="btn" type="button" data-run id="retry">'+ICO.redo+' Intentar otra vez</button></div></div>'}
+document.addEventListener("click",function(e){if(e.target.closest("#retry")&&LAST&&!RUN){var f=LAST;LAST=null;f()}});
+
+/* ═════════ copiar ═════════ */
+function copyText(txt,btn){var ok=function(){if(!btn)return;var o=btn.innerHTML;btn.classList.add("done");btn.innerHTML=ICO.check+" Copiado";setTimeout(function(){btn.classList.remove("done");btn.innerHTML=o},1600)};
+  var fb=function(){var ta=document.createElement("textarea");ta.value=txt;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){}document.body.removeChild(ta)};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,fb)}else fb()}catch(e){fb()}}
+var CLIP={};
+document.addEventListener("click",function(e){var b=e.target.closest("[data-copy]");if(!b)return;var t=CLIP[b.dataset.copy];if(t!=null)copyText(t,b)});
+function copyBtn(id,txt,label){CLIP[id]=txt;return '<button class="copy" type="button" data-copy="'+id+'">'+ICO.copy+" "+(label||"Copiar")+"</button>"}
+
+/* ═════════ navegación ═════════ */
+var SCREENS=["metodo","cliente","momentos","anuncios","vsl","revisar"];
+function go(s,keepScroll){if(SCREENS.indexOf(s)<0)s="metodo";state.screen=s;save();render();if(!keepScroll)window.scrollTo(0,0);
+  var h=document.querySelector("#main h1, #main h2");if(h){h.setAttribute("tabindex","-1");try{h.focus({preventScroll:true})}catch(e){}}}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-nav]");if(b){if(b.dataset.nav==="cliente"&&state.screen!=="cliente")state.page=0;go(b.dataset.nav)}});
+function briefOk(){var b=state.brief;return !!(b.marca&&b.cliente&&b.promesa&&b.prueba&&b.destino)}
+function sel(){return state.momentos.filter(function(m){return m.sel})}
+function drawStepper(){var done={cliente:briefOk(),momentos:sel().length>0,anuncios:state.anuncios.length>0,vsl:state.vsl.length>0};
+  ["cliente","momentos","anuncios","vsl"].forEach(function(k){var li=$("st-"+k);li.className=(state.screen===k?"cur ":"")+(done[k]&&state.screen!==k?"done":"");
+    li.querySelector("button").setAttribute("aria-current",state.screen===k?"step":"false");
+    li.querySelector(".dot").innerHTML=done[k]&&state.screen!==k?ICO.check:String(["cliente","momentos","anuncios","vsl"].indexOf(k)+1)});
+  $("hl-metodo").setAttribute("aria-current",String(state.screen==="metodo"));$("hl-revisar").setAttribute("aria-current",String(state.screen==="revisar"))}
+function render(){drawStepper();var m=$("main");CLIP={};
+  m.innerHTML="";var s=document.createElement("section");s.className="screen";s.id="s-"+state.screen;m.appendChild(s);
+  ({metodo:vMetodo,cliente:vCliente,momentos:vMomentos,anuncios:vAnuncios,vsl:vVsl,revisar:vRevisar})[state.screen](s);
+  if(RUN)drawRun();setBusy(!!RUN)}
+
+/* ═════════ pantalla: método ═════════ */
+var FORM=[{n:1,t:"Avance",d:"El elogio que califica: algo que tu cliente ideal ya logró o ya decidió.",g:1},{n:2,t:"Obstáculo",d:"Lo que le aparece justo ahí. El gancho junta 1 y 2 en la primera frase.",g:1},{n:3,t:"Error principal",d:"Lo que casi todos hacen para resolverlo, sin culparlo.",g:1},{n:4,t:"Solución real",d:"El camino que sí funciona, en positivo.",g:1},{n:5,t:"Autoridad",d:"Años y personas acompañadas. Tus números reales.",g:2},{n:6,t:"Sistema",d:"Qué incluye, en una frase. El cómo lo cuenta el video.",g:2},{n:7,t:"Llamado al video",d:"Toca el botón y mira el video completo.",g:3},{n:8,t:"Exclusividad",d:"Para quién es: conducta, resultados y decisión de invertir.",g:3},{n:9,t:"Escasez",d:"Lugares y fecha de cierre reales.",g:3},{n:10,t:"Llamado final",d:"Mira el video antes de que cierre.",g:3}];
+var GRP={1:"Atrae · cambia en cada anuncio",2:"Respalda",3:"Cierra · igual en los 3 anuncios"};
+function vMetodo(s){var last=0;
+  s.innerHTML='<p class="kick">Cómo funciona</p><h1>Anuncios que traen clientes que invierten, no curiosos.</h1>'+
+  '<p class="lead">En 4 pasos sales con 3 anuncios a cámara y tu VSL, con la estructura que agenda. Cada guion se revisa solo antes de mostrártelo.</p>'+
+  '<div class="card ej"><span class="kick" style="font-size:15px">Ejemplo real que agenda</span><p class="q">«Te ascendieron y por primera vez en años no sabes si vas a estar a la altura.»</p><div class="chips"><span class="chip">Avance: te ascendieron</span><span class="chip">Obstáculo: estar a la altura</span></div><p class="note">El dolor atrae a quien está hundido. Un avance con un obstáculo atrae a quien ya está creciendo: ese decide, invierte y se compromete.</p></div>'+
+  '<h2 style="margin-top:34px">Las 10 partes de cada anuncio</h2><ol class="rail">'+FORM.map(function(f){var h="";if(f.g!==last){last=f.g;h='<li class="gh" style="display:block;padding:0"><span class="grp g'+f.g+'">'+GRP[f.g]+'</span></li>'}
+    return h+'<li><span class="num g'+f.g+'">'+f.n+'</span><span><b>'+f.t+'</b><span class="d">'+f.d+'</span></span></li>'}).join("")+'</ol>'+
+  '<details class="more"><summary>Lo que trae curiosos</summary><div class="body"><ul><li>Mostrar dolor o miseria: trae a quien no puede invertir.</li><li>Explicar tu método o tus razones.</li><li>Contar tu historia antes de que el cliente se sienta nombrado.</li><li>Un testimonio en frío: lo mira cualquiera.</li><li>Textos largos con listas, emojis o citas.</li></ul></div></details>'+
+  '<details class="more"><summary>Cómo se prueba</summary><div class="body"><ol><li>Un solo conjunto en frío con los 3 anuncios. Más conjuntos reparten la plata y Meta no termina de aprender.</li><li>Déjalos correr al menos 4 días sin tocarlos.</li><li>Apaga el de CTR menor a 1,5 % o el de visita más cara. Las agendas confirman al ganador.</li><li>Al ganador, grábale 3 variantes del mismo momento.</li></ol></div></details>'+
+  '<details class="more"><summary>De dónde sale cada medida</summary><div class="body"><ul><li><b>Texto principal de 125 caracteres y titular de 40</b>: lo que se ve antes de cortarse. <a href="https://www.facebook.com/business/help/908491205873167" target="_blank" rel="noopener">Meta, especificaciones</a>.</li><li><b>Lo importante en los primeros 3 segundos, con texto en pantalla</b>: la mayoría mira sin sonido. <a href="https://www.facebook.com/business/help/188534925073536" target="_blank" rel="noopener">Meta, buenas prácticas de video</a>.</li><li><b>Versión de 15 segundos</b>: Meta dice que los videos cortos rinden mejor en el feed. <a href="https://www.facebook.com/business/help/188534925073536" target="_blank" rel="noopener">Meta</a>.</li><li><b>Pruebas de 4 días y pocos conjuntos</b>: <a href="https://www.facebook.com/business/help/269269737396981" target="_blank" rel="noopener">Meta, aprendizaje limitado</a>.</li><li><b>Estimaciones propias</b>: 140 palabras por minuto y CTR de 1,5 % como piso.</li></ul></div></details>'+
+  '<div class="dock"><div class="in"><button class="btn" type="button" data-nav="cliente">Empezar '+ICO.arrow+'</button></div></div>'}
+
+/* ═════════ pantalla: cliente ═════════ */
+var FIELDS=[
+ {k:"marca",p:0,l:"¿Quién firma los anuncios?",h:"Tu nombre y tu marca.",req:1,i:1},
+ {k:"cliente",p:0,l:"¿Quién es tu cliente ideal?",h:"Qué hace hoy y cómo trabaja: la conducta, no solo la profesión.",req:1},
+ {k:"palabras",p:0,l:"¿Cómo habla tu cliente?",h:"Opcional. Palabras y frases que usa de verdad.",req:0},
+ {k:"promesa",p:1,l:"¿Qué cambia con tu oferta?",h:"La promesa en concreto y qué incluye.",req:1},
+ {k:"prueba",p:1,l:"¿A cuántas personas ya ayudaste?",h:"Con números reales: personas, años, países.",req:1,i:1},
+ {k:"destino",p:1,l:"¿Qué ve al tocar el botón?",h:"Por ejemplo: un video donde explicas el método.",req:1,i:1},
+ {k:"escasez",p:2,l:"¿Hay lugares limitados?",h:"Lugares que quedan y fecha de cierre. Solo si es verdad; si no, déjalo vacío.",req:0,i:1},
+ {k:"creencias",p:2,l:"¿Qué cree tu cliente que lo frena?",h:"Opcional. Lo que escuchas seguido en tus llamadas.",req:0},
+ {k:"prohibidas",p:2,l:"¿Palabras que nunca usas?",h:"Opcional, separadas por coma.",req:0,i:1},
+ {k:"historia",p:3,l:"Tu historia, en pocas líneas",h:"Opcional, para el VSL: por qué haces esto.",req:0},
+ {k:"garantia",p:3,l:"Cómo trabajan y tu garantía",h:"Opcional, para el VSL: duración, formato, garantía y la parte del cliente.",req:0}];
+var PAGES=["Tu cliente","Tu oferta","Filtros reales","Para el VSL"];
+var wipeArmed=false;
+function vCliente(s){var p=Math.max(0,Math.min(3,state.page||0)),fs=FIELDS.filter(function(f){return f.p===p});
+  s.innerHTML='<p class="kick">Paso 1 · '+PAGES[p]+' · '+(p+1)+' de 4</p><h2>'+["¿Para quién son los anuncios?","¿Qué le ofreces?","¿Qué filtra a los curiosos?","Datos para tu VSL"][p]+'</h2>'+
+   '<div class="pager" aria-hidden="true">'+PAGES.map(function(x,i){return '<span class="'+(i<=p?"on":"")+'"></span>'}).join("")+'</div>'+
+   (state.ejemplo&&p===0?'<div class="banner">Viene cargado con el ejemplo de Tu Clínica Digital. Cámbialo por tu cliente o toca «Empezar de cero».</div>':"")+
+   fs.map(function(f){return '<div class="field" id="fw-'+f.k+'"><label for="b-'+f.k+'">'+f.l+'</label><span class="h">'+f.h+'</span>'+
+     (f.i?'<input type="text" id="b-'+f.k+'" autocomplete="off">':'<textarea id="b-'+f.k+'"></textarea>')+'<span class="ferr">Completa este campo para seguir.</span></div>'}).join("")+
+   (p===0?'<div class="rowbtns" style="margin-top:22px"><button class="ghost danger" type="button" id="wipe">Empezar de cero</button></div>':"")+
+   '<div class="dock"><div class="in">'+(p>0?'<button class="ghost" type="button" id="prev" aria-label="Atrás">'+ICO.back+'</button>':"")+
+   (p<3?'<button class="btn" type="button" id="next">Siguiente '+ICO.arrow+'</button>':'<button class="btn" type="button" id="next" data-run>Buscar los momentos '+ICO.arrow+'</button>')+'</div>'+
+   (p===2?'<div style="text-align:center;margin-top:6px"><button class="link" type="button" id="skip">Saltar los datos del VSL y buscar los momentos</button></div>':"")+'</div>';
+  fs.forEach(function(f){var el=$("b-"+f.k);el.value=state.brief[f.k]||"";
+    el.addEventListener("input",function(){state.brief[f.k]=el.value;state.ejemplo=false;$("fw-"+f.k).classList.remove("err");save();drawStepper()})});
+  function valid(){var bad=fs.filter(function(f){return f.req&&!String(state.brief[f.k]||"").trim()});
+    bad.forEach(function(f){$("fw-"+f.k).classList.add("err")});if(bad.length){$("b-"+bad[0].k).focus();return false}return true}
+  $("next").addEventListener("click",function(){if(!valid())return;trimBrief();if(p<3){state.page=p+1;save();go("cliente")}else buscarMomentos()});
+  if($("prev"))$("prev").addEventListener("click",function(){state.page=p-1;save();go("cliente")});
+  if($("skip"))$("skip").addEventListener("click",function(){if(!valid())return;trimBrief();buscarMomentos()});
+  if($("wipe"))$("wipe").addEventListener("click",function(){var b=$("wipe");
+    if(!wipeArmed){wipeArmed=true;b.textContent="Toca otra vez para vaciar todo";setTimeout(function(){wipeArmed=false;if($("wipe"))$("wipe").textContent="Empezar de cero"},3500);return}
+    wipeArmed=false;state={v:6,brief:{marca:"",cliente:"",palabras:"",promesa:"",prueba:"",destino:"un video donde explico el método a detalle",escasez:"",creencias:"",prohibidas:"",historia:"",garantia:""},momentos:[],cierre:null,anuncios:[],vsl:[],ejemplo:false,screen:"cliente",page:0,adTab:0,view:"grabar"};save();go("cliente")})}
+function trimBrief(){for(var k in state.brief)state.brief[k]=String(state.brief[k]||"").trim();save()}
+
+/* ═════════ pantalla: momentos ═════════ */
+function vMomentos(s){var n=sel().length,max=Math.min(3,state.momentos.length);
+  s.innerHTML='<p class="kick">Paso 2</p><h2>Los 3 momentos más urgentes</h2>'+
+   '<p class="lead">Un momento es un avance de tu cliente más el obstáculo que le aparece justo ahí. Ya están marcados los 3 que más agendan. Cambia uno si quieres.</p>'+
+   '<div id="runbox"></div><div id="errbox"></div><div class="moms" id="moms"></div>'+
+   (state.momentos.length?'<div style="text-align:center;margin-top:14px"><button class="link" type="button" id="otros" data-run>Buscar otros momentos</button></div>':"")+
+   '<div class="dock"><div class="count" id="count">'+(state.momentos.length?"Elegiste "+n+" de "+max:"")+'</div><div class="in">'+
+   (state.momentos.length?'<button class="btn" type="button" id="write" data-run'+(n===max&&n>0?"":" disabled")+'>Escribir los '+max+' anuncios '+ICO.arrow+'</button>':'<button class="btn" type="button" id="buscar" data-run>Buscar los momentos '+ICO.arrow+'</button>')+'</div></div>';
+  var box=$("moms");
+  if(!state.momentos.length&&!RUN){box.innerHTML='<div class="empty">Todavía no hay momentos. Toca «Buscar los momentos».</div>'}
+  state.momentos.forEach(function(m,i){var b=document.createElement("button");b.type="button";b.className="mcard";b.setAttribute("data-run","");b.setAttribute("aria-pressed",String(!!m.sel));
+    b.innerHTML='<span class="tick" aria-hidden="true">'+ICO.check+'</span><span style="min-width:0"><span class="rank">Momento '+(i+1)+'</span><span class="esc">'+esc(m.escena)+'</span><span class="why"><b>Se resuelve:</b> '+esc(m.verdad)+'</span></span>';
+    b.addEventListener("click",function(){var k=sel().length;if(!m.sel&&k>=max){$("count").textContent="Ya tienes "+max+": desmarca uno primero.";$("count").style.color="var(--bad)";return}
+      m.sel=!m.sel;save();vMomentos(s);drawStepper()});box.appendChild(b)});
+  if($("write"))$("write").addEventListener("click",function(){escribir(false)});
+  if($("buscar"))$("buscar").addEventListener("click",buscarMomentos);
+  if($("otros"))$("otros").addEventListener("click",buscarMomentos)}
+
+async function buscarMomentos(){if(RUN)return;
+  if(!briefOk()){state.page=0;go("cliente");return}
+  go("momentos");
+  if(!startRun("runbox","Buscando los momentos de tu cliente",["Leer a tu cliente y buscar momentos"]))return;
+  var previos=state.momentos.map(function(m){return "- "+m.escena}).join("\n");
   var p="Eres estratega de anuncios en frío de Meta para ofertas high ticket que llevan a un VSL. Tu tarea: encontrar MOMENTOS.\n\n"+
-  "Un MOMENTO es un AVANCE positivo (un logro, una decisión tomada, algo que ya intentó) que solo vive alguien que encaja en el perfil, más el OBSTÁCULO concreto que aparece justo ahí. Atrae a quien ya está avanzando y puede invertir. Nunca es un dolor, una miseria ni una carencia: eso atrae clientes que no pueden pagar.\n"+
+  "Un MOMENTO es un AVANCE positivo (un logro, una decisión tomada, algo que ya intentó o invirtió) que solo vive alguien que encaja en el perfil, más el OBSTÁCULO concreto que aparece justo ahí. Atrae a quien ya está avanzando y puede invertir. Nunca es un dolor, una miseria ni una carencia.\n"+
   "Ejemplo que funciona: «Te ascendieron y por primera vez en años no sabes si vas a estar a la altura.»\n"+
-  "No sirven: dolores o quejas; hablar del método, del precio o de la solución; opiniones generales; la historia del vendedor; testimonios de terceros; escenas que vive cualquiera o un principiante.\n\n"+
+  "No sirven: dolores o quejas; hablar del método, del precio o de la solución; opiniones generales; la historia del vendedor; testimonios; escenas que vive cualquiera o un principiante.\n\n"+
   "BRIEF:\n"+briefTxt(state.brief)+"\n\n"+(previos?"Ya se propusieron estos, no los repitas:\n"+previos+"\n\n":"")+
-  "Escribe con las palabras del cliente, en castellano neutro con «tú», sin la palabra «gente» y sin señales de falta de dinero.\n"+
-  "Responde SOLO con JSON: {\"momentos\":[{\"escena\":\"frase de máximo 120 caracteres, en segunda persona: el avance y el obstáculo\",\"siente\":\"el obstáculo dicho como lo piensa él\",\"creencia\":\"lo que la mayoría cree que lo resuelve\",\"verdad\":\"lo que de verdad lo resuelve\",\"filtro\":\"por qué solo lo vive un cliente que puede invertir\"}]} con 8 momentos distintos (decisiones tomadas, logros, intentos previos, crecimiento, colegas, precio, publicidad, próximo paso).";
-  var r=await ask(p,$("st-momentos"),[$("go-anuncios"),$("otros"),$("go-momentos")],$("stop1"));
-  if(r&&Array.isArray(r.momentos)){state.momentos=r.momentos.filter(function(m){return m&&m.escena}).map(function(m){return {escena:String(m.escena),siente:String(m.siente||""),creencia:String(m.creencia||""),verdad:String(m.verdad||""),filtro:String(m.filtro||""),sel:false}});state.ejemplo=false;save();renderMom();$("ej-note").hidden=true}}
+  "REGLAS:\n"+REGLAS+"\n\n"+
+  "Devuelve 6 momentos distintos (decisiones tomadas, logros, intentos previos, inversión hecha, crecimiento, próximo paso), ORDENADOS del más urgente al menos urgente: primero los que vive alguien listo para invertir YA.\n"+
+  "Responde SOLO con JSON: {\"momentos\":[{\"escena\":\"máximo 110 caracteres, en segunda persona: el avance y el obstáculo en una frase\",\"siente\":\"el obstáculo como lo piensa él\",\"creencia\":\"lo que la mayoría cree que lo resuelve\",\"verdad\":\"lo que de verdad lo resuelve, en una frase\",\"filtro\":\"por qué solo lo vive un cliente que puede invertir\"}]}";
+  try{step(0,"run","");var r=await ai(p);
+    var list=(r&&Array.isArray(r.momentos)?r.momentos:[]).filter(function(m){return m&&m.escena}).map(function(m,i){return {escena:clean(m.escena),siente:clean(m.siente),creencia:clean(m.creencia),verdad:clean(m.verdad),filtro:clean(m.filtro),sel:i<3}});
+    if(!list.length)throw {code:"invalid_json"};
+    state.momentos=list;state.ejemplo=false;save();endRun();go("momentos")}
+  catch(e){endRun();go("momentos");showErr("errbox",e,buscarMomentos)}}
 
-async function escribir(){
-  var elegidos=(state.momentos||[]).filter(function(m){return m.sel});
-  if(!elegidos.length){$("st-momentos").className="status err";$("st-momentos").textContent="Elige al menos un momento.";return}
-  show("anuncios");
-  function mk(m){var lista="1. ESCENA: "+m.escena+" | SIENTE: "+m.siente+" | CREENCIA: "+m.creencia+" | VERDAD: "+m.verdad;
-  var p="Escribe UN anuncio en frío de Meta (video a cámara) para un VSL high ticket, para el momento indicado. Es parte de una campaña de 3 momentos distintos del mismo cliente ideal.\n\n"+
-  "ESTRUCTURA OBLIGATORIA DEL GUION, en este orden y en párrafos cortos:\n1. Avance: el elogio que califica, algo que el cliente ideal ya logró o ya decidió. Nunca dolor ni miseria.\n2. Obstáculo: lo que le aparece justo ahí, con lo que piensa y no dice. Avance y obstáculo van juntos en la PRIMERA frase.\n3. Error principal: lo que casi todos hacen para resolverlo y por qué no alcanza, sin culpar.\n4. Solución real: el camino que sí funciona, en positivo.\n5. Autoridad: años y personas acompañadas, solo con datos del brief.\n6. Sistema: qué incluye, en una sola frase.\n7. Primer llamado: tocar el botón y ver el video completo.\n8. Exclusividad: para quién es, por conducta, resultados y decisión de invertir.\n9. Escasez: lugares y cierre EXACTOS del brief; si el brief no trae escasez, se omite.\n10. Llamado final: ver el video antes del cierre.\nCada anuncio es un momento distinto del MISMO cliente ideal calificado. Del 5 al 10 el texto puede ser idéntico en todos los anuncios.\n\n"+
-  "EJEMPLO DE TONO (otro rubro): Título «Te ascendieron y por primera vez en años no sabes si vas a estar a la altura.» Texto: «El cargo nuevo no te pide hacer más de lo que ya hacías. Te pide convertirte en alguien distinto. Por eso tantos buenos ejecutivos chocan justo después de subir.»\n\n"+
-  "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(state.brief)+"\n\nMOMENTOS ELEGIDOS:\n"+lista+"\n\n"+
-  "Medidas (recomendaciones de Meta para videos que se ven sin sonido y textos que se cortan en el celular):\n- pantalla = texto grande que se lee en los primeros 3 segundos, máximo 8 palabras, con el avance y el obstáculo.\n- titulo = el gancho: la primera frase del guion, máximo 15 palabras.\n- guion = entre 150 y 190 palabras, párrafos cortos separados por línea en blanco.\n- corto = versión de 15 segundos: gancho, solución en una frase, escasez y llamado al video; entre 30 y 40 palabras.\n- texto = texto principal de 4 líneas separadas por salto de línea; la PRIMERA línea (máximo 120 caracteres) es el avance y el obstáculo, porque es lo único que se ve antes de «ver más».\n- titular = máximo 40 caracteres, la promesa del video.\n"+
-  "Responde SOLO con JSON: {\"anuncios\":[{\"momento\":\"...\",\"pantalla\":\"...\",\"titulo\":\"...\",\"guion\":\"...\",\"corto\":\"...\",\"texto\":\"...\",\"titular\":\"...\"}]}";
-  return p}
-  var out=[];
-  for(var k=0;k<elegidos.length;k++){
-    var r=await ask(mk(elegidos[k]),$("st-anuncios"),[$("go-anuncios"),$("otros")],$("stop2"),"Anuncio "+(k+1)+" de "+elegidos.length);
-    if(!r||!Array.isArray(r.anuncios)||!r.anuncios[0])return;
-    var a=r.anuncios[0];out.push({momento:String(a.momento||elegidos[k].escena),pantalla:String(a.pantalla||""),titulo:String(a.titulo||""),guion:String(a.guion||""),corto:String(a.corto||""),texto:String(a.texto||""),titular:String(a.titular||"")});
-    state.anuncios=out.slice();state.ejemplo=false;save();renderAds()}
-}
+/* ═════════ escritura con control ═════════ */
+function pick(o,keys){var r={};keys.forEach(function(k){r[k]=o[k]});return r}
+function cierreKey(){var b=state.brief;return JSON.stringify([b.marca,b.cliente,b.promesa,b.prueba,b.destino,b.escasez,b.prohibidas])}
+function normCierre(r){var c={};CLOSE.forEach(function(k){c[k]=clean(r&&r[k])});if(!state.brief.escasez)c.escasez="";return c}
+async function makeCierre(si){var b=state.brief;
+  if(state.cierre&&state.cierre.key===cierreKey()&&!fails(checksCierre(state.cierre)).length){step(si,"ok","Ya estaba listo");return state.cierre}
+  step(si,"run","Escribiendo");
+  var p="Escribe el CIERRE de los anuncios en frío de una campaña de Meta: video a cámara, hablado, que lleva a un VSL high ticket.\n"+
+  "Son las partes 5 a 10 del guion y es el MISMO texto en los 3 anuncios de la campaña: se graba una sola vez.\n\n"+
+  "5. autoridad: una frase con años y personas acompañadas. Usa SOLO los datos de AUTORIDAD Y PRUEBA del brief, con los mismos números.\n"+
+  "6. sistema: una frase con lo que incluye la oferta (sale de PROMESA Y QUÉ INCLUYE), sin explicar cómo funciona.\n"+
+  "7. cta1: una frase corta que invita a tocar el botón y mirar el video completo. Tiene que decir «video».\n"+
+  "8. exclusividad: una frase: para quién es, por conducta, resultados y decisión de invertir. En positivo.\n"+
+  "9. escasez: "+(b.escasez?"la ESCASEZ REAL del brief en primera persona, con los mismos números y fechas: «"+b.escasez+"».":"cadena vacía: el brief no trae escasez y no se inventa.")+"\n"+
+  "10. cta2: una frase final que invita a mirar el video "+(b.escasez?"antes del cierre":"ahora")+". Tiene que decir «video».\n"+
+  "Entre las 6 partes: de 65 a 95 palabras.\n\n"+
+  "EJEMPLO de una campaña real (copia la medida y el tono; el contenido sale del brief):\n"+JSON.stringify(EJ_CIERRE)+"\n\n"+
+  "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(b)+"\n\n"+
+  "Responde SOLO con JSON: {\"autoridad\":\"\",\"sistema\":\"\",\"cta1\":\"\",\"exclusividad\":\"\",\"escasez\":\"\",\"cta2\":\"\"}";
+  var c=normCierre(await ai(p));
+  for(var r=0;r<2;r++){var f=fails(checksCierre(c));if(!f.length)break;
+    step(si,"run","Corrigiendo: "+f[0].t.toLowerCase());
+    var c2=normCierre(await ai(repairPrompt("el CIERRE (partes 5 a 10) de los anuncios",c,f)));
+    if(fails(checksCierre(c2)).length<=f.length)c=c2}
+  c.key=cierreKey();state.cierre=c;save();
+  var nf=fails(checksCierre(c)).length;step(si,nf?"warn":"ok",nf?"Listo, con "+nf+" detalle para revisar":"Listo y revisado");return c}
+function repairPrompt(que,obj,f){var o={};for(var k in obj)if(k!=="key"&&k!=="momento")o[k]=obj[k];
+  return "Este JSON es "+que+". No pasó estos controles:\n"+f.map(function(c){return "- "+(c.fix||c.t)}).join("\n")+
+  "\n\nCorrige SOLO eso. Todo lo demás queda igual, palabra por palabra. Mantén la estructura, el tono hablado y estas reglas:\n"+REGLAS+
+  "\n\nBRIEF:\n"+briefTxt(state.brief)+"\n\nJSON ACTUAL:\n"+JSON.stringify(o)+"\n\nResponde SOLO con el JSON corregido, con exactamente los mismos campos.";}
+function normAd(r,m,c,prev){var a={momento:m.escena};r=r||{};prev=prev||{};
+  OPEN.concat(["pantalla","corto","titular"]).forEach(function(k){a[k]=clean(r[k]!=null?r[k]:prev[k])});
+  a.texto=cleanLines(r.texto!=null?r.texto:prev.texto);a.titular=a.titular.replace(/[.]$/,"");a.pantalla=a.pantalla.replace(/[.]$/,"");
+  CLOSE.forEach(function(k){a[k]=c[k]});return a}
+function openPrompt(m,c,otros){var cw=wClose(c),lo=Math.max(45,150-cw),hi=190-cw,b=state.brief;
+  var ej=pick(EJ_ADS[0],OPEN.concat(["pantalla","corto","texto","titular"]));
+  return "Escribe la APERTURA de UN anuncio en frío de Meta: video a cámara, hablado, para un VSL high ticket.\n"+
+  "El anuncio tiene 10 partes. El cierre (partes 5 a 10) ya está escrito y es igual en los 3 anuncios de la campaña. Tú escribes las partes 1 a 4 y las piezas para publicar.\n\n"+
+  "MOMENTO DE ESTE ANUNCIO:\nEscena: "+m.escena+"\nObstáculo (lo que piensa): "+m.siente+"\nLo que la mayoría cree que lo resuelve: "+m.creencia+"\nLo que de verdad lo resuelve: "+m.verdad+"\n\n"+
+  "PARTES QUE ESCRIBES:\n"+
+  "1. gancho: la primera frase del video. Junta el AVANCE (algo que el cliente ideal ya logró o decidió: el elogio que lo califica) y el OBSTÁCULO que le aparece justo ahí. Primera frase de máximo 15 palabras; si sumas una segunda frase corta, el gancho completo no pasa de 22 palabras. Nunca dolor, miseria ni carencia.\n"+
+  "2. obstaculo: 1 o 2 frases. Reconoce el avance y nombra el obstáculo como lo piensa él.\n"+
+  "3. error: 1 o 2 frases. Lo que casi todos hacen para resolverlo y por qué no alcanza. Sin culpar.\n"+
+  "4. solucion: 1 o 2 frases. El camino que sí funciona, en positivo y en concreto, conectado con la promesa. No cuentes el método completo: eso lo hace el video.\n"+
+  "Entre las 4 partes: de "+lo+" a "+hi+" palabras.\n\n"+
+  "CIERRE YA ESCRITO (no lo cambies ni lo repitas en las partes 1 a 4):\n"+CLOSE.map(function(k,i){return (i+5)+". "+c[k]}).filter(function(x){return !/\. $/.test(x)}).join("\n")+"\n\n"+
+  "PIEZAS PARA PUBLICAR:\n"+
+  "- pantalla: texto grande para los primeros 3 segundos (la mayoría mira sin sonido): máximo 8 palabras, con el avance y el obstáculo.\n"+
+  "- corto: versión de 15 segundos, de 25 a 40 palabras: el gancho, la solución en una frase"+(b.escasez?", la escasez del brief":"")+" y termina invitando a mirar el video.\n"+
+  "- texto: lista de 4 líneas. Línea 1: avance y obstáculo, máximo 110 caracteres (es lo único que se ve antes de «ver más»). Línea 2: el error. Línea 3: la solución. Línea 4: "+(b.escasez?"la escasez del brief y ":"")+"la invitación a mirar el video, con la prueba del brief.\n"+
+  "- titular: máximo 35 caracteres, la promesa del video.\n\n"+
+  (otros.length?"LOS OTROS ANUNCIOS DE LA CAMPAÑA ARRANCAN ASÍ (usa un arranque distinto, con otra forma de frase):\n"+otros.map(function(x){return "- "+x}).join("\n")+"\n\n":"")+
+  "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(b)+"\n\n"+
+  "EJEMPLO de una campaña real (copia la estructura, la medida y el tono; el contenido sale del brief y del momento):\n"+JSON.stringify(ej)+"\n\n"+
+  "Responde SOLO con JSON: {\"gancho\":\"\",\"obstaculo\":\"\",\"error\":\"\",\"solucion\":\"\",\"pantalla\":\"\",\"corto\":\"\",\"texto\":[\"\",\"\",\"\",\"\"],\"titular\":\"\"}"}
+async function writeAd(m,c,otros,si,label){
+  step(si,"run","Escribiendo");
+  var a=normAd(await ai(openPrompt(m,c,otros)),m,c);
+  for(var r=0;r<2;r++){var f=fails(checksAd(a));if(!f.length)break;
+    step(si,"run","Corrigiendo: "+f[0].t.toLowerCase().replace(/:.*/,""));
+    var b2=normAd(await ai(repairPrompt("la apertura (partes 1 a 4) y las piezas para publicar de un anuncio. El cierre ya está fijo: "+JSON.stringify(pick(c,CLOSE)),pick(a,OPEN.concat(["pantalla","corto","texto","titular"])),f.filter(function(x){return x.fix}))),m,c,a);
+    if(fails(checksAd(b2)).length<=f.length)a=b2}
+  var nf=fails(checksAd(a)).length;step(si,nf?"warn":"ok",nf?"Listo, con "+nf+" detalle para revisar":"Listo y revisado: cumple las "+checksAd(a).length+" reglas");return a}
+async function escribir(resume){if(RUN)return;
+  var el=sel();if(!el.length){go("momentos");return}
+  if(!resume){state.anuncios=[];state.adTab=0}
+  go("anuncios");
+  var have=state.anuncios.map(function(a){return a.momento});
+  if(!startRun("runbox","Escribiendo tus "+el.length+" anuncios",["Cierre común (partes 5 a 10)"].concat(el.map(function(m,i){return "Anuncio "+(i+1)}))))return;
+  el.forEach(function(m,i){if(have.indexOf(m.escena)>-1)step(i+1,"ok","Ya estaba listo")});
+  try{var c=await makeCierre(0);
+    for(var i=0;i<el.length;i++){if(have.indexOf(el[i].escena)>-1)continue;
+      var otros=state.anuncios.map(function(a){return a.gancho});
+      var a=await writeAd(el[i],c,otros,i+1);
+      state.anuncios.push(a);state.ejemplo=false;save()}
+    await sleep(500);endRun();state.adTab=0;state.view="grabar";go("anuncios")}
+  catch(e){var cur=RUN?RUN.steps.findIndex(function(x){return x.s==="run"}):-1;if(cur>-1)step(cur,"err","No se completó");
+    endRun();go("anuncios");showErr("errbox",e,function(){escribir(true)})}}
 
+/* ═════════ pantalla: anuncios ═════════ */
+var PLAB={gancho:"Avance + obstáculo",obstaculo:"Obstáculo",error:"Error principal",solucion:"Solución real",autoridad:"Autoridad",sistema:"Sistema",cta1:"Llamado al video",exclusividad:"Exclusividad",escasez:"Escasez",cta2:"Llamado final"};
+function adHTML(a,id,isEj){var ck=checksAd(a),f=fails(ck),w=words(guion(a)),v=state.view||"grabar";
+  var q='<button class="quality '+(f.length?"warn":"ok")+'" type="button" data-toggle="ck-'+id+'"><span class="qi">'+(f.length?ICO.warn:ICO.check)+'</span><span class="qt">'+(f.length?"Revisa "+f.length+" detalle"+(f.length>1?"s":""):"Estructura completa y revisada")+'<small>'+(f.length?f.map(function(x){return x.t}).join(" · "):"Cumple las "+ck.length+" reglas. Toca para ver cuáles.")+'</small></span></button>'+
+    '<ul class="cklist" id="ck-'+id+'" hidden>'+ck.map(function(c){return '<li class="'+(c.ok?"ok":"no")+'">'+(c.ok?ICO.check:ICO.x)+'<span>'+esc(c.t)+'</span></li>'}).join("")+'</ul>';
+  var seg='<div class="seg" role="tablist"><button type="button" role="tab" data-view="grabar" aria-selected="'+(v==="grabar")+'">Grabar</button><button type="button" role="tab" data-view="corto" aria-selected="'+(v==="corto")+'">15 seg</button><button type="button" role="tab" data-view="publicar" aria-selected="'+(v==="publicar")+'">Publicar</button></div>';
+  var body="";
+  if(v==="grabar"){var last=0;
+    body='<div class="screen-text" style="margin-top:18px"><small>En pantalla · primeros 3 segundos</small>'+esc(a.pantalla)+'</div>'+
+    '<div class="meta"><span>'+ICO.clock+' ≈ '+Math.round(w/140*60)+' segundos</span><span>'+ICO.cam+' '+w+' palabras</span></div>'+
+    '<ol class="parts">'+ALLP.map(function(k,i){if(!a[k])return "";var g=i<4?1:i<6?2:3;
+      return '<li class="g'+g+(i===0?" first":"")+'"><span class="num g'+g+'">'+(i+1)+'</span><span style="min-width:0"><span class="pl g'+g+'">'+PLAB[k]+(i>=4?'<span class="same">igual en los 3</span>':"")+'</span><div class="pt">'+esc(a[k])+'</div></span></li>'}).join("")+'</ol>'+
+    '<div class="rowbtns">'+copyBtn(id+"g",guion(a),"Copiar guion completo")+copyBtn(id+"p",a.pantalla,"Copiar texto en pantalla")+'</div>'+
+    '<p class="note">Grábalo de corrido o en dos tomas: la apertura (1 a 4) y el cierre (5 a 10). El cierre es igual en los 3 anuncios: grábalo una vez.</p>'}
+  else if(v==="corto"){body='<div class="box"><div class="bl"><b>Versión de 15 segundos</b>'+copyBtn(id+"c",a.corto)+'</div><div class="bt">'+esc(a.corto)+'</div></div>'+
+    '<div class="meta"><span>'+ICO.clock+' ≈ '+Math.round(words(a.corto)/140*60)+' segundos</span></div><p class="note">Súbela al mismo conjunto como un anuncio aparte: así Meta compara la corta con la larga.</p>'}
+  else{var tx=(a.texto||[]).join("\n");
+    body='<div class="box"><div class="bl"><b>Texto principal</b>'+copyBtn(id+"x",tx)+'</div><div class="bt">'+esc(tx)+'</div></div>'+
+    '<div class="box"><div class="bl"><b>Titular</b>'+copyBtn(id+"h",a.titular)+'</div><div class="bt" style="font-family:var(--fs);font-size:23px">'+esc(a.titular)+'</div></div>'+
+    '<p class="note">La primera línea es lo único que se ve antes de «ver más». El titular aparece debajo del video.</p>'}
+  return '<p class="note" style="margin-top:16px"><b style="color:var(--ink)">Momento:</b> '+esc(a.momento)+(isEj?" · <b>ejemplo</b>":"")+'</p>'+q+seg+body}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-toggle]");if(t){var l=$(t.dataset.toggle);if(l)l.hidden=!l.hidden;return}
+  var v=e.target.closest("[data-view]");if(v){state.view=v.dataset.view;save();if(state.screen==="anuncios")vAnuncios($("s-anuncios"));else if(state.screen==="revisar")drawRevision()}});
+function vAnuncios(s){var A=state.anuncios,t=Math.min(state.adTab||0,Math.max(0,A.length-1));CLIP={};
+  s.innerHTML='<p class="kick">Paso 3</p><h2>Tus anuncios, listos para grabar</h2>'+
+   '<div id="runbox"></div><div id="errbox"></div><div id="adsbox"></div>';
+  var box=$("adsbox");
+  if(!A.length){if(!RUN)box.innerHTML='<div class="empty">Todavía no hay anuncios. Elige tus 3 momentos en el paso 2.<br><button class="btn" type="button" data-nav="momentos">Ir a los momentos '+ICO.arrow+'</button></div>';return}
+  box.innerHTML='<div class="adtabs" role="tablist" style="--n:'+A.length+'">'+A.map(function(a,i){var f=fails(checksAd(a)).length;
+     return '<button class="adtab" type="button" role="tab" data-tab="'+i+'" aria-selected="'+(i===t)+'"><b>Anuncio '+(i+1)+'</b><small class="'+(f?"warn":"ok")+'">'+(f?"Revisar":"Listo")+'</small></button>'}).join("")+'</div>'+
+   '<div class="ad">'+adHTML(A[t],"a"+t,state.ejemplo)+'</div>'+
+   '<div class="rowbtns" style="margin-top:22px"><button class="ghost" type="button" data-run id="redo">'+ICO.redo+' Reescribir este anuncio</button></div>'+
+   '<details class="more"><summary>Cómo lanzarlos</summary><div class="body"><ol><li>Los 3 anuncios en un solo conjunto en frío. La versión de 15 s de cada uno, en el mismo conjunto.</li><li>Déjalos correr 4 días sin tocarlos.</li><li>Apaga el de CTR menor a 1,5 % o el de visita más cara. Las agendas confirman al ganador.</li><li>Al ganador, grábale 3 variantes del mismo momento.</li></ol></div></details>'+
+   '<div class="dock"><div class="in"><button class="btn" type="button" data-nav="vsl">Siguiente: el VSL '+ICO.arrow+'</button></div></div>';
+  box.querySelectorAll("[data-tab]").forEach(function(b){b.addEventListener("click",function(){state.adTab=+b.dataset.tab;save();vAnuncios(s)})});
+  $("redo").addEventListener("click",function(){rehacer(t)});
+  if(RUN)setBusy(true)}
+async function rehacer(i){if(RUN)return;var a=state.anuncios[i];if(!a)return;
+  var m=state.momentos.filter(function(x){return x.escena===a.momento})[0]||{escena:a.momento,siente:"",creencia:"",verdad:""};
+  if(!startRun("runbox","Reescribiendo el anuncio "+(i+1),["Cierre común","Anuncio "+(i+1)]))return;window.scrollTo(0,0);
+  try{var c=await makeCierre(0);var otros=state.anuncios.filter(function(x,j){return j!==i}).map(function(x){return x.gancho});
+    var n=await writeAd(m,c,otros,1);state.anuncios[i]=n;state.ejemplo=false;save();await sleep(400);endRun();go("anuncios")}
+  catch(e){endRun();go("anuncios");showErr("errbox",e,function(){rehacer(i)})}}
 
-function renderVsl(){var box=$("vsl");box.innerHTML="";
-  if(!state.vsl||!state.vsl.length){box.innerHTML='<div class="empty">Todavía no hay VSL. Completa el paso 1 y toca «Escribir el VSL».</div>';return}
-  state.vsl.forEach(function(x,i){var d=document.createElement("div");d.className="ad";
-    d.innerHTML='<div class="hd"><span class="badge">'+esc(x.tiempo||"")+(state.ejemplo?" · ejemplo":"")+'</span></div>'+blk(x.parte||("Parte "+(i+1)),"v"+i,x.texto);box.appendChild(d)});
-  var w=state.vsl.reduce(function(n,x){return n+words(x.texto)},0);
-  var n=document.createElement("p");n.className="note";n.style.marginTop="18px";n.textContent=w+" palabras: unos "+Math.round(w/140)+" minutos hablados.";box.appendChild(n)}
-async function hacerVsl(){
-  state.brief=readBrief();save();
-  if(!state.brief.cliente||!state.brief.promesa){$("st-vsl").className="status err";$("st-vsl").textContent="Completa al menos «Cliente ideal» y «Qué cambia con tu oferta» en el paso 1.";return}
-  var mom=(state.momentos||[]).filter(function(m){return m.sel}).map(function(m){return "- "+m.escena}).join("\n");
-  var p="Escribe el guion de un VSL (video de venta a cámara, unos 8 minutos, entre 900 y 1.200 palabras) para una oferta high ticket que lleva a agendar un diagnóstico 1 a 1 sin costo.\n\n"+
-  "ESTRUCTURA, en este orden:\n1. Apertura: para quién es + el AVANCE que ya hizo (decidió, intentó, creció) + el OBSTÁCULO concreto. Nunca dolor ni miseria.\n2. Quién soy: corto, con la historia del brief si la hay.\n3. El obstáculo real: lo que de verdad lo frena y por qué lo que intentó no lo resolvió. Una sola idea.\n4. El camino: el mecanismo de la oferta, paso por paso, en concreto.\n5. Prueba: remite a los testimonios debajo del video, sin nombrar a nadie ni inventar cifras.\n6. Cómo trabajamos y garantía, con la parte del cliente (compromiso).\n7. Para quién es: perfil del cliente que invierte y se compromete, dicho en positivo.\n8. Llamado a la acción: el diagnóstico y el calendario debajo del video.\n\n"+
-  "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(state.brief)+(mom?"\n\nMOMENTOS QUE ESTÁN FUNCIONANDO EN LOS ANUNCIOS (usa el tono y uno en la apertura):\n"+mom:"")+
-  "\n\nIncluye la escasez EXACTA del brief en «Para quién es» y en el llamado final; si no hay, no la inventes. No inventes cifras, nombres ni resultados que no estén en el brief.\nResponde SOLO con JSON: {\"secciones\":[{\"parte\":\"nombre corto\",\"tiempo\":\"m:ss aproximado\",\"texto\":\"lo que se dice, en párrafos cortos\"}]}";
-  var r=await ask(p,$("st-vsl"),[$("hacer-vsl")],$("stop4"));
-  if(r&&Array.isArray(r.secciones)){state.vsl=r.secciones.map(function(x){return {parte:String(x.parte||""),tiempo:String(x.tiempo||""),texto:String(x.texto||"")}});state.ejemplo=false;save();renderVsl()}}
-$("hacer-vsl").addEventListener("click",hacerVsl);
-$("copiar-vsl").addEventListener("click",function(){var t=(state.vsl||[]).map(function(x){return x.parte.toUpperCase()+"\n"+x.texto}).join("\n\n");var b=$("copiar-vsl");
-  try{navigator.clipboard.writeText(t).then(function(){b.textContent="Copiado";setTimeout(function(){b.textContent="Copiar todo"},1400)},function(){})}catch(e){}});
+/* ═════════ VSL ═════════ */
+var VS=[{parte:"Apertura",min:90,max:150,d:"para quién es + el AVANCE que ya hizo (decidió, intentó, creció) + el OBSTÁCULO concreto. Nunca dolor ni miseria. Promete lo que va a ver en el video."},
+ {parte:"Quién soy",min:70,max:150,d:"corto: la HISTORIA del brief si la hay y la autoridad del brief. Si no hay historia, solo autoridad, sin inventar."},
+ {parte:"El obstáculo real",min:110,max:190,d:"lo que de verdad lo frena y por qué lo que intentó no lo resolvió. Una sola idea, dicha con claridad."},
+ {parte:"El camino",min:220,max:380,d:"el mecanismo de la oferta paso por paso, en concreto, con lo que incluye la promesa."},
+ {parte:"Prueba",min:35,max:90,d:"remite a los testimonios debajo del video, sin nombrar a nadie ni inventar cifras."},
+ {parte:"Cómo trabajamos y garantía",min:80,max:160,d:"formato, duración y garantía del brief, con la parte del cliente (su compromiso). Si el brief no trae garantía, no la inventes."},
+ {parte:"Para quién es",min:70,max:150,d:"el perfil que invierte y se compromete, en positivo"},
+ {parte:"Llamado a la acción",min:60,max:120,d:"el siguiente paso: agendar un diagnóstico 1 a 1 sin costo en el calendario debajo del video"}];
+function vslSpec(from,to){var b=state.brief;return VS.slice(from,to).map(function(x,i){var d=x.d;if(from+i>=6&&b.escasez)d+=", con la escasez exacta del brief: «"+b.escasez+"»";return (from+i+1)+". "+x.parte+" ("+x.min+" a "+x.max+" palabras): "+d+"."}).join("\n")}
+function vslBase(){var b=state.brief,mom=sel().map(function(m){return "- "+m.escena}).join("\n");
+  return "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(b)+"\nHISTORIA DEL VENDEDOR: "+(b.historia||"(no indicada)")+"\nCÓMO TRABAJAN Y GARANTÍA: "+(b.garantia||"(no indicada: no inventes garantía)")+(mom?"\n\nMOMENTOS QUE USAN LOS ANUNCIOS (usa uno en la apertura):\n"+mom:"")}
+function normSecs(r,from,to){var arr=(r&&Array.isArray(r.secciones))?r.secciones:[];
+  return VS.slice(from,to).map(function(x,i){var s=arr[i]||{};return {id:from+i+1,parte:x.parte,texto:clean(s.texto||"").replace(/\n{3,}/g,"\n\n")}})}
+function checksHalf(secs,from){var b=state.brief,all=secs.map(function(s){return s.texto}).join("\n"),L=[];
+  secs.forEach(function(s,i){var x=VS[from+i],w=words(s.texto);L.push({ok:w>=Math.round(x.min*.75)&&w<=Math.round(x.max*1.3),t:x.parte+": "+w+" palabras",fix:"«"+x.parte+"» tiene "+w+" palabras: déjala entre "+x.min+" y "+x.max+"."})});
+  if(from>0){if(b.escasez)L.push({ok:escasezOk(secs[2].texto)&&escasezOk(secs[3].texto),t:"Escasez exacta",fix:"«Para quién es» y «Llamado a la acción» tienen que decir la escasez exacta del brief: «"+b.escasez+"»."});
+    L.push({ok:/calendario|agenda/i.test(secs[3].texto),t:"Lleva al calendario",fix:"El llamado a la acción tiene que nombrar el calendario debajo del video."})}
+  return L.concat(commonChecks(all,false))}
+async function writeHalf(from,to,si,prev){
+  step(si,"run","Escribiendo");
+  var p="Escribe "+(from===0?"la PRIMERA":"la SEGUNDA")+" mitad del guion de un VSL: video de venta a cámara, unos 8 minutos en total, para una oferta high ticket que lleva a agendar un diagnóstico 1 a 1 sin costo.\n\n"+
+   (prev?"PRIMERA MITAD YA ESCRITA (sigue desde ahí, sin repetirla):\n"+prev.map(function(s){return s.parte.toUpperCase()+"\n"+s.texto}).join("\n\n")+"\n\n":"")+
+   "PARTES QUE ESCRIBES, en este orden:\n"+vslSpec(from,to)+"\n\n"+vslBase()+"\n\n"+
+   "Párrafos cortos separados por línea en blanco. Responde SOLO con JSON: {\"secciones\":["+VS.slice(from,to).map(function(x){return "{\"parte\":\""+x.parte+"\",\"texto\":\"\"}"}).join(",")+"]}";
+  var s=normSecs(await ai(p),from,to);
+  var f=fails(checksHalf(s,from));
+  if(f.length){step(si,"run","Corrigiendo: "+f[0].t.toLowerCase());
+    var s2=normSecs(await ai(repairPrompt("una mitad del guion de un VSL",{secciones:s.map(function(x){return {parte:x.parte,texto:x.texto}})},f)),from,to);
+    if(fails(checksHalf(s2,from)).length<=f.length&&s2.every(function(x){return x.texto}))s=s2}
+  var nf=fails(checksHalf(s,from)).length;step(si,nf?"warn":"ok",nf?"Lista, con "+nf+" detalle para revisar":"Lista y revisada");return s}
+async function hacerVsl(){if(RUN)return;
+  if(!briefOk()){state.page=0;go("cliente");return}
+  go("vsl");
+  if(!startRun("runbox","Escribiendo tu VSL",["Primera mitad: apertura, quién soy, obstáculo y camino","Segunda mitad: prueba, garantía, para quién es y llamado"]))return;
+  try{var a=await writeHalf(0,4,0,null);var b=await writeHalf(4,8,1,a);
+    state.vsl=a.concat(b);state.ejemplo=false;save();await sleep(400);endRun();go("vsl")}
+  catch(e){endRun();go("vsl");showErr("errbox",e,hacerVsl)}}
+function vVsl(s){var V=state.vsl,ck=V.length?checksVsl(V):[],f=fails(ck),acc=0;CLIP={};
+  s.innerHTML='<p class="kick">Paso 4</p><h2>Tu VSL, con la misma estructura</h2>'+
+   '<p class="lead">Arranca con el avance y el obstáculo, nombra el obstáculo real, muestra el camino, filtra a quién es y cierra en el diagnóstico. Unos 8 minutos.</p>'+
+   '<div id="runbox"></div><div id="errbox"></div><div id="vbox"></div>'+
+   '<div class="dock"><div class="in">'+(V.length?copyBtn("vall",V.map(function(x){return x.parte.toUpperCase()+"\n"+x.texto}).join("\n\n"),"Copiar todo").replace('class="copy"','class="ghost"'):"")+
+   '<button class="btn" type="button" id="mkvsl" data-run>'+(V.length?ICO.redo+" Rehacer":"Escribir el VSL "+ICO.arrow)+'</button></div></div>';
+  var box=$("vbox");
+  if(!V.length){if(!RUN)box.innerHTML='<div class="empty">Usa el cliente del paso 1 y los momentos del paso 2. Para un VSL más fuerte, completa «Tu historia» y «Cómo trabajan y tu garantía» en el paso 1.</div>'}
+  else{var w=V.reduce(function(n,x){return n+words(x.texto)},0);
+    box.innerHTML='<button class="quality '+(f.length?"warn":"ok")+'" type="button" data-toggle="ck-vsl"><span class="qi">'+(f.length?ICO.warn:ICO.check)+'</span><span class="qt">'+(f.length?"Revisa "+f.length+" detalle"+(f.length>1?"s":""):"Estructura completa y revisada")+'<small>'+w+' palabras · unos '+Math.round(w/140)+' minutos'+(state.ejemplo?" · ejemplo":"")+'</small></span></button>'+
+     '<ul class="cklist" id="ck-vsl" hidden>'+ck.map(function(c){return '<li class="'+(c.ok?"ok":"no")+'">'+(c.ok?ICO.check:ICO.x)+'<span>'+esc(c.t)+'</span></li>'}).join("")+'</ul>'+
+     V.map(function(x,i){var t0=acc;acc+=words(x.texto);var mm=Math.floor(t0/140),ss=Math.round((t0/140-mm)*60);
+      return '<details class="card vsec"'+(i===0?" open":"")+'><summary><span class="num g'+(i<3?1:i<6?2:3)+'">'+(i+1)+'</span><span class="vt"><b>'+esc(x.parte)+'</b><span>Desde el minuto '+mm+':'+(ss<10?"0":"")+ss+' · '+words(x.texto)+' palabras</span></span><span class="chev">'+ICO.chev+'</span></summary><div class="vb"><div class="bt">'+esc(x.texto)+'</div><div class="rowbtns">'+copyBtn("v"+i,x.texto)+'</div></div></details>'}).join("")}
+  $("mkvsl").addEventListener("click",hacerVsl)}
 
-async function revisar(){
-  var t=$("r-texto").value.trim();if(!t){$("st-revisar").className="status err";$("st-revisar").textContent="Pega un anuncio primero.";return}
-  state.brief=readBrief();
-  var p="Revisa este anuncio en frío de Meta contra el método del momento exacto y reescríbelo.\n\n"+
-  "MÉTODO: el anuncio que agenda nombra una escena concreta que solo vive el cliente ideal y lo que siente sin decirlo; da vuelta UNA creencia; muestra la consecuencia; cierra invitando a ver el video. El que trae curiosos explica el método, cuenta la historia del vendedor, usa testimonios de terceros o listas largas.\n\n"+
-  "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(state.brief)+"\n\nANUNCIO A REVISAR:\n"+t.slice(0,6000)+"\n\n"+
-  "Responde SOLO con JSON: {\"veredicto\":\"una frase directa: si va a traer clientes ideales o curiosos y por qué\",\"momento\":\"el momento que nombra o cadena vacía si no nombra ninguno\",\"puntos\":[{\"regla\":\"nombre corto\",\"cumple\":true,\"por_que\":\"una frase\"}],\"reescrito\":{\"pantalla\":\"máximo 8 palabras\",\"titulo\":\"gancho de máximo 15 palabras\",\"guion\":\"110 a 150 palabras\",\"corto\":\"30 a 40 palabras\",\"texto\":\"4 líneas, la primera de máximo 120 caracteres\",\"titular\":\"máximo 40 caracteres\"}} con 5 a 7 puntos: momento concreto, solo lo vive el cliente ideal, lo que siente, una sola creencia, largo, tono hablado, cierre al video.";
-  var r=await ask(p,$("st-revisar"),[$("revisar")],$("stop3"));
-  var box=$("revision");if(!r)return;
-  var pts=Array.isArray(r.puntos)?r.puntos:[];var re=r.reescrito||{};
-  box.innerHTML='<p class="verd">'+esc(r.veredicto)+'</p>'+(r.momento?'<p class="note">Momento que nombra: '+esc(r.momento)+'</p>':'<p class="note">No nombra ningún momento concreto.</p>')+
-   '<ul class="diag">'+pts.map(function(x){return '<li class="'+(x.cumple?"ok":"no")+'"><b>'+(x.cumple?"✓ ":"✕ ")+esc(x.regla)+'</b>'+esc(x.por_que)+'</li>'}).join("")+'</ul>'+
-   '<div class="ad"><span class="badge">Reescrito con un momento</span>'+adBlocks(re,"r")+
-   '<div class="checks">'+chipsHTML(checks(re))+'</div></div>'}
+/* ═════════ revisar uno ═════════ */
+var REV=null;
+function vRevisar(s){s.innerHTML='<p class="kick">Antes de gastar en pauta</p><h2>Revisa un anuncio que ya tienes</h2>'+
+   '<p class="lead">Pega el guion o el texto. Te digo qué parte de la estructura falta y te lo devuelvo reescrito con las 10 partes. Usa el cliente del paso 1.</p>'+
+   '<div class="field"><label for="r-texto">Tu anuncio</label><textarea id="r-texto" style="min-height:190px" placeholder="Pega aquí el guion o el texto del anuncio"></textarea><span class="ferr">Pega un anuncio primero.</span></div>'+
+   '<div id="runbox"></div><div id="errbox"></div><div id="revbox"></div>'+
+   '<div class="dock"><div class="in"><button class="btn" type="button" id="rev" data-run>Revisar y reescribir '+ICO.arrow+'</button></div></div>';
+  var ta=$("r-texto");ta.value=(REV&&REV.src)||"";ta.addEventListener("input",function(){ta.parentNode.classList.remove("err")});
+  $("rev").addEventListener("click",revisar);drawRevision()}
+function drawRevision(){var box=$("revbox");if(!box||!REV||!REV.res)return;var r=REV.res;CLIP={};
+  box.innerHTML='<p class="verd">'+esc(r.veredicto)+'</p><ul class="cklist" style="margin-top:14px">'+(r.puntos||[]).map(function(x){return '<li class="'+(x.cumple?"ok":"no")+'">'+(x.cumple?ICO.check:ICO.x)+'<span><b>'+esc(x.parte)+':</b> '+esc(x.por_que)+'</span></li>'}).join("")+'</ul>'+
+   (REV.ad?'<h3 style="margin-top:30px">Reescrito con las 10 partes</h3><div class="ad">'+adHTML(REV.ad,"r",false)+'</div>':"")}
+async function revisar(){if(RUN)return;var t=$("r-texto").value.trim();if(!t){$("r-texto").parentNode.classList.add("err");$("r-texto").focus();return}
+  if(!briefOk()){state.page=0;go("cliente");return}
+  REV={src:t,res:null,ad:null};$("revbox").innerHTML="";
+  if(!startRun("runbox","Revisando tu anuncio",["Leer tu anuncio contra las 10 partes","Cierre común","Reescribir con un momento"]))return;
+  try{step(0,"run","");
+    var p="Revisa este anuncio en frío de Meta contra la estructura de 10 partes que agenda: 1 avance (elogio que califica), 2 obstáculo, 3 error principal, 4 solución real, 5 autoridad, 6 sistema, 7 llamado al video, 8 exclusividad, 9 escasez, 10 llamado final. El gancho junta avance y obstáculo en la primera frase. Lo que trae curiosos: dolor o miseria, explicar el método, la historia del vendedor, testimonios, listas largas.\n\n"+
+     "REGLAS:\n"+REGLAS+"\n\nBRIEF:\n"+briefTxt(state.brief)+"\n\nANUNCIO A REVISAR:\n"+t.slice(0,6000)+"\n\n"+
+     "Responde SOLO con JSON: {\"veredicto\":\"una frase directa: si va a traer clientes que invierten o curiosos, y por qué\",\"puntos\":[{\"parte\":\"nombre de la parte\",\"cumple\":true,\"por_que\":\"una frase\"}],\"momento\":{\"escena\":\"el mejor momento para reescribirlo: avance + obstáculo en una frase de máximo 110 caracteres, en segunda persona\",\"siente\":\"\",\"creencia\":\"\",\"verdad\":\"\"}} con un punto por cada una de las 10 partes.";
+    var r=await ai(p);r=r||{};REV.res={veredicto:clean(r.veredicto),puntos:(Array.isArray(r.puntos)?r.puntos:[]).map(function(x){return {parte:clean(x.parte),cumple:!!x.cumple,por_que:clean(x.por_que)}})};step(0,"ok","");
+    var m=r.momento&&r.momento.escena?{escena:clean(r.momento.escena),siente:clean(r.momento.siente),creencia:clean(r.momento.creencia),verdad:clean(r.momento.verdad)}:{escena:t.slice(0,140),siente:"",creencia:"",verdad:""};
+    var c=await makeCierre(1);REV.ad=await writeAd(m,c,[],2);await sleep(400);endRun();state.view="grabar";go("revisar")}
+  catch(e){endRun();go("revisar");showErr("errbox",e,revisar)}}
 
-$("go-momentos").addEventListener("click",buscarMomentos);
-$("otros").addEventListener("click",buscarMomentos);
-$("go-anuncios").addEventListener("click",escribir);
-$("revisar").addEventListener("click",revisar);
-$("nuevo").addEventListener("click",function(){state={brief:{marca:"",cliente:"",palabras:"",promesa:"",creencias:"",escasez:"",prueba:"",destino:"un video donde explico el método a detalle",prohibidas:""},momentos:[],anuncios:[],vsl:[],ejemplo:false};save();fillBrief();renderMom();renderAds();renderVsl();$("b-marca").focus()});
-
-fillBrief();renderMom();renderAds();renderVsl();
+/* ═════════ arranque ═════════ */
+render();
+window.__aqa={state:function(){return state},checksAd:checksAd,checksCierre:checksCierre,checksVsl:checksVsl,clean:clean};
 })();
 </script>
+</body>
+</html>
