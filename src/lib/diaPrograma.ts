@@ -16,7 +16,6 @@
  *
  * Lógica pura: no importa supabase, así se puede probar.
  */
-import { corrimientoActual } from './pausaGlobal';
 
 const MS_DIA = 86_400_000;
 
@@ -37,11 +36,11 @@ export function diasDesdeInicio(fechaInicio: string | null | undefined, hoy: Dat
   const ini = fechaInicio ? fechaLocal(fechaInicio) : null;
   const h = fechaLocal(hoy);
   if (!ini || !h) return null;
-  // Los días en que el Camino estuvo parado para todos no cuentan: durante una
-  // pausa global nadie avanza de día ni acumula atraso, y al terminar las
-  // fechas de todos quedan corridas lo que duró.
-  const bruto = Math.round((h.getTime() - ini.getTime()) / MS_DIA);
-  return bruto - corrimientoActual(`${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`);
+  // Días de calendario, sin descuentos. La app no corta nunca: lo que se cierra
+  // algunos días es el soporte, y eso no mueve el día de nadie. Acá había un
+  // descuento por «pausa global» que congelaba el día del cliente durante un
+  // mes y le corría el cierre: le quitaba el mes que compró sin pedírselo.
+  return Math.round((h.getTime() - ini.getTime()) / MS_DIA);
 }
 
 /** Día del programa, 1 a 90. Sin fecha de inicio: null (quien llama decide qué mostrar). */

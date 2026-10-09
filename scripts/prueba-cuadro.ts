@@ -1,18 +1,22 @@
 /**
- * Pruebas del cuadro de validación por ticket.
+ * Pruebas del cuadro de validación por escalón de servicio.
  *
  * La más importante es la primera: que ningún id de las listas sea inventado.
  * Son cadenas de texto — el compilador no las verifica, y un id que no existe
  * hace que un ítem quede mal repartido sin que nadie se entere. Al construir
  * esto inventé 41 de 47 y compilaba perfecto.
  *
+ * La segunda más importante es la del final: que el servicio NO se derive del
+ * plan de acceso. Ese puente existió, y hacía que un cliente de $497 figurara
+ * con $5.000 de instalación contratada.
+ *
  * Correr con: npx tsx scripts/prueba-cuadro.ts
  */
 import { readFileSync } from 'node:fs';
 import { STEPS, SECTIONS } from '../src/lib/preactivacionSteps';
 import {
-  TICKETS, cuadroDe, resumirCuadro, marcarBloques, bloquesDisponibles, avanceDe,
-  type Ticket,
+  TICKETS, CIMA, cuadroDe, resumirCuadro, marcarBloques, bloquesDisponibles,
+  avanceDe, servicioDe, type Ticket,
 } from '../src/lib/cuadroTickets';
 
 let fallas = 0;
@@ -22,7 +26,7 @@ const linea = (ok: boolean, txt: string) => {
 };
 
 const REALES = new Set(STEPS.map((s) => s.id));
-const TODOS: Ticket[] = ['mil', 'dos_mil', 'cinco_mil', 'diez_mil'];
+const TODOS: Ticket[] = ['base', 'ascenso', 'instalacion'];
 
 // ── 1 · Ningún id inventado ────────────────────────────────────────────────
 console.log('══ los ids son reales ══');
@@ -34,55 +38,67 @@ linea(inventados.length === 0,
     ? `los ${enListas.length} ids de las listas existen en preactivacionSteps`
     : `IDS INVENTADOS: ${inventados.join(', ')}`);
 
-// ── 2 · Los cuatro tickets ─────────────────────────────────────────────────
-console.log('\n══ los cuatro tickets ══');
+// ── 2 · Los tres escalones ─────────────────────────────────────────────────
+console.log('\n══ los tres escalones ══');
 linea(TODOS.every((t) => TICKETS[t].criterio.length > 40),
-  'cada ticket tiene su criterio escrito, no solo un precio');
-linea(TICKETS.mil.precio < TICKETS.dos_mil.precio
-   && TICKETS.dos_mil.precio < TICKETS.cinco_mil.precio
-   && TICKETS.cinco_mil.precio < TICKETS.diez_mil.precio,
-  'los precios están en orden');
-linea(!TICKETS.mil.conDireccion && !TICKETS.dos_mil.conDireccion
-   && TICKETS.diez_mil.conDireccion,
-  'solo el de $10.000 tiene sesiones de dirección');
+  'cada escalón tiene su criterio escrito, no solo un precio');
+linea(TODOS.every((t) => TICKETS[t].incluye.length > 40),
+  'y dice qué incluye, como se le dijo al cliente');
+linea(TICKETS.base.precio === 1000 && TICKETS.ascenso.precio === 3000
+   && TICKETS.instalacion.precio === 5000,
+  'los precios son los que se venden: 1.000 · 3.000 · 5.000');
+linea(TICKETS.base.precio < TICKETS.ascenso.precio
+   && TICKETS.ascenso.precio < TICKETS.instalacion.precio,
+  'y están en orden');
+linea(CIMA.precio === 5000 && CIMA.dias === 5,
+  'La Cima son 5 días y 5.000 USD, y se suma aparte');
+linea(!Object.values(TICKETS).some((d) => 'conDireccion' in d),
+  'ya no hay «sesiones de dirección»: era un campo que el código nunca usaba');
 
 for (const t of TODOS) {
   const r = resumirCuadro(t);
-  console.log(`  ${t.padEnd(10)} ${r.total} ítems · cliente ${r.delCliente} · equipo ${r.delEquipo} · juntos ${r.compartidos}`);
+  console.log(`  ${t.padEnd(12)} ${r.total} ítems · cliente ${r.delCliente} · equipo ${r.delEquipo} · juntos ${r.compartidos}`);
 }
 
-// ── 3 · Lo que el cliente solo NO puede hacer ──────────────────────────────
-console.log('\n══ el que va solo ══');
-const mil = cuadroDe('mil');
-const aplicanMil = mil.filter((i) => !i.noAplica);
-linea(aplicanMil.length < STEPS.length,
-  `al de $1.000 no se le muestran los ${STEPS.length - aplicanMil.length} ítems que necesitan a un instalador`);
-linea(aplicanMil.every((i) => i.loHace === 'el cliente'),
+// ── 3 · La Base: va solo, con tutoriales ───────────────────────────────────
+console.log('\n══ La Base ══');
+const base = cuadroDe('base');
+const aplicanBase = base.filter((i) => !i.noAplica);
+linea(aplicanBase.length < STEPS.length,
+  `no se le muestran los ${STEPS.length - aplicanBase.length} ítems que necesitan a un instalador`);
+linea(aplicanBase.every((i) => i.loHace === 'el cliente'),
   'todo lo que le queda lo hace él: no hay tareas huérfanas esperando a nadie');
-linea(mil.filter((i) => i.noAplica).some((i) => i.id === 'm_portafolio'),
+linea(base.filter((i) => i.noAplica).some((i) => i.id === 'm_portafolio'),
   'el portafolio de Meta no le aplica: su campaña corre sin uno propio');
-linea(mil.filter((i) => i.noAplica).some((i) => i.id === 'dominio'),
+linea(base.filter((i) => i.noAplica).some((i) => i.id === 'dominio'),
   'ni el dominio: su landing va dentro de la app');
-linea(aplicanMil.filter((i) => i.conTutorial).length > 20,
-  `${aplicanMil.filter((i) => i.conTutorial).length} de sus ítems tienen paso a paso`);
+linea(aplicanBase.filter((i) => i.conTutorial).length > 20,
+  `${aplicanBase.filter((i) => i.conTutorial).length} de sus ítems tienen paso a paso`);
 
-console.log('\n══ el de $2.000 ══');
-const dos = cuadroDe('dos_mil').filter((i) => !i.noAplica);
-const revisados = dos.filter((i) => i.loHace === 'los dos');
-linea(revisados.length === 4,
-  `el equipo revisa ${revisados.length} puntos: ${revisados.map((i) => i.id).join(', ')}`);
-linea(cuadroDe('mil').filter((i) => !i.noAplica).length === dos.length,
-  've los mismos ítems que el de $1.000 — lo que cambia es quién los revisa');
+// ── 4 · El Ascenso: lo construyen juntos ───────────────────────────────────
+console.log('\n══ El Ascenso ══');
+const ascenso = cuadroDe('ascenso');
+linea(ascenso.every((i) => !i.noAplica),
+  `le aplican los ${ascenso.length} ítems: en 90 días se instala todo`);
+linea(ascenso.filter((i) => i.loHace === 'el equipo').length === 0,
+  'ninguno lo hace el equipo solo — si lo hiciera, dejaría de ser una mentoría');
+linea(ascenso.filter((i) => i.loHace === 'los dos').length > 20,
+  `${ascenso.filter((i) => i.loHace === 'los dos').length} se hacen juntos en la grupal`);
+linea(ascenso.filter((i) => i.loHace === 'el cliente').length > 5,
+  'y lo suyo sigue siendo suyo');
+linea(aplicanBase.length < ascenso.length,
+  've más que el de La Base, que es parte de lo que pagó');
 
-console.log('\n══ la instalación acompañada ══');
-const cinco = cuadroDe('cinco_mil');
-linea(cinco.every((i) => !i.noAplica), `ve los ${cinco.length} ítems, sin recortes`);
-linea(cinco.filter((i) => i.loHace === 'el equipo').length > 30,
+// ── 5 · La Instalación: la monta el equipo ─────────────────────────────────
+console.log('\n══ La Instalación ══');
+const inst = cuadroDe('instalacion');
+linea(inst.every((i) => !i.noAplica), `ve los ${inst.length} ítems, sin recortes`);
+linea(inst.filter((i) => i.loHace === 'el equipo').length > 30,
   'y la mayoría los hace el equipo, que es lo que compró');
-linea(cinco.filter((i) => i.loHace === 'el cliente').length > 5,
+linea(inst.filter((i) => i.loHace === 'el cliente').length > 5,
   'pero su método y su voz siguen siendo suyos');
 
-// ── 4 · Los clientes de antes de la app ────────────────────────────────────
+// ── 6 · Los clientes de antes de la app ────────────────────────────────────
 console.log('\n══ el que viene de antes ══');
 const bloques = bloquesDisponibles();
 linea(bloques.length === SECTIONS.length, `hay ${bloques.length} bloques para marcar`);
@@ -100,18 +116,46 @@ linea(marcarBloques([]).hechos.length === 0, 'sin bloques no marca nada');
 linea(marcarBloques(['inventado']).hechos.length === 0,
   'un bloque que no existe no rompe');
 
-// ── 5 · El avance cuenta solo lo que aplica ────────────────────────────────
+// ── 7 · El avance cuenta solo lo que aplica ────────────────────────────────
 console.log('\n══ el avance ══');
 const hechos = new Set(yaTiene.hechos);
-const avMil = avanceDe('mil', hechos);
-const avCinco = avanceDe('cinco_mil', hechos);
-linea(avMil.total < avCinco.total,
-  `el de $1.000 tiene ${avMil.total} ítems y el de $5.000 ${avCinco.total}`);
-linea(avMil.pct > avCinco.pct,
-  `con lo mismo hecho, el de $1.000 va ${avMil.pct}% y el de $5.000 ${avCinco.pct}% — el porcentaje cuenta solo lo que le aplica`);
-linea(avanceDe('mil', new Set()).pct === 0, 'sin nada hecho va en cero');
-linea(avanceDe('mil', new Set(STEPS.map((s) => s.id))).pct === 100,
+const avBase = avanceDe('base', hechos);
+const avInst = avanceDe('instalacion', hechos);
+linea(avBase.total < avInst.total,
+  `La Base tiene ${avBase.total} ítems y La Instalación ${avInst.total}`);
+linea(avBase.pct > avInst.pct,
+  `con lo mismo hecho, La Base va ${avBase.pct}% y La Instalación ${avInst.pct}% — el porcentaje cuenta solo lo que le aplica`);
+linea(avanceDe('base', new Set()).pct === 0, 'sin nada hecho va en cero');
+linea(avanceDe('base', new Set(STEPS.map((s) => s.id))).pct === 100,
   'con todo hecho va en cien, sin pasarse');
+
+// ── 8 · El servicio NO se deriva del plan de acceso ────────────────────────
+console.log('\n══ las dos escaleras, separadas ══');
+linea(!/TICKET_DE_PLAN/.test(fuente),
+  'el puente plan → ticket ya no existe: era lo que hacía figurar a un cliente de $497 con $5.000 de instalación');
+
+// Los colores pueden quedar nombrados en los comentarios —ahí explican por qué
+// se quitó el puente— pero no en una línea que se ejecute.
+const codigo = fuente
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\/\/.*$/gm, '');
+linea(!/verde|negro|blanco|amarillo/.test(codigo),
+  'y ningún color del plan de acceso aparece en el código que corre');
+linea(servicioDe('ascenso') === 'ascenso' && servicioDe('instalacion') === 'instalacion',
+  'lo que está marcado se respeta');
+linea(servicioDe('verde') === 'base' && servicioDe('negro') === 'base',
+  'un color del plan de acceso NO compra servicio: cae en el más bajo');
+linea(servicioDe(null) === 'base' && servicioDe(undefined) === 'base'
+   && servicioDe('') === 'base' && servicioDe('inventado') === 'base',
+  'sin marcar, o con un valor raro, cae en el más bajo — nunca en el más alto');
+
+const mig = readFileSync('supabase/migrations/20261009_servicio_contratado.sql', 'utf-8');
+linea(/default 'base'/.test(mig),
+  'y en la base todos arrancan en el más bajo hasta que alguien los marque');
+linea(/admin_rol in \('owner', 'manager', 'staff'\)/.test(mig),
+  'solo el equipo puede marcarlo');
+linea(/servicio_marcado_por/.test(mig) && /servicio_marcado_el/.test(mig),
+  'y queda registrado quién lo marcó y cuándo: es una decisión de plata');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);

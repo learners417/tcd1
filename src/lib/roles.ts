@@ -42,7 +42,7 @@ export const ROLES: Record<Rol, DefinicionRol> = {
     id: 'direccion',
     nombre: 'Dirección',
     proposito: 'Poner el criterio y atender los tickets altos. Nada más.',
-    leToca: ['sala', 'plata', 'motor', 'sesiones'],
+    leToca: ['sala', 'motor', 'sesiones'],
     noLeToca: [
       { que: 'La cola del día',
         porque: 'Si entra por ahí, el rol de acompañamiento deja de ser necesario y todo vuelve a pasar por una sola persona.' },

@@ -46,7 +46,12 @@ export default function BandejaSoporte({
       const { data, error } = await db()
         .from('mensajes')
         .select('id, emisor_id, contenido, created_at, tipo, emisor:profiles!emisor_id(nombre)')
-        .eq('canal', 'humano')
+        // El canal único del soporte, y sin receptor = lo escribió el cliente
+        // y va al equipo. Antes esto filtraba por 'humano', que es el canal
+        // con el que el equipo RESPONDE: por eso la bandeja decía siempre
+        // que no había nadie esperando.
+        .eq('canal', 'privado')
+        .is('receptor_id', null)
         .is('respondido_en', null)
         .order('created_at', { ascending: true })
         .limit(50);

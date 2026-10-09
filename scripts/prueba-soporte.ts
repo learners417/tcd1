@@ -10,7 +10,7 @@
 import {
   COMPROMISO, mensajesQueEsperan, saludDelSoporte,
 } from '../src/lib/soporte';
-import { ticketDe, TICKET_DE_PLAN, cuadroDe, avanceDe } from '../src/lib/cuadroTickets';
+import { servicioDe, cuadroDe, avanceDe } from '../src/lib/cuadroTickets';
 
 let fallas = 0;
 const linea = (ok: boolean, txt: string) => {
@@ -99,22 +99,21 @@ const vacio = saludDelSoporte({ esperando: [], respondidosATiempo: 0, respondido
 linea(!vacio.alerta && vacio.titular.includes('Nadie escribió'),
   'una semana sin mensajes no es una alarma');
 
-console.log('\n══ el puente entre los dos vocabularios ══');
-linea(ticketDe('verde') === 'cinco_mil', 'un cliente «verde» es uno de $5.000');
-linea(ticketDe('blanco') === 'mil' && ticketDe('negro') === 'diez_mil',
-  'y los cuatro planes tienen su ticket');
-linea(ticketDe('inventado') === 'mil',
-  'un plan desconocido cae en el MÁS BAJO: mostrar de menos se arregla con un mensaje, mostrar de más enseña que no hacía falta pagar');
-linea(ticketDe(null) === 'mil' && ticketDe(undefined) === 'mil',
-  'y sin plan tampoco se regala acceso');
-linea(Object.keys(TICKET_DE_PLAN).length >= 5,
-  'el mapa cubre los planes reales, incluido «completo» del equipo');
+console.log('\n══ el servicio contratado, que no se adivina ══');
+linea(servicioDe('ascenso') === 'ascenso' && servicioDe('instalacion') === 'instalacion',
+  'lo que una persona marcó se respeta');
+linea(servicioDe('verde') === 'base' && servicioDe('negro') === 'base',
+  'un color del plan de ACCESO no compra servicio: antes «verde» figuraba con $5.000 de instalación contratada');
+linea(servicioDe('inventado') === 'base',
+  'un valor desconocido cae en el MÁS BAJO: mostrar de menos se arregla con un mensaje, mostrar de más hace trabajar al equipo gratis');
+linea(servicioDe(null) === 'base' && servicioDe(undefined) === 'base',
+  'y sin marcar tampoco se regala trabajo');
 
 console.log('\n══ y el cuadro ahora se puede usar ══');
-linea(cuadroDe(ticketDe('verde')).filter((i) => !i.noAplica).length
-    > cuadroDe(ticketDe('blanco')).filter((i) => !i.noAplica).length,
-  'el de $5.000 ve más ítems que el de $1.000');
-linea(avanceDe(ticketDe('verde'), new Set()).total > 0,
+linea(cuadroDe('instalacion').filter((i) => !i.noAplica).length
+    > cuadroDe('base').filter((i) => !i.noAplica).length,
+  'el de La Instalación ve más ítems que el de La Base');
+linea(avanceDe('instalacion', new Set()).total > 0,
   'y su avance se calcula sobre lo que le aplica');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);

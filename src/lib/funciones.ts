@@ -145,6 +145,87 @@ export interface ObservacionFuncion {
   minutos: number;
 }
 
+/** Lo mínimo que esta tabla necesita de una jornada cerrada. */
+export interface JornadaParaFunciones {
+  dia: string;
+  fin?: string;
+  funciones?: Funcion[];
+  /** Los minutos de reloj de ese día. */
+  minutos: number;
+}
+
+/**
+ * Reparte los minutos de reloj de un día entre las funciones que se marcaron.
+ *
+ * ═══ POR QUÉ SE REPARTE Y NO SE PREGUNTA ═══
+ *
+ * Nadie sabe cuántos minutos exactos se le fueron en destrabar y cuántos en
+ * producir. Si se le pregunta, inventa un número, y un número inventado es
+ * peor que un reparto declarado: el inventado parece medido.
+ *
+ * Así que los minutos son los del reloj —esos son reales— y lo declarado es
+ * solo EN QUÉ se fueron. Repartirlos en partes iguales entre lo marcado no es
+ * exacto para un día, y a lo largo de un mes es suficiente para ver si
+ * «absorber» sube mientras las demás bajan, que es lo único que esta tabla
+ * tiene que contestar.
+ *
+ * Un día cerrado sin funciones marcadas no aporta nada: se deja afuera en
+ * lugar de repartirse a ciegas.
+ */
+export function repartirMinutos(jornadas: JornadaParaFunciones[]): ObservacionFuncion[] {
+  const obs: ObservacionFuncion[] = [];
+  for (const j of jornadas) {
+    if (!j.fin) continue;
+    const fs = (j.funciones ?? []).filter((f) => f in FUNCIONES);
+    if (fs.length === 0 || j.minutos <= 0) continue;
+    const porCada = Math.round(j.minutos / fs.length);
+    for (const f of fs) obs.push({ funcion: f, minutos: porCada });
+  }
+  return obs;
+}
+
+/** El lunes de la semana de una fecha aaaa-mm-dd, como aaaa-mm-dd. */
+export function lunesDe(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
+  const f = new Date(y, m - 1, d);
+  const desplazar = (f.getDay() + 6) % 7; // lunes = 0
+  f.setDate(f.getDate() - desplazar);
+  return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Parte las jornadas en esta semana y las anteriores, ya repartidas.
+ *
+ * Es lo que le faltaba a la pantalla: recibía `semanasAnteriores={[]}` fijo,
+ * y sin anteriores el promedio es null, el cambio es null y la columna de
+ * tendencia —lo único que esa tabla existe para mostrar— no podía decir nada
+ * nunca. Ahora se piden cuatro semanas de jornadas y se agrupan por lunes.
+ */
+export function porSemanas(
+  jornadas: JornadaParaFunciones[],
+  hoy: string,
+): { estaSemana: ObservacionFuncion[]; semanasAnteriores: ObservacionFuncion[][] } {
+  const estaSemanaLunes = lunesDe(hoy);
+  const porLunes = new Map<string, JornadaParaFunciones[]>();
+  for (const j of jornadas) {
+    const l = lunesDe(j.dia);
+    const ya = porLunes.get(l);
+    if (ya) ya.push(j); else porLunes.set(l, [j]);
+  }
+
+  const anteriores = [...porLunes.keys()]
+    .filter((l) => l < estaSemanaLunes)
+    .sort()
+    .reverse()
+    .map((l) => repartirMinutos(porLunes.get(l) ?? []))
+    .filter((obs) => obs.length > 0);
+
+  return {
+    estaSemana: repartirMinutos(porLunes.get(estaSemanaLunes) ?? []),
+    semanasAnteriores: anteriores,
+  };
+}
+
 /**
  * La tabla de la semana: cada función con su cambio y su lectura.
  *
@@ -179,8 +260,12 @@ export function tablaDeFunciones(x: {
       ? Math.round(minutos / x.clientesActivos)
       : 0;
 
-    const hitos = x.hitos.filter((h) => h.funcion === f);
-    const { lectura, alerta } = leer(def, minutos, cambio, hitos);
+    const hitos = (x.hitos ?? []).filter((h) => h.funcion === f);
+    // Sin ninguna observación en toda la semana, el cero no significa «nadie
+    // trabajó»: significa que nadie marcó en qué se fue el día. Son dos cosas
+    // distintas y una de ellas no es culpa de nadie.
+    const sinRegistro = x.estaSemana.length === 0;
+    const { lectura, alerta } = leer(def, minutos, cambio, hitos, sinRegistro);
 
     return {
       funcion: f, nombre: def.nombre, destino: def.destino,
@@ -194,7 +279,18 @@ function leer(
   minutos: number,
   cambio: number | null,
   hitos: HitoDeAbsorcion[],
+  sinRegistro = false,
 ): { lectura: string; alerta: boolean } {
+  // Nadie marcó en qué se fue el día. Decirlo así en vez de mostrar seis ceros
+  // y una alerta: durante meses esta tabla acusó de no absorber a un equipo
+  // que no tenía dónde registrarlo.
+  if (sinRegistro) {
+    return {
+      lectura: 'Todavía nadie marcó en qué se fue el día. Se registra al cerrar la jornada.',
+      alerta: false,
+    };
+  }
+
   if (minutos === 0) {
     return def.destino === 'crece'
       // Una función que debe crecer y está en cero es la peor noticia de todas.

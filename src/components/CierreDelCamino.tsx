@@ -6,8 +6,10 @@
  * conversación de la garantía, la renovación o el paso siguiente.
  */
 import React, { useMemo } from 'react';
-import { cierreDeCuentas, veredictoDeGarantia } from '../lib/cierreDeCuentas';
+import { cierreDeCuentas, veredictoDeGarantia, loQueLeDimos } from '../lib/cierreDeCuentas';
 import { VOC } from '../lib/vocabulario';
+import { sesionesDe } from '../lib/sesionesDatos';
+import type { Sesion } from '../lib/sesionesHumanas';
 
 interface Props {
   nombre?: string;
@@ -19,12 +21,31 @@ interface Props {
   entregas?: Record<string, string>;
   /** Para escribirle: el número de WhatsApp de la casa. */
   waLink?: string;
+  /** Para verificar la mitad del equipo: las sesiones que recibió. */
+  userId?: string;
+  servicio?: string | null;
 }
 
-export default function CierreDelCamino({ nombre, motivo, desde, completadas, fechaInicio, entregas, waLink }: Props) {
+export default function CierreDelCamino({
+  nombre, motivo, desde, completadas, fechaInicio, entregas, waLink, userId, servicio,
+}: Props) {
+  // Las sesiones que de verdad recibió. Sin esto la garantía solo medía su
+  // mitad: lo que él entregó, dando por hecho lo que le dimos nosotros.
+  // null hasta que la consulta vuelve: si se arrancara en [], el cierre leería
+  // «te dimos 0 de 36 sesiones» en el primer render de todo el mundo.
+  const [sesiones, setSesiones] = React.useState<Sesion[] | null>(null);
+  React.useEffect(() => {
+    if (!userId) { setSesiones([]); return; }
+    let vivo = true;
+    void sesionesDe(userId)
+      .then((s) => { if (vivo) setSesiones(s); })
+      .catch(() => { /* la pantalla funciona igual sin ellas */ });
+    return () => { vivo = false; };
+  }, [userId]);
+
   const c = useMemo(
-    () => cierreDeCuentas(completadas, fechaInicio, entregas ?? {}),
-    [completadas, fechaInicio, entregas],
+    () => cierreDeCuentas(completadas, fechaInicio, entregas ?? {}, sesiones, servicio),
+    [completadas, fechaInicio, entregas, sesiones, servicio],
   );
 
   return (
@@ -48,6 +69,17 @@ export default function CierreDelCamino({ nombre, motivo, desde, completadas, fe
             <p className="mt-1 text-[17px] text-cream/70">quedaron sin entregar</p>
           </div>
         </div>
+
+        {/* Lo que le dimos NOSOTROS. Va al lado de su número, no escondido:
+            la garantía tiene dos partes y antes solo se mostraba la suya. */}
+        {c.sesionesPrometidas > 0 && (
+          <p className={`mt-3 rounded-2xl border p-4 text-[17px] leading-relaxed ${
+            c.cumplimosNuestraParte
+              ? 'border-[var(--line2,#DFD3BC)] text-cream/75'
+              : 'border-gold/40 bg-gold/[0.07] text-cream/90'}`}>
+            {loQueLeDimos(c)}
+          </p>
+        )}
 
         <p className="mt-4 text-[17px] text-cream">
           Tu atraso más grande fue de {c.atrasoMayor} {c.atrasoMayor === 1 ? 'día' : 'días'}.

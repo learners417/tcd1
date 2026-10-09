@@ -33,9 +33,13 @@ export async function loadAllChecks(): Promise<ChecksByCliente> {
   const map: ChecksByCliente = new Map();
   if (!supabase) return map;
 
+  // Solo lo TILDADO. Una fila puede existir sin tilde cuando guarda una nota
+  // o el link de un anuncio en un paso que sigue pendiente; contarla como
+  // hecha inflaría el avance de cada cliente.
   const { data, error } = await supabase
     .from('cliente_preactivacion_check')
-    .select('cliente_id, step_id');
+    .select('cliente_id, step_id')
+    .not('completado_at', 'is', null);
 
   if (error) {
     throw new Error(`Error cargando checklist: ${error.message}`);
@@ -68,18 +72,38 @@ export async function setCheck(
   }
 
   if (on) {
-    const { error } = await guardarFila('cliente_preactivacion_check', { cliente_id: clienteId, step_id: stepId, completado_por: completadoPor }, ['cliente_id', 'step_id']);
+    // `completado_at` va explícito: dejó de tener valor por defecto cuando se
+    // permitió que una fila exista sin tilde, para guardar la nota y el link
+    // de un paso pendiente. Sin esto, tildar dejaría la fecha en nulo y el
+    // paso seguiría contando como no hecho.
+    const { error } = await guardarFila(
+      'cliente_preactivacion_check',
+      {
+        cliente_id: clienteId,
+        step_id: stepId,
+        completado_por: completadoPor,
+        completado_at: new Date().toISOString(),
+      },
+      ['cliente_id', 'step_id'],
+    );
     if (error) {
       throw new Error(`Error tildando paso: ${(error as { message?: string }).message ?? ''}`);
     }
   } else {
+    // Destildar NO borra la fila: se llevaría puestos la nota y el link que
+    // alguien cargó ahí. Se quita la fecha, y la función de la base limpia la
+    // fila solo si no quedó nada adentro.
     const { error } = await supabase
       .from('cliente_preactivacion_check')
-      .delete()
+      .update({ completado_at: null })
       .match({ cliente_id: clienteId, step_id: stepId });
     if (error) {
       throw new Error(`Error destildando paso: ${error.message}`);
     }
+    await supabase.rpc('guardar_extra_celda', {
+      p_cliente: clienteId, p_step: stepId,
+      p_estado: null, p_nota: null, p_link: null,
+    });
   }
 }
 

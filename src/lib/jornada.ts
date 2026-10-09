@@ -21,6 +21,7 @@
  * cantidad de clientes, y es lo único que distingue una app que reemplaza
  * trabajo de una que solo suma pantallas.
  */
+import type { Funcion } from './funciones';
 
 export interface Jornada {
   personaId: string;
@@ -40,6 +41,15 @@ export interface Jornada {
   traba?: string;
   /** De qué cliente fue la traba. */
   trabaCliente?: string;
+  /**
+   * En qué funciones se fue el día.
+   *
+   * Es el dato que le faltaba a la tabla de La Semana: los minutos de reloj
+   * existían, pero no en qué se habían gastado, así que cinco de las seis
+   * funciones se dibujaban en cero para siempre. No se piden minutos por
+   * función —nadie los sabe— solo en qué trabajó; los minutos se reparten.
+   */
+  funciones?: Funcion[];
 }
 
 /** Una jornada que quedó abierta más de esto, se cerró sola en la vida real. */
@@ -62,7 +72,11 @@ export function iniciarJornada(
 
 export function cerrarJornada(
   j: Jornada,
-  x: { cerradas: string[]; atendidos: string[]; traba?: string; trabaCliente?: string },
+  x: {
+    cerradas: string[]; atendidos: string[];
+    traba?: string; trabaCliente?: string;
+    funciones?: Funcion[];
+  },
   ahora = new Date(),
 ): Jornada {
   return {
@@ -72,6 +86,7 @@ export function cerrarJornada(
     atendidos: x.atendidos,
     traba: x.traba?.trim() || undefined,
     trabaCliente: x.trabaCliente,
+    funciones: x.funciones ?? [],
   };
 }
 

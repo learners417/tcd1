@@ -20,7 +20,10 @@ const linea = (ok: boolean, txt: string) => {
 const fuente = readFileSync('src/components/campanas/MontajeCupos.tsx', 'utf-8');
 
 // Se leen los candados del código, no de una copia que se desincroniza.
-const candados = [...fuente.matchAll(/\{ id: '([a-z]+)', titulo: '([^']+)'/g)]
+// El título puede venir entre comillas o entre acentos invertidos: el de
+// presupuesto arma su texto con la constante de los días, para que el número
+// no se desincronice de la regla que lo decide.
+const candados = [...fuente.matchAll(/\{ id: '([a-z]+)', titulo: ['`]([^'`]+)['`]/g)]
   .map((m) => ({ id: m[1], titulo: m[2] }));
 const tutorialesUsados = [...fuente.matchAll(/tutorial: '([^']+)'/g)].map((m) => m[1]);
 const sesionesUsadas = [...fuente.matchAll(/sesion: '([^']+)'/g)].map((m) => m[1]);
@@ -57,15 +60,18 @@ linea(Object.values(TUTORIALES).every((t) => t.intro.length > 40),
   'todos explican para qué sirve antes de los pasos');
 
 console.log('\n══ los candados que no tienen herramienta, la nombran ══');
-const sinNada = candados.filter((c) =>
-  !fuente.includes(`id: '${c.id}', titulo: '${c.titulo}',\n    detalle:`)
-    ? false
-    : true);
 linea(sesionesUsadas.length >= 4,
   `${sesionesUsadas.length} candados nombran la sesión del Camino donde se sellan`);
 linea(sesionesUsadas.every((x) => x.length > 10),
   'y la nombran completa, no con un código suelto');
-linea(sinNada.length === candados.length, 'todos tienen su detalle escrito');
+
+// Cada candado explica qué es, no solo cómo se llama: sin el detalle, «tu
+// perfil ordenado» no le dice a nadie qué tiene que hacer.
+const detalles = [...fuente.matchAll(/detalle: '([^']+)'/g)].map((m) => m[1]);
+linea(detalles.length === candados.length,
+  `los ${candados.length} tienen su detalle escrito`);
+linea(detalles.every((d) => d.length > 40),
+  'y ninguno se despacha con media línea');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);

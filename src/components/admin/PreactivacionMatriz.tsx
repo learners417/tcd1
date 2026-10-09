@@ -6,10 +6,10 @@ import {
   loadAllChecks,
   setCheck,
   applyToggle,
-  progressPct,
   type ChecksByCliente,
 } from '../../lib/preactivacionCheck';
-import { TOTAL_STEPS } from '../../lib/preactivacionSteps';
+import { loadExtras, saveExtra, type ExtrasByCliente, type EstadoCelda } from '../../lib/matrizExtras';
+import { avanceDelCuadro } from '../../lib/avanceDelCuadro';
 import MatrizGrid, { type MatrizClienteRow } from './preactivacion/MatrizGrid';
 import ElCaminoView from './preactivacion/ElCaminoView';
 
@@ -19,6 +19,8 @@ interface Cliente {
   id: string;
   nombre: string;
   especialidad?: string;
+  /** Qué contrató. Decide cuáles de los 62 ítems le aplican de verdad. */
+  servicio_contratado?: string | null;
 }
 
 interface PreactivacionMatrizProps {
@@ -45,6 +47,32 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
   }, []);
   const [view, setView] = useState<View>('matriz');
   const [checks, setChecks] = useState<ChecksByCliente>(new Map());
+  // Los estados, notas y links de cada celda. Viven acá y no en la grilla
+  // porque el cartel de arriba los necesita para contar igual que ella.
+  const [extras, setExtras] = useState<ExtrasByCliente>(new Map());
+  useEffect(() => { void loadExtras().then(setExtras).catch(() => { /* la grilla igual anda */ }); }, []);
+
+  /**
+   * Guarda el estado, la nota o el link de una celda.
+   *
+   * Si la base lo rechaza se avisa y se vuelve atrás en pantalla: antes esto
+   * fallaba en silencio y lo cargado quedaba solo en el navegador de quien lo
+   * escribió, aunque la pantalla lo prometiera compartido.
+   */
+  const guardarExtra = (clienteId: string, stepId: string, cambio: { estado?: EstadoCelda; nota?: string; link?: string }) => {
+    const antes = extras;
+    setExtras((prev) => {
+      const n = new Map(prev);
+      const m = new Map(n.get(clienteId) ?? []);
+      m.set(stepId, { ...m.get(stepId), ...cambio });
+      n.set(clienteId, m);
+      return n;
+    });
+    void saveExtra(clienteId, stepId, cambio).catch((err: unknown) => {
+      setExtras(antes);
+      toast.error(err instanceof Error ? err.message : 'No se pudo guardar.');
+    });
+  };
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -102,22 +130,35 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
         nombre: c.nombre,
         metodo: c.especialidad,
         initial: c.nombre.charAt(0).toUpperCase(),
+        servicio: c.servicio_contratado,
       }));
   }, [clientes, search]);
 
+  /**
+   * El cartel cuenta IGUAL que la grilla.
+   *
+   * Antes contaba solo las filas tildadas en la base, mientras la grilla
+   * sumaba además los tildes automáticos del Camino y las celdas puestas en
+   * «listo» a mano. Dos números distintos para el mismo cliente, en la misma
+   * pantalla, enseñan a no creerle a ninguno de los dos.
+   */
   const stats = useMemo(() => {
     const total = clientes.length;
     let listos = 0;
-    let totalDone = 0;
+    let sumaPct = 0;
     for (const c of clientes) {
-      const pct = progressPct(checks, c.id);
-      if (pct === 100) listos += 1;
-      totalDone += checks.get(c.id)?.size ?? 0;
+      const a = avanceDelCuadro({
+        tildados: checks.get(c.id),
+        delCamino: caminoDone.get(c.id),
+        estados: extras.get(c.id),
+        servicio: c.servicio_contratado,
+      });
+      if (a.total > 0 && a.hechos === a.total) listos += 1;
+      sumaPct += a.pct;
     }
-    const totalSteps = total * TOTAL_STEPS;
-    const avgPct = totalSteps === 0 ? 0 : Math.round((totalDone / totalSteps) * 100);
+    const avgPct = total === 0 ? 0 : Math.round(sumaPct / total);
     return { total, listos, avgPct };
-  }, [clientes, checks]);
+  }, [clientes, checks, caminoDone, extras]);
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -204,15 +245,40 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
           </div>
         ) : (
           <div className="px-4 md:px-6 py-4">
+            {/* ── QUIÉN DECIDE QUE UNA CAMPAÑA PUEDE ENCENDER ──
+
+                Este cartel decía «clientes listos para activar», y esta
+                pantalla no mide eso. Mide las 62 tareas de preparación del
+                equipo. Lo que decide el encendido son los 8 candados del
+                Montaje, y cada uno se tilda porque SU DATO está cargado: el
+                píxel con su id, el dominio verificado, el formulario probado.
+
+                Dos listas que dicen «listo» sobre el mismo cliente, con dos
+                varas distintas, enseñan a no creerle a ninguna. Así que esta
+                dice lo que de verdad sabe, y nombra a la otra. */}
             {stats.listos > 0 && (
-              <div className="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-success/8 border border-success/20 text-sm font-semibold text-success w-fit">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>
-                  {stats.listos} {stats.listos === 1 ? 'cliente listo' : 'clientes listos'} para activar
-                </span>
+              <div className="mb-4 px-4 py-2.5 rounded-lg bg-success/8 border border-success/20 w-fit max-w-full">
+                <p className="flex items-center gap-2 text-sm font-semibold text-success">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>
+                    {stats.listos} {stats.listos === 1 ? 'cliente' : 'clientes'} con
+                    {' '}{stats.listos === 1 ? 'su' : 'todo su'} trabajo de preparación al día
+                  </span>
+                </p>
+                <p className="mt-1 text-sm text-cream/60">
+                  Encender se decide en el Montaje: ahí están los 8 candados, y
+                  cada uno se tilda solo cuando su dato está cargado.
+                </p>
               </div>
             )}
-            <MatrizGrid clientes={rows} checks={checks} onToggle={handleToggle} caminoDone={caminoDone} />
+            <MatrizGrid
+              clientes={rows}
+              checks={checks}
+              onToggle={handleToggle}
+              caminoDone={caminoDone}
+              extras={extras}
+              onExtra={guardarExtra}
+            />
           </div>
         )}
       </div>

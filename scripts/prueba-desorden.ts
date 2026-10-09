@@ -32,7 +32,7 @@ ok(!!vivo('la cola', () => armarCola([])), 'la cola sin cuentas');
 ok(!!vivo('los pacientes', () => estadoDePacientes([])), 'los pacientes vacíos');
 ok(!!vivo('la bitácora', () => resumirBitacora([])), 'la bitácora vacía');
 ok(!!vivo('el motor', () => veredictoMotor({ cobrado: 0, objetivo: 0, conversaciones: 0, calificados: 0, agendas: 0, llamadasTomadas: 0, cerradas: 0, gastoPauta: 0, diasSinAgenda: 0 })), 'el motor con objetivo cero');
-ok(!!vivo('el cuadro', () => avanceDe('mil', new Set())), 'el cuadro sin nada hecho');
+ok(!!vivo('el cuadro', () => avanceDe('base', new Set())), 'el cuadro sin nada hecho');
 ok(!!vivo('las fórmulas', () => recomendarFormulas({ tienePrueba: false, marcaPersonal: false, tieneFrases: false, metodoConNombre: false, tienePiedras: false })), 'las fórmulas sin ADN');
 
 console.log('\n══ números imposibles que igual se pueden escribir ══');

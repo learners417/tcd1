@@ -1,17 +1,21 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SECTIONS, STEPS, TOTAL_STEPS, RESPONSABLE_SIGLA, RESPONSABLE_LABEL } from '../../../lib/preactivacionSteps';
-import { type ExtrasByCliente, type EstadoCelda, extraDe, saveExtra, loadExtras, SIGUIENTE_ESTADO, ESTADO_LABEL } from '../../../lib/matrizExtras';
+import { type ExtrasByCliente, type EstadoCelda, extraDe, SIGUIENTE_ESTADO, ESTADO_LABEL } from '../../../lib/matrizExtras';
 import {
   type ChecksByCliente,
   isChecked,
 } from '../../../lib/preactivacionCheck';
+import { cuadroDe, servicioDe, type Ticket } from '../../../lib/cuadroTickets';
+import { avanceDelCuadro } from '../../../lib/avanceDelCuadro';
 
 export interface MatrizClienteRow {
   id: string;
   nombre: string;
   metodo?: string;
   initial: string;
+  /** Qué contrató. Sin esto se le piden los 62 a todo el mundo. */
+  servicio?: string | null;
 }
 
 interface MatrizGridProps {
@@ -19,25 +23,49 @@ interface MatrizGridProps {
   checks: ChecksByCliente;
   onToggle: (clienteId: string, stepId: string, on: boolean) => void;
   caminoDone?: Map<string, Set<string>>;
+  /**
+   * Los estados, notas y links de cada celda.
+   *
+   * Bajan del padre y no se cargan acá a propósito: el cartel de arriba los
+   * necesita para contar igual que esta grilla. Cuando cada uno tenía su copia,
+   * editar una celda dejaba los dos números distintos hasta recargar.
+   */
+  extras: ExtrasByCliente;
+  onExtra: (clienteId: string, stepId: string, cambio: { estado?: EstadoCelda; nota?: string; link?: string }) => void;
 }
 
 type Orden = 'atrasados' | 'avanzados' | 'nombre';
 
-export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: MatrizGridProps) {
+export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, extras, onExtra }: MatrizGridProps) {
   const [seccion, setSeccion] = useState<string>('todas');
-  const [extras, setExtras] = useState<ExtrasByCliente>(new Map());
-  React.useEffect(() => { void loadExtras().then(setExtras); }, []);
 
-  const aplicar = (clienteId: string, stepId: string, cambio: { estado?: EstadoCelda; nota?: string; link?: string }) => {
-    setExtras((prev) => {
-      const n = new Map(prev);
-      const m = new Map(n.get(clienteId) ?? []);
-      m.set(stepId, { ...m.get(stepId), ...cambio });
-      n.set(clienteId, m);
-      return n;
-    });
-    void saveExtra(clienteId, stepId, cambio);
-  };
+  /**
+   * LO QUE NO LE APLICA A CADA UNO, SEGÚN LO QUE CONTRATÓ.
+   *
+   * La matriz le pedía los 62 ítems a todo el mundo. A quien contrató La Base
+   * eso son veinte tareas que nadie va a hacer por él y que él tampoco puede
+   * hacer —son cuentas de la agencia— así que su avance se veía siempre bajo
+   * y la columna no significaba nada.
+   *
+   * El reparto ya estaba programado y probado en `cuadroDe`. Lo único que
+   * faltaba era usarlo: se calcula una vez por escalón, no por cliente.
+   */
+  const noAplicaPorServicio = useMemo(() => {
+    const porTicket = new Map<Ticket, Set<string>>();
+    for (const t of ['base', 'ascenso', 'instalacion'] as Ticket[]) {
+      porTicket.set(t, new Set(cuadroDe(t).filter((i) => i.noAplica).map((i) => i.id)));
+    }
+    const porCliente = new Map<string, Set<string>>();
+    for (const c of clientes) {
+      porCliente.set(c.id, porTicket.get(servicioDe(c.servicio)) ?? new Set());
+    }
+    return porCliente;
+  }, [clientes]);
+
+  const noLeAplica = (clienteId: string, stepId: string): boolean =>
+    noAplicaPorServicio.get(clienteId)?.has(stepId) ?? false;
+
+  const aplicar = onExtra;
   const pedirDetalle = (clienteId: string, stepId: string, titulo: string) => {
     const actual = extraDe(extras, clienteId, stepId);
     const link = window.prompt(`Link para «${titulo}» (Drive, doc, página, calendario). Vacío para quitarlo:`, actual.link ?? '');
@@ -64,17 +92,14 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
   const filas = useMemo(() => {
     const c = [...clientes];
     if (orden === 'nombre') return c.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    const pctDe = (id: string) => {
-      const m = extras.get(id);
-      let l = 0, na = 0;
-      for (const p of STEPS) {
-        const auto = Boolean(p.meta && caminoDone?.get(id)?.has(p.meta));
-        const e = m?.get(p.id)?.estado;
-        if (e === 'na') { na++; continue; }
-        if (auto || isChecked(checks, id, p.id) || e === 'listo') l++;
-      }
-      return Math.round((l / Math.max(1, TOTAL_STEPS - na)) * 100);
-    };
+    // La misma cuenta que el cartel de arriba y que la columna de avance:
+    // una sola, en un solo lugar.
+    const pctDe = (id: string) => avanceDelCuadro({
+      tildados: checks.get(id),
+      delCamino: caminoDone?.get(id),
+      estados: extras.get(id),
+      servicio: clientes.find((c) => c.id === id)?.servicio,
+    }).pct;
     c.sort((a, b) => pctDe(a.id) - pctDe(b.id));
     return orden === 'avanzados' ? c.reverse() : c;
   }, [clientes, orden, checks, extras, caminoDone]);
@@ -148,7 +173,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
       </div>
 
       <p className="text-sm text-cream/40">
-        {seccion === 'todas' ? 'Arrastra la tabla con el mouse, usa la barra de abajo o Shift + rueda para moverte entre las 32 columnas.' : `Viendo solo ${SECTIONS.find((x) => x.id === seccion)?.title ?? ''}.`}
+        {seccion === 'todas' ? `Arrastra la tabla con el mouse, usa la barra de abajo o Shift + rueda para moverte entre las ${TOTAL_STEPS} columnas.` : `Viendo solo ${SECTIONS.find((x) => x.id === seccion)?.title ?? ''}.`}
         {' '}Toca una celda para pasar de Pendiente → En proceso (•) → Listo (✓) → No aplica (–). El tilde dorado es automático: ya lo hizo en su Camino. Con ＋ pegas link y nota; con 🔗 clic derecho lo abres. La sigla dice quién lo hace: C cliente · A agencia · C+A ambos.</p>
 
     <div
@@ -284,17 +309,15 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
         <tbody>
           {filas.map((cl) => {
             // Como en la planilla: lo que no aplica no cuenta en el total.
-            const mapa = extras.get(cl.id);
-            let listos = 0, naCount = 0;
-            for (const p of STEPS) {
-              const auto = Boolean(p.meta && caminoDone?.get(cl.id)?.has(p.meta));
-              const e = mapa?.get(p.id)?.estado;
-              if (e === 'na') { naCount++; continue; }
-              if (auto || isChecked(checks, cl.id, p.id) || e === 'listo') listos++;
-            }
-            const base = Math.max(1, TOTAL_STEPS - naCount);
-            const pct = Math.round((listos / base) * 100);
-            const done = listos;
+            const av = avanceDelCuadro({
+              tildados: checks.get(cl.id),
+              delCamino: caminoDone?.get(cl.id),
+              estados: extras.get(cl.id),
+              servicio: cl.servicio,
+            });
+            const pct = av.pct;
+            const done = av.hechos;
+            const base = av.total;
             const isComplete = pct === 100;
             return (
               <tr key={cl.id} className="group">
@@ -366,6 +389,18 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                       }}
                     >
                       {(() => {
+                        // Lo que su servicio no incluye: se ve apagado y no se
+                        // puede tildar. Mostrarle una tarea que nadie va a
+                        // hacer por él, y que él tampoco puede hacer, es la
+                        // forma más rápida de que abandone el cuadro entero.
+                        if (noLeAplica(cl.id, step.id)) {
+                          return (
+                            <span
+                              title={`${step.title} — no entra en lo que contrató`}
+                              style={{ fontSize: 13, color: 'rgba(255,255,255,0.14)' }}
+                            >–</span>
+                          );
+                        }
                         const ex = extraDe(extras, cl.id, step.id);
                         const estado: EstadoCelda = autoCamino || on ? 'listo' : (ex.estado ?? 'pendiente');
                         const color = estado === 'listo' ? 'var(--color-success)' : estado === 'proceso' ? 'var(--color-gold)' : estado === 'na' ? 'rgba(255,255,255,0.22)' : 'var(--matrix-checkbox-off)';
@@ -428,7 +463,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone }: M
                     color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
                     fontWeight: isComplete ? 700 : 500,
                   }}
-                  title={`${done} de ${TOTAL_STEPS - naCount} que aplican${naCount ? ` · ${naCount} N/A` : ''}`}
+                  title={`${done} de ${base} que le aplican${av.noAplican ? ` · ${av.noAplican} no entran en lo que contrató` : ''}`}
                 >
                   {pct}%
                 </td>

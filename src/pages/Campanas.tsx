@@ -10,7 +10,6 @@ import CampanasHome from '../components/campanas/CampanasHome';
 import CopiesView from '../components/campanas/CopiesView';
 import DiagnosticoView from '../components/campanas/DiagnosticoView';
 import NuevaCampanaChat from '../components/campanas/NuevaCampanaChat';
-import MontajeView from '../components/campanas/MontajeView';
 import MontajeCupos from '../components/campanas/MontajeCupos';
 import HistorialView from '../components/campanas/HistorialView';
 import GanadoresView from '../components/campanas/GanadoresView';

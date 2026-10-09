@@ -4,7 +4,8 @@ import { armarMarcador, comoVaElCirculo, minutosDe, type Jornada, type Marcador 
 import { agruparTrabas, type CierreDelDia } from '../../lib/cierreDelDia';
 import { puedeVer, type Rol } from '../../lib/permisos';
 import TablaFunciones from './TablaFunciones';
-import { MINUTOS_POR, type ObservacionFuncion, type HitoDeAbsorcion } from '../../lib/funciones';
+import { porSemanas, type HitoDeAbsorcion } from '../../lib/funciones';
+import { hoyISO } from '../../lib/ventanaSinSoporte';
 import Termino from '../Termino';
 
 /**
@@ -68,6 +69,17 @@ export default function LaSemana({
     [jornadas],
   );
 
+  /** Los minutos por función, de esta semana y de las anteriores. */
+  const semanas = useMemo(
+    () => porSemanas(
+      jornadas.filter((j) => j.fin).map((j) => ({
+        dia: j.dia, fin: j.fin, funciones: j.funciones, minutos: minutosDe(j),
+      })),
+      hoyISO(),
+    ),
+    [jornadas],
+  );
+
   const trabas = useMemo(() => agruparTrabas(cierres), [cierres]);
   const delSistema = trabas.filter((t) => t.esDelSistema).length;
 
@@ -108,10 +120,16 @@ export default function LaSemana({
           dice si el negocio escaló o si simplemente hubo menos trabajo. */}
       {veRendimiento && (
         <TablaFunciones
-          estaSemana={cierres.flatMap((c): ObservacionFuncion[] => [
-            { funcion: MINUTOS_POR.excepcion.funcion, minutos: c.minutos },
-          ])}
-          semanasAnteriores={[]}
+          /* Las dos listas salen de las jornadas reales.
+
+             Antes `estaSemana` mapeaba TODO el día a una sola función
+             (destrabar) y `semanasAnteriores` iba vacío fijo. Resultado: las
+             otras cinco funciones en cero permanente, «absorber» en cero
+             disparando su alerta todos los días, y la columna de tendencia
+             —lo único que esta tabla existe para mostrar— sin poder decir
+             nada nunca, porque sin semanas anteriores el promedio es null. */
+          estaSemana={semanas.estaSemana}
+          semanasAnteriores={semanas.semanasAnteriores}
           clientesActivos={clientesActivos}
           hitos={hitos}
           clientes={clientesConMinutos}

@@ -90,7 +90,9 @@ export default function EnMarcha({
         : `${enviados} de ${META_MENSAJES} — faltan ${META_MENSAJES - enviados}`,
       alDia: ok,
       pie: racha >= 2 ? `${racha} días seguidos` : undefined,
-      ir: 'mensajes',
+      // Sin destino a propósito. Esto es estado, no una tarea: los mensajes a
+      // su red los manda afuera de la app. Apuntaba a Soporte, que es la
+      // conversación con el equipo — otra cosa completamente.
     });
   }
 
@@ -103,7 +105,8 @@ export default function EnMarcha({
       titulo: 'Responder',
       detalle: sin === 1 ? '1 conversación esperando' : `${sin} conversaciones esperando`,
       alDia: false,
-      ir: 'mensajes',
+      // Son las conversaciones del cliente con SUS consultantes, no con el
+      // equipo. Apuntaba a Soporte por el nombre parecido.
     });
   }
 

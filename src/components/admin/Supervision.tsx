@@ -5,6 +5,8 @@ import { semanaISO } from '../../lib/bitacoraCampana';
 import { mensajeDeFalla, causaDe } from '../../lib/conexion';
 import { situacionDe } from '../../lib/salaDeMando';
 import { marcarEncendida } from '../../lib/salaDeMandoStorage';
+import { loadAllChecks, type ChecksByCliente } from '../../lib/preactivacionCheck';
+import { avanceDe, servicioDe } from '../../lib/cuadroTickets';
 import TableroPlata from './TableroPlata';
 import NumerosDeLaSemana from './NumerosDeLaSemana';
 import Termino from '../Termino';
@@ -90,6 +92,13 @@ export default function Supervision(
    * no se activa nunca.
    */
   const [encendiendo, setEncendiendo] = useState<string | null>(null);
+  /** Lo que ya está tildado de cada cliente, para decir cuánto le falta. */
+  const [checks, setChecks] = useState<ChecksByCliente>(new Map());
+  useEffect(() => {
+    let vivo = true;
+    void loadAllChecks().then((d) => { if (vivo) setChecks(d); }).catch(() => { /* la línea dice «Instalando» a secas */ });
+    return () => { vivo = false; };
+  }, []);
   /**
    * El cliente abierto.
    *
@@ -214,9 +223,17 @@ export default function Supervision(
                   <td className="px-3 py-2.5">
                     {(() => {
                       const c = cliente(f.clienteId);
+                      // Cuántas le faltan según lo que contrató. Sin este dato
+                      // la línea decía «Instalando» a secas: estaba programada
+                      // para decir «le faltan 3 cosas» y nadie se lo pasaba.
+                      const av = avanceDe(
+                        servicioDe((c as { servicio_contratado?: string } | undefined)?.servicio_contratado),
+                        checks.get(f.clienteId) ?? new Set<string>(),
+                      );
                       const sit = situacionDe({
                         campanaDesde: c?.campana_desde,
                         campanaPausada: c?.campana_pausada,
+                        faltanEnCuadro: av.total - av.hechos,
                       });
                       if (sit.estado === 'instalando') {
                         return (

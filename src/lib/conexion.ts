@@ -72,6 +72,24 @@ export function causaDe(err: unknown): CausaFalla {
 }
 
 /**
+ * Si el error es «esa función no está en la base».
+ *
+ * Existe porque el panel del motor confundía los dos casos: cualquier error
+ * de una RPC le decía al equipo «corre el SQL en Supabase», incluso después
+ * de haberlo corrido. Mandar a alguien a repetir una migración que ya corrió
+ * esconde la causa real y le hace perder la tarde.
+ *
+ * PostgREST devuelve PGRST202 cuando no encuentra la función; Postgres, 42883.
+ * El texto se mira además porque el código no siempre llega.
+ */
+export function funcionQueNoExiste(err: unknown): boolean {
+  const e = err as { code?: string; message?: string } | null;
+  if (e?.code === 'PGRST202' || e?.code === '42883') return true;
+  const msg = (e?.message ?? String(err ?? '')).toLowerCase();
+  return msg.includes('does not exist') || msg.includes('could not find the function');
+}
+
+/**
  * El mensaje que ve el sanador, con la acción que le corresponde.
  *
  * Nunca se le muestra el error técnico: no puede hacer nada con él y solo

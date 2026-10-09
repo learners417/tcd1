@@ -7,6 +7,7 @@ import {
 import { ROLES, type Rol } from '../../lib/permisos';
 import { calcularCarga } from '../../lib/roles';
 import type { ItemCola } from '../../lib/colaExcepciones';
+import { FUNCIONES, type Funcion } from '../../lib/funciones';
 import { abrirJornada, cerrarJornadaEnBase, jornadaDeHoy } from '../../lib/jornadaStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
 import Termino from '../Termino';
@@ -32,6 +33,8 @@ export default function Jornada({
   rol,
   items,
   jornadasDelEquipo = [],
+  sesiones = 0,
+  enInstalacion = 0,
   children,
 }: {
   personaId: string;
@@ -39,6 +42,10 @@ export default function Jornada({
   items: ItemCola[];
   /** Las jornadas abiertas de los demás, para avisar si se pisan. */
   jornadasDelEquipo?: Jornada[];
+  /** Las sesiones que dio en los últimos siete días. Noventa minutos cada una. */
+  sesiones?: number;
+  /** Las cuentas que todavía se están instalando. */
+  enInstalacion?: number;
   /** La cola, que se dibuja en el medio. */
   children?: React.ReactNode;
 }) {
@@ -59,6 +66,8 @@ export default function Jornada({
   const [elegidos, setElegidos] = useState<Set<string>>(new Set());
   const [cerrando, setCerrando] = useState(false);
   const [traba, setTraba] = useState('');
+  /** En qué se fue el día. Es el dato que La Semana no tenía. */
+  const [enQue, setEnQue] = useState<Set<Funcion>>(new Set());
   const [trabaCliente, setTrabaCliente] = useState('');
 
   const guardarLocal = useCallback((j: Jornada | null) => {
@@ -105,6 +114,7 @@ export default function Jornada({
       atendidos: [...elegidos],
       traba: traba.trim() || undefined,
       trabaCliente: trabaCliente || undefined,
+      funciones: [...enQue],
     };
     guardarLocal(cerrarJornada(jornada, datos));
     try {
@@ -128,10 +138,14 @@ export default function Jornada({
     ...(abierta && jornada ? [jornada] : []),
   ]);
 
+  // La misma cuenta que usa «Mi rol»: una sola definición de carga para las
+  // dos pantallas. Antes esta ponía sesiones e instalación en cero, así que
+  // alguien que dio nueve sesiones en la semana empezaba el día con la barra
+  // casi vacía.
   const carga = calcularCarga(rol as never, {
     excepciones: items.filter((i) => i.quien !== 'la app').length,
-    sesiones: 0,
-    enInstalacion: 0,
+    sesiones,
+    enInstalacion,
   });
 
   // ── ENTRADA ──────────────────────────────────────────────────────────────
@@ -265,6 +279,40 @@ export default function Jornada({
                       : 'border-cream/12 text-cream/60'}`}>
                   <Check size={12} className={elegidos.has(i.clienteId) ? 'text-success' : 'text-cream/25'} />
                   {i.nombre}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── EN QUÉ SE FUE EL DÍA ──
+              La tabla de funciones de La Semana no tenía con qué llenarse: la
+              jornada guardaba los minutos y a quién atendió, pero no en qué
+              trabajó. Así que cinco de las seis funciones se dibujaban en cero
+              para siempre, y «absorber» en cero disparaba su alerta todos los
+              días contra un equipo que no tenía dónde registrarlo.
+
+              No se piden minutos: nadie sabe cuántos se le fueron en cada
+              cosa, y un número inventado parece medido. Se marca en qué, y los
+              minutos del reloj se reparten. */}
+          <div>
+            <p className="text-sm text-cream/85 mb-1">¿En qué se te fue el día?</p>
+            <p className="text-sm text-cream/45 mb-2">
+              Marca todas las que apliquen. Los minutos ya los tiene el reloj:
+              esto dice en qué se fueron.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(FUNCIONES) as Funcion[]).map((f) => (
+                <button key={f} type="button"
+                  onClick={() => setEnQue((prev) => {
+                    const n = new Set(prev);
+                    if (n.has(f)) n.delete(f); else n.add(f);
+                    return n;
+                  })}
+                  className={`min-h-[44px] rounded-xl border px-3.5 text-sm font-semibold transition ${
+                    enQue.has(f)
+                      ? 'border-gold/50 bg-gold/15 text-goldhi'
+                      : 'border-cream/15 text-cream/65'}`}>
+                  {FUNCIONES[f].nombre}
                 </button>
               ))}
             </div>

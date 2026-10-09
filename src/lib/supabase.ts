@@ -72,7 +72,18 @@ export interface Profile {
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
-  plan_comercial?: 'blanco' | 'amarillo' | 'verde' | 'negro' | 'completo'; // la escalera de venta
+  plan_comercial?: 'blanco' | 'amarillo' | 'verde' | 'negro' | 'completo'; // la escalera de ACCESO: qué pantallas ve
+  /**
+   * La escalera de SERVICIO: qué trabajo le debe el equipo.
+   *
+   * Separada de `plan_comercial` a propósito. Cuando una sola columna hacía
+   * los dos trabajos, un cliente de $497 de acceso figuraba con $5.000 de
+   * instalación contratada. Esta la marca una persona en su ficha, nunca el
+   * checkout.
+   */
+  servicio_contratado?: 'base' | 'ascenso' | 'instalacion';
+  /** Los cinco días en Bariloche. Se suma a cualquier escalón. */
+  cima_incluida?: boolean;
   plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
   acceso_hasta?: string | null;    // fin de la Semana Blanca (o del acceso del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
@@ -124,12 +135,27 @@ export interface TareaUsuario {
   tarea?: TareaTemplate;
 }
 
+/**
+ * El canal del soporte entre el cliente y el equipo.
+ *
+ * Es uno solo, y es 'privado' porque es el único que la base protege: lo leen
+ * el emisor, el receptor y el equipo, nadie más. Hubo un tiempo en que cada
+ * pantalla usaba un nombre distinto ('Consultas Generales' al escribir,
+ * 'privado' al leer, 'humano' en la bandeja) y el mensaje del cliente no
+ * aparecía en ninguna. Este tipo existe para que eso no vuelva a compilar.
+ */
+export type CanalDeSoporte = 'privado';
+
 export interface Mensaje {
   id: string;
   canal: 'privado' | 'comunidad' | 'victorias' | 'consultas';
   emisor_id?: string;
   receptor_id?: string;
   contenido: string;
+  /** 'duda' espera 24 h; 'roto' se mira el mismo día. Pone en marcha el reloj. */
+  tipo?: 'duda' | 'roto' | null;
+  /** Cuándo lo respondió el equipo. Null = sigue esperando. */
+  respondido_en?: string | null;
   tipo_archivo?: 'imagen' | 'audio';
   archivo_url?: string;
   created_at: string;

@@ -74,6 +74,7 @@ export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel 
     creativos: '',
     montaje: '',
   });
+  const [guardando, setGuardando] = useState(false);
   const [summaryTab, setSummaryTab] = useState<'resumen' | 'salida' | 'tips'>('resumen');
   const [aiOutput, setAiOutput] = useState('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -101,11 +102,73 @@ export default function NuevaCampanaChat({ userId, perfil, onComplete, onCancel 
     }
   }, [messages]);
 
+  /**
+   * Avanza de fase, y al terminar la última GUARDA LA CAMPAÑA.
+   *
+   * Acá terminaba el wizard sin hacer nada: cuando ya no quedaban fases,
+   * `advancePhase` no guardaba ni avisaba. `saveCampana` se importaba y no se
+   * llamaba nunca, y `onComplete` estaba declarado y sin invocar.
+   *
+   * O sea: se podían recorrer las seis fases con KAI, definir audiencias,
+   * copies y creativos, y al cerrar la pantalla no quedaba nada. La campaña
+   * no existía: no se podía abrir después, ni retomar, ni montar sobre ella
+   * los ocho candados. La única forma de tener una campaña en la app era
+   * cargarla a mano en la base.
+   */
+  const guardarYSalir = useCallback(async () => {
+    if (guardando) return;
+    // Sin sesión no hay dónde guardarla. Se avisa en vez de perder el trabajo
+    // en silencio, que es lo que hacía antes con todo el mundo.
+    if (!userId) {
+      toast.error('Vuelve a entrar para guardar la campaña: tu sesión venció.');
+      return;
+    }
+    setGuardando(true);
+    try {
+      const guardada = await saveCampana({
+        usuario_id: userId,
+        nombre: campaignData.nombre.trim() || 'Campaña sin nombre',
+        // Lo que el wizard no pregunta queda en el valor que la app ya usa por
+        // defecto. Inventar un dato acá sería peor que dejarlo editable después.
+        objetivo: 'clientes_potenciales',
+        nicho: campaignData.rubro || undefined,
+        ubicacion: campaignData.ubicacion || undefined,
+        edad_min: 25,
+        edad_max: 55,
+        genero: 'todos',
+        presupuesto_diario: Number(campaignData.presupuesto) || undefined,
+        duracion_dias: 30,
+        // Todo lo que KAI produjo en las seis fases. Sin esto se perdería el
+        // trabajo de la conversación, que es lo que el cliente pagó.
+        guia_configuracion: [
+          campaignData.estrategia && `## Estrategia\n${campaignData.estrategia}`,
+          campaignData.audiencias && `## Audiencias\n${campaignData.audiencias}`,
+          campaignData.copies && `## Copies\n${campaignData.copies}`,
+          campaignData.creativos && `## Creativos\n${campaignData.creativos}`,
+          campaignData.montaje && `## Montaje\n${campaignData.montaje}`,
+        ].filter(Boolean).join('\n\n') || undefined,
+        // Borrador: todavía hay que montarla en Meta. Decirla «configurada»
+        // sería anunciar como lista una campaña que no corrió nunca.
+        estado: 'borrador',
+      });
+      if (guardada) {
+        toast.success('Campaña guardada. Sigue el montaje para encenderla.');
+        onComplete(guardada);
+      } else {
+        toast.error('No se pudo guardar la campaña. Todo tu trabajo sigue en pantalla: prueba de nuevo.');
+      }
+    } finally {
+      setGuardando(false);
+    }
+  }, [guardando, userId, campaignData, onComplete]);
+
   const advancePhase = () => {
     setCompletedPhases((prev) => new Set([...prev, currentPhase]));
     const nextIndex = currentPhaseIndex + 1;
     if (nextIndex < PHASES.length) {
       setCurrentPhase(PHASES[nextIndex].id);
+    } else {
+      void guardarYSalir();
     }
   };
 

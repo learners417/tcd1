@@ -199,10 +199,8 @@ export async function notificarMensajeAdmin(
     usuario_id: userId,
     tipo: 'mensaje',
     titulo: `Nuevo mensaje de ${adminNombre}`,
-    descripcion: 'Tienes un mensaje nuevo en tu bandeja privada.',
-    // Mensajes está oculto hasta que sea usable: el aviso lleva al
-    // Dashboard, donde el cliente ve que tiene algo pendiente.
-    accion_url: '/dashboard',
+    descripcion: 'Te respondieron en Soporte.',
+    accion_url: '/mensajes',
   });
 }
 
@@ -275,10 +273,19 @@ export async function notificarMensajeCliente(
   });
 }
 
-/** Notifica a TODOS los admins (helper del G1). */
+/**
+ * Todo el equipo, no solo los dueños.
+ *
+ * Antes buscaba solo `rol = 'admin'`, así que quien tiene `admin_rol` de
+ * manager o staff —Lupe, por ejemplo— no recibía ningún aviso, aunque la base
+ * sí la deja leer los mensajes. El criterio es el mismo que usa la política de
+ * lectura: `is_team_member()`.
+ */
 async function idsAdmins(): Promise<string[]> {
   if (!isSupabaseReady() || !supabase) return [];
-  const { data } = await supabase.from('profiles').select('id').eq('rol', 'admin');
+  const { data } = await supabase
+    .from('profiles').select('id')
+    .or('rol.eq.admin,admin_rol.in.(owner,manager,staff)');
   return (data ?? []).map((r: { id: string }) => r.id);
 }
 

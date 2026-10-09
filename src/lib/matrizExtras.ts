@@ -32,7 +32,9 @@ export async function loadExtras(): Promise<ExtrasByCliente> {
     if (cli && step) poner(cli, step, v);
   }
   if (supabase) {
-    const { data, error } = await supabase.from('cliente_preactivacion_check').select('cliente_id, step_id, estado, nota, link');
+    // Lo de la base pisa lo local: es la versión que ve todo el equipo.
+    const { data, error } = await supabase.from('cliente_preactivacion_check')
+      .select('cliente_id, step_id, estado, nota, link');
     if (!error && data) {
       for (const r of data as Array<{ cliente_id: string; step_id: string; estado?: string | null; nota?: string | null; link?: string | null }>) {
         poner(r.cliente_id, r.step_id, {
@@ -46,18 +48,44 @@ export async function loadExtras(): Promise<ExtrasByCliente> {
   return out;
 }
 
+/**
+ * Guarda el estado, la nota o el link de una celda.
+ *
+ * ═══ POR QUÉ NO ES UN UPDATE ═══
+ *
+ * Antes esto hacía `update` sobre `cliente_preactivacion_check`, y en esa
+ * tabla **la fila existe solo si el paso está tildado**. Así que poner una
+ * nota en un paso pendiente —que es justo cuando una nota sirve— no tocaba
+ * ninguna fila. No fallaba: actualizaba cero filas y seguía de largo.
+ *
+ * La función de la base crea la fila si hace falta, sin tildar el paso, y
+ * devuelve el error si algo sale mal en vez de tragárselo.
+ *
+ * El guardado local sigue, pero como respaldo y no como destino: si la base
+ * no responde, al menos no se pierde lo que se acaba de escribir.
+ */
 export async function saveExtra(clienteId: string, stepId: string, cambio: ExtraCelda): Promise<void> {
   const all = leerLocal();
   const k = clave(clienteId, stepId);
   const nuevo = { ...(all[k] ?? {}), ...cambio };
   if (!nuevo.estado && !nuevo.nota && !nuevo.link) delete all[k]; else all[k] = nuevo;
   try { localStorage.setItem(LOCAL, JSON.stringify(all)); } catch { /* noop */ }
+
   if (!supabase) return;
-  await supabase
-    .from('cliente_preactivacion_check')
-    .update({ estado: nuevo.estado ?? null, nota: nuevo.nota ?? null, link: nuevo.link ?? null })
-    .eq('cliente_id', clienteId)
-    .eq('step_id', stepId);
+  const { error } = await supabase.rpc('guardar_extra_celda', {
+    p_cliente: clienteId,
+    p_step: stepId,
+    p_estado: nuevo.estado ?? null,
+    p_nota: nuevo.nota ?? null,
+    p_link: nuevo.link ?? null,
+  });
+  if (error) {
+    throw new Error(
+      /guardar_extra_celda/.test(error.message)
+        ? 'Falta correr la migración de la matriz compartida: por ahora esto queda solo en este navegador.'
+        : error.message,
+    );
+  }
 }
 
 export function extraDe(extras: ExtrasByCliente, clienteId: string, stepId: string): ExtraCelda {

@@ -209,6 +209,18 @@ export function planificarAvisos(
   return { aMandar, aEscalar, repetidos };
 }
 
+// ── El historial, y quién lo mantiene ──────────────────────────────────────
+//
+// En producción NO se guarda en memoria: el cron lo deriva de la tabla de
+// notificaciones en cada corrida, porque las dos cosas que hay que saber
+// —cuántas veces salió cada aviso y en qué semana salió el último— ya están
+// ahí desde el primer día. Una segunda copia del mismo historial es una
+// segunda copia que se puede desincronizar.
+//
+// Las dos funciones de abajo son la versión pura de esas transiciones, y es
+// con ellas que se verifica la regla del escalamiento a lo largo de varias
+// semanas sin tocar la base.
+
 /** Anota que un aviso salió, para no repetirlo. */
 export function anotarEnviado(
   historial: HistorialAvisos,

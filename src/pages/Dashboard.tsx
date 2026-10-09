@@ -12,6 +12,7 @@ import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
 import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
 import EnMarcha, { type EstadoEnMarcha } from '../components/EnMarcha';
+import MisSesiones from '../components/MisSesiones';
 import { hechoHoy, racha, anguloDelDia } from '../lib/sostenido';
 import { carriles } from '../lib/carriles';
 import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
@@ -22,8 +23,8 @@ import { VOC } from '../lib/vocabulario';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import CintaCinturon from '../components/CintaCinturon';
-import CaminoEnPausa from '../components/CaminoEnPausa';
-import { pausaActiva } from '../lib/pausaGlobal';
+import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
+import { soporteCerrado } from '../lib/ventanaSinSoporte';
 import { accesoDelPerfil, cierreDeLaVentana, sumarDias } from '../lib/ventanaDeAcceso';
 import { claveDelDia } from '../lib/roadmapSeed';
 
@@ -294,15 +295,12 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
 
-      {/* ── El Camino parado para todos: antes que nada, cuándo retoma. ── */}
+      {/* ── Si el equipo no responde estos días, se dice arriba de todo.
+             Ya no se le anuncia un Camino parado ni una fecha de cierre
+             nueva: su Camino sigue corriendo y su fecha no se movió. ── */}
       {(() => {
-        const parado = pausaActiva();
-        if (!parado) return null;
-        const acc = accesoDelPerfil(perfil as Parameters<typeof accesoDelPerfil>[0]);
-        // La víspera: así el cierre que se le pasa todavía no trae el
-        // corrimiento de ESTA pausa, que el cartel suma una sola vez.
-        const vispera = sumarDias(parado.desde, -1);
-        return <CaminoEnPausa pausa={parado} cierreOriginal={acc ? cierreDeLaVentana(acc, vispera) : null} />;
+        const cerrado = soporteCerrado();
+        return cerrado ? <SinSoporteEstosDias ventana={cerrado} /> : null;
       })()}
 
       {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
@@ -423,6 +421,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         };
         return <EnMarcha dia={diaProg} estado={est} onIr={setCurrentPage} />;
       })()}
+
+      {/* ─── TUS SESIONES ─── lo que compró y no tenía dónde ver.
+          No se dibuja hasta que tuvo la primera: un panel vacío enseña a
+          ignorarlo. */}
+      <MisSesiones
+        userId={userId}
+        servicio={(perfil as { servicio_contratado?: string | null } | undefined)?.servicio_contratado}
+      />
 
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
       <MapaCincoDias />

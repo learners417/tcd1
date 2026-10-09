@@ -7,6 +7,7 @@
  *
  * Correr con: npx tsx scripts/prueba-avisos.ts
  */
+import { readFileSync } from 'node:fs';
 import {
   planificarAvisos, anotarEnviado, olvidarAviso, mandarAviso,
   mandarMensajeDelEquipo, HISTORIAL_VACIO, AVISOS_ANTES_DE_ESCALAR,
@@ -115,6 +116,30 @@ linea((mandados[1] as { tipo: string }).tipo === 'admin',
 const vacia = await mandarMensajeDelEquipo('c1', 'Lupe', '   ', '/x', crearOk as never);
 linea(vacia === false && mandados.length === 2,
   'una nota vacía no se manda');
+
+// ── El disparador, que era lo que faltaba ─────────────────────────────────
+//
+// Toda la máquina de arriba estaba escrita y probada, y el cron insertaba el
+// aviso DIRECTO sin pasar por ella. Así que las tres reglas no se aplicaban:
+// el cliente recibía el mismo aviso todos los días y nada escalaba nunca.
+console.log('\n── el cron pasa por las tres reglas ──');
+const cron = readFileSync('api/cron/alarmas-inactividad.ts', 'utf-8');
+linea(/planificarAvisos\(pendientes, historial/.test(cron),
+  'el cron planifica en vez de insertar directo');
+linea(/for \(const aviso of plan\.aMandar\)/.test(cron),
+  'manda los que corresponden');
+linea(/for \(const aviso of plan\.aEscalar\)/.test(cron),
+  'y los que ya no alcanzan pasan a una persona: dos avisos sin cambio no es un cliente que no leyó');
+linea(/el aviso automático no alcanzó/.test(cron),
+  'con un título que le dice al equipo exactamente eso');
+linea(/\.eq\('tipo', 'sistema'\)/.test(cron) && /claveDeTitulo/.test(cron),
+  'el historial se deriva de las notificaciones ya enviadas: el dato estaba, no hacía falta una tabla nueva');
+linea(/sem > h\.ultimaSemana\[id\]/.test(cron),
+  'y se queda con la semana más reciente, porque la consulta no viene ordenada');
+linea(!/titulo: texto\.titulo/.test(cron),
+  'ya no queda ninguna inserción que se saltee el plan');
+linea(/repetidos_evitados/.test(cron),
+  'y el log dice cuántos avisos repetidos se evitaron, para poder verlo sin entrar a la base');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);

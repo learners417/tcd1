@@ -96,6 +96,10 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         { id: 'entrenadores', icon: Sparkles, label: 'Entrenadores' } as MenuItem,
         { id: 'campanas', icon: Megaphone, label: 'Campañas' } as MenuItem,
         { id: 'miclinica', icon: Hexagon, label: 'Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as MenuItem,
+        // Soporte NO entra acá. Son cinco destinos y tienen que ser los mismos
+        // que la barra de abajo; un sexto rompe las dos reglas y hace dudar
+        // cuál navegación mirar. Vive en la barra de arriba, como el Mentor:
+        // visible en todas las pantallas, sin abrir nada.
       ]
     },
   ];

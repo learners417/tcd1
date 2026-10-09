@@ -1,30 +1,33 @@
 import { useMemo } from 'react';
 import { Check } from 'lucide-react';
-import { cuadroDe, avanceDe, ticketDe, TICKETS } from '../../lib/cuadroTickets';
+import { cuadroDe, avanceDe, servicioDe, TICKETS } from '../../lib/cuadroTickets';
 
 /**
- * QUÉ LE FALTA INSTALAR, según lo que pagó.
+ * QUÉ LE FALTA INSTALAR, según el servicio que contrató.
  *
- * ═══ POR QUÉ ESTABA SUELTO ═══
+ * ═══ LOS DOS DEFECTOS QUE TENÍA ═══
  *
- * El cuadro estaba construido y probado, y **no se podía usar**: la app tenía
- * dos vocabularios de ticket que no se hablaban, así que no sabía que un
- * cliente «verde» es uno de $5.000. Por eso nunca se montó, y por eso el de
- * $5.000 no recibía nada distinto dentro de la app.
+ * 1. Leía el **plan de acceso** y lo traducía a un escalón de servicio, así
+ *    que un cliente de $497 aparecía como si tuviera contratada la
+ *    instalación de $5.000. Ahora lee la columna del servicio, que se marca
+ *    a mano.
  *
- * Ahora el puente existe y esto muestra, para cada cliente, **solo los ítems
- * que le aplican** y quién hace cada uno.
+ * 2. Se montaba **sin los tildes y sin el botón**: los valores por defecto
+ *    dejaban el progreso en 0% y todos los ítems deshabilitados, así que
+ *    decía «le faltan 42 para poder encender» para todos, siempre. Los
+ *    tildes reales existían en la base, en la misma pantalla, dos bloques
+ *    más abajo.
  */
 export default function CuadroDelCliente({
-  plan,
+  servicio,
   hechos = new Set(),
   onMarcar,
 }: {
-  plan: string | null | undefined;
+  servicio: string | null | undefined;
   hechos?: Set<string>;
   onMarcar?: (id: string) => void;
 }) {
-  const ticket = ticketDe(plan);
+  const ticket = servicioDe(servicio);
   const def = TICKETS[ticket];
   const items = useMemo(() => cuadroDe(ticket), [ticket]);
   const avance = useMemo(() => avanceDe(ticket, hechos), [ticket, hechos]);
@@ -42,14 +45,14 @@ export default function CuadroDelCliente({
     <div className="space-y-4">
       <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/70 mb-1">
-          {def.nombre}
+          {def.nombre} · {def.precio.toLocaleString('es')} USD
         </p>
         <p className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>
           {avance.hechos} de {avance.total}
         </p>
         <p className="text-sm text-cream/65 mt-1">
           {avance.pct === 100
-            ? 'Tiene todo lo que su plan incluye.'
+            ? 'Tiene todo lo que su servicio incluye.'
             : `Le faltan ${avance.total - avance.hechos} para poder encender.`}
         </p>
         <div className="h-1.5 rounded-full bg-cream/10 mt-3 overflow-hidden">
@@ -83,9 +86,10 @@ export default function CuadroDelCliente({
         </div>
       ))}
 
-      <p className="text-sm text-cream/35 text-center">
-        Solo se muestran los {avance.total} ítems que su plan incluye.
-        Los demás no le aplican y no cuentan para su avance.
+      <p className="text-sm text-cream/45 text-center leading-relaxed">
+        {def.incluye}
+        {' '}Solo se muestran los {avance.total} ítems que su servicio incluye;
+        los demás no le aplican y no cuentan para su avance.
       </p>
     </div>
   );

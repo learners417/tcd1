@@ -12,8 +12,8 @@ import {
   estaEnFaseAutonomia, mensajeDeRitmo, fechaLocal,
   esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar,
 } from '../src/lib/diaPrograma';
+import { readFileSync, existsSync } from 'node:fs';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
-import { opcionesDePartida, jornadasHasta, resumenDePartida, diaDeLaOpcion } from '../src/lib/puntoDePartida';
 import { cinturonDesdeProgreso } from '../src/lib/cinturones';
 import { HERRAMIENTAS, HERRAMIENTAS_V3, getHerramienta, herramientasV3 } from '../src/lib/herramientas';
 import { SESIONES_GUIADAS, sesionGuiadaDe } from '../src/lib/sesionesGuiadas';
@@ -90,24 +90,24 @@ ok(pilarAlcanzado(primerPaso.p.metas, 0, primerPaso.m.dia_asignado ?? 0), `el pi
 const reglasViejas = new Set(['auto', 'completar_anterior', 'venta_real', 'qa_verde']);
 ok(SEED_ROADMAP_V2.every((p) => !reglasViejas.has(p.desbloqueo)), 'control: el seed ya no usa las reglas viejas (por eso hacía falta la nueva)');
 
-console.log('\n── el punto de partida del cliente que ya venía andando ──');
-const ops = opcionesDePartida();
-ok(ops.length === 10, `hay ${ops.length} opciones, una por grado ganable`);
-ok(ops.every((o) => o.loQueYaTienes && !/cintur/i.test(o.loQueYaTienes)), 'cada opción dice lo que YA TIENE, no el nombre del grado');
-const campana = ops.find((o) => o.id === '4gup')!;
-ok(campana.dia === 31, `«${campana.loQueYaTienes}» entra en el día ${campana.dia}`);
-const marcadas = jornadasHasta(SEED_ROADMAP_V2, campana.dia);
-ok(marcadas.length > 0 && marcadas.length < 90, `marca ${marcadas.length} jornadas, no las 90`);
-const codigos = new Set(marcadas.map((m) => m.codigo));
-const todas = SEED_ROADMAP_V2.flatMap((p) => p.metas.map((m) => ({ p, m })));
-ok(!codigos.has('P0.d0'), 'no marca la entrega técnica: es del equipo');
-ok(todas.filter(({ m }) => codigos.has(m.codigo)).every(({ m }) => (m.dia_asignado ?? 0) <= 31), 'no marca nada posterior al día elegido');
-ok(!todas.some(({ m }) => codigos.has(m.codigo) && m.evidencia_requerida?.del_mercado), 'no marca lo que depende de que otro pague: eso se gana');
-const grado = cinturonDesdeProgreso(new Set(marcadas.map((m) => m.clave)));
-ok(grado.id === '4gup', `con eso marcado, el cinturón queda en ${grado.nombre}`);
-ok(diaDeLaOpcion('inventado') === null && resumenDePartida(SEED_ROADMAP_V2, 'inventado') === null, 'una opción inventada no rompe nada');
-const cero = jornadasHasta(SEED_ROADMAP_V2, 0);
-ok(cero.length === 0, 'el que empieza de cero no arrastra nada');
+console.log('\n── lo que ya tiene: en revisión, no por hecho ──');
+// Acá había un bloque que probaba puntoDePartida.ts: un módulo que marcaba
+// hasta ochenta jornadas COMO HECHAS según lo que el cliente dijera tener.
+//
+// El producto descartó eso a propósito —«nadie se salta el Camino: el que
+// llega con la agenda llena y el que empieza de cero recorren lo mismo»— y la
+// pantalla se reescribió sobre yaTienes.ts, que las deja EN REVISIÓN: las hace
+// igual, más cortas, con el Crítico midiendo lo que trae.
+//
+// El módulo viejo y esta prueba sobrevivieron al cambio. Eso es peor que
+// código muerto: es código muerto con prueba en verde, que parece vivo y
+// correcto, y lo primero que invita es a volver a cablearlo. Se borraron los
+// dos. Lo que queda verificado es que la pantalla usa el camino nuevo.
+const ya = readFileSync('src/components/PuntoDePartida.tsx', 'utf-8');
+ok(/from '\.\.\/lib\/yaTienes'/.test(ya),
+  'la pantalla marca lo que ya tiene como revisión, no como jornada cumplida');
+ok(!existsSync('src/lib/puntoDePartida.ts'),
+  'y el módulo que las daba por hechas ya no existe para tentar a nadie');
 
 // ── 2. El vocabulario ─────────────────────────────────────────────────────
 console.log('\n── ningún token crudo sale del catálogo ──');

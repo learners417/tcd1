@@ -5,7 +5,7 @@
 
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { cargarPausas } from './lib/pausasDatos';
+import { cargarVentanas } from './lib/ventanasDatos';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
@@ -144,7 +144,7 @@ export default function App() {
   // mostrar nada: está para que, cuando la respuesta llegue, las pantallas que
   // ya se pintaron vuelvan a calcular su día con el corrimiento puesto.
   const [pausasListas, setPausasListas] = useState(false);
-  useEffect(() => { void cargarPausas().then(() => setPausasListas(true)); }, []);
+  useEffect(() => { void cargarVentanas().then(() => setPausasListas(true)); }, []);
   // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
   useEffect(() => {
     try {
@@ -546,6 +546,8 @@ export default function App() {
           completadas={completadas}
           fechaInicio={supabaseProfile?.fecha_inicio}
           entregas={supabaseProfile?.entregas}
+          userId={supabaseProfile?.id}
+          servicio={(supabaseProfile as { servicio_contratado?: string | null } | null)?.servicio_contratado}
           waLink={waLink('Terminé mi Camino y quiero hablar de lo que sigue')}
         />
       );

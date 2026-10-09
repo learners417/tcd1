@@ -44,8 +44,14 @@ INTERNAS = [
     ('campanas>ganadores', 'campanas', 'Ganadores'),
 ]
 # Las pestañas del Admin (VALID_MAIN_TABS de Admin.tsx), vistas con rol de dirección.
+# 'plata' se cayó de acá el 9 oct: la Mesa de plata se borró en la cirugía 5 y
+# esta lista seguía pidiéndola. Una pestaña que no existe no deja la pantalla en
+# blanco: el Admin se queda en la anterior y el medidor la mide dos veces,
+# contando un verde que no corresponde a ninguna pantalla. La lente
+# «el medidor mide las pestañas que existen» de auditoria.py vigila que no
+# vuelva a pasar.
 ADMIN = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos',
-         'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa']
+         'tareas', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa']
 # Desde el 16 sep, TODAS las pantallas del cliente.
 ESTRICTAS = list(PANTALLAS) + [n for n, _, _ in INTERNAS]
 ADMIN_ESTRICTO = True  # el Admin llegó a cero el 16 sep
@@ -231,7 +237,10 @@ def main():
         vals = [m['lateral'] if c == 'lateral' else m['tokens'] if c == 'tokens' else len(m[c]) for c in COLUMNAS]
         total += sum(vals)
         print(p.ljust(ancho), ' '.join(str(v).rjust(7) for v in vals))
-    print(f'\nTOTAL de faltas: {total}')
+    # Las dos cuentas que lee auditoria.py. El total de vistas sale de acá y no
+    # escrito a mano en la auditoría: estuvo a mano y se desfasó sin avisar.
+    print(f'\nVISTAS MEDIDAS: {len(resultados)}')
+    print(f'TOTAL de faltas: {total}')
     with open('/tmp/medir-app.json', 'w') as f:
         json.dump(resultados, f, ensure_ascii=False, indent=1)
     print('detalle en /tmp/medir-app.json · capturas en /tmp/app-<pantalla>.png')

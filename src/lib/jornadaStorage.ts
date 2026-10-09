@@ -1,5 +1,6 @@
 import { db } from './supabase';
 import type { Jornada } from './jornada';
+import type { Funcion } from './funciones';
 
 /**
  * Las consultas de la jornada.
@@ -19,6 +20,7 @@ interface FilaJornada {
   atendidos: string[] | null;
   traba: string | null;
   traba_cliente: string | null;
+  funciones?: string[] | null;
 }
 
 const aJornada = (f: FilaJornada): Jornada => ({
@@ -31,6 +33,7 @@ const aJornada = (f: FilaJornada): Jornada => ({
   atendidos: f.atendidos ?? [],
   traba: f.traba ?? undefined,
   trabaCliente: f.traba_cliente ?? undefined,
+  funciones: (f.funciones ?? []) as Funcion[],
 });
 
 /** Abre el día. Si ya estaba abierto, actualiza lo planeado. */
@@ -48,13 +51,14 @@ export async function abrirJornada(
 /** Cierra el día con lo atendido y la traba, si la hubo. */
 export async function cerrarJornadaEnBase(
   personaId: string,
-  x: { atendidos: string[]; traba?: string; trabaCliente?: string },
+  x: { atendidos: string[]; traba?: string; trabaCliente?: string; funciones?: Funcion[] },
 ): Promise<void> {
   const { error } = await db().rpc('cerrar_jornada', {
     p_persona: personaId,
     p_atendidos: x.atendidos,
     p_traba: x.traba ?? null,
     p_traba_cliente: x.trabaCliente ?? null,
+    p_funciones: x.funciones ?? [],
   });
   if (error) throw new Error(error.message);
 }
@@ -66,7 +70,7 @@ export async function cerrarJornadaEnBase(
  * uno viera solo las suyas, no habría forma de notar que la misma traba le
  * pasó a tres personas.
  */
-export async function jornadasRecientes(dias = 7): Promise<Jornada[]> {
+export async function jornadasRecientes(dias = 28): Promise<Jornada[]> {
   const { data, error } = await db().rpc('jornadas_recientes', { p_dias: dias });
   if (error || !data) return [];
   return (data as unknown as FilaJornada[]).map(aJornada);
@@ -76,7 +80,7 @@ export async function jornadasRecientes(dias = 7): Promise<Jornada[]> {
 export async function jornadaDeHoy(personaId: string): Promise<Jornada | null> {
   const { data, error } = await db()
     .from('jornadas')
-    .select('persona_id, dia, inicio, fin, planeados, atendidos, traba, traba_cliente')
+    .select('persona_id, dia, inicio, fin, planeados, atendidos, traba, traba_cliente, funciones')
     .eq('persona_id', personaId)
     .eq('dia', new Date().toISOString().slice(0, 10))
     .maybeSingle();

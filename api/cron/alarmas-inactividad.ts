@@ -11,7 +11,10 @@
 
 import { getAdminClient } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
-import { AVISOS } from '../../src/lib/avisosCliente.js';
+import {
+  AVISOS, planificarAvisos, type HistorialAvisos,
+} from '../../src/lib/avisosCliente.js';
+import type { ItemCola } from '../../src/lib/colaExcepciones.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -158,6 +161,39 @@ async function handler(req: any, res: any) {
     // recorre a los clientes activos: sumar otro cron sería otro lugar más
     // donde algo puede fallar en silencio.
     let avisados = 0;
+    let escalados = 0;
+    let repetidosHoy = 0;
+    const pendientes: ItemCola[] = [];
+    const nombrePorId = new Map<string, string>(
+      (clientes ?? []).map((c: { id: string; nombre?: string | null }) =>
+        [c.id, c.nombre ?? 'Cliente']));
+
+    // El historial de avisos, derivado de lo que ya se mandó. Las dos cosas
+    // que planificarAvisos necesita saber —cuántas veces salió cada aviso y
+    // en qué semana salió la última— están en la tabla de notificaciones
+    // desde el primer día. El título identifica el aviso: en AVISOS hay uno
+    // por cuello y no se repiten.
+    const historial: HistorialAvisos = await (async () => {
+      const claveDeTitulo = new Map<string, string>(
+        Object.entries(AVISOS).map(([clave, a]) => [a.titulo, clave]));
+      const desde = new Date(Date.now() - 70 * 86400000).toISOString();
+      const { data: previas } = await admin
+        .from('notificaciones')
+        .select('usuario_id, titulo, created_at')
+        .eq('tipo', 'sistema')
+        .gte('created_at', desde);
+      const h: HistorialAvisos = { enviados: {}, ultimaSemana: {} };
+      for (const n of (previas ?? []) as Array<{ usuario_id: string; titulo: string; created_at: string }>) {
+        const clave = claveDeTitulo.get(n.titulo);
+        if (!clave) continue;
+        const id = `${n.usuario_id}|${clave}`;
+        h.enviados[id] = (h.enviados[id] ?? 0) + 1;
+        const sem = semanaISOde(new Date(n.created_at));
+        // Se queda la más reciente: la lista no viene ordenada.
+        if (!h.ultimaSemana[id] || sem > h.ultimaSemana[id]) h.ultimaSemana[id] = sem;
+      }
+      return h;
+    })();
     try {
       const semana = semanaISOde(new Date());
       const { data: filas } = await admin.rpc('clientes_para_avisar', { p_semana: semana });
@@ -176,26 +212,72 @@ async function handler(req: any, res: any) {
           : null;
         if (!cuello) continue;
 
-        const texto = AVISOS[cuello];
-        if (!texto) continue;
+        pendientes.push({
+          clienteId: it.cliente_id,
+          nombre: nombrePorId.get(it.cliente_id) ?? 'Cliente',
+          cuello,
+          situacion: '', accion: '', como: '',
+          // El cron solo manda lo automático: lo que necesita persona ya está
+          // en la cola del Admin y lo ve el equipo al abrir su día.
+          quien: 'la app',
+          enRiesgo: 0, semanasIgual: 0, yaSeIntento: false,
+        });
+      }
 
+      // ── LAS TRES REGLAS QUE FALTABAN ──
+      //
+      // El bloque anterior insertaba el aviso DIRECTO, sin mirar nada. Dos
+      // consecuencias, las dos en contra de lo que el aviso busca:
+      //
+      //   · El cliente recibía el mismo aviso TODOS LOS DÍAS mientras el
+      //     cuello siguiera. Las alarmas del equipo sí chequean si ya salieron
+      //     hoy; estas no. Un aviso diario por el mismo motivo deja de leerse
+      //     al segundo día, y de paso enseña a ignorar la campana entera.
+      //   · Nunca escalaba. `AVISOS_ANTES_DE_ESCALAR` estaba escrito y no se
+      //     aplicaba en ninguna parte: después de dos avisos sin que el
+      //     cliente lo resolviera, no se enteraba nadie.
+      //
+      // `planificarAvisos` ya resolvía las tres reglas y nadie la llamaba. El
+      // historial que necesita se deriva de las notificaciones ya enviadas:
+      // el dato estaba, no hacía falta una tabla nueva.
+      const plan = planificarAvisos(pendientes, historial, semanaISOde(new Date()));
+
+      for (const aviso of plan.aMandar) {
         await admin.from('notificaciones').insert({
-          usuario_id: it.cliente_id,
+          usuario_id: aviso.clienteId,
           tipo: 'sistema',
-          titulo: texto.titulo,
-          descripcion: texto.descripcion,
-          accion_url: texto.destino,
+          titulo: aviso.titulo,
+          descripcion: aviso.descripcion,
+          accion_url: aviso.destino,
           leida: false,
         });
         avisados++;
       }
+
+      // Lo que el aviso automático no pudo resolver pasa a una persona. Dos
+      // veces avisado y sin cambio no es un cliente que no leyó: es un aviso
+      // que no alcanza para eso.
+      for (const aviso of plan.aEscalar) {
+        const nombre = nombrePorId.get(aviso.clienteId) ?? 'Cliente';
+        await Promise.all(adminIds.map((aid) =>
+          admin.from('notificaciones').insert({
+            usuario_id: aid,
+            tipo: 'admin',
+            titulo: `${nombre}: el aviso automático no alcanzó`,
+            descripcion: `Se le avisó ${aviso.vecesEnviado} ${aviso.vecesEnviado === 1 ? 'vez' : 'veces'} por «${aviso.titulo}» y sigue igual. Necesita una persona.`,
+            accion_url: '/admin/clientes',
+            leida: false,
+          })));
+        escalados++;
+      }
+      repetidosHoy = plan.repetidos;
     } catch (err) {
       // No tumba el cron: las alarmas del equipo ya se mandaron, y perderlas
       // por un fallo de los avisos sería cambiar un problema por dos.
       console.error('[cron/alarmas-inactividad] fallaron los avisos', err);
     }
 
-    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados}`);
+    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados} escalados=${escalados} repetidos_evitados=${repetidosHoy}`);
     return res.status(200).json({ ok: true, alarmas });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

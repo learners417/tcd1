@@ -1,6 +1,6 @@
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target, LifeBuoy } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -9,6 +9,7 @@ import CreditsBadge from './credits/CreditsBadge';
 import { CREDITS_ENABLED } from '../lib/featureFlags';
 import { useConexion } from '../lib/conexion';
 import { VOC } from '../lib/vocabulario';
+import { sinLeerDelCliente } from '../lib/soporteDatos';
 
 interface TopbarProps {
   currentPage?: string;
@@ -32,7 +33,7 @@ const searchablePages = [
   { id: 'roadmap', label: 'El Camino', icon: Map, desc: 'Tus sesiones, una por día', minPilar: 0 },
   { id: 'adn', label: 'Mi ADN', icon: Sparkles, desc: 'Las piezas que ya sellaste', minPilar: 0 },
   { id: 'coach', label: 'Tu Mentor', icon: MessageSquare, desc: 'Tu guía del proceso', minPilar: 0 },
-  // { id: 'mensajes', label: 'Mensajes', icon: Users, desc: 'Comunicación con el equipo' }, // oculto hasta que esté usable
+  { id: 'mensajes', label: 'Soporte', icon: LifeBuoy, desc: 'Escríbele al equipo, o pregunta a la IA', minPilar: 0 },
   { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, pacientes', minPilar: 4 },
   { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0 },
   { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Las clases del método', minPilar: 2 },
@@ -80,7 +81,7 @@ const URL_TO_PAGE: Record<string, string> = {
   '/adn': 'adn',
   '/coach': 'coach',
   '/biblioteca': 'biblioteca',
-  // '/mensajes': 'mensajes', // oculto hasta que esté usable
+  '/mensajes': 'mensajes',
   '/admin/clientes': 'admin-clientes',
   '/admin/mensajes': 'admin-mensajes',
 };
@@ -111,6 +112,14 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
   const [notifications, setNotifications] = useState<NotificacionDB[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [shaking, setShaking] = useState(false);
+  /**
+   * Respuestas del equipo que el cliente todavía no abrió.
+   *
+   * Vive acá y no en App porque el botón vive acá: antes el contador era un
+   * cero escrito a mano dentro de la pantalla de Soporte, así que el cliente
+   * solo se enteraba de que le habían respondido si entraba por las dudas.
+   */
+  const [soporteSinLeer, setSoporteSinLeer] = useState(0);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -168,6 +177,28 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
     }
     return () => { alive = false; };
   }, [userId, setCurrentPage]);
+
+  // Las respuestas del equipo sin abrir, y el aviso en vivo cuando llega una.
+  useEffect(() => {
+    if (!userId) return;
+    let vivo = true;
+    void sinLeerDelCliente(userId).then((n) => { if (vivo) setSoporteSinLeer(n); });
+
+    if (!isSupabaseReady() || !supabase) return () => { vivo = false; };
+    const canal = supabase.channel(`soporte-sin-leer-${userId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'mensajes',
+        filter: `receptor_id=eq.${userId}`,
+      }, () => { if (vivo) setSoporteSinLeer((n) => n + 1); })
+      .subscribe();
+
+    return () => { vivo = false; if (supabase) supabase.removeChannel(canal); };
+  }, [userId]);
+
+  // Abrir Soporte es leerlo: el contador no puede sobrevivir a la visita.
+  useEffect(() => {
+    if (currentPage === 'mensajes') setSoporteSinLeer(0);
+  }, [currentPage]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -272,6 +303,31 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               style={{ background: '#6E5019', color: '#FFFDF7' }}
             >
               <MessageSquare className="w-5 h-5" /> <span className="hidden sm:inline">Mentor</span>
+            </button>
+          )}
+          {/* Soporte está en todas las pantallas, igual que el Mentor.
+              Antes la página existía y no se llegaba desde ningún lado: el
+              cliente que necesitaba al equipo no tenía por dónde escribir, y
+              terminaba buscándolos afuera de la app. */}
+          {currentPage !== 'mensajes' && setCurrentPage && (
+            <button
+              type="button"
+              onClick={() => setCurrentPage('mensajes')}
+              aria-label={soporteSinLeer > 0
+                ? `Soporte (${soporteSinLeer} sin leer)`
+                : 'Soporte: escríbele al equipo'}
+              className={`w-12 h-12 rounded-full card-panel flex items-center justify-center transition-colors active:scale-95 relative ${
+                soporteSinLeer > 0
+                  ? 'text-gold ring-1 ring-gold/30 hover:text-goldhi'
+                  : 'text-cream/75 hover:text-cream'
+              }`}
+            >
+              <LifeBuoy className="w-6 h-6" />
+              {soporteSinLeer > 0 && (
+                <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-sm font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
+                  {soporteSinLeer > 9 ? '9+' : soporteSinLeer}
+                </span>
+              )}
             </button>
           )}
           {/* Credits balance · click → modal de compra · oculto via flag mientras el sistema esta apagado */}

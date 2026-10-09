@@ -1,16 +1,25 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase, db } from '../../lib/supabase';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { mensajeDeFalla } from '../../lib/conexion';
+import { mensajeDeFalla, funcionQueNoExiste } from '../../lib/conexion';
+import {
+  costoPorCliente, comoVaElCosto, enPorciento,
+  type GastoDeUno, type ClienteParaElCosto,
+} from '../../lib/costoDelCliente';
 
 /**
  * PANEL DEL MOTOR DE IA
  *
- * Para quien mantiene la app. Responde cuatro preguntas y nada más:
- * qué se está usando, qué cuesta, qué falla y qué tarda.
+ * Para quien mantiene la app. Responde cinco preguntas y nada más: qué se está
+ * usando, qué cuesta, a quién le cuesta, qué falla y qué tarda.
  *
- * No es un tablero de negocio — ese es la Mesa de plata. Este es el tablero
- * del motor: sin él, optimizar es adivinar.
+ * La tercera se agregó después y es la que decide si el negocio cierra. El
+ * total del motor dice si la cuenta del proveedor duele; el costo por cliente
+ * dice a quién le duele. Cien dólares repartidos entre cuarenta clientes es el
+ * costo de operar. Cien dólares de un solo cliente es un problema con nombre.
+ *
+ * Este es el tablero del motor, no el del negocio: sin él, optimizar es
+ * adivinar.
  */
 
 interface FilaModelo {
@@ -34,11 +43,16 @@ const usd = (n: number | null | undefined) =>
 const ms = (n: number | null | undefined) =>
   n == null ? '—' : n >= 1000 ? `${(n / 1000).toFixed(1)} s` : `${Math.round(n)} ms`;
 
-export default function PanelMotorIA() {
+export default function PanelMotorIA({
+  clientes = [],
+}: {
+  clientes?: ClienteParaElCosto[];
+}) {
   const [dias, setDias] = useState<number>(7);
   const [modelos, setModelos] = useState<FilaModelo[] | null>(null);
   const [fallas, setFallas] = useState<FilaFalla[] | null>(null);
   const [total, setTotal] = useState<Total | null>(null);
+  const [gastos, setGastos] = useState<GastoDeUno[] | null>(null);
   const [cargando, setCargando] = useState(true);
   const [problema, setProblema] = useState<string | null>(null);
 
@@ -46,23 +60,31 @@ export default function PanelMotorIA() {
     setCargando(true);
     setProblema(null);
     try {
-      const [m, f, t] = await Promise.all([
+      const [m, f, t, g] = await Promise.all([
         db().rpc('panel_ia_por_modelo', { p_dias: dias }),
         db().rpc('panel_ia_fallas', { p_limite: 20 }),
         db().rpc('panel_ia_total', { p_dias: dias }),
+        db().rpc('gasto_ia_por_cliente', { p_dias: dias }),
       ]);
-      if (m.error || f.error || t.error) {
-        // El caso más probable: el SQL todavía no se corrió. Decirlo con
-        // todas las letras en vez de mostrar un panel vacío que parece un bug.
+
+      // Dos causas que se veían iguales y se arreglan distinto. Antes, cualquier
+      // error decía «corre sala-de-mando.sql»: después de haberlo corrido, eso
+      // manda a repetir una migración y esconde la causa verdadera.
+      const roto = [m.error, f.error, t.error, g.error].find(Boolean);
+      if (roto) {
         setProblema(
-          'Todavía no hay datos del motor. Corre sala-de-mando.sql en Supabase para que empiece a registrarse.',
+          funcionQueNoExiste(roto)
+            ? 'El motor todavía no tiene sus funciones en la base. Corre sala-de-mando.sql en Supabase.'
+            : `La base rechazó la consulta del panel: ${roto.message}`,
         );
-        setModelos([]); setFallas([]); setTotal(null);
+        setModelos([]); setFallas([]); setTotal(null); setGastos([]);
         return;
       }
+
       setModelos((m.data ?? []) as FilaModelo[]);
       setFallas((f.data ?? []) as FilaFalla[]);
       setTotal((Array.isArray(t.data) ? t.data[0] : t.data) as Total);
+      setGastos((g.data ?? []) as GastoDeUno[]);
     } catch (err) {
       setProblema(mensajeDeFalla(err, 'cargar el panel'));
     } finally {
@@ -71,6 +93,11 @@ export default function PanelMotorIA() {
   }, [dias]);
 
   useEffect(() => { void cargar(); }, [cargar]);
+
+  const porCliente = useMemo(
+    () => costoPorCliente(gastos ?? [], clientes),
+    [gastos, clientes],
+  );
 
   const hayEstimado = (total?.usd_estimado ?? 0) > 0;
 
@@ -175,6 +202,53 @@ export default function PanelMotorIA() {
         <p className="text-sm text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
           La mediana dice cómo se siente normalmente. El P95 dice cuánto espera el cliente
           en el peor de cada veinte intentos — es el que hace abandonar.
+        </p>
+      </div>
+
+      {/* ── A quién le cuesta ──
+          El total de arriba dice si la cuenta duele. Esto dice a quién. */}
+      <div className="rounded-2xl border border-cream/12 overflow-hidden">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold px-4 pt-4 pb-2">
+          Lo que cuesta cada cliente
+        </p>
+        <p className="text-sm text-cream/70 px-4 pb-3 leading-relaxed">
+          {gastos === null ? 'Cargando…' : comoVaElCosto(porCliente)}
+        </p>
+        {porCliente.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs uppercase tracking-wider text-cream/45">
+                  <th className="text-left font-semibold px-4 py-2">Cliente</th>
+                  <th className="text-right font-semibold px-3 py-2">Pagó</th>
+                  <th className="text-right font-semibold px-3 py-2">Gastó en IA</th>
+                  <th className="text-right font-semibold px-3 py-2">De su ticket</th>
+                  <th className="text-right font-semibold px-4 py-2">Llamadas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {porCliente.map((f) => (
+                  <tr key={f.id} className="border-t border-cream/[0.07]">
+                    <td className="px-4 py-2 text-cream/85">{f.nombre}</td>
+                    <td className="px-3 py-2 text-right text-cream/50">${f.ticket.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-right text-gold">{usd(f.usd)}</td>
+                    <td className={`px-3 py-2 text-right font-semibold ${
+                      f.senal === 'actuar' ? 'text-danger'
+                      : f.senal === 'mirar' ? 'text-gold'
+                      : 'text-cream/45'}`}>
+                      {enPorciento(f.porcion)}
+                    </td>
+                    <td className="px-4 py-2 text-right text-cream/60">{f.llamadas}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="text-sm text-cream/40 px-4 py-3 border-t border-cream/[0.07]">
+          Un cliente que pagó una vez y consume IA durante noventa días es una
+          suscripción al revés. Este cruce lo muestra ahora, no en el resumen de
+          la tarjeta tres meses después.
         </p>
       </div>
 

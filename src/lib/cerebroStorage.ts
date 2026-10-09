@@ -101,7 +101,8 @@ export async function mandarleAlCliente(x: {
   if (!x.clienteId || !x.texto.trim()) return false;
   try {
     const { error } = await db().from('mensajes').insert({
-      canal: 'humano',
+      // El canal único: es el que la base protege y el que el cliente lee.
+      canal: 'privado',
       emisor_id: x.deQuien,
       receptor_id: x.clienteId,
       contenido: x.texto.trim(),
@@ -113,7 +114,7 @@ export async function mandarleAlCliente(x: {
       usuario_id: x.clienteId,
       titulo: 'Tienes un mensaje del equipo',
       descripcion: x.texto.trim().slice(0, 120),
-      accion_url: '/dashboard',
+      accion_url: '/mensajes',
     });
 
     // Responder al último es responder a todos los anteriores: dejarlos

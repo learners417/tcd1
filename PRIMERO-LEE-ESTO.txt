@@ -1,34 +1,31 @@
 ══════════════════════════════════════════════════════════════════
-  TU CLÍNICA DIGITAL · los números del cliente a la vista del equipo
-  Para que Lupe vea cómo le va a cada uno con sus anuncios.
+  VERSIÓN FINAL — turnos 1 al 9
+  Reemplaza cualquier ZIP anterior.
 ══════════════════════════════════════════════════════════════════
 
-Son 9 archivos. Van a la rama "mejoras", encima de lo que ya subiste.
-
-NO subas esto hasta que Ani y el resto estén adentro y andando.
-La app no se toca en la semana de un lanzamiento.
+Son 87 archivos. Van a la rama "mejoras".
 
 
-1 · SUBIR
+1 · CORRER LAS SIETE MIGRACIONES EN SUPABASE
 ──────────────────────────────────────────────────────────────────
-  auditoria.py
-  scripts/              1 archivo (prueba nueva)
-  src/components/admin/ 1 archivo (nuevo)
-  src/components/campanas/ 1 archivo
-  src/lib/              4 archivos (2 nuevos)
-  src/pages/Admin.tsx
-  supabase/migrations/  1 archivo (nuevo)
+  20261009_canal_unico_soporte.sql
+  20261009_servicio_contratado.sql
+  20261010_mensajes_sin_leer.sql
+  20261011_matriz_compartida.sql
+  20261012_montaje_de_campana.sql
+  20261013_sesiones_humanas.sql
+  20261014_funciones_de_la_jornada.sql    ← nueva
+
+Y la de antes, si todavía no corrió:
+  20261002_numeros_del_cliente.sql
+
+Las siete son idempotentes: correrlas dos veces no rompe nada.
+
+sala-de-mando.sql YA CORRIÓ: lo confirmamos con la lista de tablas
+que pasaste. Sus 17 tablas y 23 funciones están.
 
 
-2 · CORRER LA MIGRACIÓN EN SUPABASE
-──────────────────────────────────────────────────────────────────
-  supabase/migrations/20261002_numeros_del_cliente.sql
-
-Sin esto no funciona nada de lo nuevo: hoy la base solo deja que cada
-cliente lea sus propias métricas, y por eso el equipo no veía ninguna.
-
-
-3 · LOS CINCO QUE SIGUEN SIN BORRAR
+2 · BORRAR
 ──────────────────────────────────────────────────────────────────
   LEEME-SUBIR.txt
   src/components/tasks/TaskChecklist.tsx
@@ -36,61 +33,290 @@ cliente lea sus propias métricas, y por eso el equipo no veía ninguna.
   src/components/sesion/CheckInPanel.tsx
   src/components/sesion/CheckOutPanel.tsx
   src/components/sesion/CronometroSesion.tsx
-
-La app anda igual con ellos, pero la auditoría marca dos fallas por
-su culpa: componentes que nadie abre, y el paso a paso duplicado.
-
-
-══════════════════════════════════════════════════════════════════
-  QUÉ CAMBIA
-══════════════════════════════════════════════════════════════════
-
-EN LA FICHA DEL CLIENTE · "Sus números"
-  Arriba de todo, la frase con la que se le escribe:
-
-    "Por cada peso en anuncios le vuelven 6.7. Esto se sostiene y se sube."
-    "Agenda bien, pero solo aparece 30%. El problema está entre agendar
-     y la llamada."
-    "Tomó 8 llamadas y no cerró ninguna. El problema está en la llamada,
-     no en los anuncios."
-    "Cada venta le cuesta 1.500 USD y deja 1.000. Así pierde en cada una."
-
-  Debajo, su embudo de la semana en una línea, y los cuatro números que
-  importan: cuánto le cuesta una agenda, cuánto una venta, cuántos de los
-  que agendan aparecen, y cuánto vuelve por cada peso.
-
-  Después, si subió o bajó respecto de la semana pasada, su última lectura
-  de campaña guardada, y las cuatro semanas anteriores.
-
-EN EL SEMÁFORO · una luz nueva
-  Quien ya pasó el día 26 (cuando el Camino le pide sus números) y hace
-  tres semanas que no carga, aparece en amarillo:
-
-    "Al día, pero hace 3 semanas que no carga sus números."
-    "Al día, pero todavía no cargó sus números ni una vez."
-
-  Antes del día 26 no se le reclama nada: todavía no tiene qué cargar.
-
-EN CAMPAÑAS · la lectura queda guardada
-  El diagnóstico de campaña se guarda en la semana que lo produjo. Antes
-  se leía una vez y se perdía; ahora se puede comparar, y el equipo lo ve
-  sin pedirlo.
+  src/components/campanas/MontajeView.tsx
+  src/lib/pausaGlobal.ts                  ← nuevo
+  src/lib/pausasDatos.ts                  ← nuevo
+  src/lib/puntoDePartida.ts               ← nuevo
+  src/components/CaminoEnPausa.tsx        ← nuevo
+  src/components/admin/PausaGlobalPanel.tsx  ← nuevo (se llama
+                                             SinSoportePanel.tsx)
+  scripts/prueba-pausa.ts                 ← nuevo
 
 
 ══════════════════════════════════════════════════════════════════
-  LO QUE NO CAMBIA, A PROPÓSITO
+  LO MÁS GRAVE QUE ENCONTRÉ, Y POR QUÉ
 ══════════════════════════════════════════════════════════════════
-  · Los números los carga el cliente, en su pestaña de Métricas. El
-    equipo solo lee. Si Lupe cargara por ellos, el cliente nunca miraría
-    sus propios números, que es justo el hábito que se le enseña.
-  · No hay conexión automática con Meta. Todo es carga a mano.
+
+Hay un patrón que apareció nueve veces en esta revisión: código
+construido, probado y NUNCA conectado a una pantalla.
+
+Es peor que código faltante. El código que falta se nota. Este
+pasa la auditoría, tiene su prueba en verde, y la pantalla que
+debería usarlo muestra ceros que parecen datos.
+
+
+1 · LA PAUSA DE DICIEMBRE HACÍA LO CONTRARIO
+──────────────────────────────────────────────────────────────────
+Existía un sistema de "pausa global" completo. Si alguien cargaba
+la pausa del 15 de diciembre, esto es lo que pasaba:
+
+  · El día del Camino se congelaba: el cliente se quedaba en el
+    día 61 todo enero.
+  · A todos se les corría la fecha de cierre 35 días.
+  · Las fechas de la hoja de ruta se movían un mes.
+  · El semáforo se apagaba para todos, un mes entero.
+  · Y al cliente le aparecía un cartel: "El Camino retoma el 19
+    de enero".
+
+Vos me dijiste que la app no corta nunca. Lo di vuelta entero.
+
+Ahora la ventana del 15 de diciembre hace lo único que de verdad
+pasa: marca los días en que el equipo no responde.
+
+  · El Camino sigue corriendo. Nadie pierde días ni se le mueve
+    la fecha de cierre.
+  · El cliente lee "Respondemos desde el 19 de enero. Tu Camino
+    sigue abierto: avanza todo lo que quieras estos días."
+  · El semáforo NO se apaga. Esto importa más de lo que parece:
+    con el semáforo callado, el cliente que dejó de entrar el 16
+    de diciembre reaparecía en rojo a fin de enero, cuando ya se
+    había ido.
+  · Lo único que cambia es de qué días responde el equipo: esos
+    días se descuentan del reclamo. Un cliente que pasó enero sin
+    sesión no fue abandonado si enero estaba avisado.
+
+Y la ventana ya no se estira a semanas enteras. Eso existía para
+que cada jornada siguiera cayendo en su día cuando todo se corría.
+Nada se corre: son los días que pidas.
+
+
+2 · LA SEMANA MOSTRABA UNA ALERTA FALSA TODOS LOS DÍAS
+──────────────────────────────────────────────────────────────────
+La tabla de funciones es el tablero que dice si el negocio escaló
+o si simplemente hubo menos trabajo. Mide seis funciones y
+recibía datos de una: la pantalla mapeaba todo el día del equipo
+a "destrabar".
+
+  · "Absorber" quedaba en cero. Es la única función que debe
+    crecer, y el código trata el cero ahí como "la peor noticia
+    de todas". La tabla acusaba de no absorber nada a un equipo
+    que no tenía dónde registrarlo.
+  · Y la columna de tendencia no podía mostrar nada nunca, porque
+    la lista de semanas anteriores se pasaba vacía: sin anteriores
+    no hay promedio y sin promedio no hay cambio.
+
+La causa de fondo: la jornada guardaba los minutos de reloj y a
+quién atendió, pero NO en qué trabajó. El dato no existía.
+
+Ahora al cerrar el día se marca en qué se fue. No se piden
+minutos por función —nadie los sabe, y un número inventado parece
+medido— se marca en qué, y los minutos del reloj se reparten. Y se
+piden cuatro semanas de jornadas para poder comparar.
+
+Mientras nadie marque nada, la tabla dice "todavía nadie marcó en
+qué se fue el día" en vez de mostrar seis ceros y una alarma.
+
+
+3 · EL ASISTENTE DE CAMPAÑAS NO GUARDABA NADA
+──────────────────────────────────────────────────────────────────
+Se podían recorrer las seis fases con KAI —cliente, estrategia,
+audiencias, copies, creativos, montaje— y al cerrar la pantalla
+no quedaba nada. La función de guardar se importaba y no se
+llamaba nunca.
+
+La campaña no existía: no se podía abrir después, ni retomar, ni
+montar sobre ella los ocho candados. La única forma de tener una
+campaña en la app era cargarla a mano en la base.
+
+Ahora guarda al terminar la última fase, con todo lo que produjo
+la conversación adentro, y nace como borrador: decirla
+"configurada" sería anunciar como lista una campaña que no corrió.
+
+
+4 · LOS AVISOS SE REPETÍAN Y NUNCA ESCALABAN
+──────────────────────────────────────────────────────────────────
+La app sí avisaba. Lo que no hacía eran dos cosas:
+
+  · Repetía el mismo aviso TODOS LOS DÍAS mientras el cuello
+    siguiera. Las alarmas al equipo sí chequean si ya salieron
+    hoy; las del cliente no. Un aviso diario por el mismo motivo
+    deja de leerse al segundo día, y enseña a ignorar la campana.
+  · Nunca escalaba. La regla "después de dos avisos pasa a una
+    persona" estaba escrita y no se aplicaba en ningún lado.
+
+Las dos reglas ya estaban programadas y probadas en un módulo de
+307 líneas que el cron se salteaba. Ahora pasa por ahí. El
+historial sale de las notificaciones ya enviadas: el dato estaba,
+no hizo falta una tabla nueva.
+
+
+5 · LA MITAD DE LA GARANTÍA QUE ERA NUESTRA
+──────────────────────────────────────────────────────────────────
+El cierre de cuentas verificaba con datos lo que el CLIENTE
+entregó —jornadas y atrasos— y daba por hecho lo que le dimos
+nosotros.
+
+Si él cumplió y el equipo no dio las sesiones, la garantía corre a
+nuestro cargo. Y nadie se iba a enterar, porque el único número a
+la vista era el suyo.
+
+Ahora se miden las dos mitades. El Ascenso son 38 sesiones en los
+90 días; si se dieron menos del 80 %, el veredicto lo dice ANTES
+de pedirle cuentas al cliente, y la ficha del equipo lo muestra
+desde el primer mes, no al final.
+
+El margen del 80 % no es una licencia para dar menos: es
+reconocer que una grupal que se cae por un feriado no rompe la
+promesa. Por debajo de ahí el cliente recibió visiblemente menos
+de lo que compró.
+
+Y no saber NO es no haber cumplido: si las sesiones no se
+consultaron, no se mide. Decir "te dimos 0 de 38" por una consulta
+que no se hizo sería peor que no decir nada.
+
+
+6 · UN FALSO VERDE EN MI PROPIA AUDITORÍA
+──────────────────────────────────────────────────────────────────
+El medidor recorre el Admin pestaña por pestaña y medía 38 vistas.
+Su lista seguía pidiendo la Mesa de plata, borrada en la cirugía 5.
+
+Una pestaña que no existe no deja la pantalla en blanco: el Admin
+se queda en la anterior y la mide dos veces. Ese verde no
+correspondía a ninguna pantalla. Es la peor clase de falso verde:
+el que da tranquilidad.
+
+Además nueve lentes certificaban el bug de la pausa: verificaban
+que el día se congelara y que el semáforo callara. Las di vuelta:
+ahora vigilan que nada de eso vuelva.
+
+Y había un módulo muerto CON PRUEBA EN VERDE. Calculaba en qué
+día del Camino entrar según lo que el cliente ya tuviera, dando
+hasta 80 jornadas por hechas. Eso lo descartaste a propósito —la
+pantalla se reescribió para que nadie se saltee el Camino— pero el
+módulo y su prueba sobrevivieron. Código muerto que parece vivo y
+correcto es lo primero que invita a volver a cablearlo: casi lo
+hice. Borré los dos.
+
+
+7 · UN SOLO CALENDARIO
+──────────────────────────────────────────────────────────────────
+Los cinco sistemas estaban escritos en dos lados y no decían lo
+mismo. Ni los nombres ni los días:
+
+   00-MAESTRO.md          →  El roadmap de la app
+   Tú · 1–12                 Tu reset · 1–5
+   Tu programa · 15–19       Tu programa de alto impacto · 8–12
+   Tu sistema de venta·22–46 Tu captación automática · 15–33
+   Tu clínica adentro·2,47-53 Tu propia app · 36–44
+   Tu plan de marca · 61–67  Tu ecosistema circular · 85–86
+
+El roadmap es el que ve el cliente todos los días y el que vas a
+usar para grabar. Manda el roadmap: reescribí el maestro desde el
+seed.
+
+Y de paso quedó claro algo que el maestro leía mal: los sistemas
+NO son bloques consecutivos. Se entrelazan a propósito. Cada uno
+tiene su cuerpo —los días seguidos donde se construye— y vuelve
+después en días sueltos, cuando ya hay con qué revisarlo. El
+sistema 1 se escribe la primera semana y se vuelve a tocar el día
+80, con el control de los 7.000 USD.
+
+Hay una lente nueva que compara las dos tablas. Si cambia el seed,
+la auditoría avisa que el maestro quedó viejo.
+
+
+══════════════════════════════════════════════════════════════════
+  LAS DECISIONES QUE TOMASTE, APLICADAS
+══════════════════════════════════════════════════════════════════
+
+LA GARANTÍA, VERIFICADA (elegiste A)
+  Hecho. Las dos mitades, con datos de la base. Y te lo repito
+  porque es un compromiso real: la app ahora también va a mostrar
+  cuando el equipo NO cumplió.
+
+"SIETE LUGARES", TEXTO FIJO (elegiste C)
+  No construí nada.
+
+LAS DOS LISTAS (elegiste A)
+  La matriz dejó de decir "clientes listos para activar": no mide
+  eso, mide las 62 tareas de preparación del equipo. Ahora dice
+  "con todo su trabajo de preparación al día" y nombra quién
+  decide el encendido: los 8 candados del Montaje, donde cada uno
+  se tilda porque SU DATO está cargado.
+
+  Dos listas que dicen "listo" sobre el mismo cliente con varas
+  distintas enseñan a no creerle a ninguna.
+
+CREAR UNA CAMPAÑA DESDE LA APP (elegiste A)
+  Hecho, y era peor de lo que pensábamos: no faltaba el botón,
+  faltaba que el asistente guardara.
+
+EL COPY "SIN APRENDER TECNOLOGÍA" (elegiste A)
+  La frase vive en la landing, que no está en este repo: ese
+  cambio es tuyo. Lo que cerré acá es que El Ascenso diga quién
+  monta — "monta sus cinco sistemas acompañado" en vez de "los
+  cinco sistemas", que es donde chocaba. Si no se dice, el cliente
+  llega esperando que se lo entreguen hecho.
+
+
+══════════════════════════════════════════════════════════════════
+  DOS COSAS QUE TE DIJE MAL, Y CORREGÍ
+══════════════════════════════════════════════════════════════════
+
+Durante la revisión te pasé cuatro hallazgos y dos eran falsos.
+Los había tomado de un barrido sin verificarlos uno por uno.
+
+NO ERA CIERTO que la especialidad no se aplique. Lo probé
+corriendo el código: psicólogo lee "tu paciente", coach lee "tu
+consultante", entrenador lee "tu alumno". El dialecto por país
+también se aplica.
+
+NO ERA CIERTO que el punto de partida esté roto. La pantalla hace
+lo correcto. Lo que estaba mal era el módulo muerto con prueba en
+verde al lado (punto 6).
+
+
+══════════════════════════════════════════════════════════════════
+  LO QUE NO CONSTRUÍ, Y ES DECISIÓN TUYA
+══════════════════════════════════════════════════════════════════
+
+Hay lógica completa, de punta a punta, sin ninguna pantalla. No la
+cablée porque son features enteras, no arreglos — y cablear una
+feature que decidiste no mostrar es peor que no tenerla:
+
+  · LA RED — la Semana Blanca regalable y la Herencia. Está
+    completa, con sus tres funciones en la base. Ojo con esta: la
+    función que captura la invitación desde la URL no corre nunca,
+    así que si repartís links de invitación hoy, no atribuyen nada.
+  · LA LIGA DE CONSTANCIA y EL MURO DE HITOS de la cohorte. Los
+    dos con su función en la base.
+  · EL PUENTE A MICLÍNICA DIGITAL — los artefactos del Camino no
+    se instalan en MCD.
+  · LA LISTA ÚNICA DEL CLIENTE — el gemelo del cerebro del equipo,
+    que sí está cableado.
+  · LOS CAPÍTULOS DEL LIBRO junto a los videos, las perlas del
+    maestro en los momentos quiebre, el PDF de una página por
+    episodio, el radar de precios, los teasers.
+  · EL REPORTE DEL DIRECTOR — construido y sin forma de llegar:
+    su interruptor nunca se enciende.
+
+Decime cuáles van y las construyo. Son todas trabajo real, no
+arreglos de media hora.
+
+Y seguís debiendo seis tutoriales del Camino sin grabar: L-02,
+L-05, L-18, L-19, L-20, L-21. No dejan enlace roto —cae al PDF—
+pero son seis días en los que el cliente abre y no hay video.
 
 
 ══════════════════════════════════════════════════════════════════
   CÓMO QUEDÓ VERIFICADO
 ══════════════════════════════════════════════════════════════════
   · Tipos: limpio.
-  · 50 pruebas de escenario: todas en verde (una nueva, con 36 casos).
-  · Auditoría: 695 comprobaciones, 0 fallas.
-  · 38 pantallas medidas en navegador real: 0 faltas.
-  · El panel nuevo, mirado en Chromium con datos de tres semanas.
+  · 60 pruebas de escenario: todas en verde (10 nuevas).
+  · Auditoría (unas 700 lentes): en verde, sin fallas — con las
+    nueve de la pausa dadas vuelta y cuatro lentes nuevas.
+  · npm run build: pasa, que es lo que corre Vercel.
+  · 38 vistas medidas en Chromium real: 0 faltas de diseño.
+  · El número de vistas ya no está escrito a mano: sale del
+    medidor, y una lente compara su lista con las pestañas reales
+    del Admin.
