@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import Markdown from 'react-markdown';
 import CustomSelect from '../components/CustomSelect';
 import { VOC } from '../lib/vocabulario';
+import { copiar } from '../lib/copiar';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -129,9 +130,11 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
   }, [output, userId, herramientaId, inputs]);
 
   const handleCopiar = useCallback(() => {
-    navigator.clipboard.writeText(output);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+    void copiar(output).then((ok) => {
+      if (!ok) return;
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
   }, [output]);
 
   // ─── Render ───────────────────────────────────────────────────────────────

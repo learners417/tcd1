@@ -11,7 +11,7 @@ import type { Montaje } from './montajeCampana';
 const COLUMNAS =
   'user_id, palabra, url_pagina, pixel_id, url_perfil, presupuesto_diario, ' +
   'dias_sostenidos, dm_probado, trabajo_claro, url_anuncio_meta, dominio, ' +
-  'url_formulario, url_calendario';
+  'url_formulario, url_calendario, paises';
 
 function db() {
   return isSupabaseReady() ? supabase : null;

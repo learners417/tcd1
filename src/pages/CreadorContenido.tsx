@@ -48,6 +48,7 @@ import { generateText } from '../lib/aiProvider';
 import { getCompletadas, isPilarCompletado } from '../lib/agents/unlock';
 import { primero } from '../lib/primero';
 import { VOC } from '../lib/vocabulario';
+import { copiar, NO_SE_PUDO_COPIAR } from '../lib/copiar';
 
 interface CreadorContenidoProps {
   userId?: string;
@@ -303,7 +304,8 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
   const handleCopiar = async () => {
     try {
-      await navigator.clipboard.writeText(editando ? editOutput : output);
+      const ok = await copiar(editando ? editOutput : output);
+      if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
       setCopiado(true);
       toast.success('Copiado al portapapeles');
     } catch {

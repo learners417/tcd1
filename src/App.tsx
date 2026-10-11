@@ -9,13 +9,15 @@ import { cargarVentanas } from './lib/ventanasDatos';
 import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
+import MiClinica from './pages/MiClinica';
 import NumeroPanel from './components/numero/NumeroPanel';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
-import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
+import Acompanamiento from './pages/Acompanamiento';
+import MiMigracion from './pages/MiMigracion'; // G4: el chat habilitado
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -62,11 +64,20 @@ function loadProfile(): Profile {
   return { nombre: 'Profesional', email: '', especialidad: '', fecha_inicio: today, plan: 'DWY' };
 }
 
-// Páginas válidas — fuente de verdad para validar lo guardado en localStorage
+// Páginas válidas — fuente de verdad para validar lo guardado en localStorage.
+//
+// 'mensajes' FALTABA, y eso era la mitad de «el chat no funciona»: el cliente
+// entraba a Soporte, cerraba la app —en una PWA eso pasa a cada rato— y al
+// volver aparecía en Hoy, porque su página guardada no pasaba esta validación
+// y caía al default. La conversación seguía ahí; el cliente creía que no.
 const VALID_PAGES = [
   'dashboard', 'roadmap', 'entrenadores', 'coach', 'metrics',
   'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
-  'campanas',
+  'campanas', 'mensajes', 'miclinica',
+  // 'migracion' NO está en el menú a propósito: se hace una sola vez, y el
+  // menú tiene tope de cinco destinos. Se llega por la tarjeta del HOY, que
+  // aparece solo mientras el equipo le habilitó la migración y no la terminó.
+  'migracion',
 ] as const;
 const PAGE_STORAGE_KEY = 'tcd_current_page';
 
@@ -509,6 +520,39 @@ export default function App() {
     );
   }
 
+  /* ─── SIN PERFIL NO SE ENTRA ─────────────────────────────────────────────
+   *
+   * La guarda de abajo exige `supabaseProfile` para mostrar el wizard. Si la
+   * consulta falla, pasa los 4 s de timeout, o la fila de `profiles` no existe
+   * —el trigger de alta no corrió, o se borró—, `supabaseProfile` queda null y
+   * el cliente entraba DIRECTO a HOY.
+   *
+   * No se ve roto, y es peor que roto: nunca cambia su contraseña temporal,
+   * nunca firma el pacto, nunca carga su medición de entrada. Y como `userId`
+   * llega undefined a todas las pantallas, el Camino cae a modo offline y todo
+   * su avance del día 1 queda solo en ese navegador. El equipo lo ve como un
+   * cliente que no entró nunca.
+   *
+   * Así que se dice y se ofrece reintentar, en vez de dejarlo entrar a medias.
+   */
+  if (!supabaseProfile && isSupabaseReady()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-ink">
+        <div className="card-panel p-6 max-w-md w-full">
+          <p className="text-[19px] font-bold text-cream mb-2">No pude abrir tu cuenta</p>
+          <p className="text-[17px] leading-relaxed text-cream/75">
+            Tus datos no llegaron. Suele ser la conexión. Toca el botón y lo intento
+            de nuevo; si sigue igual, escríbenos y lo resolvemos hoy.
+          </p>
+          <button onClick={() => window.location.reload()}
+            className="mt-4 w-full min-h-[44px] btn-primary rounded-xl text-[17px] font-bold">
+            Volver a intentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ─── Onboarding wizard (primer login) ──────────────────────────────────────
   if (supabaseProfile && supabaseProfile.onboarding_completed === false) {
     return (
@@ -582,16 +626,36 @@ export default function App() {
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
-        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+          <div className="p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
             <CeremoniaCinturon />
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'migracion' && (
+              <MiMigracion
+                clienteId={supabaseProfile?.id}
+                onIrACampanas={() => setCurrentPage('campanas')}
+              />
+            )}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
-            {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
+            {/* El destino 'mensajes' ahora abre Acompañamiento, que ADENTRO
+                tiene el chat (o el reporte, según lo que contrató) más los
+                canales de la comunidad y las mentorías con su link. El menú
+                tiene tope de cinco destinos, así que esto no suma uno más:
+                absorbe el de Soporte, que era la pantalla del chat sola. */}
+            {currentPage === 'mensajes' && (
+              <Acompanamiento
+                clienteId={supabaseProfile?.id}
+                nombre={supabaseProfile?.nombre}
+                servicio={supabaseProfile?.servicio_contratado}
+              />
+            )}
+            {/* Mi Clínica dejó de ser un window.open sin aviso: ahora se
+                explica qué es y el botón para abrirla va al final. */}
+            {currentPage === 'miclinica' && <MiClinica perfil={supabaseProfile} userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
@@ -608,7 +672,16 @@ export default function App() {
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'numero' && <NumeroPanel userId={supabaseProfile?.id} />}
             {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-            {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
+            {currentPage === 'biblioteca' && (
+              <Biblioteca
+                userId={supabaseProfile?.id}
+                /* Su día del Camino decide qué material le corresponde, y el
+                   permiso del equipo lo abre todo sin esperarlo. */
+                diaActual={diaDelPrograma(supabaseProfile?.fecha_inicio)}
+                bibliotecaAbierta={Boolean(
+                  (supabaseProfile as { biblioteca_abierta?: boolean } | null)?.biblioteca_abierta)}
+              />
+            )}
             {currentPage === 'agentes' && (
               <Agentes
                 userId={supabaseProfile?.id}
@@ -626,6 +699,7 @@ export default function App() {
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
+                onIrAlCamino={() => setCurrentPage('roadmap')}
               />
             )}
             {currentPage === 'creador' && (() => {

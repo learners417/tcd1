@@ -441,7 +441,7 @@ Devuelve SOLO este JSON:
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 anímate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
       {/* Header */}
       <div className="flex justify-between items-end">
@@ -492,7 +492,7 @@ Devuelve SOLO este JSON:
       {/* Resumen semanal */}
       {generandoResumen && (
         <div className="flex items-center gap-2 text-gold bg-gold/10 border border-gold/20 rounded-2xl p-4">
-          <Loader2 className="w-4 h-4 anímate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">El Coach está analizando tu semana...</span>
         </div>
       )}
@@ -792,7 +792,7 @@ Devuelve SOLO este JSON:
                 className="w-full py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
-                  <><Loader2 className="w-4 h-4 anímate-spin" /> Guardando...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
                 ) : (
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
@@ -812,7 +812,7 @@ Devuelve SOLO este JSON:
         <div className="space-y-4">
           {loading && entries.length === 0 && (
             <div className="flex items-center gap-2 text-cream/55 text-sm">
-              <Loader2 className="w-4 h-4 anímate-spin" /> Cargando historial...
+              <Loader2 className="w-4 h-4 animate-spin" /> Cargando historial...
             </div>
           )}
           {entries.length === 0 && !loading && (

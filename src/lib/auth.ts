@@ -113,5 +113,9 @@ export function syncProfileToLocalStorage(profile: Profile): void {
     adn_avatar: v2.adn_avatar ?? null,
     metodo_nombre: v2.metodo_nombre ?? '',
     oferta_mid: v2.oferta_mid ?? '',
+    // El permiso de la Biblioteca. Sin espejarlo, el menú del Topbar la
+    // esconde por plan aunque el equipo se la haya abierto: el cliente
+    // tendría el permiso dado y ninguna forma de llegar.
+    biblioteca_abierta: v2.biblioteca_abierta ?? false,
   }));
 }

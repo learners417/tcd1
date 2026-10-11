@@ -97,7 +97,7 @@ GLOSARIO OBLIGATORIO (a la izquierda lo prohibido · a la derecha lo correcto):
 - Sticker                  → "sticker (botón interactivo de la historia)" la primera
                               vez que aparece · después solo "sticker"
 - Poll / question / slider / quiz → "encuesta · pregunta abierta · barra deslizable · quiz"
-- Watch-through rate       → "porcentaje de gente que mira el video hasta el final"
+- Watch-through rate       → "porcentaje de personas que miran el video hasta el final"
 - Awareness                → "qué tan consciente del problema está el paciente"
 - N1 / N2 / N3             → "Frío · Tibio · Caliente" (sin la letra N · es jerga)
 - Workflow                 → "flujo de trabajo"

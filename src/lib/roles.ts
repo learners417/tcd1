@@ -67,7 +67,7 @@ export const ROLES: Record<Rol, DefinicionRol> = {
         porque: 'Reportar el error sí. Arreglarlo es de desarrollo.' },
     ],
     techoHoras: 12,
-    indicador: 'El porcentaje de cuentas en rojo. Si sube del 10% al 30%, no hace falta más gente: hace falta arreglar lo que las pone en rojo.',
+    indicador: 'El porcentaje de cuentas en rojo. Si sube del 10% al 30%, no hace falta más personal: hace falta arreglar lo que las pone en rojo.',
   },
 
   desarrollo: {

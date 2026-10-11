@@ -58,6 +58,12 @@
   --border-gold: rgba(176, 130, 46, 0.22);
   --border-gold-strong: rgba(176, 130, 46, 0.45);
   --font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  /* La tercera familia: la de leer. La misma de los libros. */
+  --font-lectura: 'Lora Variable', 'Lora', Georgia, serif;
+  /* El oro de la colección: mate, tipo pan de oro. Sale del PDF de imprenta,
+     no de una aproximación. Va en líneas de 1px, versalitas y numerales —
+     nunca de relleno, nunca en degradé, nunca con brillo. */
+  --oro-libro: #A8875A;
   --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
 
   /* Geometria calida: esquinas suaves, no vivas. */
@@ -823,9 +829,27 @@ h1, h2, h3 {
    - Las opacidades bajas que quedaban (20–35) también se sacan. */
 [data-theme="light"] #root .truncate {
   white-space: normal !important;
-  overflow-wrap: anywhere;
+  /* `break-word` y no `anywhere`: con `anywhere` el navegador corta por donde
+     sea, aunque haya un espacio a mano. El título de la barra salía «El /
+     Camin / o» en tres renglones teniendo un espacio justo en el medio.
+     Con `break-word` solo parte una palabra que no entra ni sola. */
+  overflow-wrap: break-word;
 }
-[data-theme="light"] #root [class~="uppercase"] { overflow-wrap: anywhere; }
+[data-theme="light"] #root [class~="uppercase"] { overflow-wrap: break-word; }
+
+/* La excepción: las cajas de alto fijo.
+ *
+ * La regla de arriba está bien como norma —el nombre de un cliente cortado a
+ * la mitad no sirve— y está mal en una barra de 56 px de alto: ahí el texto
+ * que pasa a tres renglones no se lee mejor, se monta sobre los botones de al
+ * lado. En esos pocos lugares vuelve a mandar el corte con puntos. */
+[data-theme="light"] #root .una-linea,
+.una-linea {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: normal !important;
+}
 [data-theme="light"] #root [class~="tracking-widest"] { letter-spacing: 0.08em !important; }
 [data-theme="light"] #root [class~="bg-gold"] { background-color: var(--oro-d) !important; }
 [data-theme="light"] #root :is([class~="opacity-20"], [class~="opacity-25"], [class~="opacity-30"], [class~="opacity-35"]) {
@@ -835,3 +859,106 @@ h1, h2, h3 {
 /* En una tabla no se parte la palabra: la tabla se desplaza dentro de su caja. */
 [data-theme="light"] #root table [class~="uppercase"],
 [data-theme="light"] #root th { overflow-wrap: normal !important; word-break: normal !important; }
+
+
+/* ═══════════════ LO EDITORIAL ═══════════════
+ *
+ * Las cuatro marcas que hacen que un bloque se lea como una página del libro
+ * y no como una tarjeta de app. Se usan juntas y en pocos lugares: el momento
+ * editorial se gana una vez por pantalla, no cinco.
+ */
+
+/* El rótulo de arriba: versalitas con tracking amplio, en oro. */
+.rotulo-libro {
+  font-family: var(--font-display);
+  font-size: 15px;            /* 15 es el mínimo de la casa: nunca letra chica */
+  font-weight: 600;
+  /* El libro usa .22em en sus versalitas; la norma de la app corta en .2em,
+     y manda la norma: por encima de ahí las mayúsculas se leen letra por
+     letra. La diferencia entre .20 y .22 no se ve; la de .22 a .30, sí. */
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--oro-libro);
+}
+
+/* La regla de 20 mm de la tapa, a escala de pantalla. */
+.regla-libro {
+  width: 56px;
+  border-top: 1px solid var(--oro-libro);
+}
+
+/* El cuerpo de lectura. */
+.prosa-libro {
+  font-family: var(--font-lectura);
+  font-size: 17px;
+  line-height: 1.62;
+}
+
+/* La capitular, como la primera letra de cada capítulo.
+   `float` y no `::first-letter` con posición absoluta: así el texto fluye
+   alrededor solo, en cualquier ancho y sin medir nada. */
+.prosa-libro.con-capitular::first-letter {
+  font-family: var(--font-display);
+  font-size: 3.1em;
+  line-height: 0.9;
+  font-weight: 500;
+  color: var(--oro-libro);
+  float: left;
+  padding: 0.05em 0.09em 0 0;
+}
+
+/* Y la primera línea en versalitas, que es lo que hace que el ojo entre.
+   Solo la primera línea: el navegador la recalcula al cambiar el ancho. */
+.prosa-libro.con-entrada::first-line {
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+}
+
+/* El bloque de acción: lo que hay que hacer con lo que se acaba de leer.
+   Un borde de 1px a la izquierda, igual que en el libro. */
+.accion-libro {
+  border-left: 1px solid var(--oro-libro);
+  padding-left: 16px;
+}
+
+
+/* ═══════════════ TEXTO SOBRE UN PAISAJE ═══════════════
+ *
+ * Las portadas de los cinco sistemas tienen fondo oscuro SIEMPRE —el color de
+ * la tapa de su libro— en los dos temas. El texto encima tiene que ser claro
+ * en los dos, y el tema claro pisa el color con `!important` en varias reglas:
+ * medido en el navegador, el título salía en rgb(42,33,24) sobre el azul del
+ * lago. Contraste 1,4 a 1. Ilegible.
+ *
+ * Por eso estas reglas van al final del archivo y llevan `!important`: es la
+ * única forma de que el tema no las toque. El `[data-theme="light"]` repetido
+ * sube la especificidad por encima de las reglas de arriba.
+ */
+.sobre-paisaje,
+[data-theme="light"] #root .sobre-paisaje {
+  color: #FFFFFF !important;
+}
+.sobre-paisaje-2,
+[data-theme="light"] #root .sobre-paisaje-2 {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+.sobre-paisaje-3,
+[data-theme="light"] #root .sobre-paisaje-3 {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+/* El oro de la colección, que en el tema claro se cambiaba por un oro oscuro
+   pensado para fondo crema. Sobre el paisaje tiene que seguir siendo el de la
+   tapa. */
+.oro-paisaje,
+[data-theme="light"] #root .oro-paisaje,
+[data-theme="light"] #root .rotulo-libro.oro-paisaje {
+  color: #C9A86F !important;
+}
+.regla-paisaje,
+[data-theme="light"] #root .regla-paisaje {
+  border-top-color: #C9A86F !important;
+}
+.accion-paisaje,
+[data-theme="light"] #root .accion-paisaje {
+  border-left-color: #C9A86F !important;
+}

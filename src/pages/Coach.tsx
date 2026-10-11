@@ -52,7 +52,9 @@ type Message = CoachConversationMessage;
 function buildInitialMessage(): Message {
   const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
   const semanaActual = semanaDelPrograma(profile.fecha_inicio, 13);
-  const nombre = profile.nombre || 'Fundadora';
+  // Sin nombre, el Mentor abría con «Hola Fundadora» — en femenino, y a un
+  // médico varón el día 1. Sin nombre, saluda sin nombre.
+  const nombre = profile.nombre?.trim() || '';
 
   const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
   const last = diary.length > 0 ? diary[0].respuestas : null;
@@ -63,14 +65,21 @@ function buildInitialMessage(): Message {
   if (semanaActual === 1 && freno) {
     return {
       role: 'assistant',
-      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
+      content: `${nombre ? `${nombre}, antes` : 'Antes'} de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
     } as Message;
   }
-  let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
+  // Sin nombre, «Hola ${nombre}.» quedaba «Hola .»
+  let msg = `${nombre ? `Hola ${nombre}.` : 'Hola.'} Empezamos la **Semana ${semanaActual}**.\n\n`;
   if (last && last.cuello) {
-    msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, pero estás frenada por: _"${last.cuello}"_.\n\n`;
+    // «frenada» en femenino para cualquiera: se neutraliza.
+    msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, y que lo que te frena es: _"${last.cuello}"_.\n\n`;
+    msg += `¿Qué acción atómica vamos a tomar ahora mismo para destrabar eso y avanzar?`;
+  } else {
+    // Antes el cierre decía «destrabar ESTO» en los dos casos, y sin el
+    // párrafo de arriba «esto» no refería a nada. Es el primer mensaje que
+    // lee un cliente que saltó el diagnóstico, el día 1.
+    msg += `Cuéntame en qué estás trabajando ahora y qué es lo que más te está costando. Con eso armamos el próximo paso.`;
   }
-  msg += `¿Qué acción atómica vamos a tomar ahora mismo para destrabar esto y avanzar?`;
   return { role: 'assistant', content: msg };
 }
 

@@ -38,9 +38,16 @@ export interface Avance {
   noAplican: number;
 }
 
-/** Los pasos que un escalón de servicio no incluye. Se calcula una vez. */
+/**
+ * Los pasos que un escalón de servicio no incluye. Se calcula una vez.
+ *
+ * Se exporta porque lo necesitan la matriz y la lista de un cliente a la vez,
+ * y las dos tienen que dejar fuera exactamente los mismos ítems: si una lo
+ * replica, el día que cambie el reparto una pantalla va a pedirle al cliente
+ * algo que la otra ya no le pide.
+ */
 const SIN_APLICAR = new Map<Ticket, Set<string>>();
-function noIncluye(ticket: Ticket): Set<string> {
+export function noIncluye(ticket: Ticket): Set<string> {
   let s = SIN_APLICAR.get(ticket);
   if (!s) {
     s = new Set(cuadroDe(ticket).filter((i) => i.noAplica).map((i) => i.id));

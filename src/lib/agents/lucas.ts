@@ -223,7 +223,7 @@ export const lucas: ConfigAgente = {
   unlockExtraCheck: (perfil) =>
     typeof perfil.script_venta === 'string' && perfil.script_venta.trim().length > 0,
   unlockReason:
-    'Genera tu Script de Venta · la W (Pilar 9B.1) para entrenar con Lucas. Sin script no hay W contra la cual simular.',
+    'Se abre al cerrar tu jornada del día 17, donde escribes tu guion de venta. Con el guion escrito, Lucas lo entrena contigo.',
   descripcion:
     'Simula pacientes en video-llamada con personalidad · trauma · objeciones reales. Te entrena la W: apertura · dolor · deseo · obstáculo · cierre. En 10-15 consultas la W queda como reflejo.',
   adnFieldsNeeded: ADN_FIELDS,

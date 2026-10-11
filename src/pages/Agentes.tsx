@@ -57,6 +57,7 @@ import {
   type ChatAttachment,
 } from '../lib/chatAttachments';
 import { VOC } from '../lib/vocabulario';
+import { copiar, NO_SE_PUDO_COPIAR } from '../lib/copiar';
 import {
   AGENTES,
   type AgenteCategoria,
@@ -457,9 +458,11 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
     const texto = mensajes
       .map((m) => `${m.rol === 'agente' ? 'ENTRENADOR' : 'TÚ'}: ${m.contenido}`)
       .join('\n\n');
-    navigator.clipboard.writeText(texto);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+    void copiar(texto).then((ok) => {
+      if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
   }, [mensajes]);
 
   const volverAlGrid = useCallback(() => {

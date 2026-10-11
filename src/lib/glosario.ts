@@ -49,7 +49,7 @@ export const GLOSARIO: Record<string, Termino> = {
   micro_paso: {
     palabra: 'micro-paso',
     que: 'Uno de los siete tramos del embudo: presupuesto, anuncio, mensaje, conversación, confirmación, llamada, cierre, cobro.',
-    porQue: 'El diagnóstico va de arriba hacia abajo y se detiene en el primero que falla: si el anuncio no trae gente, no hay a quién cerrarle.',
+    porQue: 'El diagnóstico va de arriba hacia abajo y se detiene en el primero que falla: si el anuncio no trae personas, no hay a quién cerrarle.',
   },
   traba: {
     palabra: 'traba',

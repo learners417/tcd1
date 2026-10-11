@@ -7,6 +7,7 @@ import CadenaADN from '../components/CadenaADN';
 import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
 import React, { useEffect, useState } from 'react';
+import { miEstadoDeMigracion } from '../lib/migracionDatos';
 import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
@@ -82,6 +83,19 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
     racha: 0,
     diasConectados: 0,
   });
+  /**
+   * SI YA SE SABE QUÉ LE TOCA HOY.
+   *
+   * No había ninguno, y el estado inicial es `tareasHoy: []`. Con ese estado la
+   * pantalla afirmaba dos cosas falsas: tachaba «Tu sesión del Camino» con
+   * «Hecha — el dojo te vio hoy», y abajo mostraba «Todo al día. Estás libre.»
+   *
+   * O sea que el día 1 de un cliente pago empezaba diciéndole que no tenía
+   * nada que hacer, mientras esperaba una consulta de red. Y el `await` del
+   * medio no tenía timeout en ninguna de las dos puntas, así que con Mi Clínica
+   * en arranque frío la pantalla quedaba así indefinidamente.
+   */
+  const [yaCargo, setYaCargo] = useState(false);
   const [proximoHito, setProximoHito] = useState<ProximoHito | null>(null);
   // G2: las sesiones se abren en El Camino (un solo lugar, con evidencia y checklist)
   // G3: el valor visible — las ventas del sistema
@@ -107,7 +121,15 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       try {
         const email = p?.email ?? (await supabase?.auth.getUser())?.data.user?.email;
         if (email) {
-          const r = await fetch(`/api/mcd-bridge?email=${encodeURIComponent(String(email))}`);
+          // Con timeout: este fetch sale a otra app, que puede estar en
+          // arranque frío. Sin cortarlo, toda la pantalla de HOY queda
+          // esperando a un servicio que no es el que el cliente vino a ver.
+          const corte = new AbortController();
+          const reloj = setTimeout(() => corte.abort(), 4000);
+          const r = await fetch(
+            `/api/mcd-bridge?email=${encodeURIComponent(String(email))}`,
+            { signal: corte.signal },
+          ).finally(() => clearTimeout(reloj));
           if (r.ok) {
             const j = await r.json();
             if (j?.cobro_verificado) {
@@ -215,6 +237,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         diasConectados: 0,
       });
       setProximoHito(hito);
+      // Acá ya se sabe qué le toca: lo de abajo refina con la base, pero la
+      // pantalla puede dejar de callarse.
+      setYaCargo(true);
 
       if (isSupabaseReady() && supabase && userId) {
         const { data: hrRows } = await supabase
@@ -281,7 +306,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         setData(prev => ({ ...prev, diasConectados }));
       }
     }
-    loadData();
+    // Pase lo que pase, la pantalla deja de esperar: una excepción acá dejaba
+    // «Todo al día. Estás libre.» para siempre.
+    void loadData().finally(() => setYaCargo(true));
   }, [userId]);
 
   const pctTareas = data.totalTareas > 0 ? Math.round((data.completadas / data.totalTareas) * 100) : 0;
@@ -290,7 +317,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
     : 0;
   const tareasRestantesHito = proximoHito ? proximoHito.metasTotal - proximoHito.metasCompletadas : 0;
 
-  const nombreDisplay = data.profile.nombre || 'bienvenida';
+  // Sin nombre cargado el saludo decía «Buenos días, bienvenida.» — en
+  // femenino para cualquiera y como si «bienvenida» fuera su nombre. Sin
+  // nombre, el saludo va solo: «Buenos días.»
+  const nombreDisplay = data.profile.nombre?.trim() || '';
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
@@ -318,7 +348,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           <section className="card-panel p-5 sm:p-6" aria-label="Tu día">
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-                {saludo}, {nombreDisplay}.
+                {saludo}{nombreDisplay ? `, ${nombreDisplay}` : ''}.
               </h1>
               {c && <CintaCinturon cinturon={c} variante="tira" />}
             </div>
@@ -441,6 +471,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       {/* ZIP A — La graduación de los 5 días (solo plan EL NÚMERO, tras el día 5) */}
       <GraduacionSemanaBlanca />
 
+      {/* TRAER SU TRABAJO — solo mientras el equipo le habilitó la migración y
+          no la terminó. Va arriba de todo porque hasta que no la hace, su
+          Camino le pide cosas que ya tiene hechas afuera. */}
+      <TraeTuTrabajo userId={userId} onIr={() => setCurrentPage('migracion')} />
+
       {/* S10 — La Cadena del ADN: el ikigai encendiéndose */}
       <CadenaADN onAbrir={() => setCurrentPage('adn')} />
 
@@ -487,7 +522,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         })()}
 
         {/* Sin paso pendiente: el día de campo o el día libre. */}
-        {data.tareasHoy.length === 0 && (
+        {yaCargo && data.tareasHoy.length === 0 && (
           <div className="card-panel p-6">
               {(() => {
                 let sv = false;
@@ -534,7 +569,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           let set = setDB ?? new Set<string>();
           if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
           const sistemaVivo = set.has(claveDelDia(31));
-          const sesionHecha = data.tareasHoy.length === 0;
+          // `yaCargo` es la diferencia entre «no tiene nada que hacer» y «todavía no
+  // sé qué tiene que hacer». Sin él, lo segundo se mostraba como lo primero.
+  const sesionHecha = yaCargo && data.tareasHoy.length === 0;
           const mentorRestantes = Math.max(0, TOPE_MENTOR_SEMANAL - usosSemana('mentor'));
           const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
             <button onClick={onClick} disabled={!onClick}
@@ -592,6 +629,42 @@ function DescansoInput({ onGuardar }: { onGuardar: (t: string) => void }) {
         className="flex-1 min-w-[180px] bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[15px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
       <button disabled={!t.trim()} onClick={() => { onGuardar(t.trim()); setOk(true); }}
         className="btn-primary text-[15px] font-bold px-4 rounded-xl disabled:opacity-40 min-h-[44px] shrink-0">Guardar</button>
+    </div>
+  );
+}
+
+
+/* ══════════════════ TRAER SU TRABAJO ══════════════════
+ *
+ * Para los clientes que vienen de Discord con sus manuales ya hechos. La
+ * tarjeta aparece solo con la llave encendida por el equipo y hasta que la
+ * termina: a un cliente nuevo, migrarse sería saltearse su propio Camino.
+ */
+function TraeTuTrabajo({ userId, onIr }: { userId?: string; onIr: () => void }) {
+  const [mostrar, setMostrar] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    let vivo = true;
+    void miEstadoDeMigracion(userId)
+      .then((e) => { if (vivo) setMostrar(e.habilitada && !e.migradoEn); })
+      .catch(() => { /* sin llave no se muestra */ });
+    return () => { vivo = false; };
+  }, [userId]);
+
+  if (!mostrar) return null;
+
+  return (
+    <div className="card-panel p-5 border-gold/30">
+      <p className="text-[19px] font-bold text-cream">Trae tu trabajo</p>
+      <p className="text-[17px] text-cream/75 mt-1 leading-relaxed">
+        Ya tienes tu plan, tu método y tu oferta hechos. Tráelos y tu Camino queda al
+        día: no vas a hacer de nuevo lo que ya hiciste.
+      </p>
+      <button onClick={onIr}
+        className="mt-3 w-full min-h-[44px] btn-primary rounded-xl text-[17px] font-bold">
+        Empezar
+      </button>
     </div>
   );
 }

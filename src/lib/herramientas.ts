@@ -1485,9 +1485,9 @@ Extensión: 180-280 palabras. Tono: profesional pero como si te escribiera un co
   {
     id: 'D4',
     grupo: 'D',
-    titulo: 'Secuencia de Captación ManyChat',
+    titulo: 'Secuencia de Captación por mensajes',
     descripcion:
-      'Genera las keywords disparadoras, respuestas automáticas y secuencia de seguimiento para configurar en ManyChat o herramienta equivalente.',
+      'Genera las keywords disparadoras, respuestas automáticas y secuencia de seguimiento para configurar en tu herramienta de mensajes.',
     emoji: '🤖',
     inputs: [
       {
@@ -1543,7 +1543,7 @@ Extensión: 180-280 palabras. Tono: profesional pero como si te escribiera un co
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Genera la secuencia completa de captación para ManyChat del protocolo "${inputs.nombre_protocolo}".
+Genera la secuencia completa de captación por mensajes del protocolo "${inputs.nombre_protocolo}".
 
 RESULTADO PROMETIDO: ${inputs.resultado}
 KEYWORDS: ${[inputs.keyword_1, inputs.keyword_2, inputs.keyword_3].filter(Boolean).join(', ')}
@@ -1559,11 +1559,11 @@ Luego genera:
 4. RESPUESTA A "¿CUÁNTO CUESTA?" (bot que da el precio con contexto de valor, no solo el número)
 5. RESPUESTA A "MÁNDAME MÁS INFO" (da info sin revelar todo)
 6. RESPUESTA A "NO ME INTERESA / GRACIAS" (cierre elegante que deja la puerta abierta)
-7. GUÍA DE CONFIGURACIÓN: dónde y cómo pegar cada mensaje en ManyChat (paso a paso, máximo 8 pasos)
+7. GUÍA DE CONFIGURACIÓN: dónde y cómo pegar cada mensaje en tu herramienta de mensajes (paso a paso, máximo 8 pasos)
 
 Tono: cálido, personal, que no parezca un bot. Que el lead sienta que hay una persona real detrás.
     `.trim(),
-    outputLabel: 'Secuencia de Captación ManyChat',
+    outputLabel: 'Secuencia de Captación por mensajes',
   },
 
   {

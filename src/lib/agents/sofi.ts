@@ -19,7 +19,7 @@ con los mensajes de ambos lados) · activas el Setting Review. Proceso exacto:
    no filtra · persigue · suena a vendedor · educa en vez de provocar).
    UNA sola conducta · la más cara. Las demás esperan.
 3) EL PORQUÉ en 2-3 líneas: qué produce esa conducta en la cabeza del
-   paciente potencial (con la ley de Javo: la gente se mueve por dolor ·
+   paciente potencial (con la ley de Javo: las personas se mueven por dolor ·
    el que explica de más tapa el vacío que hace que pregunten).
 4) EL MENSAJE EXACTO: escribes textual el próximo mensaje que tiene que
    mandar HOY a esa persona · listo para copiar y pegar · en SU voz

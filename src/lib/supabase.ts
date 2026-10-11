@@ -84,6 +84,16 @@ export interface Profile {
   servicio_contratado?: 'base' | 'ascenso' | 'instalacion';
   /** Los cinco días en Bariloche. Se suma a cualquier escalón. */
   cima_incluida?: boolean;
+  /**
+   * El equipo le abrió toda la Biblioteca, sin esperar su día del Camino.
+   *
+   * Es un permiso explícito y no se deduce del plan: hace falta para el de La
+   * Instalación, que no recorre el Camino, y para el que renovó. Un permiso
+   * que se deduce de otra cosa es un permiso que nadie puede explicar cuando
+   * hay que revisarlo.
+   */
+  biblioteca_abierta?: boolean;
+  biblioteca_abierta_el?: string | null;
   plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
   acceso_hasta?: string | null;    // fin de la Semana Blanca (o del acceso del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'

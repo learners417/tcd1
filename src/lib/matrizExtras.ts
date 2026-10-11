@@ -1,14 +1,51 @@
 /**
  * EXTRAS DE LA MATRIZ — el estado real de cada celda.
  *
- * Cada cruce cliente×paso guarda: estado (pendiente · en proceso · listo · N/A),
- * una nota y un link (Drive, doc, página, calendario). Igual que en la planilla,
- * pero vivo y compartido. Guarda en la tabla si existen las columnas; si no,
- * queda en este navegador y no rompe nada.
+ * Cada cruce cliente×paso guarda su estado, una nota y un link (Drive, doc,
+ * página, calendario). Igual que en la planilla, pero vivo y compartido.
+ * Guarda en la tabla si existen las columnas; si no, queda en este navegador
+ * y no rompe nada.
+ *
+ * ═══ POR QUÉ «EN PROCESO» SE PARTIÓ EN DOS ═══
+ *
+ * Había un solo estado intermedio y no servía para lo único que se necesita
+ * mirando esta matriz: **de quién es la pelota ahora.**
+ *
+ * «En proceso» podía ser que el cliente esté grabando su VSL o que el equipo
+ * esté editándolo. Son dos situaciones opuestas: en una se le reclama a él, en
+ * la otra la demora es nuestra. Con un solo color, el lunes había que
+ * preguntar por cada celda amarilla de quién estaba esperando — que es
+ * exactamente el trabajo que esta pantalla existe para ahorrar.
  */
 import { supabase } from './supabase';
 
-export type EstadoCelda = 'pendiente' | 'proceso' | 'listo' | 'na';
+/**
+ * Los cuatro estados, con el color que les corresponde:
+ *
+ *   pendiente → ROJO     · nadie lo empezó
+ *   cliente   → NARANJA  · está en manos del cliente
+ *   nosotros  → AMARILLO · está en manos del equipo
+ *   listo     → VERDE    · hecho
+ *
+ * Y `na`, que no es un estado de avance: es un ítem que a este cliente no le
+ * aplica y que por eso no cuenta para su porcentaje.
+ */
+export type EstadoCelda = 'pendiente' | 'cliente' | 'nosotros' | 'listo' | 'na';
+
+/**
+ * Lo que había guardado antes de partir «en proceso» en dos.
+ *
+ * Las filas viejas con 'proceso' se leen como 'nosotros', que es lo más
+ * probable: 42 de los 62 ítems son de la agencia. Convertirlas a 'pendiente'
+ * borraría trabajo que ya estaba empezado, y eso se ve como un retroceso que
+ * nadie hizo.
+ */
+export function alEstadoNuevo(crudo: string | null | undefined): EstadoCelda | undefined {
+  if (!crudo) return undefined;
+  if (crudo === 'proceso') return 'nosotros';
+  const validos: EstadoCelda[] = ['pendiente', 'cliente', 'nosotros', 'listo', 'na'];
+  return validos.includes(crudo as EstadoCelda) ? (crudo as EstadoCelda) : undefined;
+}
 
 export interface ExtraCelda { estado?: EstadoCelda; nota?: string; link?: string }
 export type ExtrasByCliente = Map<string, Map<string, ExtraCelda>>;
@@ -38,7 +75,7 @@ export async function loadExtras(): Promise<ExtrasByCliente> {
     if (!error && data) {
       for (const r of data as Array<{ cliente_id: string; step_id: string; estado?: string | null; nota?: string | null; link?: string | null }>) {
         poner(r.cliente_id, r.step_id, {
-          estado: (r.estado as EstadoCelda) || undefined,
+          estado: alEstadoNuevo(r.estado),
           nota: r.nota || undefined,
           link: r.link || undefined,
         });
@@ -92,17 +129,91 @@ export function extraDe(extras: ExtrasByCliente, clienteId: string, stepId: stri
   return extras.get(clienteId)?.get(stepId) ?? {};
 }
 
-/** El ciclo del clic, igual que en la planilla. */
-export const SIGUIENTE_ESTADO: Record<EstadoCelda, EstadoCelda> = {
-  pendiente: 'proceso',
-  proceso: 'listo',
-  listo: 'na',
-  na: 'pendiente',
-};
+/**
+ * El ciclo del clic, que depende de QUIÉN hace el ítem.
+ *
+ * Con cinco estados, un ciclo único serían cinco toques para llegar a «listo»
+ * — y la matriz se toca cientos de veces por semana. Así que el estado
+ * intermedio que aparece primero es el del responsable del ítem: en uno del
+ * cliente, «en manos del cliente»; en uno de la agencia, «en manos del
+ * equipo». Los de ambos pasan por los dos, que es lo que de verdad ocurre.
+ *
+ * Para pasarle la pelota al otro alcanza con seguir tocando: nadie queda
+ * encerrado en un estado por el responsable que tenga escrito el ítem.
+ */
+export function siguienteEstado(
+  actual: EstadoCelda | undefined,
+  quien: 'cliente' | 'agencia' | 'ambos',
+): EstadoCelda {
+  const ciclo: EstadoCelda[] = quien === 'cliente'
+    ? ['pendiente', 'cliente', 'listo', 'na']
+    : quien === 'agencia'
+      ? ['pendiente', 'nosotros', 'listo', 'na']
+      : ['pendiente', 'cliente', 'nosotros', 'listo', 'na'];
+  const i = ciclo.indexOf(actual ?? 'pendiente');
+  // Un estado que no está en el ciclo de este responsable —un ítem de la
+  // agencia que alguien dejó «en manos del cliente», que es legítimo— no
+  // vuelve a cero: avanza a listo. Con `indexOf` en -1 el siguiente caía en
+  // 'pendiente' y el toque borraba el avance en vez de completarlo.
+  if (i === -1) return 'listo';
+  return ciclo[(i + 1) % ciclo.length];
+}
 
 export const ESTADO_LABEL: Record<EstadoCelda, string> = {
-  pendiente: 'Pendiente',
-  proceso: 'En proceso',
+  pendiente: 'Sin empezar',
+  cliente: 'La tiene el cliente',
+  nosotros: 'La tenemos nosotros',
   listo: 'Listo',
   na: 'No aplica',
 };
+
+/** El color de cada estado. Uno por estado y el mismo en todas las pantallas. */
+export const ESTADO_COLOR: Record<EstadoCelda, { fondo: string; borde: string; texto: string }> = {
+  pendiente: { fondo: 'bg-danger/[0.10]', borde: 'border-danger/45', texto: 'text-danger' },
+  cliente:   { fondo: 'bg-[#E8862E]/[0.12]', borde: 'border-[#E8862E]/50', texto: 'text-[#F0A65C]' },
+  nosotros:  { fondo: 'bg-gold/[0.12]', borde: 'border-gold/50', texto: 'text-goldhi' },
+  listo:     { fondo: 'bg-success/[0.10]', borde: 'border-success/45', texto: 'text-success' },
+  na:        { fondo: '', borde: 'border-cream/10', texto: 'text-cream/30' },
+};
+
+/** La marca corta de cada estado, para una celda angosta. */
+export const ESTADO_MARCA: Record<EstadoCelda, string> = {
+  pendiente: '',
+  cliente: 'C',
+  nosotros: 'N',
+  listo: '✓',
+  na: '–',
+};
+
+/**
+ * De quién es la pelota, contando toda la lista de un cliente.
+ *
+ * Es la línea que el equipo necesita el lunes: cuántas está esperando él y
+ * cuántas estamos trabando nosotros. Antes las dos eran el mismo amarillo y
+ * había que preguntar celda por celda.
+ */
+export function deQuienEsLaPelota(estados: Array<EstadoCelda | undefined>): {
+  delCliente: number; nuestras: number; sinEmpezar: number; listas: number;
+} {
+  let delCliente = 0, nuestras = 0, sinEmpezar = 0, listas = 0;
+  for (const e of estados) {
+    if (e === 'cliente') delCliente++;
+    else if (e === 'nosotros') nuestras++;
+    else if (e === 'listo') listas++;
+    else if (e !== 'na') sinEmpezar++;
+  }
+  return { delCliente, nuestras, sinEmpezar, listas };
+}
+
+/** Esa cuenta, dicha en una línea. */
+export function laPelota(x: ReturnType<typeof deQuienEsLaPelota>): string {
+  if (x.nuestras === 0 && x.delCliente === 0) {
+    return x.sinEmpezar > 0
+      ? `${x.sinEmpezar} sin empezar. Nada en curso.`
+      : 'Todo listo.';
+  }
+  const partes: string[] = [];
+  if (x.nuestras > 0) partes.push(`${x.nuestras} ${x.nuestras === 1 ? 'la tenemos' : 'las tenemos'} nosotros`);
+  if (x.delCliente > 0) partes.push(`${x.delCliente} ${x.delCliente === 1 ? 'la tiene' : 'las tiene'} él`);
+  return `${partes.join(' y ')}.`;
+}

@@ -63,7 +63,7 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
   },
   costo_conversacion: {
     accion: 'Que genere tres piezas nuevas con otro gancho.',
-    como: 'Mensaje: «Los anuncios están trayendo poca gente para lo que gastas. Entra al Constructor y genera tres nuevas — la app ya te dice cuáles.»',
+    como: 'Mensaje: «Los anuncios están trayendo pocas personas para lo que gastas. Entra al Constructor y genera tres nuevas — la app ya te dice cuáles.»',
   },
   comentario_a_conversacion: {
     accion: 'Revisar la palabra clave y la automatización del DM.',

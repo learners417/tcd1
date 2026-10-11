@@ -21,6 +21,18 @@ export interface CrearNotificacionInput {
   titulo: string;
   descripcion?: string;
   accion_url?: string;
+  /**
+   * El cuello de botella que originó un aviso automático ('show_rate', 'cpm'…).
+   *
+   * Va a la base porque es la única forma de saber cuántas veces ya le salió
+   * el mismo aviso, y de eso depende la regla que importa: después de dos
+   * avisos iguales sin resultado, el aviso no está funcionando y entra una
+   * persona. Sin la clave guardada, el aviso o no sale nunca o sale todos los
+   * días.
+   *
+   * Queda vacía en todo lo que no es un aviso automático, que es la mayoría.
+   */
+  clave?: string;
 }
 
 const QUEUE_KEY = 'tcd_notif_queue';
@@ -61,6 +73,7 @@ async function insertarNotificacionRPC(input: CrearNotificacionInput): Promise<{
     p_titulo: input.titulo,
     p_descripcion: input.descripcion ?? null,
     p_accion_url: input.accion_url ?? null,
+    p_clave: input.clave ?? null,
   });
   if (error) {
     console.error('[notifications] crear_notificacion RPC error:', error);
@@ -199,7 +212,7 @@ export async function notificarMensajeAdmin(
     usuario_id: userId,
     tipo: 'mensaje',
     titulo: `Nuevo mensaje de ${adminNombre}`,
-    descripcion: 'Te respondieron en Soporte.',
+    descripcion: 'Te respondieron en Acompañamiento.',
     accion_url: '/mensajes',
   });
 }

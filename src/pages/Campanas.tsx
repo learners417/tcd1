@@ -9,7 +9,7 @@ import ConstructorAnuncios from '../components/campanas/ConstructorAnuncios';
 import CampanasHome from '../components/campanas/CampanasHome';
 import CopiesView from '../components/campanas/CopiesView';
 import DiagnosticoView from '../components/campanas/DiagnosticoView';
-import NuevaCampanaChat from '../components/campanas/NuevaCampanaChat';
+import AsesorDeMontaje from '../components/campanas/AsesorDeMontaje';
 import MontajeCupos from '../components/campanas/MontajeCupos';
 import HistorialView from '../components/campanas/HistorialView';
 import GanadoresView from '../components/campanas/GanadoresView';
@@ -17,15 +17,30 @@ import CreativoStudio from '../components/campanas/CreativoStudio';
 import CreativoDetalle from '../components/campanas/CreativoDetalle';
 import { fetchCampanas, fetchCreativos } from '../lib/campanasStorage';
 import type { CampanasView, Campana, Creativo } from '../lib/campanasTypes';
+import LaActivacion from '../components/campanas/LaActivacion';
+import { montajeDe } from '../lib/montajeDatos';
+import { numerosDe } from '../lib/numerosDatos';
+import { CLAVE_ENCENDIDA, type Montaje } from '../lib/montajeCampana';
+import { diaDelPrograma } from '../lib/diaPrograma';
 import type { ProfileV2 } from '../lib/supabase';
 
 interface CampanasProps {
   userId?: string;
   perfil?: Partial<ProfileV2>;
+  /** Para devolverlo a su sesión cuando todavía no le toca montar. */
+  onIrAlCamino?: () => void;
 }
 
-export default function Campanas({ userId, perfil }: CampanasProps) {
-  const [view, setView] = useState<CampanasView>('anuncios');
+export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps) {
+  /**
+   * Se aterriza en la ACTIVACIÓN, no en el Constructor de anuncios.
+   *
+   * Al terminar el Camino, «andá a Campañas» dejaba al cliente en una
+   * pantalla para escribir anuncios, que es el paso 1 de cuatro — y sin nada
+   * que le dijera que había un paso 0, ni qué venía después, ni qué no tocar.
+   * La activación contesta las tres cosas y desde ahí se va a lo que toque.
+   */
+  const [view, setView] = useState<CampanasView>('activacion');
   const [previousView, setPreviousView] = useState<CampanasView>('home');
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [creativos, setCreativos] = useState<Creativo[]>([]);
@@ -33,6 +48,45 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
   const [selectedCreativo, setSelectedCreativo] = useState<Creativo | null>(null);
   const [loading, setLoading] = useState(true);
   const topRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Lo que la pantalla de activación necesita saber: sus candados, si tiene
+   * los tres anuncios y hace cuántos días encendió.
+   *
+   * Vive acá y no adentro de la pantalla porque el montaje y el encendido ya
+   * los leen otras vistas de Campañas: dos lugares pidiendo lo mismo es cómo
+   * terminan mostrando cosas distintas.
+   */
+  const [montaje, setMontaje] = useState<Montaje | null>(null);
+  const [diasEncendida, setDiasEncendida] = useState<number | null>(null);
+  /** Las ventas que cargó. null mientras no se consultaron. */
+  const [ventas, setVentas] = useState<number | null>(null);
+  useEffect(() => {
+    if (!userId) return;
+    let vivo = true;
+    void montajeDe(userId)
+      .then((m) => { if (vivo) setMontaje(m); })
+      .catch(() => { /* la pantalla funciona igual: muestra el primer paso */ });
+    // Las ventas salen de los números que él mismo carga. Si la consulta
+    // falla queda en null, y la puerta de pivotear no se dispara: decirle que
+    // su oferta está mal por una consulta que no se hizo sería peor que no
+    // decir nada.
+    void numerosDe(userId)
+      .then((semanas) => {
+        if (!vivo) return;
+        setVentas(semanas.reduce((t, s) => t + (s.ventas_cerradas ?? 0), 0));
+      })
+      .catch(() => { /* queda en null */ });
+    try {
+      const crudo = localStorage.getItem(CLAVE_ENCENDIDA);
+      const fecha = crudo ? (JSON.parse(crudo) as string | null) : null;
+      if (fecha) {
+        const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / 86400000);
+        setDiasEncendida(Math.max(0, dias));
+      }
+    } catch { /* sin fecha, se trata como no encendida */ }
+    return () => { vivo = false; };
+  }, [userId]);
 
   const loadData = useCallback(async () => {
     if (!userId) {
@@ -87,11 +141,11 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
     navigateTo('detail');
   };
 
-  const handleCampanaCreated = (campana: Campana) => {
-    setCampanas((prev) => [campana, ...prev]);
-    setSelectedCampana(campana);
-    navigateTo('studio');
-  };
+  // `handleCampanaCreated` vivía acá: lo llamaba el chat de seis fases al
+  // terminar, para guardar una campaña armada con la estrategia que el propio
+  // cliente eligió en la conversación. Ese chat se fue y la estrategia ya no se
+  // elige, así que no hay nada que guardar: el montaje se verifica en la
+  // Activación, contra los candados.
 
   const handleCreativoSaved = (creativo: Creativo) => {
     setCreativos((prev) => [creativo, ...prev]);
@@ -153,12 +207,7 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
       )}
 
       {view === 'nueva' && (
-        <NuevaCampanaChat
-          userId={userId}
-          perfil={perfil}
-          onComplete={handleCampanaCreated}
-          onCancel={() => navigateTo('home')}
-        />
+        <AsesorDeMontaje onVolver={() => navigateTo('home')} clienteId={userId} />
       )}
 
       {view === 'copies' && (
@@ -170,6 +219,23 @@ export default function Campanas({ userId, perfil }: CampanasProps) {
       )}
 
       {view === 'montaje' && <MontajeCupos clienteId={userId} onIrAnuncios={() => setView('anuncios')} />}
+
+      {/* LA ACTIVACIÓN: la primera pantalla al llegar del Camino.
+          Dice qué toca hoy y, sobre todo, qué NO tocar todavía. */}
+      {view === 'activacion' && (
+        <LaActivacion
+          montaje={montaje}
+          anunciosListos={creativos.length >= 3}
+          diasEncendida={diasEncendida}
+          ventas={ventas}
+          onIrAlMontaje={() => setView('montaje')}
+          /* El día decide si le toca montar o si todavía está escribiendo lo
+             que su campaña va a necesitar. Sin esto la pantalla le presentaba
+             el paso 1 del montaje como la tarea del día 1. */
+          diaDelPrograma={diaDelPrograma(perfil?.fecha_inicio)}
+          onIrAlCamino={() => { window.location.hash = ''; onIrAlCamino?.(); }}
+        />
+      )}
 
       {view === 'historial' && (
         <HistorialView

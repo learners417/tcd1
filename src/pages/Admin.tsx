@@ -21,14 +21,19 @@ import CargarSesion from '../components/admin/CargarSesion';
 import LaSemana from '../components/admin/LaSemana';
 import LaCasa from '../components/admin/LaCasa';
 import ListaDeHoy from '../components/admin/ListaDeHoy';
+import SeguimientoDeTodos from '../components/admin/SeguimientoDeTodos';
+import ReportesYGrupales from '../components/admin/ReportesYGrupales';
+import HabilitarMigraciones from '../components/admin/HabilitarMigraciones';
 import BandejaSoporte from '../components/admin/BandejaSoporte';
 import type { AperturaDeTarea } from '../lib/cerebro';
 import ServicioDelCliente from '../components/admin/ServicioDelCliente';
 import { cuantosEsperan, comoSeLee, subirArchivo, TOPE_ARCHIVO } from '../lib/soporteDatos';
 import MontajeDelCliente from '../components/admin/MontajeDelCliente';
+import BibliotecaDelCliente from '../components/admin/BibliotecaDelCliente';
 import AcompanamientoDelCliente from '../components/admin/AcompanamientoDelCliente';
 import { sesionesDeVarios } from '../lib/sesionesDatos';
 import { cuantasDioEstaSemana, type Sesion } from '../lib/sesionesHumanas';
+import { copiar } from '../lib/copiar';
 import CargarSesionHumana from '../components/admin/CargarSesionHumana';
 import { TICKETS, type Ticket } from '../lib/cuadroTickets';
 import { cierreDeLaVentana, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
@@ -36,6 +41,7 @@ import JornadaPanel from '../components/admin/Jornada';
 import { jornadasRecientes } from '../lib/jornadaStorage';
 import { comparativaSemana, rachasDeTodos } from '../lib/mesaPlataStorage';
 import { armarCola, type ItemCola } from '../lib/colaExcepciones';
+import { repartirLaCola, type ResultadoDeLaPasada } from '../lib/avisosStorage';
 import type { PlanComercial } from '../lib/planes';
 import type { Jornada as JornadaTipo } from '../lib/jornada';
 import { rolDe as rolPermisos } from '../lib/permisos';
@@ -375,6 +381,16 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
    */
   const [cola, setCola] = useState<ItemCola[]>([]);
 
+  /**
+   * LO QUE LA APP HIZO SOLA CON ESA COLA.
+   *
+   * La cola se mostraba y no pasaba nada más: ni le salía un aviso al cliente,
+   * ni quedaba una tarea para nadie. Ahora cada cosa termina en algún lado, y
+   * este recuento es para poder decirlo: sin un número a la vista, el trabajo
+   * que la app hace sola parece que no existe.
+   */
+  const [pasada, setPasada] = useState<ResultadoDeLaPasada | null>(null);
+
   /** Las sesiones que dio quien está mirando, en los últimos siete días. */
   const misSesionesDeLaSemana = useMemo(() => {
     const mias = Object.values(sesionesPorCliente).flat();
@@ -423,12 +439,23 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
           ((clientes.find((c) => c.id === id) as { plan_comercial?: string } | undefined)
             ?.plan_comercial as PlanComercial) ?? 'completo';
 
-        setCola(armarCola(comp.map((f) => ({
+        const colaDeHoy = armarCola(comp.map((f) => ({
           ...f,
           nombre: nombre(f.clienteId),
           plan: planDe(f.clienteId),
           semanasIgual: rachas.get(f.clienteId) ?? 0,
-        }))));
+        })));
+        setCola(colaDeHoy);
+
+        // Y acá la cola deja de ser una lista para mirar. Lo que ya se avisó
+        // dos veces sin resultado, y lo que nunca fue para la app, quedan como
+        // tarea de una persona. Los avisos al cliente NO salen de acá: los
+        // manda el cron diario, y con los dos lados mandando el cliente
+        // recibía el mismo aviso dos veces. Va después de pintar la cola a
+        // propósito: la pantalla no espera al reparto para mostrarse.
+        void repartirLaCola(colaDeHoy, (adminProfile as { id?: string }).id ?? '')
+          .then((r) => { if (vivo) setPasada(r); })
+          .catch(() => { /* la pantalla funciona igual; el aviso sale la próxima */ });
 
         setSemanaClientes({
           vendieron: comp.filter((f) => (f.ventas ?? 0) > 0).length,
@@ -886,13 +913,14 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       // ═══ Blindaje: el RPC puede no traer las columnas del plan — las mergeamos directo ═══
       try {
         const { data: planes } = await db().from('profiles')
-          .select('id, plan_comercial, plan_reservado, acceso_hasta, acceso_tipo, servicio_contratado, cima_incluida');
+          .select('id, plan_comercial, plan_reservado, acceso_hasta, acceso_tipo, servicio_contratado, cima_incluida, biblioteca_abierta, biblioteca_abierta_el');
         if (planes) {
           const porId = new Map(planes.map((x) => [x.id, x]));
           for (const p of profiles as Array<{
             id: string; plan_comercial?: string; plan_reservado?: string | null;
             acceso_hasta?: string | null; acceso_tipo?: string | null;
             servicio_contratado?: string | null; cima_incluida?: boolean | null;
+            biblioteca_abierta?: boolean | null; biblioteca_abierta_el?: string | null;
           }>) {
             const extra = porId.get(p.id);
             if (extra) {
@@ -904,6 +932,13 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
               p.acceso_tipo = extra.acceso_tipo;
               p.servicio_contratado = extra.servicio_contratado;
               p.cima_incluida = extra.cima_incluida;
+              // Y sin estas dos el interruptor de la Biblioteca se dibuja
+              // siempre cerrado, aunque el permiso esté dado en la base. Es el
+              // mismo olvido que dejó la matriz pidiéndole los 62 ítems a todo
+              // el mundo: la columna existe, la consulta la trae, y el merge
+              // no la copia.
+              p.biblioteca_abierta = extra.biblioteca_abierta;
+              p.biblioteca_abierta_el = extra.biblioteca_abierta_el;
             }
           }
         }
@@ -2265,7 +2300,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             const msj = selectedCliente.traba_sesion
                               ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado. 🥋`
                               : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos. 🥋`;
-                            try { navigator.clipboard?.writeText(msj); } catch { /* noop */ }
+                            // El mensaje se deja escrito en el chat igual, así
+                            // que si la copia falla no se pierde nada: por eso
+                            // acá no hay aviso de error.
+                            void copiar(msj);
                             setDetalleTab('mensajes');
                             setEmpujonListo(msj);
                           }}
@@ -2371,6 +2409,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <MontajeDelCliente
                             clienteId={selectedCliente.id}
                             nombre={selectedCliente.nombre ?? 'Este cliente'}
+                          />
+                          {/* Abrirle todo el material sin esperar su día del
+                              Camino. Hace falta para el de La Instalación, que
+                              no lo recorre, y para el que renovó. */}
+                          <BibliotecaDelCliente
+                            clienteId={selectedCliente.id}
+                            nombre={selectedCliente.nombre ?? 'Este cliente'}
+                            abierta={Boolean((selectedCliente as { biblioteca_abierta?: boolean }).biblioteca_abierta)}
+                            abiertaEl={(selectedCliente as { biblioteca_abierta_el?: string | null }).biblioteca_abierta_el}
+                            quienCarga={(adminProfile as { id?: string }).id}
+                            onCambio={(abierta) => {
+                              setSelectedCliente((c) => (c ? { ...c, biblioteca_abierta: abierta } as typeof c : c));
+                              setClientes((cs) => cs.map((c) => (c.id === selectedCliente.id
+                                ? { ...c, biblioteca_abierta: abierta } as typeof c : c)));
+                            }}
                           />
                           {/* Para que el semáforo no marque en rojo a quien trabaja por fuera de la app. */}
                           <HechoAfueraPanel
@@ -4034,6 +4087,45 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               jornadasDelEquipo={jornadasEquipo.filter(
                 (j) => j.personaId !== (adminProfile as { id?: string }).id)}
             >
+            {/* LO QUE LA APP YA HIZO, antes de pedirle nada a nadie.
+                Aparece solo cuando hizo algo: un cartel que dice «0 y 0»
+                todos los días se deja de leer, y entonces tampoco se lee el
+                día que dice algo. */}
+            {pasada && (pasada.escalados > 0 || pasada.deLaPersona > 0 || pasada.losLleveLaApp > 0) && (
+              <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 mb-4">
+                <p className="text-[15px] text-cream/90">
+                  {pasada.escalados + pasada.deLaPersona > 0 ? (
+                    <>Quedaron{' '}
+                      <strong className="text-gold">{pasada.escalados + pasada.deLaPersona}</strong>
+                      {pasada.escalados + pasada.deLaPersona === 1 ? ' tarea' : ' tareas'}{' '}
+                      en tu lista, de la semana de tus clientes.
+                    </>
+                  ) : (
+                    <>Las{' '}
+                      <strong className="text-gold">{pasada.losLleveLaApp}</strong>{' '}
+                      {pasada.losLleveLaApp === 1 ? 'cuenta' : 'cuentas'} que están trabadas
+                      las lleva la app sola por ahora.
+                    </>
+                  )}
+                </p>
+                {pasada.escalados > 0 && (
+                  <p className="text-[15px] text-cream/65 mt-1">
+                    De esas,{' '}
+                    <strong className="text-cream/85">{pasada.escalados}</strong>{' '}
+                    {pasada.escalados === 1 ? 'venía' : 'venían'} avisada dos veces y el
+                    problema sigue: ahí hace falta que hables con la persona.
+                  </p>
+                )}
+                {pasada.losLleveLaApp > 0 && pasada.escalados + pasada.deLaPersona > 0 && (
+                  <p className="text-[15px] text-cream/65 mt-1">
+                    Otras{' '}
+                    <strong className="text-cream/85">{pasada.losLleveLaApp}</strong>{' '}
+                    las está llevando la app sola: el cliente ya tiene su aviso.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Arriba de todo: alguien esperando respuesta manda sobre
                 cualquier cuello. Una cuenta rota se destraba mañana; una
                 persona esperando se va hoy. */}
@@ -4048,6 +4140,26 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               onAbrir={abrirDestino}
               clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))}
             />
+
+            {/* CÓMO VA CADA UNO.
+                La lista de arriba muestra TAREAS: quien no generó ninguna no
+                aparece, y el que no aparece es justamente el que se está yendo
+                en silencio. Esta muestra a los diez, con cuántas mentorías
+                seguidas se perdió cada uno — que hasta ahora no se veía en
+                ninguna pantalla hasta que el cliente avisaba. */}
+            <SeguimientoDeTodos onAbrir={abrirDestino} />
+
+            {/* Los reportes de La Base y las mentorías con su link: los dos
+                trabajos que vivían en Discord y en el calendario aparte. */}
+            <ReportesYGrupales
+              quienSoy={(adminProfile as { id?: string }).id ?? ''}
+              nombres={Object.fromEntries(clientes.map((c) => [c.id, c.nombre]))}
+            />
+
+            {/* La llave de la migración. El asistente del Admin sigue estando
+                para los casos en que haya que hacerla por alguien; esto es
+                para que la haga el cliente, que es quien conoce su material. */}
+            <HabilitarMigraciones />
 
             {/* La cola vieja SE FUE de acá.
 

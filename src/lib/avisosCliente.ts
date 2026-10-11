@@ -45,7 +45,7 @@ export const AVISOS: Record<string, { titulo: string; descripcion: string; desti
     destino: '/campanas',
   },
   costo_conversacion: {
-    titulo: 'Tus anuncios están trayendo poca gente',
+    titulo: 'Tus anuncios están trayendo pocas personas',
     descripcion: 'Entra al Constructor: la app ya tiene elegidas las tres fórmulas que te convienen ahora.',
     destino: '/campanas',
   },
@@ -56,7 +56,7 @@ export const AVISOS: Record<string, { titulo: string; descripcion: string; desti
   },
   conv_a_agenda: {
     titulo: 'Conversas mucho y agendas poco',
-    descripcion: 'El anuncio trae gente y el mensaje la pierde. Habla con Sofi, tu entrenadora de DM.',
+    descripcion: 'El anuncio trae personas y el mensaje las pierde. Habla con Sofi, tu entrenadora de DM.',
     destino: '/agentes',
   },
   show_rate: {
@@ -86,7 +86,7 @@ export const AVISOS: Record<string, { titulo: string; descripcion: string; desti
   },
   costo_agenda: {
     titulo: 'Cada agenda te está saliendo cara',
-    descripcion: 'El anuncio trae gente, pero no la que reserva. Revisa a quién le hablas en el gancho, no el presupuesto.',
+    descripcion: 'El anuncio trae personas, pero no las que reservan. Revisa a quién le hablas en el gancho, no el presupuesto.',
     destino: '/campanas',
   },
   mensajes: {
@@ -149,6 +149,30 @@ export interface HistorialAvisos {
 }
 
 export const HISTORIAL_VACIO: HistorialAvisos = { enviados: {}, ultimaSemana: {} };
+
+/**
+ * La semana ISO de una fecha: '2026-W41'.
+ *
+ * La regla es «no dos veces en la misma semana», no «no dos veces en siete
+ * días». Con los siete días corridos el aviso se corre un día cada vez y
+ * termina cayendo cualquier día; con la semana calendario cae siempre dentro
+ * de la misma, y el cliente que entra el lunes ve lo de su semana.
+ *
+ * Es la misma cuenta que hace `to_char(fecha, 'IYYY"-W"IW')` en la base, para
+ * que los dos lados comparen la misma cadena.
+ */
+export function semanaISO(fecha: Date = new Date()): string {
+  const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
+  // El jueves de la misma semana define el año ISO: una semana pertenece al
+  // año donde cae su jueves, y por eso el 31 de diciembre puede ser semana 1
+  // del año siguiente.
+  const dia = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dia);
+  const anio = d.getUTCFullYear();
+  const primero = new Date(Date.UTC(anio, 0, 1));
+  const semana = Math.ceil(((d.getTime() - primero.getTime()) / 86400000 + 1) / 7);
+  return `${anio}-W${String(semana).padStart(2, '0')}`;
+}
 
 export interface PlanDeAvisos {
   /** Los que la app manda ahora. */
@@ -266,7 +290,7 @@ export async function mandarAviso(
   aviso: Aviso,
   crear: (input: {
     usuario_id: string; tipo: 'sistema' | 'admin' | 'mensaje';
-    titulo: string; descripcion?: string; accion_url?: string;
+    titulo: string; descripcion?: string; accion_url?: string; clave?: string;
   }) => Promise<void>,
 ): Promise<boolean> {
   try {
@@ -276,6 +300,10 @@ export async function mandarAviso(
       titulo: aviso.titulo,
       descripcion: aviso.descripcion,
       accion_url: aviso.destino,
+      // La clave viaja a la base: es con lo que la próxima corrida sabe que
+      // este aviso ya salió, y cuántas veces. Sin ella el historial no existe
+      // y la regla del escalamiento no puede aplicarse nunca.
+      clave: aviso.clave,
     });
     return true;
   } catch (err) {
@@ -298,7 +326,7 @@ export async function mandarMensajeDelEquipo(
   destino: string,
   crear: (input: {
     usuario_id: string; tipo: 'sistema' | 'admin' | 'mensaje';
-    titulo: string; descripcion?: string; accion_url?: string;
+    titulo: string; descripcion?: string; accion_url?: string; clave?: string;
   }) => Promise<void>,
 ): Promise<boolean> {
   const limpio = texto.trim();

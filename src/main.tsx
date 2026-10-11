@@ -6,6 +6,12 @@ import App from './App.tsx';
 import '@fontsource-variable/sora';
 import '@fontsource-variable/fraunces/soft.css';
 import '@fontsource-variable/fraunces/soft-italic.css';
+// Lora: la letra con la que están impresos los libros de la colección. Va solo
+// donde el cliente LEE —el dato del paisaje, un tutorial, una lección— y no
+// donde opera. Sora sigue siendo la de la interfaz: botones, datos y números
+// se leen mejor en una sans, y una app entera en serif se lee como un PDF.
+import '@fontsource-variable/lora';
+import '@fontsource-variable/lora/wght-italic.css';
 import './index.css';
 import {initSentry, Sentry} from './lib/sentry';
 import {installDomTranslationGuard} from './lib/domTranslationGuard';

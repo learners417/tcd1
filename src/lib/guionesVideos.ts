@@ -88,7 +88,7 @@ Tú ya sabes que vales más. Lo sabes hace años. Entonces, ¿por qué no lo cob
 Eso no es un problema técnico. Es una relación rota con el dinero. Y la mayoría la arrastra desde mucho antes de tener un consultorio.
 
 [DE DÓNDE VIENE · 1:30-2:30]
-En tu casa, ¿cómo se hablaba del dinero? ¿Era escaso, sucio, motivo de pelea? ¿Te enseñaron que la gente buena no piensa en dinero, que cobrar mucho es de aprovechadores? Si te dedicas a ayudar, probablemente sí. Y esa creencia hoy te cuesta dinero real, todos los meses.
+En tu casa, ¿cómo se hablaba del dinero? ¿Era escaso, sucio, motivo de pelea? ¿Te enseñaron que las personas buenas no piensan en dinero, que cobrar mucho es de aprovechadores? Si te dedicas a ayudar, probablemente sí. Y esa creencia hoy te cuesta dinero real, todos los meses.
 
 [LOS TRES SABOTAJES · 2:30-3:30]
 Se manifiesta de tres formas. El que baja el precio antes de que el paciente lo pida — a veces antes de terminar de decirlo. El que justifica su precio con títulos y años, como si tuviera que ganarse el permiso de cobrar. Y el que trabaja de más, regala horas, para compensar la culpa de cobrar. ¿Te reconoces en alguno?
@@ -124,14 +124,14 @@ Te voy a decir algo que probablemente no sabes de ti mismo: ya tienes un método
 Cuando un paciente mejora contigo, tú sabes por qué. Hay un orden en lo que haces — una primera sesión que siempre es parecida, un momento en que pasa el click, una forma tuya de acompañar. Eso es un método. Pero si vive solo en tu intuición, pasan tres cosas: no lo puedes repetir igual, no lo puedes delegar, y no lo puedes cobrar caro. Lo que no tiene nombre, no tiene precio.
 
 [POR QUÉ IMPORTA · 1:30-2:30]
-La gente no paga caro por sesiones sueltas. Paga caro por un proceso con nombre, con inicio y con final, que promete un resultado. "Diez sesiones de terapia" vale poco. "El Programa de Reconstrucción Emocional de 90 días" vale diez veces más — con el mismo conocimiento tuyo adentro. La diferencia no es lo que sabes. Es cómo lo empaquetas.
+Nadie paga caro por sesiones sueltas. Paga caro por un proceso con nombre, con inicio y con final, que promete un resultado. "Diez sesiones de terapia" vale poco. "El Programa de Reconstrucción Emocional de 90 días" vale diez veces más — con el mismo conocimiento tuyo adentro. La diferencia no es lo que sabes. Es cómo lo empaquetas.
 
 [EL AVATAR B · 2:30-3:15]
 Y si eres de los que ya tienen años de práctica, esto es todavía más para ti. No vas a inventar nada. Vas a ORDENAR y ponerle nombre a lo que ya haces hace quince años sin darte cuenta. Es tu activo más valioso, enterrado.
 
 [CIERRE · 3:15-4min]
 En las próximas sesiones vamos a sacar tu método de tu cabeza, ordenarlo en pasos, y ponerle un nombre que sea tuyo. Cuando lo veas en la pantalla, con nombre, algo va a cambiar en cómo te ves. Vas a dejar de ser alguien que da sesiones. Vas a ser el dueño de un método.`,
-    esencia: 'Ya tienes un método — hace años que lo usas, solo que nunca lo sacaste de tu cabeza. Lo que no tiene nombre no tiene precio: la gente paga caro por un proceso con nombre, no por sesiones sueltas. Vamos a ordenarlo y nombrarlo. Ahí dejas de dar sesiones y pasas a ser dueño de un método.',
+    esencia: 'Ya tienes un método — hace años que lo usas, solo que nunca lo sacaste de tu cabeza. Lo que no tiene nombre no tiene precio: se paga caro por un proceso con nombre, no por sesiones sueltas. Vamos a ordenarlo y nombrarlo. Ahí dejas de dar sesiones y pasas a ser dueño de un método.',
   },
 
   // ═══════════════ FASE 3 · NARRATIVA · LA OFERTA ═══════════════
@@ -144,7 +144,7 @@ En las próximas sesiones vamos a sacar tu método de tu cabeza, ordenarlo en pa
 Una buena oferta no se vende con técnicas de venta. Se vende sola — porque decir que no se vuelve la decisión irracional. Hoy vas a entender cómo se construye una así.
 
 [EL CAMBIO DE MARCO · 15s-1:15]
-El error es vender lo que HACES: "sesiones de nutrición", "consultas de kinesiología". A nadie le emociona comprar tu tiempo. Lo que la gente compra es el RESULTADO: verse bien en la playa en tres meses, volver a jugar con sus hijos sin dolor, dejar de despertarse con angustia. Vende el destino, no el vehículo.
+El error es vender lo que HACES: "sesiones de nutrición", "consultas de kinesiología". A nadie le emociona comprar tu tiempo. Lo que se compra es el RESULTADO: verse bien en la playa en tres meses, volver a jugar con sus hijos sin dolor, dejar de despertarse con angustia. Vende el destino, no el vehículo.
 
 [LOS CUATRO INGREDIENTES · 1:15-2:45]
 Una oferta irresistible tiene cuatro partes. Primero, el resultado concreto — específico, medible, con tiempo. Segundo, el proceso — tu método con nombre, que le muestra CÓMO va a llegar. Tercero, la garantía — que le saca el miedo de encima; tú te la aguantas porque confías en tu trabajo. Y cuarto, los bonos — cosas que aumentan el valor sin aumentar tu costo. Cuando los cuatro están, el precio deja de ser el tema.
@@ -196,7 +196,7 @@ Dos caminos. Si ya tienes un dominio, hoy lo conectas — vas a copiar dos datos
 Una cosa importante: después de conectarlo, a veces tarda unas horas en activarse. Es normal, no rompiste nada. Se sigue al día siguiente.
 
 [CIERRE · 2:15-3min]
-Cuando termine, vas a tener un link con tu nombre que puedes compartir con orgullo. Tu dirección en el mundo digital, tuya para siempre. Es un paso chico que cambia cómo te percibe la gente. Vamos.`,
+Cuando termine, vas a tener un link con tu nombre que puedes compartir con orgullo. Tu dirección en el mundo digital, tuya para siempre. Es un paso chico que cambia cómo te perciben los demás. Vamos.`,
     esencia: 'Tu clínica necesita una dirección digital propia (tu-nombre.com) — transmite seriedad, a diferencia de un link genérico. Si ya tienes dominio, lo conectas con 2 registros DNS (guiado paso a paso); si no, compras uno simple (~$12/año). Si tarda horas en activarse, es normal.',
   },
 

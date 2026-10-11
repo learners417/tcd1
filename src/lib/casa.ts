@@ -152,7 +152,7 @@ export const INDUCCION: SesionDeInduccion[] = [
     datos: [
       'Presupuesto → anuncio → mensaje → conversación → confirmación → llamada → cierre → cobro.',
       'El diagnóstico se detiene en el PRIMERO que falla.',
-      'Si el anuncio no trae gente, no tiene sentido mirar el cierre: no hay a quién cerrarle.',
+      'Si el anuncio no trae personas, no tiene sentido mirar el cierre: no hay a quién cerrarle.',
     ],
     queQuedaClaro: 'Los siete micro-pasos en orden, y por qué el diagnóstico se detiene en el primero que falla.',
     accion: 'Mirar tres cuentas reales y nombrar en qué paso está trabada cada una.',
@@ -280,15 +280,15 @@ export const HISTORIA: CapituloDeLaHistoria[] = [
   {
     titulo: 'Empecé liderando antes de saber qué era liderar',
     texto:
-      'A los quince ya coordinaba gente en la secundaria. A los dieciocho abrí un ' // primera persona, no voseo
+      'A los quince ya coordinaba equipos en la secundaria. A los dieciocho abrí un ' // primera persona, no voseo
       + 'centro cultural a tres cuadras del Obelisco. No sabía nada de gestión: '
       + 'aprendí porque no había otra opción.',
   },
   {
     titulo: 'Pasé por la política y me recibí de abogado',
     texto:
-      'Varios años adentro. Vi cómo se toman las decisiones que afectan a mucha '
-      + 'gente, y vi lo que pasa cuando nadie escribe el criterio: todo se vuelve '
+      'Varios años adentro. Vi cómo se toman las decisiones que afectan a muchas '
+      + 'personas, y vi lo que pasa cuando nadie escribe el criterio: todo se vuelve '
       + 'a discutir, siempre, y siempre gana el que grita más fuerte.',
   },
   {
@@ -342,7 +342,7 @@ export const SISTEMA_POR_DENTRO: PiezaDelSistema[] = [
     respuesta:
       'Porque arreglar dos cosas a la vez no deja saber cuál funcionó. Y porque un '
       + 'número malo abajo casi siempre es consecuencia de uno malo arriba: si el '
-      + 'anuncio no trae gente, el cierre va a estar mal aunque el cierre esté bien.',
+      + 'anuncio no trae personas, el cierre va a estar mal aunque el cierre esté bien.',
   },
   {
     pregunta: '¿De dónde salen las referencias?',

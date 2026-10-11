@@ -45,18 +45,20 @@ export interface NumerosSemana {
   /** Precio del programa que vende. Manda sobre casi todas las referencias. */
   precio: number;
 
-  /**
-   * Dónde corre la pauta. NO es donde vive el sanador: puede vivir en Chile
-   * y anunciar en Perú, Colombia y México. Sin esto, todos se miden con la
-   * misma vara y el diagnóstico miente en las dos direcciones.
-   */
-  mercados?: string[];
+  // El campo `mercados` vivía acá y se fue. Nadie lo poblaba en ninguna
+  // pantalla, así que `bandaDe(n.mercados ?? [])` recibía siempre una lista
+  // vacía y caía en la banda de México: se juzgaba el CPM de toda la cartera
+  // contra la referencia mexicana, en silencio. Los países ahora son un
+  // argumento de `calcularCadena`, que el llamador tiene que traer del
+  // montaje del cliente. Dejarlo acá como opcional invitaba a volver a
+  // leerlo de los números, donde nunca llega.
+
 
   // ── Atracción (predictivos: se ejecutan) ──
   gasto: number;
   /** Cuántas veces se mostró el anuncio. De acá salen el CPM y la frecuencia. */
   impresiones: number;
-  /** A cuánta gente distinta llegó. Con las impresiones da la frecuencia. */
+  /** A cuántas personas distintas llegó. Con las impresiones da la frecuencia. */
   alcance: number;
   piezasPublicadas: number;
   mensajesEnviados: number;
@@ -87,7 +89,6 @@ export interface NumerosSemana {
 
 export const SEMANA_VACIA: NumerosSemana = {
   precio: 0, gasto: 0, impresiones: 0, alcance: 0, piezasPublicadas: 0, mensajesEnviados: 0,
-  mercados: [],
   comentarios: 0, conversaciones: 0, agendas: 0,
   llamadasTomadas: 0, ofertasPresentadas: 0, ventas: 0,
   facturado: 0, cobrado: 0, cuotasPorCobrar: 0, cuotasCobradas: 0,
@@ -171,7 +172,20 @@ const div = (a: number, b: number): number | null => (b > 0 ? a / b : null);
  * una llamada calificada no puede costar lo mismo en un programa de $1.000
  * que en uno de $10.000.
  */
-export function calcularCadena(n: NumerosSemana): Indicador[] {
+export function calcularCadena(
+  n: NumerosSemana,
+  /**
+   * Dónde corre su campaña. Va aparte de los números y no dentro de ellos
+   * porque no cambia cada semana: el cliente elige sus países una vez, al
+   * montar.
+   *
+   * Es obligatorio a propósito. Antes salía de un campo de los números que nadie poblaba
+   * nunca, así que `bandaDe` caía en la referencia de México y se juzgaba el
+   * CPM de toda la cartera contra la banda mexicana — en silencio. Un valor por
+   * omisión acá devolvería ese mismo error.
+   */
+  paises: string[],
+): Indicador[] {
   const p = n.precio || 0;
   const out: Indicador[] = [];
 
@@ -240,7 +254,7 @@ export function calcularCadena(n: NumerosSemana): Indicador[] {
   // La banda del CPM sale del MERCADO donde corre la pauta, no de una
   // referencia única: el techo argentino está por debajo del piso español, y
   // medirlos igual se equivoca en las dos direcciones.
-  const banda = bandaDe(n.mercados ?? []);
+  const banda = bandaDe(paises);
 
   add('cpm', 'Costo por mil impresiones', 'atraccion', 'historico',
     div(n.gasto * 1000, n.impresiones), [banda.cpmMin, banda.cpmMax], 'dinero', 'menor_mejor',
@@ -250,10 +264,20 @@ export function calcularCadena(n: NumerosSemana): Indicador[] {
   // La frecuencia es el número que evita tirar un creativo que está bien.
   // Con presupuesto y público chicos sube rapidísimo, y sin verla parece que
   // la pieza se gastó cuando el problema es que el público es muy angosto.
+  // La muestra se mide por las IMPRESIONES y no por el alcance, aunque el
+  // alcance sea el divisor. La frecuencia es impresiones ÷ alcance: con las
+  // impresiones en cero la cuenta da cero, y cero leído como medición dice
+  // «cada persona lo vio menos de una vez», que es la zona sana. O sea que la
+  // app mostraba en verde un número que nunca midió.
+  //
+  // Hoy pasa siempre, porque `impresiones` no es una columna de la base: el
+  // formulario de carga nunca la pidió. Con la muestra puesta acá, el
+  // indicador dice «sin datos» —que es la verdad— en vez de decir que está
+  // bien. El día que el formulario pida las impresiones, empieza a medir solo.
   add('frecuencia', 'Veces que cada uno lo vio', 'atraccion', 'historico',
     div(n.impresiones, n.alcance), [1, 3], 'veces', 'menor_mejor',
     'Arriba de 3 en una semana, la audiencia se agotó: ampliar el público o sumar otro país. No es el creativo.',
-    { tiene: n.alcance, necesita: 500 });
+    { tiene: Math.min(n.impresiones, n.alcance * 1000), necesita: 1000 });
 
   add('costo_conversacion', 'Costo por conversación', 'atraccion', 'historico',
     div(n.gasto, n.conversaciones), [p * 0.001, p * 0.01], 'dinero', 'menor_mejor',
@@ -269,7 +293,7 @@ export function calcularCadena(n: NumerosSemana): Indicador[] {
 
   add('conv_a_agenda', 'Conversación → agenda', 'atraccion', 'historico',
     div(n.agendas, n.conversaciones), [0.25, 0.60], 'porcentaje', 'mayor_mejor',
-    'El anuncio trae gente y el DM la pierde. Escucha las conversaciones reales, no el resumen.',
+    'El anuncio trae personas y el DM las pierde. Escucha las conversaciones reales, no el resumen.',
     { tiene: n.conversaciones, necesita: 8 });
 
   // ══ CONVERSIÓN ═════════════════════════════════════════════════════════
@@ -553,3 +577,91 @@ export function formatear(v: number | null, f: Indicador['formato']): string {
 export function formatearRef([a, b]: [number, number], f: Indicador['formato']): string {
   return `${formatear(a, f)} – ${formatear(b, f)}`;
 }
+
+/* ══════════════════ LA FILA DE LA BASE, A NÚMEROS ══════════════════ */
+
+/**
+ * Cómo viene una semana desde `sala_metricas_semana`.
+ *
+ * El tipo vive acá y no en la capa que consulta la base porque hay dos
+ * llamadores y no uno: el Admin, que lee con la sesión del equipo, y el cron
+ * diario, que lee con la llave de servidor. Con el mapeo escrito en la capa
+ * del navegador, el cron tenía su propia versión —cuatro cuellos contra
+ * veinte— y los dos lados diagnosticaban distinto sobre los mismos datos.
+ */
+export interface FilaDeSemana {
+  cliente_id: string;
+  semana_iso: string;
+  objetivo?: string | null;
+  precio?: number | null;
+  gasto?: number | null;
+  impresiones?: number | null;
+  alcance?: number | null;
+  comentarios?: number | null;
+  conversaciones?: number | null;
+  agendas?: number | null;
+  llamadas_tomadas?: number | null;
+  ofertas_presentadas?: number | null;
+  ventas?: number | null;
+  facturado?: number | null;
+  cobrado?: number | null;
+  cuotas_por_cobrar?: number | null;
+  cuotas_cobradas?: number | null;
+  piezas_publicadas?: number | null;
+  mensajes_enviados?: number | null;
+  clientes_activos?: number | null;
+  clientes_que_terminan?: number | null;
+  renovaciones?: number | null;
+  referidos?: number | null;
+  casos_de_exito?: number | null;
+  actualizado_en?: string | null;
+}
+
+const num = (v: number | null | undefined): number =>
+  typeof v === 'number' && Number.isFinite(v) ? v : 0;
+
+/**
+ * La fila de la base convertida en los números de la semana.
+ *
+ * Las impresiones y el alcance se cargan desde el formulario de la semana, y
+ * mientras estén en cero los dos indicadores que los necesitan —el costo de
+ * aparecer y la frecuencia— dicen «sin datos» y no opinan. Que es lo
+ * correcto: un cero tratado como medición diría que el anuncio se mostró
+ * menos de una vez por persona, y eso cae en la zona sana. La app mostraría
+ * en verde un número que nunca midió.
+ */
+export function numerosDeFila(f: FilaDeSemana): NumerosSemana {
+  return {
+    ...SEMANA_VACIA,
+    precio: num(f.precio),
+    gasto: num(f.gasto),
+    impresiones: num(f.impresiones),
+    // `alcance` se perdía en el camino: la consulta lo traía y el mapeo no lo
+    // copiaba, así que llegaba en cero a `calcularCadena`.
+    alcance: num(f.alcance),
+    piezasPublicadas: num(f.piezas_publicadas),
+    mensajesEnviados: num(f.mensajes_enviados),
+    comentarios: num(f.comentarios),
+    conversaciones: num(f.conversaciones),
+    agendas: num(f.agendas),
+    llamadasTomadas: num(f.llamadas_tomadas),
+    ofertasPresentadas: num(f.ofertas_presentadas),
+    ventas: num(f.ventas),
+    facturado: num(f.facturado),
+    cobrado: num(f.cobrado),
+    cuotasPorCobrar: num(f.cuotas_por_cobrar),
+    cuotasCobradas: num(f.cuotas_cobradas),
+    clientesActivos: num(f.clientes_activos),
+    clientesQueTerminan: num(f.clientes_que_terminan),
+    renovaciones: num(f.renovaciones),
+    referidos: num(f.referidos),
+    casosDeExito: num(f.casos_de_exito),
+  };
+}
+
+/** Las columnas que hay que pedir para que `numerosDeFila` tenga todo. */
+export const COLUMNAS_DE_SEMANA = `cliente_id, semana_iso, objetivo, precio, gasto,
+  impresiones, alcance, comentarios, conversaciones, agendas, llamadas_tomadas, ofertas_presentadas,
+  ventas, facturado, cobrado, cuotas_por_cobrar, cuotas_cobradas, piezas_publicadas,
+  mensajes_enviados, clientes_activos, clientes_que_terminan, renovaciones, referidos,
+  casos_de_exito, actualizado_en`;

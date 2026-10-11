@@ -3,7 +3,8 @@ import { contarRacha, pesoDeLaCuenta, ordenarPorRiesgo } from './colaExcepciones
 import { semanaISO } from './bitacoraCampana';
 import {
   calcularCadena, encontrarDomino, SEMANA_VACIA,
-  type NumerosSemana, type Domino,
+  numerosDeFila, COLUMNAS_DE_SEMANA,
+  type NumerosSemana, type Domino, type FilaDeSemana,
 } from './valueChain';
 
 /**
@@ -27,66 +28,18 @@ export interface SemanaCliente {
 }
 
 /** Cómo viene una fila de la base. Los nombres son los de la tabla. */
-interface FilaBase {
-  cliente_id: string;
-  semana_iso: string;
-  objetivo: string | null;
-  precio: number | null;
-  gasto: number | null;
-  alcance: number | null;
-  comentarios: number | null;
-  conversaciones: number | null;
-  agendas: number | null;
-  llamadas_tomadas: number | null;
-  ofertas_presentadas: number | null;
-  ventas: number | null;
-  facturado: number | null;
-  cobrado: number | null;
-  cuotas_por_cobrar: number | null;
-  cuotas_cobradas: number | null;
-  piezas_publicadas: number | null;
-  mensajes_enviados: number | null;
-  clientes_activos: number | null;
-  clientes_que_terminan: number | null;
-  renovaciones: number | null;
-  referidos: number | null;
-  casos_de_exito: number | null;
-  actualizado_en: string | null;
-}
+// La forma de la fila y su mapeo a números viven en valueChain: el cron
+// diario lee la misma tabla con la llave de servidor, y con el mapeo acá
+// —en un módulo que importa el cliente del navegador— tenía que escribir su
+// propia versión. Terminó con cuatro cuellos contra los veinte de esta.
+type FilaBase = FilaDeSemana;
 
 const n = (v: number | null | undefined): number =>
   typeof v === 'number' && Number.isFinite(v) ? v : 0;
 
-function aNumeros(f: FilaBase): NumerosSemana {
-  return {
-    ...SEMANA_VACIA,
-    precio: n(f.precio),
-    gasto: n(f.gasto),
-    piezasPublicadas: n(f.piezas_publicadas),
-    mensajesEnviados: n(f.mensajes_enviados),
-    comentarios: n(f.comentarios),
-    conversaciones: n(f.conversaciones),
-    agendas: n(f.agendas),
-    llamadasTomadas: n(f.llamadas_tomadas),
-    ofertasPresentadas: n(f.ofertas_presentadas),
-    ventas: n(f.ventas),
-    facturado: n(f.facturado),
-    cobrado: n(f.cobrado),
-    cuotasPorCobrar: n(f.cuotas_por_cobrar),
-    cuotasCobradas: n(f.cuotas_cobradas),
-    clientesActivos: n(f.clientes_activos),
-    clientesQueTerminan: n(f.clientes_que_terminan),
-    renovaciones: n(f.renovaciones),
-    referidos: n(f.referidos),
-    casosDeExito: n(f.casos_de_exito),
-  };
-}
+const aNumeros = numerosDeFila;
 
-const COLUMNAS = `cliente_id, semana_iso, objetivo, precio, gasto, alcance, comentarios,
-  conversaciones, agendas, llamadas_tomadas, ofertas_presentadas, ventas, facturado,
-  cobrado, cuotas_por_cobrar, cuotas_cobradas, piezas_publicadas, mensajes_enviados,
-  clientes_activos, clientes_que_terminan, renovaciones, referidos, casos_de_exito,
-  actualizado_en`;
+const COLUMNAS = COLUMNAS_DE_SEMANA;
 
 /** La semana de un cliente. null si todavía no se cargó. */
 export async function cargarSemana(
@@ -107,7 +60,7 @@ export async function cargarSemana(
     clienteId, semana,
     numeros: aNumeros(f),
     objetivo: f.objetivo ?? 'mensajes',
-    actualizadoEn: f.actualizado_en,
+    actualizadoEn: f.actualizado_en ?? null,
   };
 }
 
@@ -145,7 +98,7 @@ export async function historialCliente(
     semana: f.semana_iso,
     numeros: aNumeros(f),
     objetivo: f.objetivo ?? 'mensajes',
-    actualizadoEn: f.actualizado_en,
+    actualizadoEn: f.actualizado_en ?? null,
   }));
 }
 
@@ -190,6 +143,29 @@ export async function comparativaSemana(
   const filas = (error || !data) ? [] : (data as unknown as FilaBase[]);
   const porCliente = new Map(filas.map((f) => [f.cliente_id, f]));
 
+  /**
+   * Los países de cada uno, en UNA consulta para todos.
+   *
+   * Sin esto, `calcularCadena` juzgaba el CPM de toda la cartera contra la
+   * banda de México: `bandaDe([])` cae en la referencia por defecto. El techo
+   * argentino está por debajo del piso español, así que el diagnóstico se
+   * equivocaba en las dos direcciones, en silencio y para todos.
+   */
+  const paisesPorCliente = new Map<string, string[]>();
+  {
+    const r = await db()
+      // La clave de montaje_campana es `user_id`, no `cliente_id`. Estaba mal
+      // puesto y la consulta fallaba en silencio: el `?? []` tapaba el error y
+      // la banda volvía a ser la de México, que es exactamente el bug que esto
+      // venía a arreglar.
+      .from('montaje_campana')
+      .select('user_id, paises')
+      .in('user_id', clienteIds);
+    for (const m of (r.data ?? []) as Array<{ user_id: string; paises: string[] | null }>) {
+      if (m.paises?.length) paisesPorCliente.set(m.user_id, m.paises);
+    }
+  }
+
   const out: FilaComparativa[] = clienteIds.map((id) => {
     const f = porCliente.get(id);
     if (!f) {
@@ -207,7 +183,7 @@ export async function comparativaSemana(
       };
     }
     const numeros = aNumeros(f);
-    const cadena = calcularCadena(numeros);
+    const cadena = calcularCadena(numeros, paisesPorCliente.get(id) ?? []);
     const domino = encontrarDomino(cadena);
     return {
       clienteId: id, semana, domino,
@@ -257,8 +233,16 @@ export async function rachaDelCuello(
 ): Promise<RachaCuello> {
   const historial = await historialCliente(clienteId, cuantas);
   if (historial.length === 0) return { clienteId, cuello: null, semanas: 0 };
+  // Los países de este cliente: la racha de cuello depende de contra qué banda
+  // se mide su CPM, así que con la lista vacía la racha también salía mal.
+  const m = await db()
+    .from('montaje_campana')
+    .select('paises')
+    .eq('user_id', clienteId)
+    .maybeSingle();
+  const paises = ((m.data as { paises?: string[] } | null)?.paises) ?? [];
   const cuellos = historial.map(
-    (h) => encontrarDomino(calcularCadena(h.numeros)).indicador?.id ?? null);
+    (h) => encontrarDomino(calcularCadena(h.numeros, paises)).indicador?.id ?? null);
   return { clienteId, ...contarRacha(cuellos) };
 }
 

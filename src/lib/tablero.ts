@@ -101,7 +101,7 @@ export function diagnosticar(s: SemanaTablero, meta: CadenaMeta): Diagnostico {
     return {
       cuello: 'volumen',
       titulo: 'Tu cuello es el volumen',
-      detalle: `Tuviste ${s.conversaciones} conversaciones y necesitas ~${meta.conversaciones} por semana. No es tu técnica: es que no te está escribiendo suficiente gente.`,
+      detalle: `Tuviste ${s.conversaciones} conversaciones y necesitas ~${meta.conversaciones} por semana. No es tu técnica: es que no te está escribiendo suficiente personas.`,
       accion: 'Sube el presupuesto de tu anuncio o publica más esta semana. Es lo único que mueve este número.',
     };
   }
@@ -109,7 +109,7 @@ export function diagnosticar(s: SemanaTablero, meta: CadenaMeta): Diagnostico {
     return {
       cuello: 'filtro',
       titulo: 'Tu cuello está entre el chat y la agenda',
-      detalle: `Te escribieron ${s.conversaciones} pero solo agendaste ${s.llamadas} llamadas. La gente llega y no avanza.`,
+      detalle: `Te escribieron ${s.conversaciones} pero solo agendaste ${s.llamadas} llamadas. Las personas llegan y no avanzan.`,
       accion: 'Revisa dos cosas: que tu agente responda en menos de un minuto, y que tu mensaje hable del dolor de tu paciente, no de tu técnica. Y confirma cada cita 24 h y 2 h antes: sin eso, 3 de cada 10 no se presentan.',
     };
   }

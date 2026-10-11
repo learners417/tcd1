@@ -50,7 +50,7 @@ export interface MicroPaso {
 
 /**
  * El embudo, en orden. **El diagnóstico se detiene en el primero que falla**:
- * si el anuncio no trae gente, no tiene sentido hablar del cierre porque no
+ * si el anuncio no trae personas, no tiene sentido hablar del cierre porque no
  * hay a quién cerrarle. Por eso el orden de esta lista importa.
  */
 export const MICRO_PASOS: MicroPaso[] = [
@@ -75,15 +75,15 @@ export const MICRO_PASOS: MicroPaso[] = [
     entrenador: null, a: 'dev' },
 
   { cuello: 'costo_conversacion', area: 'anuncio', paso: 'El costo de conversar',
-    significa: 'Trae poca gente para lo que gasta.',
+    significa: 'Trae pocas personas para lo que gasta.',
     entrenador: 'mateo' },
 
   { cuello: 'costo_agenda', area: 'anuncio', paso: 'A quién le habla',
-    significa: 'Trae gente, pero no la que reserva. Es el avatar del gancho.',
+    significa: 'Trae personas, pero no las que reservan. Es el avatar del gancho.',
     entrenador: 'mateo' },
 
   { cuello: 'conv_a_agenda', area: 'setting', paso: 'La conversación',
-    significa: 'El anuncio trae gente y el mensaje la pierde.',
+    significa: 'El anuncio trae personas y el mensaje las pierde.',
     entrenador: 'sofi' },
 
   { cuello: 'mensajes', area: 'setting', paso: 'La prospección',

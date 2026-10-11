@@ -88,10 +88,13 @@ import { usePersistedState } from '../lib/usePersistedState';
 import { VOC } from '../lib/vocabulario';
 import PuntoDePartida, { KEY_PARTIDA } from '../components/PuntoDePartida';
 import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
+import { tutorialEscrito } from '../lib/tutorialesDeLupe';
+import { paisajeDeSistema, paisajeDelDia } from '../lib/losCincoPaisajes';
+import PortadaDeSistema from '../components/PortadaDeSistema';
 import { baseDeOnboarding } from '../lib/onboardingBase';
 import VeredictoCriticoPanel from '../components/VeredictoCriticoPanel';
 import { codigoDelDia } from '../lib/roadmapSeed';
-import { codigosEnRevision, revisionDelDia, pasosDeRevision, proximoLunes, YA_TIENES } from '../lib/yaTienes';
+import { codigosEnRevision, revisionDelDia, pasosDeRevision, YA_TIENES } from '../lib/yaTienes';
 import TestEneagrama from '../components/tasks/TestEneagrama';
 import { tipo as tipoEneagrama } from '../lib/eneagrama';
 import PreventaPanel from '../components/tasks/PreventaPanel';
@@ -840,26 +843,67 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     return (meta.pasos ?? []).map((p) => VOC(p));
   }, [enRevision]);
 
+  /**
+   * EL PUNTO DE PARTIDA: SE GUARDA LO QUE YA TIENE, NO SE MUEVE SU FECHA.
+   *
+   * Acá estaba `const fechaInicio = proximoLunes();`, y escribía esa fecha en
+   * el perfil, en localStorage y en la base. `proximoLunes` devuelve siempre un
+   * lunes ESTRICTAMENTE futuro —de 1 a 7 días adelante, porque `|| 7` convierte
+   * el 0 en 7—, así que el primer botón que toca un cliente en su Camino le
+   * reescribía la fecha de inicio hacia adelante. Tres cosas a la vez:
+   *
+   *   · `diaDelPrograma` de una fecha futura da negativo y cae en
+   *     `Math.max(1, …)`: su día quedaba congelado en «Día 1 de 90 · vas al
+   *     día» hasta ese lunes, en el Camino y en HOY.
+   *   · Pisaba la fecha que el equipo cargó en el alta, sin avisar, así que la
+   *     ficha del Admin y la pantalla del cliente mostraban días distintos.
+   *   · Su ventana de acceso se calcula de `fecha_inicio` pero `acceso_hasta`
+   *     quedaba de la fecha original: dos fechas de cierre para el mismo
+   *     cliente.
+   *
+   * Y se disparaba aunque no marcara nada, porque el botón llama igual con una
+   * lista vacía.
+   *
+   * Ahora: la fecha la pone el equipo en el alta y no se toca. Si por algo no
+   * está, se pone HOY — alguien que está tocando «Empezar el día 1» empieza
+   * hoy, no el lunes que viene, que es además lo que dice el botón.
+   */
   const marcarPartida = useCallback((ids: string[]) => {
-    const fechaInicio = proximoLunes();
-    onProfileFieldUpdate?.({ fecha_inicio: fechaInicio, ya_tiene: ids });
+    const campos: Record<string, unknown> = { ya_tiene: ids };
+
+    let perfilLocal: Record<string, unknown> = {};
+    try { perfilLocal = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); } catch { /* noop */ }
+    const yaTieneFecha = Boolean(perfil?.fecha_inicio ?? perfilLocal.fecha_inicio);
+
+    if (!yaTieneFecha) {
+      const hoy = new Date();
+      campos.fecha_inicio = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    }
+
+    onProfileFieldUpdate?.(campos);
     try {
-      const perfilLocal = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
-      localStorage.setItem('tcd_profile',
-        JSON.stringify({ ...perfilLocal, fecha_inicio: fechaInicio, ya_tiene: ids }));
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...perfilLocal, ...campos }));
     } catch { /* noop */ }
     if (isSupabaseReady() && supabase && userId) {
-      void supabase.from('profiles').update({ fecha_inicio: fechaInicio }).eq('id', userId);
+      void supabase.from('profiles').update(campos).eq('id', userId);
     }
     setEnRevision(codigosEnRevision(ids));
-  }, [userId, onProfileFieldUpdate]);
+  }, [userId, onProfileFieldUpdate, perfil?.fecha_inicio]);
 
   /** El tutorial de Lupe del día, si ya tiene enlace cargado. */
   const tutorialDelDia = useCallback((dia: number | null | undefined) => {
     if (dia === null || dia === undefined) return null;
-    const t = roadmap.tutoriales.find((x) => x.dia === dia && (videosPorPilar[x.codigo] || PDFS_POR_TUTORIAL[x.codigo]));
+    // Antes exigía video o PDF, y sin ninguno de los dos devolvía null: el
+    // tutorial DESAPARECÍA. Trece de los veintiún están grabados, así que en
+    // ocho jornadas el cliente hacía su sesión sin enterarse nunca de que
+    // había un paso a paso — su link de pago, su página publicada, su
+    // bandeja, su contenido del mes. Ahora el texto es el tutorial y el video
+    // se suma arriba cuando llega.
+    const t = roadmap.tutoriales.find((x) => x.dia === dia
+      && (videosPorPilar[x.codigo] || PDFS_POR_TUTORIAL[x.codigo] || tutorialEscrito(x.codigo)));
     if (!t) return null;
     const pdf = PDFS_POR_TUTORIAL[t.codigo];
+    const escrito = tutorialEscrito(t.codigo);
     return (
       <div className="space-y-2">
         <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso en pantalla</p>
@@ -874,6 +918,33 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             className="absolute inset-0 w-full h-full"
           />
         </div>
+        )}
+        {/* EL PASO A PASO ESCRITO. Completo, no detrás de un «ver más»: quien
+            abre este bloque viene a hacer el paso, no a decidir si lo lee. */}
+        {escrito && (
+          <div className="rounded-2xl border border-[var(--line2,#DFD3BC)] p-4 space-y-3">
+            {/* Lo que el cliente LEE va en la letra de los libros, no en la de
+                la interfaz. Es el mismo paso a paso de antes: lo que cambia es
+                que ahora se lee como una página y no como un panel. */}
+            <p className="prosa-libro text-cream/85">{VOC(escrito.intro)}</p>
+            <ol className="space-y-2.5">
+              {escrito.pasos.map((paso, i) => (
+                <li key={i} className="flex gap-3">
+                  {/* El numeral en versalita de oro, como en el libro. */}
+                  <span className="rotulo-libro shrink-0" style={{ lineHeight: '1.62' }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="prosa-libro text-cream/85">{VOC(paso)}</span>
+                </li>
+              ))}
+            </ol>
+            {/* Leyendo sin nadie al lado, lo que traba es lo que sale distinto
+                de lo que dice el paso. */}
+            <p className="prosa-libro accion-libro text-cream/70">
+              <span className="rotulo-libro block mb-1">Si algo no sale</span>
+              {VOC(escrito.siFalla)}
+            </p>
+          </div>
         )}
         {pdf && (
           <a href={pdf} target="_blank" rel="noreferrer"
@@ -1059,16 +1130,34 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           );
 
           return (
-            <div key={fase.fase} className="space-y-2">
-              {/* Encabezado de fase */}
-              <div className="flex items-center gap-3 px-1 mb-1">
-                <div className="flex-1">
-                  <h2 className="text-[22px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-                    {VOC(fase.titulo)}
-                  </h2>
-                  <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
+            <div key={fase.fase} className="space-y-3">
+              {/* LA PORTADA DEL SISTEMA.
+                  Acá había un rótulo de carpeta: «Tu reset · Días 1-5».
+                  Correcto, y no decía nada — el cliente leía un título de
+                  sección en el lugar donde debería entender por qué esos cinco
+                  días van juntos.
+                  Ahora va el paisaje del libro que trata ese sistema, con su
+                  dato real y lo que significa para su trabajo. Es la misma
+                  imagen que va a encontrar en el libro, en la landing y en
+                  Bariloche: la misma idea, igual en todos lados.
+                  La portada entera solo en la fase donde está parado; en las
+                  otras va la tira. Un momento repetido cinco veces deja de ser
+                  un momento. */}
+              {paisajeDeSistema(fase.fase) ? (
+                <PortadaDeSistema
+                  paisaje={paisajeDeSistema(fase.fase)!}
+                  compacta={paisajeDelDia(diaActual)?.n !== fase.fase}
+                />
+              ) : (
+                <div className="flex items-center gap-3 px-1 mb-1">
+                  <div className="flex-1">
+                    <h2 className="text-[22px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                      {VOC(fase.titulo)}
+                    </h2>
+                    <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Grid de pilares de la fase */}
               <div className={`grid gap-3 ${pilaresEnFase.length === 1 ? 'grid-cols-1' : pilaresEnFase.length === 3 || pilaresEnFase.length > 4 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>

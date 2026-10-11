@@ -154,7 +154,7 @@ GUÍA DE EDICIÓN (después de los 8 campos · siempre):
 ═══════════════════════════════════════════════════════════════════
 LOS DOS OBJETIVOS Y EL MIX:
 ═══════════════════════════════════════════════════════════════════
-N1 · viral · alcance · sin llamada a la acción dura · que llegue a gente nueva.
+N1 · viral · alcance · sin llamada a la acción dura · que llegue a personas nuevas.
 N2 · ultra nichado · genera vacío de contenido · llamada directa al regalo
 gratuito · convierte a la audiencia que ya existe.
 Mix mensual base: 60% N1 / 40% N2. El plan del mes solo se arma con 2+
@@ -259,7 +259,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
     subtitle: 'Pásame las métricas · diagnostico y corrijo los 8 campos',
     action: 'start_diagnostico',
     first_message:
-      'Pásame las métricas: vistas · cuánta gente lo miró hasta el final · y comentarios. Con eso diagnostico si falló el gancho · la edición · el horario/setup o la referencia. No defiendo el guión · lo mejoro · y te devuelvo la corrección en los 8 campos.',
+      'Pásame las métricas: vistas · cuántas personas lo miraron hasta el final · y comentarios. Con eso diagnostico si falló el gancho · la edición · el horario/setup o la referencia. No defiendo el guión · lo mejoro · y te devuelvo la corrección en los 8 campos.',
   },
 ];
 

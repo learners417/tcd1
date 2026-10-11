@@ -77,13 +77,13 @@ TIPO DE CAMPANA: Trafico al Perfil con CTA de Palabra Clave
 - Objetivo en Meta: TRAFICO
 - Destino: Perfil de Instagram
 - CTA: El usuario comenta una palabra clave en el post o envia por DM
-- Automatizacion: ManyChat detecta la palabra clave y activa flujo automatico
+- Automatizacion: la herramienta de mensajes detecta la palabra clave y activa el flujo automatico
 - GHL: Recibe el lead y envia recursos automaticamente + inicia conversacion
 - Conversion: DM -> Recurso gratuito -> Conversacion -> Retargeting
 
 INSTRUCCIONES ESPECIALES:
-- Explicar como configurar la palabra clave en ManyChat (trigger por comentario y por DM)
-- Explicar como conectar ManyChat con GHL via webhook o Zapier
+- Explicar como configurar la palabra clave en GHL (trigger por comentario y por DM)
+- Explicar como conectar Instagram con GHL via webhook
 - Detallar el flujo automatico: mensaje de bienvenida -> envio de recurso -> follow up a las 24h
 - Naming convention para la campaña: [NICHO]_TRAFICO_[PALABRA-CLAVE]_[FECHA]`,
 
@@ -156,7 +156,7 @@ Genera una guia numerada paso a paso con las siguientes secciones:
 (Formato, creativos, copy, CTA, tracking)
 
 ## 5. Automatizaciones Post-Campana
-(ManyChat/GHL segun tipo, follow-ups, nurturing)
+(GHL segun tipo, follow-ups, nurturing)
 
 ## 6. Metricas Clave a Monitorear
 (KPIs especificos para este tipo de campana)

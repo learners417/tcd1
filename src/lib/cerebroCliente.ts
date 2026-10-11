@@ -83,7 +83,7 @@ export function loQueSigue(x: {
     tareas.push({
       id: 'cargar_numeros',
       titulo: `Cargar ${x.numerosSinCargar === 1 ? 'el número que falta' : `los ${x.numerosSinCargar} números que faltan`}`,
-      porQue: 'Sin esto no puedo decirte dónde se está perdiendo la gente. Es lo único que me falta para ayudarte.',
+      porQue: 'Sin esto no puedo decirte dónde se están perdiendo las personas. Es lo único que me falta para ayudarte.',
       origen: 'numeros',
       destino: 'tablero',
       peso: 1000,
@@ -140,7 +140,7 @@ export function loQueSigue(x: {
   // ── 5. Publicar lo que ya tiene hecho ──
   //
   // Va último a propósito: **generar piezas nuevas es más fácil que publicar
-  // las que ya tiene**, y por eso mucha gente se queda generando. Si le
+  // las que ya tiene**, y por eso muchos se quedan generando. Si le
   // sobran piezas sin publicar, generar más no es lo que necesita.
   if (x.piezasSinPublicar > 0 && x.lanzado) {
     tareas.push({

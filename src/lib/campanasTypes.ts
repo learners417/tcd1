@@ -65,7 +65,7 @@ export const CAMPANA_FORM_INITIAL: CampanaFormState = {
 export const OBJETIVO_LABELS: Record<ObjetivoCampana, { titulo: string; descripcion: string }> = {
   trafico_perfil: {
     titulo: 'Trafico al Perfil',
-    descripcion: 'CTA con palabra clave para activar automatización en ManyChat y GHL. Envío de recursos automático y generación de conversación.',
+    descripcion: 'CTA con palabra clave para activar la automatización de mensajes en GHL. Envío de recursos automático y generación de conversación.',
   },
   mensajes_retargeting: {
     titulo: 'Mensajes (Retargeting)',
@@ -386,6 +386,10 @@ export interface SlideConfig {
 
 export type CampanasView =
   | 'home'
+  // La primera pantalla al llegar del Camino: qué toca hoy y qué no tocar.
+  // Sin esto, «andá a Campañas» dejaba al cliente frente a seis pantallas sin
+  // saber cuál era la primera.
+  | 'activacion'
   | 'nueva'
   | 'copies'
   | 'diagnostico'

@@ -300,7 +300,7 @@ export const diego: ConfigAgente = {
   unlockPilares: ['P8'],
   unlockExtraCheck: (perfil) => tieneLas4Ofertas(perfil),
   unlockReason:
-    'Completa tus 4 ofertas con Vera (Pilar 8): Extra Low · Low · Medium · High con nombre y precio. Sin las 4 ofertas definidas · Diego construiría en el vacío.',
+    'Se abre al cerrar tu jornada del día 9, donde nace tu método. Antes de eso Diego construiría en el vacío.',
   descripcion:
     'Editor de fondo · no lo hace por ti. Te entrena a construir el producto de cada oferta: guiones de video (≤7 min) · ejercicios · guías de 1 hoja · agendas de sesión 1:1. De arriba (High) hacia abajo · con criterio Hormozi.',
   adnFieldsNeeded: ADN_FIELDS,

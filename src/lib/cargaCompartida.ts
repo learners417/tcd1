@@ -40,7 +40,7 @@ export type CargaSemanal = Partial<Record<Campo, ValorConFirma>>;
 export const NOMBRE_CAMPO: Record<Campo, string> = {
   gasto: 'lo que gastaste en pauta',
   impresiones: 'las impresiones',
-  alcance: 'a cuánta gente llegó',
+  alcance: 'a cuántas personas llegó',
   comentarios: 'los comentarios',
   conversaciones: 'las conversaciones nuevas',
   agendas: 'las agendas',
@@ -123,7 +123,7 @@ const TRAMOS: Array<{
   /** Lo que se puede afirmar si están todos. */
   loQueDice: string;
 }> = [
-  { nombre: 'si el anuncio trae gente',
+  { nombre: 'si el anuncio trae personas',
     necesita: ['gasto', 'impresiones', 'alcance', 'comentarios'],
     loQueDice: 'si el anuncio para el scroll y a qué costo' },
   { nombre: 'si el mensaje abre conversaciones',

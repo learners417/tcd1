@@ -147,7 +147,7 @@ export const CONSULTORIO: Pregunta[] = [
   { codigo: 'P4.2e', p: '¿No es mucho pedir tantos datos antes de agendar?',
     r: 'El que de verdad quiere resolverlo los completa. El que abandona en la pregunta cuatro no iba a comprar: te ahorró cuarenta y cinco minutos.' },
   { codigo: 'P4.1', p: '¿Necesito tener seguidores para que esto funcione?',
-    r: 'No. Tu campaña le muestra tu anuncio a gente que no te conoce, y tu página hace el resto. Los seguidores ayudan después, cuando ya tienes qué vender. Por eso el contenido va en el mes 3.' },
+    r: 'No. Tu campaña le muestra tu anuncio a personas que no te conocen, y tu página hace el resto. Los seguidores ayudan después, cuando ya tienes qué vender. Por eso el contenido va en el mes 3.' },
   { codigo: 'P4.2b', p: '¿Tengo que publicar todos los días?',
     r: 'No, y menos ahora. Tu perfil hoy solo tiene que confirmar que eres una persona real que trabaja en serio. Publicar todas las semanas es otro programa y empieza después de estos noventa días.' },
   { codigo: 'P4.4', p: '¿Y si me rechazan la cuenta publicitaria?',

@@ -18,7 +18,7 @@ import {
   Bot, Globe, Phone, Megaphone, Triangle, Cog, Building2, Handshake,
   Palette, BarChart3, Sunrise, UserCircle,
 } from 'lucide-react';
-import { SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
+import { SEED_ROADMAP_V2, SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
 import { getHerramienta, herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
 import type { HerramientaV3 } from '../lib/herramientas';
@@ -35,6 +35,8 @@ import {
   type VideoModulo,
 } from '../lib/videos';
 import HerramientaDetalle from './HerramientaDetalle';
+import TodoElMaterial from '../components/TodoElMaterial';
+import { videosCargadosEnLaBase } from '../lib/bibliotecaDatos';
 import { VOC } from '../lib/vocabulario';
 import { COMPLEMENTOS as VIDEOS_COMPLEMENTO, idDeYoutube } from '../lib/videosCargados';
 
@@ -298,6 +300,10 @@ function RecursoVideoInApp({ r }: { r: RecursoADN }) {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 interface BibliotecaProps {
+  /** El día del Camino en que va. Decide qué material le corresponde. */
+  diaActual?: number | null;
+  /** El equipo le abrió todo el material, sin esperar su día. */
+  bibliotecaAbierta?: boolean;
   userId?: string;
 }
 
@@ -343,7 +349,27 @@ function Complementos() {
   );
 }
 
-export default function Biblioteca({ userId }: BibliotecaProps) {
+export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta = false }: BibliotecaProps) {
+  /**
+   * Los títulos reales de las jornadas y los videos que cargó el equipo.
+   *
+   * Sin los títulos, cada video de jornada se llamaría «Día 31» en la lista.
+   */
+  const titulosPorDia = useMemo(() => {
+    const out: Record<number, string> = {};
+    for (const p of SEED_ROADMAP_V2) {
+      for (const m of p.metas) if (m.dia_asignado) out[m.dia_asignado] = m.titulo;
+    }
+    return out;
+  }, []);
+  const [videosDeLaBase, setVideosDeLaBase] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let vivo = true;
+    void videosCargadosEnLaBase()
+      .then((v) => { if (vivo) setVideosDeLaBase(v); })
+      .catch(() => { /* el catálogo se arma con lo del archivo */ });
+    return () => { vivo = false; };
+  }, []);
   const VALID_TABS: ClinicaTabId[] = ['O', 'C1', 'L', 'I1', 'N', 'I2', 'C2', 'A'];
   const [activeTabId, setActiveTabId] = usePersistedState<ClinicaTabId>(
     'tcd_biblioteca_tab',
@@ -488,6 +514,17 @@ export default function Biblioteca({ userId }: BibliotecaProps) {
           Videos y herramientas IA del Método C·L·I·N·I·C·A.
         </p>
       </div>
+
+      {/* TODO EL MATERIAL, con buscador. Va arriba porque es para encontrar
+          algo puntual; las etapas de abajo son para recorrer. Antes los
+          tutoriales paso a paso no estaban en ninguna pantalla: vivían dentro
+          de la sesión de su día y pasado ese día no se volvían a ver. */}
+      <TodoElMaterial
+        titulos={titulosPorDia}
+        cargadosEnLaBase={videosDeLaBase}
+        diaActual={diaActual}
+        bibliotecaAbierta={bibliotecaAbierta}
+      />
 
       <Complementos />
 

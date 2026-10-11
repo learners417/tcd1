@@ -100,7 +100,7 @@ export const ROLES: Record<Rol, DefinicionRol> = {
       rendimiento_equipo: 'Ve SU carga, no la de los demás. Comparar personas entre sí no destraba ninguna cuenta y sí genera ruido.',
     },
     techoHoras: 12,
-    indicador: 'El porcentaje de cuentas en rojo. Si sube del 10% al 30%, no hace falta más gente: hace falta arreglar lo que las pone en rojo.',
+    indicador: 'El porcentaje de cuentas en rojo. Si sube del 10% al 30%, no hace falta más personal: hace falta arreglar lo que las pone en rojo.',
     entraPor: 'hoy',
   },
 

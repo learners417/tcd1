@@ -14,6 +14,8 @@
  * Lógica pura: no toca la base, así se puede probar sola.
  */
 
+import type { ObjetivoCampana } from './campanasTypes';
+
 export interface Montaje {
   palabra?: string | null;
   url_pagina?: string | null;
@@ -27,6 +29,10 @@ export interface Montaje {
   dominio?: string | null;
   url_formulario?: string | null;
   url_calendario?: string | null;
+  /** Dónde corre la campaña. De acá sale la banda de CPM con la que se juzga
+   *  su costo: `bandaDe([])` cae en la referencia de México, y así se le decía
+   *  «caro» o «barato» a toda la cartera con la banda mexicana. */
+  paises?: string[] | null;
 }
 
 export type IdCandado =
@@ -35,6 +41,35 @@ export type IdCandado =
 
 /** Los días que hay que poder sostener el presupuesto sin tocarlo. */
 export const DIAS_SIN_TOCAR = 14;
+
+/**
+ * Dónde queda anotada la fecha de encendido.
+ *
+ * Vive acá y no escrita a mano en cada pantalla: la escribe el Montaje y la
+ * leen la activación y el tablero. Con el texto repetido, cambiarla en un
+ * lugar deja a los otros leyendo una clave que ya nadie escribe — y eso se ve
+ * igual que una campaña que nunca se encendió.
+ */
+export const CLAVE_ENCENDIDA = 'tcd_campana_encendida_v1';
+
+/**
+ * LOS CANDADOS QUE APLICAN A CADA MOTOR.
+ *
+ * Había ocho candados obligatorios «sin excepciones». Pero dos de ellos —la
+ * palabra clave y el DM automático— son del motor de comentarios: alguien
+ * escribe la palabra, le llega el DM, y el DM lo manda a la página.
+ *
+ * Una campaña de clientes potenciales va DIRECTO al video, sin palabra. Con los
+ * ocho obligatorios, esa campaña nunca podía encender: le faltaban para siempre
+ * dos candados que pedían configurar algo que no usa.
+ */
+export function candadosQueAplican(objetivo: ObjetivoCampana): IdCandado[] {
+  const base: IdCandado[] = [
+    'anuncios', 'pagina', 'pixel', 'perfil', 'presupuesto', 'trabajo',
+  ];
+  // Solo el motor de comentarios necesita la palabra y el DM probado.
+  return objetivo === 'clientes_potenciales' ? base : [...base, 'palabra', 'dm'];
+}
 
 const hayTexto = (v: string | null | undefined): boolean =>
   typeof v === 'string' && v.trim().length > 0;
@@ -60,45 +95,96 @@ export function candadoCerrado(m: Montaje, id: IdCandado): boolean {
   }
 }
 
-/** Cuántos de los ocho están cerrados, contando el de los anuncios. */
-export function cuantosCerrados(m: Montaje, anunciosListos: boolean): number {
-  const propios: IdCandado[] = ['palabra', 'dm', 'pagina', 'pixel', 'perfil', 'trabajo', 'presupuesto'];
-  return propios.filter((id) => candadoCerrado(m, id)).length + (anunciosListos ? 1 : 0);
+/**
+ * CUÁNTOS CANDADOS LE APLICAN, Y CUÁNTOS CERRÓ.
+ *
+ * Acá vivían `cuantosCerrados` y `puedeEncender` contando OCHO fijos. Eran la
+ * cuenta vieja: dos de los ocho —la palabra y el DM probado— son del motor de
+ * comentarios, y la campaña que la app monta va directo al video sin palabra.
+ * Con los ocho obligatorios, al cliente le faltaban para siempre dos candados
+ * que pedían configurar algo que no usa.
+ *
+ * La cuenta correcta está en `activacion.ts` (`candadosQueAplican`) y ahora es
+ * la única. Esta función la usa en vez de repetirla: con dos cuentas en el
+ * repo, el Admin le decía «6 de 8» al equipo mientras el cliente leía «6 de 6
+ * · listo para encender» — y la discusión de quién tiene razón la termina
+ * teniendo el que está delante del cliente.
+ *
+ * El objetivo es obligatorio a propósito. Un valor por omisión es exactamente
+ * cómo esta pantalla quedó pidiendo ocho sin que nadie lo notara.
+ */
+export function cuantosCerrados(
+  m: Montaje,
+  objetivo: ObjetivoCampana,
+  anunciosListos: boolean,
+): number {
+  return candadosQueAplican(objetivo).filter((id) =>
+    id === 'anuncios' ? anunciosListos : candadoCerrado(m, id)).length;
 }
 
-/** Listo para encender: los ocho, sin excepciones. */
-export function puedeEncender(m: Montaje, anunciosListos: boolean): boolean {
-  return cuantosCerrados(m, anunciosListos) === 8;
+/** Cuántos le aplican en total, para poder decir «4 de 6». */
+export function cuantosAplican(objetivo: ObjetivoCampana): number {
+  return candadosQueAplican(objetivo).length;
+}
+
+/** Listo para encender: los que le aplican, sin excepciones. */
+export function puedeEncender(
+  m: Montaje,
+  objetivo: ObjetivoCampana,
+  anunciosListos: boolean,
+): boolean {
+  return cuantosCerrados(m, objetivo, anunciosListos) === cuantosAplican(objetivo);
 }
 
 /**
  * Lo que le falta, dicho como se dice.
  *
  * En el orden en que conviene resolverlo: primero lo que sin ello la campaña
- * no puede funcionar, después lo que la hace medible.
+ * no puede funcionar, después lo que la hace medible. Y solo lo que le aplica:
+ * antes le reclamaba al equipo «su palabra configurada» para una campaña que
+ * no usa palabra, y el equipo se lo pedía al cliente.
  */
-export function loQueFalta(m: Montaje, anunciosListos: boolean): string[] {
-  const falta: string[] = [];
-  if (!anunciosListos) falta.push('sus tres anuncios escritos y auditados');
-  if (!candadoCerrado(m, 'pagina')) falta.push('su página de venta');
-  if (!candadoCerrado(m, 'palabra')) falta.push('su palabra configurada');
-  if (!candadoCerrado(m, 'dm')) falta.push('probar su DM desde otra cuenta');
-  if (!candadoCerrado(m, 'pixel')) falta.push('el píxel en su página');
-  if (!candadoCerrado(m, 'perfil')) falta.push('el link de su perfil');
-  if (!candadoCerrado(m, 'presupuesto')) falta.push(`un presupuesto que sostenga ${DIAS_SIN_TOCAR} días`);
-  if (!candadoCerrado(m, 'trabajo')) falta.push('tener claro cuál es su único trabajo');
-  return falta;
+export function loQueFalta(
+  m: Montaje,
+  objetivo: ObjetivoCampana,
+  anunciosListos: boolean,
+): string[] {
+  const aplican = new Set(candadosQueAplican(objetivo));
+  const nombre: Array<[IdCandado, string]> = [
+    ['anuncios', 'sus tres anuncios escritos y auditados'],
+    ['pagina', 'su página de venta'],
+    ['palabra', 'su palabra configurada'],
+    ['dm', 'probar su DM desde otra cuenta'],
+    ['pixel', 'el píxel en su página'],
+    ['perfil', 'el link de su perfil'],
+    ['presupuesto', `un presupuesto que sostenga ${DIAS_SIN_TOCAR} días`],
+    ['trabajo', 'tener claro cuál es su único trabajo'],
+  ];
+  return nombre
+    .filter(([id]) => aplican.has(id))
+    .filter(([id]) => (id === 'anuncios' ? !anunciosListos : !candadoCerrado(m, id)))
+    .map(([, texto]) => texto);
 }
 
-/** La línea que lee el equipo en la ficha del cliente. */
-export function comoVaElMontaje(m: Montaje, anunciosListos: boolean): string {
-  const n = cuantosCerrados(m, anunciosListos);
-  if (n === 8) return 'Tiene los ocho. Puede encender.';
-  const falta = loQueFalta(m, anunciosListos);
-  const primero = falta[0];
-  return n === 7
+/**
+ * La línea que lee el equipo en la ficha del cliente.
+ *
+ * El total sale de lo que le aplica y ya no está escrito a mano: decía «de 8»
+ * aunque al cliente le pidiera seis, y el equipo leía «6 de 8» mientras el
+ * cliente leía «listo para encender».
+ */
+export function comoVaElMontaje(
+  m: Montaje,
+  objetivo: ObjetivoCampana,
+  anunciosListos: boolean,
+): string {
+  const total = cuantosAplican(objetivo);
+  const n = cuantosCerrados(m, objetivo, anunciosListos);
+  if (n === total) return `Tiene los ${total}. Puede encender.`;
+  const primero = loQueFalta(m, objetivo, anunciosListos)[0];
+  return n === total - 1
     ? `Le falta uno: ${primero}.`
-    : `Tiene ${n} de 8. Lo primero que le falta: ${primero}.`;
+    : `Tiene ${n} de ${total}. Lo primero que le falta: ${primero}.`;
 }
 
 // ── La pieza que el equipo necesita mirar ──────────────────────────
