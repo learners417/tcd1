@@ -31,14 +31,17 @@ os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
 from playwright.sync_api import sync_playwright
 
 PANTALLAS = ['dashboard', 'roadmap', 'entrenadores', 'adn', 'coach', 'miclinica', 'metrics',
-             'biblioteca', 'diario', 'agentes', 'creador', 'numero', 'manualNegocio', 'campanas']
+             'biblioteca', 'diario', 'agentes', 'creador', 'numero', 'manualNegocio', 'campanas',
+             # 'mensajes' entró el 9 de oct: es uno de los cinco destinos del
+             # cliente y no se estaba midiendo ninguna de sus pantallas.
+             'mensajes']
 # Las pantallas ya llevadas al nivel de la especificación. Crece turno a turno.
 # Las pestañas internas del cliente: (nombre, pantalla, texto del botón a tocar).
 INTERNAS = [
     ('metrics>sistema', 'metrics', 'Mi Sistema'),
     ('diario>historial', 'diario', 'Historial'),
     ('biblioteca>conciencia', 'biblioteca', 'Conciencia'),
-    ('campanas>nueva', 'campanas', 'Nueva campaña'),
+    ('campanas>nueva', 'campanas', 'Montar en Meta'),
     ('campanas>diagnosticar', 'campanas', 'Diagnosticar'),
     ('campanas>copies', 'campanas', 'Copies'),
     ('campanas>ganadores', 'campanas', 'Ganadores'),

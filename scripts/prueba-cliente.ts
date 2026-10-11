@@ -40,10 +40,10 @@ linea(muchas[0].minutos === 2, 'diciendo cuánto le lleva: 2 minutos');
 
 console.log('\n══ el cuello, cuando hay datos ══');
 const cadena = calcularCadena({
-  ...SEMANA_VACIA, precio: 1000, mercados: ['MX'],
+  ...SEMANA_VACIA, precio: 1000,
   gasto: 140, impresiones: 20000, alcance: 9000,
   comentarios: 30, conversaciones: 18, agendas: 2, llamadasTomadas: 2,
-});
+}, ['MX']);
 const conCuello = loQueSigue({ ...base, cuello: encontrarDomino(cadena).indicador });
 linea(conCuello.some((t) => t.id.startsWith('cuello_')), 'aparece el cuello');
 const c = conCuello.find((t) => t.id.startsWith('cuello_'))!;

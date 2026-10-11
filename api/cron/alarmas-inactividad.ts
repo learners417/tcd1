@@ -14,6 +14,10 @@ import { withSentry, Sentry } from '../_lib/sentry.js';
 import {
   AVISOS, planificarAvisos, type HistorialAvisos,
 } from '../../src/lib/avisosCliente.js';
+import {
+  calcularCadena, encontrarDomino, numerosDeFila, COLUMNAS_DE_SEMANA,
+  type FilaDeSemana,
+} from '../../src/lib/valueChain.js';
 import type { ItemCola } from '../../src/lib/colaExcepciones.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
@@ -168,25 +172,26 @@ async function handler(req: any, res: any) {
       (clientes ?? []).map((c: { id: string; nombre?: string | null }) =>
         [c.id, c.nombre ?? 'Cliente']));
 
-    // El historial de avisos, derivado de lo que ya se mandó. Las dos cosas
-    // que planificarAvisos necesita saber —cuántas veces salió cada aviso y
-    // en qué semana salió la última— están en la tabla de notificaciones
-    // desde el primer día. El título identifica el aviso: en AVISOS hay uno
-    // por cuello y no se repiten.
+    // El historial de avisos, derivado de lo que ya se mandó.
+    //
+    // Se lee por la COLUMNA `clave`, no comparando títulos. Antes el aviso se
+    // reconocía por su texto: cambiarle una palabra a un título dejaba el
+    // historial de ese aviso en cero para todos, y a la mañana siguiente
+    // volvía a salir desde el principio a quien ya lo había recibido dos
+    // veces. Con la clave guardada en la base, el texto se puede reescribir
+    // cuando haga falta.
     const historial: HistorialAvisos = await (async () => {
-      const claveDeTitulo = new Map<string, string>(
-        Object.entries(AVISOS).map(([clave, a]) => [a.titulo, clave]));
       const desde = new Date(Date.now() - 70 * 86400000).toISOString();
       const { data: previas } = await admin
         .from('notificaciones')
-        .select('usuario_id, titulo, created_at')
+        .select('usuario_id, clave, created_at')
         .eq('tipo', 'sistema')
+        .not('clave', 'is', null)
         .gte('created_at', desde);
       const h: HistorialAvisos = { enviados: {}, ultimaSemana: {} };
-      for (const n of (previas ?? []) as Array<{ usuario_id: string; titulo: string; created_at: string }>) {
-        const clave = claveDeTitulo.get(n.titulo);
-        if (!clave) continue;
-        const id = `${n.usuario_id}|${clave}`;
+      for (const n of (previas ?? []) as Array<{ usuario_id: string; clave: string; created_at: string }>) {
+        if (!AVISOS[n.clave]) continue;
+        const id = `${n.usuario_id}|${n.clave}`;
         h.enviados[id] = (h.enviados[id] ?? 0) + 1;
         const sem = semanaISOde(new Date(n.created_at));
         // Se queda la más reciente: la lista no viene ordenada.
@@ -196,25 +201,63 @@ async function handler(req: any, res: any) {
     })();
     try {
       const semana = semanaISOde(new Date());
-      const { data: filas } = await admin.rpc('clientes_para_avisar', { p_semana: semana });
-      const items = (filas ?? []) as unknown as Array<{
-        cliente_id: string; gasto: number; conversaciones: number;
-        agendas: number; ventas: number; cargo: boolean;
-      }>;
 
-      for (const it of items) {
-        // El primer tramo roto, de arriba hacia abajo. Sin datos no se opina:
-        // se le pide que cargue.
-        const cuello = !it.cargo ? 'no_cargo'
-          : it.gasto > 0 && it.conversaciones === 0 ? 'comentario_a_conversacion'
-          : it.conversaciones > 0 && it.agendas / it.conversaciones < 0.15 ? 'conv_a_agenda'
-          : it.agendas > 0 && it.ventas === 0 ? 'close_rate'
-          : null;
+      // ── EL DIAGNÓSTICO, EL MISMO QUE VE EL EQUIPO ──
+      //
+      // Acá había cuatro condiciones escritas a mano —sin cargar, sin
+      // conversaciones, pocas agendas, sin ventas— y con eso solo podían
+      // salir CUATRO de los veinte avisos. Los otros dieciséis estaban
+      // escritos y no tenían forma de dispararse: el costo de la agenda, la
+      // frecuencia agotada, las cuotas sin cobrar, el cliente que termina y
+      // no renueva. Justo los tramos donde el cliente se cae DESPUÉS de
+      // empezar a vender, que es donde más cuesta recuperarlo.
+      //
+      // Ahora corre `calcularCadena` y `encontrarDomino`, las mismas que usa
+      // la cola del Admin sobre la misma tabla. Un solo diagnóstico: lo que
+      // la app le dice al cliente y lo que le muestra al equipo no pueden ser
+      // dos lecturas distintas de los mismos números.
+      const { data: activos } = await admin
+        .from('profiles')
+        .select('id')
+        .eq('rol', 'cliente')
+        .not('campana_desde', 'is', null)
+        .or('campana_pausada.is.null,campana_pausada.eq.false');
+      const idsActivos: string[] = (activos ?? []).map((a: { id: string }) => a.id);
+
+      const { data: filas } = await admin
+        .from('sala_metricas_semana')
+        .select(COLUMNAS_DE_SEMANA)
+        .in('cliente_id', idsActivos)
+        .eq('semana_iso', semana)
+        .is('anuncio', null);
+      const semanaDe = new Map<string, FilaDeSemana>(
+        ((filas ?? []) as unknown as FilaDeSemana[]).map((f) => [f.cliente_id, f]));
+
+      // Los países, que deciden contra qué banda se juzga el costo. Sin
+      // esto, `calcularCadena` cae en la referencia de México y juzga a toda
+      // la cartera contra ella — el techo argentino está por debajo del piso
+      // español, así que se equivoca en las dos direcciones y en silencio.
+      const { data: montajes } = await admin
+        .from('montaje_campana')
+        .select('user_id, paises')
+        .in('user_id', idsActivos);
+      const paisesDe = new Map<string, string[]>(
+        ((montajes ?? []) as Array<{ user_id: string; paises: string[] | null }>)
+          .filter((m) => m.paises?.length)
+          .map((m) => [m.user_id, m.paises as string[]]));
+
+      for (const id of idsActivos) {
+        const fila = semanaDe.get(id);
+        // Sin números no se opina: se le pide que cargue, que es lo primero.
+        const cuello = fila
+          ? encontrarDomino(calcularCadena(numerosDeFila(fila), paisesDe.get(id) ?? []))
+              .indicador?.id ?? null
+          : 'no_cargo';
         if (!cuello) continue;
 
         pendientes.push({
-          clienteId: it.cliente_id,
-          nombre: nombrePorId.get(it.cliente_id) ?? 'Cliente',
+          clienteId: id,
+          nombre: nombrePorId.get(id) ?? 'Cliente',
           cuello,
           situacion: '', accion: '', como: '',
           // El cron solo manda lo automático: lo que necesita persona ya está
@@ -249,6 +292,11 @@ async function handler(req: any, res: any) {
           titulo: aviso.titulo,
           descripcion: aviso.descripcion,
           accion_url: aviso.destino,
+          // La clave queda guardada: es con lo que la corrida de mañana sabe
+          // que este aviso ya salió. Sin ella el historial se reconstruía
+          // comparando títulos, y cambiarle una palabra a un texto reseteaba
+          // la cuenta de todos.
+          clave: aviso.clave,
           leida: false,
         });
         avisados++;

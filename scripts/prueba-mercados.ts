@@ -3,10 +3,11 @@
  *
  * Lo que se juega: juzgar a todos con la misma vara se equivoca en las DOS
  * direcciones — le dice «caro» a quien está bien para su mercado, y «barato»
- * a quien trae gente que no puede pagarle.
+ * a quien trae personas que no pueden pagarle.
  *
  * Correr con: npx tsx scripts/prueba-mercados.ts
  */
+import { readFileSync } from 'node:fs';
 import {
   MERCADOS, bandaDe, explicarBanda, aprenderDeSemana, recomendarMercados,
   SEMANAS_PARA_CONFIAR, type DatoPropio,
@@ -114,8 +115,11 @@ const base = {
   gasto: 140, impresiones: 12000, alcance: 9000,
   comentarios: 20, conversaciones: 14, agendas: 5, llamadasTomadas: 4,
 };
-const cpmDe = (mercados: string[]) =>
-  calcularCadena({ ...base, mercados }).find((i) => i.id === 'cpm')!;
+// Los países van como ARGUMENTO y ya no dentro de los números: `n.mercados`
+// era el campo que nadie poblaba nunca, así que esta prueba verificaba el
+// comportamiento correcto de una ruta que en la app no se recorría.
+const cpmDe = (paises: string[]) =>
+  calcularCadena(base, paises).find((i) => i.id === 'cpm')!;
 
 const esp = cpmDe(['ES']);
 const arg = cpmDe(['AR']);
@@ -127,15 +131,38 @@ linea(esp.ref[1] > arg.ref[1] * 2,
   `las bandas ni se parecen: España hasta $${esp.ref[1]}, Argentina hasta $${arg.ref[1]}`);
 
 console.log('\n══ la frecuencia ══');
-const agotado = calcularCadena({ ...base, mercados: ['MX'], impresiones: 42000 })
+const agotado = calcularCadena({ ...base, impresiones: 42000 }, ['MX'])
   .find((i) => i.id === 'frecuencia')!;
 linea((agotado.valor ?? 0) > 4 && agotado.brecha > 0.5,
   `42.000 impresiones sobre 9.000 personas dan ${agotado.valor?.toFixed(1)} y se marca`);
 linea(agotado.dondeMirar.includes('No es el creativo'),
   'y lo dice: no es el creativo, es que el público se agotó');
-linea(calcularCadena({ ...base, impresiones: 0, alcance: 0 })
+linea(calcularCadena({ ...base, impresiones: 0, alcance: 0 }, ['MX'])
   .find((i) => i.id === 'frecuencia')!.valor === null,
   'sin impresiones ni alcance no inventa una frecuencia');
+
+// ── EL BUG QUE HACÍA INÚTIL TODO ESTO ─────────────────────────────────────
+// `bandaDe(n.mercados ?? [])` recibía SIEMPRE una lista vacía: nadie poblaba
+// ese campo en ninguna pantalla, así que caía en MERCADO_POR_DEFECTO = 'MX' y
+// se juzgaba el CPM de toda la cartera contra la banda mexicana. Esta prueba
+// estaba en verde mientras eso pasaba, porque le pasaba los mercados a mano.
+console.log('\n══ y la app se los pasa de verdad ══');
+const sinComentarios = (r: string) =>
+  readFileSync(r, 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+const vc = sinComentarios('src/lib/valueChain.ts');
+linea(/paises: string\[\],/.test(vc),
+  'calcularCadena pide los países como argumento obligatorio');
+linea(!/n\.mercados/.test(vc),
+  'y ya no los busca en los números, donde nunca llegaban');
+const tp = sinComentarios('src/components/admin/TableroPlata.tsx');
+linea(/calcularCadena\(n, paises\)/.test(tp) && /montajeDe\(clienteId\)/.test(tp),
+  'el tablero del equipo los trae del montaje del cliente');
+const mp = sinComentarios('src/lib/mesaPlataStorage.ts');
+linea(/paisesPorCliente/.test(mp),
+  'la comparativa los trae de todos en una sola consulta');
+const as = sinComentarios('src/components/campanas/AsesorDeMontaje.tsx');
+linea(/guardarMontaje\(clienteId, \{ paises \}\)/.test(as),
+  'y el cliente los guarda al elegirlos: antes vivían solo en su navegador');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);

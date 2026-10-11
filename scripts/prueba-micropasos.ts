@@ -22,7 +22,7 @@ const linea = (ok: boolean, txt: string) => {
 
 console.log('══ el mapa cubre la cadena entera ══');
 const cuellosReales = new Set(
-  calcularCadena({ ...SEMANA_VACIA, precio: 1000 }).map((i) => i.id));
+  calcularCadena({ ...SEMANA_VACIA, precio: 1000 }, ['MX']).map((i) => i.id));
 const mapeados = new Set(MICRO_PASOS.map((m) => m.cuello));
 const sinMapear = [...cuellosReales].filter((c) => !mapeados.has(c));
 linea(sinMapear.length === 0,

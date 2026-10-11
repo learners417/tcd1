@@ -84,6 +84,15 @@ create index if not exists idx_mensajes_soporte_pendiente
 -- La versión de sala-de-mando.sql filtraba por canal='humano', así que
 -- nunca marcaba nada. Esta trabaja sobre el canal único.
 
+-- `marcar_respondido` ya existe en sala-de-mando.sql devolviendo void, y acá
+-- devuelve cuántos mensajes marcó. `create or replace` no puede cambiar el
+-- tipo de retorno de una función que ya está: hay que soltarla primero.
+--
+-- El drop va EN ESTA migración y no en una posterior: corriendo de arriba
+-- hacia abajo, esta es la primera que toca la función, así que un drop más
+-- abajo nunca llega a ejecutarse — la corrida se detiene acá.
+drop function if exists public.marcar_respondido(uuid);
+
 create or replace function public.marcar_respondido(p_cliente uuid)
 returns integer
 language plpgsql

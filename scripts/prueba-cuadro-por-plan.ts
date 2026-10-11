@@ -107,8 +107,15 @@ ok(/p\.servicio_contratado = extra\.servicio_contratado/.test(admin),
 
 console.log('\n══ el texto que había quedado viejo ══');
 ok(!/32 columnas/.test(grilla), 'ya no dice «32 columnas»');
-ok(/\$\{TOTAL_STEPS\} columnas/.test(grilla),
-  'el número sale del código, así no se vuelve a desincronizar');
+// Esta aserción pedía el texto «${TOTAL_STEPS} columnas» de un párrafo que
+// explicaba cómo arrastrar la tabla con el mouse. Ese párrafo se fue el 9 de
+// octubre: si hay que explicar cómo deslizar, la interacción está mal. Lo que
+// importa sigue en pie y es por qué existía la aserción — que el número de
+// ítems salga del código y no escrito a mano.
+ok(/\{TOTAL_STEPS\}/.test(grilla),
+  'el número de ítems sale del código, así no se vuelve a desincronizar');
+ok(!/Arrastra la tabla/.test(grilla),
+  'y se fue el manual de cómo moverse, reemplazado por la referencia de colores');
 
 // ── 5 · Lo que se sacó ─────────────────────────────────────────────────────
 console.log('\n══ los cascarones que se sacaron ══');

@@ -94,7 +94,7 @@ async function main() {
   const { default: Jornada } = await import('../src/components/admin/Jornada');
   const cola = [{
     clienteId: 'a', nombre: 'Rosana', cuello: 'conv_a_agenda',
-    situacion: 'El DM pierde a la gente.', accion: 'Revisar el DM.',
+    situacion: 'El DM pierde a las personas.', accion: 'Revisar el DM.',
     como: 'Mensaje al cliente.', quien: 'operador' as const,
     enRiesgo: 1000, semanasIgual: 0, yaSeIntento: false,
   }];
@@ -113,7 +113,7 @@ async function main() {
         fin: '2026-07-27T17:00:00Z', planeados: [], cerradas: [], atendidos: ['a'],
         traba: 'no le llega el DM automatico' }]}
       clientesActivos={11} clientesQueVendieron={7}
-      cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde gente', semanasIgual: 3, enRiesgo: 3000 }]}
+      cuentasFrenadas={[{ clienteId: 'a', nombre: 'Rosana', cuello: 'El DM pierde personas', semanasIgual: 3, enRiesgo: 3000 }]}
       facturadoClientes={9000} />);
 
   const { default: BandejaSoporte } = await import('../src/components/admin/BandejaSoporte');
@@ -123,7 +123,7 @@ async function main() {
   dibuja('TarjetaCliente · sana',
     <TarjetaCliente nombre="Rosana" estado="lanzada hace 12 días" semaforo="bien"
       numero="18" numeroDe="2" etiqueta="charlas → agendas"
-      frase="El anuncio trae gente y el mensaje la pierde." />);
+      frase="El anuncio trae personas y el mensaje las pierde." />);
   dibuja('TarjetaCliente · frenada con acciones',
     <TarjetaCliente nombre="Ana" estado="instalando" semaforo="frenado"
       numero="34" numeroDe="51" etiqueta="ítems instalados"

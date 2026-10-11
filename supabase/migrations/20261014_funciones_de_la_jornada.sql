@@ -31,6 +31,12 @@ comment on column jornadas.funciones is
 -- El parámetro va al final y con default, así que una app vieja que llame
 -- cerrar_jornada(persona, atendidos, traba, traba_cliente) sigue andando:
 -- guarda el día sin funciones, igual que antes.
+-- Las dos firmas que puede haber dejado una versión anterior. Sin esto,
+-- `create or replace` choca contra la que ya está y la corrida se detiene
+-- acá, antes de llegar a cualquier migración posterior.
+drop function if exists public.cerrar_jornada(uuid, uuid[], text, uuid);
+drop function if exists public.cerrar_jornada(uuid, uuid[], text, uuid, text[]);
+
 create or replace function cerrar_jornada(
   p_persona uuid,
   p_atendidos uuid[],
@@ -54,6 +60,10 @@ end $$;
 -- La Semana compara esta semana contra el promedio de las anteriores, así que
 -- pide 28 días y agrupa. Antes pedía 7: con una sola semana no hay con qué
 -- comparar y la columna de tendencia no podía mostrar nada nunca.
+-- Suma la columna `funciones` a lo que devuelve, y eso cambia el tipo de
+-- retorno: la de sala-de-mando.sql devuelve ocho columnas y esta nueve.
+drop function if exists public.jornadas_recientes(int);
+
 create or replace function jornadas_recientes(p_dias int default 7)
 returns table (
   persona_id uuid, dia date, inicio timestamptz, fin timestamptz,

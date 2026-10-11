@@ -72,10 +72,10 @@ create table mensajes (
   respondido_en timestamptz, tipo text default 'duda',
   created_at timestamptz default now());
 
-create table notificaciones (
-  id uuid primary key default gen_random_uuid(),
-  usuario_id uuid, titulo text, descripcion text, accion_url text,
-  leida boolean default false, created_at timestamptz default now());
+-- `notificaciones` NO va en el andamiaje: la crea la migración 20260518, y
+-- una tabla de prueba parecida pero sin la columna `tipo` hacía que
+-- `create table if not exists` la saltara y después fallara un insert
+-- correcto. Lo que crean las migraciones, lo crean las migraciones.
 
 create type admin_tarea_prioridad as enum ('baja','media','alta','urgente');
 
@@ -90,10 +90,32 @@ create table user_credits (
 create table credit_transactions (
   id uuid primary key default gen_random_uuid(), user_id uuid, delta int,
   source text, reason text, created_at timestamptz default now());
+-- Lo que Supabase trae de fábrica y un PostgreSQL pelado no: sin esto, una
+-- migración correcta falla acá y el error no dice nada sobre la migración.
+create schema if not exists storage;
+create table auth.users (id uuid primary key, email text, created_at timestamptz default now());
+create table storage.buckets (
+  id text primary key, name text, public boolean default false,
+  file_size_limit bigint, allowed_mime_types text[]);
+create table storage.objects (
+  id uuid primary key default gen_random_uuid(), bucket_id text, name text,
+  owner uuid, created_at timestamptz default now(), metadata jsonb);
+create publication supabase_realtime;
+
+-- Las tablas que las migraciones viejas ya dejaron en la base de Javo. Las
+-- nuevas las dan por hechas, y es correcto que lo hagan.
+create table hoja_de_ruta (
+  id uuid primary key default gen_random_uuid(), user_id uuid, codigo text,
+  estado text, hecho_afuera boolean default false, orden int,
+  created_at timestamptz default now());
+create table programa_videos (
+  id uuid primary key default gen_random_uuid(), titulo text, url text,
+  grupo text, pilar_id text, orden int);
 create table sala_metricas_semana (
   id uuid primary key default gen_random_uuid(), cliente_id uuid not null,
   campana_id uuid, semana_iso text not null, anuncio text,
-  objetivo text default 'mensajes', gasto numeric default 0, alcance int default 0,
+  objetivo text default 'mensajes', gasto numeric default 0,
+  impresiones numeric default 0, alcance int default 0,
   comentarios int default 0, conversaciones int default 0, agendas int default 0,
   llamadas int default 0, ventas int default 0, facturado numeric default 0,
   cargado_por text, created_at timestamptz default now(),
@@ -103,6 +125,52 @@ SQL
 marcar() {
   if [ "$1" -eq 0 ]; then echo "✓ $2"; else echo "✗ $2"; fallas=$((fallas + 1)); fi
 }
+
+# ── Lo que las migraciones viejas ya dejaron en la base de Javo ─────────────
+#
+# `profiles` tiene cerca de cien columnas agregadas a lo largo de sesenta
+# migraciones, y las nuevas las dan por hechas. Se extraen de las propias
+# migraciones en vez de copiarse a mano: con la lista escrita acá, la columna
+# que agregue la próxima migración rompería esta prueba en vez de la base.
+python3 - << 'PY' > "$DATA/viejo.sql"
+import re, glob, os
+col = re.compile(r'add\s+column\s+(?:if\s+not\s+exists\s+)?([a-z_0-9]+)\s+([A-Za-z0-9_]+(?:\s*\[\s*\])?)', re.I)
+tab = re.compile(r'alter\s+table\s+(?:if\s+exists\s+)?(?:public\.)?([a-z_0-9]+)', re.I)
+vistas, salida = set(), []
+for f in sorted(glob.glob('supabase/migrations/*.sql')):
+    if os.path.basename(f) >= '20261009': continue
+    texto = re.sub(r'--.*$', '', open(f, encoding='utf-8').read(), flags=re.M)
+    for trozo in texto.split(';'):
+        m = tab.search(trozo)
+        if not m: continue
+        for c in col.finditer(trozo):
+            clave = (m.group(1), c.group(1).lower())
+            if clave in vistas: continue
+            vistas.add(clave)
+            salida.append(f'alter table {m.group(1)} add column if not exists {c.group(1)} {c.group(2)};')
+print('\n'.join(salida))
+PY
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -f $DATA/viejo.sql" > /dev/null 2>&1
+
+# Y las tablas y funciones que Supabase o una migración vieja ya crearon, que
+# las nuevas usan sin crearlas.
+psqlq << 'SQL' > /dev/null 2>&1
+create table if not exists notificaciones (
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid not null references profiles(id) on delete cascade,
+  tipo text not null, titulo text not null, descripcion text,
+  leida boolean default false, accion_url text,
+  created_at timestamptz default now());
+-- Como está en la base de Javo ANTES de la migración 20261011: `completado_at`
+-- obligatorio y con default, que es justo lo que esa migración afloja para
+-- poder distinguir «tildado» de «tiene una nota y sigue pendiente».
+create table if not exists cliente_preactivacion_check (
+  id uuid primary key default gen_random_uuid(), cliente_id uuid, paso text,
+  completado_at timestamptz not null default now(),
+  unique (cliente_id, paso));
+create or replace function storage.foldername(name text)
+  returns text[] language sql immutable as $$ select string_to_array(name, '/') $$;
+SQL
 
 echo "══ el SQL contra PostgreSQL real ══"
 
@@ -193,6 +261,128 @@ SQL
 marcar $? "la traba queda guardada y la puede leer todo el equipo"
 [ "$FILAS" = "1" ]
 marcar $? "guardar la misma semana dos veces reemplaza, no duplica (filas: $FILAS)"
+
+# ── LAS MIGRACIONES, EN ORDEN ──────────────────────────────────────────────
+#
+# Por qué están acá y no en su propia prueba: `sala-de-mando.sql` vive en la
+# raíz y no en supabase/migrations, así que nada chequeaba los choques entre
+# los dos. De ahí salieron tres de los cuatro errores que impedían correr las
+# migraciones de arriba hacia abajo —una función que cambia de tipo de
+# retorno, otra que pierde un default— y ninguno se veía mirando el archivo
+# nuevo solo. Se ven cuando corren todas juntas, que es como las corre Javo.
+echo ""
+echo "══ las migraciones, de arriba hacia abajo ══"
+
+# Las que hay que correr ahora: desde 20261009. Las anteriores ya están
+# aplicadas en la base de Javo, y reaplicarlas acá contra un andamiaje que no
+# es el esquema real da errores que no dicen nada. Lo que se prueba es lo que
+# él va a correr.
+NUEVAS=$(ls supabase/migrations/*.sql | sort | awk -F/ '$NF >= "20261009"')
+CUANTAS=$(echo "$NUEVAS" | wc -l)
+
+corrida() {
+  local salida="$1"; local malas=0
+  : > "$salida"
+  for m in $NUEVAS; do
+    if ! psqlq -f "$m" >> "$salida" 2>&1; then
+      echo "  ✗ $(basename "$m")"
+      grep -E "^ERROR|^psql.*ERROR" "$salida" | tail -2 | sed 's/^/      /'
+      malas=$((malas + 1))
+      : > "$salida"
+    fi
+  done
+  return "$malas"
+}
+
+corrida "$DATA/m1.txt"
+marcar $? "las $CUANTAS migraciones nuevas corren en orden, sin errores"
+
+corrida "$DATA/m2.txt"
+marcar $? "y corren DOS VECES (son idempotentes, que es como se reaplican)"
+
+echo ""
+echo "══ el candado de los avisos ══"
+#
+# `crear_notificacion` era SECURITY DEFINER sin mirar quién llamaba: cualquier
+# persona con cuenta podía escribirle a cualquier otra un aviso con el título
+# y el enlace que quisiera. Esto prueba las cuatro combinaciones.
+psqlq << 'SQL' > "$DATA/n.txt" 2>&1
+insert into profiles (id, nombre, rol) values
+  ('aaaaaaaa-0000-0000-0000-000000000001','Cliente A','cliente'),
+  ('aaaaaaaa-0000-0000-0000-000000000002','Cliente B','cliente'),
+  ('bbbbbbbb-0000-0000-0000-000000000001','Lupe','admin')
+  on conflict (id) do update set rol = excluded.rol;
+SQL
+marcar $? "se pueden crear las tres cuentas de prueba"
+
+comoSi() {  # comoSi <uid> <sql> → corre con auth.uid() devolviendo ese uid
+  su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -v ON_ERROR_STOP=1" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$1'::uuid \$\$;
+$2
+SQL
+}
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select crear_notificacion('aaaaaaaa-0000-0000-0000-000000000002','admin','Lupe te dejó una nota','abrí esto','/x','');"
+[ $? -ne 0 ]
+marcar $? "un cliente NO puede escribirle a otro cliente"
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select crear_notificacion('aaaaaaaa-0000-0000-0000-000000000001','sistema','Mi propio aviso',null,null,null);"
+marcar $? "pero sí puede escribirse a sí mismo"
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select crear_notificacion('bbbbbbbb-0000-0000-0000-000000000001','mensaje','Algo no funciona',null,null,null);"
+marcar $? "y puede avisarle al equipo que algo se rompió"
+
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select crear_notificacion('aaaaaaaa-0000-0000-0000-000000000002','sistema','Faltan tus números','dos minutos','/campanas','no_cargo');"
+marcar $? "el equipo le escribe a cualquiera"
+
+echo ""
+echo "══ el historial que decide si el aviso ya no alcanza ══"
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select crear_notificacion('aaaaaaaa-0000-0000-0000-000000000002','sistema','Faltan tus números','dos minutos','/campanas','no_cargo');"
+VECES=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select veces from historial_avisos(array['aaaaaaaa-0000-0000-0000-000000000002']::uuid[]) where clave='no_cargo';
+SQL
+)
+[ "$VECES" = "2" ]
+marcar $? "cuenta los dos avisos que salieron (veces: $VECES)"
+
+SEM=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select ultima_semana from historial_avisos(array['aaaaaaaa-0000-0000-0000-000000000002']::uuid[]) where clave='no_cargo';
+SQL
+)
+echo "$SEM" | grep -qE '^[0-9]{4}-W[0-9]{2}$'
+marcar $? "y la semana ISO viene en el formato que compara el frente ($SEM)"
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select count(*) from historial_avisos(array['aaaaaaaa-0000-0000-0000-000000000002']::uuid[]);"
+FUERA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select count(*) from historial_avisos(array['aaaaaaaa-0000-0000-0000-000000000002']::uuid[]);
+SQL
+)
+[ "$FUERA" = "0" ]
+marcar $? "un cliente no puede leer el historial de otro (filas: $FUERA)"
+
+echo ""
+echo "══ las impresiones, que no se pedían ══"
+#
+# El costo de aparecer y la frecuencia se calculan con las impresiones, y la
+# columna no existía. La frecuencia daba cero, y cero cae en la zona sana: la
+# app mostraba en verde un número que nunca midió.
+psqlq << 'SQL' > /dev/null 2>&1
+select guardar_semana_cliente('11111111-1111-1111-1111-111111111111','2026-W42',
+  '{"gasto":300,"impresiones":48000,"alcance":12000,"conversaciones":60}'::jsonb);
+SQL
+marcar $? "guardar la semana acepta las impresiones"
+IMP=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select impresiones from sala_metricas_semana where semana_iso = '2026-W42';
+SQL
+)
+[ "$IMP" = "48000" ]
+marcar $? "y llegan a la tabla en vez de perderse en silencio (impresiones: $IMP)"
 
 echo ""
 if [ "$fallas" -eq 0 ]; then echo "✓ TODO EN VERDE"; else echo "✗ $fallas FALLAS"; fi

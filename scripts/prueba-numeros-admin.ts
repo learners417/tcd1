@@ -8,7 +8,7 @@ import {
   type SemanaDeNumeros,
 } from '../src/lib/numerosDelCliente';
 import { filaDe, DIA_EN_QUE_YA_MIDE, SEMANAS_SIN_NUMEROS } from '../src/lib/semaforo';
-import { fijarPausas } from '../src/lib/pausaGlobal';
+import { fijarVentanas } from '../src/lib/ventanaSinSoporte';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
 
 let fallas = 0;
@@ -17,7 +17,7 @@ function ok(cond: boolean, que: string) {
   if (!cond) fallas++;
 }
 
-fijarPausas([]);
+fijarVentanas([]);
 
 // Una semana que anda: pone 300, agendan 10, aparecen 8, compran 2, cobra 2.000.
 const buena: SemanaDeNumeros = {

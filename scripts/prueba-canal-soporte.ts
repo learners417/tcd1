@@ -88,8 +88,19 @@ ok(/id: 'mensajes', label: 'Soporte'/.test(topbar),
   'está en el buscador');
 ok(/setCurrentPage\('mensajes'\)/.test(topbar) && /LifeBuoy/.test(topbar),
   'y hay un botón fijo en la barra de arriba, visible en todas las pantallas y también en el teléfono');
-ok(!/id: 'mensajes', icon/.test(sidebar),
-  'pero NO en el menú lateral: son cinco destinos y tienen que ser los mismos que la barra de abajo');
+
+// ESTA ASERCIÓN ESTABA AL REVÉS Y SE DIO VUELTA EL 9 DE OCTUBRE.
+//
+// Decía que Soporte NO debía estar en el menú lateral, para respetar los cinco
+// destinos. Se cumplía, y el resultado fue que el único acceso al chat era un
+// icono de salvavidas arriba a la derecha, sin etiqueta, entre otros iconos.
+// En el celular —donde están los clientes— eso es invisible.
+//
+// La regla de los cinco destinos no era el problema: el problema era CUÁL de
+// los cinco. Salió Clínica, que no era un destino de esta app sino un
+// window.open a otra, y encima bloqueado hasta el pilar 6.
+ok(/id: 'mensajes', icon/.test(sidebar),
+  'y Soporte ES uno de los cinco destinos: un canal que no se encuentra manda al cliente a buscar al equipo afuera de la app');
 ok((soloCodigo(sidebar).match(/as MenuItem,/g) ?? []).length <= 5,
   'el menú sigue teniendo cinco destinos o menos');
 ok(/accion_url: '\/mensajes'/.test(avisos),

@@ -1,322 +1,204 @@
 ══════════════════════════════════════════════════════════════════
-  VERSIÓN FINAL — turnos 1 al 9
-  Reemplaza cualquier ZIP anterior.
+  REVISIÓN FINAL — lo que encontré mirando otra vez
+  Reemplaza todos los ZIPs anteriores.
 ══════════════════════════════════════════════════════════════════
 
-Son 87 archivos. Van a la rama "mejoras".
-
-
-1 · CORRER LAS SIETE MIGRACIONES EN SUPABASE
-──────────────────────────────────────────────────────────────────
-  20261009_canal_unico_soporte.sql
-  20261009_servicio_contratado.sql
-  20261010_mensajes_sin_leer.sql
-  20261011_matriz_compartida.sql
-  20261012_montaje_de_campana.sql
-  20261013_sesiones_humanas.sql
-  20261014_funciones_de_la_jornada.sql    ← nueva
-
-Y la de antes, si todavía no corrió:
-  20261002_numeros_del_cliente.sql
-
-Las siete son idempotentes: correrlas dos veces no rompe nada.
-
-sala-de-mando.sql YA CORRIÓ: lo confirmamos con la lista de tablas
-que pasaste. Sus 17 tablas y 23 funciones están.
-
-
-2 · BORRAR
-──────────────────────────────────────────────────────────────────
-  LEEME-SUBIR.txt
-  src/components/tasks/TaskChecklist.tsx
-  src/components/tasks/TaskHerramientaIA.tsx
-  src/components/sesion/CheckInPanel.tsx
-  src/components/sesion/CheckOutPanel.tsx
-  src/components/sesion/CronometroSesion.tsx
-  src/components/campanas/MontajeView.tsx
-  src/lib/pausaGlobal.ts                  ← nuevo
-  src/lib/pausasDatos.ts                  ← nuevo
-  src/lib/puntoDePartida.ts               ← nuevo
-  src/components/CaminoEnPausa.tsx        ← nuevo
-  src/components/admin/PausaGlobalPanel.tsx  ← nuevo (se llama
-                                             SinSoportePanel.tsx)
-  scripts/prueba-pausa.ts                 ← nuevo
+  · 200 archivos, a la raíz de "mejoras"
+  · 12 migraciones SQL. La 20261018 y la 20261019 van sí o sí
+    antes de dar acceso: las dos cierran agujeros de seguridad.
+  · Hay que correr `npm install` después de subir (entra la
+    tipografía Lora, la de los libros).
 
 
 ══════════════════════════════════════════════════════════════════
-  LO MÁS GRAVE QUE ENCONTRÉ, Y POR QUÉ
+  1 · CUALQUIER CLIENTE PODÍA ESCRIBIRLE A OTRO
 ══════════════════════════════════════════════════════════════════
 
-Hay un patrón que apareció nueve veces en esta revisión: código
-construido, probado y NUNCA conectado a una pantalla.
+Lo más grave de todo lo que apareció, y es de los que no se ven
+mirando la app: la función que crea avisos corría con permisos de
+administrador y no preguntaba quién la estaba llamando.
 
-Es peor que código faltante. El código que falta se nota. Este
-pasa la auditoría, tiene su prueba en verde, y la pantalla que
-debería usarlo muestra ceros que parecen datos.
+En la práctica: cualquier persona con cuenta podía meterle a otra
+un «Lupe te dejó una nota» con el texto y el enlace que quisiera.
+Con la app abierta para todos, eso es lo primero que hay que
+cerrar.
 
+La regla queda en tres líneas, y cubre todo lo que la app ya hacía:
+el equipo le escribe a cualquiera, cualquiera se escribe a sí mismo,
+y cualquiera le escribe al equipo (que es como un cliente reporta
+que algo se rompió). Un cliente escribiéndole a otro cliente ya no
+existe.
 
-1 · LA PAUSA DE DICIEMBRE HACÍA LO CONTRARIO
-──────────────────────────────────────────────────────────────────
-Existía un sistema de "pausa global" completo. Si alguien cargaba
-la pausa del 15 de diciembre, esto es lo que pasaba:
-
-  · El día del Camino se congelaba: el cliente se quedaba en el
-    día 61 todo enero.
-  · A todos se les corría la fecha de cierre 35 días.
-  · Las fechas de la hoja de ruta se movían un mes.
-  · El semáforo se apagaba para todos, un mes entero.
-  · Y al cliente le aparecía un cartel: "El Camino retoma el 19
-    de enero".
-
-Vos me dijiste que la app no corta nunca. Lo di vuelta entero.
-
-Ahora la ventana del 15 de diciembre hace lo único que de verdad
-pasa: marca los días en que el equipo no responde.
-
-  · El Camino sigue corriendo. Nadie pierde días ni se le mueve
-    la fecha de cierre.
-  · El cliente lee "Respondemos desde el 19 de enero. Tu Camino
-    sigue abierto: avanza todo lo que quieras estos días."
-  · El semáforo NO se apaga. Esto importa más de lo que parece:
-    con el semáforo callado, el cliente que dejó de entrar el 16
-    de diciembre reaparecía en rojo a fin de enero, cuando ya se
-    había ido.
-  · Lo único que cambia es de qué días responde el equipo: esos
-    días se descuentan del reclamo. Un cliente que pasó enero sin
-    sesión no fue abandonado si enero estaba avisado.
-
-Y la ventana ya no se estira a semanas enteras. Eso existía para
-que cada jornada siguiera cayendo en su día cuando todo se corría.
-Nada se corre: son los días que pidas.
-
-
-2 · LA SEMANA MOSTRABA UNA ALERTA FALSA TODOS LOS DÍAS
-──────────────────────────────────────────────────────────────────
-La tabla de funciones es el tablero que dice si el negocio escaló
-o si simplemente hubo menos trabajo. Mide seis funciones y
-recibía datos de una: la pantalla mapeaba todo el día del equipo
-a "destrabar".
-
-  · "Absorber" quedaba en cero. Es la única función que debe
-    crecer, y el código trata el cero ahí como "la peor noticia
-    de todas". La tabla acusaba de no absorber nada a un equipo
-    que no tenía dónde registrarlo.
-  · Y la columna de tendencia no podía mostrar nada nunca, porque
-    la lista de semanas anteriores se pasaba vacía: sin anteriores
-    no hay promedio y sin promedio no hay cambio.
-
-La causa de fondo: la jornada guardaba los minutos de reloj y a
-quién atendió, pero NO en qué trabajó. El dato no existía.
-
-Ahora al cerrar el día se marca en qué se fue. No se piden
-minutos por función —nadie los sabe, y un número inventado parece
-medido— se marca en qué, y los minutos del reloj se reparten. Y se
-piden cuatro semanas de jornadas para poder comparar.
-
-Mientras nadie marque nada, la tabla dice "todavía nadie marcó en
-qué se fue el día" en vez de mostrar seis ceros y una alarma.
-
-
-3 · EL ASISTENTE DE CAMPAÑAS NO GUARDABA NADA
-──────────────────────────────────────────────────────────────────
-Se podían recorrer las seis fases con KAI —cliente, estrategia,
-audiencias, copies, creativos, montaje— y al cerrar la pantalla
-no quedaba nada. La función de guardar se importaba y no se
-llamaba nunca.
-
-La campaña no existía: no se podía abrir después, ni retomar, ni
-montar sobre ella los ocho candados. La única forma de tener una
-campaña en la app era cargarla a mano en la base.
-
-Ahora guarda al terminar la última fase, con todo lo que produjo
-la conversación adentro, y nace como borrador: decirla
-"configurada" sería anunciar como lista una campaña que no corrió.
-
-
-4 · LOS AVISOS SE REPETÍAN Y NUNCA ESCALABAN
-──────────────────────────────────────────────────────────────────
-La app sí avisaba. Lo que no hacía eran dos cosas:
-
-  · Repetía el mismo aviso TODOS LOS DÍAS mientras el cuello
-    siguiera. Las alarmas al equipo sí chequean si ya salieron
-    hoy; las del cliente no. Un aviso diario por el mismo motivo
-    deja de leerse al segundo día, y enseña a ignorar la campana.
-  · Nunca escalaba. La regla "después de dos avisos pasa a una
-    persona" estaba escrita y no se aplicaba en ningún lado.
-
-Las dos reglas ya estaban programadas y probadas en un módulo de
-307 líneas que el cron se salteaba. Ahora pasa por ahí. El
-historial sale de las notificaciones ya enviadas: el dato estaba,
-no hizo falta una tabla nueva.
-
-
-5 · LA MITAD DE LA GARANTÍA QUE ERA NUESTRA
-──────────────────────────────────────────────────────────────────
-El cierre de cuentas verificaba con datos lo que el CLIENTE
-entregó —jornadas y atrasos— y daba por hecho lo que le dimos
-nosotros.
-
-Si él cumplió y el equipo no dio las sesiones, la garantía corre a
-nuestro cargo. Y nadie se iba a enterar, porque el único número a
-la vista era el suyo.
-
-Ahora se miden las dos mitades. El Ascenso son 38 sesiones en los
-90 días; si se dieron menos del 80 %, el veredicto lo dice ANTES
-de pedirle cuentas al cliente, y la ficha del equipo lo muestra
-desde el primer mes, no al final.
-
-El margen del 80 % no es una licencia para dar menos: es
-reconocer que una grupal que se cae por un feriado no rompe la
-promesa. Por debajo de ahí el cliente recibió visiblemente menos
-de lo que compró.
-
-Y no saber NO es no haber cumplido: si las sesiones no se
-consultaron, no se mide. Decir "te dimos 0 de 38" por una consulta
-que no se hizo sería peor que no decir nada.
-
-
-6 · UN FALSO VERDE EN MI PROPIA AUDITORÍA
-──────────────────────────────────────────────────────────────────
-El medidor recorre el Admin pestaña por pestaña y medía 38 vistas.
-Su lista seguía pidiendo la Mesa de plata, borrada en la cirugía 5.
-
-Una pestaña que no existe no deja la pantalla en blanco: el Admin
-se queda en la anterior y la mide dos veces. Ese verde no
-correspondía a ninguna pantalla. Es la peor clase de falso verde:
-el que da tranquilidad.
-
-Además nueve lentes certificaban el bug de la pausa: verificaban
-que el día se congelara y que el semáforo callara. Las di vuelta:
-ahora vigilan que nada de eso vuelva.
-
-Y había un módulo muerto CON PRUEBA EN VERDE. Calculaba en qué
-día del Camino entrar según lo que el cliente ya tuviera, dando
-hasta 80 jornadas por hechas. Eso lo descartaste a propósito —la
-pantalla se reescribió para que nadie se saltee el Camino— pero el
-módulo y su prueba sobrevivieron. Código muerto que parece vivo y
-correcto es lo primero que invita a volver a cablearlo: casi lo
-hice. Borré los dos.
-
-
-7 · UN SOLO CALENDARIO
-──────────────────────────────────────────────────────────────────
-Los cinco sistemas estaban escritos en dos lados y no decían lo
-mismo. Ni los nombres ni los días:
-
-   00-MAESTRO.md          →  El roadmap de la app
-   Tú · 1–12                 Tu reset · 1–5
-   Tu programa · 15–19       Tu programa de alto impacto · 8–12
-   Tu sistema de venta·22–46 Tu captación automática · 15–33
-   Tu clínica adentro·2,47-53 Tu propia app · 36–44
-   Tu plan de marca · 61–67  Tu ecosistema circular · 85–86
-
-El roadmap es el que ve el cliente todos los días y el que vas a
-usar para grabar. Manda el roadmap: reescribí el maestro desde el
-seed.
-
-Y de paso quedó claro algo que el maestro leía mal: los sistemas
-NO son bloques consecutivos. Se entrelazan a propósito. Cada uno
-tiene su cuerpo —los días seguidos donde se construye— y vuelve
-después en días sueltos, cuando ya hay con qué revisarlo. El
-sistema 1 se escribe la primera semana y se vuelve a tocar el día
-80, con el control de los 7.000 USD.
-
-Hay una lente nueva que compara las dos tablas. Si cambia el seed,
-la auditoría avisa que el maestro quedó viejo.
+Probado contra PostgreSQL de verdad, las cuatro combinaciones.
 
 
 ══════════════════════════════════════════════════════════════════
-  LAS DECISIONES QUE TOMASTE, APLICADAS
+  2 · TRES MIGRACIONES SE CORTABAN A MITAD DE CAMINO
 ══════════════════════════════════════════════════════════════════
 
-LA GARANTÍA, VERIFICADA (elegiste A)
-  Hecho. Las dos mitades, con datos de la base. Y te lo repito
-  porque es un compromiso real: la app ahora también va a mostrar
-  cuando el equipo NO cumplió.
+Las ibas a correr de arriba hacia abajo y se detenían en la cuarta.
 
-"SIETE LUGARES", TEXTO FIJO (elegiste C)
-  No construí nada.
+El motivo es el mismo en las tres: sala-de-mando.sql ya tiene esas
+funciones, y la migración las redefine con otra forma. Postgres no
+deja cambiarle el tipo de retorno a una función que ya está — hay
+que soltarla primero, y eso faltaba.
 
-LAS DOS LISTAS (elegiste A)
-  La matriz dejó de decir "clientes listos para activar": no mide
-  eso, mide las 62 tareas de preparación del equipo. Ahora dice
-  "con todo su trabajo de preparación al día" y nombra quién
-  decide el encendido: los 8 candados del Montaje, donde cada uno
-  se tilda porque SU DATO está cargado.
+  · marcar_respondido   (20261009)  devolvía nada, ahora devuelve
+                                    cuántos mensajes marcó
+  · jornadas_recientes  (20261014)  suma la columna de funciones
+  · marcar_biblioteca   (20261015)  falla en la SEGUNDA corrida
 
-  Dos listas que dicen "listo" sobre el mismo cliente con varas
-  distintas enseñan a no creerle a ninguna.
+La tercera es la peor de las tres: anda la primera vez y se rompe
+al reaplicar, que es cuando uno menos lo espera y con la base a
+medio actualizar.
 
-CREAR UNA CAMPAÑA DESDE LA APP (elegiste A)
-  Hecho, y era peor de lo que pensábamos: no faltaba el botón,
-  faltaba que el asistente guardara.
+Y una cuarta: la 20261011 daba por hecho que existía una columna
+vieja (`notas`) en una tabla que se creó a mano en Supabase y que
+ninguna migración de este repo crea. Si no estaba, fallaba en el
+medio. Ahora pregunta antes.
 
-EL COPY "SIN APRENDER TECNOLOGÍA" (elegiste A)
-  La frase vive en la landing, que no está en este repo: ese
-  cambio es tuyo. Lo que cerré acá es que El Ascenso diga quién
-  monta — "monta sus cinco sistemas acompañado" en vez de "los
-  cinco sistemas", que es donde chocaba. Si no se dice, el cliente
-  llega esperando que se lo entreguen hecho.
+Para que esto no vuelva: la prueba de SQL ahora corre las 12
+migraciones en orden, DOS VECES, contra una base de verdad armada
+como la tuya. Antes solo probaba sala-de-mando.sql por su cuenta,
+y los choques entre los dos archivos no los miraba nadie.
 
 
 ══════════════════════════════════════════════════════════════════
-  DOS COSAS QUE TE DIJE MAL, Y CORREGÍ
+  3 · DE LOS 20 AVISOS AL CLIENTE, SOLO 4 PODÍAN SALIR
 ══════════════════════════════════════════════════════════════════
 
-Durante la revisión te pasé cuatro hallazgos y dos eran falsos.
-Los había tomado de un barrido sin verificarlos uno por uno.
+Los veinte textos estaban escritos. El cron que los manda decidía
+cuál correspondía con cuatro condiciones escritas a mano, en vez de
+usar el diagnóstico real. Los otros dieciséis no tenían forma de
+dispararse nunca.
 
-NO ERA CIERTO que la especialidad no se aplique. Lo probé
-corriendo el código: psicólogo lee "tu paciente", coach lee "tu
-consultante", entrenador lee "tu alumno". El dialecto por país
-también se aplica.
+Y son justo los tramos donde el cliente se cae DESPUÉS de empezar
+a vender: la agenda que sale cara, la frecuencia agotada, las
+cuotas sin cobrar, el que termina y no renueva, el que no pide
+referidos.
 
-NO ERA CIERTO que el punto de partida esté roto. La pantalla hace
-lo correcto. Lo que estaba mal era el módulo muerto con prueba en
-verde al lado (punto 6).
+Ahora el cron corre la misma cadena de valor que ve el equipo en la
+cola del Admin, sobre la misma tabla y con los países del cliente.
+Un solo diagnóstico: lo que la app le dice al cliente y lo que te
+muestra a vos no pueden ser dos lecturas distintas de los mismos
+números.
+
+LA MEMORIA DEL AVISO
+
+  El historial —cuántas veces salió cada aviso— se reconstruía
+  comparando el TÍTULO de cada notificación contra el texto. O sea
+  que el día que mejoraras la redacción de un aviso, su historial
+  volvía a cero para todos: a la mañana siguiente le salía desde el
+  principio a quien ya lo había recibido dos veces.
+
+  Ahora la clave del aviso se guarda en la base. Los textos se
+  pueden reescribir cuando quieras.
 
 
 ══════════════════════════════════════════════════════════════════
-  LO QUE NO CONSTRUÍ, Y ES DECISIÓN TUYA
+  4 · LA COLA SE CALCULABA, SE MOSTRABA, Y AHÍ TERMINABA
 ══════════════════════════════════════════════════════════════════
 
-Hay lógica completa, de punta a punta, sin ninguna pantalla. No la
-cablée porque son features enteras, no arreglos — y cablear una
-feature que decidiste no mostrar es peor que no tenerla:
+El Admin ya sabía cada semana qué cliente estaba trabado, en qué,
+cuánto dinero había en juego y qué había que hacer. Lo mostraba en
+una pantalla y nada más: ni quedaba una tarea para nadie, ni se
+escalaba.
 
-  · LA RED — la Semana Blanca regalable y la Herencia. Está
-    completa, con sus tres funciones en la base. Ojo con esta: la
-    función que captura la invitación desde la URL no corre nunca,
-    así que si repartís links de invitación hoy, no atribuyen nada.
-  · LA LIGA DE CONSTANCIA y EL MURO DE HITOS de la cohorte. Los
-    dos con su función en la base.
-  · EL PUENTE A MICLÍNICA DIGITAL — los artefactos del Camino no
-    se instalan en MCD.
-  · LA LISTA ÚNICA DEL CLIENTE — el gemelo del cerebro del equipo,
-    que sí está cableado.
-  · LOS CAPÍTULOS DEL LIBRO junto a los videos, las perlas del
-    maestro en los momentos quiebre, el PDF de una página por
-    episodio, el radar de precios, los teasers.
-  · EL REPORTE DEL DIRECTOR — construido y sin forma de llegar:
-    su interruptor nunca se enciende.
+La lista existía mientras esa pantalla estaba abierta. Quien no
+entraba a esa tab ese día, no se enteraba.
 
-Decime cuáles van y las construyo. Son todas trabajo real, no
-arreglos de media hora.
+Ahora cada cosa termina en algún lado:
 
-Y seguís debiendo seis tutoriales del Camino sin grabar: L-02,
-L-05, L-18, L-19, L-20, L-21. No dejan enlace roto —cae al PDF—
-pero son seis días en los que el cliente abre y no hay video.
+  · Lo que se arregla avisando        →  aviso al cliente (el cron)
+  · Avisado dos veces y sigue igual   →  tarea de una persona
+  · Lo que nunca fue para la app      →  tarea de una persona
+
+El escalamiento es la parte que importa. Un aviso que se repite
+todas las semanas deja de leerse: si el cliente no se movió después
+de dos, el problema no era que no estuviera avisado.
+
+Y arriba de Hoy aparece lo que la app hizo sola: cuántas tareas te
+dejó y cuántas de esas ya venían avisadas dos veces.
+
+
+══════════════════════════════════════════════════════════════════
+  5 · UN NÚMERO EN VERDE QUE NUNCA SE MIDIÓ
+══════════════════════════════════════════════════════════════════
+
+La frecuencia —cuántas veces vio cada persona el anuncio— se
+calcula dividiendo impresiones por alcance. Y las impresiones no se
+pedían en ninguna parte: no eran columna de la tabla ni campo del
+formulario.
+
+Dividir cero da cero, y cero cae en la zona sana. Así que la app
+mostraba en VERDE un número que nunca midió. Y la frecuencia es
+justo el número que evita tirar un creativo que estaba bien: arriba
+de 3 el público se agotó, y no es el creativo.
+
+Dos campos nuevos en la carga de la semana: Impresiones y Alcance.
+Están en la misma pantalla de Meta que el gasto, así que no agregan
+una vuelta. Mientras estén en cero, los dos indicadores dicen «sin
+datos» en vez de opinar.
+
+
+══════════════════════════════════════════════════════════════════
+  6 · LO QUE SE VEÍA MAL EN EL TELÉFONO
+══════════════════════════════════════════════════════════════════
+
+Abrí la app en un navegador de verdad a 390 px y miré.
+
+EL TÍTULO PARTIDO EN TRES
+
+  «El Camino» salía «El / Camin / o», en tres renglones, montado
+  sobre el botón del chat. Lo causaba una regla que yo mismo había
+  puesto para que nada se cortara: terminaba partiendo palabras por
+  la mitad aunque hubiera un espacio a mano.
+
+  Los cuatro botones de la derecha se llevaban 249 de los 390 px,
+  y al título le quedaban 91. «Entrenadores» pedía 126.
+
+  El salvavidas se fue del teléfono y su contador de respuestas sin
+  abrir se mudó encima de la pestaña Contacto — que es donde se
+  busca y donde se toca. En pantalla grande sigue arriba, donde hay
+  lugar de sobra.
+
+LAS PESTAÑAS DE ABAJO, PEGADAS Y CHICAS
+
+  Las cinco etiquetas estaban a 14 px —por debajo del piso de 15—
+  y aun así se leían pegadas: «EntrenadoresCampañasContacto». Cada
+  botón era más angosto que su palabra.
+
+  Ahora van a 15 px y cada pestaña se lleva el ancho de su palabra,
+  no una quinta parte parejo. Medido: las cinco entran enteras, con
+  aire entre ellas.
+
+EL HISTORIAL DE CRÉDITOS QUE NO SE PODÍA ABRIR
+
+  La tabla estaba escrita y ninguna pantalla la mostraba: se podía
+  comprar y gastar, y no había dónde ver en qué. Ahora está dentro
+  de la ventana de compra, que es donde surge la pregunta.
 
 
 ══════════════════════════════════════════════════════════════════
   CÓMO QUEDÓ VERIFICADO
 ══════════════════════════════════════════════════════════════════
+
   · Tipos: limpio.
-  · 60 pruebas de escenario: todas en verde (10 nuevas).
-  · Auditoría (unas 700 lentes): en verde, sin fallas — con las
-    nueve de la pausa dadas vuelta y cuatro lentes nuevas.
-  · npm run build: pasa, que es lo que corre Vercel.
-  · 38 vistas medidas en Chromium real: 0 faltas de diseño.
-  · El número de vistas ya no está escrito a mano: sale del
-    medidor, y una lente compara su lista con las pestañas reales
-    del Admin.
+  · 69 pruebas de escenario: todas en verde.
+  · Auditoría: 747 lentes, 0 faltas.
+  · SQL contra PostgreSQL 16 real: las 12 migraciones en orden,
+    dos veces, más el candado de los avisos probado en sus cuatro
+    combinaciones.
+  · npm run build: pasa.
+  · 39 vistas en Chromium real: 0 faltas de diseño.
+  · Las 15 pantallas del cliente abiertas en el día 1, sin datos:
+    todas dibujan, ninguna queda vacía, cero errores de consola.
+
+AL SUBIR
+
+  1. Descomprimí a la raíz de "mejoras".
+  2. `npm install`.
+  3. Corré las 12 migraciones, de arriba hacia abajo.
+  4. Marcá el escalón de servicio en cada alta: el formulario
+     arranca en el más bajo, y quien pagó acompañamiento se
+     quedaría sin chat.

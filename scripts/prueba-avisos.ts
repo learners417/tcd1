@@ -23,7 +23,7 @@ const linea = (ok: boolean, txt: string) => {
 
 const item = (x: Partial<ItemCola> = {}): ItemCola => ({
   clienteId: 'c1', nombre: 'Rosana', cuello: 'conv_a_agenda',
-  situacion: 'El DM pierde a la gente.', accion: 'Revisar el DM.',
+  situacion: 'El DM pierde a las personas.', accion: 'Revisar el DM.',
   como: 'Mensaje al cliente.', quien: 'la app',
   enRiesgo: 1000, semanasIgual: 0, yaSeIntento: false, ...x,
 });
@@ -132,14 +132,67 @@ linea(/for \(const aviso of plan\.aEscalar\)/.test(cron),
   'y los que ya no alcanzan pasan a una persona: dos avisos sin cambio no es un cliente que no leyó');
 linea(/el aviso automático no alcanzó/.test(cron),
   'con un título que le dice al equipo exactamente eso');
-linea(/\.eq\('tipo', 'sistema'\)/.test(cron) && /claveDeTitulo/.test(cron),
-  'el historial se deriva de las notificaciones ya enviadas: el dato estaba, no hacía falta una tabla nueva');
-linea(/sem > h\.ultimaSemana\[id\]/.test(cron),
-  'y se queda con la semana más reciente, porque la consulta no viene ordenada');
 linea(!/titulo: texto\.titulo/.test(cron),
   'ya no queda ninguna inserción que se saltee el plan');
 linea(/repetidos_evitados/.test(cron),
   'y el log dice cuántos avisos repetidos se evitaron, para poder verlo sin entrar a la base');
+
+// ── El historial, por clave y no por título ───────────────────────────────
+//
+// El historial se derivaba comparando el TÍTULO de cada notificación contra
+// el texto de AVISOS. Funcionaba hasta el día que alguien mejora un texto:
+// ahí el historial de ese aviso vuelve a cero para todos, y a la mañana
+// siguiente le sale desde el principio a quien ya lo recibió dos veces.
+console.log('\n── el historial aguanta que se reescriban los textos ──');
+linea(/\.select\('usuario_id, clave, created_at'\)/.test(cron),
+  'el historial se lee por la columna clave');
+linea(/\.not\('clave', 'is', null\)/.test(cron),
+  'y solo mira las filas que son un aviso automático');
+linea(!/claveDeTitulo/.test(cron),
+  'ya no se reconoce el aviso por su texto: cambiar una palabra reseteaba la cuenta de todos');
+linea(/clave: aviso\.clave/.test(cron),
+  'y al mandarlo guarda la clave, que es lo que hace que mañana se pueda contar');
+linea(/sem > h\.ultimaSemana\[id\]/.test(cron),
+  'se queda con la semana más reciente, porque la consulta no viene ordenada');
+
+// ── Los veinte avisos, no cuatro ──────────────────────────────────────────
+//
+// El cron decidía el cuello con cuatro condiciones escritas a mano, así que
+// solo podían salir cuatro de los veinte avisos. Los otros dieciséis estaban
+// escritos y no tenían forma de dispararse — y son los tramos donde el
+// cliente se cae DESPUÉS de empezar a vender.
+console.log('\n── el diagnóstico es uno solo ──');
+linea(/encontrarDomino\(calcularCadena\(numerosDeFila\(fila\)/.test(cron),
+  'el cron diagnostica con la misma cadena de valor que la cola del Admin');
+linea(/paisesDe\.get\(id\) \?\? \[\]/.test(cron),
+  'y con los países del cliente: sin ellos se juzga a toda la cartera contra la banda de México');
+linea(!/it\.agendas \/ it\.conversaciones < 0\.15/.test(cron),
+  'ya no quedan condiciones escritas a mano que solo alcanzaban para cuatro cuellos');
+linea(/COLUMNAS_DE_SEMANA/.test(cron),
+  'pide las mismas columnas, para que no le falte un dato que el Admin sí tiene');
+
+const cadena = readFileSync('src/lib/valueChain.ts', 'utf-8');
+linea(/alcance: num\(f\.alcance\)/.test(cadena),
+  'y «alcance» llega al diagnóstico: la consulta lo traía y el mapeo lo tiraba');
+
+// ── El reparto: la cola deja de ser una lista para mirar ──────────────────
+console.log('\n── la cola termina en tareas de alguien ──');
+const reparto = readFileSync('src/lib/avisosStorage.ts', 'utf-8');
+const admin = readFileSync('src/pages/Admin.tsx', 'utf-8');
+linea(/desdeLaCadena\(\{/.test(reparto),
+  'el armador de tareas desde un cuello tiene quién lo llame');
+linea(/crearDesdeElSistema\(tarea, asignarA\)/.test(reparto),
+  'y la tarea se guarda: existe aunque nadie abra la pantalla');
+linea(/repartirLaCola\(colaDeHoy/.test(admin),
+  'el Admin reparte la cola que ya calculaba y mostraba sin usar');
+linea(!/mandarAviso/.test(reparto),
+  'y NO manda avisos: con los dos lados mandando, el cliente recibía el mismo dos veces');
+linea(/historial_avisos/.test(reparto),
+  'el historial viene de la base, que es el mismo que mira el cron');
+
+const mig = readFileSync('supabase/migrations/20261019_los_avisos_salen.sql', 'utf-8');
+linea(/es_del_equipo\(auth\.uid\(\)\)/.test(mig) && /p_usuario_id = auth\.uid\(\)/.test(mig),
+  'y escribir un aviso en nombre de otro ya no se puede: era SECURITY DEFINER sin mirar quién llamaba');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
 process.exit(fallas === 0 ? 0 : 1);

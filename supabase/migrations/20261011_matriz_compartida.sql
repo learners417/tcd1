@@ -48,11 +48,27 @@ begin
   end if;
 end $$;
 
--- `notas` (plural) es la columna vieja, que ninguna pantalla escribió
--- nunca. Lo que haya adentro se pasa a la nueva antes de dejarla quieta.
-update public.cliente_preactivacion_check
-   set nota = notas
- where nota is null and notas is not null;
+-- `notas` (plural) es la columna vieja, que ninguna pantalla escribió nunca.
+-- Lo que haya adentro se pasa a la nueva antes de dejarla quieta.
+--
+-- Va preguntando si la columna está, y no derecho: la tabla se creó a mano en
+-- Supabase y no la crea ninguna migración de este repo, así que no hay dónde
+-- leer si `notas` existe o no. Dando por hecho que está, la migración falla
+-- en la base donde no está — y falla a mitad de camino, con los pasos de
+-- arriba aplicados y los de abajo no.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'cliente_preactivacion_check'
+      and column_name  = 'notas'
+  ) then
+    execute 'update public.cliente_preactivacion_check
+                set nota = notas
+              where nota is null and notas is not null';
+  end if;
+end $$;
 
 -- ── 3 · Guardar sin pisar el tilde ─────────────────────────────────
 -- Crea la fila si no está, y deja `completado_at` como esté: poner una

@@ -30,7 +30,7 @@ const entrada = (
   x: Partial<EntradaCola> = {},
 ): EntradaCola => {
   const n: NumerosSemana = { ...SEMANA_VACIA, precio: 1000, ...numeros };
-  const domino = encontrarDomino(calcularCadena(n));
+  const domino = encontrarDomino(calcularCadena(n, []));
   return {
     clienteId: nombre.toLowerCase(), nombre, semana: '2026-W31',
     domino, facturado: n.facturado, cobrado: n.cobrado,

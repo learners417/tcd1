@@ -18,9 +18,11 @@
  */
 import { readFileSync } from 'node:fs';
 import {
-  candadoCerrado, cuantosCerrados, puedeEncender, loQueFalta,
+  candadoCerrado, cuantosCerrados, cuantosAplican, candadosQueAplican,
+  puedeEncender, loQueFalta,
   comoVaElMontaje, linksDe, comoUrl, DIAS_SIN_TOCAR, type Montaje,
 } from '../src/lib/montajeCampana';
+import type { ObjetivoCampana } from '../src/lib/campanasTypes';
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -68,28 +70,73 @@ ok(!candadoCerrado({ presupuesto_diario: 0, dias_sostenidos: 30 }, 'presupuesto'
   'y un presupuesto de cero no es un presupuesto');
 
 // ── 2 · Encender ───────────────────────────────────────────────────────────
+//
+// Esta parte de la prueba certificaba «los ocho cerrados son ocho» y estaba en
+// verde. Lo que medía ya no era cierto: dos de los ocho son del motor de
+// comentarios, y la campaña que la app monta va directo al video sin palabra.
+// Con los ocho obligatorios, LA CAMPAÑA QUE EL CLIENTE MONTA no podía encender
+// nunca — y esta prueba lo protegía. Ahora mide lo que corresponde: que a cada
+// motor se le pidan sus candados, y solo los suyos.
 console.log('\n══ qué hace falta para encender ══');
-ok(cuantosCerrados(COMPLETO, true) === 8, 'los ocho cerrados son ocho');
-ok(puedeEncender(COMPLETO, true), 'y con los ocho se puede encender');
-ok(!puedeEncender(COMPLETO, false),
+const VSL: ObjetivoCampana = 'clientes_potenciales';   // directo al video
+const COMENT: ObjetivoCampana = 'mensajes_retargeting'; // por palabra en comentarios
+
+ok(cuantosAplican(VSL) === 6, `a la campaña al video se le piden ${cuantosAplican(VSL)}`);
+ok(cuantosAplican(COMENT) === 8, 'y a la de comentarios los ocho');
+ok(!candadosQueAplican(VSL).includes('palabra'),
+  'la palabra NO se le pide a la campaña al video: no la usa');
+ok(!candadosQueAplican(VSL).includes('dm'),
+  'ni el DM probado, por lo mismo');
+ok(candadosQueAplican(COMENT).includes('palabra') && candadosQueAplican(COMENT).includes('dm'),
+  'y a la de comentarios sí: sin esos dos, ese motor no existe');
+
+ok(puedeEncender(COMPLETO, VSL, true), 'con todo cargado, enciende');
+// EL BUG, ESCRITO COMO PRUEBA: un cliente que montó la campaña al video sin
+// configurar palabra ni DM tenía seis de seis y el botón le decía «Faltan 2».
+const SIN_PALABRA: Montaje = { ...COMPLETO, palabra: null, dm_probado: false };
+ok(puedeEncender(SIN_PALABRA, VSL, true),
+  'sin palabra ni DM, la campaña al video TAMBIÉN enciende: es el bug que trababa el botón');
+ok(!puedeEncender(SIN_PALABRA, COMENT, true),
+  'y la de comentarios no, que es lo que la regla de los ocho quería proteger');
+
+ok(!puedeEncender(COMPLETO, VSL, false),
   'sin los tres anuncios auditados NO se enciende, aunque todo lo demás esté');
-ok(!puedeEncender({ ...COMPLETO, pixel_id: null }, true),
+ok(!puedeEncender({ ...COMPLETO, pixel_id: null }, VSL, true),
   'ni sin el píxel: la campaña aprendería a ciegas');
-ok(cuantosCerrados({}, false) === 0, 'sin nada cargado no hay ninguno cerrado');
+ok(cuantosCerrados({}, VSL, false) === 0, 'sin nada cargado no hay ninguno cerrado');
 
 console.log('\n══ qué le falta, dicho como se dice ══');
-ok(loQueFalta({}, false).length === 8, 'sin nada, le faltan los ocho');
-ok(loQueFalta(COMPLETO, true).length === 0, 'con todo, no le falta nada');
-ok(/anuncios/.test(loQueFalta({}, false)[0]),
+ok(loQueFalta({}, VSL, false).length === 6, 'sin nada, le faltan sus seis');
+ok(!loQueFalta({}, VSL, false).some((x) => /palabra|DM/.test(x)),
+  'y no se le reclama la palabra: el equipo se la pedía por mensaje para nada');
+ok(loQueFalta({}, COMENT, false).length === 8, 'a la de comentarios, los ocho');
+ok(loQueFalta(COMPLETO, VSL, true).length === 0, 'con todo, no le falta nada');
+ok(/anuncios/.test(loQueFalta({}, VSL, false)[0]),
   'y lo primero que se nombra son los anuncios: sin ellos no hay campaña');
-ok(/Puede encender/.test(comoVaElMontaje(COMPLETO, true)),
-  `la línea del equipo lo dice derecho: "${comoVaElMontaje(COMPLETO, true)}"`);
-ok(/Le falta uno/.test(comoVaElMontaje({ ...COMPLETO, trabajo_claro: false }, true)),
+ok(/Puede encender/.test(comoVaElMontaje(COMPLETO, VSL, true)),
+  `la línea del equipo lo dice derecho: "${comoVaElMontaje(COMPLETO, VSL, true)}"`);
+ok(/Le falta uno/.test(comoVaElMontaje({ ...COMPLETO, trabajo_claro: false }, VSL, true)),
   'cuando falta uno solo, lo dice así');
-ok(/Tiene 0 de 8/.test(comoVaElMontaje({}, false)),
-  'y cuando no empezó, también');
-ok(!/undefined|NaN|null/.test(comoVaElMontaje({}, false) + loQueFalta({}, false).join(' ')),
+ok(/Tiene 0 de 6/.test(comoVaElMontaje({}, VSL, false)),
+  'y el total que le lee el equipo es el que le aplica, no «de 8» escrito a mano');
+ok(!/undefined|NaN|null/.test(comoVaElMontaje({}, VSL, false) + loQueFalta({}, VSL, false).join(' ')),
   'sin agujeros en el texto');
+
+// ── 2b · UNA SOLA CUENTA PARA LAS DOS PANTALLAS ────────────────────────────
+// El cliente leía «6 de 6 · listo» y el equipo «6 de 8». Dos números para el
+// mismo cliente enseñan a no creerle a ninguno, y la discusión la termina
+// ganando el que está delante del cliente.
+console.log('\n══ el cliente y el equipo cuentan igual ══');
+const cliente = readFileSync('src/components/campanas/MontajeCupos.tsx', 'utf-8');
+const equipo = readFileSync('src/components/admin/MontajeDelCliente.tsx', 'utf-8');
+ok(/candadosQueAplican/.test(cliente),
+  'la pantalla del cliente usa los candados por objetivo');
+ok(/cuantosAplican/.test(equipo),
+  'y la del equipo también, en vez del 8 escrito a mano');
+ok(!/ de 8</.test(cliente) && !/ de 8</.test(equipo),
+  'ninguna de las dos tiene «de 8» escrito en el texto');
+ok(!/\{listos\} de 8|=== 8|length === 8/.test(cliente),
+  'ni la cuenta vieja escondida en una comparación');
 
 // ── 3 · Los links que el equipo abre ───────────────────────────────────────
 console.log('\n══ para mirar su campaña ══');

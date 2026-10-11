@@ -21,8 +21,8 @@ const vivo = (n: string, fn: () => unknown): unknown => {
 
 console.log('══ el cliente que entra a todo el día 1, sin nada cargado ══');
 const cero = { ...SEMANA_VACIA };
-ok(!!vivo('la cadena', () => calcularCadena(cero)), 'la cadena se calcula con todo en cero');
-ok(!!vivo('el dominó', () => encontrarDomino(calcularCadena(cero))), 'el dominó no revienta');
+ok(!!vivo('la cadena', () => calcularCadena(cero, [])), 'la cadena se calcula con todo en cero');
+ok(!!vivo('el dominó', () => encontrarDomino(calcularCadena(cero, []))), 'el dominó no revienta');
 ok(!!vivo('la proyección', () => proyectar(0, cero)), 'la proyección con objetivo cero');
 ok(!!vivo('la campaña', () => decidirCampana({ objetivo: 'mensajes', precio: 0, diasEncendida: 0, anuncios: [], semanasDelGanador: 0 } as never)), 'decidir una campaña sin anuncios');
 ok(!!vivo('el paquete', () => armarPaquete({ piezas: {}, elegidas: [], stories: '', brief: {}, notas: {} })), 'el paquete sin nada');
@@ -37,7 +37,7 @@ ok(!!vivo('las fórmulas', () => recomendarFormulas({ tienePrueba: false, marcaP
 
 console.log('\n══ números imposibles que igual se pueden escribir ══');
 const raro = { ...SEMANA_VACIA, precio: -1000, gasto: -50, conversaciones: -5, ventas: 999999, facturado: -1 };
-const c = vivo('cadena rara', () => calcularCadena(raro)) as ReturnType<typeof calcularCadena> | null;
+const c = vivo('cadena rara', () => calcularCadena(raro, [])) as ReturnType<typeof calcularCadena> | null;
 ok(!!c, 'la cadena con números negativos no revienta');
 ok(!!c && c.every(i => i.valor === null || Number.isFinite(i.valor)), 'y ninguno da infinito ni NaN');
 const d = vivo('dominó raro', () => encontrarDomino(c ?? [])) as { titulo?: string } | null;
@@ -46,7 +46,7 @@ ok(!!d?.titulo, 'el dominó sigue diciendo algo');
 console.log('\n══ el orden al revés ══');
 // Vendió antes de tener conversaciones (vino por recomendación)
 const recomendado = { ...SEMANA_VACIA, precio: 1000, ventas: 2, facturado: 2000, cobrado: 2000, conversaciones: 0, gasto: 0 };
-const cr = calcularCadena(recomendado);
+const cr = calcularCadena(recomendado, []);
 ok(cr.every(i => i.valor === null || Number.isFinite(i.valor)), 'vender sin pauta ni conversaciones no rompe la cadena');
 ok(!!encontrarDomino(cr).titulo, 'y el dominó dice algo sensato');
 

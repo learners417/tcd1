@@ -14,6 +14,18 @@ def check(nombre, ok, detalle=''):
     if not ok: F += 1
 def rd(f): return open(f, encoding='utf-8', errors='replace').read()
 
+def solo_codigo(s: str) -> str:
+    """El archivo sin comentarios.
+
+    Tres lentes dieron falso positivo por mirar el archivo crudo: contaban la
+    palabra prohibida, el writeText viejo o el campo retirado dentro del
+    comentario que explica POR QUE se saco. Una lente que marca en rojo al
+    archivo que arreglo el problema ensena a borrar la explicacion.
+    """
+    import re as _r
+    s = _r.sub(r'/\*[\s\S]*?\*/', '', s)
+    return _r.sub(r'^\s*//.*$', '', s, flags=_r.M)
+
 # ── Ayudante: ¿una tab del Admin está en sus 5 superficies? ─────────────
 # Se comprueba PERTENENCIA al array, nunca una cadena con el corchete
 # pegado: anclar a la posición hizo que agregar una tab después rompiera
@@ -241,6 +253,8 @@ check('regla de avatar (la brecha, nunca la culpa)', not av, str(av))
 _BLANCO = {'más','quizás','estás','jamás','atrás','detrás','demás','además','país',
  'después','través','revés','cortés','interés','inglés','francés','mes','vas','das',
  'tras','análisis','crisis','compás','estés','estrés','clichés',
+ # sustantivos tomados del frances, no voseo
+ 'degradés','degradé','canapés','pies','bebés','purés','cafés','bidés',
  # futuros IRREGULARES de tuteo — correctos, no voseo
  'sabrás','podrás','tendrás','harás','querrás','vendrás','pondrás','saldrás',
  'dirás','valdrás','cabrás'}
@@ -257,6 +271,20 @@ for _f, _src in todo.items():
     for _w in re.findall(r'\b(?:vos|sos|contame|decime|escribime|acordate|fijate|pasame|mandame|mostrame|compartilo|agendate)\b', _src, re.I):
         _vos.append(f"{_f.split('/')[-1]}:{_w.lower()}")
 check('voseo = 0 en TODO el repo (prompts incluidos)', not _vos, '; '.join(sorted(set(_vos))[:5]))
+
+# ── 6.4a · la palabra "gente" ──────────────────────────────────────────
+# Javo la pidio fuera: habla de personas y de consultantes, no de "gente".
+# Habia 50 en 25 archivos, y varias en copy que el cliente lee. Esta lente
+# existe para que no vuelvan de a una.
+# La linea que PROHIBE la palabra tiene que poder nombrarla: los prompts de
+# IA llevan la regla escrita ("nunca la palabra gente: personas o
+# consultantes"), y sin ella el modelo no la respeta. Mismo criterio que la
+# excepcion de vozLocalizada.ts en la lente del voseo.
+_gente = [f"{_f.split('/')[-1]}:{_n}" for _f, _src in todo.items()
+          for _n, _l in enumerate(_src.split('\n'), 1)
+          if re.search(r'\bgente\b', _l, re.I)
+          and not re.search(r'nunca.{0,30}\bgente\b|\bgente\b.{0,40}(?:personas|consultantes)', _l, re.I)]
+check('la palabra "gente" = 0 en todo el repo', not _gente, '; '.join(_gente[:5]))
 # 6.4b · La lente de arriba solo ve -ás/-és/-ís: se le escapaban los
 # imperativos ("Escribí", "Mirá", "Recordá") y no miraba el seed, que es
 # texto que el cliente lee. El diccionario vive en tcd-spec/datos/tuteo.py.
@@ -449,6 +477,9 @@ if _os69.path.exists('src/components/admin/PanelMotorIA.tsx'):
 import os as _os610
 _fa = rd('src/lib/formulasAnuncios.ts')
 _con = rd('src/components/campanas/ConstructorAnuncios.tsx')
+_apr = rd('src/lib/aprobacionAnuncio.ts')
+_cop = rd('src/lib/copiar.ts')
+_btn = rd('src/components/BotonCopiar.tsx')
 check('existe el recomendador de fórmulas',
       'export function recomendarFormulas' in _fa)
 check('cada recomendación explica POR QUÉ esa y no otra',
@@ -533,8 +564,30 @@ check('existe el chequeo determinista de políticas',
 check('cada alerta dice CÓMO se escribe lo mismo sin romper la regla',
       _fa.count('comoSeArregla:') >= 7,
       'señalar el problema sin dar la salida deja al cliente trabado')
+# La lente pedia 'bloqueantes.length === 0' escrito en la pantalla. Esa
+# linea era el bug: TODO el veredicto se derivaba ahi, sin ninguna forma de
+# que una persona aprobara nada, y el cliente quedaba trabado con un anuncio
+# que estaba bien. Ahora el veredicto vive en aprobacionAnuncio.ts y lo que
+# se verifica es lo que importa: que la politica de Meta siga bloqueando, y
+# que los avisos de calidad tengan salida.
 check('las políticas bloquean el copiado en el Constructor',
-      'revisarPoliticas' in _con and 'bloqueantes.length === 0' in _con)
+      'revisarPoliticas' in _con and 'estadoDePieza' in _con
+      and 'bloqueantes: bloqueantes.length' in _con)
+check('una pieza bloqueada por Meta NO se puede aprobar a mano',
+      "veredicto: 'bloqueada'" in _apr and 'puedeAprobarAMano: false' in _apr,
+      'lo que esta en juego es la cuenta publicitaria, no el estilo')
+check('pero los 8 ingredientes SÍ se pueden aprobar a mano',
+      'puedeAprobarAMano: true' in _apr and 'aprobar(' in _con,
+      'se detectan por regex: quien escribio su analogia con otras palabras quedaba trabado')
+check('la aprobación muere si reescribe el anuncio',
+      'export function huella' in _apr and 'estaAprobada(aprobadas' in _con,
+      'sin eso aprobaba una version y publicaba otra')
+check('y la pantalla explica quién aprueba qué',
+      'COMO_FUNCIONA_LA_AUDITORIA' in _con,
+      '«no me queda claro como es la auditoria, como la pasan, como la aprueban»')
+check('en cada estado hay una línea que dice qué sigue',
+      'estado.queSigue' in _con,
+      'el cartel decia «todavia no esta lista» y ahi terminaba')
 check('el candado del montaje mira políticas Y no solo ingredientes',
       'revisarPoliticas' in _fa
       and 'no se puede publicar' in _fa,
@@ -542,14 +595,150 @@ check('el candado del montaje mira políticas Y no solo ingredientes',
 check('se distingue lo que bloquea de lo que solo hay que revisar',
       "'bloquea' | 'revisa'" in _fa)
 
+# ── 6.11c · UNA SOLA FECHA PARA LA PRIMERA VENTA ───────────────────────
+# El contrato que el cliente FIRMA en su sesion del plan de inversion decia
+# "primera venta esperada ~dia 42". Su hoja de ruta dice dia 26. Dos fechas
+# distintas para lo mismo, y la que firma es la que va a esperar: el cliente
+# que firmo ese plan se queda tranquilo dieciseis dias de mas.
+_hoja = rd('src/lib/hojaDeRuta.ts')
+_ses = rd('src/lib/sesionesGuiadas.ts')
+import re as _re
+_m = _re.search(r"(\d+): 'Tu primera venta'", _hoja)
+check('la hoja de ruta dice cuando es la primera venta', bool(_m))
+if _m:
+    _dia = _m.group(1)
+    _otras = sorted(set(_re.findall(r'(?:d[ií]a|DIA) ~?(\d{2})', _ses))
+                    - {_dia, '24', '90', '30', '45', '60'})
+    check(f'y ninguna sesion promete otra fecha (la hoja dice dia {_dia})',
+          'primera venta esperada' not in _ses,
+          'el plan que firma no puede decir una fecha distinta de su hoja de ruta')
+    check('la sesion del plan de inversion nombra las fechas de la hoja',
+          f'dia {_dia}' in _ses or f'd\u00eda {_dia}' in _ses,
+          'sin la fecha, el cliente firma un plan sin saber que espera')
+
+# ── 6.11d · CONSTRUIDO, PROBADO Y SIN CABLEAR ──────────────────────────
+# El patron que aparecio DIEZ veces en esta revision: un modulo completo,
+# exportado, a veces con su prueba en verde, que ninguna pantalla importa.
+# El cliente paga por algo que existe en el codigo y no se puede usar.
+#
+# Estas son las que ya se arreglaron. La lente existe para que no se
+# desconecten otra vez, que es exactamente como llegaron a estar asi.
+_vivas = [
+    ('sincronizarArtefactos', 'src/pages/MiClinica.tsx',
+     'la pantalla afirma en presente que su trabajo ya esta en Mi Clinica'),
+    ('leerTrabajoDeCampanas', 'src/components/campanas/ConstructorAnuncios.tsx',
+     'sin esto pierde anuncios que pago con creditos, estando en la base'),
+    ('grabacionesGrupales', 'src/pages/Acompanamiento.tsx',
+     'quien se perdio la mentoria es el que necesita la grabacion'),
+    ('costoPorCliente', 'src/components/admin/PanelMotorIA.tsx',
+     'el costo de IA por cliente'),
+]
+for _fn, _pantalla, _porque in _vivas:
+    _src = todo.get(_pantalla, '')
+    check(f'{_fn} esta cableado en {_pantalla.split("/")[-1]}',
+          _fn in _src, _porque)
+
+# Y la que no se puede medir por nombre: que el diagnostico reciba los
+# paises. `bandaDe(n.mercados ?? [])` recibia siempre una lista vacia, y
+# caia en la banda de Mexico para TODA la cartera.
+_vc = todo.get('src/lib/valueChain.ts', '')
+_vc_codigo = solo_codigo(_vc)
+check('calcularCadena exige los paises, no los busca en los numeros',
+      'paises: string[],' in _vc_codigo and 'n.mercados' not in _vc_codigo,
+      'con la lista vacia se le dice "caro" a quien esta bien para su mercado')
+
+# ── 6.0 · EL PRIMER DIA DE UN CLIENTE NUEVO ────────────────────────────
+# Lo que una auditoria del dia 1 encontro, convertido en lentes: son los
+# errores que solo se ven con la base vacia, y por eso ninguna prueba de
+# escenario los agarraba.
+_dash = solo_codigo(todo.get('src/pages/Dashboard.tsx', ''))
+check('HOY no afirma "todo al dia" mientras todavia esta cargando',
+      'yaCargo && data.tareasHoy.length === 0' in _dash,
+      'el dia 1 tachaba su sesion con "Hecha - el dojo te vio hoy"')
+check('y el fetch a Mi Clinica tiene corte',
+      'corte.abort()' in _dash and 'signal: corte.signal' in _dash,
+      'sin timeout, HOY esperaba a otra app en arranque frio')
+
+_rm = solo_codigo(todo.get('src/pages/Roadmap.tsx', ''))
+check('el punto de partida NO reescribe la fecha de inicio',
+      'proximoLunes' not in _rm and 'yaTieneFecha' in _rm,
+      'el primer tap la movia al lunes siguiente y congelaba su dia en 1')
+
+_app = solo_codigo(todo.get('src/App.tsx', ''))
+check('sin perfil no se entra a medias',
+      'No pude abrir tu cuenta' in _app,
+      'sin fila en profiles se salteaba el wizard y todo quedaba en el navegador')
+
+_act = solo_codigo(todo.get('src/components/campanas/LaActivacion.tsx', ''))
+check('Campanas dice cuando le toca, en vez de invitarlo el dia 1',
+      'todaviaNo' in _act and 'DIA_EN_QUE_EMPIEZA' in _act,
+      'el dia 1 le presentaba el paso 1 del montaje como la tarea de hoy')
+
+_tc = solo_codigo(todo.get('src/components/tasks/TaskCoach.tsx', ''))
+check('solo se pide adjuntar cuando la evidencia es un archivo',
+      'ADJUNTABLES' in _tc,
+      'el boton de cerrar la sesion estaba deshabilitado en TODO el Camino')
+
+# Textos que delatan un dato que falta. El dia 1 es cuando falta todo.
+_malos = [
+    ("|| 'bienvenida'", 'el saludo en femenino como si fuera su nombre'),
+    ("|| 'Fundadora'", 'el Mentor saludando en femenino a cualquiera'),
+    ('animate-spin'.replace('a', '\u00e1', 1), 'clase con tilde: no anima nada'),
+]
+for _mal, _porque in _malos:
+    _donde = [f.split('/')[-1] for f, s in todo.items() if _mal in solo_codigo(s)]
+    check(f'sin «{_mal}» en el copy', not _donde, f'{_porque} - {_donde[:3]}')
+
+# Y los pilares: el cliente ve dias, no pilares.
+_ag = ' '.join(solo_codigo(s) for f, s in todo.items() if '/agents/' in f)
+check('ningun unlockReason nombra un "Pilar N"',
+      not re.search(r'Pilar \d', _ag),
+      'el cliente lee un requisito que no puede ubicar, y que ademas no es el requisito')
+
+# ── 6.12b · UN SOLO CAMINO AL PORTAPAPELES ─────────────────────────────
+# Habia 18 botones de copiar, cada uno a su manera, en dos formas:
+#   navigator.clipboard.writeText(t)        -> sin catch
+#   void navigator.clipboard?.writeText(t)  -> sin catch y sin aviso
+# navigator.clipboard no existe en contexto no seguro, y aun existiendo la
+# promesa RECHAZA cuando el documento no tiene foco: en el telefono pasa
+# seguido. Con `?.` el boton no hacia nada; con el `void`, el rechazo se
+# tiraba a la basura. En los dos casos el cartel decia «Copiado» igual, el
+# cliente pegaba en Meta lo que tenia antes, y no habia como enterarse.
+# Se miran LINEAS DE CODIGO: la version anterior de esta lente contaba las
+# menciones en los comentarios que explican por que el helper existe, y
+# marcaba en rojo a los dos archivos que arreglaron el problema.
+def _es_comentario(l):
+    s = l.strip()
+    return s.startswith(('*', '//', '/*'))
+_crudo = [f"{f.split('/')[-1]}:{n}" for f, s in todo.items()
+          if '/lib/copiar.ts' not in f
+          for n, l in enumerate(s.split('\n'), 1)
+          if 'navigator.clipboard' in l and not _es_comentario(l)]
+check('nadie llama a navigator.clipboard por su cuenta',
+      not _crudo, '; '.join(_crudo[:5]))
+check('el helper unico existe y responde si copio',
+      'export async function copiar' in _cop
+      and 'return conTextarea(texto)' in _cop
+      and 'Promise<boolean>' in _cop,
+      'un copiar que no devuelve si funciono no se puede avisar')
+check('y tiene respaldo para donde la API moderna no corre',
+      'execCommand' in _cop and 'NO_SE_PUDO_COPIAR' in _cop)
+check('el boton dice cuando NO pudo copiar',
+      "'copiado'" in _btn and "'fall" in _btn and 'NO_SE_PUDO_COPIAR' in _btn,
+      'antes mostraba «Copiado» sin esperar el resultado')
+
 # ── 6.13 · El guion llega como carrusel, no como bloque de texto ───────
 check('existe el armado de láminas',
       'export function armarCarrusel' in _fa)
 check('el guion se parte solo, sin una segunda llamada al modelo',
       'PANTALLA' in _fa and 'armarCarrusel' in _con,
       'el prompt ya pedía PANTALLA N: — faltaba leerlo')
+# Pedia writeText(l.texto) crudo. Ese writeText crudo ERA el bug: sin catch,
+# el boton no hacia nada en el telefono y el cartel decia «Copiado» igual.
+# Ahora hay un solo helper y la lente exige que se use.
 check('cada lámina se copia sola',
-      'carrusel.laminas.map' in _con and 'writeText(l.texto)' in _con)
+      'carrusel.laminas.map' in _con and 'BotonCopiar' in _con
+      and 'texto={l.texto}' in _con)
 check('se avisa cuando una lámina no entra en el teléfono',
       'LARGO_MAX_LAMINA' in _fa and 'muy larga para el teléfono' in _con)
 check('la palabra clave se exige en el cierre o en el post',
@@ -576,7 +765,7 @@ if _os614.path.exists('src/lib/paqueteCampana.ts'):
           "estado: problemas.length ? 'revisar' : 'listo'" in _paq)
     check('el paquete está en el Constructor con copiar todo y copiar por pieza',
           'armarPaquete' in _con and 'paquete.textoCompleto' in _con
-          and 'writeText(x.contenido)' in _con)
+          and 'texto={x.contenido}' in _con)
 
 # ── 6.15 · Cada candado del montaje lleva lo que lo resuelve ───────────
 # Antes eran ocho casillas y nada más. Un cliente que no sabe instalar un
@@ -1257,7 +1446,13 @@ for _x in set(_re33.findall(r"^\s+'([a-z0-9_]+)',", rd('src/lib/cuadroTickets.ts
     _malos33.append(f'ítem del cuadro {_x}')
 _tut33 = set(_re33.findall(r"^  '([^']+)': \{", rd('src/lib/tutorialesTecnicos.ts'), _re33.M))
 for _f, _s in _TODO33.items():
-    for _x in set(_re33.findall(r"tutorial: '([^']+)'", _s)) - _tut33:
+    # Un id de tutorial nunca lleva espacios: son 'perfil-y-pagina', 'P4.5-dm'.
+    # Sin este filtro la lente confundía la ETIQUETA de pantalla de un origen
+    # de la Biblioteca —`tutorial: 'Paso a paso'`— con un id inventado. Una
+    # lente que no distingue un identificador de un texto para leer manda a
+    # buscar un bug que no existe, y la próxima vez se la mira con menos
+    # atención.
+    for _x in set(_re33.findall(r"tutorial: '([^' ]+)'", _s)) - _tut33:
         _malos33.append(f'tutorial {_x} ({_f.split("/")[-1]})')
 
 # TODA SESIÓN CON GUION TIENE QUE ESTAR EN EL CAMINO. Si no, está escrita y
@@ -1586,8 +1781,15 @@ if _os43.path.exists('src/lib/mercados.ts'):
     _mk = rd('src/lib/mercados.ts')
     _vc43 = rd('src/lib/valueChain.ts')
     _sm43 = rd('src/lib/salaDeMando.ts')
-    check('los mercados son DÓNDE CORRE LA PAUTA, no dónde vive el sanador',
-          'mercados?: string[]' in _vc43 and 'NO es donde vive el sanador' in _vc43)
+    # Esta lente pedia el campo `mercados?: string[]` DENTRO de los numeros.
+    # Estaba en verde, y era justamente el campo que nadie poblaba nunca: con
+    # el, `bandaDe` recibia una lista vacia y caia en la banda de Mexico para
+    # TODA la cartera. Ahora los paises son un argumento obligatorio, que el
+    # llamador trae del montaje del cliente.
+    check('los paises llegan al diagnostico como argumento, no en los numeros',
+          'paises: string[],' in solo_codigo(_vc43)
+          and 'mercados?: string[]' not in solo_codigo(_vc43),
+          'un campo que nadie puebla es peor que no tenerlo: el default miente en silencio')
     check('la banda del CPM sale del mercado',
           "add('cpm'" in _vc43 and 'banda.cpmMin' in _vc43)
     check('con varios países se toma el rango que abarca a todos',
@@ -2513,8 +2715,18 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
 import os as _os68
 _cron68 = rd('api/cron/alarmas-inactividad.ts')
 check('los avisos al cliente se disparan solos',
-      'planificarAvisos(' in _cron68 and 'clientes_para_avisar' in _cron68,
+      'planificarAvisos(' in _cron68 and 'encontrarDomino(calcularCadena(' in _cron68,
       'estaban construidos y nadie los mandaba')
+# Los VEINTE, no cuatro. El cron decidía el cuello con cuatro condiciones
+# escritas a mano, así que dieciséis avisos estaban escritos y no tenían forma
+# de dispararse — y son los tramos donde el cliente se cae DESPUÉS de vender.
+check('los veinte avisos pueden salir, no cuatro',
+      'numerosDeFila(fila)' in _cron68 and 'COLUMNAS_DE_SEMANA' in _cron68
+      and "it.agendas / it.conversaciones" not in _cron68,
+      'el cron diagnostica con la misma cadena de valor que la cola del Admin')
+check('y juzga contra la banda de SUS países',
+      'paisesDe.get(id)' in _cron68,
+      'sin los países se juzga el costo de toda la cartera contra la referencia de México')
 # Y las tres reglas, que es lo que el disparador no aplicaba.
 #
 # El cron insertaba el aviso DIRECTO desde AVISOS[cuello], salteándose la
@@ -2528,8 +2740,14 @@ check('y lo que el aviso no resuelve pasa a una persona',
       'plan.aEscalar' in _cron68 and 'el aviso automático no alcanzó' in _cron68,
       'dos avisos sin cambio no es un cliente que no leyó: es un aviso que no alcanza')
 check('el historial sale de lo ya enviado, sin tabla nueva',
-      'claveDeTitulo' in _cron68 and "eq('tipo', 'sistema')" in _cron68,
+      "select('usuario_id, clave, created_at')" in _cron68 and 'claveDeTitulo' not in _cron68,
       'una segunda copia del mismo historial es una segunda copia que se desincroniza')
+# Por CLAVE y no por título: el aviso se reconocía comparando su texto, así que
+# mejorar la redacción de uno dejaba su historial en cero para todos y volvía a
+# salir desde el principio a quien ya lo había recibido dos veces.
+check('y aguanta que se reescriban los textos',
+      'clave: aviso.clave' in _cron68,
+      'reconocer el aviso por su texto ataba el historial a no tocar una palabra')
 check('van en el cron que ya existe, no en uno nuevo',
       'sumar otro cron sería otro lugar' in _cron68,
       'otro cron es otro lugar donde algo puede fallar en silencio')
@@ -2537,7 +2755,23 @@ check('si fallan los avisos, las alarmas del equipo igual salieron',
       'No tumba el cron' in _cron68,
       'perder las alarmas por un fallo de los avisos sería cambiar un problema por dos')
 check('sin datos no se opina: se le pide que cargue',
-      "!it.cargo ? 'no_cargo'" in _cron68)
+      ": 'no_cargo'" in _cron68)
+# El candado que faltaba: `crear_notificacion` corría con permisos de
+# administrador y no miraba quién la llamaba. Cualquier cliente podía
+# escribirle a otro un aviso con el título y el enlace que quisiera.
+_mig68 = rd('supabase/migrations/20261019_los_avisos_salen.sql')
+check('nadie puede escribir un aviso en nombre de otro',
+      'es_del_equipo(auth.uid())' in _mig68 and 'p_usuario_id = auth.uid()' in _mig68,
+      'era SECURITY DEFINER sin mirar quién llamaba: un «te dejó una nota» falso con el link que quisiera')
+# Y la cola, que se calculaba y se mostraba sin que nada saliera de ahí.
+_rep68 = rd('src/lib/avisosStorage.ts')
+check('la cola del Admin termina en tareas de alguien',
+      'desdeLaCadena({' in _rep68 and 'crearDesdeElSistema(tarea, asignarA)' in _rep68
+      and 'repartirLaCola(colaDeHoy' in rd('src/pages/Admin.tsx'),
+      'existía mientras la pantalla estaba abierta: quien no abría esa tab no se enteraba')
+check('y el reparto no manda avisos: eso es del cron',
+      'mandarAviso' not in _rep68,
+      'con los dos lados mandando, el cliente recibía el mismo aviso dos veces')
 check('el mapa de avisos se exporta, no se duplica',
       'export const AVISOS' in rd('src/lib/avisosCliente.ts'))
 

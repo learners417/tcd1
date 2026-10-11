@@ -17,7 +17,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { cierreDeLaVentana, sumarDias } from '../src/lib/ventanaDeAcceso';
-import { fijarPausas } from '../src/lib/pausaGlobal';
+import { fijarVentanas } from '../src/lib/ventanaSinSoporte';
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -30,7 +30,7 @@ const soloCodigo = (src: string) => src
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\/\/.*$/gm, '');
 
-fijarPausas([]);
+fijarVentanas([]);
 
 const admin = leer('src/pages/Admin.tsx');
 const extras = leer('src/lib/matrizExtras.ts');

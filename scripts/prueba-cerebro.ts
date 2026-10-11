@@ -32,14 +32,14 @@ linea(DESTINOS.every((d) => ETIQUETA_DESTINO[d].length > 5),
 console.log('\n══ desde la cadena ══');
 const cadena = desdeLaCadena({
   clienteId: 'a', nombre: 'Rosana', cuello: 'conv_a_agenda',
-  accion: 'Revisar el DM con ella', mensaje: 'Pasame tres conversaciones',
+  accion: 'Revisar el DM con ella', mensaje: 'Pásame tres conversaciones',
   enRiesgo: 1000, semanasIgual: 0,
 });
 linea(cadena.origen === 'cadena' && cadena.ref === 'conv_a_agenda',
   'guarda de dónde vino y qué la causó');
-linea(cadena.destino === 'mensaje' && cadena.textoListo === 'Pasame tres conversaciones',
+linea(cadena.destino === 'mensaje' && cadena.textoListo === 'Pásame tres conversaciones',
   'un cuello de ejecución se resuelve con un mensaje YA ESCRITO');
-linea(cadena.descripcion.includes('el mensaje la pierde'),
+linea(cadena.descripcion.includes('el mensaje las pierde'),
   'y la descripción dice qué significa el cuello, no su nombre técnico');
 linea(cadena.area === 'setting', 'con su área, para poder agrupar');
 
