@@ -1,0 +1,603 @@
+import React, { useMemo, useRef, useState } from 'react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { SECTIONS, STEPS, TOTAL_STEPS, RESPONSABLE_SIGLA, RESPONSABLE_LABEL } from '../../../lib/preactivacionSteps';
+import { type ExtrasByCliente, type EstadoCelda, extraDe, siguienteEstado, ESTADO_LABEL } from '../../../lib/matrizExtras';
+import {
+  type ChecksByCliente,
+  isChecked,
+} from '../../../lib/preactivacionCheck';
+import { cuadroDe, servicioDe, type Ticket } from '../../../lib/cuadroTickets';
+import { avanceDelCuadro } from '../../../lib/avanceDelCuadro';
+
+export interface MatrizClienteRow {
+  id: string;
+  nombre: string;
+  metodo?: string;
+  initial: string;
+  /** Qué contrató. Sin esto se le piden los 62 a todo el mundo. */
+  servicio?: string | null;
+}
+
+interface MatrizGridProps {
+  clientes: MatrizClienteRow[];
+  checks: ChecksByCliente;
+  onToggle: (clienteId: string, stepId: string, on: boolean) => void;
+  caminoDone?: Map<string, Set<string>>;
+  /**
+   * Los estados, notas y links de cada celda.
+   *
+   * Bajan del padre y no se cargan acá a propósito: el cartel de arriba los
+   * necesita para contar igual que esta grilla. Cuando cada uno tenía su copia,
+   * editar una celda dejaba los dos números distintos hasta recargar.
+   */
+  extras: ExtrasByCliente;
+  onExtra: (clienteId: string, stepId: string, cambio: { estado?: EstadoCelda; nota?: string; link?: string }) => void;
+}
+
+type Orden = 'atrasados' | 'avanzados' | 'nombre';
+
+export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, extras, onExtra }: MatrizGridProps) {
+  const [seccion, setSeccion] = useState<string>('todas');
+
+  /**
+   * LO QUE NO LE APLICA A CADA UNO, SEGÚN LO QUE CONTRATÓ.
+   *
+   * La matriz le pedía los 62 ítems a todo el mundo. A quien contrató La Base
+   * eso son veinte tareas que nadie va a hacer por él y que él tampoco puede
+   * hacer —son cuentas de la agencia— así que su avance se veía siempre bajo
+   * y la columna no significaba nada.
+   *
+   * El reparto ya estaba programado y probado en `cuadroDe`. Lo único que
+   * faltaba era usarlo: se calcula una vez por escalón, no por cliente.
+   */
+  const noAplicaPorServicio = useMemo(() => {
+    const porTicket = new Map<Ticket, Set<string>>();
+    for (const t of ['base', 'ascenso', 'instalacion'] as Ticket[]) {
+      porTicket.set(t, new Set(cuadroDe(t).filter((i) => i.noAplica).map((i) => i.id)));
+    }
+    const porCliente = new Map<string, Set<string>>();
+    for (const c of clientes) {
+      porCliente.set(c.id, porTicket.get(servicioDe(c.servicio)) ?? new Set());
+    }
+    return porCliente;
+  }, [clientes]);
+
+  const noLeAplica = (clienteId: string, stepId: string): boolean =>
+    noAplicaPorServicio.get(clienteId)?.has(stepId) ?? false;
+
+  const aplicar = onExtra;
+  const pedirDetalle = (clienteId: string, stepId: string, titulo: string) => {
+    const actual = extraDe(extras, clienteId, stepId);
+    const link = window.prompt(`Link para «${titulo}» (Drive, doc, página, calendario). Vacío para quitarlo:`, actual.link ?? '');
+    if (link === null) return;
+    const nota = window.prompt(`Nota para «${titulo}» (qué falta, quién quedó a cargo). Vacío para quitarla:`, actual.nota ?? '');
+    if (nota === null) { aplicar(clienteId, stepId, { link: link.trim() }); return; }
+    aplicar(clienteId, stepId, { link: link.trim(), nota: nota.trim() });
+  };
+  const [orden, setOrden] = useState<Orden>('atrasados');
+  const scroller = useRef<HTMLDivElement | null>(null);
+
+  /** Solo las columnas de la sección elegida — de 32 a las justas. */
+  const pasos = useMemo(
+    () => (seccion === 'todas' ? STEPS : STEPS.filter((p) => p.sectionId === seccion)),
+    [seccion],
+  );
+  const secciones = useMemo(
+    () => (seccion === 'todas' ? SECTIONS : SECTIONS.filter((sec) => sec.id === seccion)),
+    [seccion],
+  );
+
+  /** Quién está más atrasado primero: el orden que sirve para trabajar. */
+  const filas = useMemo(() => {
+    const c = [...clientes];
+    if (orden === 'nombre') return c.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    // La misma cuenta que el cartel de arriba y que la columna de avance:
+    // una sola, en un solo lugar.
+    const pctDe = (id: string) => avanceDelCuadro({
+      tildados: checks.get(id),
+      delCamino: caminoDone?.get(id),
+      estados: extras.get(id),
+      servicio: clientes.find((c) => c.id === id)?.servicio,
+    }).pct;
+    c.sort((a, b) => pctDe(a.id) - pctDe(b.id));
+    return orden === 'avanzados' ? c.reverse() : c;
+  }, [clientes, orden, checks, extras, caminoDone]);
+
+  /** Cuántos clientes tienen cada paso — el cuello de botella a simple vista. */
+  const totalPorPaso = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of pasos) {
+      let n = 0;
+      for (const cl of clientes) {
+        const auto = Boolean(p.meta && caminoDone?.get(cl.id)?.has(p.meta));
+        const ex = extras.get(cl.id)?.get(p.id);
+        if (auto || isChecked(checks, cl.id, p.id) || ex?.estado === 'listo' || ex?.estado === 'na') n++;
+      }
+      m.set(p.id, n);
+    }
+    return m;
+  }, [pasos, clientes, checks, caminoDone, extras]);
+
+  const mover = (dir: -1 | 1) => scroller.current?.scrollBy({ left: dir * 420, behavior: 'smooth' });
+
+  if (clientes.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-16 text-cream/55 text-sm">
+        Sin clientes que coincidan
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <style>{`
+        .matriz-scroll::-webkit-scrollbar { height: 14px; width: 14px; }
+        .matriz-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 8px; }
+        .matriz-scroll::-webkit-scrollbar-thumb { background: rgba(232,150,46,0.45); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
+        .matriz-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,150,46,0.75); background-clip: content-box; }
+        .matriz-scroll { scrollbar-color: rgba(232,150,46,0.5) rgba(255,255,255,0.05); scrollbar-width: auto; }
+      `}</style>
+
+      {/* Barra: secciones · orden · flechas */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button type="button" onClick={() => setSeccion('todas')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider border transition-colors ${seccion === 'todas' ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}>
+            Todas · {TOTAL_STEPS}
+          </button>
+          {SECTIONS.map((sec) => (
+            <button key={sec.id} type="button" onClick={() => setSeccion(sec.id)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider border transition-colors ${seccion === sec.id ? 'border-gold/60 bg-gold/10 text-gold' : 'border-cream/12 text-cream/60 hover:border-cream/30'}`}
+              title={sec.title}>
+              {sec.short} · {sec.items.length}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5 ml-auto">
+          <select value={orden} onChange={(e) => setOrden(e.target.value as Orden)}
+            className="bg-surface/50 border border-cream/12 rounded-lg px-2.5 py-1.5 text-sm text-cream/80 outline-none focus:border-gold/40">
+            <option value="atrasados">Más atrasados primero</option>
+            <option value="avanzados">Más avanzados primero</option>
+            <option value="nombre">Por nombre</option>
+          </select>
+          {seccion === 'todas' && (
+            <>
+              <button type="button" onClick={() => mover(-1)} title="Ver columnas anteriores"
+                className="p-1.5 rounded-lg border border-cream/12 text-cream/60 hover:border-gold/50 hover:text-gold"><ChevronLeft className="w-4 h-4" /></button>
+              <button type="button" onClick={() => mover(1)} title="Ver más columnas"
+                className="p-1.5 rounded-lg border border-cream/12 text-cream/60 hover:border-gold/50 hover:text-gold"><ChevronRight className="w-4 h-4" /></button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* LA REFERENCIA DE COLORES, no un manual de cómo deslizar.
+          Acá había un párrafo de letra chica que explicaba arrastrar con el
+          mouse, la barra de abajo y Shift + rueda. Si hay que explicar cómo
+          moverse, la interacción está mal: ahora la tabla se desliza sola con
+          el dedo y con la rueda, y este espacio dice lo único que no se puede
+          adivinar, que es qué significa cada color. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[17px]">
+        {([
+          ['pendiente', 'Sin empezar'],
+          ['cliente', 'La tiene él'],
+          ['nosotros', 'La tenemos'],
+          ['listo', 'Listo'],
+        ] as const).map(([est, texto]) => (
+          <span key={est} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="w-6 h-6 rounded-md border-2 inline-flex items-center justify-center text-[15px] font-extrabold"
+              style={{
+                borderColor: est === 'pendiente' ? 'var(--color-danger)'
+                  : est === 'cliente' ? '#E8862E'
+                  : est === 'nosotros' ? 'var(--color-gold)'
+                  : 'var(--color-success)',
+                background: est === 'listo' ? 'var(--color-success)'
+                  : est === 'cliente' ? 'rgba(232,134,46,0.20)'
+                  : est === 'nosotros' ? 'rgba(232,150,46,0.20)'
+                  : 'transparent',
+                color: est === 'cliente' ? '#F0A65C' : 'var(--color-goldhi)',
+              }}
+            >
+              {est === 'cliente' ? 'C' : est === 'nosotros' ? 'N' : ''}
+            </span>
+            <span className="text-cream/70">{texto}</span>
+          </span>
+        ))}
+        <span className="text-cream/45">
+          Toca una celda para cambiarla. El tilde dorado ya lo hizo en su Camino.
+        </span>
+      </div>
+
+    {/* EL DESLIZAMIENTO.
+        Antes esto era `cursor-grab` con arrastre por onMouseDown: el mismo
+        gesto servía para mover la tabla y para tocar una celda, así que en la
+        computadora se cambiaba un estado sin querer al intentar moverse, y en
+        el teléfono el arrastre con mouse no corre — quedaba solo el scroll
+        nativo, sin que nada lo dijera.
+
+        Ahora el navegador se encarga: scroll táctil nativo con inercia,
+        `overscroll-contain` para que al llegar al borde no arrastre la página
+        entera, y la rueda mueve en horizontal cuando el gesto es horizontal
+        (trackpad) o con Shift. Un gesto para moverse, un toque para cambiar. */}
+    <div
+      ref={scroller}
+      className="matriz-scroll overflow-auto overscroll-contain"
+      style={{
+        height: 'calc(100dvh - 300px)',
+        minHeight: 420,
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'auto',
+      }}
+      onWheel={(e) => {
+        if (!scroller.current) return;
+        // Trackpad en diagonal o Shift + rueda: se mueve al costado.
+        if (e.shiftKey) { scroller.current.scrollLeft += e.deltaY; return; }
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) scroller.current.scrollLeft += e.deltaX;
+      }}
+    >
+      <table
+        className="border-separate"
+        style={{ borderSpacing: 0, fontSize: 16 }}
+      >
+        <thead>
+          {/* Group row */}
+          <tr>
+            <th
+              className="sticky left-0 top-0 z-50 bg-[#0E0E0E]"
+              style={{ minWidth: 240 }}
+            />
+            {secciones.map((sec, idx) => (
+              <th
+                key={sec.id}
+                colSpan={sec.items.length}
+                className="sticky top-0 z-30 bg-panel text-gold uppercase tracking-widest"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  letterSpacing: 1.5,
+                  padding: '10px 0',
+                  textAlign: 'center',
+                  borderBottom: '1px solid rgba(232,150,46,0.10)',
+                  borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
+                }}
+              >
+                {sec.short}
+              </th>
+            ))}
+            <th
+              className="sticky right-0 top-0 z-40 bg-panel text-gold"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 15,
+                fontWeight: 700,
+                letterSpacing: 1.5,
+                padding: '10px 10px',
+                textAlign: 'center',
+                borderBottom: '1px solid rgba(232,150,46,0.10)',
+                borderLeft: '2px solid var(--matrix-section-divider)',
+                textTransform: 'uppercase',
+              }}
+            >
+              %
+            </th>
+          </tr>
+
+          {/* Column labels */}
+          <tr>
+            <th
+              className="sticky left-0 z-40 bg-[#0E0E0E]"
+              style={{
+                top: 40,
+                minWidth: 240,
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
+              }}
+            />
+            {pasos.map((step, idx) => {
+              const isFirstOfSection =
+                idx === 0 || pasos[idx - 1].sectionId !== step.sectionId;
+              return (
+                <th
+                  key={step.id}
+                  className="sticky z-20 bg-[#0F0F0F]"
+                  style={{
+                    top: 40,
+                    padding: '10px 8px 12px',
+                    fontWeight: 500,
+                    verticalAlign: 'bottom',
+                    borderBottom: '2px solid rgba(232,150,46,0.10)',
+                    borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
+                  }}
+                  title={step.title}
+                >
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 15,
+                      fontWeight: 500,
+                      color: 'var(--matrix-header-text)',
+                      lineHeight: 1.3,
+                      textAlign: 'center',
+                      minWidth: 84,
+                      whiteSpace: 'pre-line',
+                      wordBreak: 'keep-all',
+                    }}
+                  >
+                    {step.lbl}
+                  </div>
+                  <div style={{ fontSize: 15, textAlign: 'center', marginTop: 3, letterSpacing: 0.5, color: step.quien === 'cliente' ? 'rgba(232,150,46,0.75)' : step.quien === 'ambos' ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.28)' }}>
+                    {RESPONSABLE_SIGLA[step.quien]}
+                  </div>
+                </th>
+              );
+            })}
+            <th
+              className="sticky right-0 z-30 bg-[#0F0F0F]"
+              style={{
+                top: 40,
+                padding: '10px 12px 12px',
+                borderBottom: '2px solid rgba(232,150,46,0.10)',
+                borderLeft: '2px solid var(--matrix-section-divider)',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: 'var(--matrix-header-text)',
+                  textAlign: 'center',
+                }}
+              >
+                Total
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filas.map((cl) => {
+            // Como en la planilla: lo que no aplica no cuenta en el total.
+            const av = avanceDelCuadro({
+              tildados: checks.get(cl.id),
+              delCamino: caminoDone?.get(cl.id),
+              estados: extras.get(cl.id),
+              servicio: cl.servicio,
+            });
+            const pct = av.pct;
+            const done = av.hechos;
+            const base = av.total;
+            const isComplete = pct === 100;
+            return (
+              <tr key={cl.id} className="group">
+                {/* Sticky client cell */}
+                <td
+                  className="sticky left-0 z-30 bg-ink group-hover:bg-panel transition-colors"
+                  style={{
+                    padding: '0 14px',
+                    height: 56,
+                    borderBottom: '1px solid var(--matrix-row-divider)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="rounded-md flex items-center justify-center shrink-0"
+                      style={{
+                        width: 36,
+                        height: 36,
+                        background: 'rgba(232,150,46,0.12)',
+                        color: 'var(--color-gold)',
+                        fontSize: 16,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {cl.initial}
+                    </div>
+                    <div className="min-w-0">
+                      <div
+                        className="truncate font-semibold"
+                        style={{ maxWidth: 190, fontSize: 17 }}
+                        title={cl.nombre}
+                      >
+                        {cl.nombre}
+                      </div>
+                      {cl.metodo && (
+                        <div
+                          className="truncate"
+                          style={{
+                            color: 'var(--matrix-subtitle-text)',
+                            fontSize: 15,
+                            maxWidth: 190,
+                          }}
+                        >
+                          {cl.metodo}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+
+                {pasos.map((step, idx) => {
+                  const isFirstOfSection =
+                    idx === 0 || pasos[idx - 1].sectionId !== step.sectionId;
+                  const autoCamino = Boolean(step.meta && caminoDone?.get(cl.id)?.has(step.meta));
+                  const on = autoCamino || isChecked(checks, cl.id, step.id);
+                  return (
+                    <td
+                      key={step.id}
+                      className="group-hover:bg-panel transition-colors"
+                      style={{
+                        padding: 0,
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                        height: 62,
+                        borderBottom: '1px solid var(--matrix-row-divider)',
+                        borderLeft: isFirstOfSection
+                          ? '2px solid var(--matrix-section-divider)'
+                          : '1px solid var(--matrix-cell-divider)',
+                      }}
+                    >
+                      {(() => {
+                        // Lo que su servicio no incluye: se ve apagado y no se
+                        // puede tildar. Mostrarle una tarea que nadie va a
+                        // hacer por él, y que él tampoco puede hacer, es la
+                        // forma más rápida de que abandone el cuadro entero.
+                        if (noLeAplica(cl.id, step.id)) {
+                          return (
+                            <span
+                              title={`${step.title} — no entra en lo que contrató`}
+                              style={{ fontSize: 15, color: 'rgba(255,255,255,0.20)' }}
+                            >–</span>
+                          );
+                        }
+                        const ex = extraDe(extras, cl.id, step.id);
+                        const estado: EstadoCelda = autoCamino || on ? 'listo' : (ex.estado ?? 'pendiente');
+                        // Un color por estado, y el mismo en toda la app.
+                        //   rojo      · nadie lo empezó
+                        //   naranja   · la pelota la tiene el cliente
+                        //   amarillo  · la pelota la tenemos nosotros
+                        //   verde     · listo
+                        // Antes «en proceso» era un solo amarillo y no decía de
+                        // quién se estaba esperando: el lunes había que
+                        // preguntar celda por celda, que es el trabajo que esta
+                        // pantalla existe para ahorrar.
+                        const TRAZO: Record<EstadoCelda, string> = {
+                          pendiente: 'var(--color-danger)',
+                          cliente: '#E8862E',
+                          nosotros: 'var(--color-gold)',
+                          listo: 'var(--color-success)',
+                          na: 'rgba(255,255,255,0.22)',
+                        };
+                        const RELLENO: Record<EstadoCelda, string> = {
+                          pendiente: 'transparent',
+                          cliente: 'rgba(232,134,46,0.20)',
+                          nosotros: 'rgba(232,150,46,0.20)',
+                          listo: 'var(--color-success)',
+                          na: 'transparent',
+                        };
+                        const color = TRAZO[estado];
+                        const relleno = RELLENO[estado];
+                        const siguiente = siguienteEstado(estado, step.quien);
+                        const avanzar = () => {
+                          if (autoCamino) return;
+                          if (siguiente === 'listo') onToggle(cl.id, step.id, true);
+                          if (estado === 'listo') onToggle(cl.id, step.id, false);
+                          aplicar(cl.id, step.id, { estado: siguiente });
+                        };
+                        return (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <button
+                              type="button"
+                              onClick={avanzar}
+                              title={autoCamino
+                                ? `${step.title} — ✓ completado en El Camino (automático)`
+                                : `${step.title}\n${RESPONSABLE_LABEL[step.quien]} · ${ESTADO_LABEL[estado]} — toca para pasar a ${ESTADO_LABEL[siguiente]}${ex.nota ? '\nNota: ' + ex.nota : ''}`}
+                              className="inline-flex items-center justify-center transition-all hover:border-gold/60"
+                              style={{
+                                width: 30, height: 30, borderRadius: 7,
+                                border: `2px solid ${autoCamino ? 'var(--color-gold)' : color}`,
+                                background: autoCamino ? 'var(--color-gold)' : relleno,
+                                cursor: autoCamino ? 'default' : 'pointer',
+                              }}
+                            >
+                              {estado === 'listo' && <Check className="w-4 h-4" style={{ color: 'var(--color-ink)', strokeWidth: 3 }} />}
+                              {/* La letra dice de quién es la pelota: C el
+                                  cliente, N nosotros. Con dos colores parecidos
+                                  —naranja y amarillo— el color solo no alcanza,
+                                  y menos para quien no los distingue bien. */}
+                              {estado === 'cliente' && <span style={{ fontSize: 15, color: '#F0A65C', fontWeight: 800, lineHeight: 1 }}>C</span>}
+                              {estado === 'nosotros' && <span style={{ fontSize: 15, color: 'var(--color-goldhi)', fontWeight: 800, lineHeight: 1 }}>N</span>}
+                              {estado === 'na' && <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>–</span>}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); pedirDetalle(cl.id, step.id, step.title); }}
+                              onContextMenu={(e) => { if (ex.link) { e.preventDefault(); window.open(ex.link, '_blank'); } }}
+                              title={ex.link ? `Abrir: ${ex.link}  ·  (clic para editar)` : ex.nota ? `Nota: ${ex.nota}  ·  (clic para editar)` : 'Pegar un link o una nota'}
+                              className="leading-none min-h-[22px] px-1"
+                              style={{ fontSize: 15, color: ex.link ? 'var(--color-gold)' : ex.nota ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.28)' }}
+                            >
+                              {ex.link ? '🔗' : ex.nota ? '📝' : '＋'}
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                  );
+                })}
+
+                {/* Sticky total */}
+                <td
+                  className="sticky right-0 z-10 bg-ink group-hover:bg-panel transition-colors"
+                  style={{
+                    padding: '0 12px',
+                    height: 56,
+                    borderBottom: '1px solid var(--matrix-row-divider)',
+                    borderLeft: '2px solid var(--matrix-section-divider)',
+                    textAlign: 'center',
+                    fontSize: 16,
+                    minWidth: 84,
+                    color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
+                    fontWeight: isComplete ? 700 : 500,
+                  }}
+                  title={`${done} de ${base} que le aplican${av.noAplican ? ` · ${av.noAplican} no entran en lo que contrató` : ''}`}
+                >
+                  {pct}%
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+
+        {/* Totales por paso: dónde se traba TODO el mundo */}
+        <tfoot>
+          <tr>
+            <td
+              className="sticky left-0 bottom-0 z-30 bg-[#0E0E0E]"
+              style={{ padding: '0 14px', height: 46, borderTop: '2px solid rgba(232,150,46,0.14)' }}
+            >
+              <span className="text-sm font-bold uppercase tracking-widest text-gold">Cuántos lo tienen</span>
+            </td>
+            {pasos.map((step, idx) => {
+              const n = totalPorPaso.get(step.id) ?? 0;
+              const pct = clientes.length ? Math.round((n / clientes.length) * 100) : 0;
+              const isFirstOfSection = idx === 0 || pasos[idx - 1].sectionId !== step.sectionId;
+              return (
+                <td
+                  key={step.id}
+                  className="sticky bottom-0 z-20 bg-[#0E0E0E]"
+                  style={{
+                    height: 46,
+                    textAlign: 'center',
+                    borderTop: '2px solid rgba(232,150,46,0.14)',
+                    borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : '1px solid var(--matrix-cell-divider)',
+                  }}
+                  title={`${n} de ${clientes.length} clientes · ${step.title}`}
+                >
+                  <span
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: pct >= 70 ? 'var(--color-success)' : pct >= 30 ? 'var(--color-gold)' : 'var(--matrix-subtitle-text)',
+                    }}
+                  >
+                    {n}
+                  </span>
+                </td>
+              );
+            })}
+            <td
+              className="sticky right-0 bottom-0 z-30 bg-[#0E0E0E]"
+              style={{ height: 46, textAlign: 'center', borderTop: '2px solid rgba(232,150,46,0.14)', borderLeft: '2px solid var(--matrix-section-divider)' }}
+            >
+              <span className="text-sm font-bold text-cream/50">{clientes.length}</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    </div>
+  );
+}
