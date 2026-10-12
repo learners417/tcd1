@@ -14,9 +14,10 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import {
-  cuantosCerrados, loQueFalta, comoVaElMontaje, linksDe, candadoCerrado,
+  cuantosCerrados, cuantosAplican, loQueFalta, comoVaElMontaje, linksDe, candadoCerrado,
   DIAS_SIN_TOCAR, type Montaje,
 } from '../../lib/montajeCampana';
+import type { ObjetivoCampana } from '../../lib/campanasTypes';
 import { montajeDe } from '../../lib/montajeDatos';
 
 interface Props {
@@ -43,8 +44,14 @@ export default function MontajeDelCliente({ clienteId, nombre, anunciosListos = 
     );
   }
 
-  const listos = cuantosCerrados(montaje, anunciosListos);
-  const falta = loQueFalta(montaje, anunciosListos);
+  /** El mismo objetivo que monta el cliente: directo al video, sin palabra.
+   *  Con «8» escrito a mano acá, el equipo leía «6 de 8» mientras el cliente
+   *  leía «6 de 6 · listo para encender», y se le reclamaba una palabra clave
+   *  que su campaña no usa. */
+  const objetivo: ObjetivoCampana = 'clientes_potenciales';
+  const total = cuantosAplican(objetivo);
+  const listos = cuantosCerrados(montaje, objetivo, anunciosListos);
+  const falta = loQueFalta(montaje, objetivo, anunciosListos);
   const links = linksDe(montaje);
   const nada = listos === 0 && links.length === 0;
 
@@ -52,7 +59,7 @@ export default function MontajeDelCliente({ clienteId, nombre, anunciosListos = 
     <section className="rounded-2xl border border-gold/25 bg-espresso/40 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-[19px] font-bold text-cream">Su montaje</h3>
-        <span className="text-[16px] text-cream/55">{listos} de 8</span>
+        <span className="text-[16px] text-cream/55">{listos} de {total}</span>
       </div>
 
       {nada ? (
@@ -63,7 +70,7 @@ export default function MontajeDelCliente({ clienteId, nombre, anunciosListos = 
       ) : (
         <>
           <p className="mt-3 text-[18px] font-bold leading-snug text-cream">
-            {comoVaElMontaje(montaje, anunciosListos)}
+            {comoVaElMontaje(montaje, objetivo, anunciosListos)}
           </p>
 
           <div className="mt-3 h-1.5 rounded-full bg-cream/10 overflow-hidden">

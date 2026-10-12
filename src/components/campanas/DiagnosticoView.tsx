@@ -10,6 +10,7 @@ import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { primero } from '../../lib/primero';
 import { guardarDiagnostico } from '../../lib/numerosDatos';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 interface Props {
   perfil: Partial<ProfileV2>;
@@ -112,8 +113,9 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
     }
   }, [form, perfil]);
 
-  const handleCopiar = useCallback(() => {
-    navigator.clipboard.writeText(output);
+  const handleCopiar = useCallback(async () => {
+    const ok = await copiar(output);
+    if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
     setCopiado(true);
     toast.success('Diagnostico copiado.');
     setTimeout(() => setCopiado(false), 2000);

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Check, TrendingUp, Sparkles } from 'lucide-react';
+import { copiar as alPortapapeles } from '../../lib/copiar';
 import {
   type ElNumero, emptyNumero, calcPHR, agujeroAnual, gananciaAnual, gananciaMensual,
   getElNumero, saveElNumero, marcarNumeroEnElCamino,
@@ -94,7 +95,11 @@ export default function NumeroPanel({ userId }: Props) {
     `Sanar también es aprender a recibir. 🌱`;
 
   function copiar(id: string, texto: string) {
-    navigator.clipboard?.writeText(texto).then(() => {
+    // Antes: `navigator.clipboard?.writeText(...).then(...)`. Con el `?.`, si
+    // la API no existe la expresión es undefined y el `.then` reventaba —
+    // tocar el botón tiraba un error y no copiaba nada.
+    void alPortapapeles(texto).then((ok: boolean) => {
+      if (!ok) return;
       setCopiado(id);
       setTimeout(() => setCopiado(null), 1800);
     });

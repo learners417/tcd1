@@ -110,6 +110,23 @@ export default function EnMarcha({
     });
   }
 
+  // ── TE TOCA ACTIVAR ── cuando el Camino ya dejó todo escrito.
+  //
+  // El día 31 es el de encender, y el cliente llegaba a esa fecha con su ADN
+  // completo y sin que nada le dijera qué hacer con él. Esta fila aparece dos
+  // días antes y lo lleva a la pantalla que ordena los cuatro pasos.
+  if (dia >= 29 && !estado.campanaActiva) {
+    filas.push({
+      clave: 'activar',
+      icono: Megaphone,
+      titulo: 'Te toca activar',
+      detalle: 'Ya tienes todo escrito: tu método, tu oferta, tu página y tus anuncios.',
+      alDia: false,
+      pie: 'Cuatro pasos de montaje y enciendes',
+      ir: 'campanas',
+    });
+  }
+
   // ── Campaña ── desde el día 31, si está encendida
   if (dia >= 31 && estado.campanaActiva) {
     const c = estado.costoPorAgenda;

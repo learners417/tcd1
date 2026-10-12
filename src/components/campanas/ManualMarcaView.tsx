@@ -16,6 +16,7 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 import type { ProfileV2 } from '../../lib/supabase';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 interface Props {
   userId?: string;
@@ -433,8 +434,8 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
   const copyHex = useCallback(async () => {
     if (!valido) return;
     try {
-      await navigator.clipboard.writeText(hexLocal);
-      toast.success(`${hexLocal} copiado`);
+      const ok = await copiar(hexLocal);
+      toast[ok ? 'success' : 'error'](ok ? `${hexLocal} copiado` : NO_SE_PUDO_COPIAR);
     } catch {
       /* noop */
     }

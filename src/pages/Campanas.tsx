@@ -2,9 +2,10 @@
  * Campanas.tsx — Orquestador principal del modulo de campanas
  * Sub-nav horizontal + router de vistas
  */
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CampanasSubNav from '../components/campanas/CampanasSubNav';
+import AnunciosQueAgendan from '../components/campanas/AnunciosQueAgendan';
 import ConstructorAnuncios from '../components/campanas/ConstructorAnuncios';
 import CampanasHome from '../components/campanas/CampanasHome';
 import CopiesView from '../components/campanas/CopiesView';
@@ -20,8 +21,9 @@ import type { CampanasView, Campana, Creativo } from '../lib/campanasTypes';
 import LaActivacion from '../components/campanas/LaActivacion';
 import { montajeDe } from '../lib/montajeDatos';
 import { numerosDe } from '../lib/numerosDatos';
-import { CLAVE_ENCENDIDA, type Montaje } from '../lib/montajeCampana';
-import { diaDelPrograma } from '../lib/diaPrograma';
+import { diasEncendida as diasEncendidaDeLaCuenta, type Montaje } from '../lib/montajeCampana';
+import { dondeVa } from '../lib/diaPrograma';
+import { diaDeLaProximaJornada, jornadasCerradas } from '../lib/roadmapSeed';
 import type { ProfileV2 } from '../lib/supabase';
 
 interface CampanasProps {
@@ -40,6 +42,18 @@ export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps
    * que le dijera que había un paso 0, ni qué venía después, ni qué no tocar.
    * La activación contesta las tres cosas y desde ahí se va a lo que toque.
    */
+  /**
+   * DÓNDE VA DE VERDAD.
+   *
+   * El día del calendario queda para decir el ritmo. Lo que abre y lo que
+   * cierra sale del trabajo cerrado: quien está en la sesión del día 15 ve el
+   * día 15, aunque hayan pasado treinta y uno desde el alta.
+   */
+  const donde = useMemo(
+    () => dondeVa(perfil?.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas())),
+    [perfil?.fecha_inicio],
+  );
+
   const [view, setView] = useState<CampanasView>('activacion');
   const [previousView, setPreviousView] = useState<CampanasView>('home');
   const [campanas, setCampanas] = useState<Campana[]>([]);
@@ -77,14 +91,9 @@ export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps
         setVentas(semanas.reduce((t, s) => t + (s.ventas_cerradas ?? 0), 0));
       })
       .catch(() => { /* queda en null */ });
-    try {
-      const crudo = localStorage.getItem(CLAVE_ENCENDIDA);
-      const fecha = crudo ? (JSON.parse(crudo) as string | null) : null;
-      if (fecha) {
-        const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / 86400000);
-        setDiasEncendida(Math.max(0, dias));
-      }
-    } catch { /* sin fecha, se trata como no encendida */ }
+    // El cálculo vive en montajeCampana: la pantalla de Hoy lo necesita igual,
+    // y dos copias terminan contando distinto.
+    setDiasEncendida(diasEncendidaDeLaCuenta());
     return () => { vivo = false; };
   }, [userId]);
 
@@ -172,6 +181,16 @@ export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps
       <div ref={topRef} />
 
       {/* El header ceremonial (Lote 5 · la piel) */}
+      {/* «Anuncios que Agendan» reemplaza al Constructor. El Constructor hacía
+          una sola cosa —escribir— y el cliente llegaba sin saber qué separa un
+          anuncio que trae agendas de uno que trae curiosos: lo que salía era
+          correcto y olvidable, y la culpa parecía del generador. Acá primero
+          entiende las reglas con el ejemplo al lado, después elige el ángulo, y
+          recién entonces escribe. */}
+      {/* ESCRIBIR va antes que montar. El Constructor sigue siendo el que
+          aprueba y arma los campos de Meta; acá se decide QUÉ decir, que es lo
+          que antes nadie enseñaba y por eso lo que salía era olvidable. */}
+      {view === 'escribir' && <AnunciosQueAgendan clienteId={userId} perfil={perfil} />}
       {view === 'anuncios' && <ConstructorAnuncios clienteId={userId} />}
         {view === 'home' && (
         <div className="mb-6">
@@ -230,9 +249,10 @@ export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps
           ventas={ventas}
           onIrAlMontaje={() => setView('montaje')}
           /* El día decide si le toca montar o si todavía está escribiendo lo
-             que su campaña va a necesitar. Sin esto la pantalla le presentaba
-             el paso 1 del montaje como la tarea del día 1. */
-          diaDelPrograma={diaDelPrograma(perfil?.fecha_inicio)}
+             que su campaña va a necesitar. Y es el día DEL TRABAJO, no el del
+             calendario: quien se atrasó dos semanas leía «enciende tus
+             campañas» sin tener la página hecha ni los anuncios escritos. */
+          donde={donde}
           onIrAlCamino={() => { window.location.hash = ''; onIrAlCamino?.(); }}
         />
       )}

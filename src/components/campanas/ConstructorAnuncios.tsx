@@ -6,7 +6,7 @@
  * historia + 1 de resultado o método), genera los 3 guiones + la secuencia
  * de 3 stories con IA, y audita cada pieza contra los 8 ingredientes.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   FORMULAS_ANUNCIOS, FAMILIAS_TEST, NOMBRE_FAMILIA, FORMULA_STORIES,
   recomendarFormulas, formulasBloqueadas,
@@ -18,8 +18,17 @@ import { generateText } from '../../lib/aiProvider';
 import { primero } from '../../lib/primero';
 import { armarPaquete } from '../../lib/paqueteCampana';
 import { revisarPieza, type VeredictoCritico } from '../../lib/criticoPieza';
-import { guardarTrabajoDeCampanas } from '../../lib/tableroSync';
+import { guardarTrabajoDeCampanas, leerTrabajoDeCampanas } from '../../lib/tableroSync';
 import { VOC } from '../../lib/vocabulario';
+import BotonCopiar from '../BotonCopiar';
+import {
+  estadoDePieza, leerAprobadas, estaAprobada, aprobar, desaprobar,
+  COMO_FUNCIONA_LA_AUDITORIA,
+} from '../../lib/aprobacionAnuncio';
+import {
+  primerIntento, promptDeCampos, leerRespuesta, revisarCampos, paraPegar,
+  type CamposMeta,
+} from '../../lib/camposMeta';
 
 /* ── El brief: 7 insumos, autocompletados desde lo sellado ── */
 
@@ -105,6 +114,51 @@ export default function ConstructorAnuncios(
   } = {},
 ) {
   const [brief, setBrief] = useState<Brief>(() => briefDesdeADN());
+  /**
+   * RECUPERAR LO QUE YA PAGÓ, DE LA BASE.
+   *
+   * El Constructor guardaba el brief y las piezas en Supabase —
+   * `guardarTrabajoDeCampanas` corre en los dos lugares — y rehidrataba SOLO
+   * de localStorage. `leerTrabajoDeCampanas` existía, con su consulta escrita,
+   * y nadie la llamaba.
+   *
+   * O sea: el cliente cambiaba de teléfono, limpiaba la caché o entraba en
+   * modo incógnito, y perdía anuncios que había pagado con créditos — estando
+   * guardados en la base. Y volvía a gastar créditos para rehacerlos.
+   *
+   * Lo local sigue siendo el arranque, porque es instantáneo. Esto llega
+   * después y solo rellena lo que falta: si lo de la base pisara lo local,
+   * alguien que acaba de escribir algo lo vería desaparecer.
+   */
+  useEffect(() => {
+    if (!clienteId) return;
+    let vivo = true;
+    void (async () => {
+      const [b, a] = await Promise.all([
+        leerTrabajoDeCampanas(clienteId, 'brief'),
+        leerTrabajoDeCampanas(clienteId, 'anuncios'),
+      ]);
+      if (!vivo) return;
+      if (b && typeof b === 'object') {
+        setBrief((actual) => {
+          const guardado = b as Partial<Brief>;
+          const mezcla = { ...actual };
+          for (const k of Object.keys(mezcla) as Array<keyof Brief>) {
+            // Solo lo que está vacío acá: lo que el cliente tiene escrito
+            // ahora mismo gana siempre.
+            if (!mezcla[k]?.trim() && guardado[k]?.trim()) mezcla[k] = guardado[k]!;
+          }
+          return mezcla;
+        });
+      }
+      if (a && typeof a === 'object') {
+        const guardadas = a as Record<number, Pieza>;
+        setPiezas((actual) => (Object.keys(actual).length > 0 ? actual : guardadas));
+      }
+    })();
+    return () => { vivo = false; };
+  }, [clienteId]);
+
   /** Lo que la app sabe del sanador, leído de su brief. */
   const senales: SenalesSanador = useMemo(() => ({
     tienePrueba: !!brief.prueba.trim(),
@@ -125,6 +179,12 @@ export default function ConstructorAnuncios(
   /** El veredicto del crítico por pieza. Se pide a demanda, no al generar. */
   const [revision, setRevision] = useState<Record<number, VeredictoCritico>>({});
   const [revisando, setRevisando] = useState<number | null>(null);
+  /** Las piezas que el cliente aprobó a mano, por huella del texto: si edita el
+   *  anuncio, la aprobación se cae sola y se la vuelvo a pedir. */
+  const [aprobadas, setAprobadas] = useState<Record<string, string>>(() => leerAprobadas());
+  /** El titular y la descripción de cada pieza, por id de fórmula. */
+  const [campos, setCampos] = useState<Record<number, CamposMeta>>({});
+  const [armandoCampos, setArmandoCampos] = useState<number | null>(null);
 
   const revisar = async (id: number, texto: string) => {
     setRevisando(id);
@@ -133,6 +193,42 @@ export default function ConstructorAnuncios(
       setRevision((p) => ({ ...p, [id]: v }));
     } finally {
       setRevisando(null);
+    }
+  };
+
+  /**
+   * EL TITULAR Y LA DESCRIPCIÓN QUE META PIDE.
+   *
+   * Meta no pide «el anuncio»: pide tres campos. La app escribía el cuerpo y
+   * el cliente llegaba al administrador con dos campos vacíos delante, así que
+   * escribía cualquier cosa ahí mismo — y eso es lo que lee quien duda si
+   * tocar. El primer intento sale del gancho sin gastar una llamada; el botón
+   * está para cuando ese intento no alcanza.
+   */
+  const pedirCampos = async (id: number, texto: string) => {
+    setArmandoCampos(id);
+    try {
+      const crudo = await generateText({
+        feature: 'campana_chat', tarea: 'guion',
+        prompt: promptDeCampos({
+          textoDelAnuncio: texto, oferta: brief.oferta, aQuien: brief.avatar,
+        }),
+      });
+      const leido = leerRespuesta(crudo);
+      if (!leido) {
+        // Sin esto el botón quedaba girando y después no pasaba nada: el
+        // cliente no sabía si tenía que volver a tocarlo.
+        setFallo('No pude escribir el titular. Vuelve a tocar el botón.');
+        return;
+      }
+      setCampos((c) => ({
+        ...c,
+        [id]: { ...primerIntento(texto, brief.oferta), ...leido },
+      }));
+    } catch {
+      setFallo('No pude escribir el titular. Vuelve a tocar el botón.');
+    } finally {
+      setArmandoCampos(null);
     }
   };
 
@@ -442,6 +538,23 @@ CAPTION: …`;
       </button>
       {fallo && <p className="text-sm text-danger">{fallo}</p>}
 
+      {/* CÓMO FUNCIONA LA AUDITORÍA — solo cuando ya hay algo que auditar.
+          Antes no se explicaba en ninguna parte quién aprobaba qué, así que el
+          cliente leía «todavía no está lista» y suponía que lo miraba alguien. */}
+      {FAMILIAS.some((f) => piezas[elegidas[f]]?.texto) && (
+        <div className="card-panel p-5">
+          <p className="text-sm font-bold text-cream mb-3">Cómo se aprueba un anuncio</p>
+          <div className="space-y-3">
+            {COMO_FUNCIONA_LA_AUDITORIA.map((x) => (
+              <div key={x.titulo}>
+                <p className="text-sm font-bold text-gold/80">{x.titulo}</p>
+                <p className="text-sm text-cream/70 leading-relaxed">{x.texto}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* LAS PIEZAS */}
       {FAMILIAS.map((fam) => {
         const pieza = piezas[elegidas[fam]];
@@ -455,24 +568,25 @@ CAPTION: …`;
         /** El guion ya viene marcado "PANTALLA N:" — esto solo lo lee. */
         const carrusel = armarCarrusel(pieza.texto, brief.palabra);
         const bloqueantes = politicas.filter((a) => a.gravedad === 'bloquea');
-        const listaParaPublicar =
-          audit.aprobada && bloqueantes.length === 0 && (rev?.alertasMeta?.length ?? 0) === 0;
+        /** El veredicto vive en `aprobacionAnuncio.ts`, no acá: antes esta
+         *  cuenta estaba escrita en el JSX y por eso nadie vio que la única
+         *  salida era volver a escribir el anuncio. */
+        const estado = estadoDePieza({
+          audit,
+          bloqueantes: bloqueantes.length,
+          alertasMeta: rev?.alertasMeta?.length ?? 0,
+          aprobadaAMano: estaAprobada(aprobadas, pieza.formulaId, pieza.texto),
+        });
+        const listaParaPublicar = estado.sePuedePublicar;
         return (
           <div key={fam} className="card-panel p-5">
             <div className="flex items-start justify-between gap-3 mb-2">
               <p className="text-sm font-bold text-cream">{f.id} · {f.nombre}</p>
-              <button
-                onClick={() => void navigator.clipboard?.writeText(pieza.texto)}
+              <BotonCopiar
+                texto={pieza.texto}
                 disabled={!listaParaPublicar}
-                title={
-                  listaParaPublicar ? ''
-                  : bloqueantes.length > 0
-                    ? `No se puede publicar así: ${bloqueantes[0].que}`
-                    : 'Todavía le falta algo. Revísala antes de publicarla.'
-                }
-                className="text-sm font-bold text-gold hover:text-goldhi shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
-                Copiar ⧉
-              </button>
+                title={listaParaPublicar ? '' : estado.queSigue}
+                className="min-h-[44px] px-3 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0 disabled:opacity-30 disabled:cursor-not-allowed" />
             </div>
             {carrusel.problema ? (
               <>
@@ -492,10 +606,7 @@ CAPTION: …`;
                         {l.tipo === 'portada' ? 'Portada' : l.tipo === 'cierre' ? 'Cierre' : `Lámina ${l.n}`}
                         {l.larga && <span className="text-gold ml-2">· muy larga para el teléfono</span>}
                       </span>
-                      <button onClick={() => void navigator.clipboard?.writeText(l.texto)}
-                        className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
-                        Copiar
-                      </button>
+                      <BotonCopiar texto={l.texto} className="min-h-[44px] px-2 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0" />
                     </div>
                     <p className="text-sm text-cream/85 whitespace-pre-wrap leading-relaxed">{l.texto}</p>
                   </div>
@@ -507,10 +618,7 @@ CAPTION: …`;
                       <span className="text-xs uppercase tracking-[0.2em] text-cream/45">
                         Texto del post
                       </span>
-                      <button onClick={() => void navigator.clipboard?.writeText(carrusel.caption)}
-                        className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
-                        Copiar
-                      </button>
+                      <BotonCopiar texto={carrusel.caption} className="min-h-[44px] px-2 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0" />
                     </div>
                     <p className="text-sm text-cream/85 whitespace-pre-wrap leading-relaxed">{carrusel.caption}</p>
                   </div>
@@ -559,21 +667,47 @@ CAPTION: …`;
             )}
 
             <div className={`mt-3 rounded-xl border p-3 ${
-              listaParaPublicar ? 'border-success/25 bg-success/[0.05]' : 'border-gold/30 bg-gold/[0.05]'}`}>
+              estado.veredicto === 'bloqueada' ? 'border-danger/45 bg-danger/[0.07]'
+              : listaParaPublicar ? 'border-success/25 bg-success/[0.05]'
+              : 'border-gold/30 bg-gold/[0.05]'}`}>
               <p className="text-sm font-bold uppercase tracking-wider mb-1 text-cream/70">
-                {listaParaPublicar ? 'Lista para publicar' : 'Todavía no está lista'}
+                {estado.titulo}
               </p>
-              <p className="text-sm text-cream/70">{audit.nota}</p>
-              {!audit.aprobada && (
+              {/* Lo que sigue, SIEMPRE. El cartel viejo decía «todavía no está
+                  lista» y ahí terminaba: el cliente quedaba mirando una pieza
+                  escrita sin saber qué se esperaba de él. */}
+              <p className="text-sm text-cream/80">{estado.queSigue}</p>
+              <p className="text-sm text-cream/60 mt-1">{audit.nota}</p>
+              {audit.faltantes.length > 0 && (
                 <p className="text-sm text-cream/60 mt-1">Le falta: {audit.faltantes.join(' · ')}</p>
               )}
 
-              {/* La segunda revisión: otro modelo, y escribe lo que falta */}
-              {!audit.aprobada && !rev && (
+              {/* SALIDA 1 · Que se lo escriba: otro modelo, y escribe lo que falta */}
+              {audit.faltantes.length > 0 && !rev && (
                 <button onClick={() => void revisar(pieza.formulaId, pieza.texto)}
                   disabled={revisando === pieza.formulaId}
-                  className="mt-3 w-full py-2 rounded-lg border border-gold/40 text-gold text-sm font-bold disabled:opacity-50">
+                  className="mt-3 w-full min-h-[44px] rounded-lg border border-gold/40 text-gold text-sm font-bold disabled:opacity-50">
                   {revisando === pieza.formulaId ? 'Revisando…' : 'Que la revise y escriba lo que falta'}
+                </button>
+              )}
+
+              {/* SALIDA 2 · La que no existía. Los ocho ingredientes se detectan
+                  por las palabras con que SUELEN escribirse: quien escribió su
+                  analogía con otras palabras quedaba trabado para siempre, y el
+                  botón de copiar deshabilitado. El que decide es el que escribe. */}
+              {estado.puedeAprobarAMano && (
+                <button
+                  onClick={() => setAprobadas((a) => aprobar(a, pieza.formulaId, pieza.texto))}
+                  className="mt-2 w-full min-h-[44px] rounded-lg border border-success/40 text-success text-sm font-bold">
+                  Ya está como la quiero · aprobarla igual
+                </button>
+              )}
+
+              {estado.veredicto === 'aprobada_a_mano' && (
+                <button
+                  onClick={() => setAprobadas((a) => desaprobar(a, pieza.formulaId))}
+                  className="mt-2 min-h-[44px] text-sm font-bold text-cream/55">
+                  Deshacer mi aprobación
                 </button>
               )}
 
@@ -620,6 +754,59 @@ CAPTION: …`;
                 </p>
               )}
             </div>
+
+            {/* LOS TRES CAMPOS QUE META PIDE ────────────────────────────────
+                Solo cuando la pieza ya se puede publicar: antes de eso el
+                titular sale de un anuncio que todavía va a cambiar. */}
+            {listaParaPublicar && (() => {
+              const c = campos[pieza.formulaId] ?? primerIntento(pieza.texto, brief.oferta);
+              const revisados = revisarCampos(c);
+              return (
+                <div className="mt-3 rounded-xl border border-cream/12 p-3">
+                  <div className="flex items-baseline justify-between gap-2 mb-1">
+                    <p className="text-sm font-bold uppercase tracking-wider text-cream/70">
+                      Para pegar en Meta
+                    </p>
+                    <BotonCopiar texto={paraPegar(c)}
+                      className="min-h-[44px] px-2 inline-flex items-center gap-1.5 text-sm font-bold text-gold shrink-0" />
+                  </div>
+                  <p className="text-sm text-cream/55 leading-relaxed mb-3">
+                    Meta pide tres campos, no uno. En el reel el titular y la descripción
+                    casi no se ven, pero el mismo anuncio aparece en Feed y en Explorar,
+                    donde sí. Lo que decide en el reel son tus tres primeros segundos.
+                  </p>
+
+                  <div className="space-y-2.5">
+                    {revisados.map((x) => (
+                      <div key={x.id}>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-xs uppercase tracking-wider text-gold/70">
+                            {x.etiqueta}
+                          </span>
+                          <BotonCopiar texto={x.valor}
+                            className="min-h-[44px] px-2 inline-flex items-center gap-1.5 text-sm font-bold text-gold shrink-0" />
+                        </div>
+                        <p className="text-sm text-cream/85 whitespace-pre-wrap leading-relaxed">
+                          {x.valor || '—'}
+                        </p>
+                        {x.aviso && <p className="text-sm text-gold mt-0.5">{x.aviso}</p>}
+                        <p className="text-sm text-cream/45 mt-0.5 leading-relaxed">{x.dondeSeVe}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button onClick={() => void pedirCampos(pieza.formulaId, pieza.texto)}
+                    disabled={armandoCampos === pieza.formulaId}
+                    className="mt-3 w-full min-h-[44px] rounded-lg border border-gold/40 text-gold text-sm font-bold disabled:opacity-50">
+                    {armandoCampos === pieza.formulaId
+                      ? 'Escribiendo…'
+                      : campos[pieza.formulaId]
+                        ? 'Escribir otro titular'
+                        : 'Que escriba el titular y la descripción'}
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         );
       })}
@@ -628,8 +815,7 @@ CAPTION: …`;
         <div className="card-panel p-5">
           <div className="flex items-start justify-between gap-3 mb-2">
             <p className="text-sm font-bold text-cream">12 · La secuencia de 3 stories — acompaña siempre</p>
-            <button onClick={() => void navigator.clipboard?.writeText(stories)}
-              className="text-sm font-bold text-gold hover:text-goldhi shrink-0">Copiar ↗</button>
+            <BotonCopiar texto={stories} className="min-h-[44px] px-3 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0" />
           </div>
           <pre className="whitespace-pre-wrap text-sm text-cream/85 font-[inherit] leading-relaxed">{stories}</pre>
           <p className="text-sm text-cream/45 mt-2">Se publican el mismo día, con horas de diferencia. Repetible 2-3 veces por semana con distinto ángulo.</p>
@@ -656,10 +842,8 @@ CAPTION: …`;
               </p>
             </div>
             {paquete.textoCompleto && (
-              <button onClick={() => void navigator.clipboard?.writeText(paquete.textoCompleto)}
-                className="text-sm font-bold text-gold hover:text-goldhi shrink-0">
-                Copiar todo
-              </button>
+              <BotonCopiar texto={paquete.textoCompleto} etiqueta="Copiar todo"
+                className="min-h-[44px] px-3 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0" />
             )}
           </div>
 
@@ -692,10 +876,8 @@ CAPTION: …`;
                     {!x.obligatoria && <span className="text-xs text-cream/35 ml-2">opcional</span>}
                   </span>
                   {x.contenido && (
-                    <button onClick={() => void navigator.clipboard?.writeText(x.contenido)}
-                      className="text-xs font-bold text-gold hover:text-goldhi shrink-0">
-                      Copiar
-                    </button>
+                    <BotonCopiar texto={x.contenido}
+                      className="min-h-[44px] px-2 inline-flex items-center gap-1.5 text-[17px] font-bold text-gold shrink-0" />
                   )}
                 </div>
                 {x.aviso && <p className="text-sm text-danger/85 mt-1">{x.aviso}</p>}

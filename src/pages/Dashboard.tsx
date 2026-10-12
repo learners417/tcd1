@@ -22,6 +22,9 @@ import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import { VOC } from '../lib/vocabulario';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
+import { yaEncendio } from '../lib/montajeCampana';
+import { montajeDe } from '../lib/montajeDatos';
+import TableroDeLaSemana from '../components/TableroDeLaSemana';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import CintaCinturon from '../components/CintaCinturon';
 import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
@@ -65,6 +68,22 @@ interface ProximoHito {
 }
 
 export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurrentPage: (page: string) => void, userId?: string, perfil?: Partial<Profile> }) {
+  /**
+   * Los países del montaje, para que el tablero juzgue el costo contra SU
+   * banda. Sin ellos la cadena cae en la referencia de México, y el techo
+   * argentino está por debajo del piso español: el diagnóstico se equivoca en
+   * las dos direcciones y en silencio.
+   */
+  const [paisesDelCliente, setPaisesDelCliente] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    if (!userId || !yaEncendio()) return;
+    let vivo = true;
+    void montajeDe(userId)
+      .then((m) => { if (vivo && m.paises?.length) setPaisesDelCliente(m.paises); })
+      .catch(() => { /* sin países, la cadena no opina del costo */ });
+    return () => { vivo = false; };
+  }, [userId]);
+
   // El Diario se abre al terminar Sanar el Dinero (cinturón 2) — igual que en el menú.
   const diarioAbierto = React.useMemo(() => {
     try {
@@ -332,6 +351,17 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const cerrado = soporteCerrado();
         return cerrado ? <SinSoporteEstosDias ventana={cerrado} /> : null;
       })()}
+
+      {/* ═══ EL CAMBIO DE ETAPA ═══
+          El día que enciende sus campañas, el cliente deja de construir y
+          empieza a sostener. Hasta ahora la app no se enteraba: seguía
+          abriendo con la sesión del día, igual que el día 3.
+          Desde que enciende, lo primero que ve son sus seis números y dónde se
+          corta su semana. La sesión del día sigue abajo: no desaparece, deja
+          de ser lo primero. */}
+      {yaEncendio() && (
+        <TableroDeLaSemana clienteId={userId} paises={paisesDelCliente} />
+      )}
 
       {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
       {(() => {

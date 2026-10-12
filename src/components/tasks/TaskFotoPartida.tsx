@@ -106,7 +106,7 @@ export default function TaskFotoPartida({
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="text-sm font-mono text-gold uppercase tracking-widest font-bold">
             <Camera className="w-3 h-3 inline mr-1" />
-            {meta.codigo} · Foto de Partida
+            Foto de Partida
           </span>
           {saved && (
             <span className="text-sm text-success uppercase tracking-widest font-bold flex items-center gap-1">

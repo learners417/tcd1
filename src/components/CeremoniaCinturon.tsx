@@ -16,6 +16,7 @@ import { X, Check } from 'lucide-react';
 import { cinturonDesdeProgreso, type Cinturon } from '../lib/cinturones';
 import CintaCinturon from './CintaCinturon';
 import { VOC } from '../lib/vocabulario';
+import { copiar } from '../lib/copiar';
 
 export const KEY_ULTIMO = 'tcd_ultimo_cinturon_visto';
 
@@ -86,7 +87,11 @@ export default function CeremoniaCinturon() {
   };
   const compartir = () => {
     const texto = `Acabo de ganar mi Cinturón ${cinturon.nombre} en Tu Clínica Digital: ${cinturon.metafora}. Cada grado se gana con evidencia.`;
-    try { void navigator.clipboard.writeText(texto); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { /* noop */ }
+    void copiar(texto).then((ok) => {
+      if (!ok) return;
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
   };
   const carta = CARTAS[cinturon.id];
   const ganado = GANADO_CON[cinturon.id];

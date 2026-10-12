@@ -223,7 +223,7 @@ export default function TableroCupos(
   }> = [
     { k: 'gasto', titulo: '¿Cuánto gastó cada anuncio?', ayuda: 'En dólares, esta semana.',
       donde: 'Columna «Importe gastado» del administrador de anuncios.' },
-    { k: 'visitas', titulo: '¿Cuánta gente los vio?', ayuda: 'Personas alcanzadas.',
+    { k: 'visitas', titulo: '¿Cuántas personas los vieron?', ayuda: 'Personas alcanzadas.',
       donde: 'Columna «Alcance».' },
     { k: 'conversaciones', titulo: '¿Cuántas conversaciones se abrieron?', ayuda: 'Comentarios con tu palabra o mensajes nuevos.',
       donde: 'Los cuentas tú, o la columna de mensajes iniciados.' },

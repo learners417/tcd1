@@ -37,7 +37,8 @@ import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
 import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
-import { diaDelPrograma } from './lib/diaPrograma';
+import { diaDelPrograma, dondeVa } from './lib/diaPrograma';
+import { diaDeLaProximaJornada, jornadasCerradas } from './lib/roadmapSeed';
 import Entrenadores from './pages/Entrenadores';
 import { MessageSquare } from 'lucide-react';
 import { setFamiliaActual } from './lib/vocabulario';
@@ -626,7 +627,9 @@ export default function App() {
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
-        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMore={() => setMobileMenuOpen(true)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
+          donde={dondeVa(supabaseProfile?.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas()))}
+          onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
           <div className="p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
             <CeremoniaCinturon />

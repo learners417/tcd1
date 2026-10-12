@@ -6,6 +6,7 @@ import { buildCopyPrompt } from '../../lib/campanasPrompts';
 import { ANGULO_LABELS, TIPO_LABELS } from '../../lib/campanasTypes';
 import type { AnguloCreativo, TipoCreativo, CopyGenerado, ObjetivoCampana } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 interface Props {
   perfil: Partial<ProfileV2>;
@@ -59,9 +60,13 @@ export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Pro
   const handleCopyCopy = (idx: number) => {
     const c = copies[idx];
     const text = `TEXTO PRINCIPAL:\n${c.texto_principal}\n\nTITULO:\n${c.titulo}\n\nDESCRIPCION:\n${c.descripcion}\n\nCTA:\n${c.cta_texto}`;
-    navigator.clipboard.writeText(text);
-    setCopiedIdx(idx);
-    setTimeout(() => setCopiedIdx(null), 2000);
+    // Se espera el resultado antes de decir «Copiado»: sin esto, el botón
+    // afirmaba haber copiado aunque el navegador lo hubiera bloqueado.
+    void copiar(text).then((ok) => {
+      if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
   };
 
   return (

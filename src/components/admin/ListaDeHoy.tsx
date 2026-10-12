@@ -155,6 +155,12 @@ export default function ListaDeHoy({
               <Tarjeta
                 key={t.id ?? t.titulo}
                 t={t}
+                /* EL NOMBRE DE QUIÉN ES. Antes la tarjeta lo sacaba de partir
+                   el título por un guion largo: si el título no traía guion
+                   —y muchos no lo traen— mostraba la tarea entera y el cliente
+                   no aparecía en ninguna parte, con su id ahí al lado. */
+                nombreCliente={
+                  clientes.find((c) => c.id === t.clienteId)?.nombre ?? ''}
                 ocupado={trabajando === t.id}
                 onMandar={() => void mandar(t)}
                 onHecha={() => void marcarHecha(t)}
@@ -185,9 +191,11 @@ export default function ListaDeHoy({
  * detrás de los tres puntos.
  */
 function Tarjeta({
-  t, ocupado, onMandar, onHecha, onAbrir,
+  t, nombreCliente, ocupado, onMandar, onHecha, onAbrir,
 }: {
   t: TareaOrdenada;
+  /** De quién es esta tarea. Vacío solo si la tarea no es de un cliente. */
+  nombreCliente: string;
   ocupado: boolean;
   onMandar: () => void;
   onHecha: () => void;
@@ -212,6 +220,22 @@ function Tarjeta({
     ...(apertura && onAbrir && t.destino === 'mensaje'
       ? [{ id: 'abrir', label: ETIQUETA_DESTINO[t.destino], onClick: () => onAbrir(apertura) }]
       : []),
+    /* ESCRIBIRLE, SIEMPRE QUE SEA DE UN CLIENTE.
+       Antes solo se podía mandar un mensaje si la tarea ERA de tipo mensaje y
+       traía su texto escrito. En las otras —revisar un anuncio, mirar sus
+       números, un pendiente vencido— no había ninguna forma de contactarlo
+       desde la lista: había que acordarse del nombre, salir a Clientes,
+       buscarlo y abrirle el chat. Cuatro pasos por cada empujón, veinte veces
+       al día. */
+    ...(t.clienteId && onAbrir
+      ? [{
+        id: 'escribirle',
+        label: 'Escribirle',
+        onClick: () => onAbrir({
+          tab: 'mensajes', clienteId: t.clienteId!, seccion: 'conversacion',
+        }),
+      }]
+      : []),
     { id: 'hecha', label: 'Marcarla hecha', onClick: onHecha },
   ];
 
@@ -220,7 +244,9 @@ function Tarjeta({
 
   return (
     <TarjetaCliente
-      nombre={t.titulo.split('—')[0].trim()}
+      /* El nombre que llega; el título partido queda como respaldo para las
+         tareas que no son de un cliente (las del equipo, las del dev). */
+      nombre={nombreCliente || t.titulo.split('—')[0].trim()}
       estado={t.porQueAca}
       semaforo={semaforo}
       numero={numeros ? numeros[1] : (t.vencida ? '!' : '·')}

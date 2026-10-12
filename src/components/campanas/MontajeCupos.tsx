@@ -24,12 +24,14 @@ import { frenoDe } from '../../lib/frenos';
 import Freno from '../Freno';
 import NumerosDeLaSemana from '../admin/NumerosDeLaSemana';
 import {
-  candadoCerrado, cuantosCerrados, comoUrl, DIAS_SIN_TOCAR,
+  candadoCerrado, comoUrl, DIAS_SIN_TOCAR, CLAVE_ENCENDIDA,
   type Montaje, type IdCandado,
 } from '../../lib/montajeCampana';
 import { montajeDe, guardarMontaje } from '../../lib/montajeDatos';
+import { candadosQueAplican } from '../../lib/activacion';
+import type { ObjetivoCampana } from '../../lib/campanasTypes';
 
-const KEY_ON = 'tcd_campana_encendida_v1';
+const KEY_ON = CLAVE_ENCENDIDA;
 /** Historial de encendidos. El tope no es capricho: el metodo pide UNA
  *  campana medida 14 dias, no diez a la vez. Tres da margen para pivotear
  *  dos veces sin que el cliente se escape de medir. */
@@ -192,8 +194,27 @@ export default function MontajeCupos(
   const verificado = (id: IdCandado): boolean =>
     id === 'anuncios' ? estadoPiezas.listas : candadoCerrado(montaje, id);
 
-  const listos = cuantosCerrados(montaje, estadoPiezas.listas);
-  const todo = listos === CANDADOS.length;
+  /**
+   * LOS CANDADOS QUE APLICAN A ESTA CAMPAÑA, NO LOS OCHO SIEMPRE.
+   *
+   * Esta pantalla pedía los ocho a todo el mundo, y dos de ellos —la palabra
+   * clave y el DM probado— son del motor de comentarios: alguien comenta la
+   * palabra, le llega un mensaje, el mensaje lo manda a la página.
+   *
+   * La campaña que se monta acá va DIRECTO al video, sin palabra. Con los ocho
+   * obligatorios le faltaban para siempre dos candados que piden configurar
+   * algo que no usa: el botón decía «Faltan 2 candados para encender» y no
+   * había forma de cerrarlos. Eso es lo que no se podía tildar.
+   *
+   * La cuenta por objetivo ya estaba escrita y probada en `activacion.ts`
+   * desde el 9 de octubre. Lo único que faltaba era usarla acá.
+   */
+  const objetivo: ObjetivoCampana = 'clientes_potenciales';
+  const aplican = candadosQueAplican(objetivo);
+  const visibles = CANDADOS.filter((c) => aplican.includes(c.id));
+  const listos = visibles.filter((c) => verificado(c.id)).length;
+  const todo = listos === visibles.length;
+  const faltan = visibles.length - listos;
 
   const encender = () => {
     if (!todo || restantes <= 0) return;
@@ -201,8 +222,19 @@ export default function MontajeCupos(
     setConfirmando(true);
   };
 
+  /**
+   * La ceremonia del cambio de etapa.
+   *
+   * Encender es el momento más importante del programa: el cliente deja de
+   * construir y empieza a sostener. Pasaba sin que nada lo marcara —misma
+   * pantalla, mismo menú, misma sesión del día— y la transición no se sentía.
+   * Esto sale una sola vez, cuando pasa.
+   */
+  const [ceremonia, setCeremonia] = useState(false);
+
   const encenderDeVerdad = () => {
     setConfirmando(false);
+    setCeremonia(true);
     const fecha = new Date().toISOString();
     const hist = [...historial, fecha];
     setEncendida(fecha);
@@ -219,6 +251,39 @@ export default function MontajeCupos(
       .then(() => setSinAvisar(false))
       .catch(() => setSinAvisar(true));
   };
+
+  const PanelDeCeremonia = () => (
+    <div className="fixed inset-0 z-50 grid place-items-center p-5"
+      style={{ background: 'rgba(0,0,0,0.72)' }} role="dialog" aria-modal="true"
+      aria-label="Tu campaña está corriendo">
+      <div className="card-panel p-6 sm:p-7 max-w-lg w-full border border-gold/50">
+        <p className="text-[15px] font-bold uppercase tracking-[0.2em] text-gold">
+          Cambia tu etapa
+        </p>
+        <h2 className="mt-2 text-cream"
+          style={{ fontFamily: 'var(--font-display)', fontSize: 30, lineHeight: 1.15, fontWeight: 500 }}>
+          Tu campaña está corriendo.
+        </h2>
+        <div className="h-px w-14 bg-gold my-4" />
+        <p className="text-[18px] leading-relaxed text-cream/85">
+          Hasta hoy construiste. Desde hoy sostienes: tu pantalla de Hoy abre
+          con tus seis números de la semana y con dónde se corta tu embudo.
+        </p>
+        <p className="mt-3 text-[18px] leading-relaxed text-cream/85">
+          Tus sesiones del Camino siguen ahí, debajo. Lo que cambia es qué
+          miras primero.
+        </p>
+        <p className="mt-4 text-[17px] leading-relaxed text-cream/65">
+          Los próximos catorce días no se toca nada. Tu campaña está aprendiendo
+          a quién mostrarse, y cada cambio la hace empezar de cero.
+        </p>
+        <button type="button" onClick={() => setCeremonia(false)}
+          className="mt-6 w-full min-h-[48px] btn-primary rounded-xl text-[17px] font-bold">
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
 
   /** Cerrar la campana viva. Antes de los 14 dias no se puede: es la regla
    *  que protege el metodo, no un capricho de la app. */
@@ -240,6 +305,8 @@ export default function MontajeCupos(
   if (encendida) {
     const dias = Math.max(1, Math.floor((Date.now() - new Date(encendida).getTime()) / 86400000) + 1);
     return (
+      <>
+      {ceremonia && <PanelDeCeremonia />}
       <div className="card-panel p-6 text-center space-y-3">
         <p className="text-4xl">🔴</p>
         <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Campaña viva — día {Math.min(dias, 99)}</p>
@@ -286,6 +353,7 @@ export default function MontajeCupos(
           </p>
         )}
       </div>
+      </>
     );
   }
 
@@ -302,7 +370,7 @@ export default function MontajeCupos(
     <div className="space-y-4">
       <div>
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">El montaje</p>
-        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus 8 candados — {listos} de 8</h2>
+        <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Tus {visibles.length} candados — {listos} de {visibles.length}</h2>
         <p className="text-sm text-gold mt-1">Campaña {Math.min(historial.length + 1, TOPE_CAMPANAS)} de {TOPE_CAMPANAS}</p>
         <p className="text-sm text-cream/60 mt-1">
           Cada candado se cierra cuando cargas lo que lo prueba. Nada se enciende
@@ -310,7 +378,7 @@ export default function MontajeCupos(
         </p>
       </div>
       <div className="space-y-2">
-        {CANDADOS.map((c, i) => (
+        {visibles.map((c, i) => (
           <div key={c.id}
             onClick={() => { if (c.id === 'dm' || c.id === 'trabajo') toggle(c.id); }}
             role={c.id === 'dm' || c.id === 'trabajo' ? 'button' : undefined}
@@ -457,7 +525,9 @@ export default function MontajeCupos(
         className="w-full btn-primary py-4 rounded-xl text-sm font-bold disabled:opacity-40">
         {restantes <= 0
           ? 'Usaste tus 3 campañas — habla con Soporte'
-          : todo ? '🚀 ENCENDER — y anotar la fecha' : `Faltan ${8 - listos} candados para encender`}
+          : todo ? '🚀 ENCENDER — y anotar la fecha'
+          : faltan === 1 ? 'Falta 1 candado para encender'
+          : `Faltan ${faltan} candados para encender`}
       </button>
     </div>
     </>

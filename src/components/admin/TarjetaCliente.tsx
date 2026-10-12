@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MoreHorizontal, Send, Copy, Check } from 'lucide-react';
+import { copiar } from '../../lib/copiar';
 
 /**
  * LA TARJETA DE CLIENTE.
@@ -125,9 +126,11 @@ export default function TarjetaCliente({
           {mensajeListo && (
             <button
               onClick={() => {
-                void navigator.clipboard?.writeText(mensajeListo);
-                setCopiado(true);
-                setTimeout(() => setCopiado(false), 1800);
+                void copiar(mensajeListo).then((ok) => {
+                  if (!ok) return;
+                  setCopiado(true);
+                  setTimeout(() => setCopiado(false), 1800);
+                });
               }}
               className="rounded-xl border border-cream/15 px-3 py-2.5 text-sm text-cream/70">
               {copiado ? <Check size={13} /> : <Copy size={13} />}

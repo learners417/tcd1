@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SECTIONS, STEPS, TOTAL_STEPS, RESPONSABLE_SIGLA, RESPONSABLE_LABEL } from '../../../lib/preactivacionSteps';
-import { type ExtrasByCliente, type EstadoCelda, extraDe, SIGUIENTE_ESTADO, ESTADO_LABEL } from '../../../lib/matrizExtras';
+import { type ExtrasByCliente, type EstadoCelda, extraDe, siguienteEstado, ESTADO_LABEL } from '../../../lib/matrizExtras';
 import {
   type ChecksByCliente,
   isChecked,
@@ -76,7 +76,6 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
   };
   const [orden, setOrden] = useState<Orden>('atrasados');
   const scroller = useRef<HTMLDivElement | null>(null);
-  const arrastre = useRef<{ x: number; left: number } | null>(null);
 
   /** Solo las columnas de la sección elegida — de 32 a las justas. */
   const pasos = useMemo(
@@ -172,23 +171,75 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
         </div>
       </div>
 
-      <p className="text-sm text-cream/40">
-        {seccion === 'todas' ? `Arrastra la tabla con el mouse, usa la barra de abajo o Shift + rueda para moverte entre las ${TOTAL_STEPS} columnas.` : `Viendo solo ${SECTIONS.find((x) => x.id === seccion)?.title ?? ''}.`}
-        {' '}Toca una celda para pasar de Pendiente → En proceso (•) → Listo (✓) → No aplica (–). El tilde dorado es automático: ya lo hizo en su Camino. Con ＋ pegas link y nota; con 🔗 clic derecho lo abres. La sigla dice quién lo hace: C cliente · A agencia · C+A ambos.</p>
+      {/* LA REFERENCIA DE COLORES, no un manual de cómo deslizar.
+          Acá había un párrafo de letra chica que explicaba arrastrar con el
+          mouse, la barra de abajo y Shift + rueda. Si hay que explicar cómo
+          moverse, la interacción está mal: ahora la tabla se desliza sola con
+          el dedo y con la rueda, y este espacio dice lo único que no se puede
+          adivinar, que es qué significa cada color. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[17px]">
+        {([
+          ['pendiente', 'Sin empezar'],
+          ['cliente', 'La tiene él'],
+          ['nosotros', 'La tenemos'],
+          ['listo', 'Listo'],
+        ] as const).map(([est, texto]) => (
+          <span key={est} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="w-6 h-6 rounded-md border-2 inline-flex items-center justify-center text-[15px] font-extrabold"
+              style={{
+                borderColor: est === 'pendiente' ? 'var(--color-danger)'
+                  : est === 'cliente' ? '#E8862E'
+                  : est === 'nosotros' ? 'var(--color-gold)'
+                  : 'var(--color-success)',
+                background: est === 'listo' ? 'var(--color-success)'
+                  : est === 'cliente' ? 'rgba(232,134,46,0.20)'
+                  : est === 'nosotros' ? 'rgba(232,150,46,0.20)'
+                  : 'transparent',
+                color: est === 'cliente' ? '#F0A65C' : 'var(--color-goldhi)',
+              }}
+            >
+              {est === 'cliente' ? 'C' : est === 'nosotros' ? 'N' : ''}
+            </span>
+            <span className="text-cream/70">{texto}</span>
+          </span>
+        ))}
+        <span className="text-cream/45">
+          Toca una celda para cambiarla. El tilde dorado ya lo hizo en su Camino.
+        </span>
+      </div>
 
+    {/* EL DESLIZAMIENTO.
+        Antes esto era `cursor-grab` con arrastre por onMouseDown: el mismo
+        gesto servía para mover la tabla y para tocar una celda, así que en la
+        computadora se cambiaba un estado sin querer al intentar moverse, y en
+        el teléfono el arrastre con mouse no corre — quedaba solo el scroll
+        nativo, sin que nada lo dijera.
+
+        Ahora el navegador se encarga: scroll táctil nativo con inercia,
+        `overscroll-contain` para que al llegar al borde no arrastre la página
+        entera, y la rueda mueve en horizontal cuando el gesto es horizontal
+        (trackpad) o con Shift. Un gesto para moverse, un toque para cambiar. */}
     <div
       ref={scroller}
-      className="matriz-scroll overflow-auto cursor-grab active:cursor-grabbing"
-      style={{ height: 'calc(100vh - 250px)', minHeight: 380 }}
-      onWheel={(e) => { if (e.shiftKey && scroller.current) { scroller.current.scrollLeft += e.deltaY; } }}
-      onMouseDown={(e) => { if ((e.target as HTMLElement).closest('button')) return; arrastre.current = { x: e.clientX, left: scroller.current?.scrollLeft ?? 0 }; }}
-      onMouseMove={(e) => { if (arrastre.current && scroller.current) scroller.current.scrollLeft = arrastre.current.left - (e.clientX - arrastre.current.x); }}
-      onMouseUp={() => { arrastre.current = null; }}
-      onMouseLeave={() => { arrastre.current = null; }}
+      className="matriz-scroll overflow-auto overscroll-contain"
+      style={{
+        height: 'calc(100dvh - 300px)',
+        minHeight: 420,
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'auto',
+      }}
+      onWheel={(e) => {
+        if (!scroller.current) return;
+        // Trackpad en diagonal o Shift + rueda: se mueve al costado.
+        if (e.shiftKey) { scroller.current.scrollLeft += e.deltaY; return; }
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) scroller.current.scrollLeft += e.deltaX;
+      }}
     >
       <table
         className="border-separate"
-        style={{ borderSpacing: 0, fontSize: 14 }}
+        style={{ borderSpacing: 0, fontSize: 16 }}
       >
         <thead>
           {/* Group row */}
@@ -204,7 +255,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                 className="sticky top-0 z-30 bg-panel text-gold uppercase tracking-widest"
                 style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: 12,
+                  fontSize: 15,
                   fontWeight: 700,
                   letterSpacing: 1.5,
                   padding: '10px 0',
@@ -220,7 +271,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               className="sticky right-0 top-0 z-40 bg-panel text-gold"
               style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: 12,
+                fontSize: 15,
                 fontWeight: 700,
                 letterSpacing: 1.5,
                 padding: '10px 10px',
@@ -264,7 +315,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   <div
                     style={{
                       fontFamily: 'var(--font-body)',
-                      fontSize: 12,
+                      fontSize: 15,
                       fontWeight: 500,
                       color: 'var(--matrix-header-text)',
                       lineHeight: 1.3,
@@ -276,7 +327,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   >
                     {step.lbl}
                   </div>
-                  <div style={{ fontSize: 9, textAlign: 'center', marginTop: 3, letterSpacing: 0.5, color: step.quien === 'cliente' ? 'rgba(232,150,46,0.75)' : step.quien === 'ambos' ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.28)' }}>
+                  <div style={{ fontSize: 15, textAlign: 'center', marginTop: 3, letterSpacing: 0.5, color: step.quien === 'cliente' ? 'rgba(232,150,46,0.75)' : step.quien === 'ambos' ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.28)' }}>
                     {RESPONSABLE_SIGLA[step.quien]}
                   </div>
                 </th>
@@ -294,7 +345,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               <div
                 style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: 12,
+                  fontSize: 15,
                   fontWeight: 500,
                   color: 'var(--matrix-header-text)',
                   textAlign: 'center',
@@ -338,7 +389,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                         height: 36,
                         background: 'rgba(232,150,46,0.12)',
                         color: 'var(--color-gold)',
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: 700,
                       }}
                     >
@@ -347,7 +398,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                     <div className="min-w-0">
                       <div
                         className="truncate font-semibold"
-                        style={{ maxWidth: 175, fontSize: 14 }}
+                        style={{ maxWidth: 190, fontSize: 17 }}
                         title={cl.nombre}
                       >
                         {cl.nombre}
@@ -357,8 +408,8 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                           className="truncate"
                           style={{
                             color: 'var(--matrix-subtitle-text)',
-                            fontSize: 12,
-                            maxWidth: 175,
+                            fontSize: 15,
+                            maxWidth: 190,
                           }}
                         >
                           {cl.metodo}
@@ -397,17 +448,40 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                           return (
                             <span
                               title={`${step.title} — no entra en lo que contrató`}
-                              style={{ fontSize: 13, color: 'rgba(255,255,255,0.14)' }}
+                              style={{ fontSize: 15, color: 'rgba(255,255,255,0.20)' }}
                             >–</span>
                           );
                         }
                         const ex = extraDe(extras, cl.id, step.id);
                         const estado: EstadoCelda = autoCamino || on ? 'listo' : (ex.estado ?? 'pendiente');
-                        const color = estado === 'listo' ? 'var(--color-success)' : estado === 'proceso' ? 'var(--color-gold)' : estado === 'na' ? 'rgba(255,255,255,0.22)' : 'var(--matrix-checkbox-off)';
-                        const relleno = estado === 'listo' ? 'var(--color-success)' : estado === 'proceso' ? 'rgba(232,150,46,0.22)' : 'transparent';
+                        // Un color por estado, y el mismo en toda la app.
+                        //   rojo      · nadie lo empezó
+                        //   naranja   · la pelota la tiene el cliente
+                        //   amarillo  · la pelota la tenemos nosotros
+                        //   verde     · listo
+                        // Antes «en proceso» era un solo amarillo y no decía de
+                        // quién se estaba esperando: el lunes había que
+                        // preguntar celda por celda, que es el trabajo que esta
+                        // pantalla existe para ahorrar.
+                        const TRAZO: Record<EstadoCelda, string> = {
+                          pendiente: 'var(--color-danger)',
+                          cliente: '#E8862E',
+                          nosotros: 'var(--color-gold)',
+                          listo: 'var(--color-success)',
+                          na: 'rgba(255,255,255,0.22)',
+                        };
+                        const RELLENO: Record<EstadoCelda, string> = {
+                          pendiente: 'transparent',
+                          cliente: 'rgba(232,134,46,0.20)',
+                          nosotros: 'rgba(232,150,46,0.20)',
+                          listo: 'var(--color-success)',
+                          na: 'transparent',
+                        };
+                        const color = TRAZO[estado];
+                        const relleno = RELLENO[estado];
+                        const siguiente = siguienteEstado(estado, step.quien);
                         const avanzar = () => {
                           if (autoCamino) return;
-                          const siguiente = SIGUIENTE_ESTADO[estado];
                           if (siguiente === 'listo') onToggle(cl.id, step.id, true);
                           if (estado === 'listo') onToggle(cl.id, step.id, false);
                           aplicar(cl.id, step.id, { estado: siguiente });
@@ -419,7 +493,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                               onClick={avanzar}
                               title={autoCamino
                                 ? `${step.title} — ✓ completado en El Camino (automático)`
-                                : `${step.title}\n${RESPONSABLE_LABEL[step.quien]} · ${ESTADO_LABEL[estado]} — toca para pasar a ${ESTADO_LABEL[SIGUIENTE_ESTADO[estado]]}${ex.nota ? '\nNota: ' + ex.nota : ''}`}
+                                : `${step.title}\n${RESPONSABLE_LABEL[step.quien]} · ${ESTADO_LABEL[estado]} — toca para pasar a ${ESTADO_LABEL[siguiente]}${ex.nota ? '\nNota: ' + ex.nota : ''}`}
                               className="inline-flex items-center justify-center transition-all hover:border-gold/60"
                               style={{
                                 width: 30, height: 30, borderRadius: 7,
@@ -429,16 +503,21 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                               }}
                             >
                               {estado === 'listo' && <Check className="w-4 h-4" style={{ color: 'var(--color-ink)', strokeWidth: 3 }} />}
-                              {estado === 'proceso' && <span style={{ fontSize: 13, color: 'var(--color-gold)', fontWeight: 700, lineHeight: 1 }}>•</span>}
-                              {estado === 'na' && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>–</span>}
+                              {/* La letra dice de quién es la pelota: C el
+                                  cliente, N nosotros. Con dos colores parecidos
+                                  —naranja y amarillo— el color solo no alcanza,
+                                  y menos para quien no los distingue bien. */}
+                              {estado === 'cliente' && <span style={{ fontSize: 15, color: '#F0A65C', fontWeight: 800, lineHeight: 1 }}>C</span>}
+                              {estado === 'nosotros' && <span style={{ fontSize: 15, color: 'var(--color-goldhi)', fontWeight: 800, lineHeight: 1 }}>N</span>}
+                              {estado === 'na' && <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>–</span>}
                             </button>
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); pedirDetalle(cl.id, step.id, step.title); }}
                               onContextMenu={(e) => { if (ex.link) { e.preventDefault(); window.open(ex.link, '_blank'); } }}
                               title={ex.link ? `Abrir: ${ex.link}  ·  (clic para editar)` : ex.nota ? `Nota: ${ex.nota}  ·  (clic para editar)` : 'Pegar un link o una nota'}
-                              className="leading-none"
-                              style={{ fontSize: 10, color: ex.link ? 'var(--color-gold)' : ex.nota ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.16)' }}
+                              className="leading-none min-h-[22px] px-1"
+                              style={{ fontSize: 15, color: ex.link ? 'var(--color-gold)' : ex.nota ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.28)' }}
                             >
                               {ex.link ? '🔗' : ex.nota ? '📝' : '＋'}
                             </button>
@@ -458,7 +537,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                     borderBottom: '1px solid var(--matrix-row-divider)',
                     borderLeft: '2px solid var(--matrix-section-divider)',
                     textAlign: 'center',
-                    fontSize: 14,
+                    fontSize: 16,
                     minWidth: 84,
                     color: isComplete ? 'var(--color-success)' : 'var(--matrix-pct-text)',
                     fontWeight: isComplete ? 700 : 500,
@@ -499,7 +578,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                 >
                   <span
                     style={{
-                      fontSize: 13,
+                      fontSize: 15,
                       fontWeight: 700,
                       color: pct >= 70 ? 'var(--color-success)' : pct >= 30 ? 'var(--color-gold)' : 'var(--matrix-subtitle-text)',
                     }}

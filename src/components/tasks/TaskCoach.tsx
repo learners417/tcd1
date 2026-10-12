@@ -28,7 +28,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
   const [verificando, setVerificando] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
   useEffect(() => {
-    if (!meta.evidencia_requerida) return;
+    if (!meta.evidencia_requerida?.nombre?.trim()) return;
     (async () => {
       const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
       const userId = data.user?.id ?? null;
@@ -37,7 +37,30 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
       else setEvidencias(0);
     })();
   }, [meta.codigo, meta.evidencia_requerida]);
-  const requiereEvidencia = Boolean(meta.evidencia_requerida) && !isCompleted;
+  /**
+   * CUÁNDO DE VERDAD HACE FALTA SUBIR UN ARCHIVO.
+   *
+   * Era `Boolean(meta.evidencia_requerida)`, que nunca es falso: `comoMeta`
+   * SIEMPRE construye ese objeto, y cuando la jornada no pide evidencia lo
+   * llena con un default vacío. O sea que el botón «Marcar como completado»
+   * estaba deshabilitado en todas las jornadas del Camino, con el cartel
+   * «Este paso requiere tu evidencia. Súbela arriba — sin ella, el cinturón no
+   * se gana.»
+   *
+   * Y en la primera sesión era peor: su evidencia es de tipo `numero` —«Tus
+   * diez números de entrada», que se escriben— y lo único que la pantalla le
+   * ofrecía era un selector de archivos. El día 1 de un cliente pago,
+   * bloqueado pidiéndole una foto de diez números que tenía que escribir.
+   *
+   * De los siete tipos del seed, solo tres son algo para adjuntar. Los otros
+   * —número, texto, url, evento— se resuelven dentro de la propia sesión.
+   */
+  const ADJUNTABLES = new Set(['archivo', 'captura', 'imagen']);
+  const pide = meta.evidencia_requerida;
+  const requiereEvidencia = !isCompleted
+    && !meta.avanza_sin_evidencia
+    && Boolean(pide?.nombre?.trim())
+    && ADJUNTABLES.has(String(pide?.tipo ?? ''));
   const evidenciaLista = !requiereEvidencia || evidencias > 0;
 
   // ── El cuaderno de la sesión: acá se vuelca el trabajo (escrito o hablado) ──

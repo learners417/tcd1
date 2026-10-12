@@ -2,7 +2,7 @@
  * FotoDia90 — T11 · La Foto del Día 90 (Plan Maestro, idea #9).
  * La tarjeta antes/después en formato premium, para compartir. Reusa el mismo
  * comparador que la Foto de Partida (compararFotoPartida): Día 1 vs presente.
- * Pensada para captura de pantalla (el formato que la gente comparte en IG).
+ * Pensada para captura de pantalla (el formato que las personas comparten en IG).
  */
 import React from 'react';
 import { X, Camera, TrendingUp, ArrowRight } from 'lucide-react';

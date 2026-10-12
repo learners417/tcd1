@@ -1,10 +1,12 @@
 import { planLimitado } from '../lib/adnPiezas';
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Hexagon, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun, Megaphone } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LifeBuoy, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun, Megaphone } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
-import { diaDelPrograma, semanaDelPrograma } from '../lib/diaPrograma';
+import { diaDelPrograma, semanaDelPrograma, dondeVa } from '../lib/diaPrograma';
+import { diaDeLaProximaJornada, jornadasCerradas } from '../lib/roadmapSeed';
+import { destinoQueCambia } from '../lib/destinoDelMomento';
 
 interface SidebarProps {
   currentPage: string;
@@ -47,8 +49,13 @@ function getSidebarData() {
 
   const semana = semanaDelPrograma(profile.fecha_inicio, 13);
   const diaPrograma = diaDelPrograma(profile.fecha_inicio) ?? 1;
+  // El cuarto destino se decide acá, junto al resto de lo que el menú lee una
+  // sola vez: calcularlo en el render lo recalcularía en cada pintada.
+  const cuarto = destinoQueCambia(
+    dondeVa(profile.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas())),
+  );
 
-  return { profile, progress, hasPending, semana, diaPrograma, cinturon };
+  return { profile, progress, hasPending, semana, diaPrograma, cinturon, cuarto };
 }
 
 export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, onSignOut, messageBadge = 0, collapsed, onToggleCollapse, mobileOpen, onMobileClose }: SidebarProps) {
@@ -94,12 +101,21 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
         { id: 'dashboard', icon: Sun, label: 'Hoy' } as MenuItem,
         { id: 'roadmap', icon: RoadmapIcon, label: 'Camino', badge: data.hasPending } as MenuItem,
         { id: 'entrenadores', icon: Sparkles, label: 'Entrenadores' } as MenuItem,
-        { id: 'campanas', icon: Megaphone, label: 'Campañas' } as MenuItem,
-        { id: 'miclinica', icon: Hexagon, label: 'Clínica', minPilar: 6, action: () => window.open('https://mcd-eight.vercel.app', '_blank') } as MenuItem,
-        // Soporte NO entra acá. Son cinco destinos y tienen que ser los mismos
-        // que la barra de abajo; un sexto rompe las dos reglas y hace dudar
-        // cuál navegación mirar. Vive en la barra de arriba, como el Mentor:
-        // visible en todas las pantallas, sin abrir nada.
+        // El cuarto cambia con el avance: hasta que le toque montar es Mi ADN.
+        // Los dos menús preguntan lo mismo, así que siguen diciendo lo mismo.
+        { id: data.cuarto.id, icon: Megaphone, label: data.cuarto.etiqueta } as MenuItem,
+        { id: 'mensajes', icon: LifeBuoy, label: 'Acompañamiento' } as MenuItem,
+        // SOPORTE ENTRÓ Y CLÍNICA SALIÓ.
+        //
+        // Siguen siendo cinco y siguen siendo los mismos que la barra de
+        // abajo. Lo que cambió es cuál: Soporte es la única forma de llegar al
+        // equipo desde que Discord salió, y vivía en un icono sin etiqueta
+        // arriba a la derecha que nadie encontraba. Un canal de soporte que no
+        // se encuentra manda al cliente a buscar al equipo afuera de la app.
+        //
+        // Clínica no era un destino de esta app: era un window.open a otra,
+        // bloqueado hasta el pilar 6. Ahora es una pantalla que explica qué
+        // es, y el botón para abrirla va al final.
       ]
     },
   ];

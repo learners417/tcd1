@@ -10,6 +10,7 @@ import type { ProfileV2 } from '../../lib/supabase';
 import type { AnguloCreativo, TipoCreativo } from '../../lib/campanasTypes';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 const TIPOS: { value: TipoCreativo; label: string }[] = [
   { value: 'imagen_single', label: 'Imagen única' },
@@ -72,7 +73,7 @@ Tu tarea: armar UN SOLO carrusel bien trabajado (NO variantes). Tú decidis cuan
 ESTRUCTURA DEL CARRUSEL:
 - Slide 1: HOOK que frena el scroll (puede ser una afirmacion contraintuitiva, una pregunta, un dato impactante)
 - Slides intermedios: desarrollo del argumento. Una idea por slide. Sin relleno.
-- Slide final (ULTIMO): CTA con PALABRA CLAVE para activar automatizacion en ManyChat. Ejemplo: "Comenta la palabra GUIA y te mando el recurso por DM". La palabra clave debe ser corta, en mayusculas y memorable.
+- Slide final (ULTIMO): CTA con PALABRA CLAVE para activar la automatizacion de mensajes. Ejemplo: "Comenta la palabra GUIA y te mando el recurso por DM". La palabra clave debe ser corta, en mayusculas y memorable.
 
 FORMATO DE RESPUESTA (Markdown — respeta esta estructura EXACTA):
 
@@ -99,13 +100,13 @@ FORMATO DE RESPUESTA (Markdown — respeta esta estructura EXACTA):
 
 ---
 
-### SLIDE [N] — CTA + Palabra clave ManyChat
+### SLIDE [N] — CTA + Palabra clave
 - **H1:** [CTA principal corto y accionable]
 - **H2:** [refuerzo del beneficio inmediato]
 - **H3 (opcional):** [recordatorio de escasez o urgencia si aplica]
 - **Copy del slide:** [llamada explicita: "Comenta la palabra X y te mando Y por DM"]
-- **PALABRA CLAVE MANYCHAT:** \`[PALABRA]\` (en mayusculas, una sola palabra, facil de tipear)
-- **Mensaje de respuesta automatica sugerido:** [1-2 lineas que ManyChat enviara cuando detecte la palabra clave]
+- **PALABRA CLAVE:** \`[PALABRA]\` (en mayusculas, una sola palabra, facil de tipear)
+- **Mensaje de respuesta automatica sugerido:** [1-2 lineas que se envian solas cuando alguien escribe la palabra clave]
 
 ---
 
@@ -170,8 +171,12 @@ REGLAS:
     }
   }, [rubro, pais, producto, tipo, tono, variantes]);
 
-  const handleCopiar = useCallback(() => {
-    navigator.clipboard.writeText(output);
+  // Antes decía «Copiado» sin esperar el resultado: cuando el navegador no
+  // deja copiar —el del teléfono, seguido— la app afirmaba que copió y el
+  // cliente pegaba en Meta lo que tenía antes.
+  const handleCopiar = useCallback(async () => {
+    const ok = await copiar(output);
+    if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
     setCopiado(true);
     toast.success('Copies copiados al portapapeles.');
     setTimeout(() => setCopiado(false), 2000);
@@ -308,7 +313,7 @@ REGLAS:
               </p>
               <p className="text-sm text-cream/75 leading-relaxed">
                 Generamos un solo carrusel bien trabajado (hasta 10 slides). El ultimo slide
-                incluye una palabra clave para activar la automatizacion en ManyChat.
+                incluye una palabra clave para activar la automatizacion de mensajes.
               </p>
             </div>
           )}

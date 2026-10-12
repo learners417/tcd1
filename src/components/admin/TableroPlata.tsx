@@ -8,6 +8,7 @@ import {
   TRAMO_LABEL, SEMANA_VACIA,
   type NumerosSemana, type Indicador, type Tramo,
 } from '../../lib/valueChain';
+import { montajeDe } from '../../lib/montajeDatos';
 
 /**
  * TABLERO DE PLATA — la cadena de valor de una cuenta, de punta a punta.
@@ -26,6 +27,13 @@ const CAMPOS: Array<{ k: keyof NumerosSemana; label: string; ayuda: string; grup
 
   { k: 'mensajesEnviados', label: 'Mensajes enviados', ayuda: 'Prospección propia, fuera de pauta', grupo: 'Base' },
 
+  // Los dos que faltaban, y por eso dos avisos no podían salir nunca. Están
+  // en la misma pantalla de Meta que el gasto, así que cargarlos no agrega
+  // una vuelta: ya están a la vista. Con ellos en cero, el costo de aparecer
+  // y la frecuencia dicen «sin datos» en vez de dar un número inventado.
+  { k: 'impresiones', label: 'Impresiones', ayuda: 'Veces que se mostró el anuncio. Con el gasto da el costo de aparecer', grupo: 'Atracción' },
+  { k: 'alcance', label: 'Alcance', ayuda: 'Personas distintas que lo vieron. Con las impresiones da la frecuencia', grupo: 'Atracción' },
+
   { k: 'comentarios', label: 'Comentarios', ayuda: 'Con la palabra clave', grupo: 'Atracción' },
   { k: 'conversaciones', label: 'Conversaciones', ayuda: 'DMs nuevos que empezaron', grupo: 'Atracción' },
   { k: 'agendas', label: 'Agendas', ayuda: 'Reservaron día y hora', grupo: 'Atracción' },
@@ -43,7 +51,7 @@ const CAMPOS: Array<{ k: keyof NumerosSemana; label: string; ayuda: string; grup
   { k: 'clientesQueTerminan', label: 'Terminan', ayuda: 'Se les acaba el servicio', grupo: 'Retención' },
   { k: 'renovaciones', label: 'Renovaron', ayuda: 'De esos, cuántos siguieron', grupo: 'Retención' },
   { k: 'casosDeExito', label: 'Casos de éxito', ayuda: 'Llegaron al resultado prometido', grupo: 'Retención' },
-  { k: 'referidos', label: 'Referidos', ayuda: 'Gente nueva que trajo un cliente', grupo: 'Retención' },
+  { k: 'referidos', label: 'Referidos', ayuda: 'Personas nuevas que trajo un cliente', grupo: 'Retención' },
 ];
 
 const COLOR: Record<Indicador['estado'], string> = {
@@ -123,7 +131,26 @@ export default function TableroPlata({
   }, [clienteId, n, semana]);
 
   const errores = useMemo(() => validarNumeros(n), [n]);
-  const cadena = useMemo(() => calcularCadena(n), [n]);
+  /**
+   * Los países donde corre su campaña, para juzgar su CPM contra la banda de
+   * SU mercado. Vienen del montaje, que es donde el cliente los eligió.
+   *
+   * Antes esto no llegaba y `calcularCadena` caía en la banda de México para
+   * todos: el techo argentino está por debajo del piso español, así que se le
+   * decía «caro» a quien estaba bien y «barato» a quien traía personas que no
+   * pueden pagarle.
+   */
+  const [paises, setPaises] = useState<string[]>([]);
+  useEffect(() => {
+    if (!clienteId) return;
+    let vivo = true;
+    void montajeDe(clienteId)
+      .then((m) => { if (vivo) setPaises(m.paises ?? []); })
+      .catch(() => { /* sin países, la banda es la de referencia */ });
+    return () => { vivo = false; };
+  }, [clienteId]);
+
+  const cadena = useMemo(() => calcularCadena(n, paises), [n, paises]);
   const domino = useMemo(() => encontrarDomino(cadena), [cadena]);
   const proy = useMemo(() => proyectar(objetivo, n), [objetivo, n]);
 
@@ -289,7 +316,7 @@ export default function TableroPlata({
                 </thead>
                 <tbody>
                   {historial.map((h) => {
-                    const d = encontrarDomino(calcularCadena(h.numeros));
+                    const d = encontrarDomino(calcularCadena(h.numeros, paises));
                     return (
                       <tr key={h.semana} className="border-t border-cream/[0.06]">
                         <td className="py-1.5 text-cream/60">{h.semana}</td>

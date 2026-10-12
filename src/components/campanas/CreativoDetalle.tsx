@@ -15,6 +15,7 @@ import {
 } from '../../lib/campanasStorage';
 import { generateImageWithFallback, editImage } from '../../lib/campanasImageGen';
 import type { Creativo, CreativoAsset } from '../../lib/campanasTypes';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 interface Props {
   creativo: Creativo;
@@ -79,9 +80,11 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
 
   const handleCopyCopy = () => {
     const text = `TEXTO PRINCIPAL:\n${creativo.texto_principal}\n\nTITULO:\n${creativo.titulo}\n\nDESCRIPCION:\n${creativo.descripcion ?? ''}\n\nCTA:\n${creativo.cta_texto ?? ''}`;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void copiar(text).then((ok) => {
+      if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const handleStatusChange = async (estado: 'aprobado' | 'descartado') => {

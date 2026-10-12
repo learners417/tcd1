@@ -195,17 +195,17 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
         // Guardar energía y frustración como primera entrada del diario
         const hoy = new Date().toISOString().split('T')[0];
-        await supabase.from('diario_entradas').insert({
-          user_id: profile.id,
-          fecha: hoy,
-          respuestas: {
-            q1: frustracion.trim() ? `[Onboarding] ${frustracion.trim()}` : '',
-            q2: '',
-            q3: energia,
-            q4: '',
-            q5: '',
-          },
-        });
+        // NO se inserta una fila de diario acá.
+      //
+      // Esto escribía una fila con la columna vieja `respuestas`, y el Diario
+      // la lee con el mapeo nuevo (`diario_cuerpo`, `diario_mente`, …). Como la
+      // encontraba por fecha, el día 1 le mostraba «Entrada del día completada»
+      // con un 0 gigante sobre «de 100 puntos», bienestar 0 y equilibrio 0/10 —
+      // y además le escondía el formulario, así que no podía cargar su diario
+      // real de ese día.
+      //
+      // Lo que el cliente contesta en el wizard ya queda en su perfil. Su
+      // primera entrada de diario la escribe él, en el Diario.
       }
       setStep('diagnostico');
     } catch {
@@ -225,7 +225,10 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     completarWizard(firstPage);
   }
 
-  const nombreCorto = profile.nombre.split(' ')[0];
+  // `profile.nombre` puede venir vacío —el alta lo inserta con COALESCE a ''—
+  // y si la columna acepta nulos, `.split` de null revienta el render entero.
+  // Sin nombre el saludo va solo, en vez de «Hola, ».
+  const nombreCorto = (profile.nombre ?? '').trim().split(' ')[0];
   const currentStepIndex = STEPS.indexOf(step);
 
   return (

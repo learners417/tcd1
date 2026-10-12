@@ -20,6 +20,7 @@ import {
   type UserCredits,
   type CreditBalance,
 } from '../../lib/credits';
+import CreditsHistory from './CreditsHistory';
 import { supabase } from '../../lib/supabase';
 
 interface BuyCreditsModalProps {
@@ -331,6 +332,16 @@ export default function BuyCreditsModal({
                   )}
                 </div>
               )}
+
+              {/* EN QUÉ SE FUERON LOS CRÉDITOS.
+                  La tabla del historial estaba escrita y ninguna pantalla la
+                  abría: se podía comprar y gastar, y no había dónde ver en qué.
+                  Va acá porque es la pregunta que trae a esta ventana: antes de
+                  comprar más, quien mira quiere saber en qué se fueron los
+                  anteriores. */}
+              <div className="border-t border-white/10 pt-5">
+                <CreditsHistory userId={userId} limit={8} />
+              </div>
             </>
           )}
         </div>

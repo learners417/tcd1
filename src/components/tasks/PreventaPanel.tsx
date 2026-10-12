@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { BONOS, KEY_BONOS, bonosElegidos, mensajeDePreventa } from '../../lib/bonosPreventa';
 import { VOC } from '../../lib/vocabulario';
+import { copiar as alPortapapeles } from '../../lib/copiar';
 
 interface Props {
   /** Lo que ya tiene sellado en su ADN. */
@@ -38,9 +39,11 @@ export default function PreventaPanel({ promesa, plazo, precio, onElegir }: Prop
   );
 
   const copiar = () => {
-    void navigator.clipboard?.writeText(mensaje);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+    void alPortapapeles(mensaje).then((ok: boolean) => {
+      if (!ok) return;
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
   };
 
   return (

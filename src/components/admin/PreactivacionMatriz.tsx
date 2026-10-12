@@ -9,8 +9,11 @@ import {
   type ChecksByCliente,
 } from '../../lib/preactivacionCheck';
 import { loadExtras, saveExtra, type ExtrasByCliente, type EstadoCelda } from '../../lib/matrizExtras';
-import { avanceDelCuadro } from '../../lib/avanceDelCuadro';
+import { avanceDelCuadro, noIncluye } from '../../lib/avanceDelCuadro';
+import { servicioDe } from '../../lib/cuadroTickets';
+import { isChecked } from '../../lib/preactivacionCheck';
 import MatrizGrid, { type MatrizClienteRow } from './preactivacion/MatrizGrid';
+import UnClienteALaVez from './preactivacion/UnClienteALaVez';
 import ElCaminoView from './preactivacion/ElCaminoView';
 
 type View = 'matriz' | 'camino';
@@ -46,6 +49,29 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
     })();
   }, []);
   const [view, setView] = useState<View>('matriz');
+
+  /**
+   * El cliente que se está viendo en el teléfono.
+   *
+   * En la matriz se ven todos a la vez; en la lista, uno. Arranca en el
+   * primero en vez de vacío: una pantalla que pide elegir antes de mostrar
+   * nada es un paso de más para algo que casi siempre es «el que vengo
+   * trabajando».
+   */
+  const [clienteEnPantalla, setClienteEnPantalla] = useState<string>('');
+
+  /** Qué ítems no le aplican, con la MISMA cuenta que usa la matriz. */
+  const noAplicaDe = (servicio?: string | null) => noIncluye(servicioDe(servicio));
+
+  /** La nota y el link de un ítem. El mismo flujo que en la matriz. */
+  const pedirNotaYLink = (clienteId: string, stepId: string, titulo: string) => {
+    const actual = extras.get(clienteId)?.get(stepId) ?? {};
+    const link = window.prompt(`Link para «${titulo}» (Drive, doc, página, calendario). Vacío para quitarlo:`, actual.link ?? '');
+    if (link === null) return;
+    const nota = window.prompt(`Nota para «${titulo}» (qué falta, quién quedó a cargo). Vacío para quitarla:`, actual.nota ?? '');
+    if (nota === null) { guardarExtra(clienteId, stepId, { link: link.trim() }); return; }
+    guardarExtra(clienteId, stepId, { link: link.trim(), nota: nota.trim() });
+  };
   const [checks, setChecks] = useState<ChecksByCliente>(new Map());
   // Los estados, notas y links de cada celda. Viven acá y no en la grilla
   // porque el cartel de arriba los necesita para contar igual que ella.
@@ -133,6 +159,18 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
         servicio: c.servicio_contratado,
       }));
   }, [clientes, search]);
+
+  /**
+   * El cliente de la lista del teléfono.
+   *
+   * Si el elegido se cae del filtro de búsqueda, se pasa al primero que quedó
+   * en vez de dejar la pantalla vacía: buscar no debería borrar lo que se
+   * estaba mirando.
+   */
+  const elegido = useMemo(
+    () => rows.find((c) => c.id === clienteEnPantalla) ?? rows[0],
+    [rows, clienteEnPantalla],
+  );
 
   /**
    * El cartel cuenta IGUAL que la grilla.
@@ -271,14 +309,67 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
                 </p>
               </div>
             )}
-            <MatrizGrid
-              clientes={rows}
-              checks={checks}
-              onToggle={handleToggle}
-              caminoDone={caminoDone}
-              extras={extras}
-              onExtra={guardarExtra}
-            />
+            {/* ── DOS VISTAS PARA DOS PREGUNTAS DISTINTAS ──
+
+                La matriz cruza clientes × 62 ítems y contesta «quién está
+                trabado»: se compara una fila contra otra. Es la forma correcta
+                en una computadora.
+
+                En un teléfono no hay forma de que funcione, y no es cuestión
+                de letra ni de scroll: 62 columnas en 390 px son 62 columnas de
+                6 px. Así que ahí se muestra un cliente a la vez, con sus
+                bloques uno debajo del otro, y solo se desliza para abajo. La
+                pregunta que contesta es «qué le falta a este». */}
+            <div className="hidden lg:block">
+              <MatrizGrid
+                clientes={rows}
+                checks={checks}
+                onToggle={handleToggle}
+                caminoDone={caminoDone}
+                extras={extras}
+                onExtra={guardarExtra}
+              />
+            </div>
+
+            <div className="lg:hidden">
+              <label className="block mb-4">
+                <span className="block text-[17px] font-medium text-cream/80 mb-1.5">
+                  Qué cliente
+                </span>
+                <select
+                  value={clienteEnPantalla}
+                  onChange={(e) => setClienteEnPantalla(e.target.value)}
+                  className="min-h-[52px] w-full rounded-xl border border-cream/20 bg-espresso/60 px-4 text-[17px] text-cream"
+                >
+                  {rows.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
+              </label>
+
+              {elegido && (
+                <UnClienteALaVez
+                  cliente={{
+                    id: elegido.id,
+                    nombre: elegido.nombre,
+                    noLeAplica: (stepId) => noAplicaDe(elegido.servicio).has(stepId),
+                    porElCamino: (step) => Boolean(step.meta && caminoDone.get(elegido.id)?.has(step.meta)),
+                    extra: (stepId) => extras.get(elegido.id)?.get(stepId) ?? {},
+                    tildado: (stepId) => isChecked(checks, elegido.id, stepId),
+                  }}
+                  onEstado={(stepId, estado) => {
+                    // El tilde de la base sigue al estado: así el porcentaje y
+                    // el cartel de arriba cuentan lo mismo que esta lista.
+                    if (estado === 'listo') handleToggle(elegido.id, stepId, true);
+                    else if ((extras.get(elegido.id)?.get(stepId)?.estado ?? 'pendiente') === 'listo') {
+                      handleToggle(elegido.id, stepId, false);
+                    }
+                    guardarExtra(elegido.id, stepId, { estado });
+                  }}
+                  onDetalle={(stepId, titulo) => pedirNotaYLink(elegido.id, stepId, titulo)}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>

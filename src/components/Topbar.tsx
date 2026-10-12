@@ -1,6 +1,6 @@
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target, LifeBuoy } from 'lucide-react';
+import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target, Hexagon, LifeBuoy } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -27,6 +27,31 @@ const PAGE_TITLES: Record<string, string> = {
   campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
 
+/**
+ * El título en el teléfono.
+ *
+ * En la barra de arriba quedan 109 px al lado de los cuatro botones, y
+ * «Creador de Contenido» pide casi doscientos. Medido: a 20 px el título
+ * salía partido en tres renglones y montado sobre el botón del chat, y al
+ * forzarlo a una línea quedaba cortado con puntos en doce pantallas.
+ *
+ * Achicar la letra no alcanza y además rompe el piso de 15 px. Así que acá
+ * manda el nombre corto, y el largo sigue entero en el menú lateral, que es
+ * donde se elige a dónde ir. En la barra el título no presenta la pantalla
+ * —el contenido ya se ve— solo dice dónde está parado.
+ *
+ * Los que ya entran no se tocan: «El Camino» es «El Camino».
+ */
+const TITULOS_CORTOS: Record<string, string> = {
+  diario: 'Diario',
+  creador: 'Creador',
+  manualNegocio: 'Manual',
+  // `agentes` y `entrenadores` son la MISMA pantalla: Entrenadores.tsx no
+  // hace otra cosa que dibujar Agentes. Que una se llamara «Entrenadores» y
+  // la otra «Entrenadores IA» hacía parecer que eran dos lugares distintos.
+  agentes: 'Entrenadores',
+};
+
 /** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
 const searchablePages = [
   { id: 'dashboard', label: 'Hoy', icon: LayoutDashboard, desc: 'Tu día, en orden', minPilar: 0 },
@@ -38,6 +63,10 @@ const searchablePages = [
   { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0 },
   { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Las clases del método', minPilar: 2 },
   { id: 'campanas', label: 'Campañas & Creativos', icon: Megaphone, desc: 'Anuncios y creativos', minPilar: 4 },
+  // Mi Clínica salió de la barra de navegación —era un window.open a otra app
+  // sin aviso— y ahora es una pantalla que explica qué es. Se llega por acá y
+  // desde el Camino, no tocando un botón que te saca de TCD.
+  { id: 'miclinica', label: 'Mi Clínica', icon: Hexagon, desc: 'Dónde operas: tus consultantes y sus protocolos', minPilar: 0 },
 ];
 
 const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
@@ -224,7 +253,13 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
     }
   }, [showSearch]);
 
-  const filteredPages = searchablePages.filter((p) => planPermitePilar(planActual(), (p as { minPilar?: number }).minPilar ?? 0)).filter(p =>
+  // La Biblioteca se esconde por plan, salvo que el equipo se la haya abierto
+  // a este cliente. Sin esta excepción el permiso se podía dar y el cliente no
+  // tenía ninguna forma de llegar: el destino quedaba escondido igual.
+  const bibliotecaAbierta = Boolean((profile as { biblioteca_abierta?: boolean }).biblioteca_abierta);
+  const filteredPages = searchablePages.filter((p) =>
+    (p.id === 'biblioteca' && bibliotecaAbierta)
+    || planPermitePilar(planActual(), (p as { minPilar?: number }).minPilar ?? 0)).filter(p =>
     p.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -276,8 +311,11 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               <Menu className="w-5 h-5" />
             </button>
           )}
-          <h1 className="text-[20px] leading-tight text-cream truncate not-italic" style={{ fontFamily: 'var(--font-display)' }}>
-            {(currentPage && PAGE_TITLES[currentPage]) || ''}
+          {/* `una-linea` y no `truncate` a secas: la barra mide 56 px y el
+              título que pasa a dos renglones se monta sobre los botones de la
+              derecha. «El Camino» salía partido en tres. */}
+          <h1 className="text-[20px] leading-tight text-cream una-linea not-italic" style={{ fontFamily: 'var(--font-display)' }}>
+            {(currentPage && (TITULOS_CORTOS[currentPage] ?? PAGE_TITLES[currentPage])) || ''}
           </h1>
         </div>
 
@@ -292,7 +330,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
           {/* El Mentor está en todas las pantallas: es un botón, no una pestaña. */}
           {currentPage !== 'coach' && setCurrentPage && (
             <button
@@ -305,10 +343,12 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               <MessageSquare className="w-5 h-5" /> <span className="hidden sm:inline">Mentor</span>
             </button>
           )}
-          {/* Soporte está en todas las pantallas, igual que el Mentor.
-              Antes la página existía y no se llegaba desde ningún lado: el
-              cliente que necesitaba al equipo no tenía por dónde escribir, y
-              terminaba buscándolos afuera de la app. */}
+          {/* El salvavidas se queda SOLO en pantalla grande.
+              En el teléfono, el contador de respuestas sin abrir se mudó
+              encima de la pestaña Contacto, que es donde se busca y donde se
+              toca. Acá ocupaba 56 px de los 390 de la barra, y entre los
+              cuatro botones dejaban 91 px para el título: «El Camino» salía
+              cortado, y «Entrenadores» no entraba ni por asomo. */}
           {currentPage !== 'mensajes' && setCurrentPage && (
             <button
               type="button"
@@ -316,7 +356,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               aria-label={soporteSinLeer > 0
                 ? `Soporte (${soporteSinLeer} sin leer)`
                 : 'Soporte: escríbele al equipo'}
-              className={`w-12 h-12 rounded-full card-panel flex items-center justify-center transition-colors active:scale-95 relative ${
+              className={`hidden md:flex w-12 h-12 rounded-full card-panel items-center justify-center transition-colors active:scale-95 relative ${
                 soporteSinLeer > 0
                   ? 'text-gold ring-1 ring-gold/30 hover:text-goldhi'
                   : 'text-cream/75 hover:text-cream'
