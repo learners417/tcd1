@@ -386,6 +386,11 @@ export interface SlideConfig {
 
 export type CampanasView =
   | 'home'
+  // Donde se APRENDE y se ESCRIBE el anuncio: las veinte reglas con su
+  // ejemplo, las siete estructuras y el 20. Va antes de «Tus 3 anuncios»
+  // porque ese es el orden del trabajo: primero se escribe con criterio,
+  // después se aprueba y se monta en Meta.
+  | 'escribir'
   // La primera pantalla al llegar del Camino: qué toca hoy y qué no tocar.
   // Sin esto, «andá a Campañas» dejaba al cliente frente a seis pantallas sin
   // saber cuál era la primera.

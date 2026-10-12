@@ -541,3 +541,38 @@ export const claveDesbloqueoAgente = (agenteId: string): string | null => {
   }
   return null
 }
+
+/**
+ * EL DÍA DE LA PRÓXIMA JORNADA ABIERTA.
+ *
+ * Es el número que manda sobre lo que la app abre y lo que cierra: quien está
+ * en el día 15 del trabajo ve el día 15, aunque el calendario diga 31.
+ *
+ * Cada pantalla lo calculaba por su cuenta recorriendo pilares y metas, y no
+ * todas igual: Campañas ni lo miraba y preguntaba el calendario. Con el cálculo
+ * acá, lo que abre Campañas, lo que abre un destino del menú y lo que dice el
+ * ritmo salen del mismo número.
+ *
+ * `null` = cerró todas: terminó el Camino.
+ */
+export function diaDeLaProximaJornada(hechas: Set<string>): number | null {
+  for (const p of SEED_ROADMAP_V2) {
+    for (const m of p.metas) {
+      // Los días de campo y la entrega del equipo no se cierran: saltarlos es
+      // lo que evita que el cliente quede trabado un fin de semana para siempre.
+      const minutos = parseInt(String(m.tiempo_estimado ?? '0'), 10) || 0
+      const esDelCliente = m.tipo_jornada !== 'entrega_tecnica' && (minutos > 0 || Boolean(m.cinturon))
+      if (!esDelCliente) continue
+      if (!hechas.has(`${p.numero}-${m.codigo}`)) return m.dia_asignado ?? null
+    }
+  }
+  return null
+}
+
+/** Las jornadas cerradas, leídas del espejo local. Nunca lanza. */
+export function jornadasCerradas(): Set<string> {
+  try {
+    const crudo = localStorage.getItem('tcd_hoja_ruta_v2')
+    return new Set<string>(crudo ? (JSON.parse(crudo) as string[]) : [])
+  } catch { return new Set<string>() }
+}

@@ -32,6 +32,67 @@ export interface Rubrica {
 }
 
 export const RUBRICAS: Record<string | number, Rubrica> = {
+  // ─── La segunda mitad: lo que sostiene lo que la primera construyó ──
+  //
+  // Del día 50 al 90 el Camino tenía veinticuatro días de campo sin nada que
+  // hacer, justo cuando el cliente ya vende y más caro sale perderlo. Estas
+  // son las que entraron ahí, y acá está con qué se juzga cada una.
+  'P9B.d53': {
+    codigo: 'P9B.d53', pieza: 'tu criterio de derivación',
+    criterios: [
+      { pregunta: '¿Dice a quién NO atiende, en conducta?', busca: 'Quien no hizo nada en tres meses, quien busca una sesión suelta. No «los que no están listos», que no se puede mirar.' },
+      { pregunta: '¿Nombra dos colegas concretos?', busca: 'Dos nombres, no «una colega que conozco».' },
+      { pregunta: '¿Están avisados?', busca: 'Derivar a alguien que no sabe que lo derivas es mandarle un problema.' },
+    ],
+    descalificador: "Un criterio que no se puede mirar: «los que no están listos», «los que no tienen ganas».",
+    donde_se_arregla: "Vuelve a tu sesión del día 10, la de tu programa: quién entra sale de ahí.",
+    bloquea: false,
+  },
+  'P9B.d58': {
+    codigo: 'P9B.d58', pieza: 'tu oferta de continuidad',
+    criterios: [
+      { pregunta: '¿Es distinta del programa que ya hizo?', busca: 'Repetir lo mismo no es continuar: es que no terminó.' },
+      { pregunta: '¿Dice qué resultado nuevo trae?', busca: 'Un resultado, no «seguimos trabajando juntos».' },
+      { pregunta: '¿Tiene precio y plazo?', busca: 'Sin los dos, la conversación de renovación no se puede cerrar.' },
+    ],
+    descalificador: "Ofrecerle el mismo programa otra vez al mismo precio.",
+    donde_se_arregla: "Vuelve a tu sesión del día 10 y arma el escalón que sigue.",
+    bloquea: false,
+  },
+  'P9B.d61': {
+    codigo: 'P9B.d61', pieza: 'tus tres respuestas guardadas',
+    criterios: [
+      { pregunta: '¿Son preguntas que le hicieron de verdad?', busca: 'Las que más se repitieron este mes, no las que imagina que le van a hacer.' },
+      { pregunta: '¿La respuesta está completa?', busca: 'Completa significa que el consultante no necesita escribirle de nuevo.' },
+      { pregunta: '¿Dice dónde queda guardada?', busca: 'En su app o en el mensaje automático. Una respuesta en un cuaderno la vuelve a escribir.' },
+    ],
+    descalificador: "Respuestas inventadas: preguntas que todavía nadie le hizo.",
+    donde_se_arregla: "Mira tus conversaciones del último mes y saca las tres que más se repiten.",
+    bloquea: false,
+  },
+  'P9B.d67': {
+    codigo: 'P9B.d67', pieza: 'tu primer cierre completo',
+    criterios: [
+      { pregunta: '¿El resultado está en las palabras del consultante?', busca: 'Su frase textual, no el resumen de ella.' },
+      { pregunta: '¿Hay permiso por escrito?', busca: 'Sin permiso no se puede usar, y entonces no es prueba.' },
+      { pregunta: '¿Pidió el referido en vivo?', busca: 'Al final de la llamada. Por escrito casi nunca sale.' },
+    ],
+    descalificador: "Usar el resultado sin el permiso escrito.",
+    donde_se_arregla: "Escríbele hoy y pídeselo. Sin permiso, no es prueba.",
+    bloquea: true,
+  },
+  'P9B.d79': {
+    codigo: 'P9B.d79', pieza: 'lo que sigue sin ti',
+    criterios: [
+      { pregunta: '¿Marcó lo que se apaga, no solo lo que anda?', busca: 'La lista sirve por lo que está marcado, no por lo que está completo.' },
+      { pregunta: '¿Eligió UNO para dejar andando?', busca: 'Uno. Tres elegidos a la vez es ninguno hecho.' },
+      { pregunta: '¿Lo elegido se puede terminar antes del día 90?', busca: 'Si pide dos semanas de trabajo, no es para esta ventana.' },
+    ],
+    descalificador: "Marcar todo como «anda solo» sin haber faltado una semana para comprobarlo.",
+    donde_se_arregla: "Vuelve a tu sesión del día 44 y mira qué quedó grabado de verdad.",
+    bloquea: false,
+  },
+
 
   // ─── Las jornadas nuevas de la Hoja de Ruta ────────────────────────
   2: {

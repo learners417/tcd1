@@ -216,3 +216,33 @@ export function comoUrl(valor: string): string {
   if (!v) return v;
   return /^https?:\/\//i.test(v) ? v : `https://${v}`;
 }
+
+/**
+ * CUÁNTOS DÍAS LLEVA ENCENDIDA.
+ *
+ * El cálculo estaba escrito en Campañas y lo necesita también la pantalla de
+ * Hoy, que cambia de cara el día que el cliente enciende. Con dos copias, una
+ * se arregla y la otra queda contando distinto, y entonces la app dice una
+ * cosa en una pantalla y otra en la de al lado.
+ *
+ * `null` = todavía no encendió.
+ */
+export function diasEncendida(): number | null {
+  try {
+    const crudo = localStorage.getItem(CLAVE_ENCENDIDA);
+    const fecha = crudo ? (JSON.parse(crudo) as string | null) : null;
+    if (!fecha) return null;
+    const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / 86400000);
+    return Number.isFinite(dias) ? Math.max(0, dias) : null;
+  } catch { return null; }
+}
+
+/**
+ * Si ya pasó de construir a sostener.
+ *
+ * Es el cambio de etapa del programa: de acá en adelante lo que manda son sus
+ * números de la semana, no la sesión del día.
+ */
+export function yaEncendio(): boolean {
+  return diasEncendida() !== null;
+}
