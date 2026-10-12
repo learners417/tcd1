@@ -47,9 +47,23 @@ const idsDe = (txt: string, re: RegExp) =>
 
 // ── 1 · Soporte está donde se ve ───────────────────────────────────────────
 console.log('══ soporte está en las dos navegaciones ══');
-const enAbajo = idsDe(abajo, /id: '([a-z]+)'/g);
-const enLateral = idsDe(lateral, /id: '([a-z]+)', icon/g);
+// El cuarto destino cambia con el avance —Mi ADN hasta que le toque montar,
+// Campañas desde ahí— así que en el código no es un literal: es `cuarto.id`.
+// Se normaliza a 'campanas' para poder comparar las dos listas, que es lo que
+// esta lente cuida: que las dos navegaciones digan lo mismo.
+const idsDeNav = (txt: string, re: RegExp) => {
+  const ids = [...txt.matchAll(re)].map((m) => m[1]);
+  // Va en su lugar, el cuarto: el orden es parte de lo que esta lente cuida.
+  // La barra de abajo conserva el literal en su lista y lo cambia al pintar;
+  // el menú lateral lo arma directo. Solo hace falta reponerlo donde no está.
+  if (/cuarto\.id/.test(txt) && !ids.includes('campanas')) ids.splice(3, 0, 'campanas');
+  return ids;
+};
+const enAbajo = idsDeNav(abajo, /id: '([a-z]+)'/g);
+const enLateral = idsDeNav(lateral, /id: '([a-z]+)', icon/g);
 
+ok(/destinoQueCambia/.test(abajo) && /destinoQueCambia/.test(lateral),
+  'el cuarto destino cambia con el avance, y las dos navegaciones lo preguntan igual');
 ok(enAbajo.includes('mensajes'),
   'en la barra de abajo, que es la que usan los clientes en el celular');
 ok(enLateral.includes('mensajes'), 'y en el menú lateral');

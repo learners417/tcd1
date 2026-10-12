@@ -1,182 +1,208 @@
 ══════════════════════════════════════════════════════════════════
-  REVISIÓN FINAL — lo que encontré mirando otra vez
+  LOS 90 DÍAS, ALINEADOS
   Reemplaza todos los ZIPs anteriores.
 ══════════════════════════════════════════════════════════════════
 
-  · 200 archivos, a la raíz de "mejoras"
-  · 12 migraciones SQL. La 20261018 y la 20261019 van sí o sí
-    antes de dar acceso: las dos cierran agujeros de seguridad.
-  · Hay que correr `npm install` después de subir (entra la
-    tipografía Lora, la de los libros).
+  · 221 archivos, a la raíz de "mejoras"
+  · 14 migraciones SQL, de arriba hacia abajo. Las tres últimas
+    (20261019, 20261020, 20261021) son nuevas.
+  · Hay que correr `npm install` después de subir.
+  · Adentro va EL-CAMINO-DIA-POR-DIA.md: el plan exacto de los 90
+    días, generado desde lo que la app le sirve al cliente. No es
+    un resumen ni una versión paralela — si el documento y la app
+    dicen algo distinto, la auditoría no pasa.
 
 
 ══════════════════════════════════════════════════════════════════
-  1 · CUALQUIER CLIENTE PODÍA ESCRIBIRLE A OTRO
+  LO QUE ENCONTRÉ AL MIRAR LOS 90 DÍAS COMPLETOS
 ══════════════════════════════════════════════════════════════════
 
-Lo más grave de todo lo que apareció, y es de los que no se ven
-mirando la app: la función que crea avisos corría con permisos de
-administrador y no preguntaba quién la estaba llamando.
+Me pediste el mejor vehículo para que el cliente llegue solo del
+punto A al punto B. Así que dejé de mirar pantalla por pantalla y
+miré el viaje entero, los noventa días seguidos, como lo vive él.
 
-En la práctica: cualquier persona con cuenta podía meterle a otra
-un «Lupe te dejó una nota» con el texto y el enlace que quisiera.
-Con la app abierta para todos, eso es lo primero que hay que
-cerrar.
+Aparecieron seis agujeros. Ninguno era un error de código: eran
+tramos del camino donde la app lo dejaba solo.
 
-La regla queda en tres líneas, y cubre todo lo que la app ya hacía:
-el equipo le escribe a cualquiera, cualquiera se escribe a sí mismo,
-y cualquiera le escribe al equipo (que es como un cliente reporta
-que algo se rompió). Un cliente escribiéndole a otro cliente ya no
-existe.
-
-Probado contra PostgreSQL de verdad, las cuatro combinaciones.
+Están los seis cerrados.
 
 
-══════════════════════════════════════════════════════════════════
-  2 · TRES MIGRACIONES SE CORTABAN A MITAD DE CAMINO
-══════════════════════════════════════════════════════════════════
+──────────────────────────────────────────────────────────────────
+  1 · EL DÍA QUE MANDA ES EL DEL TRABAJO
+──────────────────────────────────────────────────────────────────
 
-Las ibas a correr de arriba hacia abajo y se detenían en la cuarta.
+La app contaba días de calendario. Si alguien entraba el 1 de
+marzo, el 31 de marzo la app lo trataba como si estuviera en el
+día 31 — aunque hubiera cerrado solo seis sesiones.
 
-El motivo es el mismo en las tres: sala-de-mando.sql ya tiene esas
-funciones, y la migración las redefine con otra forma. Postgres no
-deja cambiarle el tipo de retorno a una función que ya está — hay
-que soltarla primero, y eso faltaba.
+En la práctica le decía "enciende tus campañas" a alguien que
+todavía no tiene página publicada. Y el que se atrasa una semana es
+el que más necesita que la app le hable de su camino, no de uno que
+no es suyo.
 
-  · marcar_respondido   (20261009)  devolvía nada, ahora devuelve
-                                    cuántos mensajes marcó
-  · jornadas_recientes  (20261014)  suma la columna de funciones
-  · marcar_biblioteca   (20261015)  falla en la SEGUNDA corrida
+Ahora hay dos números: el del almanaque y el de su próxima sesión
+pendiente. Todo lo que se abre, se abre por el segundo.
 
-La tercera es la peor de las tres: anda la primera vez y se rompe
-al reaplicar, que es cuando uno menos lo espera y con la base a
-medio actualizar.
+Y funciona en los dos sentidos: el que adelantó trabajo no espera
+al almanaque. Si cerró la sesión 31 en tres semanas, tiene lo del
+día 31.
 
-Y una cuarta: la 20261011 daba por hecho que existía una columna
-vieja (`notas`) en una tabla que se creó a mano en Supabase y que
-ninguna migración de este repo crea. Si no estaba, fallaba en el
-medio. Ahora pregunta antes.
+LO QUE SE LE DICE AL QUE FALTA
 
-Para que esto no vuelva: la prueba de SQL ahora corre las 12
-migraciones en orden, DOS VECES, contra una base de verdad armada
-como la tuya. Antes solo probaba sala-de-mando.sql por su cuenta,
-y los choques entre los dos archivos no los miraba nadie.
+  No "vas 8 días atrasado". Eso no lo puede cambiar: los días ya
+  pasaron.
+
+  Sí "te faltan 3 sesiones para llegar — la próxima es tu día 15".
+  Eso lo puede hacer hoy, y mañana son dos.
 
 
-══════════════════════════════════════════════════════════════════
-  3 · DE LOS 20 AVISOS AL CLIENTE, SOLO 4 PODÍAN SALIR
-══════════════════════════════════════════════════════════════════
+──────────────────────────────────────────────────────────────────
+  2 · EL CUARTO LUGAR DEL MENÚ YA NO ESTÁ VACÍO
+──────────────────────────────────────────────────────────────────
 
-Los veinte textos estaban escritos. El cron que los manda decidía
-cuál correspondía con cuatro condiciones escritas a mano, en vez de
-usar el diagnóstico real. Los otros dieciséis no tenían forma de
-dispararse nunca.
+Campañas ocupaba un lugar fijo en el menú desde el día 1. Un tercio
+del programa tocando un botón que no tiene nada adentro, porque
+antes del día 29 no hay campaña que montar.
 
-Y son justo los tramos donde el cliente se cae DESPUÉS de empezar
-a vender: la agenda que sale cara, la frecuencia agotada, las
-cuotas sin cobrar, el que termina y no renueva, el que no pide
-referidos.
+Ahora ese lugar lo ocupa MI ADN mientras construye —que es
+exactamente lo que está haciendo esos días— y se convierte en
+CAMPAÑAS el día que le toca montar.
 
-Ahora el cron corre la misma cadena de valor que ve el equipo en la
-cola del Admin, sobre la misma tabla y con los países del cliente.
-Un solo diagnóstico: lo que la app le dice al cliente y lo que te
-muestra a vos no pueden ser dos lecturas distintas de los mismos
+Las dos navegaciones (la del teléfono y la de la computadora)
+preguntan lo mismo a la misma función, así que no pueden decir
+cosas distintas.
+
+
+──────────────────────────────────────────────────────────────────
+  3 · LAS ENTREGAS DEL EQUIPO AVISAN SOLAS
+──────────────────────────────────────────────────────────────────
+
+Las tres entregas estaban escritas en la especificación y nadie las
+disparaba. Dependían de que alguien se acordara.
+
+Ahora el cron las dispara, y lo hace por el día del TRABAJO:
+montarle los formularios a quien todavía no escribió su oferta es
+trabajo que se hace dos veces.
+
+  Día 0   El alta — subcuenta, WhatsApp nuevo, accesos
+  Día 11  Sitios, formularios y contactos
+  Día 29  Conversaciones, automatizaciones, reportes y WhatsApp
+
+Al cliente le llega un aviso que dice qué recibe y qué va a poder
+hacer cuando esté. Al equipo le entra la tarea con el nombre
+adelante y lo que hay que instalar, punto por punto.
+
+
+──────────────────────────────────────────────────────────────────
+  4 · LA SEGUNDA MITAD DEL CAMINO TENÍA HUECOS
+──────────────────────────────────────────────────────────────────
+
+Del día 50 al 90 había 24 días sin ninguna sesión y 735 minutos de
+trabajo en total. El cliente que llega hasta ahí —el que ya hizo lo
+difícil— abría la app y no tenía nada que hacer.
+
+Entraron doce sesiones nuevas: cobranza, revisión de la entrega,
+casos de éxito, referidos, el guion que ya no funciona, la segunda
+tanda de anuncios, qué subir de precio. 1.040 minutos.
+
+Y NINGUNA PASA DE MEDIA HORA
+
+  Es a propósito. Esos son los días de atender a los consultantes
+  que ya tiene. La promesa es cuatro horas y diez consultantes:
+  llenarle los cinco días rompe lo que el programa vino a arreglar.
+
+  Quedan 12 días enteros libres.
+
+Cinco de las doce traen su rúbrica, así que se pueden juzgar con la
+misma vara que el resto: criterios, descalificador y a dónde se
+manda si no sale.
+
+
+──────────────────────────────────────────────────────────────────
+  5 · EL DÍA QUE ENCIENDE, CAMBIA DE ETAPA
+──────────────────────────────────────────────────────────────────
+
+Encender las campañas era el momento más importante de los noventa
+días y en la app no pasaba nada. Mismo menú, misma pantalla de Hoy
+que el día 3.
+
+Ahora hay una ceremonia que lo marca: hasta hoy construiste, desde
+hoy sostienes. Y desde ese día la pantalla de Hoy abre con sus seis
 números.
 
-LA MEMORIA DEL AVISO
+LOS SEIS
 
-  El historial —cuántas veces salió cada aviso— se reconstruía
-  comparando el TÍTULO de cada notificación contra el texto. O sea
-  que el día que mejoraras la redacción de un aviso, su historial
-  volvía a cero para todos: a la mañana siguiente le salía desde el
-  principio a quien ya lo había recibido dos veces.
+  Invertido · Conversaciones · Agendas · Llamadas · Ventas ·
+  Cobrado
 
-  Ahora la clave del aviso se guarda en la base. Los textos se
-  pueden reescribir cuando quieras.
+  La cadena entera, de lo que paga a lo que entra. Cada uno con la
+  flecha contra la semana pasada.
 
+Y UNA FRASE DEBAJO: DÓNDE SE CORTA
 
-══════════════════════════════════════════════════════════════════
-  4 · LA COLA SE CALCULABA, SE MOSTRABA, Y AHÍ TERMINABA
-══════════════════════════════════════════════════════════════════
+  Seis números sin esa frase son seis números. El cliente los lee,
+  no sabe cuál mirar, y vuelve a preguntar.
 
-El Admin ya sabía cada semana qué cliente estaba trabado, en qué,
-cuánto dinero había en juego y qué había que hacer. Lo mostraba en
-una pantalla y nada más: ni quedaba una tarea para nadie, ni se
-escalaba.
+  Es el mismo diagnóstico que ve el equipo en su cola, sobre la
+  misma tabla: lo que la app le dice a él y lo que nos muestra a
+  nosotros no pueden ser dos lecturas distintas.
 
-La lista existía mientras esa pantalla estaba abierta. Quien no
-entraba a esa tab ese día, no se enteraba.
-
-Ahora cada cosa termina en algún lado:
-
-  · Lo que se arregla avisando        →  aviso al cliente (el cron)
-  · Avisado dos veces y sigue igual   →  tarea de una persona
-  · Lo que nunca fue para la app      →  tarea de una persona
-
-El escalamiento es la parte que importa. Un aviso que se repite
-todas las semanas deja de leerse: si el cliente no se movió después
-de dos, el problema no era que no estuviera avisado.
-
-Y arriba de Hoy aparece lo que la app hizo sola: cuántas tareas te
-dejó y cuántas de esas ya venían avisadas dos veces.
+  Y juzga el costo contra la banda de SUS países, no la de México.
 
 
-══════════════════════════════════════════════════════════════════
-  5 · UN NÚMERO EN VERDE QUE NUNCA SE MIDIÓ
-══════════════════════════════════════════════════════════════════
+──────────────────────────────────────────────────────────────────
+  6 · SUS NÚMEROS SON SUYOS
+──────────────────────────────────────────────────────────────────
 
-La frecuencia —cuántas veces vio cada persona el anuncio— se
-calcula dividiendo impresiones por alcance. Y las impresiones no se
-pedían en ninguna parte: no eran columna de la tabla ni campo del
-formulario.
+La tabla de la semana tenía una sola política: solo el equipo. O
+sea que el cliente no podía leer los números de su propio negocio.
+Cualquier tablero que le mostráramos venía vacío.
 
-Dividir cero da cero, y cero cae en la zona sana. Así que la app
-mostraba en VERDE un número que nunca midió. Y la frecuencia es
-justo el número que evita tirar un creativo que estaba bien: arriba
-de 3 el público se agotó, y no es el creativo.
+Tenía sentido cuando los cargaba Lupe en la Mesa de plata y nadie
+más los miraba. Dejó de tenerlo el día que el Camino le pide, en su
+sesión del día 82, que mire "tus seis números de hoy".
 
-Dos campos nuevos en la carga de la semana: Impresiones y Alcance.
-Están en la misma pantalla de Meta que el gasto, así que no agregan
-una vuelta. Mientras estén en cero, los dos indicadores dicen «sin
-datos» en vez de opinar.
+Ahora cada uno lee y carga los suyos, el equipo sigue viendo todos,
+y nadie puede escribirle los números a otro. Eso último está
+probado contra PostgreSQL de verdad, no asumido.
 
 
 ══════════════════════════════════════════════════════════════════
-  6 · LO QUE SE VEÍA MAL EN EL TELÉFONO
+  EL PLAN DE LOS 90 DÍAS, POR ESCRITO
 ══════════════════════════════════════════════════════════════════
 
-Abrí la app en un navegador de verdad a 390 px y miré.
+EL-CAMINO-DIA-POR-DIA.md tiene las 90 jornadas en el orden en que
+se abren: qué hace cada día, cuántos minutos, qué queda hecho, qué
+se le habilita, qué queda trabado hasta cumplirlo, qué cinturón
+gana y el veredicto con el que cierra.
 
-EL TÍTULO PARTIDO EN TRES
+NO LO ESCRIBÍ A MANO
 
-  «El Camino» salía «El / Camin / o», en tres renglones, montado
-  sobre el botón del chat. Lo causaba una regla que yo mismo había
-  puesto para que nada se cortara: terminaba partiendo palabras por
-  la mitad aunque hubiera un espacio a mano.
+  Lo genera `scripts/generar-plan-90-dias.py` leyendo el mismo
+  archivo que la app le sirve al cliente.
 
-  Los cuatro botones de la derecha se llevaban 249 de los 390 px,
-  y al título le quedaban 91. «Entrenadores» pedía 126.
+  Un plan escrito a mano es una segunda verdad: el día que una
+  jornada cambia, el documento sigue diciendo lo de antes y alguien
+  lo lee. Así no puede pasar — y si alguien cambia una jornada y no
+  regenera el documento, la auditoría lo caza.
 
-  El salvavidas se fue del teléfono y su contador de respuestas sin
-  abrir se mudó encima de la pestaña Contacto — que es donde se
-  busca y donde se toca. En pantalla grande sigue arriba, donde hay
-  lugar de sobra.
+CÓMO QUEDA REPARTIDO
 
-LAS PESTAÑAS DE ABAJO, PEGADAS Y CHICAS
+  Días 1-29    construir              21 sesiones   1.500 min
+  Días 30-60   encender y corregir    23 sesiones   1.120 min
+  Días 61-90   sostener               20 sesiones     735 min
 
-  Las cinco etiquetas estaban a 14 px —por debajo del piso de 15—
-  y aun así se leían pegadas: «EntrenadoresCampañasContacto». Cada
-  botón era más angosto que su palabra.
+  Y 26 días de campo: los que tiene libres para atender.
 
-  Ahora van a 15 px y cada pestaña se lleva el ancho de su palabra,
-  no una quinta parte parejo. Medido: las cinco entran enteras, con
-  aire entre ellas.
+LOS TRES MOMENTOS EN QUE CAMBIA DE ETAPA
 
-EL HISTORIAL DE CRÉDITOS QUE NO SE PODÍA ABRIR
-
-  La tabla estaba escrita y ninguna pantalla la mostraba: se podía
-  comprar y gastar, y no había dónde ver en qué. Ahora está dentro
-  de la ventana de compra, que es donde surge la pregunta.
+  Día 11   Le montan sitios y formularios → puede publicar su
+           página y recibir aplicaciones
+  Día 29   Conecta Meta y su pixel mide → el cuarto destino del
+           menú se convierte en Campañas
+  Día 31   Enciende sus dos campañas → la ceremonia, y desde ahí
+           la pantalla de Hoy abre con sus seis números
+  Día 90   Graduación → cinturón negro primer dan
 
 
 ══════════════════════════════════════════════════════════════════
@@ -184,21 +210,64 @@ EL HISTORIAL DE CRÉDITOS QUE NO SE PODÍA ABRIR
 ══════════════════════════════════════════════════════════════════
 
   · Tipos: limpio.
-  · 69 pruebas de escenario: todas en verde.
-  · Auditoría: 747 lentes, 0 faltas.
-  · SQL contra PostgreSQL 16 real: las 12 migraciones en orden,
-    dos veces, más el candado de los avisos probado en sus cuatro
-    combinaciones.
+  · 71 pruebas de escenario: todas en verde. Una es nueva y
+    protege los seis cambios de arriba.
+  · Auditoría: 749 lentes, 0 faltas.
+  · SQL contra PostgreSQL 16 real: las 14 migraciones en orden,
+    dos veces, más el candado nuevo probado en sus dos sentidos
+    (el cliente carga los suyos, y no puede cargarle a otro).
   · npm run build: pasa.
-  · 39 vistas en Chromium real: 0 faltas de diseño.
-  · Las 15 pantallas del cliente abiertas en el día 1, sin datos:
-    todas dibujan, ninguna queda vacía, cero errores de consola.
+  · 40 vistas en Chromium real: 0 faltas de diseño.
+  · El anillo del día, la navegación y el acceso: medidos en un
+    navegador de verdad, no asumidos.
 
-AL SUBIR
 
-  1. Descomprimí a la raíz de "mejoras".
-  2. `npm install`.
-  3. Corré las 12 migraciones, de arriba hacia abajo.
-  4. Marcá el escalón de servicio en cada alta: el formulario
+══════════════════════════════════════════════════════════════════
+  AL SUBIR
+══════════════════════════════════════════════════════════════════
+
+  1. Descomprime a la raíz de "mejoras".
+
+  2. BORRA ESTOS TRECE ARCHIVOS. Son los que quedaron atrás en las
+     cirugías: ya nada los usa, y uno de ellos
+     (src/lib/pausasDatos.ts) importa un archivo que ya no existe.
+     Si se quedan, `npm run lint` falla. La app igual compila,
+     porque Vite solo mira lo que se usa.
+
+       src/lib/pausaGlobal.ts
+       src/lib/pausasDatos.ts
+       src/lib/puntoDePartida.ts
+       src/components/CaminoEnPausa.tsx
+       src/components/campanas/MontajeView.tsx
+       src/components/campanas/NuevaCampanaChat.tsx
+       src/components/sesion/CheckInPanel.tsx
+       src/components/sesion/CheckOutPanel.tsx
+       src/components/sesion/CronometroSesion.tsx
+       src/components/tasks/TaskChecklist.tsx
+       src/components/tasks/TaskHerramientaIA.tsx
+       scripts/prueba-pausa.ts
+       LEEME-SUBIR.txt
+
+  3. `npm install`.
+
+  4. Corre las 14 migraciones, de arriba hacia abajo. Las tres
+     últimas son nuevas: 20261019 (el candado de los avisos),
+     20261020 (la ficha de anuncios) y 20261021 (los números del
+     cliente).
+
+  5. Marca el escalón de servicio en cada alta: el formulario
      arranca en el más bajo, y quien pagó acompañamiento se
      quedaría sin chat.
+
+
+══════════════════════════════════════════════════════════════════
+  LO QUE QUEDA DE TU LADO
+══════════════════════════════════════════════════════════════════
+
+  · Los 8 tutoriales sin grabar. El Camino los pide en su día y
+    hoy abren vacíos.
+  · El acceso de GitHub: no puedo subir los commits a la rama
+    "mejoras" porque la organización todavía no tiene instalada la
+    app de Claude. Mientras tanto, el ZIP es la vía.
+
+══════════════════════════════════════════════════════════════════

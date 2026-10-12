@@ -41,6 +41,7 @@ INTERNAS = [
     ('metrics>sistema', 'metrics', 'Mi Sistema'),
     ('diario>historial', 'diario', 'Historial'),
     ('biblioteca>conciencia', 'biblioteca', 'Conciencia'),
+    ('campanas>escribir', 'campanas', 'Escribir'),
     ('campanas>nueva', 'campanas', 'Montar en Meta'),
     ('campanas>diagnosticar', 'campanas', 'Diagnosticar'),
     ('campanas>copies', 'campanas', 'Copies'),

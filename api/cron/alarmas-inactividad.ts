@@ -19,6 +19,9 @@ import {
   type FilaDeSemana,
 } from '../../src/lib/valueChain.js';
 import type { ItemCola } from '../../src/lib/colaExcepciones.js';
+import {
+  ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo,
+} from '../../src/lib/entregasDelEquipo.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -325,7 +328,75 @@ async function handler(req: any, res: any) {
       console.error('[cron/alarmas-inactividad] fallaron los avisos', err);
     }
 
-    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados} escalados=${escalados} repetidos_evitados=${repetidosHoy}`);
+    // ── LAS ENTREGAS DEL EQUIPO ──
+    //
+    // El plan tiene tres momentos en que el equipo instala algo técnico: el
+    // alta, los sitios y formularios del día 11, y las automatizaciones del 29.
+    // Estaban escritas en el seed y NADIE LAS LEÍA: el cliente llegaba al día
+    // 11 sin saber que le tocaba una entrega, y Lupe sin saber que debía
+    // hacerla. Aparecían cuando alguien se acordaba, o cuando el cliente
+    // preguntaba por WhatsApp.
+    //
+    // Se disparan por el día del TRABAJO y no por el del calendario: la
+    // entrega existe para desbloquear la sesión que viene, así que llega
+    // cuando el cliente llega. Montarle los formularios a alguien que todavía
+    // no escribió su oferta es trabajo que se hace dos veces.
+    let entregasAvisadas = 0;
+    try {
+      const claves = ENTREGAS.map((e) => `entrega-${e.dia}`);
+      const { data: yaSalieron } = await admin
+        .from('notificaciones')
+        .select('usuario_id, clave')
+        .in('clave', claves);
+      const hechasDe = new Map<string, number[]>();
+      for (const n of (yaSalieron ?? []) as Array<{ usuario_id: string; clave: string }>) {
+        const dia = Number(n.clave.replace('entrega-', ''));
+        if (!Number.isFinite(dia)) continue;
+        hechasDe.set(n.usuario_id, [...(hechasDe.get(n.usuario_id) ?? []), dia]);
+      }
+
+      for (const cli of clientes ?? []) {
+        if (!cli.fecha_inicio) continue;
+        if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
+        const done = completadasPor.get(cli.id) ?? new Set();
+        const proxima = CAMINO.find((m) => !done.has(m.c));
+        // Sin próxima, terminó el Camino: todas las entregas ya corresponden.
+        const diaDeTrabajo = proxima ? proxima.d : 90;
+        const e = entregaPendiente(diaDeTrabajo, hechasDe.get(cli.id) ?? []);
+        if (!e) continue;
+
+        const nombre = cli.nombre ?? 'Cliente';
+        const aviso = avisoAlCliente(e);
+        await admin.from('notificaciones').insert({
+          usuario_id: cli.id, tipo: 'sistema',
+          titulo: aviso.titulo, descripcion: aviso.descripcion,
+          accion_url: '/mensajes', clave: `entrega-${e.dia}`, leida: false,
+        });
+
+        // Y la tarea en la lista de quien la tiene que hacer. La huella la
+        // forman el cliente y la referencia, así que no se duplica.
+        const tarea = tareaDelEquipo(e, nombre);
+        await Promise.all(adminIds.map((aid) =>
+          admin.rpc('crear_tarea_del_sistema', {
+            p_titulo: tarea.titulo,
+            p_descripcion: tarea.descripcion,
+            p_asignado: aid,
+            p_cliente: cli.id,
+            p_origen: 'recorrido',
+            p_ref: `entrega-${e.dia}`,
+            p_destino: 'escalar',
+            p_texto_listo: null,
+            p_peso: 60_000,
+            p_prioridad: 'alta',
+            p_vence: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+          }).then(() => undefined, () => undefined)));
+        entregasAvisadas++;
+      }
+    } catch (err) {
+      console.error('[cron/alarmas-inactividad] fallaron las entregas', err);
+    }
+
+    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados} escalados=${escalados} repetidos_evitados=${repetidosHoy} entregas=${entregasAvisadas}`);
     return res.status(200).json({ ok: true, alarmas });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

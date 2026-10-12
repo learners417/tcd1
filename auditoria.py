@@ -206,9 +206,19 @@ except Exception:
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
 
 _bt = todo.get('src/components/BottomTabBar.tsx','')
-_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt))
-_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", todo.get('src/components/Sidebar.tsx','')))
+_sb = todo.get('src/components/Sidebar.tsx','')
+# El cuarto destino cambia con el avance —Mi ADN hasta que le toque montar,
+# Campañas desde ahí— y las dos navegaciones lo preguntan a `destinoQueCambia`.
+# La barra conserva el literal en su lista y lo cambia al pintar; el menú
+# lateral lo arma directo, así que ahí no hay literal que encontrar. Lo que
+# esta lente cuida es que los dos lleven a lo mismo, no cómo está escrito.
+_dinamico = lambda s: {'campanas'} if 'destinoQueCambia' in s else set()
+_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt)) | _dinamico(_bt)
+_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", _sb)) | _dinamico(_sb)
 check('la barra de abajo y el menu lateral llevan a lo mismo', _ids_bt == _ids_sb, f'abajo {sorted(_ids_bt)} / lateral {sorted(_ids_sb)}')
+check('y el cuarto destino lo deciden las dos con la misma función',
+      ('destinoQueCambia' in _bt) == ('destinoQueCambia' in _sb),
+      'con una sola que lo pregunte, las dos navegaciones dicen cosas distintas')
 
 try:
     _css = open('src/index.css', encoding='utf-8').read()
@@ -316,6 +326,18 @@ with _tf64.TemporaryDirectory() as _tmp64:
     _regen = open(f'{_tmp64}/spec/datos/roadmap.seed.json', encoding='utf-8').read() if _g.returncode == 0 else ''
 check('el seed de la app es exactamente el que genera hoy generar_seed.py',
       _g.returncode == 0 and _regen == rd('src/lib/roadmap.seed.json'), (_g.stderr or 'difiere: correr generar_seed.py y copiar')[-160:])
+
+# El plan de los 90 días que se entrega por escrito también se genera: un plan
+# escrito a mano es una segunda verdad, y el día que una jornada cambia el
+# documento sigue diciendo lo de antes y alguien lo lee.
+with _tf64.TemporaryDirectory() as _tmpP:
+    _dst = f'{_tmpP}/plan.md'
+    _p = subprocess.run([sys.executable, 'scripts/generar-plan-90-dias.py', _dst],
+                        capture_output=True, text=True)
+    _plan = open(_dst, encoding='utf-8').read() if _p.returncode == 0 else ''
+check('el plan escrito de los 90 días sale del seed, no de la mano',
+      _p.returncode == 0 and _plan == rd('EL-CAMINO-DIA-POR-DIA.md'),
+      (_p.stderr or 'difiere: correr scripts/generar-plan-90-dias.py')[-160:])
 
 # ── 6.5 · Todo endpoint de IA pasa por el enrutador ────────────────────
 # Antes había una cadena copiada en cada endpoint: DeepSeek→Claude escrita

@@ -367,18 +367,33 @@ SQL
 marcar $? "un cliente no puede leer el historial de otro (filas: $FUERA)"
 
 echo ""
+echo "══ sus números son suyos ══"
+#
+# La tabla de la semana solo la podía leer el equipo, así que el cliente no
+# veía los números de su propio negocio. Ahora cada uno carga los suyos, y
+# nadie puede escribirle los números a otro.
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select guardar_semana_cliente('aaaaaaaa-0000-0000-0000-000000000002','2026-W42','{\"gasto\":1}'::jsonb);"
+[ $? -ne 0 ]
+marcar $? "un cliente NO puede cargarle los números a otro"
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select guardar_semana_cliente('aaaaaaaa-0000-0000-0000-000000000001','2026-W42','{\"gasto\":120}'::jsonb);"
+marcar $? "pero sí los suyos"
+
+echo ""
 echo "══ las impresiones, que no se pedían ══"
 #
 # El costo de aparecer y la frecuencia se calculan con las impresiones, y la
 # columna no existía. La frecuencia daba cero, y cero cae en la zona sana: la
 # app mostraba en verde un número que nunca midió.
-psqlq << 'SQL' > /dev/null 2>&1
-select guardar_semana_cliente('11111111-1111-1111-1111-111111111111','2026-W42',
-  '{"gasto":300,"impresiones":48000,"alcance":12000,"conversaciones":60}'::jsonb);
-SQL
-marcar $? "guardar la semana acepta las impresiones"
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select guardar_semana_cliente('11111111-1111-1111-1111-111111111111','2026-W42','{\"gasto\":300,\"impresiones\":48000,\"alcance\":12000,\"conversaciones\":60}'::jsonb);"
+marcar $? "el equipo carga la semana de cualquiera, con las impresiones"
 IMP=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
-select impresiones from sala_metricas_semana where semana_iso = '2026-W42';
+select impresiones from sala_metricas_semana
+ where semana_iso = '2026-W42'
+   and cliente_id = '11111111-1111-1111-1111-111111111111';
 SQL
 )
 [ "$IMP" = "48000" ]

@@ -160,9 +160,11 @@ try:
         t = pag.evaluate('() => document.body.innerText')
         m_total = re.search(r'de (\d+) pasos', t)
         # Los pasos del cliente son las jornadas que hace: los días de campo y
-        # los fines de semana no se completan.
+        # los fines de semana no se completan. La banda subió a 70 cuando
+        # entraron doce sesiones cortas en los días 50 al 90, que estaban
+        # vacíos justo cuando el cliente ya vende.
         check('el anillo cuenta los pasos del cliente, no los días',
-              bool(m_total) and 45 <= int(m_total.group(1)) <= 60, m_total.group(0) if m_total else 'sin anillo')
+              bool(m_total) and 45 <= int(m_total.group(1)) <= 70, m_total.group(0) if m_total else 'sin anillo')
         pag.get_by_role('button', name='Empezar').click()
         pag.wait_for_timeout(1200)
         abierto = pag.evaluate('() => !!document.querySelector("[id^=meta-]")')
