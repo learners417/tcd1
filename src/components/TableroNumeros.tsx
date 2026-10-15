@@ -2,7 +2,7 @@
  * TU TABLERO — la matemática de los 10, viva (ZIP C).
  * Tres números por semana. Un diagnóstico. Una acción.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { VOC } from '../lib/vocabulario';
 import {
   cadenaPara, metaSemanal, semanaActual, registrarSemana, ventasTotales,

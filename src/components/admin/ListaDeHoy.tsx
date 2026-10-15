@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Copy, Send, ArrowUpRight, Plus, AlertTriangle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   ordenar, porArea, titularDelDia, comoSeResuelve, aQuienEscala,
-  avisoDeEscalado, ETIQUETA_DESTINO, POR_QUE,
-  type TareaDelCerebro, type TareaOrdenada, type AperturaDeTarea,
+  ETIQUETA_DESTINO, POR_QUE,
+  type TareaOrdenada, type AperturaDeTarea,
 } from '../../lib/cerebro';
 import { miListaDeHoy, cerrar, mandarleAlCliente } from '../../lib/cerebroStorage';
 import { mensajesEsperando, crearTareasDeSoporte } from '../../lib/soporteStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
-import Termino from '../Termino';
 import TarjetaCliente, { type Semaforo } from './TarjetaCliente';
 
 /**

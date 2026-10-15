@@ -1,8 +1,8 @@
 import BotonAudio from './sesion/BotonAudio';
 import { getOrigen, setOrigen } from '../lib/origen';
 import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
-import React, { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, Loader2, CheckCircle2, Sparkles, Map, Bot, MessageSquare, BookOpen, LockKeyhole, UserCircle, Rocket } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, Eye, EyeOff, Loader2, CheckCircle2, Sparkles, Map, Bot, MessageSquare, LockKeyhole, UserCircle, Rocket } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -787,7 +787,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
 
             <div className="rounded-2xl border border-cream/10 bg-[#0F0F0F] p-5 mb-5">
               <p className="text-sm text-cream/80 leading-relaxed">
-                Esto no es un formulario. Es una promesa — y las promesas se hacen con nombre y apellido.
+                Es una promesa, y las promesas se hacen con nombre y apellido.
               </p>
               <p className="text-sm text-cream/80 leading-relaxed mt-3">
                 Y no la haces solo. Al firmar te sumas a los <strong className="text-gold">Sanadores Libres</strong> — profesionales que se negaron a elegir entre su vocación y vivir dignamente de ella. Contra la vieja idea de que el que sana tiene que ser pobre, acá caminamos juntos.

@@ -6,9 +6,13 @@ import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
 import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
+import {
+  evidenciasQueCuentan, guardarVeredictoIA, loQueDiceElVeredicto,
+  type Veredicto,
+} from '../../lib/veredictoEvidencia';
 import { notificarAdminsEvidencia } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
-import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import BotonAudio from '../sesion/BotonAudio';
 import { VOC } from '../../lib/vocabulario';
@@ -27,16 +31,32 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
   const [veredicto, setVeredicto] = useState<VeredictoVision | null>(null);
   const [verificando, setVerificando] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
+  /** El veredicto que frena, si hay uno. Es lo que explica por qué. */
+  const [frena, setFrena] = useState<Veredicto | null>(null);
+  /**
+   * EL CONTEO SALE DE LA BASE, NO DE LA CARPETA.
+   *
+   * Contaba archivos. El cliente subía la foto equivocada, la IA la
+   * rechazaba, la pantalla le pedía otra, él recargaba, y la jornada se
+   * destrababa con la foto que la IA había rechazado: el archivo seguía en la
+   * carpeta, y el veredicto vivía en este mismo estado de React.
+   */
+  const recontar = React.useCallback(async (userId: string) => {
+    const archivos = await listarEvidencias(userId, meta.codigo);
+    const r = await evidenciasQueCuentan(userId, meta.codigo, archivos);
+    setEvidencias(r.cuentan);
+    setFrena(r.frena);
+  }, [meta.codigo]);
   useEffect(() => {
     if (!meta.evidencia_requerida?.nombre?.trim()) return;
     (async () => {
       const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
       const userId = data.user?.id ?? null;
       setUid(userId);
-      if (userId) setEvidencias((await listarEvidencias(userId, meta.codigo)).length);
+      if (userId) await recontar(userId);
       else setEvidencias(0);
     })();
-  }, [meta.codigo, meta.evidencia_requerida]);
+  }, [meta.codigo, meta.evidencia_requerida, recontar]);
   /**
    * CUÁNDO DE VERDAD HACE FALTA SUBIR UN ARCHIVO.
    *
@@ -90,20 +110,42 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
     const res = await subirEvidencia(uid, meta.codigo, file);
     if (res.ok) {
       setEvidencias((n) => Math.max(0, n) + 1);
+      setFrena(null);
       try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
-      // CP9 · Visión IA (asistente, nunca bloquea): verifica la imagen en segundo plano.
-      if (meta.evidencia_requerida?.descripcion) {
+      const archivo = res.evidencia.path;
+      /*
+       * EL TESTIGO JUZGA, Y EL VEREDICTO QUEDA.
+       *
+       * Antes el veredicto vivía acá y se iba al recargar. Ahora se guarda con
+       * la firma de quién lo dictó, y lo que la IA no mira —el audio, el
+       * video, el PDF— va derecho a la cola del equipo.
+       *
+       * Si la IA no pudo mirar una imagen (sin clave, o un error) no se
+       * escribe veredicto: nadie la juzgó, y sin fila la evidencia cuenta. El
+       * equipo la ve igual en la ficha del cliente y puede decidir ahí.
+       */
+      const esImagen = file.type.startsWith('image/');
+      if (!esImagen) {
+        await guardarVeredictoIA(uid, meta.codigo, archivo, 'pendiente',
+          'La mira el equipo: el testigo solo lee imágenes.');
+      } else if (meta.evidencia_requerida?.descripcion) {
         setVeredicto(null);
         setVerificando(true);
         const v = await verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion);
         setVerificando(false);
         setVeredicto(v);
+        if (v) {
+          await guardarVeredictoIA(uid, meta.codigo, archivo,
+            v.ok ? 'aprobada' : 'rechazada', v.motivo ?? '');
+        }
         if (v && v.ok === false) {
           // El testigo no la confirmó: esa evidencia NO cuenta.
           setEvidencias((n) => Math.max(0, n - 1));
           setErrorSubida(`Tu testigo no pudo confirmarla${v.motivo ? ': ' + v.motivo : ''}. Sube otra foto — la de verdad.`);
         }
       }
+      // La verdad del conteo está en la base, no en este estado.
+      await recontar(uid);
     } else {
       setErrorSubida((res as { ok: false; motivo: string }).motivo);
     }
@@ -237,10 +279,21 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
               <p className="text-xs text-success mt-2">✓ Tu testigo la vio{veredicto.motivo ? `: ${veredicto.motivo}` : ''}. Confirmada.</p>
             )}
             {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
-            {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
+            {/* EL MOTIVO SOBREVIVE A LA RECARGA.
+                Antes el veredicto vivía en este componente: el cliente volvía
+                al otro día y la pantalla le pedía una evidencia sin decirle
+                qué tenía de malo la que ya había subido. */}
+            {!errorSubida && !verificando && frena && (
+              <p className="text-[17px] text-gold mt-2">{loQueDiceElVeredicto(frena)} Sube otra que muestre lo que pide esta jornada.</p>
+            )}
+            {verificando && <p className="text-[17px] text-cream/55 mt-2">Revisando la imagen…</p>}
+            {/* El veredicto se decía y se desarmaba en la misma línea: «revisa
+                que la foto muestre lo pedido — si estás seguro, puedes seguir
+                igual». Así nadie revisa nada. Ahora el veredicto va solo, y
+                seguir igual lo decide el botón, que es donde se decide. */}
             {veredicto && !verificando && (veredicto.ok
-              ? <p className="text-xs text-success mt-2">✓ Se ve bien — coincide con lo pedido.</p>
-              : <p className="text-xs text-gold mt-2">⚠️ {veredicto.motivo || 'Revisa que la foto muestre lo pedido'} — si estás seguro, puedes seguir igual.</p>
+              ? <p className="text-[17px] text-success mt-2">Se ve bien: coincide con lo pedido.</p>
+              : <p className="text-[17px] text-gold mt-2">{veredicto.motivo || 'Mira si la foto muestra lo pedido.'}</p>
             )}
           </div>
         )}

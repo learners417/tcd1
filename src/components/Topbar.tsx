@@ -1,8 +1,9 @@
 import { planActual, planPermitePilar } from '../lib/planes';
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, X, CheckCircle2, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Trophy, Shield, Menu, Megaphone, ChevronLeft, Sparkles, Target, Hexagon, LifeBuoy } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { UserCircle2, Search, Bell, X, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Menu, Megaphone, ChevronLeft, Sparkles, Hexagon, LifeBuoy } from 'lucide-react';
 import { toast } from 'sonner';
-import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB, type TipoNotificacion } from '../lib/notifications';
+import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB } from '../lib/notifications';
+import { comoSeVeElAviso } from '../lib/avisoVisual';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { playNotificationSound } from '../lib/notificationSound';
 import CreditsBadge from './credits/CreditsBadge';
@@ -17,12 +18,14 @@ interface TopbarProps {
   setCurrentPage: (page: string) => void;
   userId?: string;
   onMobileMenuToggle: () => void;
+  /** Abre su cuenta: sus datos y el cerrar sesión. */
+  onOpenSettings?: () => void;
 }
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
   mensajes: 'Soporte', adn: 'Mi ADN', diario: 'Diario del Fundador',
-  biblioteca: 'El Método', agentes: 'Entrenadores IA', creador: 'Creador de Contenido',
+  biblioteca: 'El Método', creador: 'Creador de Contenido',
   entrenadores: 'Entrenadores',
   campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
 };
@@ -46,10 +49,10 @@ const TITULOS_CORTOS: Record<string, string> = {
   diario: 'Diario',
   creador: 'Creador',
   manualNegocio: 'Manual',
-  // `agentes` y `entrenadores` son la MISMA pantalla: Entrenadores.tsx no
-  // hace otra cosa que dibujar Agentes. Que una se llamara «Entrenadores» y
-  // la otra «Entrenadores IA» hacía parecer que eran dos lugares distintos.
-  agentes: 'Entrenadores',
+  // `agentes` salió de acá: era la ruta vieja de esta misma pantalla, no
+  // estaba en ningún menú, y nombrarla en los títulos con «Entrenadores IA»
+  // hacía parecer que eran dos lugares distintos. Los avisos que todavía
+  // mandan a '/agentes' se redirigen abajo.
 };
 
 /** El buscador respeta el plan: nadie llega por acá a lo que no compró. */
@@ -69,21 +72,6 @@ const searchablePages = [
   { id: 'miclinica', label: 'Mi Clínica', icon: Hexagon, desc: 'Dónde operas: tus consultantes y sus protocolos', minPilar: 0 },
 ];
 
-const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
-  hito: Trophy,
-  tarea: CheckCircle2,
-  mensaje: MessageSquare,
-  sistema: Bell,
-  admin: Shield,
-};
-
-const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-gold', bg: 'bg-gold/10' },
-  tarea: { text: 'text-success', bg: 'bg-success/10' },
-  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
-  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
-  admin: { text: 'text-gold', bg: 'bg-gold/10' },
-};
 
 /**
  * A dónde lleva cada aviso.
@@ -101,7 +89,6 @@ const URL_TO_PAGE: Record<string, string> = {
   '/hoja-de-ruta': 'roadmap',
   '/diario': 'diario',
   '/campanas': 'campanas',
-  '/agentes': 'agentes',
   '/creador': 'creador',
   '/miclinica': 'campanas',   // MiClínica todavía es un enlace externo:
                               // el puente vive dentro de Campañas.
@@ -109,6 +96,12 @@ const URL_TO_PAGE: Record<string, string> = {
   '/numero': 'numero',
   '/adn': 'adn',
   '/coach': 'coach',
+  // Cuatro avisos del cliente mandan a '/agentes', que era la ruta vieja de
+  // la pantalla de Entrenadores. Al unificar las dos rutas se quedó sin
+  // destino, y un aviso sin destino no dibuja el botón «Ver»: el clic no hace
+  // nada. Son justo los cuatro que lo mandan a hablar con un entrenador.
+  '/agentes': 'entrenadores',
+  '/entrenadores': 'entrenadores',
   '/biblioteca': 'biblioteca',
   '/mensajes': 'mensajes',
   '/admin/clientes': 'admin-clientes',
@@ -134,7 +127,7 @@ function tiempoRelativo(fechaISO: string): string {
   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle }: TopbarProps) {
+export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle, onOpenSettings }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,10 +217,23 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
     return () => { vivo = false; if (supabase) supabase.removeChannel(canal); };
   }, [userId]);
 
-  // Abrir Soporte es leerlo: el contador no puede sobrevivir a la visita.
+  /*
+   * El contador se apagaba con solo estar en la pantalla, y la pantalla abre
+   * en el canal de comunidad: el cliente entraba, el globo desaparecía, y se
+   * iba sin ver la respuesta. Al recargar volvía, porque en la base seguía
+   * sin leer — o sea que el contador mentía justo cuando importaba.
+   *
+   * Ahora se vuelve a preguntar a la base. `marcarLeidos` corre cuando abre
+   * la conversación de verdad, así que el globo se apaga cuando la leyó.
+   */
   useEffect(() => {
-    if (currentPage === 'mensajes') setSoporteSinLeer(0);
-  }, [currentPage]);
+    if (currentPage !== 'mensajes' || !userId) return;
+    const t = setInterval(() => {
+      void sinLeerDelCliente(userId).then(setSoporteSinLeer).catch(() => { /* queda el que había */ });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [currentPage, userId]);
+
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -370,6 +376,26 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
               )}
             </button>
           )}
+          {/* ── TU CUENTA ──
+                 Solo en pantalla grande. En el teléfono se llega por el menú
+                 lateral, que se abre con el botón de la izquierda y tiene la
+                 misma entrada.
+                 Acá ocupaba 48 px de los 390 de la barra, y el título volvía a
+                 salir cortado: «El Camino», «Entrenadores», «El Método» y
+                 «Campañas». Es el mismo problema que ya se arregló una vez
+                 sacando un botón de esta barra. */}
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label="Tu cuenta"
+              className="hidden md:flex w-12 h-12 rounded-full card-panel items-center justify-center
+                text-cream/75 hover:text-cream transition-colors active:scale-95"
+            >
+              <UserCircle2 className="w-6 h-6" />
+            </button>
+          )}
+
           {/* Credits balance · click → modal de compra · oculto via flag mientras el sistema esta apagado */}
           {CREDITS_ENABLED && <CreditsBadge userId={userId} variant="expanded" />}
 
@@ -412,8 +438,7 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
                     </div>
                   )}
                   {notifications.map(notif => {
-                    const IconComponent = ICON_MAP[notif.tipo] ?? Bell;
-                    const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
+                    const { Icono: IconComponent, color: colors } = comoSeVeElAviso(notif.tipo);
 
                     return (
                       <div

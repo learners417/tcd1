@@ -1,6 +1,6 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, CheckCircle2, MessageSquare, Trophy, Shield } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   obtenerNotificaciones,
@@ -8,27 +8,12 @@ import {
   marcarTodasLeidas,
   contarNoLeidas,
   type NotificacionDB,
-  type TipoNotificacion,
 } from '../lib/notifications';
+import { comoSeVeElAviso } from '../lib/avisoVisual';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { playNotificationSound } from '../lib/notificationSound';
 import { VOC } from '../lib/vocabulario';
 
-const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
-  hito: Trophy,
-  tarea: CheckCircle2,
-  mensaje: MessageSquare,
-  sistema: Bell,
-  admin: Shield,
-};
-
-const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-gold', bg: 'bg-gold/10' },
-  tarea: { text: 'text-success', bg: 'bg-success/10' },
-  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
-  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
-  admin: { text: 'text-gold', bg: 'bg-gold/10' },
-};
 
 function tiempoRelativo(fechaISO: string): string {
   const ahora = Date.now();
@@ -215,8 +200,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                 </div>
               )}
               {items.map(notif => {
-                const Icon = ICON_MAP[notif.tipo] ?? Bell;
-                const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
+                const { Icono: Icon, color: colors } = comoSeVeElAviso(notif.tipo);
                 return (
                   <div
                     key={notif.id}

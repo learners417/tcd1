@@ -87,8 +87,7 @@ export default function LaActivacion({
               sesiones sí: puede hacerlas hoy. */}
           <p className="mt-3 text-[18px] leading-relaxed text-cream/85">
             Vas por la sesión del día {donde.diaDeTrabajo}.{' '}
-            {faltaParaLlegar(donde, DIA_EN_QUE_EMPIEZA)} Y no es una espera: lo
-            que escribes hasta entonces es de donde salen tus anuncios. Tu
+            {faltaParaLlegar(donde, DIA_EN_QUE_EMPIEZA)} Lo que escribes hasta entonces es de donde salen tus anuncios. Tu
             método, tu oferta, tu precio y tu página. Con eso hecho, montar la
             campaña es una tarde.
           </p>

@@ -2,7 +2,7 @@
  * CopiesView.tsx — Modulo de generacion de copies para Meta Ads
  * Split layout: form izquierda + output streaming derecha
  */
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { PenTool, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { streamText } from '../../lib/aiProvider';
 import { adnContext } from '../../lib/campanasPrompts';

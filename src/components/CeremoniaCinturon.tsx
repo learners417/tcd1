@@ -11,7 +11,7 @@
  * - Las cartas van por id de grado (los 11 actuales), no por número de orden:
  *   la tabla vieja era de los 9 cinturones anteriores y quedó corrida.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { cinturonDesdeProgreso, type Cinturon } from '../lib/cinturones';
 import CintaCinturon from './CintaCinturon';

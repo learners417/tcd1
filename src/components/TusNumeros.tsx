@@ -5,7 +5,7 @@
  * registró en el Camino; acá ve el acumulado, lo que le queda después de
  * impuestos y cuánto falta para su meta.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import {
   leerNumeros, guardarNumeros, balance, anotarHoras, lunesDe, lecturaDeLaHora,

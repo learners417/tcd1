@@ -4,7 +4,7 @@
  * Día 1, que se abre en la graduación. Si todavía no lo grabó (la captura del
  * Día 1 llega con T3), muestra el sobre cerrado — nunca rompe.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Mail, Play, Pause, Lock } from 'lucide-react';
 import { fetchMensajeFuturo } from '../lib/graduacion';
 

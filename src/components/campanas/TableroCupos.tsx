@@ -5,9 +5,10 @@
  * >$0,07 por visita → se apaga · conversaciones sin agendas → es la página
  * o el DM · primeros 14 días → se mide, no se opina.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { hoyISO } from '../../lib/diaPrograma';
 import {
-  METRICAS_REGLAS, UMBRALES, veredictoAnuncio, diasDeMedicion,
+  UMBRALES, veredictoAnuncio, diasDeMedicion,
   type ObjetivoCampana,
 } from '../../lib/formulasAnuncios';
 import { decidirCampana } from '../../lib/decidirCampana';
@@ -30,7 +31,7 @@ const FILA0: FilaAnuncio = { gasto: '', visitas: '', conversaciones: '', agendas
 function leer<T>(k: string, def: T): T {
   try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
 }
-const hoy = () => new Date().toISOString().slice(0, 10);
+const hoy = () => hoyISO();
 
 export default function TableroCupos(
   { diasCampana, onIrAnuncios, clienteId }: {
@@ -95,7 +96,7 @@ export default function TableroCupos(
     let n = 0;
     const d = new Date();
     for (let i = 0; i < 60; i++) {
-      const clave = d.toISOString().slice(0, 10);
+      const clave = hoyISO(d);
       if (diario[clave] === undefined) break;
       n++;
       d.setDate(d.getDate() - 1);

@@ -4,7 +4,7 @@
  * Step 1: Achievement celebration screen.
  * Step 2: Mandatory 1-5 star satisfaction rating + optional comment.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trophy, ChevronRight, Sparkles, Star, Award } from 'lucide-react';
 import { VOC } from '../lib/vocabulario';
 

@@ -3,7 +3,7 @@ import { resumenRuedaParaMentor } from '../lib/rueda';
 import { planDe, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { safeGet } from '../lib/safeStorage';
-import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
+import { Send, Bot, RefreshCw, Sparkles } from 'lucide-react';
 import { streamText } from '../lib/aiProvider';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -301,7 +301,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         if (usosSemana('mentor') >= TOPE_MENTOR_SEMANAL) {
           setMessages((prev) => [...prev, { role: 'user', content: text }, {
             role: 'assistant',
-            content: 'Usaste tus ' + TOPE_MENTOR_SEMANAL + ' preguntas de maestro de esta semana — bien usadas valen oro. El lunes se renuevan. Mientras tanto, el dojo sigue abierto: tu sesión de hoy te espera en El Camino, y si algo se traba en plena sesión, ahí estoy contigo adentro.',
+            content: 'Usaste tus ' + TOPE_MENTOR_SEMANAL + ' preguntas de maestro de esta semana — bien usadas valen oro. El lunes se renuevan. Mientras tanto, tu sesión de hoy te espera en El Camino, y ahí adentro estoy contigo en cada paso.',
           }]);
           setInput('');
           return;
@@ -314,7 +314,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         if (usados >= TOPE_MENTOR_BLANCO) {
           setMessages((prev) => [...prev, {
             role: 'assistant' as const,
-            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
+            content: 'Llegamos al límite de conversaciones de tus 5 días. Del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
           }]);
           return;
         }

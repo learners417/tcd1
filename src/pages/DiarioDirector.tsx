@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { hoyISO } from '../lib/diaPrograma';
 import {
   BookOpen,
   Loader2,
@@ -43,7 +44,6 @@ import {
   consistencia7d,
   energiaPromedio7d,
   rachaActiva,
-  etiquetaEnergia,
   colorDimension,
   toFechaStr,
   type EntradaHistorica,
@@ -238,7 +238,7 @@ export default function DiarioDirector({
   const [mente, setMente] = useState(5);
   const [emociones, setEmociones] = useState(5);
   const [logro, setLogro] = useState(() => {
-    try { const ses = localStorage.getItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10)); return ses ? `Completé: ${ses}` : ''; } catch { return ''; }
+    try { const ses = localStorage.getItem('tcd_sesion_hoy_' + hoyISO()); return ses ? `Completé: ${ses}` : ''; } catch { return ''; }
   });
   const [tareas, setTareas] = useState<string[]>([]);
   const [checkeos, setCheckeos] = useState<string[]>([]);
@@ -256,8 +256,8 @@ export default function DiarioDirector({
   const sesionDeHoy = useMemo(() => {
     try {
       const ult = JSON.parse(localStorage.getItem('tcd_ultima_sesion_v1') ?? 'null') as { titulo?: string; fecha?: string } | null;
-      const hoyISO = new Date().toISOString().slice(0, 10);
-      if (ult?.titulo && (!ult.fecha || ult.fecha.slice(0, 10) === hoyISO)) return ult.titulo;
+      const deHoy = hoyISO();
+      if (ult?.titulo && (!ult.fecha || ult.fecha.slice(0, 10) === deHoy)) return ult.titulo;
     } catch { /* noop */ }
     return null;
   }, []);
@@ -599,7 +599,7 @@ Devuelve SOLO este JSON:
                 const dias: Array<{ d: string; e: number }> = [];
                 for (let k = 13; k >= 0; k--) {
                   const f = new Date(); f.setDate(f.getDate() - k);
-                  const key = f.toISOString().slice(0, 10);
+                  const key = hoyISO(f);
                   dias.push({ d: key.slice(8), e: porFecha.get(key) ?? 0 });
                 }
                 return (

@@ -4,7 +4,7 @@
  * que el fundador subió en los hitos de venta. Sin comprobantes, un mensaje
  * cálido — nunca rompe.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Receipt } from 'lucide-react';
 import { fetchComprobantes, type Comprobante } from '../lib/graduacion';
 

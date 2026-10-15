@@ -2,7 +2,7 @@
  * CreditsHistory.tsx — Tabla del historial de movimientos de creditos.
  * Usado en el modal de cuenta/facturacion.
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { History, Loader2, TrendingUp, TrendingDown } from 'lucide-react';
 import {
   fetchCreditTransactions,

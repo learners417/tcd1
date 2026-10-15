@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Download, RotateCcw } from 'lucide-react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { base64ToDataUrl } from '../../lib/campanasImageGen';
 import type { CopyGenerado } from '../../lib/campanasTypes';

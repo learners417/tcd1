@@ -2,7 +2,7 @@
  * CustomSelect.tsx
  * Dropdown estilizado con el tema dark de la app. Reemplaza los <select> nativos.
  */
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface CustomSelectProps {

@@ -2,7 +2,7 @@
  * Campanas.tsx — Orquestador principal del modulo de campanas
  * Sub-nav horizontal + router de vistas
  */
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CampanasSubNav from '../components/campanas/CampanasSubNav';
 import AnunciosQueAgendan from '../components/campanas/AnunciosQueAgendan';

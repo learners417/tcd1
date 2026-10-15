@@ -101,8 +101,19 @@ export default function BottomTabBar({ currentPage, setCurrentPage, userId, dond
     return () => { vivo = false; void supabase?.removeChannel(canal); };
   }, [userId]);
 
-  // Al entrar a Soporte, el contador vuelve a cero: ya las vio.
-  useEffect(() => { if (currentPage === 'mensajes') setSinLeer(0); }, [currentPage]);
+  /*
+   * No se apaga por estar en la pantalla: se apaga cuando la conversación
+   * quedó leída en la base. Apagarlo al entrar lo hacía desaparecer antes de
+   * que el cliente viera la respuesta, porque la pantalla abre en el canal de
+   * comunidad.
+   */
+  useEffect(() => {
+    if (currentPage !== 'mensajes' || !userId) return;
+    const t = setInterval(() => {
+      void sinLeerDelCliente(userId).then(setSinLeer).catch(() => { /* queda el que había */ });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [currentPage, userId]);
 
   return (
     <nav

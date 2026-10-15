@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase, db } from '../../lib/supabase';
+import { db } from '../../lib/supabase';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { mensajeDeFalla, funcionQueNoExiste } from '../../lib/conexion';
 import {

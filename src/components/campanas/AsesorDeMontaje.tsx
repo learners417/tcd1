@@ -20,7 +20,7 @@
  * Queda lo único que no vive en ninguna otra pantalla: el montaje, paso por
  * paso, con la receta ya decidida. El asesor no la elige. La explica.
  */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Send, ArrowLeft, Check, Circle, ShieldAlert } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';

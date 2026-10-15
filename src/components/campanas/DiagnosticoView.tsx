@@ -1,8 +1,8 @@
 /**
  * DiagnosticoView.tsx — Diagnostico de campana con metricas + IA
  */
-import React, { useState, useCallback } from 'react';
-import { BarChart3, Loader2, Copy, CheckCircle2, Sparkles } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Loader2, Copy, CheckCircle2, Sparkles } from 'lucide-react';
 import { streamText } from '../../lib/aiProvider';
 import type { ProfileV2 } from '../../lib/supabase';
 import type { DiagnosticoInput } from '../../lib/campanasTypes';

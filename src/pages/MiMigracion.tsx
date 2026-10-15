@@ -18,7 +18,7 @@
  *     «completo» y el ADN con agujeros — y sus tres anuncios saliendo de un
  *     avatar que no existe. Acá se le dice cuánto le falta y cuál es.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Loader2, ArrowRight, Check, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractFromText } from '../lib/migrationExtractor';

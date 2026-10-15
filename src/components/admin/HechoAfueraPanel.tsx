@@ -7,7 +7,7 @@
  * Es para el caso real: el que viene construyendo por fuera de la app y a
  * quien el semáforo marcaría en rojo estando al día.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check, RotateCcw } from 'lucide-react';
 import { marcarHechoAfuera, desmarcarHechoAfuera, AVISO_HECHO_AFUERA } from '../../lib/hechoAfuera';
 import { SEED_ROADMAP_V2 } from '../../lib/roadmapSeed';

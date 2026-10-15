@@ -27,7 +27,7 @@
  * nombre, sal, búscalo, ábrele el chat» son cuatro pasos que se pagan diez
  * veces por día.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Loader2, MessageSquare, FileText, Users } from 'lucide-react';
 import { estadoDeAcompanamiento, type EstadoDeAcompanamiento } from '../../lib/acompanamientoDatos';
 import { viaDe } from '../../lib/viaDeContacto';

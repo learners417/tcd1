@@ -6,8 +6,7 @@ import {
 import type { ProfileV2 } from '../../lib/supabase';
 import { copiar as copiarTexto, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 import {
-  REGLAS, CASO_REAL, PLANTILLAS, CAMPOS_DE_LA_FICHA,
-  completitud, marcasAlInstante, puntaje, cuentaDeAgenda, exportarFicha,
+  REGLAS, CASO_REAL, PLANTILLAS, completitud, marcasAlInstante, puntaje, cuentaDeAgenda, exportarFicha,
   type Ficha, type AnuncioEscrito, type ColorSemaforo, type MarcaDeRevision,
 } from '../../lib/anunciosQueAgendan';
 import {

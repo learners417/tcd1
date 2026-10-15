@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Loader2, Sparkles, Copy, Check, RotateCcw, Image as ImageIcon, Layers, Youtube } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Loader2, Sparkles, Copy, Check, Image as ImageIcon, Layers, Youtube } from 'lucide-react';
 import { generateText } from '../../lib/aiProvider';
 import { toast } from 'sonner';
 import { buildCopyPrompt } from '../../lib/campanasPrompts';

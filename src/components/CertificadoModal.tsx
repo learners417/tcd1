@@ -4,7 +4,7 @@
  * (jsPDF dinámico) y lleva el sello + link a TCD — así trabaja cuando el
  * fundador lo comparte. El método propio aparece si está definido en el ADN.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Award, Download, ExternalLink } from 'lucide-react';
 
 /** Slot: ajusta al dominio público real de TCD si cambia. */

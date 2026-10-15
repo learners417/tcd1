@@ -5,7 +5,7 @@
  * Reemplaza a la vieja página de Mensajes multicanal.
  */
 import { notificarAdminsMensaje } from '../lib/notifications';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bot, Users, Send, Loader2, Paperclip, X } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase, isSupabaseReady } from '../lib/supabase';

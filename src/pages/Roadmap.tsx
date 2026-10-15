@@ -1,4 +1,5 @@
 import { teaserDeMeta } from '../lib/teasers';
+import { hoyISO } from '../lib/diaPrograma';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { listarEvidencias, subirEvidencia } from '../lib/evidencia';
 import {
@@ -76,7 +77,10 @@ import { planDe, planPermitePilar, NOMBRE_PLAN, waLink, planParaPilar, checkoutU
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada } from '../lib/racha';
 import { diaDelPrograma, diasHabilesDeAtraso, estaEnFaseAutonomia, mensajeDeRitmo, esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar } from '../lib/diaPrograma';
+import { faltaEnLaAntesala, leToca, type Antesala } from '../lib/antesala';
+import { entraEnElEscalon, puertaDelEscalon } from '../lib/topeDelEscalon';
 import EncabezadoCamino, { type SistemaAvance, type PasoDeHoy } from '../components/camino/EncabezadoCamino';
+import QuienMonta from '../components/camino/QuienMonta';
 import CintaCinturon from '../components/CintaCinturon';
 
 // Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
@@ -93,7 +97,7 @@ import { paisajeDeSistema, paisajeDelDia } from '../lib/losCincoPaisajes';
 import PortadaDeSistema from '../components/PortadaDeSistema';
 import { baseDeOnboarding } from '../lib/onboardingBase';
 import VeredictoCriticoPanel from '../components/VeredictoCriticoPanel';
-import { codigoDelDia } from '../lib/roadmapSeed';
+import { claveDelDia, codigoDelDia, jornadaDe } from '../lib/roadmapSeed';
 import { codigosEnRevision, revisionDelDia, pasosDeRevision, YA_TIENES } from '../lib/yaTienes';
 import TestEneagrama from '../components/tasks/TestEneagrama';
 import { tipo as tipoEneagrama } from '../lib/eneagrama';
@@ -174,15 +178,47 @@ function isTaskUnlocked(
   meta: RoadmapMeta,
   pilar: RoadmapPilar,
   completadas: Set<string>,
-  perfil?: { adn_validacion_organica?: unknown },
+  perfil?: {
+    adn_validacion_organica?: unknown;
+    antesala?: Antesala;
+    servicio_contratado?: string | null;
+    servicio_marcado_el?: string | null;
+  },
 ): boolean {
+  // ── La antesala abre la primera jornada ──
+  // El Camino arrancaba con 75 minutos de medición y pacto para alguien que
+  // llega agotado. Ahora el día 1 espera a que haya hecho sus cinco días de
+  // descanso. A quien ya lo cerró no se le agrega esta puerta atrás.
+  if (
+    meta.dia_asignado === 1
+    && leToca(perfil?.antesala, completadas.has(claveDelDia(1)))
+  ) {
+    return false;
+  }
+
+  // ── Lo que queda del otro lado de su escalón ──
+  if (
+    typeof meta.dia_asignado === 'number'
+    && !entraEnElEscalon(meta.dia_asignado, jornadaDe(meta.dia_asignado)?.sistema ?? null,
+      perfil?.servicio_contratado, perfil?.servicio_marcado_el)
+  ) {
+    return false;
+  }
+
   if (meta.orden > 1) {
-    // Las jornadas anteriores tienen que estar hechas, con dos excepciones:
-    // la entrega técnica es del equipo y los días de campo no se completan.
-    // Sin esto, el cliente entraba el día 1 y encontraba su primera jornada
-    // trabada esperando algo que hace otro.
+    // Las jornadas anteriores tienen que estar hechas, con tres excepciones:
+    // la entrega técnica es del equipo, los días de campo no se completan, y
+    // las jornadas fuera de su escalón no son suyas. Sin la tercera, el día 12
+    // —que es del sistema 2 y cierra su primera etapa— quedaba trabado para
+    // siempre esperando el día 11, que es del sistema 3 y no compró.
     for (const m of pilar.metas) {
-      if (m.orden < meta.orden && esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)) {
+      if (
+        m.orden < meta.orden
+        && esPasoDelCliente(m)
+        && entraEnElEscalon(m.dia_asignado ?? 0, jornadaDe(m.dia_asignado ?? 0)?.sistema ?? null,
+          perfil?.servicio_contratado, perfil?.servicio_marcado_el)
+        && !completadas.has(`${pilar.numero}-${m.codigo}`)
+      ) {
         return false;
       }
     }
@@ -201,8 +237,27 @@ function isTaskUnlocked(
 /** Mensaje de bloqueo específico cuando una tarea NO está desbloqueada. */
 function motivoBloqueo(
   meta: RoadmapMeta,
-  perfil?: { adn_validacion_organica?: unknown },
+  perfil?: {
+    adn_validacion_organica?: unknown;
+    antesala?: Antesala;
+    servicio_contratado?: string | null;
+    servicio_marcado_el?: string | null;
+  },
+  completadas?: Set<string>,
 ): string | null {
+  if (meta.dia_asignado === 1 && leToca(perfil?.antesala, completadas?.has(claveDelDia(1)) ?? false)) {
+    const falta = faltaEnLaAntesala(perfil?.antesala);
+    return falta || 'Se abre cuando cierras tus cinco días de descanso.';
+  }
+
+  if (
+    typeof meta.dia_asignado === 'number'
+    && !entraEnElEscalon(meta.dia_asignado, jornadaDe(meta.dia_asignado)?.sistema ?? null,
+      perfil?.servicio_contratado, perfil?.servicio_marcado_el)
+  ) {
+    return puertaDelEscalon(perfil?.servicio_contratado, perfil?.servicio_marcado_el);
+  }
+
   if (meta.codigo === codigoDelDia(31)) {
     const count = contarPiezasValidacionOrganica(perfil);
     if (count < 3) {
@@ -273,7 +328,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         .from('ventas_registradas')
         .insert({
           usuario_id: userId,
-          fecha: new Date().toISOString().slice(0, 10),
+          fecha: hoyISO(),
           monto,
           canal: 'llamada',
         })
@@ -691,7 +746,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
       // Celebración
       if (ahoraCompletada && meta.es_estrella) {
-        try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
+        try { localStorage.setItem('tcd_sesion_hoy_' + hoyISO(), meta.titulo); } catch { /* noop */ }
         setCelebracion(`✓ Micro-sesión completada: ${VOC(meta.titulo)} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
         setTimeout(() => setCelebracion(null), 5000);
       }
@@ -899,14 +954,26 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     // había un paso a paso — su link de pago, su página publicada, su
     // bandeja, su contenido del mes. Ahora el texto es el tutorial y el video
     // se suma arriba cuando llega.
-    const t = roadmap.tutoriales.find((x) => x.dia === dia
+    // Y mostraba SOLO EL PRIMERO del día. El día 17 tiene seis tutoriales —su
+    // video, su formulario, su calendario, su página de preparación, cargar
+    // consultantes y facturar— y el cliente veía uno. El día 29 tiene cuatro.
+    // En los dos escalones que montan todo ellos mismos, eso es media jornada
+    // sin paso a paso.
+    const todos = roadmap.tutoriales.filter((x) => x.dia === dia
       && (videosPorPilar[x.codigo] || PDFS_POR_TUTORIAL[x.codigo] || tutorialEscrito(x.codigo)));
-    if (!t) return null;
-    const pdf = PDFS_POR_TUTORIAL[t.codigo];
-    const escrito = tutorialEscrito(t.codigo);
+    if (todos.length === 0) return null;
+    const minutosTotales = todos.reduce((n, x) => n + (x.minutos ?? 0), 0);
     return (
-      <div className="space-y-2">
-        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso en pantalla</p>
+      <div className="space-y-4">
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+          {todos.length === 1 ? 'Paso a paso en pantalla' : `Los ${todos.length} pasos a paso de hoy`}
+          {minutosTotales > 0 && ` · ${minutosTotales} min`}
+        </p>
+        {todos.map((t) => {
+          const pdf = PDFS_POR_TUTORIAL[t.codigo];
+          const escrito = tutorialEscrito(t.codigo);
+          return (
+      <div key={t.codigo} className="space-y-2">
         <p className="text-[17px] text-cream">{VOC(t.titulo)} · {t.minutos} min</p>
         {videosPorPilar[t.codigo] && (
         <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-[var(--line2,#DFD3BC)]">
@@ -953,6 +1020,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           </a>
         )}
       </div>
+          );
+        })}
+      </div>
     );
   }, [videosPorPilar]);
 
@@ -964,7 +1034,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     const key = `${pilarNum}-${meta.codigo}`;
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
     if (meta.es_estrella) {
-      try { localStorage.setItem('tcd_sesion_hoy_' + new Date().toISOString().slice(0, 10), meta.titulo); } catch { /* noop */ }
+      try { localStorage.setItem('tcd_sesion_hoy_' + hoyISO(), meta.titulo); } catch { /* noop */ }
         setCelebracion(`✓ Micro-sesión completada: ${VOC(meta.titulo)} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
       setTimeout(() => setCelebracion(null), 5000);
     }
@@ -1091,6 +1161,23 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           setTimeout(() => document.getElementById(`meta-${pasoDeHoy.codigo}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
         }}
         onRegistrarVenta={() => setVentaModal(true)}
+      />
+
+      {/* ── Quién monta lo técnico en su escalón ──
+             Las tres ofertas se diferencian sobre todo en esto, y estaba
+             decidido en la ficha del cliente y en ninguna parte de su app. */}
+      <QuienMonta
+        servicio={perfil?.servicio_contratado}
+        servicioMarcadoEl={perfil?.servicio_marcado_el}
+        onIrAlDia={(dia) => {
+          const cod = codigoDelDia(dia);
+          if (!cod) return;
+          const pil = seedConVideos.find((p) => p.metas.some((m) => m.codigo === cod));
+          if (!pil) return;
+          setPilarAbierto(pil.numero);
+          setActiveMeta(cod);
+          setTimeout(() => document.getElementById(`meta-${cod}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+        }}
       />
 
       {/* ── Banner Día 45 (Regla #6 v8) ── */}
@@ -1330,7 +1417,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 const estaCompletada = completadas.has(key);
                 const tieneOutput = taskOutputs.has(key);
                 const unlocked = isTaskUnlocked(meta, pilar, completadas, perfil);
-                const bloqueoMsg = !unlocked ? motivoBloqueo(meta, perfil) : null;
+                const bloqueoMsg = !unlocked ? motivoBloqueo(meta, perfil, completadas) : null;
                 const isActive = activeMeta === meta.codigo;
                 const badge = getTypeBadge(meta.tipo);
                 const BadgeIcon = badge.icon;

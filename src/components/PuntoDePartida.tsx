@@ -9,7 +9,7 @@
  * de cero recorren lo mismo: es el recorrido el que los convierte en directores
  * de su clínica. Antes esta pantalla daba ochenta jornadas por hechas.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { YA_TIENES, KEY_YA_TIENES } from '../lib/yaTienes';
 import { VOC } from '../lib/vocabulario';

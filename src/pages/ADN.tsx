@@ -4,7 +4,7 @@
  * forma de cambiarla. Lo bloqueado se ve con su nombre y su resultado:
  * esa vista es la puerta al camino completo.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR } from '../lib/planes';
 import { Lock, ChevronRight, Check, Circle } from 'lucide-react';
 import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, contenidoDePieza, esEscribibleAqui, guardarOrigen, type PiezaADN } from '../lib/adnPiezas';

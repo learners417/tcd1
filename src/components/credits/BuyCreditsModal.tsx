@@ -11,7 +11,7 @@
  *
  * Carga el SDK de PayPal on-demand para no inflar el bundle.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Coins, Check, Loader2, ShoppingBag, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {

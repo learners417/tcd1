@@ -41,11 +41,33 @@ const DIA_DEL_TEMA: Record<string, string> = {
   producto: 'Martes', marketing: 'Miércoles', ventas: 'Jueves',
 };
 
+import { sinLeerDelCliente } from '../lib/soporteDatos';
+
 export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadChange }: Props) {
   const via = useMemo(() => viaDe(servicio), [servicio]);
   const canales = useMemo(() => canalesDe(servicio), [servicio]);
   const [pestana, setPestana] = useState<IdCanal | 'contacto' | 'calendario'>(
     via.via === 'chat' ? 'producto' : 'contacto');
+
+  /*
+   * ═══ SI TIENE UNA RESPUESTA SIN ABRIR, ABRE EN CONTACTO ═══
+   *
+   * El globo del menú dice «2 sin leer» sobre Contacto. El cliente tocaba,
+   * aterrizaba en el canal de comunidad —la pestaña por default para quien
+   * tiene chat— y el globo se apagaba igual, porque el menú lo apagaba con
+   * solo estar en la pantalla. Se iba sin haber visto la respuesta, y el
+   * contador volvía al recargar: en la base seguía sin leer.
+   *
+   * Ahora la respuesta sin abrir gana la pestaña. Es lo que vino a buscar.
+   */
+  useEffect(() => {
+    if (!clienteId || via.via !== 'chat') return;
+    let vivo = true;
+    void sinLeerDelCliente(clienteId).then((n) => {
+      if (vivo && n > 0) setPestana('contacto');
+    }).catch(() => { /* sin contador, queda la pestaña de siempre */ });
+    return () => { vivo = false; };
+  }, [clienteId, via.via]);
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">

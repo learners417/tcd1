@@ -11,7 +11,6 @@ import {
   Play,
   Youtube,
   X,
-  Clock,
   Loader2,
   Sprout, Mail, BookOpen, RefreshCw, DollarSign, Microscope, Target,
   Lightbulb, Ruler, Smartphone, Clapperboard, CalendarDays, Camera,
@@ -20,7 +19,7 @@ import {
 } from 'lucide-react';
 import { SEED_ROADMAP_V2, SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
-import { getHerramienta, herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
+import { herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
 import type { HerramientaV3 } from '../lib/herramientas';
 
 const BIB_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -38,7 +37,7 @@ import HerramientaDetalle from './HerramientaDetalle';
 import TodoElMaterial from '../components/TodoElMaterial';
 import { videosCargadosEnLaBase } from '../lib/bibliotecaDatos';
 import { VOC } from '../lib/vocabulario';
-import { COMPLEMENTOS as VIDEOS_COMPLEMENTO, idDeYoutube } from '../lib/videosCargados';
+import { idDeYoutube } from '../lib/videosCargados';
 
 // ─── CLINICA Tab definitions ────────────────────────────────────────────────
 
@@ -234,7 +233,7 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
   if (!r.youtubeId) {
     return (
       <div className="rounded-2xl border border-[rgba(242,239,233,0.07)] bg-black/20 p-4 opacity-70">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">🎬 Próximamente</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/35 mb-1">Para leer</p>
         <p className="text-sm text-cream/75">{VOC(r.titulo)}</p>
                   {COMPLEMENTOS[r.id] && (
                     <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
@@ -311,43 +310,6 @@ interface BibliotecaProps {
  * Lo que suma y no está en el Camino: se mira cuando el cliente quiere.
  * Una jornada tiene un video; acá va el resto, por tema.
  */
-function Complementos() {
-  const temas = [...new Set(VIDEOS_COMPLEMENTO.map((c) => c.tema))];
-  return (
-    <section className="card-panel p-5 space-y-4">
-      <div>
-        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Para ver cuando quieras</p>
-        <p className="mt-1 text-[17px] text-cream/70">No hace falta para avanzar. Suma cuando el tema te toca.</p>
-      </div>
-      {temas.map((tema) => (
-        <div key={tema} className="space-y-2">
-          <p className="text-[17px] font-semibold text-cream">{tema}</p>
-          {VIDEOS_COMPLEMENTO.filter((c) => c.tema === tema).map((c) => {
-            const id = idDeYoutube(c.url);
-            return (
-              <details key={c.url} className="rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 py-3">
-                <summary className="cursor-pointer list-none min-h-[44px] flex items-center text-[17px] text-cream">
-                  {c.titulo}
-                </summary>
-                {id && (
-                  <div className="relative mt-3 w-full aspect-video rounded-xl overflow-hidden border border-[var(--line,#EBE1CF)]">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-                      title={c.titulo}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="absolute inset-0 w-full h-full"
-                    />
-                  </div>
-                )}
-              </details>
-            );
-          })}
-        </div>
-      ))}
-    </section>
-  );
-}
 
 export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta = false }: BibliotecaProps) {
   /**
@@ -505,15 +467,14 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-light tracking-tight text-cream mb-2">
-          El Método
-        </h1>
-        <p className="text-cream/75 text-sm">
-          Videos y herramientas IA del Método C·L·I·N·I·C·A.
-        </p>
-      </div>
+      {/* ── EL TÍTULO YA ESTÁ ARRIBA ──
+             La barra de arriba dice «El Método» en todas las pantallas, así
+             que este h1 lo repetía justo debajo. Queda solo la bajada, que es
+             lo que sí agrega: qué hay acá adentro. Y en 17 px, que es el
+             mínimo de la app: estaba en 14. */}
+      <p className="text-[17px] text-cream/75">
+        Los videos y las herramientas del Método C·L·I·N·I·C·A.
+      </p>
 
       {/* TODO EL MATERIAL, con buscador. Va arriba porque es para encontrar
           algo puntual; las etapas de abajo son para recorrer. Antes los
@@ -526,7 +487,13 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
         bibliotecaAbierta={bibliotecaAbierta}
       />
 
-      <Complementos />
+      {/* ── LOS NUEVE DEL MÉTODO ESTABAN DOS VECES ──
+             `TodoElMaterial` ya los trae, con su tema al lado y buscables
+             junto al resto del material. Debajo volvía a listarlos un
+             bloque propio agrupado por tema, así que el cliente leía nueve
+             títulos repetidos —«Tu historia», «Tu legado», «A quién
+             sirves»— y no sabía si eran dos cosas o la misma. Medido en el
+             navegador con scripts/prueba-repetido.py. */}
 
       {/* CLINICA tabs */}
       <div className="relative flex items-center gap-1">
@@ -753,7 +720,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
         <div className="flex flex-col items-center justify-center py-16 text-center bg-surface/30 border border-[rgba(232,150,46,0.1)] border-dashed rounded-2xl">
           <Sparkles className="w-12 h-12 text-gold/30 mb-4" />
           <p className="text-cream/75 text-sm font-medium mb-2">
-            Este modulo esta en desarrollo
+            Su material vive en las sesiones
           </p>
           <p className="text-cream/45 text-xs max-w-sm leading-relaxed">
             Pronto se habilitaran videos y herramientas para{' '}

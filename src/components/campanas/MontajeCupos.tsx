@@ -15,7 +15,7 @@
  * Al encender se guarda la fecha: el tablero y la regla de los 14 días
  * cuentan desde ahí.
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import TableroCupos from './TableroCupos';
 import { estadoDeLasPiezas } from '../../lib/formulasAnuncios';
 import TutorialTecnicoBox from '../TutorialTecnicoBox';

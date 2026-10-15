@@ -6,7 +6,7 @@
  *   - low:     amarillo intenso
  *   - empty:   rojo
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Coins, AlertTriangle } from 'lucide-react';
 import BuyCreditsModal from './BuyCreditsModal';
 import { useCreditsBalance } from './useCreditsBalance';

@@ -4,7 +4,7 @@
  * Elige dos bonos de cinco y la app le arma el mensaje con esos dos adentro,
  * listo para mandar. El precio queda completo: lo que cambia son los bonos.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { BONOS, KEY_BONOS, bonosElegidos, mensajeDePreventa } from '../../lib/bonosPreventa';
 import { VOC } from '../../lib/vocabulario';

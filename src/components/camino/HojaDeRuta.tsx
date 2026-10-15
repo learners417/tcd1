@@ -5,7 +5,7 @@
  * jornadas con fecha real y lo que ya está hecho. Los hitos quedan marcados
  * para que sepa hacia dónde va antes de llegar.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { diasDeLaRuta, fechaCorta, fechaDelDia, SEMANAS } from '../../lib/hojaDeRuta';
 import { VOC } from '../../lib/vocabulario';

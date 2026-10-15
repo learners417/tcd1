@@ -6,7 +6,6 @@
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cargarVentanas } from './lib/ventanasDatos';
-import CustomSelect from './components/CustomSelect';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
 import MiClinica from './pages/MiClinica';
@@ -73,8 +72,17 @@ function loadProfile(): Profile {
 // y caía al default. La conversación seguía ahí; el cliente creía que no.
 const VALID_PAGES = [
   'dashboard', 'roadmap', 'entrenadores', 'coach', 'metrics',
-  'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
+  'diario', 'adn', 'manualNegocio', 'biblioteca',
+  // 'agentes' salió: era una SEGUNDA ruta a la misma pantalla que
+  // 'entrenadores', sin estar en ningún menú. Quien la tenga guardada de
+  // antes se redirige abajo, así que nadie cae en Hoy sin entender por qué.
   'campanas', 'mensajes', 'miclinica',
+  // 'creador' y 'numero' las dibuja el router de abajo y faltaban acá. Un
+  // aviso manda al cliente al Creador, él entra, se guarda la página, cierra
+  // la app —en una PWA pasa a cada rato— y al volver aparece en Hoy, porque
+  // su página guardada no pasaba esta validación. Es el mismo bug que el
+  // comentario de arriba cuenta haber arreglado para 'mensajes'.
+  'creador', 'numero',
   // 'migracion' NO está en el menú a propósito: se hace una sola vez, y el
   // menú tiene tope de cinco destinos. Se llega por la tarjeta del HOY, que
   // aparece solo mientras el equipo le habilitó la migración y no la terminó.
@@ -82,9 +90,19 @@ const VALID_PAGES = [
 ] as const;
 const PAGE_STORAGE_KEY = 'tcd_current_page';
 
+/**
+ * Las páginas que ya no existen, y a dónde va cada una.
+ *
+ * 'agentes' y 'entrenadores' eran dos rutas a la misma pantalla y solo la
+ * segunda estaba en el menú. Sin este mapa, quien tenía la primera guardada
+ * en su teléfono —una PWA guarda la última— aparecía en Hoy al volver.
+ */
+const PAGINAS_MUDADAS: Record<string, string> = { agentes: 'entrenadores' };
+
 function loadCurrentPage(): string {
   try {
     const saved = localStorage.getItem(PAGE_STORAGE_KEY);
+    if (saved && PAGINAS_MUDADAS[saved]) return PAGINAS_MUDADAS[saved];
     if (saved && (VALID_PAGES as readonly string[]).includes(saved)) return saved;
   } catch { /* noop */ }
   return 'dashboard';
@@ -139,7 +157,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
   );
 }
 
-function PaginaBloqueada({ nombre }: { nombre: string }) {
+function __________PaginaBloqueada({ nombre }: { nombre: string }) {
   return (
     <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
       <p className="text-4xl mb-4">🔒</p>
@@ -196,6 +214,8 @@ export default function App() {
     });
   }, []);
   const [showSettings, setShowSettings] = useState(false);
+  /** El día que entregó cada jornada, sacado de hoja_de_ruta. */
+  const [entregasReales, setEntregasReales] = useState<Record<string, string>>({});
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
   const [profile, setProfile] = useState<Profile>(loadProfile);
   const [profileDraft, setProfileDraft] = useState<Profile>(loadProfile);
@@ -220,14 +240,41 @@ export default function App() {
     if (!uid || !supabase) return;
     let vivo = true;
     void (async () => {
-      const { data } = await supabase.from('hoja_de_ruta').select('pilar_numero, meta_codigo, completada').eq('usuario_id', uid);
+      const { data } = await supabase.from('hoja_de_ruta')
+        .select('pilar_numero, meta_codigo, completada, fecha_completada')
+        .eq('usuario_id', uid);
       if (!vivo || !data) return;
       try {
+        const filas = data as Array<{
+          pilar_numero: number; meta_codigo: string;
+          completada: boolean; fecha_completada: string | null;
+        }>;
         const locales = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-        (data as Array<{ pilar_numero: number; meta_codigo: string; completada: boolean }>)
-          .filter((r) => r.completada)
+        filas.filter((r) => r.completada)
           .forEach((r) => locales.add(`${r.pilar_numero}-${r.meta_codigo}`));
         localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...locales]));
+
+        /*
+         * ═══ EL DÍA QUE ENTREGÓ CADA JORNADA ═══
+         *
+         * El cierre de cuentas calcula el atraso de cada una contra la fecha
+         * que le tocaba, y lo leía de `profiles.entregas` — una columna que
+         * NADIE escribe en toda la app. Con el objeto vacío el atraso daba
+         * cero siempre, así que a todo cliente que subió sus evidencias se le
+         * decía «entregaste todo completo y a tiempo». Es la frase que decide
+         * si la garantía corre a nuestro cargo.
+         *
+         * La fecha ya estaba acá: `hoja_de_ruta.fecha_completada` se guarda
+         * cada vez que cierra una jornada. No hace falta una segunda columna,
+         * hace falta leer la que ya hay.
+         */
+        const entregas: Record<string, string> = {};
+        for (const r of filas) {
+          if (r.completada && r.fecha_completada) {
+            entregas[`${r.pilar_numero}-${r.meta_codigo}`] = r.fecha_completada.slice(0, 10);
+          }
+        }
+        setEntregasReales(entregas);
       } catch { /* noop */ }
     })();
     return () => { vivo = false; };
@@ -590,7 +637,7 @@ export default function App() {
           desde={estado.desde}
           completadas={completadas}
           fechaInicio={supabaseProfile?.fecha_inicio}
-          entregas={supabaseProfile?.entregas}
+          entregas={entregasReales}
           userId={supabaseProfile?.id}
           servicio={(supabaseProfile as { servicio_contratado?: string | null } | null)?.servicio_contratado}
           waLink={waLink('Terminé mi Camino y quiero hablar de lo que sigue')}
@@ -626,7 +673,8 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <Topbar
+              onOpenSettings={openSettings} currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
         <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
           donde={dondeVa(supabaseProfile?.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas()))}
           onMore={() => setMobileMenuOpen(true)} />
@@ -685,33 +733,18 @@ export default function App() {
                   (supabaseProfile as { biblioteca_abierta?: boolean } | null)?.biblioteca_abierta)}
               />
             )}
-            {currentPage === 'agentes' && (
-              <Agentes
-                userId={supabaseProfile?.id}
-                perfil={supabaseProfile ?? undefined}
-                setCurrentPage={setCurrentPage}
-              />
-            )}
-            {currentPage === 'campanas' && (() => {
-              try {
-                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
-              } catch { /* noop */ }
-              return null;
-            })() || currentPage === 'campanas' && (
+            {/* El plan es la única puerta: si compró la sección, entra. El
+                orden lo cuida el Camino. Antes esto estaba escrito dentro de
+                un bloque que leía el progreso, no lo usaba y devolvía null
+                siempre, así que la condición se evaluaba dos veces para nada. */}
+            {currentPage === 'campanas' && (
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
                 onIrAlCamino={() => setCurrentPage('roadmap')}
               />
             )}
-            {currentPage === 'creador' && (() => {
-              try {
-                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
-              } catch { /* noop */ }
-              return null;
-            })() || currentPage === 'creador' && (
+            {currentPage === 'creador' && (
               <CreadorContenido
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}

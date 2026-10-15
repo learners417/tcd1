@@ -1,7 +1,7 @@
 import { planLimitado } from '../lib/adnPiezas';
 import { planActual, planPermitePilar } from '../lib/planes';
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, LifeBuoy, Map as RoadmapIcon, MessageSquare, Settings, LogOut, Sparkles, Sun, Megaphone } from 'lucide-react';
+import { UserCircle2, ChevronLeft, ChevronRight, LifeBuoy, Map as RoadmapIcon, Sparkles, Sun, Megaphone } from 'lucide-react';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { cinturonDesdeProgreso, CINTURONES, type Cinturon } from '../lib/cinturones';
 import { diaDelPrograma, semanaDelPrograma, dondeVa } from '../lib/diaPrograma';
@@ -58,7 +58,7 @@ function getSidebarData() {
   return { profile, progress, hasPending, semana, diaPrograma, cinturon, cuarto };
 }
 
-export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, onSignOut, messageBadge = 0, collapsed, onToggleCollapse, mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, messageBadge = 0, collapsed, onToggleCollapse, mobileOpen, onMobileClose }: SidebarProps) {
   const [data, setData] = useState(getSidebarData());
 
   useEffect(() => {
@@ -243,6 +243,20 @@ export default function Sidebar({ currentPage, setCurrentPage, onOpenSettings, o
           </div>
         ))}
       </div>
+
+      {/* ── TU CUENTA ──
+             Los ajustes se abrían SOLO desde acá, y este archivo recibía la
+             función y no la usaba. O sea que el modal existía completo —con
+             sus pestañas y su botón de cerrar sesión— y nada lo abría: el
+             cliente no tenía por dónde salir de su cuenta. */}
+      <button
+        onClick={onOpenSettings}
+        className={`mt-6 flex items-center gap-3 text-cream/75 hover:text-cream transition-colors min-h-[44px] ${collapsed ? 'justify-center px-0' : 'px-6'}`}
+        title="Tu cuenta"
+      >
+        <UserCircle2 className="w-5 h-5 shrink-0" />
+        {!collapsed && <span className="text-[17px]">Tu cuenta</span>}
+      </button>
 
       {/* Toggle collapse button */}
       <button

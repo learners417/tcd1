@@ -10,7 +10,7 @@
  *   acá, el cliente entra directo desde su calendario y la asistencia se marca
  *   sola al tocar «Entrar».
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, Send, CalendarPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import {

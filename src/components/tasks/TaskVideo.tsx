@@ -1,7 +1,7 @@
 import TutorialTecnicoBox from '../TutorialTecnicoBox';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getGuion } from '../../lib/guionesVideos';
-import { Play, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Play, CheckCircle2 } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import { VOC } from '../../lib/vocabulario';
 
@@ -67,14 +67,14 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
                   <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                     {guion.esencia}
                   </p>
-                  <p className="text-sm text-cream/35 mt-4">La versión en video llega pronto — la lección completa está acá abajo, no te frena nada.</p>
+                  <p className="text-sm text-cream/35 mt-4">Tu lección, escrita. El video se suma arriba cuando esté.</p>
                 </div>
               );
             }
             return (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-panel px-6 text-center">
                 <Play className="w-12 h-12 text-gold/50 mb-3" />
-                <p className="text-sm text-cream/80">🎬 El video de esta sesión está en producción</p>
+                <p className="text-sm text-cream/80">Tu sesión, escrita</p>
                 <p className="text-xs text-cream/45 mt-2 leading-relaxed max-w-sm">
                   No te frena nada: la instrucción completa está aquí abajo.
                 </p>

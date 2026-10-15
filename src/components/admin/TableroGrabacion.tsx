@@ -8,7 +8,7 @@
  * Guarda en `programa_videos`, usando `pilar_id` para el código de la jornada
  * (P1.0) o del tutorial (L-01). Sin migración de base.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Check, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { roadmap, SEED_ROADMAP_V2 } from '../../lib/roadmapSeed';

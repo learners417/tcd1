@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import { loQueAbre } from '../lib/queAbreCadaOferta';
 import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
@@ -15,7 +16,7 @@ import TableroPlata from '../components/admin/TableroPlata';
 import PanelMotorIA from '../components/admin/PanelMotorIA';
 import Supervision from '../components/admin/Supervision';
 import SalaDeMando from '../components/admin/SalaDeMando';
-import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
+import { rolDe, ROLES } from '../lib/roles';
 import MiRol from '../components/admin/MiRol';
 import CargarSesion from '../components/admin/CargarSesion';
 import LaSemana from '../components/admin/LaSemana';
@@ -38,13 +39,16 @@ import CargarSesionHumana from '../components/admin/CargarSesionHumana';
 import { TICKETS, type Ticket } from '../lib/cuadroTickets';
 import { cierreDeLaVentana, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
 import JornadaPanel from '../components/admin/Jornada';
+import ColaDeEvidencias from '../components/admin/ColaDeEvidencias';
+import {
+  veredictosDelCliente, decidirEvidencia, lecturaDelVeredicto, type Veredicto,
+} from '../lib/veredictoEvidencia';
 import { jornadasRecientes } from '../lib/jornadaStorage';
 import { comparativaSemana, rachasDeTodos } from '../lib/mesaPlataStorage';
 import { armarCola, type ItemCola } from '../lib/colaExcepciones';
 import { repartirLaCola, type ResultadoDeLaPasada } from '../lib/avisosStorage';
 import type { PlanComercial } from '../lib/planes';
 import type { Jornada as JornadaTipo } from '../lib/jornada';
-import { rolDe as rolPermisos } from '../lib/permisos';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
   Stethoscope, CheckCircle2, Circle, LogOut,
@@ -334,6 +338,16 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   }, []);
   const [evidenciasCliente, setEvidenciasCliente] = useState<{ meta: string; archivos: { name: string; path: string }[] }[]>([]);
   const [evidenciasLoading, setEvidenciasLoading] = useState(false);
+  const [veredictosCliente, setVeredictosCliente] = useState<Map<string, Veredicto>>(new Map());
+  /** El archivo cuyo rechazo se está escribiendo, en la ficha. */
+  const [rechazoEnFicha, setRechazoEnFicha] = useState<{ archivo: string; meta: string; motivo: string } | null>(null);
+  /**
+   * LAS EVIDENCIAS DEL CLIENTE, CON SU VEREDICTO.
+   *
+   * Listaba los archivos y los abría: sin estado, sin motivo, sin botón. O
+   * sea que la decisión de la IA —que ya existía— no se veía en ninguna
+   * pantalla del equipo, y la que ella rechazaba no se podía revisar.
+   */
   const cargarEvidenciasCliente = useCallback(async (clienteId: string) => {
     if (!supabase) return;
     setEvidenciasLoading(true);
@@ -348,10 +362,21 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
         if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
       }
       setEvidenciasCliente(resultado);
+      // El veredicto de cada archivo, en una consulta para todo el cliente.
+      setVeredictosCliente(await veredictosDelCliente(clienteId));
     } finally {
       setEvidenciasLoading(false);
     }
   }, []);
+  /** Decide sobre una evidencia desde la ficha, y el cliente recibe el aviso. */
+  const decidirDesdeLaFicha = async (
+    archivo: string, meta: string, estado: 'aprobada' | 'rechazada', motivo: string,
+  ) => {
+    if (!selectedCliente) return;
+    const ok = await decidirEvidencia(archivo, estado, motivo, selectedCliente.id, meta);
+    if (ok) setVeredictosCliente(await veredictosDelCliente(selectedCliente.id));
+    else toast.error('Esa decisión no se guardó. Recarga la pantalla e intenta de nuevo.');
+  };
   const abrirEvidencia = async (path: string) => {
     if (!supabase) return;
     const { data } = await db().storage.from('task-attachments').createSignedUrl(path, 3600);
@@ -1580,10 +1605,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           fecha_inicio: nuevoForm.fecha_inicio,
           status: nuevoForm.status,
           onboarding_completed: nuevoForm.status !== 'ONBOARDING',
-          servicio_contratado: nuevoForm.servicio,
           acceso_tipo: nuevoForm.acceso,
           acceso_hasta: cierra,
         }).eq('id', signUpData.user.id);
+
+        // El escalón se marca con el RPC y no con el update de arriba, porque
+        // el RPC además sella quién lo marcó y cuándo. Y esa fecha es la que
+        // hace correr el tope del Camino: escribiendo la columna a mano, un
+        // alta en La Base quedaba sin marcar —el valor es el mismo que el
+        // default— y el cliente abría los 90 días completos.
+        const { error: eMarca } = await db().rpc('marcar_servicio', {
+          p_cliente: signUpData.user.id,
+          p_servicio: nuevoForm.servicio,
+          p_cima: null,
+        });
+        if (eMarca) throw eMarca;
       }
 
       toast.success(`Cuenta creada para ${nuevoForm.nombre}. Ya puede iniciar sesión.`);
@@ -2750,15 +2786,67 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     </div>
                   ) : (
                     evidenciasCliente.map((g) => (
-                      <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4">
-                        <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {g.archivos.map((f) => (
-                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-sm text-gold hover:bg-gold/20 transition-colors">
-                              📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
-                            </button>
-                          ))}
-                        </div>
+                      <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4 space-y-3">
+                        <p className="text-sm font-bold uppercase tracking-widest text-gold">Sesión {g.meta}</p>
+                        {g.archivos.map((f) => {
+                          const v = veredictosCliente.get(f.path);
+                          const lectura = lecturaDelVeredicto(v);
+                          const tono = lectura.tono === 'bien' ? 'bg-success/15 text-success'
+                            : lectura.tono === 'frena' ? 'bg-danger/15 text-danger'
+                            : lectura.tono === 'espera' ? 'bg-gold/15 text-gold'
+                            : 'bg-cream/[0.07] text-cream/60';
+                          return (
+                            <div key={f.path} className="rounded-lg border border-cream/10 p-3">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <button onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-sm text-gold hover:bg-gold/20 transition-colors">
+                                  📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
+                                </button>
+                                <span className={`rounded-lg px-2.5 py-1 text-sm ${tono}`}>{lectura.texto}</span>
+                              </div>
+                              {v?.motivo && <p className="text-sm text-cream/55 mt-2 leading-relaxed">«{v.motivo}»</p>}
+                              {/* Aprobar y pedir otra, desde acá también: la
+                                  cola de Hoy trae lo que espera decisión, y
+                                  esta pestaña es donde se revisa el camino
+                                  entero de un cliente. */}
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {v?.estado !== 'aprobada' && (
+                                  <button onClick={() => void decidirDesdeLaFicha(f.path, g.meta, 'aprobada', '')}
+                                    className="rounded-lg px-3 py-2 text-sm font-bold bg-success/15 text-success hover:bg-success/25 transition-colors">
+                                    Aprobar
+                                  </button>
+                                )}
+                                {rechazoEnFicha?.archivo !== f.path && (
+                                  <button onClick={() => setRechazoEnFicha({ archivo: f.path, meta: g.meta, motivo: v?.motivo ?? '' })}
+                                    className="rounded-lg px-3 py-2 text-sm font-bold bg-danger/12 text-danger hover:bg-danger/20 transition-colors">
+                                    Pedirle otra
+                                  </button>
+                                )}
+                              </div>
+                              {rechazoEnFicha?.archivo === f.path && (
+                                <div className="mt-2 rounded-lg border border-danger/25 bg-danger/[0.04] p-3">
+                                  <label className="block text-sm text-cream/70 mb-2">Lo que va a leer:</label>
+                                  <textarea
+                                    value={rechazoEnFicha.motivo}
+                                    onChange={(e) => setRechazoEnFicha({ archivo: f.path, meta: g.meta, motivo: e.target.value })}
+                                    rows={2}
+                                    placeholder="Qué tiene que mostrar la foto que suba."
+                                    className="w-full rounded-lg bg-cream/[0.05] border border-cream/15 px-3 py-2 text-sm text-cream/90 placeholder:text-cream/35"
+                                  />
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    <button onClick={() => { void decidirDesdeLaFicha(f.path, g.meta, 'rechazada', rechazoEnFicha.motivo); setRechazoEnFicha(null); }}
+                                      className="rounded-lg px-3 py-2 text-sm font-bold bg-danger/15 text-danger hover:bg-danger/25 transition-colors">
+                                      Pedirle otra y avisarle
+                                    </button>
+                                    <button onClick={() => setRechazoEnFicha(null)}
+                                      className="rounded-lg px-3 py-2 text-sm text-cream/60 hover:text-cream/90 transition-colors">
+                                      Dejarlo así
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     ))
                   )}
@@ -4079,7 +4167,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {mainTab === 'hoy' && (
             <JornadaPanel
               personaId={(adminProfile as { id?: string }).id ?? ''}
-              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              rol={rol}
               items={cola}
               sesiones={misSesionesDeLaSemana}
               enInstalacion={clientes.filter((c) =>
@@ -4135,6 +4223,19 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               })}
             />
 
+            {/* Después de quien espera respuesta, quien está TRABADO.
+                Una evidencia rechazada no deja cerrar la jornada: el cliente
+                está mirando una pantalla que le pide otra foto y la decisión
+                es de acá. Se calla cuando no hay ninguna. */}
+            <ColaDeEvidencias
+              onAbrirCliente={(id) => {
+                const c = clientes.find((x) => x.id === id);
+                if (c) setSelectedCliente(c as never);
+                setDetalleTab('evidencias');
+                setMainTab('clientes');
+              }}
+            />
+
             <ListaDeHoy
               personaId={(adminProfile as { id?: string }).id ?? ''}
               onAbrir={abrirDestino}
@@ -4186,7 +4287,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
           {mainTab === 'semana' && (
             <LaSemana
-              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              rol={rol}
               jornadas={jornadasEquipo}
               clientesActivos={clientes.filter((c) =>
                 ((c as { estado?: string }).estado ?? 'ACTIVE') === 'ACTIVE').length}
@@ -4541,7 +4642,30 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   />
                 </div>
               </div>
-              <p className="text-sm text-cream/55">
+              {/* Qué abre lo que acaba de elegir, antes de crear la cuenta.
+                  Elegir entre tres nombres sin ver qué le abre a la persona es
+                  de las decisiones más caras de esta pantalla: de esto depende
+                  cuánto del Camino ve y cuánto trabajo le debe el equipo. */}
+              {(() => {
+                const abre = loQueAbre(nuevoForm.servicio);
+                return (
+                  <div className="rounded-2xl border border-gold/30 p-4">
+                    <p className="text-[15px] font-bold uppercase tracking-[0.18em] text-gold">
+                      {TICKETS[nuevoForm.servicio].nombre} le abre
+                    </p>
+                    <ul className="mt-2 flex flex-col gap-1.5">
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.camino}</li>
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.monta}</li>
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.entregas}</li>
+                    </ul>
+                    <p className="mt-2.5 text-[15px] text-cream/60">
+                      {TICKETS[nuevoForm.servicio].criterio}
+                    </p>
+                  </div>
+                );
+              })()}
+
+              <p className="text-[17px] text-cream/60">
                 Su acceso cierra el{' '}
                 <strong className="text-cream/80">
                   {cierreDeLaVentana({ tipo: nuevoForm.acceso, inicio: nuevoForm.fecha_inicio })}

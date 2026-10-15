@@ -3,7 +3,7 @@
  * Se muestra UNA vez, cuando el Sanador llega a las 10 ventas registradas.
  * El clímax emocional del programa + las dos puertas: MCD y el Nivel 2.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trophy, ArrowRight, MessageSquare, Camera, Award, Film } from 'lucide-react';
 import type { ProfileV2 } from '../lib/supabase';
 import type { ComparacionDia45 as Comparacion } from '../lib/diaValidator';

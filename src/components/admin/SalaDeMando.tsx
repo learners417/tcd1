@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshCw, ArrowRight, Plus, X } from 'lucide-react';
+import { ArrowRight, Plus, X } from 'lucide-react';
 import {
   ETAPAS, ETAPA_CON_CANDADO, armarRecorrido, veredictoMotor,
   DIAS_PAUTA_SIN_AGENDA, type ClienteEnRecorrido, type EstadoMotor,

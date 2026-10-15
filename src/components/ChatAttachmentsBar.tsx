@@ -11,7 +11,7 @@
  * El paste (Ctrl+V) se maneja en el componente padre via onPaste en el input,
  * porque solo el input/textarea con foco recibe el evento del teclado.
  */
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Paperclip, X, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
 import {
   ATTACHMENTS_ACCEPT_ATTR,

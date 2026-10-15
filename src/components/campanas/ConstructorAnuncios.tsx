@@ -6,13 +6,13 @@
  * historia + 1 de resultado o método), genera los 3 guiones + la secuencia
  * de 3 stories con IA, y audita cada pieza contra los 8 ingredientes.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  FORMULAS_ANUNCIOS, FAMILIAS_TEST, NOMBRE_FAMILIA, FORMULA_STORIES,
+  FAMILIAS_TEST, NOMBRE_FAMILIA, FORMULA_STORIES,
   recomendarFormulas, formulasBloqueadas,
   type Familia3, type RecomendacionTrio, type SenalesSanador,
   LAS_7_REGLAS, REGLAS_META, auditarPieza, revisarPoliticas, armarCarrusel, formulaPorId,
-  type FamiliaFormula, type FormulaAnuncio,
+  type FormulaAnuncio,
 } from '../../lib/formulasAnuncios';
 import { generateText } from '../../lib/aiProvider';
 import { primero } from '../../lib/primero';
@@ -659,8 +659,7 @@ CAPTION: …`;
                 </div>
                 {bloqueantes.length > 0 && (
                   <p className="text-sm text-cream/45 mt-2.5 border-t border-cream/10 pt-2">
-                    Lo que está en juego es tu cuenta publicitaria. Recuperarla tarda semanas
-                    y a veces no se recupera.
+                    Lo que está en juego es tu cuenta publicitaria. Recuperarla lleva semanas.
                   </p>
                 )}
               </div>

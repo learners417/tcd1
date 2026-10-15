@@ -8,7 +8,7 @@
  * Cuando falta la salida, la pantalla pide los seis. No muestra progreso
  * inventado ni compara contra un valor que no existe.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CAMPOS, comparar, cuantosMejoraron, lecturaDelCierre, estaCompleta,
          guardar, leer, KEY_ENTRADA, KEY_SALIDA, type Medicion } from '../../lib/medicion';
 import { VOC } from '../../lib/vocabulario';

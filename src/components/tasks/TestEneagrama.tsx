@@ -5,7 +5,7 @@
  * punto medio. Si los dos primeros tipos quedan cerca, pide tres elecciones
  * más. El resultado queda en su ADN y cambia cómo le habla el Mentor.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ITEMS, RESPUESTAS, TIPOS, resultadoDe, desempate, tipo as tipoDe } from '../../lib/eneagrama';
 
 export const KEY_ENEAGRAMA = 'tcd_eneagrama_v1';

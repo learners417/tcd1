@@ -6,18 +6,17 @@ import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
 import CadenaADN from '../components/CadenaADN';
 import type { Profile } from '../lib/supabase';
 import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { miEstadoDeMigracion } from '../lib/migracionDatos';
-import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
+import { ChevronRight, CheckCircle2 } from 'lucide-react';
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
-import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
+import { cinturonDesdeProgreso } from '../lib/cinturones';
 import EnMarcha, { type EstadoEnMarcha } from '../components/EnMarcha';
 import MisSesiones from '../components/MisSesiones';
 import { hechoHoy, racha, anguloDelDia } from '../lib/sostenido';
 import { carriles } from '../lib/carriles';
-import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
-import ReporteDirector from '../components/ReporteDirector';
+import { calcularRachaDesdeFechas } from '../lib/racha';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import { VOC } from '../lib/vocabulario';
@@ -29,8 +28,10 @@ import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import CintaCinturon from '../components/CintaCinturon';
 import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
 import { soporteCerrado } from '../lib/ventanaSinSoporte';
-import { accesoDelPerfil, cierreDeLaVentana, sumarDias } from '../lib/ventanaDeAcceso';
+import { sumarDias } from '../lib/ventanaDeAcceso';
 import { claveDelDia } from '../lib/roadmapSeed';
+import LaAntesala from '../components/LaAntesala';
+import { fechaQueSellaElInicio, leToca, type Antesala } from '../lib/antesala';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -41,7 +42,7 @@ function getTypeBadge(tipo?: string) {
   }
 }
 
-function MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function __________MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="card-panel p-5">
       <p className="text-sm text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
@@ -341,6 +342,44 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   // nombre, el saludo va solo: «Buenos días.»
   const nombreDisplay = data.profile.nombre?.trim() || '';
 
+  // ─── LA ANTESALA ───────────────────────────────────────────────────────
+  // Los cinco a siete días de descanso que abren la sesión 1. Le toca a quien
+  // todavía no cerró su día 1: a quien ya entró no se le agrega una puerta
+  // atrás.
+  const [antesala, setAntesala] = useState<Antesala>(perfil?.antesala ?? {});
+  useEffect(() => { if (perfil?.antesala) setAntesala(perfil.antesala); }, [perfil?.antesala]);
+
+  const yaCerroElDiaUno = useMemo(() => {
+    try {
+      const guardadas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+      return guardadas.has(claveDelDia(1));
+    } catch { return false; }
+  }, []);
+  const enAntesala = leToca(antesala, yaCerroElDiaUno);
+
+  /**
+   * Guarda la antesala y, cuando queda lista, sella la fecha de inicio del
+   * Camino con el día en que la cerró.
+   *
+   * Sin eso, los 90 días arrancan el día del alta y el cliente sale de su
+   * semana de descanso con una semana de diferencia encima — exactamente la
+   * carga que esta semana vino a quitarle.
+   */
+  const guardarAntesala = useCallback(async (nueva: Antesala) => {
+    const campos: Record<string, unknown> = { antesala: nueva };
+    const sella = fechaQueSellaElInicio(nueva);
+    if (sella && !fechaQueSellaElInicio(antesala)) campos.fecha_inicio = sella;
+    if (userId && isSupabaseReady() && supabase) {
+      const { error } = await supabase.from('profiles').update(campos).eq('id', userId);
+      if (error) throw error;
+    }
+    setAntesala(nueva);
+    try {
+      const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...p, ...campos }));
+    } catch { /* el guardado local es de conveniencia */ }
+  }, [antesala, userId]);
+
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
 
@@ -352,6 +391,21 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         return cerrado ? <SinSoporteEstosDias ventana={cerrado} /> : null;
       })()}
 
+      {/* ═══ LA ANTESALA ═══
+          Mientras le toca, la pantalla de Hoy es su protocolo de descanso y
+          nada más del Camino: ni el saludo con el ritmo —que le diría «día 1
+          de 90» cuando todavía no empezó— ni la jornada del día. Sus sesiones
+          1-1 y su manual siguen abajo: leer y hablar con el equipo no le
+          cuesta energía, y es parte de lo que pagó. */}
+      {enAntesala && (
+        <LaAntesala
+          antesala={antesala}
+          nombre={nombreDisplay || undefined}
+          onGuardar={guardarAntesala}
+          onAbrirCamino={() => setCurrentPage('roadmap')}
+        />
+      )}
+
       {/* ═══ EL CAMBIO DE ETAPA ═══
           El día que enciende sus campañas, el cliente deja de construir y
           empieza a sostener. Hasta ahora la app no se enteraba: seguía
@@ -359,12 +413,12 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           Desde que enciende, lo primero que ve son sus seis números y dónde se
           corta su semana. La sesión del día sigue abajo: no desaparece, deja
           de ser lo primero. */}
-      {yaEncendio() && (
+      {!enAntesala && yaEncendio() && (
         <TableroDeLaSemana clienteId={userId} paises={paisesDelCliente} />
       )}
 
       {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
-      {(() => {
+      {!enAntesala && (() => {
         let c = null as ReturnType<typeof cinturonDesdeProgreso> | null;
         try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
         let fechaInicio = (perfil as { fecha_inicio?: string } | undefined)?.fecha_inicio;
@@ -392,7 +446,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       })()}
 
       {/* ── La única acción importante de la pantalla (10-DISENO regla 1) ── */}
-      {data.tareasHoy[0] && (
+      {!enAntesala && data.tareasHoy[0] && (
         <TarjetaDeHoy
           hoy={{
             codigo: data.tareasHoy[0].codigo,

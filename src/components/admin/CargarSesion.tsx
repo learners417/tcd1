@@ -6,7 +6,7 @@ import { guardarDecision } from '../../lib/salaDeMandoStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
 import {
   promptDeExtraccion, leerExtraccion, puedeExtraerse, resumirExtraccion,
-  EXTRACCION_VACIA, type Extraccion, type Pendiente,
+  type Extraccion, type Pendiente,
 } from '../../lib/transcripcion';
 
 /**
