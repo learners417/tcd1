@@ -57,9 +57,17 @@ export async function subirNumerosDelCliente(
     filas.reduce((t, f) => t + num(f[campo]), 0);
 
   try {
+    // Los nombres de los parámetros son los de la función, no los que
+    // parecen. PostgREST resuelve los RPC POR NOMBRE DE ARGUMENTO: con
+    // `p_cliente` y `p_semana` la llamada devolvía PGRST202 y el `return
+    // !error` la daba por buena. O sea que los números que cargaba el cliente
+    // no llegaban nunca a la base: su propio tablero le seguía diciendo
+    // «todavía no cargaste tus números», la cola del equipo lo marcaba sin
+    // datos todas las semanas, y el cron le mandaba el aviso de que faltaban.
+    // Existían solo si alguien los copiaba a mano en la Mesa de plata.
     const { error } = await db().rpc('guardar_semana_cliente', {
-      p_cliente: clienteId,
-      p_semana: semanaISO(),
+      p_cliente_id: clienteId,
+      p_semana_iso: semanaISO(),
       p_datos: {
         gasto: suma('gasto'),
         conversaciones: suma('conversaciones'),
@@ -68,8 +76,14 @@ export async function subirNumerosDelCliente(
         comentarios: suma('visitas'),
       },
     });
-    return !error;
-  } catch {
+    if (error) {
+      // Que no se lo coma el silencio: éste es el que estuvo roto meses.
+      console.error('[tableroSync] no se pudieron guardar los números:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('[tableroSync] excepción guardando los números:', e);
     return false;
   }
 }

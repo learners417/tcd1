@@ -22,6 +22,7 @@
  * trabajo de una que solo suma pantallas.
  */
 import type { Funcion } from './funciones';
+import { hoyISO } from './diaPrograma';
 
 export interface Jornada {
   personaId: string;
@@ -62,7 +63,7 @@ export function iniciarJornada(
 ): Jornada {
   return {
     personaId,
-    dia: ahora.toISOString().slice(0, 10),
+    dia: hoyISO(ahora),
     inicio: ahora.toISOString(),
     planeados,
     cerradas: [],

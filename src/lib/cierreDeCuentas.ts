@@ -25,6 +25,7 @@
  * vista, no es una sensación.
  */
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
+import { fechaLocal } from './diaPrograma';
 import { fechaDelDia } from './hojaDeRuta';
 import { loQuePrometimos, cumplimosNuestraParte, type Sesion } from './sesionesHumanas';
 
@@ -79,9 +80,24 @@ export function jornadasCerradas(
       const clave = `${p.numero}-${m.codigo}`;
       const hecha = completadas.has(clave);
       const leTocaba = fechaDelDia(fechaInicio, dia);
-      const entregada = entregas[clave] ? new Date(`${entregas[clave]}T12:00:00`) : null;
+      /*
+       * El atraso se cuenta en DÍAS DE CALENDARIO, no en milisegundos.
+       *
+       * Antes era `(entregada - leTocaba) / 86400000` redondeado, con
+       * `entregada` a las 12:00 y `leTocaba` a medianoche: entregar en la
+       * fecha exacta daba medio día, que redondeado es UNO. O sea que al que
+       * cumplió puntual se le contaba un día de atraso en cada jornada, y con
+       * 63 jornadas eso es la diferencia entre que la garantía corra o no.
+       *
+       * No se notaba porque las fechas no llegaban: `profiles.entregas` no
+       * tenía escritor y el atraso daba cero para todos.
+       */
+      const entregada = fechaLocal(entregas[clave] ?? '');
       const atraso = hecha && leTocaba && entregada
-        ? Math.max(0, Math.round((entregada.getTime() - leTocaba.getTime()) / (24 * 60 * 60 * 1000)))
+        ? Math.max(0, Math.round(
+            (Date.UTC(entregada.getFullYear(), entregada.getMonth(), entregada.getDate())
+             - Date.UTC(leTocaba.getFullYear(), leTocaba.getMonth(), leTocaba.getDate()))
+            / (24 * 60 * 60 * 1000)))
         : 0;
       out.push({ dia, titulo: m.titulo, clave, pedia: Boolean(m.evidencia_requerida?.pide), hecha, atraso });
     }

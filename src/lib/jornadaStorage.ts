@@ -1,4 +1,5 @@
 import { db } from './supabase';
+import { hoyISO } from './diaPrograma';
 import type { Jornada } from './jornada';
 import type { Funcion } from './funciones';
 
@@ -82,7 +83,7 @@ export async function jornadaDeHoy(personaId: string): Promise<Jornada | null> {
     .from('jornadas')
     .select('persona_id, dia, inicio, fin, planeados, atendidos, traba, traba_cliente, funciones')
     .eq('persona_id', personaId)
-    .eq('dia', new Date().toISOString().slice(0, 10))
+    .eq('dia', hoyISO())
     .maybeSingle();
   if (error || !data) return null;
   return aJornada(data as unknown as FilaJornada);

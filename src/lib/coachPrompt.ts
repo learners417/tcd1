@@ -11,7 +11,7 @@ import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 import { getGuion } from './guionesVideos';
 import { getTutoriales } from './tutorialesTecnicos';
-import { calcularFunnelKPIs, diagnosticarEmbudo, type FunnelKPIs } from './funnelCalcs';
+import { calcularFunnelKPIs, diagnosticarEmbudo } from './funnelCalcs';
 import { ADN_SCHEMA_V7, campoEstaCompleto, getADNValor } from './adnSchema';
 import { getPaisInfo } from './vozLocalizada';
 import { primero } from './primero';

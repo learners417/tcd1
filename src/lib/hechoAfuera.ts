@@ -11,6 +11,7 @@
  * mide lo que el cliente entregó adentro.
  */
 import { supabase, isSupabaseReady, guardarFila } from './supabase';
+import { hoyISO } from './diaPrograma';
 
 export interface JornadaHechaAfuera {
   clave: string;
@@ -42,7 +43,7 @@ export async function marcarHechoAfuera(
       hecho_afuera: true,
       marcado_por: quien,
       marcado_el: new Date().toISOString(),
-      fecha_completada: new Date().toISOString().slice(0, 10),
+      fecha_completada: hoyISO(),
     }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
   }
   return clave;

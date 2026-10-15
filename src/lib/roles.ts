@@ -17,10 +17,26 @@
  * en rojo y hay que arreglar lo que las rompe.
  */
 
-export type Rol = 'direccion' | 'acompanamiento' | 'desarrollo';
-
-/** Los nombres viejos siguen en la base; se traducen a rol. */
-export type RolLegado = 'owner' | 'manager' | 'staff';
+/*
+ * ═══ UN SOLO ROL, Y UNA SOLA FUNCIÓN QUE LO DECIDE ═══
+ *
+ * Este archivo tenía su propio `Rol` de TRES valores y su propio `rolDe`, al
+ * lado de los de `permisos.ts`, que tiene CUATRO. Y contestaban distinto: para
+ * `produccion`, `dev` y `editor`, permisos decía «producción» o «desarrollo» y
+ * esto decía «acompañamiento».
+ *
+ * O sea que un compañero de producción veía su rol escrito de dos formas según
+ * la pestaña del Admin que abriera. Y era peor que confuso: `Jornada.tsx`
+ * llamaba a `calcularCarga` con el rol de permisos y un `as never` para que el
+ * tipo no se quejara, así que al abrir la pestaña Hoy el panel se rompía con
+ * «Cannot read properties of undefined (reading 'techoHoras')».
+ *
+ * Manda `permisos.ts`, que es la que se declara autoridad. Acá se re-exporta
+ * para no romper a quien ya la pedía desde este archivo.
+ */
+export { rolDe } from './permisos';
+export type { Rol } from './permisos';
+import { ROLES as PERMISOS, type Rol } from './permisos';
 
 export interface DefinicionRol {
   id: Rol;
@@ -31,8 +47,13 @@ export interface DefinicionRol {
   leToca: string[];
   /** Qué NO le toca, y por qué. Sin esto, dos personas hacen lo mismo. */
   noLeToca: Array<{ que: string; porque: string }>;
-  /** Horas semanales que puede sostener antes de que se le caiga. */
-  techoHoras: number;
+  /**
+   * Horas semanales que puede sostener. NO se escribe acá: sale de
+   * `permisos.ts`, que ya lo define para los cuatro roles. Estaba en los dos
+   * archivos con los mismos números, que es el estado justo antes de que se
+   * desfasen.
+   */
+  readonly techoHoras?: never;
   /** El único número que dice si está haciendo bien su trabajo. */
   indicador: string;
 }
@@ -49,7 +70,6 @@ export const ROLES: Record<Rol, DefinicionRol> = {
       { que: 'Los errores de la app',
         porque: 'Son de desarrollo. Reportarlos sí; arreglarlos no.' },
     ],
-    techoHoras: 6,
     indicador: 'Cuántas decisiones nuevas hicieron falta esta semana. Menos es mejor: significa que el criterio ya está escrito.',
   },
 
@@ -66,7 +86,6 @@ export const ROLES: Record<Rol, DefinicionRol> = {
       { que: 'Tocar la app',
         porque: 'Reportar el error sí. Arreglarlo es de desarrollo.' },
     ],
-    techoHoras: 12,
     indicador: 'El porcentaje de cuentas en rojo. Si sube del 10% al 30%, no hace falta más personal: hace falta arreglar lo que las pone en rojo.',
   },
 
@@ -81,8 +100,26 @@ export const ROLES: Record<Rol, DefinicionRol> = {
       { que: 'La cola del día',
         porque: 'Los errores que la cola reporta sí; las cuentas frenadas no.' },
     ],
-    techoHoras: 30,
     indicador: 'Los minutos de humano por cliente. Tienen que bajar mes a mes con la misma cantidad de clientes — es lo único que distingue una app que reemplaza trabajo de una que solo suma pantallas.',
+  },
+  // El cuarto rol venía de `permisos.ts` y acá no existía, así que indexar
+  // ROLES['produccion'] daba undefined y rompía la pestaña Hoy del Admin.
+  // Su propósito, su nombre y su indicador son los que permisos.ts ya define:
+  // no se inventan de nuevo acá.
+  produccion: {
+    id: 'produccion',
+    nombre: 'Producción',
+    proposito: 'Editar, escribir y diseñar el material de los clientes asignados.',
+    leToca: ['clientes', 'creativos'],
+    noLeToca: [
+      { que: 'Los clientes que no le asignaron',
+        porque: 'No le aportan y son información de otros.' },
+      { que: 'Lo que paga cada cliente',
+        porque: 'No cambia cómo se edita su video.' },
+      { que: 'Los números del cliente',
+        porque: 'Su trabajo es el material. Los números pueden condicionar mal una pieza.' },
+    ],
+    indicador: 'Piezas entregadas a tiempo y con la marca correcta.',
   },
 };
 
@@ -93,21 +130,20 @@ export const ROLES: Record<Rol, DefinicionRol> = {
  * nombres: los dos pasan a acompañamiento, que es lo que de hecho hacían.
  * Desarrollo se asigna a mano — nadie lo tenía antes porque el rol no existía.
  */
-export function rolDe(legado: string | null | undefined): Rol {
-  switch (legado) {
-    case 'owner': return 'direccion';
-    case 'desarrollo': return 'desarrollo';
-    default: return 'acompanamiento';
-  }
-}
-
 /** Las tabs que este rol ve primero, en orden. */
 export function tabsDe(rol: Rol): string[] {
   return ROLES[rol].leToca;
 }
 
-/** ¿Este rol puede entrar acá? Dirección entra a todo. */
-export function puedeVer(rol: Rol, tab: string): boolean {
+/**
+ * ¿Este rol entra a esta TAB? Dirección entra a todo.
+ *
+ * Se llamaba `puedeVer`, igual que la de `permisos.ts`, y son dos preguntas
+ * distintas: ésta es por pantalla y la otra por categoría de información
+ * («el dinero de TCD», «los números del cliente»). Con el mismo nombre en dos
+ * archivos, cualquiera importa la que no era y la respuesta parece correcta.
+ */
+export function entraALaTab(rol: Rol, tab: string): boolean {
   if (rol === 'direccion') return true;
   return ROLES[rol].leToca.includes(tab);
 }
@@ -149,7 +185,7 @@ export function calcularCarga(
     x.sesiones * MINUTOS.sesion +
     x.enInstalacion * MINUTOS.instalacion;
   const horas = Math.round((minutos / 60) * 10) / 10;
-  const techo = ROLES[rol].techoHoras;
+  const techo = PERMISOS[rol].techoHoras;
   const ocupacion = techo > 0 ? horas / techo : 0;
 
   let lectura: string;
@@ -204,5 +240,13 @@ export const TRASPASO: Record<Rol, PasoTraspaso[]> = {
       porque: 'Si algo estaba rojo antes, no lo causaste tú; si se pone rojo después, sí.' },
     { que: 'Mirar los minutos de humano por cliente cada mes',
       porque: 'Es el único número que dice si el trabajo está sirviendo.' },
+  ],
+  produccion: [
+    { que: 'Dejar cada pieza en la carpeta del cliente, con su nombre y su fecha',
+      porque: 'Una pieza guardada en la computadora de quien la hizo es una pieza que el equipo no tiene.' },
+    { que: 'Anotar qué quedó a medio editar y en qué archivo',
+      porque: 'Quien sigue abre el proyecto y continúa, en vez de empezarlo de nuevo.' },
+    { que: 'Pasar el manual de marca de cada cliente asignado',
+      porque: 'Sin eso, la pieza siguiente sale con otra tipografía y hay que rehacerla.' },
   ],
 };

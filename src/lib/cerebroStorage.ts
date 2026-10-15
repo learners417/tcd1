@@ -1,4 +1,5 @@
 import { db } from './supabase';
+import { hoyISO } from './diaPrograma';
 import type { TareaDelCerebro, TareaOrdenada, Origen, Destino } from './cerebro';
 
 /**
@@ -55,7 +56,7 @@ export async function crearDesdeElSistema(
       p_peso: t.peso,
       p_prioridad: t.peso > 50_000 ? 'urgente' : t.peso > 10_000 ? 'alta' : 'media',
       p_vence: t.venceEn === null ? null
-        : new Date(Date.now() + t.venceEn * 86400000).toISOString().slice(0, 10),
+        : hoyISO(new Date(Date.now() + t.venceEn * 86400000)),
     });
     if (error) return null;
     return data as unknown as string;
@@ -110,12 +111,22 @@ export async function mandarleAlCliente(x: {
     if (error) return false;
 
     // Y el aviso, para que le llegue aunque no tenga la app abierta.
-    await db().from('notificaciones').insert({
-      usuario_id: x.clienteId,
-      titulo: 'Tienes un mensaje del equipo',
-      descripcion: x.texto.trim().slice(0, 120),
-      accion_url: '/mensajes',
+    //
+    // Por el RPC y no con un insert directo. `notificaciones` tiene RLS con
+    // políticas de lectura y de marcar leído, y NINGUNA de insertar: es a
+    // propósito, y `notifications.ts` lo dice textual. Un insert directo con
+    // la clave del navegador lo rechaza en silencio, y encima a este le
+    // faltaba `tipo`, que es NOT NULL. Así que el equipo tocaba «Mandárselo
+    // en la app», el mensaje entraba en la bandeja, y la campanita del
+    // cliente no sonaba nunca.
+    const { error: eAviso } = await db().rpc('crear_notificacion', {
+      p_usuario_id: x.clienteId,
+      p_tipo: 'mensaje',
+      p_titulo: 'Tienes un mensaje del equipo',
+      p_descripcion: x.texto.trim().slice(0, 120),
+      p_accion_url: '/mensajes',
     });
+    if (eAviso) console.error('[cerebro] el aviso no salió:', eAviso.message);
 
     // Responder al último es responder a todos los anteriores: dejarlos
     // abiertos haría que la bandeja muestre personas que ya fueron atendidas.

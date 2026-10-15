@@ -2,7 +2,7 @@ import { supabase, isSupabaseReady } from './supabase';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────────
 
-export type TipoNotificacion = 'hito' | 'tarea' | 'mensaje' | 'sistema' | 'admin';
+export type TipoNotificacion = 'hito' | 'tarea' | 'mensaje' | 'sistema' | 'admin' | 'evidencia';
 
 export interface NotificacionDB {
   id: string;

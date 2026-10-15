@@ -1,9 +1,8 @@
 import { db } from './supabase';
-import { contarRacha, pesoDeLaCuenta, ordenarPorRiesgo } from './colaExcepciones';
+import { contarRacha, pesoDeLaCuenta } from './colaExcepciones';
 import { semanaISO } from './bitacoraCampana';
 import {
-  calcularCadena, encontrarDomino, SEMANA_VACIA,
-  numerosDeFila, COLUMNAS_DE_SEMANA,
+  calcularCadena, encontrarDomino, numerosDeFila, COLUMNAS_DE_SEMANA,
   type NumerosSemana, type Domino, type FilaDeSemana,
 } from './valueChain';
 

@@ -2052,13 +2052,13 @@ Genera un párrafo de 150-200 palabras que presente a este profesional. Usa tono
     id: 'H-P1.3',
     constructorFases: {
       etiquetaOpciones: 'Elige la versión de tu historia',
-      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+      promptOpciones: (_inputs, perfil) => `${contextoBase(perfil)}
 
 Su origen (si está cargado): ${primero(perfil.historia_origen) || 'usar lo que sepas del contexto'}\nTAREA: proponer 3 VERSIONES de su historia de origen (el enfoque narrativo + la primera frase con la que arranca). Una más íntima, una más profesional, una más cruda. Todas verdaderas, cero drama inventado.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
-      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+      promptBloques: (eleccion, _inputs, perfil) => `${contextoBase(perfil)}
 
 El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
 
@@ -2391,13 +2391,13 @@ El avatar tiene que ser una persona real con una vida real, no "profesional de 3
     id: 'H-P5.2',
     constructorFases: {
       etiquetaOpciones: 'Elige tu PUV — la frase que te define',
-      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+      promptOpciones: (_inputs, perfil) => `${contextoBase(perfil)}
 
 TAREA: proponer la PUV (propuesta única de valor) de este profesional: UNA frase que diga a quién ayuda + qué transformación logra + qué lo hace distinto. Escrita con las palabras de su {{consultante}}, no con jerga. Directa, para la primera línea de su bio.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 5 opciones:
 [{"titulo":"La frase PUV completa","significado":"Por qué esta versión le calza a su ADN y a su {{consultante}} ideal"}]`,
-      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+      promptBloques: (eleccion, _inputs, perfil) => `${contextoBase(perfil)}
 
 El profesional ELIGIÓ su PUV: "${eleccion.titulo}".
 
@@ -2468,13 +2468,13 @@ Sé específico. Si la PUV podría ser dicha por cualquier colega, no está list
     id: 'H-P6.3',
     constructorFases: {
       etiquetaOpciones: 'Elige el dolor central de {{tu_consultante}}',
-      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+      promptOpciones: (_inputs, perfil) => `${contextoBase(perfil)}
 
 TAREA: proponer 3 LECTURAS del dolor central de su {{consultante}} ideal (el dolor que más mueve, dicho con las palabras del {{consultante}} + por qué ese es EL dolor según su especialidad y su historia).
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
-      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+      promptBloques: (eleccion, _inputs, perfil) => `${contextoBase(perfil)}
 
 El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
 
@@ -2537,13 +2537,13 @@ El Estado B tiene que ser tan específico que si el {{consultante}} lo lee, diga
     id: 'H-P7.3',
     constructorFases: {
       etiquetaOpciones: 'Elige el nombre de tu método',
-      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+      promptOpciones: (_inputs, perfil) => `${contextoBase(perfil)}
 
 TAREA: proponer NOMBRES para el método propio de este profesional, construidos desde SU ADN (su historia, su herida sanada, su {{consultante}} ideal, su especialidad). Nombres con alma y con venta: memorables, pronunciables, que un {{consultante}} entienda en 3 segundos.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown) con 4 opciones:
 [{"titulo":"Nombre del método (con sigla si suma)","significado":"En 2 líneas: qué significa y por qué le calza a ESTE profesional según su ADN"}]`,
-      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+      promptBloques: (eleccion, _inputs, perfil) => `${contextoBase(perfil)}
 
 El profesional ELIGIÓ el nombre de su método: "${eleccion.titulo}" (${eleccion.significado}).
 
@@ -2585,13 +2585,13 @@ Paso 1: [nombre] — [qué es y por qué existe]
     id: 'H-P8.2',
     constructorFases: {
       etiquetaOpciones: 'Elige el ángulo de tu oferta',
-      promptOpciones: (inputs, perfil) => `${contextoBase(perfil)}
+      promptOpciones: (_inputs, perfil) => `${contextoBase(perfil)}
 
 Método propio: ${primero(perfil.metodo_nombre) || 'sin nombre aún'}\nTAREA: proponer 4 ÁNGULOS para su programa de 1.000 USD (el nombre del programa + desde qué promesa central se vende). Construidos desde su método, su {{consultante}} ideal y la transformación real. Nombres que un {{consultante}} entienda en 3 segundos.
 
 Responde SOLO un JSON array válido (sin texto antes ni después, sin markdown):
 [{"titulo":"...","significado":"..."}]`,
-      promptBloques: (eleccion, inputs, perfil) => `${contextoBase(perfil)}
+      promptBloques: (eleccion, _inputs, perfil) => `${contextoBase(perfil)}
 
 El profesional ELIGIÓ: "${eleccion.titulo}" (${eleccion.significado}).
 

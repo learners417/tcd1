@@ -66,6 +66,15 @@ export interface Profile {
 
   /** El día que entregó cada jornada, para medir el atraso. */
   entregas?: Record<string, string>;
+  /**
+   * La antesala: los cinco a siete días de descanso que abren la sesión 1.
+   * `{ protocolo: [{ area, loQueHago }], dias: [ISO], cerrada: ISO }`.
+   */
+  antesala?: {
+    protocolo?: Array<{ area: string; loQueHago: string }>;
+    dias?: string[];
+    cerrada?: string;
+  };
   plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';
   rol: 'cliente' | 'admin';
   created_at: string;
@@ -82,6 +91,8 @@ export interface Profile {
    * checkout.
    */
   servicio_contratado?: 'base' | 'ascenso' | 'instalacion';
+  /** Cuándo una persona marcó el escalón. Sin esto, el tope no corre. */
+  servicio_marcado_el?: string | null;
   /** Los cinco días en Bariloche. Se suma a cualquier escalón. */
   cima_incluida?: boolean;
   /**

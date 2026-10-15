@@ -19,6 +19,22 @@
 
 const MS_DIA = 86_400_000;
 
+
+/**
+ * La fecha de HOY en hora local, como 'AAAA-MM-DD'.
+ *
+ * `new Date().toISOString().slice(0, 10)` devuelve UTC, y en Argentina —UTC−3—
+ * de las 21:00 en adelante eso da el día siguiente. Estaba escrito así en
+ * quince lugares, y tres de ellos guardan la fecha en la base: la jornada que
+ * el cliente cerraba a la noche quedaba fechada mañana, y de esa fecha sale el
+ * atraso con el que se decide si la garantía corre.
+ *
+ * Toda fecha de un día —no un instante— se arma con esto.
+ */
+export function hoyISO(d: Date = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 /** Fecha local a medianoche, desde 'YYYY-MM-DD' o un ISO completo. */
 export function fechaLocal(valor: string | Date): Date | null {
   if (valor instanceof Date) {

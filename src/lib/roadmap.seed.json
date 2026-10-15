@@ -434,63 +434,63 @@
     {
       "codigo": "L-02",
       "titulo": "Cargar consultantes, agenda y cobros",
-      "dia": 2,
+      "dia": 17,
       "minutos": 9,
       "donde": "MCD"
     },
     {
       "codigo": "L-03",
       "titulo": "Tu link de pago",
-      "dia": 9,
+      "dia": 5,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-04",
       "titulo": "Facturar y llevar la cuenta",
-      "dia": 9,
+      "dia": 17,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-05",
       "titulo": "Subir tu página y publicarla",
-      "dia": 25,
+      "dia": 16,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-06",
       "titulo": "Tu subdominio",
-      "dia": 25,
+      "dia": 16,
       "minutos": 3,
       "donde": "Sistema"
     },
     {
       "codigo": "L-07",
       "titulo": "Subir tu video a la página",
-      "dia": 28,
+      "dia": 17,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-08",
       "titulo": "Tu formulario de filtro",
-      "dia": 28,
+      "dia": 17,
       "minutos": 6,
       "donde": "Sistema"
     },
     {
       "codigo": "L-09",
       "titulo": "Tu calendario en dos pasos",
-      "dia": 28,
+      "dia": 17,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-10",
       "titulo": "Tu página de preparación",
-      "dia": 28,
+      "dia": 17,
       "minutos": 4,
       "donde": "Sistema"
     },
@@ -539,35 +539,35 @@
     {
       "codigo": "L-17",
       "titulo": "Grabar tus llamadas",
-      "dia": 39,
+      "dia": 23,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-18",
       "titulo": "Tu bandeja y tu embudo",
-      "dia": 44,
+      "dia": 25,
       "minutos": 7,
       "donde": "Sistema"
     },
     {
       "codigo": "L-19",
       "titulo": "Tus respuestas automáticas",
-      "dia": 44,
+      "dia": 25,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-20",
       "titulo": "Grabar y editar con el celular",
-      "dia": 67,
+      "dia": 86,
       "minutos": 5,
       "donde": "Celular"
     },
     {
       "codigo": "L-21",
       "titulo": "Programar tu contenido del mes",
-      "dia": 67,
+      "dia": 86,
       "minutos": 5,
       "donde": "Sistema"
     }
@@ -791,13 +791,13 @@
     },
     {
       "id": "F-PAGINA",
-      "regla": "El día 26 no abre sin el enlace de la página",
+      "regla": "Del día 16 en adelante, nada abre sin el enlace de la página",
       "apertura": "adn.sistema.url_pagina",
       "mensaje": "Sin página publicada, el guion del video no tiene dónde vivir."
     },
     {
       "id": "F-RODAJE",
-      "regla": "La fecha de rodaje se elige el día 19",
+      "regla": "La fecha de rodaje se elige antes del día 15",
       "apertura": "evento.rodaje_agendado",
       "mensaje": "Elige el día. El rodaje que no tiene fecha no ocurre."
     },
@@ -821,7 +821,7 @@
     },
     {
       "id": "F-PRECIO",
-      "regla": "El precio del día 17 no puede ser menor al del día 9",
+      "regla": "El precio de la oferta del día 10 no puede ser menor al precio digno del día 5",
       "apertura": "oferta.precio>=numeros.precio_digno",
       "mensaje": "Tu oferta no puede valer menos que lo que ya cobras."
     },
@@ -1114,7 +1114,9 @@
         "P1.5",
         "P3.7"
       ],
-      "tutoriales": [],
+      "tutoriales": [
+        "L-03"
+      ],
       "agente": "vera",
       "manual": "LID-3",
       "acceso": null,
@@ -1361,7 +1363,7 @@
         "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
         "Plazo, con fecha de cierre",
         "Entregables: lo que la persona recibe, no lo que tú haces",
-        "Precio con número, nunca menor al que sellaste el día 8",
+        "Precio con número, nunca menor al que sellaste el día 5",
         "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
       ],
       "evidencias": [
@@ -1391,7 +1393,7 @@
         "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
         "Plazo, con fecha de cierre",
         "Entregables: lo que la persona recibe, no lo que tú haces",
-        "Precio con número, nunca menor al que sellaste el día 8",
+        "Precio con número, nunca menor al que sellaste el día 5",
         "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
       ]
     },
@@ -1689,7 +1691,8 @@
         "L-08",
         "L-09",
         "L-10",
-        "L-02"
+        "L-02",
+        "L-04"
       ],
       "agente": "lucas",
       "manual": null,
