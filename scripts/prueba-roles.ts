@@ -9,9 +9,13 @@
  * Correr con: npx tsx scripts/prueba-roles.ts
  */
 import {
-  ROLES, rolDe, tabsDe, puedeVer, calcularCarga, TRASPASO, MINUTOS,
+  ROLES, rolDe, tabsDe, entraALaTab, calcularCarga, TRASPASO, MINUTOS,
   type Rol,
 } from '../src/lib/roles';
+// El techo de horas y quién ve qué viven en permisos.ts, que es la autoridad.
+// Este archivo tenía su propio Rol de tres valores y su propio rolDe, y
+// contestaban distinto que los de permisos para produccion, dev y editor.
+import { ROLES as PERMISOS } from '../src/lib/permisos';
 
 let fallas = 0;
 const linea = (ok: boolean, txt: string) => {
@@ -45,13 +49,13 @@ linea(ROLES.direccion.noLeToca.some((n) => n.que.includes('cola')),
   'dirección NO entra por la cola: si lo hace, todo vuelve a pasar por una persona');
 
 console.log('\n══ quién ve qué ══');
-linea(puedeVer('direccion', 'cualquier-cosa'), 'dirección entra a todo');
-linea(puedeVer('acompanamiento', 'hoy') && puedeVer('acompanamiento', 'supervision'),
+linea(entraALaTab('direccion', 'cualquier-cosa'), 'dirección entra a todo');
+linea(entraALaTab('acompanamiento', 'hoy') && entraALaTab('acompanamiento', 'supervision'),
   'acompañamiento ve la cola y la supervisión');
-linea(!puedeVer('acompanamiento', 'plata'),
+linea(!entraALaTab('acompanamiento', 'plata'),
   'pero no la Mesa de plata: no es su decisión');
-linea(puedeVer('desarrollo', 'motor'), 'desarrollo ve el panel del motor');
-linea(!puedeVer('desarrollo', 'hoy'),
+linea(entraALaTab('desarrollo', 'motor'), 'desarrollo ve el panel del motor');
+linea(!entraALaTab('desarrollo', 'hoy'),
   'y NO ve la cola del día: si la ve, la termina atendiendo');
 linea(tabsDe('acompanamiento')[0] === 'hoy',
   'lo primero que ve acompañamiento es la cola');
@@ -69,7 +73,7 @@ linea(vacia.horas === 0 && !vacia.pasado, 'una semana sin nada da cero');
 
 // La cuenta que sostiene el modelo: 20 clientes, ~10% en rojo, en 12 horas.
 const real = calcularCarga('acompanamiento', { excepciones: 2, sesiones: 4, enInstalacion: 8 });
-linea(real.horas <= ROLES.acompanamiento.techoHoras,
+linea(real.horas <= PERMISOS.acompanamiento.techoHoras,
   `20 clientes con 2 excepciones, 4 sesiones y 8 en instalación: ${real.horas} h de ${real.techo} — entra`);
 linea(!real.pasado, 'y no se pasa del techo');
 

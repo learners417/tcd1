@@ -100,8 +100,19 @@ ok(/tab\.id === 'mensajes' && sinLeer > 0/.test(tabs),
   'el número de respuestas sin abrir va encima de la pestaña Contacto, que es donde se busca y donde se toca');
 ok(/sinLeerDelCliente\(userId\)/.test(tabs) && /event: 'INSERT'/.test(tabs),
   'y se entera en vivo, sin recargar');
-ok(/currentPage === 'mensajes'\) setSinLeer\(0\)/.test(tabs),
-  'al entrar a Soporte vuelve a cero: ya las vio');
+// ═══ ESTA REGLA CAMBIÓ, Y A PROPÓSITO ═══
+//
+// Pedía que el contador se apagara con solo estar en la pantalla. Y la
+// pantalla abre en el canal de comunidad, no en Contacto: el cliente veía
+// «2», entraba, el globo desaparecía, y se iba sin haber leído la respuesta.
+// Al recargar volvía, porque en la base seguía sin leer. El contador mentía
+// justo cuando más importaba.
+//
+// Ahora se vuelve a preguntar a la base mientras está en la pantalla, y lo
+// que lo apaga es `marcarLeidos`, que corre cuando abre la conversación de
+// verdad. Y si tiene algo sin abrir, la pantalla abre en Contacto.
+ok(/currentPage !== 'mensajes' \|\| !userId/.test(tabs) && /sinLeerDelCliente\(userId\)\.then\(setSinLeer\)/.test(tabs),
+  'el contador sale de la base mientras está en Soporte, no de haber entrado');
 ok(/hidden md:flex w-12 h-12/.test(topbar),
   'el salvavidas de arriba queda solo en pantalla grande, donde hay lugar de sobra');
 ok(/soporteSinLeer > 0/.test(topbar),

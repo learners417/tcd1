@@ -25,8 +25,7 @@
  */
 import { readFileSync } from 'node:fs';
 import {
-  repartirMinutos, porSemanas, lunesDe, tablaDeFunciones, FUNCIONES,
-  type Funcion, type JornadaParaFunciones, type HitoDeAbsorcion,
+  repartirMinutos, porSemanas, lunesDe, tablaDeFunciones, type Funcion, type JornadaParaFunciones, type HitoDeAbsorcion,
 } from '../src/lib/funciones';
 
 let fallas = 0;

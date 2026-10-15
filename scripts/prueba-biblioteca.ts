@@ -22,8 +22,7 @@
 import { readFileSync } from 'node:fs';
 import {
   armarCatalogo, loQuePuedeVer, cuantasFaltan, porOrigen, buscar, comoLaVe,
-  COMO_SE_LLAMA_EL_ORIGEN, type PiezaDeBiblioteca,
-} from '../src/lib/catalogoBiblioteca';
+  COMO_SE_LLAMA_EL_ORIGEN, } from '../src/lib/catalogoBiblioteca';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
 
 let fallas = 0;

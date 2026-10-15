@@ -183,6 +183,49 @@ async function main() {
       `${rol}: el rendimiento del equipo NO está en el HTML`);
   }
 
+  // ── La fila de la cola de evidencias ────────────────────────────────────
+  //
+  // Sale del componente a propósito: el render estático no corre los efectos,
+  // así que la cola llega vacía, el panel devuelve null y la fila —la parte
+  // con el condicional anidado y el textarea— no la montaba nadie.
+  const { FilaDeLaCola } = await import('../src/components/admin/ColaDeEvidencias');
+  const unaFila = {
+    archivo: 'evidencias/cli/P1.6/1760000000_quema.jpg',
+    clienteId: 'cli', cliente: 'Rosana', metaCodigo: 'P1.6',
+    estado: 'rechazada' as const, quien: 'ia' as const,
+    motivo: 'No se ve fuego en la imagen', decididoEn: '2026-10-14T10:00:00Z',
+    jornadaCerrada: false,
+  };
+  const nada = () => { /* la prueba no toca nada */ };
+  const filaHtml = rr(
+    <FilaDeLaCola fila={unaFila} ocupado={false} rechazando={null}
+      onAbrir={nada} onDecidir={nada} onEscribirRechazo={nada} />);
+  linea(filaHtml.includes('Rosana') && filaHtml.includes('No se ve fuego'),
+    'la fila de la cola monta con el nombre y el motivo del testigo');
+  linea(filaHtml.includes('Día 4'),
+    'y dice de qué jornada habla, no solo su código');
+  linea(filaHtml.includes('Aprobar') && filaHtml.includes('Pedirle otra'),
+    'con las dos decisiones a un toque');
+
+  // Escribiendo el rechazo: el motivo del testigo viene cargado.
+  const filaEscribiendo = rr(
+    <FilaDeLaCola fila={unaFila} ocupado={false}
+      rechazando={{ archivo: unaFila.archivo, motivo: unaFila.motivo }}
+      onAbrir={nada} onDecidir={nada} onEscribirRechazo={nada} />);
+  linea(filaEscribiendo.includes('Lo que va a leer Rosana')
+    && filaEscribiendo.includes('No se ve fuego'),
+    'confirmar el rechazo trae el motivo escrito: es un toque');
+
+  // Y una jornada ya cerrada lo dice, en vez de reabrirla sola.
+  const filaCerrada = rr(
+    <FilaDeLaCola fila={{ ...unaFila, jornadaCerrada: true, estado: 'pendiente', motivo: '' }}
+      ocupado={false} rechazando={null}
+      onAbrir={nada} onDecidir={nada} onEscribirRechazo={nada} />);
+  linea(filaCerrada.includes('ya la cerró'),
+    'y si esa jornada ya cerró, la fila lo dice antes de decidir');
+  linea(filaCerrada.includes('El testigo no la lee'),
+    'lo que la IA no mira se distingue de lo que rechazó');
+
   const htmlJefe = rr(<LS rol="direccion" {...conPlata} />);
   linea(soloDigitos(htmlJefe).includes('123456'),
     'dirección SÍ ve lo facturado — si no, el permiso estaría de más');

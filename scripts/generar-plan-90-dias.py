@@ -80,6 +80,52 @@ w('- **Los días de campo no son huecos.** Son los días de atender a los '
 w('')
 
 # ── Los cinco sistemas ────────────────────────────────────────────────
+w('## Antes del día 1: la antesala')
+w('')
+w('El Camino abre con una sesión de 75 minutos que pide cabeza: diez números '
+  'de medición, el pacto, la hora real neta. Antes de eso hay **cinco a siete '
+  'días que no construyen nada**.')
+w('')
+w('El cliente elige de tres a cinco movidas entre seis áreas —sueño, '
+  'pantallas, alimentación, movimiento, silencio, agua—, escribe qué va a '
+  'hacer en cada una con una hora o un número, y las tilda un día por día. '
+  'Al quinto se abre su sesión 1; al séptimo se cierra sola.')
+w('')
+w('**Lo diseña él.** Si le decimos a qué hora dormir y qué comer, le sumamos '
+  'una obligación más a alguien que ya tiene de sobra, y la cumple dos días. '
+  'Es la misma regla que el día 4 usa con sus disparadores.')
+w('')
+w('La fecha en que cierra la antesala es la que arranca los 90 días: así '
+  'nadie sale de su semana de descanso con una semana de diferencia encima.')
+w('')
+
+w('## Hasta dónde llega cada escalón')
+w('')
+w('| Oferta | Qué abre del Camino | Quién monta lo técnico |')
+w('| --- | --- | --- |')
+w('| **La Base** · $1.000 | La antesala y los sistemas 1 y 2: días 1 al 10 y el '
+  '12. Cierra con su precio, su método y su oferta en una página | Él, con los '
+  'tutoriales |')
+w('| **El Ascenso** · $3.000 | Los 90 días completos | Él, y lo revisa en la '
+  'mentoría tres veces por semana |')
+w('| **La Instalación** · $5.000 | Los 90 días completos | El equipo, con las '
+  'tres entregas |')
+w('')
+w('Las tres entregas técnicas son del escalón que las compró. Antes el Camino '
+  'no miraba el escalón, así que quien pagó la primera etapa tenía los 90 días '
+  'abiertos y a las dos semanas el equipo recibía la tarea de montarle la '
+  'instalación entera.')
+w('')
+w('**El tope corre con el escalón marcado.** La columna viene en `base` por '
+  'defecto, así que mientras nadie marque la ficha el Camino se abre completo '
+  'y las entregas no se disparan solas. Se marca una vez, en el alta.')
+w('')
+w('En La Base y en El Ascenso, lo técnico lo monta el cliente con los '
+  'tutoriales de la app, y su Camino se lo muestra en el día de cada pieza: su '
+  'página el día 16, su formulario y su calendario el 17, su bandeja el 25, '
+  'Meta y su pixel el 29.')
+w('')
+
 w('## Los cinco sistemas')
 w('')
 for s in SEED['sistemas']:
@@ -165,14 +211,12 @@ for jor in SEED['jornadas']:
         w(f"**Se le habilita:** {jor['acceso']}")
         w('')
 
-    for f in jor.get('freno_levanta') or []:
-        if f in FRENOS:
-            w(f"**Se libera:** {FRENOS[f]['regla']}")
-            w('')
-    for f in jor.get('freno_activa') or []:
-        if f in FRENOS:
-            w(f"**Queda trabado hasta cumplirlo:** {FRENOS[f]['regla']}")
-            w('')
+    # Los frenos NO se imprimen por día. El seed guarda en qué jornada se activa
+    # y en cuál se levanta cada uno, y esos dos campos tienen ruido: F-PAGINA
+    # figura levantándose el día 11 y activándose el 16, y F-RODAJE activándose
+    # el día 46, que es «Tus cinco niveles» y no tiene nada que ver con grabar.
+    # Imprimirlos por día convertía ese ruido en una frase afirmada. Van juntos
+    # en su propia sección, que es lo que el seed sí sostiene: la regla.
 
     if jor.get('cinturon'):
         c = CINTURONES.get(jor['cinturon'], {})
@@ -186,6 +230,19 @@ for jor in SEED['jornadas']:
     if jor.get('nota'):
         w(f"*{jor['nota']}*")
         w('')
+
+# ── Los frenos ────────────────────────────────────────────────────────
+w('## Los diez frenos')
+w('')
+w('Las reglas que el programa no negocia. El primero, `F-ORDEN`, es el que '
+  'sostiene todo lo demás: una jornada no abre sin cerrar la anterior.')
+w('')
+for f in SEED['frenos']:
+    w(f"**{f['id']}** — {f['regla']}")
+    if f.get('mensaje'):
+        w('')
+        w(f"> {f['mensaje']}")
+    w('')
 
 # ── El resumen que importa ────────────────────────────────────────────
 tramos = [(1, 29, 'construir'), (30, 60, 'encender y corregir'), (61, 90, 'sostener')]

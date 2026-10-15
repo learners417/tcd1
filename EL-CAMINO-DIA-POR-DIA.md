@@ -10,6 +10,30 @@ Las 90 jornadas que la app le sirve al cliente, en el orden en que se abren. Gen
 - **Una jornada no abre sin cerrar la anterior.** Es el freno `F-ORDEN`, y es el método: sin el protocolo escrito no hay programa que vender.
 - **Los días de campo no son huecos.** Son los días de atender a los consultantes que ya tiene. La promesa es cuatro horas, y ocuparle los cinco días rompe lo que el programa vino a arreglar.
 
+## Antes del día 1: la antesala
+
+El Camino abre con una sesión de 75 minutos que pide cabeza: diez números de medición, el pacto, la hora real neta. Antes de eso hay **cinco a siete días que no construyen nada**.
+
+El cliente elige de tres a cinco movidas entre seis áreas —sueño, pantallas, alimentación, movimiento, silencio, agua—, escribe qué va a hacer en cada una con una hora o un número, y las tilda un día por día. Al quinto se abre su sesión 1; al séptimo se cierra sola.
+
+**Lo diseña él.** Si le decimos a qué hora dormir y qué comer, le sumamos una obligación más a alguien que ya tiene de sobra, y la cumple dos días. Es la misma regla que el día 4 usa con sus disparadores.
+
+La fecha en que cierra la antesala es la que arranca los 90 días: así nadie sale de su semana de descanso con una semana de diferencia encima.
+
+## Hasta dónde llega cada escalón
+
+| Oferta | Qué abre del Camino | Quién monta lo técnico |
+| --- | --- | --- |
+| **La Base** · $1.000 | La antesala y los sistemas 1 y 2: días 1 al 10 y el 12. Cierra con su precio, su método y su oferta en una página | Él, con los tutoriales |
+| **El Ascenso** · $3.000 | Los 90 días completos | Él, y lo revisa en la mentoría tres veces por semana |
+| **La Instalación** · $5.000 | Los 90 días completos | El equipo, con las tres entregas |
+
+Las tres entregas técnicas son del escalón que las compró. Antes el Camino no miraba el escalón, así que quien pagó la primera etapa tenía los 90 días abiertos y a las dos semanas el equipo recibía la tarea de montarle la instalación entera.
+
+**El tope corre con el escalón marcado.** La columna viene en `base` por defecto, así que mientras nadie marque la ficha el Camino se abre completo y las entregas no se disparan solas. Se marca una vez, en el alta.
+
+En La Base y en El Ascenso, lo técnico lo monta el cliente con los tutoriales de la app, y su Camino se lo muestra en el día de cada pieza: su página el día 16, su formulario y su calendario el 17, su bandeja el 25, Meta y su pixel el 29.
+
 ## Los cinco sistemas
 
 **1 · Tu reset** — días 1-5
@@ -125,8 +149,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Lo que queda hecho:** Precio digno · Link de pago · Cobro de prueba · Las tres listas
 
-**Queda trabado hasta cumplirlo:** El precio del día 17 no puede ser menor al del día 9
-
 **Cinturón:** Blanco punta amarilla
 
 **Veredicto:** Primero el número, después la cartera. Ya está hecho en ese orden.
@@ -187,7 +209,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones
 - Plazo, con fecha de cierre
 - Entregables: lo que la persona recibe, no lo que tú haces
-- Precio con número, nunca menor al que sellaste el día 8
+- Precio con número, nunca menor al que sellaste el día 5
 - Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo
 
 **Lo que queda hecho:** La oferta en una página
@@ -209,8 +231,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 **Lo que queda hecho:** Tu embudo dibujado · Tu recurso elegido
 
 **Se le habilita:** Entrega 2 del Sistema — sitios, formularios y contactos
-
-**Se libera:** El día 26 no abre sin el enlace de la página
 
 **Veredicto:** El lunes no improvisas: grabas lo que ya está escrito.
 
@@ -262,8 +282,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Lo que queda hecho:** Cinco archivos
 
-**Se libera:** La fecha de rodaje se elige el día 19
-
 **Veredicto:** Un día de grabación, un mes de contenido. Así se hace siempre.
 
 *Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.*
@@ -279,8 +297,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Cierra y no toques nada más hoy
 
 **Lo que queda hecho:** Captura del perfil · El enlace vivo
-
-**Queda trabado hasta cumplirlo:** El día 26 no abre sin el enlace de la página
 
 **Cinturón:** Amarillo punta verde
 
@@ -488,10 +504,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Lo que queda hecho:** Campaña activa
 
-**Queda trabado hasta cumplirlo:** Escalar o apagar queda cerrado del 31 al 45
-
-**Queda trabado hasta cumplirlo:** Ramiro responde 'todavía no' del 31 al 45
-
 **Cinturón:** Azul
 
 **Veredicto:** Están encendidas. Ahora vienen catorce días sin tocar nada: al tercero vas a querer cambiar algo, y por eso a la mayoría no le funciona.
@@ -645,10 +657,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Lo que queda hecho:** La decisión
 
-**Se libera:** Escalar o apagar queda cerrado del 31 al 45
-
-**Se libera:** Ramiro responde 'todavía no' del 31 al 45
-
 **Veredicto:** Decidiste con el número, no con la sensación. Así se sube el presupuesto sin miedo.
 
 *Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.*
@@ -687,8 +695,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Elige qué nivel ofreces primero después de tu programa
 
 **Lo que queda hecho:** Los cinco niveles · Rodaje agendado
-
-**Queda trabado hasta cumplirlo:** La fecha de rodaje se elige el día 19
 
 **Veredicto:** Vendes uno solo: el tercero. Los otros existen para que ese se entienda.
 
@@ -1201,8 +1207,6 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Lo que queda hecho:** Doce semanas con sus ganchos
 
-**Queda trabado hasta cumplirlo:** No se graba contenido de marca dentro de los 90 días
-
 **Veredicto:** Lo escribiste todo hoy. Se graba en un solo día y te deja un mes tranquilo.
 
 ### Día 87 · Tu foto de llegada
@@ -1251,6 +1255,48 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 **Cinturón:** Negro
 
 **Veredicto:** Terminaste. Tienes número, precio, método, oferta, embudo, app y tu ecosistema andando.
+
+## Los diez frenos
+
+Las reglas que el programa no negocia. El primero, `F-ORDEN`, es el que sostiene todo lo demás: una jornada no abre sin cerrar la anterior.
+
+**F-ORDEN** — No se abre una sesión sin cerrar la anterior, salvo que su evidencia dependa de que otro pague
+
+> El orden es el método. Termina la de ayer.
+
+**F-PAGINA** — Del día 16 en adelante, nada abre sin el enlace de la página
+
+> Sin página publicada, el guion del video no tiene dónde vivir.
+
+**F-RODAJE** — La fecha de rodaje se elige antes del día 15
+
+> Elige el día. El rodaje que no tiene fecha no ocurre.
+
+**F-14DIAS** — Escalar o apagar queda cerrado del 31 al 45
+
+> Faltan {n} días. Tu campaña está aprendiendo.
+
+**F-TABLERO** — Ramiro responde 'todavía no' del 31 al 45
+
+**F-COMPRA** — No invita sin hacer la compra de prueba
+
+> Cómprate a ti mismo antes de invitar a nadie.
+
+**F-PRECIO** — El precio de la oferta del día 10 no puede ser menor al precio digno del día 5
+
+> Tu oferta no puede valer menos que lo que ya cobras.
+
+**F-ADN** — Ningún agente arranca con campos requeridos vacíos
+
+> {agente} necesita {campo}. Vuelve al día {dia}.
+
+**F-GRADO-ESPERA** — El grado que depende de que otro pague queda pendiente y visible; el camino sigue
+
+> Sigues en {grado_actual}. Te falta {lo_que_falta} para el siguiente. Mientras tanto, el paso de hoy es este.
+
+**F-ORGANICO** — No se graba contenido de marca dentro de los 90 días
+
+> Hoy escribes las doce. Se graban en un solo día, después del 90.
 
 ## El reparto del trabajo
 

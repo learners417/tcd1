@@ -99,8 +99,13 @@ ok(/acceso: 'noventa' as TipoDeAcceso/.test(admin),
   'el alta pregunta la ventana de acceso');
 ok(/acceso_tipo: nuevoForm\.acceso/.test(admin) && /acceso_hasta: cierra/.test(admin),
   'y la guarda al crear la cuenta');
-ok(/servicio_contratado: nuevoForm\.servicio/.test(admin),
-  'y también qué contrató, en vez de dejarlo en el más bajo sin que nadie lo decidiera');
+// Antes esta lente pedía `servicio_contratado: nuevoForm.servicio` en el
+// update. Lo correcto es el RPC: además de poner el escalón sella quién lo
+// marcó y cuándo, y esa fecha es la que hace correr el tope del Camino.
+// Escribiendo la columna a mano, un alta en La Base quedaba sin marcar —el
+// valor es el mismo que el default— y abría los 90 días completos.
+ok(/rpc\('marcar_servicio'/.test(admin) && /p_servicio: nuevoForm\.servicio/.test(admin),
+  'y también qué contrató, marcado y con fecha, en vez de dejarlo en el más bajo sin que nadie lo decidiera');
 ok(/marcar_acceso/.test(panel) && /marcar_acceso/.test(migServicio),
   'y se puede cambiar después, desde la ficha');
 ok(/Solo el equipo puede cambiar la ventana de acceso/.test(migServicio),

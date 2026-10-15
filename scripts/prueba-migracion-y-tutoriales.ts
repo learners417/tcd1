@@ -48,11 +48,32 @@ const sinGrabar = seed.tutoriales.map((t) => t.codigo).filter((c) => !grabados.h
 ok(seed.tutoriales.length === 21, `el Camino tiene ${seed.tutoriales.length} tutoriales`);
 ok(grabados.size === 13, `${grabados.size} están grabados`);
 ok(sinGrabar.length === 8, `y faltan ${sinGrabar.length} por grabar`);
-for (const c of sinGrabar) {
-  ok(tutorialEscrito(c) !== null, `${c} ya tiene su paso a paso escrito`);
+
+// ═══ LA REGLA CAMBIÓ, Y A PROPÓSITO ═══
+//
+// Antes esta prueba pedía lo contrario: que SOLO los que faltaban grabar
+// tuvieran texto, para no tener dos versiones del mismo paso a paso.
+//
+// Dejó de servir cuando La Base y El Ascenso pasaron a montar todo ellos
+// mismos. Con esa regla, trece tutoriales tenían el video como única forma, y
+// el que abre la app sin datos para ver video se queda sin su paso a paso. Y
+// la cuenta real era peor: trece de los veintiuno no tenían ni texto ni PDF,
+// así que cuatro jornadas —entre ellas el día 29, Meta y el pixel, y el 31,
+// encender las campañas— abrían sin ningún paso a paso.
+//
+// Ahora los VEINTIUNO tienen su texto. El video, cuando está, se suma arriba.
+for (const t of seed.tutoriales) {
+  ok(tutorialEscrito(t.codigo) !== null, `${t.codigo} tiene su paso a paso escrito`);
 }
-ok(CODIGOS_ESCRITOS.every((c) => !grabados.has(c)),
-  'y no se escribió ninguno de los grabados: dos versiones del mismo paso a paso dejan al cliente leyendo la que no se actualizó');
+// Y lo que sí hay que vigilar de tener las dos formas: que el texto no se
+// quede apuntando a otro día que el seed. Es lo único que la app lee para
+// mostrarlo, y desfasado el cliente no lo ve nunca.
+ok(seed.tutoriales.every((t) => {
+  const e = tutorialEscrito(t.codigo);
+  return e !== null && e.dia === t.dia && e.codigo === t.codigo;
+}), 'y cada texto declara el mismo día y el mismo código que el seed');
+ok(CODIGOS_ESCRITOS.length === seed.tutoriales.length,
+  `los ${CODIGOS_ESCRITOS.length} escritos son exactamente los ${seed.tutoriales.length} del Camino`);
 
 console.log('\n══ cada uno sirve para hacer el paso solo ══');
 for (const [codigo, t] of Object.entries(TUTORIALES_DE_LUPE)) {

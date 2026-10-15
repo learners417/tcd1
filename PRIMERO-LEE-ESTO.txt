@@ -1,225 +1,178 @@
 ══════════════════════════════════════════════════════════════════
-  LOS 90 DÍAS, ALINEADOS
+  EL VEREDICTO DE LA EVIDENCIA
   Reemplaza todos los ZIPs anteriores.
 ══════════════════════════════════════════════════════════════════
 
-  · 221 archivos, a la raíz de "mejoras"
-  · 14 migraciones SQL, de arriba hacia abajo. Las tres últimas
-    (20261019, 20261020, 20261021) son nuevas.
+  · 273 archivos, a la raíz de "mejoras"
+  · 17 migraciones SQL, de arriba hacia abajo. La nueva es
+    20261025 (el veredicto queda).
+  · Y `sala-de-mando.sql`, que va aparte: se pega entero en el
+    editor SQL. Lo explico abajo, en AL SUBIR.
   · Hay que correr `npm install` después de subir.
-  · Adentro va EL-CAMINO-DIA-POR-DIA.md: el plan exacto de los 90
-    días, generado desde lo que la app le sirve al cliente. No es
-    un resumen ni una versión paralela — si el documento y la app
-    dicen algo distinto, la auditoría no pasa.
+  · Y BORRAR 22 archivos. La lista está al final, en AL SUBIR.
 
 
 ══════════════════════════════════════════════════════════════════
-  LO QUE ENCONTRÉ AL MIRAR LOS 90 DÍAS COMPLETOS
+  LO QUE CERRÉ
 ══════════════════════════════════════════════════════════════════
 
-Me pediste el mejor vehículo para que el cliente llegue solo del
-punto A al punto B. Así que dejé de mirar pantalla por pantalla y
-miré el viaje entero, los noventa días seguidos, como lo vive él.
+Lo primero de los tres que te había dejado: aprobar o rechazar una
+evidencia. Quedó como lo decidiste.
 
-Aparecieron seis agujeros. Ninguno era un error de código: eran
-tramos del camino donde la app lo dejaba solo.
-
-Están los seis cerrados.
+JUZGA LA IA, Y SE GUARDA. LUPE ENTRA EN LO QUE ELLA NO PUDO.
 
 
 ──────────────────────────────────────────────────────────────────
-  1 · EL DÍA QUE MANDA ES EL DEL TRABAJO
+  EL AGUJERO ERA DE RECARGA
 ──────────────────────────────────────────────────────────────────
 
-La app contaba días de calendario. Si alguien entraba el 1 de
-marzo, el 31 de marzo la app lo trataba como si estuviera en el
-día 31 — aunque hubiera cerrado solo seis sesiones.
+El testigo ya miraba la foto y contestaba. Eso andaba.
 
-En la práctica le decía "enciende tus campañas" a alguien que
-todavía no tiene página publicada. Y el que se atrasa una semana es
-el que más necesita que la app le hable de su camino, no de uno que
-no es suyo.
+Lo que no andaba es que su respuesta vivía en la pantalla. El
+archivo rechazado quedaba guardado, y el conteo contaba archivos.
 
-Ahora hay dos números: el del almanaque y el de su próxima sesión
-pendiente. Todo lo que se abre, se abre por el segundo.
+  El cliente sube la foto equivocada.
+  La IA la rechaza. La pantalla le pide otra.
+  Él recarga.
+  El archivo sigue ahí, cuenta uno, y la jornada se destraba
+  con la foto que la IA había rechazado.
 
-Y funciona en los dos sentidos: el que adelantó trabajo no espera
-al almanaque. Si cerró la sesión 31 en tres semanas, tiene lo del
-día 31.
+Un F5 y la puerta se abría. Y al otro día la pantalla le pedía una
+evidencia sin decirle qué tenía de malo la que ya había subido,
+porque el motivo también se había ido con la pantalla.
 
-LO QUE SE LE DICE AL QUE FALTA
-
-  No "vas 8 días atrasado". Eso no lo puede cambiar: los días ya
-  pasaron.
-
-  Sí "te faltan 3 sesiones para llegar — la próxima es tu día 15".
-  Eso lo puede hacer hoy, y mañana son dos.
+Ahora el veredicto se guarda, con la firma de quién lo dictó. Y el
+conteo lo lee de ahí, no de la carpeta.
 
 
 ──────────────────────────────────────────────────────────────────
-  2 · EL CUARTO LUGAR DEL MENÚ YA NO ESTÁ VACÍO
+  QUÉ CUENTA Y QUÉ NO
 ──────────────────────────────────────────────────────────────────
 
-Campañas ocupaba un lugar fijo en el menú desde el día 1. Un tercio
-del programa tocando un botón que no tiene nada adentro, porque
-antes del día 29 no hay campaña que montar.
+  APROBADA     cuenta.
 
-Ahora ese lugar lo ocupa MI ADN mientras construye —que es
-exactamente lo que está haciendo esos días— y se convierte en
-CAMPAÑAS el día que le toca montar.
+  PENDIENTE    cuenta también. Es lo que la IA no mira —el audio,
+               el video, el PDF— y lo que espera a una persona.
+               Que el cliente quede trabado hasta que alguien abra
+               el Admin convierte el método en una sala de espera.
 
-Las dos navegaciones (la del teléfono y la de la computadora)
-preguntan lo mismo a la misma función, así que no pueden decir
-cosas distintas.
+  RECHAZADA    no cuenta. Es la única que frena.
 
-
-──────────────────────────────────────────────────────────────────
-  3 · LAS ENTREGAS DEL EQUIPO AVISAN SOLAS
-──────────────────────────────────────────────────────────────────
-
-Las tres entregas estaban escritas en la especificación y nadie las
-disparaba. Dependían de que alguien se acordara.
-
-Ahora el cron las dispara, y lo hace por el día del TRABAJO:
-montarle los formularios a quien todavía no escribió su oferta es
-trabajo que se hace dos veces.
-
-  Día 0   El alta — subcuenta, WhatsApp nuevo, accesos
-  Día 11  Sitios, formularios y contactos
-  Día 29  Conversaciones, automatizaciones, reportes y WhatsApp
-
-Al cliente le llega un aviso que dice qué recibe y qué va a poder
-hacer cuando esté. Al equipo le entra la tarea con el nombre
-adelante y lo que hay que instalar, punto por punto.
+  SIN JUZGAR   cuenta. Son las evidencias que ya están subidas de
+               antes de esta tabla: nadie pierde lo que ya tiene
+               hecho.
 
 
 ──────────────────────────────────────────────────────────────────
-  4 · LA SEGUNDA MITAD DEL CAMINO TENÍA HUECOS
+  TU COLA, EN HOY
 ──────────────────────────────────────────────────────────────────
 
-Del día 50 al 90 había 24 días sin ninguna sesión y 735 minutos de
-trabajo en total. El cliente que llega hasta ahí —el que ya hizo lo
-difícil— abría la app y no tenía nada que hacer.
+Abajo de quien está esperando respuesta, porque una persona
+esperando manda sobre un cliente trabado.
 
-Entraron doce sesiones nuevas: cobranza, revisión de la entrega,
-casos de éxito, referidos, el guion que ya no funciona, la segunda
-tanda de anuncios, qué subir de precio. 1.040 minutos.
+Cada fila trae el nombre, el día y el título de la jornada, y el
+motivo del testigo entre comillas. Y dos botones:
 
-Y NINGUNA PASA DE MEDIA HORA
+  APROBAR         un toque.
+  PEDIRLE OTRA    un toque. El motivo viene escrito por el
+                  testigo, así que confirmarlo no te pide redactar
+                  nada. Si quieres cambiarlo, es el texto que el
+                  cliente va a leer.
 
-  Es a propósito. Esos son los días de atender a los consultantes
-  que ya tiene. La promesa es cuatro horas y diez consultantes:
-  llenarle los cinco días rompe lo que el programa vino a arreglar.
+Cuando decides, el cliente recibe su aviso con el motivo. Sale
+adentro de la misma operación que guarda la decisión: no existe el
+caso de la decisión guardada y el aviso que no salió.
 
-  Quedan 12 días enteros libres.
+El panel se calla cuando no hay nada. Un cartel que dice "0" todos
+los días se deja de leer, y entonces tampoco se lee el día que dice
+algo.
 
-Cinco de las doce traen su rúbrica, así que se pueden juzgar con la
-misma vara que el resto: criterios, descalificador y a dónde se
-manda si no sale.
-
-
-──────────────────────────────────────────────────────────────────
-  5 · EL DÍA QUE ENCIENDE, CAMBIA DE ETAPA
-──────────────────────────────────────────────────────────────────
-
-Encender las campañas era el momento más importante de los noventa
-días y en la app no pasaba nada. Mismo menú, misma pantalla de Hoy
-que el día 3.
-
-Ahora hay una ceremonia que lo marca: hasta hoy construiste, desde
-hoy sostienes. Y desde ese día la pantalla de Hoy abre con sus seis
-números.
-
-LOS SEIS
-
-  Invertido · Conversaciones · Agendas · Llamadas · Ventas ·
-  Cobrado
-
-  La cadena entera, de lo que paga a lo que entra. Cada uno con la
-  flecha contra la semana pasada.
-
-Y UNA FRASE DEBAJO: DÓNDE SE CORTA
-
-  Seis números sin esa frase son seis números. El cliente los lee,
-  no sabe cuál mirar, y vuelve a preguntar.
-
-  Es el mismo diagnóstico que ve el equipo en su cola, sobre la
-  misma tabla: lo que la app le dice a él y lo que nos muestra a
-  nosotros no pueden ser dos lecturas distintas.
-
-  Y juzga el costo contra la banda de SUS países, no la de México.
+Y en la ficha del cliente, la pestaña Evidencias ahora muestra el
+veredicto de cada archivo con los mismos dos botones. Antes era una
+fila de botones para abrir archivos: sin estado, sin motivo, sin
+decisión. Eso era todo lo que el equipo veía.
 
 
 ──────────────────────────────────────────────────────────────────
-  6 · SUS NÚMEROS SON SUYOS
+  UNA COSA QUE DECIDÍ, Y TE LA DIGO
 ──────────────────────────────────────────────────────────────────
 
-La tabla de la semana tenía una sola política: solo el equipo. O
-sea que el cliente no podía leer los números de su propio negocio.
-Cualquier tablero que le mostráramos venía vacío.
+Si rechazas una evidencia de una jornada QUE EL CLIENTE YA CERRÓ,
+la jornada NO se reabre.
 
-Tenía sentido cuando los cargaba Lupe en la Mesa de plata y nadie
-más los miraba. Dejó de tenerlo el día que el Camino le pide, en su
-sesión del día 82, que mire "tus seis números de hoy".
+Reabrir el día 4 cuando está en el 40 le pone una jornada vencida
+de hace cinco semanas en una pantalla que venía en verde. Esa es la
+fatiga que esta app existe para no producir.
 
-Ahora cada uno lee y carga los suyos, el equipo sigue viendo todos,
-y nadie puede escribirle los números a otro. Eso último está
-probado contra PostgreSQL de verdad, no asumido.
+La fila de la cola te avisa que esa jornada ya cerró, y la
+conversación la tienes tú con él. Si quieres que reabra sola,
+dime y lo cambio.
 
 
 ══════════════════════════════════════════════════════════════════
-  EL PLAN DE LOS 90 DÍAS, POR ESCRITO
+  Y DOS VERIFICADORES QUE NO VERIFICABAN
 ══════════════════════════════════════════════════════════════════
 
-EL-CAMINO-DIA-POR-DIA.md tiene las 90 jornadas en el orden en que
-se abren: qué hace cada día, cuántos minutos, qué queda hecho, qué
-se le habilita, qué queda trabado hasta cumplirlo, qué cinturón
-gana y el veredicto con el que cierra.
+Los encontré escribiendo esto, y son peores que una pantalla roja:
+una prueba en verde que no mira lo que dice mirar.
 
-NO LO ESCRIBÍ A MANO
 
-  Lo genera `scripts/generar-plan-90-dias.py` leyendo el mismo
-  archivo que la app le sirve al cliente.
+  1 · LA PRUEBA DEL SQL DECLARABA UNA TABLA QUE NO EXISTE
 
-  Un plan escrito a mano es una segunda verdad: el día que una
-  jornada cambia, el documento sigue diciendo lo de antes y alguien
-  lo lee. Así no puede pasar — y si alguien cambia una jornada y no
-  regenera el documento, la auditoría lo caza.
+      Mi prueba levanta un PostgreSQL de verdad y le arma el
+      andamiaje. Ahí `hoja_de_ruta` estaba declarada con
+      (user_id, codigo, estado).
 
-CÓMO QUEDA REPARTIDO
+      La tabla de verdad tiene (usuario_id, pilar_numero,
+      meta_codigo, completada, fecha_completada). Así la crean tus
+      migraciones de abril y mayo, y así la leen las catorce
+      pantallas que la consultan.
 
-  Días 1-29    construir              21 sesiones   1.500 min
-  Días 30-60   encender y corregir    23 sesiones   1.120 min
-  Días 61-90   sostener               20 sesiones     735 min
+      O sea que una función nueva que la tocara BIEN fallaba en la
+      prueba, y una que la tocara MAL también podía pasar. Las dos
+      respuestas sin valor.
 
-  Y 26 días de campo: los que tiene libres para atender.
 
-LOS TRES MOMENTOS EN QUE CAMBIA DE ETAPA
+  2 · VERIFICABA 4 DE LAS 56 LLAMADAS
 
-  Día 11   Le montan sitios y formularios → puede publicar su
-           página y recibir aplicaciones
-  Día 29   Conecta Meta y su pixel mide → el cuarto destino del
-           menú se convierte en Campañas
-  Día 31   Enciende sus dos campañas → la ceremonia, y desde ahí
-           la pantalla de Hoy abre con sus seis números
-  Día 90   Graduación → cinturón negro primer dan
+      Esta es la que importa. Supabase resuelve estas llamadas POR
+      NOMBRE DE ARGUMENTO: si el nombre no coincide, la llamada
+      sale, no hace nada, y el código la da por buena. Es el bug
+      que te conté la vez pasada, el de los números de la semana
+      que no llegaban nunca.
+
+      La prueba que encontró ese bug tenía la lista escrita a mano,
+      con cuatro funciones. La app hace 56 llamadas.
+
+      Las tres del veredicto que acabo de escribir pasaron sin que
+      las mirara. Y la próxima también iba a pasar.
+
+      Ahora la lista sale del código: se leen las 56 llamadas de
+      src/ y se comparan contra lo que declara el SQL. Las 56 están
+      verificadas. Una llamada nueva entra sola.
+
+
+  3 · Y ALGO QUE ESTABA DOS VECES
+
+      Los iconos y colores de los avisos estaban idénticos en el
+      Topbar y en la campana. Lo descubrió el compilador al entrar
+      el tipo nuevo: quedó dibujado en una pantalla y con la
+      campana genérica en la otra. Ahora están una vez.
 
 
 ══════════════════════════════════════════════════════════════════
-  CÓMO QUEDÓ VERIFICADO
+  CÓMO QUEDÓ MEDIDO
 ══════════════════════════════════════════════════════════════════
 
-  · Tipos: limpio.
-  · 71 pruebas de escenario: todas en verde. Una es nueva y
-    protege los seis cambios de arriba.
-  · Auditoría: 749 lentes, 0 faltas.
-  · SQL contra PostgreSQL 16 real: las 14 migraciones en orden,
-    dos veces, más el candado nuevo probado en sus dos sentidos
-    (el cliente carga los suyos, y no puede cargarle a otro).
-  · npm run build: pasa.
-  · 40 vistas en Chromium real: 0 faltas de diseño.
-  · El anillo del día, la navegación y el acceso: medidos en un
-    navegador de verdad, no asumidos.
+  · npx tsc --noEmit ............................ limpio
+  · 75 pruebas de escenario ..................... en verde
+  · npm run build ............................... limpio
+  · 798 lentes de auditoría ..................... 0 faltas
+  · 44 pruebas SQL contra PostgreSQL 16 real .... en verde
+    (las 17 migraciones, de arriba hacia abajo, DOS veces)
+  · 56 de 56 llamadas RPC, nombre por nombre .... verificadas
+  · 23 vistas en Chromium ....................... 0 faltas
+  · ninguna pantalla repite nada ................ en verde
 
 
 ══════════════════════════════════════════════════════════════════
@@ -228,11 +181,10 @@ LOS TRES MOMENTOS EN QUE CAMBIA DE ETAPA
 
   1. Descomprime a la raíz de "mejoras".
 
-  2. BORRA ESTOS TRECE ARCHIVOS. Son los que quedaron atrás en las
-     cirugías: ya nada los usa, y uno de ellos
-     (src/lib/pausasDatos.ts) importa un archivo que ya no existe.
-     Si se quedan, `npm run lint` falla. La app igual compila,
-     porque Vite solo mira lo que se usa.
+  2. BORRA ESTOS 22 ARCHIVOS. Los once primeros quedaron atrás en
+     las cirugías; los nueve del medio son los que ninguna pantalla
+     podía alcanzar. Si se quedan, `npm run lint` falla y el
+     paquete sigue cargando 604 líneas que no hacen nada.
 
        src/lib/pausaGlobal.ts
        src/lib/pausasDatos.ts
@@ -245,29 +197,64 @@ LOS TRES MOMENTOS EN QUE CAMBIA DE ETAPA
        src/components/sesion/CronometroSesion.tsx
        src/components/tasks/TaskChecklist.tsx
        src/components/tasks/TaskHerramientaIA.tsx
+       src/lib/ligaCalcs.ts
+       src/lib/mentorPanelPrompt.ts
+       src/lib/muroHitos.ts
+       src/lib/perlasMaestro.ts
+       src/lib/red.ts
+       src/lib/sesionDePapel.ts
+       src/lib/tokens.ts
+       src/components/ReporteDirector.tsx
+       src/components/credits/index.ts
        scripts/prueba-pausa.ts
        LEEME-SUBIR.txt
 
   3. `npm install`.
 
-  4. Corre las 14 migraciones, de arriba hacia abajo. Las tres
-     últimas son nuevas: 20261019 (el candado de los avisos),
-     20261020 (la ficha de anuncios) y 20261021 (los números del
-     cliente).
+  4. Corre las 17 migraciones de supabase/migrations, de arriba
+     hacia abajo. La nueva es 20261025.
 
-  5. Marca el escalón de servicio en cada alta: el formulario
-     arranca en el más bajo, y quien pagó acompañamiento se
-     quedaría sin chat.
+  5. Y pega `sala-de-mando.sql` entero en el editor SQL.
+
+     Esto te lo aclaro porque lo descubrí ahora y no estaba dicho
+     en ningún ZIP anterior: ese archivo no es una migración, está
+     en la raíz, y declara 23 funciones que la app llama todos los
+     días —tu lista de la mañana, abrir y cerrar la jornada, la
+     carga de la semana. Si ya lo corriste alguna vez, correrlo de
+     nuevo no rompe nada: es idempotente.
+
+  6. Marca el escalón de los clientes que ya tienes, en su ficha.
+     Sin marcar, el Camino se abre completo: nadie pierde nada
+     mientras no lo hagas. Los nuevos quedan marcados desde el alta.
 
 
 ══════════════════════════════════════════════════════════════════
-  LO QUE QUEDA DE TU LADO
+  LO QUE QUEDA, Y ES DECISIÓN TUYA
 ══════════════════════════════════════════════════════════════════
 
-  · Los 8 tutoriales sin grabar. El Camino los pide en su día y
-    hoy abren vacíos.
-  · El acceso de GitHub: no puedo subir los commits a la rama
-    "mejoras" porque la organización todavía no tiene instalada la
-    app de Claude. Mientras tanto, el ZIP es la vía.
+Las otras dos que te había señalado. Siguen igual, porque cambian
+el producto y eso lo decides tú.
+
+  1 · LAS TAREAS DEL DÍA SE CREAN CUANDO ALGUIEN ABRE EL ADMIN.
+      El reparto de la cola y las tareas de soporte corren dentro
+      de la pantalla. El día que nadie abre el Admin, no se crea
+      ninguna tarea. Lo único que corre solo es el cron, y no hace
+      eso.
+
+  2 · OCHO COSAS QUE EL EQUIPO HACE Y EL CLIENTE NO SE ENTERA:
+      responder un reporte, cargar una sesión, habilitarle la
+      migración, abrirle la Biblioteca, cambiarle el escalón,
+      cerrarle una jornada por él. Ninguna le manda aviso. Y tres
+      de esas solo se ven cuando recarga la app.
+
+      Esta ahora tiene el camino hecho: el aviso de la evidencia
+      sale desde la base, adentro de la misma operación que guarda
+      la decisión. Las otras siete se cablean igual.
+
+Dime por cuál sigo.
+
+Y el acceso de GitHub sigue pendiente: no puedo subir los commits a
+la rama "mejoras" porque la organización todavía no tiene instalada
+la app de Claude.
 
 ══════════════════════════════════════════════════════════════════

@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import {
   cruces, elEmbudo, queEstaPasando, ordenadas, ultimaCargada, tieneDatos,
-  semanasSinCargar, avisoDeCarga, comparado, usd, pct,
+  semanasSinCargar, avisoDeCarga, comparado, pct,
   type SemanaDeNumeros,
 } from '../src/lib/numerosDelCliente';
 import { filaDe, DIA_EN_QUE_YA_MIDE, SEMANAS_SIN_NUMEROS } from '../src/lib/semaforo';

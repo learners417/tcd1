@@ -23,8 +23,7 @@
 import { readFileSync } from 'node:fs';
 import {
   siguienteEstado, ESTADO_LABEL, ESTADO_COLOR, ESTADO_MARCA,
-  deQuienEsLaPelota, laPelota, alEstadoNuevo, type EstadoCelda,
-} from '../src/lib/matrizExtras';
+  deQuienEsLaPelota, laPelota, alEstadoNuevo, } from '../src/lib/matrizExtras';
 import { SECTIONS, TOTAL_STEPS } from '../src/lib/preactivacionSteps';
 import { noIncluye } from '../src/lib/avanceDelCuadro';
 

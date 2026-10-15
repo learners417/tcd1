@@ -115,7 +115,13 @@ try:
             check('el mensaje de ritmo existe y está en positivo',
                   bool(m['ritmo']) and not re.search(r'atr[aá]s|atraso', m['ritmo'], re.I), m['ritmo'] or 'no encontrado')
             check('ninguna palabra corta se parte en dos líneas', not m['partidas'], ', '.join(m['partidas'][:5]))
-            check('los títulos de fase no llevan una letra inventada', not re.search(r'M[ée]todo [A-Z]\b', t, re.I), re.findall(r'.{10}M[ée]todo [A-Z]\b', t, re.I)[:2])
+            # Cazaba un título roto que decía «Método C», con una letra suelta.
+            # Pero con re.I también cazaba «tienes precio, método y oferta»:
+            # cualquier «método» seguido de una palabra de una letra. Ahora pide
+            # mayúscula de verdad y descarta las siglas, que llevan punto.
+            check('los títulos de fase no llevan una letra inventada',
+                  not re.search(r'M[ée]todo ([A-Z])(?![\w.])', t),
+                  re.findall(r'.{10}M[ée]todo [A-Z](?![\w.])', t)[:2])
             check('los días de cada fase no se repiten', not re.search(r'D[íi]as (\d+-\d+) · \1', t), re.findall(r'D[íi]as \d+-\d+ · \d+-\d+', t)[:2])
             check('el candado de la Fase 4 no aparece en el paso del día 15', 'se abre con tu ADN' not in t)
             check('ningún texto visible mide menos de 13 px', not m['chica'], '; '.join(m['chica'][:4]))

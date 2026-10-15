@@ -31,7 +31,11 @@ os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
 from playwright.sync_api import sync_playwright
 
 PANTALLAS = ['dashboard', 'roadmap', 'entrenadores', 'adn', 'coach', 'miclinica', 'metrics',
-             'biblioteca', 'diario', 'agentes', 'creador', 'numero', 'manualNegocio', 'campanas',
+             # 'agentes' salió: era la segunda ruta a la misma pantalla que
+             # 'entrenadores' y no estaba en ningún menú. Medirla era medir la
+             # misma pantalla dos veces, y desde que la ruta no existe, medir
+             # una pantalla en blanco.
+             'biblioteca', 'diario', 'creador', 'numero', 'manualNegocio', 'campanas',
              # 'mensajes' entró el 9 de oct: es uno de los cinco destinos del
              # cliente y no se estaba midiendo ninguna de sus pantallas.
              'mensajes']
@@ -167,15 +171,35 @@ def puerto_libre():
     s = socket.socket(); s.bind(('127.0.0.1', 0)); p = s.getsockname()[1]; s.close(); return p
 
 
-def preparar(pag, pantalla, dias=20, hechas=12):
-    pag.evaluate("""([pantalla, dias, hechas]) => {
+def preparar(pag, pantalla, dias=20, hechas=12, antesala=None):
+    """Deja la cuenta de Julia lista en la pantalla que se va a medir.
+
+    `antesala` decide en qué lado de la puerta del día 1 queda:
+
+      None  → su antesala está cerrada y su día 1 hecho, así que la pantalla de
+              Hoy dibuja el Camino. Es el estado de casi toda la app.
+      {}    → recién entró y todavía no diseñó su protocolo, así que ve la
+              antesala. Sin este caso la pantalla nueva no se medía nunca, y
+              con él de default no se medía el Camino: hacen falta los dos.
+    """
+    pag.evaluate("""([pantalla, dias, hechas, antesala]) => {
       localStorage.clear();
       const d = new Date(); d.setDate(d.getDate() - (dias - 1));
       const f = d.toISOString().slice(0, 10);
-      localStorage.setItem('tcd_profile', JSON.stringify({nombre: 'Julia', email: 'julia@test', especialidad: 'Psicóloga', fecha_inicio: f, plan: 'DWY'}));
+      const perfil = {nombre: 'Julia', email: 'julia@test', especialidad: 'Psicóloga', fecha_inicio: f, plan: 'DWY'};
+      if (antesala) {
+        perfil.antesala = antesala;
+      } else {
+        perfil.antesala = { protocolo: [
+          { area: 'sueno', loQueHago: 'Apago la luz a las 23:30' },
+          { area: 'pantallas', loQueHago: 'El celular a la cocina a las 22:00' },
+          { area: 'movimiento', loQueHago: 'Camino 25 minutos al mediodía' },
+        ], cerrada: f };
+      }
+      localStorage.setItem('tcd_profile', JSON.stringify(perfil));
       localStorage.setItem('tcd_current_page', pantalla);
       localStorage.setItem('tcd_plan', 'implementacion');
-    }""", [pantalla, dias, hechas])
+    }""", [pantalla, dias, hechas, antesala])
 
 
 def main():
@@ -230,6 +254,18 @@ def main():
                 pag.screenshot(path=f'/tmp/app-{p}.png')
                 resultados[p] = m
                 pag.close()
+            # ── La antesala ──
+            # Es la primera pantalla que ve el cliente, antes de su día 1, y es
+            # la única que se mide con la cuenta recién abierta. Va aparte
+            # porque el resto de la app se mide con su antesala ya cerrada.
+            if not solo or 'antesala' in solo:
+                pag = ctx.new_page(); errores = []
+                pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
+                pag.goto(base); preparar(pag, 'dashboard', antesala={}); pag.reload()
+                pag.wait_for_timeout(2500)
+                m = pag.evaluate(MEDIR); m['errores'] = errores
+                pag.screenshot(path='/tmp/app-antesala.png')
+                resultados['antesala'] = m; pag.close()
             nav.close()
     finally:
         srv.terminate()

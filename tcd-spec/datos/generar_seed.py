@@ -109,16 +109,16 @@ FRENOS = [
  ("F-ORDEN","No se abre una sesión sin cerrar la anterior, salvo que su evidencia dependa de que otro pague",
   "evidencia_anterior_aprobada or anterior.avanza_sin_evidencia",
   "El orden es el método. Terminá la de ayer."),
- ("F-PAGINA","El día 26 no abre sin el enlace de la página","adn.sistema.url_pagina",
+ ("F-PAGINA","Del día 16 en adelante, nada abre sin el enlace de la página","adn.sistema.url_pagina",
   "Sin página publicada, el guion del video no tiene dónde vivir."),
- ("F-RODAJE","La fecha de rodaje se elige el día 19","evento.rodaje_agendado",
+ ("F-RODAJE","La fecha de rodaje se elige antes del día 15","evento.rodaje_agendado",
   "Elegí el día. El rodaje que no tiene fecha no ocurre."),
  ("F-14DIAS","Escalar o apagar queda cerrado del 31 al 45","dia>=46",
   "Faltan {n} días. Tu campaña está aprendiendo."),
  ("F-TABLERO","Ramiro responde 'todavía no' del 31 al 45","dia>=46",None),
  ("F-COMPRA","No invita sin hacer la compra de prueba","evento.compra_de_prueba",
   "Comprate a vos mismo antes de invitar a nadie."),
- ("F-PRECIO","El precio del día 17 no puede ser menor al del día 9","oferta.precio>=numeros.precio_digno",
+ ("F-PRECIO","El precio de la oferta del día 10 no puede ser menor al precio digno del día 5","oferta.precio>=numeros.precio_digno",
   "Tu oferta no puede valer menos que lo que ya cobrás."),
  ("F-ADN","Ningún agente arranca con campos requeridos vacíos","adn.campos_requeridos",
   "{agente} necesita {campo}. Volvé al día {dia}."),
@@ -399,7 +399,7 @@ add(17,"sesion","Tu oferta en una página",sistema=2,minutos=60,piezas=["P3.1","
     pasos=["Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
            "Plazo, con fecha de cierre",
            "Entregables: lo que la persona recibe, no lo que tú haces",
-           "Precio con número, nunca menor al que sellaste el día 8",
+           "Precio con número, nunca menor al que sellaste el día 5",
            "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"],
     evidencias=[ev("texto","La oferta en una página","precio >= precio_digno",
                    pide="Escribe tu oferta completa, en una página.")],
@@ -857,6 +857,11 @@ for r in REUBICADAS:
                 lleva=r["lleva"], veredicto=r["veredicto"])
     base["paso_esencial"] = len(r["pasos"]) or None
     if r.get("cinturon"): base["cinturon"] = r["cinturon"]
+    # Una jornada puede sumar tutoriales que su origen no tenía. Hacía falta
+    # para L-03 y L-04 —el link de pago y facturar—, que estaban grabados y no
+    # los pedía ninguna jornada: el cliente nunca se enteraba de que existían.
+    for t in r.get("tutoriales") or []:
+        if t not in base["tutoriales"]: base["tutoriales"].append(t)
     J[r["dia"]] = base
 
 for n in NUEVAS:
@@ -896,6 +901,19 @@ def _forma_grado(gid, porDefecto):
     if j and j["evidencias"]: return j["evidencias"][0]["nombre"]
     return porDefecto
 
+# El día real de cada tutorial: el de la primera jornada que lo pide.
+DIA_DEL_TUTORIAL = {}
+for _d in sorted(J):
+    for _t in J[_d]["tutoriales"]:
+        DIA_DEL_TUTORIAL.setdefault(_t, _d)
+
+_huerfanos = [c for c, *_ in TUTORIALES if c not in DIA_DEL_TUTORIAL]
+if _huerfanos:
+    raise SystemExit(
+        "Tutoriales que ninguna jornada pide, así que el cliente no los ve nunca: "
+        + ", ".join(_huerfanos)
+        + ". Agregarlos a la jornada que corresponde en hoja_de_ruta.py.")
+
 out = {
   "version":"2026.09","idioma":"es-neutro","dias":90,
   "promesa":{"consultantes":10,"jornada_horas":4,"dias_semana":5},
@@ -909,7 +927,14 @@ out = {
     {"n":5,"nombre":"Tu ecosistema circular","dias":"85-86"}],
   "piezas":[{"codigo":c,"titulo":t,"dia":d,"sistema":s,"set":st,"minutos":m,"estado":e}
             for c,t,d,s,st,m,e in PIEZAS],
-  "tutoriales":[{"codigo":c,"titulo":t,"dia":d,"minutos":m,"donde":w}
+  # El día de cada tutorial SALE de la jornada que lo pide, no de un número
+  # escrito a mano acá. Estaba a mano y se desfasó en 14 de los 21: la app
+  # busca el paso a paso por este campo, así que al cliente que publicaba su
+  # página el día 16 no le aparecía ninguno —L-05 decía 25— y al del día 25 le
+  # ofrecía subir una página que ya tenía. Con dos escalones que montan todo
+  # ellos mismos, el tutorial en el día correcto es el producto.
+  "tutoriales":[{"codigo":c,"titulo":t,"dia":DIA_DEL_TUTORIAL.get(c,d),
+                 "minutos":m,"donde":w}
                 for c,t,d,m,w in TUTORIALES],
   # El día es ESTIMACIÓN, nunca la razón del otorgamiento. Lo que otorga es
   # "se_gana_con": la evidencia. Ningún grado se da por fecha.

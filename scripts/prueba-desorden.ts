@@ -7,9 +7,9 @@ import { calcularCadena, encontrarDomino, proyectar, SEMANA_VACIA } from '../src
 import { decidirCampana } from '../src/lib/decidirCampana';
 import { armarPaquete } from '../src/lib/paqueteCampana';
 import { estadoDeLasPiezas, recomendarFormulas, armarCarrusel } from '../src/lib/formulasAnuncios';
-import { armarCola, resumirCola } from '../src/lib/colaExcepciones';
-import { estadoDePacientes, resumirPacientes } from '../src/lib/libroYPacientes';
-import { avanceDe, cuadroDe } from '../src/lib/cuadroTickets';
+import { armarCola } from '../src/lib/colaExcepciones';
+import { estadoDePacientes } from '../src/lib/libroYPacientes';
+import { avanceDe } from '../src/lib/cuadroTickets';
 import { veredictoMotor } from '../src/lib/salaDeMando';
 import { leerBitacora, resumirBitacora } from '../src/lib/bitacoraCampana';
 

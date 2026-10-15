@@ -22,6 +22,7 @@ import type { ItemCola } from '../../src/lib/colaExcepciones.js';
 import {
   ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo,
 } from '../../src/lib/entregasDelEquipo.js';
+import { leTocanLasEntregas } from '../../src/lib/topeDelEscalon.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -99,7 +100,7 @@ async function handler(req: any, res: any) {
     // 1) clientes activos con fecha de inicio
     const { data: clientes, error: e1 } = await admin
       .from('profiles')
-      .select('id, nombre, fecha_inicio, rol, status')
+      .select('id, nombre, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el')
       .neq('rol', 'admin');
     if (e1) throw e1;
 
@@ -358,6 +359,10 @@ async function handler(req: any, res: any) {
       for (const cli of clientes ?? []) {
         if (!cli.fecha_inicio) continue;
         if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
+        // Las entregas son el escalón que las compró. Sin esta línea, a las dos
+        // semanas le entraba a Lupe la tarea de montarle los sitios, los
+        // formularios y las automatizaciones a quien pagó la primera etapa.
+        if (!leTocanLasEntregas(cli.servicio_contratado, cli.servicio_marcado_el)) continue;
         const done = completadasPor.get(cli.id) ?? new Set();
         const proxima = CAMINO.find((m) => !done.has(m.c));
         // Sin próxima, terminó el Camino: todas las entregas ya corresponden.

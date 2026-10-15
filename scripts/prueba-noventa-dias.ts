@@ -28,9 +28,21 @@ const ok = (c: boolean, q: string) => { console.log(c ? `✓ ${q}` : `✗ ${q}`)
 const codigoDe = (r: string) =>
   readFileSync(r, 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-/** Una fecha de inicio que deja hoy en el día N del calendario. */
-const inicioParaDia = (n: number) =>
-  new Date(Date.now() - (n - 1) * 86400000).toISOString().slice(0, 10);
+/**
+ * Una fecha de inicio que deja hoy en el día N, contada en LOCAL.
+ *
+ * Estaba con `toISOString()`, que da UTC: en UTC−3, de las 21:00 en adelante
+ * la fecha saltaba al día siguiente y el cálculo daba uno menos. O sea que la
+ * prueba pasaba de mañana y fallaba de noche, sin que nada hubiera cambiado.
+ */
+const fechaLocalISO = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const inicioParaDia = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - (n - 1));
+  return fechaLocalISO(d);
+};
 
 // ── 1 · El día lo marca el trabajo ─────────────────────────────────────────
 console.log('══ el día que manda ══');

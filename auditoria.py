@@ -1316,22 +1316,29 @@ if _os29.path.exists('src/lib/roles.ts'):
     _adm29 = rd('src/pages/Admin.tsx')
     # Se cuentan las DEFINICIONES, no las apariciones: la interfaz declara
     # cada campo una vez y eso sumaba uno de más.
-    _defsRol = _re25.findall(r'^  (direccion|acompanamiento|desarrollo): \{', _rl, _re25.M)
-    check('los tres roles existen con su propósito',
-          len(_defsRol) == 3 and _rl.count('proposito:') == 4)
+    # Son CUATRO, no tres: `produccion` vivía solo en permisos.ts, así que
+    # indexar ROLES['produccion'] daba undefined y rompía la pestaña Hoy del
+    # Admin con «Cannot read properties of undefined (reading 'techoHoras')».
+    _defsRol = _re25.findall(r'^  (direccion|acompanamiento|desarrollo|produccion): \{', _rl, _re25.M)
+    check('los cuatro roles existen con su propósito',
+          len(_defsRol) == 4 and _rl.count('proposito:') == 5)
     check('cada rol declara qué NO le toca y por qué',
-          _rl.count('noLeToca:') == 4 and _rl.count('porque:') >= 7,
+          _rl.count('noLeToca:') == 5 and _rl.count('porque:') >= 9,
           'sin esto, dos personas hacen lo mismo y una tercera cosa no la hace nadie')
     check('desarrollo NO atiende clientes',
           'Atender clientes' in _rl and 'deja de construir' in _rl,
           'cada vez que lo hace deja de construir lo que evitaría atenderlos')
     check('cada rol tiene UN número que lo mide',
-          _rl.count('indicador:') == 4)
+          _rl.count('indicador:') == 5)
     check('el techo de carga avisa lo correcto, no "trabaja más"',
           'no se arregla con más horas' in _rl,
           'decirle que trabaje más rompe el modelo en silencio')
+    # El `rolDe` dejó de estar duplicado: había uno acá y uno en permisos.ts,
+    # y contestaban DISTINTO para produccion, dev y editor. Manda el de
+    # permisos y este archivo lo re-exporta, así que la regla se mira allá.
     check('sin rol cargado se asume el más acotado, nunca dirección',
-          "default: return 'acompanamiento'" in _rl)
+          "default: return 'acompanamiento'" in rd('src/lib/permisos.ts')
+          and "export { rolDe } from './permisos';" in _rl)
     # El menú pasó a ser cuatro momentos con un orden fijo —el del día—, así
     # que ya no se ordena por rol. Lo que el rol decide es QUÉ VE, y eso lo
     # verifica la lente 6.38 sobre las categorías de dato.
@@ -2348,8 +2355,16 @@ if _os56.path.exists('src/lib/cerebro.ts'):
           'export async function mandarleAlCliente' in _cs
           and "from('mensajes').insert" in _cs,
           'antes solo tachaba el ítem: el botón prometía algo y quien lo tocaba creía que pasó')
+    # Pedía un insert directo a `notificaciones`, y es justo lo que NO funciona:
+    # esa tabla tiene políticas de leer y de marcar leído, y ninguna de
+    # insertar — a propósito, porque se inserta por la función SECURITY
+    # DEFINER. Con la clave del navegador el insert se rechaza en silencio, así
+    # que el mensaje entraba en la bandeja y la campanita no sonaba nunca. La
+    # lente pedía exactamente la forma que no andaba.
     check('y el cliente se entera aunque no tenga la app abierta',
-          "from('notificaciones').insert" in _cs)
+          "rpc('crear_notificacion'" in _cs
+          and "from('notificaciones').insert" not in _cs,
+          'el insert directo lo rechaza la RLS sin decir nada')
     check('el cerebro está probado',
           _os56.path.exists('scripts/prueba-cerebro.ts'))
 
@@ -3285,8 +3300,17 @@ check('el precio se sella antes de ordenar la cartera',
       f'precio día {_dia_precio} · cartera día {_dia_cartera}')
 check('cada tutorial con PDF lo ofrece al lado de su video',
       'PDFS_POR_TUTORIAL' in _vc and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
+# Siguen en la Biblioteca, pero por una sola vía. Estaban por DOS: el catálogo
+# unificado los traía con su tema, y debajo un bloque propio los volvía a
+# listar agrupado por tema. El cliente leía nueve títulos repetidos —«Tu
+# historia», «Tu legado», «A quién sirves»— y no sabía si eran dos cosas o la
+# misma. Medido en el navegador con scripts/prueba-repetido.py.
 check('lo complementario vive en la Biblioteca, no en el Camino',
-      'COMPLEMENTOS' in _vc and 'VIDEOS_COMPLEMENTO' in todo.get('src/pages/Biblioteca.tsx', ''))
+      'COMPLEMENTOS' in _vc
+      and 'COMPLEMENTOS' in rd('src/lib/catalogoBiblioteca.ts')
+      and '<TodoElMaterial' in todo.get('src/pages/Biblioteca.tsx', ''))
+check('y una sola vez: no por dos listas en la misma pantalla',
+      '<Complementos />' not in todo.get('src/pages/Biblioteca.tsx', ''))
 check('el tablero del Admin pisa lo que viene por archivo',
       'VIDEOS_POR_JORNADA' in rd('src/components/admin/TableroGrabacion.tsx'))
 
@@ -3433,6 +3457,230 @@ else:
     SIN_MEDIR_MOVIL = True
     print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')
     print('    pip install playwright --break-system-packages && python3 -m playwright install chromium')
+
+# ── 11) LA ANTESALA Y EL TOPE POR ESCALÓN ──────────────────────────────
+# Dos módulos nuevos, completos y probados. El patrón que ya me falló tres
+# veces es exactamente éste: lógica impecable que ninguna pantalla importa.
+# Estas lentes miran el cable, no el módulo.
+print()
+print('══ 11) LA ANTESALA, EL ESCALÓN Y LAS TRES OFERTAS ══')
+import json as _json11
+_json_seed = _json11.loads(rd('src/lib/roadmap.seed.json'))
+_ant = rd('src/lib/antesala.ts')
+_tope = rd('src/lib/topeDelEscalon.ts')
+_road = rd('src/pages/Roadmap.tsx')
+_dash = rd('src/pages/Dashboard.tsx')
+_cronE = rd('api/cron/alarmas-inactividad.ts')
+
+check('la antesala existe y la pantalla de Hoy la dibuja',
+      bool(_ant) and '<LaAntesala' in _dash)
+check('el Camino no abre el día 1 hasta que la cerró',
+      'leToca(perfil?.antesala' in _road)
+check('y al cerrarla se sella la fecha de inicio del Camino',
+      'campos.fecha_inicio = sella' in _dash)
+check('el tope por escalón corta el Camino',
+      bool(_tope) and 'entraEnElEscalon(' in _road)
+check('el cron pregunta el escalón antes de mandarle una entrega al equipo',
+      'leTocanLasEntregas(cli.servicio_contratado' in _cronE)
+# El tope mira el escalón MARCADO y no el valor suelto: la columna es
+# `not null default 'base'`, así que mirar el valor le cortaría el Camino a
+# todos los clientes de hoy, que están en base porque nadie los marcó.
+check('y el tope corre con el escalón marcado, no con el default',
+      'estaMarcado' in _tope and 'servicio_marcado_el' in _road
+      and 'servicio_marcado_el' in _cronE)
+check('el módulo del tope no importa nada (lo usa el cron en frío)',
+      not re.search(r'^import ', _tope, re.M))
+import os as _os31
+check('y las dos cosas tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-antesala-y-escalon.ts'))
+
+# ── Las tres ofertas ──
+# La Base monta todo con los tutoriales, El Ascenso también. La app los busca
+# por `tutorial.dia`, y ese número estaba a mano: 14 de 21 apuntaban a otra
+# jornada, así que al que publicaba su página el día 16 no le aparecía ninguno.
+_tut = _json_seed.get('tutoriales', [])
+_porJ = {}
+for _j in sorted(_json_seed.get('jornadas', []), key=lambda x: x['dia']):
+    for _c in _j.get('tutoriales', []):
+        _porJ.setdefault(_c, _j['dia'])
+_desf = [t['codigo'] for t in _tut if _porJ.get(t['codigo']) != t['dia']]
+check(f'los {len(_tut)} tutoriales dicen el día de la jornada que los pide',
+      not _desf, ', '.join(_desf[:6]))
+check('y ninguno queda sin jornada que lo pida (la app los busca por día)',
+      all(t['codigo'] in _porJ for t in _tut),
+      ', '.join(t['codigo'] for t in _tut if t['codigo'] not in _porJ)[:80])
+check('el día de cada tutorial sale calculado, no escrito a mano',
+      'DIA_DEL_TUTORIAL' in rd('tcd-spec/datos/generar_seed.py'))
+check('el alta marca el escalón con el RPC que sella quién y cuándo',
+      "rpc('marcar_servicio'" in rd('src/pages/Admin.tsx')
+      and 'servicio_contratado: nuevoForm.servicio' not in rd('src/pages/Admin.tsx'))
+check('y dice qué abre la oferta elegida antes de crear la cuenta',
+      'loQueAbre(nuevoForm.servicio)' in rd('src/pages/Admin.tsx'))
+check('el Camino le dice quién monta lo técnico en su escalón',
+      '<QuienMonta' in rd('src/pages/Roadmap.tsx')
+      and 'construyeSolo' in rd('src/components/camino/QuienMonta.tsx'))
+check('y las tres ofertas tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-tres-ofertas.ts'))
+
+# ── 12) LO QUE ENCONTRÓ LA REVISIÓN FINAL ──────────────────────────────
+# Once cosas que fallaban en SILENCIO: ninguna rompía una pantalla, ninguna
+# aparecía en la consola, y esta batería estaba en verde con las once adentro.
+print()
+print('══ 12) LO QUE FALLABA EN SILENCIO ══')
+
+# El cliente no tenía por dónde cerrar sesión: el modal existía completo y la
+# única función que lo abría se le pasaba al Sidebar, que no la usaba.
+_side = rd('src/components/Sidebar.tsx')
+_topb = rd('src/components/Topbar.tsx')
+check('el cliente puede abrir su cuenta y cerrar sesión, desde las dos barras',
+      'onClick={onOpenSettings}' in _side and 'onClick={onOpenSettings}' in _topb,
+      'el modal existía y nada lo abría')
+
+# El alcance se mide caminando el grafo, no con una lista de arreglos viejos.
+_alc = subprocess.run([sys.executable, 'scripts/alcance.py'], capture_output=True, text=True)
+check('ningún módulo de src/ queda sin que una pantalla lo pueda alcanzar',
+      _alc.returncode == 0,
+      _alc.stdout.strip().split('\n')[-1][:160])
+
+# Las fechas de un día se arman en LOCAL. Con toISOString() —que es UTC— en
+# UTC−3 de las 21:00 en adelante se guarda la fecha de mañana, y de esas
+# fechas sale el atraso con el que se decide si la garantía corre.
+_utc = []
+for _r, _s in todo.items():
+    if _r.startswith('src/') and 'toISOString().slice(0, 10)' in solo_codigo(_s):
+        _utc.append(_r)
+check('ninguna fecha de un día se arma en UTC (se corre un día de noche)',
+      not _utc, ', '.join(_utc[:4]))
+check('y hay un solo helper para eso',
+      'export function hoyISO' in rd('src/lib/diaPrograma.ts'))
+
+# Los números que carga el cliente llegan a la base: el RPC se llamaba con
+# nombres que la función no declara, y PostgREST resuelve por nombre.
+_sync = solo_codigo(rd('src/lib/tableroSync.ts'))
+check('los números del cliente llegan a la base (los nombres del RPC)',
+      'p_cliente_id: clienteId' in _sync and 'p_semana_iso: semanaISO()' in _sync,
+      'con p_cliente/p_semana la llamada fallaba y el código la daba por buena')
+
+# Los mensajes en vivo: seis suscripciones escuchaban una tabla sin publicar.
+check('la tabla de mensajes está en la publicación de tiempo real',
+      'mensajes' in rd('supabase/migrations/20261024_los_mensajes_en_vivo.sql'))
+
+# El aviso del equipo salía con un insert que la RLS rechaza en silencio.
+check('el aviso del equipo al cliente sale por el RPC, no por un insert',
+      "rpc('crear_notificacion'" in rd('src/lib/cerebroStorage.ts'))
+
+# Los 21 tutoriales tienen su paso a paso: trece no tenían ni texto ni PDF, y
+# cuatro jornadas abrían sin ninguno.
+_tut_lupe = rd('src/lib/tutorialesDeLupe.ts')
+_cods = set(re.findall(r"'(L-\d\d)': \{", _tut_lupe))
+_delseed = {t['codigo'] for t in _json_seed.get('tutoriales', [])}
+check(f'los {len(_delseed)} tutoriales tienen su paso a paso escrito',
+      _delseed <= _cods, ', '.join(sorted(_delseed - _cods))[:80])
+check('y la jornada muestra todos los de su día, no solo el primero',
+      'roadmap.tutoriales.filter((x) => x.dia === dia' in rd('src/pages/Roadmap.tsx'),
+      'el día 17 tiene seis y mostraba uno')
+
+# Un solo sistema de roles: había dos, contestaban distinto, y la pestaña Hoy
+# del Admin se rompía con tres de los cuatro valores.
+check('hay un solo rolDe, y es el de permisos.ts',
+      "export { rolDe } from './permisos';" in rd('src/lib/roles.ts'))
+check('y el cálculo de carga no se llama con `as never`',
+      'as never' not in rd('src/components/admin/Jornada.tsx'),
+      'tapaba el error de tipo que avisaba del crash')
+
+# El veredicto de la garantía se calculaba contra una columna sin escritor.
+check('el atraso de cada jornada sale de la fecha que ya se guarda',
+      'entregas={entregasReales}' in rd('src/App.tsx')
+      and 'fecha_completada' in rd('src/App.tsx'),
+      'profiles.entregas no tenía un solo escritor: el atraso daba cero para todos')
+
+# Lo repetido se mide en el navegador.
+check('y lo repetido se mide en el navegador, no leyendo el código',
+      _os31.path.exists('scripts/prueba-repetido.py'))
+check('la revisión final tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-revision-final.ts'))
+
+# ── 13) EL VEREDICTO DE LA EVIDENCIA QUEDA ─────────────────────────────
+# El testigo ya juzgaba. Su veredicto vivía en un useState: al recargar, el
+# archivo rechazado seguía en Storage, el conteo lo contaba, y la jornada se
+# destrababa con la foto que la IA había rechazado.
+print()
+print('══ 13) EL VEREDICTO DE LA EVIDENCIA ══')
+
+_ver_mig = rd('supabase/migrations/20261025_el_veredicto_queda.sql')
+_coach31 = solo_codigo(rd('src/components/tasks/TaskCoach.tsx'))
+_ver_lib = solo_codigo(rd('src/lib/veredictoEvidencia.ts'))
+
+check('el veredicto de cada evidencia se guarda, con la firma de quién lo dictó',
+      'create table if not exists public.evidencia_veredictos' in _ver_mig
+      and "check (quien in ('ia', 'equipo'))" in _ver_mig)
+check('la jornada cuenta por veredicto, no por cantidad de archivos',
+      'evidenciasQueCuentan(' in _coach31,
+      'contaba archivos: el rechazado seguía en Storage y un F5 destrababa la jornada')
+check('y la rechazada es la única que frena (la pendiente no deja esperando a nadie)',
+      "return estado !== 'rechazada';" in _ver_lib)
+check('el cliente no escribe sus propios veredictos: los guarda el RPC',
+      'guardar_veredicto_ia' in _ver_mig
+      and 'for select to authenticated' in _ver_mig,
+      'con escritura directa, «la IA me rechazó» se vuelve «yo me aprobé»')
+check('y la función comprueba que el archivo esté en la carpeta de su dueño',
+      "not like ('evidencias/' || p_cliente_id::text || '/%')" in _ver_mig)
+check('lo que la IA no mira —audio, video, PDF— va a la cola del equipo',
+      "'pendiente'" in _coach31 and "file.type.startsWith('image/')" in _coach31)
+check('el motivo del rechazo sobrevive a la recarga y se le muestra',
+      'loQueDiceElVeredicto(frena)' in _coach31,
+      'antes vivía en el estado de React: volvía al otro día sin saber qué estaba mal')
+check('la cola del equipo trae lo que espera decisión de todos los clientes',
+      _os31.path.exists('src/components/admin/ColaDeEvidencias.tsx')
+      and '<ColaDeEvidencias' in rd('src/pages/Admin.tsx'))
+check('y la ficha del cliente muestra el veredicto de cada archivo, con su decisión',
+      'lecturaDelVeredicto(v)' in rd('src/pages/Admin.tsx'),
+      'listaba archivos y los abría: sin estado, sin motivo, sin botón')
+check('el aviso al cliente sale adentro del RPC que decide',
+      'perform public.crear_notificacion(' in _ver_mig,
+      'desde el navegador existe el caso de la decisión guardada y el aviso que no salió')
+check('y llega con su icono: el tipo nuevo está en los dos lugares que dibujan avisos',
+      'evidencia: ClipboardCheck' in rd('src/lib/avisoVisual.ts')
+      and 'ICON_MAP' not in rd('src/components/Topbar.tsx')
+      and 'ICON_MAP' not in rd('src/components/NotificationBell.tsx'),
+      'los mapas estaban idénticos en dos pantallas')
+check('el veredicto tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-veredicto.ts'))
+check('y la fila de la cola se monta de verdad, con datos',
+      'export function FilaDeLaCola' in rd('src/components/admin/ColaDeEvidencias.tsx')
+      and 'FilaDeLaCola' in rd('scripts/prueba-pantallas.tsx'),
+      'el render estático no corre los efectos: con la cola vacía el panel '
+      'devuelve null y la fila no la montaba nadie')
+
+# ── Y los verificadores que no verificaban ─────────────────────────────
+# Dos pruebas en verde que no miraban lo que decían mirar. Es el patrón
+# peor: una lente en verde protegiendo algo que el producto ya cambió.
+_psql = rd('scripts/prueba-sql.sh')
+check('el andamiaje de la prueba SQL declara hoja_de_ruta con sus columnas reales',
+      'usuario_id uuid, pilar_numero int, meta_codigo text' in _psql,
+      'declaraba (user_id, codigo, estado), que no existen en ninguna parte')
+check('los nombres de los RPC a verificar salen del código, no de una lista a mano',
+      'rpc-que-llama-la-app.py' in _psql
+      and 'for PAR in "guardar_semana_cliente' not in _psql,
+      'la lista tenía cuatro de las cincuenta y seis llamadas que hace la app')
+check('las cuentas de prueba existen en auth.users, no solo en profiles',
+      "insert into auth.users (id, email) values" in _psql,
+      'un insert correcto en una tabla con clave foránea a auth.users fallaba '
+      'por una cuenta que en producción sí existe')
+check('y el andamiaje da los permisos que Supabase da por defecto',
+      'alter default privileges in schema public' in _psql
+      and 'set role authenticated;' in _psql,
+      'sin permiso, una prueba de RLS da verde porque falta el permiso y no '
+      'porque la política funcione: dos razones para el mismo resultado')
+check('las funciones plpgsql del veredicto se EJECUTAN contra Postgres',
+      'select guardar_veredicto_ia(' in _psql and 'select decidir_evidencia(' in _psql,
+      'plpgsql no valida el cuerpo al crearlo: un error de tipo aparece la '
+      'primera vez que corre, que es cuando el cliente sube su foto')
+_rpcn = subprocess.run([sys.executable, 'scripts/prueba-rpc-nombres.py'],
+                       capture_output=True, text=True)
+check('cada parámetro que la app manda por RPC existe en la función que llama',
+      _rpcn.returncode == 0,
+      _rpcn.stdout.strip().split('\n')[0][:160])
 
 print()
 if F == 0 and SIN_MEDIR_MOVIL:

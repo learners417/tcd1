@@ -58,8 +58,21 @@ ok(/soporteSinLeer/.test(topbar) && /sinLeerDelCliente/.test(topbar),
   'el botón de Soporte cuenta lo que no abrió');
 ok(/filter: `receptor_id=eq\.\$\{userId\}`/.test(topbar),
   'y se entera en vivo cuando le responden, sin recargar');
-ok(/currentPage === 'mensajes'\) setSoporteSinLeer\(0\)/.test(topbar),
-  'abrir Soporte es leerlo: el contador no sobrevive a la visita');
+// ═══ ESTA REGLA CAMBIÓ, Y A PROPÓSITO ═══
+//
+// Pedía que el contador se apagara con solo estar en la pantalla. Y la
+// pantalla abre en el canal de comunidad, no en Contacto: el cliente veía
+// «2», entraba, el globo desaparecía, y se iba sin haber leído la respuesta.
+// Al recargar volvía, porque en la base seguía sin leer. El contador mentía
+// justo cuando más importaba.
+//
+// Ahora se vuelve a preguntar a la base mientras está en la pantalla, y lo
+// que lo apaga es `marcarLeidos`, que corre cuando abre la conversación de
+// verdad. Y si tiene algo sin abrir, la pantalla abre en Contacto.
+ok(/currentPage !== 'mensajes' \|\| !userId/.test(topbar) && /sinLeerDelCliente\(userId\)\.then\(setSoporteSinLeer\)/.test(topbar),
+  'el contador sale de la base mientras está en Soporte, no de haber entrado');
+ok(/sinLeerDelCliente/.test(readFileSync('src/pages/Acompanamiento.tsx', 'utf-8')),
+  'y con algo sin abrir la pantalla abre en Contacto, que es lo que vino a buscar');
 ok(/badge-pulse/.test(topbar) && /soporteSinLeer > 9/.test(topbar),
   'el badge se ve, y con muchos dice 9+ en vez de desbordarse');
 ok(/if \(n > 0\) setTab\('humano'\)/.test(cliente),

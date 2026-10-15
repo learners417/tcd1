@@ -54,6 +54,18 @@ psqlq << 'SQL' > /dev/null 2>&1
 create role authenticated;
 create role anon;
 create role service_role;
+-- LOS PERMISOS QUE SUPABASE DA POR DEFECTO.
+--
+-- En Supabase, cada tabla nueva de `public` nace con permisos para
+-- `authenticated`: lo que decide qué puede hacer un cliente es la RLS, no el
+-- permiso. En un PostgreSQL de fábrica la tabla nace sin permisos, así que
+-- una prueba de RLS daba verde porque faltaba el permiso, no porque la
+-- política funcionara. Dos razones distintas para el mismo resultado.
+grant usage on schema public to authenticated, anon, service_role;
+alter default privileges in schema public
+  grant all on tables to authenticated, anon, service_role;
+alter default privileges in schema public
+  grant all on sequences to authenticated, anon, service_role;
 create schema if not exists auth;
 create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
 create table profiles (
@@ -104,10 +116,23 @@ create publication supabase_realtime;
 
 -- Las tablas que las migraciones viejas ya dejaron en la base de Javo. Las
 -- nuevas las dan por hechas, y es correcto que lo hagan.
+-- `hoja_de_ruta` con las columnas DE VERDAD.
+--
+-- Estaba declarada `(user_id, codigo, estado)`, que no existen en ninguna
+-- parte: la tabla real es `(usuario_id, pilar_numero, meta_codigo,
+-- completada, fecha_completada)` —así la crean las migraciones de abril y
+-- mayo, y así la leen las catorce pantallas que la consultan.
+--
+-- O sea que una función nueva que la tocara bien fallaba acá, y una que la
+-- tocara mal también podía pasar. Las dos respuestas sin valor.
 create table hoja_de_ruta (
-  id uuid primary key default gen_random_uuid(), user_id uuid, codigo text,
-  estado text, hecho_afuera boolean default false, orden int,
-  created_at timestamptz default now());
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid, pilar_numero int, meta_codigo text,
+  completada boolean default false, fecha_completada date,
+  output_generado jsonb, es_estrella boolean default false,
+  hecho_afuera boolean default false, marcado_por text, marcado_el timestamptz,
+  created_at timestamptz default now(),
+  unique (usuario_id, pilar_numero, meta_codigo));
 create table programa_videos (
   id uuid primary key default gen_random_uuid(), titulo text, url text,
   grupo text, pilar_id text, orden int);
@@ -307,6 +332,15 @@ echo "══ el candado de los avisos ══"
 # persona con cuenta podía escribirle a cualquier otra un aviso con el título
 # y el enlace que quisiera. Esto prueba las cuatro combinaciones.
 psqlq << 'SQL' > "$DATA/n.txt" 2>&1
+-- En `auth.users` TAMBIÉN, no solo en `profiles`. En la base de Javo cada
+-- ficha cuelga de una cuenta, y varias tablas apuntan ahí con una clave
+-- foránea. Acá estaban solo en `profiles`, así que un insert correcto en una
+-- tabla nueva fallaba por una cuenta que en producción sí existe.
+insert into auth.users (id, email) values
+  ('aaaaaaaa-0000-0000-0000-000000000001','a@prueba'),
+  ('aaaaaaaa-0000-0000-0000-000000000002','b@prueba'),
+  ('bbbbbbbb-0000-0000-0000-000000000001','lupe@prueba')
+  on conflict (id) do nothing;
 insert into profiles (id, nombre, rol) values
   ('aaaaaaaa-0000-0000-0000-000000000001','Cliente A','cliente'),
   ('aaaaaaaa-0000-0000-0000-000000000002','Cliente B','cliente'),
@@ -398,6 +432,246 @@ SQL
 )
 [ "$IMP" = "48000" ]
 marcar $? "y llegan a la tabla en vez de perderse en silencio (impresiones: $IMP)"
+
+echo ""
+echo "══ el escalón, marcado por una persona ══"
+#
+# El tope del Camino corre con el escalón MARCADO y no con el default. La
+# columna es `not null default 'base'`, así que si el tope mirara el valor
+# suelto, todos los clientes de hoy —que están en base porque nadie los
+# marcó— perderían los días 13 al 90 de un día para el otro.
+#
+# Quien sella la fecha es `marcar_servicio`, que ya existía: pone el escalón,
+# quién lo marcó y cuándo. Lo que hay que probar es que la sella SIEMPRE,
+# incluso cuando el escalón elegido es el mismo que el default — que es
+# justamente el caso del que paga la primera etapa.
+ANTES=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select coalesce(servicio_marcado_el::text, 'SIN MARCAR') from profiles
+ where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$ANTES" = "SIN MARCAR" ]
+marcar $? "una ficha que nadie marcó queda sin marcar ($ANTES)"
+
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select marcar_servicio('aaaaaaaa-0000-0000-0000-000000000001','base',null);"
+marcar $? "el equipo la marca en el escalón más bajo"
+
+MARCA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select case when servicio_marcado_el is null then 'SIN MARCAR' else 'marcado' end
+  from profiles where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$MARCA" = "marcado" ]
+marcar $? "y queda marcada aunque el escalón elegido sea el mismo que el default ($MARCA)"
+
+QUIEN=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select coalesce(servicio_marcado_por::text, 'NADIE') from profiles
+ where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$QUIEN" = "bbbbbbbb-0000-0000-0000-000000000001" ]
+marcar $? "con el nombre de quién la marcó: es una decisión de plata ($QUIEN)"
+
+comoSi 'aaaaaaaa-0000-0000-0000-000000000002' \
+  "select marcar_servicio('aaaaaaaa-0000-0000-0000-000000000001','instalacion',null);"
+[ $? -ne 0 ]
+marcar $? "y un cliente NO puede marcarse a sí mismo la instalación de \$5.000"
+
+echo ""
+echo "══ el veredicto de la evidencia ══"
+#
+# Las dos funciones que deciden son plpgsql, y plpgsql NO valida el cuerpo al
+# crearlo: un error de tipo adentro aparece la primera vez que se ejecuta. Que
+# en producción es cuando el cliente sube su foto.
+#
+# Así que se ejecutan las tres: la de la IA, la del equipo y la cola.
+A1='aaaaaaaa-0000-0000-0000-000000000001'
+LUPE='bbbbbbbb-0000-0000-0000-000000000001'
+FOTO="evidencias/$A1/P1.6/1760000000_quema.jpg"
+
+comoSi "$A1" \
+  "select guardar_veredicto_ia('$FOTO','$A1','P1.6','rechazada','No se ve fuego');"
+marcar $? "el cliente guarda el veredicto que dictó el testigo sobre su foto"
+
+EST=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select estado || '/' || quien from evidencia_veredictos where archivo = '$FOTO';
+SQL
+)
+[ "$EST" = "rechazada/ia" ]
+marcar $? "y queda guardado con la firma de quién lo dictó ($EST)"
+
+# El path lo arma el navegador: un veredicto apuntando a la carpeta de otro no
+# entra, aunque el cliente mande su propio id.
+comoSi "$A1" \
+  "select guardar_veredicto_ia('evidencias/aaaaaaaa-0000-0000-0000-000000000002/P1.6/x.jpg','$A1','P1.6','aprobada',null);"
+[ $? -ne 0 ]
+marcar $? "un veredicto sobre un archivo de otra carpeta NO entra"
+
+# Y el cliente no se aprueba a sí mismo escribiendo la tabla: la RLS le da
+# lectura y nada más.
+#
+# Con `set role authenticated`, que es el rol con el que entra la app. Como
+# postgres —dueño de la tabla— la RLS NO se aplica: el update pasaba y esta
+# línea daba verde sin haber probado la política.
+comoSi "$A1" "select 1;"
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+set role authenticated;
+update evidencia_veredictos set estado = 'aprobada' where archivo = '$FOTO';
+SQL
+APR=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select estado from evidencia_veredictos where archivo = '$FOTO';
+SQL
+)
+[ "$APR" = "rechazada" ]
+marcar $? "y no se aprueba a sí mismo escribiendo la tabla ($APR)"
+
+# La cola del equipo: lo rechazado y lo pendiente, con el nombre del cliente.
+comoSi "$LUPE" "select 1;"
+EN_COLA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from cola_de_evidencias() where archivo = '$FOTO';
+SQL
+)
+[ "$EN_COLA" = "1" ]
+marcar $? "le cae a la cola del equipo, con el motivo del testigo al lado ($EN_COLA)"
+
+# Un cliente no ve la cola: la función la filtra por equipo.
+comoSi "$A1" "select 1;"
+SIN_COLA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from cola_de_evidencias();
+SQL
+)
+[ "$SIN_COLA" = "0" ]
+marcar $? "y un cliente no lee la cola de nadie (filas: $SIN_COLA)"
+
+# El equipo decide, y el aviso al cliente sale en la misma operación.
+comoSi "$LUPE" \
+  "select decidir_evidencia('$FOTO','aprobada','Está, se ve el fuego','$A1','P1.6');"
+marcar $? "el equipo la aprueba en un toque"
+
+FIRMA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select estado || '/' || quien || '/' || coalesce(decidido_por::text,'nadie')
+  from evidencia_veredictos where archivo = '$FOTO';
+SQL
+)
+[ "$FIRMA" = "aprobada/equipo/$LUPE" ]
+marcar $? "y la decisión queda con el nombre de quién la tomó ($FIRMA)"
+
+AVISO=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from notificaciones
+ where usuario_id = '$A1' and tipo = 'evidencia';
+SQL
+)
+[ "$AVISO" = "1" ]
+marcar $? "el cliente recibe su aviso desde la misma operación (avisos: $AVISO)"
+
+# La IA no pisa lo que ya decidió una persona.
+comoSi "$A1" \
+  "select guardar_veredicto_ia('$FOTO','$A1','P1.6','rechazada','otra vez no');"
+TRAS=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select estado || '/' || quien from evidencia_veredictos where archivo = '$FOTO';
+SQL
+)
+[ "$TRAS" = "aprobada/equipo" ]
+marcar $? "y la IA no pisa lo que ya decidió una persona ($TRAS)"
+
+# Un cliente no decide por nadie, ni por sí mismo.
+comoSi "$A1" \
+  "select decidir_evidencia('$FOTO','aprobada',null,'$A1','P1.6');"
+[ $? -ne 0 ]
+marcar $? "un cliente NO decide sobre una evidencia, ni sobre la suya"
+
+# Y 'pendiente' no es una decisión de persona: es el estado de lo no mirado.
+comoSi "$LUPE" \
+  "select decidir_evidencia('$FOTO','pendiente',null,'$A1','P1.6');"
+[ $? -ne 0 ]
+marcar $? "y nadie «decide pendiente»: ese es el estado de lo que falta mirar"
+
+# La jornada cerrada se ve en la cola, que es lo que cambia la conversación.
+comoSi "$LUPE" \
+  "insert into hoja_de_ruta (usuario_id, pilar_numero, meta_codigo, completada)
+     values ('$A1', 1, 'P1.6', true)
+     on conflict (usuario_id, pilar_numero, meta_codigo) do update set completada = true;
+   select decidir_evidencia('$FOTO','rechazada','Sube otra con la hoja entera','$A1','P1.6');"
+comoSi "$LUPE" "select 1;"
+CERRADA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select jornada_cerrada from cola_de_evidencias() where archivo = '$FOTO';
+SQL
+)
+[ "$CERRADA" = "t" ]
+marcar $? "la cola avisa que esa jornada ya cerró, en vez de reabrirla sola ($CERRADA)"
+
+echo ""
+echo "══ los nombres con los que la app llama a los RPC ══"
+#
+# PostgREST resuelve los RPC POR NOMBRE DE ARGUMENTO. `tableroSync.ts` llamaba
+# a guardar_semana_cliente con `p_cliente` y `p_semana` —la función los llama
+# `p_cliente_id` y `p_semana_iso`— y el `return !error` daba la llamada por
+# buena. Los números que cargaba el cliente no llegaban nunca a la base.
+#
+# Esto compara los nombres que usa el código con los que declara la base. Un
+# nombre de menos acá es una función que no se llama nunca y nadie se entera.
+#
+# LA LISTA SALE DEL CÓDIGO, NO DE ACÁ.
+#
+# Estaban escritas a mano cuatro funciones. O sea que esta prueba en verde no
+# decía nada de la quinta: las tres del veredicto de la evidencia pasaron sin
+# que las mirara, y la próxima también iba a pasar.
+#
+# Ahora se leen todas las llamadas `.rpc('nombre', { p_x: … })` de src/ y se
+# comparan contra lo que declara la base. Una llamada nueva entra sola.
+python3 scripts/rpc-que-llama-la-app.py > "$DATA/rpc.txt"
+
+FALTAN=""
+SINFUNC=""
+MIRADAS=0
+while IFS= read -r PAR; do
+  [ -z "$PAR" ] && continue
+  FN="${PAR%%:*}"; ARGS="${PAR#*:}"
+  MIRADAS=$((MIRADAS + 1))
+  EXISTE=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public' and p.proname = '$FN';
+SQL
+)
+  # Una función que el código llama y ninguna migración del repo crea: o la
+  # dejó una migración vieja que ya corrió en la base de Javo, o el nombre
+  # está mal escrito. Se nombra abajo en vez de dar por buena la llamada.
+  if [ "$EXISTE" = "0" ]; then SINFUNC="$SINFUNC $FN"; continue; fi
+  REALES=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select string_agg(a, ',' order by i) from (
+  select unnest(p.proargnames) as a, generate_subscripts(p.proargnames,1) as i
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = '$FN' limit 40) t;
+SQL
+)
+  for A in $(echo "$ARGS" | tr ',' ' '); do
+    case ",$REALES," in
+      *",$A,"*) ;;
+      *) FALTAN="$FALTAN $FN.$A" ;;
+    esac
+  done
+done < "$DATA/rpc.txt"
+[ -z "$FALTAN" ]
+marcar $? "los $MIRADAS RPC que llama la app: cada parámetro existe en la función ($([ -z "$FALTAN" ] && echo "todos" || echo "faltan:$FALTAN"))"
+
+# Las que no existen en esta base de prueba, que levanta las migraciones
+# desde 20261009 y `sala-de-mando.sql`: las crea una migración anterior. Sus
+# nombres los verifica `scripts/prueba-rpc-nombres.py` contra el texto del
+# SQL del repo, que cubre las 56.
+echo "   fuera de esta base (las mira prueba-rpc-nombres.py):${SINFUNC:- ninguna}"
+
+# Y la prueba de fondo: guardar con los nombres que usa la app de verdad.
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' \
+  "select guardar_semana_cliente(p_cliente_id => 'aaaaaaaa-0000-0000-0000-000000000001', p_semana_iso => '2026-W43', p_datos => '{\"gasto\":250,\"conversaciones\":40,\"agendas\":9}'::jsonb);"
+marcar $? "el cliente guarda su semana con los nombres del código"
+GAS=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << 'SQL'
+select gasto::int from sala_metricas_semana
+ where semana_iso = '2026-W43' and cliente_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$GAS" = "250" ]
+marcar $? "y llega a la tabla, que es lo que el equipo y su tablero leen (gasto: $GAS)"
 
 echo ""
 if [ "$fallas" -eq 0 ]; then echo "✓ TODO EN VERDE"; else echo "✗ $fallas FALLAS"; fi
