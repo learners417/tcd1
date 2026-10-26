@@ -4,26 +4,26 @@
  * Los 5 destinos principales siempre visibles; "Más" abre el drawer con el resto.
  */
 import { useEffect, useState } from 'react';
-import { Sun, Map, Dna, Megaphone, LifeBuoy } from 'lucide-react';
+import { Sun, Map, Dna, Dumbbell, Megaphone, LifeBuoy } from 'lucide-react';
 import { sinLeerDelCliente } from '../lib/soporteDatos';
+import { destinoQueCambia } from '../lib/destinoDelMomento';
+import type { DondeVa } from '../lib/diaPrograma';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 
 interface Tab {
   id: string;
   label: string;
-  icon: typeof Sun;
   /**
-   * Cuánto ancho se lleva, proporcional a su palabra.
+   * El nombre completo del destino, cuando esta barra lo escribe más corto.
    *
-   * Con las cinco pestañas repartiendo en partes iguales, «Entrenadores» se
-   * salía de su botón y se montaba encima de «Campañas»: las etiquetas se
-   * leían pegadas, «EntrenadoresCampañasContacto». Repartir parejo solo
-   * funciona si las palabras miden parecido, y acá van de tres a doce letras.
-   *
-   * Medido a 15 px, que es el piso: achicar la letra habría sido la salida
-   * fácil y la peor, porque esta barra es lo que más se mira de la app.
+   * Con cinco pestañas en 390 píxeles no entra «Acompañamiento» ni «El
+   * Camino», así que acá van cortos. Declararlo lo vuelve un sistema en vez
+   * de un desacuerdo: `prueba-un-destino-un-nombre.ts` compara los tres
+   * lugares donde se escribe cada destino —esta barra, la de arriba y el
+   * buscador— y la diferencia solo pasa si está escrita acá.
    */
-  ancho: number;
+  nombreCompleto?: string;
+  icon: typeof Sun;
 }
 
 /**
@@ -46,15 +46,37 @@ interface Tab {
  * al final.
  */
 const TABS: Tab[] = [
-  { id: 'dashboard', label: 'Hoy', icon: Sun, ancho: 0.8 },
-  { id: 'roadmap', label: 'Camino', icon: Map, ancho: 1 },
-  { id: 'entrenadores', label: 'Entrenadores', icon: Dna, ancho: 1.6 },
-  { id: 'campanas', label: 'Campañas', icon: Megaphone, ancho: 1.25 },
+  { id: 'dashboard', label: 'Hoy', icon: Sun },
+  { id: 'roadmap', label: 'Camino', nombreCompleto: 'El Camino', icon: Map },
+  /*
+   * Pesas, no hélice: acá se entrena una habilidad. La hélice es de Mi ADN.
+   *
+   * ═══ POR QUÉ «ENTRENAR» Y NO «ENTRENADORES» ═══
+   *
+   * «Entrenadores» son doce letras y mide 98 px a 15, que es el piso de la
+   * casa. Medido: las cinco etiquetas piden 334 px y un Android de 320 deja
+   * 316, así que la última se iba de la pantalla — y la última es Contacto,
+   * la única forma que tiene el cliente de llegar al equipo. A 360 entraba
+   * justo, sin aire.
+   *
+   * Achicar la letra estaba descartado. Acortar la más larga es el mismo
+   * mecanismo que esta barra ya usa para «Acompañamiento → Contacto» y para
+   * «El Camino → Camino»: el nombre completo queda declarado y el menú
+   * lateral, donde hay ancho, lo muestra entero.
+   *
+   * «Entrenar» guarda la raíz —se ve de dónde viene— es neutro en toda
+   * Latinoamérica, y es lo que el cliente va a hacer ahí.
+   */
+  { id: 'entrenadores', label: 'Entrenar', nombreCompleto: 'Entrenadores', icon: Dumbbell },
+  // Este cambia: hasta que le toque montar es Mi ADN, que es lo que está
+  // construyendo. Ver «Campañas» cuatro semanas diciendo «todavía no» gasta
+  // uno de los cinco destinos justo cuando recién aprende a usar la app.
+  { id: 'campanas', label: 'Campañas', icon: Megaphone },
   // «Acompañamiento» es el nombre del destino, y en la barra de abajo no
   // entra: con cinco pestañas en 390 px se sale de la pantalla. Acá va corto
   // y en el menú lateral, donde hay ancho, va completo. El medidor lo cazó en
   // las quince pantallas del cliente a la vez.
-  { id: 'mensajes', label: 'Contacto', icon: LifeBuoy, ancho: 1.1 },
+  { id: 'mensajes', label: 'Contacto', nombreCompleto: 'Acompañamiento', icon: LifeBuoy },
 ];
 
 interface Props {
@@ -62,11 +84,14 @@ interface Props {
   setCurrentPage: (p: string) => void;
   /** Para el contador de respuestas sin abrir sobre Contacto. */
   userId?: string;
+  /** Dónde va en el Camino: decide qué dice el cuarto destino. */
+  donde?: DondeVa | null;
   /** @deprecated V5: con cinco destinos no hay boton "mas". */
   onMore?: () => void;
 }
 
-export default function BottomTabBar({ currentPage, setCurrentPage, userId }: Props) {
+export default function BottomTabBar({ currentPage, setCurrentPage, userId, donde }: Props) {
+  const cuarto = destinoQueCambia(donde);
   /**
    * LAS RESPUESTAS SIN ABRIR, SOBRE EL DESTINO.
    *
@@ -93,8 +118,19 @@ export default function BottomTabBar({ currentPage, setCurrentPage, userId }: Pr
     return () => { vivo = false; void supabase?.removeChannel(canal); };
   }, [userId]);
 
-  // Al entrar a Soporte, el contador vuelve a cero: ya las vio.
-  useEffect(() => { if (currentPage === 'mensajes') setSinLeer(0); }, [currentPage]);
+  /*
+   * No se apaga por estar en la pantalla: se apaga cuando la conversación
+   * quedó leída en la base. Apagarlo al entrar lo hacía desaparecer antes de
+   * que el cliente viera la respuesta, porque la pantalla abre en el canal de
+   * comunidad.
+   */
+  useEffect(() => {
+    if (currentPage !== 'mensajes' || !userId) return;
+    const t = setInterval(() => {
+      void sinLeerDelCliente(userId).then(setSinLeer).catch(() => { /* queda el que había */ });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [currentPage, userId]);
 
   return (
     <nav
@@ -102,14 +138,56 @@ export default function BottomTabBar({ currentPage, setCurrentPage, userId }: Pr
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Navegación principal"
     >
-      {/* Sin separación lateral y sin hueco entre pestañas: con cinco
-          destinos a 15 px en 390 px, cada píxel que se va en márgenes es un
-          píxel que le falta a «Entrenadores». Las etiquetas quedaban pegadas
-          una a la otra —«EntrenadoresCampañasContacto»— porque cada botón era
-          más angosto que su palabra. El aire entre ellas lo da ahora el ancho
-          que a cada una le sobra. */}
-      <div className="flex items-stretch justify-between px-0.5">
-        {TABS.map((tab) => {
+      {/* ═══ CADA PALABRA SU ANCHO, Y EL AIRE SOBRANTE PAREJO ═══
+          
+          Antes cada pestaña declaraba a mano cuánto ancho se llevaba —0.8, 1,
+          1.6, 1.25, 1.1— y esos números estaban mal en todos los anchos.
+          Medido a 360 px, que es el ancho más común de un Android de hoy:
+          «Hoy» recibía 50 px para una palabra de 29 y «Campañas» recibía 77
+          para una de 79, así que «Campañas» y «Contacto» ya salían cortadas
+          mientras sobraban 21 px al principio de la barra. A 390 zafaba por
+          casualidad, y a 320 «Contacto» se iba de la pantalla.
+          
+          Ahora ningún número: cada botón mide lo que mide su palabra
+          —`flex: 0 1 auto`— y los píxeles que sobran se reparten entre ellas
+          como aire, que es para lo que sirve `justify-between`. Se corrige
+          solo si una palabra cambia, y a cualquier ancho de teléfono.
+          
+          El piso de 44 px es la zona táctil: «Hoy» mide 29 y sin eso quedaría
+          un blanco que no se puede tocar.
+          
+          Y el aire va TAMBIÉN en las puntas. Con `justify-between` la primera
+          etiqueta queda contra el filo izquierdo y la última contra el
+          derecho: medido a 390, «Contacto» terminaba a dos píxeles del borde y
+          se leía como cortada. `justify-evenly` reparte el sobrante en los
+          seis lugares —las cuatro juntas y las dos puntas— así que a 390 cada
+          una respira seis píxeles y a 320, donde no sobra nada, se comporta
+          igual que antes.
+          
+          La letra sigue en 15, que es el piso de la casa. Achicarla habría
+          sido la salida fácil y la peor, porque esta barra es lo que más se
+          mira de la app. */}
+      {/* ═══ SIN `gap`, Y ESTÁ MEDIDO ═══
+            Se probó con `gap-1` para garantizar cuatro píxeles entre
+            etiquetas. A 320 px no entra: el contenido pide 298, pero «Hoy»
+            está forzada a 44 por el piso táctil aunque su palabra mida 29, así
+            que lo efectivo es 313 de 316. Los dieciséis píxeles del gap
+            recortaron CUATRO etiquetas tres o cuatro píxeles cada una.
+            Cuatro palabras cortadas es peor que cuatro palabras cerca. A 320 el
+            aire que sobra es medio píxel por lugar, y a 390 son nueve: el
+            reparto es lo mejor que se puede hacer con cinco etiquetas a 15 px y
+            una zona táctil de 44. */}
+        <div className="flex items-stretch justify-evenly px-0.5">
+        {TABS.map((crudo) => {
+          /*
+            El cuarto destino cambia de nombre, de id Y DE ÍCONO con el
+            avance. El ícono faltaba: la pestaña pasaba a decir «Mi ADN» y
+            heredaba el megáfono de Campañas. Y como «Entrenadores» llevaba la
+            hélice de ADN, las dos metáforas quedaban intercambiadas.
+          */
+          const tab = crudo.id === 'campanas'
+            ? { ...crudo, id: cuarto.id, label: cuarto.etiquetaCorta, icon: cuarto.icono === 'Dna' ? Dna : Megaphone }
+            : crudo;
           const active = currentPage === tab.id;
           const Icon = tab.icon;
           return (
@@ -118,13 +196,37 @@ export default function BottomTabBar({ currentPage, setCurrentPage, userId }: Pr
               type="button"
               onClick={() => setCurrentPage(tab.id)}
               aria-current={active ? 'page' : undefined}
-              // 10-DISENO §4: el activo cambia el trazo del ícono a oro y el peso
-              // de la etiqueta a 700. Nada más: sin fondo, sin píldora.
+              /*
+               * ═══ EL ACTIVO, EN ESTA BARRA ═══
+               *
+               * Cambia el trazo del ícono a oro y el peso de la etiqueta a
+               * 700. Nada más: sin fondo, sin píldora.
+               *
+               * Y ACÁ VA QUÉ GOBIERNA ESTA REGLA, porque leída suelta se
+               * contradice con el resto de la app: las pestañas de adentro
+               * —Campañas, Métricas, el Diario, la Biblioteca,
+               * Acompañamiento— marcan su activo con un lavado de oro al diez
+               * o quince por ciento, y son cuarenta y cinco controles.
+               *
+               * No es un olvido, son dos problemas distintos. Esta barra está
+               * SIEMPRE en pantalla, sobre el papel, con cinco destinos
+               * peleando 320 píxeles: cada fondo que se agregue acá compite
+               * con la etiqueta por el mismo lugar, y cinco píldoras en fila
+               * son una regla de más. Las pestañas de adentro son un grupo
+               * chico dentro de una pantalla, donde el lavado contesta «acá
+               * estás» sin quitarle lugar a nada.
+               *
+               * La regla del oro —«solo en líneas de 1px, versalitas y
+               * numerales, nunca relleno»— apunta al oro usado como
+               * SUPERFICIE para parecer caro, que fue el botón principal y ya
+               * se arregló. Un lavado al diez por ciento sobre papel crema se
+               * lee como papel. El lente del medidor caza desde el 35%.
+               */
               //
-              // Cada una se lleva el ancho de su palabra (ver `ancho`), y la
-              // zona táctil sigue por encima de los 44 px de alto.
-              className="flex flex-col items-center justify-center gap-1 min-w-0 min-h-[4.5rem] pt-2.5 pb-2 text-cream/70"
-              style={{ flex: `${tab.ancho} 1 0%` }}
+              // Cada una se lleva el ancho de su palabra, y la zona táctil
+              // queda por encima de los 44 px en los dos lados.
+              className="flex flex-col items-center justify-center gap-1 min-w-[44px] min-h-[4.5rem] pt-2.5 pb-2 text-cream/70"
+              style={{ flex: '0 1 auto' }}
             >
               <span className="relative">
                 <Icon className={`w-[25px] h-[25px] ${active ? 'text-gold' : ''}`} strokeWidth={active ? 2.2 : 1.7} />
