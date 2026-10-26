@@ -1,0 +1,14 @@
+pantalla lateral   fuera   chica  tactil degrade  brillo  versal insigni  tokens contras cortado desbord  tildes errores
+campanas       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+numero         0       0       0       0       0       0       0       0       0       0       0       0       0       0
+diario         0       0       0       0       0       0       0       0       0       0       0       0       0       0
+
+── composición · cuántos lenguajes habla cada pantalla a la vez ──
+pantalla   letras  superf  esquin   (techo: letras 7 superficies 5 esquinas 4)
+campanas       3       1       1
+numero         2       1       1
+diario         4       3       2
+
+VISTAS MEDIDAS: 3
+TOTAL de faltas: 0
+detalle en /tmp/medir-app.json · capturas en /tmp/app-<pantalla>.png

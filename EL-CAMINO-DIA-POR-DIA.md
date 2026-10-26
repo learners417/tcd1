@@ -83,17 +83,17 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 75 min · sistema 1: Tu reset · entrenador: espejo*
 
-- Contesta las diez preguntas de tu medición de entrada
+- Contesta las seis preguntas de tu medición de entrada
 - Elige dónde y a qué hora vas a construir esto cada día
 - Suma lo que cobraste el último mes y las horas que trabajaste de verdad
 - Divide: esa es tu hora real neta
 - Escríbela donde la veas
 
-**Lo que queda hecho:** Tus diez números de entrada · Foto del búnker · Pacto publicado · Dónde lo sentiste
+**Lo que queda hecho:** Tus seis números de entrada · Foto del búnker · Pacto publicado · Dónde lo sentiste
 
 **Cinturón:** Blanco
 
-**Veredicto:** Ya sabes de dónde partes. El día 87 lo vuelves a medir.
+**Veredicto:** Ya sabes de dónde partes. El día 82 lo vuelves a medir.
 
 ### Día 2 · Tu árbol y el dinero
 

@@ -3676,11 +3676,278 @@ check('las funciones plpgsql del veredicto se EJECUTAN contra Postgres',
       'select guardar_veredicto_ia(' in _psql and 'select decidir_evidencia(' in _psql,
       'plpgsql no valida el cuerpo al crearlo: un error de tipo aparece la '
       'primera vez que corre, que es cuando el cliente sube su foto')
+# ── 14) QUE SE MIGREN SOLOS, DESDE EL ALTA ─────────────────────────────
+print()
+print('══ 14) EL ALTA Y LA MIGRACIÓN ══')
+
+_dash14 = rd('src/pages/Dashboard.tsx')
+_mig14 = rd('src/pages/MiMigracion.tsx')
+_libmig14 = rd('src/lib/migracionDelCliente.ts')
+_adm14 = rd('src/pages/Admin.tsx')
+
+# Cuatro pantallas le prometían al cliente que traer su trabajo le ponía el
+# Camino al día. Ese flujo escribe su ADN y no toca el Camino.
+_promete = [n for n, t in (
+    ('su HOY', _dash14), ('la pantalla de traer', _mig14),
+    ('el resumen del final', _libmig14))
+    if ('Camino queda al d' in solo_codigo(t)
+        or 'Camino quedó cerrado' in solo_codigo(t)
+        or 'sesiones\n                pendientes en tu Camino' in solo_codigo(t))]
+check('ningún texto le promete al cliente que su Camino se actualiza solo',
+      not _promete, ', '.join(_promete))
+check('y dice lo que sí hace: queda cargado su ADN',
+      'cargados en' in _dash14 and 'tu ADN' in _dash14
+      and 'Tu ADN quedó completo' in _libmig14)
+check('las piezas que faltan se escriben en esa misma pantalla, sin voseo',
+      'Complétalas abajo' in _mig14 and 'Completalas' not in _mig14)
+
+# La llave de la migración se encendía solo desde Hoy, en otra lista: dar de
+# alta a alguien que ya trae su trabajo hecho eran dos pantallas.
+check('el alta puede abrir la migración en el mismo movimiento',
+      'traeSuTrabajo' in _adm14
+      and 'habilitarMigracion(signUpData.user.id, true)' in _adm14,
+      'estaba solo en Hoy, y el segundo paso es el que se olvida')
+check('apagada por defecto: no todo el que entra trae trabajo hecho',
+      'traeSuTrabajo: false,' in _adm14)
+check('y la lista de migraciones deja fuera al equipo',
+      'and not public.es_del_equipo(p.id)' in
+      rd('supabase/migrations/20261026_la_lista_de_migraciones_son_clientes.sql'),
+      'mostraba a Lupe con cero de cinco piezas y un botón para migrarla')
+check('el alta y la migración tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-alta-y-migracion.ts'))
+
+# EL BLOQUEO QUE NADIE VEÍA. La migración del cliente entró el 17 de octubre;
+# el disparador que impide que un cliente se cambie lo que compró, el 18. Ese
+# disparador prohíbe tocar `migrado_en`, que es justo la columna que escribe
+# `cerrar_mi_migracion()`. Desde el 18, el cliente pegaba su material, su ADN
+# se guardaba, el cierre fallaba, y la tarjeta le seguía apareciendo.
+_cierre14 = rd('supabase/migrations/20261027_el_cliente_puede_cerrar_su_migracion.sql')
+check('el cliente puede cerrar su propia migración',
+      "perform set_config('app.cerrando_migracion', 'si', true)" in _cierre14,
+      'el disparador bloqueaba a la función oficial que él mismo señala')
+check('y marcarse migrado a mano sigue rebotando',
+      "current_setting('app.cerrando_migracion', true), '') <> 'si'" in _cierre14,
+      'la excepción vale solo cuando la escritura viene de la función')
+check('el disparador se recrea entero, con sus nueve columnas',
+      _cierre14.count('raise exception') >= 8,
+      'dos versiones de la misma lista es cómo se pierde una')
+check('y el cierre del cliente se prueba contra Postgres, con su candado',
+      'select cerrar_mi_migracion();' in _psql
+      and 'update profiles set migrado_en = now()' in _psql)
+
+# ── 15) LA REVISIÓN EXHAUSTIVA ANTES DE DAR ACCESO A TODOS ─────────────
+# Siete cosas que fallaban en silencio. Se buscaron por la clase de falla de
+# los dos bugs del turno anterior: piezas correctas por separado que juntas se
+# bloquean, y escrituras que declaran éxito sin haberlo comprobado.
+print()
+print('══ 15) LA REVISIÓN EXHAUSTIVA ══')
+
+_app15 = rd('src/App.tsx')
+_adm15 = rd('src/pages/Admin.tsx')
+_wiz15 = rd('src/components/WelcomeWizard.tsx')
+
+# El wizard se dibuja según la BASE. Esa escritura no se comprobaba, así que
+# con un corte de un segundo el cliente lo volvía a ver al recargar. Siempre.
+check('el cierre del onboarding se comprueba y se reintenta',
+      "data && data.length > 0" in _wiz15 and 'intento < 2' in _wiz15,
+      'App.tsx dibuja el wizard con onboarding_completed === false: sin '
+      'comprobar esa escritura, el cliente no podía salir nunca')
+check('y si no se puede, se le dice en vez de entrar',
+      'setNoCerro(true)' in _wiz15)
+
+# Su pantalla de cuenta mandaba campos que el formulario no edita.
+check('guardar su cuenta no le pisa la fecha de inicio ni su plan',
+      'fecha_inicio: profileDraft.fecha_inicio' not in _app15
+      and 'plan: profileDraft.plan,' not in _app15,
+      'de fecha_inicio salen el día del Camino, los colores y el atraso de la garantía')
+check('y la copia local se actualiza, no se reemplaza',
+      '...previo, ...profileDraft' in _app15,
+      'pisarla borraba su id, su plan_comercial y su ventana de acceso')
+
+# El alta decía «Cuenta creada» sin haber escrito nada.
+check('el alta espera la ficha y comprueba que escribió',
+      'i < 10 && !existe' in _adm15 and 'tocadas.length === 0' in _adm15,
+      'con 1500 ms fijos y el resultado sin mirar, el cliente quedaba sin '
+      'ventana de acceso y con la fecha de inicio equivocada')
+check('y avisa si la fecha de inicio deja su acceso cerrado el mismo día',
+      'Con esta fecha de inicio su acceso ya está cerrado' in _adm15,
+      'un cliente que viene de hace meses ve la pantalla de cierre, no la app')
+
+# Lo que lee el cliente cuando algo falla.
+_crudo = subprocess.run([sys.executable, 'scripts/prueba-lo-que-el-cliente-ve.py'],
+                        capture_output=True, text=True)
+check('sin voseo, sin errores técnicos en crudo, sin éxitos sin comprobar',
+      _crudo.returncode == 0,
+      ' · '.join(l.strip() for l in _crudo.stdout.split('\n') if l.startswith('✗'))[:200])
+
+# La pantalla de su cuenta no declara lo que no hace.
+check('ningún interruptor de esa pantalla promete algo que no guarda',
+      'defaultChecked' not in _app15 and 'Tus avisos' in _app15)
+check('y la facturación muestra lo que contrató, no un código interno',
+      'TICKETS[esc]' in _app15 and 'Tu Clínica Digital — {profile.plan}' not in _app15)
+
+# Y la base de prueba se parece a la de verdad.
+check('la prueba SQL carga la RLS real de profiles',
+      'alter table profiles enable row level security' in _psql,
+      'sin ella, «un cliente no lee la ficha de otro» salía verde por falta '
+      'de RLS, no porque la política funcionara')
+check('y lee el SQL de la raíz, no solo las migraciones',
+      "f.startswith('supabase/migrations/') and os.path.basename(f) >= '20261009'" in _psql,
+      'el corte por fecha descartaba pais-migration.sql: una letra es mayor '
+      'que un dígito en una comparación de texto')
+check('y hace el recorrido completo del primer día, como cliente',
+      'el primer día de un cliente nuevo' in _psql)
+check('la revisión exhaustiva tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-revision-exhaustiva.ts'))
+
 _rpcn = subprocess.run([sys.executable, 'scripts/prueba-rpc-nombres.py'],
                        capture_output=True, text=True)
 check('cada parámetro que la app manda por RPC existe en la función que llama',
       _rpcn.returncode == 0,
       _rpcn.stdout.strip().split('\n')[0][:160])
+
+# ── 6.72 · LO QUE SE LE OFRECE AL CLIENTE ES LO QUE SE VENDE HOY ───────
+#
+# EL NÚMERO ($27) abre hasta el día 5 y corta ahí, que es el mejor momento
+# para ofrecerle seguir: tiene su precio decidido y un grado ganado. Y los
+# cinco puntos donde la app le ofrecía seguir —los dos candados del Camino, la
+# puerta del ADN, el cartel del Dashboard y la pantalla de acceso vencido—
+# decían «Tu Sistema · $497» y «El Programa Completo · $997»: la escalera de
+# cuando los planes se llamaban por color y se cortaban por pilar.
+#
+# La venta automática del ultra low se cortaba exactamente ahí: el que pagaba
+# los $27 llegaba al día 6 enganchado, tocaba el botón y veía un nombre y un
+# precio que ya no se venden.
+#
+# Las DOS escaleras conviven a propósito y eso no cambia: `plan_comercial`
+# gobierna el acceso (qué pantallas ve) y los tickets gobiernan la venta (qué
+# se le cobra y qué le debe el equipo). Lo que este lente sostiene es que la
+# segunda nunca aparezca escrita a mano en una pantalla.
+import glob as _g72, re as _re72, os as _os72
+
+check('la escalera que se le ofrece vive en un solo módulo',
+      _os72.path.exists('src/lib/laOfertaQueSigue.ts'))
+check('y tiene su prueba de escenario',
+      _os72.path.exists('scripts/prueba-la-oferta-que-sigue.ts'))
+
+# El barrido mira SOLO lo que lee el cliente.
+#
+# El Admin y el servidor sí nombran la escalera de acceso, y está bien: los
+# botones del equipo dicen qué acceso dan («🟢 Tu Sistema (+90d)») y el tope
+# de gasto se documenta por plan. Esa escalera no se jubila: gobierna qué
+# pantallas ve cada quien. Lo que no puede pasar es que un nombre o un precio
+# de ahí aparezca en una pantalla DEL CLIENTE como si fuera algo que comprar.
+#
+# Los comentarios se descuentan antes de mirar —documentan por qué cambió—
+# incluidos los de fin de línea, cuidando de no cortar un `https://`.
+_VIEJO72 = ['Tu Sistema', 'Programa Completo', r'\$497', r'\$997', r'\$147']
+_PERMITIDOS72 = {
+    # Define la escalera de ACCESO: es su casa.
+    'src/lib/planes.ts',
+    # El prompt de Diego habla de rangos de precio de la oferta DEL CLIENTE,
+    # no de la escalera de TCD.
+    'src/lib/agents/diego.ts',
+}
+def _sin_comentarios72(s):
+    s = _re72.sub(r'/\*.*?\*/', '', s, flags=_re72.S)
+    s = _re72.sub(r'^\s*\*.*$', '', s, flags=_re72.M)
+    return _re72.sub(r'(?<!:)//.*$', '', s, flags=_re72.M)
+
+_vieja72 = []
+for _f72 in (_g72.glob('src/**/*.tsx', recursive=True) + _g72.glob('src/**/*.ts', recursive=True)):
+    _r72 = _f72.replace('\\', '/')
+    # Fuera del barrido: lo del equipo y lo permitido arriba.
+    if _r72 in _PERMITIDOS72 or _r72 == 'src/pages/Admin.tsx' or '/admin/' in _r72:
+        continue
+    _vivo72 = _sin_comentarios72(rd(_f72))
+    for _v72 in _VIEJO72:
+        if _re72.search(_v72, _vivo72):
+            _vieja72.append(f'{_os72.path.basename(_f72)}: {_v72}')
+check('ninguna pantalla del cliente nombra la escalera vieja',
+      not _vieja72, ', '.join(sorted(set(_vieja72))[:6]))
+
+# Y el Admin reserva con las ofertas de hoy, que es de donde sale lo que el
+# cliente ve en su pantalla de vencimiento.
+_adm72 = rd('src/pages/Admin.tsx')
+check('el Admin reserva cupo con las ofertas de hoy',
+      "['base','La Base" in _adm72.replace(' ', '') or "'base','La Base · $1.000'" in _adm72,
+      'las opciones eran los colores viejos, y el cliente veía ese precio')
+check('y avisa cuando lo anotado es de la escalera anterior',
+      'Anotado con la escalera anterior' in _adm72,
+      'si no, el equipo no se entera de que ese cupo no le llega al cliente')
+
+# Y los cinco puntos de venta tiran del módulo, no de los nombres de acceso.
+_PUNTOS72 = ['src/pages/Roadmap.tsx', 'src/components/PuertaSiguienteNivel.tsx',
+             'src/App.tsx', 'src/pages/Dashboard.tsx']
+_sueltos72 = [_os72.path.basename(f) for f in _PUNTOS72
+              if 'laOfertaQueSigue' not in rd(f) and 'laOferta' not in rd(f)]
+check(f'los {len(_PUNTOS72)} puntos de venta tiran de la misma fuente',
+      not _sueltos72, ', '.join(_sueltos72))
+
+# El puente que no debe volver: traducir un plan de acceso a un ticket.
+_ofs72 = rd('src/lib/laOfertaQueSigue.ts')
+check('un plan de acceso NO se traduce a un ticket de venta',
+      "valor === 'base' || valor === 'ascenso' || valor === 'instalacion'" in _ofs72,
+      'ese puente ya existió en cuadroTickets: un cliente de $497 figuraba '
+      'con $5.000 de instalación contratada')
+check('y el candado nunca queda sin salida si falta el link de pago',
+      'checkout || waLink' in rd('src/App.tsx')
+      and 'checkout || waLink' in rd('src/pages/Dashboard.tsx'),
+      'con VITE_CHECKOUT_* sin configurar, el botón tiene que caer al WhatsApp')
+
+_ofsig = subprocess.run(['npx', 'tsx', 'scripts/prueba-la-oferta-que-sigue.ts'],
+                        capture_output=True, text=True)
+check('la escalera que ve el cliente es la de hoy, de punta a punta',
+      _ofsig.returncode == 0,
+      ' · '.join(l.strip() for l in _ofsig.stdout.split('\n') if l.startswith('✗'))[:200])
+
+# ── 6.73 · EL QUE PAGA, SUBE ───────────────────────────────────────────
+#
+# `plan` dice por dónde entró ('ELNUMERO') y NADIE la limpia nunca;
+# `plan_comercial` dice qué acceso tiene hoy. Cuatro lugares preguntaban por
+# la primera sin mirar la segunda: `planDe`, `planActual`, el candado del ADN
+# y el del Camino.
+#
+# Así que el que entraba por los $27 y después pagaba La Base seguía viendo el
+# Camino cortado en el día 5, con el candado del día 6 puesto, justo después
+# de pagar. Y pasaba igual si el equipo le abría el acceso a mano. Es la falla
+# más cara que puede tener el ultra low: no se nota al venderlo, se nota
+# cuando el cliente ya pagó.
+_pl73 = rd('src/lib/planes.ts')
+check('lo que pagó le gana a por dónde entró',
+      'const pago = planPagado(perfil);' in _pl73
+      and _pl73.index('const pago = planPagado(perfil);') < _pl73.index("?.plan === 'ELNUMERO') return 'blanco'"),
+      'si ELNUMERO se mira primero, al que sube de escalón no se le abre nada')
+check('«está en el tramo del $27» vive en un solo lugar',
+      'export function enElTramoDelNumero' in _pl73)
+
+_repetido73 = [f for f in ['src/lib/adnPiezas.ts', 'src/pages/Roadmap.tsx', 'src/components/WelcomeWizard.tsx']
+               if "=== 'ELNUMERO'" in rd(f)]
+check('y ninguna pantalla la vuelve a preguntar por su cuenta',
+      not _repetido73, ', '.join(_os72.path.basename(f) for f in _repetido73))
+
+# El webhook de pago: si no acepta los tickets, el cliente paga y no se le abre nada.
+_wh73 = rd('api/ghl-webhook.ts')
+check('el webhook de pago acepta las ofertas que se venden',
+      "'base', 'ascenso', 'instalacion'" in _wh73,
+      'con solo los colores, un producto que manda plan:"base" recibía '
+      'PLAN_INVALIDO y el cliente pagaba sin que se le abriera nada')
+check('y el ticket pagado abre el tramo que le corresponde',
+      'LO_QUE_ABRE' in _wh73 and "base: 'amarillo'" in _wh73,
+      'La Base llega al día 12, que es el pilar 2')
+check('el servicio contratado lo escribe el pago, no una persona',
+      'cambios.servicio_contratado = ticket' in _wh73,
+      'si lo tiene que marcar alguien a mano, la venta no es automática')
+check('y NO se escribe cuando solo vino un color de acceso',
+      'if (ticket) cambios.servicio_contratado' in _wh73,
+      'adivinarlo es el puente que hacía figurar a un cliente de $497 con '
+      'la instalación completa contratada')
+
+_sube = subprocess.run(['npx', 'tsx', 'scripts/prueba-sube-de-escalon.ts'],
+                       capture_output=True, text=True)
+check('sube de escalón y se le abre lo que pagó',
+      _sube.returncode == 0,
+      ' · '.join(l.strip() for l in _sube.stdout.split('\n') if l.startswith('✗'))[:200])
 
 print()
 if F == 0 and SIN_MEDIR_MOVIL:

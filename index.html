@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="google" content="notranslate" />
     <title>Tu Clínica Digital</title>
-    <meta name="theme-color" content="#080808" />
+    <!--
+      El color de la app es el crema del tema claro, que es el único que ve el
+      cliente. Estaba en negro: la pantalla de arranque abría en negro para
+      entrar a una app crema, y la barra de estado pintaba el reloj en blanco
+      sobre ese mismo crema.
+
+      Y la barra pasa de translúcida a normal: translúcida deja que el
+      contenido suba hasta el borde físico, así que el encabezado quedaba
+      debajo del reloj en la app instalada. En modo normal el sistema reserva
+      ese alto y el reloj se lee en oscuro.
+    -->
+    <meta name="theme-color" content="#EAE4D9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="TCD" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
