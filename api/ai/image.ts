@@ -180,7 +180,7 @@ async function handleImageRequest(req: any, res: any) {
       if (msg.includes('INSUFFICIENT_CREDITS')) {
         if (cobrado && quienPaga) await devolverCreditoServer(quienPaga, 'no se entregó la imagen');
         return res.status(402).json({
-          error: 'No tenes creditos suficientes. Compra un pack o espera al reseteo mensual.',
+          error: 'Tus créditos de imagen se renuevan el mes que viene. Si los necesitas hoy, puedes sumar un pack.',
           code: 'INSUFFICIENT_CREDITS',
         });
       }

@@ -8,21 +8,61 @@
  * Configurar en GHL (Workflow → trigger "pago recibido" → acción Webhook):
  *   POST   https://<tu-app>/api/ghl-webhook
  *   Header x-ghl-secret: <GHL_WEBHOOK_SECRET>
- *   Body   { "email": "{{contact.email}}", "plan": "verde" }
- *          plan = blanco | amarillo | verde | negro  (según el producto)
+ *   Body   { "email": "{{contact.email}}", "plan": "base" }
+ *          plan = base | ascenso | instalacion   ← las ofertas de hoy
+ *                 blanco | amarillo | verde | negro   ← los planes de acceso
  *
  * Env en Vercel:
  *   SUPABASE_URL (o VITE_SUPABASE_URL) · SUPABASE_SERVICE_ROLE_KEY · GHL_WEBHOOK_SECRET
  *
  * Reusa getAdminClient del sistema de créditos (mismo cliente service-role).
  * Idempotente por naturaleza: re-setear el mismo plan no hace daño.
+ *
+ * ═══ POR QUÉ ACEPTA LOS DOS VOCABULARIOS ═══
+ *
+ * Esta ruta aceptaba SOLO los cuatro colores. Las ofertas que se venden son
+ * La Base, El Ascenso y La Instalación, así que el producto de GHL que mandaba
+ * `plan: "base"` recibía PLAN_INVALIDO: **el cliente pagaba y no se le abría
+ * nada.** La venta automática se cortaba en el servidor.
+ *
+ * Los colores se siguen aceptando porque son los que gobiernan el acceso y hay
+ * productos viejos en GHL que los mandan.
  */
 import { getAdminClient } from './_lib/credits-server.js';
 
 const PLANES_VALIDOS = ['blanco', 'amarillo', 'verde', 'negro'] as const;
 type PlanComercial = (typeof PLANES_VALIDOS)[number];
 
-/** La Semana Blanca vence a los 7 días; los planes pagos no vencen. */
+const TICKETS_VALIDOS = ['base', 'ascenso', 'instalacion'] as const;
+type Ticket = (typeof TICKETS_VALIDOS)[number];
+
+/**
+ * QUÉ ABRE CADA OFERTA, Y QUÉ LE DEBE EL EQUIPO.
+ *
+ * ═══ ESTO NO ES EL PUENTE PROHIBIDO ═══
+ *
+ * `cuadroTickets` quitó —y documentó— una tabla que **adivinaba** el servicio
+ * contratado a partir del plan de acceso: `verde → $5.000`. Con eso, alguien
+ * que había pagado $497 de acceso figuraba con la instalación completa
+ * contratada, y el equipo que trabajara contra esa ficha instalaba gratis.
+ *
+ * Acá el sentido es el contrario y es el único lugar con autoridad para
+ * decirlo: el webhook **sabe qué producto se pagó**, y de ese dato salen las
+ * dos respuestas a la vez —qué pantallas ve y qué le debe el equipo— sin
+ * deducir una de la otra. Si esto no lo escribiera el pago, lo tendría que
+ * marcar una persona a mano en el Admin, y entonces la venta no es automática.
+ *
+ * El tope de acceso de cada oferta coincide con `topeDelEscalon`: La Base
+ * llega al día 12, que es el pilar 2 ('amarillo'); El Ascenso y La Instalación
+ * abren los 90 días ('negro') y se diferencian en quién monta, no en qué ve.
+ */
+const LO_QUE_ABRE: Record<Ticket, PlanComercial> = {
+  base: 'amarillo',
+  ascenso: 'negro',
+  instalacion: 'negro',
+};
+
+/** La Semana Blanca vence a los 21 días; los planes pagos no vencen. */
 function accesoHastaDe(plan: PlanComercial): string | null {
   // 21 días: sus 5 días + su viernes en vivo (aunque el corte lo mande al siguiente)
   // + la garantía de repetir la semana. Después entra el modo lectura digno.
@@ -41,8 +81,12 @@ export default async function handler(req: any, res: any) {
   const email = String(req.body?.email ?? '')
     .trim()
     .toLowerCase();
-  const plan = String(req.body?.plan ?? '').trim() as PlanComercial;
+  const pedido = String(req.body?.plan ?? '').trim().toLowerCase();
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'EMAIL_REQUIRED' });
+
+  // El ticket pagado decide las dos columnas; un color, solo el acceso.
+  const ticket = (TICKETS_VALIDOS as readonly string[]).includes(pedido) ? (pedido as Ticket) : null;
+  const plan = (ticket ? LO_QUE_ABRE[ticket] : pedido) as PlanComercial;
   if (!PLANES_VALIDOS.includes(plan)) return res.status(400).json({ error: 'PLAN_INVALIDO' });
 
   try {
@@ -91,13 +135,20 @@ export default async function handler(req: any, res: any) {
     }
 
     // 3) Setear el plan y el acceso → los pilares se desbloquean solos.
-    const { error: upErr } = await admin
-      .from('profiles')
-      .update({ plan_comercial: plan, acceso_hasta: accesoHastaDe(plan) })
-      .eq('id', userId);
+    //
+    // `servicio_contratado` se escribe SOLO si vino un ticket. Con un color
+    // no se toca: adivinarlo es el puente que hacía figurar a un cliente de
+    // $497 con la instalación completa contratada.
+    const cambios: Record<string, unknown> = {
+      plan_comercial: plan,
+      acceso_hasta: accesoHastaDe(plan),
+    };
+    if (ticket) cambios.servicio_contratado = ticket;
+
+    const { error: upErr } = await admin.from('profiles').update(cambios).eq('id', userId);
     if (upErr) return res.status(200).json({ ok: false, motivo: upErr.message });
 
-    return res.status(200).json({ ok: true, plan });
+    return res.status(200).json({ ok: true, plan, servicio: ticket ?? null });
   } catch (e: any) {
     // Siempre 200 para que GHL no reintente en loop; el motivo queda en la respuesta.
     return res.status(200).json({ ok: false, motivo: e?.message ?? 'error' });

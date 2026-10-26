@@ -24,6 +24,7 @@ import {
   refundPayPalOrder,
 } from '../../_lib/credits-server.js';
 import { verifyWebhookSignature, extractPayPalHeaders } from '../../_lib/paypal.js';
+import { escrituraDePago } from '../../_lib/escritura-de-pago.js';
 
 interface PayPalWebhookEvent {
   id: string;
@@ -131,13 +132,17 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<void> 
     const expected = Number(order.amount_usd);
     if (resource.amount.currency_code !== 'USD' || Math.abs(paid - expected) > 0.01) {
       console.error('[webhook] AMOUNT_MISMATCH', { orderId, paid, expected });
-      await admin
-        .from('paypal_orders')
-        .update({
-          status: 'failed',
-          webhook_event_ids: [...processedEvents, event.id],
-        })
-        .eq('id', orderId);
+      await escrituraDePago(
+        'marcar la orden como fallida por monto, desde el aviso de PayPal',
+        { orderId, pagado: paid, esperado: expected, evento: event.id },
+        () => admin
+          .from('paypal_orders')
+          .update({
+            status: 'failed',
+            webhook_event_ids: [...processedEvents, event.id],
+          })
+          .eq('id', orderId),
+      );
       return;
     }
   }
@@ -150,17 +155,33 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<void> 
     paypalOrderId: orderId,
   });
 
-  // Marcar capturada
-  await admin
-    .from('paypal_orders')
-    .update({
-      status: 'captured',
-      paypal_capture_id: resource.id ?? null,
-      captured_at: order.captured_at ?? new Date().toISOString(),
-      webhook_event_ids: [...processedEvents, event.id],
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', orderId);
+  /*
+   * Marcar capturada · corre después de acreditar, igual que en
+   * capture-order, y con el mismo riesgo: si se pierde, la orden queda en
+   * «pending» con el pago hecho y los créditos entregados.
+   */
+  await escrituraDePago(
+    'marcar la orden como capturada, desde el aviso de PayPal',
+    {
+      orderId,
+      userId: order.user_id,
+      creditos: order.credits,
+      packId: order.pack_id,
+      capturaPayPal: resource.id ?? null,
+      evento: event.id,
+      acreditado: true,
+    },
+    () => admin
+      .from('paypal_orders')
+      .update({
+        status: 'captured',
+        paypal_capture_id: resource.id ?? null,
+        captured_at: order.captured_at ?? new Date().toISOString(),
+        webhook_event_ids: [...processedEvents, event.id],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId),
+  );
 
   console.log('[webhook] capture completed', { orderId, customId, credits: order.credits });
 }
@@ -173,10 +194,14 @@ async function handleCaptureDenied(event: PayPalWebhookEvent): Promise<void> {
   const orderId = resource.supplementary_data?.related_ids?.order_id;
   if (!orderId) return;
 
-  await admin
-    .from('paypal_orders')
-    .update({ status: 'failed', updated_at: new Date().toISOString() })
-    .eq('id', orderId);
+  await escrituraDePago(
+    'marcar la orden como rechazada por PayPal',
+    { orderId, evento: event.id },
+    () => admin
+      .from('paypal_orders')
+      .update({ status: 'failed', updated_at: new Date().toISOString() })
+      .eq('id', orderId),
+  );
 }
 
 async function handleRefund(event: PayPalWebhookEvent): Promise<void> {

@@ -1,0 +1,316 @@
+══════════════════════════════════════════════════════════════════
+  LA VENTA EN AUTOMÁTICO
+  Reemplaza todos los ZIPs anteriores.
+══════════════════════════════════════════════════════════════════
+
+  · 292 archivos, a la raíz de "mejoras"
+  · 19 migraciones SQL. Ninguna nueva en este turno.
+  · Y `sala-de-mando.sql`, que va aparte.
+  · `npm install` después de subir.
+  · Y BORRAR 24 archivos. La lista está en AL SUBIR.
+  · Tres variables nuevas en Vercel. Página 9.
+
+  839 lentes en verde. Cero fallos.
+
+
+══════════════════════════════════════════════════════════════════
+  1 · VENDER UNA SEMANA SOLA
+══════════════════════════════════════════════════════════════════
+
+Ya se puede. Existe y es automático.
+
+EL NÚMERO, 27 dólares. Abre la antesala y el sistema 1 —hasta el
+día 5— y corta ahí. Veintiún días de calendario para hacer esas
+cinco sesiones. Treinta mensajes con el Mentor.
+
+El alta es sola: el pago entra, la cuenta se crea, el mail de
+acceso sale. Nadie toca nada.
+
+Y corta en el mejor lugar posible. El día 5 es donde se gana
+«Blanco punta amarilla · Precio digno»: llega al candado con su
+precio nuevo decidido y un grado puesto. Ese es el momento de
+ofrecerle seguir, no antes.
+
+
+══════════════════════════════════════════════════════════════════
+  2 · DOS SEMANAS, NO
+══════════════════════════════════════════════════════════════════
+
+Dos semanas llegan al día 12.
+
+Y el día 12 es exactamente el tope de La Base, los 1.000 dólares:
+ahí cierra con su método escrito y su programa en una página.
+
+Si abres hasta el 12 por 27 dólares, La Base se queda sin nada que
+vender.
+
+Una semana por 27. Las dos siguientes, por 1.000.
+
+
+══════════════════════════════════════════════════════════════════
+  3 · EL DE 1.000 SÍ TIENE SOPORTE
+══════════════════════════════════════════════════════════════════
+
+Tienes razón en una parte, y conviene precisar la otra porque de
+esto depende qué le prometes en el checkout.
+
+LO QUE NO TIENE: el chat con el equipo, los canales grupales y las
+mentorías tres veces por semana. Eso abre con El Ascenso.
+
+LO QUE SÍ TIENE: los cuatro manuales, su plan de 90 días escrito,
+TRES SESIONES UNO A UNO —una por mes— y la app completa. Más los
+reportes: los manda y el equipo los responde por turnos.
+
+Está cableado así en la base, por política, no por pantalla. El
+que paga 1.000 no ve una puerta que después no abre.
+
+
+══════════════════════════════════════════════════════════════════
+  4 · LO QUE ESTABA ROTO Y NO SE VEÍA
+══════════════════════════════════════════════════════════════════
+
+ESTE ES EL IMPORTANTE. Ya estaba vivo: no lo trajo este turno.
+
+Hay dos columnas en la ficha de cada cliente:
+
+  `plan`             dice POR DÓNDE ENTRÓ. Queda escrita para
+                     siempre. Nadie la limpia nunca.
+
+  `plan_comercial`   dice QUÉ ACCESO TIENE HOY. La escribe el
+                     checkout, o tú en el Admin.
+
+Y cuatro lugares de la app preguntaban por la primera sin mirar la
+segunda.
+
+Entonces pasaba esto:
+
+  Paga los 27. Entra. Hace sus cinco días.
+  Llega al candado del día 6. Paga los 1.000.
+  Y el Camino le sigue cortado en el día 5.
+  Con el candado del día 6 puesto.
+  Justo después de pagar.
+
+Y pasaba igual si le abrías el acceso a mano desde el Admin.
+
+Ahora lo que pagó manda. Si tiene un plan pago escrito, ese gana:
+es el dato más nuevo, y solo lo escribe el checkout o alguien del
+equipo. Y la pregunta «está en el tramo de los 27» vive en un solo
+lugar, no en cuatro.
+
+
+══════════════════════════════════════════════════════════════════
+  5 · EL WEBHOOK QUE RECHAZABA LOS PAGOS
+══════════════════════════════════════════════════════════════════
+
+La ruta que recibe el aviso de pago de GoHighLevel aceptaba cuatro
+nombres: blanco, amarillo, verde y negro. Los colores de la
+escalera anterior.
+
+Tus productos de hoy son La Base, El Ascenso y La Instalación.
+
+Un producto que mandara «base» recibía PLAN_INVALIDO. El cliente
+pagaba, y no se le abría nada. La venta automática se cortaba en el
+servidor, antes de llegar a la app.
+
+Ahora acepta los dos vocabularios. Y el ticket pagado escribe las
+dos cosas de una vez: qué pantallas ve, y qué le debe el equipo.
+
+Esto último importa. Antes el servicio contratado lo marcaba una
+persona a mano en la ficha. Si lo tiene que marcar alguien, la
+venta no es automática.
+
+  La Base        → su Camino hasta el día 12
+  El Ascenso     → los 90 días completos
+  La Instalación → los 90 días, y el equipo los monta
+
+
+══════════════════════════════════════════════════════════════════
+  6 · LA ESCALERA QUE VEÍA EL CLIENTE
+══════════════════════════════════════════════════════════════════
+
+Cinco puntos de la app le ofrecían seguir. Los cinco con los
+nombres y los precios de antes:
+
+  · El candado de un pilar cerrado          «Tu Sistema · $497»
+  · El cartel debajo de ese pilar           «Tu Sistema · $497»
+  · La puerta del ADN                       «$497»
+  · El cartel de la cuenta regresiva        «$497 · 50% off»
+  · La pantalla de acceso vencido           «$497» y «$997»
+
+El que pagaba 27 dólares llegaba al día 6 enganchado, tocaba el
+botón, y veía un nombre y un precio que ya no vendes.
+
+Los cinco salen ahora del mismo lugar, y ese lugar lee tus tres
+ofertas. El día que cambies un precio, cambia en los cinco.
+
+Y cada candado ofrece UN escalón —el que lo abre— nunca el
+catálogo. Elegir entre tres en el momento de pagar es la forma más
+cara de no decidir.
+
+  $27 ──día 5──▸ La Base $1.000 ──día 12──▸ El Ascenso $3.000
+
+
+══════════════════════════════════════════════════════════════════
+  7 · LA PANTALLA DE CUANDO SE LE VENCE
+══════════════════════════════════════════════════════════════════
+
+Es la más valiosa de las cinco, y la que peor estaba.
+
+El que paga 27 dólares la cruza siempre: a los 21 días el acceso se
+cierra, y esa es la pantalla que ve. Tiene su precio decidido, su
+grado ganado, y acaba de perder la puerta.
+
+Le ofrecía dos tarjetas escritas a mano: 497 y 997 dólares.
+
+Ahora le ofrece La Base, una sola, con lo que le abre dicho en una
+línea. Y si tú le reservaste un cupo en su ficha, le ofrece ese.
+
+Una cosa más. El título decía «Tus 5 días están completos». Esa
+pantalla no sabe si hizo las cinco sesiones —solo sabe que venció
+el plazo—, así que a quien compró y no entró le afirmaba un logro
+que no ganó. Ahora dice que terminó el plazo, que es lo que pasó.
+
+
+══════════════════════════════════════════════════════════════════
+  8 · Y EL ADMIN RESERVA CON LAS DE HOY
+══════════════════════════════════════════════════════════════════
+
+En la ficha, «Reservó (lo que eligió en el WhatsApp)» ofrecía los
+tres colores. Y de ahí salía el precio que el cliente veía en su
+pantalla.
+
+Ahora ofrece La Base, El Ascenso y La Instalación.
+
+Lo que anotaste antes no se borra: si un cliente tiene un color
+guardado, la ficha te lo avisa en una línea, y mientras no elijas
+uno de hoy el cliente ve el escalón que sigue, que es verdad
+siempre.
+
+No traduje los colores a las ofertas nuevas, y fue a propósito. Ese
+puente ya existió una vez en esta app y se quitó: hacía que un
+cliente de 497 figurara con 5.000 de instalación contratada, y
+quien trabajara contra esa ficha instalaba de regalo.
+
+
+══════════════════════════════════════════════════════════════════
+  9 · LO QUE TIENES QUE CONFIGURAR
+══════════════════════════════════════════════════════════════════
+
+Esto es lo único que falta para que el circuito ande solo, y es
+tuyo: son links y variables, no código.
+
+EN VERCEL, tres variables nuevas:
+
+  VITE_CHECKOUT_BASE          el order form de La Base
+  VITE_CHECKOUT_ASCENSO       el de El Ascenso
+  VITE_CHECKOUT_INSTALACION   el de La Instalación
+
+  Pegas el link y haces redeploy. Mientras estén vacías el botón
+  cae a tu WhatsApp, así que el candado nunca queda sin salida.
+
+EN GOHIGHLEVEL, en el workflow de cada producto, la acción Webhook:
+
+  POST   https://<tu-app>/api/ghl-webhook
+  Header x-ghl-secret: <GHL_WEBHOOK_SECRET>
+  Body   { "email": "{{contact.email}}", "plan": "base" }
+
+  Y «plan» con el nombre del escalón que vendió ese producto:
+  base, ascenso o instalacion.
+
+Con eso: el cliente paga en GHL, el webhook le abre el tramo y le
+marca el servicio, y la app se le abre sola. Sin que nadie entre al
+Admin.
+
+
+══════════════════════════════════════════════════════════════════
+  10 · AL SUBIR
+══════════════════════════════════════════════════════════════════
+
+  1. Sube los 292 archivos a la raíz de "mejoras".
+
+  2. BORRA estos 24. Son archivos que la app ya no importa, y si
+     quedan, el compilador los sigue mirando.
+
+       LEEME-SUBIR.txt
+       scripts/prueba-pausa.ts
+       src/components/CaminoEnPausa.tsx
+       src/components/ReporteDirector.tsx
+       src/components/campanas/MontajeView.tsx
+       src/components/campanas/NuevaCampanaChat.tsx
+       src/components/credits/index.ts
+       src/components/sesion/CheckInPanel.tsx
+       src/components/sesion/CheckOutPanel.tsx
+       src/components/sesion/CronometroSesion.tsx
+       src/components/tasks/TaskChecklist.tsx
+       src/components/tasks/TaskHerramientaIA.tsx
+       src/lib/ligaCalcs.ts
+       src/lib/mentorPanelPrompt.ts
+       src/lib/muroHitos.ts
+       src/lib/pausaGlobal.ts
+       src/lib/pausasDatos.ts
+       src/lib/perlasMaestro.ts
+       src/lib/puntoDePartida.ts
+       src/lib/red.ts
+       src/lib/sesionDePapel.ts
+       src/lib/tokens.ts
+       tcd-spec/datos/__pycache__/hoja_de_ruta.cpython-312.pyc
+       tcd-spec/datos/__pycache__/tuteo.cpython-312.pyc
+
+  3. `npm install`.
+
+  4. Corre las 19 migraciones de supabase/migrations, de arriba
+     hacia abajo. Si ya corriste las de los ZIPs anteriores, no hay
+     ninguna nueva: este turno no tocó la base.
+
+  5. Y pega `sala-de-mando.sql` entero en el editor SQL. No es una
+     migración, está en la raíz, y declara 23 funciones que la app
+     llama todos los días. Correrlo de nuevo no rompe nada.
+
+  6. Las tres variables de Vercel y los webhooks de GHL, página 9.
+
+  7. Marca el escalón de los clientes que ya tienes, en su ficha.
+     Sin marcar, el Camino se abre completo: nadie pierde nada
+     mientras no lo hagas. Los nuevos quedan marcados desde el
+     pago.
+
+
+══════════════════════════════════════════════════════════════════
+  11 · DOS NÚMEROS QUE NECESITO DE TI
+══════════════════════════════════════════════════════════════════
+
+No coinciden entre el código y lo que tengo anotado de nuestras
+conversaciones. Dime cuál vale:
+
+  · LA CIMA: el código dice 5 días. Yo tenía anotado 4.
+
+  · LA ESCALERA: el código dice 1.000 / 3.000 / 5.000. Yo tenía
+    anotado que la oferta era 2.000 / 5.000 / 9.500.
+
+Todo lo de este turno sale del código. Si los precios son los
+otros, se cambian en un solo lugar y los cinco puntos de venta
+cambian con ellos.
+
+
+══════════════════════════════════════════════════════════════════
+  12 · LO QUE QUEDA, Y ES DECISIÓN TUYA
+══════════════════════════════════════════════════════════════════
+
+Las dos de siempre, que cambian el producto.
+
+  1 · LAS TAREAS DEL DÍA SE CREAN CUANDO ALGUIEN ABRE EL ADMIN.
+      El día que nadie lo abre, no se crea ninguna tarea. Lo único
+      que corre solo es el cron, y no hace eso.
+
+  2 · OCHO COSAS QUE EL EQUIPO HACE Y EL CLIENTE NO SE ENTERA:
+      responder un reporte, cargar una sesión, habilitarle la
+      migración, abrirle la Biblioteca, cambiarle el escalón,
+      cerrarle una jornada por él. El aviso de la evidencia ya
+      quedó cableado; las otras siete se hacen igual.
+
+Dime por cuál sigo.
+
+Y el acceso de GitHub sigue pendiente: no puedo subir los commits a
+la rama "mejoras" porque la organización todavía no tiene instalada
+la app de Claude.
+
+══════════════════════════════════════════════════════════════════

@@ -80,11 +80,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!userId) return res.status(500).json({ error: 'SIN_USER_ID' });
 
     // 2) Perfil con plan ELNUMERO — sin pisar un plan superior
-    const { data: perfil } = await admin.from('profiles').select('id, plan, nombre').eq('id', userId).maybeSingle();
+    const { data: perfil } = await admin.from('profiles').select('id, plan, nombre, fecha_inicio').eq('id', userId).maybeSingle();
+    /*
+     * La fecha de inicio se sella acá, en el alta.
+     *
+     * En el Camino de noventa días la sella la antesala al cerrarse. El tramo
+     * de cinco no pasa por la antesala, así que sin esto se quedaba sin día
+     * uno: el ritmo caía al día 1 por defecto y la alarma de inactividad del
+     * equipo lo salteaba, porque esa alarma se corta en los clientes que no
+     * tienen fecha. Nadie se enteraba de que había dejado de entrar.
+     */
+    const hoy = new Date().toISOString().slice(0, 10);
     if (!perfil) {
-      await admin.from('profiles').insert({ id: userId, nombre: nombre || email.split('@')[0], plan: 'ELNUMERO', acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() });
+      await admin.from('profiles').insert({ id: userId, nombre: nombre || email.split('@')[0], plan: 'ELNUMERO', fecha_inicio: hoy, acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() });
     } else if (!perfil.plan) {
-      await admin.from('profiles').update({ plan: 'ELNUMERO', acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() }).eq('id', userId);
+      // Una fecha de inicio anterior no se pisa: si ya empezó un camino, ese es su día uno.
+      const cambios: Record<string, unknown> = { plan: 'ELNUMERO', acceso_hasta: new Date(Date.now() + 21 * 86400000).toISOString() };
+      if (!perfil.fecha_inicio) cambios.fecha_inicio = hoy;
+      await admin.from('profiles').update(cambios).eq('id', userId);
     } // si ya tiene DWY/DFY/IMPLEMENTACION, no se toca
 
     return res.status(200).json({ ok: true, estado, plan_resultante: perfil?.plan ?? 'ELNUMERO' });
