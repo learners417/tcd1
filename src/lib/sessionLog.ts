@@ -16,22 +16,22 @@ import { supabase } from './supabase';
 export type EmocionSesion =
   | 'enfocado' | 'con_dudas' | 'cansado' | 'con_miedo' | 'encendido' | 'en_paz' | 'orgulloso';
 
-export const EMOCIONES_ENTRADA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
-  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
-  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
-  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
-  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
-  { id: 'con_miedo', emoji: '😰', label: 'Con miedo' },
-  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
+export const EMOCIONES_ENTRADA: Array<{ id: EmocionSesion; label: string }> = [
+  { id: 'enfocado', label: 'Enfocado/a' },
+  { id: 'encendido', label: 'Encendido/a' },
+  { id: 'con_dudas', label: 'Con dudas' },
+  { id: 'cansado', label: 'Cansado/a' },
+  { id: 'con_miedo', label: 'Con miedo' },
+  { id: 'en_paz', label: 'En paz' },
 ];
 
-export const EMOCIONES_SALIDA: Array<{ id: EmocionSesion; emoji: string; label: string }> = [
-  { id: 'orgulloso', emoji: '🏆', label: 'Orgulloso/a' },
-  { id: 'encendido', emoji: '🔥', label: 'Encendido/a' },
-  { id: 'en_paz', emoji: '🌿', label: 'En paz' },
-  { id: 'enfocado', emoji: '🎯', label: 'Enfocado/a' },
-  { id: 'cansado', emoji: '😮‍💨', label: 'Cansado/a' },
-  { id: 'con_dudas', emoji: '🤔', label: 'Con dudas' },
+export const EMOCIONES_SALIDA: Array<{ id: EmocionSesion; label: string }> = [
+  { id: 'orgulloso', label: 'Orgulloso/a' },
+  { id: 'encendido', label: 'Encendido/a' },
+  { id: 'en_paz', label: 'En paz' },
+  { id: 'enfocado', label: 'Enfocado/a' },
+  { id: 'cansado', label: 'Cansado/a' },
+  { id: 'con_dudas', label: 'Con dudas' },
 ];
 
 export interface SessionLog {
@@ -199,9 +199,15 @@ export async function cerrarSessionLog(
     await supabase
       .from('session_logs')
       .update({ ...datos, completada: true, closed_at: new Date().toISOString() })
-      .eq('id', logId);
-  } catch {
-    /* noop — el progreso local nunca se bloquea por red */
+      .eq('id', logId)
+      .then(({ error }) => {
+        // No se bloquea al cliente por esto: su progreso es local. Pero se
+        // ve, porque si no llega, la pestaña Sesiones del Admin cuenta de
+        // menos y nadie sabe por qué.
+        if (error) console.error('[sessionLog] la sesión no se cerró en la base:', error.message);
+      });
+  } catch (e) {
+    console.error('[sessionLog] el cierre de sesión falló:', e);
   }
 }
 

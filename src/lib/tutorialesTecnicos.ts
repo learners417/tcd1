@@ -115,11 +115,11 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
     pasos: [
       'En tu Business Manager, ve a "Administrador de eventos" → "Conectar orígenes de datos" → "Web" → "Pixel de Meta".',
       'Ponle un nombre (tu negocio) y toca "Crear".',
-      'Meta te da un código. Copialo entero.',
-      'Pegalo en la configuración de tu página (el tutorial de tu plataforma te muestra dónde — suele ser "Código de encabezado" o "Header").',
+      'Meta te da un código. Cópialo entero.',
+      'Pégalo en la configuración de tu página (el tutorial de tu plataforma te muestra dónde — suele ser "Código de encabezado" o "Header").',
       'Vuelve a Meta y toca "Verificar" — o instala la extensión "Meta Pixel Helper" en Chrome, entra a tu página, y si el ícono se pone azul, funciona.',
     ],
-    siFalla: 'Si el Pixel no verifica al toque, espera unas horas — a veces tarda. Si tu plataforma no tiene dónde pegar el código, avisá por Mensajes: hay una forma alternativa con "Google Tag Manager" que te guiamos.',
+    siFalla: 'Si el Pixel no verifica al instante, espera unas horas: la conexión se confirma sola. Si tu plataforma no tiene dónde pegar el código, avísanos por Mensajes: hay una forma alternativa con "Google Tag Manager" que te guiamos.',
   },
   'P4.5-dm': {
     dia: 31,
@@ -130,7 +130,7 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
       'Entra a tu subcuenta de GoHighLevel → Automatización → Workflows → + Crear workflow',
       'Disparador: «Instagram Comment» (comentario en Instagram). Elige tu cuenta y déjalo para TODOS tus anuncios',
       'Condición: que el comentario CONTENGA tu PALABRA exacta (la misma de tus anuncios, en mayúsculas)',
-      'Acción 1: «Send Instagram DM» y pega tu mensaje: «¡Buenísimo! Acá tienes todo lo de [TU PROGRAMA] 👉 [LINK DE TU PÁGINA]. Míralo tranquilo y cuéntame: [TU PREGUNTA]»',
+      'Acción 1: «Send Instagram DM» y pega tu mensaje: «¡Buenísimo! Acá tienes todo lo de [TU PROGRAMA]: [LINK DE TU PÁGINA]. Míralo tranquilo y cuéntame: [TU PREGUNTA]»',
       'Acción 2: Espera de 24 horas → segundo DM solo si NO respondió: «¿Pudiste verlo? ¿Qué te quedó dando vueltas?»',
       'Publica el workflow y PRUÉBALO: comenta tu palabra desde otra cuenta y espera el DM. Si no llega, revisa que la cuenta de Instagram esté conectada en Settings → Integrations',
     ],
@@ -142,7 +142,7 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
     titulo: 'Conectar tu dominio (tu dirección digital)',
     intro: 'Tu dominio es tu dirección propia en internet, como "tunombre.com". Le da seriedad a todo. Es técnico pero te llevo de la mano.',
     pasos: [
-      '¿Ya tienes un dominio? Si no, comprá uno simple en Namecheap o Google Domains: tu nombre + ".com", cuesta ~$12 al año.',
+      '¿Ya tienes un dominio? Si no, compra uno simple en Namecheap o Google Domains: tu nombre + ".com", cuesta ~$12 al año.',
       'En tu sistema, ve a "Configuración" → "Dominios" → "Agregar dominio".',
       'El sistema te muestra dos datos llamados "registros DNS" (son como coordenadas). Cópialos.',
       'Entra a donde compraste el dominio → "Administrar DNS" → pega esos dos registros.',
@@ -154,16 +154,16 @@ export const TUTORIALES: Record<string, TutorialTecnico> = {
   'P4.4': {
     dia: 31,
     codigo: 'P4.4',
-    titulo: 'Escalar tu campaña ganadora (sin quemar plata)',
-    intro: 'Ya sabes cuál de tus anuncios funciona. Escalar es ponerle más presupuesto al ganador, con cabeza — no de golpe.',
+    titulo: 'Ponerle más presupuesto a tu anuncio ganador',
+    intro: 'Ya sabes cuál de tus anuncios funciona. Ahora le subes el presupuesto de a poco, y el costo te dice cuándo parar.',
     pasos: [
-      'Identificá tu anuncio ganador: el que trae agendas calificadas más baratas (Ramiro te ayuda a leer el número).',
-      'Pausá los que no funcionan — no tiene sentido gastar en ellos.',
-      'Al ganador, subile el presupuesto de a poco: 20% cada 2-3 días, no el doble de golpe (eso confunde al algoritmo).',
-      'Mira que el costo por agenda calificada se mantenga estable mientras subes. Si se dispara, frená y espera.',
+      'Identifica tu anuncio ganador: el que trae agendas calificadas más baratas (Ramiro te ayuda a leer el número).',
+      'Pausa los que no funcionan — no tiene sentido gastar en ellos.',
+      'Al ganador, súbele el presupuesto de a poco: 20% cada 2-3 días, no el doble de golpe (eso confunde al algoritmo).',
+      'Mira que el costo por agenda calificada se mantenga estable mientras subes. Si se dispara, frena y espera.',
       'Cuando encuentres tu techo (donde el costo empieza a subir), quédate ahí. Ese es tu ritmo sostenible.',
     ],
-    siFalla: 'Si al subir el presupuesto los resultados empeoran, bajá al nivel anterior y espera 3 días. Escalar es paciencia, no apuro. Ramiro te lee los números si tienes dudas.',
+    siFalla: 'Si al subir el presupuesto los resultados empeoran, baja al nivel anterior y espera 3 días. Cada subida necesita tres días para mostrar su número. Ramiro te lee los números si tienes dudas.',
   },
 };
 

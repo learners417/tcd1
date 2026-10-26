@@ -14,15 +14,32 @@ function db() {
 }
 
 /** Las sesiones de un cliente, de la más nueva a la más vieja. */
-export async function sesionesDe(clienteId: string): Promise<Sesion[]> {
+/**
+ * ═══ `null` ES «NO PUDE CONSULTAR», NO «NO TUVO NINGUNA» ═══
+ *
+ * Devolvía un arreglo vacío en los tres casos en los que no puede saber: sin
+ * base, sin id, o con la consulta fallando. Y el cierre del Camino lee ese
+ * vacío como un hecho: «Te dimos 0 de las 3 sesiones que te prometimos. La
+ * garantía corre.»
+ *
+ * O sea: en el modo sin base —que es el modo en el que la app funciona cuando
+ * la red no está— la app le decía a TODOS los clientes que la casa no cumplió.
+ * Y al revés, un incumplimiento real quedaba indistinguible de una consulta
+ * caída.
+ *
+ * `cierreDeCuentas` ya tenía la distinción escrita en su firma —«`null`
+ * significa "no las traje", no "no tuvo ninguna"»— y acá se perdía. Ahora el
+ * vacío solo sale de una consulta que respondió bien y no trajo filas.
+ */
+export async function sesionesDe(clienteId: string): Promise<Sesion[] | null> {
   const s = db();
-  if (!s || !clienteId) return [];
+  if (!s || !clienteId) return null;
   const { data, error } = await s
     .from('sesiones_asistentes')
     .select(`asistio, sesion:sesiones(${COLUMNAS})`)
     .eq('cliente_id', clienteId)
     .eq('asistio', true);
-  if (error || !data) return [];
+  if (error || !data) return null;
   return (data as unknown as Array<{ sesion: Sesion | null }>)
     .map((f) => f.sesion)
     .filter((x): x is Sesion => Boolean(x))

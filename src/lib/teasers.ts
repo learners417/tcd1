@@ -15,7 +15,7 @@ export interface Teaser {
 
 /** Teasers escritos para las sesiones-hito (voz Javo, cortos, con filo). */
 const TEASERS_HITO: Record<string, { frase: string; videoId?: string }> = {
-  'P1.3': { frase: 'Mañana: LA QUEMA. Vas a necesitar fuego. En serio. Papel, birome… y todo lo que ya no te sirve.' },
+  'P1.3': { frase: 'Mañana: LA QUEMA. Vas a necesitar fuego. En serio. Papel, lapicero… y todo lo que ya no te sirve.' },
   'P1.5': { frase: 'Mañana pronuncias tu precio en voz alta por primera vez. Tu voz. Tu número. Sin pedir perdón.' },
   'P0.2': { frase: 'Lo primero: tu Foto de Partida. Números reales, sin maquillaje. En 90 días no te vas a reconocer.' },
   'P4.3b': { frase: 'Mañana es TU día de grabación. Tu voz al mundo. Llegas con guion y con práctica — nadie graba a ciegas acá.' },

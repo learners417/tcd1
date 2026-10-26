@@ -17,12 +17,24 @@ export const SEMANAS: Record<number, string> = {
   4: 'Tus primeras ventas',
   5: 'La pauta',
   6: 'Tu app, co-creada con los tres',
-  7: 'Escalar',
-  8: 'Tu ciclo y tu producto',
-  9: 'Tu ciclo y tu producto',
-  10: 'Tu ciclo y tu producto',
-  11: 'Tu ciclo y tu producto',
-  12: 'Tu ciclo y tu producto',
+  /*
+   * De la 7 a la 12 estaban sin nombre propio: la 7 decía «Escalar» —palabra
+   * que esta casa no usa— y de la 8 a la 12 las cinco decían lo mismo, «Tu
+   * ciclo y tu producto». El comentario de arriba promete «las trece semanas
+   * con nombre»: cinco con el mismo nombre no son cinco semanas, son una
+   * repetida cinco veces, y es lo primero que el cliente ve el día 1.
+   *
+   * Los cinco sistemas del seed cubren los días 1-5, 8-12, 15-33, 36-44 y
+   * 85-86: los días 45 a 84 no pertenecen a ninguno, y por eso acá no había de
+   * dónde sacar el nombre. Así que cada una se nombra por lo que de verdad
+   * contienen sus días en `roadmap.seed.json`, no por una frase inventada.
+   */
+  7: 'Crecer o apagar',               // su propia jornada bisagra, día 43
+  8: 'Tu cobranza y tu entrega',      // cobranza, entrega revisada, derivación
+  9: 'Tu renovación',                 // la conversación de renovación
+  10: 'Tu próxima camada',            // precio y números de la que viene
+  11: 'Lo que cuentan los tuyos',     // sus resultados, contados por ellos
+  12: 'Lo que sigue sin ti',          // su propia jornada, día 79
   13: 'Tu ecosistema y el cierre',
 };
 

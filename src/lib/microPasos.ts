@@ -159,7 +159,7 @@ export const DE_QUE_SE_OCUPA: Record<Entrenador, string> = {
   diego: 'construir el producto: convertir la oferta en videos, ejercicios y sesiones',
   mateo: 'el contenido: guiones, ganchos y qué publicar',
   caro: 'la cámara y la presencia: grabar sin sufrir, y los testimonios',
-  ramiro: 'leer los números: el presupuesto, la pauta y el embudo',
+  ramiro: 'leer los números: el presupuesto, la pauta y la captación',
   bruno: 'el servicio post-venta: sostener al paciente hasta el resultado',
 };
 

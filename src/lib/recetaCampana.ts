@@ -324,7 +324,7 @@ export const A_DONDE_MANDAR: Array<{ cuando: string; aDonde: string }> = [
     aDonde: 'eso es con Sofi, tu entrenadora de conversaciones.',
   },
   {
-    cuando: 'cuándo apagar, cuándo escalar o qué hacer con los números',
+    cuando: 'cuándo apagar, cuándo hacer crecer o qué hacer con los números',
     aDonde: 'está en Activación: la puerta del día en que estás te dice qué toca.',
   },
   {

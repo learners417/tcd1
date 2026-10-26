@@ -14,7 +14,7 @@ export interface Complemento {
 export const COMPLEMENTOS: Record<string, Complemento> = {
   'r-bienvenido': {
     resumen: 'El mapa completo: 90 días, 4 fases visibles, 9 cinturones. No es un curso — es un camino con niveles, donde cada sesión de 20-30 minutos deja algo construido.',
-    mapa: ['El Camino es el dojo: una sesión por día, de lunes a viernes', 'Cada cinturón se gana con un hito verificable, no con asistencia', 'El progreso visible sostiene la constancia cuando la motivación falla'],
+    mapa: ['El Camino es una sesión por día, de lunes a viernes', 'Cada cinturón se gana con un hito verificable, no con asistencia', 'El progreso visible sostiene la constancia cuando la motivación falla'],
     referente: 'Yu-kai Chou (Octalysis): el avance que se VE es el motor psicológico más fuerte de un juego bien diseñado.',
     dato: '44 sesiones de trabajo, a una por día hábil, son exactamente tus 90 días. La matemática cierra: alcanza con presentarte.',
   },
@@ -33,7 +33,7 @@ export const COMPLEMENTOS: Record<string, Complemento> = {
   },
   'r-legado': {
     resumen: 'De profesional independiente a director de clínica: el legado no ocurre — se diseña. Qué vas a crear con el tiempo, el dinero y la energía que recuperes es LA pregunta del camino.',
-    mapa: ['El x3 de ingresos es el medio; el legado es el fin', 'La Rueda de la Vida es tu tablero: 8 dimensiones, no una', 'El descanso también se registra: la vida es parte del camino'],
+    mapa: ['El x3 de ingresos es el medio; el legado es el fin', 'Las siete libertades son tu tablero: ocho rayos, no uno', 'El descanso también se registra: la vida es parte del camino'],
   },
   'r-avatar': {
     resumen: 'Primero a quién sirves; la oferta es la última consecuencia. Tu paciente ideal casi siempre es tu yo del pasado — y cuando le hablas a UNO con precisión, llegas a miles.',
@@ -88,8 +88,8 @@ export const COMPLEMENTOS: Record<string, Complemento> = {
     mapa: ['Protocolo con pasos > improvisación con buena voluntad', 'El avance medido es la razón por la que renuevan', 'Tu clínica digital ordena la entrega: tú pones la presencia'],
   },
   'r-maquina': {
-    resumen: 'La máquina de 10 por mes es un ritmo, no un sprint: plan los lunes, revisión los miércoles, cierre del director los viernes. Y una regla de oro: la pauta escala con la caja.',
-    mapa: ['El problema casi siempre es volumen, no técnica: más pauta o más contenido', 'Escala con la caja: sube el presupuesto tras cada venta, no antes', 'El scorecard del viernes diagnostica el cuello: conversaciones, agendas o cierres'],
+    resumen: 'La máquina de 10 por mes es un ritmo, no un sprint: plan los lunes, revisión los miércoles, cierre del director los viernes. Y una regla de oro: la pauta crece con la caja.',
+    mapa: ['El problema casi siempre es volumen, no técnica: más pauta o más contenido', 'Crece con la caja: sube el presupuesto tras cada venta, no antes', 'El scorecard del viernes diagnostica el cuello: conversaciones, agendas o cierres'],
     dato: 'En LATAM, una conversación de WhatsApp desde anuncios cuesta entre $0.20 y $0.60. Una sola venta de $1.000 paga meses enteros de sistema.',
   },
 };

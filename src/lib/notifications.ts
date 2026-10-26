@@ -156,11 +156,35 @@ export async function notificarPilarCompletado(
     usuario_id: userId,
     tipo: 'hito',
     titulo: `Pilar ${pilarNumero} completado`,
-    descripcion: `Felicidades, completaste "${pilarTitulo}". Sigue avanzando en tu transformacion.`,
+    descripcion: `Felicidades, completaste "${pilarTitulo}". Sigue avanzando en tu transformación.`,
     accion_url: '/hoja-de-ruta',
   });
 }
 
+/*
+ * ═══ LOS AVISOS QUE TODAVÍA NO DISPARA NADA ═══
+ *
+ * De los dieciséis avisos de este archivo, ocho no los llama ninguna
+ * pantalla. No están rotos: están construidos y esperando quién los toque.
+ * Vale la pena saber por qué, porque son dos casos distintos:
+ *
+ * CUATRO SON PERIÓDICOS y necesitan un reloj que la app no tiene. Avisar
+ * «hoy no escribiste tu diario» o «van cuarenta y cinco días» pide algo que
+ * corra solo todos los días, del lado del servidor: una tarea programada en
+ * Supabase o en Vercel. Desde el navegador no se puede, porque el navegador
+ * solo corre cuando la persona entró — y justamente se le avisa cuando NO
+ * entró. Son: notificarRecordatorioDiario, notificarMetricasSemanal,
+ * notificarAlertaDia45 y notificarClienteInactivo.
+ *
+ * CUATRO SON POR EVENTO y les falta el llamado en la pantalla donde pasa el
+ * evento: notificarEnergiBaja (cuando el diario registra energía baja varios
+ * días seguidos), notificarNuevoCliente y notificarProgresoCliente (para el
+ * equipo, desde el Admin) y notificarMensajeCliente, que se superpone con
+ * notificarAdminsMensaje, el que sí está conectado.
+ *
+ * `prueba-los-avisos-llevan-a-algun-lado.ts` los cuenta: si aparece uno más
+ * sin conectar, avisa.
+ */
 export async function notificarPilarDesbloqueado(
   userId: string,
   pilarTitulo: string,
@@ -188,8 +212,8 @@ export async function notificarMetricasSemanal(userId: string): Promise<void> {
   await crearNotificacion({
     usuario_id: userId,
     tipo: 'tarea',
-    titulo: 'Registra tus metricas semanales',
-    descripcion: 'Es domingo. Actualiza tus numeros para ver tu progreso real.',
+    titulo: 'Registra tus métricas semanales',
+    descripcion: 'Es domingo. Actualiza tus números para ver tu progreso real.',
     accion_url: '/metricas',
   });
 }
@@ -224,7 +248,7 @@ export async function notificarEnergiBaja(
   await crearNotificacion({
     usuario_id: userId,
     tipo: 'sistema',
-    titulo: 'Tu energia ha estado baja',
+    titulo: 'Tu energía ha estado baja',
     descripcion: `Tu promedio de energia en los ultimos 7 días es ${promedio.toFixed(1)}/10. Revisa tu modulo energetico.`,
     accion_url: '/diario',
   });
@@ -308,18 +332,24 @@ export async function notificarAdminsEvidencia(clienteNombre: string, sesion: st
   await Promise.all(admins.map((adminId) => crearNotificacion({
     usuario_id: adminId,
     tipo: 'admin',
-    titulo: `📎 Evidencia de ${clienteNombre}`,
+    titulo: `Evidencia de ${clienteNombre}`,
     descripcion: `${clienteNombre} subió su evidencia de la sesión ${sesion}. Revísala en su ficha.`,
     accion_url: '/admin/clientes',
   })));
 }
 
 /** El cliente ganó un cinturón → celebración en su campanita. */
-export async function notificarCinturon(userId: string, emoji: string, nombre: string, metafora: string): Promise<void> {
+/*
+ * El emoji del grado sigue en el dato porque el Admin lo usa para reconocer
+ * de un vistazo en qué grado va cada persona, pero no entra en el título del
+ * aviso: eso lo lee el cliente, y un emoji lo dibuja la tipografía de su
+ * teléfono. El parámetro se queda para no tocar a quien llama.
+ */
+export async function notificarCinturon(userId: string, _emoji: string, nombre: string, metafora: string): Promise<void> {
   await crearNotificacion({
     usuario_id: userId,
     tipo: 'hito',
-    titulo: `${emoji} ¡Cinturón ${nombre}!`,
+    titulo: `¡Cinturón ${nombre}!`,
     descripcion: `${metafora}. Tu Mentor te espera con una pregunta.`,
     accion_url: '/hoja-de-ruta',
   });

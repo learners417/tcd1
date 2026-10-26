@@ -206,7 +206,7 @@ Responde SOLO un JSON array válido de 10 objetos (sin texto antes ni después, 
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Eres un coach de negocios para profesionales de la salud. Genera el "Perfil de Fundador/a" completo de este profesional.
+Eres un mentor de negocios para profesionales de la salud. Genera el "Perfil de Fundador/a" completo de este profesional.
 
 DATOS DEL PROFESIONAL:
 - Especialidad: ${inputs.especialidad}
@@ -239,7 +239,7 @@ Escribe en segunda persona ("Eres...", "Tu diferencial es...") en tono directo, 
     grupo: 'A',
     titulo: 'Carta del Día 91',
     descripcion:
-      'Escribe la carta que te enviará el Coach al terminar los 90 días. Es la brújula emocional del programa y el recordatorio de por qué empezaste.',
+      'Escribe la carta que te enviará tu Mentor al terminar los 90 días. Es la brújula emocional del programa y el recordatorio de por qué empezaste.',
     emoji: '💌',
     inputs: [
       {
@@ -441,7 +441,7 @@ Reglas: no uses frases genéricas de coaching. Menciona la especialidad específ
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Eres un coach de mentalidad especializado en profesionales de la salud. Tu trabajo es reformular creencias limitantes con lógica, evidencia real y respeto — sin frases vacías de autoayuda.
+Eres un mentor de mentalidad especializado en profesionales de la salud. Tu trabajo es reformular creencias limitantes con lógica, evidencia real y respeto — sin frases vacías de autoayuda.
 
 CREENCIAS A REFORMULAR:
 1. "${inputs.creencia1}"
@@ -537,7 +537,7 @@ DATOS:
 Calcula y presenta:
 1. INGRESO NETO OBJETIVO (meta - gastos) y cuántos protocolos representa
 2. PROTOCOLOS NECESARIOS POR MES y por semana
-3. EMBUDO REQUERIDO (cuántas llamadas y leads necesitas asumiendo 30% cierre en llamada y 20% conversión lead→llamada)
+3. CAPTACIÓN REQUERIDA (cuántas llamadas y consultas necesitas asumiendo 30% cierre en llamada y 20% conversión lead→llamada)
 4. BRECHA Y TIEMPO (cuánto falta, cuánto puede crecer por mes si es constante)
 5. DIAGNÓSTICO DE VIABILIDAD (¿es realista en 90 días con las horas disponibles? ¿Qué tiene que pasar sí o sí?)
 6. LOS 3 HITOS (qué lograr en el día 30, 60 y 90 — con números específicos)
@@ -1123,7 +1123,7 @@ Al final: 3 ERRORES COMUNES al hacer stories en este nicho que el profesional de
         id: 'cta',
         label: '¿Cuál es el CTA?',
         tipo: 'select',
-        opciones: ['Escríbeme "INFO"', 'Agenda una consulta gratuita', 'Mándame un DM', 'Link en bio', 'Guárdalo para después'],
+        opciones: ['Escríbeme "INFO"', 'Agenda tu consulta', 'Mándame un DM', 'Link en bio', 'Guárdalo para después'],
         required: true,
       },
       {
@@ -1357,8 +1357,8 @@ REGLAS: tuteo neutro (tú/tienes). Prohibido usar: coach, escalar, embudo, funne
         label: '¿Cuál es el CTA del link en bio?',
         tipo: 'select',
         opciones: [
-          'Agenda una consulta gratuita',
-          'Descargá el recurso gratis',
+          'Agenda tu consulta',
+          'Descarga el recurso',
           'Escríbeme para más info',
           'Conocé el protocolo',
           'Mira cómo trabajo',
@@ -1513,7 +1513,7 @@ Extensión: 180-280 palabras. Tono: profesional pero como si te escribiera un co
         id: 'keyword_2',
         label: 'Keyword disparadora #2',
         tipo: 'text',
-        placeholder: 'ej: GUÍA, GRATIS, MÁS INFO',
+        placeholder: 'ej: GUÍA, QUIERO, MÁS INFO',
       },
       {
         id: 'keyword_3',
@@ -1862,7 +1862,7 @@ Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
       },
       {
         id: 'mayor_problema_percibido',
-        label: '¿Cuál crees que es el mayor problema en tu embudo ahora mismo?',
+        label: '¿Cuál crees que es el mayor problema en tu captación ahora mismo?',
         tipo: 'textarea',
         placeholder: 'Lo que sientes que está fallando: no llegan suficientes leads, los leads no son calificados, no cierro las llamadas...',
         required: true,
@@ -1877,7 +1877,7 @@ Tono: empático primero, siempre. Jamás presionar, siempre ayudar a decidir.
     promptTemplate: (inputs, perfil) => `
 ${contextoBase(perfil)}
 
-Analiza las métricas del embudo de ${primero(perfil.nombre) || 'este profesional'} de las últimas 4 semanas.
+Analiza las métricas de la captación de ${primero(perfil.nombre) || 'este profesional'} de las últimas 4 semanas.
 
 MÉTRICAS:
 - Visitas a la landing: ${inputs.visitas_landing || 'no registrado'}
@@ -1910,9 +1910,11 @@ Calcula y presenta:
 
 7. PROYECCIÓN: si mejora el cuello de botella un 20%, ¿qué pasa con las ventas el próximo mes?
 
-8. QUÉ MEDIR DE AHORA EN ADELANTE (métricas adicionales que ayudarían a entender mejor el embudo)
+8. QUÉ MEDIR DE AHORA EN ADELANTE (métricas adicionales que ayudarían a entender mejor la captación)
     `.trim(),
-    outputLabel: 'Análisis de Métricas del Embudo',
+    // «Embudo» no es una palabra de la casa: el sistema se llama «Tu
+    // captación automática», y esto es lo que el cliente lee en pantalla.
+    outputLabel: 'Análisis de tus números de captación',
   },
 ];
 
@@ -2028,7 +2030,7 @@ Respuestas del formulario:
 - {{Consultantes}} pagando por mes: ${inputs.pacientes_mes}
 - Problema principal que resuelve: ${inputs.problema_principal}
 
-Genera un párrafo de 150-200 palabras que presente a este profesional. Usa tono rioplatense, directo y cálido.`.trim(),
+Genera un párrafo de 150-200 palabras que presente a este profesional. Usa castellano neutro (tú), directo y cálido.`.trim(),
   },
 
   // ─── P1.2: Línea de tiempo vital (NO IA) ───────────────────────────────────
@@ -2084,7 +2086,7 @@ ${adnContext(perfil)}
 Genera exactamente en este formato:
 
 ---HISTORIA 300 PALABRAS---
-[Historia completa para sitio web. Incluí los momentos de quiebre, la transformación y por qué hace lo que hace. Tono personal, auténtico, en primera persona.]
+[Historia completa para sitio web. Incluye los momentos de quiebre, la transformación y por qué hace lo que hace. Tono personal, auténtico, en primera persona.]
 
 ---HISTORIA 150 PALABRAS---
 [Versión compacta para bio de redes sociales. Los momentos clave y la esencia.]
@@ -2092,7 +2094,7 @@ Genera exactamente en este formato:
 ---HISTORIA 50 PALABRAS---
 [Versión ultra-corta para presentaciones. Una oración potente.]
 
-Usa tono rioplatense, directo, sin jerga de marketing. La historia tiene que sonar a persona real, no a bio de LinkedIn.`.trim(),
+Usa castellano neutro (tú), directo, sin palabras técnicas. La historia tiene que sonar a persona real, no a bio de LinkedIn.`.trim(),
   },
 
   // ─── P2.2: Los 5 por qué ───────────────────────────────────────────────────
@@ -2128,7 +2130,7 @@ Usa tono rioplatense, directo, sin jerga de marketing. La historia tiene que son
     outputLabel: 'Propósito destilado',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Eres un coach de propósito para profesionales de salud. Lee las 5 respuestas del ejercicio "Los 5 por qué" y destilá 3 versiones de la oración de propósito.
+Eres un mentor de propósito para profesionales de salud. Lee las cinco respuestas del ejercicio "Los 5 por qué" y destila 3 versiones de la oración de propósito.
 ${adnContext(perfil)}
 
 Las 5 respuestas: ${perfil.adn_cinco_por_que ? (Array.isArray(perfil.adn_cinco_por_que) ? perfil.adn_cinco_por_que.join('\n') : perfil.adn_cinco_por_que) : 'No disponibles'}
@@ -2633,7 +2635,7 @@ Genera: nombre de la oferta, promesa principal, para quién es, qué incluye, pr
   {
     id: 'H-P8.3',
     grupo: 'B' as GrupoHerramienta,
-    titulo: 'Generador de Oferta High + Low + Lead Magnet',
+    titulo: 'Generador de tus tres ofertas y tu recurso de entrada',
     descripcion: 'Genera las 3 ofertas restantes a partir de la Oferta Mid.',
     emoji: '🏗️',
     usa_ia: true,
@@ -2653,7 +2655,7 @@ Genera exactamente:
 ---OFERTA LOW ($500 a $1.000)---
 [Las primeras 2-3 sesiones del protocolo Mid. Nombre, qué incluye, precio.]
 
----LEAD MAGNET (gratis o hasta $27)---
+---RECURSO DE ENTRADA (hasta $27)---
 [Recurso que resuelve el primer dolor del Estado A de forma completa. Formato, contenido, CTA.]`.trim(),
   },
 
@@ -2662,12 +2664,12 @@ Genera exactamente:
     id: 'H-P9A.2',
     campoPerfil: 'adn_landing_copy',
     grupo: 'D' as GrupoHerramienta,
-    titulo: 'Generador de Copy de Landing Page',
-    descripcion: 'Copy completo usando Avatar + Matriz + Oferta Mid.',
+    titulo: 'Generador del texto de tu página',
+    descripcion: 'El texto completo, con tu avatar, tu matriz y tu oferta media.',
     emoji: '📣',
     usa_ia: true,
     adn_field: 'adn_landing_copy',
-    outputLabel: 'Copy de landing page',
+    outputLabel: 'El texto de tu página',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
 Eres un copywriter de landing pages para profesionales de salud. Genera el copy completo usando el ADN del profesional.
@@ -2760,7 +2762,7 @@ El contenido debe responder directamente a la objeción/miedo de la semana.`.tri
     outputLabel: 'Script de ventas',
     inputs: [],
     promptTemplate: (_inputs, perfil) => `
-Eres un coach de ventas para profesionales de salud. Construye un script completo de llamada de diagnóstico de 45 minutos.
+Eres un mentor de ventas para profesionales de salud. Construye un script completo de llamada de diagnóstico de 45 minutos.
 ${adnContext(perfil)}
 
 Secciones del script:
@@ -2780,7 +2782,7 @@ El tono es de evaluación, no de venta. Estás diagnosticando si puedes ayudar, 
     campoPerfil: 'adn_protocolo_servicio',
     grupo: 'D' as GrupoHerramienta,
     titulo: 'Documentador de Protocolo de Entrega',
-    descripcion: 'Automatizá la entrega sin perder el toque personal.',
+    descripcion: 'Ordena tu entrega y conserva tu presencia.',
     emoji: '🤝',
     usa_ia: true,
     adn_field: 'adn_protocolo_servicio',
@@ -2814,7 +2816,7 @@ Genera:
     id: 'H-P10.2',
     grupo: 'D' as GrupoHerramienta,
     titulo: 'Generador de Sistema de Identidad',
-    descripcion: 'Paleta, tipografía, tono de voz y brief completo.',
+    descripcion: 'Paleta, tipografía, tono de voz y el resumen de tu marca.',
     emoji: '🎨',
     usa_ia: true,
     adn_field: 'adn_identidad_sistema',

@@ -134,7 +134,7 @@ export interface Invitacion {
 export const INVITACION_AL_ACOMPANAMIENTO: Invitacion = {
   titulo: 'Súmate al acompañamiento',
   queGana: [
-    'Tres encuentros por semana conmigo: producto los martes, marketing los miércoles, ventas los jueves.',
+    'Tres encuentros por semana conmigo: producto los martes, captación los miércoles, ventas los jueves.',
     'Chat con el equipo de lunes a viernes, con respuesta el mismo día.',
     'Los canales de la comunidad, donde preguntas y ves lo que están resolviendo los demás.',
   ],
@@ -173,7 +173,7 @@ export const CANALES: Canal[] = [
     diaDeMentoria: 'martes', abiertoALaBase: false,
   },
   {
-    id: 'marketing', nombre: 'Marketing',
+    id: 'marketing', nombre: 'Captación',
     paraQue: 'Tu perfil, tus anuncios, tu página y tu campaña. Cómo llegan a ti.',
     diaDeMentoria: 'miércoles', abiertoALaBase: false,
   },
@@ -232,20 +232,53 @@ export interface Destino {
   quien?: string;
 }
 
+/**
+ * Dónde se trata un canal, escrito con el dato de `CANALES`.
+ *
+ * Los tres primeros destinos repetían a mano el día y el nombre del canal, y
+ * ya habían divergido: el canal se llama «Captación» desde su propia línea de
+ * `CANALES`, y el destino de al lado decía «canal Marketing» —una palabra que
+ * la casa no usa— a doce renglones de distancia. Derivado no puede volver a
+ * pasar.
+ */
+export function elDiaYElTema(id: string): string {
+  const c = CANALES.find((x) => x.id === id);
+  if (!c) return id;
+  const dia = c.diaDeMentoria
+    ? c.diaDeMentoria.charAt(0).toUpperCase() + c.diaDeMentoria.slice(1)
+    : '';
+  return dia ? `${dia} · ${c.nombre}` : c.nombre;
+}
+
+/** «Martes producto · Miércoles captación · Jueves ventas», con el dato. */
+export function losTresEncuentros(): string {
+  return CANALES.filter((c) => c.diaDeMentoria)
+    .map((c) => `${c.diaDeMentoria!.charAt(0).toUpperCase()}${c.diaDeMentoria!.slice(1)} ${c.nombre.toLowerCase()}`)
+    .join(' · ');
+}
+
+export function enLaMentoria(id: IdCanal): string {
+  const c = CANALES.find((x) => x.id === id);
+  if (!c) return '';
+  return c.diaDeMentoria
+    ? `Mentoría del ${c.diaDeMentoria} · canal ${c.nombre}`
+    : `Canal ${c.nombre}`;
+}
+
 export const A_DONDE_VA: Destino[] = [
   {
     loQueTrae: 'Mi método, mi oferta, mi precio, mis cupos',
-    donde: 'Mentoría del martes · canal Producto',
+    donde: enLaMentoria('producto'),
     quien: 'Javo',
   },
   {
     loQueTrae: 'Mi perfil, mi página, mis anuncios, mi campaña',
-    donde: 'Mentoría del miércoles · canal Marketing',
+    donde: enLaMentoria('marketing'),
     quien: 'Javo',
   },
   {
     loQueTrae: 'Mis conversaciones, mis llamadas, cómo cierro',
-    donde: 'Mentoría del jueves · canal Ventas',
+    donde: enLaMentoria('ventas'),
     quien: 'Javo',
   },
   {

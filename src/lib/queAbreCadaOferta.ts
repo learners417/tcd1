@@ -20,7 +20,7 @@
  */
 import { TICKETS, type Ticket } from './cuadroTickets';
 import { ULTIMO_DIA_DE_BASE, leTocanLasEntregas } from './topeDelEscalon';
-import { quienMonta } from './construyeSolo';
+
 
 export interface LoQueAbre {
   /** Hasta dónde llega su Camino. */
@@ -37,7 +37,14 @@ export function loQueAbre(t: Ticket): LoQueAbre {
     camino: t === 'base'
       ? `Su Camino abre la antesala y los sistemas 1 y 2: hasta el día ${ULTIMO_DIA_DE_BASE}, que cierra con su precio, su método y su oferta en una página.`
       : 'Su Camino abre los 90 días completos, desde la antesala hasta su graduación.',
-    monta: `Lo técnico —su página, sus formularios, su WhatsApp, sus automatizaciones— lo monta ${quienMonta(t)}.`,
+    /*
+     * EN TERCERA PERSONA, porque esta frase la lee el equipo sobre un cliente.
+     *
+     * Reusaba `quienMonta`, que devuelve «tú» porque está escrita para la
+     * pantalla DEL CLIENTE, donde «lo montas tú» se lee bien. Acá quedaba
+     * «lo técnico lo monta tú», en la pantalla del alta.
+     */
+    monta: `Lo técnico —su página, sus formularios, su WhatsApp, sus automatizaciones— lo monta ${TICKETS[t].quienInstala}.`,
     entregas: leTocanLasEntregas(t, marcado)
       ? 'El equipo recibe las tres entregas como tarea, en los días 0, 11 y 29 de su trabajo.'
       : 'El equipo no recibe tareas de instalación: él las hace con los tutoriales, en su día.',

@@ -147,15 +147,15 @@ export const TUTORIALES_DE_LUPE: Record<string, TutorialTecnico> = {
   'L-18': {
     dia: 25,
     codigo: 'L-18',
-    titulo: 'Tu bandeja y tu embudo',
+    titulo: 'Tu bandeja y tu captación',
     intro:
       'Cuando empiezan a escribirte varios por semana, la memoria no alcanza. El '
-      + 'embudo es la lista de en qué momento está cada uno, y es lo que te evita '
+      + 'captación es la lista de en qué momento está cada uno, y es lo que te evita '
       + 'perder a alguien que estaba por decir sí.',
     pasos: [
       'Conecta tus mensajes de Instagram a tu bandeja, para contestar todo desde un '
       + 'solo lugar y no desde cuatro aplicaciones.',
-      'Arma las cuatro etapas de tu embudo, en este orden: escribió · agendó · tuvo '
+      'Arma las cuatro etapas de tu captación, en este orden: escribió · agendó · tuvo '
       + 'la llamada · decidió.',
       'Mueve a mano a los que tengas abiertos ahora mismo. Es la única vez que lo '
       + 'haces completo.',
@@ -259,7 +259,7 @@ export const TUTORIALES_DE_LUPE: Record<string, TutorialTecnico> = {
     titulo: 'Tu primer ingreso a la plataforma',
     intro:
       'Son dos aplicaciones y hacen cosas distintas. En TCD está tu Camino: la '
-      + 'sesión de cada día, tu ADN y tus entrenadores. En MiClínica está tu '
+      + 'sesión de cada día, tu ADN y tus entrenadores. En Mi Clínica está tu '
       + 'operación: tus consultantes, tu agenda y tus cobros. Entras a las dos con '
       + 'el mismo correo.',
     pasos: [

@@ -34,6 +34,8 @@ const MAPA_ESPECIALIDAD: Record<string, FamiliaProfesional> = {
   'Terapeuta': 'clinica',
   'Kinesiólogo/a': 'clinica',
   'Odontólogo/a': 'clinica',
+  /* La etiqueta «Coach» salió del wizard; la clave se queda acá por los
+     perfiles que ya la eligieron. «Consultor/a» ya estaba más abajo. */
   'Coach': 'acompanamiento',
   'Coach ontológico': 'acompanamiento',
   'Mentor/a': 'acompanamiento',

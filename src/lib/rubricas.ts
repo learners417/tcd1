@@ -261,7 +261,7 @@ export const RUBRICAS: Record<string | number, Rubrica> = {
     bloquea: false,
   },
   46: {
-    codigo: 46, pieza: 'tu decisión de escalar o apagar',
+    codigo: 46, pieza: 'tu decisión de hacer crecer o apagar',
     criterios: [
       { pregunta: '¿La decisión es una sola y está escrita?', busca: 'Escalo o apago. Las dos juntas no son una decisión.' },
       { pregunta: '¿Está apoyada en sus cuatro números?', busca: 'Los números de las últimas dos semanas, escritos.' },

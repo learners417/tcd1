@@ -307,7 +307,7 @@
     },
     {
       "codigo": "P4.4c",
-      "titulo": "Cuándo escalar y cuándo apagar",
+      "titulo": "Cuándo crecer y cuándo apagar",
       "dia": 46,
       "sistema": 3,
       "set": "pantalla",
@@ -545,7 +545,7 @@
     },
     {
       "codigo": "L-18",
-      "titulo": "Tu bandeja y tu embudo",
+      "titulo": "Tu bandeja y tu captación",
       "dia": 25,
       "minutos": 7,
       "donde": "Sistema"
@@ -581,8 +581,8 @@
       "dia": 1,
       "dia_estimado": 1,
       "significado": "La semilla bajo la nieve",
-      "forma": "Tus diez números de entrada",
-      "se_gana_con": "Tus diez números de entrada",
+      "forma": "Tus seis números de entrada",
+      "se_gana_con": "Tus seis números de entrada",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -770,7 +770,7 @@
     {
       "id": "ramiro",
       "nombre": "Ramiro",
-      "rol": "tu embudo",
+      "rol": "tu captación",
       "dia_estimado": 26,
       "se_abre_con": "campana_activa"
     },
@@ -803,7 +803,7 @@
     },
     {
       "id": "F-14DIAS",
-      "regla": "Escalar o apagar queda cerrado del 31 al 45",
+      "regla": "Crecer o apagar queda cerrado del 31 al 45",
       "apertura": "dia>=46",
       "mensaje": "Faltan {n} días. Tu campaña está aprendiendo."
     },
@@ -898,7 +898,7 @@
       "manual": "LID-1",
       "acceso": null,
       "pasos": [
-        "Contesta las diez preguntas de tu medición de entrada",
+        "Contesta las seis preguntas de tu medición de entrada",
         "Elige dónde y a qué hora vas a construir esto cada día",
         "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
         "Divide: esa es tu hora real neta",
@@ -907,10 +907,10 @@
       "evidencias": [
         {
           "tipo": "numero",
-          "nombre": "Tus diez números de entrada",
+          "nombre": "Tus seis números de entrada",
           "valida": "las diez respuestas, 1 a 10",
           "del_mercado": false,
-          "pide": "Contesta las diez preguntas. Quedan guardadas hasta el día 87."
+          "pide": "Contesta las seis preguntas. Quedan guardadas hasta el día 82, cuando vuelves a medir."
         },
         {
           "tipo": "imagen",
@@ -945,13 +945,13 @@
       "cinturon": "10gup",
       "jornada_larga": false,
       "lleva": "Tu medición de entrada y tu hora real neta, escritas.",
-      "veredicto": "Ya sabes de dónde partes. El día 87 lo vuelves a medir.",
+      "veredicto": "Ya sabes de dónde partes. El día 82 lo vuelves a medir.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
       "checklist": [
-        "Contesta las diez preguntas de tu medición de entrada",
+        "Contesta las seis preguntas de tu medición de entrada",
         "Elige dónde y a qué hora vas a construir esto cada día",
         "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
         "Divide: esa es tu hora real neta",
@@ -1423,10 +1423,10 @@
       "evidencias": [
         {
           "tipo": "imagen",
-          "nombre": "Tu embudo dibujado",
+          "nombre": "Tu captación dibujada",
           "valida": "dos ramas: recurso y video de venta",
           "del_mercado": false,
-          "pide": "Sube la foto de tu embudo, con las dos ramas."
+          "pide": "Sube la foto de tu captación, con las dos ramas."
         },
         {
           "tipo": "texto",
@@ -2351,8 +2351,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
-        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso",
+        "Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
         "Reparte el presupuesto mitad y mitad",
         "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
         "Enciende y anota la fecha y la hora"
@@ -2381,8 +2381,8 @@
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
       "checklist": [
-        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
-        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso",
+        "Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
         "Reparte el presupuesto mitad y mitad",
         "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
         "Enciende y anota la fecha y la hora"
@@ -2865,7 +2865,7 @@
     {
       "dia": 43,
       "tipo": "sesion",
-      "titulo": "Escalar o apagar",
+      "titulo": "Crecer o apagar",
       "sistema": 3,
       "minutos": 45,
       "piezas": [
@@ -4689,7 +4689,7 @@
       "cinturon": "1dan",
       "jornada_larga": false,
       "lleva": "Tus noventa días cerrados, con tus dos números lado a lado.",
-      "veredicto": "Terminaste. Tienes número, precio, método, oferta, embudo, app y tu ecosistema andando.",
+      "veredicto": "Terminaste. Tienes número, precio, método, oferta, captación, app y tu ecosistema andando.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 1,

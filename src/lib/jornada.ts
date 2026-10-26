@@ -212,7 +212,7 @@ export function armarMarcador(x: {
  *
  * Dos números: cuántos venden y cuánto cuesta cada uno. El círculo va bien
  * cuando el primero sube **y** el segundo baja. Si suben los dos, se está
- * comprando resultado con trabajo — y eso no escala.
+ * comprando resultado con trabajo — y eso no crece.
  */
 export function comoVaElCirculo(
   hoy: Marcador,
@@ -232,7 +232,7 @@ export function comoVaElCirculo(
   }
   if (masVenden && !menosTrabajo) {
     return {
-      texto: 'Venden más, pero cada uno cuesta más trabajo. Se está comprando resultado con horas, y eso no escala.',
+      texto: 'Venden más, pero cada uno cuesta más trabajo. Se está comprando resultado con horas, y eso no crece.',
       sano: false,
     };
   }

@@ -130,7 +130,7 @@ export function evaluarMigracion(
     cerradas, pendientes, camposLlenos, camposTotales, listoParaCampanas,
     resumen: listoParaCampanas
       ? pendientes.length === 0
-        ? 'Tu Camino quedó cerrado y tu ADN completo. Te toca activar.'
+        ? 'Tu ADN quedó completo. Te toca activar.'
         : `Tu ADN está completo y te toca activar. Te quedaron ${pendientes.length} `
           + `${pendientes.length === 1 ? 'sesión' : 'sesiones'} abiertas para cuando quieras.`
       : `Te faltan ${camposTotales - camposLlenos} de ${camposTotales} piezas para `

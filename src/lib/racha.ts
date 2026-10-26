@@ -1,7 +1,7 @@
 /**
  * racha.ts — La racha de sesiones (Lote A · jul 2026)
  * Cuenta días HÁBILES (lunes a viernes) consecutivos con al menos 1 sesión.
- * Sábado y domingo son libres: NO suman ni rompen la racha (el dojo respira).
+ * Sábado y domingo son libres: NO suman ni rompen la racha (el Camino respira).
  * Gracia de 1 día hábil: un día hábil sin sesión no rompe; el segundo sí.
  * Todo por CALENDARIO REAL (getDay()), no por día contado del programa.
  */

@@ -314,7 +314,7 @@ export function calcularCadena(
 
   add('cac', 'Costo de adquirir un cliente', 'conversion', 'historico',
     div(n.gasto, n.ventas), [p * 0.10, p * 0.30], 'dinero', 'menor_mejor',
-    'Arriba del 30% del precio no hay escala posible: o sube el precio o mejora el cierre.',
+    'Arriba del 30% del precio no hay crecimiento posible: o sube el precio o mejora el cierre.',
     { tiene: n.ventas, necesita: 2 });
 
   // ══ DINERO ═════════════════════════════════════════════════════════════
@@ -358,7 +358,7 @@ export function calcularCadena(
 // ── Coherencia de lo cargado ───────────────────────────────────────────────
 
 /**
- * La cadena es un embudo: cada escalón solo puede tener MENOS que el anterior.
+ * La cadena se angosta: cada escalón solo puede tener MENOS que el anterior.
  * Si alguien carga más agendas que conversaciones, no hay un negocio raro —
  * hay un dedo equivocado, y el diagnóstico de abajo sale con cara de certeza
  * sobre números imposibles. Vale más frenar que opinar.

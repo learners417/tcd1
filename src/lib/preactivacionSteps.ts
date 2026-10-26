@@ -201,7 +201,7 @@ export const SECTIONS: PreactivacionSection[] = [
     short: 'POST',
     items: [
       { id: 'llamada_1', quien: 'cliente', lbl: 'Primera\nllamada', title: 'Primera llamada', detail: 'Hizo su primera llamada de venta real. Ese día cambia todo.' },
-      { id: 'pago_1', quien: 'cliente', lbl: 'Primer\npago 🏆', title: 'Primer pago', detail: 'Cobró su precio nuevo. <strong>El hito que valida el sistema entero.</strong>' },
+      { id: 'pago_1', quien: 'cliente', lbl: 'Primer\npago', title: 'Primer pago', detail: 'Cobró su precio nuevo. <strong>El hito que valida el sistema entero.</strong>' },
       { id: 'caso', quien: 'ambos', lbl: 'Caso de\néxito', title: 'Caso de éxito', detail: 'Su historia con números: de dónde salió, qué hizo y adónde llegó.' },
       { id: 'testimonio', quien: 'ambos', lbl: 'Testimonios', title: 'Testimonios', detail: 'Pedidos y grabados — su prueba social y la nuestra.' },
     ],
