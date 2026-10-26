@@ -157,13 +157,23 @@ marcar() {
 # migraciones, y las nuevas las dan por hechas. Se extraen de las propias
 # migraciones en vez de copiarse a mano: con la lista escrita acá, la columna
 # que agregue la próxima migración rompería esta prueba en vez de la base.
+#
+# Y SE LEE TODO EL SQL DEL REPO, no solo `supabase/migrations/`. La columna
+# `pais` la agrega `pais-migration.sql`, en la raíz: mirando solo las
+# migraciones, el andamiaje no la tenía, y la escritura del onboarding
+# —especialidad y país— fallaba en la prueba estando bien en la app.
 python3 - << 'PY' > "$DATA/viejo.sql"
 import re, glob, os
 col = re.compile(r'add\s+column\s+(?:if\s+not\s+exists\s+)?([a-z_0-9]+)\s+([A-Za-z0-9_]+(?:\s*\[\s*\])?)', re.I)
 tab = re.compile(r'alter\s+table\s+(?:if\s+exists\s+)?(?:public\.)?([a-z_0-9]+)', re.I)
 vistas, salida = set(), []
-for f in sorted(glob.glob('supabase/migrations/*.sql')):
-    if os.path.basename(f) >= '20261009': continue
+for f in sorted(glob.glob('supabase/migrations/*.sql')) + sorted(glob.glob('*.sql')):
+    # El corte por fecha vale SOLO para las migraciones: los archivos de la
+    # raíz empiezan con letra, y en una comparación de texto cualquier letra
+    # es «mayor» que un dígito. Así que este filtro los descartaba todos, y
+    # la columna `pais` —que crea `pais-migration.sql`— nunca entraba.
+    if f.startswith('supabase/migrations/') and os.path.basename(f) >= '20261009':
+        continue
     texto = re.sub(r'--.*$', '', open(f, encoding='utf-8').read(), flags=re.M)
     for trozo in texto.split(';'):
         m = tab.search(trozo)
@@ -176,6 +186,24 @@ for f in sorted(glob.glob('supabase/migrations/*.sql')):
 print('\n'.join(salida))
 PY
 su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -f $DATA/viejo.sql" > /dev/null 2>&1
+
+# LA RLS DE VERDAD DE `profiles`.
+#
+# La activa `fix-supabase.sql`, en la raíz, y esta prueba no lo cargaba. O sea
+# que en la base de prueba `profiles` no tenía RLS: cualquier afirmación de
+# «un cliente no lee la ficha de otro» salía verde porque faltaba la RLS, no
+# porque la política funcionara. Se extraen de ese archivo, no se copian.
+python3 - << 'PY' > "$DATA/rls.sql"
+import re
+t = open('fix-supabase.sql', encoding='utf-8').read()
+# Solo lo que toca `profiles`: activar RLS y sus políticas.
+salida = ['alter table profiles enable row level security;']
+for m in re.finditer(r'(CREATE POLICY[\s\S]*?;)', t, re.I):
+    if re.search(r'\bON\s+(public\.)?profiles\b', m.group(1), re.I):
+        salida.append(m.group(1))
+print('\n'.join(salida))
+PY
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -f $DATA/rls.sql" > /dev/null 2>&1
 
 # Y las tablas y funciones que Supabase o una migración vieja ya crearon, que
 # las nuevas usan sin crearlas.
@@ -477,6 +505,212 @@ comoSi 'aaaaaaaa-0000-0000-0000-000000000002' \
   "select marcar_servicio('aaaaaaaa-0000-0000-0000-000000000001','instalacion',null);"
 [ $? -ne 0 ]
 marcar $? "y un cliente NO puede marcarse a sí mismo la instalación de \$5.000"
+
+echo ""
+echo "══ el primer día de un cliente nuevo, paso por paso ══"
+#
+# No mira funciones sueltas: hace la secuencia completa que hace un cliente
+# recién creado, con el ROL con el que entra la app y con todos los
+# disparadores y políticas puestos. Es donde vivía el bug del 18 de octubre:
+# dos migraciones correctas por separado que juntas se bloquean.
+NUEVO='aaaaaaaa-0000-0000-0000-000000000009'
+psqlq << SQL > /dev/null 2>&1
+insert into auth.users (id, email) values ('$NUEVO','nuevo@prueba') on conflict do nothing;
+insert into profiles (id, nombre, rol, fecha_inicio, onboarding_completed)
+  values ('$NUEVO','Cliente Nuevo','cliente', current_date, false)
+  on conflict (id) do update set onboarding_completed = false;
+SQL
+marcar $? "la ficha del cliente nuevo entra con el onboarding sin cerrar"
+
+# 1 · El equipo le marca el escalón y su ventana. Es lo que hace el alta.
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select marcar_servicio('$NUEVO','ascenso',null);"
+marcar $? "el equipo le marca su escalón desde el alta"
+
+# 2 · CIERRA SU ONBOARDING. Esta es la escritura que decide si vuelve a ver el
+#     wizard: App.tsx dibuja el wizard cuando `onboarding_completed` es false.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+update profiles set onboarding_completed = true, status = 'ACTIVE' where id = '$NUEVO';
+SQL
+CERRO=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select onboarding_completed from profiles where id = '$NUEVO';
+SQL
+)
+[ "$CERRO" = "t" ]
+marcar $? "el cliente cierra su propio onboarding: si no, vuelve a ver el wizard para siempre ($CERRO)"
+
+# 3 · Su especialidad, que decide con qué palabra le habla la app.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+update profiles set especialidad = 'Coach', pais = 'EC' where id = '$NUEVO';
+SQL
+ESP=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select coalesce(especialidad,'SIN GUARDAR') from profiles where id = '$NUEVO';
+SQL
+)
+[ "$ESP" = "Coach" ]
+marcar $? "guarda su especialidad: de ahí sale si le hablamos de pacientes o de consultantes ($ESP)"
+
+# 4 · Su antesala: el protocolo que diseña él, antes de la sesión 1.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+update profiles set antesala = '{"protocolo":[{"area":"sueno","loQueHago":"Apago la luz a las 23:30"}],"dias":["2026-10-15"]}'::jsonb
+ where id = '$NUEVO';
+SQL
+ANT=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select coalesce(jsonb_array_length(antesala->'dias')::text,'SIN GUARDAR')
+  from profiles where id = '$NUEVO';
+SQL
+)
+[ "$ANT" = "1" ]
+marcar $? "tilda su primer día de antesala, y queda guardado ($ANT)"
+
+# 5 · Cierra su primera jornada del Camino.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+insert into hoja_de_ruta (usuario_id, pilar_numero, meta_codigo, completada, fecha_completada)
+  values ('$NUEVO', 1, 'P1.1', true, current_date)
+  on conflict (usuario_id, pilar_numero, meta_codigo) do update set completada = true;
+SQL
+JOR=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from hoja_de_ruta where usuario_id = '$NUEVO' and completada;
+SQL
+)
+[ "$JOR" = "1" ]
+marcar $? "cierra su primera jornada y queda en su hoja de ruta ($JOR)"
+
+# 6 · Le escribe al equipo por Soporte. Vale para los tres escalones.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+insert into mensajes (canal, emisor_id, contenido) values ('privado','$NUEVO','no me abre el día 2');
+SQL
+MSG=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from mensajes where emisor_id = '$NUEVO';
+SQL
+)
+[ "$MSG" = "1" ]
+marcar $? "le escribe al equipo por Soporte y el mensaje llega ($MSG)"
+
+# 7 · Y el equipo lo ve en su bandeja: sin esto, nadie se enteraría.
+ESPERA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from mensajes
+ where canal = 'privado' and receptor_id is null and respondido_en is null
+   and emisor_id = '$NUEVO';
+SQL
+)
+[ "$ESPERA" = "1" ]
+marcar $? "y aparece en la bandeja del equipo como alguien esperando respuesta ($ESPERA)"
+
+# 8 · Su evidencia: la sube, la IA la juzga, y el veredicto queda.
+comoSi "$NUEVO" \
+  "select guardar_veredicto_ia('evidencias/$NUEVO/P1.6/1.jpg','$NUEVO','P1.6','aprobada','Se ve el fuego');"
+marcar $? "sube su evidencia y el veredicto del testigo queda guardado"
+
+# 9 · Un cliente NO lee la ficha de otro. Es la puerta de todo lo demás.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+SQL
+AJENA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA -c \"set role authenticated\" -c \"select count(*) from profiles where id = 'aaaaaaaa-0000-0000-0000-000000000001'\"" | tail -1)
+[ "$AJENA" = "0" ]
+marcar $? "un cliente no lee la ficha de otro cliente (filas: $AJENA)"
+
+PROPIA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA -c \"set role authenticated\" -c \"select count(*) from profiles where id = '$NUEVO'\"" | tail -1)
+[ "$PROPIA" = "1" ]
+marcar $? "y sí lee la suya, que es de donde sale toda su pantalla ($PROPIA)"
+
+# 10 · No se cambia a sí mismo lo que compró.
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select '$NUEVO'::uuid \$\$;
+set role authenticated;
+update profiles set servicio_contratado = 'instalacion' where id = '$NUEVO';
+SQL
+ESCALON=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select servicio_contratado from profiles where id = '$NUEVO';
+SQL
+)
+[ "$ESCALON" = "ascenso" ]
+marcar $? "y no se asciende solo a la instalación de 5.000 ($ESCALON)"
+
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -c 'reset role'" > /dev/null 2>&1
+
+echo ""
+echo "══ a quién se le ofrece migrarse ══"
+#
+# `estado_de_migraciones` comprobaba que quien pregunta sea del equipo y
+# devolvía TODAS las fichas, las del equipo incluidas. Así que la pantalla
+# mostraba a Lupe con cero de cinco piezas y un botón para migrarla.
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' "select 1;"
+EQUIPO_EN_LISTA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from estado_de_migraciones()
+ where cliente_id = 'bbbbbbbb-0000-0000-0000-000000000001';
+SQL
+)
+[ "$EQUIPO_EN_LISTA" = "0" ]
+marcar $? "el equipo no se lista: no se migra (filas de Lupe: $EQUIPO_EN_LISTA)"
+
+CLIENTES_EN_LISTA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select count(*) from estado_de_migraciones()
+ where cliente_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$CLIENTES_EN_LISTA" = "1" ]
+marcar $? "y los clientes sí (filas del cliente: $CLIENTES_EN_LISTA)"
+
+# La llave: la abre el equipo, y el cliente la lee en su propia ficha.
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select habilitar_migracion(cliente => 'aaaaaaaa-0000-0000-0000-000000000001', habilitar => true);"
+marcar $? "el equipo le abre la migración con los nombres que usa el alta"
+
+ABIERTA=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select migracion_habilitada from profiles
+ where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$ABIERTA" = "t" ]
+marcar $? "y queda abierta, que es lo que le hace aparecer la tarjeta en su HOY ($ABIERTA)"
+
+# Un cliente no se abre la migración a sí mismo ni se la abre a otro.
+comoSi 'aaaaaaaa-0000-0000-0000-000000000002' \
+  "select habilitar_migracion(cliente => 'aaaaaaaa-0000-0000-0000-000000000002', habilitar => true);"
+[ $? -ne 0 ]
+marcar $? "un cliente NO se abre la migración a sí mismo"
+
+# Y el cierre lo firma el propio cliente, desde su pantalla.
+comoSi 'aaaaaaaa-0000-0000-0000-000000000001' "select cerrar_mi_migracion();"
+marcar $? "el cliente cierra su propia migración al guardar"
+
+MIGRADO=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select case when migrado_en is null then 'SIN MIGRAR' else 'migrado' end
+  from profiles where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+)
+[ "$MIGRADO" = "migrado" ]
+marcar $? "y queda fechado: es lo que hace que la tarjeta deje de aparecerle ($MIGRADO)"
+
+# EL CANDADO NO SE AFLOJÓ. La excepción vale solo cuando la escritura viene
+# de la función: un update a mano desde el navegador rebota igual que antes.
+comoSi 'aaaaaaaa-0000-0000-0000-000000000002' \
+  "select habilitar_migracion(cliente => 'aaaaaaaa-0000-0000-0000-000000000002', habilitar => true);"
+comoSi 'bbbbbbbb-0000-0000-0000-000000000001' \
+  "select habilitar_migracion(cliente => 'aaaaaaaa-0000-0000-0000-000000000002', habilitar => true);"
+su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -v ON_ERROR_STOP=1" << SQL > /dev/null 2>&1
+create or replace function auth.uid() returns uuid language sql stable as \$\$ select 'aaaaaaaa-0000-0000-0000-000000000002'::uuid \$\$;
+set role authenticated;
+update profiles set migrado_en = now() where id = 'aaaaaaaa-0000-0000-0000-000000000002';
+SQL
+A_MANO=$(su postgres -c "psql -h $SOCK -p $PORT -U postgres -tA" << SQL
+select case when migrado_en is null then 'rebotó' else 'PASÓ' end
+  from profiles where id = 'aaaaaaaa-0000-0000-0000-000000000002';
+SQL
+)
+[ "$A_MANO" = "rebotó" ]
+marcar $? "y marcarse migrado a mano sigue rebotando: la excepción es solo para la función ($A_MANO)"
 
 echo ""
 echo "══ el veredicto de la evidencia ══"

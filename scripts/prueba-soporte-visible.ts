@@ -117,7 +117,10 @@ ok(/hidden md:flex w-12 h-12/.test(topbar),
   'el salvavidas de arriba queda solo en pantalla grande, donde hay lugar de sobra');
 ok(/soporteSinLeer > 0/.test(topbar),
   'y ahí sigue llevando el contador');
-ok(/id: 'miclinica'/.test(topbar), 'Mi Clínica se llega desde el menú de arriba');
+// Los destinos se mudaron de la barra a `destinos.ts`, que es de donde la
+// barra los lee. La prueba seguía mirando el archivo viejo.
+ok(/id: 'miclinica'/.test(readFileSync('src/lib/destinos.ts', 'utf-8')),
+  'Mi Clínica es uno de los destinos del menú de arriba');
 
 // ── 3 · Mi Clínica, explicada antes de mandarlo ────────────────────────────
 console.log('\n══ las dos llaves ══');
