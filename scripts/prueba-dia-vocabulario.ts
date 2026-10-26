@@ -64,7 +64,14 @@ const casos = [mensajeDeRitmo(71, 12, 42), mensajeDeRitmo(15, 13, 2), mensajeDeR
 ok(casos[0].tono === 'lejos' && casos[1].tono === 'cerca' && casos[2].tono === 'al_dia' && casos[3].tono === 'al_dia', 'tonos: lejos / cerca / al día / al día');
 const negativas = /atr[aá]s|atras(o|ado)|no vas|te atrasaste|perdiste/i;
 ok(casos.every((c) => !negativas.test(c.texto)), 'ningún mensaje dice "atrás", "atraso" ni "perdiste"');
-ok(casos[0].texto.includes('día 12') && casos[0].texto.includes('Día 71'), 'el mensaje dice qué paso toca y en qué día está');
+/*
+ * Antes era «Día 71 de 90 · tu próximo paso es el del día 12»: los dos números
+ * son ciertos —uno es el calendario, el otro el avance— pero en el mismo
+ * renglón y sin nombrar cuál es cuál se leen como una contradicción. Ahora
+ * primero va el paso, que es lo que puede hacer hoy, y los días de contexto.
+ */
+ok(casos[0].texto.includes('día 12') && casos[0].texto.includes('71 días'),
+  'el mensaje dice primero qué paso toca y después cuántos días lleva');
 ok(casos.every((c) => c.texto.length <= 110), 'cada mensaje entra en tres líneas de teléfono (≤110 caracteres)');
 
 console.log('\n── los pilares se abren por el camino, no quedan todos cerrados ──');

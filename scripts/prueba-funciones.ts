@@ -51,14 +51,14 @@ const conHito = tabla({
   hitos: [hito('instalacion', 100)],
 });
 linea(de(conHito, 'instalacion').lectura.includes('haber construido algo'),
-  'si bajó Y hay un hito declarado: es el negocio escalando');
+  'si bajó Y hay un hito declarado: es el negocio creciendo');
 
 const sinHito = tabla({
   estaSemana: [obs('instalacion', 200)],
   semanasAnteriores: [[obs('instalacion', 320)], [obs('instalacion', 310)]],
 });
 linea(sinHito.find((x) => x.funcion === 'instalacion')!.lectura.includes('aritmética'),
-  'si bajó y nadie declaró nada: puede ser que una instalación terminó, y eso no escala');
+  'si bajó y nadie declaró nada: puede ser que una instalación terminó, y eso no crece');
 
 console.log('\n══ la verificación que hace valer la declaración ══');
 const declaradoSinEfecto = tabla({
@@ -121,7 +121,7 @@ linea(tabla({ estaSemana: [], semanasAnteriores: [], clientesActivos: 0 })
   'sin clientes no divide por cero');
 
 console.log('\n══ el titular de la reunión ══');
-linea(tituloDeLaSemana(conHito).includes('el negocio escalando'),
+linea(tituloDeLaSemana(conHito).includes('el negocio creciendo'),
   `bajó con hito: "${tituloDeLaSemana(conHito)}"`);
 linea(tituloDeLaSemana(sinHito).includes('antes de festejarlo'),
   `bajó sin hito: "${tituloDeLaSemana(sinHito)}"`);

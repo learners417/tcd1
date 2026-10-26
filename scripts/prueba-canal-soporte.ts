@@ -41,6 +41,7 @@ const admin = leer('src/pages/Admin.tsx');
 const cerebro = leer('src/lib/cerebroStorage.ts');
 const avisos = leer('src/lib/notifications.ts');
 const topbar = leer('src/components/Topbar.tsx');
+const destinos = leer('src/lib/destinos.ts');
 const sidebar = leer('src/components/Sidebar.tsx');
 const tipos = leer('src/lib/supabase.ts');
 const mig = leer('supabase/migrations/20261009_canal_unico_soporte.sql');
@@ -84,8 +85,15 @@ ok(/'\/mensajes': 'mensajes'/.test(topbar),
   'el aviso de «te respondieron» lleva a la conversación, no al tablero');
 ok(!/oculto hasta que esté usable/.test(topbar),
   'ya no queda nada comentado con «oculto hasta que esté usable»');
-ok(/id: 'mensajes', label: 'Soporte'/.test(topbar),
-  'está en el buscador');
+/*
+ * El buscador se mudó: los destinos ya no se escriben en la barra, viven en
+ * `destinos.ts` y la barra los lee de ahí. Y el canal dejó de llamarse
+ * «Soporte» —una palabra de mesa de ayuda— para llamarse «Acompañamiento»,
+ * que es lo que el programa promete. Esta prueba miraba el archivo viejo y
+ * la palabra vieja: marcaba rojo con el canal funcionando.
+ */
+ok(/id: 'mensajes', label: 'Acompañamiento'/.test(destinos),
+  'está en el buscador, con el nombre que usa el programa');
 ok(/setCurrentPage\('mensajes'\)/.test(topbar) && /LifeBuoy/.test(topbar),
   'y hay un botón fijo en la barra de arriba, visible en todas las pantallas y también en el teléfono');
 
