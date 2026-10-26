@@ -110,9 +110,9 @@ export async function rotateSummaryIfNeeded(
     .map((m) => `${m.role === 'user' ? 'Sanador' : 'Javo'}: ${m.content}`)
     .join('\n\n');
 
-  const prompt = `Resumí estos ${ROTATION_THRESHOLD} mensajes de una conversación entre Javo (coach) y un sanador en formación TCD. Tu salida son 5-7 bullets cortos · sin emojis · sin palabrería. Cubrí: qué se charló · qué quedó pendiente · contexto emocional · decisiones tomadas.
+  const prompt = `Resume estos ${ROTATION_THRESHOLD} mensajes de una conversación entre Javo (el Mentor) y un sanador en formación TCD. Tu salida son 5-7 bullets cortos · sin emojis · sin palabrería. Cubre: qué se charló · qué quedó pendiente · contexto emocional · decisiones tomadas.
 
-${state.summary ? `RESUMEN PREVIO (incorporalo si sigue vigente):\n${state.summary}\n\n` : ''}MENSAJES NUEVOS:
+${state.summary ? `RESUMEN PREVIO (incorpóralo si sigue vigente):\n${state.summary}\n\n` : ''}MENSAJES NUEVOS:
 ${ventanaTexto}
 
 RESUMEN ACTUALIZADO:`;

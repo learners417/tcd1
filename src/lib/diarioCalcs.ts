@@ -42,22 +42,20 @@ export const TAREAS_TAGS: readonly TareaTag[] = [
 export interface CheckeoChip {
   id: string;
   label: string;
-  /** Emoji para la UI. */
-  emoji: string;
   /** true = aporta bienestar (suma); false = resta (ansiedad, soledad). */
   positivo: boolean;
 }
 
 /** Checkeos rápidos — chips opcionales que alimentan el Índice de bienestar. */
 export const CHECKEOS_CHIPS: readonly CheckeoChip[] = [
-  { id: 'durmio_bien', label: 'Dormí bien', emoji: '🌙', positivo: true },
-  { id: 'comio_bien', label: 'Comí bien', emoji: '🥗', positivo: true },
-  { id: 'entreno', label: 'Entrené', emoji: '💪', positivo: true },
-  { id: 'tiempo_libre', label: 'Tiempo libre', emoji: '⏱', positivo: true },
-  { id: 'conecto_alguien', label: 'Conecté con alguien', emoji: '👥', positivo: true },
-  { id: 'inspirado', label: 'Me sentí inspirado', emoji: '💡', positivo: true },
-  { id: 'ansioso', label: 'Estuve ansioso', emoji: '😟', positivo: false },
-  { id: 'solo', label: 'Me sentí solo', emoji: '🫥', positivo: false },
+  { id: 'durmio_bien', label: 'Dormí bien', positivo: true },
+  { id: 'comio_bien', label: 'Comí bien', positivo: true },
+  { id: 'entreno', label: 'Entrené', positivo: true },
+  { id: 'tiempo_libre', label: 'Tiempo libre', positivo: true },
+  { id: 'conecto_alguien', label: 'Conecté con alguien', positivo: true },
+  { id: 'inspirado', label: 'Me sentí inspirado', positivo: true },
+  { id: 'ansioso', label: 'Estuve ansioso', positivo: false },
+  { id: 'solo', label: 'Me sentí solo', positivo: false },
 ] as const;
 
 export const CHECKEOS_POSITIVOS_TOTAL = CHECKEOS_CHIPS.filter((c) => c.positivo).length;
@@ -213,7 +211,7 @@ export function etiquetaEnergia(valor: number): string {
 
 /** Color del fill de un slider de dimensión: ≤4 naranja, 5–7 dorado, 8+ verde. */
 export function colorDimension(valor: number): string {
-  if (valor <= 4) return '#E09040';
-  if (valor <= 7) return '#C8893A';
+  if (valor <= 4) return 'var(--oro-t, #74551C)';
+  if (valor <= 7) return 'var(--oro, #B0822E)';
   return '#2DD4A0';
 }

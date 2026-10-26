@@ -171,6 +171,11 @@ export function loQueLeDimos(c: CierreDeCuentas): string {
   if (c.cumplimosNuestraParte) {
     return `${c.sesionesDadas} de ${c.sesionesPrometidas} sesiones dadas. Cumplimos.`;
   }
-  return `${c.sesionesDadas} de ${c.sesionesPrometidas} sesiones dadas: faltan ${faltan}. `
-    + 'Con esto la garantía corre a nuestro cargo.';
+  /*
+   * Solo el dato. La conclusión —que la garantía corre a nuestro cargo— la
+   * dice `veredictoDeGarantia` tres líneas más abajo en la misma pantalla, y
+   * decirla dos veces seguidas con distintas palabras suena a que se está
+   * justificando algo.
+   */
+  return `${c.sesionesDadas} de ${c.sesionesPrometidas} sesiones dadas: faltan ${faltan}.`;
 }

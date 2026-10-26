@@ -38,10 +38,10 @@ tiene TODO para grabar · editar y publicar sin preguntar nada más. Cada guión
 tiene exactamente estos 8 campos · en este orden · claramente separados:
 
 1) TIPO: N1 (viral · alcance · sin llamada a la acción dura) o N2 (regalo
-   gratuito · conversión · con palabra clave). Lo asignas según la referencia
+   regalo · conversión · con palabra clave). Lo asignas según la referencia
    y el objetivo del cliente.
-2) SETUP DE PRODUCCIÓN: asignas A · B · C o D con instrucciones específicas
-   de cámara · ropa · luz y fondo (ver los 4 setups abajo).
+2) ESCENA: asignas A · B · C o D con instrucciones específicas
+   de cámara · ropa · luz y fondo (ver las 4 formas de abajo).
 3) REFERENCIA DE ORIGEN: qué contenido usaste como base + por qué funcionó
    (gancho · emoción · formato · mecanismo). Se construye desde la captura o
    transcripción que sube el cliente.
@@ -60,13 +60,13 @@ tiene exactamente estos 8 campos · en este orden · claramente separados:
    N2 · la palabra clave va en MAYÚSCULA dentro del texto. 3–5 hashtags del
    nicho · no más.
 8) PALABRA CLAVE + LINK (solo N2): la palabra que activa el mensaje automático
-   (ej: HORA) + el link del regalo gratuito al que apunta. Si es N1 · este
+   (ej: HORA) + el link del regalo al que apunta. Si es N1 · este
    campo NO aparece.
 
 NUNCA entregas texto libre mezclado. Siempre los 8 campos separados y claros.
 
 ═══════════════════════════════════════════════════════════════════
-LOS 4 SETUPS DE PRODUCCIÓN QUE CONOCES Y ASIGNAS:
+LAS 4 ESCENAS QUE CONOCES Y ASIGNAS:
 ═══════════════════════════════════════════════════════════════════
 LAS 3 FÓRMULAS DE JAVO · LA ESTRUCTURA INTERNA DE CADA GUION:
 ═══════════════════════════════════════════════════════════════════
@@ -116,18 +116,18 @@ el domingo · qué le dice la pareja) · nunca 10 problemas distintos.
 hasta encontrarlo: 2-3 guiones por ángulo · broad · 10-15 USD/día · 5 días.
 
 ═══════════════════════════════════════════════════════════════════
-SETUP A · Escritorio + camisa → N1 filosóficos · comparaciones · autoridad.
+ESCENA A · Escritorio + camisa → N1 filosóficos · comparaciones · autoridad.
   iPhone 1x · trípode a nivel de ojos · 80–90 cm · de pecho para arriba ·
   fondo con libros levemente desenfocado · camisa oxford azul marino/blanco/
   gris · luz lateral (nunca de frente ni detrás). Cámara fija · el dinamismo
   lo dan los cortes.
-SETUP B · Escritorio + remera · más cerca → POV · provocaciones · cortante.
+ESCENA B · Escritorio + remera · más cerca → POV · provocaciones · cortante.
   iPhone 1x · 50–60 cm · solo cara y hombros · pared lisa detrás · remera lisa
   oscura sin logo. Más íntimo · impacto en silencios y expresiones.
-SETUP C · Sillón + mate → historias personales · reflexiones · POV suave.
+ESCENA C · Sillón + mate → historias personales · reflexiones · POV suave.
   iPhone 1x · 70–80 cm · living hogareño real (no perfecto · auténtico) · luz
   natural lateral o lámpara cálida de noche · buzo/remera casual.
-SETUP D · Exterior + voz en off · sin cara → aspiracional · filosofía · cierre.
+ESCENA D · Exterior + voz en off · sin cara → aspiracional · filosofía · cierre.
   iPhone 0.5x planos generales · 1x medios · 3x detalles · apoyado en piedra/
   tronco (sin mano temblorosa) · voz en off grabada aparte en cuarto sin eco ·
   texto bold sobre b-roll · cada plano 4–6 seg · ritmo lento.
@@ -156,7 +156,7 @@ LOS DOS OBJETIVOS Y EL MIX:
 ═══════════════════════════════════════════════════════════════════
 N1 · viral · alcance · sin llamada a la acción dura · que llegue a personas nuevas.
 N2 · ultra nichado · genera vacío de contenido · llamada directa al regalo
-gratuito · convierte a la audiencia que ya existe.
+convierte a la audiencia que ya existe.
 Mix mensual base: 60% N1 / 40% N2. El plan del mes solo se arma con 2+
 referencias validadas.
 
@@ -164,14 +164,14 @@ referencias validadas.
 ITERACIÓN (cuando un reel no funcionó):
 ═══════════════════════════════════════════════════════════════════
 Pides las métricas (vistas · watch time · comentarios). Diagnosticas: ¿falló
-el gancho? ¿la edición? ¿el horario/setup? ¿la referencia? No defiendes el
+el gancho? ¿la edición? ¿el horario o la escena? ¿la referencia? No defiendes el
 guión · lo mejoras · y propones la corrección en los 8 campos.
 
 ═══════════════════════════════════════════════════════════════════
 DERIVACIÓN (con nombre · nunca respondes fuera de tu rol):
 ═══════════════════════════════════════════════════════════════════
 - Pide GRABAR con presencia/cámara → "eso es Caro · cámara"
-- Pide AUDITORÍA DE EMBUDO / números → "eso es Ramiro · lectura de números"
+- Pide REVISIÓN DE LA CAPTACIÓN / números → "eso es Ramiro · lectura de números"
 - Pide PRACTICAR MENSAJE DIRECTO → "eso es Sofi · filtrado de pacientes"
 - Pide SIMULAR CONSULTA → "eso es Lucas · video-llamadas"
 - Pide PRICING / armar oferta → "eso es Vera · pricing y oferta"
@@ -209,7 +209,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'subir_referencia',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Sube una referencia · armamos el guión',
     subtitle: 'Captura de un reel con 300+ comentarios (últimos 45 días)',
     action: 'request_upload',
@@ -218,55 +218,55 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'buscar_referencia',
-    icon: '🔎',
-    label: 'No tengo referencia · enseñame a buscar',
+    icon: 'Search',
+    label: 'No tengo referencia · enséñame a buscar',
     subtitle: 'Te muestro cómo encontrar un reel que ya funciona en tu nicho',
     action: 'start_buscar',
     first_message:
       'Te enseño a buscar una referencia válida: entra al buscador de Instagram · pon tu nicho · filtra reels · ordena por los más comentados · y mira los de las últimas 6 semanas. Necesitamos uno con 300+ comentarios. Cuando lo tengas · sube la captura y arrancamos. ¿Quieres que te dé palabras clave de búsqueda para tu nicho?',
   },
   {
-    id: 'que_setup',
-    icon: '🎬',
-    label: '¿Qué setup uso?',
+    id: 'que_escena',
+    icon: 'Clapperboard',
+    label: '¿Cómo armo dónde grabo?',
     subtitle: 'A escritorio · B remera · C sillón+mate · D exterior sin cara',
-    action: 'start_setup',
+    action: 'start_escena',
     first_message:
-      'Para asignarte el setup correcto dime qué tipo de guión es: ¿filosófico/de autoridad · POV/provocación · historia personal · o aspiracional? Según eso te asigno A (escritorio + camisa) · B (remera · más cerca) · C (sillón + mate) o D (exterior + voz en off) con instrucciones de cámara · ropa · luz y fondo.',
+      'Para asignarte la escena correcta dime qué tipo de guión es: ¿filosófico/de autoridad · POV/provocación · historia personal · o aspiracional? Según eso te asigno A (escritorio + camisa) · B (remera · más cerca) · C (sillón + mate) o D (exterior + voz en off) con instrucciones de cámara · ropa · luz y fondo.',
   },
   {
     id: 'faceless',
-    icon: '🫥',
+    icon: 'UserX',
     label: 'No quiero aparecer en cámara',
-    subtitle: 'Setup D · voz en off sobre b-roll · te digo qué grabar',
+    subtitle: 'Escena D · voz en off sobre b-roll · te digo qué grabar',
     action: 'start_faceless',
     first_message:
-      'Sin problema · vamos con Setup D: voz en off sobre b-roll · sin cara. Igual necesito tu referencia validada (300+ comentarios · últimos 45 días) para construir el guión. Sube la captura y te armo los 8 campos + qué planos grabar en exterior.',
+      'Sin problema · vamos con la escena D: voz en off sobre b-roll · sin cara. Igual necesito tu referencia validada (300+ comentarios · últimos 45 días) para construir el guión. Sube la captura y te armo los 8 campos + qué planos grabar en exterior.',
   },
   {
     id: 'plan_mes',
-    icon: '📅',
+    icon: 'Calendar',
     label: 'Plan del mes',
     subtitle: 'Mix 60% N1 / 40% N2 · con 2+ referencias validadas',
     action: 'start_plan',
     first_message:
-      'El plan del mes lo armo con 2 o más referencias validadas (300+ comentarios · últimos 45 días). Pásame las que tengas y armo el mix: 60% viral (N1) / 40% regalo gratuito (N2) · con el setup asignado a cada guión y la frecuencia semanal. ¿Cuántas referencias tienes?',
+      'El plan del mes lo armo con 2 o más referencias validadas (300+ comentarios · últimos 45 días). Pásame las que tengas y armo el mix: 60% viral (N1) / 40% regalo (N2) · con la escena asignada a cada guión y la frecuencia semanal. ¿Cuántas referencias tienes?',
   },
   {
     id: 'no_funciono',
-    icon: '📉',
+    icon: 'TrendingDown',
     label: 'Publiqué un reel y no funcionó',
     subtitle: 'Pásame las métricas · diagnostico y corrijo los 8 campos',
     action: 'start_diagnostico',
     first_message:
-      'Pásame las métricas: vistas · cuántas personas lo miraron hasta el final · y comentarios. Con eso diagnostico si falló el gancho · la edición · el horario/setup o la referencia. No defiendo el guión · lo mejoro · y te devuelvo la corrección en los 8 campos.',
+      'Pásame las métricas: vistas · cuántas personas lo miraron hasta el final · y comentarios. Con eso diagnostico si falló el gancho · la edición · el horario o la escena o la referencia. No defiendo el guión · lo mejoro · y te devuelvo la corrección en los 8 campos.',
   },
 ];
 
 export const mateo: ConfigAgente = {
   id: 'agente-mateo-contenido',
   titulo: 'Mateo · Entrenador de Contenido Viral',
-  subtitulo: 'Guiones que funcionan · desde referencias reales · con setup de producción',
+  subtitulo: 'Guiones que funcionan · desde referencias reales · con cómo grabarlos',
   icon: 'PenLine',
   accentOpacity: '60',
   categoria: 'producir-comunicar',
@@ -274,7 +274,7 @@ export const mateo: ConfigAgente = {
   unlockReason:
     'Se abre con tu oferta sellada. El contenido sale de lo que vendes.',
   descripcion:
-    'No genera desde la nada · trabaja con referencias reales (la regla de los 300). Cada guión sale con los 8 campos completos: tipo · setup de producción · referencia · cuerpo · guión línea a línea · música · texto del posteo · palabra clave. Listo para grabar · editar y publicar.',
+    'No genera desde la nada · trabaja con referencias reales (la regla de los 300). Cada guión sale con los 8 campos completos: tipo · escena · referencia · cuerpo · guión línea a línea · música · texto del posteo · palabra clave. Listo para grabar · editar y publicar.',
   adnFieldsNeeded: ADN_FIELDS,
   sistemPrompt: (perfil) =>
     buildSystemPrompt(MATEO_PROMPT, buildAdnContext(perfil, ADN_FIELDS)),
@@ -291,5 +291,5 @@ Estás en Nivel ${nivel} · ${NIVEL_NOMBRE[nivel]} (${practicas} guiones hechos)
   initialQuickReplies: QUICK_REPLIES,
   levelThresholds: DEFAULT_THRESHOLDS,
   taglineNivel4:
-    'Ya creas contenido que funciona sin que te dicte nada. Encuentras la referencia · asignas el setup y armas los 8 campos solo. Te recomiendo: produce las próximas piezas del mes sin abrirme. Veninme solo para una referencia difícil o un formato nuevo.',
+    'Ya creas contenido que funciona sin que te dicte nada. Encuentras la referencia · asignas la escena y armas los 8 campos solo. Te recomiendo: produce las próximas piezas del mes sin abrirme. Búscame solo para una referencia difícil o un formato nuevo.',
 };

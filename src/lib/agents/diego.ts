@@ -36,7 +36,7 @@ desalineación promesa↔producto · construir de abajo hacia arriba.
 ═══════════════════════════════════════════════════════════════════
 TU HERRAMIENTA ESTRELLA · LA FÁBRICA DE PÁGINAS (HTML listo · no teoría):
 ═══════════════════════════════════════════════════════════════════
-Cuando el sanador te pide una página · la FABRICÁS: entregas el archivo HTML
+Cuando el sanador te pide una página · la FABRICAS: entregas el archivo HTML
 COMPLETO en un solo bloque de código · autocontenido (CSS adentro · sin
 dependencias externas salvo la fuente de Google) · listo para subir a su
 hosting o pegar en GHL. Llenas cada plantilla con SU ADN (nombre · método ·
@@ -46,7 +46,7 @@ de fabricar. Estética por defecto: fondo oscuro (#0b0b0b) · un color de
 acento elegido según su marca · tipografía system + una display de Google ·
 mobile-first · UN solo objetivo por página.
 
-LAS 5 PLANTILLAS QUE FABRICÁS:
+LAS 5 PLANTILLAS QUE FABRICAS:
 1) LEAD MAGNET (captura): hook contraintuitivo del dolor · 3 bullets de lo
    que se lleva · formulario o botón a WhatsApp con mensaje precargado ·
    prueba social mínima. UNA promesa · UN botón.
@@ -227,7 +227,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'arrancar_high',
-    icon: '🏗',
+    icon: 'Hammer',
     label: 'Arrancar por el HIGH',
     subtitle: 'Construimos el producto más completo · después recortamos',
     action: 'start_high',
@@ -236,7 +236,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'guion_video',
-    icon: '🎬',
+    icon: 'Clapperboard',
     label: 'Guión del próximo video',
     subtitle: 'Estructura Hormozi · gancho → desarrollo → ejercicio → cierre',
     action: 'start_guion',
@@ -245,7 +245,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'extra_low',
-    icon: '🎟',
+    icon: 'Ticket',
     label: 'Diseñar el Extra Low',
     subtitle: '1 entregable · 1 hoja · revela el problema · no lo resuelve',
     action: 'start_extralow',
@@ -254,7 +254,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'sesion_1a1',
-    icon: '🗓',
+    icon: 'CalendarDays',
     label: 'Estructurar una sesión 1:1',
     subtitle: 'Apertura desde el ejercicio · trabajo profundo · cierre con acción',
     action: 'start_sesion',
@@ -263,7 +263,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'revisar',
-    icon: '📋',
+    icon: 'ClipboardList',
     label: 'Revisar algo que ya hice',
     subtitle: 'Texto · imagen o captura · te marco qué funciona y qué cambiar',
     action: 'request_upload',
@@ -272,7 +272,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'tarea_practica',
-    icon: '🧠',
+    icon: 'Brain',
     label: 'Tarea de práctica',
     subtitle: 'Una tarea real basada en tu método · me la compartes y doy feedback',
     action: 'start_tarea',
@@ -281,14 +281,23 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
 ];
 
-function tieneLas4Ofertas(perfil: Parameters<NonNullable<ConfigAgente['unlockExtraCheck']>>[0]): boolean {
-  const ul = perfil.adn_oferta_ultralow;
-  const ulOk = !!ul && !!ul.nombre && ul.nombre.trim().length > 0;
-  const lowOk = !!perfil.oferta_low && perfil.oferta_low.trim().length > 0;
-  const midOk = !!perfil.oferta_mid && perfil.oferta_mid.trim().length > 0;
-  const highOk = !!perfil.oferta_high && perfil.oferta_high.trim().length > 0;
-  return ulOk && lowOk && midOk && highOk;
-}
+/*
+ * ═══ POR QUÉ ACÁ NO HAY CONDICIÓN EXTRA ═══
+ *
+ * Diego pedía cuatro columnas del perfil —oferta ultralow, low, mid y high—
+ * y ninguna jornada del Camino las escribe: quedaron de la versión anterior
+ * del método. Resultado: Diego no se abría nunca. El cliente tocaba, leía
+ * «se abre al cerrar tu jornada del día 9», cerraba el día 9, y seguía
+ * bloqueado.
+ *
+ * Y la prueba que debía cazarlo verificaba que Diego APARECIERA cerca de su
+ * día, sin evaluar jamás si se podía abrir. Pasaba en verde.
+ *
+ * El desbloqueo correcto ya existe y sale del seed: `claveDesbloqueoAgente`
+ * devuelve la jornada donde el entrenador aparece por primera vez —la que
+ * exige su evidencia— y se abre al cerrarla. Para Diego es el día 9, que es
+ * exactamente lo que su mensaje promete.
+ */
 
 export const diego: ConfigAgente = {
   id: 'agente-diego-producto',
@@ -298,7 +307,6 @@ export const diego: ConfigAgente = {
   accentOpacity: '60',
   categoria: 'producir-comunicar',
   unlockPilares: ['P8'],
-  unlockExtraCheck: (perfil) => tieneLas4Ofertas(perfil),
   unlockReason:
     'Se abre al cerrar tu jornada del día 9, donde nace tu método. Antes de eso Diego construiría en el vacío.',
   descripcion:

@@ -16,7 +16,7 @@
  * que se abren POR FECHA, y cada una habilita una cosa distinta. Esa
  * diferencia es el método entero: con presupuestos chicos la variación diaria
  * es enorme, y apagar el día malo es el error más caro que existe. El freno
- * F-14DIAS del Camino cierra la sesión de escalar y apagar del día 31 al 45
+ * F-14DIAS del Camino cierra la sesión de hacer crecer y apagar del día 31 al 45
  * justamente por eso.
  *
  * Así que a las 48 horas la app no ofrece «optimizar»: dice que la campaña
@@ -111,9 +111,9 @@ export const PUERTAS: Puerta[] = [
   },
   {
     n: 7, tipo: 'ventana', diaQueAbre: 30,
-    titulo: 'Día 30: escalas al ganador',
+    titulo: 'Día 30: haces crecer al ganador',
     queHacer: 'Subes el presupuesto del que ganó, de a poco y sin tocar nada más. Un creativo que ya rindió un mes se gasta: ese es el momento de grabar el siguiente.',
-    queNoTocar: 'Se escala solo el ganador. Subirle el presupuesto a todos es volver al día 1 con más plata por minuto.',
+    queNoTocar: 'Se hace crecer solo el ganador. Subirle el presupuesto a todos es volver al día 1 con más dinero por minuto.',
   },
   {
     n: 8, tipo: 'ventana', diaQueAbre: 30,

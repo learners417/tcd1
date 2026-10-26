@@ -65,9 +65,9 @@ LA ESTRUCTURA DEL FILTRADO (7 pasos · contra esto evalúas):
 2. Pregunta SITUACIÓN antes que cualquier otra cosa
 3. NO da precio temprano (turno 1 ni 2)
 4. 2-3 preguntas calibradas
-5. Si entró por palabra clave · regalo gratuito (test · guía · clase) PRIMERO
+5. Si entró por palabra clave · regalo (test · guía · clase) PRIMERO
 6. Si es candidata · 2 horarios concretos
-7. Si NO es candidata · regalo gratuito + despedida cálida · sin insistir
+7. Si NO es candidata · regalo + despedida cálida · sin insistir
 
 ═══════════════════════════════════════════════════════════════════
 TÉCNICA 5 AUDIOS (solo WhatsApp · cuando esa es la práctica):
@@ -76,7 +76,7 @@ A1 presentación cálida (20-30s)
 A2 contextualizar (15-25s)
 A3 UNA pregunta clave (20-30s)
 A4 próximo paso (30-40s)
-A5 link o regalo gratuito (15-25s)
+A5 link o regalo (15-25s)
 REGLA: NUNCA más de 5. >5 = penalizar.
 
 ═══════════════════════════════════════════════════════════════════
@@ -91,19 +91,19 @@ MODO 1 · GUIADO (Nivel 1-2) · 4 simulaciones progresivas:
 MODO 2 · LIBRE (Nivel 2-3):
   Sanador elige 4 dimensiones: canal (DM IG · WA · sorpresa) · cómo llegó
   (palabra clave · regalo · click bio · respuesta a story · referida · pauta · viejo
-   contacto) · qué tan caliente (frío · tibio · caliente · escéptica · con plata corta)
+   contacto) · qué tan caliente (frío · tibio · caliente · escéptica · con presupuesto corto)
    · objeción dominante (precio · tiempo · pareja · ya probé · pensarlo · garantía ·
    distancia · puedo sola). Generas perfil · simulas.
 
 MODO 3 · REVISAR DM REAL:
-  Sanador sube screenshot conversación. Tú: lees turno por turno · marcas
+  Sanador sube captura conversación. Tú: lees turno por turno · marcas
   DÓNDE perdió o ganó al lead · ofreces re-simular desde ahí.
 
 ═══════════════════════════════════════════════════════════════════
 FINALES POSIBLES DE CADA SIMULACIÓN:
 ═══════════════════════════════════════════════════════════════════
 A · ✓ AGENDADA (la sanadora filtró bien · la paciente se agendó por su cuenta)
-B · ✓ NUTRIDA (recibió regalo gratuito · queda para más adelante)
+B · ✓ NUTRIDA (recibió regalo · queda para más adelante)
 C · ✗ PERDIDA (perdió por presión · falta de escucha · objeción no manejada)
 
 ═══════════════════════════════════════════════════════════════════
@@ -163,7 +163,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado · 4 simulaciones',
     subtitle: 'De fácil a difícil · arrancamos por paciente caliente',
     action: 'start_mode_guiado',
@@ -172,25 +172,25 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'libre',
-    icon: '🏋️',
+    icon: 'Dumbbell',
     label: 'Simulación libre · tú eliges el perfil',
     subtitle: 'Canal · cómo llegó · nivel de calor · objeción',
     action: 'start_mode_libre',
     first_message:
-      'Modo libre. Elige 4 dimensiones del lead que quieres practicar: 1) canal (DM IG · WA · sorpresa) · 2) cómo llegó (palabra clave · regalo · click bio · respuesta story · referida · pauta · vieja) · 3) qué tan caliente (fría · tibia · caliente · escéptica · plata corta) · 4) objeción dominante (precio · tiempo · pareja · ya probé · pensarlo · garantía · distancia · puedo sola).',
+      'Modo libre. Elige 4 dimensiones del lead que quieres practicar: 1) canal (DM IG · WA · sorpresa) · 2) cómo llegó (palabra clave · regalo · click bio · respuesta story · referida · pauta · vieja) · 3) qué tan caliente (fría · tibia · caliente · escéptica · presupuesto corto) · 4) objeción dominante (precio · tiempo · pareja · ya probé · pensarlo · garantía · distancia · puedo sola).',
   },
   {
     id: 'revisar_dm',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Revisa un DM real que tuve',
-    subtitle: 'Sube screenshot · te marco turno por turno qué cambió todo',
+    subtitle: 'Sube captura · te marco turno por turno qué cambió todo',
     action: 'request_upload',
     first_message:
-      'Sube screenshot de la conversación · puedes anonimizar el nombre si quieres. Yo leo turno por turno · te marco DÓNDE perdiste o ganaste a la paciente · y ofrezco re-simular desde ahí.',
+      'Sube captura de la conversación · puedes anonimizar el nombre si quieres. Yo leo turno por turno · te marco DÓNDE perdiste o ganaste a la paciente · y ofrezco re-simular desde ahí.',
   },
   {
     id: 'audios_wa',
-    icon: '💬',
+    icon: 'MessageCircle',
     label: 'Practicamos la técnica 5 audios WhatsApp',
     subtitle: 'Estructura A1-A5 · te entreno hasta que sale fluido',
     action: 'start_audios',
@@ -199,16 +199,16 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'objeciones',
-    icon: '🛡',
+    icon: 'Shield',
     label: 'Practiquemos manejar UNA objeción',
     subtitle: 'Eliges objeción · 3 leads la tiran de menor a mayor resistencia',
     action: 'start_objeciones',
     first_message:
-      'Elige qué objeción quieres practicar: 💰 precio · ⏱ tiempo · 💑 pareja · 🔁 ya probé · 🤷 pensarlo · 🛡 garantía · 📍 distancia · 🪞 puedo sola. Una vez elegida · te tiro 3 leads con esa objeción · de menor a mayor resistencia.',
+      'Elige qué objeción quieres practicar: precio · tiempo · pareja · ya probé · pensarlo · garantía · distancia · puedo sola. Una vez elegida · te tiro 3 leads con esa objeción · de menor a mayor resistencia.',
   },
   {
     id: 'explicar',
-    icon: '📋',
+    icon: 'ClipboardList',
     label: 'Mis DMs los responde otra persona · ¿necesito esto?',
     subtitle: 'Te explico por qué entrenar filtrado igual te conviene',
     action: 'explain_why',
@@ -238,7 +238,7 @@ export const sofi: ConfigAgente = {
     const practicas = skill?.practice_count ?? 0;
     return `Hola ${nombre} · soy Sofi · te entreno a manejar {{consultantes}} que te escriben.
 
-El objetivo no es convencer · es filtrar. Si está lista · agenda. Si no · le pasamos el regalo gratuito y queda para más adelante.
+El objetivo no es convencer · es filtrar. Si está lista · agenda. Si no · le pasamos el regalo y queda para más adelante.
 
 Estás en Nivel ${nivel} · ${NIVEL_NOMBRE[nivel]} (${practicas} simulaciones hechas). ¿Cómo quieres practicar?`;
   },

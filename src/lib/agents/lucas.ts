@@ -29,7 +29,7 @@ o audio transcrito) · activas el Closing Review. Proceso exacto:
 5) EL MENSAJE DE RESCATE: si la llamada quedó abierta · escríbele textual
    el mensaje de seguimiento para mandar HOY (corto · con fecha límite
    amable · sin perseguir).
-Sin material real no hay review: "traeme la llamada · aunque sean tus
+Sin material real no hay review: "tráeme la llamada · aunque sean tus
 notas · sin la llamada real solo puedo darte teoría".
 
 Tu trabajo tiene 2 FASES:
@@ -54,7 +54,7 @@ Lo que tienes son DUDAS CONCRETAS · OBJECIONES REALES · TEMOR DE INVERTIR.
 ═══════════════════════════════════════════════════════════════════
 INPUT MULTIMODAL · LANDING DE LA SANADORA:
 ═══════════════════════════════════════════════════════════════════
-Si sube foto/screenshot de su landing · LEELA con visión · extrae:
+Si sube foto/captura de su landing · LEELA con visión · extrae:
   - Promesa principal · duración · precio · llamada a la acción
   - Testimonios · bonos · garantía si aparece
 El paciente simulado hace preguntas COHERENTES con esa landing. Si NO sube ·
@@ -158,7 +158,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado · 5 consultas progresivas',
     subtitle: 'De fácil a difícil · arrancamos por paciente caliente',
     action: 'start_mode_guiado',
@@ -167,7 +167,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'bloque_enfocado',
-    icon: '⚡',
+    icon: 'Zap',
     label: 'Práctica enfocada de UN bloque de la W',
     subtitle: 'Apertura · dolor · deseo · obstáculo · cierre',
     action: 'start_bloque',
@@ -176,16 +176,16 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'subir_landing',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Sube tu landing · simulemos coherente',
     subtitle: 'Leo tu landing · el paciente simulado actúa como leyó eso',
     action: 'request_upload',
     first_message:
-      'Sube screenshot de tu landing. Yo leo: promesa · duración · precio · llamada a la acción · testimonios · bonos. El paciente simulado va a preguntar lo que esa landing genera. Si la landing dice algo distinto a tu ADN · te lo marco.',
+      'Sube captura de tu landing. Yo leo: promesa · duración · precio · llamada a la acción · testimonios · bonos. El paciente simulado va a preguntar lo que esa landing genera. Si la landing dice algo distinto a tu ADN · te lo marco.',
   },
   {
     id: 'manana_call',
-    icon: '🛡',
+    icon: 'Shield',
     label: 'Mañana tengo una consulta · preparémonos',
     subtitle: 'Una simulación rápida + brief de los 3 momentos clave',
     action: 'start_prep',
@@ -194,8 +194,8 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'explicar_w',
-    icon: '📖',
-    label: 'Enseñame los 5 bloques de la W',
+    icon: 'BookOpen',
+    label: 'Enséñame los 5 bloques de la W',
     subtitle: 'Apertura · máximo dolor · máximo deseo · obstáculo real · cierre',
     action: 'explain_w',
     first_message:
@@ -203,7 +203,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'consulta_perdida',
-    icon: '🔁',
+    icon: 'Repeat',
     label: 'Una consulta que perdí · revisemos qué pasó',
     subtitle: 'Cuéntame qué pasó · armo la simulación de cómo debió haber sido',
     action: 'start_post_mortem',
@@ -220,10 +220,15 @@ export const lucas: ConfigAgente = {
   accentOpacity: '60',
   categoria: 'vender-medir',
   unlockPilares: [],
-  unlockExtraCheck: (perfil) =>
-    typeof perfil.script_venta === 'string' && perfil.script_venta.trim().length > 0,
+  /*
+   * Sin condición extra: pedía `script_venta`, una columna que ninguna
+   * jornada escribe —su único escritor vivía en el catálogo de herramientas,
+   * que está apagado—. Lucas no se abría nunca. El desbloqueo sale del seed,
+   * que lo pone en el día 17: el día en que la agenda queda lista para
+   * recibir llamadas, que es cuando entrenarlas empieza a servir.
+   */
   unlockReason:
-    'Se abre al cerrar tu jornada del día 17, donde escribes tu guion de venta. Con el guion escrito, Lucas lo entrena contigo.',
+    'Se abre el día 17, cuando tu agenda queda lista para recibir llamadas. Con las llamadas andando, Lucas las entrena contigo.',
   descripcion:
     'Simula pacientes en video-llamada con personalidad · trauma · objeciones reales. Te entrena la W: apertura · dolor · deseo · obstáculo · cierre. En 10-15 consultas la W queda como reflejo.',
   adnFieldsNeeded: ADN_FIELDS,

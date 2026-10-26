@@ -125,10 +125,29 @@ export function mensajeDeRitmo(diaHoy: number, diaDelPaso: number | null, atraso
   if (diaDelPaso === null || atrasoHabil <= 0) {
     return { tono: 'al_dia', texto: `Día ${diaHoy} de 90 · vas al día` };
   }
+  /*
+   * DOS NÚMEROS EN UNA FRASE SE LEEN COMO UNA CONTRADICCIÓN.
+   *
+   * Decía «Día 20 de 90 · tu próximo paso es el del día 1». Los dos números
+   * son ciertos —uno es el calendario, el otro el avance— pero puestos así, en
+   * el mismo renglón y sin nombrar cuál es cuál, el cliente lee veinte y uno y
+   * no entiende por cuál va. Ahora primero va lo que puede hacer hoy, que es
+   * su paso, y el calendario queda de contexto, dicho como lo que es.
+   *
+   * Los dos entran en 110 caracteres, que es lo que cabe en tres renglones de
+   * teléfono con la letra al tamaño de la casa: la primera versión de esta
+   * frase se iba a 113 y la prueba la frenó.
+   */
   if (atrasoHabil <= 3) {
-    return { tono: 'cerca', texto: `Día ${diaHoy} de 90 · hoy toca el paso del día ${diaDelPaso}. Con uno por día recuperas el ritmo.` };
+    return {
+      tono: 'cerca',
+      texto: `Hoy toca tu paso del día ${diaDelPaso}. Llevas ${diaHoy} días y con uno por día recuperas el ritmo.`,
+    };
   }
-  return { tono: 'lejos', texto: `Día ${diaHoy} de 90 · tu próximo paso es el del día ${diaDelPaso}. Tu Mentor te arma hoy el plan para llegar al 90.` };
+  return {
+    tono: 'lejos',
+    texto: `Tu próximo paso es el del día ${diaDelPaso}. Llevas ${diaHoy} días — tu Mentor te arma el plan para llegar al 90.`,
+  };
 }
 
 /**
@@ -259,7 +278,15 @@ export function faltaParaLlegar(d: DondeVa, dia: number): string {
   const faltan = Math.max(0, dia - d.diaDeTrabajo);
   if (faltan === 0) return '';
   const sesiones = faltan === 1 ? 'una sesión' : `${faltan} sesiones`;
-  return d.alDia
-    ? `Te faltan ${sesiones} para llegar.`
-    : `Te faltan ${sesiones}. Tu próxima es la del día ${d.diaDeTrabajo}.`;
+  /*
+   * LA FRASE ENTERA SE ARMA ACÁ.
+   *
+   * Antes devolvía «Te faltan 28. Tu próxima es la del día 1», y la pantalla
+   * que la usa la precedía con su propio «Vas por la sesión del día 1»: el
+   * mismo número dicho dos veces en dos frases seguidas, con dos redacciones
+   * distintas. Con la frase completa en un solo lugar no hay dos versiones
+   * del mismo dato que puedan desacordar.
+   */
+  return `Vas por la sesión del día ${d.diaDeTrabajo} y te ${
+    faltan === 1 ? 'falta' : 'faltan'} ${sesiones} para llegar.`;
 }

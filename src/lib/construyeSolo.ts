@@ -69,7 +69,7 @@ export const LO_QUE_MONTA: LoQueMonta[] = [
     piezas: [
       { dia: 16, que: 'Subir tu página y publicarla, con tu subdominio', tutoriales: ['L-05', 'L-06'] },
       { dia: 17, que: 'Tu video en la página, tu formulario de filtro y tu calendario en dos pasos', tutoriales: ['L-07', 'L-08', 'L-09', 'L-10'] },
-      { dia: 25, que: 'Tu bandeja, tu embudo y tus respuestas automáticas', tutoriales: ['L-18', 'L-19'] },
+      { dia: 25, que: 'Tu bandeja, tu captación y tus respuestas automáticas', tutoriales: ['L-18', 'L-19'] },
     ],
     queda: 'Tienes una página publicada que recibe aplicaciones, agenda sola y contesta.',
   },

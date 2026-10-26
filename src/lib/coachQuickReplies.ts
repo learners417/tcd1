@@ -80,7 +80,7 @@ const PILAR_QUICK_REPLIES: Record<PilarId, CoachQuickReply[]> = {
   P8: [
     { id: 'p8_3_ofertas', label: '¿Mis 3 ofertas son coherentes?' },
     { id: 'p8_precio', label: '¿Mi precio sostiene?' },
-    { id: 'p8_lead_magnet', label: '¿Mi regalo gratuito es buen entry?' },
+    { id: 'p8_lead_magnet', label: '¿Mi regalo es buen entry?' },
   ],
   P9A: [
     { id: 'p9a_landing', label: 'Revisar mi landing antes de publicar' },

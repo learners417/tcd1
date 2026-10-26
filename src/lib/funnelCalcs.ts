@@ -154,7 +154,7 @@ export function diagnosticarEmbudo(kpis: FunnelKPIs): Diagnostico[] {
     diagnosticos.push({
       etapa: 'Costo por Venta',
       mensaje: nivel === 'ok' ? 'Buen retorno sobre inversión publicitaria'
-        : nivel === 'alerta' ? 'CPV subiendo. Optimizá el embudo o aumenta el ticket.'
+        : nivel === 'alerta' ? 'CPV subiendo. Optimiza el circuito o aumenta el ticket.'
         : 'CPV insostenible. Necesitas revisar todo el embudo.',
       nivel,
       valor: kpis.cpv,

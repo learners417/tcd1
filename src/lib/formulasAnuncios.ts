@@ -96,7 +96,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       '✗ [TÁCTICA VIEJA 1] — una línea de por qué no alcanza.',
       '✗ [TÁCTICA VIEJA 2] — una línea.',
       '✗ [TÁCTICA VIEJA 3] — una línea.',
-      '«Lo que SÍ necesitas 👉» — 3 puntos numerados, cada uno con una línea del porqué (el QUÉ, no el CÓMO).',
+      '«Lo que SÍ necesitas» — 3 puntos numerados, cada uno con una línea del porqué (el QUÉ, no el CÓMO).',
       'Prueba: [TESTIMONIO O RESULTADO REAL].',
       '«Abre [CUPOS] lugares para [PROGRAMA]. Comenta [PALABRA] y te envío los detalles.»',
     ],
@@ -420,7 +420,7 @@ export const REGLA_URGENCIA =
 /* ══════════════════ EL DM AUTOMÁTICO ══════════════════ */
 
 export const DM_AUTOMATICO = {
-  mensaje: '«¡Buenísimo! Acá tienes todo lo de [PROGRAMA] 👉 [LINK A LA PÁGINA].\nMíralo tranquilo y cuéntame: [PREGUNTA].»',
+  mensaje: '«¡Buenísimo! Acá tienes todo lo de [PROGRAMA]: [LINK A LA PÁGINA].\nMíralo tranquilo y cuéntame: [PREGUNTA].»',
   reglaPregunta: 'La [PREGUNTA] es UNA sola, fácil de contestar, y sobre SU situación — nunca sobre el programa. Ejemplos: «¿hace cuánto vienes con esto?», «¿qué probaste hasta ahora?», «¿es para ti o para tu equipo?».',
   seguimiento: '«¿Pudiste verlo? ¿Qué te quedó dando vueltas?» — a las 24-48 h, solo a quien pidió el link y no avanzó. Un solo seguimiento.',
   reglasPalabra: [
@@ -511,7 +511,7 @@ export function veredictoAnuncio(
   const u = UMBRALES[objetivo];
   const { gasto, visitas, conversaciones, agendas } = d;
   if (!gasto && !visitas && !conversaciones) {
-    return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+    return { estado: 'sin_datos', texto: 'Cargando datos… con más números, el tablero decide.' };
   }
   const base = objetivo === 'perfil' ? visitas : conversaciones;
   const costo = base > 0 ? gasto / base : null;
@@ -540,7 +540,7 @@ export function veredictoAnuncio(
       texto: `$${(gasto / conversaciones).toFixed(2)} por conversación y agenda. Este queda.`,
     };
   }
-  return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+  return { estado: 'sin_datos', texto: 'Cargando datos… con más números, el tablero decide.' };
 }
 
 /* ══════════════════ AUDITORÍA DE INGREDIENTES ══════════════════ */

@@ -79,7 +79,7 @@ TIPO DE CAMPANA: Trafico al Perfil con CTA de Palabra Clave
 - CTA: El usuario comenta una palabra clave en el post o envia por DM
 - Automatizacion: la herramienta de mensajes detecta la palabra clave y activa el flujo automatico
 - GHL: Recibe el lead y envia recursos automaticamente + inicia conversacion
-- Conversion: DM -> Recurso gratuito -> Conversacion -> Retargeting
+- Conversion: DM -> Tu recurso -> Conversacion -> Retargeting
 
 INSTRUCCIONES ESPECIALES:
 - Explicar como configurar la palabra clave en GHL (trigger por comentario y por DM)
@@ -225,9 +225,9 @@ export function buildCopyPrompt(
   slideCount?: number,
 ): string {
   const ctaByObjetivo: Record<ObjetivoCampana, string> = {
-    trafico_perfil: 'CTA: Invitar a comentar una PALABRA CLAVE o enviar DM para recibir un recurso gratuito. Ejemplo: "Comenta [PALABRA] y te envío [recurso] gratis"',
+    trafico_perfil: 'CTA: Invitar a comentar una PALABRA CLAVE o enviar DM para recibir tu recurso. Ejemplo: "Comenta [PALABRA] y te envío [recurso]"',
     mensajes_retargeting: 'CTA: Invitar a enviar mensaje directo para continuar la conversación. Tono de recordatorio amigable.',
-    clientes_potenciales: 'CTA: Invitar a hacer clic para ver la masterclass/VSL y agendar su llamada estratégica gratuita.',
+    clientes_potenciales: 'CTA: Invitar a hacer clic para ver la masterclass/VSL y agendar su llamada de estrategia.',
   };
 
   const formatoOutput = tipo === 'yt_thumbnail'
@@ -235,7 +235,7 @@ export function buildCopyPrompt(
 Cada variante es un hook visual diferente para testear cual genera mas clicks.
 
 Para CADA variante genera un JSON:
-{ "texto_principal": "Hook largo alternativo (una oracion que describe el video)", "titulo": "HOOK CORTO Y POTENTE para la portada (max 6-8 palabras, DEBE generar curiosidad)", "descripcion": "Subtitulo complementario (max 5 palabras)", "cta_texto": "Texto badge/sticker (ej: GRATIS, NUEVO, CASO REAL)" }
+{ "texto_principal": "Hook largo alternativo (una oracion que describe el video)", "titulo": "HOOK CORTO Y POTENTE para la portada (max 6-8 palabras, DEBE generar curiosidad)", "descripcion": "Subtitulo complementario (max 5 palabras)", "cta_texto": "Texto badge/sticker (ej: NUEVO, ÚLTIMOS CUPOS, CASO REAL)" }
 
 REGLAS PARA YOUTUBE THUMBNAILS:
 - El titulo es lo MAS importante — debe generar CLICK irresistible
@@ -295,7 +295,7 @@ REGLAS:
 export interface CarouselConceptoVisual {
   paleta: string;
   escena: string;
-  tipografia: string;
+  tipografía: string;
   tratamiento: string;
 }
 
@@ -316,56 +316,56 @@ export interface CarouselNarrative {
 const ESTILO_NARRATIVE_EXAMPLES: Record<EstiloVisual, {
   paleta: string;
   escena: string;
-  tipografia: string;
+  tipografía: string;
   tratamiento: string;
 }> = {
   foto_real: {
     paleta: '"#0F1419 fondo, #B0822E acento, #F2EFE9 texto"',
     escena: '"primer plano editorial de mujer 35-45 con fondo warm desenfocado"',
-    tipografia: '"sans-serif bold blanco con outline fino, alineacion izquierda"',
+    tipografía: '"sans-serif bold blanco con outline fino, alineacion izquierda"',
     tratamiento: '"fotografia editorial DSLR, luz natural, shallow depth of field, tono warm cinematografico"',
   },
   bold: {
     paleta: '"#000000 fondo, #B0822E acento saturado, #F2EFE9 texto"',
-    escena: '"composicion grafica con formas planas y tipografia oversized como protagonista, sin foto"',
-    tipografia: '"sans-serif display ultra-bold, tamanos masivos, asimetrica"',
+    escena: '"composicion grafica con formas planas y tipografía oversized como protagonista, sin foto"',
+    tipografía: '"sans-serif display ultra-bold, tamanos masivos, asimetrica"',
     tratamiento: '"diseño grafico flat vector, alto contraste, poster editorial Behance, sin fotografia"',
   },
   pixar: {
     paleta: '"tonos calidos saturados, pastel con acentos vivos (#FFB347, #4A90E2, #FFF8E1)"',
     escena: '"personaje estilizado 3D con ojos grandes expresivos en escena calida"',
-    tipografia: '"sans-serif rounded bold, legible, con leve sombra suave"',
-    tratamiento: '"render 3D estilo Pixar/Disney, subsurface scattering en piel, iluminacion cinematografica volumetrica, saturacion alta"',
+    tipografía: '"sans-serif rounded bold, legible, con leve sombra suave"',
+    tratamiento: '"render 3D estilo Pixar/Disney, subsurface scattering en piel, iluminación cinematografica volumetrica, saturacion alta"',
   },
   caricatura: {
     paleta: '"colores planos saturados tipo animacion (#FF6B6B, #4ECDC4, #FFE66D, #1A1A2E)"',
     escena: '"personaje cartoon 2D con rasgos exagerados en fondo simple de color plano"',
-    tipografia: '"sans-serif bold con contornos marcados, tipo caption de animacion"',
+    tipografía: '"sans-serif bold con contornos marcados, tipo caption de animacion"',
     tratamiento: '"ilustracion 2D cel-shaded, contornos negros gruesos, colores planos sin fotografia ni 3D"',
   },
   comic: {
     paleta: '"primarios saturados tipo comic (#E63946, #1D3557, #F1FAEE, negro tinta)"',
     escena: '"personaje en pose dinamica acción comic con lineas de velocidad, sin fotografia"',
-    tipografia: '"display comic bold con outline grueso, mayusculas, onomatopeyas estilo Marvel/DC"',
+    tipografía: '"display comic bold con outline grueso, mayusculas, onomatopeyas estilo Marvel/DC"',
     tratamiento: '"ilustracion comic book americano, tinta gruesa, halftone Ben-Day dots, cross-hatching, panel dinamico"',
   },
   plasticina: {
     paleta: '"tonos calidos tipo plastilina (#E8A87C, #C38D9E, #85DCBA, #41B3A3)"',
     escena: '"personaje/objeto hecho de plastilina con texturas visibles de dedos en fondo de masa"',
-    tipografia: '"sans-serif redonda con sombra suave, como letras modeladas en arcilla"',
+    tipografía: '"sans-serif redonda con sombra suave, como letras modeladas en arcilla"',
     tratamiento: '"claymation stop-motion, textura visible de arcilla y huellas digitales, Aardman Wallace and Gromit"',
   },
   noticias: {
     paleta: '"foto real de fondo + overlay negro semi-transparente, badge rojo #E63946, texto blanco, acento amarillo #FFD60A"',
     escena: '"foto documental de una persona reaccionando o escena candid relevante al tema, con titular bold uppercase sobre gradient negro inferior y badge VIRAL/URGENTE arriba"',
-    tipografia: '"sans-serif condensed bold uppercase para titular grande, badge en sans-serif bold con fondo de color"',
-    tratamiento: '"screenshot tipo medio viral de Instagram (El Kilombo / Infobae viral / FilterNews), foto real candid + overlay editorial bold, NO presentador en estudio, NO chyron de TV"',
+    tipografía: '"sans-serif condensed bold uppercase para titular grande, badge en sans-serif bold con fondo de color"',
+    tratamiento: '"captura tipo medio viral de Instagram (El Kilombo / Infobae viral / FilterNews), foto real candid + overlay editorial bold, NO presentador en estudio, NO chyron de TV"',
   },
   twitter: {
     paleta: '"dark mode #15202B fondo, texto #F2EFE9, handle/timestamp gris #71767B, azul verificado #1D9BF0"',
-    escena: '"screenshot organico de un post real en la app de X/Twitter, card única del tweet visible"',
-    tipografia: '"system font (Segoe UI / SF Pro) tamanos REALES de la app — display name ~16px bold, post body ~15-16px regular, handle ~14px gris. JAMAS texto display gigante"',
-    tratamiento: '"replica pixel-perfect de un screenshot autentico de X/Twitter, texto a tamaño de lectura normal (no de poster), sin efectos, sin gradientes, sin tipografia decorativa — debe parecer captura real"',
+    escena: '"captura organico de un post real en la app de X/Twitter, card única del tweet visible"',
+    tipografía: '"system font (Segoe UI / SF Pro) tamanos REALES de la app — display name ~16px bold, post body ~15-16px regular, handle ~14px gris. JAMAS texto display gigante"',
+    tratamiento: '"replica pixel-perfect de un captura autentico de X/Twitter, texto a tamaño de lectura normal (no de poster), sin efectos, sin gradientes, sin tipografía decorativa — debe parecer captura real"',
   },
 };
 
@@ -383,7 +383,7 @@ export function buildCarouselNarrativePrompt(
 === ESTILO VISUAL OBLIGATORIO — "${estiloInfo.titulo}" (NO sustituir, NO derivar hacia foto cinematografica si el estilo no lo pide) ===
 ${estiloInfo.prompt}
 
-IMPORTANTE: El concepto visual unificado que generes DEBE describir literalmente una pieza en este estilo. Si el estilo es ilustracion, 3D, comic, plastilina o UI — NO uses palabras como "fotografia", "DSLR", "cinematografico", "filtro warm", "shallow depth of field", "lente" salvo que el estilo sea foto_real. Los campos paleta/escena/tipografia/tratamiento deben estar redactados en vocabulario del estilo (ej: "ilustracion 2D cel-shaded", "render 3D con subsurface scattering", "halftone Ben-Day", "claymation stop-motion").
+IMPORTANTE: El concepto visual unificado que generes DEBE describir literalmente una pieza en este estilo. Si el estilo es ilustracion, 3D, comic, plastilina o UI — NO uses palabras como "fotografia", "DSLR", "cinematografico", "filtro warm", "shallow depth of field", "lente" salvo que el estilo sea foto_real. Los campos paleta/escena/tipografía/tratamiento deben estar redactados en vocabulario del estilo (ej: "ilustracion 2D cel-shaded", "render 3D con subsurface scattering", "halftone Ben-Day", "claymation stop-motion").
 `
     : '';
 
@@ -393,14 +393,14 @@ IMPORTANTE: El concepto visual unificado que generes DEBE describir literalmente
 Ejemplos concretos para el estilo "${estiloInfo!.titulo}" (usa este vocabulario, no palabras fotograficas si el estilo no es foto_real):
 - paleta: ${examples.paleta}
 - escena: ${examples.escena}
-- tipografia: ${examples.tipografia}
+- tipografía: ${examples.tipografía}
 - tratamiento: ${examples.tratamiento}`
     : `
 
 Ejemplos genericos:
 - paleta: "#0F1419 fondo, #B0822E acento, #F2EFE9 texto"
 - escena: "primer plano de mujer 35-45 con fondo neutro warm desenfocado"
-- tipografia: "sans-serif bold blanco con fino outline negro, alineacion izquierda"
+- tipografía: "sans-serif bold blanco con fino outline negro, alineacion izquierda"
 - tratamiento: "filtro warm cinematografico, blur de fondo, alto contraste, vineteado sutil"`;
 
   const brandPaleta = perfil.identidad_colores?.trim();
@@ -441,14 +441,14 @@ Reglas de copy:
 Concepto visual compartido (LENGUAJE VISUAL — aplicable identico a las ${totalSlides} slides):
 - paleta: 2-3 colores hex especificos, coherentes con el estilo obligatorio
 - escena: UNIVERSO VISUAL comun (contexto general y mundo en el que suceden las slides), EN EL ESTILO obligatorio. Describe el "donde" y la estetica general, NO la accion especifica de una slide.
-- tipografia: estilo tipografico unificado, coherente con el estilo obligatorio
+- tipografía: estilo tipografico unificado, coherente con el estilo obligatorio
 - tratamiento: tecnica de render/tratamiento visual repetible, EXPLICITAMENTE en el estilo obligatorio (si es comic, decir "ilustracion comic"; si es pixar, decir "render 3D Pixar"; si es foto_real, decir "fotografia editorial"; etc.)
 
 Reglas de variacion de escena por slide (CRITICAS — esto evita que todas las slides se vean iguales):
 - Cada slide tiene su propia "escena" con una VARIACION distinta: distinto plano (close-up, medium, wide, detalle), distinto angulo (frontal, lateral, picado, contrapicado, over-the-shoulder), distinta accion (mirada, gesto, interaccion con objeto, pose), distintos elementos visibles (prop nuevo, fragmento de entorno distinto, gesto corporal diferente).
 - Si hay personaje: misma persona e identidad, pero expresion/gesto/pose/interaccion DIFERENTE y encuadre DIFERENTE en cada slide.
 - Cada "escena" por slide debe describir UNA micro-escena distinta dentro del mismo universo visual — no repetir el mismo plano ni los mismos elementos.
-- Sin embargo, el LENGUAJE VISUAL (paleta, tipografia, tratamiento, iluminacion, mood, tecnica de render) debe ser IDENTICO entre slides — es lo que las hila visualmente.
+- Sin embargo, el LENGUAJE VISUAL (paleta, tipografía, tratamiento, iluminación, mood, tecnica de render) debe ser IDENTICO entre slides — es lo que las hila visualmente.
 - Pensa como un director de arte armando los storyboard frames de un carrusel: mismo set/universo, misma paleta, misma tecnica, pero CADA frame muestra algo distinto.
 ${exampleBlock}
 
@@ -457,7 +457,7 @@ Responde SOLO con este JSON, sin markdown, sin texto adicional:
   "concepto_visual": {
     "paleta": "...",
     "escena": "...",
-    "tipografia": "...",
+    "tipografía": "...",
     "tratamiento": "..."
   },
   "slides": [
@@ -506,7 +506,7 @@ export function buildImagePrompt(
   const mode = options?.mode ?? 'completa';
   const estilo = options?.estilo;
 
-  // ── Manual de Marca: paleta/tipografia/reglas con prioridad sobre estilo y refs
+  // ── Manual de Marca: paleta/tipografía/reglas con prioridad sobre estilo y refs
   const brandPaleta = perfil.identidad_colores?.trim();
   const brandTipografia = perfil.identidad_tipografia?.trim();
   const brandReglas = perfil.identidad_reglas_uso?.trim();
@@ -579,19 +579,19 @@ export function buildImagePrompt(
 - Tamano de lectura NORMAL — system font (Segoe UI / SF Pro / Helvetica)
 - Body del tweet en regular weight ~15-16px equivalente, alineado a la izquierda
 - Display name en bold ~16px, handle y timestamp en gris ~14px
-- PROHIBIDO texto display gigante, oversized, poster style o tipografia decorativa
+- PROHIBIDO texto display gigante, oversized, poster style o tipografía decorativa
 - El texto NO debe dominar la imagen — debe verse organico dentro del card del tweet`
     : estilo === 'noticias'
       ? `TIPOGRAFIA (estilo medio viral — overlay editorial sobre foto):
 - Titular en sans-serif condensed BOLD UPPERCASE, ocupa el tercio inferior sobre gradient negro
 - Si hay subtitulo o cifra clave (ej: "67%", "8 de cada 10"), destacarla en color amarillo o acento
 - Badge superior pequeno tipo "VIRAL" / "ULTIMO MOMENTO" / "URGENTE" en sans-serif bold mayusculas, fondo de color solido
-- Sin tipografia decorativa, sin serifs ornamentales — debe parecer post real de medio viral de Instagram`
+- Sin tipografía decorativa, sin serifs ornamentales — debe parecer post real de medio viral de Instagram`
       : `TIPOGRAFIA:
 - Texto principal grande, bold, legible desde el celular
 - Tipografia moderna sans-serif (tipo Montserrat o Inter)
 - Contraste MAXIMO entre texto y fondo
-- El texto debe DOMINAR la composicion, no ser un detalle pequeno
+- El texto debe DOMINAR la composición, no ser un detalle pequeno
 - Incluir CTA visual si es relevante`;
 
   const inventaTextoBlock = slideInfo
@@ -618,7 +618,7 @@ ${tipografiaBlock}`
 ${tipografiaBlock}`;
 
   const textoSection = mode === 'fondo'
-    ? `IMPORTANTE: NO incluir NINGUN texto, letras, palabras, numeros ni tipografia en la imagen. Solo imagen visual pura. La imagen sera usada como fondo y el texto se agrega después.`
+    ? `IMPORTANTE: NO incluir NINGUN texto, letras, palabras, numeros ni tipografía en la imagen. Solo imagen visual pura. La imagen sera usada como fondo y el texto se agrega después.`
     : customTextSection
       ? customTextSection
       : hasRealTexto
@@ -656,11 +656,11 @@ La referencia adjunta define el LENGUAJE VISUAL del carrusel, NO una plantilla a
 Esta pieza es UNA slide de un set — cada slide del carrusel debe ser visualmente FRESCA y DISTINTA a las otras (plano, angulo, accion, elementos), manteniendo el MISMO lenguaje visual.
 
 COPIAR EXACTAMENTE de la referencia (LENGUAJE VISUAL — identico en TODAS las slides):
-- La MISMA tipografia (peso, familia, estilo serif/sans-serif/display, tracking, jerarquia)
+- La MISMA tipografía (peso, familia, estilo serif/sans-serif/display, tracking, jerarquia)
 ${brandPaleta ? '- NO copiar la paleta de la referencia — la PALETA DE MARCA del bloque "MANUAL DE MARCA" manda. La referencia aporta tratamiento y estetica, pero los COLORES finales son los del manual.' : '- La MISMA paleta de colores (tonos hex exactos, gradientes, contrastes)'}
 - El MISMO tratamiento visual (filtros, temperatura de color, contraste, grano, textura)
 - La MISMA estetica y mood (premium, bold, editorial, minimalista, etc.)
-- La MISMA calidad de iluminacion y tecnica de render
+- La MISMA calidad de iluminación y tecnica de render
 
 VARIAR OBLIGATORIAMENTE (ESCENA — distinta en cada slide del carrusel):
 - DISTINTO plano: close-up, medium shot, wide, plano detalle, over-the-shoulder, insert de objeto. No repetir el plano de la referencia en TODAS las slides.
@@ -669,20 +669,20 @@ VARIAR OBLIGATORIAMENTE (ESCENA — distinta en cada slide del carrusel):
 - DISTINTOS elementos y props: nuevos objetos visibles, fragmentos de entorno distintos, distintos detalles del set. No clonar los mismos elementos de la referencia en cada slide.
 - DISTINTA composicion puntual: la posicion del texto y del sujeto puede variar slide a slide, siempre respetando la jerarquia tipografica.
 
-La referencia adjunta es una muestra del ESTILO — pensala como un frame de moodboard, no como una plantilla a clonar. El carrusel resultante debe tener 5-10 slides que se sientan de la MISMA familia visual pero muestren distintos momentos/planos/acciones.
+La referencia adjunta es una muestra del ESTILO — piénsala como un frame de moodboard, no como una plantilla a clonar. El carrusel resultante debe tener 5-10 slides que se sientan de la MISMA familia visual pero muestren distintos momentos/planos/acciones.
 
 NO COPIAR (PROHIBIDO):
 - NO copies el texto/palabras que aparecen en la referencia
 - NO copies logos ni marcas de la referencia
-- NO clones la composicion exacta de la referencia en cada slide (eso genera 10 slides iguales)
+- NO clones la composición exacta de la referencia en cada slide (eso genera 10 slides iguales)
 - Usa UNICAMENTE el texto proporcionado en ESTE prompt
 
-Resultado esperado: el carrusel completo debe verse como si el MISMO director de arte armara un storyboard — misma paleta, misma tipografia, mismo tratamiento, pero CADA slide muestra algo visualmente distinto.\n`
+Resultado esperado: el carrusel completo debe verse como si el MISMO director de arte armara un storyboard — misma paleta, misma tipografía, mismo tratamiento, pero CADA slide muestra algo visualmente distinto.\n`
       : `\nREFERENCIA DE ESTILO VISUAL (${styleCount} ${styleCount === 1 ? 'imagen adjunta' : 'imagenes adjuntas de referencia estetica'} — PRIORIDAD MAXIMA):
 REPLICA el diseño de la imagen de referencia de estilo lo mas fielmente posible:
 
 COPIAR EXACTAMENTE:
-- La MISMA tipografia (peso, tamaño relativo, tracking, estilo serif/sans-serif/display)
+- La MISMA tipografía (peso, tamaño relativo, tracking, estilo serif/sans-serif/display)
 ${brandPaleta ? '- NO copiar la paleta de la referencia — la PALETA DE MARCA del bloque "MANUAL DE MARCA" manda. La referencia aporta composicion/tratamiento/estetica, pero los COLORES finales son los del manual.' : '- La MISMA paleta de colores (tonos exactos, gradientes, contrastes)'}
 - La MISMA composicion y layout (posicion de elementos, alineacion, spacing)
 - Los MISMOS efectos visuales (sombras, glows, overlays, mascaras, gradientes)
@@ -727,7 +727,7 @@ El resultado debe verse como si el MISMO diseñador hubiera creado ambas piezas.
 ${nc.conceptoVisual ? `LENGUAJE VISUAL UNIFICADO (aplicar IDENTICO a TODAS las slides del carrusel${estilo ? ` — SIEMPRE dentro de la tecnica "${ESTILO_VISUAL_OPTIONS[estilo].titulo}"` : ''}):
 - Paleta: ${brandPaleta ? `IGNORAR la paleta del concepto — usar la PALETA DE MARCA del bloque "MANUAL DE MARCA" (${brandPaleta})` : nc.conceptoVisual.paleta}
 - Universo visual / contexto: ${nc.conceptoVisual.escena}
-- Tipografia: ${nc.conceptoVisual.tipografia}
+- Tipografia: ${nc.conceptoVisual.tipografía}
 - Tratamiento visual: ${nc.conceptoVisual.tratamiento}
 
 ` : ''}${nc.allSlideTitles && nc.allSlideTitles.length > 0 ? `NARRATIVA COMPLETA DEL CARRUSEL (asi se lee de izquierda a derecha — contexto interno SOLAMENTE, no renderizar):
@@ -741,11 +741,11 @@ ${nc.slideEscena}
 
 ` : ''}${nc.previousSlideTitle ? `La pieza ANTERIOR decia: "${nc.previousSlideTitle}" — esta debe encadenar argumentalmente con esa, pero con una escena visualmente DISTINTA (otro plano, otro gesto, otros elementos).\n` : ''}${nc.nextSlideTitle ? `La pieza SIGUIENTE dira: "${nc.nextSlideTitle}" — esta debe construir hacia esa idea.\n` : ''}
 REGLA DE CONTINUIDAD (CRITICA — leer con atencion):
-- LO QUE SE MANTIENE IDENTICO entre TODAS las slides (lenguaje visual): paleta exacta, tipografia y jerarquia tipografica, tratamiento visual, iluminacion, mood, tecnica de render, identidad del personaje si hay, calidad y textura.
+- LO QUE SE MANTIENE IDENTICO entre TODAS las slides (lenguaje visual): paleta exacta, tipografía y jerarquia tipografica, tratamiento visual, iluminación, mood, tecnica de render, identidad del personaje si hay, calidad y textura.
 - LO QUE DEBE VARIAR en CADA slide (escena): plano (close-up/medium/wide/detalle), angulo y encuadre (frontal/lateral/picado/contrapicado/over-the-shoulder), accion o gesto, expresion del personaje, elementos y props visibles, composicion puntual.
-- NO es una plantilla donde solo cambia el texto — cada slide es un FRAME distinto del mismo universo visual. Pensalo como storyboard frames: mismo set, mismo art direction, pero cada frame muestra algo distinto.
+- NO es una plantilla donde solo cambia el texto — cada slide es un FRAME distinto del mismo universo visual. Piénsalo como storyboard frames: mismo set, mismo art direction, pero cada frame muestra algo distinto.
 - Si el personaje aparece en varias slides, es la MISMA persona (misma identidad/rostro/ropa) pero en DISTINTA pose/accion/encuadre en cada slide.
-- PROHIBIDO: generar esta slide clonando la composicion de la referencia o de las otras slides con solo el texto cambiado. Si sentis la tentacion de repetir el mismo plano/accion, cambialos.${estilo && estilo !== 'foto_real' ? `\n\nREGLA DE ESTILO (NO NEGOCIABLE): La técnica de render es "${ESTILO_VISUAL_OPTIONS[estilo].titulo}". Si el LENGUAJE VISUAL arriba contiene palabras tipo "fotografia", "DSLR", "cinematografico", "lente", "warm filter", IGNORALAS — el estilo base manda. Usa solo la PALETA, UNIVERSO y TIPOGRAFIA del concepto, pero RENDERIZA siempre en "${ESTILO_VISUAL_OPTIONS[estilo].titulo}".` : ''}\n`
+- PROHIBIDO: generar esta slide clonando la composición de la referencia o de las otras slides con solo el texto cambiado. Si sientes la tentacion de repetir el mismo plano/accion, cámbialos.${estilo && estilo !== 'foto_real' ? `\n\nREGLA DE ESTILO (NO NEGOCIABLE): La técnica de render es "${ESTILO_VISUAL_OPTIONS[estilo].titulo}". Si el LENGUAJE VISUAL arriba contiene palabras tipo "fotografia", "DSLR", "cinematografico", "lente", "warm filter", IGNORALAS — el estilo base manda. Usa solo la PALETA, UNIVERSO y TIPOGRAFIA del concepto, pero RENDERIZA siempre en "${ESTILO_VISUAL_OPTIONS[estilo].titulo}".` : ''}\n`
     : '';
 
   const hasEstiloOverride = estilo && nc?.conceptoVisual;
@@ -776,14 +776,14 @@ ${isYouTube ? 'Esta portada debe generar CLICKS. El hook visual es CRITICO — e
 ${estiloOverrideHeader}
 NICHO: ${nicho}
 ${hasEstiloOverride
-  ? 'DIRECCION VISUAL: Aplicar el CONCEPTO VISUAL UNIFICADO del carrusel (paleta, escena, tipografia) ESTRICTAMENTE dentro de la TECNICA DE RENDER OBLIGATORIA definida arriba.'
+  ? 'DIRECCION VISUAL: Aplicar el CONCEPTO VISUAL UNIFICADO del carrusel (paleta, escena, tipografía) ESTRICTAMENTE dentro de la TECNICA DE RENDER OBLIGATORIA definida arriba.'
   : nc?.conceptoVisual
     ? 'DIRECCION VISUAL: Seguir el CONCEPTO VISUAL UNIFICADO del carrusel (ver bloque abajo)'
     : styleCount > 0
       ? 'DIRECCION VISUAL: Seguir la referencia de estilo adjunta (ver instrucciones abajo)'
       : `DIRECCION VISUAL: ${estiloPrompt}`}
 ${shouldSuppressAnguloVisual
-  ? `ANGULO COMUNICACIONAL (aplicar SOLO como guia emocional/narrativa, NO como direccion fotografica — la técnica de render de arriba manda): ${anguloVisual[angulo].replace(/foto|fotografia|cinematografic[oa]|DSLR|lente|warm|filtro/gi, '').trim() || 'guiar la emocion y el enfasis de la composicion'}`
+  ? `ANGULO COMUNICACIONAL (aplicar SOLO como guia emocional/narrativa, NO como direccion fotografica — la técnica de render de arriba manda): ${anguloVisual[angulo].replace(/foto|fotografia|cinematografic[oa]|DSLR|lente|warm|filtro/gi, '').trim() || 'guiar la emocion y el enfasis de la composición'}`
   : `ANGULO COMUNICACIONAL: ${anguloVisual[angulo]}`}
 ${brandPaleta
   ? 'COLORES: Usar la PALETA DE MARCA del bloque "MANUAL DE MARCA" — tiene prioridad sobre concepto visual, estilo y referencia.'
@@ -792,7 +792,7 @@ TONO: ${tono}
 ${userPromptSection}${narrativeBlock}${characterRefPrompt}${styleRefPrompt}${instruccionesCustom}${brandBlock}
 ${textoSection}
 
-${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografia, tratamiento) pero VARIAR la escena (plano, angulo, acción, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
+${slideInfo ? `(Esta es la pieza ${slideInfo.slideNumber} de un set de ${slideInfo.totalSlides} — mantener LENGUAJE VISUAL identico (paleta, tipografía, tratamiento) pero VARIAR la escena (plano, angulo, acción, elementos) respecto a las demas slides. La numeracion es metadata interna, NO se renderiza.)` : `FORMATO: ${fmtInfo.label} — ${fmtInfo.descripcion}`}
 ${marginLine ? marginLine + '\n' : ''}
 REQUISITOS CRITICOS:
 - ${marginLine || 'Composicion centrada'}

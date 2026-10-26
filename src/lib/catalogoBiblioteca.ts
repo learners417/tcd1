@@ -81,7 +81,16 @@ export function armarCatalogo(
     const diaReal = Number.isFinite(dia) && (dia as number) > 0 ? (dia as number) : null;
     piezas.push({
       id: `jornada:${clave}`,
-      titulo: titulos[diaReal ?? -1] ?? (esTutorial ? `Paso a paso ${clave}` : `Día ${clave}`),
+      /*
+       * El respaldo decía «Paso a paso L-01»: el código interno, en la
+       * Biblioteca, que es la pantalla donde el cliente elige qué mirar. Si el
+       * video todavía no tiene título cargado, lo que se dice es el día — que
+       * es lo que el cliente usa para ubicarse — y nunca la clave.
+       */
+      titulo: titulos[diaReal ?? -1]
+        ?? (esTutorial
+          ? (diaReal ? `Paso a paso del día ${diaReal}` : 'Paso a paso')
+          : `Día ${clave}`),
       origen: esTutorial ? 'tutorial' : 'jornada',
       dia: diaReal,
       url,

@@ -76,14 +76,9 @@ export function carriles(): Carriles {
   return carrilesDe(leerSituacion());
 }
 
-/**
- * El ingreso que hay que reemplazar, no sumar. Es el nudo de quien tiene la
- * agenda llena: cada silla ocupada queda ocupada por años.
+/*
+ * Acá vivía `ingresoAReemplazar`: personas por semana × precio × 4. No la
+ * llamaba nadie, y sus dos entradas eran justo los campos que el formulario
+ * repetía de la medición de entrada. Si vuelve, sale de la medición —que
+ * pregunta facturación del último mes— y no de un segundo formulario.
  */
-export function ingresoAReemplazar(s: Situacion | null = leerSituacion()): number | null {
-  if (!s) return null;
-  const porSemana = num(s.consultantes_semana);
-  const precio = num(s.precio_sesion);
-  if (!porSemana || !precio) return null;
-  return porSemana * precio * 4;
-}

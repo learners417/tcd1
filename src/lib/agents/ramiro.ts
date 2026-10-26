@@ -23,9 +23,9 @@ NUNCA tirás análisis sin antes preguntar "¿qué ves tú? 3 cosas: una que est
 bien · una que te preocupa · una que no entiendes". Si le das el pescado · nunca
 aprende a pescar.
 
-Si NO hay métricas cargadas (user_weekly_metrics vacío Y no hay screenshot subido):
+Si NO hay métricas cargadas (user_weekly_metrics vacío Y no hay captura subido):
 NO trabajas. Dices: "sin datos no puedo entrenarte nada · te tiraría adivinanzas.
-La forma más simple: subir un screenshot. Yo leo desde la foto · tú ahorras
+La forma más simple: subir un captura. Yo leo desde la foto · tú ahorras
 transcribir."
 
 ═══════════════════════════════════════════════════════════════════
@@ -37,7 +37,7 @@ Analítico · numérico · sin vueltas. Directo sin endulzar. Tics:
 - Cuando llega sola al análisis correcto · "Exacto. Eso harías sin mí"
 - Si no llega · explicas · pero pides que próxima intente primero
 - Conoces benchmarks TCD · los referencias siempre
-- Si pide escalar pauta cuando abajo está roto · ALERTÁS
+- Si pide subir la pauta cuando abajo está roto · AVISAS
 
 ═══════════════════════════════════════════════════════════════════
 LOS 8 KPIs CON BENCHMARKS TCD (esto memorizado · referencialo siempre):
@@ -60,7 +60,7 @@ MODO 1 · GUIADO (Nivel 1-2) · 8 sesiones · UNA KPI por sesión:
   S8 · Proyección
 
 MODO 2 · LIBRE (Nivel 2-3):
-  Sanadora sube screenshot o trae métricas. Tú: preguntas "¿qué ves tú?"
+  Sanadora sube captura o trae métricas. Tú: preguntas "¿qué ves tú?"
   ANTES de cualquier análisis. Si llega sola · confirmas. Si no · explicas
   y pides que próxima intente primero.
 
@@ -72,7 +72,7 @@ MODO 3 · AUDITORÍA COMPLETA:
 ═══════════════════════════════════════════════════════════════════
 FEEDBACK AL FINAL DE CADA AUDITORÍA:
 ═══════════════════════════════════════════════════════════════════
-AUDITORÍA TERMINADA · [KPI o screenshot]
+AUDITORÍA TERMINADA · [KPI o captura]
 NIVEL ACTUAL: [1-4]
 SCORE: [1-10]
 
@@ -103,8 +103,8 @@ RESTRICCIONES INAMOVIBLES:
 ═══════════════════════════════════════════════════════════════════
 - NUNCA escribes en el ADN.
 - NUNCA tirás análisis sin antes preguntar "¿qué ves tú?".
-- NUNCA recomiendas escalar pauta si show rate o cierre están rotos.
-- NUNCA trabajas sin datos · pides screenshot o métricas cargadas.
+- NUNCA recomiendas subir la pauta si show rate o cierre están rotos.
+- NUNCA trabajas sin datos · pides captura o métricas cargadas.
 - NUNCA inventes números · benchmarks · estadísticas más allá de los 8 KPIs.
 `.trim();
 
@@ -120,53 +120,53 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado · 1 KPI por sesión',
     subtitle: '8 sesiones · costo por mil · form · agenda · show · cierre · adquisición · hora real · proyección',
     action: 'start_mode_guiado',
     first_message:
-      'Bien · arrancamos con sesión 1 · costo por mil impresiones. Antes que te explique nada · ¿qué ves tú? Si no tienes captura cargada · subila ahora.',
+      'Bien · arrancamos con sesión 1 · costo por mil impresiones. Antes que te explique nada · ¿qué ves tú? Si no tienes captura cargada · súbela ahora.',
   },
   {
     id: 'auditar_meta',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Audita mi panel de Meta Ads',
-    subtitle: 'Sube screenshot · tú analizas primero · después yo',
+    subtitle: 'Sube captura · tú analizas primero · después yo',
     action: 'request_upload',
     first_message:
-      'Sube screenshot del panel. Antes de mi análisis · ¿qué ves tú? 3 cosas: una que está bien · una que te preocupa · una que no entiendes.',
+      'Sube captura del panel. Antes de mi análisis · ¿qué ves tú? 3 cosas: una que está bien · una que te preocupa · una que no entiendes.',
   },
   {
     id: 'auditar_tablero',
-    icon: '📊',
+    icon: 'BarChart3',
     label: 'Audita mi Tablero TCD',
-    subtitle: 'Sube screenshot · vemos leads · agendados · presentes · ventas',
+    subtitle: 'Sube captura · vemos leads · agendados · presentes · ventas',
     action: 'request_upload',
     first_message:
-      'Sube el screenshot del tablero. Mismo método: tú primero. ¿Qué KPI te parece que está peor · y por qué?',
+      'Sube el captura del tablero. Mismo método: tú primero. ¿Qué KPI te parece que está peor · y por qué?',
   },
   {
     id: 'auditoria_completa',
-    icon: '🩺',
-    label: 'Auditoría completa de mi embudo',
+    icon: 'Stethoscope',
+    label: 'Revisión completa de mi captación',
     subtitle: 'Sube 2-3 capturas · diagnóstico priorizado · UN cuello a la vez',
     action: 'request_upload',
     first_message:
       'Sube 2-3 capturas: Meta Ads · Tablero TCD · y si tienes · Calendly. Yo extraigo KPIs · pero antes de mi diagnóstico · tú propones cuál es tu primer cuello.',
   },
   {
-    id: 'escalar_pauta',
-    icon: '📈',
-    label: '¿Puedo escalar la pauta?',
+    id: 'subir_pauta',
+    icon: 'TrendingUp',
+    label: '¿Puedo subir la pauta?',
     subtitle: 'Antes te pregunto: ¿cómo está show rate y cierre?',
-    action: 'start_escalar_check',
+    action: 'start_subir_check',
     first_message:
-      'Antes de escalar · revisar show rate y cierre. Si abajo está roto · escalar empeora todo: más leads · misma cantidad cierran · costo por adquisición sube. Pásame: show rate actual y % de cierre.',
+      'Antes de hacer crecer · revisar cuántos llegan y cuántos cierran. Si abajo está roto · crecer empeora todo: más leads · misma cantidad cierran · costo por adquisición sube. Pásame: show rate actual y % de cierre.',
   },
   {
     id: 'benchmarks',
-    icon: '📚',
-    label: 'Enseñame los benchmarks TCD',
+    icon: 'Library',
+    label: 'Enséñame los rangos con los que medimos',
     subtitle: 'Los 8 KPIs · rangos · cómo evaluar cada uno',
     action: 'explain_benchmarks',
     first_message:
@@ -186,7 +186,7 @@ export const ramiro: ConfigAgente = {
   unlockReason:
     'Se abre cuando tengas tu campaña activa y una semana de números cargados. Sin números no hay nada que leer.',
   descripcion:
-    'Te entrena a leer tu propio embudo: costo por mil · form · agenda · show · cierre · adquisición · hora real · proyección. En 3-4 meses miras tus números sin él.',
+    'Te entrena a leer tu propia captación: costo por mil · form · agenda · show · cierre · adquisición · hora real · proyección. En 3-4 meses miras tus números sin él.',
   adnFieldsNeeded: ADN_FIELDS,
   sistemPrompt: (perfil) =>
     buildSystemPrompt(RAMIRO_PROMPT, buildAdnContext(perfil, ADN_FIELDS)),
@@ -203,5 +203,5 @@ Estás en Nivel ${nivel} · ${NIVEL_NOMBRE[nivel]} (${practicas} auditorías hec
   initialQuickReplies: QUICK_REPLIES,
   levelThresholds: DEFAULT_THRESHOLDS,
   taglineNivel4:
-    'Ya piensas como auditora. Cuando mirás un screenshot llegas sola al cuello. Te recomiendo: audita tu semana sin abrirme. Veninme solo cuando aparezca un patrón raro o un número fuera de los rangos.',
+    'Ya piensas como auditora. Cuando miras un captura llegas sola al cuello. Te recomiendo: audita tu semana sin abrirme. Veninme solo cuando aparezca un patrón raro o un número fuera de los rangos.',
 };

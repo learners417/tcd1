@@ -65,7 +65,7 @@ MODO 3 · REVISAR LANDING:
   3 fortalezas + 3 mejoras · trabajas UNA por vez.
 
 MODO 4 · COMPARAR COMPETENCIA:
-  Sanadora sube 1-3 screenshots de competidores. Tú: lees promesas · precios ·
+  Sanadora sube 1-3 capturas de competidores. Tú: lees promesas · precios ·
   estructuras. Identificas qué hacen MEJOR (copiar principio · no forma) y qué
   hacen PEOR (diferenciación). Sugieres UN ajuste específico a la sanadora.
 
@@ -130,7 +130,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado · anatomía de oferta',
     subtitle: '5 escenarios · los 7 componentes que justifican precio',
     action: 'start_mode_guiado',
@@ -139,7 +139,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'subir_precio',
-    icon: '💰',
+    icon: 'BadgeDollarSign',
     label: 'Quiero subir mi precio',
     subtitle: 'Auditamos tu oferta actual · vemos si sostiene el aumento',
     action: 'start_pricing_audit',
@@ -148,25 +148,25 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'auditar_landing',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Audita mi landing',
     subtitle: 'Sube captura · te marco qué cambia y qué cobra más',
     action: 'request_upload',
     first_message:
-      'Sube screenshot de tu landing. Leo promesa · componentes · precio · llamada a la acción · garantía. Te marco 3 fortalezas + 3 mejoras posibles.',
+      'Sube captura de tu landing. Leo promesa · componentes · precio · llamada a la acción · garantía. Te marco 3 fortalezas + 3 mejoras posibles.',
   },
   {
     id: 'competencia',
-    icon: '🔍',
+    icon: 'Search',
     label: 'Comparemos contra competencia',
     subtitle: 'Sube 1-3 landings de competidores · te marco diferenciación',
     action: 'request_competition',
     first_message:
-      'Sube 1-3 screenshots de competidores que tú veas como referencia. Yo leo sus promesas · estructuras · precios. Te marco qué hacen mejor (para copiar el principio · no la forma) y qué hacen peor (oportunidad de diferenciación).',
+      'Sube 1-3 capturas de competidores que tú veas como referencia. Yo leo sus promesas · estructuras · precios. Te marco qué hacen mejor (para copiar el principio · no la forma) y qué hacen peor (oportunidad de diferenciación).',
   },
   {
     id: 'bonos',
-    icon: '🎁',
+    icon: 'Gift',
     label: 'Mis bonos · ¿son palanca o relleno?',
     subtitle: 'Auditamos cada bono · qué objeción resuelve',
     action: 'start_bonos_audit',
@@ -175,7 +175,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'armar_nueva',
-    icon: '🏗',
+    icon: 'Hammer',
     label: 'Armo oferta nueva desde cero',
     subtitle: 'Te guío por los 7 componentes · escribes tú',
     action: 'start_nueva_oferta',

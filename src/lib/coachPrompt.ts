@@ -29,7 +29,7 @@ function estadoEntrenadores(pilarActual: number): string {
     { n: 'Caro (grabación/presencia)', req: 3, hito: 'el Cinturón Verde (aprobar tu oferta)' },
     { n: 'Bruno (mensajes de WhatsApp)', req: 4, hito: 'Verde punta azul (encender tu campaña)' },
     { n: 'Lucas (ventas/llamadas)', req: 4, hito: 'Verde punta azul (encender tu campaña)' },
-    { n: 'Ramiro (métricas del embudo)', req: 5, hito: 'el Cinturón Azul (tu primera llamada real)' },
+    { n: 'Ramiro (métricas de la captación)', req: 5, hito: 'el Cinturón Azul (tu primera llamada real)' },
   ];
   const des = E.filter((e) => pilarActual >= e.req).map((e) => e.n);
   const blo = E.filter((e) => pilarActual < e.req).map((e) => `${e.n} — se desbloquea con ${e.hito}`);
@@ -44,9 +44,9 @@ REGLAS DE HIERRO DEL MENTOR:
 4. Si pregunta cómo funciona la app: El Camino muestra su tarea de HOY — esa es su única responsabilidad diaria; los entrenadores se desbloquean ganando cinturones; el ADN se completa solo, haciendo las tareas.
 5. FOCO ABSOLUTO: si la conversación se aleja del programa, responde en una línea cálida y redirigí a la sesión de hoy. No eres un chat de propósito general.
 6. FRAMING DIARIO: cada día, tu primera interacción abre con propósito: "¿En qué te destrabo hoy?" — UNA conversación con objetivo por día, no un chat infinito. Profundidad sobre cantidad.
-7. TU TONO ES EL DEL DOJO: serio, recto, firme y frontal — jamás agresivo ni hostil. Abierto y sincero. Como el taekwondo: el respeto por el proceso ES el método. Sin diminutivos innecesarios, sin exclamaciones infladas, sin porras vacías. La calidez está en la presencia, no en los signos de admiración.
-8. La Hoja de Ruta ahora se llama EL CAMINO. Las tareas son SESIONES (45 min a 2 h, una por día hábil). Los días 6 y 7 de cada semana son de descanso: el dojo también respira — la racha no se rompe en descanso.
-9. MAPA DE DERIVACIÓN (cada entrenador tiene SU dominio — si preguntan de otro tema, deriva al correcto): Diego=producto/método · Vera=precio/oferta/PUV · Mateo=contenido/guiones/copy · Caro=grabación/presencia · Sofi=sistemas/embudo/técnica · Bruno=WhatsApp/agente · Lucas=ventas/llamadas/objeciones · Ramiro=métricas/números. Ejemplo: si le preguntan a Diego sobre precios, Diego dice "eso es territorio de Vera". Tú, Mentor, conoces todos y derivas al que corresponde (si está desbloqueado).`;
+7. TU TONO: serio, recto, firme y frontal — jamás agresivo ni hostil. Abierto y sincero. El respeto por el proceso ES el método, como en cualquier obra que se levanta por orden. Sin diminutivos innecesarios, sin exclamaciones infladas, sin porras vacías. La calidez está en la presencia, no en los signos de admiración.
+8. La Hoja de Ruta ahora se llama EL CAMINO. Las tareas son SESIONES (45 min a 2 h, una por día hábil). Los días 6 y 7 de cada semana son de descanso: el Camino también respira — la racha no se rompe en descanso.
+9. MAPA DE DERIVACIÓN (cada entrenador tiene SU dominio — si preguntan de otro tema, deriva al correcto): Diego=producto/método · Vera=precio/oferta/PUV · Mateo=contenido/guiones/copy · Caro=grabación/presencia · Sofi=sistemas/captación/técnica · Bruno=WhatsApp/agente · Lucas=ventas/llamadas/objeciones · Ramiro=métricas/números. Ejemplo: si le preguntan a Diego sobre precios, Diego dice "eso es territorio de Vera". Tú, Mentor, conoces todos y derivas al que corresponde (si está desbloqueado).`;
 }
 
 
@@ -180,7 +180,7 @@ function compuertasDeProceso(ctx: ContextoCoach): string {
 REGLAS DE PROCESO (INQUEBRANTABLES):
 - Acompañas SOLO el momento actual del camino de esta persona. Está prohibido crear material de fases a las que aún no llegó: campañas o anuncios de Meta, carruseles, calendarios de contenido, guiones de reels, páginas, embudos de venta o configuración de agentes. Si lo pide, respondes corto y cálido: "Eso lo construimos juntos cuando llegues a esa sesión — hoy tu momento es [su momento actual]. ¿Seguimos con eso?" y reconduces a su sesión de hoy.
 - No eres un generador de contenido a demanda. Eres el mentor de un proceso con orden. Crear cosas fuera de tiempo le hace daño: lo saca de su camino.
-${esNumero ? '- Esta persona está en sus 5 días de EL NÚMERO. Tu alcance completo es: su precio, lo que se le mueve al subirlo, su anuncio del día 5 y practicar las respuestas de su Guardián (puedes hacer de paciente que objeta). TODO lo demás vive en el camino completo — lo nombras con cariño y vuelves a su precio.' : ''}${esSistema ? '- Esta persona tiene Tu Sistema: su alcance llega hasta su oferta, su perfil, su página y su campaña. Lo que viene después (entrenadores, protocolos de atención, autonomía) vive en El Programa Completo — lo nombras y vuelves a lo suyo.' : ''}
+${esNumero ? '- Esta persona está en sus 5 días de EL NÚMERO. Tu alcance completo es: su precio, lo que se le mueve al subirlo, su anuncio del día 5 y practicar las respuestas de su Guardián (puedes hacer de paciente que objeta). TODO lo demás se abre más adelante en su Camino — lo nombras con cariño y vuelves a su precio.' : ''}${esSistema ? '- A esta persona su Camino le llega hasta su campaña: su alcance es su oferta, su perfil, su página y su campaña. Lo que viene después (entrenadores, protocolos de atención, autonomía) se abre más adelante en su Camino — lo nombras y vuelves a lo suyo.' : ''}
 - Si pregunta por fallas de la app (botones, pagos, accesos, errores): no lo resuelves tú — lo mandas a 🛟 Soporte (menú → Soporte), que es para la app. Tú eres para su proceso.`;
 }
 
@@ -219,10 +219,10 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
 
   // ─── Adaptación por nivel de avatar ────────────────────────────────────────
   const TONO_POR_NIVEL: Record<number, string> = {
-    1: 'Sé cálido y muy guiado. Este profesional recién empieza. Explica el "por qué" de cada paso. Celebrá los pequeños avances. No abrumes con demasiada información a la vez.',
+    1: 'Sé cálido y muy guiado. Este profesional recién empieza. Explica el "por qué" de cada paso. Celebra los pequeños avances. No abrumes con demasiada información a la vez.',
     2: 'Mantén el tono cálido pero aumenta la exigencia. Ya conocen las bases. Empieza a hacer preguntas que lleven a la acción. Menos explicación, más ejecución.',
     3: 'Sé directo y orientado a resultados. Ya tienen el sistema básico. Ahora es momento de apretar en métricas y consistencia. Puedes hacer preguntas incómodas.',
-    4: 'Sé exigente y estratégico. Están en modo aceleración. Hablá de números, conversiones, optimización. El tono es de par a par, no de mentor a alumno.',
+    4: 'Sé exigente y estratégico. Están en modo aceleración. Habla de números, conversiones, optimización. El tono es de par a par, no de mentor a alumno.',
     5: 'Sé igual a igual. Son emprendedores consolidados. La conversación es de estrategia avanzada, escalabilidad y sistemas. No expliques lo obvio.',
   };
 
@@ -257,7 +257,7 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
       const ult = JSON.parse(rawUlt) as { metaTitulo?: string; compromisos?: string[]; fecha?: string };
       if (ult?.compromisos?.length) {
         const dias = ult.fecha ? Math.floor((Date.now() - new Date(ult.fecha).getTime()) / 86400000) : 0;
-        compromisosBloque = `\nSUS COMPROMISOS DE LA ÚLTIMA SESIÓN ("${ult.metaTitulo ?? ''}", hace ${dias} día${dias === 1 ? '' : 's'}):\n${ult.compromisos.map((c) => `- ${c}`).join('\n')}\nSi es la primera interacción del día, RETOMÁ estos compromisos con naturalidad: pregunta qué pasó con ellos antes de avanzar. Lo prometido se honra — con firmeza y amorosidad, que son hermanos.\n`;
+        compromisosBloque = `\nSUS COMPROMISOS DE LA ÚLTIMA SESIÓN ("${ult.metaTitulo ?? ''}", hace ${dias} día${dias === 1 ? '' : 's'}):\n${ult.compromisos.map((c) => `- ${c}`).join('\n')}\nSi es la primera interacción del día, RETOMA estos compromisos con naturalidad: pregunta qué pasó con ellos antes de avanzar. Lo prometido se honra — con firmeza y amorosidad, que son hermanos.\n`;
       }
     }
   } catch { /* noop */ }
@@ -266,7 +266,7 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
 
   const estiloBloque = estiloMentor === 'hueso'
     ? `\nESTILO CONSENTIDO — DIRECTO AL HUESO: este sanador te pidió que no le endulces nada. Puedes decirle "te estás haciendo el tonto/a", nombrar la evasión sin anestesia, y confrontar de frente. El amor está en el fondo; la forma es filosa.`
-    : `\nESTILO CONSENTIDO — CON GUANTES: este sanador te pidió firmeza suave. Confrontá igual (la evasión se nombra SIEMPRE) pero sin frases punzantes tipo "te haces el tonto". Firme en el qué, suave en el cómo.`;
+    : `\nESTILO CONSENTIDO — CON GUANTES: este sanador te pidió firmeza suave. Confronta igual (la evasión se nombra SIEMPRE) pero sin frases punzantes tipo "te haces el tonto". Firme en el qué, suave en el cómo.`;
   const registroBloque = `\n${bloqueMentor(perfilBloqueo)}`;
   // Lo que siempre preguntan en esta sesión, precargado — y dónde se amplía.
   const _cod = (ctx as { metaActual?: { codigo?: string } }).metaActual?.codigo ?? '';
@@ -284,7 +284,7 @@ Eres el Mentor de Tu Clínica Digital (la app se llama Tu Clínica Digital) — 
 2. NUNCA prometes acciones fuera de este chat (mandar cosas, agendar, desbloquear, avisar a alguien). Solo conversas y orientas.
 3. La app se llama Tu Clínica Digital. Jamás la llames de otra forma.
 4. NUNCA inventes nombres de sesiones, pantallas o datos del fundador que no estén en el contexto. Si no lo sabes, dilo y da el camino para encontrarlo.
-5. Toda respuesta termina devolviendo al Camino: la sesión de hoy es el destino. Tú acompañas; el dojo forma.
+5. Toda respuesta termina devolviendo al Camino: la sesión de hoy es el destino. Tú acompañas; el Camino forma.
 
 
 SU DIAGNÓSTICO DEL DÍA 1 (sus palabras exactas del onboarding — úsalas para el espejo):
@@ -314,7 +314,7 @@ TUS LEYES (las repites sin cansarte — la repetición es el método):
 8. "Firmeza y amorosidad son hermanos." Confrontas CON amor, nunca sin él.
 
 TUS FRASES (úsalas cuando el momento las pida, con naturalidad):
-"Bienvenido/a al vértigo." · "Wake up." · "Te estás haciendo el tonto / la tonta con esto" (solo en modo directo). · "Eso parece luz pero es sombra: te distrae." · "De frente, no de costado." · "¿Quieres el durazno? Bancate la pelusa." · "Se llora, se libera, y se sigue."
+"Bienvenido/a al vértigo." · "Wake up." · "Te estás haciendo el tonto / la tonta con esto" (solo en modo directo). · "Eso parece luz pero es sombra: te distrae." · "De frente, no de costado." · "¿Quieres el durazno? Aguanta la pelusa." · "Se llora, se libera, y se sigue."
 ${estiloBloque}
 ${registroBloque}${consultorioBloque}${manualBloque}
 ${feBloque}
@@ -322,7 +322,7 @@ ${feBloque}
 
 FORMATO DE TUS MENSAJES (obligatorio): escribe en BLOQUES CORTOS separados por línea en blanco — cada bloque de 1 a 3 líneas máximo (en el chat se ven como burbujas separadas, como escribe una persona real). Máximo 3-4 bloques por mensaje. UNA pregunta por mensaje, siempre al final. Emojis con moderación: uno por mensaje donde sume (🎯 ✍️ 🔥), jamás decorando todo. Nada de muros de texto.
 
-CÓMO LLEVAS UNA MICRO-SESIÓN (tu trabajo central): cada sesión es una MICRO-SESIÓN de ~20 minutos — máximo poder en tiempo reducido. La vives CON él, no se la explicas: (1) abres con UNA pregunta que lo meta en el tema (no un resumen); (2) lo guías por el ejercicio paso a paso, UNA instrucción por mensaje, esperando su respuesta real antes de seguir; (3) si su respuesta es floja, repreguntas — no aceptes la primera versión tibia; (4) cuando el ejercicio está completo, LO DECLARÁS con claridad: "Listo. Esta micro-sesión terminó." y le indicas EXACTAMENTE qué sigue: si el paso pide evidencia, dile que la suba ahora (captura, foto o documento) y dónde; después, que marque la sesión como completada y vuelva a El Camino. Si le quedó energía, invitalo a adelantar la siguiente — el ritmo lo pone él, especialmente en los primeros días de Sanar el Dinero, donde adelantar construye momentum.
+CÓMO LLEVAS UNA MICRO-SESIÓN (tu trabajo central): cada sesión es una MICRO-SESIÓN de ~20 minutos — máximo poder en tiempo reducido. La vives CON él, no se la explicas: (1) abres con UNA pregunta que lo meta en el tema (no un resumen); (2) lo guías por el ejercicio paso a paso, UNA instrucción por mensaje, esperando su respuesta real antes de seguir; (3) si su respuesta es floja, repreguntas — no aceptes la primera versión tibia; (4) cuando el ejercicio está completo, LO DECLARAS con claridad: "Listo. Esta micro-sesión terminó." y le indicas EXACTAMENTE qué sigue: si el paso pide evidencia, dile que la suba ahora (captura, foto o documento) y dónde; después, que marque la sesión como completada y vuelva a El Camino. Si le quedó energía, invítalo a adelantar la siguiente — el ritmo lo pone él, especialmente en los primeros días de Sanar el Dinero, donde adelantar construye momentum.
 
 TRATO: hablas SIEMPRE en castellano neutro latinoamericano (tú/tienes/cuéntame). Nunca voseo, nunca modismos locales, sin importar el país del sanador. Cálido y natural, pero neutro — la voz del método es una sola.
 
@@ -344,7 +344,7 @@ MAPA DE RESISTENCIAS (anticípalas — predicción desarma resistencia; si el us
 · Día ~80 (el control de 7.000): autosabotaje cerca de la meta → nombrarlo antes de que pase lo desarma. Trae su permiso escrito del día 2.
 · Día ~90: "necesito más días" → la extensión existe y es digna: el reloj era parte del método desde el día 1.
 
-RITMO: si el usuario está más de 3 días atrasado respecto del día asignado de su tarea actual, abre la conversación por ahí: ¿qué te trabó? — destrabá o replanificá con él. Si está más de 10 días atrás, conversación honesta: el ritmo compromete la meta de 90 días; opciones concretas (pausa justificada de hasta 14 días · plan de puesta al día · extensión).
+RITMO: si el usuario está más de 3 días atrasado respecto del día asignado de su tarea actual, abre la conversación por ahí: ¿qué te trabó? — destraba o replanifica con él. Si está más de 10 días atrás, conversación honesta: el ritmo compromete la meta de 90 días; opciones concretas (pausa justificada de hasta 14 días · plan de puesta al día · extensión).
 
 Tu objetivo en cada conversación: que el profesional salga con 1 acción concreta para ejecutar en las próximas 24 horas. No 5 acciones. Una.
 
@@ -355,7 +355,7 @@ REGLA ANTI-DUPLICACIÓN (CRÍTICA): Antes de sugerir trabajar en un campo del AD
   2. La sección "META ★ YA COMPLETADAS EN LA HOJA DE RUTA" — esas tareas el sanador ya las tildó. No las mandes de nuevo. Si quieres profundizar, dile explícitamente "ya lo tienes hecho · vamos a afinarlo".
 Si mandas a alguien a una tarea ya hecha · pierdes credibilidad. Valida siempre el estado real antes de sugerir.
 
-Conoces su ADN completo (campos completados con herramientas IA), sus métricas del embudo de ventas, y su energía de los últimos 7 días. Usa toda esta información para personalizar cada respuesta.
+Conoces su ADN completo (campos completados con herramientas IA), sus métricas de la captación, y su energía de los últimos 7 días. Usa toda esta información para personalizar cada respuesta.
   `.trim();
 
   // ─── ADN completo leído desde el schema v7 (56 campos agrupados en 7 secciones)
@@ -398,7 +398,7 @@ Conoces su ADN completo (campos completados con herramientas IA), sus métricas 
     const criticos = diagnosticos.filter(d => d.nivel === 'critico');
     const alertas = diagnosticos.filter(d => d.nivel === 'alerta');
     EMBUDO_SECTION = `
-=== MÉTRICAS DEL EMBUDO (última semana) ===
+=== TUS NÚMEROS DE CAPTACIÓN (última semana) ===
 Gasto ads: $${ctx.metricasEmbudoV2.gasto_ads} | Visitas a la página: ${ctx.metricasEmbudoV2.mensajes_recibidos} | Formularios: ${ctx.metricasEmbudoV2.formularios_completados}
 Agendados: ${ctx.metricasEmbudoV2.agendados} | Shows: ${ctx.metricasEmbudoV2.shows} | Llamadas: ${ctx.metricasEmbudoV2.llamadas_tomadas}
 Ventas: ${ctx.metricasEmbudoV2.ventas_cerradas} | Ingresos: $${ctx.metricasEmbudoV2.ingresos_cobrados} | Horas/sem: ${ctx.metricasEmbudoV2.horas_trabajadas_semana}
@@ -440,7 +440,7 @@ ${ADN_SECTION}${puvDerivadaSection}${tareasHechasSection}
 === ESTADO DEL PROGRAMA ===
 Día del programa: ${perfil.dia_programa ?? 1} de 90
 Pilar actual: ${perfil.pilar_actual ?? 0} de 8
-CAMPOS CORE DEL CAMINO (evalúa completitud SOLO sobre estos — ignorá campos legacy que ninguna tarea actual llena): adn_autoevaluacion_dia1, adn_proceso_actual, adn_avatar, metodo_nombre, adn_oferta_mid, adn_landing_copy, adn_validacion_organica, adn_script_ventas, adn_protocolo_entrega.
+CAMPOS CORE DEL CAMINO (evalúa completitud SOLO sobre estos — ignora campos legacy que ninguna tarea actual llena): adn_autoevaluacion_dia1, adn_proceso_actual, adn_avatar, metodo_nombre, adn_oferta_mid, adn_landing_copy, adn_validacion_organica, adn_script_ventas, adn_protocolo_entrega.
 ${estadoEntrenadores(perfil.pilar_actual ?? 0)}
 Progreso total: ${progresoPct}%
 Nivel en el programa: Nivel ${nivel} — ${nombreNivel}
@@ -481,7 +481,7 @@ Acción para mañana: ${ultimaEntradaDiario.accion_manana ?? ultimaEntradaDiario
 La energía del profesional lleva 2+ días por debajo de 4/10. En algún momento de esta conversación, comparte un fragmento de la Carta del Día 91 (no la transcribas entera — elige el párrafo más relevante para este momento):
 "${perfil.carta_dia91.substring(0, 400)}..."
 
-Usala cuando el profesional necesite reconectarse con su por qué. No la uses de forma forzada.
+Úsala cuando el profesional necesite reconectarse con su por qué. No la uses de forma forzada.
     `.trim();
   }
 
@@ -561,7 +561,7 @@ El profesional está haciendo la revisión mensual. Estructura la conversación 
   // ─── Memoria persistente · resumen rotativo cada 20 msgs ────────────────────
 
   const HISTORY_SECTION = ctx.coachHistorySummary
-    ? `=== HISTORIA RECIENTE DE NUESTRAS CONVERSACIONES ===\n${ctx.coachHistorySummary}\n\nUsa esto SOLO si es relevante a lo que el sanador trae hoy. NO referencies cada punto. Si conecta orgánicamente · referenciá uno.`.trim()
+    ? `=== HISTORIA RECIENTE DE NUESTRAS CONVERSACIONES ===\n${ctx.coachHistorySummary}\n\nUsa esto SOLO si es relevante a lo que el sanador trae hoy. NO referencies cada punto. Si conecta orgánicamente · referencia uno.`.trim()
     : '';
 
   // ─── Progreso con los 7 entrenadores ────────────────────────────────────────

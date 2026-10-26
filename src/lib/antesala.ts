@@ -195,11 +195,25 @@ export function abreLaSesionUno(a: Antesala | null | undefined): boolean {
 /**
  * Quien ya cerró su primera jornada no vuelve atrás. La antesala es la puerta
  * de entrada, no un paso que se le agrega a mitad de camino a quien ya entró.
+ *
+ * ═══ Y A QUIEN COMPRÓ CINCO DÍAS NO LE TOCA NUNCA ═══
+ *
+ * La antesala existe porque el que compra noventa días llega agotado y la
+ * primera sesión le pide claridad. Ese razonamiento vale para los noventa
+ * días. Para el tramo de cinco, se da vuelta entero: su acceso dura lo mismo
+ * que la antesala, así que descansar primero le consume la compra completa.
+ * Lo que la página le promete para hoy le llegaría el día seis, con el acceso
+ * por vencer.
+ *
+ * Así que en el tramo corto se entra directo a la sesión 1. El descanso no
+ * desaparece: vuelve a estar disponible el día que sube al Camino de noventa.
  */
 export function leToca(
   a: Antesala | null | undefined,
   yaCerroElDiaUno: boolean,
+  tramoCorto = false,
 ): boolean {
+  if (tramoCorto) return false;
   return !yaCerroElDiaUno && !abreLaSesionUno(a);
 }
 

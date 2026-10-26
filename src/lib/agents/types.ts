@@ -50,7 +50,7 @@ export type AgenteCategoria =
  */
 export interface QuickReplyEstructurado {
   id: string;
-  icon: string;          // emoji unicode
+  icon: string;          // nombre del ícono · lo resuelve MISION_ICON_MAP en Agentes.tsx
   label: string;         // título corto del botón
   subtitle: string;      // descripción breve
   action: string;        // 'start_mode_guiado' | 'request_upload' | etc · informativo

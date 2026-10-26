@@ -32,6 +32,11 @@ export interface DestinoQueCambia {
   etiqueta: string;
   /** Corto, para la barra de abajo. */
   etiquetaCorta: string;
+  /**
+   * Su ícono. Antes no venía, así que la barra cambiaba la etiqueta y
+   * heredaba el ícono del destino anterior: «Mi ADN» salía con un megáfono.
+   */
+  icono: 'Dna' | 'Megaphone';
 }
 
 /**
@@ -43,8 +48,8 @@ export interface DestinoQueCambia {
 export function destinoQueCambia(donde: DondeVa | null | undefined): DestinoQueCambia {
   const montando = !donde || yaLlegoAlDia(donde, DIA_EN_QUE_EMPIEZA_CAMPANAS);
   return montando
-    ? { id: 'campanas', etiqueta: 'Campañas', etiquetaCorta: 'Campañas' }
-    : { id: 'adn', etiqueta: 'Mi ADN', etiquetaCorta: 'Mi ADN' };
+    ? { id: 'campanas', etiqueta: 'Campañas', etiquetaCorta: 'Campañas', icono: 'Megaphone' }
+    : { id: 'adn', etiqueta: 'Mi ADN', etiquetaCorta: 'Mi ADN', icono: 'Dna' };
 }
 
 /**

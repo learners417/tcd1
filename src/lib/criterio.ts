@@ -107,7 +107,7 @@ export const CRITERIOS: Record<SituacionDeCriterio, Criterio> = {
     cuando: 'Pide pausar, congelar o darse de baja.',
     loQuePasa:
       'Hay DOS motivos y se atienden distinto. «No me está funcionando» es un problema de '
-      + 'diagnóstico: hay un cuello sin resolver. «No tengo tiempo o plata» es una circunstancia, '
+      + 'diagnóstico: hay un cuello sin resolver. «No tengo tiempo o dinero» es una circunstancia, '
       + 'y ahí pausar es lo correcto.',
     queSeHace:
       'Se pregunta cuál de los dos es, antes de aceptar nada. Si es «no funciona», se mira su cadena '

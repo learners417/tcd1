@@ -91,7 +91,7 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
   },
   frecuencia: {
     accion: 'Ampliar el público o sumar otro país.',
-    como: 'Mensaje: «Tu público ya vio el anuncio más de tres veces esta semana: se agotó. NO es que el creativo dejó de servir — el público es muy chico. Ampliá la edad o suma otro país.»',
+    como: 'Mensaje: «Tu público ya vio el anuncio más de tres veces esta semana: se agotó. NO es que el creativo dejó de servir — el público es muy chico. Amplía la edad o suma otro país.»',
   },
   costo_agenda: {
     accion: 'Revisar a quién le está hablando el anuncio.',
@@ -114,7 +114,7 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
     como: 'Mensaje: «Estás vendiendo pero cobrando poco por adelantado. Ofrece el pago completo primero, y las cuotas solo si dice que no.»',
   },
   roi_cash: {
-    accion: 'Frenar la pauta hasta que entre plata.',
+    accion: 'Frenar la pauta hasta que entre dinero.',
     como: 'Mensaje: «Vamos a bajar la inversión unos días. Lo que entra todavía no alcanza para sostener lo que sale.»',
   },
   gasto_ratio: {
@@ -141,7 +141,7 @@ const ACCIONES: Record<string, { accion: string; como: string }> = {
 
 const GENERICA = {
   accion: 'Revisar la cuenta en el 1-1.',
-  como: 'Abrir su Mesa de plata juntos y mirar el cuello de botella que marca.',
+  como: 'Abrir su Mesa de dinero juntos y mirar el cuello de botella que marca.',
 };
 
 /**

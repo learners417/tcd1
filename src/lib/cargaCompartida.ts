@@ -111,7 +111,7 @@ export function firmaDe(v: ValorConFirma | undefined): string {
 // ── EL DIAGNÓSTICO PARCIAL ─────────────────────────────────────────────────
 
 /**
- * Los tramos del embudo, y qué campos hacen falta para poder opinar de cada uno.
+ * Los tramos de la captación, y qué campos hacen falta para poder opinar de cada uno.
  *
  * El orden importa: se va de arriba hacia abajo y se dice hasta dónde se
  * llega. Si falta un campo del medio, se puede opinar de lo de arriba y se

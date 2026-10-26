@@ -135,7 +135,9 @@ export function decidirCampana(e: EstadoCampana): DecisionCampana {
       return {
         ...base, estado: 'muerto',
         porQue: `Cada venta te cuesta $${costoPorVenta!.toFixed(0)}, más del 30% de tu precio.`,
-        queHacer: 'Apágalo. A ese costo no hay margen para escalar.',
+        // «escalar» está en el vocabulario prohibido de la casa, y la regla
+        // de voz dice con qué se reemplaza: «crecer sin poner más horas».
+        queHacer: 'Apágalo. A ese costo no hay margen para crecer.',
       };
     }
     // Una conversación cara SOLA no mata a un anuncio.

@@ -52,12 +52,12 @@ M4 · Cierre del programa
 ═══════════════════════════════════════════════════════════════════
 LOS 6 CASOS DIFÍCILES · CÓMO LOS SIMULAS:
 ═══════════════════════════════════════════════════════════════════
-💸 DESCUENTO: "está caro · ¿no puedes bajar un poco?"
-❌ CANCELACIÓN: "esto no es para mí · quiero pausar / quiero cancelar"
-💰 DEVOLUCIÓN: "no me sirvió · quiero plata"
-😤 INSATISFECHO: "esperaba más"
-😢 DRAMA EMOCIONAL: crisis personal a mitad del programa
-✍️ CUSTOM: sanadora describe un caso real · tú lo recreas
+DESCUENTO: "está caro · ¿no puedes bajar un poco?"
+CANCELACIÓN: "esto no es para mí · quiero pausar / quiero cancelar"
+DEVOLUCIÓN: "no me sirvió · quiero plata"
+INSATISFECHO: "esperaba más"
+DRAMA EMOCIONAL: crisis personal a mitad del programa
+CUSTOM: sanadora describe un caso real · tú lo recreas
 
 ═══════════════════════════════════════════════════════════════════
 LOS 3 MODOS:
@@ -73,7 +73,7 @@ MODO 2 · LIBRE · caso específico:
   Sanadora trae caso real. Tú simulas al cliente. Al final sales y feedback.
 
 MODO 3 · REVISAR MENSAJE REAL:
-  Sanadora sube screenshot mensaje difícil. Tú: lees · identificas qué hay
+  Sanadora sube captura mensaje difícil. Tú: lees · identificas qué hay
   debajo (frustración · miedo · objeción real) · sugieres cómo responder
   SIN escribir tú la respuesta.
 
@@ -131,7 +131,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado · 5 escenarios del ciclo',
     subtitle: 'Onboarding · primera sesión · checkpoint · caso difícil · cierre',
     action: 'start_mode_guiado',
@@ -140,8 +140,8 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'descuento',
-    icon: '💸',
-    label: 'Cliente me pidió descuento · ayudame',
+    icon: 'TrendingDown',
+    label: 'Cliente me pidió descuento · ayúdame',
     subtitle: 'Simulamos · te entreno a sostener sin regalar',
     action: 'start_descuento',
     first_message:
@@ -149,7 +149,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'cancelar',
-    icon: '❌',
+    icon: 'DoorOpen',
     label: 'Cliente quiere pausar o cancelar',
     subtitle: 'Distinguimos "irse genuino" vs "necesita revisión"',
     action: 'start_cancelar',
@@ -158,16 +158,16 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'revisar_mensaje',
-    icon: '📸',
+    icon: 'Camera',
     label: 'Revisa un mensaje real difícil',
-    subtitle: 'Sube screenshot · identifico qué hay debajo · te muestro cómo responder',
+    subtitle: 'Sube captura · identifico qué hay debajo · te muestro cómo responder',
     action: 'request_upload',
     first_message:
-      'Sube screenshot del mensaje del cliente · anonimiza nombre si quieres. Yo identifico qué hay debajo (frustración · miedo · objeción real) y te muestro CÓMO responder · pero tú escribes la respuesta · yo solo te guío.',
+      'Sube captura del mensaje del cliente · anonimiza nombre si quieres. Yo identifico qué hay debajo (frustración · miedo · objeción real) y te muestro CÓMO responder · pero tú escribes la respuesta · yo solo te guío.',
   },
   {
     id: 'cierre_testimonio',
-    icon: '🎉',
+    icon: 'Trophy',
     label: 'Cierre de programa · ¿cómo pido testimonio?',
     subtitle: 'Estructura de sesión cierre + testimonio fresco + invitación renovación',
     action: 'start_cierre',
@@ -176,7 +176,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'onboarding',
-    icon: '🤝',
+    icon: 'Handshake',
     label: 'Onboarding del cliente nuevo',
     subtitle: 'Los 4 puntos de las primeras 48hs post-pago',
     action: 'start_onboarding',

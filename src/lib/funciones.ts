@@ -59,7 +59,7 @@ export const FUNCIONES: Record<Funcion, DefinicionFuncion> = {
   },
   absorber: {
     id: 'absorber', nombre: 'Absorber',
-    siNadie: 'Los minutos no bajan nunca y el modelo deja de escalar.',
+    siNadie: 'Los minutos no bajan nunca y el modelo deja de crecer.',
     destino: 'crece',
     porQue: 'Su único producto es que las otras bajen. Si sus minutos suben y los de las demás también, está construyendo lo que no hace falta.',
   },
@@ -334,7 +334,7 @@ function leer(
           };
         }
         return {
-          lectura: `Bajó ${pct}%, pero nadie declaró qué lo bajó. Puede ser que una instalación terminó — eso es aritmética, no escala.`,
+          lectura: `Bajó ${pct}%, pero nadie declaró qué lo bajó. Puede ser que una instalación terminó — eso es aritmética, no crecimiento.`,
           alerta: false,
         };
       }
@@ -365,7 +365,7 @@ export function tituloDeLaSemana(tabla: MinutosDeFuncion[]): string {
   const alertas = tabla.filter((t) => t.alerta);
 
   if (conHito.length > 0) {
-    return `${conHito.map((t) => t.nombre).join(' y ')} bajó porque se construyó algo. Eso es el negocio escalando.`;
+    return `${conHito.map((t) => t.nombre).join(' y ')} bajó porque se construyó algo. Eso es el negocio creciendo.`;
   }
   if (bajaron.length > 0) {
     return `${bajaron.map((t) => t.nombre).join(' y ')} bajó, pero nadie declaró por qué. Averígualo antes de festejarlo.`;

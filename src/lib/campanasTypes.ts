@@ -73,7 +73,7 @@ export const OBJETIVO_LABELS: Record<ObjetivoCampana, { titulo: string; descripc
   },
   clientes_potenciales: {
     titulo: 'Clientes Potenciales',
-    descripcion: 'Directo a landing page con VSL. Objetivo: agendar llamada via formulario y calendario de GHL. Filtro API de inversion.',
+    descripcion: 'Directo a landing page con VSL. Objetivo: agendar llamada por formulario y calendario de GHL. Filtro API de inversion.',
   },
 };
 
@@ -161,7 +161,7 @@ export const ANGULO_LABELS: Record<AnguloCreativo, { titulo: string; descripcion
   },
   deseo: {
     titulo: 'Desde el Deseo',
-    descripcion: 'Vision aspiracional del resultado que el avatar quiere',
+    descripcion: 'Visión aspiracional del resultado que el avatar quiere',
   },
 };
 
@@ -206,7 +206,7 @@ export type ImageMode = 'completa' | 'fondo';
 export const ESTILO_VISUAL_OPTIONS: Record<EstiloVisual, { titulo: string; descripcion: string; prompt: string }> = {
   foto_real: {
     titulo: 'Estilo Foto Real',
-    descripcion: 'Fotografia profesional, naturalista, editorial',
+    descripcion: 'Fotografía profesional, naturalista, editorial',
     prompt: 'High-end editorial photography. Full-frame DSLR look, natural key light, shallow depth of field with smooth bokeh. Photorealistic skin tones and materials. Magazine-cover commercial quality. Premium stock photo aesthetic. No illustration, no CGI — pure photographic realism.',
   },
   bold: {
@@ -221,7 +221,7 @@ export const ESTILO_VISUAL_OPTIONS: Record<EstiloVisual, { titulo: string; descr
   },
   caricatura: {
     titulo: 'Estilo Caricatura',
-    descripcion: 'Ilustracion 2D cartoon, contornos marcados, colores planos',
+    descripcion: 'Ilustración 2D cartoon, contornos marcados, colores planos',
     prompt: '2D cartoon illustration style. Bold clean black outlines. Flat cel-shaded colors with minimal shadow. Exaggerated expressive features. Vibrant Saturday-morning animation palette. Hand-drawn feel with high readability. Similar to modern animated series. No photorealism, pure 2D illustration.',
   },
   comic: {
@@ -237,12 +237,12 @@ export const ESTILO_VISUAL_OPTIONS: Record<EstiloVisual, { titulo: string; descr
   noticias: {
     titulo: 'Estilo Noticias',
     descripcion: 'Captura tipo medio viral: foto real + titular bold + badge urgente + dato/estadistica',
-    prompt: 'Viral news/media post style — looks like an authentic screenshot of a viral news outlet post on Instagram (in the vein of El Kilombo, Infobae viral, FilterNews). Real photographic image as background (a person reacting, a relevant scene, candid documentary photo — NOT a TV anchor in a studio). Bold uppercase sans-serif headline overlaid at the bottom over a subtle dark gradient — headline includes a SHOCKING DATA POINT, percentage, statistic, or surprising claim (ej: "EL 67% DE LOS USUARIOS...", "ESPANA ES EL PAIS CON MAS..."). Small colored rectangular badge at the top-left of the headline area saying "VIRAL", "ULTIMO MOMENTO", "URGENTE" or similar in red/yellow. Optional small fake media logo bottom-left and small swipe arrow ">>" bottom-right. Vertical 4:5 or 9:16 framing. The vibe is tabloid digital, scroll-stopping, data-driven shock value — NOT a TV news broadcast, NOT a studio, NOT an anchor with chyron.',
+    prompt: 'Viral news/media post style — looks like an authentic captura of a viral news outlet post on Instagram (in the vein of El Kilombo, Infobae viral, FilterNews). Real photographic image as background (a person reacting, a relevant scene, candid documentary photo — NOT a TV anchor in a studio). Bold uppercase sans-serif headline overlaid at the bottom over a subtle dark gradient — headline includes a SHOCKING DATA POINT, percentage, statistic, or surprising claim (ej: "EL 67% DE LOS USUARIOS...", "ESPANA ES EL PAIS CON MAS..."). Small colored rectangular badge at the top-left of the headline area saying "VIRAL", "ULTIMO MOMENTO", "URGENTE" or similar in red/yellow. Optional small fake media logo bottom-left and small swipe arrow ">>" bottom-right. Vertical 4:5 or 9:16 framing. The vibe is tabloid digital, scroll-stopping, data-driven shock value — NOT a TV news broadcast, NOT a studio, NOT an anchor with chyron.',
   },
   twitter: {
     titulo: 'Estilo Twitter/X',
-    descripcion: 'Screenshot organico de un post real en X — texto a tamaño normal, no titular gigante',
-    prompt: 'AUTHENTIC X (Twitter) post screenshot — must look like a real screenshot taken from the X mobile or desktop app. Pixel-perfect replica of the platform UI: profile avatar circle (40-48px), display name in bold sans-serif at NORMAL size (~15-17px equivalent), verified blue checkmark next to name, gray @handle and timestamp on the same row, post body text rendered at 15-16px equivalent (NORMAL reading size — NOT giant headline-size text, NOT poster typography, NOT bold display). The post body uses regular weight sans-serif (system font: Segoe UI / SF Pro / Helvetica), left-aligned, with normal line-height. Below the text: small action row (reply, retweet, like, view counts) in muted gray. Dark mode (#15202B background, #F2EFE9 text) or light mode (white background, #0F1419 text). The post should occupy a card with subtle border. ABSOLUTE RULES: text in the body must be the same size as a real tweet — small enough that you could fit 280 characters. No oversized typography, no poster design, no decorative effects, no gradients, no extra graphics. Just a clean, organic, believable Twitter/X post screenshot.',
+    descripcion: 'Captura orgánica de un post real en X — texto a tamaño normal, no titular gigante',
+    prompt: 'AUTHENTIC X (Twitter) post captura — must look like a real captura taken from the X mobile or desktop app. Pixel-perfect replica of the platform UI: profile avatar circle (40-48px), display name in bold sans-serif at NORMAL size (~15-17px equivalent), verified blue checkmark next to name, gray @handle and timestamp on the same row, post body text rendered at 15-16px equivalent (NORMAL reading size — NOT giant headline-size text, NOT poster typography, NOT bold display). The post body uses regular weight sans-serif (system font: Segoe UI / SF Pro / Helvetica), left-aligned, with normal line-height. Below the text: small action row (reply, retweet, like, view counts) in muted gray. Dark mode (#15202B background, #F2EFE9 text) or light mode (white background, #0F1419 text). The post should occupy a card with subtle border. ABSOLUTE RULES: text in the body must be the same size as a real tweet — small enough that you could fit 280 characters. No oversized typography, no poster design, no decorative effects, no gradients, no extra graphics. Just a clean, organic, believable Twitter/X post captura.',
   },
 };
 
@@ -263,14 +263,14 @@ export const IMAGE_FORMAT_OPTIONS: Record<ImageFormat, { label: string; descripc
   'yt_thumbnail': { label: 'YouTube Thumbnail',   descripcion: 'Portada de video (1280x720)',   width: 1280, height: 720 },
 };
 
-// ─── Calidad de generacion (OpenAI gpt-image-2) ─────────────────────────────
+// ─── Calidad de generación (OpenAI gpt-image-2) ─────────────────────────────
 // Trade-off de costo/velocidad: low = rapido y barato, high = fidelidad maxima.
 
 export type ImageQuality = 'low' | 'medium' | 'high' | 'auto';
 
 export const IMAGE_QUALITY_OPTIONS: Record<ImageQuality, { label: string; descripcion: string; costoAprox: string }> = {
   auto:   { label: 'Auto',   descripcion: 'Deja que el modelo decida',                  costoAprox: 'variable' },
-  low:    { label: 'Baja',   descripcion: 'Rapida y barata — borradores, iteracion',    costoAprox: '~$0.006/img' },
+  low:    { label: 'Baja',   descripcion: 'Rápida y barata — borradores, iteración',    costoAprox: '~$0.006/img' },
   medium: { label: 'Media',  descripcion: 'Default recomendado — balance calidad/costo', costoAprox: '~$0.053/img' },
   high:   { label: 'Alta',   descripcion: 'Fidelidad maxima — assets finales, texto denso', costoAprox: '~$0.211/img' },
 };

@@ -147,7 +147,7 @@ export const INDUCCION: SesionDeInduccion[] = [
   },
   {
     numero: 2, dia: 1, minutos: 20,
-    titulo: 'El embudo de siete pasos',
+    titulo: 'La captación de siete pasos',
     diagrama: 'embudo',
     datos: [
       'Presupuesto → anuncio → mensaje → conversación → confirmación → llamada → cierre → cobro.',

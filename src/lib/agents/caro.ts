@@ -45,7 +45,7 @@ MODO 2 · LIBRE (Nivel 2-3):
   o si pide feedback explícito. Si va bien · te quedas al margen.
 
 MODO 3 · REVISAR REAL (cualquier nivel):
-  Sanador sube foto/selfie/screenshot del setup. Tú analizas con visión y marcas:
+  Sanador sube foto o captura de dónde grabas. Tú analizas con visión y marcas:
   altura del celular (a la altura de ojos) · luz (natural · lateral · evitar contraluz) ·
   fondo (limpio · sin reflejos) · postura · expresión · encuadre · estabilidad.
 
@@ -111,7 +111,7 @@ const ADN_FIELDS: AdnFieldKey[] = [
 const QUICK_REPLIES: QuickReplyEstructurado[] = [
   {
     id: 'guiado',
-    icon: '🎯',
+    icon: 'Target',
     label: 'Entrenamiento guiado desde cero',
     subtitle: '5 prácticas progresivas · arrancamos por la mirada',
     action: 'start_mode_guiado',
@@ -120,7 +120,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'libre',
-    icon: '🏋️',
+    icon: 'Dumbbell',
     label: 'Práctica libre · yo te observo',
     subtitle: 'Tú eliges qué practicar hoy · yo corrijo si veo algo',
     action: 'start_mode_libre',
@@ -129,8 +129,8 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'subir_setup',
-    icon: '📸',
-    label: 'Sube una foto de tu setup',
+    icon: 'Camera',
+    label: 'Sube una foto de dónde grabas',
     subtitle: 'Te reviso luz · encuadre · postura',
     action: 'request_upload',
     first_message:
@@ -138,8 +138,8 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'miedo',
-    icon: '😬',
-    label: 'Tengo miedo a cámara · ayudame',
+    icon: 'Frown',
+    label: 'Tengo miedo a cámara · ayúdame',
     subtitle: 'Charlemos lo que te pasa antes de practicar',
     action: 'start_emotional',
     first_message:
@@ -147,7 +147,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'planificar',
-    icon: '🎬',
+    icon: 'Clapperboard',
     label: 'Necesito grabar reels esta semana',
     subtitle: 'Planificamos los reels y te entreno cada uno',
     action: 'start_planning',
@@ -156,7 +156,7 @@ const QUICK_REPLIES: QuickReplyEstructurado[] = [
   },
   {
     id: 'explicar_metodo',
-    icon: '💡',
+    icon: 'Lightbulb',
     label: '¿Cómo es entrenar conmigo?',
     subtitle: 'Te explico mi método · mis modos · y cómo subir de nivel',
     action: 'explain_method',
