@@ -5,12 +5,17 @@
  * Reemplaza a la vieja página de Mensajes multicanal.
  */
 import { notificarAdminsMensaje } from '../lib/notifications';
+import { mensajeDeFalla } from '../lib/conexion';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bot, Users, Send, Loader2, Paperclip, X } from 'lucide-react';
+/* Era `Bot`: una carita de robot de 32px como estado vacío de Soporte IA, lo
+   primero que ve quien abre esa pestaña. Se lee infantil y abarata al Mentor.
+   `Sparkles` es el que esta casa ya usa para su mundo de IA (Mi ADN). */
+import { Sparkles, Users, Send, Loader2, Paperclip, X } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { generateText } from '../lib/aiProvider';
 import { usosSemana, consumirUso } from '../lib/planes';
+import { mapaDelMenu } from '../lib/destinos';
 import { COMPROMISO, type TipoDeMensaje } from '../lib/soporte';
 import {
   sinLeerDelCliente, marcarLeidos, subirArchivo, TOPE_ARCHIVO,
@@ -35,9 +40,17 @@ const TOPE_SOPORTE_SEMANAL = 10;
 const CANAL_SOPORTE: CanalDeSoporte = 'privado';
 type CanalDeSoporte = 'privado';
 
-const PROMPT_SOPORTE = `Eres el Soporte de Tu Clínica Digital (así se llama la app — jamás la llames de otra forma). Ayudas al fundador a usar la app: dónde está cada cosa, cómo se hace cada acción, qué hacer si algo no carga.
+/*
+ * Es una FUNCIÓN y no una constante: el mapa sale de `DESTINOS`, y evaluarlo
+ * al cargar el módulo reventaba con «mapaDelMenu is not defined» — hay un
+ * ciclo de imports entre esta pantalla y la lista de destinos, así que al
+ * momento de armar la constante la función todavía no existe. Armado cuando
+ * se usa, el ciclo ya está resuelto. El medidor lo cazó: dos errores de
+ * consola en una vista estricta.
+ */
+const promptDeSoporte = () => `Eres el Soporte de Tu Clínica Digital (así se llama la app — jamás la llames de otra forma). Ayudas al fundador a usar la app: dónde está cada cosa, cómo se hace cada acción, qué hacer si algo no carga.
 
-EL MAPA REAL DEL MENÚ (usa estos nombres exactos): Hoy · El Camino · Mi Clínica · El Método · Diario del Fundador · Mentor IA · Entrenadores IA · Creador de Contenido · Campañas & Creativos · Ajustes · Soporte.
+EL MAPA REAL DEL MENÚ (usa estos nombres exactos): ${mapaDelMenu()} · Ajustes.
 
 REGLAS DE HIERRO:
 1. NUNCA ofreces "links" ni "enlaces" (no puedes generarlos). Das el camino de clics exacto: "Menú → El Camino → toca la sesión".
@@ -72,16 +85,23 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
 
   return (
     <div className="max-w-2xl mx-auto pb-12 animate-in fade-in duration-300">
-      <p className="text-2xl font-light text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Soporte</p>
+      {/*
+        Decía «Soporte», que era el CUARTO nombre del mismo lugar: la barra de
+        arriba y las pestañas dicen «Contacto», el buscador «Acompañamiento»,
+        y acá adentro «Soporte». La prueba de los nombres miraba tres lugares y
+        este es el cuarto — el encabezado DENTRO de la pantalla, que es el que
+        el cliente tiene delante mientras lee.
+      */}
+      <p className="text-2xl font-light text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Acompañamiento</p>
       <p className="text-sm text-cream/55 mb-5">Dos puertas: la respuesta al instante, o el equipo humano.</p>
 
       <div className="grid grid-cols-2 gap-2 mb-5">
         <button onClick={() => setTab('ia')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'ia' ? 'border-gold/50 bg-gold/10 text-gold' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
-          <Bot className="w-4 h-4" /> Soporte IA
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'ia' ? 'elegido-etiqueta' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
+          <Sparkles className="w-4 h-4" /> Soporte IA
         </button>
         <button onClick={() => setTab('humano')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'humano' ? 'border-gold/50 bg-gold/10 text-gold' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-bold transition-colors ${tab === 'humano' ? 'elegido-etiqueta' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'}`}>
           <Users className="w-4 h-4" /> Soporte Humano
         </button>
       </div>
@@ -120,7 +140,7 @@ function SoporteIA() {
     setCargando(true);
     try {
       const out = await generateText({ tarea: 'chat',
-        systemInstruction: PROMPT_SOPORTE,
+        systemInstruction: promptDeSoporte(),
         messages: nuevos.slice(-8).map((m) => ({ role: m.role, content: m.content })),
       });
       setMsgs((p) => [...p, { role: 'assistant', content: out || 'No pude responder ahora. Intenta de nuevo, o escríbele al equipo en Soporte Humano.' }]);
@@ -135,13 +155,13 @@ function SoporteIA() {
       <div ref={scrollRef} className="h-[46vh] overflow-y-auto space-y-3 mb-4 pr-1">
         {msgs.length === 0 && (
           <div className="text-center py-10">
-            <Bot className="w-8 h-8 text-gold/50 mx-auto mb-3" />
+            <Sparkles className="w-8 h-8 text-gold/50 mx-auto mb-3" />
             <p className="text-sm text-cream/70">Pregunta lo que necesites de la app.</p>
             <p className="text-xs text-cream/45 mt-1">"¿Dónde subo mi comprobante?" · "¿Cómo retomo mi sesión?" · "No me carga un video"</p>
           </div>
         )}
         {msgs.map((m, i) => (
-          <div key={i} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
+          <div key={i} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'ml-auto burbuja-mia' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
             {m.role === 'assistant' ? <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-li:my-0"><Markdown>{m.content}</Markdown></div> : m.content}
           </div>
         ))}
@@ -150,7 +170,7 @@ function SoporteIA() {
       <div className="flex gap-2">
         <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar()}
           placeholder="Escribe tu pregunta…"
-          className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+          className="flex-1 bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
         <button onClick={enviar} disabled={!input.trim() || cargando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]"><Send className="w-4 h-4" /></button>
       </div>
       <p className="text-sm text-cream/40 mt-2 text-right">Te quedan {restantes} consultas esta semana · se renuevan el lunes</p>
@@ -222,7 +242,7 @@ function SoporteHumano({
       try {
         subido = await subirArchivo(adjunto, userId);
       } catch (err) {
-        setFallo(err instanceof Error ? err.message : 'No pudimos subir el archivo.');
+        setFallo(mensajeDeFalla(err, 'subir el archivo'));
         setEnviando(false);
         return;
       }
@@ -261,7 +281,7 @@ function SoporteHumano({
         {(['duda', 'roto'] as TipoDeMensaje[]).map((t) => (
           <button key={t} type="button" onClick={() => setTipo(t)}
             className={`min-h-[44px] px-3 rounded-xl border text-sm font-bold transition-colors ${
-              tipo === t ? 'border-gold/50 bg-gold/10 text-gold' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'
+              tipo === t ? 'elegido-etiqueta' : 'border-cream/10 bg-surface/30 text-cream/60 hover:border-cream/25'
             }`}>
             {t === 'duda' ? 'Tengo una duda' : 'Algo no funciona'}
           </button>
@@ -273,7 +293,7 @@ function SoporteHumano({
       <div ref={scrollRef} className="h-[42vh] overflow-y-auto space-y-3 mb-4 pr-1">
         {msgs.length === 0 && <p className="text-sm text-cream/45 text-center py-10">Todavía no hay mensajes. Escribe el primero.</p>}
         {msgs.map((m) => (
-          <div key={m.id} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.emisor_id === userId ? 'ml-auto bg-gold/15 text-cream border border-gold/20' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
+          <div key={m.id} className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.emisor_id === userId ? 'ml-auto burbuja-mia' : 'bg-surface/60 text-cream/90 border border-cream/10'}`}>
             {m.contenido}
             {m.archivo_url ? (
               m.tipo_archivo === 'imagen' ? (
@@ -321,12 +341,12 @@ function SoporteHumano({
           }} />
         <button type="button" onClick={() => archivoRef.current?.click()}
           aria-label="Adjuntar una captura o un archivo"
-          className="min-h-[44px] min-w-[44px] rounded-xl border border-[rgba(232,150,46,0.15)] bg-surface/50 flex items-center justify-center text-cream/70 hover:text-cream hover:border-gold/40">
+          className="min-h-[44px] min-w-[44px] rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/50 flex items-center justify-center text-cream/70 hover:text-cream hover:border-gold/40">
           <Paperclip className="w-5 h-5" />
         </button>
         <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar()}
           placeholder={adjunto ? 'Cuenta qué pasó, o mándalo así…' : 'Escribe al equipo…'}
-          className="flex-1 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+          className="flex-1 bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
         <button onClick={enviar} disabled={(!input.trim() && !adjunto) || enviando} className="btn-primary px-4 rounded-xl disabled:opacity-40 min-h-[44px]">
           {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>

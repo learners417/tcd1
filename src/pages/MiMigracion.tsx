@@ -28,6 +28,7 @@ import {
   QUE_TRAER, ANTES_DE_EMPEZAR, tieneContenido, CAMPOS_PARA_CAMPANAS,
 } from '../lib/migracionDelCliente';
 import { guardarMiMigracion } from '../lib/migracionDatos';
+import { mensajeDeFalla } from '../lib/conexion';
 
 type Paso = 'traer' | 'revisar' | 'listo';
 
@@ -59,7 +60,9 @@ export default function MiMigracion({ clienteId, onIrACampanas }: {
       setExtraido(r);
       setPaso('revisar');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'No pude leer tu material. Probá de nuevo.');
+      // El mensaje de la IA llega como «IA API error: 500 — …», y eso no se le
+      // muestra a alguien que pagó. `mensajeDeFalla` dice qué pasó y qué hacer.
+      toast.error(mensajeDeFalla(e, 'leer tu material'));
     } finally {
       setLeyendo(false);
     }
@@ -75,7 +78,7 @@ export default function MiMigracion({ clienteId, onIrACampanas }: {
       await guardarMiMigracion(clienteId, extraido);
       setPaso('listo');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'No se pudo guardar.');
+      toast.error(mensajeDeFalla(e, 'guardar tu trabajo'));
     } finally {
       setGuardando(false);
     }
@@ -90,8 +93,9 @@ export default function MiMigracion({ clienteId, onIrACampanas }: {
             Trae tu trabajo
           </h1>
           <p className="text-[17px] text-cream/70 mt-1 leading-relaxed">
-            Ya tienes tu plan, tu método y tu oferta hechos. No los vas a hacer de nuevo:
-            los traes acá y tu Camino queda al día.
+            Ya tienes tu plan, tu método y tu oferta hechos. No los vas a escribir de
+            nuevo: los traes acá y quedan cargados en tu ADN, que es de donde salen
+            tus anuncios, tu página y tu campaña.
           </p>
         </div>
 
@@ -166,8 +170,8 @@ export default function MiMigracion({ clienteId, onIrACampanas }: {
                 </p>
               ))}
               <p className="text-[17px] text-cream/60 leading-relaxed pt-2">
-                Completalas abajo. Puedes guardar igual y hacerlas después: lo que quede
-                vacío queda como sesión pendiente en tu Camino, no se da por hecho.
+                Complétalas abajo: se escriben acá mismo. Puedes guardar igual, y lo
+                que quede vacío queda vacío — nada se da por hecho.
               </p>
             </div>
           )}
@@ -236,8 +240,8 @@ export default function MiMigracion({ clienteId, onIrACampanas }: {
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-gold" />
               <span>
                 Para activar tu campaña te faltan {faltan.length}{' '}
-                {faltan.length === 1 ? 'pieza' : 'piezas'}. Están como sesiones
-                pendientes en tu Camino: se hacen en una sentada.
+                {faltan.length === 1 ? 'pieza' : 'piezas'}. Las cerramos juntos:
+                escríbenos por Soporte y las trabajamos en una sesión.
               </span>
             </p>
           </div>

@@ -6,10 +6,11 @@
  */
 import { useState } from 'react';
 import { planActual, planPermitePilar, planParaPilar, NOMBRE_PLAN, PRECIO_FUNDADOR } from '../lib/planes';
-import { Lock, ChevronRight, Check, Circle } from 'lucide-react';
+import { Lock, ChevronRight, Check, Circle, FileText } from 'lucide-react';
 import { PIEZAS_ADN, estadoPieza, resumenADN, planLimitado, contenidoDePieza, esEscribibleAqui, guardarOrigen, type PiezaADN } from '../lib/adnPiezas';
 import type { ProfileV2 } from '../lib/supabase';
 import { VOC } from '../lib/vocabulario';
+import ManualNegocio from './ManualNegocio';
 
 interface ADNProps {
   perfil?: Partial<ProfileV2>;
@@ -109,7 +110,24 @@ function Pieza({ p, onIr }: { p: PiezaADN; onIr?: () => void }) {
   );
 }
 
-export default function ADN({ setCurrentPage }: ADNProps) {
+export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ADNProps) {
+  /*
+   * Esta pantalla recibía `perfil`, `userId` y `onProfileFieldUpdate` desde
+   * App.tsx y los ignoraba: solo desestructuraba `setCurrentPage`. Y las
+   * piezas leen de localStorage, que espeja apenas tres campos del perfil.
+   *
+   * Del otro lado, ManualNegocio muestra los veintiocho campos del ADN con
+   * su contenido, el selector del país del profesional —de donde sale el
+   * tono de sus landings y sus anuncios— y los enlaces al paso exacto del
+   * Camino que completa cada campo. Quedó inalcanzable cuando el alias de
+   * `manualNegocio` empezó a redirigir acá, y con él se fueron diecinueve
+   * campos que el cliente genera y después no tiene dónde leer, y la única
+   * forma que tenía de cambiar su país después del primer día.
+   *
+   * Las piezas siguen siendo la puerta —es la pantalla del menú— y el ADN
+   * completo vive un toque más adentro, con lo que ya estaba construido.
+   */
+  const [verCompleto, setVerCompleto] = useState(false);
   const { selladas, total } = resumenADN();
   const limitado = planLimitado();
   const planHoy = planActual();
@@ -120,11 +138,32 @@ export default function ADN({ setCurrentPage }: ADNProps) {
   const irAlCamino = setCurrentPage ? () => setCurrentPage('roadmap') : undefined;
   const bloqueadas = PIEZAS_ADN.filter((p) => estadoPieza(p).bloqueada).length;
 
+  if (verCompleto && setCurrentPage) {
+    return (
+      <ManualNegocio
+        perfil={perfil ?? {}}
+        userId={userId}
+        setCurrentPage={setCurrentPage}
+        onProfileFieldUpdate={onProfileFieldUpdate}
+        onVolver={() => setVerCompleto(false)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto pb-14 animate-in fade-in duration-300 space-y-6">
       <div>
-        <p className="text-2xl font-light text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu ADN</p>
-        <p className="text-sm text-cream/55 mt-1">Todo lo que esta app construye sale de acá: tus textos, tus anuncios, tu oferta, tu clínica.</p>
+        {/* Un turno anterior vio que la barra de arriba dice «Mi ADN» a cien
+            píxeles de acá y lo resolvió igualando el posesivo: decía «Tu ADN»
+            y pasó a «Mi ADN». Quedaba el mismo nombre dos veces, uno encima
+            del otro. Ahora la pantalla abre con lo que el ADN ES para el
+            cliente, que es lo que viene abajo.
+
+            Iba como `<p>` con el serif a 24 píxeles: se veía título y no lo
+            era. Por eso el lente del nombre doble no lo marcaba, y la pantalla
+            no tenía ningún encabezado. El lente ahora mira también los títulos
+            que no usan etiqueta de título. */}
+        <p className="text-sm text-cream/55">Todo lo que esta app construye sale de acá: tus textos, tus anuncios, tu oferta, tu clínica.</p>
       </div>
 
       <div className="card-panel px-5 py-4">
@@ -132,10 +171,20 @@ export default function ADN({ setCurrentPage }: ADNProps) {
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">Sellado</p>
           <p className="text-sm font-bold text-gold">{selladas} de {total}{selladas === total ? ' — completo' : ''}</p>
         </div>
-        <div className="flex gap-1">
+        {/*
+          Catorce segmentos de 1,5 píxeles de alto, separados, y en cero
+          sellados los catorce vacíos: lo que se ve no es una barra, es una
+          línea punteada rota. Y es lo primero que mira el cliente nuevo en su
+          ADN, que justo arranca en cero.
+          Ahora miden 4 y su vacío tiene la línea del panel: siguen siendo uno
+          por pieza —cada uno dice el nombre de la suya al tocarlo— pero el
+          conjunto se lee como la barra que es.
+        */}
+        <div className="flex gap-[3px]">
           {PIEZAS_ADN.map((p) => (
             <div key={p.id} title={VOC(p.titulo)}
-              className={`h-1.5 flex-1 rounded-full ${estadoPieza(p).sellada ? 'bg-gold' : 'bg-cream/15'}`} />
+              className={`h-1 flex-1 rounded-full ${estadoPieza(p).sellada ? 'bg-gold' : ''}`}
+              style={estadoPieza(p).sellada ? undefined : { background: 'var(--line2, #DFD3BC)' }} />
           ))}
         </div>
       </div>
@@ -151,8 +200,23 @@ export default function ADN({ setCurrentPage }: ADNProps) {
         <div className="space-y-2">{activos.map((p) => <Pieza key={p.id} p={p} onIr={irAlCamino} />)}</div>
       </div>
 
+      {setCurrentPage && (
+        <button
+          type="button"
+          onClick={() => setVerCompleto(true)}
+          className="w-full card-panel px-5 min-h-[44px] py-4 flex items-center gap-3 text-left hover:bg-gold/[0.06] transition-colors"
+        >
+          <FileText className="w-5 h-5 text-gold shrink-0" />
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-semibold text-cream">Mi ADN completo</span>
+            <span className="block text-[15px] text-cream/55 mt-0.5">Los veintiocho campos con su contenido, tu país, y el paso que completa cada uno</span>
+          </span>
+          <ChevronRight className="w-4 h-4 text-cream/45 shrink-0" />
+        </button>
+      )}
+
       {nivelQueSigue && faltantes.length > 0 && (
-        <div className="card-panel p-5 border border-gold/30 bg-gradient-to-b from-gold/[0.07] to-transparent">
+        <div className="card-panel p-5 border border-gold/30 bg-gold/[0.05]">
           <p className="text-sm text-cream/85 leading-relaxed">
             Te faltan <strong className="text-gold">{faltantes.length} piezas</strong> de tu ADN. Se abren con <strong className="text-cream">{NOMBRE_PLAN[nivelQueSigue]}</strong> ({PRECIO_FUNDADOR[nivelQueSigue]}) — son las que convierten lo que ya sellaste en pacientes que lo pagan.</p>
         </div>

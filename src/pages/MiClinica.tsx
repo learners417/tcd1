@@ -61,12 +61,15 @@ export default function MiClinica(
 
       {/* ── LAS DOS LLAVES ── */}
       <section className="card-panel p-6 sm:p-7" aria-label="Qué es Mi Clínica">
-        <p className="text-[16px] font-bold uppercase tracking-[0.16em] text-goldhi">
-          Tienes dos llaves
-        </p>
-        <h1 className="mt-2 text-[30px] leading-tight text-cream"
+        {/*
+          Eran una versalita con la idea y un titular con el nombre, y el
+          nombre ya estaba en la barra de arriba. Ahora el titular ES la idea:
+          lo que el cliente tiene, que es lo único que esta tarjeta vino a
+          decir.
+        */}
+        <h1 className="text-[30px] leading-tight text-cream"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-          Mi Clínica
+          Tienes dos llaves
         </h1>
         <p className="mt-3 text-[18px] leading-relaxed text-cream/80">
           {VOC(comoLoEncuentra(perfil))}
@@ -76,10 +79,13 @@ export default function MiClinica(
           {[LAS_DOS_LLAVES.camino, LAS_DOS_LLAVES.clinica].map((l, i) => (
             <div key={l.nombre}
               className={`rounded-2xl border p-5 ${
-                i === 1 ? 'border-gold/40 bg-gold/[0.06]' : 'border-cream/12'}`}>
+                i === 1 ? 'elegido' : 'border-cream/12'}`}>
               <p className="text-[17px] font-bold text-cream">{l.nombre}</p>
-              <p className={`mt-1 text-[19px] leading-snug ${i === 1 ? 'text-goldhi' : 'text-cream/85'}`}
-                style={{ fontFamily: 'var(--font-display)' }}>
+              {/* Era serif de display a 19: con la altura de x de Cormorant eso lee
+                  como un sans de 15. Es una etiqueta de categoría, no un título
+                  editorial, así que va en el sans de la casa, donde 17 se lee
+                  como 17. */}
+              <p className={`mt-1 text-[17px] leading-snug ${i === 1 ? 'text-goldhi' : 'text-cream/85'}`}>
                 {l.que}
               </p>
               <p className="mt-2 text-[17px] leading-relaxed text-cream/65">{VOC(l.como)}</p>

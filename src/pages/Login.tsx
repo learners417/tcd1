@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Stethoscope, Eye, EyeOff, Lock, Mail, Loader2, X } from 'lucide-react';
 import { signIn, sendPasswordReset } from '../lib/auth';
 import { toast } from 'sonner';
+import { mensajeDeFalla } from '../lib/conexion';
 
 interface LoginProps {
   onLogin: () => void;
@@ -39,7 +40,7 @@ export default function Login({ onLogin }: LoginProps) {
     const { error } = await sendPasswordReset(resetEmail);
     setResetLoading(false);
     if (error) {
-      toast.error(`No se pudo enviar el mail: ${error}`);
+      toast.error(mensajeDeFalla(error, 'enviar el correo'));
       return;
     }
     toast.success('Te enviamos un mail con el link para recuperar tu contraseña.');
@@ -58,11 +59,11 @@ export default function Login({ onLogin }: LoginProps) {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-br from-gold to-goldhi items-center justify-center shadow-lg shadow-gold/20 mb-4">
+          <div className="inline-flex w-16 h-16 rounded-2xl bg-gold/[0.05] items-center justify-center shadow-lg shadow-gold/20 mb-4">
             <Stethoscope className="w-8 h-8 text-ink" />
           </div>
           <h1 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Clínica Digital</h1>
-          <p className="text-sm text-cream/55 mt-1">El dojo de tu práctica · 90 días</p>
+          <p className="text-sm text-cream/55 mt-1">El camino de tu práctica · 90 días</p>
         </div>
 
         {/* Card */}
@@ -82,7 +83,7 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="tu@email.com"
                   required
                   disabled={loading}
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-3 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50"
+                  className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-3 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50"
                 />
               </div>
             </div>
@@ -99,7 +100,7 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="••••••••"
                   required
                   disabled={loading}
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-3 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50"
+                  className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-3 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -137,15 +138,15 @@ export default function Login({ onLogin }: LoginProps) {
           </button>
 
           <p className="text-center text-xs text-cream/45 mt-6">
-            ¿Otros problemas? Contacta a tu coach por WhatsApp.
+            ¿Otros problemas? Escríbele a tu Mentor por WhatsApp.
           </p>
         </div>
       </div>
 
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-panel border border-[rgba(232,150,46,0.12)] rounded-2xl w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+          <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
               <h3 className="text-sm font-semibold text-cream">Recuperar contraseña</h3>
               <button
                 onClick={() => setShowResetModal(false)}
@@ -168,7 +169,7 @@ export default function Login({ onLogin }: LoginProps) {
                   required
                   autoFocus
                   disabled={resetLoading}
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                  className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-2.5 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
                 />
               </div>
               <button

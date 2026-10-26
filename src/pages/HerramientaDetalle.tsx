@@ -194,7 +194,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
             {campo.tipo === 'textarea' ? (
               <textarea
                 rows={3}
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 resize-none transition-all placeholder-cream/30"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 resize-none transition-all placeholder-cream/30"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -208,7 +208,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
             ) : campo.tipo === 'number' ? (
               <input
                 type="number"
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -216,7 +216,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
             ) : (
               <input
                 type="text"
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all"
                 placeholder={campo.placeholder}
                 value={inputs[campo.id] ?? ''}
                 onChange={(e) => setInput(campo.id, e.target.value)}
@@ -285,7 +285,7 @@ export default function HerramientaDetalle({ herramientaId, userId, perfil, onVo
 
           <div className="bg-black/20 rounded-xl p-4 min-h-24">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-cream/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[var(--line, rgba(142,104,36,0.18))]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : (

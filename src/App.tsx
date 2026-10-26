@@ -26,7 +26,9 @@ import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
 import { cinturonDesdeProgreso } from './lib/cinturones';
-import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, checkoutUrl, planActualPermite } from './lib/planes';
+import { accesoVencido, PILAR_MAX, waLink, planActualPermite, diasRestantes } from './lib/planes';
+import { laOferta, laOfertaTrasElAcceso, ofertaReservada } from './lib/laOfertaQueSigue';
+import { TICKETS } from './lib/cuadroTickets';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -36,6 +38,7 @@ import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
 import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
+import { mensajeDeFalla } from './lib/conexion';
 import { diaDelPrograma, dondeVa } from './lib/diaPrograma';
 import { diaDeLaProximaJornada, jornadasCerradas } from './lib/roadmapSeed';
 import Entrenadores from './pages/Entrenadores';
@@ -121,37 +124,46 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
     quemas = set.has(claveDelDia(1)) ? 1 : 0;
     racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
   } catch { /* noop */ }
-  const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
-  const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
+  /*
+   * UN SOLO ESCALÓN, EL QUE SIGUE.
+   *
+   * Acá había dos tarjetas escritas a mano —«Tu Sistema · $497» y «El Programa
+   * Completo · $997»—, la escalera de cuando los planes se llamaban por color.
+   * Es la pantalla que ve el que pagó EL NÚMERO cuando se le cierra el acceso,
+   * o sea el punto de venta más caro de la app: dos nombres y dos precios que
+   * ya no se venden, y una elección entre dos justo en el momento de pagar.
+   *
+   * Si el equipo le reservó un cupo de los de hoy, se le ofrece ese. Si no
+   * —o si lo que le anotaron es un color viejo— el que abre el primer pilar
+   * que su plan no abría, que es La Base.
+   */
+  const reservado = ofertaReservada(planReservado);
+  const oferta = reservado ? laOferta(reservado) : laOfertaTrasElAcceso(PILAR_MAX.blanco);
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
-      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
+      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[var(--line2, rgba(142,104,36,0.30))]">
+        {/* El plazo es lo que terminó. Las cinco sesiones puede no haberlas
+            hecho: «tus 5 días están completos» le afirmaba un logro que esta
+            pantalla no sabe si ganó. */}
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Terminó tu plazo de los 5 días</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
         <p className="text-sm text-cream/75 mb-5 leading-relaxed">
           {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados, esperándote.
         </p>
-        {nombreRes && (
-          <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+        {reservado && (
+          <p className="text-sm text-cream/80 mb-5">Tu lugar sigue reservado: <span className="text-goldhi font-semibold">{oferta.nombre}</span> · {oferta.precio}</p>
         )}
-        <div className="text-left mb-5 space-y-2">
-          {([
-            ['🟢', 'Tu Sistema', '$497', 'Tu método con nombre, tu oferta construida, tu página y tu primera campaña encendida.'],
-            ['⚫', 'El Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
-          ] as const).map(([e, n, p, d]) => (
-            <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
-              <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
-              <p className="text-sm text-cream/55 mt-0.5">{d}</p>
-            </div>
-          ))}
+        <div className="text-left mb-5 rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] bg-black/20 px-3.5 py-3">
+          <p className="text-sm font-bold text-cream">{oferta.nombre} · <span className="text-goldhi">{oferta.precio}</span></p>
+          <p className="text-sm text-cream/60 mt-1 leading-relaxed">{oferta.abre}</p>
         </div>
-        <a href={(planReservado && checkoutUrl(planReservado as 'verde' | 'negro')) || waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+        <a href={oferta.checkout || waLink(oferta.mensaje)} target="_blank" rel="noreferrer"
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
-        <p className="text-sm text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+        <p className="text-sm text-cream/35">Sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
       </div>
     </div>
   );
@@ -159,8 +171,8 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
 
 function __________PaginaBloqueada({ nombre }: { nombre: string }) {
   return (
-    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
-      <p className="text-4xl mb-4">🔒</p>
+    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[var(--line, rgba(142,104,36,0.18))]">
+      <Lock className="w-9 h-9 mx-auto mb-4 text-gold" />
       <h2 className="text-lg text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
       <p className="text-sm text-cream/55">Se desbloquea con el <span className="text-goldhi">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
     </div>
@@ -175,7 +187,7 @@ export default function App() {
   // ya se pintaron vuelvan a calcular su día con el corrimiento puesto.
   const [pausasListas, setPausasListas] = useState(false);
   useEffect(() => { void cargarVentanas().then(() => setPausasListas(true)); }, []);
-  // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
+  // El comprador de EL NÚMERO ($27) entra directo a su tramo corto: Mi Número
   useEffect(() => {
     try {
       const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
@@ -296,9 +308,29 @@ export default function App() {
   // ─── Auth init ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isSupabaseReady() || !supabase) {
-      // No Supabase configured — skip auth, go straight to app (dev mode)
+      // Sin base configurada: se entra directo, sin sesión.
       const existing = localStorage.getItem('tcd_profile');
       if (!existing) localStorage.setItem('tcd_profile', JSON.stringify(profile));
+      /*
+       * Y el perfil de la memoria pasa a ser EL perfil.
+       *
+       * Sin esto `supabaseProfile` quedaba en `null` en este modo, y todo lo
+       * que lo recibe como prop se comportaba como si el cliente no tuviera
+       * nada: el candado comercial del Camino abierto, el cierre de la ventana
+       * de acceso sin mostrarse nunca, el ADN completo vacío. Medio producto
+       * quedaba invisible en el único modo en que se puede medir sin una
+       * cuenta de verdad — y la ventana vencida, que es donde se recupera a
+       * alguien que no pagó, no la había visto nadie.
+       *
+       * Con base configurada no cambia nada: ahí manda la sesión, y si el
+       * perfil no llega la app lo dice en vez de entrar a medias (más abajo).
+       */
+      try {
+        const guardado = JSON.parse(existing ?? localStorage.getItem('tcd_profile') ?? '{}');
+        if (guardado && typeof guardado === 'object' && Object.keys(guardado).length > 0) {
+          setSupabaseProfile(guardado as SupabaseProfile);
+        }
+      } catch { /* si está roto, se entra igual: este modo no bloquea */ }
       setAuthState('logged_in');
       return;
     }
@@ -421,18 +453,45 @@ export default function App() {
   }, []);
 
   const saveProfile = async () => {
-    localStorage.setItem('tcd_profile', JSON.stringify(profileDraft));
+    /*
+     * La copia local se ACTUALIZA, no se reemplaza.
+     *
+     * `JSON.stringify(profileDraft)` la pisaba entera. Y `profileDraft` sale
+     * de `loadProfile()`, que cuando no encuentra la copia devuelve cinco
+     * campos de default. Así que guardar desde un navegador sin copia cargada
+     * se llevaba lo que el login había espejado de la base: el `id` —que
+     * necesita el cobro de créditos—, `plan_comercial` —sin él la escalera
+     * cae en «completo» y un comprador del plan más bajo se lleva la app
+     * entera— y `acceso_hasta`, que es su ventana de acceso.
+     */
+    try {
+      const previo = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as Record<string, unknown>;
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...previo, ...profileDraft }));
+    } catch {
+      localStorage.setItem('tcd_profile', JSON.stringify(profileDraft));
+    }
     setProfile(profileDraft);
 
-    // Also update in Supabase if available
+    /*
+     * SOLO LO QUE ESTA PANTALLA EDITA.
+     *
+     * Mandaba también `fecha_inicio` y `plan`, que no están en el formulario:
+     * salían de `tcd_profile`, la copia en el navegador. O sea que cualquier
+     * diferencia entre esa copia y la base se escribía en la base, con la
+     * copia ganando, al tocar «Guardar Cambios» para corregirse el nombre.
+     *
+     * Y `fecha_inicio` es el día desde el que se cuenta TODO: el día del
+     * Camino, el color de cada jornada y el atraso con el que se mide la
+     * garantía. Un cliente en el día 60 que entra sin esa copia cargada
+     * —navegador nuevo, datos borrados— la guardaba con la fecha de hoy y
+     * volvía al día 1.
+     */
     if (supabase && supabaseProfile) {
       const { error } = await supabase
         .from('profiles')
         .update({
           nombre: profileDraft.nombre,
           especialidad: profileDraft.especialidad,
-          fecha_inicio: profileDraft.fecha_inicio,
-          plan: profileDraft.plan,
         })
         .eq('id', supabaseProfile.id);
 
@@ -465,7 +524,7 @@ export default function App() {
     const { error } = await updatePassword(recoveryPassword);
     setRecoveryLoading(false);
     if (error) {
-      toast.error(`Error: ${error}`);
+      toast.error(mensajeDeFalla(error, 'cambiar tu contraseña'));
       return;
     }
     toast.success('Contraseña actualizada. Ya puedes usar la app.');
@@ -476,8 +535,8 @@ export default function App() {
 
   const RecoveryModal = showRecoveryModal ? (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
-        <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+      <div className="bg-panel border border-[var(--line2, rgba(142,104,36,0.30))] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="px-5 py-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
           <p className="text-sm text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
         </div>
@@ -495,7 +554,7 @@ export default function App() {
                 minLength={8}
                 disabled={recoveryLoading}
                 autoFocus
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
@@ -517,7 +576,7 @@ export default function App() {
                 placeholder="Repite la contraseña"
                 required
                 disabled={recoveryLoading}
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
             </div>
           </div>
@@ -758,8 +817,8 @@ export default function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
+          <div className="w-full max-w-2xl bg-surface border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--line, rgba(142,104,36,0.18))]">
               <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
@@ -771,7 +830,7 @@ export default function App() {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Settings Sidebar */}
-              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-surface/50 flex flex-col">
+              <div className="w-1/3 border-r border-[var(--line, rgba(142,104,36,0.18))] p-4 space-y-2 bg-surface/50 flex flex-col">
                 <div className="flex-1 space-y-2">
                   {([
                     { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
@@ -810,7 +869,7 @@ export default function App() {
                       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                       <button
                         onClick={() => avatarInputRef.current?.click()}
-                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[var(--line2, rgba(142,104,36,0.30))] hover:border-gold/50 transition-colors overflow-hidden"
                       >
                         {avatarUrl ? (
                           <img loading="lazy" src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -834,7 +893,7 @@ export default function App() {
                             type="text"
                             value={profileDraft.nombre}
                             onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                         <div>
@@ -843,7 +902,7 @@ export default function App() {
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
                           />
                           <p className="text-xs text-cream/45 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
@@ -853,12 +912,12 @@ export default function App() {
                             type="text"
                             value={profileDraft.especialidad}
                             onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
+                    <div className="pt-6 border-t border-[var(--line, rgba(142,104,36,0.18))] flex justify-end gap-3">
                       <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors">
                         Cancelar
                       </button>
@@ -869,14 +928,29 @@ export default function App() {
                   </div>
                 )}
 
+                {/* QUÉ AVISOS LLEGAN, SIN INTERRUPTORES QUE NO GUARDAN.
+                    Había cuatro switches, todos encendidos, sin nada detrás:
+                    el cliente apagaba «Mensajes del equipo», cerraba, volvía
+                    a abrir, y estaba encendido otra vez. Y entre tanto creía
+                    que lo había apagado.
+                    Mientras no exista dónde guardar esa preferencia, la
+                    pantalla dice la verdad: estos son los avisos que llegan. */}
                 {settingsTab === 'notificaciones' && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-cream mb-4">Preferencias de Notificaciones</h3>
-                    {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
-                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
-                        <span className="text-sm text-cream/80">{item}</span>
-                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-gold" />
-                      </label>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-cream mb-1">Tus avisos</h3>
+                    <p className="text-[15px] text-cream/65 leading-relaxed">
+                      Te llegan a la campana de arriba, y suenan mientras tienes la app abierta.
+                    </p>
+                    {[
+                      ['Cuando el equipo te responde', 'Tu mensaje de Soporte, respondido.'],
+                      ['Cuando se gana un cinturón', 'Al cerrar la jornada que lo entrega.'],
+                      ['Cuando una evidencia se revisa', 'Con el motivo, si hace falta subir otra.'],
+                      ['Cuando se abre algo nuevo', 'Tu Biblioteca, tu Creador, tu próxima etapa.'],
+                    ].map(([titulo, detalle]) => (
+                      <div key={titulo} className="py-3 border-b border-[var(--line, rgba(142,104,36,0.18))]">
+                        <p className="text-[17px] text-cream/90">{titulo}</p>
+                        <p className="text-[15px] text-cream/60 mt-0.5 leading-relaxed">{detalle}</p>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -894,7 +968,7 @@ export default function App() {
                           if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
                           else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
                         }}
-                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-gold text-sm hover:bg-gold/10 transition-colors"
+                        className="px-4 py-2 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] text-gold text-sm hover:bg-gold/10 transition-colors"
                       >
                         Enviarme el email de restablecimiento
                       </button>
@@ -902,18 +976,43 @@ export default function App() {
                   </div>
                 )}
 
+                {/* LO QUE CONTRATÓ, CON SU NOMBRE.
+                    Decía «Tu Clínica Digital — DWY». DWY es un código interno
+                    y al cliente no le dice nada; peor, es de la escalera
+                    vieja. Lo que compró hoy es La Base, El Ascenso o La
+                    Instalación, y eso sí lo reconoce porque es lo que pagó. */}
                 {settingsTab === 'facturacion' && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-cream mb-4">Facturación</h3>
-                    <div className="bg-surface/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-cream/80">Plan Actual</span>
-                        <span className="px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-medium">
-                          Tu Clínica Digital — {profile.plan}
-                        </span>
-                      </div>
-                      <p className="text-xs text-cream/55">Programa de 90 días</p>
-                    </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-cream mb-1">Lo que contrataste</h3>
+                    {(() => {
+                      const esc = supabaseProfile?.servicio_contratado;
+                      const t = esc ? TICKETS[esc] : null;
+                      const dias = diasRestantes(supabaseProfile);
+                      return (
+                        <>
+                          <div className="rounded-2xl border border-gold/25 p-4">
+                            <p className="text-[19px] font-bold text-cream">
+                              {t ? t.nombre : 'Tu programa de 90 días'}
+                            </p>
+                            {t && (
+                              <p className="text-[17px] text-cream/75 mt-1.5 leading-relaxed">{t.incluye}</p>
+                            )}
+                          </div>
+                          {dias !== null && (
+                            <p className="text-[17px] text-cream/70 leading-relaxed">
+                              {dias > 0
+                                ? `Tu acceso sigue abierto ${dias} ${dias === 1 ? 'día' : 'días'} más.`
+                                : 'Tu acceso está para renovar: escríbenos por Soporte y lo abrimos.'}
+                            </p>
+                          )}
+                          {supabaseProfile?.cima_incluida && (
+                            <p className="text-[17px] text-cream/70 leading-relaxed">
+                              Tienes La Cima incluida: los cuatro días en Bariloche.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

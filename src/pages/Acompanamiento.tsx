@@ -20,6 +20,7 @@ import { Send, Video, Calendar, Lock, MessageSquare, Trophy, Loader2 } from 'luc
 import { toast } from 'sonner';
 import {
   viaDe, canalesDe, puedeEscribirEn, INVITACION_AL_ACOMPANAMIENTO, A_DONDE_VA,
+  elDiaYElTema, losTresEncuentros,
   type IdCanal,
 } from '../lib/viaDeContacto';
 import {
@@ -37,11 +38,16 @@ interface Props {
   onUnreadChange?: (n: number) => void;
 }
 
-const DIA_DEL_TEMA: Record<string, string> = {
-  producto: 'Martes', marketing: 'Miércoles', ventas: 'Jueves',
-};
+/*
+ * El día y el tema salían de un mapa escrito acá, con las claves crudas del
+ * canal: la pantalla imprimía «Miércoles · marketing», que es el
+ * identificador de la base y además una palabra que la casa no usa. El canal
+ * se llama «Captación» desde su propia línea en `CANALES`, así que el día y
+ * el nombre salen de ahí: `elDiaYElTema`.
+ */
 
 import { sinLeerDelCliente } from '../lib/soporteDatos';
+import { mensajeDeFalla } from '../lib/conexion';
 
 export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadChange }: Props) {
   const via = useMemo(() => viaDe(servicio), [servicio]);
@@ -169,7 +175,7 @@ function ElReporte({ clienteId }: { clienteId?: string }) {
       cargar();
       toast.success('Lo tengo. Te contesto en 48 horas hábiles.');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'No se pudo mandar.');
+      toast.error(mensajeDeFalla(e, 'mandar tu mensaje'));
     } finally {
       setMandando(false);
     }
@@ -301,8 +307,8 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
       <div className="card-panel p-5">
         <p className="text-sm font-bold text-cream mb-1">Tus tres encuentros por semana</p>
         <p className="text-sm text-cream/70 leading-relaxed">
-          Martes producto · Miércoles marketing · Jueves ventas. El link está acá:
-          entras directo, sin que nadie te lo mande.
+          {losTresEncuentros()}. El link está acá: entras directo, sin que
+          nadie te lo mande.
         </p>
       </div>
 
@@ -326,7 +332,7 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <p className="text-xs uppercase tracking-wider text-gold/70">
-                  {DIA_DEL_TEMA[s.tema] ?? ''} · {s.tema}
+                  {elDiaYElTema(s.tema)}
                 </p>
                 <p className="text-sm font-bold text-cream mt-0.5">
                   {cuando.toLocaleDateString('es', { day: 'numeric', month: 'long' })}
@@ -367,7 +373,7 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
                 <Video className="w-4 h-4 text-gold/70 shrink-0" />
                 <span className="flex-1">
                   <span className="block text-sm font-bold text-cream">
-                    {DIA_DEL_TEMA[g.tema] ?? ''} · {g.tema}
+                    {elDiaYElTema(g.tema)}
                   </span>
                   <span className="block text-sm text-cream/55">
                     {new Date(g.empieza_en).toLocaleDateString('es', { day: 'numeric', month: 'long' })}
@@ -407,7 +413,7 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
       setTexto('');
       cargar();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'No se pudo escribir.');
+      toast.error(mensajeDeFalla(e, 'publicar lo que escribiste'));
     } finally {
       setMandando(false);
     }

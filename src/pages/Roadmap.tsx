@@ -16,7 +16,6 @@ import {
   Play,
   Wrench,
   MessageSquare,
-  Bot,
   Map as MapIcon,
   Sprout,
   BookOpen,
@@ -52,6 +51,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Palette,
   BarChart3,
 };
+import { toast } from 'sonner';
+import { mensajeDeFalla } from '../lib/conexion';
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { HojaDeRutaItem, VentaRegistrada, ProfileV2 } from '../lib/supabase';
 import {
@@ -59,7 +60,8 @@ import {
   roadmap,
   FASES_ROADMAP,
   calcularNivel,
-  TOTAL_METAS,
+  TOTAL_JORNADAS_DEL_CLIENTE,
+  SEED_ROADMAP_V3,
   type RoadmapPilar,
   type RoadmapMeta,
 } from '../lib/roadmapSeed';
@@ -73,7 +75,8 @@ import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
 import ComparacionDia45 from '../components/ComparacionDia45';
 import PilarUnlockedModal from '../components/PilarUnlockedModal';
-import { planDe, planPermitePilar, NOMBRE_PLAN, waLink, planParaPilar, checkoutUrl, PRECIO_FUNDADOR } from '../lib/planes';
+import { planDelCliente, planPermitePilar, waLink, enElTramoDelNumeroLocal } from '../lib/planes';
+import { laOfertaQueSigue } from '../lib/laOfertaQueSigue';
 import Graduacion from '../components/Graduacion';
 import { registrarSesionCompletada } from '../lib/racha';
 import { diaDelPrograma, diasHabilesDeAtraso, estaEnFaseAutonomia, mensajeDeRitmo, esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar } from '../lib/diaPrograma';
@@ -84,7 +87,7 @@ import QuienMonta from '../components/camino/QuienMonta';
 import CintaCinturon from '../components/CintaCinturon';
 
 // Lote D: adapta el encuadre de ciertas sesiones según el avatar del sanador
-import { notificarPilarCompletado, notificarCinturon } from '../lib/notifications';
+import { notificarPilarCompletado, notificarPilarDesbloqueado, notificarCinturon } from '../lib/notifications';
 import { otorgarCinturonPorPilar, calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
@@ -107,6 +110,7 @@ import HojaDeRuta from '../components/camino/HojaDeRuta';
 import { sellarDia, desactualizados, avisoDe } from '../lib/adnCoincidente';
 import TusNumeros from '../components/TusNumeros';
 import AntesYDespues from '../components/tasks/AntesYDespues';
+import { unirProgreso, leerProgresoLocal, guardarProgresoLocal } from '../lib/progresoDelCliente';
 
 // ─── Constantes v8 ────────────────────────────────────────────────────────────
 
@@ -191,7 +195,7 @@ function isTaskUnlocked(
   // descanso. A quien ya lo cerró no se le agrega esta puerta atrás.
   if (
     meta.dia_asignado === 1
-    && leToca(perfil?.antesala, completadas.has(claveDelDia(1)))
+    && leToca(perfil?.antesala, completadas.has(claveDelDia(1)), enElTramoDelNumeroLocal())
   ) {
     return false;
   }
@@ -245,7 +249,7 @@ function motivoBloqueo(
   },
   completadas?: Set<string>,
 ): string | null {
-  if (meta.dia_asignado === 1 && leToca(perfil?.antesala, completadas?.has(claveDelDia(1)) ?? false)) {
+  if (meta.dia_asignado === 1 && leToca(perfil?.antesala, completadas?.has(claveDelDia(1)) ?? false, enElTramoDelNumeroLocal())) {
     const falta = faltaEnLaAntesala(perfil?.antesala);
     return falta || 'Se abre cuando cierras tus cinco días de descanso.';
   }
@@ -270,7 +274,7 @@ function motivoBloqueo(
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 
-/** 📎 Documenta tu trabajo — la evidencia universal (Punto 7 · el archivo del viaje) */
+/** Documenta tu trabajo — la evidencia universal (Punto 7 · el archivo del viaje) */
 function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodigo: string }) {
   const [items, setItems] = useState<{ id: string; url?: string; nombre?: string }[]>([]);
   const [subiendo, setSubiendo] = useState(false);
@@ -281,13 +285,13 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
   }, [userId, metaCodigo]);
   if (!userId) return null;
   return (
-    <div className="mt-4 pt-4 border-t border-[rgba(232,150,46,0.08)]">
+    <div className="mt-4 pt-4 border-t border-[var(--line, rgba(142,104,36,0.18))]">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55">📎 Documenta tu trabajo</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55">Documenta tu trabajo</p>
         <button
           onClick={() => inputRef.current?.click()}
           disabled={subiendo}
-          className="text-sm px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.2)] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+          className="text-sm px-3 py-1.5 rounded-lg border border-[var(--line2, rgba(142,104,36,0.30))] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
         >
           {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
         </button>
@@ -339,7 +343,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         setVentas(nuevas);
         setVentaModal(false);
         setVentaMonto('');
-        // La GRADUACIÓN: al llegar a 10, una sola vez.
+        // La GRADUACIÓN: al llegar a 10, una sola vez. El día 90 también la
+        // abre, aunque las diez no estén — ver el efecto más abajo.
         if (nuevas.length >= 10 && !localStorage.getItem('tcd_graduacion_vista')) {
           localStorage.setItem('tcd_graduacion_vista', '1');
           setGraduacionVisible(true);
@@ -383,12 +388,10 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   // ─── Seed enriquecido con videos reales de programa_videos ─────────────
   // ── Gating por plan: EL NÚMERO ($27) abre P0-P1; el resto queda visible y bloqueado ──
-  const planLimitado = useMemo(() => {
-    try {
-      const p = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
-      return p === 'ELNUMERO';
-    } catch { return false; }
-  }, []);
+  // La pregunta vive en planes.ts: acá leía `plan` a mano y, como esa columna
+  // no se limpia al subir de escalón, al que pagaba La Base le dejaba el
+  // Camino cortado en el día 5 con el candado del día 6 puesto.
+  const planLimitado = useMemo(() => enElTramoDelNumeroLocal(), []);
 
   const seedConVideos: RoadmapPilar[] = useMemo(() => {
     if (Object.keys(videosPorPilar).length === 0) return SEED_ROADMAP_V2;
@@ -415,6 +418,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           const saved = localStorage.getItem('tcd_hoja_ruta_v2');
           if (saved) setCompletadas(new Set(JSON.parse(saved)));
         } catch { /* noop */ }
+        yaCargo.current = true;
         setLoading(false);
         return;
       }
@@ -426,12 +430,27 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       ]);
 
       if (hdr) {
-        const keys = (hdr as HojaDeRutaItem[])
-          .filter((r) => r.completada)
-          .map((r) => `${r.pilar_numero}-${r.meta_codigo}`);
-        setCompletadas(new Set(keys));
-        // Capa 4 · D8: la DB es la fuente de verdad — sincroniza el caché local
-        try { localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(keys)); } catch { /* noop */ }
+        /*
+         * ─── LA BASE MANDA DONDE HABLA, Y CALLA DONDE NO TIENE FILA ──────
+         *
+         * Decía «la DB es la fuente de verdad» y escribía su resultado tal
+         * cual encima del espejo local. Con la base devolviendo vacío —una
+         * cuenta nueva allá con progreso acá, una consulta que falla, el modo
+         * sin base— eso BORRA el trabajo del cliente, y es su única copia.
+         *
+         * Lo que el cliente cerró, cerrado está. Y el desmarcado también
+         * viaja: la base lo guarda como una fila con `completada: false`, que
+         * es lo que escribe `desmarcarHechoAfuera` cuando el equipo deshace
+         * desde el Admin una jornada dada por hecha afuera. Esas filas SÍ
+         * abren la jornada. Lo que la base no nombra queda como está.
+         * `unirProgreso` es ese criterio, y lo comparten las tres pantallas
+         * que traen la hoja de ruta.
+         *
+         * Y la escritura sale de acá: la hace el efecto de persistencia, que
+         * espera a que la carga termine. Dos lugares escribiendo la misma
+         * clave en el mismo arranque es cómo se perdía el progreso.
+         */
+        setCompletadas(unirProgreso(hdr as HojaDeRutaItem[]));
 
         // QA verde check — legacy, ya no se usa en V3
         // pero mantenemos para no romper el estado
@@ -456,22 +475,89 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         setVideosPorPilar(map);
       }
 
+      yaCargo.current = true;
       setLoading(false);
     }
     cargar();
   }, [userId]);
 
   // ─── Persistir en localStorage ──────────────────────────────────────────
+  /*
+   * ─── NO SE ESCRIBE ANTES DE HABER LEÍDO ──────────────────────────────
+   *
+   * Este efecto corría en el PRIMER render, cuando `completadas` todavía es
+   * el `new Set()` vacío con el que arranca, y pisaba `tcd_hoja_ruta_v2` con
+   * un array vacío. Medido: setenta y una jornadas guardadas pasaban a cero
+   * en menos de trescientos milisegundos, y no volvían.
+   *
+   * El cliente abría El Camino y perdía su progreso entero. Y ni siquiera
+   * podía entender qué pasó: con cero jornadas vuelve a aparecer la pantalla
+   * de «¿Qué ya tienes andando?», la pregunta del día cero, así que lo que ve
+   * es la app recién estrenada.
+   *
+   * `yaCargo` lo cierra: hasta que la carga termina —de la base o del espejo
+   * local— esto no toca nada. Lo escrito es la única copia que tiene quien
+   * trabaja sin base, y la primera que se consulta cuando la red falla.
+   */
+  const yaCargo = useRef(false);
   useEffect(() => {
-    localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...completadas]));
+    if (!yaCargo.current) return;
+    /*
+     * Y UN VACÍO NO PISA LO QUE HAY.
+     *
+     * El flag solo no alcanzaba: se marca al terminar la carga, pero
+     * `setCompletadas` no se refleja hasta el render siguiente, así que entre
+     * medio este efecto corre con el conjunto todavía vacío y escribe cero.
+     * Medido: con el flag puesto, las setenta y una jornadas igual se perdían.
+     *
+     * Un conjunto vacío se guarda solo si lo guardado también lo está. El
+     * único caso que esto deja afuera es el del cliente que desmarca su
+     * última jornada: se le queda esa una marcada en el espejo hasta la
+     * próxima que cierre. Contra perder setenta, es un cambio que vale.
+     */
+    const guardadas = leerProgresoLocal().size;
+    if (completadas.size === 0 && guardadas > 0) return;
+    guardarProgresoLocal(completadas);
+  }, [completadas]);
+
+  /**
+   * ═══ LAS JORNADAS SUYAS, HECHAS ═══
+   *
+   * Un solo cálculo para los dos lugares que preguntan «¿cuánto lleva?»: el
+   * porcentaje que ve el equipo y el «terminó el Camino» de la fase de
+   * autonomía. Los dos dividían o comparaban contra las noventa y una metas
+   * del seed —las del equipo y los días de campo incluidos— y ese total el
+   * cliente no lo alcanza: sus jornadas son sesenta y cuatro.
+   */
+  const suyasHechas = useMemo(() => {
+    const suyas = new Set(
+      SEED_ROADMAP_V3.flatMap((p) => (p.metas ?? [])
+        .filter(esPasoDelCliente)
+        .map((m) => `${p.numero}-${m.codigo}`)),
+    );
+    return [...completadas].filter((k) => suyas.has(k)).length;
   }, [completadas]);
 
   // ─── Sincronizar progreso en perfil de Supabase (para el Admin) ────────
   useEffect(() => {
     if (!isSupabaseReady() || !supabase || !userId) return;
-    const pct = TOTAL_METAS === 0 ? 0 : Math.round((completadas.size / TOTAL_METAS) * 100);
+    /*
+     * ─── LA MISMA VARA QUE VE EL CLIENTE ──────────────────────────────────
+     *
+     * Dividía por `TOTAL_METAS` —las noventa y una metas del seed, las del
+     * equipo y los días de campo incluidos— y ese total el cliente no lo
+     * alcanza: sus jornadas son sesenta y cuatro. Un cliente que cerró TODO
+     * lo suyo le aparecía al equipo al setenta por ciento, y desde ese número
+     * se decide a quién llamar y a quién dejar tranquilo.
+     *
+     * Ahora el numerador y el denominador son los mismos que la tarjeta de
+     * Métricas y la fracción del Camino: las jornadas del cliente.
+     */
+    const pct = TOTAL_JORNADAS_DEL_CLIENTE === 0
+      ? 0
+      : Math.round((suyasHechas / TOTAL_JORNADAS_DEL_CLIENTE) * 100);
     supabase.from('profiles').update({ progreso_porcentaje: pct }).eq('id', userId).then(() => {});
-  }, [completadas, userId]);
+  }, [suyasHechas, userId]);
 
   // ─── Cargar outputs de tareas guardados ────────────────────────────────
   useEffect(() => {
@@ -559,6 +645,26 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   // El día sale del calendario, nunca de la columna dia_programa (se congela
   // cuando el cliente deja de completar metas).
   const diaActual = diaDelPrograma(perfil?.fecha_inicio) ?? perfil?.dia_programa ?? 1;
+
+  /*
+   * ═══ LA GRADUACIÓN LLEGA POR EL DÍA, NO POR LAS VENTAS ═══
+   *
+   * Abría solo al registrar la décima venta a mano. Quien llegaba al día 90
+   * con nueve —o con diez cobradas y ninguna cargada en ese modal— no veía
+   * nunca su certificado, su foto de llegada ni el mensaje que se grabó a sí
+   * mismo el primer día. Y es un caso previsto: la app misma contesta «¿qué
+   * pasa si al día 90 no llegué a los diez?».
+   *
+   * Ahora la abre el día 90, una sola vez, y el contador de ventas sigue
+   * abriéndola antes si las diez llegan primero. La ceremonia cuenta lo que
+   * de verdad pasó: la pantalla recibe el número real de ventas.
+   */
+  useEffect(() => {
+    if (diaActual < 90) return;
+    if (localStorage.getItem('tcd_graduacion_vista')) return;
+    localStorage.setItem('tcd_graduacion_vista', '1');
+    setGraduacionVisible(true);
+  }, [diaActual]);
   // El paso en el que va: el primero sin completar, en el orden del Camino.
   let diaEsperado: number | null = null;
   let pasoDeHoy: (PasoDeHoy & { pilar: number; sistema: number | null }) | null = null;
@@ -616,7 +722,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       estado = 'bloqueado';
     }
     // ═══ El candado comercial (manda sobre todo): el pilar pertenece a un plan superior ═══
-    if (!planPermitePilar(planDe(perfil), pilar.numero)) estado = 'plan_bloqueado';
+    if (!planPermitePilar(planDelCliente(perfil), pilar.numero)) estado = 'plan_bloqueado';
     const metasCompletadas = pilar.metas.filter((m) =>
       completadas.has(`${pilar.numero}-${m.codigo}`),
     ).length;
@@ -677,6 +783,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         // G1 · Los despertares: la campanita celebra
         if (userId) {
           void notificarPilarCompletado(userId, pilar.titulo, pilar.numero);
+          /*
+           * El aviso de que se abrió el siguiente estaba escrito y nadie lo
+           * llamaba. Va acá, que es donde ya se sabe cuál es el que sigue y
+           * si quedó abierto: es el mismo dato que alimenta el modal.
+           */
+          if (nextPilar && nextPilar.estado !== 'bloqueado' && nextPilar.estado !== 'plan_bloqueado') {
+            void notificarPilarDesbloqueado(userId, nextPilar.titulo);
+          }
           const cintG1 = calcularCinturon(pilar.numero);
           void notificarCinturon(userId, cintG1.emoji, cintG1.nombre, cintG1.metafora);
         }
@@ -714,7 +828,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   // ─── Métricas globales ─────────────────────────────────────────────────
   const totalCompletadas = completadas.size;
-  const progresoPct = TOTAL_METAS === 0 ? 0 : Math.round((totalCompletadas / TOTAL_METAS) * 100);
+  /* Acá vivía `progresoPct`: declarado y nunca leído, con el mismo
+     denominador inalcanzable del de arriba. Séptima vez que esta casa
+     encuentra el patrón — código escrito y nunca conectado. */
   const pilarMasAltoCompletado = pilaresConEstado
     .filter((p) => p.estado === 'completado')
     .reduce((max, p) => Math.max(max, p.numero), -1);
@@ -727,44 +843,28 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const diasAtraso = diasHabilesDeAtraso(perfil?.fecha_inicio, diaEsperado, diaPrograma);
   const ritmo = mensajeDeRitmo(diaPrograma, diaEsperado, diasAtraso);
   // Fase Autonomía: por dónde está en el Camino (o si lo terminó), no por fecha.
-  const faseAutonomia = estaEnFaseAutonomia(diaEsperado, totalCompletadas > 0 && totalCompletadas >= TOTAL_METAS);
+  /* «Terminó el Camino» es que cerró LAS SUYAS. Comparaba contra las noventa
+     y una del seed, así que quien cerraba sus sesenta y cuatro no llegaba
+     nunca a la fase de autonomía por avance — solo por calendario. */
+  const faseAutonomia = estaEnFaseAutonomia(
+    diaEsperado,
+    suyasHechas > 0 && suyasHechas >= TOTAL_JORNADAS_DEL_CLIENTE,
+  );
 
   // ─── Toggle completar meta ─────────────────────────────────────────────
-  const toggleMeta = useCallback(
-    async (pilarNum: number, meta: RoadmapMeta, pilarEstado: EstadoPilar) => {
-      if (pilarEstado === 'bloqueado' || pilarEstado === 'plan_bloqueado') return;
-
-      const key = `${pilarNum}-${meta.codigo}`;
-      const ahoraCompletada = !completadas.has(key);
-
-      setCompletadas((prev) => {
-        const next = new Set(prev);
-        if (ahoraCompletada) next.add(key);
-        else next.delete(key);
-        return next;
-      });
-
-      // Celebración
-      if (ahoraCompletada && meta.es_estrella) {
-        try { localStorage.setItem('tcd_sesion_hoy_' + hoyISO(), meta.titulo); } catch { /* noop */ }
-        setCelebracion(`✓ Micro-sesión completada: ${VOC(meta.titulo)} — ¿te quedó energía? La siguiente ya está desbloqueada. Puedes adelantar.`);
-        setTimeout(() => setCelebracion(null), 5000);
-      }
-
-      // Sincronizar con Supabase
-      if (isSupabaseReady() && supabase && userId) {
-        await guardarFila('hoja_de_ruta', {
-            usuario_id: userId,
-            pilar_numero: pilarNum,
-            meta_codigo: meta.codigo,
-            completada: ahoraCompletada,
-            es_estrella: meta.es_estrella,
-            fecha_completada: ahoraCompletada ? new Date().toISOString().split('T')[0] : null,
-          }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
-      }
-    },
-    [completadas, userId],
-  );
+  /*
+   * Acá vivía `toggleMeta`: treinta y seis líneas con su escritura a la base y
+   * su celebración, definidas y NUNCA llamadas. El camino vivo es
+   * `handleCompleteTask`, que entra por `onComplete` en la jornada abierta.
+   *
+   * Es la quinta vez que esta casa encuentra el mismo patrón —código escrito,
+   * probado y nunca conectado— y esta vez costó algo más que espacio: su
+   * escritura de `completada: false` se usó como prueba de que la base guarda
+   * el desmarcado. La conclusión resultó correcta, pero por otra función:
+   * `desmarcarHechoAfuera`, que sí se llama, desde el panel del Admin.
+   * Razonar sobre código muerto da respuestas que a veces aciertan, que es lo
+   * peor que puede pasar.
+   */
 
   // ─── Parse historia output into 3 separate versions ────────────────────
   function parseHistoriaVersions(texto: string): { historia_300: string; historia_150: string; historia_50: string } | null {
@@ -923,6 +1023,47 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
    * está, se pone HOY — alguien que está tocando «Empezar el día 1» empieza
    * hoy, no el lunes que viene, que es además lo que dice el botón.
    */
+  /**
+   * Guarda una pieza del ADN: la escribe en el estado, en el teléfono y en la
+   * base, y MIRA el error.
+   *
+   * ═══ LOS CINCO QUE NO LLEGABAN ═══
+   *
+   * Cinco piezas se guardaban con `onProfileFieldUpdate`, que es solo estado
+   * de React: eneagrama, bonos de preventa, medición de salida, mapa de
+   * obstáculos y la foto de partida. El cliente no lo notaba, porque cada
+   * componente guarda además su copia en el teléfono; lo que no existía era
+   * el dato del lado del equipo ni del Mentor.
+   *
+   * La foto de partida era la más cara de las cinco: el día 1 promete
+   * compararla, y el día 45, la graduación y la foto del día 90 la leen desde
+   * el perfil. Las tres devolvían vacío, y como el estado vacío no dibuja
+   * nada, la promesa se rompía en silencio.
+   *
+   * Lo mismo vale para las piezas escritas desde el Espejo.
+   *
+   * El Espejo mostraba cuatro piezas y mandaba a buscarlas a otra pantalla, y
+   * a tres de las cuatro las mandaba a jornadas que ya no existen en el
+   * Camino: el propósito, el legado y los cinco NO quedaron de una versión
+   * anterior del método. Ahora se escriben ahí, en el momento en que el
+   * cliente ve que faltan.
+   *
+   * Mira el error de la base: Supabase lo DEVUELVE en vez de lanzarlo, así
+   * que un try/catch no alcanza. Si falla, el cliente se entera en el momento
+   * y no cuando vuelve y su legado no está.
+   */
+  const guardarPiezaDelADN = useCallback(async (campos: Record<string, unknown>) => {
+    onProfileFieldUpdate?.(campos);
+    try {
+      const local = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...local, ...campos }));
+    } catch { /* noop */ }
+
+    if (!isSupabaseReady() || !supabase || !userId) return;
+    const { error } = await supabase.from('profiles').update(campos).eq('id', userId);
+    if (error) toast.error(mensajeDeFalla(error, 'guardar'));
+  }, [userId, onProfileFieldUpdate]);
+
   const marcarPartida = useCallback((ids: string[]) => {
     const campos: Record<string, unknown> = { ya_tiene: ids };
 
@@ -940,7 +1081,15 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       localStorage.setItem('tcd_profile', JSON.stringify({ ...perfilLocal, ...campos }));
     } catch { /* noop */ }
     if (isSupabaseReady() && supabase && userId) {
-      void supabase.from('profiles').update(campos).eq('id', userId);
+      /*
+       * Mira el error, como su vecina guardarPiezaDelADN. Acá va
+       * `fecha_inicio`, el número del que vive toda la app: el día del
+       * Camino, el acceso y la garantía se cuentan desde ahí. La pantalla
+       * queda bien igual porque antes se escribió en el teléfono, así que si
+       * esto falla en silencio el cliente ve un día y su ficha otro.
+       */
+      void supabase.from('profiles').update(campos).eq('id', userId)
+        .then(({ error }) => { if (error) toast.error(mensajeDeFalla(error, 'guardar tu punto de partida')); });
     }
     setEnRevision(codigosEnRevision(ids));
   }, [userId, onProfileFieldUpdate, perfil?.fecha_inicio]);
@@ -966,7 +1115,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     return (
       <div className="space-y-4">
         <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
-          {todos.length === 1 ? 'Paso a paso en pantalla' : `Los ${todos.length} pasos a paso de hoy`}
+          {/*
+            Decía «Los 3 pasos a paso de hoy»: mal escrito —«pasos a paso» no
+            se dice— y además contaba en «pasos», que en esta app son los
+            cinco o seis que hay DENTRO de una jornada. El rótulo nombra lo
+            que son, y el número va donde ya van los minutos.
+          */}
+          Paso a paso en pantalla
+          {todos.length > 1 && ` · ${todos.length}`}
           {minutosTotales > 0 && ` · ${minutosTotales} min`}
         </p>
         {todos.map((t) => {
@@ -1064,7 +1220,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
       {/* ── Notificación de celebración ── */}
       {celebracion && (
-        <div className="fade-rise fixed top-6 right-6 z-50 bg-gold/90 backdrop-blur text-ink text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
+        <div className="fade-rise fixed top-6 right-6 z-50 bg-gold/90 backdrop-blur text-ink text-sm font-semibold px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
           {celebracion}
         </div>
       )}
@@ -1140,7 +1296,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         onClick={() => onNavigate?.('adn')}
         className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between text-left"
       >
-        <span className="text-[17px] font-semibold text-cream">Tu ADN</span>
+        {/* El destino se llama «Mi ADN» en la barra, el buscador y las
+            pestañas: el botón que lleva ahí dice el mismo nombre. */}
+        <span className="text-[17px] font-semibold text-cream">Mi ADN</span>
         <span className="text-[15px] text-cream/70">lo que ya sellaste ›</span>
       </button>
 
@@ -1255,9 +1413,17 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       key={pilar.numero}
                       onClick={() => {
                         if (pilar.estado === 'plan_bloqueado') {
-                          const planNec = planParaPilar(pilar.numero);
-                          const url = checkoutUrl(planNec);
-                          window.open(url || waLink(`Hola · Quiero abrir «${VOC(pilar.titulo)}» (${NOMBRE_PLAN[planNec]} ${PRECIO_FUNDADOR[planNec]})`), '_blank');
+                          /*
+                           * LA OFERTA DE HOY, NO LA DE ANTES.
+                           *
+                           * Acá ofrecía «Tu Sistema · $497» y, más arriba, «El
+                           * Programa Completo · $997»: la escalera vieja. El que
+                           * pagaba los $27 llegaba al día 6 enganchado, tocaba
+                           * este botón, y veía un nombre y un precio que ya no
+                           * se venden. La venta automática se cortaba ahí.
+                           */
+                          const oferta = laOfertaQueSigue(pilar.numero);
+                          window.open(oferta.checkout || waLink(oferta.mensaje), '_blank');
                           return;
                         }
                         const siguiente = pilarAbierto === pilar.numero ? null : pilar.numero;
@@ -1318,10 +1484,10 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         </p>
                       )}
                       {pilar.estado === 'plan_bloqueado' && (() => {
-                        const planNec = planParaPilar(pilar.numero);
+                        const oferta = laOfertaQueSigue(pilar.numero);
                         return (
                           <span className="block text-sm text-gold/85 mt-1.5 leading-relaxed">
-                            Se abre con <strong>{NOMBRE_PLAN[planNec]}</strong> · {PRECIO_FUNDADOR[planNec]} — toca para verlo
+                            Se abre con <strong>{oferta.nombre}</strong> · {oferta.precio} — toca para verlo
                           </span>
                         );
                       })()}
@@ -1342,7 +1508,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         return (
           <div ref={detalleRef} className="card-panel rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300 scroll-mt-4">
             {/* Cabecera del pilar */}
-            <div className="p-6 border-b border-[rgba(232,150,46,0.1)]">
+            <div className="p-6 border-b border-[var(--line, rgba(142,104,36,0.18))]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-gold" /> : null; })()}
@@ -1366,8 +1532,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               {/* Progreso del pilar */}
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs text-cream/55">
-                  <span>{pilar.metasCompletadas} de {pilar.totalMetas} jornadas</span>
-                  <span className="flex items-center gap-1">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 inline" /> completadas</span>
+                  {/* El segundo contador decía «0 ★ completadas» sin decir
+                      completadas de qué, y «completadas» donde el resto de la
+                      app dice «hechas». Las estrellas son las jornadas que
+                      cierran tramo: eso es lo que cuenta. */}
+                  <span>{pilar.metasCompletadas} de {pilar.totalMetas} jornadas hechas</span>
+                  <span className="flex items-center gap-1 shrink-0">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-gold fill-gold inline" /> de cierre</span>
                 </div>
                 <div className="h-1.5 bg-gold/5 rounded-full overflow-hidden">
                   <div
@@ -1384,7 +1554,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                   <p className="text-xs text-gold">
                     {pilar.desbloqueo === 'venta_real'
                       ? 'Este pilar se desbloqueó porque registraste tu primera venta real.'
-                      : 'Este pilar se desbloqueó porque completaste el QA del embudo con 24/24 puntos verdes.'}
+                      : 'Este pilar se desbloqueó porque tu camino de captación pasó sus 24 puntos de control.'}
                   </p>
                 </div>
               )}
@@ -1401,7 +1571,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                   <Trophy className={`w-4 h-4 shrink-0 mt-0.5 ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`} />
-                  <p className={`text-xs font-medium ${
+                  <p className={`text-xs font-semibold ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`}>
                     {pilar.hito_mensaje}
@@ -1434,12 +1604,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       }}
                       className={`group flex items-start gap-4 p-4 rounded-xl transition-all border ${
                         !unlocked
-                          ? 'opacity-40 cursor-not-allowed bg-surface/20 border-[rgba(232,150,46,0.05)]'
+                          ? 'opacity-40 cursor-not-allowed bg-surface/20 border-[var(--line, rgba(142,104,36,0.18))]'
                           : estaCompletada
                           ? 'bg-success/5 border-success/15 cursor-pointer'
                           : isActive
                           ? 'bg-gold/10 border-gold/30 cursor-pointer'
-                          : 'bg-surface/30 border-[rgba(232,150,46,0.1)] hover:bg-surface/60 hover:border-[rgba(232,150,46,0.12)] cursor-pointer'
+                          : 'bg-surface/30 border-[var(--line, rgba(142,104,36,0.18))] hover:bg-surface/60 hover:border-[var(--line, rgba(142,104,36,0.18))] cursor-pointer'
                       }`}
                     >
                       <div className="shrink-0 mt-0.5">
@@ -1464,28 +1634,37 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         </div>
                         {/* Con la sesión abierta el título ya está adentro: no se repite. */}
                         {!isActive && (
-                          <p className={`text-base font-medium ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
+                          <p className={`text-base font-semibold ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
                             {VOC(meta.titulo)}
                           </p>
                         )}
                         {/* Lo que se lleva se dice una sola vez, dentro de la sesión. */}
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-cream/45 font-medium">
+                          <span className="text-xs text-cream/45 font-semibold">
                             {meta.tiempo_estimado}
                           </span>
+                          {/* El oro de la casa, no el amarillo de catálogo:
+                              ese daba 4,3:1 sobre el papel de la tapa, y el
+                              piso de lectura es 4,5. */}
                           {meta.es_estrella && (
-                            <span className="text-xs text-yellow-500 font-medium flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-yellow-500" /> Desbloquea siguiente pilar
+                            /* «Desbloquea siguiente pilar»: «pilar» es el
+                               identificador de la base —al cliente el Camino le
+                               muestra el tramo por sus días— y «desbloquea» es
+                               la palabra que las puertas cambiaron por «se
+                               abre». La estrella marca la jornada que cierra el
+                               tramo: eso es lo que dice. */
+                            <span className="text-xs text-gold font-semibold flex items-start gap-1">
+                              <Star className="w-3 h-3 mt-0.5 shrink-0 fill-gold" /> Cierra este tramo
                             </span>
                           )}
                           {!unlocked && (
                             teaserDeMeta(meta.codigo) ? (
-                              <span className="text-xs text-gold/80 font-medium flex items-start gap-1.5 leading-relaxed">
+                              <span className="text-xs text-gold/80 font-semibold flex items-start gap-1.5 leading-relaxed">
                                 <Lock className="w-3 h-3 mt-0.5 shrink-0" />
                                 <span>{teaserDeMeta(meta.codigo)}</span>
                               </span>
                             ) : (
-                              <span className="text-xs text-cream/45 font-medium flex items-center gap-1">
+                              <span className="text-xs text-cream/45 font-semibold flex items-center gap-1">
                                 <Lock className="w-3 h-3" />{' '}
                                 {bloqueoMsg ?? 'Completa la tarea anterior primero'}
                               </span>
@@ -1497,7 +1676,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
                     {/* ── Inline task panel ── */}
                     {isActive && unlocked && (
-                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[rgba(232,150,46,0.12)] animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div ref={taskRef} className="mt-3 card-panel p-6 rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))] animate-in fade-in slide-in-from-top-2 duration-300">
                         {meta.tipo === 'VIDEO' && (
                           <SesionViva
                             metaKey={key}
@@ -1541,8 +1720,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           </SesionViva>
                         )}
                         {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
-                          <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#0d0a06]">
-                            <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
+                          <div className="fixed inset-0 z-[60] overflow-y-auto bg-[var(--bg-card,#17150F)]">
+                            <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
                               <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
                               <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
                               <span className="text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
@@ -1574,14 +1753,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         {meta.codigo === codigoDelDia(24) && (
                           <PreventaPanel
                             precio={precioSellado()}
-                            onElegir={(ids) => onProfileFieldUpdate?.({ adn_bonos_preventa: ids })}
+                            onElegir={(ids) => void guardarPiezaDelADN({ adn_bonos_preventa: ids })}
                           />
                         )}
 
                         {/* Tu antes y después: la medición de salida, el día 82. */}
                         {meta.codigo === codigoDelDia(82) && (
                           <AntesYDespues
-                            onGuardar={(salida) => onProfileFieldUpdate?.({ adn_medicion_salida: salida })}
+                            onGuardar={(salida) => void guardarPiezaDelADN({ adn_medicion_salida: salida })}
                           />
                         )}
 
@@ -1590,7 +1769,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           <TestEneagrama
                             onResultado={(tipoId) => {
                               const t = tipoEneagrama(tipoId);
-                              if (t) onProfileFieldUpdate?.({ adn_eneagrama: t.nombre });
+                              if (t) void guardarPiezaDelADN({ adn_eneagrama: t.nombre });
                             }}
                           />
                         )}
@@ -1601,7 +1780,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             valorExistente={perfil?.adn_autoevaluacion_dia1}
                             onSaveADN={(output, scores) => {
                               handleSaveADN(pilar.numero, meta, output);
-                              onProfileFieldUpdate?.({ adn_autoevaluacion_dia1: scores });
+                              void guardarPiezaDelADN({ adn_autoevaluacion_dia1: scores });
                             }}
                             isCompleted={estaCompletada}
                           />
@@ -1613,7 +1792,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             valorExistente={perfil?.adn_metodo_mapeo_obstaculos}
                             onSaveADN={(output, filas) => {
                               handleSaveADN(pilar.numero, meta, output);
-                              onProfileFieldUpdate?.({ adn_metodo_mapeo_obstaculos: filas });
+                              void guardarPiezaDelADN({ adn_metodo_mapeo_obstaculos: filas });
                             }}
                             isCompleted={estaCompletada}
                           />
@@ -1652,7 +1831,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                   <div className={`text-xs rounded-xl px-4 py-3 border ${
                     todasCompletas
                       ? 'bg-success/10 border-success/20 text-success'
-                      : 'bg-surface/50 border-[rgba(232,150,46,0.08)] text-cream/55'
+                      : 'bg-surface/50 border-[var(--line, rgba(142,104,36,0.18))] text-cream/55'
                   }`}>
                     {todasCompletas
                       ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-success inline shrink-0" /> Terminaste este tramo. El siguiente ya está abierto.</span>
@@ -1669,8 +1848,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       {ventaModal && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setVentaModal(false)}>
           <div className="max-w-sm w-full rounded-2xl border border-gold/30 bg-panel p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-              🎉 Registrar una venta
+            <h3 className="text-lg font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+              Registrar una venta
             </h3>
             <p className="text-xs text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
             <label className="text-sm uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
@@ -1744,6 +1923,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             setEspejoVisible(false);
             onNavigate?.('adn');
           }}
+          onGuardarPieza={guardarPiezaDelADN}
         />
       )}
     </div>

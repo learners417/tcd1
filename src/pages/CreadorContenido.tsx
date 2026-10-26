@@ -3,8 +3,10 @@
  *
  * Tab nuevo introducido por v8 (mejoras.html · Anexo Cambio #10).
  *
- * Desbloqueo: post P6 completo (Matriz A→B→C lista). Antes de eso no tiene
- * los inputs mínimos para generar contenido útil.
+ * Se abre al cerrar el tramo `PILAR_LLAVE` del Camino, que es donde queda
+ * definido a quién le habla: antes de eso el creador no tiene con qué
+ * escribir. El comentario viejo decía «Matriz A→B→C lista», y esa jornada ya
+ * no existe en ningún tramo — ver `comoSeLlamaElTramo` en el seed.
  *
  * Regla v8 #3: este creador NO escribe en ADN. Sólo genera output para que
  * el sanador lo copie y publique manualmente. Si más adelante quiere persistir
@@ -42,13 +44,16 @@ import {
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
+import { mensajeDeFalla } from '../lib/conexion';
 import type { ProfileV2 } from '../lib/supabase';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { generateText } from '../lib/aiProvider';
 import { getCompletadas, isPilarCompletado } from '../lib/agents/unlock';
+import { comoSeLlamaElTramo } from '../lib/roadmapSeed';
 import { primero } from '../lib/primero';
 import { VOC } from '../lib/vocabulario';
 import { copiar, NO_SE_PUDO_COPIAR } from '../lib/copiar';
+import { unirProgreso, guardarProgresoLocal } from '../lib/progresoDelCliente';
 
 interface CreadorContenidoProps {
   userId?: string;
@@ -197,22 +202,29 @@ function CarruselPreview({ texto }: { texto: string }) {
       <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Así se ve tu carrusel</p>
       <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
         {slides.map((s) => (
-          <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[rgba(232,150,46,0.18)] bg-gradient-to-br from-[#141311] to-[#0B0A09] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
+          <div key={s.n} className="snap-start shrink-0 w-[240px] h-[240px] rounded-2xl border border-[var(--line2, rgba(142,104,36,0.30))] bg-[var(--bg-card,#17150F)] p-4 flex flex-col relative overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
             <span className="absolute top-3 right-3 text-sm font-bold text-gold/60 num-tab">{s.n}/{slides.length}</span>
             <div className="flex-1 flex items-center">
-              <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[13px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
+              <p className={`leading-snug text-cream ${s.n === 1 ? 'text-base font-semibold' : 'text-[15px] text-cream/85'}`} style={s.n === 1 ? { fontFamily: 'var(--font-display)', fontStyle: 'italic' } : undefined}>
                 {s.contenido.length > 200 ? s.contenido.slice(0, 200) + '…' : s.contenido}
               </p>
             </div>
             {s.n === slides.length && <p className="text-sm font-bold uppercase tracking-widest text-gold mt-2">→ Tu llamado a la acción</p>}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #B0822E, transparent)' }} />
+            {/* La línea de oro es de 1px y plana: la vara de la casa no degrada el oro. */}
+            <div className="absolute bottom-0 left-0 w-1/3 h-px" style={{ background: 'var(--oro, #B0822E)' }} />
           </div>
         ))}
       </div>
-      <p className="text-sm text-cream/35 italic mt-1">Desliza para ver los {slides.length} slides · el texto completo queda abajo para copiar y llevar a Canva.</p>
+      {/* Era una instrucción de uso al 35% de opacidad, en itálica: la letra de
+                lo que no importa, para lo único que dice cómo se usa esto. Y
+                «slides» en inglés, teniendo «láminas». */}
+            <p className="text-sm text-cream/75 mt-1">Desliza para ver las {slides.length} láminas · el texto completo queda abajo para copiar.</p>
     </div>
   );
 }
+
+/** El tramo del Camino que abre el Creador. En pantalla se nombra por el seed. */
+const PILAR_LLAVE = 'P6' as const;
 
 export default function CreadorContenido({ userId, perfil, setCurrentPage }: CreadorContenidoProps) {
   const [tipo, setTipo] = useState<TipoPieza>('post');
@@ -224,7 +236,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
   const [generando, setGenerando] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
-  // ── Desbloqueo: post P6 completo ───────────────────────────────────────
+  // ── Lo que lo abre ─────────────────────────────────────────────────────
   // Inicializamos desde localStorage (cache rapido) y refrescamos desde Supabase
   // como fuente autoritativa para que no quede bloqueado el usuario en otro
   // dispositivo o despues de limpiar cache.
@@ -241,24 +253,24 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       const { data, error } = await supabase
         .from('hoja_de_ruta')
         .select('pilar_numero, meta_codigo, completada')
-        .eq('usuario_id', userId)
-        .eq('completada', true);
+        .eq('usuario_id', userId);
       if (cancelado) return;
       if (error || !data) {
         setVerificandoUnlock(false);
         return;
       }
-      const fromDB = new Set<string>(
-        data.map((row) => `${row.pilar_numero}-${row.meta_codigo}`),
-      );
-      setCompletadas(fromDB);
-      // Sincronizamos localStorage para que otras pantallas (agentes, sidebar)
-      // tambien vean el estado actualizado sin tener que volver a consultar.
-      try {
-        localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(Array.from(fromDB)));
-      } catch {
-        // ignorar
-      }
+      /*
+       * Escribía el resultado de la base TAL CUAL encima del espejo local. La
+       * consulta que falla ya estaba cubierta arriba, pero la que responde
+       * BIEN con cero filas no lo estaba: escribía `[]` encima de todo. Ahora
+       * se une — lo cerrado suma, lo desmarcado abre, y lo que la base no
+       * nombra queda como está.
+       */
+      const unido = unirProgreso(data);
+      setCompletadas(unido);
+      // Y el espejo local queda al día para las otras pantallas —agentes,
+      // barra lateral— sin que tengan que volver a consultar.
+      guardarProgresoLocal(unido);
       setVerificandoUnlock(false);
     }
     refrescarDesdeDB();
@@ -267,10 +279,15 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
     };
   }, [userId]);
 
+  /*
+   * El tramo que lo abre, nombrado con las palabras del Camino. `PILAR_LLAVE`
+   * es el identificador de la base; su nombre en pantalla sale del seed.
+   */
   const desbloqueado = useMemo(
-    () => isPilarCompletado('P6', completadas),
+    () => isPilarCompletado(PILAR_LLAVE, completadas),
     [completadas],
   );
+  const tramoQueLoAbre = useMemo(() => comoSeLlamaElTramo(PILAR_LLAVE), []);
 
   // Cleanup del feedback de "copiado"
   useEffect(() => {
@@ -295,8 +312,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
       });
       setOutput(result);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`No se pudo generar · ${msg}`);
+      toast.error(mensajeDeFalla(err, 'generar el contenido'));
     } finally {
       setGenerando(false);
     }
@@ -329,17 +345,30 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
   if (!desbloqueado) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
+        {/*
+          ESTA PANTALLA ERA UNA NOTA DE DESARROLLO.
+
+          Lo que leía el cliente, textual: «v8 · Herramienta nueva» —el número
+          de versión del producto—, «Necesitas completar P6 (Matriz A→B→C)»
+          —un identificador de la base, y una jornada que ya no existe en
+          ningún tramo del Camino, así que la instrucción no se podía
+          seguir—, «NO escribe en tu ADN · sólo genera output», que es la
+          regla de arquitectura de por qué no persiste nada, escrita para
+          quien programa y no para quien usa.
+
+          Ahora dice lo que hace, con qué se abre —derivado del seed, para que
+          siga siendo verdad cuando el camino se reordene— y por qué ese es el
+          momento. En positivo y con las palabras del Camino, que ya dice «se
+          abre» en todas sus puertas.
+        */}
         <div className="space-y-3">
-          <p className="text-sm text-gold uppercase tracking-widest font-semibold">
-            v8 · Herramienta nueva
-          </p>
-          <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
-            Creador de Contenido
-          </h1>
+          {/* La barra de arriba dice «Creador». Acá decía «Creador de
+              Contenido» otra vez, en treinta y dos píxeles de alto. La
+              pantalla abre con lo que hace. */}
           <p className="text-cream/75 max-w-xl">
-            Genera posts, carruseles y prompts de imagen usando los datos de tu ADN.
-            Esta herramienta NO escribe en tu ADN · sólo genera output para que copies
-            y publiques manualmente.
+            Escribe posts, carruseles y pedidos de imagen con lo que ya tienes
+            cargado en tu ADN. Lo que sale queda para que lo copies y lo
+            publiques desde tu cuenta.
           </p>
         </div>
 
@@ -349,11 +378,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
           </div>
           <div>
             <p className="text-lg font-medium text-cream">
-              Necesitas completar P6 (Matriz A→B→C) para desbloquear el Creador
+              {tramoQueLoAbre
+                ? `Se abre al cerrar ${tramoQueLoAbre.tramo.toLowerCase()} del Camino`
+                : 'Se abre más adelante en el Camino'}
             </p>
             <p className="text-sm text-cream/75 mt-2 max-w-md mx-auto">
-              Sin la matriz no podemos generar contenido que conecte con el avatar.
-              Vuelve a El Camino y cierra P6 antes de venir acá.
+              {tramoQueLoAbre ? `${tramoQueLoAbre.sistema}. ` : ''}
+              Ahí queda definido a quién le hablas, y eso es lo que este
+              creador usa para escribir.
             </p>
           </div>
           <button
@@ -377,9 +409,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
         <p className="text-sm text-gold uppercase tracking-widest font-semibold">
           v8 · Herramienta · usa tu ADN
         </p>
-        <h1 className="text-3xl md:text-4xl font-light text-cream tracking-tight">
-          Creador de Contenido
-        </h1>
+        {/* Igual que arriba: el nombre ya está en la barra. */}
         <p className="text-cream/75 max-w-2xl">
           Genera posts, carruseles o prompts de imagen alineados a tu método propio,
           tu avatar y tu nivel de awareness. Esta herramienta NO escribe en tu ADN —
@@ -405,7 +435,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
                       ? 'bg-gold/10 border-gold/50'
-                      : 'bg-surface/40 border-[rgba(232,150,46,0.10)] hover:border-gold/30'
+                      : 'bg-surface/40 border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/30'
                   }`}
                 >
                   <Icon
@@ -447,7 +477,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   className={`text-left p-4 rounded-xl border transition-all ${
                     activo
                       ? 'bg-gold/10 border-gold/50'
-                      : 'bg-surface/40 border-[rgba(232,150,46,0.10)] hover:border-gold/30'
+                      : 'bg-surface/40 border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/30'
                   }`}
                 >
                   <p
@@ -503,7 +533,7 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
 
       {/* Output */}
       {output && (
-        <div className="card-panel p-5 border border-[rgba(232,150,46,0.12)] space-y-4">
+        <div className="card-panel p-5 border border-[var(--line, rgba(142,104,36,0.18))] space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-sm uppercase tracking-widest text-gold font-bold">
               Resultado · {TIPO_META[tipo].label} · {nivel}
@@ -515,14 +545,14 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
                   setEditOutput(output);
                   setEditando(true);
                 }}
-                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)]"
+                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[var(--line, rgba(142,104,36,0.18))]"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={handleGenerar}
-                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[rgba(232,150,46,0.10)] flex items-center gap-1"
+                className="text-xs text-cream/65 hover:text-cream transition-colors px-3 py-1.5 rounded-lg border border-[var(--line, rgba(142,104,36,0.18))] flex items-center gap-1"
               >
                 <RotateCcw className="w-3 h-3" /> Rehacer
               </button>
@@ -583,8 +613,16 @@ export default function CreadorContenido({ userId, perfil, setCurrentPage }: Cre
         </div>
       )}
 
-      <p className="text-xs text-cream/45 text-center pt-4 italic">
-        Regla v8 · esta herramienta no escribe en tu ADN. Copia lo que te sirva y publicalo
+      {/*
+        Tres cosas en una frase: «Regla v8» era el número de versión del
+        producto, «no escribe en tu ADN» es la razón de arquitectura por la
+        que nada se guarda —escrita para quien programa—, y «publicalo» iba
+        sin tilde. Todo en itálica al 45%, centrado: la letra con que se
+        escribe lo que no importa, para decir lo que el cliente necesita
+        saber antes de copiar.
+      */}
+      <p className="text-sm text-cream/75 text-center pt-4">
+        Lo que sale queda acá para que lo copies. Publícalo desde tu cuenta
         cuando estés listo.
       </p>
     </div>

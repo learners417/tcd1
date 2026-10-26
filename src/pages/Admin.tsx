@@ -3,6 +3,7 @@ import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
 import { loQueAbre } from '../lib/queAbreCadaOferta';
+import { ofertaReservada } from '../lib/laOfertaQueSigue';
 import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
@@ -37,9 +38,10 @@ import { cuantasDioEstaSemana, type Sesion } from '../lib/sesionesHumanas';
 import { copiar } from '../lib/copiar';
 import CargarSesionHumana from '../components/admin/CargarSesionHumana';
 import { TICKETS, type Ticket } from '../lib/cuadroTickets';
-import { cierreDeLaVentana, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
+import { cierreDeLaVentana, accesoDelPerfil, estadoDeAcceso, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
 import JornadaPanel from '../components/admin/Jornada';
 import ColaDeEvidencias from '../components/admin/ColaDeEvidencias';
+import { habilitarMigracion } from '../lib/migracionDatos';
 import {
   veredictosDelCliente, decidirEvidencia, lecturaDelVeredicto, type Veredicto,
 } from '../lib/veredictoEvidencia';
@@ -549,6 +551,18 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     // script, y como nadie lo hacía, todos quedaban sin ventana de acceso.
     servicio: 'base' as Ticket,
     acceso: 'noventa' as TipoDeAcceso,
+    /*
+     * QUE TRAIGA SU TRABAJO, DESDE EL ALTA.
+     *
+     * La llave de la migración estaba solo en Hoy, en una lista aparte. O sea
+     * que dar de alta a alguien que ya tiene su plan y su método hechos eran
+     * dos pantallas y un viaje de vuelta por cada persona — y el que se
+     * olvidaba del segundo paso le dejaba al cliente un Camino que le pide
+     * cosas que ya tiene hechas afuera.
+     *
+     * Se decide acá, que es donde ya se sabe de quién se trata.
+     */
+    traeSuTrabajo: false,
   });
   const [creando, setCreando] = useState(false);
 
@@ -1217,7 +1231,7 @@ VENTAS REALES: ${selectedCliente.ventas_count}
 ÚLTIMO DIARIO: ${diarioResumen}
 MÉTRICAS NEGOCIO: ${lastMetric ? `${lastMetric.leads} leads, ${lastMetric.conversaciones ?? 0} llamadas, ${lastMetric.ventas} ventas en la última semana` : 'sin datos de métricas aún'}
 
-Generá un briefing para el coach en 3 partes:
+Genera un briefing para el coach en 3 partes:
 1. ESTADO ACTUAL (1-2 oraciones sobre dónde está el cliente y su ritmo real)
 2. RIESGO O PUNTO CRÍTICO (qué puede frenar el avance si no se interviene)
 3. ACCIÓN SUGERIDA PARA EL COACH (qué decirle o hacer en la próxima interacción — específico y directo)
@@ -1540,17 +1554,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setGuardandoAdmin(true);
     try {
       if (supabase) {
-        await db().from('profiles').update({
+        // Con el error mirado: Supabase lo DEVUELVE, no lo lanza, así que el
+        // `catch` de abajo no lo veía nunca y el cartel decía «Perfil
+        // actualizado» aunque no se hubiera guardado nada.
+        const { error } = await db().from('profiles').update({
           nombre: adminDraft.nombre,
           especialidad: adminDraft.cargo,
         }).eq('id', adminProfile.id);
+        if (error) throw new Error(error.message);
       }
       adminProfile.nombre = adminDraft.nombre;
       adminProfile.especialidad = adminDraft.cargo;
       toast.success('Perfil actualizado.');
       setShowAdminSettings(false);
     } catch {
-      toast.error('Error al guardar. Intentá de nuevo.');
+      toast.error('No se guardó. Intenta de nuevo.');
     } finally {
       setGuardandoAdmin(false);
     }
@@ -1593,13 +1611,43 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       if (error) throw error;
 
       if (signUpData.user && supabase) {
-        await new Promise(r => setTimeout(r, 1500));
+        /*
+         * SE ESPERA A QUE LA FICHA EXISTA, Y SE COMPRUEBA QUE SE ESCRIBIÓ.
+         *
+         * La ficha no la crea este código: la crea un disparador de la base
+         * cuando entra la cuenta. Acá había un `setTimeout` de 1500 ms y
+         * después un update cuyo resultado no se miraba.
+         *
+         * O sea que si el disparador tardaba un poco más —y en un alta tras
+         * otra, tarda—, el update no encontraba la fila, afectaba cero filas
+         * sin devolver error, y el cartel decía «Cuenta creada». El cliente
+         * quedaba con la fecha de inicio del disparador en vez de la elegida
+         * y SIN ventana de acceso: su Camino arrancaba el día equivocado y su
+         * acceso no cerraba nunca.
+         *
+         * Ahora se pregunta por la ficha hasta diez veces, y el update pide
+         * de vuelta la fila que tocó: si no vuelve ninguna, es un error que
+         * se ve.
+         */
+        let existe = false;
+        for (let i = 0; i < 10 && !existe; i++) {
+          await new Promise(r => setTimeout(r, i === 0 ? 400 : 600));
+          const { data: fila } = await db().from('profiles')
+            .select('id').eq('id', signUpData.user.id).maybeSingle();
+          existe = Boolean(fila);
+        }
+        if (!existe) {
+          throw new Error(
+            'La cuenta se creó, pero su ficha todavía no apareció en la base. '
+            + 'Espera un momento y cárgale los datos desde su ficha.');
+        }
+
         // El cierre sale de la ventana elegida, ya corrido por las pausas
         // globales: una pausa no le come días de acceso a nadie.
         const cierra = cierreDeLaVentana(
           { tipo: nuevoForm.acceso, inicio: nuevoForm.fecha_inicio },
         );
-        await db().from('profiles').update({
+        const { data: tocadas, error: eFicha } = await db().from('profiles').update({
           especialidad: nuevoForm.especialidad.trim() || null,
           plan: nuevoForm.plan,
           fecha_inicio: nuevoForm.fecha_inicio,
@@ -1607,7 +1655,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           onboarding_completed: nuevoForm.status !== 'ONBOARDING',
           acceso_tipo: nuevoForm.acceso,
           acceso_hasta: cierra,
-        }).eq('id', signUpData.user.id);
+        }).eq('id', signUpData.user.id).select('id');
+        if (eFicha) throw eFicha;
+        if (!tocadas || tocadas.length === 0) {
+          throw new Error(
+            'La cuenta se creó, pero sus datos no se guardaron. '
+            + 'Cárgalos desde su ficha antes de darle el acceso.');
+        }
 
         // El escalón se marca con el RPC y no con el update de arriba, porque
         // el RPC además sella quién lo marcó y cuándo. Y esa fecha es la que
@@ -1620,14 +1674,26 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           p_cima: null,
         });
         if (eMarca) throw eMarca;
+
+        // Y si ya trae su trabajo hecho, la llave queda abierta desde el alta:
+        // al entrar le aparece «Trae tu trabajo» en su HOY, sin un segundo
+        // viaje por otra pantalla.
+        // Por la función de la biblioteca y no con un rpc a mano: los nombres
+        // de los parámetros viven en un solo lugar, y PostgREST resuelve estas
+        // llamadas por nombre de argumento.
+        if (nuevoForm.traeSuTrabajo) {
+          await habilitarMigracion(signUpData.user.id, true);
+        }
       }
 
-      toast.success(`Cuenta creada para ${nuevoForm.nombre}. Ya puede iniciar sesión.`);
+      toast.success(nuevoForm.traeSuTrabajo
+        ? `Cuenta creada para ${nuevoForm.nombre}. Al entrar le aparece «Trae tu trabajo».`
+        : `Cuenta creada para ${nuevoForm.nombre}. Ya puede iniciar sesión.`);
       setShowNuevoCliente(false);
       setNuevoForm({
         nombre: '', email: '', password: '', especialidad: '', plan: 'DWY',
         fecha_inicio: new Date().toISOString().split('T')[0], status: 'ONBOARDING',
-        servicio: 'base', acceso: 'noventa',
+        servicio: 'base', acceso: 'noventa', traeSuTrabajo: false,
       });
       await cargarClientes();
     } catch (e: any) {
@@ -1891,7 +1957,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-gold/10 bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
         <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
-            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-[0_0_20px_rgba(232,150,46,0.18)] shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-[0_0_20px_var(--line2, rgba(142,104,36,0.30))] shrink-0">
               <Stethoscope className="w-5 h-5 text-cream" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
@@ -1938,7 +2004,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <span className="relative shrink-0">
                       <item.icon className="w-4 h-4" />
                       {sidebarCollapsed && totalUnread > 0 && (
-                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_6px_rgba(232,150,46,0.6)]" />
+                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_6px_var(--oro, #B0822E)]" />
                       )}
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
@@ -2127,7 +2193,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onChange={(val) => setFiltroPlan(val)}
                     options={[
                       { value: 'ALL', label: 'Todos los planes' },
-                      { value: 'blanco', label: '🥋 Semana Blanca' },
+                      { value: 'blanco', label: '⚪ Semana Blanca' },
                       { value: 'amarillo', label: '🟡 Tu Base' },
                       { value: 'verde', label: '🟢 Tu Sistema' },
                       { value: 'negro', label: '⬛ Completo' },
@@ -2216,7 +2282,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <td className="px-4 py-3 text-sm text-cream/65">{c.fecha_inicio}</td>
                             <td className="px-4 py-3 text-sm text-cream/75 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-sm`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
                     {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
-                      const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
+                      const map: Record<string, [string, string]> = { blanco: ['⚪ Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
                       const [l, col] = map[p] ?? [p, '#F2EFE9'];
                       return <span className="ml-2 text-sm font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
                     {(c as { plan_comercial?: string }).plan_comercial === 'blanco' && (
@@ -2334,8 +2400,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           onClick={() => {
                             const nombre = selectedCliente.nombre.split(' ')[0];
                             const msj = selectedCliente.traba_sesion
-                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado. 🥋`
-                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos. 🥋`;
+                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado.`
+                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que no te vemos en el Camino. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos.`;
                             // El mensaje se deja escrito en el chat igual, así
                             // que si la copia falla no se pierde nada: por eso
                             // acá no hay aviso de error.
@@ -2412,7 +2478,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <tab.icon className="w-3.5 h-3.5" />
                       {tab.label}
                       {detalleTab === tab.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full shadow-[0_0_10px_rgba(232,150,46,0.5)]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full shadow-[0_0_10px_var(--oro, #B0822E)]" />
                       )}
                     </button>
                   ))}
@@ -2486,7 +2552,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <div className="bg-panel border border-gold/15 rounded-2xl p-4">
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
                             <div className="flex flex-wrap gap-2">
-                              {([['blanco','🥋 Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
+                              {([['blanco','⚪ Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
                                   onClick={async () => {
                                     if (!supabase) return;
@@ -2502,8 +2568,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               ))}
                             </div>
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
+                            {/* Lo que se le muestra al cliente sale de acá. Las opciones
+                                eran los colores de la escalera vieja, así que la app le
+                                decía «tu lugar está reservado · $497» de un precio que ya
+                                no se vende. Lo anotado entonces no se borra: se avisa, y
+                                mientras no se elija uno de hoy el cliente ve el escalón
+                                que sigue, que es verdad siempre. */}
+                            {(() => {
+                              const guardado = (selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '';
+                              if (!guardado || ofertaReservada(guardado)) return null;
+                              return (
+                                <p className="text-sm text-cream/60 mb-2">
+                                  Anotado con la escalera anterior: <span className="text-goldhi">{guardado}</span>. Elige el escalón de hoy para que lo vea en su pantalla.
+                                </p>
+                              );
+                            })()}
                             <div className="flex flex-wrap gap-2">
-                              {([['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['','Sin reserva']] as const).map(([p, label]) => (
+                              {([['base','La Base · $1.000'],['ascenso','El Ascenso · $3.000'],['instalacion','La Instalación · $5.000'],['','Sin reserva']] as const).map(([p, label]) => (
                                 <button key={p || 'ninguno'}
                                   onClick={async () => {
                                     if (!supabase) return;
@@ -2589,7 +2670,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         <div className="flex flex-col items-center gap-2 flex-1">
                                           <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 shrink-0 transition-all ${
                                             isActive
-                                              ? 'bg-gold border-gold shadow-[0_0_14px_rgba(232,150,46,0.45)]'
+                                              ? 'bg-gold border-gold shadow-[0_0_14px_var(--oro, #B0822E)]'
                                               : isDone
                                               ? 'bg-success/15 border-success/60'
                                               : 'bg-ink border-gold/10'
@@ -3104,7 +3185,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <>
                 {empujonListo && (
                   <div className="mb-3 rounded-xl border border-gold/30 bg-gold/8 p-3">
-                    <p className="text-sm font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si quieres</p>
+                    <p className="text-sm font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pégalo abajo (Ctrl+V) y ajústalo si quieres</p>
                     <p className="text-sm text-white/70 italic">{empujonListo}</p>
                   </div>
                 )}
@@ -3115,7 +3196,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           {detalleMensajes.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
                               <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                              <p className="text-cream/55 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
+                              <p className="text-cream/55 text-sm">Comienza la conversación con {selectedCliente.nombre}</p>
                             </div>
                           ) : detalleMensajes.map(m => {
                             const isMe = m.emisor_id === adminProfile.id;
@@ -3269,7 +3350,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         ) : chatMessages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center">
                             <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                            <p className="text-cream/55 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
+                            <p className="text-cream/55 text-sm">Comienza la conversación con {chatCliente.nombre}</p>
                           </div>
                         ) : chatMessages.map(m => {
                           const isMe = m.emisor_id === adminProfile.id;
@@ -3918,7 +3999,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-light text-white tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Gestión de Equipo</h2>
-                  <p className="text-sm text-white/55 mt-1">Administrá roles y permisos de los miembros del equipo.</p>
+                  <p className="text-sm text-white/55 mt-1">Administra roles y permisos de los miembros del equipo.</p>
                 </div>
                 <button onClick={() => setShowAddTeamMember(true)} className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold">
                   <Plus className="w-4 h-4" /> Agregar Miembro
@@ -4672,6 +4753,64 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 </strong>
                 . Si paga en cuotas, cada una se carga después en su ficha.
               </p>
+
+              {/* SI LA VENTANA YA ESTÁ CERRADA, NO ENTRA.
+                  Su ventana de acceso se cuenta desde la fecha de inicio. Con
+                  la fecha real de un cliente que empezó hace meses, la app le
+                  muestra la pantalla de cierre en vez de la app: no es un
+                  error, es la ventana vencida el mismo día del alta.
+                  Las dos cosas son distintas y la app ya las separa: esta
+                  fecha abre su ACCESO; su avance en el Camino se siembra con
+                  el asistente de migración. */}
+              {(() => {
+                const a = accesoDelPerfil({ fecha_inicio: nuevoForm.fecha_inicio, acceso_tipo: nuevoForm.acceso });
+                const e = a ? estadoDeAcceso(a) : null;
+                if (!e || e.abierto) return null;
+                return (
+                  <div className="rounded-2xl border border-danger/40 bg-danger/[0.06] p-4">
+                    <p className="text-[17px] text-cream/90 leading-relaxed">
+                      Con esta fecha de inicio su acceso ya está cerrado: al entrar
+                      va a ver la pantalla de cierre, no la app.
+                    </p>
+                    <p className="text-[17px] text-cream/70 leading-relaxed mt-1.5">
+                      Si viene trabajando desde hace meses, pon la fecha de hoy: esta
+                      fecha abre su acceso. Su avance en el Camino se carga aparte, con
+                      el asistente de migración.
+                    </p>
+                  </div>
+                );
+              })()}
+
+              {/* YA VIENE CON SU TRABAJO HECHO.
+                  Para los que llegan de Discord con su plan, su método y su
+                  oferta ya armados. La llave estaba solo en Hoy, en otra
+                  lista: dar de alta a uno de ellos eran dos pantallas, y el
+                  segundo paso es el que se olvida. */}
+              <button type="button"
+                onClick={() => setNuevoForm({ ...nuevoForm, traeSuTrabajo: !nuevoForm.traeSuTrabajo })}
+                className={`w-full text-left rounded-2xl border p-4 transition-colors ${
+                  nuevoForm.traeSuTrabajo
+                    ? 'border-gold/35 bg-gold/[0.06]'
+                    : 'border-cream/12 hover:border-cream/25'}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center ${
+                    nuevoForm.traeSuTrabajo
+                      ? 'border-gold/60 bg-gold/20 text-gold'
+                      : 'border-cream/25 text-transparent'}`}>
+                    <Check className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[17px] font-bold text-cream leading-snug">
+                      Ya tiene su plan y su método hechos: que los traiga él
+                    </p>
+                    <p className="text-[15px] text-cream/60 leading-relaxed mt-1">
+                      {nuevoForm.traeSuTrabajo
+                        ? 'Al entrar le aparece «Trae tu trabajo» en su HOY. Pega su material, lo revisa campo por campo, y queda con su ADN cargado y sus Campañas listas.'
+                        : 'Para los que llegan con todo armado de antes. Se puede abrir después desde Hoy.'}
+                    </p>
+                  </div>
+                </div>
+              </button>
 
             </div>
 

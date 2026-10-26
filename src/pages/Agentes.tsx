@@ -30,10 +30,35 @@ import {
   MessageCircle,
   PenLine,
   Layers,
-  Bot,
   BadgeDollarSign,
   ArrowRight,
   Trophy,
+  BarChart3,
+  BookOpen,
+  Brain,
+  Calendar,
+  Camera,
+  ClipboardList,
+  CloudRain,
+  DoorOpen,
+  Dumbbell,
+  Frown,
+  Gift,
+  Hammer,
+  Handshake,
+  Library,
+  Lightbulb,
+  Repeat,
+  Shield,
+  Sprout,
+  Stethoscope,
+  Target,
+  Ticket,
+  TrendingDown,
+  TrendingUp,
+  UserX,
+  Users,
+  Zap,
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import type { ProfileV2, AgentSkillProgressRow } from '../lib/supabase';
@@ -84,11 +109,28 @@ El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
 · Fase 1 — Sanar el Dinero (P1, días 2-7): protocolo de 7 días; termina con SU precio definido.
 · Fase 2 — Tu Protocolo (P2 método con nombre · P3 oferta de $1.000, días 8-14).
 · Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
-· Fase 4 — Servicio y Escala (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
-El progreso se mide en CINTURONES (taekwondo/planta): Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
-EL ADN DEL NEGOCIO (lo que SÍ existe — referite a cada cosa por su paso de El Camino): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · tus 3 anuncios y la campaña única (P4.3-P4.4) · el montaje de campaña (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
-TRATO: espejá el voseo o tuteo del usuario.
+· Fase 4 — Servicio y Crecimiento (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
+El progreso se mide en CINTURONES: Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
+EL ADN DEL NEGOCIO (lo que SÍ existe. El código entre paréntesis es para que sepas de qué paso viene cada cosa: NO se lo digas nunca. Al cliente nómbrale la cosa por su nombre, y el paso por su día): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · tus 3 anuncios y la campaña única (P4.3-P4.4) · el montaje de campaña (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
+TRATO: háblale de tú, siempre, sin importar su país.
 === FIN DEL CONTEXTO VIGENTE ===`;
+
+/*
+ * El nombre y el rol salen del mismo título.
+ *
+ * El dato viene como «Caro · Entrenadora de Cámara y Presencia»: el nombre
+ * propio y el oficio pegados con un punto medio. En la lista, el nombre es lo
+ * que se busca; el rol, lo que explica de qué entrena. Se parten acá y no en
+ * el dato porque el dato lo usan también el buscador y los avisos, donde el
+ * título entero es lo correcto.
+ */
+function nombreDe(titulo: string): string {
+  return VOC(titulo).split('·')[0].trim();
+}
+function rolDe(titulo: string): string {
+  const partes = VOC(titulo).split('·');
+  return partes.length > 1 ? partes.slice(1).join('·').trim() : '';
+}
 
 const AGENTE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Phone,
@@ -99,6 +141,20 @@ const AGENTE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }
   PenLine,
   Layers,
   BadgeDollarSign,
+};
+
+/*
+ * Las 48 misiones de los ocho entrenadores llevaban su ícono como emoji, y un
+ * emoji lo dibuja la tipografía del teléfono: cambia de forma y de color en
+ * cada aparato y nunca es de la casa. Ahora el dato trae el NOMBRE del ícono y
+ * la pantalla lo resuelve acá, con el mismo trazo que el resto de la app.
+ */
+const MISION_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Target, TrendingDown, TrendingUp, BadgeDollarSign, Frown, CloudRain, PenLine,
+  Camera, Trophy, Handshake, Dumbbell, Clapperboard, Lightbulb, Hammer, Ticket,
+  CalendarDays, Calendar, ClipboardList, Brain, Zap, Shield, BookOpen, Repeat,
+  Search, UserX, BarChart3, Stethoscope, Library, MessageCircle, Gift, Sprout,
+  Users, DoorOpen, Phone, Layers,
 };
 
 const CATEGORIA_LABEL: Record<AgenteCategoria, string> = {
@@ -301,7 +357,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
       const textoVisible = tieneAdjuntos
         ? `${texto.trim() || '(adjuntos para analizar)'}\n\n${enviados
             .map((a) =>
-              a.kind === 'image' ? `📎 ${a.fileName} (imagen)` : `📎 ${a.fileName}`,
+              a.kind === 'image' ? `Adjunto: ${a.fileName} (imagen)` : `Adjunto: ${a.fileName}`,
             )
             .join('\n')}`
         : texto;
@@ -475,12 +531,28 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
     return (
       <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
         <div>
-          <h1 className="text-2xl font-light text-white flex items-center gap-2">
-            <Bot className="w-6 h-6 text-gold" /> Entrenadores IA
-          </h1>
+          {/*
+            ─── ACÁ DECÍA «ENTRENADORES» POR SEGUNDA VEZ ───────────────────
+            La barra de arriba ya lo dice, a ochenta píxeles. Lo primero que
+            leía el cliente era la misma palabra dos veces, justo donde hace
+            más falta el aire. Ahora la pantalla abre con lo que hacen.
+
+            Y con el encabezado se fue el robot que lo acompañaba. Es el
+            signo más gastado que existe para decir «IA», y esta pantalla
+            presenta a ocho entrenadores con nombre, voz y oficio: Caro
+            entrena cámara, Mateo guiones. Un robot arriba de todo los
+            convierte en software.
+          */}
           <p className="text-sm text-white/75 mt-1">
-            Cada uno entrena UNA habilidad hasta que la haces sola. Se desbloquean
-            cuando avanzas en El Camino.
+            {/*
+              Decía «Se desbloquean», y en esta misma pantalla cada tarjeta
+              dice «Se abre cuando…» — dos palabras para lo mismo, a dos
+              centímetros. «Se abre» es la de las puertas del Camino. Y «UNA»
+              en mayúsculas en medio de una frase es un grito: el énfasis lo
+              da la frase, que ya dice «una sola».
+            */}
+            Cada uno entrena una sola habilidad, hasta que la haces sola. Se
+            abren a medida que avanzas en El Camino.
           </p>
         </div>
 
@@ -566,7 +638,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             {(() => {
               const ident = identidadDe(agenteActivo.id);
               return ident ? (
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}><span className="text-[18px] font-bold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span></div>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}><span className="text-xl font-bold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span></div>
               ) : (IconActivo && <IconActivo className="w-6 h-6 text-gold" />);
             })()}
             <div>
@@ -579,7 +651,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
                 )}
               </h2>
               {identidadDe(agenteActivo.id) && (
-                <p className="text-sm text-cream/65 mt-0.5 italic">{identidadDe(agenteActivo.id)!.frase}</p>
+                <p className="text-sm text-cream/65 mt-0.5 italic">{VOC(identidadDe(agenteActivo.id)!.frase)}</p>
               )}
               <p className="text-xs text-white/65">
                 Nivel {snapshotActivo.current_level} · {NIVEL_NOMBRE[snapshotActivo.current_level]} ·{' '}
@@ -630,7 +702,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               /* Burbujas humanas: el entrenador escribe en bloques, como una persona */
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.contenido.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
-                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 text-sm leading-relaxed fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[var(--line, rgba(142,104,36,0.18))] px-5 py-3.5 text-sm leading-relaxed fade-rise" style={{ animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
                     <div className="prose prose-invert prose-sm max-w-none prose-p:my-0 prose-li:my-0.5 prose-strong:text-goldhi prose-code:text-gold prose-code:bg-gold/10 prose-code:px-1 prose-code:rounded">
                       <Markdown>{parte}</Markdown>
                     </div>
@@ -641,12 +713,12 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.rol === 'usuario'
-                  ? 'bg-gold text-white whitespace-pre-wrap'
+                  ? 'burbuja-mia whitespace-pre-wrap'
                   : 'card-panel text-white/90'
               }`}
             >
               {msg.rol === 'agente' ? (
-                <div className="prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-headings:text-white prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1.5 prose-li:my-0.5 prose-li:text-white/80 prose-strong:text-white prose-strong:font-semibold prose-code:text-gold prose-code:bg-gold/10 prose-code:px-1 prose-code:rounded prose-hr:border-[rgba(232,150,46,0.12)]">
+                <div className="prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-headings:text-white prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-1.5 prose-li:my-0.5 prose-li:text-white/80 prose-strong:text-white prose-strong:font-semibold prose-code:text-gold prose-code:bg-gold/10 prose-code:px-1 prose-code:rounded prose-hr:border-[var(--line, rgba(142,104,36,0.18))]">
                   <Markdown>{msg.contenido}</Markdown>
                 </div>
               ) : (
@@ -674,10 +746,13 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             <button
               key={qr.id}
               onClick={() => onQuickReplyClick(qr)}
-              className="text-left bg-gold/5 border border-[rgba(232,150,46,0.12)] text-white/80 px-3 py-2.5 rounded-xl hover:bg-gold/15 hover:border-[rgba(232,150,46,0.24)] hover:text-white transition-colors"
+              className="text-left bg-gold/5 border border-[var(--line, rgba(142,104,36,0.18))] text-white/80 px-3 py-2.5 rounded-xl hover:bg-gold/15 hover:border-[var(--line2, rgba(142,104,36,0.30))] hover:text-white transition-colors"
             >
               <div className="flex items-start gap-2">
-                <span className="text-base shrink-0 mt-0.5">{qr.icon}</span>
+                {(() => {
+                  const IconQR = MISION_ICON_MAP[qr.icon] ?? Target;
+                  return <IconQR className="w-5 h-5 shrink-0 mt-0.5 text-gold" />;
+                })()}
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium">{qr.label}</div>
                   <div className="text-sm text-white/55 mt-0.5 leading-snug">
@@ -716,7 +791,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           }}
           placeholder="Escribe tu respuesta o pega una captura (Ctrl+V)..."
           rows={2}
-          className="flex-1 bg-gold/5 border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
+          className="flex-1 bg-gold/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
         />
         <button
           onClick={() => enviarMensaje(inputUsuario)}
@@ -750,10 +825,10 @@ interface AgenteCardProps {
 // Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
 // 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
 const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: string }> = {
-  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.', anillo: 'rgba(232,150,46,0.45)' },
-  caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'rgba(232,150,46,0.45)' },
-  vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'rgba(232,150,46,0.45)' },
-  ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, escalamos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },
+  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.', anillo: 'var(--oro, #B0822E)' },
+  caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'var(--oro, #B0822E)' },
+  vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'var(--oro, #B0822E)' },
+  ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, crecemos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },
   lucas:  { inicial: 'L', frase: 'Lo técnico sin sufrimiento. Paso a paso, hasta que funciona.', anillo: 'rgba(96,165,250,0.40)' },
   bruno:  { inicial: 'B', frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.', anillo: 'rgba(96,165,250,0.40)' },
   diego:  { inicial: 'D', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(244,182,92,0.50)' },
@@ -789,17 +864,29 @@ function AgenteCard({
   //   - autónoma · borde verde · etiqueta
   //   - disponible · gold accent · nivel y dots
   //   - bloqueada · opacity baja · candado · razón
+  /*
+   * Las tres tarjetas tenían tres fondos distintos —verde traslúcido, oro al
+   * diez, oro al cinco— y ninguno era la superficie de la casa, así que esta
+   * pantalla no tenía paneles: tenía manchas de color. Ahora la superficie es
+   * una sola, `card-panel`, y el estado lo dice la LÍNEA —oro mate en 1px,
+   * que es la vara— más el candado, la etiqueta y la línea del pie. El
+   * nombre no lo dice: el nombre se lee, y para leerse va al contraste pleno.
+   *
+   * Y la bloqueada tenía `opacity-60` encima de todo, incluido el texto que
+   * explica qué falta para abrirla — que es justo lo único que el cliente
+   * necesita leer ahí. El estado ya se ve en la línea punteada.
+   */
   let className =
-    'text-left p-5 rounded-2xl border transition-all group cursor-pointer ';
+    'text-left p-5 rounded-2xl border card-panel transition-all group cursor-pointer ';
   if (autonomo) {
     className +=
-      'bg-gradient-to-br from-emerald-500/10 to-gold/5 border-emerald-500/40 hover:from-emerald-500/15';
+      'border-emerald-500/40 hover:bg-emerald-500/[0.06]';
   } else if (unlocked) {
     className +=
-      'bg-gold/10 border-gold/20 hover:bg-gold/15';
+      'border-gold/30 hover:bg-gold/[0.06]';
   } else {
     className +=
-      'bg-gold/5 border-dashed border-gold/15 opacity-60';
+      'border-dashed border-gold/20';
   }
 
   return (
@@ -810,10 +897,26 @@ function AgenteCard({
           if (ident) {
             return (
               <div
-                className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30 ${unlocked ? '' : 'opacity-40'}`}
-                style={{ borderColor: unlocked ? ident.anillo : 'rgba(255,255,255,0.10)' }}
+                /*
+                 * ─── EL DISCO ERA TEMA OSCURO FILTRÁNDOSE ────────────────
+                 *
+                 * `bg-black/30` sobre el papel crema da un disco gris sucio, y
+                 * el anillo del bloqueado era `rgba(255,255,255,0.10)`: blanco
+                 * al diez por ciento sobre crema, o sea nada. Por eso los ocho
+                 * entrenadores se veían como el círculo gris con inicial de
+                 * cualquier app, con su anillo de color declarado y sin
+                 * mostrarse.
+                 *
+                 * Ahora el fondo es la tinta de papel de la casa y el anillo
+                 * del que todavía no se abrió es la línea de la casa — fina y
+                 * presente, no ausente.
+                 */
+                className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border-2 bg-surface/30`}
+                style={{ borderColor: unlocked ? ident.anillo : 'var(--line2, #DFD3BC)' }}
               >
-                <span className={`text-[19px] font-bold ${unlocked ? 'text-cream' : 'text-white/55'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
+                {/* 20px es el piso de la Garamond: debajo de eso su altura de x
+                    la hace leer como un cuerpo dos puntos más chico. */}
+                <span className={`text-xl font-bold ${unlocked ? 'text-cream' : 'text-cream/50'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
               </div>
             );
           }
@@ -823,34 +926,64 @@ function AgenteCard({
         })()}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
+            {/*
+              El nombre de la entrenadora era lo más DÉBIL de su propia
+              tarjeta: 17px en la Garamond de display —que tiene la altura de
+              x muy baja y a ese cuerpo lee como un sans de 14— y en oro, que
+              sobre la tarjeta oscura contrasta menos que el blanco. Debajo,
+              su descripción iba a 15px en la letra de cuerpo, en blanco: más
+              grande y más clara que el nombre que la encabeza.
+
+              Ahora el nombre es lo primero que se lee —18px de cuerpo,
+              semibold, al contraste pleno— y el estado lo siguen diciendo las
+              cuatro señales que ya estaban: el borde, el candado, la etiqueta
+              «Autónoma» y la línea de abajo. El oro vuelve a donde manda la
+              vara: la línea de 1px y las versalitas del pie.
+            */}
+            {/*
+              El título trae el nombre y el rol pegados con un punto medio —
+              «Caro · Entrenadora de Cámara y Presencia»— y a 390 píxeles eso
+              son dos renglones de 18, con el candado empujado al medio del
+              segundo. El nombre propio es lo que se busca al recorrer la
+              lista; el rol dice de qué entrena. Separados, el nombre entra en
+              una línea y el candado tiene dónde ir.
+            */}
             <h3
-              className={`text-sm font-medium ${
-                autonomo
-                  ? 'text-emerald-300'
-                  : unlocked
-                    ? 'text-gold'
-                    : 'text-white/55'
+              className={`font-sans not-italic text-xl font-semibold ${
+                unlocked || autonomo ? 'text-cream' : 'text-white/55'
               }`}
             >
-              {VOC(agente.titulo)}
+              {nombreDe(agente.titulo)}
             </h3>
-            {!unlocked && <Lock className="w-3.5 h-3.5 text-white/55" />}
+            {/*
+              ─── ACÁ HABÍA UN CANDADO ─────────────────────────────────────
+              Pegado al nombre: «Caro 🔒». Un «no» a dos centímetros de la
+              línea que ya explica, en positivo, qué lo abre: «Se abre cuando
+              selles tu historia, tu propósito y tu legado». El candado no
+              agrega información, agrega una negativa — y esta casa ya había
+              decidido lo mismo para la barra de abajo: sin huecos, sin
+              candados. Lo que distingue al que todavía no se abrió es su
+              anillo y su frase, no una prohibición.
+            */}
             {autonomo && (
               <span className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 Autónoma
               </span>
             )}
           </div>
-          <p className="text-xs text-white/65 mt-0.5">{VOC(agente.subtitulo)}</p>
+          {rolDe(agente.titulo) && (
+            <p className="text-xs text-white/65 mt-0.5">{rolDe(agente.titulo)}</p>
+          )}
+          <p className="text-xs text-white/55 mt-0.5">{VOC(agente.subtitulo)}</p>
         </div>
       </div>
 
       <p className="text-xs text-white/65 leading-relaxed">
-        {unlocked ? (identidadDe(agente.id)?.frase ?? agente.descripcion) : reason}
+        {VOC(unlocked ? (identidadDe(agente.id)?.frase ?? agente.descripcion) : reason)}
       </p>
 
       <div
-        className={`mt-3 flex items-center justify-between text-sm font-medium uppercase tracking-wider ${
+        className={`mt-3 flex items-center ${unlocked ? 'justify-between gap-3' : 'justify-end'} text-sm font-medium uppercase tracking-wider ${
           autonomo
             ? 'text-emerald-300'
             : unlocked
@@ -858,12 +991,19 @@ function AgenteCard({
               : 'text-white/55'
         }`}
       >
-        <span>
-          {unlocked
-            ? `Nivel ${snapshot.current_level} · ${NIVEL_NOMBRE[snapshot.current_level]} · ${snapshot.practice_count} prácticas`
-            : 'Bloqueado'}
-        </span>
-        <span className="flex items-center gap-1">
+        {/*
+          Eran dos textos con `justify-between` y sin hueco de reserva: a 390
+          píxeles «Bloqueado» y «Ver requisitos» no entran en una línea y el
+          flex los pegaba, así que se leía «BLOQUEADOVER REQUISITOS». Y decían
+          lo mismo dos veces: el candado de arriba ya dice que está cerrada.
+          Cerrada muestra una sola cosa; abierta, el nivel y la acción.
+        */}
+        {unlocked && (
+          <span className="min-w-0 truncate">
+            {`Nivel ${snapshot.current_level} · ${NIVEL_NOMBRE[snapshot.current_level]} · ${snapshot.practice_count} prácticas`}
+          </span>
+        )}
+        <span className="flex items-center gap-1 shrink-0">
           {unlocked ? (autonomo ? 'Hablar' : 'Entrenar') : 'Ver requisitos'}
           <ArrowRight className="w-3 h-3" />
         </span>
@@ -906,7 +1046,7 @@ function ModalBloqueado({ agente, onCerrar, onIrAlRoadmap }: ModalBloqueadoProps
       >
         <div className="flex items-center gap-3">
           <Lock className="w-5 h-5 text-gold" />
-          <h3 className="text-base font-medium text-white">
+          <h3 className="text-xl font-medium text-white">
             {VOC(agente.titulo)} está bloqueada
           </h3>
         </div>

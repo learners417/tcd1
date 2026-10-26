@@ -25,13 +25,16 @@ import {
   Lightbulb,
   CloudRain,
   UserX,
+  Timer,
 } from 'lucide-react';
+import SieteLibertades from '../components/SieteLibertades';
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
 import { diaDelPrograma } from '../lib/diaPrograma';
+import { mensajeDeFalla } from '../lib/conexion';
 import {
   TAREAS_TAGS,
   CHECKEOS_CHIPS,
@@ -139,11 +142,11 @@ function mapRow(d: any): EntradaDiario {
 
 /** Cinco toques con palabra — nadie sabe qué es un 7 sobre 10. */
 const NIVELES_ENERGIA = [
-  { valor: 2, emoji: '🪫', palabra: 'En cero' },
-  { valor: 4, emoji: '😮‍💨', palabra: 'Bajo' },
-  { valor: 6, emoji: '😐', palabra: 'Normal' },
-  { valor: 8, emoji: '💪', palabra: 'Bien' },
-  { valor: 10, emoji: '⚡', palabra: 'Encendido' },
+  { valor: 2, palabra: 'En cero' },
+  { valor: 4, palabra: 'Bajo' },
+  { valor: 6, palabra: 'Normal' },
+  { valor: 8, palabra: 'Bien' },
+  { valor: 10, palabra: 'Encendido' },
 ];
 
 function Escala10({
@@ -168,7 +171,7 @@ function Escala10({
             aria-label={`Nivel ${n}`}
             className="flex-1 h-7 rounded-md transition-all"
             style={{
-              background: activo ? fill : 'rgba(232,150,46,0.08)',
+              background: activo ? fill : 'var(--line, rgba(142,104,36,0.18))',
             }}
           />
         );
@@ -193,9 +196,9 @@ function KpiCard({
   delta?: string;
 }) {
   const valColor =
-    tone === 'green' ? 'text-success' : tone === 'warn' ? 'text-[#E09040]' : 'text-cream';
+    tone === 'green' ? 'text-success' : tone === 'warn' ? 'text-[var(--oro,#B0822E)]' : 'text-cream';
   return (
-    <div className="card-panel p-4 rounded-2xl border border-[rgba(232,150,46,0.12)]">
+    <div className="card-panel p-4 rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))]">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-gold/60" />
         <p className="text-sm text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
@@ -364,12 +367,14 @@ export default function DiarioDirector({
       if (esDomingo) await generarResumenSemana(actualizadas);
     } catch (err) {
       // Reportar a Sentry con contexto en vez de tragarse el error en silencio.
-      const msg = reportError(err, {
+      // El reporte sigue yendo entero a Sentry; lo que cambia es que su texto
+      // ya no se le muestra al cliente, que no puede hacer nada con él.
+      reportError(err, {
         feature: 'diario-fundador',
         action: 'guardar-entrada',
         extra: { fecha: todayStr, userId },
       });
-      toast.error(`Error al guardar: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'guardar tu entrada'));
     } finally {
       setSaving(false);
     }
@@ -391,7 +396,7 @@ export default function DiarioDirector({
 
       setGenerandoResumen(true);
       try {
-        const prompt = `Eres el Mentor de "Tu Clínica Digital": master coach especialista en PNL, neurociencia y emprendimiento. Analiza las entradas del Diario del Fundador de esta semana y devuelve un resumen en JSON. Busca: la evolución (energía), los miedos recurrentes (bloqueos), los deseos que asoman (logros), y UN reencuadre de PNL accionable.
+        const prompt = `Eres el Mentor de "Tu Clínica Digital": mentor especialista en PNL, neurociencia y emprendimiento. Analiza las entradas del Diario del Fundador de esta semana y devuelve un resumen en JSON. Busca: la evolución (energía), los miedos recurrentes (bloqueos), los deseos que asoman (logros), y UN reencuadre de PNL accionable.
 
 ENTRADAS:
 ${entradasSemana.map((e, i) => `Día ${i + 1} (${e.fecha}): energía ${e.energia}/10 · cuerpo ${e.cuerpo} · mente ${e.mente} · emociones ${e.emociones} · score ${e.score} · logro: "${e.logro}" · bloqueo: "${e.bloqueo || '—'}"`).join('\n')}
@@ -416,7 +421,7 @@ Devuelve SOLO este JSON:
           await guardarFila('diario_resumen', { user_id: userId, semana_inicio: semanaInicio, resumen_texto: resumenTexto }, ['user_id', 'semana_inicio']);
           setResumen({ id: '', semana_inicio: semanaInicio, resumen_texto: resumenTexto, created_at: new Date().toISOString() });
         }
-        toast.success('Resumen de la semana generado por el Coach.');
+        toast.success('Resumen de la semana generado por tu Mentor.');
       } catch {
         /* nice-to-have, silencioso */
       } finally {
@@ -443,27 +448,69 @@ Devuelve SOLO este JSON:
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
 
-      {/* Header */}
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-light text-cream flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-gold" /> Diario del Fundador
-          </h1>
-          <p className="text-sm text-cream/75 mt-1 flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5" />
-            {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            <span className="text-gold/80 font-medium">· Día {getCurrentDay()} de 90</span>
+      {/*
+        EL MISMO BUG QUE LA BARRA DE ARRIBA.
+
+        Dos grupos en un `flex justify-between` y ninguno con `flex-1`: el de
+        la derecha —el botón del historial— toma lo suyo y el de la izquierda
+        se comprime hasta donde el texto se lo permite. A 390 píxeles el
+        párrafo que explica para qué sirve el diario envolvía a poco más de la
+        mitad del ancho disponible, en cinco renglones de cuatro palabras.
+
+        `flex-1 min-w-0` en el grupo del texto, `shrink-0` en el del botón:
+        el texto reclama el ancho y el botón se queda con el suyo. Y
+        `items-start` porque con `items-end` el botón se alineaba con el
+        último renglón del párrafo, que es donde no lo busca nadie.
+      */}
+      <div className="flex justify-between items-start gap-3">
+        <div className="flex-1 min-w-0">
+          {/*
+            ─── ACÁ DECÍA «DIARIO DEL FUNDADOR» ─────────────────────────────
+            La barra de arriba dice «Diario» a ochenta píxeles. Un diario abre
+            con su fecha, que es lo que viene abajo y lo que el cliente busca
+            al entrar: en qué día está.
+          */}
+          {/*
+            El punto medio vivía dentro del span del día, y con el gap del flex
+            quedaba pegado al día y separado de la fecha. A 390 píxeles la
+            fecha se parte y el punto arrancaba la segunda línea solo. Ahora
+            el separador es del texto, no del layout: la fecha y el día viven
+            en el mismo nodo y se parten juntos.
+          */}
+          <p className="text-sm text-cream/75 mt-1 flex items-start gap-2">
+            <Calendar className="w-3.5 h-3.5 mt-[3px] shrink-0" />
+            <span>
+              {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              {' · '}
+              <span className="text-gold/80 font-medium">Día {getCurrentDay()} de 90</span>
+            </span>
           </p>
-          <p className="text-sm text-cream/55 mt-1.5 italic">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
-          <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-full border border-[rgba(232,150,46,0.2)] bg-black/25 px-3 py-1.5">
-            <span className="text-[15px]">⏱</span>
+          {/*
+            Era un párrafo entero en itálica, en el sans, al 55%. La itálica
+            de un sans geométrico es una inclinación mecánica: no está
+            dibujada, se lee peor y no agrega nada. En esta casa la cursiva es
+            de la Garamond de display. Y al 55% un texto que explica para qué
+            sirve la pantalla queda como una nota al pie, que es justo lo que
+            no puede ser: es lo que convence de escribir hoy.
+          */}
+          <p className="text-sm text-cream/75 mt-1.5">Este diario alimenta a tu Mentor: lo que escribes hoy es lo que él te devuelve cuando lo necesitas.</p>
+          <button type="button" onClick={() => setCronoActivo(true)} className="mt-2 inline-flex items-center gap-2 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] bg-black/25 px-3 min-h-[44px]">
+            <Timer className="w-4 h-4 text-cream/55 shrink-0" />
             <span className={`text-[15px] font-semibold num-tab ${cronoSegundos === 0 ? 'text-success' : cronoActivo ? 'text-goldhi' : 'text-cream/75'}`}>{Math.floor(cronoSegundos / 60)}:{String(cronoSegundos % 60).padStart(2, '0')}</span>
-            <span className="text-sm text-cream/55">{cronoSegundos === 0 ? '¿Viste? Ya está. Guarda cuando quieras.' : cronoActivo ? 'tu cierre en 3 minutos' : 'toca si quieres cronometrarlo'}</span>
+            {/*
+              El texto del chip era de tres a seis palabras —«toca si quieres
+              cronometrarlo», «¿Viste? Ya está. Guarda cuando quieras.»— y en
+              una píldora al lado del historial eso son dos renglones: la
+              píldora crecía al doble de alto que su vecina, y dos píldoras de
+              distinta altura en la misma fila se leen como un error de
+              encuadre. Dicho corto, entra en una línea y las dos empatan.
+            */}
+            <span className="text-sm text-cream/55 whitespace-nowrap">{cronoSegundos === 0 ? 'listo, guarda cuando quieras' : cronoActivo ? 'tu cierre en 3 minutos' : 'tócalo si lo quieres medir'}</span>
           </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {energiaPromedio !== null && (
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
+            <div className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl border ${
               energiaPromedio >= 7 ? 'text-success bg-emerald-500/10 border-emerald-500/20' :
               energiaPromedio >= 4 ? 'text-gold bg-gold/10 border-gold/20' :
               'text-danger bg-red-500/10 border-red-500/20'
@@ -474,14 +521,21 @@ Devuelve SOLO este JSON:
             </div>
           )}
           {racha > 0 && (
-            <div className="flex items-center gap-1.5 text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20">
+            <div className="flex items-center gap-1.5 text-amber-500 bg-amber-500/10 px-3 min-h-[44px] rounded-xl border border-amber-500/20">
               <Flame className="w-3.5 h-3.5" />
               <span className="text-sm font-bold">{racha} días</span>
             </div>
           )}
           <button
             onClick={() => setVista(vista === 'formulario' ? 'historial' : 'formulario')}
-            className="flex items-center gap-1.5 text-cream/75 bg-gold/5 px-3 py-1.5 rounded-xl border border-[rgba(232,150,46,0.12)] hover:bg-gold/10 transition-colors text-sm"
+            /*
+              Las tres píldoras de esta fila tenían la misma sangría y
+              distinta altura, porque la altura la ponía el contenido: una
+              lleva dos números, otra uno, esta un ícono y una palabra. Ahora
+              la altura es la misma y es el piso táctil de 44, que este botón
+              tampoco alcanzaba.
+            */
+            className="flex items-center justify-center gap-1.5 text-cream/75 bg-gold/5 px-3 min-h-[44px] rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] hover:bg-gold/10 transition-colors text-sm"
           >
             <History className="w-3.5 h-3.5" />
             Historial
@@ -493,7 +547,7 @@ Devuelve SOLO este JSON:
       {generandoResumen && (
         <div className="flex items-center gap-2 text-gold bg-gold/10 border border-gold/20 rounded-2xl p-4">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm">El Coach está analizando tu semana...</span>
+          <span className="text-sm">Tu Mentor está analizando tu semana…</span>
         </div>
       )}
       {esDomingo && resumen && (() => {
@@ -503,7 +557,7 @@ Devuelve SOLO este JSON:
             <div className="card-panel p-5 rounded-2xl border border-violet-500/20 bg-violet-500/5 space-y-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-violet-400" />
-                <h3 className="text-sm font-medium text-violet-300">Resumen del Coach — Semana cerrada</h3>
+                <h3 className="text-sm font-medium text-violet-300">Resumen de tu Mentor — Semana cerrada</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-surface/50 rounded-xl p-3">
@@ -539,8 +593,12 @@ Devuelve SOLO este JSON:
         } catch { return null; }
       })()}
 
-      {/* S5 — La Rueda de la Vida: el registro del fin, no solo del medio */}
-
+      {/*
+        Las siete libertades: el registro del fin, no solo del medio.
+        Acá había este mismo comentario y nada debajo durante meses, mientras
+        el onboarding le prometía al cliente que el día 90 las iba a mirar.
+      */}
+      {vista === 'formulario' && <SieteLibertades />}
 
       {/* ── Vista: Formulario ── */}
       {vista === 'formulario' && (
@@ -608,7 +666,22 @@ Devuelve SOLO este JSON:
                     <div className="flex items-end gap-1.5 h-12">
                       {dias.map((x, i2) => (
                         <div key={i2} className="flex-1 flex flex-col items-center gap-1">
-                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'rgba(255,255,255,0.06)' : x.e >= 7 ? '#22C55E' : x.e >= 4 ? '#C79A45' : '#B0822E', opacity: x.e === 0 ? 1 : 0.9 }} />
+                          {/*
+                            ─── EL DÍA EN CERO ERA INVISIBLE ────────────────
+                            Se pintaba con `rgba(255,255,255,0.06)`: blanco al
+                            seis por ciento sobre el papel crema, o sea nada.
+                            El cliente no podía distinguir «ese día estuve en
+                            cero» de «ese día no existe», que en un diario es
+                            justo la diferencia que importa. Un color escrito
+                            en el estilo en línea no lo remapea el tema: por
+                            eso sobrevivió al pase a papel.
+
+                            Ahora el día en cero es la línea de la casa —una
+                            ranura vacía, visible— y el día bueno es el verde
+                            del tilde, no el verde brillante de la librería,
+                            que en esta paleta se ve de otra familia.
+                          */}
+                          <div className="w-full rounded-t" style={{ height: `${Math.max(6, x.e * 10)}%`, background: x.e === 0 ? 'var(--line2, #DFD3BC)' : x.e >= 7 ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }} />
                         </div>
                       ))}
                     </div>
@@ -620,13 +693,15 @@ Devuelve SOLO este JSON:
                   <BookOpen className="w-5 h-5 text-gold" />
                 </div>
                 <div>
-                  <h2 className="text-base font-medium text-cream">Tu cierre de hoy</h2>
+                  {/* 20 y no 16: en la Garamond de display, 16 lee como un sans
+                      de 13 y quedaba casi igual que su propia descripción. */}
+                  <h2 className="text-xl font-medium text-cream">Tu cierre de hoy</h2>
                   <p className="text-xs text-cream/75">Dos toques y una línea. Nada más.</p>
                 </div>
               </div>
 
               {/* Energía general */}
-              <div className="bg-surface/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
+              <div className="bg-surface/30 rounded-xl p-4 border border-[var(--line, rgba(142,104,36,0.18))]">
                 <p className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2 mb-3">
                   <Zap className="w-4 h-4 text-yellow-400" /> ¿Cómo estuvo tu energía hoy?
                 </p>
@@ -638,9 +713,9 @@ Devuelve SOLO este JSON:
                         key={n.valor}
                         type="button"
                         onClick={() => setEnergia(n.valor)}
-                        className={`rounded-xl border py-2.5 px-3 flex sm:flex-col items-center gap-2 sm:gap-1 transition-colors ${activo ? 'border-gold bg-gold/[0.12]' : 'border-cream/10 hover:border-cream/30'}`}
+                        className={`rounded-xl border py-2.5 px-3 flex sm:flex-col items-center gap-2 sm:gap-1 transition-colors ${activo ? 'elegido' : 'border-cream/10 hover:border-cream/30'}`}
                       >
-                        <span className="block text-xl leading-none">{n.emoji}</span>
+                        <span className="block text-xl leading-none font-semibold" style={{ fontFamily: 'var(--font-display)' }}>{n.valor}</span>
                         <span className={`block text-[15px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
                       </button>
                     );
@@ -673,7 +748,7 @@ Devuelve SOLO este JSON:
                   rows={2}
                   maxLength={LOGRO_MAX_CHARS}
                   placeholder="El avance del que estás orgulloso hoy..."
-                  className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/50 resize-none transition-all placeholder-cream/30"
+                  className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/50 resize-none transition-all placeholder-cream/30"
                   value={logro}
                   onChange={(e) => setLogro(e.target.value)}
                 />
@@ -725,7 +800,7 @@ Devuelve SOLO este JSON:
                         onClick={() => setTareas((prev) => toggle(prev, tag.id))}
                         className={`text-xs px-3 py-2 rounded-lg border transition-all ${
                           on
-                            ? 'border-gold/40 text-cream bg-gold/10'
+                            ? 'elegido'
                             : 'border-white/8 text-cream/55 hover:bg-white/5'
                         }`}
                       >
@@ -745,14 +820,14 @@ Devuelve SOLO este JSON:
                   rows={2}
                   maxLength={BLOQUEO_MAX_CHARS}
                   placeholder="¿Algo te frenó hoy? Técnico, emocional, externo. No hay respuesta mala."
-                  className="w-full bg-black/20 border border-dashed border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/50 resize-none transition-all placeholder-cream/30"
+                  className="w-full bg-black/20 border border-dashed border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/50 resize-none transition-all placeholder-cream/30"
                   value={bloqueo}
                   onChange={(e) => setBloqueo(e.target.value)}
                 />
               </div>
 
               {/* Checkeos rápidos */}
-              <div className="bg-surface/30 rounded-xl p-4 border border-[rgba(232,150,46,0.1)]">
+              <div className="bg-surface/30 rounded-xl p-4 border border-[var(--line, rgba(142,104,36,0.18))]">
                 <div className="flex items-center gap-2 mb-3">
                   <HeartPulse className="w-4 h-4 text-success" />
                   <span className="text-xs font-medium text-cream/80 uppercase tracking-wider">Checkeos rápidos</span>
@@ -763,7 +838,7 @@ Devuelve SOLO este JSON:
                     const Icon = CHECKEO_ICONS[chip.id] ?? Check;
                     const onColor = chip.positivo
                       ? 'border-success/30 text-success bg-success/5'
-                      : 'border-[#E09040]/30 text-[#E09040] bg-[#E09040]/5';
+                      : 'border-[var(--oro,#B0822E)]/30 text-[var(--oro,#B0822E)] bg-[var(--oro,#B0822E)]/5';
                     return (
                       <button
                         key={chip.id}

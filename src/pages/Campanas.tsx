@@ -195,7 +195,10 @@ export default function Campanas({ userId, perfil, onIrAlCamino }: CampanasProps
         {view === 'home' && (
         <div className="mb-6">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu máquina de pacientes</p>
-          <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas & Creativos</h1>
+          {/* «Campañas & Creativos»: el «&» no es castellano y «Creativos» es la
+            palabra con que la publicidad llama a sus piezas. El destino se
+            llama «Campañas» en la barra, en el buscador y en el menú. */}
+          <h1 className="text-2xl sm:text-3xl font-light text-cream mt-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Campañas</h1>
           <p className="text-sm text-cream/65 mt-1">Tus anuncios, con tu marca, listos para encender. La primera campaña casi nunca es la ganadora — se mide, se ajusta y se vuelve a encender.</p>
         </div>
       )}

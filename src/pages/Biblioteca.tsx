@@ -17,7 +17,7 @@ import {
   Bot, Globe, Phone, Megaphone, Triangle, Cog, Building2, Handshake,
   Palette, BarChart3, Sunrise, UserCircle,
 } from 'lucide-react';
-import { SEED_ROADMAP_V2, SEED_ROADMAP_V3 } from '../lib/roadmapSeed';
+import { SEED_ROADMAP_V2, SEED_ROADMAP_V3, diaDelCodigo } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
 import { herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
 import type { HerramientaV3 } from '../lib/herramientas';
@@ -35,6 +35,7 @@ import {
 } from '../lib/videos';
 import HerramientaDetalle from './HerramientaDetalle';
 import TodoElMaterial from '../components/TodoElMaterial';
+import EstanteDeLibros from '../components/EstanteDeLibros';
 import { videosCargadosEnLaBase } from '../lib/bibliotecaDatos';
 import { VOC } from '../lib/vocabulario';
 import { idDeYoutube } from '../lib/videosCargados';
@@ -57,7 +58,7 @@ const CLINICA_TABS: readonly ClinicaTab[] = [
     letter: 'O',
     label: 'Onboarding',
     pilarIds: ['P0'],
-    color: '#C79A45',
+    color: 'var(--oro, #B0822E)',
   },
   {
     id: 'C1',
@@ -71,7 +72,7 @@ const CLINICA_TABS: readonly ClinicaTab[] = [
     letter: 'L',
     label: 'Liberación',
     pilarIds: ['P1'],
-    color: '#C79A45',
+    color: 'var(--oro, #B0822E)',
   },
   {
     id: 'I1',
@@ -85,7 +86,7 @@ const CLINICA_TABS: readonly ClinicaTab[] = [
     letter: 'N',
     label: 'Narrativa',
     pilarIds: ['P3'],
-    color: '#C79A45',
+    color: 'var(--oro, #B0822E)',
   },
   {
     id: 'I2',
@@ -99,7 +100,7 @@ const CLINICA_TABS: readonly ClinicaTab[] = [
     letter: 'C',
     label: 'Cobro',
     pilarIds: ['P5', 'P6'],
-    color: '#C79A45',
+    color: 'var(--oro, #B0822E)',
   },
   {
     id: 'A',
@@ -237,19 +238,19 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
         <p className="text-sm text-cream/75">{VOC(r.titulo)}</p>
                   {COMPLEMENTOS[r.id] && (
                     <details className="mt-3 rounded-xl border border-gold/15 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
-                      <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">📖 Resumen y mapa — la teoría en 2 min</summary>
+                      <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">Resumen y mapa — la teoría en 2 min</summary>
                       <div className="mt-3 space-y-3">
                         <p className="text-sm text-cream/80 leading-relaxed">{COMPLEMENTOS[r.id].resumen}</p>
                         <ul className="space-y-1.5">
                           {COMPLEMENTOS[r.id].mapa.map((b, bi) => (
-                            <li key={bi} className="text-[13px] text-cream/70 pl-4 relative"><span className="absolute left-0 text-gold">·</span>{b}</li>
+                            <li key={bi} className="text-[15px] text-cream/70 pl-4 relative"><span className="absolute left-0 text-gold">·</span>{b}</li>
                           ))}
                         </ul>
                         {COMPLEMENTOS[r.id].referente && (
-                          <p className="text-[12px] text-cream/55 italic border-l-2 border-gold/30 pl-3">{COMPLEMENTOS[r.id].referente}</p>
+                          <p className="text-[15px] text-cream/55 italic border-l-2 border-gold/30 pl-3">{COMPLEMENTOS[r.id].referente}</p>
                         )}
                         {COMPLEMENTOS[r.id].dato && (
-                          <p className="text-[12px] text-goldhi/90">📊 {COMPLEMENTOS[r.id].dato}</p>
+                          <p className="text-[15px] text-goldhi/90">{COMPLEMENTOS[r.id].dato}</p>
                         )}
                       </div>
                     </details>
@@ -259,11 +260,14 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
   }
   if (!desbloqueado) {
     return (
-      <div className="rounded-2xl border border-[rgba(232,150,46,0.10)] bg-black/25 p-4 relative overflow-hidden">
+      <div className="rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))] bg-black/25 p-4 relative overflow-hidden">
         <div className="absolute inset-0 backdrop-blur-[1px] bg-black/20 pointer-events-none" />
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">🔒 Guardado para ti</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold/60 mb-1">Guardado para ti</p>
         <p className="text-sm text-cream/70">{VOC(r.titulo)}</p>
-        <p className="text-sm text-cream/45 mt-1.5">Se desbloquea con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
+        {/* «Se desbloquea» → «Se abre», que es como hablan las puertas del
+            Camino. Y al 45% esta línea dice lo único que importa saber acá:
+            con qué se abre. */}
+        <p className="text-sm text-cream/75 mt-1.5">Se abre con <span className="text-goldhi">{r.pasoDesbloqueo!.nombre}</span> · El Camino →</p>
       </div>
     );
   }
@@ -275,10 +279,10 @@ function RecursoCard({ r, completadas }: { r: RecursoADN; completadas: Set<strin
 function RecursoVideoInApp({ r }: { r: RecursoADN }) {
   const [abierto, setAbierto] = useState(false);
   return (
-    <div className={`rounded-2xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-br from-gold/8 to-transparent overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
+    <div className={`rounded-2xl border border-[var(--line2, rgba(142,104,36,0.30))] bg-gold/8 overflow-hidden transition-all fade-rise ${abierto ? 'sm:col-span-2' : ''}`}>
       <button onClick={() => setAbierto((v) => !v)} className="w-full text-left p-4 hover:bg-gold/5 transition-colors">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">▶ Video del método</p>
-        <p className="text-sm text-cream/90 font-medium">{VOC(r.titulo)}</p>
+        <p className="text-sm text-cream/90 font-semibold">{VOC(r.titulo)}</p>
         <p className="text-sm text-cream/55 mt-1">{abierto ? 'Cerrar' : 'Toca para ver aquí mismo'}</p>
       </button>
       {abierto && (
@@ -473,8 +477,15 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
              lo que sí agrega: qué hay acá adentro. Y en 17 px, que es el
              mínimo de la app: estaba en 14. */}
       <p className="text-[17px] text-cream/75">
-        Los videos y las herramientas del Método C·L·I·N·I·C·A.
+        Los libros, los videos y las herramientas del Método C·L·I·N·I·C·A.
       </p>
+
+      {/* LOS LIBROS. Van primero porque son la fuente: Sanadores Libres
+          explica esta app y las siete libertades son lo que hay detrás de
+          todo. La Biblioteca no tenía concepto de libro, así que el cliente
+          que quería entender por qué el Camino está en este orden no lo
+          encontraba en ninguna pantalla. */}
+      <EstanteDeLibros />
 
       {/* TODO EL MATERIAL, con buscador. Va arriba porque es para encontrar
           algo puntual; las etapas de abajo son para recorrer. Antes los
@@ -519,10 +530,10 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
                 disabled={!unlocked}
                 className={`shrink-0 flex flex-col items-center px-4 py-3 rounded-2xl transition-colors border min-w-[96px] ${
                   !unlocked
-                    ? 'bg-surface/40 border-[rgba(232,150,46,0.05)] text-cream/20 cursor-not-allowed'
+                    ? 'bg-surface/40 border-[var(--line, rgba(142,104,36,0.18))] text-cream/20 cursor-not-allowed'
                     : isActive
                     ? 'bg-gold/15 border-gold/50 text-gold'
-                    : 'bg-surface/30 border-[rgba(232,150,46,0.1)] text-cream/75 hover:text-cream hover:bg-surface/50'
+                    : 'bg-surface/30 border-[var(--line, rgba(142,104,36,0.18))] text-cream/75 hover:text-cream hover:bg-surface/50'
                 }`}
               >
                 {!unlocked ? (
@@ -605,7 +616,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
                 return (
                   <div
                     key={v.id}
-                    className="card-panel rounded-2xl border border-[rgba(232,150,46,0.1)] hover:border-[rgba(232,150,46,0.12)] transition-all overflow-hidden group flex flex-col"
+                    className="card-panel rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line, rgba(142,104,36,0.18))] transition-all overflow-hidden group flex flex-col"
                   >
                     <div
                       className={`relative aspect-video overflow-hidden bg-black/40 ${
@@ -631,19 +642,30 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
                           </div>
                         </div>
                       )}
+                      {/* La pastilla estaba, con la duración borrada adentro:
+                          se dibujaba un rectángulo oscuro con nada. */}
                       {v.duracion && (
                         <div className="absolute bottom-2 right-2 bg-black/80 text-cream text-sm font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
-                          
+                          {v.duracion}
                         </div>
                       )}
                     </div>
 
                     <div className="p-4 flex-1 flex flex-col">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
-                          {v.pilar_id ?? v.id}
-                        </span>
-                      </div>
+                      {/* Decía «P1» o «r-dinero»: el código interno de la
+                          jornada. El cliente ve el día, igual que en el
+                          Camino, y si no hay día no ve una etiqueta vacía. */}
+                      {(() => {
+                        const diaDelVideo = v.pilar_id ? diaDelCodigo(v.pilar_id) : null;
+                        if (!diaDelVideo) return null;
+                        return (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
+                              Día {diaDelVideo}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       <h3 className="text-sm font-semibold text-cream mb-1">
                         {VOC(v.titulo)}
                       </h3>
@@ -667,7 +689,29 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
         </div>
       )}
 
-      {/* L2 · recorte: El Método es SOLO la escuela — las herramientas viven en las sesiones del Camino */}
+      {/*
+        APAGADO A PROPÓSITO, Y ES UNA DECISIÓN PENDIENTE — no un resto.
+
+        El recorte fue: El Método es SOLO la escuela, y el trabajo se hace en
+        las sesiones del Camino. Pero el apagón dejó mucho más de lo que se ve
+        desde acá, y conviene que esté escrito antes de tocarlo:
+
+          · las 22 herramientas de IA del catálogo V3, con sus campos y sus
+            instrucciones, en `herramientas.ts`
+          · las 34 del catálogo anterior (GRUPO_A…E), ~1.830 líneas del mismo
+            archivo, con el lenguaje más viejo que queda en el repositorio
+          · `HerramientaDetalle.tsx` entera: este bloque es lo único que la
+            abría, así que hoy no hay forma de llegar a esa pantalla
+          · el rescate de `tcd_herramienta_*` en el Camino y el mapa de
+            `userKnowledgeBase.ts`, que cruzan contra `meta.herramienta_id`:
+            ese campo está en `undefined` en las 91 jornadas del seed, así que
+            los dos caminos corren en vacío
+
+        O sea: ninguna meta del Camino apunta a una herramienta. Son dos
+        decisiones opuestas y las dos son legítimas —encender el catálogo V3
+        acá, o sacarlo del código— y la segunda no se deshace desde un ZIP.
+        Queda para que la tome Javo, no la prueba.
+      */}
       {false && herramientas.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-sm font-bold uppercase tracking-widest text-cream/55 flex items-center gap-2">
@@ -679,7 +723,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
             {herramientas.map((h) => (
               <div
                 key={h.id}
-                className="card-panel rounded-2xl p-5 border border-[rgba(232,150,46,0.1)] hover:border-[rgba(232,150,46,0.12)] hover:bg-surface/50 transition-all group flex flex-col"
+                className="card-panel rounded-2xl p-5 border border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line, rgba(142,104,36,0.18))] hover:bg-surface/50 transition-all group flex flex-col"
               >
                 <div className="flex items-start gap-3 mb-3">
                   {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-gold shrink-0" /> : <Sparkles className="w-6 h-6 text-gold shrink-0" />; })()}
@@ -717,9 +761,9 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
 
       {/* Empty state when both lists are empty */}
       {herramientas.length === 0 && tabVideos.length === 0 && recursosTab.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-surface/30 border border-[rgba(232,150,46,0.1)] border-dashed rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-surface/30 border border-[var(--line, rgba(142,104,36,0.18))] border-dashed rounded-2xl">
           <Sparkles className="w-12 h-12 text-gold/30 mb-4" />
-          <p className="text-cream/75 text-sm font-medium mb-2">
+          <p className="text-cream/75 text-sm font-semibold mb-2">
             Su material vive en las sesiones
           </p>
           <p className="text-cream/45 text-xs max-w-sm leading-relaxed">
@@ -740,7 +784,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <h3 className="text-cream font-medium text-sm truncate flex-1">
+              <h3 className="text-cream font-semibold text-sm truncate flex-1">
                 {VOC(videoActivo.titulo)}
               </h3>
               <button
@@ -750,7 +794,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[rgba(232,150,46,0.12)]">
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[var(--line, rgba(142,104,36,0.18))]">
               <iframe
                 src={getYoutubeEmbedUrl(videoActivo.youtubeUrl)}
                 title={VOC(videoActivo.titulo)}

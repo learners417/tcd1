@@ -5,8 +5,9 @@ import { TrendingUp, Save, Megaphone, Sprout } from 'lucide-react';
 import { supabase, isSupabaseReady, type MetricaSemanaV2, guardarFila } from '../lib/supabase';
 import { reportError } from '../lib/errors';
 import { toast } from 'sonner';
-import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_METAS } from '../lib/roadmapSeed';
-import { semanaDelPrograma } from '../lib/diaPrograma';
+import { SEED_ROADMAP_V2 as SEED_ROADMAP, TOTAL_JORNADAS_DEL_CLIENTE } from '../lib/roadmapSeed';
+import { semanaDelPrograma, esPasoDelCliente } from '../lib/diaPrograma';
+import { mensajeDeFalla } from '../lib/conexion';
 import {
   calcularEmbudoV3KPIs,
   formatPct,
@@ -70,9 +71,29 @@ function saveMetricsLocal(data: MetricaSemanaV2[]) {
 
 function KPICard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
-    <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-gold/30' : 'border-[rgba(232,150,46,0.1)]'}`}>
-      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere]">{label}</p>
-      <p className={`text-2xl font-light tracking-tight ${highlight ? 'text-gold' : 'text-cream'}`}>{value}</p>
+    <div className={`card-panel p-4 rounded-2xl ${highlight ? 'border-gold/30' : 'border-[var(--line, rgba(142,104,36,0.18))]'}`}>
+      {/*
+        LA ETIQUETA RESERVA SU ALTO.
+
+        «Jornadas hechas» y «Cinturones ganados» envuelven en dos renglones;
+        «Días con diario» y «Semana actual» entran en uno. Sin alto
+        reservado, el numeral de cada tarjeta arranca donde termina su propia
+        etiqueta, así que en una fila de cuatro los números quedaban a cuatro
+        alturas distintas — y el ojo, que recorre la fila buscando las cifras,
+        tiene que ir a buscarlas una por una.
+
+        Dos renglones es el alto de la etiqueta más larga de esta pantalla, y
+        las de un renglón apoyan arriba: así los cuatro numerales arrancan en
+        la misma línea.
+      */}
+      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere] min-h-[2.5rem]">{label}</p>
+      {/*
+        El número a 30 y no a 24: con la etiqueta en 15 —que es el piso— la
+        diferencia de 24 no alcanza para que el ojo sepa qué leer primero, y
+        esta pantalla tenía veintidós de sus veinticuatro bloques en el piso.
+        Treinta contra quince se lee de un saque.
+      */}
+      <p className={`text-3xl font-light tracking-tight tabular-nums ${highlight ? 'text-gold' : 'text-cream'}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
   );
@@ -81,9 +102,11 @@ function KPICard({ label, value, sub, highlight }: { label: string; value: strin
 /** KPI con color según umbral (ok/alerta/critico). */
 function KPICardTone({ label, value, tone, sub }: { label: string; value: string; tone: DiagnosticoNivel; sub?: string }) {
   return (
-    <div className="card-panel p-4 rounded-2xl border-[rgba(232,150,46,0.1)]">
-      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere]">{label}</p>
-      <p className={`text-2xl font-light tracking-tight ${nivelColor(tone)}`}>{value}</p>
+    <div className="card-panel p-4 rounded-2xl border-[var(--line, rgba(142,104,36,0.18))]">
+      {/* El mismo alto reservado que en `KPICard`: los numerales de una fila
+          arrancan en la misma línea, aunque las etiquetas no midan igual. */}
+      <p className="text-[15px] text-cream/60 mb-1.5 font-semibold leading-snug [overflow-wrap:anywhere] min-h-[2.5rem]">{label}</p>
+      <p className={`text-3xl font-light tracking-tight tabular-nums ${nivelColor(tone)}`}>{value}</p>
       {sub && <p className="text-xs text-cream/55 mt-1">{sub}</p>}
     </div>
   );
@@ -96,7 +119,7 @@ function NumField({
 }: { label: string; value: string; onChange: (v: string) => void; prefix?: string }) {
   return (
     <div>
-      <label className="block text-xs text-cream/75 mb-1.5 font-medium">{label}</label>
+      <label className="block text-xs text-cream/75 mb-1.5 font-semibold">{label}</label>
       <div className="relative">
         {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/45 text-sm">{prefix}</span>}
         <input
@@ -109,10 +132,10 @@ function NumField({
   );
 }
 
-// ─── Tab: Mi Progreso (sin cambios) ────────────────────────────────────────────
+// ─── Tab: Mi Progreso ──────────────────────────────────────────────────────────
 
 function TabProgreso({ userId }: { userId?: string }) {
-  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: TOTAL_METAS, compTareas: 0, diasDiario: 0, hitos: 0 });
+  const [progData, setProgData] = useState({ semanaActual: 1, totTareas: TOTAL_JORNADAS_DEL_CLIENTE, compTareas: 0, diasDiario: 0, hitos: 0 });
 
   useEffect(() => {
     let p: { nombre?: string; fecha_inicio?: string; [k: string]: unknown } = {}; try { p = JSON.parse(localStorage.getItem('tcd_profile') || '{}'); } catch { /* noop */ }
@@ -122,8 +145,14 @@ function TabProgreso({ userId }: { userId?: string }) {
     try {
       const saved = localStorage.getItem('tcd_hoja_ruta_v2');
       const completadasSet = new Set<string>(saved ? JSON.parse(saved) : []);
+      /*
+       * Solo las jornadas del cliente, arriba y abajo de la fracción. Contaba
+       * todas las metas del seed —las del equipo y los días de campo
+       * incluidos— así que la tarjeta decía «71 de 91» y ese 91 no se alcanza
+       * nunca: terminar el programa daba 78%. El Camino ya contaba bien.
+       */
       for (const pil of SEED_ROADMAP) {
-        const metasPilar = pil.metas ?? [];
+        const metasPilar = (pil.metas ?? []).filter(esPasoDelCliente);
         const compPilar = metasPilar.filter((m) => completadasSet.has(`${pil.numero}-${m.codigo}`)).length;
         tot += metasPilar.length;
         comp += compPilar;
@@ -147,28 +176,44 @@ function TabProgreso({ userId }: { userId?: string }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="card-panel p-6 rounded-2xl bg-gold/[0.03] border-gold/10">
-        <h2 className="text-xl font-medium text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h2 className="text-xl font-semibold text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Tu progreso en el Programa
         </h2>
         <p className="text-sm text-cream/75">Semana {progData.semanaActual} de 13 · 90 días · ADN del Negocio</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Tareas completadas" value={progData.compTareas.toString()} sub={`${progData.compTareas}/${progData.totTareas} del total`} />
-        <KPICard label="Días con diario" value={progData.diasDiario.toString()} sub={`${progData.diasDiario}/90 totales`} />
-        <KPICard label="Pilares completados" value={progData.hitos.toString()} sub={`${progData.hitos}/${SEED_ROADMAP.length} pilares`} />
-        <KPICard label="Semana actual" value={progData.semanaActual.toString()} sub="de 13 semanas" highlight />
+        {/*
+          El oro estaba en «Semana actual», que es el dato que el cliente NO
+          puede mover: dice dónde cae el calendario. El oro es el color de la
+          atención de la casa, así que va en lo único de esta fila que se
+          mueve trabajando hoy.
+        */}
+        {/*
+          Cuatro tarjetas, tres palabras para lo mismo y tres formatos de
+          contador. Decían «Tareas completadas» —la palabra del código, que el
+          Camino llama jornada— y «Pilares completados», donde «pilar» es el
+          identificador de la base: al cliente el Camino le muestra el tramo
+          por sus días, y lo que gana al cerrarlo es un cinturón.
+
+          Y el contador iba en tres formas: «12/91 del total», «8/90 totales»,
+          «de 13 semanas». La barra es notación; «12 de 91» se lee.
+        */}
+        <KPICard label="Jornadas hechas" value={progData.compTareas.toString()} sub={`de ${progData.totTareas} en total`} highlight />
+        <KPICard label="Días con diario" value={progData.diasDiario.toString()} sub="de 90 en total" />
+        <KPICard label="Cinturones ganados" value={progData.hitos.toString()} sub={`de ${SEED_ROADMAP.length} en total`} />
+        <KPICard label="Semana actual" value={progData.semanaActual.toString()} sub="de 13 semanas" />
       </div>
 
       <div className="card-panel p-6 rounded-2xl">
-        <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase mb-6">Velocidad de Avance (Tareas)</h3>
+        <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase mb-6">Velocidad de avance</h3>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-              <XAxis dataKey="semana" stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 15, fill: '#5E5244' }} />
-              <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fontSize: 15, fill: '#5E5244' }} />
-              <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '12px' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--line, rgba(142,104,36,0.18))" vertical={false} />
+              <XAxis dataKey="semana" stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fontSize: 15, fill: '#5E5244' }} />
+              <YAxis stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fontSize: 15, fill: '#5E5244' }} />
+              <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'var(--line, rgba(142,104,36,0.18))', borderRadius: '12px' }} />
               <Line type="monotone" dataKey="esperado" stroke="#6B7280" strokeDasharray="5 5" strokeWidth={2} dot={false} name="Ritmo Esperado" />
               <Line type="monotone" dataKey="real" stroke="#B0822E" strokeWidth={3} dot={{ r: 4, fill: '#B0822E', strokeWidth: 0 }} name="Progreso Real" />
             </LineChart>
@@ -181,7 +226,7 @@ function TabProgreso({ userId }: { userId?: string }) {
 
 // ─── Tab: Mi Embudo (v3 · spec) ────────────────────────────────────────────────
 
-function TabEmbudo({ userId }: { userId?: string }) {
+function TabSistema({ userId }: { userId?: string }) {
   const [data, setData] = useState<MetricaSemanaV2[]>(loadMetricsLocal);
   const [saving, setSaving] = useState(false);
 
@@ -293,12 +338,14 @@ function TabEmbudo({ userId }: { userId?: string }) {
       const { data: row, error } = await guardarFila('metricas_v2', { ...entry, user_id: userId }, ['user_id', 'semana']);
       if (error) {
         // No tragarse el error: reportar, avisar y NO limpiar el form (no se perdió lo cargado).
-        const msg = reportError(error, {
+        // El reporte sigue yendo entero a Sentry; lo que cambia es que su
+        // texto ya no se le muestra al cliente.
+        reportError(error, {
           feature: 'metricas-embudo',
           action: 'guardar-metricas',
           extra: { semana, userId },
         });
-        toast.error(`No se pudieron guardar las métricas: ${msg}`);
+        toast.error(mensajeDeFalla(error, 'guardar tus números'));
         setSaving(false);
         return;
       }
@@ -354,10 +401,13 @@ function TabEmbudo({ userId }: { userId?: string }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-xl font-medium text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+        <h2 className="text-xl font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           Mi Sistema de Ventas
         </h2>
-        <p className="text-sm text-cream/75">Orgánico + Ads · 12 KPIs automáticos · carga diaria o semanal</p>
+        {/* «Ads» y «KPIs» son la jerga de quien compra publicidad; el que usa
+            esta app es un terapeuta. Y «12 KPIs automáticos» no dice qué hacen:
+            se calculan solos a partir de lo que él carga. */}
+        <p className="text-sm text-cream/75">Lo que publicas y lo que pagas · doce números que se calculan solos · los cargas por día o por semana</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -368,10 +418,19 @@ function TabEmbudo({ userId }: { userId?: string }) {
             {(['dia', 'semana'] as const).map((t) => (
               <button
                 key={t} type="button" onClick={() => setPeriodoTipo(t)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+                /*
+                  Era `bg-gold` relleno, y la regla del tema que saca el oro de
+                  los botones lo convirtió en el BLOQUE DE TINTA — que es el
+                  gesto de la acción principal, no el de una opción elegida.
+                  Resultado: un rectángulo negro enorme en el medio de la
+                  pantalla para decir «semana». Elegir una de dos tiene su
+                  propio gesto declarado: `.elegido-etiqueta`, la línea de oro
+                  y el fondo apenas teñido.
+                */
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                   periodoTipo === t
-                    ? 'bg-gold border-gold text-[#0A0806] font-semibold'
-                    : 'bg-black/20 border-[rgba(232,150,46,0.12)] text-cream/65 hover:bg-gold/10'
+                    ? 'elegido-etiqueta'
+                    : 'border-[var(--line, rgba(142,104,36,0.18))] text-cream/65 hover:bg-gold/10'
                 }`}
               >
                 {t === 'dia' ? 'Día' : 'Semana'}
@@ -391,7 +450,9 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
             <Sprout className="w-4 h-4 text-success" />
-            <p className="text-sm font-semibold tracking-widest uppercase text-success">A — Contenido orgánico</p>
+            {/* La letra era el código de la sección. El ícono y el color ya
+                distinguen las dos, y el nombre dice qué es cada una. */}
+            <p className="text-sm font-semibold tracking-widest uppercase text-success">Lo que publicas</p>
           </div>
           <p className="text-xs text-cream/55 mb-3">Posts publicados por plataforma</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
@@ -409,7 +470,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-5 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
             <Megaphone className="w-4 h-4 text-gold" />
-            <p className="text-sm font-semibold tracking-widest uppercase text-gold">B — Publicidad (Ads)</p>
+            <p className="text-sm font-semibold tracking-widest uppercase text-gold">Lo que pagas</p>
           </div>
 
           <p className="text-xs text-cream/55 mb-2">Plataforma activa este período</p>
@@ -420,7 +481,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
                 className={`text-xs px-3 py-2 rounded-lg border transition-all ${
                   adsPlataforma === p
                     ? 'bg-gold/10 border-gold/40 text-cream'
-                    : 'border-[rgba(232,150,46,0.18)] text-cream/55 hover:bg-white/5'
+                    : 'border-[var(--line2, rgba(142,104,36,0.30))] text-cream/55 hover:bg-white/5'
                 }`}
               >
                 {p}
@@ -447,7 +508,9 @@ function TabEmbudo({ userId }: { userId?: string }) {
 
         {/* KPIs en vivo */}
         <div>
-          <p className="text-sm font-semibold tracking-widest uppercase text-success mb-3">KPIs calculados</p>
+          {/* «KPIs calculados» → lo que esos números dicen, que es para lo
+              que el cliente los carga. */}
+          <p className="text-sm font-semibold tracking-widest uppercase text-success mb-3">Lo que dicen tus números</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KPICardTone label="ROAS" value={kpis.roas !== null ? `${kpis.roas.toFixed(1)}×` : '—'} tone={roasTone(kpis.roas)} />
             <KPICardTone label="Tasa de cierre" value={formatPct(kpis.tasa_cierre)} tone={cierreTone(kpis.tasa_cierre)} />
@@ -474,17 +537,17 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase">Contenido orgánico publicado</h3>
-            <div className="flex items-center gap-2 text-xs font-medium text-cream/75">
+            <div className="flex items-center gap-2 text-xs font-semibold text-cream/75">
               <div className="w-2.5 h-2.5 rounded-full bg-success" /> Posts totales
             </div>
           </div>
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
-                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} allowDecimals={false} />
-                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line, rgba(142,104,36,0.18))" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fill: '#5E5244', fontSize: 15 }} />
+                <YAxis stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fill: '#5E5244', fontSize: 15 }} allowDecimals={false} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'var(--line, rgba(142,104,36,0.18))', borderRadius: '8px', color: '#F2EFE9' }} />
                 <Bar dataKey="posts" fill="#22C55E" radius={[4, 4, 0, 0]} name="Posts" />
               </BarChart>
             </ResponsiveContainer>
@@ -497,7 +560,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
         <div className="card-panel p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-cream/75 tracking-widest uppercase">Evolución de ingresos</h3>
-            <div className="flex gap-4 text-xs font-medium text-cream/75">
+            <div className="flex gap-4 text-xs font-semibold text-cream/75">
               <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-gold" /> Ingresos</div>
               <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-success" /> Ventas</div>
             </div>
@@ -508,10 +571,10 @@ function TabEmbudo({ userId }: { userId?: string }) {
                 <defs>
                   <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#B0822E" stopOpacity={0.3} /><stop offset="95%" stopColor="#B0822E" stopOpacity={0} /></linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(232,150,46,0.08)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
-                <YAxis stroke="rgba(232,150,46,0.12)" tick={{ fill: '#5E5244', fontSize: 15 }} />
-                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'rgba(232,150,46,0.12)', borderRadius: '8px', color: '#F2EFE9' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line, rgba(142,104,36,0.18))" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fill: '#5E5244', fontSize: 15 }} />
+                <YAxis stroke="var(--line, rgba(142,104,36,0.18))" tick={{ fill: '#5E5244', fontSize: 15 }} />
+                <RechartsTooltip contentStyle={{ backgroundColor: '#1A1917', borderColor: 'var(--line, rgba(142,104,36,0.18))', borderRadius: '8px', color: '#F2EFE9' }} />
                 <Area type="monotone" dataKey="ingresos" stroke="#B0822E" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" />
                 <Area type="monotone" dataKey="ventas" stroke="#22C55E" strokeWidth={2} fillOpacity={0} />
               </AreaChart>
@@ -519,7 +582,7 @@ function TabEmbudo({ userId }: { userId?: string }) {
           </div>
         </div>
       ) : (
-        <div className="card-panel p-8 rounded-2xl border border-dashed border-[rgba(232,150,46,0.12)] text-center">
+        <div className="card-panel p-8 rounded-2xl border border-dashed border-[var(--line, rgba(142,104,36,0.18))] text-center">
           <TrendingUp className="w-10 h-10 text-gold/30 mx-auto mb-3" />
           <p className="text-sm text-cream/75">Carga al menos 2 períodos para ver la evolución de tus ingresos.</p>
         </div>
@@ -531,11 +594,18 @@ function TabEmbudo({ userId }: { userId?: string }) {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Metrics({ userId }: { userId?: string }) {
-  const [tab, setTab] = usePersistedState<'progreso' | 'embudo'>(
+  /*
+   * La pestaña se llama «Mi Sistema» en pantalla, pero su valor guardado era
+   * 'embudo' — una palabra que no se dice acá. Ahora se guarda 'sistema', y
+   * el validador acepta 'embudo' para que a quien ya tenía esa pestaña
+   * abierta no se le mueva el lugar la primera vez que entra.
+   */
+  const [tab, setTab] = usePersistedState<'progreso' | 'sistema' | 'embudo'>(
     'tcd_metrics_tab',
     'progreso',
-    { validate: (v) => v === 'progreso' || v === 'embudo' },
+    { validate: (v) => v === 'progreso' || v === 'sistema' || v === 'embudo' },
   );
+  const enSistema = tab === 'sistema' || tab === 'embudo';
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-6 animate-in fade-in duration-500">
@@ -544,17 +614,17 @@ export default function Metrics({ userId }: { userId?: string }) {
           onClick={() => setTab('progreso')}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
             tab === 'progreso'
-              ? 'bg-gold/20 text-gold border border-gold/30'
+              ? 'elegido-etiqueta'
               : 'bg-gold/5 text-cream/55 border border-transparent hover:bg-gold/10 hover:text-cream/80'
           }`}
         >
           Mi Progreso
         </button>
         <button
-          onClick={() => setTab('embudo')}
+          onClick={() => setTab('sistema')}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
-            tab === 'embudo'
-              ? 'bg-gold/20 text-gold border border-gold/30'
+            enSistema
+              ? 'elegido-etiqueta'
               : 'bg-gold/5 text-cream/55 border border-transparent hover:bg-gold/10 hover:text-cream/80'
           }`}
         >
@@ -562,7 +632,7 @@ export default function Metrics({ userId }: { userId?: string }) {
         </button>
       </div>
 
-      {tab === 'progreso' ? <TabProgreso userId={userId} /> : <TabEmbudo userId={userId} />}
+      {enSistema ? <TabSistema userId={userId} /> : <TabProgreso userId={userId} />}
     </div>
   );
 }
