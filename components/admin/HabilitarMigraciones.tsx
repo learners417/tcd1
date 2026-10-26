@@ -15,7 +15,7 @@
  *
  * Por eso la pantalla no dice «migrado: sí». Dice con cuántas quedó.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import {

@@ -15,7 +15,8 @@
  * Al encender se guarda la fecha: el tablero y la regla de los 14 días
  * cuentan desde ahí.
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { Radio } from 'lucide-react';
 import TableroCupos from './TableroCupos';
 import { estadoDeLasPiezas } from '../../lib/formulasAnuncios';
 import TutorialTecnicoBox from '../TutorialTecnicoBox';
@@ -222,8 +223,19 @@ export default function MontajeCupos(
     setConfirmando(true);
   };
 
+  /**
+   * La ceremonia del cambio de etapa.
+   *
+   * Encender es el momento más importante del programa: el cliente deja de
+   * construir y empieza a sostener. Pasaba sin que nada lo marcara —misma
+   * pantalla, mismo menú, misma sesión del día— y la transición no se sentía.
+   * Esto sale una sola vez, cuando pasa.
+   */
+  const [ceremonia, setCeremonia] = useState(false);
+
   const encenderDeVerdad = () => {
     setConfirmando(false);
+    setCeremonia(true);
     const fecha = new Date().toISOString();
     const hist = [...historial, fecha];
     setEncendida(fecha);
@@ -240,6 +252,39 @@ export default function MontajeCupos(
       .then(() => setSinAvisar(false))
       .catch(() => setSinAvisar(true));
   };
+
+  const PanelDeCeremonia = () => (
+    <div className="fixed inset-0 z-50 grid place-items-center p-5"
+      style={{ background: 'rgba(0,0,0,0.72)' }} role="dialog" aria-modal="true"
+      aria-label="Tu campaña está corriendo">
+      <div className="card-panel p-6 sm:p-7 max-w-lg w-full border border-gold/50">
+        <p className="text-[15px] font-bold uppercase tracking-[0.2em] text-gold">
+          Cambia tu etapa
+        </p>
+        <h2 className="mt-2 text-cream"
+          style={{ fontFamily: 'var(--font-display)', fontSize: 30, lineHeight: 1.15, fontWeight: 500 }}>
+          Tu campaña está corriendo.
+        </h2>
+        <div className="h-px w-14 bg-gold my-4" />
+        <p className="text-[18px] leading-relaxed text-cream/85">
+          Hasta hoy construiste. Desde hoy sostienes: tu pantalla de Hoy abre
+          con tus seis números de la semana y con dónde se corta tu captación.
+        </p>
+        <p className="mt-3 text-[18px] leading-relaxed text-cream/85">
+          Tus sesiones del Camino siguen ahí, debajo. Lo que cambia es qué
+          miras primero.
+        </p>
+        <p className="mt-4 text-[17px] leading-relaxed text-cream/65">
+          Los próximos catorce días no se toca nada. Tu campaña está aprendiendo
+          a quién mostrarse, y cada cambio la hace empezar de cero.
+        </p>
+        <button type="button" onClick={() => setCeremonia(false)}
+          className="mt-6 w-full min-h-[48px] btn-primary rounded-xl text-[17px] font-bold">
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
 
   /** Cerrar la campana viva. Antes de los 14 dias no se puede: es la regla
    *  que protege el metodo, no un capricho de la app. */
@@ -261,8 +306,10 @@ export default function MontajeCupos(
   if (encendida) {
     const dias = Math.max(1, Math.floor((Date.now() - new Date(encendida).getTime()) / 86400000) + 1);
     return (
+      <>
+      {ceremonia && <PanelDeCeremonia />}
       <div className="card-panel p-6 text-center space-y-3">
-        <p className="text-4xl">🔴</p>
+        <Radio className="w-9 h-9 mx-auto text-gold" />
         <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>Campaña viva — día {Math.min(dias, 99)}</p>
         {sinAvisar && (
           <p className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-medium text-goldhi">
@@ -307,6 +354,7 @@ export default function MontajeCupos(
           </p>
         )}
       </div>
+      </>
     );
   }
 
@@ -360,7 +408,7 @@ export default function MontajeCupos(
                         if (v === actual) return;
                         void guardarCampo(campo, v ? (campo === 'palabra' || campo === 'pixel_id' ? v : comoUrl(v)) : null);
                       }}
-                      className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+                      className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
                     {guardandoCampo === String(c.pide.campo) && (
                       <span className="block text-sm text-cream/45 mt-1">Guardando…</span>
                     )}
@@ -380,7 +428,7 @@ export default function MontajeCupos(
                             void guardarCampo('presupuesto_diario', n > 0 ? n : null);
                           }
                         }}
-                        className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
+                        className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
                     </span>
                     <span className="block">
                       <label className="block text-sm text-cream/60 mb-1">Días que lo sostienes</label>
@@ -392,7 +440,7 @@ export default function MontajeCupos(
                             void guardarCampo('dias_sostenidos', n > 0 ? Math.round(n) : null);
                           }
                         }}
-                        className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
+                        className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
                     </span>
                     {(montaje.dias_sostenidos ?? 0) > 0 && (montaje.dias_sostenidos ?? 0) < DIAS_SIN_TOCAR && (
                       <span className="col-span-2 block text-sm text-gold/85">
@@ -468,7 +516,7 @@ export default function MontajeCupos(
                   if (v === ((montaje[f.campo] as string | null) ?? '')) return;
                   void guardarCampo(f.campo, v ? comoUrl(v) : null);
                 }}
-                className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+                className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
             </div>
           ))}
         </div>
@@ -478,7 +526,7 @@ export default function MontajeCupos(
         className="w-full btn-primary py-4 rounded-xl text-sm font-bold disabled:opacity-40">
         {restantes <= 0
           ? 'Usaste tus 3 campañas — habla con Soporte'
-          : todo ? '🚀 ENCENDER — y anotar la fecha'
+          : todo ? 'ENCENDER — y anotar la fecha'
           : faltan === 1 ? 'Falta 1 candado para encender'
           : `Faltan ${faltan} candados para encender`}
       </button>

@@ -14,6 +14,7 @@ import { Check, Lock, AlertTriangle, ArrowRight } from 'lucide-react';
 import {
   PUERTAS, dondeEsta, type Puerta,
 } from '../../lib/activacion';
+import { yaLlegoAlDia, faltaParaLlegar, type DondeVa } from '../../lib/diaPrograma';
 import type { ObjetivoCampana } from '../../lib/campanasTypes';
 import type { Montaje } from '../../lib/montajeCampana';
 import { VOC } from '../../lib/vocabulario';
@@ -25,7 +26,7 @@ export default function LaActivacion({
   diasEncendida,
   ventas,
   onIrAlMontaje,
-  diaDelPrograma,
+  donde,
   onIrAlCamino,
 }: {
   montaje: Montaje | null;
@@ -35,9 +36,13 @@ export default function LaActivacion({
   /** null = no se consultaron. No saber no es no haber vendido. */
   ventas?: number | null;
   onIrAlMontaje?: () => void;
-  /** En qué día del programa está. Sin esto la pantalla le presenta el paso 1
-   *  como la tarea de hoy, cualquiera sea el día. */
-  diaDelPrograma?: number | null;
+  /**
+   * Dónde va de verdad: el día de su próxima jornada abierta, no el del
+   * calendario. Sin esto la pantalla le presentaba el paso 1 del montaje como
+   * la tarea de hoy, y a quien se atrasó le abría el montaje sin que tuviera
+   * la página ni los anuncios.
+   */
+  donde?: DondeVa | null;
   onIrAlCamino?: () => void;
 }) {
   const d = dondeEsta({ montaje, objetivo, anunciosListos, diasEncendida, ventas });
@@ -61,13 +66,12 @@ export default function LaActivacion({
    * devuelve a donde sí tiene algo que hacer.
    */
   const DIA_EN_QUE_EMPIEZA = 29;
-  const todaviaNo = typeof diaDelPrograma === 'number'
-    && diaDelPrograma < DIA_EN_QUE_EMPIEZA
+  const todaviaNo = !!donde
+    && !yaLlegoAlDia(donde, DIA_EN_QUE_EMPIEZA)
     && diasEncendida === null
     && !anunciosListos;
 
-  if (todaviaNo) {
-    const faltan = DIA_EN_QUE_EMPIEZA - diaDelPrograma;
+  if (todaviaNo && donde) {
     return (
       <div className="max-w-3xl mx-auto space-y-4">
         <section className="card-panel p-6 sm:p-7 border border-gold/30">
@@ -78,11 +82,13 @@ export default function LaActivacion({
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
             Se monta el día {DIA_EN_QUE_EMPIEZA}
           </h1>
+          {/* Se cuenta por SESIONES y no por días de almanaque: a quien se
+              atrasó, «faltan 3 días» le dice algo que no depende de él. Las
+              sesiones sí: puede hacerlas hoy. */}
           <p className="mt-3 text-[18px] leading-relaxed text-cream/85">
-            Estás en el día {diaDelPrograma}. Faltan {faltan}{' '}
-            {faltan === 1 ? 'día' : 'días'}, y no es una espera: lo que escribes
-            hasta entonces es de donde salen tus anuncios. Tu método, tu oferta,
-            tu precio y tu página. Con eso hecho, montar la campaña es una tarde.
+            {faltaParaLlegar(donde, DIA_EN_QUE_EMPIEZA)} Lo que escribes hasta entonces es de donde salen tus anuncios. Tu
+            método, tu oferta, tu precio y tu página. Con eso hecho, montar la
+            campaña es una tarde.
           </p>
           <p className="mt-3 text-[17px] leading-relaxed text-cream/65">
             Cuando llegue el día, acá te espera el paso a paso: los nueve pasos

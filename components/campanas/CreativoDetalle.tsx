@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ArrowLeft, Download, Trash2, ChevronLeft, ChevronRight, Copy, Check,
   CheckCircle, XCircle, RefreshCw, Wand2, Loader2,
@@ -16,6 +16,7 @@ import {
 import { generateImageWithFallback, editImage } from '../../lib/campanasImageGen';
 import type { Creativo, CreativoAsset } from '../../lib/campanasTypes';
 import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 interface Props {
   creativo: Creativo;
@@ -152,8 +153,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
       await replaceSlideImage(result.imageBase64, result.mimeType);
       toast.success(isCarousel ? `Slide ${activeSlide + 1} regenerada` : 'Imagen regenerada');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error regenerando: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'rehacer la pieza'));
     } finally {
       setRegenerating(false);
     }
@@ -182,8 +182,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
       setEditMode(false);
       toast.success('Edicion aplicada');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error en la edicion: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'editar la imagen'));
     } finally {
       setEditing(false);
     }
@@ -244,9 +243,12 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
           {assets.length > 0 ? (
             <>
               {/* Lote 5 · EL MOCKUP DE FEED: tu anuncio como lo verá el mundo */}
-              <div className="rounded-2xl border border-[rgba(232,150,46,0.14)] bg-[#0D0C0B] overflow-hidden" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
+              <div className="rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))] bg-[var(--bg-card,#17150F)] overflow-hidden" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-goldhi to-gold flex items-center justify-center text-ink text-sm font-bold">Tú</div>
+                  {/* Oro al 5% con text-ink: en el oscuro era #080808 sobre
+                      tarjeta #17150F y en el papel cream claro sobre papel.
+                      La «Tú» no se leía en NINGUNO de los dos temas. */}
+                  <div className="w-8 h-8 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold text-sm font-bold">Tú</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-cream truncate">Tu consulta profesional</p>
                     <p className="text-sm text-cream/55">Publicidad · Sugerido para ti</p>
@@ -305,7 +307,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                       onClick={() => setActiveSlide(idx)}
                       disabled={busy}
                       className={`w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0 transition-all disabled:opacity-40 ${
-                        activeSlide === idx ? 'border-gold' : 'border-transparent opacity-50 hover:opacity-100'
+                        activeSlide === idx ? 'elegido' : 'border-transparent opacity-50 hover:opacity-100'
                       }`}
                     >
                       <img loading="lazy" src={displayUrl(asset)} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
@@ -359,14 +361,14 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
 
               {/* Panel de edicion con IA */}
               {editMode && (
-                <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.12)] space-y-2">
+                <div className="p-4 rounded-xl bg-panel border border-[var(--line, rgba(142,104,36,0.18))] space-y-2">
                   <div className="flex items-center gap-2">
                     <Wand2 className="w-3.5 h-3.5 text-gold" />
                     <span className="text-sm font-bold tracking-wider uppercase text-gold">
                       Editar con IA {isCarousel ? `· slide ${activeSlide + 1}` : ''}
                     </span>
                     <span className="text-sm text-cream/45 normal-case font-normal">
-                      — retoque sutil, mantiene composicion
+                      — retoque sutil, mantiene composición
                     </span>
                   </div>
                   <textarea
@@ -374,7 +376,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
                     onChange={(e) => setEditPrompt(e.target.value)}
                     rows={2}
                     placeholder="Ej: quita el logo de la esquina; cambia el color del boton a dorado; borra el icono del costado"
-                    className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-xl p-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20 resize-none"
+                    className="w-full bg-black/30 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20 resize-none"
                     disabled={editing}
                   />
                   <div className="flex justify-end gap-2">
@@ -407,7 +409,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
               )}
             </>
           ) : (
-            <div className="aspect-square bg-panel rounded-xl border border-[rgba(232,150,46,0.1)] flex items-center justify-center">
+            <div className="aspect-square bg-panel rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] flex items-center justify-center">
               <p className="text-sm text-cream/20">Sin imagenes</p>
             </div>
           )}
@@ -415,7 +417,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
 
         {/* Copy details */}
         <div className="space-y-4">
-          <div className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-4">
+          <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium text-cream">Copy del Anuncio</h3>
               <button
@@ -452,7 +454,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
           </div>
 
           {/* Metadata */}
-          <div className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-xl p-4">
+          <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-4">
             <h3 className="text-sm font-medium text-cream/55 mb-3">Metadata</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">

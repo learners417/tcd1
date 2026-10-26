@@ -37,7 +37,11 @@ export default function AcompanamientoDelCliente({
     let vivo = true;
     void sesionesDe(clienteId)
       .then((s) => { if (vivo) setSesiones(s); })
-      .catch(() => { if (vivo) setSesiones([]); });
+      // Un error no es «no tuvo sesiones»: acá es donde el equipo decide si
+      // la garantía corre, y una consulta caída no puede parecer un
+      // incumplimiento propio. Queda en `null`, que esta vista ya muestra
+      // como «todavía no sé».
+      .catch(() => { /* queda en null: no saber no es cero */ });
     return () => { vivo = false; };
   }, [clienteId, recarga]);
 

@@ -1,8 +1,16 @@
 /**
- * CopiesView.tsx — Modulo de generacion de copies para Meta Ads
- * Split layout: form izquierda + output streaming derecha
+ * CopiesView.tsx — Los textos de un anuncio.
+ *
+ * Sus tres grupos de píldoras de selección habían quedado fuera del barrido
+ * que dejó un solo gesto para «elegido»: escribían `bg-gold/15 border-gold/40
+ * text-gold` a mano, que es uno de los nueve que esa cirugía unificó. Y a
+ * `font-medium`, con lo cual esta pantalla hablaba CUATRO pesos sobre un
+ * mismo cuerpo —400, 500, 600 y 700— uno más del techo de la casa.
+ *
+ * Las tres usan `.elegido-etiqueta`, que es ese gesto declarado una vez: la
+ * línea de oro de 1px y el fondo apenas teñido.
  */
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { PenTool, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { streamText } from '../../lib/aiProvider';
 import { adnContext } from '../../lib/campanasPrompts';
@@ -54,7 +62,7 @@ export default function CopiesView({ perfil }: Props) {
 
     const cantVariantes = parseInt(variantes) || 3;
     const adnBlock = perfil.adn_avatar ? `\n\n${adnContext(perfil)}` : '';
-    const oferta = producto || perfil.oferta_high || perfil.oferta_mid || 'Consulta gratuita';
+    const oferta = producto || perfil.oferta_high || perfil.oferta_mid || 'Consulta';
 
     const baseContext = `Eres un copywriter de elite especializado en Meta Ads para profesionales de la salud.
 ${adnBlock}
@@ -208,7 +216,7 @@ REGLAS:
               Rubro / especialidad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Psicologa especializada en burnout"
               value={rubro}
               onChange={(e) => setRubro(e.target.value)}
@@ -220,7 +228,7 @@ REGLAS:
               País / ciudad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Buenos Aires, Argentina"
               value={pais}
               onChange={(e) => setPais(e.target.value)}
@@ -232,9 +240,9 @@ REGLAS:
               Que se ofrece?
             </label>
             <textarea
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
               rows={3}
-              placeholder="Ej: Auditoria gratuita de 45 min. Sin costo. 5 cupos por semana."
+              placeholder="Ej: Revisión de 45 min. 5 cupos por semana."
               value={producto}
               onChange={(e) => setProducto(e.target.value)}
             />
@@ -250,9 +258,9 @@ REGLAS:
                 <button
                   key={t.value}
                   onClick={() => setTipo(t.value)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                     tipo === t.value
-                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      ? 'elegido-etiqueta'
                       : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                   }`}
                 >
@@ -272,9 +280,9 @@ REGLAS:
                 <button
                   key={t.value}
                   onClick={() => setTono(t.value)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                     tono === t.value
-                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      ? 'elegido-etiqueta'
                       : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                   }`}
                 >
@@ -295,9 +303,9 @@ REGLAS:
                   <button
                     key={v}
                     onClick={() => setVariantes(v)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                       variantes === v
-                        ? 'bg-gold/15 border-gold/40 text-gold'
+                        ? 'elegido-etiqueta'
                         : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                     }`}
                   >
@@ -307,9 +315,9 @@ REGLAS:
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-gold/5 p-3">
+            <div className="rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] bg-gold/5 p-3">
               <p className="text-sm font-bold tracking-wider uppercase text-gold mb-1">
-                Carrusel unico
+                Carrusel único
               </p>
               <p className="text-sm text-cream/75 leading-relaxed">
                 Generamos un solo carrusel bien trabajado (hasta 10 slides). El ultimo slide
@@ -333,7 +341,7 @@ REGLAS:
 
         {/* Output derecho */}
         <div className="flex-1 card-panel flex flex-col min-h-[200px]">
-          <div className="flex items-center justify-between p-4 border-b border-[rgba(232,150,46,0.1)]">
+          <div className="flex items-center justify-between p-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
             <div className="flex items-center gap-2">
               {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
               <span className="text-sm font-bold tracking-wider uppercase text-gold">
@@ -353,7 +361,7 @@ REGLAS:
 
           <div className="flex-1 p-4">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[var(--line, rgba(142,104,36,0.18))]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : !generando ? (

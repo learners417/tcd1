@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SECTIONS, STEPS, TOTAL_STEPS, RESPONSABLE_SIGLA, RESPONSABLE_LABEL } from '../../../lib/preactivacionSteps';
 import { type ExtrasByCliente, type EstadoCelda, extraDe, siguienteEstado, ESTADO_LABEL } from '../../../lib/matrizExtras';
@@ -133,9 +133,9 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
       <style>{`
         .matriz-scroll::-webkit-scrollbar { height: 14px; width: 14px; }
         .matriz-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 8px; }
-        .matriz-scroll::-webkit-scrollbar-thumb { background: rgba(232,150,46,0.45); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
-        .matriz-scroll::-webkit-scrollbar-thumb:hover { background: rgba(232,150,46,0.75); background-clip: content-box; }
-        .matriz-scroll { scrollbar-color: rgba(232,150,46,0.5) rgba(255,255,255,0.05); scrollbar-width: auto; }
+        .matriz-scroll::-webkit-scrollbar-thumb { background: var(--oro, #B0822E); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
+        .matriz-scroll::-webkit-scrollbar-thumb:hover { background: var(--oro, #B0822E); background-clip: content-box; }
+        .matriz-scroll { scrollbar-color: var(--oro, #B0822E) rgba(255,255,255,0.05); scrollbar-width: auto; }
       `}</style>
 
       {/* Barra: secciones · orden · flechas */}
@@ -195,7 +195,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   : 'var(--color-success)',
                 background: est === 'listo' ? 'var(--color-success)'
                   : est === 'cliente' ? 'rgba(232,134,46,0.20)'
-                  : est === 'nosotros' ? 'rgba(232,150,46,0.20)'
+                  : est === 'nosotros' ? 'var(--line2, rgba(142,104,36,0.30))'
                   : 'transparent',
                 color: est === 'cliente' ? '#F0A65C' : 'var(--color-goldhi)',
               }}
@@ -260,7 +260,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   letterSpacing: 1.5,
                   padding: '10px 0',
                   textAlign: 'center',
-                  borderBottom: '1px solid rgba(232,150,46,0.10)',
+                  borderBottom: '1px solid var(--line, rgba(142,104,36,0.18))',
                   borderLeft: idx === 0 ? 'none' : '2px solid var(--matrix-section-divider)',
                 }}
               >
@@ -276,7 +276,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                 letterSpacing: 1.5,
                 padding: '10px 10px',
                 textAlign: 'center',
-                borderBottom: '1px solid rgba(232,150,46,0.10)',
+                borderBottom: '1px solid var(--line, rgba(142,104,36,0.18))',
                 borderLeft: '2px solid var(--matrix-section-divider)',
                 textTransform: 'uppercase',
               }}
@@ -292,7 +292,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               style={{
                 top: 40,
                 minWidth: 240,
-                borderBottom: '2px solid rgba(232,150,46,0.10)',
+                borderBottom: '2px solid var(--line, rgba(142,104,36,0.18))',
               }}
             />
             {pasos.map((step, idx) => {
@@ -307,7 +307,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                     padding: '10px 8px 12px',
                     fontWeight: 500,
                     verticalAlign: 'bottom',
-                    borderBottom: '2px solid rgba(232,150,46,0.10)',
+                    borderBottom: '2px solid var(--line, rgba(142,104,36,0.18))',
                     borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : 'none',
                   }}
                   title={step.title}
@@ -327,7 +327,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   >
                     {step.lbl}
                   </div>
-                  <div style={{ fontSize: 15, textAlign: 'center', marginTop: 3, letterSpacing: 0.5, color: step.quien === 'cliente' ? 'rgba(232,150,46,0.75)' : step.quien === 'ambos' ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.28)' }}>
+                  <div style={{ fontSize: 15, textAlign: 'center', marginTop: 3, letterSpacing: 0.5, color: step.quien === 'cliente' ? 'var(--oro, #B0822E)' : step.quien === 'ambos' ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.28)' }}>
                     {RESPONSABLE_SIGLA[step.quien]}
                   </div>
                 </th>
@@ -338,7 +338,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               style={{
                 top: 40,
                 padding: '10px 12px 12px',
-                borderBottom: '2px solid rgba(232,150,46,0.10)',
+                borderBottom: '2px solid var(--line, rgba(142,104,36,0.18))',
                 borderLeft: '2px solid var(--matrix-section-divider)',
               }}
             >
@@ -387,7 +387,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                       style={{
                         width: 36,
                         height: 36,
-                        background: 'rgba(232,150,46,0.12)',
+                        background: 'var(--line, rgba(142,104,36,0.18))',
                         color: 'var(--color-gold)',
                         fontSize: 16,
                         fontWeight: 700,
@@ -473,7 +473,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                         const RELLENO: Record<EstadoCelda, string> = {
                           pendiente: 'transparent',
                           cliente: 'rgba(232,134,46,0.20)',
-                          nosotros: 'rgba(232,150,46,0.20)',
+                          nosotros: 'var(--line2, rgba(142,104,36,0.30))',
                           listo: 'var(--color-success)',
                           na: 'transparent',
                         };
@@ -556,7 +556,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
           <tr>
             <td
               className="sticky left-0 bottom-0 z-30 bg-[#0E0E0E]"
-              style={{ padding: '0 14px', height: 46, borderTop: '2px solid rgba(232,150,46,0.14)' }}
+              style={{ padding: '0 14px', height: 46, borderTop: '2px solid var(--line, rgba(142,104,36,0.18))' }}
             >
               <span className="text-sm font-bold uppercase tracking-widest text-gold">Cuántos lo tienen</span>
             </td>
@@ -571,7 +571,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
                   style={{
                     height: 46,
                     textAlign: 'center',
-                    borderTop: '2px solid rgba(232,150,46,0.14)',
+                    borderTop: '2px solid var(--line, rgba(142,104,36,0.18))',
                     borderLeft: isFirstOfSection ? '2px solid var(--matrix-section-divider)' : '1px solid var(--matrix-cell-divider)',
                   }}
                   title={`${n} de ${clientes.length} clientes · ${step.title}`}
@@ -590,7 +590,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
             })}
             <td
               className="sticky right-0 bottom-0 z-30 bg-[#0E0E0E]"
-              style={{ height: 46, textAlign: 'center', borderTop: '2px solid rgba(232,150,46,0.14)', borderLeft: '2px solid var(--matrix-section-divider)' }}
+              style={{ height: 46, textAlign: 'center', borderTop: '2px solid var(--line, rgba(142,104,36,0.18))', borderLeft: '2px solid var(--matrix-section-divider)' }}
             >
               <span className="text-sm font-bold text-cream/50">{clientes.length}</span>
             </td>

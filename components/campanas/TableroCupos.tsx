@@ -5,9 +5,10 @@
  * >$0,07 por visita → se apaga · conversaciones sin agendas → es la página
  * o el DM · primeros 14 días → se mide, no se opina.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { hoyISO } from '../../lib/diaPrograma';
 import {
-  METRICAS_REGLAS, UMBRALES, veredictoAnuncio, diasDeMedicion,
+  UMBRALES, veredictoAnuncio, diasDeMedicion,
   type ObjetivoCampana,
 } from '../../lib/formulasAnuncios';
 import { decidirCampana } from '../../lib/decidirCampana';
@@ -30,7 +31,7 @@ const FILA0: FilaAnuncio = { gasto: '', visitas: '', conversaciones: '', agendas
 function leer<T>(k: string, def: T): T {
   try { return JSON.parse(localStorage.getItem(k) ?? '') as T; } catch { return def; }
 }
-const hoy = () => new Date().toISOString().slice(0, 10);
+const hoy = () => hoyISO();
 
 export default function TableroCupos(
   { diasCampana, onIrAnuncios, clienteId }: {
@@ -95,7 +96,7 @@ export default function TableroCupos(
     let n = 0;
     const d = new Date();
     for (let i = 0; i < 60; i++) {
-      const clave = d.toISOString().slice(0, 10);
+      const clave = hoyISO(d);
       if (diario[clave] === undefined) break;
       n++;
       d.setDate(d.getDate() - 1);
@@ -240,7 +241,7 @@ export default function TableroCupos(
     };
     if (!d.gasto && !d.visitas && !d.conversaciones) return null;
     const v = veredictoAnuncio(objetivo, d);
-    const icono = { rojo: '🔴 ', amarillo: '🟡 ', verde: '🟢 ', sin_datos: '' }[v.estado];
+    const icono = { rojo: '', amarillo: '', verde: '', sin_datos: '' }[v.estado];
     return { color: COLOR[v.estado], texto: icono + v.texto };
   };
 
@@ -327,11 +328,11 @@ export default function TableroCupos(
 
       {enMedicion ? (
         <div className="rounded-2xl border border-gold/25 bg-gold/[0.05] p-4">
-          <p className="text-sm text-cream/85">⏳ <strong>Se mide, no se opina.</strong> Faltan {diasMedicion - diasCampana + 1} días para decidir. Hoy tu único trabajo es cargar y atender.</p>
+          <p className="text-sm text-cream/85"><strong>Se mide, no se opina.</strong> Faltan {diasMedicion - diasCampana + 1} días para decidir. Hoy tu único trabajo es cargar y atender.</p>
         </div>
       ) : (
         <div className="rounded-2xl border border-cream/15 p-4">
-          <p className="text-sm text-cream/85">✅ Pasaste los {diasMedicion} días: las reglas de abajo deciden. {diasCampana >= 21 ? 'Y ya toca refrescar el creativo del ganador — mismo esqueleto, otro hook.' : ''}</p>
+          <p className="text-sm text-cream/85">Pasaste los {diasMedicion} días: las reglas de abajo deciden. {diasCampana >= 21 ? 'Y ya toca refrescar el creativo del ganador — mismo esqueleto, otro hook.' : ''}</p>
         </div>
       )}
 

@@ -9,7 +9,7 @@
  * incluido lo que NO va a pasar, que es lo que el equipo necesita saber para
  * animarse a usarlo.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   loQueVaAPasar, resumenParaElEquipo, enPalabras, vuelveElSoporte, hoyISO,
   type VentanaSinSoporte,

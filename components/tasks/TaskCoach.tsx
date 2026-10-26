@@ -6,9 +6,13 @@ import TutorialTecnicoBox from '../TutorialTecnicoBox';
 import React, { useEffect, useState } from 'react';
 import { listarEvidencias, subirEvidencia } from '../../lib/evidencia';
 import { verificarEvidenciaVision, type VeredictoVision } from '../../lib/visionEvidencia';
+import {
+  evidenciasQueCuentan, guardarVeredictoIA, loQueDiceElVeredicto,
+  type Veredicto,
+} from '../../lib/veredictoEvidencia';
 import { notificarAdminsEvidencia } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
-import { MessageSquare, CheckCircle2, ExternalLink } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import type { RoadmapMeta } from '../../lib/roadmapSeed';
 import BotonAudio from '../sesion/BotonAudio';
 import { VOC } from '../../lib/vocabulario';
@@ -27,16 +31,32 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
   const [veredicto, setVeredicto] = useState<VeredictoVision | null>(null);
   const [verificando, setVerificando] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
+  /** El veredicto que frena, si hay uno. Es lo que explica por qué. */
+  const [frena, setFrena] = useState<Veredicto | null>(null);
+  /**
+   * EL CONTEO SALE DE LA BASE, NO DE LA CARPETA.
+   *
+   * Contaba archivos. El cliente subía la foto equivocada, la IA la
+   * rechazaba, la pantalla le pedía otra, él recargaba, y la jornada se
+   * destrababa con la foto que la IA había rechazado: el archivo seguía en la
+   * carpeta, y el veredicto vivía en este mismo estado de React.
+   */
+  const recontar = React.useCallback(async (userId: string) => {
+    const archivos = await listarEvidencias(userId, meta.codigo);
+    const r = await evidenciasQueCuentan(userId, meta.codigo, archivos);
+    setEvidencias(r.cuentan);
+    setFrena(r.frena);
+  }, [meta.codigo]);
   useEffect(() => {
     if (!meta.evidencia_requerida?.nombre?.trim()) return;
     (async () => {
       const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
       const userId = data.user?.id ?? null;
       setUid(userId);
-      if (userId) setEvidencias((await listarEvidencias(userId, meta.codigo)).length);
+      if (userId) await recontar(userId);
       else setEvidencias(0);
     })();
-  }, [meta.codigo, meta.evidencia_requerida]);
+  }, [meta.codigo, meta.evidencia_requerida, recontar]);
   /**
    * CUÁNDO DE VERDAD HACE FALTA SUBIR UN ARCHIVO.
    *
@@ -90,20 +110,42 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
     const res = await subirEvidencia(uid, meta.codigo, file);
     if (res.ok) {
       setEvidencias((n) => Math.max(0, n) + 1);
+      setFrena(null);
       try { const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}'); void notificarAdminsEvidencia(p?.nombre ?? 'Un cliente', meta.codigo); } catch { /* noop */ }
-      // CP9 · Visión IA (asistente, nunca bloquea): verifica la imagen en segundo plano.
-      if (meta.evidencia_requerida?.descripcion) {
+      const archivo = res.evidencia.path;
+      /*
+       * EL TESTIGO JUZGA, Y EL VEREDICTO QUEDA.
+       *
+       * Antes el veredicto vivía acá y se iba al recargar. Ahora se guarda con
+       * la firma de quién lo dictó, y lo que la IA no mira —el audio, el
+       * video, el PDF— va derecho a la cola del equipo.
+       *
+       * Si la IA no pudo mirar una imagen (sin clave, o un error) no se
+       * escribe veredicto: nadie la juzgó, y sin fila la evidencia cuenta. El
+       * equipo la ve igual en la ficha del cliente y puede decidir ahí.
+       */
+      const esImagen = file.type.startsWith('image/');
+      if (!esImagen) {
+        await guardarVeredictoIA(uid, meta.codigo, archivo, 'pendiente',
+          'La mira el equipo: el testigo solo lee imágenes.');
+      } else if (meta.evidencia_requerida?.descripcion) {
         setVeredicto(null);
         setVerificando(true);
         const v = await verificarEvidenciaVision(file, meta.evidencia_requerida.descripcion);
         setVerificando(false);
         setVeredicto(v);
+        if (v) {
+          await guardarVeredictoIA(uid, meta.codigo, archivo,
+            v.ok ? 'aprobada' : 'rechazada', v.motivo ?? '');
+        }
         if (v && v.ok === false) {
           // El testigo no la confirmó: esa evidencia NO cuenta.
           setEvidencias((n) => Math.max(0, n - 1));
           setErrorSubida(`Tu testigo no pudo confirmarla${v.motivo ? ': ' + v.motivo : ''}. Sube otra foto — la de verdad.`);
         }
       }
+      // La verdad del conteo está en la base, no en este estado.
+      await recontar(uid);
     } else {
       setErrorSubida((res as { ok: false; motivo: string }).motivo);
     }
@@ -135,7 +177,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         </h3>
         <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[var(--line, rgba(142,104,36,0.18))] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
               title={`Tutorial: ${VOC(meta.titulo)}`}
@@ -165,8 +207,8 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
         {guionVivo && !isCompleted && (
           <button onClick={() => setPlayerAbierto(true)}
-            className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
-            <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
+            className="w-full text-left rounded-2xl border border-gold/40 bg-gold/[0.12] p-5 hover:border-gold/60 transition-colors">
+            <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-1.5">Micro-sesión guiada</p>
             <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
             <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
           </button>
@@ -197,15 +239,15 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
 
         {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
         {!isCompleted && (
-          <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
-            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
+          <div className="card-panel p-4 border border-[var(--line, rgba(142,104,36,0.18))] mt-4">
+            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">Tu trabajo de hoy</p>
             <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
             <textarea
               value={nota}
               onChange={(e) => setNota(e.target.value)}
               rows={5}
               placeholder="Lo que trabajaste, lo que descubriste, lo que decidiste…"
-              className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
+              className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
             />
             <div className="flex items-center justify-between mt-2">
               <BotonAudio onTexto={(t) => setNota((p) => (p ? p + '\n' + t : t))} />
@@ -224,7 +266,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
             <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
-              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
+              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : 'Evidencia requerida'}
             </p>
             <p className="text-sm text-cream/75 leading-relaxed mb-3">{VOC(meta.evidencia_requerida.descripcion)}</p>
             {!isCompleted && (
@@ -237,10 +279,21 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
               <p className="text-xs text-success mt-2">✓ Tu testigo la vio{veredicto.motivo ? `: ${veredicto.motivo}` : ''}. Confirmada.</p>
             )}
             {errorSubida && <p className="text-xs text-danger mt-2">⚠️ {errorSubida}</p>}
-            {verificando && <p className="text-xs text-cream/55 mt-2">Revisando la imagen…</p>}
+            {/* EL MOTIVO SOBREVIVE A LA RECARGA.
+                Antes el veredicto vivía en este componente: el cliente volvía
+                al otro día y la pantalla le pedía una evidencia sin decirle
+                qué tenía de malo la que ya había subido. */}
+            {!errorSubida && !verificando && frena && (
+              <p className="text-[17px] text-gold mt-2">{loQueDiceElVeredicto(frena)} Sube otra que muestre lo que pide esta jornada.</p>
+            )}
+            {verificando && <p className="text-[17px] text-cream/55 mt-2">Revisando la imagen…</p>}
+            {/* El veredicto se decía y se desarmaba en la misma línea: «revisa
+                que la foto muestre lo pedido — si estás seguro, puedes seguir
+                igual». Así nadie revisa nada. Ahora el veredicto va solo, y
+                seguir igual lo decide el botón, que es donde se decide. */}
             {veredicto && !verificando && (veredicto.ok
-              ? <p className="text-xs text-success mt-2">✓ Se ve bien — coincide con lo pedido.</p>
-              : <p className="text-xs text-gold mt-2">⚠️ {veredicto.motivo || 'Revisa que la foto muestre lo pedido'} — si estás seguro, puedes seguir igual.</p>
+              ? <p className="text-[17px] text-success mt-2">Se ve bien: coincide con lo pedido.</p>
+              : <p className="text-[17px] text-gold mt-2">{veredicto.motivo || 'Mira si la foto muestra lo pedido.'}</p>
             )}
           </div>
         )}
@@ -248,7 +301,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
       </div>
 
       {/* Confirmation — prominent completion button */}
-      <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
+      <div className="border-t border-[var(--line, rgba(142,104,36,0.18))] pt-5">
         {checked ? (
           <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-success/10 border border-success/30 text-success text-base font-semibold">
             <CheckCircle2 className="w-5 h-5" />
@@ -264,7 +317,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}
               disabled={!evidenciaLista}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
             >
               <CheckCircle2 className="w-5 h-5" />
               Marcar como completado

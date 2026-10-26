@@ -16,6 +16,7 @@
  * o allá es lo mismo.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { hoyISO } from '../../lib/diaPrograma';
 import { Mountain } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TICKETS, CIMA, servicioDe, type Ticket } from '../../lib/cuadroTickets';
@@ -65,7 +66,7 @@ export default function ServicioDelCliente({
     setVentana(acceso === 'treinta' || acceso === 'cuotas' ? acceso : 'noventa');
   }, [acceso]);
 
-  const arranque = inicio ?? new Date().toISOString().slice(0, 10);
+  const arranque = inicio ?? hoyISO();
   const cierra = cierreDeLaVentana({ tipo: ventana, inicio: arranque });
 
   const guardarVentana = useCallback(async (nueva: TipoDeAcceso) => {

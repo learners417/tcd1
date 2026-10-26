@@ -102,7 +102,7 @@ export default function TaskFotoPartida({
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
+      <div className="border-b border-[var(--line, rgba(142,104,36,0.18))] pb-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="text-sm font-mono text-gold uppercase tracking-widest font-bold">
             <Camera className="w-3 h-3 inline mr-1" />
@@ -137,7 +137,7 @@ export default function TaskFotoPartida({
           return (
             <div
               key={dim.key}
-              className="card-panel p-4 border border-[rgba(232,150,46,0.1)]"
+              className="card-panel p-4 border border-[var(--line, rgba(142,104,36,0.18))]"
             >
               <div className="flex items-start justify-between gap-3 mb-3">
                 <label className="text-sm font-medium text-cream flex-1">
@@ -158,7 +158,7 @@ export default function TaskFotoPartida({
                     className={`py-2.5 rounded-lg border text-sm font-semibold transition-all ${
                       score === n
                         ? 'bg-gold border-gold text-ink'
-                        : 'bg-surface/40 border-[rgba(232,150,46,0.10)] text-cream/65 hover:bg-gold/10 hover:text-cream/80 hover:border-gold/30'
+                        : 'bg-surface/40 border-[var(--line, rgba(142,104,36,0.18))] text-cream/65 hover:bg-gold/10 hover:text-cream/80 hover:border-gold/30'
                     }`}
                     aria-label={`Puntaje ${n} en ${dim.label}`}
                   >
@@ -175,7 +175,7 @@ export default function TaskFotoPartida({
         })}
       </div>
 
-      <div className="card-panel p-4 border border-[rgba(232,150,46,0.12)] bg-surface/30 flex items-center justify-between">
+      <div className="card-panel p-4 border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest text-cream/65 font-semibold">
             Promedio actual

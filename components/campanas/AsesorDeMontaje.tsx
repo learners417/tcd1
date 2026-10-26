@@ -20,7 +20,7 @@
  * Queda lo único que no vive en ninguna otra pantalla: el montaje, paso por
  * paso, con la receta ya decidida. El asesor no la elige. La explica.
  */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Send, ArrowLeft, Check, Circle, ShieldAlert } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -306,7 +306,7 @@ export default function AsesorDeMontaje(
         <p className="text-sm text-cream/55 leading-relaxed mb-3">
           Solo del montaje. Lo demás tiene su lugar y te digo cuál es:
           tu oferta y tu precio en la mentoría, tus anuncios en «Tus 3 anuncios»,
-          tus mensajes con Sofi, y cuándo apagar o escalar en Activación.
+          tus mensajes con Sofi, y cuándo apagar o hacer crecer en Activación.
         </p>
 
         {mensajes.length > 0 && (
@@ -315,7 +315,7 @@ export default function AsesorDeMontaje(
               <div key={m.id} className={`flex ${m.de === 'yo' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[88%] rounded-2xl px-4 py-3 ${
                   m.de === 'yo'
-                    ? 'bg-gold/10 border border-gold/20 rounded-br-sm'
+                    ? 'burbuja-mia rounded-br-sm'
                     : 'bg-surface border border-cream/8 rounded-bl-sm'}`}>
                   {m.texto ? (
                     <div className="prose prose-invert max-w-none text-sm text-cream/85 leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1.5 [&_strong]:text-cream">

@@ -11,7 +11,8 @@
  *
  * Carga el SDK de PayPal on-demand para no inflar el bundle.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { mensajeDeFalla } from '../../lib/conexion';
 import { X, Coins, Check, Loader2, ShoppingBag, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -109,7 +110,9 @@ export default function BuyCreditsModal({
         setPaypalReady(true);
       })
       .catch((err) => {
-        toast.error(err instanceof Error ? err.message : 'Error cargando PayPal');
+        // En crudo decía cosas como «Failed to fetch» o el error de PayPal
+        // tal cual. En una pantalla de pago eso no se le muestra a nadie.
+        toast.error(mensajeDeFalla(err, 'abrir el pago'));
       })
       .finally(() => setPaypalLoading(false));
   }, [selectedPack]);
@@ -154,7 +157,7 @@ export default function BuyCreditsModal({
       await onPurchaseComplete();
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error procesando pago');
+      toast.error(mensajeDeFalla(err, 'confirmar tu pago'));
     } finally {
       setProcessing(false);
     }
@@ -190,9 +193,9 @@ export default function BuyCreditsModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-[#0F0F0F] shadow-2xl">
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-[var(--bg-card,#17150F)] shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold/10 bg-[#0F0F0F]/95 backdrop-blur p-5">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold/10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-gold/15 p-2 border border-gold/30">
               <ShoppingBag className="h-5 w-5 text-gold" />
@@ -267,7 +270,7 @@ export default function BuyCreditsModal({
                         onClick={() => setSelectedPack(pack)}
                         className={`relative rounded-xl border p-4 text-left transition-all ${
                           isSelected
-                            ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(232,150,46,0.12)]'
+                            ? 'border-gold bg-gold/10'
                             : 'border-white/10 bg-[#1A1A1A] hover:border-gold/40 hover:bg-gold/5'
                         }`}
                       >
@@ -305,7 +308,7 @@ export default function BuyCreditsModal({
 
                   {!PAYPAL_CLIENT_ID && (
                     <div className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-white/80 mb-3">
-                      ⚠️ VITE_PAYPAL_CLIENT_ID no configurada — el botón de PayPal no se va a renderizar.
+                      Aviso: VITE_PAYPAL_CLIENT_ID no configurada — el botón de PayPal no se va a renderizar.
                     </div>
                   )}
 

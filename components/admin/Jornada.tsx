@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { hoyISO } from '../../lib/diaPrograma';
 import { LogIn, LogOut, Check } from 'lucide-react';
 import {
   iniciarJornada, cerrarJornada, minutosDe, estaAbierta, cuentasPisadas,
@@ -58,7 +59,7 @@ export default function Jornada({
   const [jornada, setJornada] = useState<Jornada | null>(() => {
     try {
       const j = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Jornada | null;
-      return j && j.dia === new Date().toISOString().slice(0, 10) ? j : null;
+      return j && j.dia === hoyISO() ? j : null;
     } catch { return null; }
   });
   const [problema, setProblema] = useState<string | null>(null);
@@ -142,7 +143,7 @@ export default function Jornada({
   // dos pantallas. Antes esta ponía sesiones e instalación en cero, así que
   // alguien que dio nueve sesiones en la semana empezaba el día con la barra
   // casi vacía.
-  const carga = calcularCarga(rol as never, {
+  const carga = calcularCarga(rol, {
     excepciones: items.filter((i) => i.quien !== 'la app').length,
     sesiones,
     enInstalacion,

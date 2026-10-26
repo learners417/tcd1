@@ -1,8 +1,8 @@
 /**
  * DiagnosticoView.tsx — Diagnostico de campana con metricas + IA
  */
-import React, { useState, useCallback } from 'react';
-import { BarChart3, Loader2, Copy, CheckCircle2, Sparkles } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Loader2, Copy, CheckCircle2, Sparkles } from 'lucide-react';
 import { streamText } from '../../lib/aiProvider';
 import type { ProfileV2 } from '../../lib/supabase';
 import type { DiagnosticoInput } from '../../lib/campanasTypes';
@@ -126,7 +126,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
       {/* Header */}
       <div className="mb-5">
         <p className="text-sm font-bold tracking-[0.2em] uppercase text-gold mb-1">
-          Optimizacion - Carga manual de metricas
+          Optimización · carga manual de métricas
         </p>
         <h2 className="text-xl font-light text-cream">
           Diagnosticar{' '}
@@ -135,7 +135,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
           </span>
         </h2>
         <p className="text-sm text-cream/55 mt-1">
-          Cargas los numeros de Meta Ads Manager y la IA diagnostica que falla y da el plan exacto.
+          Cargas los números de Meta y la IA te dice qué falla y cuál es el plan exacto.
         </p>
       </div>
 
@@ -147,7 +147,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
               Cliente / campaña
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Dra. Garcia — Leads Mayo"
               value={form.nombre_campana}
               onChange={(e) => updateField('nombre_campana', e.target.value)}
@@ -158,7 +158,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
               Rubro y ciudad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Psicologa, Buenos Aires"
               value={form.rubro}
               onChange={(e) => updateField('rubro', e.target.value)}
@@ -169,9 +169,9 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
         {/* Metricas */}
         <div className="flex items-center gap-3 pt-2">
           <span className="text-sm font-bold tracking-[0.15em] uppercase text-cream/45">
-            Metricas actuales
+            Métricas actuales
           </span>
-          <div className="flex-1 h-px bg-[rgba(232,150,46,0.1)]" />
+          <div className="flex-1 h-px bg-[var(--line, rgba(142,104,36,0.18))]" />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -179,7 +179,9 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             { key: 'gasto' as const, label: 'Gasto total ($)', placeholder: '0', sub: 'USD gastados', step: '0.01' },
             { key: 'clicks' as const, label: 'Clicks', placeholder: '0', sub: 'clicks totales', step: undefined },
             { key: 'leads' as const, label: 'Leads / Resultados', placeholder: '0', sub: 'conversiones', step: undefined },
-            { key: 'ctr' as const, label: 'CTR (%)', placeholder: '0.00', sub: 'click-through rate', step: '0.01' },
+            /* El nombre del campo es el que Meta usa en su panel —si se traduce, el
+               cliente no lo encuentra—, pero lo que significa va en castellano. */
+            { key: 'ctr' as const, label: 'CTR (%)', placeholder: '0.00', sub: 'de cada cien que lo vieron, cuántos tocaron', step: '0.01' },
             { key: 'impresiones' as const, label: 'Impresiones', placeholder: '0', sub: 'veces mostrado', step: undefined },
             { key: 'dias' as const, label: 'Días activa', placeholder: '0', sub: 'días corriendo', step: undefined },
           ]).map((m) => (
@@ -207,7 +209,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             Que observas que no funciona? (opcional)
           </label>
           <textarea
-            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
+            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
             rows={2}
             placeholder="Ej: Muchos clicks pero nadie completa el formulario"
             value={form.problema_observado ?? ''}
@@ -235,7 +237,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
             <div className="flex items-center gap-2">
               {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
               <span className="text-sm font-bold tracking-wider uppercase text-gold">
-                Diagnostico IA
+                Diagnóstico IA
               </span>
             </div>
             {output && !generando && (
@@ -250,12 +252,12 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
           </div>
           <div className="bg-black/20 rounded-xl p-4">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[var(--line, rgba(142,104,36,0.18))]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : (
               <span className="text-cream/55 flex items-center gap-2 text-sm">
-                <Loader2 className="w-4 h-4 animate-spin" /> Analizando metricas...
+                <Loader2 className="w-4 h-4 animate-spin" /> Analizando métricas...
               </span>
             )}
           </div>
