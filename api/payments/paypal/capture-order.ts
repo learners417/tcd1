@@ -30,6 +30,7 @@ import {
   grantCreditsFromPayPal,
 } from '../../_lib/credits-server.js';
 import { captureOrder } from '../../_lib/paypal.js';
+import { escrituraDePago } from '../../_lib/escritura-de-pago.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -88,14 +89,18 @@ export default async function handler(req: any, res: any) {
     const captureResult = await captureOrder(orderId);
 
     if (captureResult.status !== 'COMPLETED') {
-      await admin
-        .from('paypal_orders')
-        .update({
-          status: 'failed',
-          raw_capture_response: captureResult as unknown as Record<string, unknown>,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderId);
+      await escrituraDePago(
+        'marcar la orden como fallida (la captura no completó)',
+        { orderId, userId, estadoPayPal: captureResult.status },
+        () => admin
+          .from('paypal_orders')
+          .update({
+            status: 'failed',
+            raw_capture_response: captureResult as unknown as Record<string, unknown>,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId),
+      );
       return res.status(400).json({
         error: 'CAPTURE_NOT_COMPLETED',
         message: `Status: ${captureResult.status}`,
@@ -110,13 +115,17 @@ export default async function handler(req: any, res: any) {
     const paidValue = parseFloat(capture.amount.value);
     const expectedValue = Number(order.amount_usd);
     if (capture.amount.currency_code !== 'USD' || Math.abs(paidValue - expectedValue) > 0.01) {
-      await admin
-        .from('paypal_orders')
-        .update({
-          status: 'failed',
-          raw_capture_response: captureResult as unknown as Record<string, unknown>,
-        })
-        .eq('id', orderId);
+      await escrituraDePago(
+        'marcar la orden como fallida (el monto no coincide)',
+        { orderId, userId, pagado: capture.amount.value, esperado: expectedValue },
+        () => admin
+          .from('paypal_orders')
+          .update({
+            status: 'failed',
+            raw_capture_response: captureResult as unknown as Record<string, unknown>,
+          })
+          .eq('id', orderId),
+      );
       return res.status(400).json({
         error: 'AMOUNT_MISMATCH',
         message: `Paid ${capture.amount.value} ${capture.amount.currency_code}, expected ${expectedValue} USD`,
@@ -131,18 +140,38 @@ export default async function handler(req: any, res: any) {
       paypalOrderId: orderId,
     });
 
-    // ─── Actualizar paypal_orders ────────────────────────────────────────────
-    await admin
-      .from('paypal_orders')
-      .update({
-        status: 'captured',
-        paypal_capture_id: capture.id,
-        paypal_payer_email: captureResult.payer?.email_address ?? null,
-        raw_capture_response: captureResult as unknown as Record<string, unknown>,
-        captured_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
+    /*
+     * ─── Marcar la orden como capturada ──────────────────────────────────
+     *
+     * Esta corre DESPUÉS de acreditar, y es la que no se puede perder: si
+     * falla, el cliente tiene sus créditos y PayPal cobró, pero la orden
+     * queda en «pending». El registro diría que no pagó, y un segundo
+     * intento del cliente no entraría por la guarda de idempotencia —que
+     * mira justamente este campo— así que volvería a capturar en PayPal y
+     * vería un error con el pago hecho.
+     */
+    const registro = await escrituraDePago(
+      'marcar la orden como capturada',
+      {
+        orderId,
+        userId,
+        creditos: order.credits,
+        packId: order.pack_id,
+        capturaPayPal: capture.id,
+        acreditado: true,
+      },
+      () => admin
+        .from('paypal_orders')
+        .update({
+          status: 'captured',
+          paypal_capture_id: capture.id,
+          paypal_payer_email: captureResult.payer?.email_address ?? null,
+          raw_capture_response: captureResult as unknown as Record<string, unknown>,
+          captured_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', orderId),
+    );
 
     // ─── Devolver nuevo balance ──────────────────────────────────────────────
     const { data: credits } = await admin
@@ -151,9 +180,16 @@ export default async function handler(req: any, res: any) {
       .eq('user_id', userId)
       .maybeSingle();
 
+    /*
+     * Los créditos están acreditados, así que para el cliente el pago salió
+     * bien y la respuesta es 200. `registroPendiente` es para el equipo:
+     * dice que la fila de la orden quedó sin actualizar y que el detalle
+     * completo está en el registro del servidor, bajo [PAGO-SIN-REGISTRAR].
+     */
     return res.status(200).json({
       credits: order.credits,
       balance: credits,
+      ...(registro.ok ? {} : { registroPendiente: true }),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

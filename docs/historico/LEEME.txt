@@ -1,0 +1,99 @@
+════════════════════════════════════════════════════════════
+  TU CLÍNICA DIGITAL · seis tandas · 14 sep 2026
+  repo learners417/tcd1 · rama mejoras
+════════════════════════════════════════════════════════════
+
+DÓNDE VA CADA ARCHIVO  (todos reemplazan, salvo los marcados NUEVO)
+
+  auditoria.py                              → raíz del repo
+  src/lib/roadmapSeed.ts
+  src/lib/cinturones.ts
+  src/lib/roadmap.seed.json
+  src/lib/sostenido.ts                      NUEVO
+  src/lib/carriles.ts                       NUEVO
+  src/lib/agents/unlock.ts
+  src/components/EnMarcha.tsx               NUEVO
+  src/components/WelcomeWizard.tsx
+  src/components/onboarding/PasoSituacion.tsx  NUEVO (crear la carpeta)
+  src/pages/Dashboard.tsx
+  tcd-spec/datos/generar_seed.py
+  tcd-spec/datos/roadmap.seed.json
+
+BORRAR: docs/tcd-spec/datos/ — es una copia duplicada del generador.
+Dos fuentes del mismo archivo es lo que produjo todo este lío.
+
+────────────────────────────────────────────────────────────
+VERIFICADO EN ESTE CONTENEDOR
+
+  npx tsc --noEmit        0 errores   (venía de 198)
+  npm run build           OK
+  python3 auditoria.py    BATERÍA EN VERDE
+  python3 verificar-sala.py   49 verdes · 0 rojos
+
+────────────────────────────────────────────────────────────
+QUÉ CAMBIÓ, POR TANDA
+
+1 · EL CAMINO RECONECTADO
+  Los días 13-14 dejan de ser "Campo" y pasan a ser el plan de caza:
+  sesenta nombres de su red profesional y los primeros veinte mensajes.
+  Desde ahí, dos por día, sostenidos.
+  Las 14 sesiones guiadas escritas y no alcanzables ahora tienen jornada
+  — entre ellas la Prueba de Fuego y Tu primera llamada real (día 37).
+  El día 89 pasa a ser La última recta.
+
+2 · NUEVE ENTRENADORES, DESBLOQUEO POR EVIDENCIA
+  Había dos sistemas de agentes que no se hablaban. Ahora son nueve:
+  los ocho que ya existían como código, más el Espejo.
+  Vera (precio) y Sofi (mensajes) estaban construidas y sin usar:
+  entraron en los días 9 y 14, donde faltaban.
+  El desbloqueo salía de un mapa a mano que apuntaba a pilares del
+  modelo viejo. Ahora cada entrenador se abre al cerrar la jornada
+  donde aparece por primera vez, que es la que exige su evidencia.
+  Los once grados llevan por_evidencia y se_gana_con. El día es estimación.
+
+3 · EL PASO AVANZA, EL GRADO ESPERA
+  Los días 12, 45 y 90 dependen de que otro pague. Antes trababan el
+  camino. Ahora avanzan igual y lo que queda pendiente es el grado.
+  Freno nuevo F-GRADO-ESPERA con el mensaje.
+
+4 · LO SOSTENIDO Y LA ZONA "EN MARCHA"
+  Lo sostenido vive en el set de progreso que ya se sincroniza, con la
+  fecha en la clave. Cero campos nuevos en la base.
+  La racha no se corta si hoy todavía no marcó pero ayer sí.
+  El ángulo del día se calcula desde la rotación, no se guarda.
+  Regla: una fila sin fuente de datos NO se muestra. Nunca dice "0 de 2"
+  cuando nadie mide.
+
+5 · NAVEGACIÓN
+  Sin cambios: el menú ya tenía cinco destinos. La auditoría ya protege
+  ese límite y la paridad entre el menú lateral y la barra de abajo.
+
+6 · EL ONBOARDING
+  Paso nuevo "Tu situación" con las ocho preguntas que faltaban, cada una
+  con su salida. Se guarda dentro del JSON `diagnostico` que ya existe:
+  SIN MIGRACIÓN. Nada se rompe con los clientes que entren hoy.
+  Se puede saltar: lo que falte se cierra en los primeros diez días.
+  carriles.ts convierte esas respuestas en canal, límites, capacidad,
+  bifurcación de pauta y punto de entrada de los días 1 a 10.
+
+────────────────────────────────────────────────────────────
+LO QUE HAY QUE PROBAR A MANO (yo no puedo abrir la app)
+
+  □ El wizard completo de punta a punta, en celular.
+    El paso nuevo es el tercero, después de "perfil".
+  □ Que el botón "Saltar" del paso nuevo lleve a "diagnóstico".
+  □ Recargar la página en medio del paso nuevo: debe retomar donde quedó.
+  □ El Dashboard a partir del día 11: aparece la zona "En marcha".
+    Antes del 11 no debe aparecer nada.
+  □ Que "Publicar" muestre el ángulo del día.
+  □ Con un cliente que declare límites profesionales: el ángulo de prueba
+    social debe salir reemplazado por Demostración.
+
+────────────────────────────────────────────────────────────
+LO QUE QUEDA PENDIENTE
+
+  · "Conversaciones sin responder" en la zona En marcha: no tiene fuente
+    de datos. Necesita el sistema de mensajería.
+  · Migración para mover la situación del JSON a columnas propias.
+  · Los textos viejos del wizard hablan de nueve cinturones y de cinco
+    días. Quedaron sin tocar: son copy, no lógica.

@@ -11,7 +11,7 @@
  *
  * Override de testing via env var FORCE_AI_PROVIDER=deepseek|claude.
  */
-import { callDeepSeek, isDeepSeekConfigured, shouldFallback } from '../_lib/deepseek.js';
+import { callDeepSeek, isDeepSeekConfigured } from '../_lib/deepseek.js';
 import { callClaude, isClaudeConfigured } from '../_lib/claude.js';
 import { rutaDe, costoDe, normalizarUso, type PasoRuta } from '../_lib/router.js';
 import { guardarLlamada, deshacerCobro, anotarCosto } from '../_lib/guardian.js';

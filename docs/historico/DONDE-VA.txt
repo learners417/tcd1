@@ -1,0 +1,62 @@
+PAQUETE · C1 estructura + C2 sesión + C3 partida y tablero de grabación · 17 sep 2026
+Rama: mejoras · repo learners417/tcd1
+Se descomprime en la RAÍZ del repo: cada archivo ya trae su carpeta.
+Incluye también la tanda anterior (día único y vocabulario): se aplica sobre
+la rama tal como está hoy.
+
+NUEVOS
+  src/lib/puntoDePartida.ts             el cliente que ya viene andando entra en su día
+  src/components/PuntoDePartida.tsx     la pregunta, una sola vez
+  src/pages/Entrenadores.tsx            el ADN y los nueve, en una pestaña
+  src/components/admin/TableroGrabacion.tsx  donde se pegan los enlaces de YouTube
+  src/components/camino/EncabezadoCamino.tsx   anillo, grado y ritmo del Camino
+  src/components/camino/TarjetaDeHoy.tsx       la tarjeta de hoy (Hoy y Camino)
+  src/lib/diaPrograma.ts                       día, atraso, paso del cliente, apertura de pilares
+  tcd-spec/datos/tuteo.py                      voseo → tú para el seed
+  scripts/medir-app.py                         toda la app contra 10-DISENO (Chromium)
+  scripts/prueba-movil.py                      El Camino a 360/390 px (Chromium)
+  scripts/prueba-dia-vocabulario.ts            día, pilares y vocabulario
+  scripts/visor/camino.html + camino.tsx       visor para la prueba móvil
+  scripts/visor/admin.html + admin.tsx         visor del Admin para el medidor
+
+REEMPLAZAN
+  package.json + package-lock.json   fuentes Sora y Fraunces dentro de la app
+  index.html                         sin Google Fonts
+  src/main.tsx                       importa las fuentes
+  src/index.css                      capa 10-DISEÑO para toda la app
+  src/pages/Roadmap.tsx              encabezado nuevo, pilares que abren, mapa de fases
+  src/pages/Dashboard.tsx            Hoy: tarjeta arriba, mismo ritmo, solo pasos del cliente
+  src/components/CadenaADN.tsx       las nueve piezas a la vista, sin desplazamiento
+  src/components/EnMarcha.tsx        título en la letra de cuerpo
+  Coach · Metrics · Biblioteca · DiarioDirector · Agentes · ManualNegocio ·
+  ConstructorAnuncios · ChatAttachmentsBar · Topbar   contraste, tamaños y cortes
+  unos 60 archivos con tildes corregidas en textos visibles (ver lista de git)
+  Admin.tsx · NotificationBell · TableroPlata · TasksPipeline · TaskFiltersBar ·
+  NuevaCampanaChat · DiagnosticoView · CopiesView   Admin y pestañas internas
+  src/components/CeremoniaCinturon.tsx  tarjeta abajo, 11 grados, sin pantalla completa
+  src/components/CintaCinturon.tsx   color real del grado
+  src/components/BottomTabBar.tsx    etiquetas a 14 px
+  src/components/Topbar.tsx          título en Fraunces
+  src/components/Dia45Banner.tsx     aviso de Fase 4 en positivo
+  src/lib/roadmap.seed.json          seed tuteado (solo cambian textos)
+  tcd-spec/datos/generar_seed.py     tutea antes de escribir
+  tcd-spec/datos/roadmap.seed.json   igual al de la app
+  src/App.tsx · Admin.tsx · Metrics.tsx · Coach.tsx ·
+  DiarioDirector.tsx · Biblioteca.tsx · Sidebar.tsx · herramientas.ts ·
+  sesionesGuiadas.ts · vocabulario.ts · roadmapSeed.ts · adnSchema.ts
+  y los archivos con voseo corregido (ver lista de git)
+  auditoria.py · COMO-FUNCIONA.md · DONDE-VA.txt
+
+SE BORRAN (la sesión ya no pide emoción ni muestra reloj)
+  src/components/sesion/CheckInPanel.tsx
+  src/components/sesion/CheckOutPanel.tsx
+  src/components/sesion/CronometroSesion.tsx
+  git rm src/components/sesion/CheckInPanel.tsx src/components/sesion/CheckOutPanel.tsx src/components/sesion/CronometroSesion.tsx
+
+COMANDOS
+  unzip -o tcd-camino-visual-15sep.zip -d .
+  npm install
+  pip install playwright --break-system-packages
+  python3 -m playwright install chromium
+  python3 auditoria.py
+  git add -A && git commit -m "App completa al nivel 10-DISENO: 38 vistas en cero faltas" && git push

@@ -11,7 +11,18 @@
 
 import { getAdminClient } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
-import { AVISOS } from '../../src/lib/avisosCliente.js';
+import {
+  AVISOS, planificarAvisos, type HistorialAvisos,
+} from '../../src/lib/avisosCliente.js';
+import {
+  calcularCadena, encontrarDomino, numerosDeFila, COLUMNAS_DE_SEMANA,
+  type FilaDeSemana,
+} from '../../src/lib/valueChain.js';
+import type { ItemCola } from '../../src/lib/colaExcepciones.js';
+import {
+  ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo,
+} from '../../src/lib/entregasDelEquipo.js';
+import { leTocanLasEntregas } from '../../src/lib/topeDelEscalon.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -89,7 +100,7 @@ async function handler(req: any, res: any) {
     // 1) clientes activos con fecha de inicio
     const { data: clientes, error: e1 } = await admin
       .from('profiles')
-      .select('id, nombre, fecha_inicio, rol, status')
+      .select('id, nombre, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el')
       .neq('rol', 'admin');
     if (e1) throw e1;
 
@@ -158,44 +169,239 @@ async function handler(req: any, res: any) {
     // recorre a los clientes activos: sumar otro cron sería otro lugar más
     // donde algo puede fallar en silencio.
     let avisados = 0;
+    let escalados = 0;
+    let repetidosHoy = 0;
+    const pendientes: ItemCola[] = [];
+    const nombrePorId = new Map<string, string>(
+      (clientes ?? []).map((c: { id: string; nombre?: string | null }) =>
+        [c.id, c.nombre ?? 'Cliente']));
+
+    // El historial de avisos, derivado de lo que ya se mandó.
+    //
+    // Se lee por la COLUMNA `clave`, no comparando títulos. Antes el aviso se
+    // reconocía por su texto: cambiarle una palabra a un título dejaba el
+    // historial de ese aviso en cero para todos, y a la mañana siguiente
+    // volvía a salir desde el principio a quien ya lo había recibido dos
+    // veces. Con la clave guardada en la base, el texto se puede reescribir
+    // cuando haga falta.
+    const historial: HistorialAvisos = await (async () => {
+      const desde = new Date(Date.now() - 70 * 86400000).toISOString();
+      const { data: previas } = await admin
+        .from('notificaciones')
+        .select('usuario_id, clave, created_at')
+        .eq('tipo', 'sistema')
+        .not('clave', 'is', null)
+        .gte('created_at', desde);
+      const h: HistorialAvisos = { enviados: {}, ultimaSemana: {} };
+      for (const n of (previas ?? []) as Array<{ usuario_id: string; clave: string; created_at: string }>) {
+        if (!AVISOS[n.clave]) continue;
+        const id = `${n.usuario_id}|${n.clave}`;
+        h.enviados[id] = (h.enviados[id] ?? 0) + 1;
+        const sem = semanaISOde(new Date(n.created_at));
+        // Se queda la más reciente: la lista no viene ordenada.
+        if (!h.ultimaSemana[id] || sem > h.ultimaSemana[id]) h.ultimaSemana[id] = sem;
+      }
+      return h;
+    })();
     try {
       const semana = semanaISOde(new Date());
-      const { data: filas } = await admin.rpc('clientes_para_avisar', { p_semana: semana });
-      const items = (filas ?? []) as unknown as Array<{
-        cliente_id: string; gasto: number; conversaciones: number;
-        agendas: number; ventas: number; cargo: boolean;
-      }>;
 
-      for (const it of items) {
-        // El primer tramo roto, de arriba hacia abajo. Sin datos no se opina:
-        // se le pide que cargue.
-        const cuello = !it.cargo ? 'no_cargo'
-          : it.gasto > 0 && it.conversaciones === 0 ? 'comentario_a_conversacion'
-          : it.conversaciones > 0 && it.agendas / it.conversaciones < 0.15 ? 'conv_a_agenda'
-          : it.agendas > 0 && it.ventas === 0 ? 'close_rate'
-          : null;
+      // ── EL DIAGNÓSTICO, EL MISMO QUE VE EL EQUIPO ──
+      //
+      // Acá había cuatro condiciones escritas a mano —sin cargar, sin
+      // conversaciones, pocas agendas, sin ventas— y con eso solo podían
+      // salir CUATRO de los veinte avisos. Los otros dieciséis estaban
+      // escritos y no tenían forma de dispararse: el costo de la agenda, la
+      // frecuencia agotada, las cuotas sin cobrar, el cliente que termina y
+      // no renueva. Justo los tramos donde el cliente se cae DESPUÉS de
+      // empezar a vender, que es donde más cuesta recuperarlo.
+      //
+      // Ahora corre `calcularCadena` y `encontrarDomino`, las mismas que usa
+      // la cola del Admin sobre la misma tabla. Un solo diagnóstico: lo que
+      // la app le dice al cliente y lo que le muestra al equipo no pueden ser
+      // dos lecturas distintas de los mismos números.
+      const { data: activos } = await admin
+        .from('profiles')
+        .select('id')
+        .eq('rol', 'cliente')
+        .not('campana_desde', 'is', null)
+        .or('campana_pausada.is.null,campana_pausada.eq.false');
+      const idsActivos: string[] = (activos ?? []).map((a: { id: string }) => a.id);
+
+      const { data: filas } = await admin
+        .from('sala_metricas_semana')
+        .select(COLUMNAS_DE_SEMANA)
+        .in('cliente_id', idsActivos)
+        .eq('semana_iso', semana)
+        .is('anuncio', null);
+      const semanaDe = new Map<string, FilaDeSemana>(
+        ((filas ?? []) as unknown as FilaDeSemana[]).map((f) => [f.cliente_id, f]));
+
+      // Los países, que deciden contra qué banda se juzga el costo. Sin
+      // esto, `calcularCadena` cae en la referencia de México y juzga a toda
+      // la cartera contra ella — el techo argentino está por debajo del piso
+      // español, así que se equivoca en las dos direcciones y en silencio.
+      const { data: montajes } = await admin
+        .from('montaje_campana')
+        .select('user_id, paises')
+        .in('user_id', idsActivos);
+      const paisesDe = new Map<string, string[]>(
+        ((montajes ?? []) as Array<{ user_id: string; paises: string[] | null }>)
+          .filter((m) => m.paises?.length)
+          .map((m) => [m.user_id, m.paises as string[]]));
+
+      for (const id of idsActivos) {
+        const fila = semanaDe.get(id);
+        // Sin números no se opina: se le pide que cargue, que es lo primero.
+        const cuello = fila
+          ? encontrarDomino(calcularCadena(numerosDeFila(fila), paisesDe.get(id) ?? []))
+              .indicador?.id ?? null
+          : 'no_cargo';
         if (!cuello) continue;
 
-        const texto = AVISOS[cuello];
-        if (!texto) continue;
+        pendientes.push({
+          clienteId: id,
+          nombre: nombrePorId.get(id) ?? 'Cliente',
+          cuello,
+          situacion: '', accion: '', como: '',
+          // El cron solo manda lo automático: lo que necesita persona ya está
+          // en la cola del Admin y lo ve el equipo al abrir su día.
+          quien: 'la app',
+          enRiesgo: 0, semanasIgual: 0, yaSeIntento: false,
+        });
+      }
 
+      // ── LAS TRES REGLAS QUE FALTABAN ──
+      //
+      // El bloque anterior insertaba el aviso DIRECTO, sin mirar nada. Dos
+      // consecuencias, las dos en contra de lo que el aviso busca:
+      //
+      //   · El cliente recibía el mismo aviso TODOS LOS DÍAS mientras el
+      //     cuello siguiera. Las alarmas del equipo sí chequean si ya salieron
+      //     hoy; estas no. Un aviso diario por el mismo motivo deja de leerse
+      //     al segundo día, y de paso enseña a ignorar la campana entera.
+      //   · Nunca escalaba. `AVISOS_ANTES_DE_ESCALAR` estaba escrito y no se
+      //     aplicaba en ninguna parte: después de dos avisos sin que el
+      //     cliente lo resolviera, no se enteraba nadie.
+      //
+      // `planificarAvisos` ya resolvía las tres reglas y nadie la llamaba. El
+      // historial que necesita se deriva de las notificaciones ya enviadas:
+      // el dato estaba, no hacía falta una tabla nueva.
+      const plan = planificarAvisos(pendientes, historial, semanaISOde(new Date()));
+
+      for (const aviso of plan.aMandar) {
         await admin.from('notificaciones').insert({
-          usuario_id: it.cliente_id,
+          usuario_id: aviso.clienteId,
           tipo: 'sistema',
-          titulo: texto.titulo,
-          descripcion: texto.descripcion,
-          accion_url: texto.destino,
+          titulo: aviso.titulo,
+          descripcion: aviso.descripcion,
+          accion_url: aviso.destino,
+          // La clave queda guardada: es con lo que la corrida de mañana sabe
+          // que este aviso ya salió. Sin ella el historial se reconstruía
+          // comparando títulos, y cambiarle una palabra a un texto reseteaba
+          // la cuenta de todos.
+          clave: aviso.clave,
           leida: false,
         });
         avisados++;
       }
+
+      // Lo que el aviso automático no pudo resolver pasa a una persona. Dos
+      // veces avisado y sin cambio no es un cliente que no leyó: es un aviso
+      // que no alcanza para eso.
+      for (const aviso of plan.aEscalar) {
+        const nombre = nombrePorId.get(aviso.clienteId) ?? 'Cliente';
+        await Promise.all(adminIds.map((aid) =>
+          admin.from('notificaciones').insert({
+            usuario_id: aid,
+            tipo: 'admin',
+            titulo: `${nombre}: el aviso automático no alcanzó`,
+            descripcion: `Se le avisó ${aviso.vecesEnviado} ${aviso.vecesEnviado === 1 ? 'vez' : 'veces'} por «${aviso.titulo}» y sigue igual. Necesita una persona.`,
+            accion_url: '/admin/clientes',
+            leida: false,
+          })));
+        escalados++;
+      }
+      repetidosHoy = plan.repetidos;
     } catch (err) {
       // No tumba el cron: las alarmas del equipo ya se mandaron, y perderlas
       // por un fallo de los avisos sería cambiar un problema por dos.
       console.error('[cron/alarmas-inactividad] fallaron los avisos', err);
     }
 
-    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados}`);
+    // ── LAS ENTREGAS DEL EQUIPO ──
+    //
+    // El plan tiene tres momentos en que el equipo instala algo técnico: el
+    // alta, los sitios y formularios del día 11, y las automatizaciones del 29.
+    // Estaban escritas en el seed y NADIE LAS LEÍA: el cliente llegaba al día
+    // 11 sin saber que le tocaba una entrega, y Lupe sin saber que debía
+    // hacerla. Aparecían cuando alguien se acordaba, o cuando el cliente
+    // preguntaba por WhatsApp.
+    //
+    // Se disparan por el día del TRABAJO y no por el del calendario: la
+    // entrega existe para desbloquear la sesión que viene, así que llega
+    // cuando el cliente llega. Montarle los formularios a alguien que todavía
+    // no escribió su oferta es trabajo que se hace dos veces.
+    let entregasAvisadas = 0;
+    try {
+      const claves = ENTREGAS.map((e) => `entrega-${e.dia}`);
+      const { data: yaSalieron } = await admin
+        .from('notificaciones')
+        .select('usuario_id, clave')
+        .in('clave', claves);
+      const hechasDe = new Map<string, number[]>();
+      for (const n of (yaSalieron ?? []) as Array<{ usuario_id: string; clave: string }>) {
+        const dia = Number(n.clave.replace('entrega-', ''));
+        if (!Number.isFinite(dia)) continue;
+        hechasDe.set(n.usuario_id, [...(hechasDe.get(n.usuario_id) ?? []), dia]);
+      }
+
+      for (const cli of clientes ?? []) {
+        if (!cli.fecha_inicio) continue;
+        if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
+        // Las entregas son el escalón que las compró. Sin esta línea, a las dos
+        // semanas le entraba a Lupe la tarea de montarle los sitios, los
+        // formularios y las automatizaciones a quien pagó la primera etapa.
+        if (!leTocanLasEntregas(cli.servicio_contratado, cli.servicio_marcado_el)) continue;
+        const done = completadasPor.get(cli.id) ?? new Set();
+        const proxima = CAMINO.find((m) => !done.has(m.c));
+        // Sin próxima, terminó el Camino: todas las entregas ya corresponden.
+        const diaDeTrabajo = proxima ? proxima.d : 90;
+        const e = entregaPendiente(diaDeTrabajo, hechasDe.get(cli.id) ?? []);
+        if (!e) continue;
+
+        const nombre = cli.nombre ?? 'Cliente';
+        const aviso = avisoAlCliente(e);
+        await admin.from('notificaciones').insert({
+          usuario_id: cli.id, tipo: 'sistema',
+          titulo: aviso.titulo, descripcion: aviso.descripcion,
+          accion_url: '/mensajes', clave: `entrega-${e.dia}`, leida: false,
+        });
+
+        // Y la tarea en la lista de quien la tiene que hacer. La huella la
+        // forman el cliente y la referencia, así que no se duplica.
+        const tarea = tareaDelEquipo(e, nombre);
+        await Promise.all(adminIds.map((aid) =>
+          admin.rpc('crear_tarea_del_sistema', {
+            p_titulo: tarea.titulo,
+            p_descripcion: tarea.descripcion,
+            p_asignado: aid,
+            p_cliente: cli.id,
+            p_origen: 'recorrido',
+            p_ref: `entrega-${e.dia}`,
+            p_destino: 'escalar',
+            p_texto_listo: null,
+            p_peso: 60_000,
+            p_prioridad: 'alta',
+            p_vence: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+          }).then(() => undefined, () => undefined)));
+        entregasAvisadas++;
+      }
+    } catch (err) {
+      console.error('[cron/alarmas-inactividad] fallaron las entregas', err);
+    }
+
+    console.log(`[cron/alarmas-inactividad] v2 Camino · alarmas=${alarmas} avisos=${avisados} escalados=${escalados} repetidos_evitados=${repetidosHoy} entregas=${entregasAvisadas}`);
     return res.status(200).json({ ok: true, alarmas });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

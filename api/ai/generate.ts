@@ -17,7 +17,7 @@
  *
  * El response JSON incluye `provider` para debugging desde el frontend.
  */
-import { callDeepSeek, isDeepSeekConfigured, shouldFallback } from '../_lib/deepseek.js';
+import { callDeepSeek, isDeepSeekConfigured } from '../_lib/deepseek.js';
 import { callClaude, isClaudeConfigured } from '../_lib/claude.js';
 import { withSentry } from '../_lib/sentry.js';
 import { guardarLlamada, deshacerCobro, anotarCosto } from '../_lib/guardian.js';
