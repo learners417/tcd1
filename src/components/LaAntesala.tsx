@@ -105,17 +105,17 @@ export default function LaAntesala({ antesala, onGuardar, onAbrirCamino, nombre 
             return (
               <div key={a.id}
                 className={`rounded-2xl p-4 border transition-colors ${
-                  puesta ? 'border-gold/50 bg-gold/5' : 'border-cream/10'
+                  puesta ? 'elegido' : 'border-cream/10'
                 }`}>
                 <button type="button" onClick={() => alternar(a.id)} disabled={tope}
                   className="w-full flex items-start justify-between gap-3 text-left disabled:opacity-40">
                   <span className="min-w-0">
-                    <span className="block text-[19px] text-cream"
+                    <span className="block text-[20px] text-cream"
                       style={{ fontFamily: 'var(--font-display)' }}>{a.nombre}</span>
                     <span className="block mt-0.5 text-[15px] text-cream/60">{a.pregunta}</span>
                   </span>
                   <span className={`shrink-0 w-9 h-9 rounded-full grid place-items-center border ${
-                    puesta ? 'border-gold/60 text-gold' : 'border-cream/20 text-cream/50'
+                    puesta ? 'elegido-etiqueta' : 'border-cream/20 text-cream/50'
                   }`} aria-hidden>
                     {puesta ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   </span>

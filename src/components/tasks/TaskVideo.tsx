@@ -47,8 +47,19 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
         <TutorialTecnicoBox codigo={meta.codigo} />
       </div>
 
-      {/* YouTube Embed */}
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black">
+      {/*
+        El recuadro del video. Cuando hay video es un marco oscuro, que es lo
+        que corresponde: el reproductor viene negro de fábrica.
+        Cuando lo que va adentro es la lección escrita, no: ahí es una página
+        de la app y lleva el papel de la app.
+      */}
+      <div
+        className="relative w-full aspect-video rounded-xl overflow-hidden border"
+        style={{
+          borderColor: 'var(--line, rgba(142,104,36,0.18))',
+          background: videoId ? '#000' : 'var(--card, #F6F2E9)',
+        }}
+      >
         {videoId ? (
           <iframe
             src={getYoutubeEmbedUrl(videoId)}
@@ -62,21 +73,26 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
             const guion = getGuion(meta.codigo);
             if (guion?.esencia) {
               return (
-                <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-[#141311] to-[#0B0A09] p-6 sm:p-8">
-                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-4">La lección de hoy</p>
-                  <p className="text-base sm:text-lg leading-relaxed text-cream/90" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                    {guion.esencia}
+                <div className="absolute inset-0 overflow-y-auto p-6 sm:p-8">
+                  <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi mb-3">La lección de hoy</p>
+                  {/*
+                    La esencia lleva los tokens del vocabulario —{{consultante}}—
+                    igual que el resto del Camino: un entrenador no tiene
+                    pacientes. Sin VOC el cliente leería las llaves.
+                  */}
+                  <p className="text-[17px] sm:text-[19px] leading-relaxed text-cream" style={{ fontFamily: 'var(--font-display)' }}>
+                    {VOC(guion.esencia)}
                   </p>
-                  <p className="text-sm text-cream/35 mt-4">Tu lección, escrita. El video se suma arriba cuando esté.</p>
+                  <p className="text-[15px] text-cream/55 mt-4">Tu lección, escrita. El video se suma arriba cuando esté.</p>
                 </div>
               );
             }
             return (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-panel px-6 text-center">
-                <Play className="w-12 h-12 text-gold/50 mb-3" />
-                <p className="text-sm text-cream/80">Tu sesión, escrita</p>
-                <p className="text-xs text-cream/45 mt-2 leading-relaxed max-w-sm">
-                  No te frena nada: la instrucción completa está aquí abajo.
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                <Play className="w-12 h-12 mb-3" style={{ color: 'var(--gold, #8E6824)', opacity: 0.45 }} />
+                <p className="text-[17px] text-cream">Tu sesión, escrita</p>
+                <p className="text-[15px] text-cream/60 mt-2 leading-relaxed max-w-sm">
+                  Tienes la instrucción completa aquí abajo.
                 </p>
               </div>
             );

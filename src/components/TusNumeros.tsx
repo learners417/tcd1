@@ -109,7 +109,7 @@ export default function TusNumeros({ cobros, onCerrar, onRegistrarCobro }: Props
             type="button"
             onClick={onRegistrarCobro}
             className="mt-4 w-full min-h-[52px] rounded-[20px] text-[18px] font-semibold"
-            style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
+            style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
           >
             Anotar un cobro
           </button>

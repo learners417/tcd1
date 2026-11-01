@@ -241,7 +241,7 @@ export default function TableroCupos(
     };
     if (!d.gasto && !d.visitas && !d.conversaciones) return null;
     const v = veredictoAnuncio(objetivo, d);
-    const icono = { rojo: '🔴 ', amarillo: '🟡 ', verde: '🟢 ', sin_datos: '' }[v.estado];
+    const icono = { rojo: '', amarillo: '', verde: '', sin_datos: '' }[v.estado];
     return { color: COLOR[v.estado], texto: icono + v.texto };
   };
 
@@ -328,11 +328,11 @@ export default function TableroCupos(
 
       {enMedicion ? (
         <div className="rounded-2xl border border-gold/25 bg-gold/[0.05] p-4">
-          <p className="text-sm text-cream/85">⏳ <strong>Se mide, no se opina.</strong> Faltan {diasMedicion - diasCampana + 1} días para decidir. Hoy tu único trabajo es cargar y atender.</p>
+          <p className="text-sm text-cream/85"><strong>Se mide, no se opina.</strong> Faltan {diasMedicion - diasCampana + 1} días para decidir. Hoy tu único trabajo es cargar y atender.</p>
         </div>
       ) : (
         <div className="rounded-2xl border border-cream/15 p-4">
-          <p className="text-sm text-cream/85">✅ Pasaste los {diasMedicion} días: las reglas de abajo deciden. {diasCampana >= 21 ? 'Y ya toca refrescar el creativo del ganador — mismo esqueleto, otro hook.' : ''}</p>
+          <p className="text-sm text-cream/85">Pasaste los {diasMedicion} días: las reglas de abajo deciden. {diasCampana >= 21 ? 'Y ya toca refrescar el creativo del ganador — mismo esqueleto, otro hook.' : ''}</p>
         </div>
       )}
 

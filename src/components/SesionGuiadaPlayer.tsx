@@ -9,9 +9,11 @@
  */
 import NumeroPanel from './numero/NumeroPanel';
 import { guardarEnLaBase, leerLoQueEscribio } from '../lib/respuestasSesion';
+import { mensajeDeFalla } from '../lib/conexion';
 import { cinturonDesdeProgreso } from '../lib/cinturones';
 import { loQueViene } from '../lib/teasers';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BellOff, Check, Coffee, Dna, NotebookPen } from 'lucide-react';
 import { sesionGuiadaDe } from '../lib/sesionesGuiadas';
 import { generateText } from '../lib/aiProvider';
 import BotonAudio from './sesion/BotonAudio';
@@ -62,10 +64,15 @@ const CONSIGNA_POR_TIPO: Record<string, string> = {
   opciones: 'Elige lo que más se parezca a lo tuyo.',
 };
 
+/*
+ * Iconos del sistema, no emojis. El emoji se dibuja con la tipografía del
+ * teléfono, así que cambia de forma y de color en cada aparato y nunca es de
+ * la casa.
+ */
 const PREPARACION = [
-  { e: '☕', t: 'Tu mate o tu café, servido', s: 'Esta sesión se toma con algo caliente al lado.' },
-  { e: '📓', t: 'Tu cuaderno físico, a mano', s: 'Lo que se escribe a mano, el cuerpo lo recuerda distinto.' },
-  { e: '🤫', t: 'Nadie te interrumpe', s: 'Avisa en tu casa: los próximos minutos son tuyos.' },
+  { Icono: Coffee, t: 'Tu mate o tu café, servido', s: 'Esta sesión se toma con algo caliente al lado.' },
+  { Icono: NotebookPen, t: 'Tu cuaderno físico, a mano', s: 'Lo que se escribe a mano, el cuerpo lo recuerda distinto.' },
+  { Icono: BellOff, t: 'Nadie te interrumpe', s: 'Avisa en tu casa: los próximos minutos son tuyos.' },
 ];
 
 export default function SesionGuiadaPlayer({
@@ -168,11 +175,10 @@ export default function SesionGuiadaPlayer({
     } catch (err) {
       // Antes esto era `catch { /* noop */ }`: el botón no hacía nada y no
       // decía por qué. Un botón mudo es peor que un botón que falla.
-      setIaFallo(
-        err instanceof Error && err.message
-          ? err.message
-          : 'No pudimos generarlo ahora. Toca de nuevo en unos segundos.',
-      );
+      // El mensaje del error venía tal cual del servidor: le decía al cliente
+      // «fetch failed» o el nombre de una función de la base. Ahora dice qué
+      // pasó y qué hacer, con las mismas cuatro causas que usa toda la app.
+      setIaFallo(mensajeDeFalla(err, 'generarlo'));
     }
     setIaCargando(false);
   };
@@ -201,14 +207,14 @@ export default function SesionGuiadaPlayer({
   );
 
   return (
-    <div ref={topRef} className="fixed inset-0 z-[70] overflow-y-auto bg-[#0d0a06]">
+    <div ref={topRef} className="fixed inset-0 z-[70] overflow-y-auto bg-[var(--bg-card,#17150F)]">
       <style>{`@keyframes tcdArder{0%{opacity:1;transform:scale(1)}60%{opacity:.85;transform:scale(1.15) rotate(-2deg)}100%{opacity:0;transform:scale(.6) translateY(-40px)}}`}</style>
 
       {/* barra superior: se nota que estás ADENTRO */}
-      <div className="sticky top-0 z-10 bg-[#0d0a06]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
         <button onClick={onClose} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Micro-sesión</p>
-        <p className="text-xs text-cream/60 tabular-nums">⏱ {reloj}</p>
+        <p className="text-xs text-cream/60 tabular-nums">{reloj}</p>
       </div>
 
       <div className="max-w-xl mx-auto px-5 py-8 pb-16">
@@ -224,7 +230,11 @@ export default function SesionGuiadaPlayer({
               {PREPARACION.map((p, i) => (
                 <button key={p.t} onClick={() => setSt((s) => ({ ...s, prep: Math.max(s.prep, i + 1) }))}
                   className={`w-full text-left rounded-2xl border p-4 flex items-start gap-3 transition-colors ${st.prep > i ? 'border-gold/40 bg-gold/[0.07]' : 'border-cream/10 bg-surface/30'}`}>
-                  <span className="text-xl">{st.prep > i ? '✓' : p.e}</span>
+                  <span className="inline-flex h-6 w-6 items-center justify-center">
+                    {st.prep > i
+                      ? <Check className="h-5 w-5" style={{ color: 'var(--tilde, #3D6A4A)' }} />
+                      : <p.Icono className="h-5 w-5" style={{ color: 'var(--oro-d, #8E6824)' }} />}
+                  </span>
                   <span className="flex-1">
                     <span className="block text-sm font-semibold text-cream">{p.t}</span>
                     <span className="block text-xs text-cream/50 mt-0.5">{p.s}</span>
@@ -246,9 +256,23 @@ export default function SesionGuiadaPlayer({
 
         {/* ══ EL FUEGO (transición del ritual) ══ */}
         {fuego && (
-          <div className="fixed inset-0 z-20 bg-[#0d0a06] flex flex-col items-center justify-center">
-            <p className="text-7xl" style={{ animation: 'tcdArder 2s ease-in forwards' }}>🔥</p>
-            <p className="text-cream/70 text-sm mt-6" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Que arda.</p>
+          /*
+            La transición del ritual. Era una pantalla negra entera con un
+            emoji de 72 píxeles: dos reglas rotas de una vez. Ahora es el papel
+            de la app, una línea de oro que se abre, y la frase en la
+            tipografía de la casa.
+          */
+          <div
+            className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-6"
+            style={{ background: 'var(--bg-root, #EAE4D9)' }}
+          >
+            <div
+              style={{
+                height: 1, background: 'var(--oro, #B0822E)',
+                animation: 'tcdArder 2s ease-in forwards',
+              }}
+            />
+            <p className="text-[26px] text-cream" style={{ fontFamily: 'var(--font-display)' }}>Que arda.</p>
           </div>
         )}
 
@@ -259,7 +283,7 @@ export default function SesionGuiadaPlayer({
             <div className="flex gap-1">{pasos.map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${i <= st.idx ? 'bg-gold' : 'bg-cream/12'}`} />)}</div>
 
             {(paso.titulo || paso.texto || paso.tituloArtefacto) && (
-              <div className="rounded-2xl border border-gold/20 bg-gradient-to-b from-gold/[0.05] to-transparent p-5">
+              <div className="rounded-2xl border border-gold/20 bg-gold/[0.05] p-5">
                 {(paso.titulo || paso.tituloArtefacto) && <p className="text-lg font-semibold text-cream mb-2" style={{ fontFamily: 'var(--font-display)' }}>{paso.titulo ?? paso.tituloArtefacto}</p>}
                 {paso.texto && <p className="text-[15px] text-cream/80 leading-relaxed whitespace-pre-wrap">{paso.texto}</p>}
                 {paso.nota && <p className="text-xs text-gold/80 mt-3 border-l-2 border-gold/30 pl-3">{paso.nota}</p>}
@@ -278,7 +302,7 @@ export default function SesionGuiadaPlayer({
                       if (paso.multiple) { sel ? set.delete(op) : set.add(op); setResp([...set].join(' · ')); }
                       else setResp(op);
                     }}
-                      className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-colors ${sel ? 'border-gold bg-gold/10 text-cream' : 'border-cream/12 bg-surface/30 text-cream/75'}`}>
+                      className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-colors ${sel ? 'elegido' : 'border-cream/12 bg-surface/30 text-cream/75'}`}>
                       {sel ? '✓ ' : ''}{op}
                     </button>
                   );
@@ -320,7 +344,7 @@ export default function SesionGuiadaPlayer({
                 )}
                 <button onClick={generarIA} disabled={iaCargando}
                   className="w-full py-3 rounded-xl border border-gold/30 text-gold text-sm font-bold hover:bg-gold/[0.06] disabled:opacity-50">
-                  {iaCargando ? 'Creando contigo…' : respActual ? '🔄 Proponme otra versión' : '✨ Crear con mi Mentor'}
+                  {iaCargando ? 'Creando contigo…' : respActual ? 'Proponme otra versión' : '✨ Crear con mi Mentor'}
                 </button>
               </div>
             )}
@@ -328,7 +352,7 @@ export default function SesionGuiadaPlayer({
             <Btn disabled={!puedeSeguir} onClick={avanzar}>
               {!puedeSeguir
                 ? (paso.tipo === 'opciones' ? 'Elige una opción para seguir ↑' : 'Escribe tu respuesta para seguir ↑')
-                : paso.tipo === 'ritual' ? '🔥 Lo quemé — que arda'
+                : paso.tipo === 'ritual' ? 'Lo quemé — que arda'
                 : st.idx === total - 1 ? 'Terminar y revisar →'
                 : 'Siguiente →'}
             </Btn>
@@ -342,7 +366,7 @@ export default function SesionGuiadaPlayer({
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-2">Estás saliendo de tu sesión</p>
               <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Esto es lo que creaste hoy</p>
             </div>
-            <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-gold/[0.06] to-transparent p-5 space-y-4">
+            <div className="rounded-2xl border border-gold/25 bg-gold/[0.06] p-5 space-y-4">
               {pasos.map((p, i) => {
                 const r = st.resp[pasoKey(p, i)];
                 if (!r?.trim()) return null;
@@ -354,14 +378,14 @@ export default function SesionGuiadaPlayer({
                 );
               })}
             </div>
-            <Btn onClick={sellar}>🧬 GRABAR EN MI ADN</Btn>
+            <Btn onClick={sellar}>GRABAR EN MI ADN</Btn>
             <Btn sec onClick={() => setSt((p) => ({ ...p, idx: Math.max(0, total - 1) }))}>← Volver a ajustar</Btn>
           </div>
         )}
 
         {selladoTexto && (
           <div className="space-y-5 text-center">
-            <p className="text-5xl">🧬</p>
+            <Dna className="mx-auto h-10 w-10" style={{ color: 'var(--oro, #B0822E)' }} />
             <p className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Sellado en tu ADN</p>
             <p className="text-sm text-cream/60">Tu sesión de hoy está hecha. Queda marcada como completada en tu Camino.</p>
             <button onClick={() => onFinish(selladoTexto)} className="w-full btn-primary py-3.5 rounded-xl text-sm font-bold">Terminar y volver al Camino →</button>

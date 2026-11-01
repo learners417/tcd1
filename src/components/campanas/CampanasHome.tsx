@@ -15,7 +15,6 @@ type PuertaId = 'seguidores' | 'comunidad' | 'ventas';
 
 const PUERTAS: Array<{
   id: PuertaId;
-  emoji: string;
   icon: React.ComponentType<{ className?: string }>;
   titulo: string;
   promesa: string;
@@ -23,7 +22,6 @@ const PUERTAS: Array<{
 }> = [
   {
     id: 'seguidores',
-    emoji: '🌱',
     icon: UserPlus,
     titulo: 'Seguidores',
     promesa: 'Que te conozcan las personas correctas',
@@ -31,15 +29,13 @@ const PUERTAS: Array<{
   },
   {
     id: 'comunidad',
-    emoji: '🎁',
     icon: Gift,
     titulo: 'Comunidad',
-    promesa: 'Entrega tu recurso gratuito por mensaje y arma tu grupo',
+    promesa: 'Entrega tu recurso por mensaje y arma tu grupo',
     detalle: 'Mensajes a Instagram · desde 5 USD/día',
   },
   {
     id: 'ventas',
-    emoji: '💰',
     icon: Wallet,
     titulo: 'Primeras Ventas',
     promesa: 'Pacientes que escriben listos para tu protocolo',
@@ -63,7 +59,7 @@ const PREGUNTAS: Array<{
   },
   {
     id: 'recurso',
-    q: '¿Tienes un recurso gratuito para regalar? (guía, masterclass, plantilla)',
+    q: '¿Tienes un recurso para regalar? (guía, masterclass, plantilla)',
     opts: [
       { v: 'si', l: 'Sí' },
       { v: 'no', l: 'No' },
@@ -180,13 +176,12 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   disabled={bloqueada}
                   className={`text-left rounded-2xl border p-5 transition-all group ${
                     bloqueada
-                      ? 'bg-[#0d0d0c] border-cream/8 cursor-not-allowed'
-                      : 'bg-panel border-[rgba(232,150,46,0.15)] hover:border-gold/50 hover:bg-[#161512]'
+                      ? 'bg-[var(--bg-card,#17150F)] border-cream/8 cursor-not-allowed'
+                      : 'bg-panel border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/50 hover:bg-[#161512]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`text-2xl ${bloqueada ? 'opacity-30 grayscale' : ''}`}>{p.emoji}</span>
-                    <Icon className={`w-4 h-4 ${bloqueada ? 'text-cream/25' : 'text-gold/60 group-hover:text-gold'} transition-colors`} />
+                    <Icon className={`w-7 h-7 ${bloqueada ? 'text-cream/25' : 'text-gold/70 group-hover:text-gold'} transition-colors`} />
                   </div>
                   <h3 className={`text-base font-semibold ${bloqueada ? 'text-cream/35' : 'text-cream'}`}>
                     {p.titulo}
@@ -211,7 +206,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
           <div className="flex justify-center">
             <button
               onClick={() => setModo('diagnostico')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.25)] text-sm text-gold hover:bg-gold/10 transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] text-sm text-gold hover:bg-gold/10 transition-all"
             >
               <Sparkles className="w-4 h-4" />
               ¿No sabes cuál te toca? Hacer mi diagnóstico (2 min)
@@ -230,7 +225,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
           </button>
 
           {PREGUNTAS.map((p, i) => (
-            <div key={p.id} className="bg-panel border border-[rgba(232,150,46,0.1)] rounded-2xl p-5">
+            <div key={p.id} className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl p-5">
               <p className="text-sm text-cream/80 font-medium mb-3">
                 <span className="text-gold/60 mr-2">{i + 1}.</span>{p.q}
               </p>
@@ -260,7 +255,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   Tu campaña es
                 </p>
                 <h3 className="text-2xl font-medium text-cream">
-                  {p.emoji} {p.titulo}
+                  {p.titulo}
                 </h3>
                 <p className="text-sm text-cream/75 mt-2 leading-relaxed">{razonRecomendada}</p>
                 {resp.experiencia === 'fallo' && (
@@ -277,7 +272,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   </button>
                   <button
                     onClick={() => { setModo('puertas'); }}
-                    className="px-5 py-2.5 rounded-xl border border-[rgba(232,150,46,0.15)] text-sm text-cream/75 hover:text-cream transition-colors"
+                    className="px-5 py-2.5 rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] text-sm text-cream/75 hover:text-cream transition-colors"
                   >
                     Prefiero elegir yo
                   </button>
@@ -289,7 +284,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
       )}
 
       {/* Mis campañas · Ganadores */}
-      <div className="flex flex-wrap gap-3 pt-2 border-t border-[rgba(232,150,46,0.08)]">
+      <div className="flex flex-wrap gap-3 pt-2 border-t border-[var(--line, rgba(142,104,36,0.18))]">
         <button
           onClick={() => onNavigate('historial')}
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/10 text-sm text-cream/65 hover:text-cream hover:border-cream/25 transition-all"

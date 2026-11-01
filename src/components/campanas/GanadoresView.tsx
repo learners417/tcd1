@@ -42,7 +42,7 @@ export default function GanadoresView({ creativos, onSelectCreativo }: Props) {
               onClick={() => onSelectCreativo(c)}
               className="card-panel p-4 text-left hover:border-gold/40 transition-all relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-gold to-goldhi" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gold/[0.05]" />
 
               {/* Image placeholder */}
               {c.assets?.[0]?.public_url ? (

@@ -135,7 +135,7 @@ export default function TaskModal({ tarea, teamMembers, clientes, currentAdminId
             onChange={setDescripcion}
             titulo={titulo}
             onTituloChange={setTitulo}
-            placeholder='Contexto, links, checklist… probá escribir "/" para insertar bloques.'
+            placeholder='Contexto, links, checklist… escribe "/" para insertar bloques.'
           />
 
           <div className="grid grid-cols-2 gap-3">

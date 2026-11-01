@@ -102,7 +102,14 @@ function Anillo({ sistemas, actual }: { sistemas: SistemaAvance[]; actual: numbe
         <span className="text-[52px] leading-none text-goldhi" style={{ fontFamily: 'var(--font-display)', fontVariantNumeric: 'lining-nums' }}>
           {hechas}
         </span>
-        <span className="mt-1 text-[15px] text-cream/65">de {total} pasos</span>
+        {/*
+          Decía «de 91 pasos», y «paso» ya significa otra cosa en esta app:
+          dentro de cada jornada hay cinco o seis pasos numerados, con su
+          versalita de oro. El cliente leía «91 pasos» arriba y, al abrir uno,
+          otros cinco pasos adentro. La unidad del Camino es la JORNADA, que
+          es como la nombra el dato, la Hoja de Ruta y el cierre de cuentas.
+        */}
+        <span className="mt-1 text-[15px] text-cream/65">de {total} jornadas</span>
       </div>
     </div>
   );
@@ -165,8 +172,12 @@ export default function EncabezadoCamino({
         </section>
       )}
 
-      {/* ── La meta, en una fila tranquila ── */}
-      <div className="flex items-center justify-between gap-3 px-1">
+      {/* ── La meta, en una fila tranquila ──
+          Los dos textos van sin cortar, y a 320 px suman 303 en 272 de ancho:
+          el botón se iba 19 px de la pantalla y el Camino se arrastraba de
+          costado. Con `flex-wrap` el botón baja a su renglón cuando no entra, y
+          a 360 y 390 la fila sigue siendo una sola. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1">
         <p className="text-[17px] text-cream whitespace-nowrap">
           <span className="text-[24px] text-goldhi" style={{ fontFamily: 'var(--font-display)' }}>{ventas}</span> de 10 {VOC('{{consultantes}}')}
         </p>

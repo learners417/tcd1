@@ -114,7 +114,7 @@ function Marcas({ lista }: { lista: MarcaDeRevision[] }) {
   return (
     <div className="flex flex-col gap-2">
       {lista.map((m, i) => (
-        <div key={i} className="flex gap-2.5 items-start text-[16px] text-cream/85">
+        <div key={i} className="flex gap-2.5 items-start text-sm text-cream/85">
           <Chip c={m.tipo}>{ROTULO[m.tipo]}</Chip>
           <span className="pt-1">{m.texto}</span>
         </div>
@@ -169,11 +169,11 @@ function Feed({ marca, lineas, titular }: { marca: string; lineas: string[]; tit
           {nombre.charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0">
-          <b className="block text-[16px] text-cream leading-tight truncate">{nombre}</b>
+          <b className="block text-sm text-cream leading-tight truncate">{nombre}</b>
           <small className="text-[15px] text-cream/55">Publicidad</small>
         </div>
       </div>
-      <p className="px-3 pb-3 text-[16px] leading-relaxed whitespace-pre-wrap break-words">
+      <p className="px-3 pb-3 text-sm leading-relaxed whitespace-pre-wrap break-words">
         <span className="text-cream underline decoration-gold decoration-2 underline-offset-4">{visible}</span>
         {resto && <><span className="text-cream/55"> … ver más</span><span className="text-cream/40">{'\n' + resto}</span></>}
       </p>
@@ -181,7 +181,7 @@ function Feed({ marca, lineas, titular }: { marca: string; lineas: string[]; tit
         Video 4:5 · lo importante en los primeros 3 segundos, con subtítulos
       </div>
       <div className="flex gap-2.5 justify-between items-center p-3">
-        <b className="text-[16px] text-cream break-words min-w-0">{titular || 'Titular'}</b>
+        <b className="text-sm text-cream break-words min-w-0">{titular || 'Titular'}</b>
         <span className="border border-cream/20 px-3 py-1.5 rounded-lg text-[15px] font-bold text-cream/85 whitespace-nowrap">Ver más</span>
       </div>
     </div>
@@ -306,12 +306,12 @@ export default function AnunciosQueAgendan(
       </nav>
 
       {trabajando && (
-        <div className="rounded-xl bg-gold/10 border border-gold/30 px-4 py-3 mb-5 flex items-center gap-3 text-[16px] text-cream/90">
+        <div className="rounded-xl bg-gold/10 border border-gold/30 px-4 py-3 mb-5 flex items-center gap-3 text-sm text-cream/90">
           <Loader2 className="w-5 h-5 animate-spin text-gold" /> {trabajando}…
         </div>
       )}
       {aviso && (
-        <div className="rounded-xl bg-danger/10 border border-danger/30 px-4 py-3 mb-5 text-[16px] text-cream/90" role="alert">
+        <div className="rounded-xl bg-danger/10 border border-danger/30 px-4 py-3 mb-5 text-sm text-cream/90" role="alert">
           {aviso}
         </div>
       )}
@@ -381,7 +381,7 @@ export default function AnunciosQueAgendan(
               <ChevronLeft className="w-5 h-5" /><span className="hidden sm:inline">Anterior</span>
             </button>
             <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
-              <span className="text-[16px] font-bold text-cream/60 tabular-nums">
+              <span className="text-sm font-bold text-cream/60 tabular-nums">
                 {(pagina[pest] ?? 0) + 1} / {cuantas[pest]}
               </span>
               <span className="w-full max-w-[260px] h-[3px] bg-cream/15 rounded-full overflow-hidden">
@@ -398,7 +398,7 @@ export default function AnunciosQueAgendan(
       )}
 
       {nota && (
-        <div className="fixed left-1/2 -translate-x-1/2 bottom-[7rem] z-40 bg-cream text-ink px-5 py-2.5 rounded-full text-[16px] font-bold">
+        <div className="fixed left-1/2 -translate-x-1/2 bottom-[7rem] z-40 bg-cream text-ink px-5 py-2.5 rounded-full text-sm font-bold">
           {nota}
         </div>
       )}
@@ -437,7 +437,7 @@ function Inicio({ ir }: { ir: (p: Pestania) => void }) {
         {PASOS.map(([t, d], i) => (
           <div key={t} className={`grid grid-cols-[52px_1fr] gap-x-4 gap-y-1 py-4 ${i ? 'border-t border-cream/12' : ''}`}>
             <span className="w-11 h-11 rounded-full border border-gold grid place-items-center text-[19px] font-bold text-gold row-span-2">{i + 1}</span>
-            <h3 className="text-[21px] font-bold text-cream">{t}</h3>
+            <h3 className="text-xl font-bold text-cream">{t}</h3>
             <p className="text-[17px] text-cream/65">{d}</p>
           </div>
         ))}
@@ -451,8 +451,8 @@ function Inicio({ ir }: { ir: (p: Pestania) => void }) {
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         {MOMENTOS.map(([t, d, on]) => (
-          <div key={t} className={`card-panel p-5 flex flex-col gap-2 ${on ? 'border-gold/50' : ''}`}>
-            <b className="text-[21px] font-bold text-cream">{t}</b>
+          <div key={t} className={`card-panel p-5 flex flex-col gap-2 ${on ? 'elegido' : ''}`}>
+            <b className="text-xl font-bold text-cream">{t}</b>
             <p className="text-[17px] text-cream/65">{d}</p>
             {on && <span className="self-start"><Chip c="si">Se pauta</Chip></span>}
           </div>
@@ -464,8 +464,8 @@ function Inicio({ ir }: { ir: (p: Pestania) => void }) {
         {PUERTAS.map(([id, t, d]) => (
           <button key={id} type="button" onClick={() => ir(id)}
             className="card-panel p-5 text-left flex flex-col gap-2 hover:border-gold/40 transition-colors min-h-[44px]">
-            <b className="text-[20px] font-bold text-cream">{t} →</b>
-            <span className="text-[16px] text-cream/65">{d}</span>
+            <b className="text-xl font-bold text-cream">{t} →</b>
+            <span className="text-sm text-cream/65">{d}</span>
           </button>
         ))}
       </div>
@@ -594,8 +594,8 @@ function Plantillas(
             <button key={p.id} type="button" onClick={() => abrir(j + 1)}
               className="card-panel p-5 text-left flex flex-col gap-2 hover:border-gold/40 transition-colors">
               <span className="text-[15px] font-bold text-gold">{p.origen} · {p.estado}</span>
-              <b className="text-[20px] font-bold text-cream leading-snug">{p.nombre}</b>
-              <span className="text-[16px] text-cream/65">{p.cuando}</span>
+              <b className="text-xl font-bold text-cream leading-snug">{p.nombre}</b>
+              <span className="text-sm text-cream/65">{p.cuando}</span>
             </button>
           ))}
         </div>
@@ -616,7 +616,7 @@ function Plantillas(
         {p.pasos.map(([t, eg], j) => (
           <div key={j} className={`grid grid-cols-[52px_1fr] gap-x-4 gap-y-1 py-4 ${j ? 'border-t border-cream/12' : ''}`}>
             <span className="w-11 h-11 rounded-full border border-gold grid place-items-center text-[19px] font-bold text-gold row-span-2">{j + 1}</span>
-            <h3 className="text-[20px] font-bold text-cream">{t}</h3>
+            <h3 className="text-xl font-bold text-cream">{t}</h3>
             <p className="text-[17px] text-cream/85 border-l-2 border-gold pl-3.5">{eg}</p>
           </div>
         ))}
@@ -656,7 +656,7 @@ function Crear(props: {
         {label}
         {clave && <i className="not-italic text-[15px] font-bold uppercase tracking-[0.08em] text-gold">Clave</i>}
       </span>
-      {ayuda && <em className="not-italic text-[16px] text-cream/55">{ayuda}</em>}
+      {ayuda && <em className="not-italic text-sm text-cream/55">{ayuda}</em>}
       {area ? (
         <textarea rows={3} value={String(f[campo] ?? '')} placeholder={ph}
           onChange={(e) => tocar({ [campo]: e.target.value } as Partial<Ficha>)}
@@ -687,7 +687,7 @@ function Crear(props: {
           <button type="button" onClick={() => irPaso(j)} aria-current={j === i ? 'step' : undefined}
             className={`flex items-center gap-2.5 px-1 py-1.5 text-[17px] font-bold whitespace-nowrap min-h-[44px] ${j === i ? 'text-cream' : 'text-cream/55'}`}>
             <i className={`w-9 h-9 rounded-full border grid place-items-center not-italic ${
-              j === i ? 'bg-gold border-gold text-ink' : hechos[j] ? 'bg-success/20 border-transparent text-success' : 'border-gold text-gold'}`}>
+              j === i ? 'elegido-etiqueta' : hechos[j] ? 'bg-success/20 border-transparent text-success' : 'border-gold text-gold'}`}>
               {hechos[j] && j !== i ? <Check className="w-4 h-4" strokeWidth={3} /> : j + 1}
             </i>
             {t}
@@ -719,7 +719,7 @@ function Crear(props: {
         </div>
 
         {delADN.length > 0 && (
-          <div className="rounded-2xl border border-dashed border-gold/50 px-4 py-3.5 text-[16px] text-cream/85">
+          <div className="rounded-2xl border border-dashed border-gold/50 px-4 py-3.5 text-sm text-cream/85">
             Ya traje de tu ADN: <b className="text-cream">{delADN.join(', ')}</b>. Corrige lo que quieras decir distinto en el anuncio.
           </div>
         )}
@@ -737,7 +737,7 @@ function Crear(props: {
         </div>
 
         <div className="flex flex-col gap-4 pt-5 border-t border-cream/12">
-          <h3 className="text-[21px] font-bold text-cream flex gap-3 items-baseline flex-wrap">
+          <h3 className="text-xl font-bold text-cream flex gap-3 items-baseline flex-wrap">
             La oferta <small className="text-[17px] font-normal text-cream/55">define el llamado y si va el precio</small>
           </h3>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -753,7 +753,7 @@ function Crear(props: {
         </div>
 
         <div className="flex flex-col gap-4 pt-5 border-t border-cream/12">
-          <h3 className="text-[21px] font-bold text-cream flex gap-3 items-baseline flex-wrap">
+          <h3 className="text-xl font-bold text-cream flex gap-3 items-baseline flex-wrap">
             Su cliente <small className="text-[17px] font-normal text-cream/55">por lo que hace, nunca por la profesión</small>
           </h3>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -769,7 +769,7 @@ function Crear(props: {
         </div>
 
         <div className="flex flex-col gap-4 pt-5 border-t border-cream/12">
-          <h3 className="text-[21px] font-bold text-cream flex gap-3 items-baseline flex-wrap">
+          <h3 className="text-xl font-bold text-cream flex gap-3 items-baseline flex-wrap">
             Lo que solo tiene esta marca <small className="text-[17px] font-normal text-cream/55">de acá sale el 20</small>
           </h3>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -825,7 +825,7 @@ function Crear(props: {
               const on = f.sel20.includes(v.id);
               return (
                 <div key={v.id}
-                  className={`card-panel p-5 flex flex-col gap-2 ${on ? 'border-gold/60' : ''}`}>
+                  className={`card-panel p-5 flex flex-col gap-2 ${on ? 'elegido' : ''}`}>
                   <button type="button" onClick={() => alternar(v.id)} aria-pressed={on}
                     className="text-left text-[15px] font-bold text-gold min-h-[44px] flex items-center">
                     {on ? 'Elegida' : 'Tocar para elegir'}
@@ -839,11 +839,11 @@ function Crear(props: {
                       onChange={(e) => tocar({ veintes: f.veintes.map((x) => (x.id === v.id ? { ...x, texto: e.target.value } : x)) })}
                       className="rounded-xl bg-surface border border-cream/15 px-3.5 py-3 text-[17px] text-cream focus:border-gold outline-none" />
                   )}
-                  {v.de && <span className="text-[16px] text-cream/65">Sale de: {v.de}</span>}
-                  {v.porque && <span className="text-[16px] text-cream/65">Da vuelta: {v.porque}</span>}
+                  {v.de && <span className="text-sm text-cream/65">Sale de: {v.de}</span>}
+                  {v.porque && <span className="text-sm text-cream/65">Da vuelta: {v.porque}</span>}
                   <button type="button"
                     onClick={() => tocar({ veintes: f.veintes.filter((x) => x.id !== v.id), sel20: f.sel20.filter((x) => x !== v.id) })}
-                    className="self-start text-[16px] text-cream/50 underline underline-offset-4 min-h-[44px]">Quitar</button>
+                    className="self-start text-sm text-cream/50 underline underline-offset-4 min-h-[44px]">Quitar</button>
                 </div>
               );
             })}
@@ -880,10 +880,10 @@ function Crear(props: {
             const on = f.plantillas.includes(p.id);
             return (
               <button key={p.id} type="button" onClick={() => alternar(p.id)} aria-pressed={on}
-                className={`card-panel p-5 text-left flex flex-col gap-2 transition-colors ${on ? 'border-gold/60' : 'hover:border-gold/40'}`}>
+                className={`card-panel p-5 text-left flex flex-col gap-2 transition-colors ${on ? 'elegido' : 'hover:border-gold/40'}`}>
                 <span className="text-[15px] font-bold text-gold">{on ? 'Elegida · ' : ''}{p.origen} · {p.estado}</span>
-                <b className="text-[20px] font-bold text-cream leading-snug">{p.nombre}</b>
-                <span className="text-[16px] text-cream/65">{p.cuando}</span>
+                <b className="text-xl font-bold text-cream leading-snug">{p.nombre}</b>
+                <span className="text-sm text-cream/65">{p.cuando}</span>
               </button>
             );
           })}
@@ -961,7 +961,7 @@ function TarjetaAnuncio(
         <div className="flex flex-col gap-4 min-w-0">
           <label className="flex flex-col gap-1.5">
             <span className="text-[18px] font-bold text-cream">Texto para Meta</span>
-            <em className="not-italic text-[16px] text-cream/55">
+            <em className="not-italic text-sm text-cream/55">
               Una idea por renglón. Lo subrayado es lo que se ve sin tocar «ver más».
             </em>
             <textarea rows={6} value={a.lineas.join('\n')}
@@ -1000,7 +1000,7 @@ function TarjetaAnuncio(
           <div className="flex flex-col mt-1.5">
             {a.pasos.map(([p, t], n) => (
               <div key={n} className={`grid sm:grid-cols-[160px_minmax(0,1fr)] gap-x-4 gap-y-1 py-3 ${n ? 'border-t border-cream/12' : ''}`}>
-                <b className="text-[16px] font-bold text-gold">{p}</b>
+                <b className="text-sm font-bold text-gold">{p}</b>
                 <span className="text-[17px] text-cream/85">{t}</span>
               </div>
             ))}
@@ -1014,7 +1014,7 @@ function TarjetaAnuncio(
 
       <div>
         <button type="button" onClick={() => tocar({ anuncios: f.anuncios.filter((x) => x.id !== a.id) })}
-          className="text-[16px] text-cream/50 underline underline-offset-4 min-h-[44px] flex items-center gap-2">
+          className="text-sm text-cream/50 underline underline-offset-4 min-h-[44px] flex items-center gap-2">
           <Trash2 className="w-4 h-4" /> Quitar este anuncio {j + 1 > 0 ? '' : ''}
         </button>
       </div>
@@ -1056,7 +1056,7 @@ function Revisar(
               <ScanLine className="w-4 h-4" /> Revisar a fondo
             </button>
           </div>
-          <p className="text-[16px] text-cream/55">
+          <p className="text-sm text-cream/55">
             Las medidas y las palabras prohibidas se marcan al instante. La lectura contra las veinte reglas tarda unos segundos.
           </p>
         </div>

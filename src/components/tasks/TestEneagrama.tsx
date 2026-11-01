@@ -121,7 +121,7 @@ export default function TestEneagrama({ onResultado }: Props) {
             aria-pressed={respuestas[i] === r.valor}
             onClick={() => responder(r.valor)}
             className={`w-full min-h-[56px] rounded-2xl border px-4 text-left text-[17px] text-cream ${
-              respuestas[i] === r.valor ? 'border-gold bg-[var(--card,#FFFDF7)]' : 'border-[var(--line2,#DFD3BC)]'
+              respuestas[i] === r.valor ? 'elegido' : 'border-[var(--line2,#DFD3BC)]'
             }`}
           >
             {r.texto}
@@ -142,7 +142,7 @@ export default function TestEneagrama({ onResultado }: Props) {
             type="button"
             onClick={() => resultado && guardar(resultado.tipo)}
             className="min-h-[48px] px-5 rounded-[20px] text-[17px] font-semibold"
-            style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
+            style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
           >
             Ver mi tipo
           </button>

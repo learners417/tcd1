@@ -43,7 +43,7 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
   return (
     <div className={`card-panel p-5 ${pideNumeros ? 'border border-gold/40' : ''}`}>
       <div className="flex items-baseline justify-between mb-1">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">📊 Tu tablero</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">Tu tablero</p>
         <p className="text-sm font-bold text-gold">{hechas} de {META_PACIENTES} pacientes</p>
       </div>
       <p className="text-xs text-cream/50 mb-4">
@@ -83,7 +83,7 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
             <div key={c.l} className="flex items-center gap-3">
               <label className="text-xs text-cream/70 flex-1">{c.l}</label>
               <input type="number" min="0" inputMode="numeric" value={c.v} onChange={(e) => c.set(e.target.value)}
-                className="w-20 bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3 py-2 text-sm text-cream text-center focus:outline-none focus:border-gold/50" />
+                className="w-20 bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2 text-sm text-cream text-center focus:outline-none focus:border-gold/50" />
             </div>
           ))}
           <button onClick={guardar} className="w-full btn-primary text-sm font-bold py-2.5 rounded-xl mt-1">Guardar mi semana</button>

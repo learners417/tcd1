@@ -41,8 +41,8 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
 
   return (
     <div className="rounded-xl border border-gold/20 bg-gold/[0.05] p-4 text-left">
-      <div className="flex items-center gap-2 mb-2">
-        <Mail className="w-4 h-4 text-gold" />
+      <div className="flex items-start gap-2.5 mb-2">
+        <Mail className="w-4 h-4 mt-0.5 text-gold shrink-0" />
         <p className="text-sm font-bold uppercase tracking-widest text-gold">
           Tu Mensaje al Futuro
         </p>
@@ -61,8 +61,10 @@ export default function MensajeFuturoPlayer({ userId }: { userId?: string }) {
           </button>
         </>
       ) : (
-        <div className="flex items-center gap-2 text-sm text-cream/45">
-          <Lock className="w-3.5 h-3.5" /> Tu mensaje del Día 1 se reproduce acá cuando lo grabes en el
+        /* Tres renglones con el candado centrado: quedaba flotando en el
+           medio. Y al 45%, en la pantalla del día 90. */
+        <div className="flex items-start gap-2.5 text-sm text-cream/75">
+          <Lock className="w-4 h-4 mt-1 shrink-0" /> Tu mensaje del Día 1 se reproduce acá cuando lo grabes en el
           Camino.
         </div>
       )}

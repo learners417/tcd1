@@ -8,6 +8,7 @@ import CreativoPreviewAuto from './CreativoPreviewAuto';
 import { saveCreativo, updateCreativo, uploadCreativeImage, upsertCreativoAsset } from '../../lib/campanasStorage';
 import type { Campana, CopyGenerado, AnguloCreativo, TipoCreativo, Creativo } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 type StudioTab = 'copy' | 'imagen' | 'edicion' | 'preview';
 
@@ -22,8 +23,8 @@ interface Props {
 const TABS: { id: StudioTab; label: string; icon: React.ElementType }[] = [
   { id: 'copy', label: 'Copy', icon: FileText },
   { id: 'imagen', label: 'Imagen', icon: ImageIcon },
-  { id: 'edicion', label: 'Edicion', icon: Wand2 },
-  { id: 'preview', label: 'Preview', icon: Eye },
+  { id: 'edicion', label: 'Edición', icon: Wand2 },
+  { id: 'preview', label: 'Vista previa', icon: Eye },
 ];
 
 export default function CreativoStudio({ campana, userId, perfil, onBack, onSaved }: Props) {
@@ -109,8 +110,7 @@ export default function CreativoStudio({ campana, userId, perfil, onBack, onSave
         setSaved(true);
         if (isFirstSave) toast.success('Creativo guardado en historial');
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al guardar: ${msg}`);
+        toast.error(mensajeDeFalla(err, 'guardar la pieza'));
       } finally {
         setSaving(false);
         saveInFlightRef.current = false;
@@ -164,7 +164,7 @@ export default function CreativoStudio({ campana, userId, perfil, onBack, onSave
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-panel p-1 rounded-xl border border-[rgba(232,150,46,0.1)]">
+      <div className="flex gap-1 bg-panel p-1 rounded-xl border border-[var(--line, rgba(142,104,36,0.18))]">
         {TABS.map((t) => {
           const Icon = t.icon;
           const disabled = t.id === 'preview' && !canPreview;
@@ -188,7 +188,7 @@ export default function CreativoStudio({ campana, userId, perfil, onBack, onSave
       </div>
 
       {/* Content */}
-      <div className="bg-surface border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
+      <div className="bg-surface border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl p-6">
         {tab === 'copy' && (
           <CopyGenerator
             perfil={perfil ?? {}}

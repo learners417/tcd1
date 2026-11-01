@@ -58,7 +58,7 @@ export default function CustomSelect({
           bg-black/20 border rounded-xl px-3 py-3
           text-sm text-cream text-left
           transition-all duration-150 outline-none
-          ${open ? 'border-gold/50 ring-1 ring-gold/20' : 'border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'}
+          ${open ? 'elegido' : 'border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line2, rgba(142,104,36,0.30))]'}
         `}
       >
         <span className={value ? 'text-cream' : 'text-cream/55'}>{selectedLabel}</span>
@@ -69,7 +69,7 @@ export default function CustomSelect({
 
       {open && (
         <div
-          className={`absolute z-50 left-0 right-0 bg-panel border border-[rgba(232,150,46,0.12)] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
+          className={`absolute z-50 left-0 right-0 bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
           style={{ maxHeight: `${DROPDOWN_MAX_HEIGHT}px` }}
         >
           {options.map((opt) => (

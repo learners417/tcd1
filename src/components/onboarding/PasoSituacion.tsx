@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VOC } from '../../lib/vocabulario';
 
 /**
  * TU SITUACIÓN — el paso que faltaba en el onboarding.
@@ -13,10 +14,14 @@ import { useState } from 'react';
  * Todo en tú neutro.
  */
 
+/*
+ * Acá había tres campos más —personas por semana, precio por sesión y horas
+ * atendiendo— que la medición de entrada ya pregunta en el paso `numeros`. Las
+ * personas iban por SEMANA acá y por MES allá: la misma pregunta con dos
+ * respuestas que pueden contradecirse. Un dato, un lugar. Lo único que los leía
+ * era `ingresoAReemplazar`, y a esa no la llamaba nadie.
+ */
 export interface Situacion {
-  consultantes_semana: string;
-  precio_sesion: string;
-  horas_ocupadas: string;
   horas_libres: string;
   mercado: 'personas' | 'organizaciones' | 'ambas' | '';
   red_propia: string;
@@ -30,7 +35,7 @@ export interface Situacion {
 }
 
 export const SITUACION_VACIA: Situacion = {
-  consultantes_semana: '', precio_sesion: '', horas_ocupadas: '', horas_libres: '',
+  horas_libres: '',
   mercado: '', red_propia: '', vendio_al_precio: '', limites_certeza: '',
   limites_eticos: '', garantia_estado: '', garantia: '', escalera: '', brecha: '',
 };
@@ -38,7 +43,7 @@ export const SITUACION_VACIA: Situacion = {
 /** Lo mínimo para que el camino pueda decidir sus carriles. */
 export function situacionCompleta(s: Situacion): boolean {
   return Boolean(
-    s.consultantes_semana && s.precio_sesion && s.horas_libres &&
+    s.horas_libres &&
     s.mercado && s.red_propia && s.vendio_al_precio &&
     s.limites_certeza && s.garantia_estado && s.brecha.trim().length >= 10,
   );
@@ -110,34 +115,15 @@ export default function PasoSituacion({
         </p>
       </div>
 
-      {/* ── la consulta ── */}
+      {/* ── las horas ── lo que la medición de entrada no pregunta ── */}
       <div className="space-y-4">
-        <Rotulo>Tu consulta hoy</Rotulo>
+        <Rotulo>Tus horas libres</Rotulo>
         <p className="text-sm text-cream/60 -mt-1">
-          A cuántas personas atiendes por semana y cuánto cobras por sesión. Los dos
-          números, aunque sean irregulares.
+          Cuántas horas a la semana te quedan libres de verdad, descontando lo que ya
+          tienes comprometido.
         </p>
-        <div className="grid grid-cols-2 gap-3">
-          <input className={campo} inputMode="numeric" placeholder="Personas por semana"
-            value={s.consultantes_semana} onChange={(e) => set({ consultantes_semana: e.target.value })} />
-          <input className={campo} placeholder="Precio por sesión"
-            value={s.precio_sesion} onChange={(e) => set({ precio_sesion: e.target.value })} />
-        </div>
-      </div>
-
-      {/* ── las horas ── */}
-      <div className="space-y-4">
-        <Rotulo>Tus horas</Rotulo>
-        <p className="text-sm text-cream/60 -mt-1">
-          Cuántas horas a la semana estás atendiendo, y cuántas te quedan libres de
-          verdad — descontando lo que ya tienes comprometido.
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          <input className={campo} inputMode="numeric" placeholder="Horas atendiendo"
-            value={s.horas_ocupadas} onChange={(e) => set({ horas_ocupadas: e.target.value })} />
-          <input className={campo} inputMode="numeric" placeholder="Horas libres reales"
-            value={s.horas_libres} onChange={(e) => set({ horas_libres: e.target.value })} />
-        </div>
+        <input className={campo} inputMode="numeric" placeholder="Horas libres reales"
+          value={s.horas_libres} onChange={(e) => set({ horas_libres: e.target.value })} />
       </div>
 
       {/* ── el mercado ── */}
@@ -159,7 +145,7 @@ export default function PasoSituacion({
         <Rotulo>Tu red</Rotulo>
         <p className="text-sm text-cream/60 -mt-1">
           A cuántas personas podrías escribirles hoy mismo por privado y te
-          contestarían. Pacientes, colegas, egresados, contactos del rubro.
+          contestarían. {VOC('{{Consultantes}}, colegas, egresados, contactos del rubro.')}
         </p>
         <input className={campo} inputMode="numeric" placeholder="Un número aproximado"
           value={s.red_propia} onChange={(e) => set({ red_propia: e.target.value })} />

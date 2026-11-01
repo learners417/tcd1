@@ -156,7 +156,7 @@ export default function PilarUnlockedModal({
         </div>
 
         {/* Content card */}
-        <div className="card-panel p-8 rounded-2xl border border-[rgba(232,150,46,0.24)]">
+        <div className="card-panel p-8 rounded-2xl border border-[var(--line2, rgba(142,104,36,0.30))]">
 
           {step === 'achievement' ? (
             <>
@@ -181,8 +181,15 @@ export default function PilarUnlockedModal({
               <div className="w-16 h-px bg-[var(--accent-gold)]/30 mx-auto mb-4" />
 
               {cinturon && (
-                <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-gradient-to-b from-[var(--accent-gold)]/10 to-transparent p-5">
-                  <div className="text-4xl mb-2">{cinturon.emoji}</div>
+                <div className="mb-4 rounded-xl border border-[var(--accent-gold)]/50 bg-[var(--accent-gold)]/10 p-5">
+                  {/*
+                    Era el emoji del grado a 36 píxeles, en el momento más
+                    importante del Camino: justo cuando se completa un pilar.
+                    Un emoji lo dibuja la tipografía del teléfono, así que esa
+                    celebración se veía distinta en cada aparato. El grado se
+                    dice con su nombre y su metáfora, que es lo que significa,
+                    y la ceremonia la pone la línea de oro de arriba.
+                  */}
                   <p className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
                     Cinturón ganado
                   </p>
@@ -222,7 +229,10 @@ export default function PilarUnlockedModal({
 
               {pilarDesbloqueado ? (
                 <div className="mb-6">
-                  <p className="text-sm text-cream/75 mb-1">Nuevo pilar desbloqueado:</p>
+                  {/* «Nuevo pilar desbloqueado» tiene las dos palabras que el
+                      cliente no usa: el Camino nombra sus tramos por los días
+                      que cubren y sus puertas dicen «se abre». */}
+                  <p className="text-sm text-cream/75 mb-1">Se abrió un tramo nuevo:</p>
                   <p className="text-lg font-medium text-cream">{pilarDesbloqueado}</p>
                 </div>
               ) : (
@@ -303,7 +313,7 @@ export default function PilarUnlockedModal({
                       placeholder={ratingConfig.placeholder}
                       maxLength={500}
                       rows={3}
-                      className="w-full bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50 resize-none"
+                      className="w-full bg-ink border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-3 text-sm text-cream placeholder-cream/25 focus:outline-none focus:border-gold/50 resize-none"
                     />
                   )}
                 </div>

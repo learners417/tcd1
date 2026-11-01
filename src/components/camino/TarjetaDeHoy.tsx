@@ -42,18 +42,31 @@ export default function TarjetaDeHoy({ hoy, esFinde, onEmpezar }: Props) {
           {hoy.descripcion && (
             <p className="mt-2 text-[17px] leading-relaxed text-cream/70">{VOC(primeraOracion(hoy.descripcion))}</p>
           )}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {hoy.tiempo && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line2,#DFD3BC)] px-3 py-1.5 text-[15px] text-cream/80">
+          {/*
+            DOS COSAS DISTINTAS, DOS FORMAS DISTINTAS.
+            Las dos iban en la misma píldora, con las mismas clases, y aun así
+            se veían como elementos de dos sistemas: «75 min» entra en un
+            renglón y «Sales con: tus seis números de entrada» en dos, así que
+            la segunda crecía al ancho completo y su tilde quedaba flotando en
+            el medio de las dos líneas.
+            No son lo mismo. El tiempo es un metadato —corto, cerrado, cabe en
+            una píldora— y lo que sale de la sesión es su resultado, que es lo
+            que al cliente le importa: va como línea, con el tilde al principio
+            y alineado con la primera palabra.
+          */}
+          {hoy.tiempo && (
+            <div className="mt-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line2,#DFD3BC)] px-3 min-h-[36px] text-[15px] text-cream/80">
                 <Clock className="w-4 h-4" /> {hoy.tiempo}
               </span>
-            )}
-            {hoy.salesCon && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line2,#DFD3BC)] px-3 py-1.5 text-[15px] text-cream/80">
-                <Check className="w-4 h-4" style={{ color: 'var(--tilde, #4A7C59)' }} /> Sales con: {VOC(hoy.salesCon)}
-              </span>
-            )}
-          </div>
+            </div>
+          )}
+          {hoy.salesCon && (
+            <p className="mt-3 flex items-start gap-2 text-[17px] leading-relaxed text-cream">
+              <Check className="w-[18px] h-[18px] mt-[3px] shrink-0" style={{ color: 'var(--tilde, #4A7C59)' }} />
+              <span>Sales con <strong className="font-semibold">{VOC(hoy.salesCon)}</strong></span>
+            </p>
+          )}
           {esFinde && (
             <p className="mt-3 text-[17px] text-cream/70">El fin de semana descansas. Si quieres adelantar, está listo.</p>
           )}

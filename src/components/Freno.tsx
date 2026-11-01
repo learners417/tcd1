@@ -27,7 +27,7 @@ export default function Freno({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className={`w-full max-w-md rounded-2xl border p-6 bg-[#0d0d0d] ${
+      <div className={`w-full max-w-md rounded-2xl border p-6 bg-[var(--bg-card,#17150F)] ${
         freno.nivel === 'escribir' ? 'border-danger/50'
         : freno.nivel === 'testigo' ? 'border-gold/45' : 'border-cream/20'}`}>
 

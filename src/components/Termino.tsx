@@ -32,7 +32,7 @@ export default function Termino({ p, children }: { p: string; children?: React.R
 
       {abierto && (
         <span className="absolute left-0 top-full mt-1.5 z-30 block w-72 rounded-xl
-          border border-gold/30 bg-[#0d0d0d] p-3 text-left shadow-xl">
+          border border-gold/30 bg-[var(--bg-card,#17150F)] p-3 text-left shadow-xl">
           <span className="block text-sm font-bold uppercase tracking-wider text-gold/70 mb-1">
             {t.palabra}
           </span>

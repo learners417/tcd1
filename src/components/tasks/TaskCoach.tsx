@@ -177,7 +177,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         </h3>
         <p className="text-sm text-cream/75 mt-1">{VOC(meta.descripcion)}</p>
         {meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[rgba(232,150,46,0.12)] bg-black mt-4">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[var(--line, rgba(142,104,36,0.18))] bg-black mt-4">
             <iframe
               src={`https://www.youtube.com/embed/${meta.video_youtube_id}`}
               title={`Tutorial: ${VOC(meta.titulo)}`}
@@ -207,8 +207,8 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {/* ── CIRUGÍA 1: la micro-sesión inmersiva (si esta sesión tiene guion) ── */}
         {guionVivo && !isCompleted && (
           <button onClick={() => setPlayerAbierto(true)}
-            className="w-full text-left rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/[0.12] to-gold/[0.03] p-5 hover:border-gold/60 transition-colors">
-            <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-1.5">🥋 Micro-sesión guiada</p>
+            className="w-full text-left rounded-2xl border border-gold/40 bg-gold/[0.12] p-5 hover:border-gold/60 transition-colors">
+            <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-1.5">Micro-sesión guiada</p>
             <p className="text-sm text-cream/85">{guionVivo.pasos.length} pasos · un paso por pantalla · el Mentor te guía y todo queda en tu ADN</p>
             <p className="text-sm font-bold text-gold mt-3">Entrar a mi sesión →</p>
           </button>
@@ -239,15 +239,15 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
 
         {/* ── Tu espacio de trabajo: escribe o habla, y queda guardado ── */}
         {!isCompleted && (
-          <div className="card-panel p-4 border border-[rgba(232,150,46,0.15)] mt-4">
-            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">✍️ Tu trabajo de hoy</p>
+          <div className="card-panel p-4 border border-[var(--line, rgba(142,104,36,0.18))] mt-4">
+            <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">Tu trabajo de hoy</p>
             <p className="text-xs text-cream/55 mb-3">Lo que salga de esta sesión, déjalo acá. Puedes escribirlo o decirlo en voz alta.</p>
             <textarea
               value={nota}
               onChange={(e) => setNota(e.target.value)}
               rows={5}
               placeholder="Lo que trabajaste, lo que descubriste, lo que decidiste…"
-              className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
+              className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 resize-y"
             />
             <div className="flex items-center justify-between mt-2">
               <BotonAudio onTexto={(t) => setNota((p) => (p ? p + '\n' + t : t))} />
@@ -266,7 +266,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
         {meta.evidencia_requerida && (
           <div className={`card-panel p-4 border ${evidenciaLista ? 'border-success/30 bg-success/[0.04]' : 'border-gold/30 bg-gold/[0.04]'}`}>
             <p className="text-sm font-bold uppercase tracking-widest mb-2 text-gold">
-              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : '📎 Evidencia requerida'}
+              {evidenciaLista && evidencias > 0 ? '✓ Evidencia recibida' : 'Evidencia requerida'}
             </p>
             <p className="text-sm text-cream/75 leading-relaxed mb-3">{VOC(meta.evidencia_requerida.descripcion)}</p>
             {!isCompleted && (
@@ -301,7 +301,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
       </div>
 
       {/* Confirmation — prominent completion button */}
-      <div className="border-t border-[rgba(232,150,46,0.10)] pt-5">
+      <div className="border-t border-[var(--line, rgba(142,104,36,0.18))] pt-5">
         {checked ? (
           <div className="flex items-center justify-center gap-2 py-4 rounded-xl bg-success/10 border border-success/30 text-success text-base font-semibold">
             <CheckCircle2 className="w-5 h-5" />
@@ -317,7 +317,7 @@ export default function TaskCoach({ meta, onComplete, isCompleted }: TaskCoachPr
             <button
               onClick={() => { if (evidenciaLista) handleCheck(); }}
               disabled={!evidenciaLista}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.25)]' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all ${evidenciaLista ? 'bg-success/15 border-2 border-success/40 text-success hover:bg-success/25 hover:border-success/70' : 'bg-cream/5 border-2 border-cream/10 text-cream/45 cursor-not-allowed'}`}
             >
               <CheckCircle2 className="w-5 h-5" />
               Marcar como completado

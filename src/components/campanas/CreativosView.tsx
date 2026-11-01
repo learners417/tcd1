@@ -29,6 +29,7 @@ import type {
 } from '../../lib/campanasTypes';
 import { IMAGE_FORMAT_OPTIONS } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 const ANGULOS: { id: AnguloCreativo; label: string; descripcion: string }[] = [
   { id: 'directo', label: 'Directo', descripcion: 'Claro y profesional' },
@@ -72,7 +73,7 @@ const TABS: TabConfig[] = [
     id: 'edicion',
     label: 'Edicion',
     icon: Wand2,
-    eyebrow: 'Edicion de imagen',
+    eyebrow: 'Edición de imagen',
     descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamaño y formato original.',
   },
   {
@@ -113,7 +114,7 @@ const TABS: TabConfig[] = [
     label: 'Manual de marca',
     icon: Palette,
     eyebrow: 'Manual de marca',
-    descripcion: 'Paleta, tipografia y reglas que mandan sobre cualquier estilo o referencia al generar imagenes.',
+    descripcion: 'Paleta, tipografía y reglas que mandan sobre cualquier estilo o referencia al generar imagenes.',
   },
 ];
 
@@ -170,8 +171,7 @@ export default function CreativosView({ userId, perfil }: Props) {
       const list = await fetchCreativos(userId);
       setCreativos(list);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al cargar historial: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'cargar tu historial'));
     } finally {
       setLoadingHist(false);
     }
@@ -261,8 +261,7 @@ export default function CreativosView({ userId, perfil }: Props) {
           );
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al guardar: ${msg}`);
+        toast.error(mensajeDeFalla(err, 'guardar la pieza'));
       } finally {
         setSaving(false);
         saveInFlightRef.current = false;
@@ -310,7 +309,7 @@ export default function CreativosView({ userId, perfil }: Props) {
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[rgba(232,150,46,0.10)] pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-[var(--line, rgba(142,104,36,0.18))] pb-3">
         {TABS.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -382,12 +381,12 @@ export default function CreativosView({ userId, perfil }: Props) {
       {/* GENERADORES (imagen / carrusel / youtube) */}
       {activeTab !== 'historial' && activeTab !== 'manual_marca' && activeTab !== 'edicion' && (
         <>
-          {/* Angulo de comunicacion (opcional) */}
+          {/* Ángulo de comunicación (opcional) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-3.5 h-3.5 text-cream/55" />
               <span className="text-sm font-bold tracking-[0.15em] uppercase text-cream/65">
-                Angulo de comunicacion
+                Ángulo de comunicación
               </span>
               <span className="text-sm text-cream/25">— opcional, orienta el tono visual</span>
             </div>

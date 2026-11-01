@@ -32,7 +32,15 @@ export default function CintaCinturon({ cinturon, variante = 'hero', className =
         width: ancho,
         borderRadius: 99,
         backgroundColor: cinturon.color,
-        border: '1px solid rgba(0, 0, 0, 0.16)',
+        /*
+         * Pan de oro de 1px, que es la línea de la casa. Era
+         * `rgba(0,0,0,0.16)` —un gris casi invisible— y con el Cinturón
+         * BLANCO, que es el de todos los que recién entran, la cinta quedaba
+         * blanca sobre el papel crema: una píldora vacía al lado del saludo,
+         * que se lee como algo que no cargó. Es lo primero que ve el cliente
+         * nuevo en la pantalla que más mira.
+         */
+        border: '1px solid var(--oro, #B0822E)',
         transition: transicion,
       }}
       title={`Cinturón ${cinturon.nombre}: ${cinturon.metafora}`}

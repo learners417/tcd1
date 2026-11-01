@@ -168,11 +168,11 @@ export default function TaskMapaMamuska({
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[rgba(232,150,46,0.10)] pb-4">
+      <div className="border-b border-[var(--line, rgba(142,104,36,0.18))] pb-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="text-sm font-mono text-gold uppercase tracking-widest font-bold">
             <Grid3X3 className="w-3 h-3 inline mr-1" />
-            {meta.codigo} · Mapa Mamuska
+            Mapa Mamuska
           </span>
           {saved && (
             <span className="text-sm text-success uppercase tracking-widest font-bold flex items-center gap-1">

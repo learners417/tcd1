@@ -27,9 +27,9 @@ export default function GraduacionComprobantes({ userId }: { userId?: string }) 
   }, [userId]);
 
   return (
-    <div className="rounded-xl border border-cream/10 bg-[#0F0F0F] p-4 text-left">
-      <div className="flex items-center gap-2 mb-3">
-        <Receipt className="w-4 h-4 text-gold" />
+    <div className="rounded-xl border border-cream/10 bg-[var(--bg-card,#17150F)] p-4 text-left">
+      <div className="flex items-start gap-2.5 mb-3">
+        <Receipt className="w-4 h-4 mt-0.5 text-gold shrink-0" />
         <p className="text-sm font-bold uppercase tracking-widest text-gold">
           Tus comprobantes{items.length > 0 ? ` · ${items.length}` : ''}
         </p>

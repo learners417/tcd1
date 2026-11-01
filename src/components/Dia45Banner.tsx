@@ -30,7 +30,9 @@ export default function Dia45Banner({ validacion, onIrAPilar }: Dia45BannerProps
           <Lock className="w-5 h-5 text-gold" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-medium text-cream tracking-tight mb-1">
+          {/* 20px es el piso del serif de display: por debajo su altura de x es tan
+              chica que el italic se lee como una mancha. Medido a 18. */}
+          <h3 className="text-xl font-medium text-cream tracking-tight mb-1">
             La Fase 4 se abre con tu ADN completo
           </h3>
           <p className="text-base text-cream/75">
@@ -55,7 +57,10 @@ export default function Dia45Banner({ validacion, onIrAPilar }: Dia45BannerProps
             key={pilar}
             type="button"
             onClick={() => onIrAPilar?.(pilar)}
-            className="w-full text-left rounded-xl border border-gold/20 bg-surface/40 hover:bg-gold/5 hover:border-gold/40 transition-colors p-3 flex items-center gap-3 group"
+            /* La misma tinta que cualquier otra fila que se toca en esta pantalla.
+               Estaba al 40% y las demás al 20%: dos tintas del MISMO color
+               haciendo el mismo trabajo es acumulación, no jerarquía. */
+            className="w-full text-left rounded-xl border border-gold/20 bg-surface/20 hover:bg-gold/5 hover:border-gold/40 transition-colors p-3 flex items-center gap-3 group"
           >
             <span className="text-sm text-gold font-semibold flex-shrink-0">
               {pilar}

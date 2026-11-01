@@ -66,7 +66,7 @@ export default function PreventaPanel({ promesa, plazo, precio, onElegir }: Prop
                 aria-pressed={activa}
                 onClick={() => alternar(b.id)}
                 className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${
-                  activa ? 'border-gold bg-[var(--card,#FFFDF7)]' : 'border-[var(--line2,#DFD3BC)]'
+                  activa ? 'elegido' : 'border-[var(--line2,#DFD3BC)]'
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function PreventaPanel({ promesa, plazo, precio, onElegir }: Prop
             type="button"
             onClick={copiar}
             className="mt-3 w-full min-h-[52px] rounded-[20px] text-[18px] font-semibold flex items-center justify-center gap-2"
-            style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
+            style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
           >
             <Copy className="w-5 h-5" />
             {copiado ? 'Copiado' : 'Copiar el mensaje'}

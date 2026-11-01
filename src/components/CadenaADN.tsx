@@ -15,7 +15,7 @@ export default function CadenaADN({ onAbrir }: { onAbrir?: () => void }) {
   return (
     <button onClick={onAbrir} disabled={!onAbrir} className="card-panel px-5 py-4 w-full text-left disabled:cursor-default">
       <div className="flex items-baseline justify-between gap-3 mb-3">
-        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-cream/60">Tu ADN</p>
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-cream/60">Mi ADN</p>
         <p className="text-[17px] font-semibold text-goldhi">
           {completo ? 'Completo — listo para grabar y lanzar' : `${selladas} de ${total} sellados`}
         </p>

@@ -99,7 +99,7 @@ export default function CargarSesionHumana({
         <label className="block text-[16px] text-cream/60 mb-1">Cuándo fue</label>
         <input type="date" value={fecha} max={hoyISO()}
           onChange={(e) => setFecha(e.target.value)}
-          className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[17px] text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
+          className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-[17px] text-cream focus:outline-none focus:border-gold/50 min-h-[44px]" />
       </div>
 
       <div>
@@ -134,14 +134,14 @@ export default function CargarSesionHumana({
         <label className="block text-[16px] text-cream/60 mb-1">Qué pasó</label>
         <textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={3}
           placeholder="En dos líneas, para que el próximo que lo lea entienda."
-          className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[17px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
+          className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-[17px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
       </div>
 
       <div>
         <label className="block text-[16px] text-cream/60 mb-1">Qué quedó para la próxima</label>
         <input value={pendiente} onChange={(e) => setPendiente(e.target.value)}
           placeholder="Lo que tiene que estar hecho antes de la siguiente."
-          className="w-full bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[17px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+          className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-[17px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
       </div>
 
       {falla && <p className="text-[17px] text-danger">{falla}</p>}

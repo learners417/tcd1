@@ -53,7 +53,7 @@ export default function CreditsBadge({ userId, variant = 'expanded' }: CreditsBa
         ) : (
           <span>
             {balance.total}{' '}
-            <span className="opacity-60 font-normal text-[12px]">créditos</span>
+            <span className="opacity-60 font-normal text-[15px]">créditos</span>
           </span>
         )}
       </button>

@@ -67,13 +67,13 @@ export default function HechoAfueraPanel({ usuarioId, abiertas, yaMarcadas, quie
                 type="button"
                 disabled={guardando === j.dia}
                 onClick={() => void alternar(j.dia, marcada)}
-                className="w-full min-h-[60px] rounded-xl border border-[rgba(232,150,46,0.18)] px-4 py-3 text-left flex items-center gap-3"
+                className="w-full min-h-[60px] rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] px-4 py-3 text-left flex items-center gap-3"
               >
                 <span
                   className="w-7 h-7 shrink-0 rounded-full grid place-items-center border"
                   style={marcada
                     ? { background: 'var(--tilde, #4A7C59)', borderColor: 'var(--tilde, #4A7C59)' }
-                    : { borderColor: 'rgba(232,150,46,0.25)' }}
+                    : { borderColor: 'var(--line2, rgba(142,104,36,0.30))' }}
                 >
                   {marcada ? <Check className="w-4 h-4" style={{ color: '#FFFDF7' }} />
                            : <RotateCcw className="w-4 h-4 opacity-40" />}

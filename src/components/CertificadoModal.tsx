@@ -98,7 +98,7 @@ export default function CertificadoModal({
         {/* Certificado en pantalla */}
         <div
           className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#141210] to-ink p-8 text-center"
-          style={{ border: '2px solid rgba(232,150,46,0.5)' }}
+          style={{ border: '2px solid var(--oro, #B0822E)' }}
         >
           <div className="absolute inset-3 border border-gold/20 rounded-xl pointer-events-none" />
           <Award className="w-10 h-10 text-gold mx-auto mb-3" />

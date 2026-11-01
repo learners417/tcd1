@@ -22,7 +22,7 @@ export default function TutorialTecnicoBox(
       {tutoriales.map((t) => (
         <details key={VOC(t.titulo)} className="rounded-xl border border-gold/20 bg-gold/[0.03] px-4 py-3 open:bg-gold/[0.05]">
           <summary className="cursor-pointer text-sm font-bold uppercase tracking-wider text-gold list-none select-none">
-            🛠️ Paso a paso: {VOC(t.titulo)}
+            Paso a paso: {VOC(t.titulo)}
           </summary>
           <div className="mt-3 space-y-3">
             <p className="text-sm text-cream/75 leading-relaxed">{t.intro}</p>

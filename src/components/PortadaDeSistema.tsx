@@ -54,8 +54,11 @@ export default function PortadaDeSistema(
         </div>
 
         {/* El lecho: el color de la tapa, oscurecido hasta que el texto se
-            lea. Medido: 10 a 1 en blanco y 4,5 en el oro, en los cinco. */}
-        <div className="flex-1 p-5 sm:p-6" style={{ background: paisaje.color.lecho }}>
+            lea. Medido: 10 a 1 en blanco y 4,5 en el oro, en los cinco.
+            Lo pinta la section, una sola vez. Acá estaba repintado con el
+            MISMO color: pintura muerta que el ojo no ve y la cuenta de
+            superficies sí. */}
+        <div className="flex-1 p-5 sm:p-6">
           <p className="rotulo-libro oro-paisaje">{COLECCION} · {paisaje.n}</p>
 
           <h2 className="mt-2 sobre-paisaje"

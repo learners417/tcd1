@@ -38,8 +38,8 @@ export default function ConfirmDialog({
 
   const isDanger = variant === 'danger';
   const accent = isDanger ? '#EF4444' : '#B0822E';
-  const accentBg = isDanger ? 'rgba(239,68,68,0.15)' : 'rgba(232,150,46,0.10)';
-  const accentBorder = isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)';
+  const accentBg = isDanger ? 'rgba(239,68,68,0.15)' : 'var(--line, rgba(142,104,36,0.18))';
+  const accentBorder = isDanger ? 'rgba(239,68,68,0.3)' : 'var(--line2, rgba(142,104,36,0.30))';
 
   return (
     <div
@@ -90,7 +90,7 @@ export default function ConfirmDialog({
                   ? 'linear-gradient(135deg, #EF4444, #DC2626)'
                   : 'linear-gradient(135deg, #B0822E, #C79A45)',
                 color: isDanger ? '#F2EFE9' : '#000000',
-                boxShadow: `0 8px 24px ${isDanger ? 'rgba(239,68,68,0.3)' : 'rgba(232,150,46,0.18)'}`,
+                boxShadow: `0 8px 24px ${isDanger ? 'rgba(239,68,68,0.3)' : 'var(--line2, rgba(142,104,36,0.30))'}`,
               }}
             >
               {loading ? 'Procesando…' : confirmLabel}

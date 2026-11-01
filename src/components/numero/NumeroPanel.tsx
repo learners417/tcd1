@@ -84,15 +84,15 @@ export default function NumeroPanel({ userId }: Props) {
   const fechaTxt = n.fecha_cambio ? new Date(n.fecha_cambio).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' }) : 'esta semana';
 
   const msgPacientes =
-    `Hola 👋 Te escribo para contarte algo con transparencia: a partir de ${fechaTxt} el valor de mis sesiones pasa a ser ${money(precioNuevo)}. ` +
+    `Hola. Te escribo para contarte algo con transparencia: a partir de ${fechaTxt} el valor de mis sesiones pasa a ser ${money(precioNuevo)}. ` +
     `Es una decisión que tomé para poder sostener mi trabajo con la calidad y la dedicación que mereces. ` +
-    `Tu proceso y tu cuidado siguen siendo mi prioridad de siempre. Cualquier duda, acá estoy. Gracias por la confianza. 🙏`;
+    `Tu proceso y tu cuidado siguen siendo mi prioridad de siempre. Cualquier duda, acá estoy. Gracias por la confianza.`;
 
   const msgIG =
     `Un mensaje honesto:\n\n` +
     `Durante mucho tiempo cobré menos de lo que mi trabajo vale. Hoy elijo cobrar con dignidad — no por mí solo, sino para poder cuidarte mejor.\n\n` +
     `Mi valor a partir de ahora: ${money(precioNuevo)}.\n\n` +
-    `Sanar también es aprender a recibir. 🌱`;
+    `Sanar también es aprender a recibir.`;
 
   function copiar(id: string, texto: string) {
     // Antes: `navigator.clipboard?.writeText(...).then(...)`. Con el `?.`, si
@@ -113,16 +113,42 @@ export default function NumeroPanel({ userId }: Props) {
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Inputs base — de acá sale el PHR */}
       <section className="rounded-2xl border border-gold/10 bg-panel p-5">
-        <h2 className="text-lg font-semibold text-cream mb-1">Tu número, hoy</h2>
-        <p className="text-sm text-cream/65 mb-4">Con esto calculamos tu <strong className="text-cream/90">PHR</strong> — lo que vale de verdad una hora tuya.</p>
-        <div className="grid grid-cols-3 gap-3">
+        {/* El título estaba en 18 y el párrafo que le sigue lleva negrita: lo que
+            más pesaba en la pantalla era el párrafo. Va al tamaño display de las
+            otras pantallas, que es donde el ojo empieza a leer. */}
+        {/* Un turno anterior vio que la barra de arriba dice «Mi Número» a
+            ciento cincuenta píxeles de acá, y lo resolvió igualando el
+            posesivo: «Mi número, hoy». Quedaba el nombre dos veces en la
+            misma pantalla, con una palabra de diferencia.
+            Ahora el encabezado dice lo que la pantalla CALCULA, que es lo que
+            el cliente vino a buscar, y el nombre queda una sola vez, arriba.
+            La línea de abajo ya no repite la frase: dice de dónde sale. */}
+        <h2 className="text-[26px] leading-tight text-cream mb-2" style={{ fontFamily: 'var(--font-display)' }}>Lo que vale una hora tuya</h2>
+        {/*
+          Decía «calculamos tu PHR» y recién después qué era. Una sigla que el
+          cliente no conoce, en la primera línea de la pantalla: primero va lo
+          que significa y la sigla queda de apoyo, para cuando la vea en otro
+          lado.
+        */}
+        <p className="text-sm text-cream/65 mb-4">
+          Sale de <strong className="text-cream/90">tus propios números</strong>, no de una tabla: es tu precio por hora real.
+        </p>
+        {/*
+          Eran tres columnas fijas. A 390 píxeles cada una queda en 110, y
+          «SESIONES» en versalitas espaciadas no entra: se partía en «SESIONE /
+          S /», con el tercer campo más arriba que los otros dos porque su
+          etiqueta ocupaba un renglón menos. Apilados en el teléfono, en tres
+          columnas desde que hay lugar, y las etiquetas sin el espaciado que
+          las rompía.
+        */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
           {([
             ['Precio por sesión', 'precio_sesion'],
-            ['Sesiones / semana', 'pacientes_semana'],
-            ['Horas / semana', 'horas_semana'],
+            ['Sesiones por semana', 'pacientes_semana'],
+            ['Horas por semana', 'horas_semana'],
           ] as const).map(([label, key]) => (
             <label key={key} className="block">
-              <span className="text-sm uppercase tracking-wider text-cream/55">{label}</span>
+              <span className="text-[15px] font-semibold text-cream/70">{label}</span>
               <input
                 type="number" inputMode="numeric" min={0}
                 value={(n[key] as number) || ''}
@@ -133,9 +159,23 @@ export default function NumeroPanel({ userId }: Props) {
             </label>
           ))}
         </div>
+        {/*
+          Todo lo que sigue vive detrás de `phr > 0`, así que con los tres
+          campos en cero la pantalla quedaba con los tres recuadros arriba y
+          dos tercios en blanco: alguien que entra a «Mi Número» por primera
+          vez no veía para qué sirve. Ahora, mientras no haya número, dice qué
+          va a salir de ahí.
+        */}
+        {n.phr === 0 && (
+          <p className="mt-4 text-[17px] leading-relaxed text-cream/75">
+            Carga los tres y en el mismo momento te digo cuánto vale tu hora,
+            cuánto dejas ir al año cobrando por debajo, y qué cambia si subes
+            el precio.
+          </p>
+        )}
         {n.phr > 0 && (
           <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-sm text-cream/65">Tu PHR real:</span>
+            <span className="text-sm text-cream/65">Tu hora real:</span>
             <span className="text-2xl font-semibold text-gold tabular-nums">{money(n.phr)}<span className="text-sm text-cream/55">/hora</span></span>
             {agujero > 0 && (
               <span className="text-sm text-danger/90 w-full">Cobrando por debajo, dejas ir <strong>{money(agujero)}</strong> al año.</span>
@@ -199,7 +239,7 @@ export default function NumeroPanel({ userId }: Props) {
                 <p className="text-3xl font-semibold text-gold tabular-nums">{money(precioNuevo)}</p>
               </div>
             </div>
-            <div className="bg-panel px-5 py-2.5 text-center text-sm text-cream/45">Sácale una captura y compártela. 🌱</div>
+            <div className="bg-panel px-5 py-2.5 text-center text-sm text-cream/45">Sácale una captura y compártela.</div>
           </section>
 
           {/* Generador de mensajes */}
@@ -216,7 +256,7 @@ export default function NumeroPanel({ userId }: Props) {
                     {copiado === id ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <div className="rounded-xl bg-surface p-3 text-[14px] leading-relaxed text-cream/80 whitespace-pre-line">{texto}</div>
+                <div className="rounded-xl bg-surface p-3 text-[15px] leading-relaxed text-cream/80 whitespace-pre-line">{texto}</div>
               </div>
             ))}
           </section>

@@ -40,7 +40,7 @@ export default function HistorialView({ campanas, onSelectCampana }: Props) {
               onClick={() => onSelectCampana(c)}
               className="w-full card-panel p-4 text-left hover:border-gold/40 transition-all relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gold/20" />
 
               <div className="flex items-start justify-between mb-2">
                 <div className="text-sm font-semibold text-cream">{c.nombre}</div>

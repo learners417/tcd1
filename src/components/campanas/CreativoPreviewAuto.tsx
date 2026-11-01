@@ -142,7 +142,7 @@ export default function CreativoPreviewAuto({ image, copy, slideIndex, onExport 
       </div>
 
       {/* Canvas preview */}
-      <div className="rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)]">
+      <div className="rounded-xl overflow-hidden border border-[var(--line, rgba(142,104,36,0.18))]">
         <canvas ref={canvasRef} className="w-full aspect-square" style={{ imageRendering: 'auto' }} />
       </div>
     </div>

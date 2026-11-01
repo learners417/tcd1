@@ -152,9 +152,9 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
         onClick={() => setOpen(o => !o)}
         className={`${buttonSize} rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
           open
-            ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
+            ? 'text-cream bg-surface ring-1 ring-gold/40'
             : hasUnread
-              ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
+              ? 'text-gold ring-1 ring-gold/30 hover:text-goldhi'
               : 'text-cream/75 hover:text-cream'
         }`}
         title="Notificaciones"
@@ -181,10 +181,10 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
+            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
             style={{ top: pos.top, right: pos.right, zIndex: 9999 }}
           >
-            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
+            <div className="p-4 border-b border-[var(--line, rgba(142,104,36,0.18))] flex items-center justify-between bg-surface/50">
               <h3 className="font-medium text-cream">Notificaciones</h3>
               {unread > 0 && (
                 <button onClick={handleMarkAll} className="text-xs text-gold hover:text-goldhi transition-colors">
@@ -205,7 +205,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                   <div
                     key={notif.id}
                     onClick={() => handleClickNotif(notif)}
-                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
+                    className={`p-4 border-b border-[var(--line, rgba(142,104,36,0.18))] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
                       <Icon className={`w-4 h-4 ${colors.text}`} />
@@ -226,7 +226,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                 );
               })}
             </div>
-            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
+            <div className="p-3 text-center border-t border-[var(--line, rgba(142,104,36,0.18))] bg-surface/50">
               <button onClick={() => setOpen(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
                 Cerrar
               </button>

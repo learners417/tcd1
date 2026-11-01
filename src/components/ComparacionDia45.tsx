@@ -60,7 +60,9 @@ export default function ComparacionDia45({ comparacion, diaActual }: Comparacion
         ))}
       </div>
 
-      <p className="text-xs text-cream/55 italic pt-2 border-t border-gold/10">
+      {/* Explica de dónde salen los números, que es lo que uno se pregunta
+          al verlos. En itálica al 55% parecía una aclaración legal. */}
+      <p className="text-sm text-cream/75 pt-2 border-t border-gold/10">
         Los puntajes de hoy salen de cómo está tu ADN. Cada pieza que sellas los mueve.
       </p>
     </div>
@@ -83,7 +85,7 @@ function Stat({ label, valor, suffix, tono = 'neutro' }: StatProps) {
       : tono === 'rojo' ? 'text-[#ff5e5e]'
       : 'text-gold';
   return (
-    <div className="card-panel p-3 border border-[rgba(232,150,46,0.10)] bg-surface/30 text-center">
+    <div className="card-panel p-3 border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 text-center">
       <p className="text-sm uppercase tracking-widest text-cream/55 font-semibold mb-1">
         {label}
       </p>
@@ -111,7 +113,7 @@ function DimensionRow({ dim }: DimensionRowProps) {
   const trendColor = delta > 0 ? 'text-success' : delta < 0 ? 'text-[#F0B429]' : 'text-cream/55';
 
   return (
-    <div className="card-panel p-3 border border-[rgba(232,150,46,0.1)] bg-surface/30 flex items-center gap-4">
+    <div className="card-panel p-3 border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 flex items-center gap-4">
       <p className="flex-1 min-w-0 text-sm text-cream/90 truncate">{label}</p>
 
       {/* Barras visuales */}

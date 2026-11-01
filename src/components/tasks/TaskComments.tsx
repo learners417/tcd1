@@ -152,8 +152,11 @@ export default function TaskComments({
       {/* Hilo */}
       {isPending ? (
         pendingList.length === 0 ? (
-          <div className="text-xs text-cream/45 italic px-1">
-            Aún no hay comentarios. Escribe debajo para iniciar la conversación.
+          /* Un estado vacío es lo PRIMERO que alguien ve, y lleva la única
+             instrucción que hay en la pantalla: en itálica al 45% quedaba
+             como una disculpa por estar vacío. */
+          <div className="text-sm text-cream/75 px-1">
+            Escribe debajo para empezar la conversación.
           </div>
         ) : (
           <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
@@ -184,10 +187,10 @@ export default function TaskComments({
           </div>
         )
       ) : loading ? (
-        <div className="text-xs text-cream/45 italic px-1">Cargando…</div>
+        <div className="text-sm text-cream/55 px-1">Cargando…</div>
       ) : comments.length === 0 ? (
-        <div className="text-xs text-cream/45 italic px-1">
-          Aún no hay comentarios. Escribe debajo para iniciar la conversación.
+        <div className="text-sm text-cream/75 px-1">
+          Escribe debajo para empezar la conversación.
         </div>
       ) : (
         <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
@@ -199,7 +202,7 @@ export default function TaskComments({
                 className={`rounded-xl px-3.5 py-2.5 border ${
                   isMine
                     ? 'bg-gold/8 border-gold/20'
-                    : 'bg-[#0F0F0F] border-[rgba(255,255,255,0.06)]'
+                    : 'bg-[var(--bg-card,#17150F)] border-[rgba(255,255,255,0.06)]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
@@ -229,7 +232,7 @@ export default function TaskComments({
       )}
 
       {/* Composer */}
-      <div className="bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 focus-within:border-gold/50 transition-colors">
+      <div className="bg-ink border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2.5 focus-within:border-gold/50 transition-colors">
         <RichTextEditor
           value={draft}
           onChange={setDraft}

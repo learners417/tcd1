@@ -112,7 +112,7 @@ export default function CreativoGallery({ creativos, onSelect, onRefresh, userId
             <button
               key={creativo.id}
               onClick={() => onSelect(creativo)}
-              className="group text-left bg-panel border border-[rgba(232,150,46,0.1)] rounded-xl overflow-hidden hover:border-[rgba(232,150,46,0.18)] transition-all"
+              className="group text-left bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl overflow-hidden hover:border-[var(--line2, rgba(142,104,36,0.30))] transition-all"
             >
               {/* Image */}
               <div className="relative aspect-square bg-ink">
