@@ -135,6 +135,14 @@ const JUSTIFICADAS: Array<{ trozo: string; razon: string }> = [
   { trozo: 'manifestar · funnel · leads', razon: 'la lista de prohibidas, escrita' },
   { trozo: '"Crecer sin poner más horas" · no "escalar"', razon: 'la regla de reemplazo: dice con qué se cambia' },
   { trozo: 'Prohibido usar: coach, escalar, embudo', razon: 'es la regla que se le da al entrenador' },
+  /*
+   * La misma regla, con otro encabezado. El prompt del panel del Mentor la
+   * escribe «PROHIBIDO usar estas palabras» y la excepción de arriba pide
+   * «Prohibido usar:», así que no coincidía: la regla escrita contaba como
+   * falta. Dos redacciones de una sola regla necesitan dos excepciones, no un
+   * patrón que las adivine.
+   */
+  { trozo: 'PROHIBIDO usar estas palabras', razon: 'la regla que se le da al panel del Mentor' },
   { trozo: 'NO un marketero', razon: 'la prohibición en la voz de Javo' },
   { trozo: 'Nunca la palabra "gente"', razon: 'la regla del vocabulario, escrita' },
   { trozo: 'Está prohibido crear material de', razon: 'el límite del Mentor, que nombra lo que no hace' },
@@ -325,6 +333,52 @@ const recorrer = (valor: unknown, ruta: string): void => {
   }
 };
 recorrer(JSON.parse(readFileSync(join(raiz, SEED), 'utf8')), '');
+
+/*
+ * ═══ AGUJERO 3: QUIEN ESCRIBE EL JSON DEL CAMINO ════════════════════════
+ *
+ * El seed no se escribe a mano: lo produce `tcd-spec/datos/generar_seed.py`,
+ * que importa los noventa y un días de `hoja_de_ruta.py` y los pasa por
+ * `tuteo.py`. Mirar solo el JSON mide el resultado, no la fuente.
+ *
+ * Qué pasó por no mirarla: las seis prohibidas se corrigieron en el JSON y
+ * la fuente quedó como estaba. Medido el 1 de nov corriendo el generador y
+ * comparando su salida contra el seed de la app: diecinueve cadenas
+ * distintas, y «escalar», «embudo» cinco veces y «recurso gratuito» dos
+ * seguían del lado del generador. Cualquiera que lo corriera —es el paso
+ * normal para agregar una jornada— devolvía las seis a la app, y el guardián
+ * del JSON no las habría visto llegar porque mira el archivo después.
+ *
+ * Van los tres `.py` como texto plano, sin la puerta de `esCastellano`: son
+ * literales de contenido con algo de código alrededor, y el filtro de
+ * identificadores ASCII del detector ya cubre lo que no es texto que alguien
+ * lee. `tuteo.py` entra porque su tabla reescribe palabras al salir: una
+ * prohibida puesta ahí entraría en todas las jornadas de una vez.
+ */
+const FUENTE_DEL_SEED = [
+  'tcd-spec/datos/generar_seed.py',
+  'tcd-spec/datos/hoja_de_ruta.py',
+  'tcd-spec/datos/tuteo.py',
+];
+for (const archivo of FUENTE_DEL_SEED) {
+  const lineas = readFileSync(join(raiz, archivo), 'utf8').split('\n');
+  lineas.forEach((linea, i) => {
+    // Los comentarios del generador explican la regla y la nombran; la regla
+    // escrita no es copy que el cliente lea.
+    const limpio = linea.replace(/#.*$/, '');
+    if (!limpio.trim()) return;
+    revisados++;
+    const m = limpio.match(PROHIBIDAS);
+    if (!m) return;
+    const just = JUSTIFICADAS.find((j) => limpio.includes(j.trozo));
+    if (just) { usadas.add(just.trozo); return; }
+    faltas.push({
+      archivo: `${archivo}:${i + 1}`,
+      palabra: m[0].toLowerCase(),
+      texto: limpio.trim().slice(0, 88),
+    });
+  });
+}
 
 if (faltas.length === 0) {
   console.log(`  ✓ ninguno de los ${revisados} textos del cliente usa una palabra prohibida`);

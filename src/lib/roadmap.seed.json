@@ -908,7 +908,7 @@
         {
           "tipo": "numero",
           "nombre": "Tus seis números de entrada",
-          "valida": "las diez respuestas, 1 a 10",
+          "valida": "los seis números de entrada cargados",
           "del_mercado": false,
           "pide": "Contesta las seis preguntas. Quedan guardadas hasta el día 82, cuando vuelves a medir."
         },

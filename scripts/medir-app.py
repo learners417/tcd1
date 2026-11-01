@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-medir-app.py — mide TODAS las pantallas del cliente contra docs/tcd-spec/10-DISENO.md.
+medir-app.py — mide TODAS las pantallas del cliente contra tcd-spec/10-DISENO.md.
 
 Abre la app real (modo sin base de datos) en Chromium a 390 px y, pantalla por
 pantalla, cuenta lo que la especificación prohíbe y se puede medir:
