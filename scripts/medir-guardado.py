@@ -137,82 +137,13 @@ def bucle_camino(ctx, base):
 
     print(f'  arranca con {len(hechas)} jornadas cerradas')
 
-    # La entrada a la lista: las tarjetas con barra son el MAPA del camino
-    # —tocarlas contrae, no despliega— y la lista de jornadas vive detrás de
-    # «Tu Hoja de Ruta». Confundir el mapa con la lista fue lo que hizo que
-    # esta sonda diera tres veces «no hay jornadas» con la app entera andando.
-    puerta = pag.evaluate("""() => {
-      const b = [...document.querySelectorAll('#root button')]
-        .filter((x) => !x.closest('aside'))
-        .find((x) => /Hoja de Ruta/i.test(x.textContent || ''));
-      if (!b) return null;
-      b.dataset.puerta = '1';
-      return (b.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
-    }""")
-    if not puerta:
+    paso = abrir_jornada_del_dia(pag)
+    if paso['falla']:
         pag.close()
-        return ['el Camino no ofrece la entrada a la hoja de ruta']
-    print(f'  entra por «{puerta}»')
-    pag.click('[data-puerta="1"]')
-    pag.wait_for_timeout(1600)
+        return [paso['falla']]
 
-    # EL TRAMO DEL DÍA YA VIENE ABIERTO.
-    #
-    # Al cargar, si no hay ninguno elegido, el Camino abre solo el primer tramo
-    # sin terminar. Y la tarjeta del tramo ALTERNA: tocarla cuando ya está
-    # abierta la cierra. Esta sonda la tocaba «para abrirla» y la cerraba, y
-    # después no encontraba jornadas — con la app funcionando perfecto. Se mira
-    # primero, y solo se toca si de verdad está cerrado.
-    hay = pag.evaluate("() => document.querySelectorAll('[id^=\"meta-\"]').length")
-    if hay == 0:
-        tramo = pag.evaluate("""() => {
-          const bs = [...document.querySelectorAll('#root button')].filter((b) => !b.closest('aside'));
-          const conRayo = bs.find((b) => b.querySelector('svg.lucide-zap'));
-          if (!conRayo) return null;
-          conRayo.dataset.tramo = '1';
-          return (conRayo.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
-        }""")
-        if tramo:
-            print(f'  venía cerrado: abre el tramo «{tramo}»')
-            pag.click('[data-tramo="1"]')
-            pag.wait_for_timeout(1400)
-    else:
-        print(f'  el tramo del día ya viene abierto, con {hay} jornadas')
-
-    jornada = pag.evaluate("""() => {
-      // La jornada es un div con id `meta-<codigo>`; adentro, la fila que se toca.
-      const filas = [...document.querySelectorAll('[id^="meta-"]')]
-        .filter((el) => { const r = el.getBoundingClientRect(); return r.width > 40 && r.height > 10; });
-      if (!filas.length) return null;
-      /*
-       * ─── CÓMO SE RECONOCE UNA JORNADA ABIERTA ───────────────────────────
-       *
-       * Por su ícono, y los nombres son los de lucide, no los que uno
-       * supondría: la cerrada lleva `lucide-circle-check`, la abierta un
-       * `lucide-circle` a secas y la bloqueada `lucide-lock`. Esta sonda
-       * buscaba `lucide-check-circle-2`, que no existe, así que daba por
-       * abiertas a las tres cerradas del tramo y tocaba la primera.
-       *
-       * Y CON TRABAJO: «Día 27 · Fin de semana · 0 min» es un día de descanso
-       * y no tiene taller. Tocarlo y esperar un taller es pedirle a la app
-       * algo que con razón no hace.
-       */
-      const conTrabajo = (el) => /[1-9]\\d* ?min/.test(el.textContent || '');
-      const abierta = filas.find((el) => el.querySelector('svg.lucide-circle')
-        && !el.querySelector('svg.lucide-lock') && conTrabajo(el));
-      if (!abierta) return { cuantas: filas.length, cual: null };
-      abierta.dataset.tocar = '1';
-      return { cuantas: filas.length, cual: (abierta.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 50) };
-    }""")
-    if not jornada:
-        pag.close()
-        return [f'el tramo «{tramo}» se abrió y no muestra ninguna jornada adentro']
-
-    if not jornada['cual']:
-        pag.close()
-        return [f'las {jornada["cuantas"]} jornadas del tramo están cerradas o bloqueadas: '
-                'no hay ninguna abierta con trabajo']
-    print(f'  el tramo tiene {jornada["cuantas"]} jornadas · toca «{jornada["cual"]}»')
+    print(f'  entra por «{paso["puerta"]}»')
+    print(f'  el tramo tiene {paso["cuantas"]} jornadas · toca «{paso["jornada"]}»')
 
     # ¿RESPONDE AL TOQUE? Se mide por su estilo, no por un texto.
     #
@@ -225,25 +156,9 @@ def bucle_camino(ctx, base):
     # Lo que sí es exacto: la fila elegida toma su estilo activo —oro en el
     # fondo y en el borde— y ese cambio es la app contestando que registró el
     # toque. Si la fila no cambia, no pasó nada, y es lo único que ninguna de
-    # las sesenta y cinco vistas del medidor vería: todas fotografían la
-    # pantalla quieta.
-    antes_clase = pag.evaluate(MEDIR_CLASE)
-    # Y se toca la FILA, no su contenedor. El `onClick` vive en el div de
-    # adentro; el de afuera solo lleva el `id`. Tocar el contenedor cae en su
-    # centro, que puede no ser la fila, y no pasa nada.
-    pag.evaluate("""() => {
-      const c = document.querySelector('[data-tocar="1"]');
-      const fila = c && c.firstElementChild;
-      if (fila) fila.dataset.fila = '1';
-    }""")
-
-    pag.click('[data-fila="1"]')
-    pag.wait_for_timeout(1600)
-    despues_clase = pag.evaluate(MEDIR_CLASE)
-
-    activa = 'gold' in despues_clase and 'gold' not in antes_clase
-    print(f'  la fila {"toma su estilo activo" if activa else "NO cambió"} al tocarla')
-    if not activa:
+    # las vistas del medidor vería: todas fotografían la pantalla quieta.
+    print(f'  la fila {"toma su estilo activo" if paso["activa"] else "NO cambió"} al tocarla')
+    if not paso['activa']:
         fallas.append('tocar la jornada no la activó: la fila no cambió de estilo')
 
     pag.close()
@@ -372,6 +287,141 @@ def bucle_numeros(ctx, base):
 # contestando que registró el toque.
 MEDIR_CLASE = ("() => { const el = document.querySelector('[data-fila=\"1\"]');"
                " return el ? String(el.className) : ''; }")
+
+
+def abrir_jornada_del_dia(pag):
+    """Del Camino a la jornada abierta del día, y la toca.
+
+    Vive acá y no adentro de `bucle_camino` porque el medidor de pantallas la
+    necesita igual: la jornada abierta es donde el cliente pasa de 45 minutos a
+    dos horas por día, y ninguna lente la había mirado nunca porque todas las
+    vistas fotografían la pantalla de entrada.
+
+    ═══ CÓMO SE NAVEGA DE VERDAD ═══
+
+    El Camino muestra TRAMOS, y las jornadas viven adentro. El tramo del día se
+    reconoce por su ícono: tilde el cerrado, candado el que no se abrió, un rayo
+    en oro el que toca hoy.
+
+    Y la jornada NO es un botón: es un `div` con `onClick`, con su `id`
+    `meta-<codigo>`. Una sonda que busca `button` no encuentra ninguna y parece
+    que la app está vacía. (De paso: un `div` que se toca sin `role="button"`
+    ni foco de teclado no lo alcanza nadie que no use el dedo — queda anotado,
+    es un patrón de toda la app y no una línea.)
+
+    ═══ SE ESPERA A LA APP, NO AL RELOJ ═══
+
+    Antes cada paso esperaba un `wait_for_timeout` fijo, y el que le servía a
+    este archivo no le servía al medidor: con más vistas la máquina va más
+    lenta y la sonda leía una lista a medio dibujar, dando «las jornadas están
+    cerradas o bloqueadas» con la app andando perfecto. Un tiempo fijo mide la
+    máquina; `wait_for_function` mide la app.
+
+    Devuelve {'falla', 'jornada', 'activa'}.
+    """
+    # La entrada a la lista: las tarjetas con barra son el MAPA del camino
+    # —tocarlas contrae, no despliega— y la lista de jornadas vive detrás de
+    # «Tu Hoja de Ruta». Confundir el mapa con la lista fue lo que hizo que
+    # esta sonda diera tres veces «no hay jornadas» con la app entera andando.
+    try:
+        pag.wait_for_function(
+            """() => [...document.querySelectorAll('#root button')]
+                 .some((b) => !b.closest('aside') && /Hoja de Ruta/i.test(b.textContent || ''))""",
+            timeout=20000)
+    except Exception:
+        return {'falla': 'el Camino no ofrece la entrada a la hoja de ruta', 'jornada': None, 'activa': False}
+
+    puerta = pag.evaluate("""() => {
+      const b = [...document.querySelectorAll('#root button')]
+        .filter((x) => !x.closest('aside'))
+        .find((x) => /Hoja de Ruta/i.test(x.textContent || ''));
+      b.dataset.puerta = '1';
+      return (b.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
+    }""")
+    pag.click('[data-puerta="1"]')
+
+    # EL TRAMO DEL DÍA YA VIENE ABIERTO.
+    #
+    # Al cargar, si no hay ninguno elegido, el Camino abre solo el primer tramo
+    # sin terminar. Y la tarjeta del tramo ALTERNA: tocarla cuando ya está
+    # abierta la cierra. Esta sonda la tocaba «para abrirla» y la cerraba, y
+    # después no encontraba jornadas — con la app funcionando perfecto. Se mira
+    # primero, y solo se toca si de verdad está cerrado.
+    try:
+        pag.wait_for_function(
+            "() => document.querySelectorAll('[id^=\"meta-\"]').length > 0", timeout=8000)
+    except Exception:
+        tramo = pag.evaluate("""() => {
+          const bs = [...document.querySelectorAll('#root button')].filter((b) => !b.closest('aside'));
+          const conRayo = bs.find((b) => b.querySelector('svg.lucide-zap'));
+          if (!conRayo) return null;
+          conRayo.dataset.tramo = '1';
+          return (conRayo.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
+        }""")
+        if not tramo:
+            return {'falla': f'entra por «{puerta}» y no hay tramo del día que abrir',
+                    'jornada': None, 'activa': False}
+        pag.click('[data-tramo="1"]')
+        try:
+            pag.wait_for_function(
+                "() => document.querySelectorAll('[id^=\"meta-\"]').length > 0", timeout=8000)
+        except Exception:
+            return {'falla': f'el tramo «{tramo}» se abrió y no muestra ninguna jornada adentro',
+                    'jornada': None, 'activa': False}
+
+    jornada = pag.evaluate("""() => {
+      // La jornada es un div con id `meta-<codigo>`; adentro, la fila que se toca.
+      const filas = [...document.querySelectorAll('[id^="meta-"]')]
+        .filter((el) => { const r = el.getBoundingClientRect(); return r.width > 40 && r.height > 10; });
+      if (!filas.length) return null;
+      /*
+       * ─── CÓMO SE RECONOCE UNA JORNADA ABIERTA ───────────────────────────
+       *
+       * Por su ícono, y los nombres son los de lucide, no los que uno
+       * supondría: la cerrada lleva `lucide-circle-check`, la abierta un
+       * `lucide-circle` a secas y la bloqueada `lucide-lock`. Esta sonda
+       * buscaba `lucide-check-circle-2`, que no existe, así que daba por
+       * abiertas a las tres cerradas del tramo y tocaba la primera.
+       *
+       * Y CON TRABAJO: «Día 27 · Fin de semana · 0 min» es un día de descanso
+       * y no tiene taller. Tocarlo y esperar un taller es pedirle a la app
+       * algo que con razón no hace.
+       */
+      const conTrabajo = (el) => /[1-9]\\d* ?min/.test(el.textContent || '');
+      const abierta = filas.find((el) => el.querySelector('svg.lucide-circle')
+        && !el.querySelector('svg.lucide-lock') && conTrabajo(el));
+      if (!abierta) return { cuantas: filas.length, cual: null };
+      abierta.dataset.tocar = '1';
+      return { cuantas: filas.length, cual: (abierta.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 50) };
+    }""")
+    if not jornada or not jornada['cual']:
+        n = jornada['cuantas'] if jornada else 0
+        return {'falla': f'las {n} jornadas del tramo están cerradas o bloqueadas: '
+                         'no hay ninguna abierta con trabajo', 'jornada': None, 'activa': False}
+
+    # Y se toca la FILA, no su contenedor. El `onClick` vive en el div de
+    # adentro; el de afuera solo lleva el `id`. Tocar el contenedor cae en su
+    # centro, que puede no ser la fila, y no pasa nada.
+    pag.evaluate("""() => {
+      const c = document.querySelector('[data-tocar="1"]');
+      const fila = c && c.firstElementChild;
+      if (fila) fila.dataset.fila = '1';
+    }""")
+    antes = pag.evaluate(MEDIR_CLASE)
+    pag.click('[data-fila="1"]')
+    # La fila elegida toma su estilo activo —oro en el fondo y en el borde— y
+    # ese cambio es la app contestando que registró el toque.
+    try:
+        pag.wait_for_function(
+            "(previa) => { const el = document.querySelector('[data-fila=\"1\"]');"
+            " return el && String(el.className) !== previa && /gold/.test(String(el.className)); }",
+            arg=antes, timeout=8000)
+        activa = True
+    except Exception:
+        activa = False
+    return {'falla': None, 'jornada': jornada['cual'], 'activa': activa,
+            'cuantas': jornada['cuantas'], 'puerta': puerta}
+
 
 # ═══ BUCLE 4 · CUANDO LA IA NO CONTESTA ════════════════════════════════════
 def bucle_sin_ia(ctx, base):

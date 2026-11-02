@@ -266,11 +266,45 @@ MEDIR = r"""
     e.scrollLeft = 200; if (e.scrollLeft > 1) r.lateral = 1; e.scrollLeft = 0;
   }
   // Un panel fijo que está entero fuera de la pantalla está escondido (menú cerrado).
+  let tapa;   // el panel que cubre la pantalla entera, si lo hay (se busca una vez)
   const escondido = (el) => { for (let p = el; p; p = p.parentElement) {
       const cs = getComputedStyle(p);
       if (cs.position === 'fixed' || cs.position === 'absolute') { const q = p.getBoundingClientRect(); if (q.right <= 1 || q.left >= vw - 1) return true; }
       if (p.getAttribute && (p.getAttribute('aria-hidden') === 'true' || p.hasAttribute('inert'))) return true;
-    } return false; };
+    }
+    /*
+     * ─── LO QUE ESTÁ DEBAJO DE UN PANEL QUE TAPA TODO ──────────────────
+     *
+     * El taller de la jornada se pinta en un `fixed inset-0` opaco encima del
+     * Camino. El Camino sigue en el DOM y sigue siendo «visible» para
+     * `getBoundingClientRect`, así que el medidor contaba sus tamaños de letra
+     * junto con los del taller: medía dos pantallas a la vez y daba siete
+     * tamaños donde el cliente ve cuatro.
+     *
+     * La vara es ESTRECHA a propósito. Una primera versión marcaba escondido
+     * todo lo que tuviera cualquier cosa encima, y dejaba fuera de la medición
+     * de 1 a 5 textos POR PANTALLA que se leen perfecto —la cadena del ADN en
+     * Hoy, los libros de la Biblioteca, el nombre de un entrenador— porque
+     * arriba tenían un velo transparente. Acá solo tapa un panel `fixed`,
+     * OPACO y del tamaño de la pantalla entera: un panel, no un velo.
+     *
+     * Se busca el panel UNA vez y se pregunta si el elemento está adentro, en
+     * lugar de preguntar por `elementFromPoint` quién tiene encima: lo que
+     * está debajo del pliegue no cae en ningún punto de la pantalla, así que
+     * por ese camino el Camino seguía contándose entero.
+     */
+    if (tapa === undefined) {
+      const vh0 = window.innerHeight;
+      tapa = [...document.querySelectorAll('#root *')].find((q) => {
+        const cq = getComputedStyle(q); if (cq.position !== 'fixed') return false;
+        const b = q.getBoundingClientRect();
+        if (b.width < vw - 2 || b.height < vh0 - 2) return false;
+        const m = cq.backgroundColor.match(/([\d.]+)\)$/);
+        return (m ? parseFloat(m[1]) : 1) > 0.5;
+      }) || null;
+    }
+    if (tapa && !tapa.contains(el)) return true;
+    return false; };
   const vis = (el) => { const b = el.getBoundingClientRect(); const cs = getComputedStyle(el);
     return b.width > 0 && b.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && Number(cs.opacity) > 0.05; };
   const nombre = (el) => (el.textContent || el.getAttribute('aria-label') || el.tagName).trim().replace(/\s+/g,' ').slice(0, 40);
@@ -1080,6 +1114,39 @@ def main():
                 m = medir_pantalla(pag); m['errores'] = errores
                 pag.screenshot(path=f'/tmp/admin-{tab}.png')
                 resultados[f'admin:{tab}'] = m; pag.close()
+            # ── La jornada abierta ────────────────────────────────────────
+            #
+            # Es donde el cliente pasa de 45 minutos a dos horas por día, y
+            # ninguna lente la había mirado: todas las vistas fotografían la
+            # pantalla de entrada, y el taller de la jornada se pinta aparte,
+            # solo después de tocar la fila.
+            #
+            # La navegación es la misma que usa medir-guardado para su bucle
+            # del Camino, importada de ahí: una sola forma de llegar, y cuando
+            # el Camino cambie se arregla en un lugar.
+            if not solo or 'roadmap>jornada' in solo:
+                # El guion del nombre impide un `import` normal, así que se
+                # carga por ruta. Se importa tarde, acá, para que medir-app
+                # siga corriendo aunque medir-guardado no esté.
+                import importlib.util
+                ruta_mg = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'medir-guardado.py')
+                spec = importlib.util.spec_from_file_location('medir_guardado', ruta_mg)
+                mg = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mg)
+                pag = ctx.new_page(); errores = []
+                pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
+                pag.goto(base)
+                preparar(pag, 'roadmap', dias=40, hechas=mg.estado_lleno()['hechas'][:30])
+                pag.reload()
+                paso = mg.abrir_jornada_del_dia(pag)
+                if paso['falla']:
+                    errores.append(paso['falla'])
+                else:
+                    pag.wait_for_timeout(900)
+                m = medir_pantalla(pag); m['errores'] = errores
+                pag.screenshot(path='/tmp/app-roadmap-jornada.png')
+                resultados['roadmap>jornada'] = m; pag.close()
+
             # ── La primera pantalla de todas ──────────────────────────────
             #
             # El login es lo primero que ve cualquiera que entra, y era la

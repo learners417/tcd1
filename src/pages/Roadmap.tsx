@@ -1705,10 +1705,22 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                         )}
                         {meta.tipo === 'COACH' && (
                           <div className="fixed inset-0 z-[60] overflow-y-auto bg-[var(--bg-card,#17150F)]">
-                            <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
-                              <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
-                              <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold">Sesión en curso</p>
-                              <span className="text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
+                            {/* Los tres en un renglón y sin aire: en el teléfono los tres
+                                partían en dos líneas cada uno —«Guardar y / salir»,
+                                «SESIÓN EN / CURSO», «60 / min»— y el encabezado de la
+                                pantalla donde el cliente pasa una hora por día se veía
+                                roto. `justify-between` reparte el sobrante, y acá no
+                                había sobrante que repartir.
+
+                                La versalita del medio se esconde en pantalla angosta:
+                                es la que menos dice —ya estás adentro de la sesión— y
+                                es la más ancha por su interletrado. Y pasa a 15/700 con
+                                0.16em, que es la versalita del lado del cliente; estaba
+                                en 17 con 0.25em, el único caso así en toda la app. */}
+                            <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between gap-4">
+                              <button onClick={() => setActiveMeta(null)} className="shrink-0 whitespace-nowrap text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
+                              <p className="hidden sm:block shrink-0 whitespace-nowrap text-[15px] font-bold uppercase tracking-[0.16em] text-gold">Sesión en curso</p>
+                              <span className="shrink-0 whitespace-nowrap text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
                             </div>
                             <div className="max-w-2xl mx-auto px-4 py-6">
 
