@@ -50,17 +50,11 @@ export default function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-4">
-      {/* Background gradient */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-gold/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex w-16 h-16 rounded-2xl bg-gold/[0.05] items-center justify-center shadow-lg shadow-gold/20 mb-4">
-            <Stethoscope className="w-8 h-8 text-ink" />
+          <div className="inline-flex w-16 h-16 rounded-2xl bg-gold/10 border border-gold/30 items-center justify-center mb-4">
+            <Stethoscope className="w-8 h-8 text-gold" />
           </div>
           <h1 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Tu Clínica Digital</h1>
           <p className="text-sm text-cream/55 mt-1">El camino de tu práctica · 90 días</p>
@@ -68,7 +62,7 @@ export default function Login({ onLogin }: LoginProps) {
 
         {/* Card */}
         <div className="card-ios p-8 backdrop-blur-sm">
-          <h2 className="text-lg font-medium text-cream mb-6">Iniciar sesión</h2>
+          <h2 className="text-lg font-sans not-italic font-semibold text-cream mb-6">Iniciar sesión</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
@@ -105,7 +99,8 @@ export default function Login({ onLogin }: LoginProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 hover:text-cream/70 transition-colors"
+                  aria-label={showPassword ? 'Ocultar la contraseña' : 'Ver la contraseña'}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-cream/55 hover:text-cream/70 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -116,7 +111,7 @@ export default function Login({ onLogin }: LoginProps) {
             <button
               type="submit"
               disabled={loading || !email.trim() || !password.trim()}
-              className="w-full py-3 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 disabled:cursor-not-allowed text-ink font-medium text-sm transition-all flex items-center justify-center gap-2 mt-2 shadow-lg shadow-gold/20"
+              className="w-full py-3 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 disabled:cursor-not-allowed text-ink font-medium text-sm transition-all flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <>
@@ -132,13 +127,13 @@ export default function Login({ onLogin }: LoginProps) {
           <button
             type="button"
             onClick={() => { setResetEmail(email); setShowResetModal(true); }}
-            className="w-full text-center text-xs text-gold/70 hover:text-gold mt-4 transition-colors"
+            className="w-full min-h-[44px] text-center text-xs text-gold/70 hover:text-gold mt-4 transition-colors"
           >
             ¿Olvidaste tu contraseña?
           </button>
 
           <p className="text-center text-xs text-cream/45 mt-6">
-            ¿Otros problemas? Escríbele a tu Mentor por WhatsApp.
+            ¿Otros problemas? Escríbenos por WhatsApp y te respondemos.
           </p>
         </div>
       </div>
@@ -147,10 +142,11 @@ export default function Login({ onLogin }: LoginProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
-              <h3 className="text-sm font-semibold text-cream">Recuperar contraseña</h3>
+              <h3 className="text-sm font-sans not-italic font-semibold text-cream">Recuperar contraseña</h3>
               <button
                 onClick={() => setShowResetModal(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
+                aria-label="Cerrar"
+                className="-mr-2 min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-cream/55 hover:text-cream hover:bg-cream/5 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -175,7 +171,7 @@ export default function Login({ onLogin }: LoginProps) {
               <button
                 type="submit"
                 disabled={resetLoading || !resetEmail.trim()}
-                className="w-full py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-black text-sm font-bold transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-ink text-sm font-bold transition-all flex items-center justify-center gap-2"
               >
                 {resetLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : 'Enviar mail de recuperación'}
               </button>

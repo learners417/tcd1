@@ -1080,6 +1080,24 @@ def main():
                 m = medir_pantalla(pag); m['errores'] = errores
                 pag.screenshot(path=f'/tmp/admin-{tab}.png')
                 resultados[f'admin:{tab}'] = m; pag.close()
+            # ── La primera pantalla de todas ──────────────────────────────
+            #
+            # El login es lo primero que ve cualquiera que entra, y era la
+            # única pantalla del recorrido del cliente que ninguna lente había
+            # mirado: el medidor entra con sesión puesta y el login le quedaba
+            # atrás. Va por su visor, igual que el Admin.
+            for nombre, qs in ([] if solo and not any(x.startswith('login') for x in solo) else
+                               [('login', ''), ('login>recuperar', '?modal=recuperar')]):
+                if solo and nombre not in solo:
+                    continue
+                pag = ctx.new_page(); errores = []
+                pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
+                pag.goto(f'{base}scripts/visor/login.html{qs}')
+                pag.wait_for_selector('#root form, #root button', timeout=15000)
+                pag.wait_for_timeout(1200)
+                m = medir_pantalla(pag); m['errores'] = errores
+                pag.screenshot(path=f"/tmp/app-{nombre.replace('>', '-')}.png")
+                resultados[nombre] = m; pag.close()
             for p in pantallas:
                 pag = ctx.new_page()
                 errores = []
