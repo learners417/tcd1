@@ -30,10 +30,27 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
     setAbierto(false);
   }
 
+  /*
+   * ─── LA CADENA VA EN VERTICAL ──────────────────────────────────────────
+   *
+   * Los cuatro eslabones estaban en un renglón, repartiéndose el ancho del
+   * teléfono: a 390 px le tocan unos 85 a cada uno, y «conversaciones» pide
+   * más de 100. Los rótulos se montaban unos sobre otros —medido: la lente de
+   * desborde caza los cuatro— en la pantalla principal del cliente.
+   *
+   * No se vio antes porque esta tarjeta solo aparece los días de cierre de
+   * semana, y el medidor corría con el reloj de la máquina. Ahora el reloj va
+   * fijo en un lunes, que es cuando se ve.
+   *
+   * En vertical cada rótulo tiene el ancho entero y los números quedan
+   * alineados por su columna, que es como se lee una cadena: de arriba abajo,
+   * viendo dónde se corta.
+   */
   const Eslabon = ({ n, label }: { n: number; label: string }) => (
-    <div className="flex-1 min-w-0 text-center">
-      <p className="text-lg font-semibold text-gold" style={{ fontFamily: 'var(--font-display)' }}>{n}</p>
-      <p className="text-xs text-cream/50 leading-tight">{label}</p>
+    <div className="flex items-baseline gap-3">
+      <p className="w-16 shrink-0 text-right text-lg font-semibold text-gold num-tab"
+         style={{ fontFamily: 'var(--font-display)' }}>{n}</p>
+      <p className="text-xs text-cream/60">{label}</p>
     </div>
   );
 
@@ -43,21 +60,20 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
   return (
     <div className={`card-panel p-5 ${pideNumeros ? 'border border-gold/40' : ''}`}>
       <div className="flex items-baseline justify-between mb-1">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/60">Tu tablero</p>
+        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-cream/60">Tu tablero</p>
         <p className="text-sm font-bold text-gold">{hechas} de {META_PACIENTES} pacientes</p>
       </div>
       <p className="text-xs text-cream/50 mb-4">
         {pideNumeros ? 'Hoy es viernes: carga tus 3 números y sabrás qué corregir.' : 'Lo que falta, en números — no en ganas.'}
       </p>
 
-      <div className="flex items-start gap-1">
+      {/* La línea de la izquierda hace de cadena: une los cuatro sin flechas
+          que, en vertical, apuntarían al costado. */}
+      <div className="space-y-2 border-l border-[var(--line2,#DFD3BC)] pl-3">
         <Eslabon n={total.conversaciones} label="conversaciones" />
-        <span className="text-cream/25 text-xs mt-1.5">→</span>
         <Eslabon n={total.agendas} label="agendas" />
-        <span className="text-cream/25 text-xs mt-1.5">→</span>
         <Eslabon n={total.llamadas} label="llamadas" />
-        <span className="text-cream/25 text-xs mt-1.5">→</span>
-        <Eslabon n={total.ventas} label="pacientes" />
+        <Eslabon n={total.ventas} label={VOC('{{consultantes}}')} />
       </div>
 
       <p className="text-xs text-cream/70 mt-4 leading-relaxed border-t border-cream/10 pt-3">

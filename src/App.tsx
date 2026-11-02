@@ -308,6 +308,25 @@ export default function App() {
   // ─── Auth init ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isSupabaseReady() || !supabase) {
+      /*
+       * ─── EN PRODUCCIÓN, ESTE MODO NO VA ────────────────────────────────
+       *
+       * Entrar sin sesión es a propósito y sirve para una sola cosa: medir la
+       * app sin una cuenta de verdad (los visores de scripts/visor/ viven de
+       * esto). Pero si se publica sin `VITE_SUPABASE_URL` o
+       * `VITE_SUPABASE_ANON_KEY`, cualquiera que abra la página entra directo
+       * como «Profesional» —sin login— y `guardarFila` devuelve éxito sin
+       * cliente, así que todo lo que escriba ese día parece guardado y no
+       * existe. Un cliente que acaba de pagar haría su jornada entera contra
+       * la nada.
+       *
+       * En un build de producción se queda afuera y lee, en el login, que el
+       * problema no es suyo. En desarrollo no cambia nada.
+       */
+      if (import.meta.env.PROD) {
+        setAuthState('logged_out');
+        return;
+      }
       // Sin base configurada: se entra directo, sin sesión.
       const existing = localStorage.getItem('tcd_profile');
       if (!existing) localStorage.setItem('tcd_profile', JSON.stringify(profile));

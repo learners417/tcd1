@@ -105,8 +105,23 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
       if (supabase) {
         // Paracaídas móvil: con señal floja, el guardado no puede colgar el botón.
         // 8 segundos y avanzamos igual — lo local ya quedó, el servidor se sincroniza después.
-        await Promise.race([
-          new Promise((res) => setTimeout(res, 8000)),
+        /*
+         * El resultado se MIRA, aunque no se bloquee al cliente.
+         *
+         * Antes se descartaba, y `update()` devuelve `{error}` en vez de
+         * lanzar: si una columna del payload no está en el esquema, PostgREST
+         * rechaza el UPDATE ENTERO (PGRST204) y las que sí existen tampoco se
+         * guardan. Eso estuvo pasando con `avatar_tipo` y `diagnostico`, que
+         * ninguna migración creaba, y se llevaba puestas a `adn_nicho` y
+         * `adn_diagnostico_capa`. Sin un solo mensaje en ningún lado: ni el
+         * cliente ni nosotros podíamos saberlo.
+         *
+         * No se le avisa al cliente ni se le corta el paso —el paracaídas de
+         * abajo existe justo para que con señal floja el botón no se cuelgue—
+         * pero queda escrito, que es lo que Sentry recoge.
+         */
+        const guardado = await Promise.race([
+          new Promise<{ error?: unknown } | null>((res) => setTimeout(() => res(null), 8000)),
           supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
           diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica },
@@ -114,8 +129,11 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
         }).eq('id', profile.id),
         ]);
+        if (guardado && guardado.error) {
+          console.error('[bienvenida] el diagnóstico no se guardó:', guardado.error);
+        }
       }
-    } catch { /* no bloqueamos el flujo */ }
+    } catch (e) { console.error('[bienvenida] el diagnóstico no se guardó:', e); }
     setDxSaving(false);
     setStep(getOrigen().porque ? 'welcome' : 'origen'); // nada se pregunta dos veces
   };

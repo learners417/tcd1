@@ -113,6 +113,48 @@ INTERNAS = [
 # vuelva a pasar.
 # Los modales del cliente, cada uno en su visor (scripts/visor/modales.tsx).
 # Son los que se abren encima de una pantalla y por eso ninguna vista los veía.
+# ╔════════════════════════════════════════════════════════════════════════╗
+# ║  EL RELOJ, FIJO                                                        ║
+# ╚════════════════════════════════════════════════════════════════════════╝
+#
+# La app cambia según el día de la semana: el tablero de la semana solo
+# aparece los días de cierre, el saludo dice buenos días o buenas noches, y el
+# fin de semana muestra otra cosa. Con el reloj de la máquina, el medidor mide
+# un día distinto en cada corrida.
+#
+# Medido el 2 de nov: `dashboard>lleno` dio 0 faltas un domingo y 4 al día
+# siguiente, sin que cambiara una línea de código. El verde de la batería
+# dependía del día en que se corría, que es lo mismo que no tener batería.
+#
+# Se fija un LUNES por la mañana, que es el día que más muestra: cierre de
+# semana con su tablero, jornada del día, saludo de mañana. Las variantes que
+# necesiten otro momento se fijan aparte.
+RELOJ = '2026-11-02T09:30:00-03:00'
+
+
+def fijar_reloj(ctx, iso):
+    """Hace que la app crea que es `iso`, en todas sus páginas.
+
+    Se reemplaza `Date` entero, no solo `Date.now()`: la app construye fechas
+    con `new Date()` sin argumentos —para saber qué día es— y también con
+    argumentos —para calcular contra la fecha de inicio—. Si solo se pisa
+    `now()`, el primer caso sigue leyendo el reloj de la máquina.
+    """
+    ctx.add_init_script("""(() => {
+      const fijo = new Date(%s).getTime();
+      const Real = Date;
+      const D = function (...args) {
+        if (args.length === 0) return new Real(fijo);
+        return new Real(...args);
+      };
+      D.prototype = Real.prototype;
+      D.now = () => fijo;
+      D.parse = Real.parse;
+      D.UTC = Real.UTC;
+      window.Date = D;
+    })();""" % repr(iso).replace("'", '"'))
+
+
 MODALES = ['freno', 'freno>campana', 'certificado', 'foto90', 'pilar', 'graduacion', 'material']
 
 ADMIN = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos',
@@ -1097,6 +1139,7 @@ def main():
         with sync_playwright() as pw:
             nav = pw.chromium.launch()
             ctx = nav.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=2)
+            fijar_reloj(ctx, RELOJ)
             solo_admin = [x for x in pantallas if x.startswith('admin:')]
             pantallas = [x for x in pantallas if not x.startswith('admin:')]
             for nombre, pant, boton in (INTERNAS if not solo else [i for i in INTERNAS if i[0] in solo]):

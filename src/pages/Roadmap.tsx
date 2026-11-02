@@ -300,8 +300,22 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
         if (!f || !userId) return;
         setSubiendo(true);
         try {
-          await subirEvidencia(userId, metaCodigo, f);
-          setItems((prev) => [...prev, { id: String(Date.now()), nombre: f.name }]);
+          /*
+           * `subirEvidencia` NO lanza: devuelve `{ok:false, motivo}` con el
+           * motivo ya escrito en castellano. Acá se descartaba el resultado y
+           * se agregaba el archivo igual, así que el cliente leía en verde
+           * «✓ 1 evidencia guardada — tu equipo las ve» aunque la subida
+           * hubiera fallado, y al recargar no estaba. El día 1 pide dos fotos.
+           *
+           * `TaskCoach.tsx` ya miraba `res.ok`: eran dos pantallas del mismo
+           * día diciendo cosas distintas sobre lo mismo.
+           */
+          const res = await subirEvidencia(userId, metaCodigo, f);
+          if (!res.ok) {
+            toast.error(res.motivo);
+          } else {
+            setItems((prev) => [...prev, { id: String(Date.now()), nombre: f.name }]);
+          }
         } catch { /* el toast global lo maneja */ }
         setSubiendo(false);
         if (inputRef.current) inputRef.current.value = '';

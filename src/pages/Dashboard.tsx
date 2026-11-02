@@ -733,7 +733,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 hover:border-gold/30'}`}>
               <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
               <span className="flex-1 min-w-0">
-                <span className={`block text-sm font-medium ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
+                {/* 600, no 500: era el cuarto peso sobre 17 px en el tablero lleno,
+                    con el techo en tres. 500 y 600 son el mismo gesto. */}
+                <span className={`block text-sm font-semibold ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
                 <span className="block text-sm text-cream/50">{meta}</span>
               </span>
               {onClick && <ChevronRight className="w-4 h-4 text-cream/40" />}

@@ -68,10 +68,13 @@ falt = set(cods) - set(re.findall(r"'(P[\w\.]+)'", m.group(1)))
 check('MetaCodigo completo', not falt, str(sorted(falt)))
 
 print('══ 3) HERRAMIENTAS ══')
-h = rd('src/lib/herramientas.ts')
-cat = set(re.findall(r"id: '(H-[\w\.]+)'", h))
+# El catálogo salió del código el 1 de nov: ninguna jornada apuntaba a una
+# herramienta. Antes acá se comparaba lo usado contra `herramientas.ts`, que ya
+# no existe, y esta auditoría se caía entera al abrirlo. La vara que queda es
+# la misma que guarda `prueba-codigos.ts`: que no vuelva a aparecer ninguna.
 usadas = set(re.findall(r"herramienta_id: '([^']+)'", s))
-check('todas las usadas existen en el catálogo', not (usadas - cat), str(sorted(usadas - cat)))
+check('ninguna jornada apunta a una herramienta: el catálogo ya no existe',
+      not usadas, str(sorted(usadas)))
 
 print('══ 4) COMPONENTES ══')
 todo = {f: rd(f) for f in glob.glob('src/**/*.ts*', recursive=True)}
@@ -234,7 +237,11 @@ try:
 except Exception:
     _c5 = ''
 _luz5 = _c5[_c5.find('[data-theme="light"]'):]
-check('card-ios no cae en su respaldo negro', '--surface: #FFFDF7' in _luz5, '')
+# El valor literal dejó de estar: `--surface` pasó a `var(--bg-card)` para que
+# el papel se defina en UN lugar. Lo que esta vara protege es que en tema claro
+# `--surface` NO caiga en el respaldo oscuro, así que mira eso y no un hex.
+check('card-ios no cae en su respaldo negro',
+      '--surface: var(--bg-card)' in _luz5 and '--bg-card: #F6F2E9' in _luz5, '')
 
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
@@ -1536,8 +1543,15 @@ check('el medidor mide las pestañas que existen, y todas',
 #
 # La fuente es el seed. Esta lente compara la tabla del maestro contra él.
 _falla33c = []
+import os as _os33
 _seed33c = _json33.loads(rd('src/lib/roadmap.seed.json'))
-for _ruta33 in ('tcd-spec/00-MAESTRO.md', 'docs/tcd-spec/00-MAESTRO.md'):
+# Eran dos rutas porque la spec estaba duplicada: `tcd-spec/` en la raíz y una
+# copia vieja en `docs/`. La copia salió el 1 de nov —traía los nombres
+# anteriores de las pestañas, «Dojo» y «Mando»— y acá quedaba una ruta a un
+# archivo que ya no existe, que tiraba abajo la auditoría entera al abrirlo.
+# Se recorre lo que hay, no una lista escrita a mano.
+for _ruta33 in [_r for _r in ('tcd-spec/00-MAESTRO.md', 'docs/tcd-spec/00-MAESTRO.md')
+                if _os33.path.exists(_r)]:
     _doc33 = rd(_ruta33)
     _sec33 = _re33.search(r'## 4\. Los cinco sistemas(.*?)\n## ', _doc33, _re33.S)
     if not _sec33:
@@ -1713,9 +1727,14 @@ if _os40.path.exists('src/lib/jornada.ts'):
           'es lo único que el check-in resuelve y el cierre solo no puede')
     check('el objetivo es UNO: que todos los clientes vendan',
           'pctVendiendo' in _jo and 'clientesQueVendieron' in _jo)
+    # Pedía la frase «no escala». «Escala» es una de las palabras prohibidas de
+    # la casa y la limpieza de vocabulario la reescribió a «eso no crece»: la
+    # vara pinchaba sobre su propia regla. Mira las dos ramas que importa que
+    # existan —vender más costando más, y aliviar sin resolver— por lo que
+    # dicen y no por una palabra suelta.
     check('el círculo se mide con dos números a la vez',
           'export function comoVaElCirculo' in _jo
-          and 'no escala' in _jo and 'todavía no está resolviendo' in _jo,
+          and 'cuesta más trabajo' in _jo and 'todavía no está resolviendo' in _jo,
           'si venden más pero cuesta más trabajo, se está comprando resultado con horas')
     check('una traba repetida manda sobre todo lo demás en el titular',
           'trabasDelSistema > 0' in _jo)
@@ -2813,8 +2832,40 @@ check('el mapa de avisos se exporta, no se duplica',
       'export const AVISOS' in rd('src/lib/avisosCliente.ts'))
 
 print('══ 7) UI ══')
-botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')
-           for m in re.finditer(r"<button(?![^>]*onClick)(?![^>]*onMouseDown)(?![^>]*type=\"submit\")[^>]*>", src)]
+# ─── POR QUÉ NO SE BUSCA CON `[^>]*` ───────────────────────────────────────
+#
+# El `[^>]*` se corta en el PRIMER `>`, y adentro de un atributo hay `>` a
+# cada rato: `disabled={faltan > 0}` y cualquier `onClick={() => ...}`. Con un
+# botón así, el lookahead nunca llega a ver el `onClick` que está dos
+# renglones más abajo y lo marca como botón muerto. Medido: daba
+# `SieteLibertades.tsx`, donde los tres botones tienen su `onClick`.
+#
+# Se toma la etiqueta entera —hasta el `>` que la cierra de verdad, contando
+# las llaves— y recién ahí se pregunta si tiene acción.
+def _etiqueta_button(src, desde):
+    i, llaves, comilla = desde, 0, ''
+    while i < len(src):
+        c = src[i]
+        if comilla:
+            if c == comilla: comilla = ''
+        elif c in '"\'':
+            comilla = c
+        elif c == '{': llaves += 1
+        elif c == '}': llaves -= 1
+        elif c == '>' and llaves == 0:
+            return src[desde:i + 1]
+        i += 1
+    return src[desde:]
+
+botones = []
+for f, src in todo.items():
+    if not f.endswith('.tsx'):
+        continue
+    for m in re.finditer(r'<button\b', src):
+        et = _etiqueta_button(src, m.start())
+        if 'onClick' in et or 'onMouseDown' in et or 'type="submit"' in et:
+            continue
+        botones.append(f.split('/')[-1])
 check('sin botones sin acción', not botones, str(botones[:4]))
 
 
@@ -2915,7 +2966,10 @@ check('el perfil llega con el día recalculado del calendario',
 _pan = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx') and re.search(r'\{\s*perfil\??\.dia_programa', src)]
 check('ninguna pantalla muestra la columna dia_programa directo', not _pan, str(_pan))
 _rm = todo.get('src/pages/Roadmap.tsx', '')
-check('la Fase Autonomía se decide por el paso, no por la fecha', 'estaEnFaseAutonomia(diaEsperado' in _rm)
+# La llamada quedó en varias líneas al crecerle el segundo argumento, así que
+# pedir los dos pegados ya no la encuentra aunque esté bien.
+check('la Fase Autonomía se decide por el paso, no por la fecha',
+      re.search(r'estaEnFaseAutonomia\(\s*diaEsperado', _rm) is not None)
 _db = todo.get('src/pages/Dashboard.tsx', '')
 check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)', 'esPasoDelCliente(meta)' in _db)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
@@ -3110,7 +3164,13 @@ check('existe la prueba del ADN coincidente', _os64.path.exists('scripts/prueba-
 # ── La Hoja de Ruta adentro de la app (24 sep) ─────────────────────
 _hr = rd('src/lib/hojaDeRuta.ts'); _hrv = rd('src/components/camino/HojaDeRuta.tsx')
 _rm_hr = rd('src/pages/Roadmap.tsx')
-check('las trece semanas tienen nombre', len(re.findall(r'^\s*\d+: .+,$', _hr, re.M)) >= 28)
+# Contaba renglones que terminen en coma, y no todos la llevan. Se cuentan las
+# entradas de cada mapa, que es lo que la vara quiere decir: trece semanas con
+# nombre y sus hitos escritos.
+_semanas_hr = re.search(r'SEMANAS: Record<number, string> = \{(.*?)\n\};', _hr, re.S)
+check('las trece semanas tienen nombre',
+      _semanas_hr is not None and len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) == 13,
+      'cuenta: ' + str(len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) if _semanas_hr else 0))
 check('los hitos están escritos', _hr.count('Tu ') >= 10)
 check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and 'tus noventa días' in _rm_hr)
 check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
@@ -3163,8 +3223,12 @@ check('el Mentor tiene preguntas cargadas del Camino nuevo',
 # ── Ningún código apunta al vacío (19 sep) ──────────────────────────
 check('existe la caza de códigos rotos', _os64.path.exists('scripts/prueba-codigos.ts'))
 _rm9 = todo.get('src/pages/Roadmap.tsx', '')
+# El catálogo salió del código el 1 de nov, y con él el campo `herramienta_id`
+# de `RoadmapMeta`. Antes esto comprobaba que el campo estuviera siempre en
+# `undefined`; ahora comprueba que el campo no esté. Si alguien lo repone,
+# `prueba-codigos.ts` lo caza del lado del seed.
 check('ninguna jornada abre el catálogo viejo de herramientas',
-      'herramienta_id: undefined' in rd('src/lib/roadmapSeed.ts'))
+      'herramienta_id' not in rd('src/lib/roadmapSeed.ts'))
 check('las jornadas con entrenador se practican con él',
       "j.agente !== null ? 'COACH'" in rd('src/lib/roadmapSeed.ts'))
 check('el consultorio responde por jornada o por pieza',
@@ -3408,7 +3472,9 @@ for _f, _src in todo.items():
 check('sin "días atrás", "quemar plata" ni "punto de no retorno" en pantalla', not _neg, '; '.join(_neg[:4]))
 # El vocabulario se aplica en la salida del dato, no en cada pantalla.
 _h = todo.get('src/lib/herramientas.ts', ''); _sg = todo.get('src/lib/sesionesGuiadas.ts', '')
-check('getHerramienta devuelve el texto ya traducido', re.search(r'function getHerramienta[\s\S]{0,400}vocabularizar\(', _h) is not None)
+# `getHerramienta` se fue con el catálogo. La vara que queda es la de las
+# sesiones guiadas, que es el cuerpo de texto con tokens que el cliente lee.
+check('el catálogo de herramientas ya no existe', not _h)
 check('sesionGuiadaDe devuelve el texto ya traducido', re.search(r'function sesionGuiadaDe[\s\S]{0,300}vocabularizar\(', _sg) is not None)
 _crudo = [f.split('/')[-1] for f, src in todo.items()
           if (f.startswith('src/components') or f.startswith('src/pages'))

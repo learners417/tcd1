@@ -26,6 +26,44 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(false);
 
     if (error) {
+      /*
+       * «Credenciales incorrectas» NO vale para todas las fallas.
+       *
+       * Si faltan `VITE_SUPABASE_URL` o `VITE_SUPABASE_ANON_KEY` al publicar,
+       * `signIn` devuelve «Supabase no configurado» y acá se leía «verifica tu
+       * email y contraseña». El cliente que acaba de pagar la prueba diez
+       * veces, pide recuperar la contraseña —que tampoco funciona— y escribe
+       * convencido de que se equivocó él. Y del otro lado nadie puede
+       * adivinarlo, porque el síntoma que cuenta es el equivocado.
+       *
+       * La app no le dice al cliente qué variable falta: eso no le sirve de
+       * nada. Le dice que el problema no es suyo y qué hacer.
+       */
+      if (/no configurado|invalid api key/i.test(error)) {
+        toast.error('La app todavía no está disponible. No es tu contraseña: escríbenos por WhatsApp y lo resolvemos.');
+        return;
+      }
+      /*
+       * El email sin confirmar es el otro caso que se leía como contraseña
+       * equivocada, y es el que más le puede pasar a un cliente nuevo: las
+       * altas por GHL y por migración ponen `email_confirm: true` con la clave
+       * de servicio, pero el alta desde el panel usa `signUp()` desde el
+       * navegador, que no puede confirmar nada. Ese cliente entra con sus
+       * datos bien y lee que se equivocó.
+       */
+      if (/email not confirmed|not confirmed/i.test(error)) {
+        toast.error('Tu cuenta todavía no está habilitada. No es tu contraseña: escríbenos por WhatsApp y la habilitamos.');
+        return;
+      }
+      /*
+       * Y lo que no es ni la contraseña ni la cuenta —quedarse sin señal, un
+       * 500 de la base— lo traduce el mismo ayudante que usa el resto de la
+       * app, para que el cliente lea siempre la misma voz.
+       */
+      if (/failed to fetch|network|fetch|timeout|50\d/i.test(error)) {
+        toast.error(mensajeDeFalla(new Error(error), 'entrar'));
+        return;
+      }
       toast.error('Credenciales incorrectas. Verifica tu email y contraseña.');
       return;
     }

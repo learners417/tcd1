@@ -228,7 +228,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Dibuja la W de tu llamada
 - Arma la lista de lo que grabas el lunes
 
-**Lo que queda hecho:** Tu embudo dibujado · Tu recurso elegido
+**Lo que queda hecho:** Tu captación dibujada · Tu recurso elegido
 
 **Se le habilita:** Entrega 2 del Sistema — sitios, formularios y contactos
 
@@ -496,8 +496,8 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 90 min · sistema 3: Tu captación automática*
 
-- Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito
-- Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta
+- Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso
+- Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta
 - Reparte el presupuesto mitad y mitad
 - Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos
 - Enciende y anota la fecha y la hora
@@ -647,7 +647,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Veredicto:** El descanso también construye. El lunes retomas donde quedaste.
 
-### Día 43 · Escalar o apagar
+### Día 43 · Crecer o apagar
 
 *Sesión · 45 min · sistema 3: Tu captación automática · entrenador: ramiro*
 
@@ -1254,7 +1254,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Cinturón:** Negro
 
-**Veredicto:** Terminaste. Tienes número, precio, método, oferta, embudo, app y tu ecosistema andando.
+**Veredicto:** Terminaste. Tienes número, precio, método, oferta, captación, app y tu ecosistema andando.
 
 ## Los diez frenos
 
@@ -1272,7 +1272,7 @@ Las reglas que el programa no negocia. El primero, `F-ORDEN`, es el que sostiene
 
 > Elige el día. El rodaje que no tiene fecha no ocurre.
 
-**F-14DIAS** — Escalar o apagar queda cerrado del 31 al 45
+**F-14DIAS** — Crecer o apagar queda cerrado del 31 al 45
 
 > Faltan {n} días. Tu campaña está aprendiendo.
 

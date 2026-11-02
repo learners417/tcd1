@@ -560,8 +560,16 @@ body,
 [data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: var(--bg-surface2) !important; }
 [data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
 [data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
-[data-theme="light"] .hover\:bg-\[\var(--bg-card)\]\/5:hover     { background-color: rgba(42, 33, 24, 0.05) !important; }
-[data-theme="light"] .hover\:bg-\[\var(--bg-card)\]\/10:hover    { background-color: rgba(42, 33, 24, 0.08) !important; }
+/*
+ * Acá vivían 30 reglas para `bg-[var(--bg-card)]`, `text-[var(--bg-card)]`,
+ * sus hover y sus placeholder. Tenían el escapado mal —`\[\var(` en vez de
+ * `\[var\(`— así que el navegador las descartaba enteras: son las 30
+ * advertencias que tiraba el build («Expected identifier in class selector»).
+ *
+ * Y arreglarlas no cambiaba nada: medido, NINGUNA de esas treinta clases
+ * aparece en el código. No tenían a qué aplicarse. Se van las dos cosas: la
+ * advertencia y la regla sin sujeto.
+ */
 [data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: var(--bg-surface2) !important; }
 
 /* ── Light scrim overlays inside content (not modal backdrops) ───── */
@@ -572,10 +580,6 @@ body,
    keep clear separation from the page underneath. */
 
 /* ── White-on-content overlays → invert to dark overlays ─────────── */
-[data-theme="light"] .bg-\[\var(--bg-card)\]\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
-[data-theme="light"] .bg-\[\var(--bg-card)\]\/8  { background-color: rgba(42, 33, 24, 0.06) !important; }
-[data-theme="light"] .bg-\[\var(--bg-card)\]\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .bg-\[\var(--bg-card)\]\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
 
 /* ── Text scale ─────────────────────────────────────────────────────
    White-on-dark and slate-on-light are not symmetric perceptually:
@@ -593,32 +597,11 @@ body,
 [data-theme="light"] .text-white\/40   { color: rgba(42, 33, 24, 0.55) !important; }
 [data-theme="light"] .text-white\/30   { color: rgba(42, 33, 24, 0.48) !important; }
 
-[data-theme="light"] .text-\[\var(--bg-card)\]       { color: var(--text-cream) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/90   { color: rgba(42, 33, 24, 0.9) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/85   { color: rgba(42, 33, 24, 0.86) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/80   { color: rgba(42, 33, 24, 0.82) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/70   { color: rgba(42, 33, 24, 0.72) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/65   { color: rgba(42, 33, 24, 0.68) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/60   { color: rgba(42, 33, 24, 0.62) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/55   { color: rgba(42, 33, 24, 0.6) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/50   { color: rgba(42, 33, 24, 0.58) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/45   { color: rgba(42, 33, 24, 0.56) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/40   { color: rgba(42, 33, 24, 0.55) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/30   { color: rgba(42, 33, 24, 0.48) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/25   { color: rgba(42, 33, 24, 0.45) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/20   { color: rgba(42, 33, 24, 0.4) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/15   { color: rgba(42, 33, 24, 0.36) !important; }
-[data-theme="light"] .text-\[\var(--bg-card)\]\/5    { color: rgba(42, 33, 24, 0.22) !important; }
 
 /* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-\[\var(--bg-card)\]:hover     { color: var(--text-cream) !important; }
 [data-theme="light"] .hover\:text-white:hover            { color: var(--text-cream) !important; }
-[data-theme="light"] .group:hover .group-hover\:text-\[\var(--bg-card)\] { color: var(--text-cream) !important; }
 
 /* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-\[\var(--bg-card)\]\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
-[data-theme="light"] .placeholder-\[\var(--bg-card)\]\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
-[data-theme="light"] .placeholder-\[\var(--bg-card)\]\/50::placeholder { color: rgba(42, 33, 24, 0.6) !important; }
 [data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
 [data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
 
@@ -649,9 +632,6 @@ body,
    cambian solos con el tema y no hace falta parchearlos. */
 
 /* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-\[\var(--bg-card)\]\/5    { border-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .border-\[\var(--bg-card)\]\/10   { border-color: rgba(42, 33, 24, 0.12) !important; }
-[data-theme="light"] .border-\[\var(--bg-card)\]\/20   { border-color: rgba(42, 33, 24, 0.18) !important; }
 [data-theme="light"] .border-white\/5           { border-color: rgba(42, 33, 24, 0.08) !important; }
 [data-theme="light"] .border-white\/10          { border-color: rgba(42, 33, 24, 0.12) !important; }
 [data-theme="light"] .border-white\/20          { border-color: rgba(42, 33, 24, 0.18) !important; }

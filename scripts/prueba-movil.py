@@ -107,9 +107,33 @@ try:
             check('ningún texto se sale de su tarjeta', not m['desborda'], '; '.join(m['desborda'][:3]))
             check('sin {{tokens}} sin traducir', not re.search(r'\{\{\s*\w+\s*\}\}', t), re.findall(r'.{20}\{\{.{20}', t)[:2])
             cab_txt = cab.inner_text()
-            dias_dichos = set(re.findall(r'D[íi]a (\d+) de 90', t)) | set(re.findall(r'(\d+)\s*/\s*90', t))
-            check('el día se dice de una sola forma: 71', dias_dichos == {'71'}, f'aparece: {sorted(dias_dichos)}')
-            check('el encabezado dice el día real (Día 71 de 90)', 'Día 71 de 90' in cab_txt)
+            # ─── EL DÍA DEL PASO, DICHO SIEMPRE IGUAL ───────────────────────
+            #
+            # Esto pedía «Día 71 de 90» literal. Dejó de valer cuando el
+            # mensaje de ritmo se rediseñó: cuando el cliente viene atrasado, el
+            # encabezado dice «Hoy toca tu paso del día 71. Llevas 72 días y con
+            # uno por día recuperas el ritmo». Los dos números son ciertos y
+            # cada uno se nombra —uno es su paso, el otro el calendario—, que es
+            # justamente lo que `mensajeDeRitmo` explica en su comentario.
+            #
+            # Lo que la prueba protege sigue siendo lo mismo: que el día del
+            # PASO se diga igual en todas las formas en que aparece, y que no se
+            # filtre el día congelado de la base. Lo que cambió es que ahora hay
+            # dos formas legítimas de decirlo, no una.
+            # Son DOS números y los dos son ciertos: 71 es el día del
+            # calendario —lo que lleva desde que empezó— y el día del PASO es el
+            # de la próxima jornada que le toca, que con 15 hechas es el 15. La
+            # primera versión de esta vara pedía que los dos fueran 71, que es
+            # justo la confusión que `mensajeDeRitmo` evita nombrando cuál es
+            # cuál. Lo que importa es que cada uno se diga SIEMPRE IGUAL.
+            pasos_dichos = (set(re.findall(r'paso del d[íi]a (\d+)', t))
+                            | set(re.findall(r'paso es el del d[íi]a (\d+)', t))
+                            | set(re.findall(r'D[íi]a (\d+) de 90', t))
+                            | set(re.findall(r'(\d+)\s*/\s*90', t)))
+            check('el día del paso se dice de una sola forma', len(pasos_dichos) == 1, f'aparece: {sorted(pasos_dichos)}')
+            check('el encabezado dice el calendario real: 71 días',
+                  re.search(r'Llevas 71 d[íi]as|D[íi]a 71 de 90', cab_txt) is not None,
+                  f'el encabezado dice: {cab_txt[:90]!r}')
             check('no aparece el día congelado de la base (37)', not re.search(r'\b37\b', cab_txt), 'el encabezado muestra 37')
             check('sin Fase Autonomía con el 20% hecho', 'Fase Autonomía' not in t and 'FASE AUTONOMÍA' not in t)
             check('el mensaje de ritmo existe y está en positivo',
@@ -164,7 +188,10 @@ try:
         pag.wait_for_selector('text=Registrar venta', timeout=30000)
         pag.wait_for_timeout(500)
         t = pag.evaluate('() => document.body.innerText')
-        m_total = re.search(r'de (\d+) pasos', t)
+        # El anillo dice «N de M jornadas hechas»; antes decía «de M pasos».
+        # Cambió la palabra, no el número: la vara seguía buscando la vieja y
+        # daba «sin anillo» con el anillo en pantalla.
+        m_total = re.search(r'de (\d+) jornadas', t)
         # Los pasos del cliente son las jornadas que hace: los días de campo y
         # los fines de semana no se completan. La banda subió a 70 cuando
         # entraron doce sesiones cortas en los días 50 al 90, que estaban
