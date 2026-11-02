@@ -626,6 +626,20 @@ body,
 [data-theme="light"] .text-\[\#E8962E\] { color: #8E6824 !important; }
 [data-theme="light"] .text-\[\#B0822E\] { color: #8E6824 !important; }
 
+/* ── La excepción: una PIEZA IMPRESA ───────────────────────────────
+ *
+ * Las dos reglas de arriba oscurecen el oro para que se lea sobre el papel de
+ * la app, y están bien. Pero el certificado y la foto del día 90 no son
+ * pantallas: son piezas oscuras con letra de oro, como un diploma, y se ven
+ * iguales en los dos temas. Adentro de una de ellas el oro oscuro queda en
+ * 3.7:1 —medido— y el de siempre en 5.4:1 sobre el mismo fondo.
+ *
+ * Se marca la pieza con `pieza-impresa` y adentro el oro vuelve a ser el
+ * suyo. Es una decisión escrita una vez, como `una-linea` para el corte.
+ */
+[data-theme="light"] .pieza-impresa .text-\[\#B0822E\],
+[data-theme="light"] .pieza-impresa .text-\[\#E8962E\] { color: #B0822E !important; }
+
 /* ── Los bordes de oro ya no necesitan parche ─────────────────────
    Estas ocho reglas corregían `rgba(245,166,35,X)` — un color que aparecía
    CERO veces en el código. Mientras tanto, el oro viejo real,

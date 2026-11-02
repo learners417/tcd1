@@ -173,7 +173,7 @@ export default function Graduacion({ nombre, ventas, onClose, onIrAlChat, userId
         </button>
         <button
           onClick={onClose}
-          className="text-xs text-cream/55 hover:text-cream/70 transition-colors"
+          className="min-h-[44px] px-3 text-xs text-cream/55 hover:text-cream/70 transition-colors"
         >
           Quedarme un rato más acá, mirando lo que logré
         </button>

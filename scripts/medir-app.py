@@ -111,6 +111,10 @@ INTERNAS = [
 # contando un verde que no corresponde a ninguna pantalla. La lente
 # «el medidor mide las pestañas que existen» de auditoria.py vigila que no
 # vuelva a pasar.
+# Los modales del cliente, cada uno en su visor (scripts/visor/modales.tsx).
+# Son los que se abren encima de una pantalla y por eso ninguna vista los veía.
+MODALES = ['freno', 'freno>campana', 'certificado', 'foto90', 'pilar', 'graduacion', 'material']
+
 ADMIN = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos',
          'tareas', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa']
 # Desde el 16 sep, TODAS las pantallas del cliente.
@@ -1114,6 +1118,29 @@ def main():
                 m = medir_pantalla(pag); m['errores'] = errores
                 pag.screenshot(path=f'/tmp/admin-{tab}.png')
                 resultados[f'admin:{tab}'] = m; pag.close()
+            # ── Los modales del cliente ───────────────────────────────────
+            #
+            # Un modal no es una pantalla: se abre encima, y varios aparecen
+            # UNA vez en noventa días —el certificado, la foto del día 90—, así
+            # que ninguna lente los había mirado. El tablero semanal ya enseñó
+            # qué pasa con lo que solo se ve un día puntual: estuvo con los
+            # rótulos montados un arco entero, en la pantalla principal del
+            # cliente, porque nada lo abría.
+            for nombre in (MODALES if not solo else [m for m in MODALES if m in solo]):
+                pag = ctx.new_page(); errores = []
+                pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
+                pag.goto(f'{base}scripts/visor/modales.html?m={nombre}')
+                try:
+                    pag.wait_for_function(
+                        "() => document.querySelector('#root') && document.querySelector('#root').children.length > 0",
+                        timeout=15000)
+                except Exception:
+                    errores.append('el modal no llegó a dibujarse')
+                pag.wait_for_timeout(900)
+                m = medir_pantalla(pag); m['errores'] = errores
+                pag.screenshot(path=f"/tmp/app-modal-{nombre.replace('>', '-')}.png")
+                resultados[f'modal>{nombre}'] = m; pag.close()
+
             # ── La jornada abierta ────────────────────────────────────────
             #
             # Es donde el cliente pasa de 45 minutos a dos horas por día, y

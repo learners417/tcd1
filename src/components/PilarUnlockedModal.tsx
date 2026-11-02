@@ -151,7 +151,7 @@ export default function PilarUnlockedModal({
         <div className="relative mx-auto w-24 h-24 mb-6">
           <div className="absolute inset-0 rounded-full bg-[var(--accent-gold)]/20 animate-pulse" />
           <div className="absolute inset-2 rounded-full bg-[var(--accent-gold)]/10 border-2 border-[var(--accent-gold)]/40 flex items-center justify-center">
-            <Trophy className="w-10 h-10 text-[var(--accent-gold)]" />
+            <Trophy className="w-10 h-10 text-gold" />
           </div>
         </div>
 
@@ -162,8 +162,8 @@ export default function PilarUnlockedModal({
             <>
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 mb-4">
-                <Sparkles className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-gold)]">
+                <Sparkles className="w-4 h-4 text-gold" />
+                <span className="text-xs font-bold uppercase tracking-widest text-gold">
                   Pilar completado
                 </span>
               </div>
@@ -174,7 +174,7 @@ export default function PilarUnlockedModal({
               >
                 Pilar {pilarNumero} completado
               </h2>
-              <p className="text-lg text-[var(--accent-gold)] font-medium mb-4">
+              <p className="text-lg text-gold font-medium mb-4">
                 {pilarCompletado}
               </p>
 
@@ -190,7 +190,7 @@ export default function PilarUnlockedModal({
                     dice con su nombre y su metáfora, que es lo que significa,
                     y la ceremonia la pone la línea de oro de arriba.
                   */}
-                  <p className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-1">
+                  <p className="text-sm font-bold uppercase tracking-widest text-gold mb-1">
                     Cinturón ganado
                   </p>
                   <p className="text-xl font-semibold text-cream mb-1">{cinturon.nombre}</p>
@@ -215,8 +215,8 @@ export default function PilarUnlockedModal({
               {nivelAlcanzado && (
                 <div className="mb-5 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 p-4">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <Award className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)]">
+                    <Award className="w-4 h-4 text-gold" />
+                    <span className="text-sm font-bold uppercase tracking-widest text-gold">
                       Nivel {nivelAlcanzado.numero} alcanzado
                     </span>
                   </div>
@@ -261,8 +261,8 @@ export default function PilarUnlockedModal({
             <>
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 mb-4">
-                <Star className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-gold)]">
+                <Star className="w-4 h-4 text-gold" />
+                <span className="text-xs font-bold uppercase tracking-widest text-gold">
                   Tu opinión
                 </span>
               </div>

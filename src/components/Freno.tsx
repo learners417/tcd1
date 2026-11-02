@@ -20,8 +20,13 @@ export default function Freno({
   const [escrito, setEscrito] = useState('');
   const listo = puedeSeguir(freno, escrito);
 
-  const color = freno.nivel === 'escribir' ? 'danger'
-    : freno.nivel === 'testigo' ? 'gold' : 'cream';
+  /* La clase entera y no `text-${color}`: Tailwind no ve las clases armadas
+     con una interpolación, así que esto solo pintaba mientras OTRO archivo
+     usara `text-danger`, `text-gold` y `text-cream` escritas a mano. El día
+     que ese otro archivo cambie, el ícono del freno se queda sin color y
+     nadie se entera. */
+  const color = freno.nivel === 'escribir' ? 'text-danger'
+    : freno.nivel === 'testigo' ? 'text-gold' : 'text-cream';
   const Icono = freno.nivel === 'escribir' ? ShieldAlert
     : freno.nivel === 'testigo' ? Eye : AlertTriangle;
 
@@ -32,11 +37,14 @@ export default function Freno({
         : freno.nivel === 'testigo' ? 'border-gold/45' : 'border-cream/20'}`}>
 
         <div className="flex items-start gap-3">
-          <Icono size={20} className={`shrink-0 mt-0.5 text-${color}`} />
+          <Icono size={20} className={`shrink-0 mt-0.5 ${color}`} />
           <div>
             {/* El título dice QUÉ VA A PASAR. No pregunta si está seguro:
                 preguntar si está seguro no informa nada. */}
-            <p className="text-base text-cream leading-snug"
+            {/* 20 px, que es donde arranca el serif de display de la casa: estaba
+                en 16 y es el título de un diálogo que frena al cliente, la línea
+                más importante de la pantalla. */}
+            <p className="text-xl text-cream leading-snug"
               style={{ fontFamily: 'var(--font-display)' }}>
               {VOC(freno.titulo)}
             </p>
