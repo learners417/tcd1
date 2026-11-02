@@ -285,14 +285,13 @@ export interface RoadmapMeta {
   dia_asignado: number
   tiempo_estimado: string
   /** Vocabulario de pantalla: decide qué componente Task se renderiza. */
-  tipo: 'VIDEO' | 'HERRAMIENTA' | 'COACH' | 'TAREA'
+  tipo: 'VIDEO' | 'COACH' | 'TAREA'
   /** El tipo real de la jornada en el seed. */
   tipo_jornada: TipoJornada
   sistema: number | null
   pasos: string[]
   checklist: string[]
   agente: AgenteId | null
-  herramienta_id: string | undefined
   usa_ia: boolean
   cinturon: CinturonId | null
   es_estrella: boolean
@@ -385,8 +384,6 @@ const comoMeta = (
   pasos: j.pasos,
   checklist: j.pasos,
   agente: j.agente,
-  // Ninguna jornada del Camino usa el catálogo viejo de herramientas.
-  herramienta_id: undefined,
   usa_ia: j.agente !== null,
   cinturon: j.cinturon,
   es_estrella: j.cinturon !== null || j.jornada_larga,

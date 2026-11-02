@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import { SEED_ROADMAP_V2, SEED_ROADMAP_V3, diaDelCodigo } from '../lib/roadmapSeed';
 import type { PilarId } from '../lib/supabase';
-import { herramientasV3, EMOJI_TO_ICON } from '../lib/herramientas';
-import type { HerramientaV3 } from '../lib/herramientas';
 
 const BIB_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, Mail, BookOpen, RefreshCw, DollarSign, Microscope, Target,
@@ -33,7 +31,6 @@ import {
   getYoutubeVideoId,
   type VideoModulo,
 } from '../lib/videos';
-import HerramientaDetalle from './HerramientaDetalle';
 import TodoElMaterial from '../components/TodoElMaterial';
 import EstanteDeLibros from '../components/EstanteDeLibros';
 import { videosCargadosEnLaBase } from '../lib/bibliotecaDatos';
@@ -151,14 +148,6 @@ function isTabUnlocked(
   const tabPilars = new Set<string>(tab.pilarIds);
   return extraVideos.some(
     (v) => v.pilar_id !== undefined && tabPilars.has(v.pilar_id),
-  );
-}
-
-/** Get herramientas V3 for a set of pilarIds */
-function getHerramientasForPilars(pilarIds: readonly PilarId[]): HerramientaV3[] {
-  const prefixes = pilarIds.map((pid) => `H-${pid}.`);
-  return herramientasV3().filter((h) =>
-    prefixes.some((prefix) => h.id.startsWith(prefix))
   );
 }
 
@@ -342,7 +331,6 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
     'O',
     { validate: (v) => VALID_TABS.includes(v) },
   );
-  const [herramientaActivaId, setHerramientaActivaId] = useState<string | null>(null);
   const [videoActivo, setVideoActivo] = useState<VideoModulo | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -355,11 +343,6 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
 
   const activeTab = CLINICA_TABS.find((t) => t.id === activeTabId) ?? CLINICA_TABS[0];
 
-  // Derive content for active tab
-  const herramientas = useMemo(
-    () => getHerramientasForPilars(activeTab.pilarIds),
-    [activeTab.pilarIds]
-  );
   const completadasSet = useMemo(() => {
     try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); return new Set<string>(saved ? JSON.parse(saved) : []); } catch { return new Set<string>(); }
   }, [activeTabId]);
@@ -447,26 +430,6 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
     });
   };
 
-  // ─── Herramienta detail view ──────────────────────────────────────────────
-
-  if (herramientaActivaId) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300 pb-12">
-        <button
-          onClick={() => setHerramientaActivaId(null)}
-          className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors uppercase tracking-wider font-bold mb-4 bg-gold/5 hover:bg-gold/10 px-4 py-2 rounded-xl w-max"
-        >
-          <ArrowLeft className="w-4 h-4" /> Volver a El Método
-        </button>
-        <HerramientaDetalle
-          herramientaId={herramientaActivaId}
-          userId={userId}
-          onVolver={() => setHerramientaActivaId(null)}
-        />
-      </div>
-    );
-  }
-
   // ─── Main view ────────────────────────────────────────────────────────────
 
   return (
@@ -477,7 +440,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
              lo que sí agrega: qué hay acá adentro. Y en 17 px, que es el
              mínimo de la app: estaba en 14. */}
       <p className="text-[17px] text-cream/75">
-        Los libros, los videos y las herramientas del Método C·L·I·N·I·C·A.
+        Los libros y los videos del Método C·L·I·N·I·C·A.
       </p>
 
       {/* LOS LIBROS. Van primero porque son la fuente: Sanadores Libres
@@ -689,85 +652,21 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
         </div>
       )}
 
-      {/*
-        APAGADO A PROPÓSITO, Y ES UNA DECISIÓN PENDIENTE — no un resto.
-
-        El recorte fue: El Método es SOLO la escuela, y el trabajo se hace en
-        las sesiones del Camino. Pero el apagón dejó mucho más de lo que se ve
-        desde acá, y conviene que esté escrito antes de tocarlo:
-
-          · las 22 herramientas de IA del catálogo V3, con sus campos y sus
-            instrucciones, en `herramientas.ts`
-          · las 34 del catálogo anterior (GRUPO_A…E), ~1.830 líneas del mismo
-            archivo, con el lenguaje más viejo que queda en el repositorio
-          · `HerramientaDetalle.tsx` entera: este bloque es lo único que la
-            abría, así que hoy no hay forma de llegar a esa pantalla
-          · el rescate de `tcd_herramienta_*` en el Camino y el mapa de
-            `userKnowledgeBase.ts`, que cruzan contra `meta.herramienta_id`:
-            ese campo está en `undefined` en las 91 jornadas del seed, así que
-            los dos caminos corren en vacío
-
-        O sea: ninguna meta del Camino apunta a una herramienta. Son dos
-        decisiones opuestas y las dos son legítimas —encender el catálogo V3
-        acá, o sacarlo del código— y la segunda no se deshace desde un ZIP.
-        Queda para que la tome Javo, no la prueba.
-      */}
-      {false && herramientas.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-cream/55 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-gold" /> Herramientas IA
-          </h2>
-
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {herramientas.map((h) => (
-              <div
-                key={h.id}
-                className="card-panel rounded-2xl p-5 border border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line, rgba(142,104,36,0.18))] hover:bg-surface/50 transition-all group flex flex-col"
-              >
-                <div className="flex items-start gap-3 mb-3">
-                  {(() => { const iconName = EMOJI_TO_ICON[h.emoji]; const IC = iconName ? BIB_ICON_MAP[iconName] : null; return IC ? <IC className="w-6 h-6 text-gold shrink-0" /> : <Sparkles className="w-6 h-6 text-gold shrink-0" />; })()}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20">
-                        {h.id}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-semibold text-cream leading-snug">
-                      {VOC(h.titulo)}
-                    </h3>
-                  </div>
-                </div>
-
-                <p className="text-xs text-cream/75 leading-relaxed mb-4 flex-1">
-                  {VOC(h.descripcion)}
-                </p>
-
-                <button
-                  onClick={() => setHerramientaActivaId(h.id)}
-
-                  className={`w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                    'bg-gold hover:bg-goldhi text-cream shadow-lg shadow-gold/20'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Abrir Herramienta
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* El catálogo de herramientas de IA salió del código el 1 de nov: ninguna
+          jornada apuntaba a una herramienta —`meta.herramienta_id` estaba en
+          `undefined` en las 91— así que el catálogo, su pantalla de detalle y los
+          tres caminos que lo cruzaban corrían en vacío. El trabajo se hace en las
+          sesiones del Camino, que es el único lugar donde se hace. */}
 
       {/* Empty state when both lists are empty */}
-      {herramientas.length === 0 && tabVideos.length === 0 && recursosTab.length === 0 && (
+      {tabVideos.length === 0 && recursosTab.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-surface/30 border border-[var(--line, rgba(142,104,36,0.18))] border-dashed rounded-2xl">
           <Sparkles className="w-12 h-12 text-gold/30 mb-4" />
           <p className="text-cream/75 text-sm font-semibold mb-2">
-            Su material vive en las sesiones
+            Tu material vive en las sesiones
           </p>
           <p className="text-cream/45 text-xs max-w-sm leading-relaxed">
-            Pronto se habilitaran videos y herramientas para{' '}
+            Pronto se habilitan los videos de{' '}
             <strong className="text-cream/75">{activeTab.label}</strong>.
           </p>
         </div>

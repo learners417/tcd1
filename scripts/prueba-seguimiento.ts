@@ -40,12 +40,24 @@ const panel = leer('src/components/admin/ServicioDelCliente.tsx');
 const migMatriz = leer('supabase/migrations/20261011_matriz_compartida.sql');
 const migServicio = leer('supabase/migrations/20261009_servicio_contratado.sql');
 
-// ── 1 · La tabla con una letra de más ──────────────────────────────────────
+/*
+ * ── 1 · La tabla que ya no se consulta ────────────────────────────────────
+ *
+ * Esto medía una letra: el Admin pedía «herramienta_outputs» en singular, una
+ * tabla que no existe, y por eso la pantalla decía que el cliente no había
+ * producido nada. El arreglo fue pasar al plural.
+ *
+ * El 1 de nov la consulta entera salió del Admin junto con el catálogo: lo que
+ * leía se cruzaba contra `meta.herramienta_id`, que está en `undefined` en las
+ * 91 jornadas, así que el resultado nunca entraba a la pantalla. Las filas que
+ * algún cliente tenga en esa tabla quedan intactas.
+ *
+ * La vara se da vuelta: antes pedía que la consulta existiera, ahora pide que
+ * no esté. Si alguien la vuelve a agregar, vuelve a leer en vacío.
+ */
 console.log('══ la pestaña de Métricas del cliente ══');
-ok(!/from\('herramienta_outputs'\)/.test(admin),
-  'ya no pide «herramienta_outputs», que no existe');
-ok(/from\('herramientas_outputs'\)/.test(admin),
-  'pide la tabla real, en plural: por esa letra la pantalla decía que el cliente no produjo nada');
+ok(!/from\('herramientas?_outputs'\)/.test(admin),
+  'el Admin ya no consulta la tabla de outputs del catálogo: lo que leía nunca llegaba a la pantalla');
 
 // ── 2 · Lo que carga el equipo, compartido ─────────────────────────────────
 console.log('\n══ la matriz se comparte de verdad ══');

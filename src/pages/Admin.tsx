@@ -522,7 +522,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [metricasLoading, setMetricasLoading] = useState(false);
   const [filtroMetricasId, setFiltroMetricasId] = useState<string | null>(null);
   const [metricasTareas, setMetricasTareas] = useState<any[]>([]);
-  const [metricasOutputs, setMetricasOutputs] = useState<any[]>([]);
   const [metricasTareasLoading, setMetricasTareasLoading] = useState(false);
   const [pilarExpandido, setPilarExpandido] = useState<Record<number, boolean>>({});
   const [satisfaccionGlobal, setSatisfaccionGlobal] = useState<number | null>(null);
@@ -645,7 +644,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
       cargarRatingsCliente(filtroMetricasId);
     } else {
       setMetricasTareas([]);
-      setMetricasOutputs([]);
       setClienteRatings([]);
     }
   }, [filtroMetricasId]);
@@ -823,12 +821,10 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setMetricasTareasLoading(true);
     try {
-      const [tareasRes, outputsRes] = await Promise.all([
+      const [tareasRes] = await Promise.all([
         db().from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
-        db().from('herramientas_outputs').select('*').eq('usuario_id', clientId),
       ]);
       setMetricasTareas(tareasRes.data ?? []);
-      setMetricasOutputs(outputsRes.data ?? []);
     } catch {
       // tables may not exist yet
     } finally {
@@ -1181,14 +1177,12 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         const { data } = await db().rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
       } else if (detalleTab === 'metricas') {
-        const [metricsRes, tareasRes, outputsRes] = await Promise.all([
+        const [metricsRes, tareasRes] = await Promise.all([
           db().rpc('get_user_metrics', { target_user_id: userId }),
           db().from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
-          db().from('herramientas_outputs').select('*').eq('usuario_id', userId),
         ]);
         setDetalleMetricas(metricsRes.data ?? []);
         setMetricasTareas(tareasRes.data ?? []);
-        setMetricasOutputs(outputsRes.data ?? []);
         setPilarExpandido({});
       } else if (detalleTab === 'mensajes') {
         const { data } = await supabase
@@ -3050,10 +3044,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         {pilar.metas.map(meta => {
                                           const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                           if (!tareaData) return null;
-                                          const herramientaOutput = meta.herramienta_id
-                                            ? metricasOutputs.find((o: any) => o.herramienta_id === meta.herramienta_id)
-                                            : null;
-                                          const rawOutput = tareaData.output_generado ?? herramientaOutput?.output ?? null;
+                                          const rawOutput = tareaData.output_generado ?? null;
                                           const hasOutput = !!rawOutput;
                                           return (
                                             <button
@@ -3843,10 +3834,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     {pilar.metas.map(meta => {
                                       const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                       if (!tareaData) return null;
-                                      const herramientaOutput = meta.herramienta_id
-                                        ? metricasOutputs.find((o: any) => o.herramienta_id === meta.herramienta_id)
-                                        : null;
-                                      const rawOutput = tareaData.output_generado ?? herramientaOutput?.output ?? null;
+                                      const rawOutput = tareaData.output_generado ?? null;
                                       const hasOutput = !!rawOutput;
                                       return (
                                         <button

@@ -25,7 +25,6 @@ import {
 } from '../lib/coachPrompt';
 import {
   getUserKnowledgeBase,
-  getUserKnowledgeBaseSync,
 } from '../lib/userKnowledgeBase';
 import {
   supabase,
@@ -115,7 +114,10 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const knowledgeBaseRef = useRef<string>(getUserKnowledgeBaseSync());
+  /* Arranca vacío: la versión síncrona leía localStorage, que solo tenía los
+     outputs del catálogo de herramientas, y devolvía siempre ''. El efecto de
+     abajo la llenaba con la versión async al instante. */
+  const knowledgeBaseRef = useRef<string>('');
   const supabaseProfileRef = useRef<Record<string, unknown> | null>(null);
 
   // Estado del Coach IA · sumario + last_summary_at_msg_count viven en DB

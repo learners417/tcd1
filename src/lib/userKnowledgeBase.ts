@@ -3,6 +3,14 @@
  * Construye la base de conocimiento del usuario a partir de los outputs
  * aprobados en cada tarea de El Camino.
  *
+ * El 1 de nov salieron tres fuentes que no podían devolver nada: la tabla
+ * `herramientas_outputs`, el rescate de `tcd_herramienta_*` de localStorage y
+ * el mapa que las dos cruzaban contra `meta.herramienta_id`, que está en
+ * `undefined` en las 91 jornadas del seed. Las filas que algún cliente tenga
+ * en esa tabla quedan intactas: se fue el código que no sabía leerlas.
+ * Con localStorage se fue también `getUserKnowledgeBaseSync()`, que devolvía
+ * siempre '' y a quien la usaba la pisaba la versión async al instante.
+ *
  * No requiere RAG — el total de texto cabe en el context window de Gemini (1M tokens).
  * Inyección directa al system prompt del Coach y los Agentes.
  */
@@ -17,23 +25,8 @@ export interface KnowledgeEntry {
   pilarTitulo: string;
   metaCodigo: string;
   metaTitulo: string;
-  herramientaId?: string;
   texto: string;
   aprobadoEn?: string;
-}
-
-// ─── Mapa herramienta_id → meta_codigo (para el fallback de localStorage) ────
-
-function buildHerramientaToMetaMap(): Map<string, { pilarNumero: number; metaCodigo: string }> {
-  const map = new Map<string, { pilarNumero: number; metaCodigo: string }>();
-  for (const pilar of SEED_ROADMAP_V2) {
-    for (const meta of pilar.metas) {
-      if (meta.herramienta_id) {
-        map.set(meta.herramienta_id, { pilarNumero: pilar.numero, metaCodigo: meta.codigo });
-      }
-    }
-  }
-  return map;
 }
 
 /**
@@ -77,48 +70,8 @@ async function fromHojaDeRuta(userId: string): Promise<KnowledgeEntry[]> {
       pilarTitulo: pilar.titulo,
       metaCodigo: meta.codigo,
       metaTitulo: meta.titulo,
-      herramientaId: meta.herramienta_id,
       texto,
       aprobadoEn: safeStringField(output, 'aprobado_en') || undefined,
-    });
-  }
-
-  return entries;
-}
-
-// ─── Fuente 2: Supabase herramientas_outputs (outputs guardados sin vincular) ─
-
-async function fromHerramientasOutputs(userId: string): Promise<KnowledgeEntry[]> {
-  if (!isSupabaseReady() || !supabase) return [];
-
-  const { data, error } = await supabase
-    .from('herramientas_outputs')
-    .select('herramienta_id, output')
-    .eq('usuario_id', userId);
-
-  if (error || !data) return [];
-
-  const hMap = buildHerramientaToMetaMap();
-  const entries: KnowledgeEntry[] = [];
-
-  for (const row of data) {
-    const ref = hMap.get(row.herramienta_id);
-    if (!ref) continue;
-
-    const pilar = SEED_ROADMAP_V2.find((p) => p.numero === ref.pilarNumero);
-    const meta = pilar?.metas.find((m) => m.codigo === ref.metaCodigo);
-    if (!pilar || !meta) continue;
-
-    const texto = safeStringField(row.output, 'texto');
-    if (!texto) continue;
-
-    entries.push({
-      pilarNumero: pilar.numero,
-      pilarTitulo: pilar.titulo,
-      metaCodigo: meta.codigo,
-      metaTitulo: meta.titulo,
-      herramientaId: row.herramienta_id,
-      texto,
     });
   }
 
@@ -213,45 +166,7 @@ async function fromProfileAdn(userId: string): Promise<KnowledgeEntry[]> {
   return entries;
 }
 
-// ─── Fuente 3: localStorage tcd_herramienta_* (fallback offline) ──────────────
-
-function fromLocalStorage(): KnowledgeEntry[] {
-  const hMap = buildHerramientaToMetaMap();
-  const entries: KnowledgeEntry[] = [];
-
-  try {
-    const keys = Object.keys(localStorage).filter((k) => k.startsWith('tcd_herramienta_'));
-    for (const key of keys) {
-      const herramientaId = key.replace('tcd_herramienta_', '');
-      const ref = hMap.get(herramientaId);
-      if (!ref) continue;
-
-      const pilar = SEED_ROADMAP_V2.find((p) => p.numero === ref.pilarNumero);
-      const meta = pilar?.metas.find((m) => m.codigo === ref.metaCodigo);
-      if (!pilar || !meta) continue;
-
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      const parsed: unknown = JSON.parse(raw);
-      const texto = safeStringField(parsed, 'texto');
-      if (!texto) continue;
-
-      entries.push({
-        pilarNumero: pilar.numero,
-        pilarTitulo: pilar.titulo,
-        metaCodigo: meta.codigo,
-        metaTitulo: meta.titulo,
-        herramientaId,
-        texto,
-      });
-    }
-  } catch { /* noop */ }
-
-  return entries;
-}
-
-// ─── Deduplicar por meta_codigo (prioridad: hoja_de_ruta > herramientas_outputs > localStorage) ──
+// ─── Deduplicar por meta_codigo (prioridad: hoja_de_ruta > profile) ──
 
 function deduplicar(all: KnowledgeEntry[]): KnowledgeEntry[] {
   const seen = new Map<string, KnowledgeEntry>();
@@ -279,17 +194,14 @@ export async function getUserKnowledgeBase(userId?: string): Promise<string> {
   let all: KnowledgeEntry[] = [];
 
   if (userId) {
-    const [fromHR, fromHO, fromProfile] = await Promise.all([
+    const [fromHR, fromProfile] = await Promise.all([
       fromHojaDeRuta(userId),
-      fromHerramientasOutputs(userId),
       fromProfileAdn(userId),
     ]);
     // Orden importa: deduplicar() queda con el PRIMERO que aparece por meta.
     // hoja_de_ruta tiene prioridad (output real del cliente) sobre profile
     // (fallback ADN, útil para clientes migrados o campos sin meta completada).
-    all = [...fromHR, ...fromHO, ...fromProfile, ...fromLocalStorage()];
-  } else {
-    all = fromLocalStorage();
+    all = [...fromHR, ...fromProfile];
   }
 
   const entries = deduplicar(all);
@@ -304,7 +216,7 @@ export async function getUserKnowledgeBase(userId?: string): Promise<string> {
 
   const sections: string[] = [
     '=== BASE DE CONOCIMIENTO DEL PROFESIONAL ===',
-    'Documentos generados con herramientas IA en cada tarea completada.',
+    'Lo que el profesional escribió y aprobó en cada jornada del Camino.',
     'Usa esta información para personalizar absolutamente todo lo que respondes.',
     '',
   ];
@@ -317,28 +229,6 @@ export async function getUserKnowledgeBase(userId?: string): Promise<string> {
       sections.push(entry.texto.trim());
       sections.push('');
     }
-  }
-
-  return sections.join('\n');
-}
-
-/**
- * Versión síncrona — solo lee localStorage.
- * Útil para componentes que no pueden usar async en el render inicial.
- */
-export function getUserKnowledgeBaseSync(): string {
-  const entries = deduplicar(fromLocalStorage());
-  if (entries.length === 0) return '';
-
-  const sections: string[] = [
-    '=== BASE DE CONOCIMIENTO DEL PROFESIONAL ===',
-    '',
-  ];
-
-  for (const entry of entries) {
-    sections.push(`### ${entry.metaCodigo}: ${entry.metaTitulo}`);
-    sections.push(entry.texto.trim());
-    sections.push('');
   }
 
   return sections.join('\n');

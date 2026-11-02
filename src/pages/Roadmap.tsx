@@ -154,8 +154,6 @@ function getTypeBadge(tipo: string) {
   switch (tipo) {
     case 'VIDEO':
       return { icon: Play, label: 'VIDEO', color: 'text-gold', bg: 'bg-gold/10 border-gold/20' };
-    case 'HERRAMIENTA':
-      return { icon: Wrench, label: 'HERRAMIENTA', color: 'text-success', bg: 'bg-success/10 border-success/20' };
     case 'COACH':
       return { icon: MessageSquare, label: 'MENTOR', color: 'text-cream/70', bg: 'bg-cream/5 border-cream/15' };
     default:
@@ -562,21 +560,11 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   // ─── Cargar outputs de tareas guardados ────────────────────────────────
   useEffect(() => {
     const outputs = new Map<string, string>();
-    // 1. localStorage: tcd_herramienta_* keys cross-referenced with seed
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k?.startsWith('tcd_herramienta_')) continue;
-      const herramientaId = k.replace('tcd_herramienta_', '');
-      for (const pilar of seedConVideos) {
-        for (const meta of pilar.metas) {
-          if (meta.herramienta_id === herramientaId) {
-            const val = localStorage.getItem(k);
-            if (val) outputs.set(`${pilar.numero}-${meta.codigo}`, val);
-          }
-        }
-      }
-    }
-    // 2. Supabase: rows with output_generado
+    /* Acá había un rescate de claves `tcd_herramienta_*` de localStorage que
+       las cruzaba contra `meta.herramienta_id`. Ese campo está en `undefined`
+       en las 91 jornadas del seed, así que el bucle nunca escribía nada.
+       Salió con el catálogo el 1 de nov. */
+    // Supabase: rows with output_generado
     if (isSupabaseReady() && supabase && userId) {
       supabase
         .from('hoja_de_ruta')
@@ -904,15 +892,11 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     };
   }
 
-  // ─── Save ADN output from herramienta task ────────────────────────────
+  // ─── Save ADN output ──────────────────────────────────────────────────
   const handleSaveADN = useCallback((pilarNum: number, meta: RoadmapMeta, outputTexto: string) => {
     const key = `${pilarNum}-${meta.codigo}`;
     setTaskOutputs(prev => new Map(prev).set(key, outputTexto));
     setCompletadas(prev => { const next = new Set(prev); next.add(key); return next; });
-    // Save to localStorage for herramienta
-    if (meta.herramienta_id) {
-      localStorage.setItem(`tcd_herramienta_${meta.herramienta_id}`, outputTexto);
-    }
     setCelebracion(`Documento guardado: ${VOC(meta.titulo)}`);
     setTimeout(() => setCelebracion(null), 5000);
     // Sync to Supabase
@@ -1719,7 +1703,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             </button>
                           </SesionViva>
                         )}
-                        {(meta.tipo === 'HERRAMIENTA' || meta.tipo === 'COACH') && (
+                        {meta.tipo === 'COACH' && (
                           <div className="fixed inset-0 z-[60] overflow-y-auto bg-[var(--bg-card,#17150F)]">
                             <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between">
                               <button onClick={() => setActiveMeta(null)} className="text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
@@ -1811,7 +1795,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           </div>
                         )}
                       
-                        {meta.tipo !== 'HERRAMIENTA' && meta.tipo !== 'COACH' && (
+                        {meta.tipo !== 'COACH' && (
                           <EvidenciaUniversal userId={userId} metaCodigo={meta.codigo} />
                         )}
                       </div>

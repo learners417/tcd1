@@ -15,7 +15,6 @@ import {
 import { readFileSync, existsSync } from 'node:fs';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
 import { cinturonDesdeProgreso } from '../src/lib/cinturones';
-import { HERRAMIENTAS, HERRAMIENTAS_V3, getHerramienta, herramientasV3 } from '../src/lib/herramientas';
 import { SESIONES_GUIADAS, sesionGuiadaDe } from '../src/lib/sesionesGuiadas';
 import { setFamiliaActual, getFamiliaActual, TOKEN_CRUDO, vocabularizar } from '../src/lib/vocabulario';
 
@@ -138,54 +137,50 @@ function tokensEn(valor: unknown, ruta: string, out: string[], vistos = new Set<
   }
 }
 
-// Control: el catálogo crudo SÍ tiene tokens (si no, esta prueba no prueba nada).
+/*
+ * Control: el corpus crudo SÍ tiene tokens, o esta prueba no prueba nada.
+ * Era el catálogo de herramientas más las sesiones; el catálogo salió del
+ * código el 1 de nov, así que quedan las sesiones guiadas, que son el cuerpo
+ * de texto con tokens que el cliente lee de verdad.
+ */
 const crudos: string[] = [];
-for (const h of [...HERRAMIENTAS_V3, ...HERRAMIENTAS]) tokensEn(h, h.id, crudos);
 for (const [c, sgu] of Object.entries(SESIONES_GUIADAS)) tokensEn(sgu, c, crudos);
-ok(crudos.length > 20, `control: el catálogo crudo tiene ${crudos.length} textos con tokens (la prueba tiene qué atrapar)`);
+ok(crudos.length > 20, `control: el corpus crudo tiene ${crudos.length} textos con tokens (la prueba tiene qué atrapar)`);
 
 const familias = [
   ['clinica', 'Psicóloga'],
   ['acompanamiento', 'Coach ontológico'],
   ['formacion', 'Entrenador personal'],
 ] as const;
-const ids = [...new Set([...HERRAMIENTAS_V3, ...HERRAMIENTAS].map((h) => h.id))];
 for (const [fam, esp] of familias) {
   setFamiliaActual(esp);
   ok(getFamiliaActual() === fam, `familia ${fam} detectada desde "${esp}"`);
   const fugas: string[] = [];
-  for (const id of ids) tokensEn(getHerramienta(id), id, fugas);
-  for (const h of herramientasV3()) tokensEn(h, `lista:${h.id}`, fugas);
   for (const c of Object.keys(SESIONES_GUIADAS)) tokensEn(sesionGuiadaDe(c), c, fugas);
-  ok(fugas.length === 0, `${fam}: ${ids.length} herramientas y ${Object.keys(SESIONES_GUIADAS).length} sesiones sin tokens crudos${fugas.length ? ` — ${fugas.slice(0, 3).join(' | ')}` : ''}`);
+  ok(fugas.length === 0, `${fam}: ${Object.keys(SESIONES_GUIADAS).length} sesiones sin tokens crudos${fugas.length ? ` — ${fugas.slice(0, 3).join(' | ')}` : ''}`);
 }
 
-console.log('\n── el caso exacto de la captura ──');
-setFamiliaActual('Médica clínica');
-const conDolor = [...HERRAMIENTAS_V3, ...HERRAMIENTAS].find((h) => h.constructorFases?.etiquetaOpciones.includes('dolor central'));
-ok(!!conDolor, 'existe la herramienta "Elige el dolor central"');
-const etiqueta = conDolor ? getHerramienta(conDolor.id)?.constructorFases?.etiquetaOpciones ?? '' : '';
-ok(etiqueta === 'Elige el dolor central de tu paciente', `se lee: "${etiqueta}"`);
-setFamiliaActual('Coach');
-const etiquetaCoach = conDolor ? getHerramienta(conDolor.id)?.constructorFases?.etiquetaOpciones ?? '' : '';
-ok(etiquetaCoach.endsWith('de tu consultante') || !etiquetaCoach.includes('{{'), `para un coach: "${etiquetaCoach}"`);
+/*
+ * Acá iba «el caso exacto de la captura»: una herramienta del catálogo cuya
+ * etiqueta decía «Elige el dolor central de tu {{paciente}}». El catálogo
+ * salió del código, así que el caso no tiene sujeto. Lo que protegía —que la
+ * sustitución llegue hasta el texto que el cliente lee— lo cubren las
+ * familias de arriba sobre las sesiones guiadas.
+ */
 
 console.log('\n── estabilidad (sin re-renders en bucle) ──');
 setFamiliaActual('Psicóloga');
-const id0 = ids[0];
-ok(getHerramienta(id0) === getHerramienta(id0), 'misma herramienta, misma familia → misma referencia');
 ok(sesionGuiadaDe('P0.3') === sesionGuiadaDe('P0.3'), 'misma sesión → misma referencia');
-const conPrompt = [...HERRAMIENTAS_V3, ...HERRAMIENTAS].find((h) => h.constructorFases);
-if (conPrompt) {
-  const a = getHerramienta(conPrompt.id)!.constructorFases!.promptOpciones;
-  const b = getHerramienta(conPrompt.id)!.constructorFases!.promptOpciones;
-  ok(a === b, 'la función de prompt envuelta también es estable');
-}
 ok(vocabularizar(null) === null && vocabularizar(undefined) === undefined && vocabularizar(3) === 3, 'valores vacíos pasan intactos');
-const original = HERRAMIENTAS_V3[0];
-const antes = JSON.stringify(original, (_k, v) => (typeof v === 'function' ? 'fn' : v));
-getHerramienta(original.id);
-ok(JSON.stringify(original, (_k, v) => (typeof v === 'function' ? 'fn' : v)) === antes, 'el catálogo original no se modifica (sigue con tokens para otras familias)');
+/*
+ * Y la fuente no se toca al vocabularizar: la sesión cruda sigue con sus
+ * tokens, que es lo que permite servirla a otra familia después.
+ */
+const crudaAntes = JSON.stringify(SESIONES_GUIADAS['P0.3'], (_k, v) => (typeof v === 'function' ? 'fn' : v));
+setFamiliaActual('Coach');
+sesionGuiadaDe('P0.3');
+ok(JSON.stringify(SESIONES_GUIADAS['P0.3'], (_k, v) => (typeof v === 'function' ? 'fn' : v)) === crudaAntes,
+   'la sesión original no se modifica (sigue con tokens para otras familias)');
 
 console.log(fallas === 0 ? '\n✓ TODO EN VERDE' : `\n✗ ${fallas} FALLAS`);
 process.exit(fallas === 0 ? 0 : 1);

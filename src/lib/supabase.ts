@@ -540,16 +540,6 @@ export interface VentaRegistrada {
   created_at: string;
 }
 
-export interface HerramientaOutput {
-  id: string;
-  usuario_id: string;
-  herramienta_id: string; // 'A1', 'A2', 'B1', etc.
-  output: Record<string, unknown>;
-  version: number;
-  created_at: string;
-  updated_at: string;
-}
-
 /** @deprecated Usar DiarioEntradaV3. */
 export interface DiarioEntradaV2 extends DiarioEntrada {
   energia_nivel?: number; // 1-10

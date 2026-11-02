@@ -2,7 +2,7 @@
  * lente-lenguaje.ts — ¿le habla la app a un profesional de la salud o a un técnico?
  *
  * Recorre TODO el texto que lee el cliente (las 91 jornadas del Camino, sus
- * pasos y evidencias, las sesiones guiadas y las herramientas) y marca:
+ * pasos y evidencias, y las sesiones guiadas) y marca:
  *   símbolo   <, >, ±, ≥, =, "x" como variable, % sueltos
  *   código    P1.0, P2.3b, 9gup… (identificadores internos)
  *   jerga     lead, KPI, CTR, CPM, funnel, copy, hook, DM, setup, brief…
@@ -12,7 +12,6 @@
  */
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
 import { SESIONES_GUIADAS, sesionGuiadaDe } from '../src/lib/sesionesGuiadas';
-import { HERRAMIENTAS_V3, getHerramienta } from '../src/lib/herramientas';
 import { setFamiliaActual } from '../src/lib/vocabulario';
 
 setFamiliaActual('Psicóloga');
@@ -78,7 +77,7 @@ for (const p of SEED_ROADMAP_V2) for (const m of p.metas) {
   revisar(`${d} · evidencia`, ev?.nombre);
   revisar(`${d} · evidencia`, ev?.descripcion);
 }
-// 2. Sesiones guiadas y herramientas: todo string que contienen, menos los prompts
+// 2. Sesiones guiadas: todo string que contienen, menos los prompts
 function recorrer(donde: string, v: unknown, clave = '') {
   /*
    * Veintisiete de los cincuenta y cinco hallazgos eran el CÓDIGO de la
@@ -89,14 +88,13 @@ function recorrer(donde: string, v: unknown, clave = '') {
    */
   if (/prompt|ia|sistema|system|id$|campo|key|tipo|icono|emoji/i.test(clave)) return;
   if (/^(codigo|code|slug|clave|ref|meta_?codigo|pilar|orden)$/i.test(clave)) return;
-  // `requiere_datos_de` y `adn_field` son referencias entre herramientas.
+  // `requiere_datos_de` y `adn_field` son referencias entre piezas, no texto.
   if (/^(requiere_datos_de|adn_field|depende_de|origen)$/i.test(clave)) return;
   if (typeof v === 'string') return revisar(donde, v);
   if (Array.isArray(v)) return v.forEach((x) => recorrer(donde, x, clave));
   if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) recorrer(donde, x, k);
 }
 for (const c of Object.keys(SESIONES_GUIADAS)) recorrer(`Sesión ${c}`, sesionGuiadaDe(c));
-for (const h of HERRAMIENTAS_V3) recorrer(`Herramienta ${h.id}`, getHerramienta(h.id));
 
 const porTipo = new Map<string, number>();
 for (const h of hallazgos) { const k = h.tipo.split(':')[0]; porTipo.set(k, (porTipo.get(k) ?? 0) + 1); }
@@ -120,6 +118,6 @@ if (hallazgos.length > 0) {
   console.log(`\n✗ ${hallazgos.length} · con --detalle se ven uno por uno\n`);
   process.exit(1);
 }
-console.log(`\n✓ los ${revisados} textos del Camino, las sesiones y las herramientas hablan claro\n`);
+console.log(`\n✓ los ${revisados} textos del Camino y las sesiones hablan claro\n`);
 
 }
