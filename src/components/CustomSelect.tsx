@@ -61,7 +61,13 @@ export default function CustomSelect({
           ${open ? 'elegido' : 'border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line2, rgba(142,104,36,0.30))]'}
         `}
       >
-        <span className={value ? 'text-cream' : 'text-cream/55'}>{selectedLabel}</span>
+        {/* `una-linea`, que es la clase de la casa, y no `truncate`: en tema claro
+            `truncate` está desactivada a propósito —un nombre de cliente cortado a
+            la mitad no sirve— y `una-linea` es la excepción escrita para las cajas
+            de alto fijo. En una columna angosta la etiqueta pasaba a dos renglones
+            y el chevron, centrado, quedaba en el hueco entre los dos, alineado a
+            nada: medido en 49 px de alto con 24 de interlínea. */}
+        <span className={`min-w-0 una-linea ${value ? 'text-cream' : 'text-cream/55'}`}>{selectedLabel}</span>
         <ChevronDown
           className={`w-4 h-4 text-cream/75 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />

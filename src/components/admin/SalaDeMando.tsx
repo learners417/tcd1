@@ -129,7 +129,7 @@ function Marcador(
 
       <div className={`rounded-2xl border p-5 ${
         frenados === 0 ? 'border-success/30 bg-success/[0.05]' : 'border-gold/35 bg-gold/[0.05]'}`}>
-        <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
+        <p className="text-xl text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
           {frenados === 0
             ? 'Ninguna cuenta está frenada.'
             : frenados === 1

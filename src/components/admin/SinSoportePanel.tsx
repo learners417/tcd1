@@ -70,7 +70,7 @@ export default function SinSoportePanel({ pausas, vigente, cuantos, quien, onCam
 
   return (
     <section className="rounded-2xl border border-gold/25 bg-espresso/40 p-5">
-      <h3 className="text-[19px] font-bold text-cream">Días sin soporte</h3>
+      <h3 className="text-[19px] font-sans not-italic font-bold text-cream">Días sin soporte</h3>
       <p className="mt-1 text-[17px] leading-relaxed text-cream/70">
         Marca los días en que el equipo no responde. El Camino de todos sigue corriendo
         igual y nadie se marca en el semáforo por estos días.
@@ -120,7 +120,7 @@ export default function SinSoportePanel({ pausas, vigente, cuantos, quien, onCam
         <div className="mt-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-[17px] font-medium text-cream/80">Sin soporte desde el</span>
+              <span className="text-[17px] font-semibold text-cream/80">Sin soporte desde el</span>
               <input
                 type="date"
                 value={desde}
@@ -129,7 +129,7 @@ export default function SinSoportePanel({ pausas, vigente, cuantos, quien, onCam
               />
             </label>
             <label className="block">
-              <span className="text-[17px] font-medium text-cream/80">Hasta el</span>
+              <span className="text-[17px] font-semibold text-cream/80">Hasta el</span>
               <input
                 type="date"
                 value={hasta}
@@ -140,7 +140,7 @@ export default function SinSoportePanel({ pausas, vigente, cuantos, quien, onCam
             </label>
           </div>
           <label className="mt-3 block">
-            <span className="text-[17px] font-medium text-cream/80">Motivo (si quieres dejarlo anotado)</span>
+            <span className="text-[17px] font-semibold text-cream/80">Motivo (si quieres dejarlo anotado)</span>
             <input
               type="text"
               value={motivo}
@@ -180,7 +180,7 @@ export default function SinSoportePanel({ pausas, vigente, cuantos, quien, onCam
                   type="button"
                   disabled={guardando}
                   onClick={() => void levantar(p)}
-                  className="min-h-[44px] rounded-lg border border-cream/20 px-4 text-[17px] font-medium text-cream/70 disabled:opacity-50"
+                  className="min-h-[44px] rounded-lg border border-cream/20 px-4 text-[17px] font-semibold text-cream/70 disabled:opacity-50"
                 >
                   Quitar
                 </button>

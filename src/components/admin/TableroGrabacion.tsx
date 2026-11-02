@@ -99,7 +99,7 @@ export default function TableroGrabacion() {
       <div className="card-panel p-5">
         <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Tablero de grabación</p>
         <p className="mt-2 text-[28px] leading-none text-cream" style={{ fontFamily: 'var(--font-display)' }}>
-          {cargados} <span className="text-[17px] text-cream/60">de {lista.length} con enlace</span>
+          {cargados} <span className="text-[17px] font-sans not-italic text-cream/60">de {lista.length} con enlace</span>
         </p>
         <p className="mt-2 text-[17px] text-cream/70">
           Pega el enlace de YouTube y el video queda en la sesión de ese día. Los que no tienen enlace no se anuncian:

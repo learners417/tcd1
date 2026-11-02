@@ -382,7 +382,9 @@ MEDIR = r"""
       if (ratio < (grande ? 3 : 4.5) && !esBotonDeshabilitado) r.contraste.push(`${nombre(el)} ${ratio.toFixed(1)}:1`);
       const recorta = (cs.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1)
         || (el.scrollWidth > el.clientWidth + 2 && ['hidden', 'clip'].includes(cs.overflowX) && cs.whiteSpace === 'nowrap');
-      if (recorta) r.cortado.push(nombre(el));
+      // Con el ancho que pide y el que tiene: «cortado» sin los dos números
+      // no dice si falta un poco de caja o si el rótulo es largo de más.
+      if (recorta) r.cortado.push(`${nombre(el)} · pide ${el.scrollWidth} y tiene ${el.clientWidth}`);
       // Texto apilado letra por letra: la caja es más angosta que dos letras.
       const txtPropio = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
       if (txtPropio.length >= 4 && b.width < fs * 2.2 && b.height > fs * 3.5) r.desborde.push(`${nombre(el)} (apilado)`);
@@ -447,7 +449,19 @@ MEDIR = r"""
         const propio = [...h.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 12);
         return propio && hb.height > lh * 1.6;
       });
-      if (chico && largo) r.iconoFlotante.push(nombre(el));
+      if (chico && largo) {
+        // Con el nombre solo —«Todos los planes»— hay que adivinar cuál de los
+        // elementos que dicen ese texto es. Van la etiqueta y las primeras
+        // clases, que es lo que lo ubica en el código.
+        const pista = `${el.tagName.toLowerCase()}.${(el.className || '').toString().trim().split(/\s+/).slice(0, 6).join('.')}`;
+        // Y la medida que disparó la falta. Un lente que dice «esto está mal»
+        // sin decir con qué número lo decidió obliga a reconstruirlo a mano:
+        // se fueron tres intentos en el select del Admin averiguando si el
+        // texto de verdad ocupaba dos renglones.
+        const hb = largo.getBoundingClientRect();
+        const lh = parseFloat(getComputedStyle(largo).lineHeight) || 20;
+        r.iconoFlotante.push(`${nombre(el)} · ${pista} · alto ${Math.round(hb.height)} con interlínea ${Math.round(lh)}`);
+      }
     }
     /*
      * ─── LA LÍNEA QUE SE QUEDÓ SIN COLOR ────────────────────────────────
@@ -635,7 +649,7 @@ MEDIR = r"""
    * disparan: no es una regla con un número redondo, es una señal de que la
    * pantalla se armó por acumulación.
    */
-  const comp = { letras: new Map(), esquinas: new Set(), superficies: new Map() };
+  const comp = { letras: new Map(), esquinas: new Set(), superficies: new Map(), ejemplos: new Map() };
   r.escala = 0; r.pesos = 0;
   for (const el of document.querySelectorAll('#root *')) {
     if (!vis(el) || escondido(el)) continue;
@@ -645,6 +659,10 @@ MEDIR = r"""
     if (propio) {
       const k = `${Math.round(parseFloat(cs.fontSize))}/${cs.fontWeight}`;
       comp.letras.set(k, (comp.letras.get(k) || 0) + 1);
+      // Un ejemplo por cada tamaño/peso: «cuatro pesos» sin saber cuál es el
+      // cuarto obliga a buscarlo a mano por todo el árbol. Medido: el 17/500
+      // de Métricas y Clientes tardó tres intentos en aparecer.
+      if (!comp.ejemplos.has(k)) comp.ejemplos.set(k, nombre(el));
     }
     // Una superficie es una caja con fondo propio y tamaño de panel.
     if (b.width > 120 && b.height > 48) {
@@ -687,7 +705,7 @@ MEDIR = r"""
   r.esquinas = comp.esquinas.size;
   // El detalle, para poder arreglarlo: un número sin su detalle no se toca.
   r.detalleComposicion = {
-    letras: vivos(comp.letras).map(([k, n]) => `${k} ×${n}`),
+    letras: vivos(comp.letras).map(([k, n]) => `${k} ×${n} · ${comp.ejemplos.get(k) || ''}`),
     superficies: vivos(comp.superficies).map(([k, n]) => `${k} ×${n}`),
     esquinas: [...comp.esquinas].sort((a, b) => String(a).localeCompare(String(b), 'es', { numeric: true })),
   };

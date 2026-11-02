@@ -55,7 +55,7 @@ export default function TablaFunciones({
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/50 mb-2">
           ¿Qué función bajó sus minutos, y por qué?
         </p>
-        <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
+        <p className="text-xl text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
           {titular}
         </p>
       </div>

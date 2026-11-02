@@ -794,7 +794,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[var(--line, rgba(142,104,36,0.18))]">
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl ring-1 ring-[var(--line,rgba(142,104,36,0.18))]">
               <iframe
                 src={getYoutubeEmbedUrl(videoActivo.youtubeUrl)}
                 title={VOC(videoActivo.titulo)}

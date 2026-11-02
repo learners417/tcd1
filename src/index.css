@@ -327,7 +327,14 @@ body,
     background: transparent;
     color: var(--accent-gold);
     border: 1px solid var(--border-gold);
-    font-weight: 500;
+    /*
+     * 600, no 500. Era el único 500 de la app y hacía que Métricas pintara
+     * cuatro pesos sobre el mismo tamaño, con el techo en tres: cuerpo,
+     * énfasis y versalita. 500 y 600 son el mismo gesto. El botón sigue
+     * distinguiéndose del primario por el 700 y por el relleno, que es la
+     * señal fuerte; cinco pantallas lo usan.
+     */
+    font-weight: 600;
     font-size: 0.875rem;
     padding: 0.625rem 1.25rem;
     border-radius: 0.75rem;

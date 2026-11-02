@@ -1957,7 +1957,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-gold/10 bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
         <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
-            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-[0_0_20px_var(--line2, rgba(142,104,36,0.30))] shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shrink-0">
               <Stethoscope className="w-5 h-5 text-cream" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
@@ -2004,7 +2004,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <span className="relative shrink-0">
                       <item.icon className="w-4 h-4" />
                       {sidebarCollapsed && totalUnread > 0 && (
-                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_6px_var(--oro, #B0822E)]" />
+                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold" />
                       )}
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
@@ -2177,8 +2177,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
               {/* Header row */}
               <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="relative flex-1 max-w-sm">
+                {/* `flex-wrap` y `shrink-0` en los filtros: en el teléfono los tres
+                    entraban en un solo renglón y cada uno se encogía —el de planes
+                    quedaba en 126 px— así que «Todos los planes» pasaba a dos
+                    renglones con el chevron flotando en el medio, o salía cortado.
+                    Envueltos, cada filtro conserva su ancho y bajan de a uno. */}
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                  <div className="relative flex-1 min-w-[200px] max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/45" />
                     <input
                       type="text"
@@ -2199,7 +2204,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       { value: 'negro', label: '⬛ Completo' },
                       { value: 'completo', label: 'Clásicos' },
                     ]}
-                    className="w-44"
+                    /* `w-52`, no `w-44`: «Todos los planes» pedía 143 px y la caja
+                       daba 126. Medido, no estimado. */
+                    className="w-52 shrink-0"
                   />
                   <CustomSelect
                     value={filtroStatus}
@@ -2212,7 +2219,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       { value: 'CHURNED', label: 'Inactivos' },
                       { value: 'COMPLETED', label: 'Completados' },
                     ]}
-                    className="w-48"
+                    className="w-48 shrink-0"
                   />
                 </div>
                 <button
@@ -2478,7 +2485,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <tab.icon className="w-3.5 h-3.5" />
                       {tab.label}
                       {detalleTab === tab.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full shadow-[0_0_10px_var(--oro, #B0822E)]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full" />
                       )}
                     </button>
                   ))}
@@ -2670,7 +2677,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         <div className="flex flex-col items-center gap-2 flex-1">
                                           <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 shrink-0 transition-all ${
                                             isActive
-                                              ? 'bg-gold border-gold shadow-[0_0_14px_var(--oro, #B0822E)]'
+                                              ? 'bg-gold border-gold'
                                               : isDone
                                               ? 'bg-success/15 border-success/60'
                                               : 'bg-ink border-gold/10'
@@ -3704,7 +3711,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <s.IconComp className={`w-8 h-8 ${s.color}`} />
                         <div>
                           <p className={`text-3xl font-light ${s.color} mb-0.5`}>{s.count}</p>
-                          <p className="text-sm text-cream/75 font-medium">{s.label}</p>
+                          <p className="text-sm text-cream/75 font-semibold">{s.label}</p>
                         </div>
                       </div>
                     ))}
@@ -3998,7 +4005,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="w-full space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-light text-white tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Gestión de Equipo</h2>
+                  {/* El encabezado de la pestaña ya dice «Gestión de Equipo»: este decía
+                      lo mismo dos veces en la misma pantalla. La pestaña de Videos ya
+                      resolvía esto con un nombre propio para su panel. Y el color va en
+                      `cream`, que es el token de la casa, como el h2 de Videos. */}
+                  <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Roles y permisos</h2>
                   <p className="text-sm text-white/55 mt-1">Administra roles y permisos de los miembros del equipo.</p>
                 </div>
                 <button onClick={() => setShowAddTeamMember(true)} className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold">

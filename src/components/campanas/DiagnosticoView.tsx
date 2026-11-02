@@ -171,7 +171,7 @@ Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
           <span className="text-sm font-bold tracking-[0.15em] uppercase text-cream/45">
             Métricas actuales
           </span>
-          <div className="flex-1 h-px bg-[var(--line, rgba(142,104,36,0.18))]" />
+          <div className="flex-1 h-px bg-[var(--line,rgba(142,104,36,0.18))]" />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

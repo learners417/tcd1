@@ -61,7 +61,7 @@ export default function LaCasa() {
       {vista === 'induccion' && (
         <>
           <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-5">
-            <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="text-xl text-cream leading-snug" style={{ fontFamily: 'var(--font-display)' }}>
               {hechas.size === total
                 ? 'Terminaste. Lo que falta se aprende trabajando.'
                 : `${hechas.size} de ${total} sesiones · ${MINUTOS_DE_CONTENIDO} minutos en total`}

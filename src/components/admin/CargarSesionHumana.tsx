@@ -76,7 +76,7 @@ export default function CargarSesionHumana({
   return (
     <section className="rounded-2xl border border-gold/25 bg-espresso/40 p-5 space-y-4">
       <div>
-        <h3 className="text-[19px] font-bold text-cream">Cargar una sesión</h3>
+        <h3 className="text-[19px] font-sans not-italic font-bold text-cream">Cargar una sesión</h3>
         <p className="text-[17px] text-cream/60 mt-1 leading-relaxed">
           Queda registrada para el cliente y cuenta como acompañamiento recibido.
         </p>
