@@ -172,7 +172,7 @@ Quien deja el puesto entra al recorrido **como cliente**, con el Dueño del crit
 |---|---|---|
 | **Meta Ads API** | La transcripción manual de gasto, alcance, conversaciones y costo | Instalador |
 | **Instagram Graph API** | Mirar veinte perfiles a mano para saber quién publicó | Instalador |
-| **Bot de DM** (GHL o ManyChat) | La respuesta inmediata y las 3 preguntas de calificación | Instalador |
+| **Bot de DM** (GHL) | La respuesta inmediata y las 3 preguntas de calificación | Instalador |
 | **Snapshot de GHL** | Las horas de alta de cada cliente nuevo | Instalador |
 
 Sobre el bot: la respuesta automática tiene que llegar en **menos de un minuto** — ningún humano llega siempre, y el lead de anuncios se enfría en minutos. Y el flujo de bienvenida decide la mitad del resultado: tres mensajes limpios convierten dos a cuatro veces mejor que diez de venta dura. El bot califica; el humano cierra.

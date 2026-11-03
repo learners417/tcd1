@@ -11,7 +11,8 @@
  *
  * Carga el SDK de PayPal on-demand para no inflar el bundle.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { mensajeDeFalla } from '../../lib/conexion';
 import { X, Coins, Check, Loader2, ShoppingBag, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -20,6 +21,7 @@ import {
   type UserCredits,
   type CreditBalance,
 } from '../../lib/credits';
+import CreditsHistory from './CreditsHistory';
 import { supabase } from '../../lib/supabase';
 
 interface BuyCreditsModalProps {
@@ -69,7 +71,7 @@ async function getAuthToken(): Promise<string> {
   if (!supabase) throw new Error('Supabase no configurado');
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error('No hay sesion activa');
+  if (!token) throw new Error('No hay sesión activa');
   return token;
 }
 
@@ -108,7 +110,9 @@ export default function BuyCreditsModal({
         setPaypalReady(true);
       })
       .catch((err) => {
-        toast.error(err instanceof Error ? err.message : 'Error cargando PayPal');
+        // En crudo decía cosas como «Failed to fetch» o el error de PayPal
+        // tal cual. En una pantalla de pago eso no se le muestra a nadie.
+        toast.error(mensajeDeFalla(err, 'abrir el pago'));
       })
       .finally(() => setPaypalLoading(false));
   }, [selectedPack]);
@@ -153,7 +157,7 @@ export default function BuyCreditsModal({
       await onPurchaseComplete();
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error procesando pago');
+      toast.error(mensajeDeFalla(err, 'confirmar tu pago'));
     } finally {
       setProcessing(false);
     }
@@ -189,9 +193,9 @@ export default function BuyCreditsModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-[#0F0F0F] shadow-2xl">
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gold/20 bg-[var(--bg-card,#17150F)] shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold/10 bg-[#0F0F0F]/95 backdrop-blur p-5">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold/10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-gold/15 p-2 border border-gold/30">
               <ShoppingBag className="h-5 w-5 text-gold" />
@@ -266,7 +270,7 @@ export default function BuyCreditsModal({
                         onClick={() => setSelectedPack(pack)}
                         className={`relative rounded-xl border p-4 text-left transition-all ${
                           isSelected
-                            ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(232,150,46,0.12)]'
+                            ? 'border-gold bg-gold/10'
                             : 'border-white/10 bg-[#1A1A1A] hover:border-gold/40 hover:bg-gold/5'
                         }`}
                       >
@@ -285,7 +289,7 @@ export default function BuyCreditsModal({
                         <div className="text-xl font-bold text-gold">
                           ${pack.price_usd.toFixed(2)}
                         </div>
-                        <div className="text-[11px] text-white/55 mt-1">
+                        <div className="text-sm text-white/55 mt-1">
                           ${pricePerCredit.toFixed(3)} / crédito
                         </div>
                       </button>
@@ -298,13 +302,13 @@ export default function BuyCreditsModal({
               {selectedPack && (
                 <div className="border-t border-white/10 pt-5">
                   <div className="text-sm text-white/70 mb-3">
-                    Pagás <span className="text-white font-semibold">${selectedPack.price_usd.toFixed(2)} USD</span>
+                    Pagas <span className="text-white font-semibold">${selectedPack.price_usd.toFixed(2)} USD</span>
                     {' '}por <span className="text-gold font-semibold">{selectedPack.credits} créditos</span>
                   </div>
 
                   {!PAYPAL_CLIENT_ID && (
                     <div className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-white/80 mb-3">
-                      ⚠️ VITE_PAYPAL_CLIENT_ID no configurada — el botón de PayPal no se va a renderizar.
+                      Aviso: VITE_PAYPAL_CLIENT_ID no configurada — el botón de PayPal no se va a renderizar.
                     </div>
                   )}
 
@@ -325,12 +329,22 @@ export default function BuyCreditsModal({
                   <div ref={paypalContainerRef} className={processing ? 'opacity-50 pointer-events-none' : ''} />
 
                   {PAYPAL_ENV === 'sandbox' && (
-                    <div className="mt-3 text-[11px] text-white/55 text-center">
+                    <div className="mt-3 text-sm text-white/55 text-center">
                       Modo sandbox · usa una cuenta de prueba de PayPal Developer
                     </div>
                   )}
                 </div>
               )}
+
+              {/* EN QUÉ SE FUERON LOS CRÉDITOS.
+                  La tabla del historial estaba escrita y ninguna pantalla la
+                  abría: se podía comprar y gastar, y no había dónde ver en qué.
+                  Va acá porque es la pregunta que trae a esta ventana: antes de
+                  comprar más, quien mira quiere saber en qué se fueron los
+                  anteriores. */}
+              <div className="border-t border-white/10 pt-5">
+                <CreditsHistory userId={userId} limit={8} />
+              </div>
             </>
           )}
         </div>

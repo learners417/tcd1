@@ -70,7 +70,7 @@ const VIAJE: Array<[string, Partial<NumerosSemana>, string[]]> = [
 ];
 
 for (const [nombre, n, prohibidos] of VIAJE) {
-  const cadena = calcularCadena(semana(n));
+  const cadena = calcularCadena(semana(n), []);
   const d = encontrarDomino(cadena);
   const id = d.indicador?.id ?? '';
   linea(!prohibidos.includes(id),
@@ -83,13 +83,13 @@ const cumple = calcularCadena(semana({
   conversaciones: 14, agendas: 5, llamadasTomadas: 4, ofertasPresentadas: 4,
   ventas: 1, facturado: 1000, cobrado: 1000,
   clientesActivos: 5, clientesQueTerminan: 1, casosDeExito: 1,
-}));
+}), []);
 const rojos = cumple.filter((i) => i.estado === 'roto');
 linea(rojos.length === 0,
   `una semana que cumple el objetivo no tiene rojos${rojos.length ? `: ${rojos.map((r) => r.id).join(', ')}` : ''}`);
 
 // Las tasas con poca base quedan sin datos, no en rojo.
-const pocaBase = calcularCadena(semana({ conversaciones: 2, agendas: 1, llamadasTomadas: 1 }));
+const pocaBase = calcularCadena(semana({ conversaciones: 2, agendas: 1, llamadasTomadas: 1 }), []);
 const cierre = pocaBase.find((i) => i.id === 'close_rate')!;
 linea(cierre.estado === 'sin_datos',
   'una tasa de cierre sobre una llamada queda sin datos, no en rojo');

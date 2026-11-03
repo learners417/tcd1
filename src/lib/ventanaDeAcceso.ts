@@ -13,7 +13,6 @@
  * qué le faltó y cuánto se atrasó.
  */
 
-import { cierreCorrido, pausasActuales } from './pausaGlobal';
 
 export type TipoDeAcceso = 'treinta' | 'noventa' | 'cuotas';
 
@@ -61,13 +60,15 @@ export function diasDeLaVentana(a: Acceso): number {
 }
 
 /**
- * El día en que cierra por su ventana (sin contar cuotas), ya corrido por los
- * días que el Camino estuvo parado para todos. Una pausa global no le come
- * días de acceso a nadie.
+ * El día en que cierra por su ventana, sin contar cuotas.
+ *
+ * Son los días que compró, contados de corrido. Antes se le sumaban los días
+ * de la «pausa global»: la ventana de acceso se estiraba sola un mes para
+ * todos, lo que suena generoso pero significa que nadie sabía nunca cuándo
+ * cerraba de verdad el acceso de un cliente.
  */
-export function cierreDeLaVentana(a: Acceso, hoy: string = aISO(new Date())): string {
-  const cierre = sumarDias(a.inicio, diasDeLaVentana(a) - 1);
-  return cierreCorrido(cierre, pausasActuales(), hoy);
+export function cierreDeLaVentana(a: Acceso, _hoy: string = aISO(new Date())): string {
+  return sumarDias(a.inicio, diasDeLaVentana(a) - 1);
 }
 
 /** La primera cuota vencida sin pagar, si hay. */

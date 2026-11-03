@@ -277,7 +277,7 @@ export default function RichTextEditor({
 
       {slash.open && filteredOptions.length > 0 && (
         <div
-          className="absolute z-50 w-64 max-h-72 overflow-y-auto bg-[#1A1A1A] border border-[rgba(232,150,46,0.14)] rounded-xl shadow-2xl py-1.5"
+          className="absolute z-50 w-64 max-h-72 overflow-y-auto bg-[#1A1A1A] border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl shadow-2xl py-1.5"
           style={{ top: slash.top, left: slash.left }}
         >
           {filteredOptions.map((opt, i) => {
@@ -290,15 +290,15 @@ export default function RichTextEditor({
                 onMouseDown={(e) => { e.preventDefault(); applyOption(opt); }}
                 onMouseEnter={() => setSlash(s => ({ ...s, selected: i }))}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
-                  active ? 'bg-gold/12' : 'hover:bg-cream/5'
+                  active ? 'elegido-etiqueta' : 'hover:bg-cream/5'
                 }`}
               >
-                <div className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center ${active ? 'bg-gold/20 text-gold' : 'bg-cream/5 text-cream/55'}`}>
+                <div className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center ${active ? 'elegido-etiqueta' : 'bg-cream/5 text-cream/55'}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-semibold text-cream">{opt.label}</div>
-                  <div className="text-[11px] text-cream/55 truncate">{opt.description}</div>
+                  <div className="text-sm text-cream/55 truncate">{opt.description}</div>
                 </div>
               </button>
             );
@@ -315,7 +315,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   const btn = (active: boolean) =>
     `w-7 h-7 rounded-md flex items-center justify-center text-xs transition-colors ${
       active
-        ? 'bg-gold/20 text-gold'
+        ? 'elegido-etiqueta'
         : 'text-cream/55 hover:text-cream hover:bg-cream/5'
     }`;
 
@@ -346,7 +346,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={btn(editor.isActive('blockquote'))} title="Cita"><Quote className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={btn(editor.isActive('code'))} title="Código en línea"><Code className="w-3.5 h-3.5" /></button>
       <button type="button" onClick={setLink} className={btn(editor.isActive('link'))} title="Enlace"><Link2 className="w-3.5 h-3.5" /></button>
-      <span className="ml-auto text-[11px] text-cream/45 hidden sm:inline">Tip: escribe "/" para más opciones</span>
+      <span className="ml-auto text-sm text-cream/45 hidden sm:inline">Tip: escribe "/" para más opciones</span>
     </div>
   );
 }

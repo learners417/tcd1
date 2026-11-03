@@ -375,7 +375,7 @@ export async function editImage(
 
 REEMPLAZO DE PERSONAJE:
 - Reemplazar al personaje principal de la imagen base por una persona con estas caracteristicas exactas: ${description}
-- Mantener IDENTICOS: pose, encuadre, angulo de camara, iluminacion, vestuario general (salvo que la instruccion lo pida), fondo, composicion.
+- Mantener IDENTICOS: pose, encuadre, angulo de camara, iluminación, vestuario general (salvo que la instruccion lo pida), fondo, composicion.
 - Solo cambian los rasgos del personaje. Todo lo demas queda igual a la imagen base.`;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -391,11 +391,11 @@ INSTRUCCION DE EDICION DEL USUARIO:
 REGLAS CRITICAS:
 - La imagen base esta adjunta como referencia obligatoria.
 - Devolver la MISMA imagen con SOLO el cambio pedido aplicado.
-- Mantener IDENTICOS: composicion, encuadre, iluminacion, paleta, personajes (salvo reemplazo explicito), tipografia, textos que no se hayan pedido cambiar, fondo, todos los demas elementos.
+- Mantener IDENTICOS: composicion, encuadre, iluminación, paleta, personajes (salvo reemplazo explicito), tipografía, textos que no se hayan pedido cambiar, fondo, todos los demas elementos.
 - NO rehacer la imagen desde cero. NO cambiar el estilo. NO mover elementos que no se hayan pedido mover.
 - Si la instruccion pide quitar algo (logo, icono, elemento), borrarlo limpiamente respetando el fondo que estaba debajo.
 - Si pide cambiar un color, cambiar SOLO ese color, todo lo demas igual.
-- Si pide agregar algo, integrarlo respetando la estetica y la iluminacion existentes.
+- Si pide agregar algo, integrarlo respetando la estetica y la iluminación existentes.
 - Resultado: la imagen debe verse como si alguien hubiera retocado un detalle en Photoshop, no como una nueva generacion.${characterReplacementBlock}`;
 
   // SOLO la base como ref. La descripcion del personaje (si la hay) ya esta

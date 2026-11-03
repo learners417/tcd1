@@ -16,9 +16,24 @@
  *
  * Lógica pura: no importa supabase, así se puede probar.
  */
-import { corrimientoActual } from './pausaGlobal';
 
 const MS_DIA = 86_400_000;
+
+
+/**
+ * La fecha de HOY en hora local, como 'AAAA-MM-DD'.
+ *
+ * `new Date().toISOString().slice(0, 10)` devuelve UTC, y en Argentina —UTC−3—
+ * de las 21:00 en adelante eso da el día siguiente. Estaba escrito así en
+ * quince lugares, y tres de ellos guardan la fecha en la base: la jornada que
+ * el cliente cerraba a la noche quedaba fechada mañana, y de esa fecha sale el
+ * atraso con el que se decide si la garantía corre.
+ *
+ * Toda fecha de un día —no un instante— se arma con esto.
+ */
+export function hoyISO(d: Date = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 /** Fecha local a medianoche, desde 'YYYY-MM-DD' o un ISO completo. */
 export function fechaLocal(valor: string | Date): Date | null {
@@ -37,11 +52,11 @@ export function diasDesdeInicio(fechaInicio: string | null | undefined, hoy: Dat
   const ini = fechaInicio ? fechaLocal(fechaInicio) : null;
   const h = fechaLocal(hoy);
   if (!ini || !h) return null;
-  // Los días en que el Camino estuvo parado para todos no cuentan: durante una
-  // pausa global nadie avanza de día ni acumula atraso, y al terminar las
-  // fechas de todos quedan corridas lo que duró.
-  const bruto = Math.round((h.getTime() - ini.getTime()) / MS_DIA);
-  return bruto - corrimientoActual(`${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`);
+  // Días de calendario, sin descuentos. La app no corta nunca: lo que se cierra
+  // algunos días es el soporte, y eso no mueve el día de nadie. Acá había un
+  // descuento por «pausa global» que congelaba el día del cliente durante un
+  // mes y le corría el cierre: le quitaba el mes que compró sin pedírselo.
+  return Math.round((h.getTime() - ini.getTime()) / MS_DIA);
 }
 
 /** Día del programa, 1 a 90. Sin fecha de inicio: null (quien llama decide qué mostrar). */
@@ -110,10 +125,29 @@ export function mensajeDeRitmo(diaHoy: number, diaDelPaso: number | null, atraso
   if (diaDelPaso === null || atrasoHabil <= 0) {
     return { tono: 'al_dia', texto: `Día ${diaHoy} de 90 · vas al día` };
   }
+  /*
+   * DOS NÚMEROS EN UNA FRASE SE LEEN COMO UNA CONTRADICCIÓN.
+   *
+   * Decía «Día 20 de 90 · tu próximo paso es el del día 1». Los dos números
+   * son ciertos —uno es el calendario, el otro el avance— pero puestos así, en
+   * el mismo renglón y sin nombrar cuál es cuál, el cliente lee veinte y uno y
+   * no entiende por cuál va. Ahora primero va lo que puede hacer hoy, que es
+   * su paso, y el calendario queda de contexto, dicho como lo que es.
+   *
+   * Los dos entran en 110 caracteres, que es lo que cabe en tres renglones de
+   * teléfono con la letra al tamaño de la casa: la primera versión de esta
+   * frase se iba a 113 y la prueba la frenó.
+   */
   if (atrasoHabil <= 3) {
-    return { tono: 'cerca', texto: `Día ${diaHoy} de 90 · hoy toca el paso del día ${diaDelPaso}. Con uno por día recuperas el ritmo.` };
+    return {
+      tono: 'cerca',
+      texto: `Hoy toca tu paso del día ${diaDelPaso}. Llevas ${diaHoy} días y con uno por día recuperas el ritmo.`,
+    };
   }
-  return { tono: 'lejos', texto: `Día ${diaHoy} de 90 · tu próximo paso es el del día ${diaDelPaso}. Tu Mentor te arma hoy el plan para llegar al 90.` };
+  return {
+    tono: 'lejos',
+    texto: `Tu próximo paso es el del día ${diaDelPaso}. Llevas ${diaHoy} días — tu Mentor te arma el plan para llegar al 90.`,
+  };
 }
 
 /**
@@ -165,4 +199,94 @@ export function pilarAlcanzado(
   const primero = primerDiaDelPilar(metas);
   if (primero === null) return false;   // pilar solo del equipo
   return primero <= diaDelPaso;
+}
+
+/* ══════════════════ DÓNDE VA DE VERDAD ══════════════════ */
+
+export interface DondeVa {
+  /** Hoy menos el alta, de 1 a 90. Es el ritmo que el programa esperaba. */
+  diaDeCalendario: number;
+  /**
+   * El día que está viviendo: el de su próxima jornada abierta.
+   *
+   * Es el que manda sobre TODO lo que se abre o se cierra. Quien va al día ve
+   * el mismo número en los dos; quien se atrasó ve acá su día real.
+   */
+  diaDeTrabajo: number;
+  /** Días hábiles de diferencia entre los dos. 0 cuando va al día. */
+  diferencia: number;
+  alDia: boolean;
+}
+
+/**
+ * EL DÍA QUE MANDA.
+ *
+ * ═══ QUÉ ESTABA ROTO ═══
+ *
+ * El día del programa eran días corridos desde el alta, y con ese número se
+ * decidía qué abrir. Un cliente que se atrasaba dos semanas leía «día 31:
+ * enciende tus campañas» sin tener la página hecha ni los anuncios escritos.
+ * Los frenos impedían que rompiera algo, pero la app le hablaba de un camino
+ * que no era el suyo: cada pantalla le decía una instrucción que no le tocaba.
+ *
+ * Y al revés también fallaba: quien adelantaba trabajo igual tenía que esperar
+ * al calendario para que se le abriera lo que ya se había ganado.
+ *
+ * ═══ LA REGLA ═══
+ *
+ * El calendario queda para una sola cosa: decir cuántos días de diferencia
+ * lleva, que es información de ritmo y la necesita. Lo que se abre y lo que se
+ * cierra sale del trabajo cerrado.
+ *
+ * `diaDelPasoPendiente` es el día de la primera jornada que todavía no cerró.
+ * `null` significa que terminó el Camino, y entonces manda el calendario
+ * porque ya no hay paso que esperar.
+ */
+export function dondeVa(
+  fechaInicio: string | null | undefined,
+  diaDelPasoPendiente: number | null,
+  hoy: Date = new Date(),
+): DondeVa {
+  const cal = diaDelPrograma(fechaInicio, hoy) ?? 1;
+  const trabajo = diaDelPasoPendiente === null ? cal : Math.max(1, diaDelPasoPendiente);
+  const dif = diasHabilesDeAtraso(fechaInicio, diaDelPasoPendiente, cal);
+  return {
+    diaDeCalendario: cal,
+    diaDeTrabajo: trabajo,
+    diferencia: dif,
+    alDia: dif <= 0,
+  };
+}
+
+/**
+ * Si ya puede abrir lo que corresponde a cierto día del Camino.
+ *
+ * Una sola función para todas las puertas —Campañas, el quinto destino, lo que
+ * venga— para que ninguna vuelva a preguntarle al calendario por su cuenta.
+ */
+export function yaLlegoAlDia(d: DondeVa, dia: number): boolean {
+  return d.diaDeTrabajo >= dia;
+}
+
+/**
+ * Lo que se le dice a quien todavía no llegó.
+ *
+ * En positivo y con el próximo paso adentro: «te faltan tres sesiones» se
+ * puede hacer hoy; «vas doce días atrasado» no se puede hacer nunca.
+ */
+export function faltaParaLlegar(d: DondeVa, dia: number): string {
+  const faltan = Math.max(0, dia - d.diaDeTrabajo);
+  if (faltan === 0) return '';
+  const sesiones = faltan === 1 ? 'una sesión' : `${faltan} sesiones`;
+  /*
+   * LA FRASE ENTERA SE ARMA ACÁ.
+   *
+   * Antes devolvía «Te faltan 28. Tu próxima es la del día 1», y la pantalla
+   * que la usa la precedía con su propio «Vas por la sesión del día 1»: el
+   * mismo número dicho dos veces en dos frases seguidas, con dos redacciones
+   * distintas. Con la frase completa en un solo lugar no hay dos versiones
+   * del mismo dato que puedan desacordar.
+   */
+  return `Vas por la sesión del día ${d.diaDeTrabajo} y te ${
+    faltan === 1 ? 'falta' : 'faltan'} ${sesiones} para llegar.`;
 }

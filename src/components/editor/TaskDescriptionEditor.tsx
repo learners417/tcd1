@@ -45,13 +45,13 @@ export default function TaskDescriptionEditor({
     <>
       <div className="relative">
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-[11px] font-bold text-cream/55 uppercase tracking-wider">
+          <label className="text-sm font-bold text-cream/55 uppercase tracking-wider">
             Descripción
           </label>
           <button
             type="button"
             onClick={() => setFullscreen(true)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-cream/45 hover:text-gold transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-cream/45 hover:text-gold transition-colors"
             title="Abrir en pantalla completa"
           >
             <Maximize2 className="w-3 h-3" />
@@ -59,7 +59,7 @@ export default function TaskDescriptionEditor({
           </button>
         </div>
 
-        <div className="bg-ink border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 focus-within:border-gold/50 transition-colors">
+        <div className="bg-ink border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2.5 focus-within:border-gold/50 transition-colors">
           <RichTextEditor
             value={value}
             onChange={onChange}
@@ -71,7 +71,7 @@ export default function TaskDescriptionEditor({
 
       {fullscreen && (
         <div className="fixed inset-0 z-[60] bg-ink flex flex-col animate-in fade-in duration-150">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(232,150,46,0.12)] shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--line, rgba(142,104,36,0.18))] shrink-0">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -82,7 +82,7 @@ export default function TaskDescriptionEditor({
                 <Minimize2 className="w-3.5 h-3.5" />
                 Cerrar
               </button>
-              <span className="text-[11px] text-cream/45 uppercase tracking-widest font-bold">Editando tarea</span>
+              <span className="text-sm text-cream/45 uppercase tracking-widest font-bold">Editando tarea</span>
             </div>
             <button
               type="button"
@@ -109,7 +109,7 @@ export default function TaskDescriptionEditor({
                 <h1 className="text-4xl font-bold text-cream mb-6">{titulo || 'Sin título'}</h1>
               )}
 
-              <div className="bg-[#0F0F0F] border border-[rgba(232,150,46,0.12)] rounded-2xl px-6 py-5 min-h-[60vh]">
+              <div className="bg-[var(--bg-card,#17150F)] border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl px-6 py-5 min-h-[60vh]">
                 <RichTextEditor
                   value={value}
                   onChange={onChange}
@@ -119,7 +119,7 @@ export default function TaskDescriptionEditor({
                 />
               </div>
 
-              <p className="text-[11px] text-cream/45 mt-4 text-center">
+              <p className="text-sm text-cream/45 mt-4 text-center">
                 Escribe <span className="font-mono text-gold/70">/</span> para insertar títulos, listas, checklists y más. Los cambios se guardan al hacer clic en "Listo" y luego "Guardar cambios".
               </p>
             </div>

@@ -11,7 +11,7 @@
  * El paste (Ctrl+V) se maneja en el componente padre via onPaste en el input,
  * porque solo el input/textarea con foco recibe el evento del teclado.
  */
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Paperclip, X, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
 import {
   ATTACHMENTS_ACCEPT_ATTR,
@@ -75,10 +75,10 @@ export function AttachButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={disabled}
-        title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
+        aria-label="Adjuntar" title="Adjuntar archivo, foto o captura (también puedes pegar con Ctrl+V)"
         className={
           className ??
-          'shrink-0 w-10 h-10 rounded-xl bg-gold/10 hover:bg-gold/20 border border-[rgba(232,150,46,0.12)] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
+          'shrink-0 w-11 h-11 rounded-full bg-gold/10 hover:bg-gold/20 border border-[var(--line, rgba(142,104,36,0.18))] disabled:opacity-40 flex items-center justify-center text-gold transition-colors'
         }
       >
         <Paperclip className="w-4 h-4" />
@@ -114,7 +114,7 @@ export function AttachmentsPreviewStrip({
         />
       ))}
       {uploading && (
-        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[rgba(232,150,46,0.14)] flex items-center gap-2 text-xs text-white/75">
+        <div className="h-16 px-3 rounded-xl bg-gold/5 border border-dashed border-[var(--line, rgba(142,104,36,0.18))] flex items-center gap-2 text-xs text-white/75">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-gold" />
           Procesando...
         </div>
@@ -131,7 +131,7 @@ interface AttachmentChipProps {
 function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
   if (attachment.kind === 'image' && attachment.previewDataUrl) {
     return (
-      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[rgba(232,150,46,0.18)] group">
+      <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-[var(--line2, rgba(142,104,36,0.30))] group">
         <img
           src={attachment.previewDataUrl}
           alt={attachment.fileName}
@@ -146,7 +146,7 @@ function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
           <X className="w-3 h-3" />
         </button>
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 py-0.5">
-          <div className="flex items-center gap-1 text-[11px] text-white/80 truncate">
+          <div className="flex items-center gap-1 text-sm text-white/80 truncate">
             <ImageIcon className="w-2.5 h-2.5 shrink-0" />
             <span className="truncate">{attachment.fileName}</span>
           </div>
@@ -156,13 +156,13 @@ function AttachmentChip({ attachment, onRemove }: AttachmentChipProps) {
   }
 
   return (
-    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[rgba(232,150,46,0.18)] bg-gold/10 flex items-center gap-2 group">
+    <div className="relative h-16 max-w-[220px] px-3 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] bg-gold/10 flex items-center gap-2 group">
       <FileText className="w-4 h-4 text-gold shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-xs text-white truncate font-medium">
           {attachment.fileName}
         </div>
-        <div className="text-[11px] text-white/65 uppercase tracking-wider">
+        <div className="text-sm text-white/65 uppercase tracking-wider">
           {formatBytes(attachment.sizeBytes)}
           {attachment.kind === 'other' ? ' · formato no leible' : ''}
         </div>

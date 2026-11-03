@@ -1,6 +1,6 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, CheckCircle2, MessageSquare, Trophy, Shield } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   obtenerNotificaciones,
@@ -8,26 +8,12 @@ import {
   marcarTodasLeidas,
   contarNoLeidas,
   type NotificacionDB,
-  type TipoNotificacion,
 } from '../lib/notifications';
+import { comoSeVeElAviso } from '../lib/avisoVisual';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import { playNotificationSound } from '../lib/notificationSound';
+import { VOC } from '../lib/vocabulario';
 
-const ICON_MAP: Record<TipoNotificacion, React.ElementType> = {
-  hito: Trophy,
-  tarea: CheckCircle2,
-  mensaje: MessageSquare,
-  sistema: Bell,
-  admin: Shield,
-};
-
-const COLOR_MAP: Record<TipoNotificacion, { text: string; bg: string }> = {
-  hito: { text: 'text-gold', bg: 'bg-gold/10' },
-  tarea: { text: 'text-success', bg: 'bg-success/10' },
-  mensaje: { text: 'text-gold', bg: 'bg-gold/10' },
-  sistema: { text: 'text-gold', bg: 'bg-gold/10' },
-  admin: { text: 'text-gold', bg: 'bg-gold/10' },
-};
 
 function tiempoRelativo(fechaISO: string): string {
   const ahora = Date.now();
@@ -153,7 +139,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
     setUnread(0);
   }
 
-  const buttonSize = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
+  const buttonSize = size === 'sm' ? 'w-11 h-11' : 'w-12 h-12';
   const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
   const hasUnread = unread > 0;
 
@@ -166,9 +152,9 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
         onClick={() => setOpen(o => !o)}
         className={`${buttonSize} rounded-full card-panel flex items-center justify-center transition-all duration-300 active:scale-95 relative ${
           open
-            ? 'text-cream bg-surface shadow-[0_0_18px_rgba(232,150,46,0.20)] ring-1 ring-gold/40'
+            ? 'text-cream bg-surface ring-1 ring-gold/40'
             : hasUnread
-              ? 'text-gold shadow-[0_0_14px_rgba(232,150,46,0.14)] ring-1 ring-gold/30 hover:text-goldhi'
+              ? 'text-gold ring-1 ring-gold/30 hover:text-goldhi'
               : 'text-cream/75 hover:text-cream'
         }`}
         title="Notificaciones"
@@ -179,7 +165,7 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
           fill={hasUnread ? 'currentColor' : 'none'}
         />
         {hasUnread && (
-          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
+          <span className="badge-pulse absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-gold text-black text-sm font-extrabold rounded-full flex items-center justify-center border-2 border-ink">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -195,10 +181,10 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
+            className="fixed w-[calc(100vw-2rem)] md:w-80 card-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
             style={{ top: pos.top, right: pos.right, zIndex: 9999 }}
           >
-            <div className="p-4 border-b border-[rgba(232,150,46,0.10)] flex items-center justify-between bg-surface/50">
+            <div className="p-4 border-b border-[var(--line, rgba(142,104,36,0.18))] flex items-center justify-between bg-surface/50">
               <h3 className="font-medium text-cream">Notificaciones</h3>
               {unread > 0 && (
                 <button onClick={handleMarkAll} className="text-xs text-gold hover:text-goldhi transition-colors">
@@ -214,34 +200,33 @@ export default function NotificationBell({ userId, onNavigate, size = 'normal' }
                 </div>
               )}
               {items.map(notif => {
-                const Icon = ICON_MAP[notif.tipo] ?? Bell;
-                const colors = COLOR_MAP[notif.tipo] ?? COLOR_MAP.sistema;
+                const { Icono: Icon, color: colors } = comoSeVeElAviso(notif.tipo);
                 return (
                   <div
                     key={notif.id}
                     onClick={() => handleClickNotif(notif)}
-                    className={`p-4 border-b border-[rgba(232,150,46,0.08)] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
+                    className={`p-4 border-b border-[var(--line, rgba(142,104,36,0.18))] hover:bg-surface/50 transition-colors cursor-pointer flex gap-3 ${notif.leida ? 'opacity-60' : ''}`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${colors.bg}`}>
                       <Icon className={`w-4 h-4 ${colors.text}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2">
-                        <p className="text-sm font-medium text-cream/90 mb-0.5">{notif.titulo}</p>
+                        <p className="text-sm font-medium text-cream/90 mb-0.5">{VOC(notif.titulo)}</p>
                         {!notif.leida && (
                           <span className="w-2 h-2 rounded-full bg-danger shrink-0 mt-1.5" />
                         )}
                       </div>
                       {notif.descripcion && (
-                        <p className="text-xs text-cream/65 line-clamp-2">{notif.descripcion}</p>
+                        <p className="text-xs text-cream/65 line-clamp-2">{VOC(notif.descripcion)}</p>
                       )}
-                      <p className="text-[11px] text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
+                      <p className="text-sm text-cream/45 mt-2">{tiempoRelativo(notif.created_at)}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="p-3 text-center border-t border-[rgba(232,150,46,0.10)] bg-surface/50">
+            <div className="p-3 text-center border-t border-[var(--line, rgba(142,104,36,0.18))] bg-surface/50">
               <button onClick={() => setOpen(false)} className="text-xs text-cream/65 hover:text-cream transition-colors">
                 Cerrar
               </button>

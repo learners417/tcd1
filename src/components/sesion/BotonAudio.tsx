@@ -2,7 +2,7 @@
  * BOTÓN DE VOZ — responde hablando. Graba → transcribe → el texto cae en tu
  * respuesta. Si no hay micrófono o clave, no se muestra (cero fricción).
  */
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Mic, Square, Loader2 } from 'lucide-react';
 import { audioDisponible, crearGrabadora, transcribirAudio } from '../../lib/audioVoz';
 

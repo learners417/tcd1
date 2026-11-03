@@ -90,7 +90,9 @@ export default function EnMarcha({
         : `${enviados} de ${META_MENSAJES} — faltan ${META_MENSAJES - enviados}`,
       alDia: ok,
       pie: racha >= 2 ? `${racha} días seguidos` : undefined,
-      ir: 'mensajes',
+      // Sin destino a propósito. Esto es estado, no una tarea: los mensajes a
+      // su red los manda afuera de la app. Apuntaba a Soporte, que es la
+      // conversación con el equipo — otra cosa completamente.
     });
   }
 
@@ -103,7 +105,25 @@ export default function EnMarcha({
       titulo: 'Responder',
       detalle: sin === 1 ? '1 conversación esperando' : `${sin} conversaciones esperando`,
       alDia: false,
-      ir: 'mensajes',
+      // Son las conversaciones del cliente con SUS consultantes, no con el
+      // equipo. Apuntaba a Soporte por el nombre parecido.
+    });
+  }
+
+  // ── TE TOCA ACTIVAR ── cuando el Camino ya dejó todo escrito.
+  //
+  // El día 31 es el de encender, y el cliente llegaba a esa fecha con su ADN
+  // completo y sin que nada le dijera qué hacer con él. Esta fila aparece dos
+  // días antes y lo lleva a la pantalla que ordena los cuatro pasos.
+  if (dia >= 29 && !estado.campanaActiva) {
+    filas.push({
+      clave: 'activar',
+      icono: Megaphone,
+      titulo: 'Te toca activar',
+      detalle: 'Ya tienes todo escrito: tu método, tu oferta, tu página y tus anuncios.',
+      alDia: false,
+      pie: 'Cuatro pasos de montaje y enciendes',
+      ir: 'campanas',
     });
   }
 

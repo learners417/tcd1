@@ -8,6 +8,7 @@ import CreativoPreviewAuto from './CreativoPreviewAuto';
 import { saveCreativo, updateCreativo, uploadCreativeImage, upsertCreativoAsset } from '../../lib/campanasStorage';
 import type { Campana, CopyGenerado, AnguloCreativo, TipoCreativo, Creativo } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 type StudioTab = 'copy' | 'imagen' | 'edicion' | 'preview';
 
@@ -15,7 +16,6 @@ interface Props {
   campana: Campana;
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
   onBack: () => void;
   onSaved: (creativo: Creativo) => void;
 }
@@ -23,11 +23,11 @@ interface Props {
 const TABS: { id: StudioTab; label: string; icon: React.ElementType }[] = [
   { id: 'copy', label: 'Copy', icon: FileText },
   { id: 'imagen', label: 'Imagen', icon: ImageIcon },
-  { id: 'edicion', label: 'Edicion', icon: Wand2 },
-  { id: 'preview', label: 'Preview', icon: Eye },
+  { id: 'edicion', label: 'Edición', icon: Wand2 },
+  { id: 'preview', label: 'Vista previa', icon: Eye },
 ];
 
-export default function CreativoStudio({ campana, userId, perfil, geminiKey, onBack, onSaved }: Props) {
+export default function CreativoStudio({ campana, userId, perfil, onBack, onSaved }: Props) {
   const [tab, setTab] = useState<StudioTab>('copy');
   const [copies, setCopies] = useState<CopyGenerado[]>([]);
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
@@ -110,8 +110,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
         setSaved(true);
         if (isFirstSave) toast.success('Creativo guardado en historial');
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al guardar: ${msg}`);
+        toast.error(mensajeDeFalla(err, 'guardar la pieza'));
       } finally {
         setSaving(false);
         saveInFlightRef.current = false;
@@ -151,7 +150,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
           </div>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/5 border border-gold/20 text-sm">
           {saving ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /><span className="text-cream/75">Guardando en historial…</span></>
           ) : saved ? (
@@ -165,7 +164,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-panel p-1 rounded-xl border border-[rgba(232,150,46,0.1)]">
+      <div className="flex gap-1 bg-panel p-1 rounded-xl border border-[var(--line, rgba(142,104,36,0.18))]">
         {TABS.map((t) => {
           const Icon = t.icon;
           const disabled = t.id === 'preview' && !canPreview;
@@ -189,11 +188,10 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
       </div>
 
       {/* Content */}
-      <div className="bg-surface border border-[rgba(232,150,46,0.10)] rounded-2xl p-6">
+      <div className="bg-surface border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl p-6">
         {tab === 'copy' && (
           <CopyGenerator
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             objetivo={campana.objetivo}
             onCopyGenerated={handleCopyGenerated}
           />
@@ -204,7 +202,6 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
             copies={copies}
             angulo={angulo}
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             onImagesGenerated={handleImagesGenerated}
           />
         )}
@@ -214,7 +211,6 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
             campana={campana}
             userId={userId}
             perfil={perfil ?? {}}
-            geminiKey={geminiKey}
             onSaved={onSaved}
           />
         )}
@@ -228,7 +224,7 @@ export default function CreativoStudio({ campana, userId, perfil, geminiKey, onB
                   <button
                     key={idx}
                     onClick={() => setActiveSlide(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-all ${
                       activeSlide === idx
                         ? 'bg-gold/15 text-gold border border-gold/30'
                         : 'bg-cream/5 text-cream/45'

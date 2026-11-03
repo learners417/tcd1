@@ -1,7 +1,7 @@
 /**
  * evidencia.ts — Evidencia por sesión (Cirugía Final F2 · jul 2026)
  * La evidencia se sube EN la tarea (foto de la quema, audio del precio,
- * screenshot de la campaña, comprobante del pago). Sin tabla nueva:
+ * captura de la campaña, comprobante del pago). Sin tabla nueva:
  * vive en Storage bajo evidencias/{userId}/{metaCodigo}/.
  */
 import { supabase, isSupabaseReady } from './supabase';

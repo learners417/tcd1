@@ -9,7 +9,7 @@ import { planLimitado } from '../lib/adnPiezas';
 import { claveDelDia } from '../lib/roadmapSeed';
 
 const DIAS = [
-  { d: 'Día 1', t: 'Tu número', s: 'lo calculas hoy mismo, en minutos' },
+  { d: 'Día 1', t: 'Mi número', s: 'lo calculas hoy mismo, en minutos' },
   { d: 'Días 2-4', t: 'Sostener tu precio', s: 'la parte que nadie te enseñó' },
   { d: 'Día 5', t: 'Tu precio y tu anuncio', s: 'lo sellas y sale el mensaje, listo para enviar' },
   { d: 'Viernes', t: 'En vivo conmigo', s: 'revisamos tu precio, respondo tus dudas' },

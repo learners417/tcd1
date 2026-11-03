@@ -1,9 +1,11 @@
 import { resumenOrigenParaMentor } from '../lib/origen';
 import { resumenRuedaParaMentor } from '../lib/rueda';
-import { planDe, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
+import { planDelCliente, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { safeGet } from '../lib/safeStorage';
-import { Send, Bot, RefreshCw, Sparkles, Zap } from 'lucide-react';
+/* `Bot` estaba importado y no se dibujaba en ningún lado. Fuera: un import
+   que nadie usa es una pista falsa para el que lea esto mañana. */
+import { Send, RefreshCw, Sparkles } from 'lucide-react';
 import { streamText } from '../lib/aiProvider';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -23,7 +25,6 @@ import {
 } from '../lib/coachPrompt';
 import {
   getUserKnowledgeBase,
-  getUserKnowledgeBaseSync,
 } from '../lib/userKnowledgeBase';
 import {
   supabase,
@@ -52,7 +53,9 @@ type Message = CoachConversationMessage;
 function buildInitialMessage(): Message {
   const profile = safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});
   const semanaActual = semanaDelPrograma(profile.fecha_inicio, 13);
-  const nombre = profile.nombre || 'Fundadora';
+  // Sin nombre, el Mentor abría con «Hola Fundadora» — en femenino, y a un
+  // médico varón el día 1. Sin nombre, saluda sin nombre.
+  const nombre = profile.nombre?.trim() || '';
 
   const diary = safeGet<{ respuestas?: { cuello?: string; foco?: string } }[]>('tcd_diary_weekly', []);
   const last = diary.length > 0 ? diary[0].respuestas : null;
@@ -63,14 +66,21 @@ function buildInitialMessage(): Message {
   if (semanaActual === 1 && freno) {
     return {
       role: 'assistant',
-      content: `${nombre}, antes de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro. 🥋`,
+      content: `${nombre ? `${nombre}, antes` : 'Antes'} de tu primera sesión quiero decirte algo.\n\nEn tu diagnóstico escribiste que lo que más te frena es: _"${freno}"_.\n\nQuiero que sepas dos cosas. La primera: eso que escribiste no es tu problema — es el síntoma. El problema real lo vamos a encontrar esta semana, y probablemente no es lo que piensas.\n\nLa segunda: el día 4 de esta semana vas a hacer algo físico con eso. No te adelanto más.\n\nTu primera sesión te espera en El Camino. Es corta. Empieza hoy — el impulso del día 1 vale oro.`,
     } as Message;
   }
-  let msg = `Hola ${nombre}. Empezamos la **Semana ${semanaActual}**.\n\n`;
+  // Sin nombre, «Hola ${nombre}.» quedaba «Hola .»
+  let msg = `${nombre ? `Hola ${nombre}.` : 'Hola.'} Empezamos la **Semana ${semanaActual}**.\n\n`;
   if (last && last.cuello) {
-    msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, pero estás frenada por: _"${last.cuello}"_.\n\n`;
+    // «frenada» en femenino para cualquiera: se neutraliza.
+    msg += `Noté en tu último check-in que tu foco es _"${last.foco}"_, y que lo que te frena es: _"${last.cuello}"_.\n\n`;
+    msg += `¿Qué acción atómica vamos a tomar ahora mismo para destrabar eso y avanzar?`;
+  } else {
+    // Antes el cierre decía «destrabar ESTO» en los dos casos, y sin el
+    // párrafo de arriba «esto» no refería a nada. Es el primer mensaje que
+    // lee un cliente que saltó el diagnóstico, el día 1.
+    msg += `Cuéntame en qué estás trabajando ahora y qué es lo que más te está costando. Con eso armamos el próximo paso.`;
   }
-  msg += `¿Qué acción atómica vamos a tomar ahora mismo para destrabar esto y avanzar?`;
   return { role: 'assistant', content: msg };
 }
 
@@ -104,7 +114,10 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const knowledgeBaseRef = useRef<string>(getUserKnowledgeBaseSync());
+  /* Arranca vacío: la versión síncrona leía localStorage, que solo tenía los
+     outputs del catálogo de herramientas, y devolvía siempre ''. El efecto de
+     abajo la llenaba con la versión async al instante. */
+  const knowledgeBaseRef = useRef<string>('');
   const supabaseProfileRef = useRef<Record<string, unknown> | null>(null);
 
   // Estado del Coach IA · sumario + last_summary_at_msg_count viven en DB
@@ -288,24 +301,24 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
 
       // ═══ El tope de los 5 días: 30 mensajes, cierre elegante ═══
       // ─── La escasez que enseña: 10 preguntas de maestro por semana (planes del camino) ───
-      if (planDe(perfil) !== 'blanco') {
+      if (planDelCliente(perfil) !== 'blanco') {
         if (usosSemana('mentor') >= TOPE_MENTOR_SEMANAL) {
           setMessages((prev) => [...prev, { role: 'user', content: text }, {
             role: 'assistant',
-            content: 'Usaste tus ' + TOPE_MENTOR_SEMANAL + ' preguntas de maestro de esta semana — bien usadas valen oro. El lunes se renuevan. Mientras tanto, el dojo sigue abierto: tu sesión de hoy te espera en El Camino, y si algo se traba en plena sesión, ahí estoy contigo adentro.',
+            content: 'Usaste tus ' + TOPE_MENTOR_SEMANAL + ' preguntas de maestro de esta semana — bien usadas valen oro. El lunes se renuevan. Mientras tanto, tu sesión de hoy te espera en El Camino, y ahí adentro estoy contigo en cada paso.',
           }]);
           setInput('');
           return;
         }
         consumirUso('mentor');
       }
-      if (planDe(perfil) === 'blanco') {
+      if (planDelCliente(perfil) === 'blanco') {
         let usados = 0;
         try { usados = parseInt(localStorage.getItem('tcd_mentor_blanco_msgs') ?? '0', 10) || 0; } catch { /* noop */ }
         if (usados >= TOPE_MENTOR_BLANCO) {
           setMessages((prev) => [...prev, {
             role: 'assistant' as const,
-            content: 'Llegamos al límite de conversaciones de tus 5 días. No es un adiós: del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
+            content: 'Llegamos al límite de conversaciones de tus 5 días. Del otro lado seguimos juntos cada semana, con todo tu historial y con las sesiones que todavía no abriste. En HOY tienes el botón para seguir tu camino — un toque y retomamos exactamente donde quedamos.',
           }]);
           return;
         }
@@ -320,7 +333,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
       const visibleText = hasAttachments
         ? `${text.trim() || '(adjuntos para analizar)'}\n\n${sentAttachments
             .map((a) =>
-              a.kind === 'image' ? `📎 ${a.fileName} (imagen)` : `📎 ${a.fileName}`,
+              a.kind === 'image' ? `Adjunto: ${a.fileName} (imagen)` : `Adjunto: ${a.fileName}`,
             )
             .join('\n')}`
         : text;
@@ -458,27 +471,71 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
   })();
   const userInitial = (profile.nombre || 'U').charAt(0).toUpperCase();
 
+  /*
+   * EL ALTO DEL CHAT SALE DE LAS BARRAS DE VERDAD.
+   *
+   * Era `100vh - 8rem`, un número redondo que no corresponde a nada: las
+   * barras suman más. Medido a 390×844, el campo donde se escribe terminaba
+   * en el píxel 779 y la barra de abajo arranca en el 760 — el input quedaba
+   * DEBAJO de las pestañas, y para verlo entero había que desplazar la
+   * página con la barra fija encima.
+   *
+   * Ahora cada término está declarado en otro lado y acá solo se suma:
+   *   3.5rem   la barra de arriba (`h-14` en Topbar)
+   *   1.5rem   el padding de arriba del contenedor (`p-6` en App)
+   *   5.25rem  la barra de abajo, que ese mismo contenedor ya reserva
+   * Y `dvh` en vez de `vh` porque en el teléfono la barra del navegador
+   * aparece y desaparece: con `vh` el chat mide siempre como si no estuviera.
+   */
+  const altoDelChat =
+    'calc(100dvh - 3.5rem - 1.5rem - 5.25rem - env(safe-area-inset-bottom, 0px))';
+
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-gold/10">
-      <div className="p-5 border-b border-[rgba(232,150,46,0.10)] bg-gold/[0.03] flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center border border-gold/30">
-            <Bot className="w-5 h-5 text-gold" />
-          </div>
+    <div
+      className="flex flex-col card-panel rounded-2xl overflow-hidden animate-in fade-in duration-500 border border-gold/10"
+      style={{ height: altoDelChat }}
+    >
+      {/*
+        EL ENCABEZADO ERA CUATRO RENGLONES DE MAYÚSCULAS.
+
+        Tenía dos retratos seguidos para una sola voz —un robot en un cuadrado
+        de oro y la foto de Javo—, el nombre «Mentor IA» en versalitas
+        espaciadas, y debajo «TU GUÍA DEL CAMINO · CONOCE TU ADN COMPLETO»
+        también en caja alta, a 17 px: a 390 píxeles eso envuelve en tres
+        renglones y se lee letra por letra, porque las mayúsculas son para
+        rótulos cortos. La chispa verde iba dentro de ese párrafo con
+        `items-center`, así que al envolver quedaba flotando en el medio del
+        bloque, sin alinear a nada.
+
+        Y era un quinto nombre para el mismo lugar: la barra de arriba, el
+        buscador y las pestañas dicen «Tu Mentor».
+
+        Queda un retrato —la foto, que es la voz de verdad—, el nombre en la
+        letra de cuerpo y una línea en minúsculas que dice lo único que hace
+        falta saber: que este no es un chat cualquiera porque conoce su
+        camino. La chispa sale: no significaba nada.
+      */}
+      <div className="p-5 border-b border-[var(--line, rgba(142,104,36,0.18))] bg-gold/[0.03] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <img
             src="/javo.jpg"
-            alt="Javo"
-            className="w-9 h-9 rounded-full object-cover border border-gold/40 shrink-0"
+            alt=""
+            className="w-11 h-11 rounded-full object-cover border border-gold/40 shrink-0"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
-          <div>
-            <h2 className="text-sm font-semibold text-white tracking-widest uppercase mb-0.5">
-              Mentor IA
+          <div className="min-w-0">
+            {/*
+              Decía «Tu Mentor» con la barra de arriba diciendo «Tu Mentor» a
+              cuarenta píxeles. Con la cara al lado y el nombre arriba, la
+              línea que queda puede decir lo que el Mentor SABE, que es lo que
+              el cliente necesita saber antes de escribirle.
+            */}
+            <h2 className="font-sans not-italic text-lg font-semibold text-cream">
+              Conoce tu Camino y tu ADN
             </h2>
-            <p className="text-sm text-white/65 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-success" /> Tu guía del camino · conoce tu ADN completo
-              {guardadoOk && <span className="text-success normal-case font-semibold tracking-normal transition-opacity">· Guardado ✓</span>}
-            </p>
+            {guardadoOk && (
+              <p className="text-xs text-success font-semibold">Guardado ✓</p>
+            )}
           </div>
         </div>
         <button
@@ -519,7 +576,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               /* El Mentor humano: burbujas separadas por párrafo — conversación, no documento */
               <div className="max-w-[85%] flex flex-col gap-2">
                 {msg.content.split(/\n\n+/).filter(Boolean).map((parte, pi) => (
-                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[rgba(232,150,46,0.10)] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
+                  <div key={pi} className="bg-surface text-white/90 rounded-[20px] rounded-tl-md border border-[var(--line, rgba(142,104,36,0.18))] px-5 py-3.5 fade-rise" style={{ boxShadow: 'var(--shadow-card)', animationDelay: `${Math.min(pi * 120, 600)}ms` }}>
                     <div className="prose prose-invert prose-sm max-w-none text-[17px] leading-relaxed prose-p:my-0 prose-strong:text-goldhi prose-li:my-0.5">
                       <Markdown>{parte}</Markdown>
                     </div>
@@ -530,8 +587,8 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             <div
               className={`max-w-[85%] rounded-2xl p-5 ${
                 msg.role === 'user'
-                  ? 'bg-gold text-ink rounded-tr-sm shadow-lg'
-                  : 'card-panel bg-surface text-white/90 rounded-tl-sm border border-[rgba(232,150,46,0.10)]'
+                  ? 'burbuja-mia rounded-tr-sm'
+                  : 'card-panel bg-surface text-white/90 rounded-tl-sm border border-[var(--line, rgba(142,104,36,0.18))]'
               }`}
             >
               {msg.role === 'user' ? (
@@ -566,7 +623,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
         ))}
       </div>
 
-      <div className="p-4 border-t border-[rgba(232,150,46,0.10)] bg-black/20">
+      <div className="p-4 border-t border-[var(--line, rgba(142,104,36,0.18))] bg-black/20">
         {quickReplies.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             {quickReplies.map((qr) => (
@@ -574,7 +631,16 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
                 key={qr.id}
                 onClick={() => handleSend(qr.label)}
                 disabled={isTyping}
-                className="px-3.5 py-2 rounded-xl border border-[rgba(232,150,46,0.22)] bg-gradient-to-b from-gold/10 to-transparent hover:from-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
+                /*
+                  `shrink-0` y `whitespace-nowrap`: la tira ya tenía
+                  `overflow-x-auto`, pero sin esto el flex no desborda —
+                  comprime. Los tres entraban a la fuerza en 358 píxeles, a
+                  unos 100 cada uno, y el texto se partía en CUATRO renglones:
+                  «Volví / después / de unos / días». Ahora cada uno mide lo
+                  que mide su frase y la tira se desplaza de costado, que es
+                  lo que el `overflow-x-auto` esperaba desde el principio.
+                */
+                className="shrink-0 whitespace-nowrap px-3.5 py-2 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] bg-gold/10 hover:bg-gold/20 hover:border-gold/40 text-xs text-cream/85 font-medium transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
                 {qr.icon && <span className="text-sm">{qr.icon}</span>}
                 {qr.label}
@@ -609,12 +675,16 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
             onChange={(e) => setInput(e.target.value)}
             onPaste={handlePaste}
             disabled={isTyping || cargandoEstado}
-            placeholder={
-              isTyping
-                ? 'Tu coach está conectando ideas...'
-                : 'Cuéntale dónde estás — tu Mentor conoce tu camino...'
-            }
-            className="flex-1 bg-white/5 border border-[rgba(232,150,46,0.12)] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
+            /*
+              El de antes decía «Cuéntale dónde estás — tu Mentor conoce tu
+              camino...» y el campo mide 289 píxeles con el botón de enviar
+              encima: se cortaba en «Cuéntale dónde estás —», con el guión
+              suelto al final. Un marcador de campo que no entra deja de ser
+              una invitación y pasa a ser un texto roto. Lo que el Mentor sabe
+              ya lo dice el encabezado.
+            */
+            placeholder={isTyping ? 'Armando la respuesta...' : 'Cuéntale dónde estás'}
+            className="flex-1 bg-white/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"
@@ -624,7 +694,15 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               cargandoEstado ||
               uploadingAttachment
             }
-            aria-label="Enviar" className="absolute right-1 w-11 h-11 rounded-full bg-[var(--oro-d,#8E6824)] disabled:opacity-50 flex items-center justify-center text-[#FFFDF7] transition-colors"
+            /*
+              Era un círculo de oro macizo, con el oro escrito a mano como
+              valor arbitrario —`bg-[var(--oro-d)]`—, así que ninguna regla del
+              tema lo alcanzaba: el mismo caso del botón del Mentor en la
+              barra. Ahora es el bloque de tinta de la casa y el oro queda
+              donde vive, en la línea del campo de al lado.
+            */
+            aria-label="Enviar" className="absolute right-1 w-11 h-11 rounded-full disabled:opacity-50 flex items-center justify-center transition-colors"
+            style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
           >
             <Send className="w-4 h-4 ml-1" />
           </button>

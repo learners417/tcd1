@@ -8,7 +8,7 @@
  * Cuando falta la salida, la pantalla pide los seis. No muestra progreso
  * inventado ni compara contra un valor que no existe.
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CAMPOS, comparar, cuantosMejoraron, lecturaDelCierre, estaCompleta,
          guardar, leer, KEY_ENTRADA, KEY_SALIDA, type Medicion } from '../../lib/medicion';
 import { VOC } from '../../lib/vocabulario';
@@ -68,7 +68,7 @@ export default function AntesYDespues({ onGuardar }: Props) {
             disabled={!estaCompleta(salida)}
             onClick={confirmar}
             className="mt-5 w-full min-h-[52px] rounded-[20px] text-[18px] font-semibold disabled:opacity-40"
-            style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
+            style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
           >
             Ver mi antes y después
           </button>

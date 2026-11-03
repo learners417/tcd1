@@ -14,6 +14,18 @@ def check(nombre, ok, detalle=''):
     if not ok: F += 1
 def rd(f): return open(f, encoding='utf-8', errors='replace').read()
 
+def solo_codigo(s: str) -> str:
+    """El archivo sin comentarios.
+
+    Tres lentes dieron falso positivo por mirar el archivo crudo: contaban la
+    palabra prohibida, el writeText viejo o el campo retirado dentro del
+    comentario que explica POR QUE se saco. Una lente que marca en rojo al
+    archivo que arreglo el problema ensena a borrar la explicacion.
+    """
+    import re as _r
+    s = _r.sub(r'/\*[\s\S]*?\*/', '', s)
+    return _r.sub(r'^\s*//.*$', '', s, flags=_r.M)
+
 # ── Ayudante: ¿una tab del Admin está en sus 5 superficies? ─────────────
 # Se comprueba PERTENENCIA al array, nunca una cadena con el corchete
 # pegado: anclar a la posición hizo que agregar una tab después rompiera
@@ -56,10 +68,13 @@ falt = set(cods) - set(re.findall(r"'(P[\w\.]+)'", m.group(1)))
 check('MetaCodigo completo', not falt, str(sorted(falt)))
 
 print('══ 3) HERRAMIENTAS ══')
-h = rd('src/lib/herramientas.ts')
-cat = set(re.findall(r"id: '(H-[\w\.]+)'", h))
+# El catálogo salió del código el 1 de nov: ninguna jornada apuntaba a una
+# herramienta. Antes acá se comparaba lo usado contra `herramientas.ts`, que ya
+# no existe, y esta auditoría se caía entera al abrirlo. La vara que queda es
+# la misma que guarda `prueba-codigos.ts`: que no vuelva a aparecer ninguna.
 usadas = set(re.findall(r"herramienta_id: '([^']+)'", s))
-check('todas las usadas existen en el catálogo', not (usadas - cat), str(sorted(usadas - cat)))
+check('ninguna jornada apunta a una herramienta: el catálogo ya no existe',
+      not usadas, str(sorted(usadas)))
 
 print('══ 4) COMPONENTES ══')
 todo = {f: rd(f) for f in glob.glob('src/**/*.ts*', recursive=True)}
@@ -194,9 +209,19 @@ except Exception:
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
 
 _bt = todo.get('src/components/BottomTabBar.tsx','')
-_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt))
-_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", todo.get('src/components/Sidebar.tsx','')))
+_sb = todo.get('src/components/Sidebar.tsx','')
+# El cuarto destino cambia con el avance —Mi ADN hasta que le toque montar,
+# Campañas desde ahí— y las dos navegaciones lo preguntan a `destinoQueCambia`.
+# La barra conserva el literal en su lista y lo cambia al pintar; el menú
+# lateral lo arma directo, así que ahí no hay literal que encontrar. Lo que
+# esta lente cuida es que los dos lleven a lo mismo, no cómo está escrito.
+_dinamico = lambda s: {'campanas'} if 'destinoQueCambia' in s else set()
+_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt)) | _dinamico(_bt)
+_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", _sb)) | _dinamico(_sb)
 check('la barra de abajo y el menu lateral llevan a lo mismo', _ids_bt == _ids_sb, f'abajo {sorted(_ids_bt)} / lateral {sorted(_ids_sb)}')
+check('y el cuarto destino lo deciden las dos con la misma función',
+      ('destinoQueCambia' in _bt) == ('destinoQueCambia' in _sb),
+      'con una sola que lo pregunte, las dos navegaciones dicen cosas distintas')
 
 try:
     _css = open('src/index.css', encoding='utf-8').read()
@@ -212,7 +237,11 @@ try:
 except Exception:
     _c5 = ''
 _luz5 = _c5[_c5.find('[data-theme="light"]'):]
-check('card-ios no cae en su respaldo negro', '--surface: #FFFDF7' in _luz5, '')
+# El valor literal dejó de estar: `--surface` pasó a `var(--bg-card)` para que
+# el papel se defina en UN lugar. Lo que esta vara protege es que en tema claro
+# `--surface` NO caiga en el respaldo oscuro, así que mira eso y no un hex.
+check('card-ios no cae en su respaldo negro',
+      '--surface: var(--bg-card)' in _luz5 and '--bg-card: #F6F2E9' in _luz5, '')
 
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
@@ -241,6 +270,8 @@ check('regla de avatar (la brecha, nunca la culpa)', not av, str(av))
 _BLANCO = {'más','quizás','estás','jamás','atrás','detrás','demás','además','país',
  'después','través','revés','cortés','interés','inglés','francés','mes','vas','das',
  'tras','análisis','crisis','compás','estés','estrés','clichés',
+ # sustantivos tomados del frances, no voseo
+ 'degradés','degradé','canapés','pies','bebés','purés','cafés','bidés',
  # futuros IRREGULARES de tuteo — correctos, no voseo
  'sabrás','podrás','tendrás','harás','querrás','vendrás','pondrás','saldrás',
  'dirás','valdrás','cabrás'}
@@ -257,6 +288,20 @@ for _f, _src in todo.items():
     for _w in re.findall(r'\b(?:vos|sos|contame|decime|escribime|acordate|fijate|pasame|mandame|mostrame|compartilo|agendate)\b', _src, re.I):
         _vos.append(f"{_f.split('/')[-1]}:{_w.lower()}")
 check('voseo = 0 en TODO el repo (prompts incluidos)', not _vos, '; '.join(sorted(set(_vos))[:5]))
+
+# ── 6.4a · la palabra "gente" ──────────────────────────────────────────
+# Javo la pidio fuera: habla de personas y de consultantes, no de "gente".
+# Habia 50 en 25 archivos, y varias en copy que el cliente lee. Esta lente
+# existe para que no vuelvan de a una.
+# La linea que PROHIBE la palabra tiene que poder nombrarla: los prompts de
+# IA llevan la regla escrita ("nunca la palabra gente: personas o
+# consultantes"), y sin ella el modelo no la respeta. Mismo criterio que la
+# excepcion de vozLocalizada.ts en la lente del voseo.
+_gente = [f"{_f.split('/')[-1]}:{_n}" for _f, _src in todo.items()
+          for _n, _l in enumerate(_src.split('\n'), 1)
+          if re.search(r'\bgente\b', _l, re.I)
+          and not re.search(r'nunca.{0,30}\bgente\b|\bgente\b.{0,40}(?:personas|consultantes)', _l, re.I)]
+check('la palabra "gente" = 0 en todo el repo', not _gente, '; '.join(_gente[:5]))
 # 6.4b · La lente de arriba solo ve -ás/-és/-ís: se le escapaban los
 # imperativos ("Escribí", "Mirá", "Recordá") y no miraba el seed, que es
 # texto que el cliente lee. El diccionario vive en tcd-spec/datos/tuteo.py.
@@ -288,6 +333,18 @@ with _tf64.TemporaryDirectory() as _tmp64:
     _regen = open(f'{_tmp64}/spec/datos/roadmap.seed.json', encoding='utf-8').read() if _g.returncode == 0 else ''
 check('el seed de la app es exactamente el que genera hoy generar_seed.py',
       _g.returncode == 0 and _regen == rd('src/lib/roadmap.seed.json'), (_g.stderr or 'difiere: correr generar_seed.py y copiar')[-160:])
+
+# El plan de los 90 días que se entrega por escrito también se genera: un plan
+# escrito a mano es una segunda verdad, y el día que una jornada cambia el
+# documento sigue diciendo lo de antes y alguien lo lee.
+with _tf64.TemporaryDirectory() as _tmpP:
+    _dst = f'{_tmpP}/plan.md'
+    _p = subprocess.run([sys.executable, 'scripts/generar-plan-90-dias.py', _dst],
+                        capture_output=True, text=True)
+    _plan = open(_dst, encoding='utf-8').read() if _p.returncode == 0 else ''
+check('el plan escrito de los 90 días sale del seed, no de la mano',
+      _p.returncode == 0 and _plan == rd('EL-CAMINO-DIA-POR-DIA.md'),
+      (_p.stderr or 'difiere: correr scripts/generar-plan-90-dias.py')[-160:])
 
 # ── 6.5 · Todo endpoint de IA pasa por el enrutador ────────────────────
 # Antes había una cadena copiada en cada endpoint: DeepSeek→Claude escrita
@@ -449,6 +506,9 @@ if _os69.path.exists('src/components/admin/PanelMotorIA.tsx'):
 import os as _os610
 _fa = rd('src/lib/formulasAnuncios.ts')
 _con = rd('src/components/campanas/ConstructorAnuncios.tsx')
+_apr = rd('src/lib/aprobacionAnuncio.ts')
+_cop = rd('src/lib/copiar.ts')
+_btn = rd('src/components/BotonCopiar.tsx')
 check('existe el recomendador de fórmulas',
       'export function recomendarFormulas' in _fa)
 check('cada recomendación explica POR QUÉ esa y no otra',
@@ -505,9 +565,20 @@ check('las correcciones se aplican DONDE van, no siempre al final',
       "posicion: 'inicio' | 'final'" in _cri
       and "posicion === 'inicio'" in _con,
       'un gancho pegado al final deja el anuncio al revés')
+# Antes se verificaba que el candado de los anuncios fuera el único que no se
+# tilda a mano. Ahora son SEIS los que no se tildan: cada uno se cierra porque
+# su dato está cargado —el id del píxel, el link de la página— y solo quedan a
+# mano los dos que son una acción y no una cosa. Un tilde vacío no lo puede
+# verificar nadie, y detrás de esa casilla se enciende una campaña con dinero
+# real.
 check('el candado de los anuncios se verifica solo, no se tilda a mano',
-      'estadoDeLasPiezas' in _mon and "c.id !== 'anuncios'" in _mon,
+      'estadoDeLasPiezas' in _mon
+      and "candadoCerrado(montaje, id)" in _mon
+      and "c.id === 'dm' || c.id === 'trabajo'" in _mon,
       'detrás de esa casilla se enciende una campaña con dinero real')
+check('y los demás se cierran con su dato, no con un tilde',
+      'guardarMontaje' in _mon and 'pixel_id' in _mon and 'url_pagina' in _mon,
+      'un tilde vacío no lo puede verificar nadie, ni el cliente a sí mismo')
 check('el candado dice QUÉ le falta a cuál pieza',
       'estadoPiezas.pendientes' in _mon)
 
@@ -522,8 +593,30 @@ check('existe el chequeo determinista de políticas',
 check('cada alerta dice CÓMO se escribe lo mismo sin romper la regla',
       _fa.count('comoSeArregla:') >= 7,
       'señalar el problema sin dar la salida deja al cliente trabado')
+# La lente pedia 'bloqueantes.length === 0' escrito en la pantalla. Esa
+# linea era el bug: TODO el veredicto se derivaba ahi, sin ninguna forma de
+# que una persona aprobara nada, y el cliente quedaba trabado con un anuncio
+# que estaba bien. Ahora el veredicto vive en aprobacionAnuncio.ts y lo que
+# se verifica es lo que importa: que la politica de Meta siga bloqueando, y
+# que los avisos de calidad tengan salida.
 check('las políticas bloquean el copiado en el Constructor',
-      'revisarPoliticas' in _con and 'bloqueantes.length === 0' in _con)
+      'revisarPoliticas' in _con and 'estadoDePieza' in _con
+      and 'bloqueantes: bloqueantes.length' in _con)
+check('una pieza bloqueada por Meta NO se puede aprobar a mano',
+      "veredicto: 'bloqueada'" in _apr and 'puedeAprobarAMano: false' in _apr,
+      'lo que esta en juego es la cuenta publicitaria, no el estilo')
+check('pero los 8 ingredientes SÍ se pueden aprobar a mano',
+      'puedeAprobarAMano: true' in _apr and 'aprobar(' in _con,
+      'se detectan por regex: quien escribio su analogia con otras palabras quedaba trabado')
+check('la aprobación muere si reescribe el anuncio',
+      'export function huella' in _apr and 'estaAprobada(aprobadas' in _con,
+      'sin eso aprobaba una version y publicaba otra')
+check('y la pantalla explica quién aprueba qué',
+      'COMO_FUNCIONA_LA_AUDITORIA' in _con,
+      '«no me queda claro como es la auditoria, como la pasan, como la aprueban»')
+check('en cada estado hay una línea que dice qué sigue',
+      'estado.queSigue' in _con,
+      'el cartel decia «todavia no esta lista» y ahi terminaba')
 check('el candado del montaje mira políticas Y no solo ingredientes',
       'revisarPoliticas' in _fa
       and 'no se puede publicar' in _fa,
@@ -531,14 +624,150 @@ check('el candado del montaje mira políticas Y no solo ingredientes',
 check('se distingue lo que bloquea de lo que solo hay que revisar',
       "'bloquea' | 'revisa'" in _fa)
 
+# ── 6.11c · UNA SOLA FECHA PARA LA PRIMERA VENTA ───────────────────────
+# El contrato que el cliente FIRMA en su sesion del plan de inversion decia
+# "primera venta esperada ~dia 42". Su hoja de ruta dice dia 26. Dos fechas
+# distintas para lo mismo, y la que firma es la que va a esperar: el cliente
+# que firmo ese plan se queda tranquilo dieciseis dias de mas.
+_hoja = rd('src/lib/hojaDeRuta.ts')
+_ses = rd('src/lib/sesionesGuiadas.ts')
+import re as _re
+_m = _re.search(r"(\d+): 'Tu primera venta'", _hoja)
+check('la hoja de ruta dice cuando es la primera venta', bool(_m))
+if _m:
+    _dia = _m.group(1)
+    _otras = sorted(set(_re.findall(r'(?:d[ií]a|DIA) ~?(\d{2})', _ses))
+                    - {_dia, '24', '90', '30', '45', '60'})
+    check(f'y ninguna sesion promete otra fecha (la hoja dice dia {_dia})',
+          'primera venta esperada' not in _ses,
+          'el plan que firma no puede decir una fecha distinta de su hoja de ruta')
+    check('la sesion del plan de inversion nombra las fechas de la hoja',
+          f'dia {_dia}' in _ses or f'd\u00eda {_dia}' in _ses,
+          'sin la fecha, el cliente firma un plan sin saber que espera')
+
+# ── 6.11d · CONSTRUIDO, PROBADO Y SIN CABLEAR ──────────────────────────
+# El patron que aparecio DIEZ veces en esta revision: un modulo completo,
+# exportado, a veces con su prueba en verde, que ninguna pantalla importa.
+# El cliente paga por algo que existe en el codigo y no se puede usar.
+#
+# Estas son las que ya se arreglaron. La lente existe para que no se
+# desconecten otra vez, que es exactamente como llegaron a estar asi.
+_vivas = [
+    ('sincronizarArtefactos', 'src/pages/MiClinica.tsx',
+     'la pantalla afirma en presente que su trabajo ya esta en Mi Clinica'),
+    ('leerTrabajoDeCampanas', 'src/components/campanas/ConstructorAnuncios.tsx',
+     'sin esto pierde anuncios que pago con creditos, estando en la base'),
+    ('grabacionesGrupales', 'src/pages/Acompanamiento.tsx',
+     'quien se perdio la mentoria es el que necesita la grabacion'),
+    ('costoPorCliente', 'src/components/admin/PanelMotorIA.tsx',
+     'el costo de IA por cliente'),
+]
+for _fn, _pantalla, _porque in _vivas:
+    _src = todo.get(_pantalla, '')
+    check(f'{_fn} esta cableado en {_pantalla.split("/")[-1]}',
+          _fn in _src, _porque)
+
+# Y la que no se puede medir por nombre: que el diagnostico reciba los
+# paises. `bandaDe(n.mercados ?? [])` recibia siempre una lista vacia, y
+# caia en la banda de Mexico para TODA la cartera.
+_vc = todo.get('src/lib/valueChain.ts', '')
+_vc_codigo = solo_codigo(_vc)
+check('calcularCadena exige los paises, no los busca en los numeros',
+      'paises: string[],' in _vc_codigo and 'n.mercados' not in _vc_codigo,
+      'con la lista vacia se le dice "caro" a quien esta bien para su mercado')
+
+# ── 6.0 · EL PRIMER DIA DE UN CLIENTE NUEVO ────────────────────────────
+# Lo que una auditoria del dia 1 encontro, convertido en lentes: son los
+# errores que solo se ven con la base vacia, y por eso ninguna prueba de
+# escenario los agarraba.
+_dash = solo_codigo(todo.get('src/pages/Dashboard.tsx', ''))
+check('HOY no afirma "todo al dia" mientras todavia esta cargando',
+      'yaCargo && data.tareasHoy.length === 0' in _dash,
+      'el dia 1 tachaba su sesion con "Hecha - el dojo te vio hoy"')
+check('y el fetch a Mi Clinica tiene corte',
+      'corte.abort()' in _dash and 'signal: corte.signal' in _dash,
+      'sin timeout, HOY esperaba a otra app en arranque frio')
+
+_rm = solo_codigo(todo.get('src/pages/Roadmap.tsx', ''))
+check('el punto de partida NO reescribe la fecha de inicio',
+      'proximoLunes' not in _rm and 'yaTieneFecha' in _rm,
+      'el primer tap la movia al lunes siguiente y congelaba su dia en 1')
+
+_app = solo_codigo(todo.get('src/App.tsx', ''))
+check('sin perfil no se entra a medias',
+      'No pude abrir tu cuenta' in _app,
+      'sin fila en profiles se salteaba el wizard y todo quedaba en el navegador')
+
+_act = solo_codigo(todo.get('src/components/campanas/LaActivacion.tsx', ''))
+check('Campanas dice cuando le toca, en vez de invitarlo el dia 1',
+      'todaviaNo' in _act and 'DIA_EN_QUE_EMPIEZA' in _act,
+      'el dia 1 le presentaba el paso 1 del montaje como la tarea de hoy')
+
+_tc = solo_codigo(todo.get('src/components/tasks/TaskCoach.tsx', ''))
+check('solo se pide adjuntar cuando la evidencia es un archivo',
+      'ADJUNTABLES' in _tc,
+      'el boton de cerrar la sesion estaba deshabilitado en TODO el Camino')
+
+# Textos que delatan un dato que falta. El dia 1 es cuando falta todo.
+_malos = [
+    ("|| 'bienvenida'", 'el saludo en femenino como si fuera su nombre'),
+    ("|| 'Fundadora'", 'el Mentor saludando en femenino a cualquiera'),
+    ('animate-spin'.replace('a', '\u00e1', 1), 'clase con tilde: no anima nada'),
+]
+for _mal, _porque in _malos:
+    _donde = [f.split('/')[-1] for f, s in todo.items() if _mal in solo_codigo(s)]
+    check(f'sin «{_mal}» en el copy', not _donde, f'{_porque} - {_donde[:3]}')
+
+# Y los pilares: el cliente ve dias, no pilares.
+_ag = ' '.join(solo_codigo(s) for f, s in todo.items() if '/agents/' in f)
+check('ningun unlockReason nombra un "Pilar N"',
+      not re.search(r'Pilar \d', _ag),
+      'el cliente lee un requisito que no puede ubicar, y que ademas no es el requisito')
+
+# ── 6.12b · UN SOLO CAMINO AL PORTAPAPELES ─────────────────────────────
+# Habia 18 botones de copiar, cada uno a su manera, en dos formas:
+#   navigator.clipboard.writeText(t)        -> sin catch
+#   void navigator.clipboard?.writeText(t)  -> sin catch y sin aviso
+# navigator.clipboard no existe en contexto no seguro, y aun existiendo la
+# promesa RECHAZA cuando el documento no tiene foco: en el telefono pasa
+# seguido. Con `?.` el boton no hacia nada; con el `void`, el rechazo se
+# tiraba a la basura. En los dos casos el cartel decia «Copiado» igual, el
+# cliente pegaba en Meta lo que tenia antes, y no habia como enterarse.
+# Se miran LINEAS DE CODIGO: la version anterior de esta lente contaba las
+# menciones en los comentarios que explican por que el helper existe, y
+# marcaba en rojo a los dos archivos que arreglaron el problema.
+def _es_comentario(l):
+    s = l.strip()
+    return s.startswith(('*', '//', '/*'))
+_crudo = [f"{f.split('/')[-1]}:{n}" for f, s in todo.items()
+          if '/lib/copiar.ts' not in f
+          for n, l in enumerate(s.split('\n'), 1)
+          if 'navigator.clipboard' in l and not _es_comentario(l)]
+check('nadie llama a navigator.clipboard por su cuenta',
+      not _crudo, '; '.join(_crudo[:5]))
+check('el helper unico existe y responde si copio',
+      'export async function copiar' in _cop
+      and 'return conTextarea(texto)' in _cop
+      and 'Promise<boolean>' in _cop,
+      'un copiar que no devuelve si funciono no se puede avisar')
+check('y tiene respaldo para donde la API moderna no corre',
+      'execCommand' in _cop and 'NO_SE_PUDO_COPIAR' in _cop)
+check('el boton dice cuando NO pudo copiar',
+      "'copiado'" in _btn and "'fall" in _btn and 'NO_SE_PUDO_COPIAR' in _btn,
+      'antes mostraba «Copiado» sin esperar el resultado')
+
 # ── 6.13 · El guion llega como carrusel, no como bloque de texto ───────
 check('existe el armado de láminas',
       'export function armarCarrusel' in _fa)
 check('el guion se parte solo, sin una segunda llamada al modelo',
       'PANTALLA' in _fa and 'armarCarrusel' in _con,
       'el prompt ya pedía PANTALLA N: — faltaba leerlo')
+# Pedia writeText(l.texto) crudo. Ese writeText crudo ERA el bug: sin catch,
+# el boton no hacia nada en el telefono y el cartel decia «Copiado» igual.
+# Ahora hay un solo helper y la lente exige que se use.
 check('cada lámina se copia sola',
-      'carrusel.laminas.map' in _con and 'writeText(l.texto)' in _con)
+      'carrusel.laminas.map' in _con and 'BotonCopiar' in _con
+      and 'texto={l.texto}' in _con)
 check('se avisa cuando una lámina no entra en el teléfono',
       'LARGO_MAX_LAMINA' in _fa and 'muy larga para el teléfono' in _con)
 check('la palabra clave se exige en el cierre o en el post',
@@ -565,7 +794,7 @@ if _os614.path.exists('src/lib/paqueteCampana.ts'):
           "estado: problemas.length ? 'revisar' : 'listo'" in _paq)
     check('el paquete está en el Constructor con copiar todo y copiar por pieza',
           'armarPaquete' in _con and 'paquete.textoCompleto' in _con
-          and 'writeText(x.contenido)' in _con)
+          and 'texto={x.contenido}' in _con)
 
 # ── 6.15 · Cada candado del montaje lleva lo que lo resuelve ───────────
 # Antes eran ocho casillas y nada más. Un cliente que no sabe instalar un
@@ -1094,22 +1323,29 @@ if _os29.path.exists('src/lib/roles.ts'):
     _adm29 = rd('src/pages/Admin.tsx')
     # Se cuentan las DEFINICIONES, no las apariciones: la interfaz declara
     # cada campo una vez y eso sumaba uno de más.
-    _defsRol = _re25.findall(r'^  (direccion|acompanamiento|desarrollo): \{', _rl, _re25.M)
-    check('los tres roles existen con su propósito',
-          len(_defsRol) == 3 and _rl.count('proposito:') == 4)
+    # Son CUATRO, no tres: `produccion` vivía solo en permisos.ts, así que
+    # indexar ROLES['produccion'] daba undefined y rompía la pestaña Hoy del
+    # Admin con «Cannot read properties of undefined (reading 'techoHoras')».
+    _defsRol = _re25.findall(r'^  (direccion|acompanamiento|desarrollo|produccion): \{', _rl, _re25.M)
+    check('los cuatro roles existen con su propósito',
+          len(_defsRol) == 4 and _rl.count('proposito:') == 5)
     check('cada rol declara qué NO le toca y por qué',
-          _rl.count('noLeToca:') == 4 and _rl.count('porque:') >= 7,
+          _rl.count('noLeToca:') == 5 and _rl.count('porque:') >= 9,
           'sin esto, dos personas hacen lo mismo y una tercera cosa no la hace nadie')
     check('desarrollo NO atiende clientes',
           'Atender clientes' in _rl and 'deja de construir' in _rl,
           'cada vez que lo hace deja de construir lo que evitaría atenderlos')
     check('cada rol tiene UN número que lo mide',
-          _rl.count('indicador:') == 4)
+          _rl.count('indicador:') == 5)
     check('el techo de carga avisa lo correcto, no "trabaja más"',
           'no se arregla con más horas' in _rl,
           'decirle que trabaje más rompe el modelo en silencio')
+    # El `rolDe` dejó de estar duplicado: había uno acá y uno en permisos.ts,
+    # y contestaban DISTINTO para produccion, dev y editor. Manda el de
+    # permisos y este archivo lo re-exporta, así que la regla se mira allá.
     check('sin rol cargado se asume el más acotado, nunca dirección',
-          "default: return 'acompanamiento'" in _rl)
+          "default: return 'acompanamiento'" in rd('src/lib/permisos.ts')
+          and "export { rolDe } from './permisos';" in _rl)
     # El menú pasó a ser cuatro momentos con un orden fijo —el del día—, así
     # que ya no se ordena por rol. Lo que el rol decide es QUÉ VE, y eso lo
     # verifica la lente 6.38 sobre las categorías de dato.
@@ -1246,7 +1482,13 @@ for _x in set(_re33.findall(r"^\s+'([a-z0-9_]+)',", rd('src/lib/cuadroTickets.ts
     _malos33.append(f'ítem del cuadro {_x}')
 _tut33 = set(_re33.findall(r"^  '([^']+)': \{", rd('src/lib/tutorialesTecnicos.ts'), _re33.M))
 for _f, _s in _TODO33.items():
-    for _x in set(_re33.findall(r"tutorial: '([^']+)'", _s)) - _tut33:
+    # Un id de tutorial nunca lleva espacios: son 'perfil-y-pagina', 'P4.5-dm'.
+    # Sin este filtro la lente confundía la ETIQUETA de pantalla de un origen
+    # de la Biblioteca —`tutorial: 'Paso a paso'`— con un id inventado. Una
+    # lente que no distingue un identificador de un texto para leer manda a
+    # buscar un bug que no existe, y la próxima vez se la mira con menos
+    # atención.
+    for _x in set(_re33.findall(r"tutorial: '([^' ]+)'", _s)) - _tut33:
         _malos33.append(f'tutorial {_x} ({_f.split("/")[-1]})')
 
 # TODA SESIÓN CON GUION TIENE QUE ESTAR EN EL CAMINO. Si no, está escrita y
@@ -1262,6 +1504,77 @@ for _x in _gui33 - _cam33:
 
 check('ningún identificador inventado en todo el repo',
       not _malos33, '; '.join(sorted(set(_malos33))[:5]))
+
+# ── 6.33b · El medidor mide las pestañas que existen ───────────────────
+#
+# medir-app.py recorre el Admin pestaña por pestaña y mide cada pantalla
+# contra 10-DISENO. La lista de pestañas estaba escrita a mano y se quedó
+# pidiendo 'plata' después de que la Mesa de plata se borró en la cirugía 5.
+#
+# Una pestaña que no existe no deja la pantalla en blanco: el Admin se queda
+# en la anterior y el medidor la mide dos veces. El verde que informa no
+# corresponde a ninguna pantalla, y la pantalla que falta no se mide nunca.
+# Es la peor clase de falso verde: el que da tranquilidad.
+_tabs33 = _re33.search(r"const VALID_MAIN_TABS: MainTab\[\] = \[(.*?)\];", rd('src/pages/Admin.tsx'), _re33.S)
+_mid33 = _re33.search(r"^ADMIN = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
+_falla33b = []
+if not _tabs33 or not _mid33:
+    _falla33b.append('no se pudo leer una de las dos listas de pestañas')
+else:
+    _enApp33 = set(_re33.findall(r"'([a-z]+)'", _tabs33.group(1)))
+    _enMedidor33 = set(_re33.findall(r"'([a-z]+)'", _mid33.group(1)))
+    for _x in sorted(_enMedidor33 - _enApp33):
+        _falla33b.append(f"el medidor pide la pestaña '{_x}', que el Admin ya no tiene")
+    for _x in sorted(_enApp33 - _enMedidor33):
+        _falla33b.append(f"la pestaña '{_x}' existe y nadie la mide")
+
+check('el medidor mide las pestañas que existen, y todas',
+      not _falla33b, '; '.join(_falla33b[:4]))
+
+# ── 6.33c · UN SOLO CALENDARIO ─────────────────────────────────────────
+#
+# Los cinco sistemas del Camino estaban escritos en dos lados y no decían lo
+# mismo: ni los nombres ni los días. 00-MAESTRO.md hablaba de «Tú · días
+# 1–12» y el roadmap de la app, de «Tu reset · días 1–5». Y así los cinco.
+#
+# El cliente ve el roadmap todos los días; el maestro es lo que el equipo lee
+# para grabar y para vender. Dos calendarios para el mismo programa es un
+# cliente que escucha una fecha y abre la app y ve otra.
+#
+# La fuente es el seed. Esta lente compara la tabla del maestro contra él.
+_falla33c = []
+import os as _os33
+_seed33c = _json33.loads(rd('src/lib/roadmap.seed.json'))
+# Eran dos rutas porque la spec estaba duplicada: `tcd-spec/` en la raíz y una
+# copia vieja en `docs/`. La copia salió el 1 de nov —traía los nombres
+# anteriores de las pestañas, «Dojo» y «Mando»— y acá quedaba una ruta a un
+# archivo que ya no existe, que tiraba abajo la auditoría entera al abrirlo.
+# Se recorre lo que hay, no una lista escrita a mano.
+for _ruta33 in [_r for _r in ('tcd-spec/00-MAESTRO.md', 'docs/tcd-spec/00-MAESTRO.md')
+                if _os33.path.exists(_r)]:
+    _doc33 = rd(_ruta33)
+    _sec33 = _re33.search(r'## 4\. Los cinco sistemas(.*?)\n## ', _doc33, _re33.S)
+    if not _sec33:
+        _falla33c.append(f'{_ruta33}: no se encontró la sección de los cinco sistemas')
+        continue
+    _enDoc33 = dict(_re33.findall(r'^\| (\d) \| \*\*(.+?)\*\*', _sec33.group(1), _re33.M))
+    for _s33 in _seed33c['sistemas']:
+        _nombre33 = _enDoc33.get(str(_s33['n']))
+        if _nombre33 is None:
+            _falla33c.append(f"{_ruta33}: falta el sistema {_s33['n']}")
+        elif _nombre33 != _s33['nombre']:
+            _falla33c.append(
+                f"{_ruta33}: el sistema {_s33['n']} se llama «{_s33['nombre']}» en la app y «{_nombre33}» acá")
+    # El cuerpo de cada sistema, tal como lo declara el seed.
+    _cuerpos33 = dict(_re33.findall(r'^\| (\d) \| \*\*.+?\*\* \| ([\d-]+) \|', _sec33.group(1), _re33.M))
+    for _s33 in _seed33c['sistemas']:
+        _c33 = _cuerpos33.get(str(_s33['n']))
+        if _c33 and _c33 != _s33['dias']:
+            _falla33c.append(
+                f"{_ruta33}: el sistema {_s33['n']} va del {_s33['dias']} en la app y del {_c33} acá")
+
+check('un solo calendario: el maestro dice lo mismo que ve el cliente',
+      not _falla33c, '; '.join(_falla33c[:4]))
 
 # ── 6.34 · Todo motor tiene prueba, y la lógica no vive con la base ────
 # La regla que ya mordió dos veces: si la lógica está en el archivo que
@@ -1414,9 +1727,14 @@ if _os40.path.exists('src/lib/jornada.ts'):
           'es lo único que el check-in resuelve y el cierre solo no puede')
     check('el objetivo es UNO: que todos los clientes vendan',
           'pctVendiendo' in _jo and 'clientesQueVendieron' in _jo)
+    # Pedía la frase «no escala». «Escala» es una de las palabras prohibidas de
+    # la casa y la limpieza de vocabulario la reescribió a «eso no crece»: la
+    # vara pinchaba sobre su propia regla. Mira las dos ramas que importa que
+    # existan —vender más costando más, y aliviar sin resolver— por lo que
+    # dicen y no por una palabra suelta.
     check('el círculo se mide con dos números a la vez',
           'export function comoVaElCirculo' in _jo
-          and 'no escala' in _jo and 'todavía no está resolviendo' in _jo,
+          and 'cuesta más trabajo' in _jo and 'todavía no está resolviendo' in _jo,
           'si venden más pero cuesta más trabajo, se está comprando resultado con horas')
     check('una traba repetida manda sobre todo lo demás en el titular',
           'trabasDelSistema > 0' in _jo)
@@ -1511,8 +1829,15 @@ if _os43.path.exists('src/lib/mercados.ts'):
     _mk = rd('src/lib/mercados.ts')
     _vc43 = rd('src/lib/valueChain.ts')
     _sm43 = rd('src/lib/salaDeMando.ts')
-    check('los mercados son DÓNDE CORRE LA PAUTA, no dónde vive el sanador',
-          'mercados?: string[]' in _vc43 and 'NO es donde vive el sanador' in _vc43)
+    # Esta lente pedia el campo `mercados?: string[]` DENTRO de los numeros.
+    # Estaba en verde, y era justamente el campo que nadie poblaba nunca: con
+    # el, `bandaDe` recibia una lista vacia y caia en la banda de Mexico para
+    # TODA la cartera. Ahora los paises son un argumento obligatorio, que el
+    # llamador trae del montaje del cliente.
+    check('los paises llegan al diagnostico como argumento, no en los numeros',
+          'paises: string[],' in solo_codigo(_vc43)
+          and 'mercados?: string[]' not in solo_codigo(_vc43),
+          'un campo que nadie puebla es peor que no tenerlo: el default miente en silencio')
     check('la banda del CPM sale del mercado',
           "add('cpm'" in _vc43 and 'banda.cpmMin' in _vc43)
     check('con varios países se toma el rango que abarca a todos',
@@ -1847,21 +2172,46 @@ if _os50.path.exists('src/lib/respuestasSesion.ts'):
     check('el equipo puede leer lo que escribió sin pedirle que lo reenvíe',
           'sesion_resp_equipo' in _sq)
 
-# ── 6.51 · Un solo vocabulario de ticket ───────────────────────────────
-# planes.ts gobierna el acceso con colores y cuadroTickets con montos, y NADA
-# traducía entre los dos. Por eso el cuadro estaba construido, probado y sin
-# montar: la app no sabía que un cliente «verde» es uno de $5.000.
+# ── 6.51 · Las dos escaleras, separadas ────────────────────────────────
+#
+# Hubo un puente que traducía el plan de ACCESO a un escalón de SERVICIO
+# (verde → $5.000, negro → $10.000). Se construyó para resolver que los dos
+# vocabularios no se hablaran, y lo que hizo fue pegar dos escaleras distintas:
+# **un cliente de $497 figuraba con $5.000 de instalación contratada**, y quien
+# trabajara contra ese cuadro instalaba de regalo.
+#
+# Son dos preguntas independientes: plan_comercial decide qué ve, y
+# servicio_contratado qué le debe el equipo. Esa la marca una persona.
 if _os50.path.exists('src/lib/cuadroTickets.ts'):
     _ct50 = rd('src/lib/cuadroTickets.ts')
-    check('existe el puente plan ↔ ticket',
-          'TICKET_DE_PLAN' in _ct50 and 'export function ticketDe' in _ct50)
-    check('un plan desconocido cae en el ticket MÁS BAJO',
-          "?? 'mil'" in _ct50,
-          'mostrar de menos se arregla con un mensaje; mostrar de más enseña que no hacía falta pagar')
+    _codigo50 = _re67.sub(r'/\*[\s\S]*?\*/', '', _ct50)
+    _codigo50 = _re67.sub(r'//.*', '', _codigo50)
+    check('el servicio NO se deriva del plan de acceso',
+          'TICKET_DE_PLAN' not in _ct50 and 'export function servicioDe' in _ct50,
+          'el puente pegaba dos escaleras: el de $497 figuraba con $5.000 de instalación')
+    check('y ningún color del plan aparece en el código que corre',
+          not _re67.search(r'verde|negro|blanco|amarillo', _codigo50),
+          'si vuelve a leer los colores, vuelve a regalar trabajo')
+    check('sin marcar cae en el escalón MÁS BAJO',
+          "'base'" in _ct50 and 'servicio === ' in _ct50,
+          'mostrar de menos se arregla con un mensaje; mostrar de más hace trabajar al equipo gratis')
+    check('los tres escalones son los que se venden',
+          all(f"precio: {p}" in _ct50 for p in (1000, 3000, 5000)),
+          'La Base 1.000 · El Ascenso 3.000 · La Instalación 5.000')
+    check('La Cima se suma aparte, no es un cuarto escalón',
+          'export const CIMA' in _ct50,
+          'son cinco días en Bariloche: no cambia el reparto de los 62 ítems')
     check('el cuadro está MONTADO, no suelto',
           _os50.path.exists('src/components/admin/CuadroDelCliente.tsx')
-          and 'CuadroDelCliente' in rd('src/pages/Admin.tsx'),
-          'el de $5.000 tiene que ver lo que compró')
+          and 'ServicioDelCliente' in rd('src/pages/Admin.tsx'),
+          'el que contrató la instalación tiene que ver lo que compró')
+    check('y se monta CON los tildes y el botón',
+          'hechos={' in rd('src/components/admin/ServicioDelCliente.tsx')
+          and 'onMarcar={' in rd('src/components/admin/ServicioDelCliente.tsx'),
+          'sin eso decía «le faltan 42 para encender» para todos, siempre, y no se podía tildar')
+    check('el escalón se marca a mano, y queda quién lo marcó',
+          'marcar_servicio' in rd('src/components/admin/ServicioDelCliente.tsx'),
+          'es una decisión de plata: tiene que tener dueño y fecha')
 
 # ── 6.52 · El soporte, con reloj y compromiso ──────────────────────────
 # El circuito funcionaba, pero si nadie respondía NADA lo señalaba. Tres días
@@ -2024,8 +2374,16 @@ if _os56.path.exists('src/lib/cerebro.ts'):
           'export async function mandarleAlCliente' in _cs
           and "from('mensajes').insert" in _cs,
           'antes solo tachaba el ítem: el botón prometía algo y quien lo tocaba creía que pasó')
+    # Pedía un insert directo a `notificaciones`, y es justo lo que NO funciona:
+    # esa tabla tiene políticas de leer y de marcar leído, y ninguna de
+    # insertar — a propósito, porque se inserta por la función SECURITY
+    # DEFINER. Con la clave del navegador el insert se rechaza en silencio, así
+    # que el mensaje entraba en la bandeja y la campanita no sonaba nunca. La
+    # lente pedía exactamente la forma que no andaba.
     check('y el cliente se entera aunque no tenga la app abierta',
-          "from('notificaciones').insert" in _cs)
+          "rpc('crear_notificacion'" in _cs
+          and "from('notificaciones').insert" not in _cs,
+          'el insert directo lo rechaza la RLS sin decir nada')
     check('el cerebro está probado',
           _os56.path.exists('scripts/prueba-cerebro.ts'))
 
@@ -2174,8 +2532,8 @@ if _os61.path.exists('src/components/campanas/MontajeCupos.tsx'):
     check('el freno se usa de verdad en algún lado',
           'from \'../Freno\'' in _mc61 or "from '../Freno'" in _mc61,
           'un freno construido y sin usar no frena nada')
-    check('el cuadro por ticket está MONTADO de verdad',
-          '<CuadroDelCliente' in rd('src/pages/Admin.tsx'),
+    check('el cuadro por escalón de servicio está MONTADO de verdad',
+          '<ServicioDelCliente' in rd('src/pages/Admin.tsx'),
           'estuvo construido, probado y con el import puesto, pero sin dibujarse')
 
 # ── 6.62 · No hay dos listas dibujadas a la vez ────────────────────────
@@ -2413,8 +2771,39 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
 import os as _os68
 _cron68 = rd('api/cron/alarmas-inactividad.ts')
 check('los avisos al cliente se disparan solos',
-      'AVISOS[' in _cron68 and 'clientes_para_avisar' in _cron68,
+      'planificarAvisos(' in _cron68 and 'encontrarDomino(calcularCadena(' in _cron68,
       'estaban construidos y nadie los mandaba')
+# Los VEINTE, no cuatro. El cron decidía el cuello con cuatro condiciones
+# escritas a mano, así que dieciséis avisos estaban escritos y no tenían forma
+# de dispararse — y son los tramos donde el cliente se cae DESPUÉS de vender.
+check('los veinte avisos pueden salir, no cuatro',
+      'numerosDeFila(fila)' in _cron68 and 'COLUMNAS_DE_SEMANA' in _cron68
+      and "it.agendas / it.conversaciones" not in _cron68,
+      'el cron diagnostica con la misma cadena de valor que la cola del Admin')
+check('y juzga contra la banda de SUS países',
+      'paisesDe.get(id)' in _cron68,
+      'sin los países se juzga el costo de toda la cartera contra la referencia de México')
+# Y las tres reglas, que es lo que el disparador no aplicaba.
+#
+# El cron insertaba el aviso DIRECTO desde AVISOS[cuello], salteándose la
+# máquina entera. Así que el cliente recibía el mismo aviso todos los días
+# —las alarmas del equipo sí chequean si ya salieron hoy; estas no— y nada
+# escalaba nunca, aunque AVISOS_ANTES_DE_ESCALAR estuviera escrito.
+check('un aviso no se repite el mismo día ni la misma semana',
+      'plan.aMandar' in _cron68 and 'titulo: texto.titulo' not in _cron68,
+      'un aviso diario por el mismo motivo enseña a ignorar la campana entera')
+check('y lo que el aviso no resuelve pasa a una persona',
+      'plan.aEscalar' in _cron68 and 'el aviso automático no alcanzó' in _cron68,
+      'dos avisos sin cambio no es un cliente que no leyó: es un aviso que no alcanza')
+check('el historial sale de lo ya enviado, sin tabla nueva',
+      "select('usuario_id, clave, created_at')" in _cron68 and 'claveDeTitulo' not in _cron68,
+      'una segunda copia del mismo historial es una segunda copia que se desincroniza')
+# Por CLAVE y no por título: el aviso se reconocía comparando su texto, así que
+# mejorar la redacción de uno dejaba su historial en cero para todos y volvía a
+# salir desde el principio a quien ya lo había recibido dos veces.
+check('y aguanta que se reescriban los textos',
+      'clave: aviso.clave' in _cron68,
+      'reconocer el aviso por su texto ataba el historial a no tocar una palabra')
 check('van en el cron que ya existe, no en uno nuevo',
       'sumar otro cron sería otro lugar' in _cron68,
       'otro cron es otro lugar donde algo puede fallar en silencio')
@@ -2422,13 +2811,61 @@ check('si fallan los avisos, las alarmas del equipo igual salieron',
       'No tumba el cron' in _cron68,
       'perder las alarmas por un fallo de los avisos sería cambiar un problema por dos')
 check('sin datos no se opina: se le pide que cargue',
-      "!it.cargo ? 'no_cargo'" in _cron68)
+      ": 'no_cargo'" in _cron68)
+# El candado que faltaba: `crear_notificacion` corría con permisos de
+# administrador y no miraba quién la llamaba. Cualquier cliente podía
+# escribirle a otro un aviso con el título y el enlace que quisiera.
+_mig68 = rd('supabase/migrations/20261019_los_avisos_salen.sql')
+check('nadie puede escribir un aviso en nombre de otro',
+      'es_del_equipo(auth.uid())' in _mig68 and 'p_usuario_id = auth.uid()' in _mig68,
+      'era SECURITY DEFINER sin mirar quién llamaba: un «te dejó una nota» falso con el link que quisiera')
+# Y la cola, que se calculaba y se mostraba sin que nada saliera de ahí.
+_rep68 = rd('src/lib/avisosStorage.ts')
+check('la cola del Admin termina en tareas de alguien',
+      'desdeLaCadena({' in _rep68 and 'crearDesdeElSistema(tarea, asignarA)' in _rep68
+      and 'repartirLaCola(colaDeHoy' in rd('src/pages/Admin.tsx'),
+      'existía mientras la pantalla estaba abierta: quien no abría esa tab no se enteraba')
+check('y el reparto no manda avisos: eso es del cron',
+      'mandarAviso' not in _rep68,
+      'con los dos lados mandando, el cliente recibía el mismo aviso dos veces')
 check('el mapa de avisos se exporta, no se duplica',
       'export const AVISOS' in rd('src/lib/avisosCliente.ts'))
 
 print('══ 7) UI ══')
-botones = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx')
-           for m in re.finditer(r"<button(?![^>]*onClick)(?![^>]*onMouseDown)(?![^>]*type=\"submit\")[^>]*>", src)]
+# ─── POR QUÉ NO SE BUSCA CON `[^>]*` ───────────────────────────────────────
+#
+# El `[^>]*` se corta en el PRIMER `>`, y adentro de un atributo hay `>` a
+# cada rato: `disabled={faltan > 0}` y cualquier `onClick={() => ...}`. Con un
+# botón así, el lookahead nunca llega a ver el `onClick` que está dos
+# renglones más abajo y lo marca como botón muerto. Medido: daba
+# `SieteLibertades.tsx`, donde los tres botones tienen su `onClick`.
+#
+# Se toma la etiqueta entera —hasta el `>` que la cierra de verdad, contando
+# las llaves— y recién ahí se pregunta si tiene acción.
+def _etiqueta_button(src, desde):
+    i, llaves, comilla = desde, 0, ''
+    while i < len(src):
+        c = src[i]
+        if comilla:
+            if c == comilla: comilla = ''
+        elif c in '"\'':
+            comilla = c
+        elif c == '{': llaves += 1
+        elif c == '}': llaves -= 1
+        elif c == '>' and llaves == 0:
+            return src[desde:i + 1]
+        i += 1
+    return src[desde:]
+
+botones = []
+for f, src in todo.items():
+    if not f.endswith('.tsx'):
+        continue
+    for m in re.finditer(r'<button\b', src):
+        et = _etiqueta_button(src, m.start())
+        if 'onClick' in et or 'onMouseDown' in et or 'type="submit"' in et:
+            continue
+        botones.append(f.split('/')[-1])
 check('sin botones sin acción', not botones, str(botones[:4]))
 
 
@@ -2529,41 +2966,103 @@ check('el perfil llega con el día recalculado del calendario',
 _pan = [f"{f.split('/')[-1]}" for f, src in todo.items() if f.endswith('.tsx') and re.search(r'\{\s*perfil\??\.dia_programa', src)]
 check('ninguna pantalla muestra la columna dia_programa directo', not _pan, str(_pan))
 _rm = todo.get('src/pages/Roadmap.tsx', '')
-check('la Fase Autonomía se decide por el paso, no por la fecha', 'estaEnFaseAutonomia(diaEsperado' in _rm)
+# La llamada quedó en varias líneas al crecerle el segundo argumento, así que
+# pedir los dos pegados ya no la encuentra aunque esté bien.
+check('la Fase Autonomía se decide por el paso, no por la fecha',
+      re.search(r'estaEnFaseAutonomia\(\s*diaEsperado', _rm) is not None)
 _db = todo.get('src/pages/Dashboard.tsx', '')
 check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)', 'esPasoDelCliente(meta)' in _db)
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
       0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
-# ── La pausa global del Camino (30 sep) ────────────────────────────
-_pg  = rd('src/lib/pausaGlobal.ts');  _pd  = rd('src/lib/pausasDatos.ts')
-_pgv = rd('src/components/admin/PausaGlobalPanel.tsx')
-_pgc = rd('src/components/CaminoEnPausa.tsx')
+# ── Los números del cliente, a la vista del equipo (2 oct) ─────────
+_nc  = rd('src/lib/numerosDelCliente.ts'); _nd = rd('src/lib/numerosDatos.ts')
+_ncv = rd('src/components/admin/NumerosDelCliente.tsx')
+_adm_nc = rd('src/pages/Admin.tsx'); _sem_nc = rd('src/lib/semaforo.ts')
+_diag_nc = rd('src/components/campanas/DiagnosticoView.tsx')
+_mig_nc = rd('supabase/migrations/20261002_numeros_del_cliente.sql')
+check('los cruces se prueban solos (no tocan la base)',
+      "from './supabase'" not in _nc and 'costoPorAgenda' in _nc)
+check('sin denominador no se inventa un número', 'b > 0 ? a / b : null' in _nc)
+check('el equipo puede leer las métricas de todos',
+      "rol = 'admin'" in _mig_nc and 'for select' in _mig_nc)
+check('pero la carga sigue siendo del cliente',
+      'for insert' not in _mig_nc and 'for update' not in _mig_nc)
+check('se traen todos en una sola consulta', ".in('user_id', userIds)" in _nd)
+check('el panel está en la ficha del cliente', 'NumerosDelCliente' in _adm_nc)
+check('el semáforo marca a quien no mira sus números',
+      'SEMANAS_SIN_NUMEROS' in _sem_nc and 'DIA_EN_QUE_YA_MIDE' in _sem_nc)
+check('y no se lo reclama a quien todavía no llegó a medir',
+      'const yaDebeMedir = dia >= DIA_EN_QUE_YA_MIDE' in _sem_nc)
+check('la lectura de campaña queda guardada', 'guardarDiagnostico' in _diag_nc)
+check('sin letra chica en los números del cliente',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _ncv))
+check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros-admin.ts'))
+
+# ── La ventana sin soporte (9 oct) ─────────────────────────────────
+#
+# Acá vivían las lentes de la «pausa global», que PARABA EL CAMINO DE TODOS:
+# congelaba el día de cada cliente, le corría el cierre treinta y cinco días,
+# movía la hoja de ruta, apagaba el semáforo un mes y le anunciaba «El Camino
+# retoma el 19 de enero».
+#
+# La app no corta nunca. Lo único que corta esos días es el soporte. Las
+# lentes se dieron vuelta: ahora vigilan que NADA del corrimiento vuelva, que
+# es lo único que las hace útiles. Nueve de ellas certificaban el bug.
+_vs  = rd('src/lib/ventanaSinSoporte.ts')
+_vsd = rd('src/lib/ventanasDatos.ts')
+_vsv = rd('src/components/admin/SinSoportePanel.tsx')
+_vsc = rd('src/components/SinSoporteEstosDias.tsx')
 _dia_pg = rd('src/lib/diaPrograma.ts'); _sem_pg = rd('src/lib/semaforo.ts')
 _adm_pg = rd('src/pages/Admin.tsx'); _app_pg = rd('src/App.tsx')
 _dash_pg = rd('src/pages/Dashboard.tsx'); _vent_pg = rd('src/lib/ventanaDeAcceso.ts')
-check('la regla de la pausa se prueba sola (no toca la base)',
-      "from './supabase'" not in _pg and 'diasDeCorrimiento' in _pg)
-check('la pausa se mide en semanas enteras',
-      'Math.ceil(diasPedidos(p) / 7) * 7' in _pg)
-check('el día del programa descuenta lo que estuvo parado',
-      'corrimientoActual' in _dia_pg)
-check('el semáforo calla durante la pausa',
-      'pausaActiva(hoy)' in _sem_pg and 'jornadaAtrasada: null' in _sem_pg)
-check('salvo la cuota impaga, que no depende de la pausa',
-      'if (parado && !cerradoPorPago)' in _sem_pg)
-check('la ventana de acceso se corre los días parados',
-      'cierreCorrido' in _vent_pg)
-check('el interruptor está en el Admin', 'PausaGlobalPanel' in _adm_pg)
-check('avisa qué va a pasar antes de confirmar', 'loQueVaAPasar' in _pgv)
-check('se puede levantar antes de tiempo', 'levantarPausa' in _pgv)
-check('el cliente ve cuándo retoma en su pantalla de inicio',
-      'CaminoEnPausa' in _dash_pg and 'El Camino retoma el' in _pg)
-check('y su fecha de cierre nueva', 'Tu Camino ahora cierra el' in _pg)
-check('la app carga las pausas al abrir', 'cargarPausas' in _app_pg)
-check('sin letra chica en la pausa',
-      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _pgv + _pgc))
-check('existe la prueba de la pausa', _os64.path.exists('scripts/prueba-pausa.ts'))
+_hoja_pg = rd('src/lib/hojaDeRuta.ts')
+
+check('la regla se prueba sola (no toca la base)',
+      "from './supabase'" not in _vs and 'diasAvisadosEntre' in _vs)
+check('EL CAMINO NO SE PARA: el día del programa no descuenta nada',
+      'corrimientoActual' not in _dia_pg and 'MS_DIA)' in _dia_pg,
+      'congelar el día le quita al cliente el mes que compró sin pedírselo')
+check('ni la hoja de ruta mueve sus fechas',
+      'corrimientoActual' not in _hoja_pg)
+check('ni la ventana de acceso se estira sola',
+      'cierreCorrido' not in _vent_pg,
+      'estirarla para todos suena generoso y deja sin saber cuándo cierra cada acceso')
+check('la ventana son los días pedidos, no semanas enteras',
+      '/ 7) * 7' not in _vs,
+      'eso existía para que las jornadas cayeran en su día cuando todo se corría')
+check('EL SEMÁFORO NO SE APAGA',
+      'pausaActiva' not in _sem_pg and 'soporteCerrado(hoy)' in _sem_pg,
+      'callar un mes es descubrir en febrero al que se fue en diciembre')
+check('solo descuenta los días avisados del reclamo al equipo',
+      'avisadosEntre' in _sem_pg and 'diasReclamables' in _sem_pg,
+      'de esos días el cliente estaba enterado: no se le pueden reclamar al equipo')
+check('y le avisa al equipo que hoy su mensaje espera',
+      'Hoy no hay soporte' in _sem_pg)
+check('el interruptor está en el Admin', 'SinSoportePanel' in _adm_pg)
+check('avisa qué va a pasar antes de confirmar, y qué NO',
+      'loQueVaAPasar' in _vsv and 'nadie pierde días' in _vs)
+check('se puede reabrir antes de tiempo', 'reabrirSoporte' in _vsv)
+check('al cliente se le dice cuándo se le responde',
+      'SinSoporteEstosDias' in _dash_pg and 'Respondemos desde el' in _vs)
+check('y que su Camino sigue corriendo',
+      'sigue abierto y corriendo' in _vs,
+      'quien leía que su Camino estaba parado dejaba de entrar, y el mes se le iba igual')
+# Solo lo que el cliente LEE. El comentario de cabecera nombra la pausa a
+# propósito, para contar qué se dio vuelta y que nadie la reponga por error.
+_vsc_visible = re.sub(r'/\*.*?\*/|//.*', '', _vsc, flags=re.S)
+check('sin la palabra «pausa» en lo que lee el cliente',
+      not re.search(r'pausa|parado|retoma', _vsc_visible, re.I),
+      'el cartel viejo anunciaba un Camino parado, que es justo lo que no pasa')
+check('la app carga las ventanas al abrir', 'cargarVentanas' in _app_pg)
+check('sin letra chica en la ventana',
+      not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _vsv + _vsc))
+check('y nada del corrimiento viejo quedó en src/',
+      not any(re.search(r'corrimientoActual|cierreCorrido|hoyDelCamino|pausaActiva|cartelDeLaPausa', src)
+              for f, src in todo.items()
+              if f.startswith('src/') and not f.endswith('ventanaSinSoporte.ts')),
+      'alcanzaba con que quedara uno: el bug era un concepto cableado en seis archivos')
+check('existe la prueba de la ventana', _os64.path.exists('scripts/prueba-sin-soporte.ts'))
 
 # ── La medición de entrada y salida (29 sep) ───────────────────────
 _med = rd('src/lib/medicion.ts'); _ww = rd('src/components/WelcomeWizard.tsx')
@@ -2665,7 +3164,13 @@ check('existe la prueba del ADN coincidente', _os64.path.exists('scripts/prueba-
 # ── La Hoja de Ruta adentro de la app (24 sep) ─────────────────────
 _hr = rd('src/lib/hojaDeRuta.ts'); _hrv = rd('src/components/camino/HojaDeRuta.tsx')
 _rm_hr = rd('src/pages/Roadmap.tsx')
-check('las trece semanas tienen nombre', len(re.findall(r'^\s*\d+: .+,$', _hr, re.M)) >= 28)
+# Contaba renglones que terminen en coma, y no todos la llevan. Se cuentan las
+# entradas de cada mapa, que es lo que la vara quiere decir: trece semanas con
+# nombre y sus hitos escritos.
+_semanas_hr = re.search(r'SEMANAS: Record<number, string> = \{(.*?)\n\};', _hr, re.S)
+check('las trece semanas tienen nombre',
+      _semanas_hr is not None and len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) == 13,
+      'cuenta: ' + str(len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) if _semanas_hr else 0))
 check('los hitos están escritos', _hr.count('Tu ') >= 10)
 check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and 'tus noventa días' in _rm_hr)
 check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
@@ -2718,8 +3223,12 @@ check('el Mentor tiene preguntas cargadas del Camino nuevo',
 # ── Ningún código apunta al vacío (19 sep) ──────────────────────────
 check('existe la caza de códigos rotos', _os64.path.exists('scripts/prueba-codigos.ts'))
 _rm9 = todo.get('src/pages/Roadmap.tsx', '')
+# El catálogo salió del código el 1 de nov, y con él el campo `herramienta_id`
+# de `RoadmapMeta`. Antes esto comprobaba que el campo estuviera siempre en
+# `undefined`; ahora comprueba que el campo no esté. Si alguien lo repone,
+# `prueba-codigos.ts` lo caza del lado del seed.
 check('ninguna jornada abre el catálogo viejo de herramientas',
-      'herramienta_id: undefined' in rd('src/lib/roadmapSeed.ts'))
+      'herramienta_id' not in rd('src/lib/roadmapSeed.ts'))
 check('las jornadas con entrenador se practican con él',
       "j.agente !== null ? 'COACH'" in rd('src/lib/roadmapSeed.ts'))
 check('el consultorio responde por jornada o por pieza',
@@ -2809,9 +3318,20 @@ check('el ADN vive en el Camino, no dentro de Entrenadores',
 check('nada dice "Delta" sin explicar', 'Delta' not in rd('src/components/ComparacionDia45.tsx'))
 
 # ── Migrar y primer ingreso (C3) ─────────────────────────────────────
-_pp2 = rd('src/lib/puntoDePartida.ts'); _rm5 = todo.get('src/pages/Roadmap.tsx', '')
-check('al migrar, la fecha de inicio acompaña al día donde entra',
-      'fechaInicioParaDia' in _pp2 and 'fecha_inicio: fechaInicio' in _rm5)
+#
+# Acá se verificaba que al migrar un cliente se le corriera la fecha de inicio
+# al día donde entraba, porque el módulo viejo lo daba hasta ochenta jornadas
+# por hechas. El producto descartó eso: nadie se saltea el Camino, y lo que ya
+# trae queda EN REVISIÓN —lo hace igual, más corto, con el Crítico midiendo—.
+#
+# El módulo y su prueba sobrevivieron al cambio y pasaban en verde: código
+# muerto que parece vivo y correcto, y lo primero que invita es a volver a
+# cablearlo. Se borraron los dos.
+_rm5 = todo.get('src/pages/Roadmap.tsx', '')
+check('lo que el cliente ya trae entra como revisión, no como jornada cumplida',
+      'from \'../lib/yaTienes\'' in rd('src/components/PuntoDePartida.tsx')
+      and not _os64.path.exists('src/lib/puntoDePartida.ts'),
+      'darle jornadas por hechas es sacarle el recorrido que lo convierte en director de su clínica')
 _ww = todo.get('src/components/WelcomeWizard.tsx', '')
 check('el primer ingreso habla con el vocabulario del cliente',
       'VOC(' in _ww and 'pacientes:' not in _ww)
@@ -2844,10 +3364,42 @@ check('el precio se sella antes de ordenar la cartera',
       f'precio día {_dia_precio} · cartera día {_dia_cartera}')
 check('cada tutorial con PDF lo ofrece al lado de su video',
       'PDFS_POR_TUTORIAL' in _vc and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
+# Siguen en la Biblioteca, pero por una sola vía. Estaban por DOS: el catálogo
+# unificado los traía con su tema, y debajo un bloque propio los volvía a
+# listar agrupado por tema. El cliente leía nueve títulos repetidos —«Tu
+# historia», «Tu legado», «A quién sirves»— y no sabía si eran dos cosas o la
+# misma. Medido en el navegador con scripts/prueba-repetido.py.
 check('lo complementario vive en la Biblioteca, no en el Camino',
-      'COMPLEMENTOS' in _vc and 'VIDEOS_COMPLEMENTO' in todo.get('src/pages/Biblioteca.tsx', ''))
+      'COMPLEMENTOS' in _vc
+      and 'COMPLEMENTOS' in rd('src/lib/catalogoBiblioteca.ts')
+      and '<TodoElMaterial' in todo.get('src/pages/Biblioteca.tsx', ''))
+check('y una sola vez: no por dos listas en la misma pantalla',
+      '<Complementos />' not in todo.get('src/pages/Biblioteca.tsx', ''))
 check('el tablero del Admin pisa lo que viene por archivo',
       'VIDEOS_POR_JORNADA' in rd('src/components/admin/TableroGrabacion.tsx'))
+
+# ── Los tutoriales del Camino: dónde están y cuáles faltan ─────────────
+# Un tutorial atado a un día que el cliente no abre es un tutorial que no
+# existe. Y uno sin grabar no rompe nada —la pantalla solo lo muestra si
+# tiene video o PDF— pero conviene que el número esté a la vista y no en la
+# memoria de alguien.
+import json as _jt
+_seedt = _jt.loads(rd('src/lib/roadmap.seed.json'))
+_mal_dia = [j['dia'] for j in _seedt['jornadas']
+            if (j.get('tutoriales') or []) and j.get('tipo') != 'sesion']
+check('ningún tutorial cae en un día que el cliente no abre',
+      not _mal_dia,
+      f'días: {_mal_dia}' if _mal_dia else 'todos en jornadas de sesión')
+
+_refs = {t for j in _seedt['jornadas'] for t in (j.get('tutoriales') or [])}
+_con_video = set(_re33.findall(r"'(L-\d+)': 'https://youtu", _vc))
+_con_pdf = set(_re33.findall(r"'(L-\d+)': 'https://drive", _vc))
+_sin_nada = sorted(_refs - _con_video - _con_pdf)
+check('la pantalla no ofrece un tutorial que no existe',
+      "videosPorPilar[x.codigo] || PDFS_POR_TUTORIAL[x.codigo]" in todo.get('src/pages/Roadmap.tsx', ''),
+      'sin esa guarda, un tutorial sin grabar deja un enlace roto')
+print(f'  · tutoriales del Camino sin grabar: {len(_sin_nada)} de {len(_refs)}'
+      + (f' — {", ".join(_sin_nada)}' if _sin_nada else ''))
 
 # ── Hoy completo (C3) ───────────────────────────────────────────────
 _db3 = todo.get('src/pages/Dashboard.tsx', '')
@@ -2871,14 +3423,19 @@ _rmv = todo.get('src/pages/Roadmap.tsx', '')
 check('el video se busca primero por jornada y después por pilar', 'videosPorPilar[meta.codigo]' in _rmv)
 check('el tutorial del día aparece en su sesión cuando tiene enlace', 'tutorialDelDia' in _rmv)
 
-# ── El punto de partida (C3) ──────────────────────────────────────────
-_pp = rd('src/lib/puntoDePartida.ts')
+# ── Lo que ya tiene andando (C3) ──────────────────────────────────────
+_ppv = rd('src/components/PuntoDePartida.tsx')
+_yt = rd('src/lib/yaTienes.ts')
 _rmp = todo.get('src/pages/Roadmap.tsx', '')
-check('existe la entrada por situación para migrar clientes', 'opcionesDePartida' in _pp and 'PuntoDePartida' in _rmp)
-check('el punto de partida no marca lo del equipo ni lo que depende de que otro pague',
-      'esPasoDelCliente(m)' in _pp and 'del_mercado' in _pp)
-check('se pregunta una sola vez', 'KEY_PARTIDA' in _pp.replace('KEY_PARTIDA', 'KEY_PARTIDA') or 'KEY_PARTIDA' in rd('src/components/PuntoDePartida.tsx'))
-check('lo marcado también se guarda en la base', 'marcarPartida' in _rmp and "guardarFila('hoja_de_ruta'" in _rmp)
+check('se le pregunta qué ya tiene andando', 'PuntoDePartida' in _rmp and 'YA_TIENES' in _ppv)
+check('y eso lo deja en revisión, no por hecho',
+      'revisas lo que traes' in _ppv and 'codigosEnRevision' in _rmp,
+      'las hace igual, más cortas, con el Crítico midiendo lo que trae')
+check('se pregunta una sola vez', 'KEY_PARTIDA' in _ppv)
+check('lo marcado también se guarda en la base',
+      'marcarPartida' in _rmp and "guardarFila('hoja_de_ruta'" in _rmp)
+check('y la revisión no se le pide a quien no trajo nada',
+      'proximoLunes' in _yt)
 
 # ── La sesión en cinco pantallas (C2) ─────────────────────────────────
 _sv = todo.get('src/components/sesion/SesionViva.tsx', '')
@@ -2915,7 +3472,9 @@ for _f, _src in todo.items():
 check('sin "días atrás", "quemar plata" ni "punto de no retorno" en pantalla', not _neg, '; '.join(_neg[:4]))
 # El vocabulario se aplica en la salida del dato, no en cada pantalla.
 _h = todo.get('src/lib/herramientas.ts', ''); _sg = todo.get('src/lib/sesionesGuiadas.ts', '')
-check('getHerramienta devuelve el texto ya traducido', re.search(r'function getHerramienta[\s\S]{0,400}vocabularizar\(', _h) is not None)
+# `getHerramienta` se fue con el catálogo. La vara que queda es la de las
+# sesiones guiadas, que es el cuerpo de texto con tokens que el cliente lee.
+check('el catálogo de herramientas ya no existe', not _h)
 check('sesionGuiadaDe devuelve el texto ya traducido', re.search(r'function sesionGuiadaDe[\s\S]{0,300}vocabularizar\(', _sg) is not None)
 _crudo = [f.split('/')[-1] for f, src in todo.items()
           if (f.startswith('src/components') or f.startswith('src/pages'))
@@ -2950,13 +3509,511 @@ if _hay_nav:
     # ni una falta; el total del resto se informa y tiene que ir bajando.
     _r = subprocess.run([sys.executable, 'scripts/medir-app.py', '--estricto', '--admin'], capture_output=True, text=True)
     _tot = re.search(r'TOTAL de faltas: (\d+)', _r.stdout)
-    check('las 38 vistas (cliente, pestañas internas y Admin) cumplen 10-DISENO', _r.returncode == 0, _r.stdout.strip().split('\n')[-1][:160])
+    # El número sale del medidor, no escrito acá. Estuvo escrito a mano y se
+    # desfasó: decía 38 cuando el medidor recorría 39, una de ellas una pestaña
+    # borrada que medía dos veces la pantalla anterior. Un contador a mano
+    # envejece sin avisar; este no puede.
+    _m = re.search(r'VISTAS MEDIDAS: (\d+)', _r.stdout)
+    _cuantas = _m.group(1) if _m else '?'
+    check(f'las {_cuantas} vistas (cliente, pestañas internas y Admin) cumplen 10-DISENO',
+          _r.returncode == 0, _r.stdout.strip().split('\n')[-1][:160])
     if _tot:
         print(f'  · faltas de diseño en toda la app: {_tot.group(1)}')
 else:
     SIN_MEDIR_MOVIL = True
     print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')
     print('    pip install playwright --break-system-packages && python3 -m playwright install chromium')
+
+# ── 11) LA ANTESALA Y EL TOPE POR ESCALÓN ──────────────────────────────
+# Dos módulos nuevos, completos y probados. El patrón que ya me falló tres
+# veces es exactamente éste: lógica impecable que ninguna pantalla importa.
+# Estas lentes miran el cable, no el módulo.
+print()
+print('══ 11) LA ANTESALA, EL ESCALÓN Y LAS TRES OFERTAS ══')
+import json as _json11
+_json_seed = _json11.loads(rd('src/lib/roadmap.seed.json'))
+_ant = rd('src/lib/antesala.ts')
+_tope = rd('src/lib/topeDelEscalon.ts')
+_road = rd('src/pages/Roadmap.tsx')
+_dash = rd('src/pages/Dashboard.tsx')
+_cronE = rd('api/cron/alarmas-inactividad.ts')
+
+check('la antesala existe y la pantalla de Hoy la dibuja',
+      bool(_ant) and '<LaAntesala' in _dash)
+check('el Camino no abre el día 1 hasta que la cerró',
+      'leToca(perfil?.antesala' in _road)
+check('y al cerrarla se sella la fecha de inicio del Camino',
+      'campos.fecha_inicio = sella' in _dash)
+check('el tope por escalón corta el Camino',
+      bool(_tope) and 'entraEnElEscalon(' in _road)
+check('el cron pregunta el escalón antes de mandarle una entrega al equipo',
+      'leTocanLasEntregas(cli.servicio_contratado' in _cronE)
+# El tope mira el escalón MARCADO y no el valor suelto: la columna es
+# `not null default 'base'`, así que mirar el valor le cortaría el Camino a
+# todos los clientes de hoy, que están en base porque nadie los marcó.
+check('y el tope corre con el escalón marcado, no con el default',
+      'estaMarcado' in _tope and 'servicio_marcado_el' in _road
+      and 'servicio_marcado_el' in _cronE)
+check('el módulo del tope no importa nada (lo usa el cron en frío)',
+      not re.search(r'^import ', _tope, re.M))
+import os as _os31
+check('y las dos cosas tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-antesala-y-escalon.ts'))
+
+# ── Las tres ofertas ──
+# La Base monta todo con los tutoriales, El Ascenso también. La app los busca
+# por `tutorial.dia`, y ese número estaba a mano: 14 de 21 apuntaban a otra
+# jornada, así que al que publicaba su página el día 16 no le aparecía ninguno.
+_tut = _json_seed.get('tutoriales', [])
+_porJ = {}
+for _j in sorted(_json_seed.get('jornadas', []), key=lambda x: x['dia']):
+    for _c in _j.get('tutoriales', []):
+        _porJ.setdefault(_c, _j['dia'])
+_desf = [t['codigo'] for t in _tut if _porJ.get(t['codigo']) != t['dia']]
+check(f'los {len(_tut)} tutoriales dicen el día de la jornada que los pide',
+      not _desf, ', '.join(_desf[:6]))
+check('y ninguno queda sin jornada que lo pida (la app los busca por día)',
+      all(t['codigo'] in _porJ for t in _tut),
+      ', '.join(t['codigo'] for t in _tut if t['codigo'] not in _porJ)[:80])
+check('el día de cada tutorial sale calculado, no escrito a mano',
+      'DIA_DEL_TUTORIAL' in rd('tcd-spec/datos/generar_seed.py'))
+check('el alta marca el escalón con el RPC que sella quién y cuándo',
+      "rpc('marcar_servicio'" in rd('src/pages/Admin.tsx')
+      and 'servicio_contratado: nuevoForm.servicio' not in rd('src/pages/Admin.tsx'))
+check('y dice qué abre la oferta elegida antes de crear la cuenta',
+      'loQueAbre(nuevoForm.servicio)' in rd('src/pages/Admin.tsx'))
+check('el Camino le dice quién monta lo técnico en su escalón',
+      '<QuienMonta' in rd('src/pages/Roadmap.tsx')
+      and 'construyeSolo' in rd('src/components/camino/QuienMonta.tsx'))
+check('y las tres ofertas tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-tres-ofertas.ts'))
+
+# ── 12) LO QUE ENCONTRÓ LA REVISIÓN FINAL ──────────────────────────────
+# Once cosas que fallaban en SILENCIO: ninguna rompía una pantalla, ninguna
+# aparecía en la consola, y esta batería estaba en verde con las once adentro.
+print()
+print('══ 12) LO QUE FALLABA EN SILENCIO ══')
+
+# El cliente no tenía por dónde cerrar sesión: el modal existía completo y la
+# única función que lo abría se le pasaba al Sidebar, que no la usaba.
+_side = rd('src/components/Sidebar.tsx')
+_topb = rd('src/components/Topbar.tsx')
+check('el cliente puede abrir su cuenta y cerrar sesión, desde las dos barras',
+      'onClick={onOpenSettings}' in _side and 'onClick={onOpenSettings}' in _topb,
+      'el modal existía y nada lo abría')
+
+# El alcance se mide caminando el grafo, no con una lista de arreglos viejos.
+_alc = subprocess.run([sys.executable, 'scripts/alcance.py'], capture_output=True, text=True)
+check('ningún módulo de src/ queda sin que una pantalla lo pueda alcanzar',
+      _alc.returncode == 0,
+      _alc.stdout.strip().split('\n')[-1][:160])
+
+# Las fechas de un día se arman en LOCAL. Con toISOString() —que es UTC— en
+# UTC−3 de las 21:00 en adelante se guarda la fecha de mañana, y de esas
+# fechas sale el atraso con el que se decide si la garantía corre.
+_utc = []
+for _r, _s in todo.items():
+    if _r.startswith('src/') and 'toISOString().slice(0, 10)' in solo_codigo(_s):
+        _utc.append(_r)
+check('ninguna fecha de un día se arma en UTC (se corre un día de noche)',
+      not _utc, ', '.join(_utc[:4]))
+check('y hay un solo helper para eso',
+      'export function hoyISO' in rd('src/lib/diaPrograma.ts'))
+
+# Los números que carga el cliente llegan a la base: el RPC se llamaba con
+# nombres que la función no declara, y PostgREST resuelve por nombre.
+_sync = solo_codigo(rd('src/lib/tableroSync.ts'))
+check('los números del cliente llegan a la base (los nombres del RPC)',
+      'p_cliente_id: clienteId' in _sync and 'p_semana_iso: semanaISO()' in _sync,
+      'con p_cliente/p_semana la llamada fallaba y el código la daba por buena')
+
+# Los mensajes en vivo: seis suscripciones escuchaban una tabla sin publicar.
+check('la tabla de mensajes está en la publicación de tiempo real',
+      'mensajes' in rd('supabase/migrations/20261024_los_mensajes_en_vivo.sql'))
+
+# El aviso del equipo salía con un insert que la RLS rechaza en silencio.
+check('el aviso del equipo al cliente sale por el RPC, no por un insert',
+      "rpc('crear_notificacion'" in rd('src/lib/cerebroStorage.ts'))
+
+# Los 21 tutoriales tienen su paso a paso: trece no tenían ni texto ni PDF, y
+# cuatro jornadas abrían sin ninguno.
+_tut_lupe = rd('src/lib/tutorialesDeLupe.ts')
+_cods = set(re.findall(r"'(L-\d\d)': \{", _tut_lupe))
+_delseed = {t['codigo'] for t in _json_seed.get('tutoriales', [])}
+check(f'los {len(_delseed)} tutoriales tienen su paso a paso escrito',
+      _delseed <= _cods, ', '.join(sorted(_delseed - _cods))[:80])
+check('y la jornada muestra todos los de su día, no solo el primero',
+      'roadmap.tutoriales.filter((x) => x.dia === dia' in rd('src/pages/Roadmap.tsx'),
+      'el día 17 tiene seis y mostraba uno')
+
+# Un solo sistema de roles: había dos, contestaban distinto, y la pestaña Hoy
+# del Admin se rompía con tres de los cuatro valores.
+check('hay un solo rolDe, y es el de permisos.ts',
+      "export { rolDe } from './permisos';" in rd('src/lib/roles.ts'))
+check('y el cálculo de carga no se llama con `as never`',
+      'as never' not in rd('src/components/admin/Jornada.tsx'),
+      'tapaba el error de tipo que avisaba del crash')
+
+# El veredicto de la garantía se calculaba contra una columna sin escritor.
+check('el atraso de cada jornada sale de la fecha que ya se guarda',
+      'entregas={entregasReales}' in rd('src/App.tsx')
+      and 'fecha_completada' in rd('src/App.tsx'),
+      'profiles.entregas no tenía un solo escritor: el atraso daba cero para todos')
+
+# Lo repetido se mide en el navegador.
+check('y lo repetido se mide en el navegador, no leyendo el código',
+      _os31.path.exists('scripts/prueba-repetido.py'))
+check('la revisión final tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-revision-final.ts'))
+
+# ── 13) EL VEREDICTO DE LA EVIDENCIA QUEDA ─────────────────────────────
+# El testigo ya juzgaba. Su veredicto vivía en un useState: al recargar, el
+# archivo rechazado seguía en Storage, el conteo lo contaba, y la jornada se
+# destrababa con la foto que la IA había rechazado.
+print()
+print('══ 13) EL VEREDICTO DE LA EVIDENCIA ══')
+
+_ver_mig = rd('supabase/migrations/20261025_el_veredicto_queda.sql')
+_coach31 = solo_codigo(rd('src/components/tasks/TaskCoach.tsx'))
+_ver_lib = solo_codigo(rd('src/lib/veredictoEvidencia.ts'))
+
+check('el veredicto de cada evidencia se guarda, con la firma de quién lo dictó',
+      'create table if not exists public.evidencia_veredictos' in _ver_mig
+      and "check (quien in ('ia', 'equipo'))" in _ver_mig)
+check('la jornada cuenta por veredicto, no por cantidad de archivos',
+      'evidenciasQueCuentan(' in _coach31,
+      'contaba archivos: el rechazado seguía en Storage y un F5 destrababa la jornada')
+check('y la rechazada es la única que frena (la pendiente no deja esperando a nadie)',
+      "return estado !== 'rechazada';" in _ver_lib)
+check('el cliente no escribe sus propios veredictos: los guarda el RPC',
+      'guardar_veredicto_ia' in _ver_mig
+      and 'for select to authenticated' in _ver_mig,
+      'con escritura directa, «la IA me rechazó» se vuelve «yo me aprobé»')
+check('y la función comprueba que el archivo esté en la carpeta de su dueño',
+      "not like ('evidencias/' || p_cliente_id::text || '/%')" in _ver_mig)
+check('lo que la IA no mira —audio, video, PDF— va a la cola del equipo',
+      "'pendiente'" in _coach31 and "file.type.startsWith('image/')" in _coach31)
+check('el motivo del rechazo sobrevive a la recarga y se le muestra',
+      'loQueDiceElVeredicto(frena)' in _coach31,
+      'antes vivía en el estado de React: volvía al otro día sin saber qué estaba mal')
+check('la cola del equipo trae lo que espera decisión de todos los clientes',
+      _os31.path.exists('src/components/admin/ColaDeEvidencias.tsx')
+      and '<ColaDeEvidencias' in rd('src/pages/Admin.tsx'))
+check('y la ficha del cliente muestra el veredicto de cada archivo, con su decisión',
+      'lecturaDelVeredicto(v)' in rd('src/pages/Admin.tsx'),
+      'listaba archivos y los abría: sin estado, sin motivo, sin botón')
+check('el aviso al cliente sale adentro del RPC que decide',
+      'perform public.crear_notificacion(' in _ver_mig,
+      'desde el navegador existe el caso de la decisión guardada y el aviso que no salió')
+check('y llega con su icono: el tipo nuevo está en los dos lugares que dibujan avisos',
+      'evidencia: ClipboardCheck' in rd('src/lib/avisoVisual.ts')
+      and 'ICON_MAP' not in rd('src/components/Topbar.tsx')
+      and 'ICON_MAP' not in rd('src/components/NotificationBell.tsx'),
+      'los mapas estaban idénticos en dos pantallas')
+check('el veredicto tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-veredicto.ts'))
+check('y la fila de la cola se monta de verdad, con datos',
+      'export function FilaDeLaCola' in rd('src/components/admin/ColaDeEvidencias.tsx')
+      and 'FilaDeLaCola' in rd('scripts/prueba-pantallas.tsx'),
+      'el render estático no corre los efectos: con la cola vacía el panel '
+      'devuelve null y la fila no la montaba nadie')
+
+# ── Y los verificadores que no verificaban ─────────────────────────────
+# Dos pruebas en verde que no miraban lo que decían mirar. Es el patrón
+# peor: una lente en verde protegiendo algo que el producto ya cambió.
+_psql = rd('scripts/prueba-sql.sh')
+check('el andamiaje de la prueba SQL declara hoja_de_ruta con sus columnas reales',
+      'usuario_id uuid, pilar_numero int, meta_codigo text' in _psql,
+      'declaraba (user_id, codigo, estado), que no existen en ninguna parte')
+check('los nombres de los RPC a verificar salen del código, no de una lista a mano',
+      'rpc-que-llama-la-app.py' in _psql
+      and 'for PAR in "guardar_semana_cliente' not in _psql,
+      'la lista tenía cuatro de las cincuenta y seis llamadas que hace la app')
+check('las cuentas de prueba existen en auth.users, no solo en profiles',
+      "insert into auth.users (id, email) values" in _psql,
+      'un insert correcto en una tabla con clave foránea a auth.users fallaba '
+      'por una cuenta que en producción sí existe')
+check('y el andamiaje da los permisos que Supabase da por defecto',
+      'alter default privileges in schema public' in _psql
+      and 'set role authenticated;' in _psql,
+      'sin permiso, una prueba de RLS da verde porque falta el permiso y no '
+      'porque la política funcione: dos razones para el mismo resultado')
+check('las funciones plpgsql del veredicto se EJECUTAN contra Postgres',
+      'select guardar_veredicto_ia(' in _psql and 'select decidir_evidencia(' in _psql,
+      'plpgsql no valida el cuerpo al crearlo: un error de tipo aparece la '
+      'primera vez que corre, que es cuando el cliente sube su foto')
+# ── 14) QUE SE MIGREN SOLOS, DESDE EL ALTA ─────────────────────────────
+print()
+print('══ 14) EL ALTA Y LA MIGRACIÓN ══')
+
+_dash14 = rd('src/pages/Dashboard.tsx')
+_mig14 = rd('src/pages/MiMigracion.tsx')
+_libmig14 = rd('src/lib/migracionDelCliente.ts')
+_adm14 = rd('src/pages/Admin.tsx')
+
+# Cuatro pantallas le prometían al cliente que traer su trabajo le ponía el
+# Camino al día. Ese flujo escribe su ADN y no toca el Camino.
+_promete = [n for n, t in (
+    ('su HOY', _dash14), ('la pantalla de traer', _mig14),
+    ('el resumen del final', _libmig14))
+    if ('Camino queda al d' in solo_codigo(t)
+        or 'Camino quedó cerrado' in solo_codigo(t)
+        or 'sesiones\n                pendientes en tu Camino' in solo_codigo(t))]
+check('ningún texto le promete al cliente que su Camino se actualiza solo',
+      not _promete, ', '.join(_promete))
+check('y dice lo que sí hace: queda cargado su ADN',
+      'cargados en' in _dash14 and 'tu ADN' in _dash14
+      and 'Tu ADN quedó completo' in _libmig14)
+check('las piezas que faltan se escriben en esa misma pantalla, sin voseo',
+      'Complétalas abajo' in _mig14 and 'Completalas' not in _mig14)
+
+# La llave de la migración se encendía solo desde Hoy, en otra lista: dar de
+# alta a alguien que ya trae su trabajo hecho eran dos pantallas.
+check('el alta puede abrir la migración en el mismo movimiento',
+      'traeSuTrabajo' in _adm14
+      and 'habilitarMigracion(signUpData.user.id, true)' in _adm14,
+      'estaba solo en Hoy, y el segundo paso es el que se olvida')
+check('apagada por defecto: no todo el que entra trae trabajo hecho',
+      'traeSuTrabajo: false,' in _adm14)
+check('y la lista de migraciones deja fuera al equipo',
+      'and not public.es_del_equipo(p.id)' in
+      rd('supabase/migrations/20261026_la_lista_de_migraciones_son_clientes.sql'),
+      'mostraba a Lupe con cero de cinco piezas y un botón para migrarla')
+check('el alta y la migración tienen su prueba de escenario',
+      _os31.path.exists('scripts/prueba-alta-y-migracion.ts'))
+
+# EL BLOQUEO QUE NADIE VEÍA. La migración del cliente entró el 17 de octubre;
+# el disparador que impide que un cliente se cambie lo que compró, el 18. Ese
+# disparador prohíbe tocar `migrado_en`, que es justo la columna que escribe
+# `cerrar_mi_migracion()`. Desde el 18, el cliente pegaba su material, su ADN
+# se guardaba, el cierre fallaba, y la tarjeta le seguía apareciendo.
+_cierre14 = rd('supabase/migrations/20261027_el_cliente_puede_cerrar_su_migracion.sql')
+check('el cliente puede cerrar su propia migración',
+      "perform set_config('app.cerrando_migracion', 'si', true)" in _cierre14,
+      'el disparador bloqueaba a la función oficial que él mismo señala')
+check('y marcarse migrado a mano sigue rebotando',
+      "current_setting('app.cerrando_migracion', true), '') <> 'si'" in _cierre14,
+      'la excepción vale solo cuando la escritura viene de la función')
+check('el disparador se recrea entero, con sus nueve columnas',
+      _cierre14.count('raise exception') >= 8,
+      'dos versiones de la misma lista es cómo se pierde una')
+check('y el cierre del cliente se prueba contra Postgres, con su candado',
+      'select cerrar_mi_migracion();' in _psql
+      and 'update profiles set migrado_en = now()' in _psql)
+
+# ── 15) LA REVISIÓN EXHAUSTIVA ANTES DE DAR ACCESO A TODOS ─────────────
+# Siete cosas que fallaban en silencio. Se buscaron por la clase de falla de
+# los dos bugs del turno anterior: piezas correctas por separado que juntas se
+# bloquean, y escrituras que declaran éxito sin haberlo comprobado.
+print()
+print('══ 15) LA REVISIÓN EXHAUSTIVA ══')
+
+_app15 = rd('src/App.tsx')
+_adm15 = rd('src/pages/Admin.tsx')
+_wiz15 = rd('src/components/WelcomeWizard.tsx')
+
+# El wizard se dibuja según la BASE. Esa escritura no se comprobaba, así que
+# con un corte de un segundo el cliente lo volvía a ver al recargar. Siempre.
+check('el cierre del onboarding se comprueba y se reintenta',
+      "data && data.length > 0" in _wiz15 and 'intento < 2' in _wiz15,
+      'App.tsx dibuja el wizard con onboarding_completed === false: sin '
+      'comprobar esa escritura, el cliente no podía salir nunca')
+check('y si no se puede, se le dice en vez de entrar',
+      'setNoCerro(true)' in _wiz15)
+
+# Su pantalla de cuenta mandaba campos que el formulario no edita.
+check('guardar su cuenta no le pisa la fecha de inicio ni su plan',
+      'fecha_inicio: profileDraft.fecha_inicio' not in _app15
+      and 'plan: profileDraft.plan,' not in _app15,
+      'de fecha_inicio salen el día del Camino, los colores y el atraso de la garantía')
+check('y la copia local se actualiza, no se reemplaza',
+      '...previo, ...profileDraft' in _app15,
+      'pisarla borraba su id, su plan_comercial y su ventana de acceso')
+
+# El alta decía «Cuenta creada» sin haber escrito nada.
+check('el alta espera la ficha y comprueba que escribió',
+      'i < 10 && !existe' in _adm15 and 'tocadas.length === 0' in _adm15,
+      'con 1500 ms fijos y el resultado sin mirar, el cliente quedaba sin '
+      'ventana de acceso y con la fecha de inicio equivocada')
+check('y avisa si la fecha de inicio deja su acceso cerrado el mismo día',
+      'Con esta fecha de inicio su acceso ya está cerrado' in _adm15,
+      'un cliente que viene de hace meses ve la pantalla de cierre, no la app')
+
+# Lo que lee el cliente cuando algo falla.
+_crudo = subprocess.run([sys.executable, 'scripts/prueba-lo-que-el-cliente-ve.py'],
+                        capture_output=True, text=True)
+check('sin voseo, sin errores técnicos en crudo, sin éxitos sin comprobar',
+      _crudo.returncode == 0,
+      ' · '.join(l.strip() for l in _crudo.stdout.split('\n') if l.startswith('✗'))[:200])
+
+# La pantalla de su cuenta no declara lo que no hace.
+check('ningún interruptor de esa pantalla promete algo que no guarda',
+      'defaultChecked' not in _app15 and 'Tus avisos' in _app15)
+check('y la facturación muestra lo que contrató, no un código interno',
+      'TICKETS[esc]' in _app15 and 'Tu Clínica Digital — {profile.plan}' not in _app15)
+
+# Y la base de prueba se parece a la de verdad.
+check('la prueba SQL carga la RLS real de profiles',
+      'alter table profiles enable row level security' in _psql,
+      'sin ella, «un cliente no lee la ficha de otro» salía verde por falta '
+      'de RLS, no porque la política funcionara')
+check('y lee el SQL de la raíz, no solo las migraciones',
+      "f.startswith('supabase/migrations/') and os.path.basename(f) >= '20261009'" in _psql,
+      'el corte por fecha descartaba pais-migration.sql: una letra es mayor '
+      'que un dígito en una comparación de texto')
+check('y hace el recorrido completo del primer día, como cliente',
+      'el primer día de un cliente nuevo' in _psql)
+check('la revisión exhaustiva tiene su prueba de escenario',
+      _os31.path.exists('scripts/prueba-revision-exhaustiva.ts'))
+
+_rpcn = subprocess.run([sys.executable, 'scripts/prueba-rpc-nombres.py'],
+                       capture_output=True, text=True)
+check('cada parámetro que la app manda por RPC existe en la función que llama',
+      _rpcn.returncode == 0,
+      _rpcn.stdout.strip().split('\n')[0][:160])
+
+# ── 6.72 · LO QUE SE LE OFRECE AL CLIENTE ES LO QUE SE VENDE HOY ───────
+#
+# EL NÚMERO ($27) abre hasta el día 5 y corta ahí, que es el mejor momento
+# para ofrecerle seguir: tiene su precio decidido y un grado ganado. Y los
+# cinco puntos donde la app le ofrecía seguir —los dos candados del Camino, la
+# puerta del ADN, el cartel del Dashboard y la pantalla de acceso vencido—
+# decían «Tu Sistema · $497» y «El Programa Completo · $997»: la escalera de
+# cuando los planes se llamaban por color y se cortaban por pilar.
+#
+# La venta automática del ultra low se cortaba exactamente ahí: el que pagaba
+# los $27 llegaba al día 6 enganchado, tocaba el botón y veía un nombre y un
+# precio que ya no se venden.
+#
+# Las DOS escaleras conviven a propósito y eso no cambia: `plan_comercial`
+# gobierna el acceso (qué pantallas ve) y los tickets gobiernan la venta (qué
+# se le cobra y qué le debe el equipo). Lo que este lente sostiene es que la
+# segunda nunca aparezca escrita a mano en una pantalla.
+import glob as _g72, re as _re72, os as _os72
+
+check('la escalera que se le ofrece vive en un solo módulo',
+      _os72.path.exists('src/lib/laOfertaQueSigue.ts'))
+check('y tiene su prueba de escenario',
+      _os72.path.exists('scripts/prueba-la-oferta-que-sigue.ts'))
+
+# El barrido mira SOLO lo que lee el cliente.
+#
+# El Admin y el servidor sí nombran la escalera de acceso, y está bien: los
+# botones del equipo dicen qué acceso dan («🟢 Tu Sistema (+90d)») y el tope
+# de gasto se documenta por plan. Esa escalera no se jubila: gobierna qué
+# pantallas ve cada quien. Lo que no puede pasar es que un nombre o un precio
+# de ahí aparezca en una pantalla DEL CLIENTE como si fuera algo que comprar.
+#
+# Los comentarios se descuentan antes de mirar —documentan por qué cambió—
+# incluidos los de fin de línea, cuidando de no cortar un `https://`.
+_VIEJO72 = ['Tu Sistema', 'Programa Completo', r'\$497', r'\$997', r'\$147']
+_PERMITIDOS72 = {
+    # Define la escalera de ACCESO: es su casa.
+    'src/lib/planes.ts',
+    # El prompt de Diego habla de rangos de precio de la oferta DEL CLIENTE,
+    # no de la escalera de TCD.
+    'src/lib/agents/diego.ts',
+}
+def _sin_comentarios72(s):
+    s = _re72.sub(r'/\*.*?\*/', '', s, flags=_re72.S)
+    s = _re72.sub(r'^\s*\*.*$', '', s, flags=_re72.M)
+    return _re72.sub(r'(?<!:)//.*$', '', s, flags=_re72.M)
+
+_vieja72 = []
+for _f72 in (_g72.glob('src/**/*.tsx', recursive=True) + _g72.glob('src/**/*.ts', recursive=True)):
+    _r72 = _f72.replace('\\', '/')
+    # Fuera del barrido: lo del equipo y lo permitido arriba.
+    if _r72 in _PERMITIDOS72 or _r72 == 'src/pages/Admin.tsx' or '/admin/' in _r72:
+        continue
+    _vivo72 = _sin_comentarios72(rd(_f72))
+    for _v72 in _VIEJO72:
+        if _re72.search(_v72, _vivo72):
+            _vieja72.append(f'{_os72.path.basename(_f72)}: {_v72}')
+check('ninguna pantalla del cliente nombra la escalera vieja',
+      not _vieja72, ', '.join(sorted(set(_vieja72))[:6]))
+
+# Y el Admin reserva con las ofertas de hoy, que es de donde sale lo que el
+# cliente ve en su pantalla de vencimiento.
+_adm72 = rd('src/pages/Admin.tsx')
+check('el Admin reserva cupo con las ofertas de hoy',
+      "['base','La Base" in _adm72.replace(' ', '') or "'base','La Base · $1.000'" in _adm72,
+      'las opciones eran los colores viejos, y el cliente veía ese precio')
+check('y avisa cuando lo anotado es de la escalera anterior',
+      'Anotado con la escalera anterior' in _adm72,
+      'si no, el equipo no se entera de que ese cupo no le llega al cliente')
+
+# Y los cinco puntos de venta tiran del módulo, no de los nombres de acceso.
+_PUNTOS72 = ['src/pages/Roadmap.tsx', 'src/components/PuertaSiguienteNivel.tsx',
+             'src/App.tsx', 'src/pages/Dashboard.tsx']
+_sueltos72 = [_os72.path.basename(f) for f in _PUNTOS72
+              if 'laOfertaQueSigue' not in rd(f) and 'laOferta' not in rd(f)]
+check(f'los {len(_PUNTOS72)} puntos de venta tiran de la misma fuente',
+      not _sueltos72, ', '.join(_sueltos72))
+
+# El puente que no debe volver: traducir un plan de acceso a un ticket.
+_ofs72 = rd('src/lib/laOfertaQueSigue.ts')
+check('un plan de acceso NO se traduce a un ticket de venta',
+      "valor === 'base' || valor === 'ascenso' || valor === 'instalacion'" in _ofs72,
+      'ese puente ya existió en cuadroTickets: un cliente de $497 figuraba '
+      'con $5.000 de instalación contratada')
+check('y el candado nunca queda sin salida si falta el link de pago',
+      'checkout || waLink' in rd('src/App.tsx')
+      and 'checkout || waLink' in rd('src/pages/Dashboard.tsx'),
+      'con VITE_CHECKOUT_* sin configurar, el botón tiene que caer al WhatsApp')
+
+_ofsig = subprocess.run(['npx', 'tsx', 'scripts/prueba-la-oferta-que-sigue.ts'],
+                        capture_output=True, text=True)
+check('la escalera que ve el cliente es la de hoy, de punta a punta',
+      _ofsig.returncode == 0,
+      ' · '.join(l.strip() for l in _ofsig.stdout.split('\n') if l.startswith('✗'))[:200])
+
+# ── 6.73 · EL QUE PAGA, SUBE ───────────────────────────────────────────
+#
+# `plan` dice por dónde entró ('ELNUMERO') y NADIE la limpia nunca;
+# `plan_comercial` dice qué acceso tiene hoy. Cuatro lugares preguntaban por
+# la primera sin mirar la segunda: `planDe`, `planActual`, el candado del ADN
+# y el del Camino.
+#
+# Así que el que entraba por los $27 y después pagaba La Base seguía viendo el
+# Camino cortado en el día 5, con el candado del día 6 puesto, justo después
+# de pagar. Y pasaba igual si el equipo le abría el acceso a mano. Es la falla
+# más cara que puede tener el ultra low: no se nota al venderlo, se nota
+# cuando el cliente ya pagó.
+_pl73 = rd('src/lib/planes.ts')
+check('lo que pagó le gana a por dónde entró',
+      'const pago = planPagado(perfil);' in _pl73
+      and _pl73.index('const pago = planPagado(perfil);') < _pl73.index("?.plan === 'ELNUMERO') return 'blanco'"),
+      'si ELNUMERO se mira primero, al que sube de escalón no se le abre nada')
+check('«está en el tramo del $27» vive en un solo lugar',
+      'export function enElTramoDelNumero' in _pl73)
+
+_repetido73 = [f for f in ['src/lib/adnPiezas.ts', 'src/pages/Roadmap.tsx', 'src/components/WelcomeWizard.tsx']
+               if "=== 'ELNUMERO'" in rd(f)]
+check('y ninguna pantalla la vuelve a preguntar por su cuenta',
+      not _repetido73, ', '.join(_os72.path.basename(f) for f in _repetido73))
+
+# El webhook de pago: si no acepta los tickets, el cliente paga y no se le abre nada.
+_wh73 = rd('api/ghl-webhook.ts')
+check('el webhook de pago acepta las ofertas que se venden',
+      "'base', 'ascenso', 'instalacion'" in _wh73,
+      'con solo los colores, un producto que manda plan:"base" recibía '
+      'PLAN_INVALIDO y el cliente pagaba sin que se le abriera nada')
+check('y el ticket pagado abre el tramo que le corresponde',
+      'LO_QUE_ABRE' in _wh73 and "base: 'amarillo'" in _wh73,
+      'La Base llega al día 12, que es el pilar 2')
+check('el servicio contratado lo escribe el pago, no una persona',
+      'cambios.servicio_contratado = ticket' in _wh73,
+      'si lo tiene que marcar alguien a mano, la venta no es automática')
+check('y NO se escribe cuando solo vino un color de acceso',
+      'if (ticket) cambios.servicio_contratado' in _wh73,
+      'adivinarlo es el puente que hacía figurar a un cliente de $497 con '
+      'la instalación completa contratada')
+
+_sube = subprocess.run(['npx', 'tsx', 'scripts/prueba-sube-de-escalon.ts'],
+                       capture_output=True, text=True)
+check('sube de escalón y se le abre lo que pagó',
+      _sube.returncode == 0,
+      ' · '.join(l.strip() for l in _sube.stdout.split('\n') if l.startswith('✗'))[:200])
 
 print()
 if F == 0 and SIN_MEDIR_MOVIL:

@@ -5,27 +5,34 @@ import TableroNumeros from '../components/TableroNumeros';
 import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
 import CadenaADN from '../components/CadenaADN';
 import type { Profile } from '../lib/supabase';
-import { planDe, diasRestantes, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, usosSemana, TOPE_MENTOR_SEMANAL } from '../lib/planes';
-import React, { useEffect, useState } from 'react';
-import { ChevronRight, CheckCircle2, Clock, Calendar, Target, Play, Wrench, MessageCircle, Bot, Sparkles } from 'lucide-react';
+import { planDelCliente, diasRestantes, PILAR_MAX, waLink, usosSemana, TOPE_MENTOR_SEMANAL, enElTramoDelNumero } from '../lib/planes';
+import { laOferta, laOfertaTrasElAcceso, ofertaReservada } from '../lib/laOfertaQueSigue';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { miEstadoDeMigracion } from '../lib/migracionDatos';
+import { ChevronRight, CheckCircle2 } from 'lucide-react';
 import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import { getActiveDaysThisWeek } from '../lib/activity';
-import { cinturonDesdeProgreso, CINTURONES } from '../lib/cinturones';
+import { cinturonDesdeProgreso } from '../lib/cinturones';
 import EnMarcha, { type EstadoEnMarcha } from '../components/EnMarcha';
+import MisSesiones from '../components/MisSesiones';
 import { hechoHoy, racha, anguloDelDia } from '../lib/sostenido';
 import { carriles } from '../lib/carriles';
-import { calcularRacha, calcularRachaDesdeFechas, esDiaDescanso, hoyTieneSesion } from '../lib/racha';
-import ReporteDirector from '../components/ReporteDirector';
+import { calcularRachaDesdeFechas } from '../lib/racha';
 import { SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import type { RoadmapMeta } from '../lib/roadmapSeed';
 import { VOC } from '../lib/vocabulario';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo, esPasoDelCliente } from '../lib/diaPrograma';
+import { yaEncendio } from '../lib/montajeCampana';
+import { montajeDe } from '../lib/montajeDatos';
+import TableroDeLaSemana from '../components/TableroDeLaSemana';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
-import CintaCinturon from '../components/CintaCinturon';
-import CaminoEnPausa from '../components/CaminoEnPausa';
-import { pausaActiva } from '../lib/pausaGlobal';
-import { accesoDelPerfil, cierreDeLaVentana, sumarDias } from '../lib/ventanaDeAcceso';
+import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
+import { soporteCerrado } from '../lib/ventanaSinSoporte';
+import { sumarDias } from '../lib/ventanaDeAcceso';
 import { claveDelDia } from '../lib/roadmapSeed';
+import LaAntesala from '../components/LaAntesala';
+import { fechaQueSellaElInicio, leToca, type Antesala } from '../lib/antesala';
+import { unirProgreso, leerProgresoLocal, guardarProgresoLocal } from '../lib/progresoDelCliente';
 
 function getTypeBadge(tipo?: string) {
   switch (tipo) {
@@ -36,7 +43,7 @@ function getTypeBadge(tipo?: string) {
   }
 }
 
-function MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function __________MetricCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="card-panel p-5">
       <p className="text-sm text-cream/55 uppercase tracking-widest mb-2 font-semibold">{label}</p>
@@ -63,6 +70,22 @@ interface ProximoHito {
 }
 
 export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurrentPage: (page: string) => void, userId?: string, perfil?: Partial<Profile> }) {
+  /**
+   * Los países del montaje, para que el tablero juzgue el costo contra SU
+   * banda. Sin ellos la cadena cae en la referencia de México, y el techo
+   * argentino está por debajo del piso español: el diagnóstico se equivoca en
+   * las dos direcciones y en silencio.
+   */
+  const [paisesDelCliente, setPaisesDelCliente] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    if (!userId || !yaEncendio()) return;
+    let vivo = true;
+    void montajeDe(userId)
+      .then((m) => { if (vivo && m.paises?.length) setPaisesDelCliente(m.paises); })
+      .catch(() => { /* sin países, la cadena no opina del costo */ });
+    return () => { vivo = false; };
+  }, [userId]);
+
   // El Diario se abre al terminar Sanar el Dinero (cinturón 2) — igual que en el menú.
   const diarioAbierto = React.useMemo(() => {
     try {
@@ -81,6 +104,19 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
     racha: 0,
     diasConectados: 0,
   });
+  /**
+   * SI YA SE SABE QUÉ LE TOCA HOY.
+   *
+   * No había ninguno, y el estado inicial es `tareasHoy: []`. Con ese estado la
+   * pantalla afirmaba dos cosas falsas: tachaba «Tu sesión del Camino» con
+   * «Hecha — hoy avanzaste», y abajo mostraba «Todo al día. Estás libre.»
+   *
+   * O sea que el día 1 de un cliente pago empezaba diciéndole que no tenía
+   * nada que hacer, mientras esperaba una consulta de red. Y el `await` del
+   * medio no tenía timeout en ninguna de las dos puntas, así que con Mi Clínica
+   * en arranque frío la pantalla quedaba así indefinidamente.
+   */
+  const [yaCargo, setYaCargo] = useState(false);
   const [proximoHito, setProximoHito] = useState<ProximoHito | null>(null);
   // G2: las sesiones se abren en El Camino (un solo lugar, con evidencia y checklist)
   // G3: el valor visible — las ventas del sistema
@@ -106,15 +142,22 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       try {
         const email = p?.email ?? (await supabase?.auth.getUser())?.data.user?.email;
         if (email) {
-          const r = await fetch(`/api/mcd-bridge?email=${encodeURIComponent(String(email))}`);
+          // Con timeout: este fetch sale a otra app, que puede estar en
+          // arranque frío. Sin cortarlo, toda la pantalla de HOY queda
+          // esperando a un servicio que no es el que el cliente vino a ver.
+          const corte = new AbortController();
+          const reloj = setTimeout(() => corte.abort(), 4000);
+          const r = await fetch(
+            `/api/mcd-bridge?email=${encodeURIComponent(String(email))}`,
+            { signal: corte.signal },
+          ).finally(() => clearTimeout(reloj));
           if (r.ok) {
             const j = await r.json();
             if (j?.cobro_verificado) {
-              const saved = localStorage.getItem('tcd_hoja_ruta_v2');
-              const set = new Set<string>(saved ? JSON.parse(saved) : []);
+              const set = leerProgresoLocal();
               if (!set.has(claveDelDia(45))) {
                 set.add(claveDelDia(45));
-                localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...set]));
+                guardarProgresoLocal(set);
                 if (isSupabaseReady() && supabase && userId) {
                   await guardarFila('hoja_de_ruta', { usuario_id: userId, pilar_numero: 6, meta_codigo: 'P6.3', completada: true, fecha_completada: new Date().toISOString() }, ['usuario_id', 'pilar_numero', 'meta_codigo']);
                 }
@@ -129,15 +172,23 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         supabase.from('hoja_de_ruta')
           .select('pilar_numero, meta_codigo, completada, fecha_completada')
           .eq('usuario_id', userId)
-          .eq('completada', true)
           .then(({ data: hr }) => {
             const rows = hr ?? [];
-            const fechas = rows.filter((r: { fecha_completada?: string | null }) => r.fecha_completada).map((r: { fecha_completada?: string | null }) => String(r.fecha_completada));
+            const cerradas = rows.filter((r: { completada?: boolean | null }) => r.completada);
+            const fechas = cerradas.filter((r: { fecha_completada?: string | null }) => r.fecha_completada).map((r: { fecha_completada?: string | null }) => String(r.fecha_completada));
             setRachaDB(calcularRachaDesdeFechas(fechas));
-            // El set real desde la DB: hitos + sesión de hoy correctos en CUALQUIER dispositivo.
-            const keys = rows.map((r: { pilar_numero: number; meta_codigo: string }) => `${r.pilar_numero}-${r.meta_codigo}`);
-            setSetDB(new Set(keys));
-            try { localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(keys)); } catch { /* noop */ }
+            /*
+             * Escribía las filas de la base TAL CUAL encima del espejo local,
+             * y esta es la pantalla de inicio: corre en cada apertura. Con la
+             * base devolviendo menos filas que el espejo —un dispositivo que
+             * trabajó sin conexión, una escritura que no llegó— borraba el
+             * trabajo del cliente. Ahora se une: `unirProgreso` suma lo
+             * cerrado, abre lo desmarcado y deja quieto lo que la base no
+             * nombra.
+             */
+            const unido = unirProgreso(rows);
+            setSetDB(unido);
+            guardarProgresoLocal(unido);
           });
       }
 
@@ -214,6 +265,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         diasConectados: 0,
       });
       setProximoHito(hito);
+      // Acá ya se sabe qué le toca: lo de abajo refina con la base, pero la
+      // pantalla puede dejar de callarse.
+      setYaCargo(true);
 
       if (isSupabaseReady() && supabase && userId) {
         const { data: hrRows } = await supabase
@@ -280,7 +334,9 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         setData(prev => ({ ...prev, diasConectados }));
       }
     }
-    loadData();
+    // Pase lo que pase, la pantalla deja de esperar: una excepción acá dejaba
+    // «Todo al día. Estás libre.» para siempre.
+    void loadData().finally(() => setYaCargo(true));
   }, [userId]);
 
   const pctTareas = data.totalTareas > 0 ? Math.round((data.completadas / data.totalTareas) * 100) : 0;
@@ -289,24 +345,124 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
     : 0;
   const tareasRestantesHito = proximoHito ? proximoHito.metasTotal - proximoHito.metasCompletadas : 0;
 
-  const nombreDisplay = data.profile.nombre || 'bienvenida';
+  // Sin nombre cargado el saludo decía «Buenos días, bienvenida.» — en
+  // femenino para cualquiera y como si «bienvenida» fuera su nombre. Sin
+  // nombre, el saludo va solo: «Buenos días.»
+  const nombreDisplay = data.profile.nombre?.trim() || '';
+
+  // ─── LA ANTESALA ───────────────────────────────────────────────────────
+  // Los cinco a siete días de descanso que abren la sesión 1. Le toca a quien
+  // todavía no cerró su día 1: a quien ya entró no se le agrega una puerta
+  // atrás.
+  const [antesala, setAntesala] = useState<Antesala>(perfil?.antesala ?? {});
+  useEffect(() => { if (perfil?.antesala) setAntesala(perfil.antesala); }, [perfil?.antesala]);
+
+  const yaCerroElDiaUno = useMemo(() => {
+    try {
+      const guardadas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
+      return guardadas.has(claveDelDia(1));
+    } catch { return false; }
+  }, []);
+  /**
+   * Al tramo de cinco días no le toca la antesala: su acceso dura lo mismo que
+   * el descanso, así que esperarlo le consume la compra entera.
+   */
+  const tramoCorto = enElTramoDelNumero(perfil);
+  const enAntesala = leToca(antesala, yaCerroElDiaUno, tramoCorto);
+
+  /**
+   * Y como era la antesala la que sellaba la fecha de inicio al cerrarse, sin
+   * ella el tramo corto se queda sin día uno: el ritmo cae al día 1 por
+   * defecto y la alarma de inactividad del equipo lo saltea, porque esa alarma
+   * se corta en los clientes sin fecha. Se sella al entrar, una sola vez.
+   */
+  const selloDeInicio = useRef(false);
+  useEffect(() => {
+    if (selloDeInicio.current || !tramoCorto || !userId) return;
+    if ((perfil as { fecha_inicio?: string } | undefined)?.fecha_inicio) return;
+    selloDeInicio.current = true;
+    const d = new Date();
+    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    void (async () => {
+      if (isSupabaseReady() && supabase) {
+        // Supabase DEVUELVE el error, no lo lanza: sin mirarlo, esto se daba
+        // por escrito aunque no entrara, y el guardado local quedaba diciendo
+        // una fecha que la base no tiene.
+        const { error } = await supabase.from('profiles').update({ fecha_inicio: hoy }).eq('id', userId);
+        if (error) {
+          selloDeInicio.current = false; // que el próximo ingreso lo reintente
+          return;
+        }
+      }
+      try {
+        const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+        localStorage.setItem('tcd_profile', JSON.stringify({ ...p, fecha_inicio: hoy }));
+      } catch { /* el guardado local es de conveniencia */ }
+    })();
+  }, [tramoCorto, userId, perfil]);
+
+  /**
+   * Guarda la antesala y, cuando queda lista, sella la fecha de inicio del
+   * Camino con el día en que la cerró.
+   *
+   * Sin eso, los 90 días arrancan el día del alta y el cliente sale de su
+   * semana de descanso con una semana de diferencia encima — exactamente la
+   * carga que esta semana vino a quitarle.
+   */
+  const guardarAntesala = useCallback(async (nueva: Antesala) => {
+    const campos: Record<string, unknown> = { antesala: nueva };
+    const sella = fechaQueSellaElInicio(nueva);
+    if (sella && !fechaQueSellaElInicio(antesala)) campos.fecha_inicio = sella;
+    if (userId && isSupabaseReady() && supabase) {
+      const { error } = await supabase.from('profiles').update(campos).eq('id', userId);
+      if (error) throw error;
+    }
+    setAntesala(nueva);
+    try {
+      const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...p, ...campos }));
+    } catch { /* el guardado local es de conveniencia */ }
+  }, [antesala, userId]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
 
-      {/* ── El Camino parado para todos: antes que nada, cuándo retoma. ── */}
+      {/* ── Si el equipo no responde estos días, se dice arriba de todo.
+             Ya no se le anuncia un Camino parado ni una fecha de cierre
+             nueva: su Camino sigue corriendo y su fecha no se movió. ── */}
       {(() => {
-        const parado = pausaActiva();
-        if (!parado) return null;
-        const acc = accesoDelPerfil(perfil as Parameters<typeof accesoDelPerfil>[0]);
-        // La víspera: así el cierre que se le pasa todavía no trae el
-        // corrimiento de ESTA pausa, que el cartel suma una sola vez.
-        const vispera = sumarDias(parado.desde, -1);
-        return <CaminoEnPausa pausa={parado} cierreOriginal={acc ? cierreDeLaVentana(acc, vispera) : null} />;
+        const cerrado = soporteCerrado();
+        return cerrado ? <SinSoporteEstosDias ventana={cerrado} /> : null;
       })()}
 
+      {/* ═══ LA ANTESALA ═══
+          Mientras le toca, la pantalla de Hoy es su protocolo de descanso y
+          nada más del Camino: ni el saludo con el ritmo —que le diría «día 1
+          de 90» cuando todavía no empezó— ni la jornada del día. Sus sesiones
+          1-1 y su manual siguen abajo: leer y hablar con el equipo no le
+          cuesta energía, y es parte de lo que pagó. */}
+      {enAntesala && (
+        <LaAntesala
+          antesala={antesala}
+          nombre={nombreDisplay || undefined}
+          onGuardar={guardarAntesala}
+          onAbrirCamino={() => setCurrentPage('roadmap')}
+        />
+      )}
+
+      {/* ═══ EL CAMBIO DE ETAPA ═══
+          El día que enciende sus campañas, el cliente deja de construir y
+          empieza a sostener. Hasta ahora la app no se enteraba: seguía
+          abriendo con la sesión del día, igual que el día 3.
+          Desde que enciende, lo primero que ve son sus seis números y dónde se
+          corta su semana. La sesión del día sigue abajo: no desaparece, deja
+          de ser lo primero. */}
+      {!enAntesala && yaEncendio() && (
+        <TableroDeLaSemana clienteId={userId} paises={paisesDelCliente} />
+      )}
+
       {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
-      {(() => {
+      {!enAntesala && (() => {
         let c = null as ReturnType<typeof cinturonDesdeProgreso> | null;
         try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
         let fechaInicio = (perfil as { fecha_inicio?: string } | undefined)?.fecha_inicio;
@@ -320,13 +476,36 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           <section className="card-panel p-5 sm:p-6" aria-label="Tu día">
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-                {saludo}, {nombreDisplay}.
+                {saludo}{nombreDisplay ? `, ${nombreDisplay}` : ''}.
               </h1>
-              {c && <CintaCinturon cinturon={c} variante="tira" />}
+              {/*
+                La cinta del grado salió de acá. Al lado del saludo no agrega
+                nada que el renglón de abajo no diga, y con el Cinturón BLANCO
+                —el de todos los que recién entran— es una píldora de 54 por 16
+                sin nada adentro: se lee como un elemento que no cargó, justo
+                en lo primero que mira el cliente nuevo.
+                Donde sí dice algo es en el Camino, al lado de su barra: ahí la
+                cinta ES el progreso. Acá el nombre y la metáfora alcanzan.
+              */}
             </div>
             {c && <p className="mt-1 text-[17px] text-cream/70">Cinturón {c.nombre} · {c.metafora}</p>}
-            <p data-ritmo={ritmo.tono} className="mt-2 text-[17px] leading-snug"
-               style={{ color: ritmo.tono === 'al_dia' ? 'var(--tilde, #4A7C59)' : 'var(--oro-d, #8E6824)' }}>
+            {/*
+              EL RITMO SE LEE, NO SE SEÑALA.
+
+              Eran tres renglones enteros en oro, que es lo primero que se ve
+              al abrir la app y lo más saturado de la pantalla: un párrafo
+              pintado de dorado es relleno de oro en forma de texto, y la vara
+              lo reserva para las líneas de 1px, las versalitas y los
+              numerales. Encima competía con el saludo, que está justo arriba.
+
+              Ahora el párrafo va en la tinta —se lee— y el color queda en la
+              línea de 1px de su izquierda, que es donde el estado puede
+              decirse sin gritar: oro cuando hay algo que recuperar, verde
+              cuando está al día.
+            */}
+            <p data-ritmo={ritmo.tono}
+               className="mt-2 text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
+               style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}>
               {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
             </p>
           </section>
@@ -334,7 +513,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
       })()}
 
       {/* ── La única acción importante de la pantalla (10-DISENO regla 1) ── */}
-      {data.tareasHoy[0] && (
+      {!enAntesala && data.tareasHoy[0] && (
         <TarjetaDeHoy
           hoy={{
             codigo: data.tareasHoy[0].codigo,
@@ -377,27 +556,31 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
 
       {/* ═══ La Semana Blanca: el plan reservado + la cuenta regresiva ═══ */}
-      {planDe(perfil) === 'blanco' && (() => {
+      {planDelCliente(perfil) === 'blanco' && (() => {
         const d = diasRestantes(perfil);
-        const reservado = (perfil?.plan_reservado ?? '') as string;
-        const nombreRes = reservado && NOMBRE_PLAN[reservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[reservado as keyof typeof NOMBRE_PLAN] : null;
-        const precioRes = reservado && PRECIO_FUNDADOR[reservado] ? PRECIO_FUNDADOR[reservado] : null;
+        /*
+         * El cupo reservado solo se nombra si es una oferta de hoy; si no, se
+         * nombra el escalón que sigue. Acá se leía `NOMBRE_PLAN`/`PRECIO_FUNDADOR`,
+         * que todavía dicen «Tu Sistema · $497».
+         */
+        const res = ofertaReservada(perfil?.plan_reservado);
+        const oferta = res ? laOferta(res) : laOfertaTrasElAcceso(PILAR_MAX.blanco);
         const urgente = d !== null && d <= 3;
         return (
-          <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[rgba(232,150,46,0.4)]' : 'border-[rgba(232,150,46,0.15)]'}`} style={urgente ? { background: 'linear-gradient(135deg, rgba(232,150,46,0.08), transparent)' } : undefined}>
+          <div className={`card-panel rounded-3xl p-5 border ${urgente ? 'border-[var(--oro,#B0822E)]' : 'border-[var(--line, rgba(142,104,36,0.18))]'}`} style={urgente ? { background: 'linear-gradient(135deg, var(--line, rgba(142,104,36,0.18)), transparent)' } : undefined}>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1.5">Tus 5 días</p>
             {d !== null && d > 0 ? (
               <p className="text-sm text-cream/85">
                 {urgente ? (d === 1 ? 'Tu último día' : `Te quedan ${d} días`) : 'Tu semana avanza, un día a la vez'}
-                {nombreRes ? <> · tu plan <span className="text-goldhi font-semibold">{nombreRes}</span> te espera{precioRes && <> ({precioRes} de fundador · 50% off de por vida)</>}</> : null}
+                {res ? <> · tu lugar en <span className="text-goldhi font-semibold">{oferta.nombre}</span> te espera</> : null}
               </p>
             ) : (
-              <p className="text-sm text-cream/85">Tu semana está completa. Lo que construiste queda guardado — y tu lugar de fundador sigue reservado.</p>
+              <p className="text-sm text-cream/85">Tu semana está completa. Lo que construiste queda guardado — y tu lugar sigue reservado.</p>
             )}
             {(urgente || (d !== null && d <= 0)) && (
-              <a href={waLink(('Hola · Quiero continuar mi camino con el plan ' + (nombreRes ?? '')).trim())} target="_blank" rel="noreferrer"
+              <a href={oferta.checkout || waLink(oferta.mensaje)} target="_blank" rel="noreferrer"
                  className="inline-block mt-3 btn-primary text-[#1a1206] text-sm font-bold px-5 py-2.5 rounded-xl">
-                Continuar mi camino →
+                {oferta.boton} →
               </a>
             )}
           </div>
@@ -424,6 +607,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         return <EnMarcha dia={diaProg} estado={est} onIr={setCurrentPage} />;
       })()}
 
+      {/* ─── TUS SESIONES ─── lo que compró y no tenía dónde ver.
+          No se dibuja hasta que tuvo la primera: un panel vacío enseña a
+          ignorarlo. */}
+      <MisSesiones
+        userId={userId}
+        servicio={(perfil as { servicio_contratado?: string | null } | undefined)?.servicio_contratado}
+      />
+
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
       <MapaCincoDias />
 
@@ -434,6 +625,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
 
       {/* ZIP A — La graduación de los 5 días (solo plan EL NÚMERO, tras el día 5) */}
       <GraduacionSemanaBlanca />
+
+      {/* TRAER SU TRABAJO — solo mientras el equipo le habilitó la migración y
+          no la terminó. Va arriba de todo porque hasta que no la hace, su
+          Camino le pide cosas que ya tiene hechas afuera. */}
+      <TraeTuTrabajo userId={userId} onIr={() => setCurrentPage('migracion')} />
 
       {/* S10 — La Cadena del ADN: el ikigai encendiéndose */}
       <CadenaADN onAbrir={() => setCurrentPage('adn')} />
@@ -470,7 +666,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           // ─── DOMINGO: el día del Fundador ───
           if (dow === 0) {
             return (
-              <div className="card-panel p-6 border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent">
+              <div className="card-panel p-6 border border-gold/25 bg-gold/[0.05]">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Domingo · El día del Fundador</p>
                 <p className="text-sm text-cream/80 mb-4">Quince minutos para ti: tu Diario, tu semana, tu intención. La transformación también se registra.</p>
                 {diarioAbierto && (<button onClick={() => setCurrentPage('diario')} className="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl">Abrir mi Diario →</button>)}
@@ -481,7 +677,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         })()}
 
         {/* Sin paso pendiente: el día de campo o el día libre. */}
-        {data.tareasHoy.length === 0 && (
+        {yaCargo && data.tareasHoy.length === 0 && (
           <div className="card-panel p-6">
               {(() => {
                 let sv = false;
@@ -490,14 +686,14 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                   sv = saved.includes(claveDelDia(31));
                 } catch { /* noop */ }
                 if (!sv) return (
-                  <div className="py-10 text-center border border-dashed border-[rgba(232,150,46,0.10)] rounded-xl bg-surface/30">
+                  <div className="py-10 text-center border border-dashed border-[var(--line, rgba(142,104,36,0.18))] rounded-xl bg-surface/30">
                     <CheckCircle2 className="w-8 h-8 text-success/50 mx-auto mb-3" />
                     <p className="text-sm text-cream/75">Todo al día. Estás libre.</p>
                     <p className="text-xs text-cream/45 mt-1">Mira El Camino para ver lo que sigue.</p>
                   </div>
                 );
                 return (
-                  <div className="rounded-xl border border-gold/25 bg-gradient-to-b from-gold/[0.05] to-transparent p-5">
+                  <div className="rounded-xl border border-gold/25 bg-gold/[0.05] p-5">
                     <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Día de campo</p>
                     <p className="text-sm text-cream/85">Hoy no hay sesión nueva. Hoy se juega.</p>
                     <p className="text-xs text-cream/50 mt-1 mb-4">Tu sistema está vivo: esto es lo que mueve tus números hoy.</p>
@@ -528,14 +724,18 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           let set = setDB ?? new Set<string>();
           if (!setDB) { try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); set = new Set(saved ? JSON.parse(saved) : []); } catch { /* noop */ } }
           const sistemaVivo = set.has(claveDelDia(31));
-          const sesionHecha = data.tareasHoy.length === 0;
+          // `yaCargo` es la diferencia entre «no tiene nada que hacer» y «todavía no
+  // sé qué tiene que hacer». Sin él, lo segundo se mostraba como lo primero.
+  const sesionHecha = yaCargo && data.tareasHoy.length === 0;
           const mentorRestantes = Math.max(0, TOPE_MENTOR_SEMANAL - usosSemana('mentor'));
           const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
             <button onClick={onClick} disabled={!onClick}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[rgba(232,150,46,0.12)] bg-surface/30 hover:border-gold/30'}`}>
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 hover:border-gold/30'}`}>
               <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
               <span className="flex-1 min-w-0">
-                <span className={`block text-sm font-medium ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
+                {/* 600, no 500: era el cuarto peso sobre 17 px en el tablero lleno,
+                    con el techo en tres. 500 y 600 son el mismo gesto. */}
+                <span className={`block text-sm font-semibold ${done ? 'text-cream/60 line-through' : 'text-cream/90'}`}>{titulo}</span>
                 <span className="block text-sm text-cream/50">{meta}</span>
               </span>
               {onClick && <ChevronRight className="w-4 h-4 text-cream/40" />}
@@ -547,7 +747,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Tu jornada de hoy</p>
               <p className="mt-1 mb-3 text-[17px] text-cream/70">Cuatro horas: dos de atender, una de construir y una de dirigir.</p>
               <div className="space-y-2">
-                <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — el dojo te vio hoy' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
+                <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — hoy avanzaste' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
                 {sistemaVivo && (
                   <Fila n="2" titulo="10 minutos de campo" meta="Responde a tus interesados y registra en Mi Clínica — y vuelve: el Camino te espera"
                     onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')} />
@@ -583,9 +783,50 @@ function DescansoInput({ onGuardar }: { onGuardar: (t: string) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
       <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Hoy… (una línea alcanza)"
-        className="flex-1 min-w-[180px] bg-surface/50 border border-[rgba(232,150,46,0.15)] rounded-xl px-3.5 py-2.5 text-[15px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
+        className="flex-1 min-w-[180px] bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-[15px] text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50 min-h-[44px]" />
       <button disabled={!t.trim()} onClick={() => { onGuardar(t.trim()); setOk(true); }}
         className="btn-primary text-[15px] font-bold px-4 rounded-xl disabled:opacity-40 min-h-[44px] shrink-0">Guardar</button>
+    </div>
+  );
+}
+
+
+/* ══════════════════ TRAER SU TRABAJO ══════════════════
+ *
+ * Para los clientes que vienen de Discord con sus manuales ya hechos. La
+ * tarjeta aparece solo con la llave encendida por el equipo y hasta que la
+ * termina: a un cliente nuevo, migrarse sería saltearse su propio Camino.
+ */
+function TraeTuTrabajo({ userId, onIr }: { userId?: string; onIr: () => void }) {
+  const [mostrar, setMostrar] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    let vivo = true;
+    void miEstadoDeMigracion(userId)
+      .then((e) => { if (vivo) setMostrar(e.habilitada && !e.migradoEn); })
+      .catch(() => { /* sin llave no se muestra */ });
+    return () => { vivo = false; };
+  }, [userId]);
+
+  if (!mostrar) return null;
+
+  return (
+    <div className="card-panel p-5 border-gold/30">
+      <p className="text-[19px] font-bold text-cream">Trae tu trabajo</p>
+      {/* LO QUE ESTA PANTALLA SÍ HACE.
+          Decía «tu Camino queda al día», y este flujo no toca el Camino:
+          carga su ADN. Prometer el Camino hace que el cliente abra sus
+          sesiones esperando encontrarlas cerradas, y las encuentra abiertas.
+          El día de su Camino lo decide el equipo. */}
+      <p className="text-[17px] text-cream/75 mt-1 leading-relaxed">
+        Ya tienes tu plan, tu método y tu oferta hechos. Tráelos y quedan cargados en
+        tu ADN, que es de donde salen tus anuncios, tu página y tu campaña.
+      </p>
+      <button onClick={onIr}
+        className="mt-3 w-full min-h-[44px] btn-primary rounded-xl text-[17px] font-bold">
+        Empezar
+      </button>
     </div>
   );
 }

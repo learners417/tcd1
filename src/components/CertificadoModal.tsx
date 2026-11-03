@@ -4,7 +4,7 @@
  * (jsPDF dinámico) y lleva el sello + link a TCD — así trabaja cuando el
  * fundador lo comparte. El método propio aparece si está definido en el ADN.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Award, Download, ExternalLink } from 'lucide-react';
 
 /** Slot: ajusta al dominio público real de TCD si cambia. */
@@ -88,44 +88,55 @@ export default function CertificadoModal({
       className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm overflow-y-auto"
       onClick={onClose}
     >
-      <div className="w-full max-w-lg my-8" onClick={(e) => e.stopPropagation()}>
+      <div className="pieza-impresa w-full max-w-lg my-8" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-cream/65 hover:text-cream transition-colors">
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="-mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#EAE4D9]/70 hover:text-[#EAE4D9] transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Certificado en pantalla */}
+        {/*
+          EL ORO TAMBIÉN VA FIJO, POR LA MISMA RAZÓN QUE EL FONDO.
+
+          En tema claro `text-gold` resuelve a #74551C —un oro oscuro, hecho
+          para leerse sobre crema— y sobre este fondo oscuro daba 2.7:1. Con
+          el #B0822E del tema oscuro da 5.4:1 sobre el mismo fondo. Medido,
+          los dos. Una pieza impresa no sigue el tema de la app.
+        */}
         <div
-          className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#141210] to-ink p-8 text-center"
-          style={{ border: '2px solid rgba(232,150,46,0.5)' }}
+          className="relative rounded-2xl overflow-hidden bg-[#141210] p-8 text-center"
+          style={{ border: '2px solid #B0822E' }}
         >
-          <div className="absolute inset-3 border border-gold/20 rounded-xl pointer-events-none" />
-          <Award className="w-10 h-10 text-gold mx-auto mb-3" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4">
+          <div className="absolute inset-3 border border-[#B0822E]/25 rounded-xl pointer-events-none" />
+          <Award className="w-10 h-10 text-[#B0822E] mx-auto mb-3" />
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#B0822E] mb-4">
             Tu Clínica Digital · Sanadores Libres
           </p>
-          <p className="text-xs uppercase tracking-widest text-cream/65 mb-2">Certifica que</p>
+          <p className="text-xs uppercase tracking-widest text-[#EAE4D9]/70 mb-2">Certifica que</p>
           <h2
-            className="text-3xl text-gold mb-3"
+            className="text-3xl text-[#B0822E] mb-3"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             {quien}
           </h2>
-          <p className="text-sm text-cream/80 leading-relaxed mb-2">
+          <p className="text-sm text-[#EAE4D9]/85 leading-relaxed mb-2">
             {metodoNombre ? (
               <>
-                alcanzó el <span className="text-cream font-medium">Cinturón Negro</span> instalando{' '}
-                <span className="text-cream font-medium">{metodoNombre}</span>
+                alcanzó el <span className="text-[#EAE4D9] font-semibold">Cinturón Negro</span> instalando{' '}
+                <span className="text-[#EAE4D9] font-semibold">{metodoNombre}</span>
               </>
             ) : (
               <>
-                alcanzó el <span className="text-cream font-medium">Cinturón Negro</span> — Sanador
+                alcanzó el <span className="text-[#EAE4D9] font-semibold">Cinturón Negro</span> — Sanador
                 Libre
               </>
             )}
           </p>
-          <p className="text-[11px] text-cream/45">
+          <p className="text-sm text-[#EAE4D9]/70">
             Clínica digital instalada · {pacientes} pacientes con precio digno · {fecha}
           </p>
         </div>
@@ -134,7 +145,7 @@ export default function CertificadoModal({
           <button
             onClick={descargar}
             disabled={generando}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gold text-black text-sm font-bold uppercase tracking-wider hover:bg-goldhi transition-colors disabled:opacity-60"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gold text-ink text-sm font-bold uppercase tracking-wider hover:bg-goldhi transition-colors disabled:opacity-60"
           >
             <Download className="w-4 h-4" /> {generando ? 'Generando…' : 'Descargar PDF'}
           </button>
@@ -142,7 +153,7 @@ export default function CertificadoModal({
             href={TCD_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gold/30 text-gold text-sm font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#B0822E]/40 text-[#B0822E] text-sm font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
           >
             <ExternalLink className="w-4 h-4" /> TCD
           </a>

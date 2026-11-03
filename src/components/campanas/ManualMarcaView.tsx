@@ -1,7 +1,7 @@
 /**
  * ManualMarcaView.tsx — Manual de Marca del profesional.
  *
- * Define paleta de colores, tipografia y reglas de uso innegociables que se
+ * Define paleta de colores, tipografía y reglas de uso innegociables que se
  * inyectan con PRIORIDAD MAXIMA en los prompts de generacion de imagen
  * (campanasPrompts.ts -> buildImagePrompt). La paleta manda sobre el estilo
  * visual elegido y sobre cualquier imagen de referencia adjunta.
@@ -16,6 +16,8 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 import type { ProfileV2 } from '../../lib/supabase';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 interface Props {
   userId?: string;
@@ -30,7 +32,7 @@ interface Swatch {
 
 interface ManualDraft {
   swatches: Swatch[];
-  tipografia: string;
+  tipografía: string;
   reglas: string;
 }
 
@@ -38,20 +40,20 @@ interface ManualDraft {
 
 const PALETA_EJEMPLO: Swatch[] = [
   { hex: '#0F1419', rol: 'fondo profundo' },
-  { hex: '#E8962E', rol: 'acento dorado' },
+  { hex: '#B0822E', rol: 'acento dorado' },
   { hex: '#F2EFE9', rol: 'texto principal' },
   { hex: '#A8B5C4', rol: 'texto secundario' },
 ];
 
 const TIPOGRAFIA_EJEMPLO =
-  'Inter bold para titulares grandes, Inter regular para cuerpo, DM Serif Display italic para acentos aspiracionales. Maximo 3 pesos en la misma pieza.';
+  'Inter bold para titulares grandes, Inter regular para cuerpo, DM Serif Display italic para acentos aspiracionales. Máximo 3 pesos en la misma pieza.';
 
 const REGLAS_EJEMPLO =
   [
     '- Nunca fondo blanco puro (usar siempre tonos calidos o profundos)',
-    '- El acento dorado #E8962E debe estar presente en cada pieza',
+    '- El acento dorado #B0822E debe estar presente en cada pieza',
     '- No usar rojo saturado — choca con la identidad aspiracional',
-    '- Textos en MAYUSCULAS solo en titulares, jamas en parrafos',
+    '- Textos en MAYUSCULAS solo en titulares, jamas en párrafos',
     '- Fotos de personas: miradas reales, no poses de stock',
   ].join('\n');
 
@@ -98,7 +100,7 @@ function serializePaleta(swatches: Swatch[]): string {
 function draftFromPerfil(perfil?: Partial<ProfileV2>): ManualDraft {
   return {
     swatches: parsePaleta(perfil?.identidad_colores),
-    tipografia: perfil?.identidad_tipografia ?? '',
+    tipografía: perfil?.identidad_tipografia ?? '',
     reglas: perfil?.identidad_reglas_uso ?? '',
   };
 }
@@ -106,7 +108,7 @@ function draftFromPerfil(perfil?: Partial<ProfileV2>): ManualDraft {
 function countCompletos(draft: ManualDraft): number {
   return [
     draft.swatches.length > 0 ? 1 : 0,
-    draft.tipografia.trim().length > 0 ? 1 : 0,
+    draft.tipografía.trim().length > 0 ? 1 : 0,
     draft.reglas.trim().length > 0 ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
 }
@@ -134,7 +136,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   const dirty = useMemo(
     () =>
       !swatchesEqual(draft.swatches, savedSnapshot.swatches) ||
-      draft.tipografia !== savedSnapshot.tipografia ||
+      draft.tipografía !== savedSnapshot.tipografía ||
       draft.reglas !== savedSnapshot.reglas,
     [draft, savedSnapshot],
   );
@@ -143,12 +145,12 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
     const nextSwatches = parsePaleta(perfil?.identidad_colores);
     const nextTipo = (perfil?.identidad_tipografia ?? '').trim();
     if (nextSwatches.length === 0 && !nextTipo) {
-      toast.error('El ADN todavia no tiene paleta ni tipografia cargadas.');
+      toast.error('El ADN todavia no tiene paleta ni tipografía cargadas.');
       return;
     }
     setDraft((prev) => ({
       swatches: nextSwatches.length > 0 ? nextSwatches : prev.swatches,
-      tipografia: nextTipo || prev.tipografia,
+      tipografía: nextTipo || prev.tipografía,
       reglas: prev.reglas,
     }));
     toast.success('Cargado desde el ADN. Revisa y guarda.');
@@ -157,7 +159,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   const cargarEjemplo = useCallback(() => {
     setDraft({
       swatches: [...PALETA_EJEMPLO],
-      tipografia: TIPOGRAFIA_EJEMPLO,
+      tipografía: TIPOGRAFIA_EJEMPLO,
       reglas: REGLAS_EJEMPLO,
     });
     toast.success('Ejemplo cargado. Ajustalo a tu marca y guarda.');
@@ -182,7 +184,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
     const paletaStr = serializePaleta(draft.swatches);
     const patch: Partial<ProfileV2> = {
       identidad_colores: paletaStr || undefined,
-      identidad_tipografia: draft.tipografia.trim() || undefined,
+      identidad_tipografia: draft.tipografía.trim() || undefined,
       identidad_reglas_uso: draft.reglas.trim() || undefined,
     };
     try {
@@ -203,8 +205,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       onSaved?.(patch);
       toast.success('Manual de marca guardado.');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al guardar: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'guardar tu manual de marca'));
     } finally {
       setSaving(false);
     }
@@ -220,7 +221,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   const addSwatch = useCallback(() => {
     setDraft((d) => ({
       ...d,
-      swatches: [...d.swatches, { hex: '#E8962E', rol: '' }],
+      swatches: [...d.swatches, { hex: '#B0822E', rol: '' }],
     }));
   }, []);
 
@@ -234,8 +235,8 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
   return (
     <div className="space-y-5">
       {/* Intro + acciones rapidas */}
-      <div className="card-panel p-4 border-[rgba(232,150,46,0.12)] flex items-start justify-between gap-4">
-        <p className="text-[13px] text-cream/70 leading-relaxed flex-1">
+      <div className="card-panel p-4 border-[var(--line, rgba(142,104,36,0.18))] flex items-start justify-between gap-4">
+        <p className="text-[15px] text-cream/70 leading-relaxed flex-1">
           Define el codigo visual que{' '}
           <span className="text-gold font-semibold">manda sobre cualquier estilo</span> o
           referencia que uses al generar imagenes. La paleta se aplica SIEMPRE, el estilo aporta
@@ -244,7 +245,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={cargarEjemplo}
           title="Cargar un ejemplo para probar"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-gold border border-gold/30 hover:bg-gold/10 transition-all whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gold border border-gold/30 hover:bg-gold/10 transition-all whitespace-nowrap"
         >
           <Sparkles className="w-3 h-3" />
           Cargar ejemplo
@@ -254,10 +255,10 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       {/* Progreso */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-cream/55">
+          <span className="text-sm font-bold tracking-[0.2em] uppercase text-cream/55">
             Completado
           </span>
-          <span className="text-[11px] font-semibold text-cream/70">{completos}/3</span>
+          <span className="text-sm font-semibold text-cream/70">{completos}/3</span>
         </div>
         <div className="flex-1 max-w-xs h-1.5 rounded-full bg-cream/5 overflow-hidden">
           <div
@@ -280,8 +281,8 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         icon={Type}
         label="Tipografia"
         hint="Familia + peso + uso. Puedes mencionar varias fuentes y cuando usarlas."
-        value={draft.tipografia}
-        onChange={(v) => setDraft((d) => ({ ...d, tipografia: v }))}
+        value={draft.tipografía}
+        onChange={(v) => setDraft((d) => ({ ...d, tipografía: v }))}
         placeholder="Inter bold para titulares, Inter regular para cuerpo, alineacion izquierda"
         rows={3}
       />
@@ -298,10 +299,10 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
       />
 
       {/* Acciones */}
-      <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[rgba(232,150,46,0.10)]">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[var(--line, rgba(142,104,36,0.18))]">
         <button
           onClick={syncConAdn}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-cream/75 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-cream/75 border border-cream/10 hover:border-gold/40 hover:text-cream/90 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Sincronizar con ADN
@@ -309,7 +310,7 @@ export default function ManualMarcaView({ userId, perfil, onSaved }: Props) {
         <button
           onClick={guardar}
           disabled={saving || !dirty || !userId}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gold/15 text-gold border border-gold/40 hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? (
             <>
@@ -348,16 +349,16 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
     <div>
       <div className="flex items-center gap-2 mb-1.5">
         <Palette className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <label className="text-sm font-bold tracking-wider uppercase text-cream/75">
           Paleta de colores
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">
+          <span className="text-sm text-gold/70 font-medium">
             · {swatches.length} color{swatches.length === 1 ? '' : 'es'}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-3">
+      <p className="text-sm text-cream/55 mb-3">
         Estos colores se aplican con prioridad sobre el estilo visual y sobre cualquier imagen de
         referencia al generar.
       </p>
@@ -365,7 +366,7 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
       {/* Gradient bar preview */}
       {swatches.length > 0 && (
         <div
-          className="h-8 rounded-lg mb-3 overflow-hidden flex border border-[rgba(232,150,46,0.12)] shadow-inner"
+          className="h-8 rounded-lg mb-3 overflow-hidden flex border border-[var(--line, rgba(142,104,36,0.18))] shadow-inner"
           style={{ background: 'rgba(0,0,0,0.3)' }}
         >
           {swatches.map((sw, i) => (
@@ -393,10 +394,10 @@ function PaletteSection({ swatches, onUpdate, onAdd, onRemove }: PaletteSectionP
         {/* Add button card */}
         <button
           onClick={onAdd}
-          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[rgba(232,150,46,0.18)] text-gold/70 hover:bg-gold/5 hover:border-gold/50 hover:text-gold transition-all"
+          className="flex items-center justify-center gap-2 min-h-[76px] rounded-xl border border-dashed border-[var(--line2, rgba(142,104,36,0.30))] text-gold/70 hover:bg-gold/5 hover:border-gold/50 hover:text-gold transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span className="text-[12px] font-medium">Agregar color</span>
+          <span className="text-[15px] font-medium">Agregar color</span>
         </button>
       </div>
     </div>
@@ -433,15 +434,15 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
   const copyHex = useCallback(async () => {
     if (!valido) return;
     try {
-      await navigator.clipboard.writeText(hexLocal);
-      toast.success(`${hexLocal} copiado`);
+      const ok = await copiar(hexLocal);
+      toast[ok ? 'success' : 'error'](ok ? `${hexLocal} copiado` : NO_SE_PUDO_COPIAR);
     } catch {
       /* noop */
     }
   }, [hexLocal, valido]);
 
   return (
-    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[rgba(232,150,46,0.10)] hover:border-gold/35 transition-all">
+    <div className="group relative flex items-center gap-3 p-2.5 rounded-xl bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/35 transition-all">
       {/* Color preview circle (clickable -> opens native picker) */}
       <button
         type="button"
@@ -459,7 +460,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
       <input
         ref={colorInputRef}
         type="color"
-        value={valido ? hexLocal : '#E8962E'}
+        value={valido ? hexLocal : '#B0822E'}
         onChange={(e) => {
           const val = e.target.value.toUpperCase();
           setHexLocal(val);
@@ -483,9 +484,9 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
             }}
             placeholder="#RRGGBB"
             maxLength={7}
-            className={`w-[92px] bg-black/30 border rounded-md px-2 py-1 text-[12px] font-mono tracking-wider transition-all focus:outline-none focus:ring-1 ${
+            className={`w-[92px] bg-black/30 border rounded-md px-2 py-1 text-[15px] font-mono tracking-wider transition-all focus:outline-none focus:ring-1 ${
               valido
-                ? 'border-[rgba(232,150,46,0.18)] text-cream/90 focus:border-gold/60 focus:ring-gold/30'
+                ? 'border-[var(--line2, rgba(142,104,36,0.30))] text-cream/90 focus:border-gold/60 focus:ring-gold/30'
                 : 'border-danger/40 text-danger focus:border-danger/60 focus:ring-danger/30'
             }`}
           />
@@ -503,7 +504,7 @@ function SwatchCard({ swatch, onChange, onRemove }: SwatchCardProps) {
           value={swatch.rol}
           onChange={(e) => onChange({ rol: e.target.value })}
           placeholder="rol (ej: fondo, acento)"
-          className="w-full bg-transparent border-0 border-b border-cream/10 text-[11px] text-cream/70 placeholder-cream/25 focus:outline-none focus:border-gold/40 pb-0.5"
+          className="w-full bg-transparent border-0 border-b border-cream/10 text-sm text-cream/70 placeholder-cream/25 focus:outline-none focus:border-gold/40 pb-0.5"
         />
       </div>
 
@@ -538,20 +539,20 @@ function Field({ icon: Icon, label, hint, value, onChange, placeholder, rows }: 
     <div>
       <div className="flex items-center gap-2 mb-1.5">
         <Icon className={`w-4 h-4 ${isCompleto ? 'text-gold' : 'text-cream/45'}`} />
-        <label className="text-[11px] font-bold tracking-wider uppercase text-cream/75">
+        <label className="text-sm font-bold tracking-wider uppercase text-cream/75">
           {label}
         </label>
         {isCompleto && (
-          <span className="text-[11px] text-gold/70 font-medium">· cargado</span>
+          <span className="text-sm text-gold/70 font-medium">· cargado</span>
         )}
       </div>
-      <p className="text-[11px] text-cream/55 mb-2">{hint}</p>
+      <p className="text-sm text-cream/55 mb-2">{hint}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
+        className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
       />
     </div>
   );

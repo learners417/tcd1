@@ -15,7 +15,7 @@
  *
  * Juzgar a todos con la misma vara se equivoca en las dos direcciones: le
  * dice «caro» a quien está bien para su mercado, y «barato» a quien está
- * trayendo gente que no puede pagarle.
+ * trayendo personas que no pueden pagarle.
  *
  * ═══ DE DÓNDE SALEN LAS BANDAS ═══
  *

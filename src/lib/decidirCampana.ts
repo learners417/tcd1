@@ -135,7 +135,9 @@ export function decidirCampana(e: EstadoCampana): DecisionCampana {
       return {
         ...base, estado: 'muerto',
         porQue: `Cada venta te cuesta $${costoPorVenta!.toFixed(0)}, más del 30% de tu precio.`,
-        queHacer: 'Apágalo. A ese costo no hay margen para escalar.',
+        // «escalar» está en el vocabulario prohibido de la casa, y la regla
+        // de voz dice con qué se reemplaza: «crecer sin poner más horas».
+        queHacer: 'Apágalo. A ese costo no hay margen para crecer.',
       };
     }
     // Una conversación cara SOLA no mata a un anuncio.
@@ -149,14 +151,14 @@ export function decidirCampana(e: EstadoCampana): DecisionCampana {
     // adquisición del 15%, o sea perfectamente rentables.
     //
     // Lo que sí mata: traer conversaciones caras Y no agendar a nadie. Eso no
-    // es un anuncio caro, es un anuncio que trae a la gente equivocada.
+    // es un anuncio caro, es un anuncio que trae a las personas equivocadas.
     const costoConversacion = a.conversaciones > 0 ? a.gasto / a.conversaciones : null;
     const cara = costoConversacion !== null && costoConversacion > u.alarma;
     if (cara && a.agendas === 0 && a.conversaciones >= 10) {
       return {
         ...base, estado: 'muerto',
         porQue: `$${costoConversacion!.toFixed(2)} por conversación y ninguna agenda de ${a.conversaciones}.`,
-        queHacer: 'Apágalo. No es que sea caro: está trayendo a la gente equivocada.',
+        queHacer: 'Apágalo. No es que sea caro: está trayendo a las personas equivocadas.',
       };
     }
     return {

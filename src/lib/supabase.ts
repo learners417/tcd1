@@ -66,13 +66,45 @@ export interface Profile {
 
   /** El día que entregó cada jornada, para medir el atraso. */
   entregas?: Record<string, string>;
+  /**
+   * La antesala: los cinco a siete días de descanso que abren la sesión 1.
+   * `{ protocolo: [{ area, loQueHago }], dias: [ISO], cerrada: ISO }`.
+   */
+  antesala?: {
+    protocolo?: Array<{ area: string; loQueHago: string }>;
+    dias?: string[];
+    cerrada?: string;
+  };
   plan: 'ELNUMERO' | 'DWY' | 'DFY' | 'IMPLEMENTACION';
   rol: 'cliente' | 'admin';
   created_at: string;
   status?: UserStatus;
   onboarding_completed?: boolean;
   full_agent_access?: boolean;
-  plan_comercial?: 'blanco' | 'amarillo' | 'verde' | 'negro' | 'completo'; // la escalera de venta
+  plan_comercial?: 'blanco' | 'amarillo' | 'verde' | 'negro' | 'completo'; // la escalera de ACCESO: qué pantallas ve
+  /**
+   * La escalera de SERVICIO: qué trabajo le debe el equipo.
+   *
+   * Separada de `plan_comercial` a propósito. Cuando una sola columna hacía
+   * los dos trabajos, un cliente de $497 de acceso figuraba con $5.000 de
+   * instalación contratada. Esta la marca una persona en su ficha, nunca el
+   * checkout.
+   */
+  servicio_contratado?: 'base' | 'ascenso' | 'instalacion';
+  /** Cuándo una persona marcó el escalón. Sin esto, el tope no corre. */
+  servicio_marcado_el?: string | null;
+  /** Los cinco días en Bariloche. Se suma a cualquier escalón. */
+  cima_incluida?: boolean;
+  /**
+   * El equipo le abrió toda la Biblioteca, sin esperar su día del Camino.
+   *
+   * Es un permiso explícito y no se deduce del plan: hace falta para el de La
+   * Instalación, que no recorre el Camino, y para el que renovó. Un permiso
+   * que se deduce de otra cosa es un permiso que nadie puede explicar cuando
+   * hay que revisarlo.
+   */
+  biblioteca_abierta?: boolean;
+  biblioteca_abierta_el?: string | null;
   plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
   acceso_hasta?: string | null;    // fin de la Semana Blanca (o del acceso del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
@@ -124,12 +156,27 @@ export interface TareaUsuario {
   tarea?: TareaTemplate;
 }
 
+/**
+ * El canal del soporte entre el cliente y el equipo.
+ *
+ * Es uno solo, y es 'privado' porque es el único que la base protege: lo leen
+ * el emisor, el receptor y el equipo, nadie más. Hubo un tiempo en que cada
+ * pantalla usaba un nombre distinto ('Consultas Generales' al escribir,
+ * 'privado' al leer, 'humano' en la bandeja) y el mensaje del cliente no
+ * aparecía en ninguna. Este tipo existe para que eso no vuelva a compilar.
+ */
+export type CanalDeSoporte = 'privado';
+
 export interface Mensaje {
   id: string;
   canal: 'privado' | 'comunidad' | 'victorias' | 'consultas';
   emisor_id?: string;
   receptor_id?: string;
   contenido: string;
+  /** 'duda' espera 24 h; 'roto' se mira el mismo día. Pone en marcha el reloj. */
+  tipo?: 'duda' | 'roto' | null;
+  /** Cuándo lo respondió el equipo. Null = sigue esperando. */
+  respondido_en?: string | null;
   tipo_archivo?: 'imagen' | 'audio';
   archivo_url?: string;
   created_at: string;
@@ -491,16 +538,6 @@ export interface VentaRegistrada {
   canal?: 'DM' | 'email' | 'llamada' | 'referido';
   protocolo_cierre_generado?: string;
   created_at: string;
-}
-
-export interface HerramientaOutput {
-  id: string;
-  usuario_id: string;
-  herramienta_id: string; // 'A1', 'A2', 'B1', etc.
-  output: Record<string, unknown>;
-  version: number;
-  created_at: string;
-  updated_at: string;
 }
 
 /** @deprecated Usar DiarioEntradaV3. */

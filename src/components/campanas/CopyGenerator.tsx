@@ -1,22 +1,23 @@
-import React, { useState, useCallback } from 'react';
-import { Loader2, Sparkles, Copy, Check, RotateCcw, Image as ImageIcon, Layers, Youtube } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Loader2, Sparkles, Copy, Check, Image as ImageIcon, Layers, Youtube } from 'lucide-react';
 import { generateText } from '../../lib/aiProvider';
 import { toast } from 'sonner';
 import { buildCopyPrompt } from '../../lib/campanasPrompts';
 import { ANGULO_LABELS, TIPO_LABELS } from '../../lib/campanasTypes';
 import type { AnguloCreativo, TipoCreativo, CopyGenerado, ObjetivoCampana } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 interface Props {
   perfil: Partial<ProfileV2>;
-  geminiKey?: string;
   objetivo: ObjetivoCampana;
   onCopyGenerated: (copies: CopyGenerado[], angulo: AnguloCreativo, tipo: TipoCreativo) => void;
 }
 
 const ANGULOS: AnguloCreativo[] = ['contraintuitivo', 'directo', 'emocional', 'curiosidad', 'autoridad', 'dolor', 'deseo'];
 
-export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGenerated }: Props) {
+export default function CopyGenerator({ perfil, objetivo, onCopyGenerated }: Props) {
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
   const [tipo, setTipo] = useState<TipoCreativo>('imagen_single');
   const [slideCount, setSlideCount] = useState(5);
@@ -30,7 +31,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
 
     try {
       const prompt = buildCopyPrompt(angulo, tipo, perfil, objetivo, tipo === 'carrusel' ? slideCount : undefined);
-      const text = await generateText({ prompt });
+      const text = await generateText({ feature: 'copy', tarea: 'guion', prompt });
       // Extraer JSON del response — limpiar markdown code blocks
       let cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       const jsonMatch = cleaned.match(/\[[\s\S]*\]/) ?? cleaned.match(/\{[\s\S]*\}/);
@@ -50,26 +51,29 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
       onCopyGenerated(result, angulo, tipo);
       toast.success(`Copy generado (${ANGULO_LABELS[angulo].titulo})`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error generando copy: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'generar el texto'));
     } finally {
       setGenerating(false);
     }
-  }, [angulo, tipo, slideCount, perfil, geminiKey, objetivo, onCopyGenerated]);
+  }, [angulo, tipo, slideCount, perfil, objetivo, onCopyGenerated]);
 
   const handleCopyCopy = (idx: number) => {
     const c = copies[idx];
     const text = `TEXTO PRINCIPAL:\n${c.texto_principal}\n\nTITULO:\n${c.titulo}\n\nDESCRIPCION:\n${c.descripcion}\n\nCTA:\n${c.cta_texto}`;
-    navigator.clipboard.writeText(text);
-    setCopiedIdx(idx);
-    setTimeout(() => setCopiedIdx(null), 2000);
+    // Se espera el resultado antes de decir «Copiado»: sin esto, el botón
+    // afirmaba haber copiado aunque el navegador lo hubiera bloqueado.
+    void copiar(text).then((ok) => {
+      if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
   };
 
   return (
     <div className="space-y-6">
       {/* Tipo selector */}
       <div>
-        <label className="block text-xs text-cream/75 mb-2 font-medium">Tipo de Creativo</label>
+        <label className="block text-sm text-cream/75 mb-2 font-medium">Tipo de Creativo</label>
         <div className="flex flex-wrap gap-2">
           {(['imagen_single', 'carrusel', 'yt_thumbnail'] as TipoCreativo[]).map((t) => {
             const Icon = t === 'yt_thumbnail' ? Youtube : t === 'carrusel' ? Layers : ImageIcon;
@@ -77,10 +81,10 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
               <button
                 key={t}
                 onClick={() => setTipo(t)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                   tipo === t
                     ? 'bg-gold/15 text-gold border border-gold/30'
-                    : 'bg-panel text-cream/65 border border-[rgba(232,150,46,0.10)] hover:border-[rgba(232,150,46,0.18)]'
+                    : 'bg-panel text-cream/65 border border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line2, rgba(142,104,36,0.30))]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -90,14 +94,14 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
           })}
           {tipo === 'carrusel' && (
             <div className="flex items-center gap-2 ml-2">
-              <label className="text-xs text-cream/55">Slides:</label>
+              <label className="text-sm text-cream/55">Slides:</label>
               <input
-                type="number"
+                type="number" inputMode="numeric"
                 min={3}
                 max={10}
                 value={slideCount}
                 onChange={(e) => setSlideCount(Number(e.target.value))}
-                className="w-16 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-2 py-1.5 text-sm text-cream text-center focus:outline-none focus:border-gold/50"
+                className="w-16 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-2 py-1.5 text-sm text-cream text-center focus:outline-none focus:border-gold/50"
               />
             </div>
           )}
@@ -106,16 +110,16 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
 
       {/* Angulo selector */}
       <div>
-        <label className="block text-xs text-cream/75 mb-2 font-medium">Angulo de Comunicacion</label>
+        <label className="block text-sm text-cream/75 mb-2 font-medium">Ángulo de Comunicación</label>
         <div className="flex flex-wrap gap-2">
           {ANGULOS.map((a) => (
             <button
               key={a}
               onClick={() => setAngulo(a)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 angulo === a
                   ? 'bg-gold/15 text-gold border border-gold/30'
-                  : 'bg-panel text-cream/55 border border-[rgba(232,150,46,0.1)] hover:text-cream/75 hover:border-[rgba(232,150,46,0.14)]'
+                  : 'bg-panel text-cream/55 border border-[var(--line, rgba(142,104,36,0.18))] hover:text-cream/75 hover:border-[var(--line, rgba(142,104,36,0.18))]'
               }`}
               title={ANGULO_LABELS[a].descripcion}
             >
@@ -123,7 +127,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
             </button>
           ))}
         </div>
-        <p className="text-xs text-cream/45 mt-1.5">{ANGULO_LABELS[angulo].descripcion}</p>
+        <p className="text-sm text-cream/45 mt-1.5">{ANGULO_LABELS[angulo].descripcion}</p>
       </div>
 
       {/* Generate button */}
@@ -140,20 +144,20 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
       {copies.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-cream/55">
+            <span className="text-sm text-cream/55">
               {tipo === 'yt_thumbnail' ? `${copies.length} variantes de thumbnail` : copies.length === 1 ? 'Copy generado' : `${copies.length} slides generados`}
               {' '}— {ANGULO_LABELS[angulo].titulo}
             </span>
           </div>
 
           {copies.map((c, idx) => (
-            <div key={idx} className="bg-panel border border-[rgba(232,150,46,0.10)] rounded-xl p-5 space-y-3">
+            <div key={idx} className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-5 space-y-3">
               {copies.length > 1 && (
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gold">{tipo === 'yt_thumbnail' ? `Variante ${idx + 1}` : `Slide ${idx + 1}`}</span>
+                  <span className="text-sm font-medium text-gold">{tipo === 'yt_thumbnail' ? `Variante ${idx + 1}` : `Slide ${idx + 1}`}</span>
                   <button
                     onClick={() => handleCopyCopy(idx)}
-                    className="flex items-center gap-1 text-xs text-cream/55 hover:text-cream transition-colors"
+                    className="flex items-center gap-1 text-sm text-cream/55 hover:text-cream transition-colors"
                   >
                     {copiedIdx === idx ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     {copiedIdx === idx ? 'Copiado' : 'Copiar'}
@@ -162,21 +166,21 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
               )}
 
               <div>
-                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Texto Principal</label>
+                <label className="text-sm text-cream/45 uppercase tracking-wider">Texto Principal</label>
                 <p className="text-sm text-cream/80 mt-1 whitespace-pre-line leading-relaxed">{c.texto_principal}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">Titulo</label>
+                  <label className="text-sm text-cream/45 uppercase tracking-wider">Titulo</label>
                   <p className="text-sm font-medium text-cream mt-1">{c.titulo}</p>
                 </div>
                 <div>
-                  <label className="text-[11px] text-cream/45 uppercase tracking-wider">CTA</label>
+                  <label className="text-sm text-cream/45 uppercase tracking-wider">CTA</label>
                   <p className="text-sm font-medium text-gold mt-1">{c.cta_texto}</p>
                 </div>
               </div>
               <div>
-                <label className="text-[11px] text-cream/45 uppercase tracking-wider">Descripcion</label>
+                <label className="text-sm text-cream/45 uppercase tracking-wider">Descripcion</label>
                 <p className="text-sm text-cream/75 mt-1">{c.descripcion}</p>
               </div>
 
@@ -184,7 +188,7 @@ export default function CopyGenerator({ perfil, geminiKey, objetivo, onCopyGener
                 <div className="flex justify-end pt-2">
                   <button
                     onClick={() => handleCopyCopy(0)}
-                    className="flex items-center gap-1.5 text-xs text-cream/55 hover:text-cream transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-cream/55 hover:text-cream transition-colors"
                   >
                     {copiedIdx === 0 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiedIdx === 0 ? 'Copiado' : 'Copiar todo'}

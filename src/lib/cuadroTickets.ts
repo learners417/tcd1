@@ -15,46 +15,68 @@ import { SECTIONS, STEPS, type PreactivacionStep } from './preactivacionSteps';
  *   2. **Con qué ya llega**, si viene de antes de la app.
  */
 
-export type Ticket = 'mil' | 'dos_mil' | 'cinco_mil' | 'diez_mil';
+/**
+ * LOS TRES ESCALONES DE SERVICIO.
+ *
+ * ═══ POR QUÉ CAMBIARON ═══
+ *
+ * Hasta hoy acá vivían cuatro montos ($1.000 / $2.000 / $5.000 / $10.000) que
+ * venían de la escalera de julio y **ya no correspondían a nada que se venda**.
+ * Peor: un puente automático traducía el plan de acceso a uno de esos montos
+ * (`verde → $5.000`, `negro → $10.000`), así que alguien que había pagado $497
+ * de acceso a la app aparecía en su ficha como si tuviera contratada la
+ * instalación completa. Quien trabajara contra ese cuadro instalaba gratis.
+ *
+ * Estos tres son los que se venden, y se marcan A MANO en la ficha de cada
+ * cliente. No se derivan del plan de acceso: son dos cosas distintas —una
+ * gobierna qué pantallas ve, la otra qué le debe el equipo.
+ */
+export type Ticket = 'base' | 'ascenso' | 'instalacion';
 
 export interface DefinicionTicket {
   id: Ticket;
   nombre: string;
   precio: number;
-  /** Quién hace lo que en la instalación acompañada haría la agencia. */
-  quienInstala: 'el cliente, con los tutoriales' | 'el cliente, con revisión' | 'la agencia';
-  /** true = tiene sesiones con dirección. */
-  conDireccion: boolean;
+  /** Quién hace el trabajo técnico. */
+  quienInstala: 'el cliente, con los tutoriales' | 'el cliente, con acompañamiento' | 'el equipo';
+  /** Qué incluye, dicho como se le dijo al cliente. */
+  incluye: string;
   /** La frase que ordena el trabajo con este cliente. */
   criterio: string;
 }
 
 export const TICKETS: Record<Ticket, DefinicionTicket> = {
-  mil: {
-    id: 'mil', nombre: 'La app sola', precio: 1000,
+  base: {
+    id: 'base', nombre: 'La Base', precio: 1000,
     quienInstala: 'el cliente, con los tutoriales',
-    conDireccion: false,
+    incluye: 'Los cuatro manuales, su plan de 90 días escrito, tres sesiones uno a uno (una por mes) y la app.',
     criterio: 'Todo lo técnico lo hace él con el paso a paso adentro de la app. Si algo necesita que una persona se lo explique, es una pantalla mal hecha.',
   },
-  dos_mil: {
-    id: 'dos_mil', nombre: 'La app con revisión', precio: 2000,
-    quienInstala: 'el cliente, con revisión',
-    conDireccion: false,
-    criterio: 'Lo hace él, y el equipo revisa los cuatro puntos donde más se rompe: el píxel, el DM, el dominio y el cobro.',
+  ascenso: {
+    id: 'ascenso', nombre: 'El Ascenso', precio: 3000,
+    quienInstala: 'el cliente, con acompañamiento',
+    // «Los cinco sistemas» sin decir quién los monta es donde choca con la
+    // promesa de la landing: en este escalón los monta ÉL, acompañado. Si eso
+    // no se dice acá, el cliente llega esperando que se lo entreguen hecho.
+    incluye: 'Los 90 días completos: monta sus cinco sistemas acompañado, con la sesión uno a uno de arranque, las mentorías grupales tres veces por semana, la app y la garantía.',
+    criterio: 'Lo construyen juntos: él ejecuta y aprende, el equipo lo acompaña en vivo. Si el equipo termina haciéndolo por él, dejó de ser una mentoría.',
   },
-  cinco_mil: {
-    id: 'cinco_mil', nombre: 'Instalación acompañada', precio: 5000,
-    quienInstala: 'la agencia',
-    conDireccion: false,
-    criterio: 'Los 62 repartidos como siempre. El cliente pone su método y su voz; el resto lo instala la agencia.',
-  },
-  diez_mil: {
-    id: 'diez_mil', nombre: 'Instalación con dirección', precio: 10000,
-    quienInstala: 'la agencia',
-    conDireccion: true,
-    criterio: 'Lo mismo que el anterior, con prioridad en la cola y con las sesiones de dirección.',
+  instalacion: {
+    id: 'instalacion', nombre: 'La Instalación', precio: 5000,
+    quienInstala: 'el equipo',
+    incluye: 'El equipo monta todo —landing, app, automatizaciones, campañas—, una sesión uno a uno, y la app.',
+    criterio: 'El cliente pone su método y su voz, y aprueba. El resto lo monta el equipo.',
   },
 };
+
+/**
+ * La Cima no es un escalón: se suma a cualquiera de los tres.
+ *
+ * Son los cinco días en Bariloche. No cambia el reparto de los 62 ítems —
+ * cambia dónde se instalan— así que vive como un sí o no aparte, no como un
+ * cuarto ticket.
+ */
+export const CIMA = { nombre: 'La Cima', precio: 5000, dias: 5 } as const;
 
 /**
  * Los ítems que el cliente puede hacer solo si tiene el paso a paso.
@@ -122,37 +144,40 @@ export interface ItemDelTicket extends PreactivacionStep {
  * campaña corre sin portafolio propio.
  */
 export function cuadroDe(ticket: Ticket): ItemDelTicket[] {
-  const def = TICKETS[ticket];
-  const autoservicio = ticket === 'mil' || ticket === 'dos_mil';
-
   return STEPS.map((s) => {
     const necesitaInstalador = NECESITA_INSTALADOR.has(s.id);
     const puedeSolo = HACE_SOLO_CON_TUTORIAL.has(s.id);
 
-    if (autoservicio && necesitaInstalador) {
-      return { ...s, loHace: 'el equipo', conTutorial: false, noAplica: true };
+    // La Base es autoservicio: lo que necesita una cuenta de la agencia o
+    // oficio que no se puede escribir, su producto no lo incluye.
+    if (ticket === 'base') {
+      if (necesitaInstalador) {
+        return { ...s, loHace: 'el equipo', conTutorial: false, noAplica: true };
+      }
+      return { ...s, loHace: 'el cliente', conTutorial: puedeSolo, noAplica: false };
     }
 
-    let loHace: ItemDelTicket['loHace'];
-    if (autoservicio) {
-      // En autoservicio todo lo que queda lo hace él; el de $2.000 tiene
-      // revisión en los cuatro puntos donde más se rompe.
-      // Los cuatro puntos donde más se rompe una instalación hecha solo:
-      // la palabra, el cobro, el píxel y el WhatsApp vinculado.
-      loHace = ticket === 'dos_mil'
-        && ['m_wa_cuenta', 'm_pago', 'metricas', 'ads_on'].includes(s.id)
-        ? 'los dos' : 'el cliente';
-    } else {
-      loHace = s.quien === 'cliente' ? 'el cliente'
-        : s.quien === 'agencia' ? 'el equipo' : 'los dos';
+    // El Ascenso es mentoría: le aplican los 62, y lo que requiere manos del
+    // equipo se hace JUNTOS en la grupal, que es lo que se vendió. Marcarlo
+    // como «el equipo» convertiría la mentoría en una instalación.
+    if (ticket === 'ascenso') {
+      return {
+        ...s,
+        loHace: necesitaInstalador ? 'los dos'
+          : s.quien === 'agencia' ? 'los dos'
+          : s.quien === 'cliente' ? 'el cliente' : 'los dos',
+        conTutorial: puedeSolo,
+        noAplica: false,
+      };
     }
 
+    // La Instalación: el reparto de siempre, el que trae cada ítem escrito.
     return {
       ...s,
-      loHace,
-      conTutorial: autoservicio && puedeSolo,
+      loHace: s.quien === 'cliente' ? 'el cliente'
+        : s.quien === 'agencia' ? 'el equipo' : 'los dos',
+      conTutorial: false,
       noAplica: false,
-      ...(def.conDireccion ? {} : {}),
     };
   });
 }
@@ -231,43 +256,29 @@ export function avanceDe(
 }
 
 
-// ── El puente entre los dos vocabularios ───────────────────────────────────
+// ── El servicio contratado, que NO se deriva del plan ──────────────────────
 
 /**
- * De qué plan a qué ticket.
+ * El escalón de servicio de un cliente.
  *
- * ═══ POR QUÉ HACÍA FALTA ═══
+ * ═══ POR QUÉ NO HAY PUENTE ═══
  *
- * La app tenía DOS vocabularios que no se hablaban: `planes.ts` gobierna el
- * acceso con colores (blanco, amarillo, verde, negro) y este archivo decide
- * qué instala cada uno con montos (mil, dos_mil, cinco_mil, diez_mil).
+ * Acá vivía una tabla que traducía el plan de acceso a un escalón de servicio:
+ * `verde → $5.000`, `negro → $10.000`. Parecía resolver un problema real —la
+ * app tenía dos vocabularios que no se hablaban— pero pegaba dos escaleras
+ * distintas como si fueran una. **Resultado: un cliente de $497 figuraba con
+ * $5.000 de instalación contratada.** El equipo que trabaje contra ese cuadro
+ * instala gratis.
  *
- * **Nada traducía entre los dos.** Y la consecuencia era que este cuadro —que
- * está construido y probado— no se podía usar: la app no sabía que un cliente
- * «verde» es uno de $5.000. Por eso también quedó sin montar en ninguna
- * pantalla, y por eso el de $5.000 no recibía nada distinto dentro de la app.
+ * Son dos preguntas independientes y así quedan:
  *
- * El puente vive acá y no en planes.ts a propósito: **planes.ts gobierna el
- * acceso y no tiene por qué saber de tickets.** Acá sí, porque el ticket es
- * el concepto de este archivo.
+ *   · `plan_comercial` → qué pantallas ve. La decide el checkout.
+ *   · `servicio_contratado` → qué le debe el equipo. **La marca una persona.**
+ *
+ * Sin marcar cae en `base`, el más bajo. Mostrarle de menos a alguien que pagó
+ * se arregla con un mensaje; mostrarle de más hace trabajar al equipo de
+ * regalo, y nadie se entera hasta que es tarde.
  */
-export const TICKET_DE_PLAN: Record<string, Ticket> = {
-  blanco: 'mil',
-  amarillo: 'dos_mil',
-  verde: 'cinco_mil',
-  negro: 'diez_mil',
-  // «completo» es el acceso total que se le da al equipo y a las pruebas:
-  // se trata como el más alto para que nada quede oculto por accidente.
-  completo: 'diez_mil',
-};
-
-/**
- * El ticket de un cliente, a partir de su plan.
- *
- * Si el plan no se reconoce cae en el MÁS BAJO, no en el más alto: mostrarle
- * de menos a alguien que pagó se arregla con un mensaje; mostrarle de más a
- * quien no pagó le enseña que no hacía falta pagar.
- */
-export function ticketDe(plan: string | null | undefined): Ticket {
-  return TICKET_DE_PLAN[plan ?? ''] ?? 'mil';
+export function servicioDe(servicio: string | null | undefined): Ticket {
+  return servicio === 'ascenso' || servicio === 'instalacion' ? servicio : 'base';
 }

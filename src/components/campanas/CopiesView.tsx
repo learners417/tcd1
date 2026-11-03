@@ -1,8 +1,16 @@
 /**
- * CopiesView.tsx — Modulo de generacion de copies para Meta Ads
- * Split layout: form izquierda + output streaming derecha
+ * CopiesView.tsx — Los textos de un anuncio.
+ *
+ * Sus tres grupos de píldoras de selección habían quedado fuera del barrido
+ * que dejó un solo gesto para «elegido»: escribían `bg-gold/15 border-gold/40
+ * text-gold` a mano, que es uno de los nueve que esa cirugía unificó. Y a
+ * `font-medium`, con lo cual esta pantalla hablaba CUATRO pesos sobre un
+ * mismo cuerpo —400, 500, 600 y 700— uno más del techo de la casa.
+ *
+ * Las tres usan `.elegido-etiqueta`, que es ese gesto declarado una vez: la
+ * línea de oro de 1px y el fondo apenas teñido.
  */
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { PenTool, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { streamText } from '../../lib/aiProvider';
 import { adnContext } from '../../lib/campanasPrompts';
@@ -10,9 +18,10 @@ import type { ProfileV2 } from '../../lib/supabase';
 import type { AnguloCreativo, TipoCreativo } from '../../lib/campanasTypes';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
+import { copiar, NO_SE_PUDO_COPIAR } from '../../lib/copiar';
 
 const TIPOS: { value: TipoCreativo; label: string }[] = [
-  { value: 'imagen_single', label: 'Imagen unica' },
+  { value: 'imagen_single', label: 'Imagen única' },
   { value: 'carrusel', label: 'Carrusel' },
 ];
 
@@ -53,7 +62,7 @@ export default function CopiesView({ perfil }: Props) {
 
     const cantVariantes = parseInt(variantes) || 3;
     const adnBlock = perfil.adn_avatar ? `\n\n${adnContext(perfil)}` : '';
-    const oferta = producto || perfil.oferta_high || perfil.oferta_mid || 'Consulta gratuita';
+    const oferta = producto || perfil.oferta_high || perfil.oferta_mid || 'Consulta';
 
     const baseContext = `Eres un copywriter de elite especializado en Meta Ads para profesionales de la salud.
 ${adnBlock}
@@ -67,12 +76,12 @@ TONO / ANGULO: ${tono}`;
 
 TIPO DE ANUNCIO: Carrusel de Meta Ads (Instagram/Facebook)
 
-Tu tarea: armar UN SOLO carrusel bien trabajado (NO variantes). Vos decidis cuantos slides necesita el carrusel para contar la historia completa, con un MAXIMO ABSOLUTO de 10 slides. Usa la cantidad minima necesaria — si la idea cierra en 6, usa 6.
+Tu tarea: armar UN SOLO carrusel bien trabajado (NO variantes). Tú decidis cuantos slides necesita el carrusel para contar la historia completa, con un MAXIMO ABSOLUTO de 10 slides. Usa la cantidad minima necesaria — si la idea cierra en 6, usa 6.
 
 ESTRUCTURA DEL CARRUSEL:
 - Slide 1: HOOK que frena el scroll (puede ser una afirmacion contraintuitiva, una pregunta, un dato impactante)
 - Slides intermedios: desarrollo del argumento. Una idea por slide. Sin relleno.
-- Slide final (ULTIMO): CTA con PALABRA CLAVE para activar automatizacion en ManyChat. Ejemplo: "Comenta la palabra GUIA y te mando el recurso por DM". La palabra clave debe ser corta, en mayusculas y memorable.
+- Slide final (ULTIMO): CTA con PALABRA CLAVE para activar la automatizacion de mensajes. Ejemplo: "Comenta la palabra GUIA y te mando el recurso por DM". La palabra clave debe ser corta, en mayusculas y memorable.
 
 FORMATO DE RESPUESTA (Markdown — respeta esta estructura EXACTA):
 
@@ -99,13 +108,13 @@ FORMATO DE RESPUESTA (Markdown — respeta esta estructura EXACTA):
 
 ---
 
-### SLIDE [N] — CTA + Palabra clave ManyChat
+### SLIDE [N] — CTA + Palabra clave
 - **H1:** [CTA principal corto y accionable]
 - **H2:** [refuerzo del beneficio inmediato]
 - **H3 (opcional):** [recordatorio de escasez o urgencia si aplica]
 - **Copy del slide:** [llamada explicita: "Comenta la palabra X y te mando Y por DM"]
-- **PALABRA CLAVE MANYCHAT:** \`[PALABRA]\` (en mayusculas, una sola palabra, facil de tipear)
-- **Mensaje de respuesta automatica sugerido:** [1-2 lineas que ManyChat enviara cuando detecte la palabra clave]
+- **PALABRA CLAVE:** \`[PALABRA]\` (en mayusculas, una sola palabra, facil de tipear)
+- **Mensaje de respuesta automatica sugerido:** [1-2 lineas que se envian solas cuando alguien escribe la palabra clave]
 
 ---
 
@@ -159,7 +168,7 @@ REGLAS:
 
     try {
       let textoCompleto = '';
-      for await (const chunk of streamText({ prompt })) {
+      for await (const chunk of streamText({ feature: 'copy', tarea: 'guion', prompt })) {
         textoCompleto += chunk;
         setOutput(textoCompleto);
       }
@@ -170,8 +179,12 @@ REGLAS:
     }
   }, [rubro, pais, producto, tipo, tono, variantes]);
 
-  const handleCopiar = useCallback(() => {
-    navigator.clipboard.writeText(output);
+  // Antes decía «Copiado» sin esperar el resultado: cuando el navegador no
+  // deja copiar —el del teléfono, seguido— la app afirmaba que copió y el
+  // cliente pegaba en Meta lo que tenía antes.
+  const handleCopiar = useCallback(async () => {
+    const ok = await copiar(output);
+    if (!ok) { toast.error(NO_SE_PUDO_COPIAR); return; }
     setCopiado(true);
     toast.success('Copies copiados al portapapeles.');
     setTimeout(() => setCopiado(false), 2000);
@@ -181,7 +194,7 @@ REGLAS:
     <div className="animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-1">
+        <p className="text-sm font-bold tracking-[0.2em] uppercase text-gold mb-1">
           Modulo directo
         </p>
         <h2 className="text-xl font-light text-cream">
@@ -190,7 +203,7 @@ REGLAS:
             copies
           </span>
         </h2>
-        <p className="text-xs text-cream/55 mt-1">
+        <p className="text-sm text-cream/55 mt-1">
           Sin pasar por el flujo completo. Completas los datos y los copies salen listos.
         </p>
       </div>
@@ -199,11 +212,11 @@ REGLAS:
         {/* Form izquierdo */}
         <div className="lg:w-[380px] lg:min-w-[380px] card-panel p-5 space-y-4">
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Rubro / especialidad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Psicologa especializada en burnout"
               value={rubro}
               onChange={(e) => setRubro(e.target.value)}
@@ -211,11 +224,11 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
-              Pais / ciudad
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+              País / ciudad
             </label>
             <input
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20"
               placeholder="Ej: Buenos Aires, Argentina"
               value={pais}
               onChange={(e) => setPais(e.target.value)}
@@ -223,13 +236,13 @@ REGLAS:
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Que se ofrece?
             </label>
             <textarea
-              className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
+              className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all resize-none placeholder-cream/20"
               rows={3}
-              placeholder="Ej: Auditoria gratuita de 45 min. Sin costo. 5 cupos por semana."
+              placeholder="Ej: Revisión de 45 min. 5 cupos por semana."
               value={producto}
               onChange={(e) => setProducto(e.target.value)}
             />
@@ -237,7 +250,7 @@ REGLAS:
 
           {/* Tipo chips */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Tipo de anuncio
             </label>
             <div className="flex flex-wrap gap-2">
@@ -245,9 +258,9 @@ REGLAS:
                 <button
                   key={t.value}
                   onClick={() => setTipo(t.value)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                     tipo === t.value
-                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      ? 'elegido-etiqueta'
                       : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                   }`}
                 >
@@ -259,7 +272,7 @@ REGLAS:
 
           {/* Tono chips */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+            <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
               Tono
             </label>
             <div className="flex flex-wrap gap-2">
@@ -267,9 +280,9 @@ REGLAS:
                 <button
                   key={t.value}
                   onClick={() => setTono(t.value)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                     tono === t.value
-                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      ? 'elegido-etiqueta'
                       : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                   }`}
                 >
@@ -282,7 +295,7 @@ REGLAS:
           {/* Variantes chips — solo para imagen unica */}
           {tipo === 'imagen_single' ? (
             <div>
-              <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-1.5">
+              <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-1.5">
                 Variantes
               </label>
               <div className="flex flex-wrap gap-2">
@@ -290,9 +303,9 @@ REGLAS:
                   <button
                     key={v}
                     onClick={() => setVariantes(v)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                       variantes === v
-                        ? 'bg-gold/15 border-gold/40 text-gold'
+                        ? 'elegido-etiqueta'
                         : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                     }`}
                   >
@@ -302,13 +315,13 @@ REGLAS:
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-[rgba(232,150,46,0.12)] bg-gold/5 p-3">
-              <p className="text-[11px] font-bold tracking-wider uppercase text-gold mb-1">
-                Carrusel unico
+            <div className="rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] bg-gold/5 p-3">
+              <p className="text-sm font-bold tracking-wider uppercase text-gold mb-1">
+                Carrusel único
               </p>
-              <p className="text-xs text-cream/75 leading-relaxed">
+              <p className="text-sm text-cream/75 leading-relaxed">
                 Generamos un solo carrusel bien trabajado (hasta 10 slides). El ultimo slide
-                incluye una palabra clave para activar la automatizacion en ManyChat.
+                incluye una palabra clave para activar la automatizacion de mensajes.
               </p>
             </div>
           )}
@@ -328,17 +341,17 @@ REGLAS:
 
         {/* Output derecho */}
         <div className="flex-1 card-panel flex flex-col min-h-[200px]">
-          <div className="flex items-center justify-between p-4 border-b border-[rgba(232,150,46,0.1)]">
+          <div className="flex items-center justify-between p-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
             <div className="flex items-center gap-2">
               {generando && <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />}
-              <span className="text-xs font-bold tracking-wider uppercase text-gold">
+              <span className="text-sm font-bold tracking-wider uppercase text-gold">
                 {generando ? 'Generando...' : 'Copies'}
               </span>
             </div>
             {output && (
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 text-sm text-cream/65 hover:text-cream bg-cream/5 px-3 py-1.5 rounded-lg transition-colors"
               >
                 {copiado ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiado ? 'Copiado' : 'Copiar todo'}
@@ -348,7 +361,7 @@ REGLAS:
 
           <div className="flex-1 p-4">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[rgba(232,150,46,0.12)]">
+              <div className="prose prose-invert prose-sm max-w-none text-cream/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_strong]:text-cream [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:my-1 [&_p]:my-2 [&_hr]:border-[var(--line, rgba(142,104,36,0.18))]">
                 <Markdown>{output}</Markdown>
               </div>
             ) : !generando ? (

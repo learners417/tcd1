@@ -5,6 +5,7 @@
 // el JSON a mano.
 
 import seed from './roadmap.seed.json'
+import { esPasoDelCliente } from './diaPrograma'
 
 // ── primitivas ──────────────────────────────────────────────────────────────
 
@@ -284,14 +285,13 @@ export interface RoadmapMeta {
   dia_asignado: number
   tiempo_estimado: string
   /** Vocabulario de pantalla: decide qué componente Task se renderiza. */
-  tipo: 'VIDEO' | 'HERRAMIENTA' | 'COACH' | 'TAREA'
+  tipo: 'VIDEO' | 'COACH' | 'TAREA'
   /** El tipo real de la jornada en el seed. */
   tipo_jornada: TipoJornada
   sistema: number | null
   pasos: string[]
   checklist: string[]
   agente: AgenteId | null
-  herramienta_id: string | undefined
   usa_ia: boolean
   cinturon: CinturonId | null
   es_estrella: boolean
@@ -384,8 +384,6 @@ const comoMeta = (
   pasos: j.pasos,
   checklist: j.pasos,
   agente: j.agente,
-  // Ninguna jornada del Camino usa el catálogo viejo de herramientas.
-  herramienta_id: undefined,
   usa_ia: j.agente !== null,
   cinturon: j.cinturon,
   es_estrella: j.cinturon !== null || j.jornada_larga,
@@ -440,6 +438,29 @@ export const SEED_ROADMAP_V3: RoadmapPilar[] = (() => {
 
 /** Alias histórico. Misma estructura, no una copia. */
 export const SEED_ROADMAP_V2 = SEED_ROADMAP_V3
+
+/**
+ * ═══ LAS JORNADAS QUE EL CLIENTE HACE ═══
+ *
+ * `TOTAL_METAS` cuenta TODAS las metas del seed, las del equipo y los días de
+ * campo incluidos. Como denominador del avance del cliente no sirve: él puede
+ * cerrar sesenta y cuatro de noventa y una, así que terminar el programa le
+ * daría un setenta y ocho por ciento.
+ *
+ * `esPasoDelCliente` ya tenía esto resuelto, y su comentario lo dice: «los
+ * días de campo y los fines de semana no se completan… contarlos hacía que el
+ * Camino dijera "1 de 90 pasos" cuando las jornadas con trabajo son cincuenta,
+ * y esos noventa no se alcanzaban nunca».
+ *
+ * Ese arreglo llegó al Camino y no a Métricas, que siguió mostrando «71 de 91»
+ * mientras el Camino decía «21 de 64» — el mismo dato, dos totales, en dos
+ * pantallas que el cliente lee en la misma sesión. Esta constante es el total
+ * del cliente, en un solo lugar.
+ */
+export const TOTAL_JORNADAS_DEL_CLIENTE: number = SEED_ROADMAP_V3.reduce(
+  (n, p) => n + (p.metas ?? []).filter(esPasoDelCliente).length,
+  0,
+);
 
 export const TOTAL_METAS: number = SEED_ROADMAP_V3.reduce(
   (s, p) => s + p.metas.length, 0,
@@ -502,6 +523,48 @@ export function codigoDelDia(dia: number): string {
 }
 
 /** El día de una jornada, a partir de su código. */
+/**
+ * El pilar al que pertenece una jornada.
+ *
+ * Hace falta para saber si el plan de alguien alcanza ese día: `PILAR_MAX`
+ * razona en pilares y «lo que ya tienes andando» razona en días.
+ */
+export function pilarDelDia(dia: number): number | null {
+  for (const p of SEED_ROADMAP_V2) {
+    if (p.metas.some((x) => x.dia_asignado === dia)) return p.numero
+  }
+  return null
+}
+
+/**
+ * Cómo se le nombra un tramo del Camino al cliente.
+ *
+ * «P6» es un identificador de la base: en pantalla no significa nada. El
+ * Camino nombra sus tramos por los días que cubren —«Días 27 a 31»— y por el
+ * sistema al que pertenecen. Una pantalla que explique qué la abre tiene que
+ * decirlo con esas palabras, y derivarlas de acá para que sigan siendo
+ * verdad cuando el camino se reordene.
+ *
+ * Así quedó el Creador diciendo «Necesitas completar P6 (Matriz A→B→C)»: el
+ * código es interno y la Matriz A→B→C ya no es una jornada de ningún tramo,
+ * así que el cliente leía una instrucción que no podía seguir.
+ */
+export function comoSeLlamaElTramo(pilar: PilarId): {
+  tramo: string
+  sistema: string
+  abre: string
+  jornadas: number
+} | null {
+  const p = SEED_ROADMAP_V2.find(x => x.id === pilar)
+  if (!p) return null
+  return {
+    tramo: p.titulo,
+    sistema: p.subtitulo,
+    abre: p.desbloqueo,
+    jornadas: p.metas.length,
+  }
+}
+
 export function diaDelCodigo(codigo: string): number | null {
   for (const p of SEED_ROADMAP_V2) {
     const m = p.metas.find(x => x.codigo === codigo)
@@ -540,4 +603,39 @@ export const claveDesbloqueoAgente = (agenteId: string): string | null => {
     if (agenteId.includes(id)) return `${m.pilar}-${m.codigo}`
   }
   return null
+}
+
+/**
+ * EL DÍA DE LA PRÓXIMA JORNADA ABIERTA.
+ *
+ * Es el número que manda sobre lo que la app abre y lo que cierra: quien está
+ * en el día 15 del trabajo ve el día 15, aunque el calendario diga 31.
+ *
+ * Cada pantalla lo calculaba por su cuenta recorriendo pilares y metas, y no
+ * todas igual: Campañas ni lo miraba y preguntaba el calendario. Con el cálculo
+ * acá, lo que abre Campañas, lo que abre un destino del menú y lo que dice el
+ * ritmo salen del mismo número.
+ *
+ * `null` = cerró todas: terminó el Camino.
+ */
+export function diaDeLaProximaJornada(hechas: Set<string>): number | null {
+  for (const p of SEED_ROADMAP_V2) {
+    for (const m of p.metas) {
+      // Los días de campo y la entrega del equipo no se cierran: saltarlos es
+      // lo que evita que el cliente quede trabado un fin de semana para siempre.
+      const minutos = parseInt(String(m.tiempo_estimado ?? '0'), 10) || 0
+      const esDelCliente = m.tipo_jornada !== 'entrega_tecnica' && (minutos > 0 || Boolean(m.cinturon))
+      if (!esDelCliente) continue
+      if (!hechas.has(`${p.numero}-${m.codigo}`)) return m.dia_asignado ?? null
+    }
+  }
+  return null
+}
+
+/** Las jornadas cerradas, leídas del espejo local. Nunca lanza. */
+export function jornadasCerradas(): Set<string> {
+  try {
+    const crudo = localStorage.getItem('tcd_hoja_ruta_v2')
+    return new Set<string>(crudo ? (JSON.parse(crudo) as string[]) : [])
+  } catch { return new Set<string>() }
 }

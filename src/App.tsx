@@ -5,17 +5,18 @@
 
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { cargarPausas } from './lib/pausasDatos';
-import CustomSelect from './components/CustomSelect';
+import { cargarVentanas } from './lib/ventanasDatos';
 import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
+import MiClinica from './pages/MiClinica';
 import NumeroPanel from './components/numero/NumeroPanel';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Roadmap from './pages/Roadmap';
 import Coach from './pages/Coach';
 import Metrics from './pages/Metrics';
-import Mensajes from './pages/Mensajes'; // G4: el chat habilitado
+import Acompanamiento from './pages/Acompanamiento';
+import MiMigracion from './pages/MiMigracion'; // G4: el chat habilitado
 import DiarioDirector from './pages/DiarioDirector';
 import Biblioteca from './pages/Biblioteca';
 import Agentes from './pages/Agentes';
@@ -25,7 +26,9 @@ import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Campanas from './pages/Campanas';
 import { cinturonDesdeProgreso } from './lib/cinturones';
-import { accesoVencido, NOMBRE_PLAN, PRECIO_FUNDADOR, waLink, checkoutUrl, planActualPermite } from './lib/planes';
+import { accesoVencido, PILAR_MAX, waLink, planActualPermite, diasRestantes } from './lib/planes';
+import { laOferta, laOfertaTrasElAcceso, ofertaReservada } from './lib/laOfertaQueSigue';
+import { TICKETS } from './lib/cuadroTickets';
 import CreadorContenido from './pages/CreadorContenido';
 import WelcomeWizard from './components/WelcomeWizard';
 import LoadingScreen from './components/LoadingScreen';
@@ -35,7 +38,9 @@ import { signOut, syncProfileToLocalStorage, updatePassword } from './lib/auth';
 import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
-import { diaDelPrograma } from './lib/diaPrograma';
+import { mensajeDeFalla } from './lib/conexion';
+import { diaDelPrograma, dondeVa } from './lib/diaPrograma';
+import { diaDeLaProximaJornada, jornadasCerradas } from './lib/roadmapSeed';
 import Entrenadores from './pages/Entrenadores';
 import { MessageSquare } from 'lucide-react';
 import { setFamiliaActual } from './lib/vocabulario';
@@ -62,17 +67,45 @@ function loadProfile(): Profile {
   return { nombre: 'Profesional', email: '', especialidad: '', fecha_inicio: today, plan: 'DWY' };
 }
 
-// Páginas válidas — fuente de verdad para validar lo guardado en localStorage
+// Páginas válidas — fuente de verdad para validar lo guardado en localStorage.
+//
+// 'mensajes' FALTABA, y eso era la mitad de «el chat no funciona»: el cliente
+// entraba a Soporte, cerraba la app —en una PWA eso pasa a cada rato— y al
+// volver aparecía en Hoy, porque su página guardada no pasaba esta validación
+// y caía al default. La conversación seguía ahí; el cliente creía que no.
 const VALID_PAGES = [
   'dashboard', 'roadmap', 'entrenadores', 'coach', 'metrics',
-  'diario', 'adn', 'manualNegocio', 'biblioteca', 'agentes',
-  'campanas',
+  'diario', 'adn', 'manualNegocio', 'biblioteca',
+  // 'agentes' salió: era una SEGUNDA ruta a la misma pantalla que
+  // 'entrenadores', sin estar en ningún menú. Quien la tenga guardada de
+  // antes se redirige abajo, así que nadie cae en Hoy sin entender por qué.
+  'campanas', 'mensajes', 'miclinica',
+  // 'creador' y 'numero' las dibuja el router de abajo y faltaban acá. Un
+  // aviso manda al cliente al Creador, él entra, se guarda la página, cierra
+  // la app —en una PWA pasa a cada rato— y al volver aparece en Hoy, porque
+  // su página guardada no pasaba esta validación. Es el mismo bug que el
+  // comentario de arriba cuenta haber arreglado para 'mensajes'.
+  'creador', 'numero',
+  // 'migracion' NO está en el menú a propósito: se hace una sola vez, y el
+  // menú tiene tope de cinco destinos. Se llega por la tarjeta del HOY, que
+  // aparece solo mientras el equipo le habilitó la migración y no la terminó.
+  'migracion',
 ] as const;
 const PAGE_STORAGE_KEY = 'tcd_current_page';
+
+/**
+ * Las páginas que ya no existen, y a dónde va cada una.
+ *
+ * 'agentes' y 'entrenadores' eran dos rutas a la misma pantalla y solo la
+ * segunda estaba en el menú. Sin este mapa, quien tenía la primera guardada
+ * en su teléfono —una PWA guarda la última— aparecía en Hoy al volver.
+ */
+const PAGINAS_MUDADAS: Record<string, string> = { agentes: 'entrenadores' };
 
 function loadCurrentPage(): string {
   try {
     const saved = localStorage.getItem(PAGE_STORAGE_KEY);
+    if (saved && PAGINAS_MUDADAS[saved]) return PAGINAS_MUDADAS[saved];
     if (saved && (VALID_PAGES as readonly string[]).includes(saved)) return saved;
   } catch { /* noop */ }
   return 'dashboard';
@@ -91,46 +124,55 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
     quemas = set.has(claveDelDia(1)) ? 1 : 0;
     racha = parseInt(localStorage.getItem('tcd_racha') ?? '0', 10) || 0;
   } catch { /* noop */ }
-  const nombreRes = planReservado && NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] ? NOMBRE_PLAN[planReservado as keyof typeof NOMBRE_PLAN] : null;
-  const precioRes = planReservado && PRECIO_FUNDADOR[planReservado] ? PRECIO_FUNDADOR[planReservado] : null;
+  /*
+   * UN SOLO ESCALÓN, EL QUE SIGUE.
+   *
+   * Acá había dos tarjetas escritas a mano —«Tu Sistema · $497» y «El Programa
+   * Completo · $997»—, la escalera de cuando los planes se llamaban por color.
+   * Es la pantalla que ve el que pagó EL NÚMERO cuando se le cierra el acceso,
+   * o sea el punto de venta más caro de la app: dos nombres y dos precios que
+   * ya no se venden, y una elección entre dos justo en el momento de pagar.
+   *
+   * Si el equipo le reservó un cupo de los de hoy, se le ofrece ese. Si no
+   * —o si lo que le anotaron es un color viejo— el que abre el primer pilar
+   * que su plan no abría, que es La Base.
+   */
+  const reservado = ofertaReservada(planReservado);
+  const oferta = reservado ? laOferta(reservado) : laOfertaTrasElAcceso(PILAR_MAX.blanco);
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
-      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[rgba(232,150,46,0.25)]">
-        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Tus 5 días están completos</p>
+      <div className="max-w-md w-full card-panel rounded-3xl p-8 text-center border border-[var(--line2, rgba(142,104,36,0.30))]">
+        {/* El plazo es lo que terminó. Las cinco sesiones puede no haberlas
+            hecho: «tus 5 días están completos» le afirmaba un logro que esta
+            pantalla no sabe si ganó. */}
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold mb-3">Terminó tu plazo de los 5 días</p>
         <h1 className="text-2xl text-cream mb-3" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
           {nombre ? `${nombre}, lo` : 'Lo'} que construiste es tuyo.
         </h1>
         <p className="text-sm text-cream/75 mb-5 leading-relaxed">
           {quemas ? 'Tu QUEMA está hecha — eso no se deshace. ' : ''}Tu ADN, tu diario y tu avance quedan guardados, esperándote.
         </p>
-        {nombreRes && (
-          <p className="text-sm text-cream/80 mb-5">Tu lugar de fundador sigue reservado: <span className="text-goldhi font-semibold">{nombreRes}</span>{precioRes && <> · {precioRes} (50% off, congelado de por vida)</>}</p>
+        {reservado && (
+          <p className="text-sm text-cream/80 mb-5">Tu lugar sigue reservado: <span className="text-goldhi font-semibold">{oferta.nombre}</span> · {oferta.precio}</p>
         )}
-        <div className="text-left mb-5 space-y-2">
-          {([
-            ['🟢', 'Tu Sistema', '$497', 'Tu método con nombre, tu oferta construida, tu página y tu primera campaña encendida.'],
-            ['⚫', 'El Programa Completo', '$997', 'Los 90 días enteros, los 9 entrenadores, y la garantía por contrato: 10 pacientes de $1.000 o seguimos gratis.'],
-          ] as const).map(([e, n, p, d]) => (
-            <div key={n} className="rounded-xl border border-[rgba(232,150,46,0.15)] bg-black/20 px-3.5 py-2.5">
-              <p className="text-xs font-bold text-cream">{e} {n} · <span className="text-goldhi">{p}</span> <span className="text-cream/35 font-normal">(precio fundador, de por vida)</span></p>
-              <p className="text-sm text-cream/55 mt-0.5">{d}</p>
-            </div>
-          ))}
+        <div className="text-left mb-5 rounded-xl border border-[var(--line, rgba(142,104,36,0.18))] bg-black/20 px-3.5 py-3">
+          <p className="text-sm font-bold text-cream">{oferta.nombre} · <span className="text-goldhi">{oferta.precio}</span></p>
+          <p className="text-sm text-cream/60 mt-1 leading-relaxed">{oferta.abre}</p>
         </div>
-        <a href={(planReservado && checkoutUrl(planReservado as 'verde' | 'negro')) || waLink(('Hola · Quiero continuar mi camino' + (nombreRes ? ' con el plan ' + nombreRes : '')))} target="_blank" rel="noreferrer"
+        <a href={oferta.checkout || waLink(oferta.mensaje)} target="_blank" rel="noreferrer"
            className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
-        <p className="text-sm text-cream/35">Un mensaje y sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
+        <p className="text-sm text-cream/35">Sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>
       </div>
     </div>
   );
 }
 
-function PaginaBloqueada({ nombre }: { nombre: string }) {
+function __________PaginaBloqueada({ nombre }: { nombre: string }) {
   return (
-    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[rgba(232,150,46,0.15)]">
-      <p className="text-4xl mb-4">🔒</p>
+    <div className="max-w-lg mx-auto mt-24 text-center card-panel p-10 rounded-3xl border border-[var(--line, rgba(142,104,36,0.18))]">
+      <Lock className="w-9 h-9 mx-auto mb-4 text-gold" />
       <h2 className="text-lg text-cream mb-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{nombre} está guardado para ti</h2>
       <p className="text-sm text-cream/55">Se desbloquea con el <span className="text-goldhi">Cinturón Verde</span> — tu oferta aprobada. Sigue en El Camino: cada micro-sesión te acerca.</p>
     </div>
@@ -144,8 +186,8 @@ export default function App() {
   // mostrar nada: está para que, cuando la respuesta llegue, las pantallas que
   // ya se pintaron vuelvan a calcular su día con el corrimiento puesto.
   const [pausasListas, setPausasListas] = useState(false);
-  useEffect(() => { void cargarPausas().then(() => setPausasListas(true)); }, []);
-  // El comprador de EL NÚMERO ($27) entra directo a su dojo chico: Mi Número
+  useEffect(() => { void cargarVentanas().then(() => setPausasListas(true)); }, []);
+  // El comprador de EL NÚMERO ($27) entra directo a su tramo corto: Mi Número
   useEffect(() => {
     try {
       const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;
@@ -184,6 +226,8 @@ export default function App() {
     });
   }, []);
   const [showSettings, setShowSettings] = useState(false);
+  /** El día que entregó cada jornada, sacado de hoja_de_ruta. */
+  const [entregasReales, setEntregasReales] = useState<Record<string, string>>({});
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('perfil');
   const [profile, setProfile] = useState<Profile>(loadProfile);
   const [profileDraft, setProfileDraft] = useState<Profile>(loadProfile);
@@ -208,14 +252,41 @@ export default function App() {
     if (!uid || !supabase) return;
     let vivo = true;
     void (async () => {
-      const { data } = await supabase.from('hoja_de_ruta').select('pilar_numero, meta_codigo, completada').eq('usuario_id', uid);
+      const { data } = await supabase.from('hoja_de_ruta')
+        .select('pilar_numero, meta_codigo, completada, fecha_completada')
+        .eq('usuario_id', uid);
       if (!vivo || !data) return;
       try {
+        const filas = data as Array<{
+          pilar_numero: number; meta_codigo: string;
+          completada: boolean; fecha_completada: string | null;
+        }>;
         const locales = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-        (data as Array<{ pilar_numero: number; meta_codigo: string; completada: boolean }>)
-          .filter((r) => r.completada)
+        filas.filter((r) => r.completada)
           .forEach((r) => locales.add(`${r.pilar_numero}-${r.meta_codigo}`));
         localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...locales]));
+
+        /*
+         * ═══ EL DÍA QUE ENTREGÓ CADA JORNADA ═══
+         *
+         * El cierre de cuentas calcula el atraso de cada una contra la fecha
+         * que le tocaba, y lo leía de `profiles.entregas` — una columna que
+         * NADIE escribe en toda la app. Con el objeto vacío el atraso daba
+         * cero siempre, así que a todo cliente que subió sus evidencias se le
+         * decía «entregaste todo completo y a tiempo». Es la frase que decide
+         * si la garantía corre a nuestro cargo.
+         *
+         * La fecha ya estaba acá: `hoja_de_ruta.fecha_completada` se guarda
+         * cada vez que cierra una jornada. No hace falta una segunda columna,
+         * hace falta leer la que ya hay.
+         */
+        const entregas: Record<string, string> = {};
+        for (const r of filas) {
+          if (r.completada && r.fecha_completada) {
+            entregas[`${r.pilar_numero}-${r.meta_codigo}`] = r.fecha_completada.slice(0, 10);
+          }
+        }
+        setEntregasReales(entregas);
       } catch { /* noop */ }
     })();
     return () => { vivo = false; };
@@ -237,9 +308,48 @@ export default function App() {
   // ─── Auth init ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isSupabaseReady() || !supabase) {
-      // No Supabase configured — skip auth, go straight to app (dev mode)
+      /*
+       * ─── EN PRODUCCIÓN, ESTE MODO NO VA ────────────────────────────────
+       *
+       * Entrar sin sesión es a propósito y sirve para una sola cosa: medir la
+       * app sin una cuenta de verdad (los visores de scripts/visor/ viven de
+       * esto). Pero si se publica sin `VITE_SUPABASE_URL` o
+       * `VITE_SUPABASE_ANON_KEY`, cualquiera que abra la página entra directo
+       * como «Profesional» —sin login— y `guardarFila` devuelve éxito sin
+       * cliente, así que todo lo que escriba ese día parece guardado y no
+       * existe. Un cliente que acaba de pagar haría su jornada entera contra
+       * la nada.
+       *
+       * En un build de producción se queda afuera y lee, en el login, que el
+       * problema no es suyo. En desarrollo no cambia nada.
+       */
+      if (import.meta.env.PROD) {
+        setAuthState('logged_out');
+        return;
+      }
+      // Sin base configurada: se entra directo, sin sesión.
       const existing = localStorage.getItem('tcd_profile');
       if (!existing) localStorage.setItem('tcd_profile', JSON.stringify(profile));
+      /*
+       * Y el perfil de la memoria pasa a ser EL perfil.
+       *
+       * Sin esto `supabaseProfile` quedaba en `null` en este modo, y todo lo
+       * que lo recibe como prop se comportaba como si el cliente no tuviera
+       * nada: el candado comercial del Camino abierto, el cierre de la ventana
+       * de acceso sin mostrarse nunca, el ADN completo vacío. Medio producto
+       * quedaba invisible en el único modo en que se puede medir sin una
+       * cuenta de verdad — y la ventana vencida, que es donde se recupera a
+       * alguien que no pagó, no la había visto nadie.
+       *
+       * Con base configurada no cambia nada: ahí manda la sesión, y si el
+       * perfil no llega la app lo dice en vez de entrar a medias (más abajo).
+       */
+      try {
+        const guardado = JSON.parse(existing ?? localStorage.getItem('tcd_profile') ?? '{}');
+        if (guardado && typeof guardado === 'object' && Object.keys(guardado).length > 0) {
+          setSupabaseProfile(guardado as SupabaseProfile);
+        }
+      } catch { /* si está roto, se entra igual: este modo no bloquea */ }
       setAuthState('logged_in');
       return;
     }
@@ -362,18 +472,45 @@ export default function App() {
   }, []);
 
   const saveProfile = async () => {
-    localStorage.setItem('tcd_profile', JSON.stringify(profileDraft));
+    /*
+     * La copia local se ACTUALIZA, no se reemplaza.
+     *
+     * `JSON.stringify(profileDraft)` la pisaba entera. Y `profileDraft` sale
+     * de `loadProfile()`, que cuando no encuentra la copia devuelve cinco
+     * campos de default. Así que guardar desde un navegador sin copia cargada
+     * se llevaba lo que el login había espejado de la base: el `id` —que
+     * necesita el cobro de créditos—, `plan_comercial` —sin él la escalera
+     * cae en «completo» y un comprador del plan más bajo se lleva la app
+     * entera— y `acceso_hasta`, que es su ventana de acceso.
+     */
+    try {
+      const previo = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}') as Record<string, unknown>;
+      localStorage.setItem('tcd_profile', JSON.stringify({ ...previo, ...profileDraft }));
+    } catch {
+      localStorage.setItem('tcd_profile', JSON.stringify(profileDraft));
+    }
     setProfile(profileDraft);
 
-    // Also update in Supabase if available
+    /*
+     * SOLO LO QUE ESTA PANTALLA EDITA.
+     *
+     * Mandaba también `fecha_inicio` y `plan`, que no están en el formulario:
+     * salían de `tcd_profile`, la copia en el navegador. O sea que cualquier
+     * diferencia entre esa copia y la base se escribía en la base, con la
+     * copia ganando, al tocar «Guardar Cambios» para corregirse el nombre.
+     *
+     * Y `fecha_inicio` es el día desde el que se cuenta TODO: el día del
+     * Camino, el color de cada jornada y el atraso con el que se mide la
+     * garantía. Un cliente en el día 60 que entra sin esa copia cargada
+     * —navegador nuevo, datos borrados— la guardaba con la fecha de hoy y
+     * volvía al día 1.
+     */
     if (supabase && supabaseProfile) {
       const { error } = await supabase
         .from('profiles')
         .update({
           nombre: profileDraft.nombre,
           especialidad: profileDraft.especialidad,
-          fecha_inicio: profileDraft.fecha_inicio,
-          plan: profileDraft.plan,
         })
         .eq('id', supabaseProfile.id);
 
@@ -406,7 +543,7 @@ export default function App() {
     const { error } = await updatePassword(recoveryPassword);
     setRecoveryLoading(false);
     if (error) {
-      toast.error(`Error: ${error}`);
+      toast.error(mensajeDeFalla(error, 'cambiar tu contraseña'));
       return;
     }
     toast.success('Contraseña actualizada. Ya puedes usar la app.');
@@ -417,8 +554,8 @@ export default function App() {
 
   const RecoveryModal = showRecoveryModal ? (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-panel border border-[rgba(232,150,46,0.18)] rounded-2xl w-full max-w-sm shadow-2xl">
-        <div className="px-5 py-4 border-b border-[rgba(232,150,46,0.1)]">
+      <div className="bg-panel border border-[var(--line2, rgba(142,104,36,0.30))] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="px-5 py-4 border-b border-[var(--line, rgba(142,104,36,0.18))]">
           <h3 className="text-sm font-semibold text-cream">Fijar nueva contraseña</h3>
           <p className="text-sm text-cream/65 mt-0.5">Elige una contraseña nueva para tu cuenta.</p>
         </div>
@@ -436,7 +573,7 @@ export default function App() {
                 minLength={8}
                 disabled={recoveryLoading}
                 autoFocus
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-2.5 pl-10 pr-10 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
@@ -458,7 +595,7 @@ export default function App() {
                 placeholder="Repite la contraseña"
                 required
                 disabled={recoveryLoading}
-                className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
+                className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-2.5 pl-10 pr-4 text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-50"
               />
             </div>
           </div>
@@ -509,6 +646,39 @@ export default function App() {
     );
   }
 
+  /* ─── SIN PERFIL NO SE ENTRA ─────────────────────────────────────────────
+   *
+   * La guarda de abajo exige `supabaseProfile` para mostrar el wizard. Si la
+   * consulta falla, pasa los 4 s de timeout, o la fila de `profiles` no existe
+   * —el trigger de alta no corrió, o se borró—, `supabaseProfile` queda null y
+   * el cliente entraba DIRECTO a HOY.
+   *
+   * No se ve roto, y es peor que roto: nunca cambia su contraseña temporal,
+   * nunca firma el pacto, nunca carga su medición de entrada. Y como `userId`
+   * llega undefined a todas las pantallas, el Camino cae a modo offline y todo
+   * su avance del día 1 queda solo en ese navegador. El equipo lo ve como un
+   * cliente que no entró nunca.
+   *
+   * Así que se dice y se ofrece reintentar, en vez de dejarlo entrar a medias.
+   */
+  if (!supabaseProfile && isSupabaseReady()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-ink">
+        <div className="card-panel p-6 max-w-md w-full">
+          <p className="text-[19px] font-bold text-cream mb-2">No pude abrir tu cuenta</p>
+          <p className="text-[17px] leading-relaxed text-cream/75">
+            Tus datos no llegaron. Suele ser la conexión. Toca el botón y lo intento
+            de nuevo; si sigue igual, escríbenos y lo resolvemos hoy.
+          </p>
+          <button onClick={() => window.location.reload()}
+            className="mt-4 w-full min-h-[44px] btn-primary rounded-xl text-[17px] font-bold">
+            Volver a intentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ─── Onboarding wizard (primer login) ──────────────────────────────────────
   if (supabaseProfile && supabaseProfile.onboarding_completed === false) {
     return (
@@ -545,7 +715,9 @@ export default function App() {
           desde={estado.desde}
           completadas={completadas}
           fechaInicio={supabaseProfile?.fecha_inicio}
-          entregas={supabaseProfile?.entregas}
+          entregas={entregasReales}
+          userId={supabaseProfile?.id}
+          servicio={(supabaseProfile as { servicio_contratado?: string | null } | null)?.servicio_contratado}
           waLink={waLink('Terminé mi Camino y quiero hablar de lo que sigue')}
         />
       );
@@ -579,17 +751,40 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        <Topbar currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
-        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} onMore={() => setMobileMenuOpen(true)} />
+        <Topbar
+              onOpenSettings={openSettings} currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
+          donde={dondeVa(supabaseProfile?.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas()))}
+          onMore={() => setMobileMenuOpen(true)} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          <div className="p-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+          <div className="p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
             <CeremoniaCinturon />
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}
             {currentPage === 'roadmap' && <Roadmap userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} onNavigate={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'coach' && <Coach userId={supabaseProfile?.id} perfil={supabaseProfile ?? undefined} />}
+            {currentPage === 'migracion' && (
+              <MiMigracion
+                clienteId={supabaseProfile?.id}
+                onIrACampanas={() => setCurrentPage('campanas')}
+              />
+            )}
             {currentPage === 'metrics' && <Metrics userId={supabaseProfile?.id} />}
-            {currentPage === 'mensajes' && <Mensajes userId={supabaseProfile?.id} />}
+            {/* El destino 'mensajes' ahora abre Acompañamiento, que ADENTRO
+                tiene el chat (o el reporte, según lo que contrató) más los
+                canales de la comunidad y las mentorías con su link. El menú
+                tiene tope de cinco destinos, así que esto no suma uno más:
+                absorbe el de Soporte, que era la pantalla del chat sola. */}
+            {currentPage === 'mensajes' && (
+              <Acompanamiento
+                clienteId={supabaseProfile?.id}
+                nombre={supabaseProfile?.nombre}
+                servicio={supabaseProfile?.servicio_contratado}
+              />
+            )}
+            {/* Mi Clínica dejó de ser un window.open sin aviso: ahora se
+                explica qué es y el botón para abrirla va al final. */}
+            {currentPage === 'miclinica' && <MiClinica perfil={supabaseProfile} userId={supabaseProfile?.id} />}
             {currentPage === 'diario' && (
               <DiarioDirector
                 userId={supabaseProfile?.id}
@@ -606,33 +801,28 @@ export default function App() {
             {currentPage === 'adn' && <ADN perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
             {currentPage === 'numero' && <NumeroPanel userId={supabaseProfile?.id} />}
             {currentPage === 'manualNegocio' && <ManualNegocio perfil={supabaseProfile ?? {}} userId={supabaseProfile?.id} setCurrentPage={setCurrentPage} onProfileFieldUpdate={(fields) => setSupabaseProfile(prev => prev ? { ...prev, ...fields } as typeof prev : prev)} />}
-            {currentPage === 'biblioteca' && <Biblioteca userId={supabaseProfile?.id} />}
-            {currentPage === 'agentes' && (
-              <Agentes
+            {currentPage === 'biblioteca' && (
+              <Biblioteca
                 userId={supabaseProfile?.id}
-                perfil={supabaseProfile ?? undefined}
-                setCurrentPage={setCurrentPage}
+                /* Su día del Camino decide qué material le corresponde, y el
+                   permiso del equipo lo abre todo sin esperarlo. */
+                diaActual={diaDelPrograma(supabaseProfile?.fecha_inicio)}
+                bibliotecaAbierta={Boolean(
+                  (supabaseProfile as { biblioteca_abierta?: boolean } | null)?.biblioteca_abierta)}
               />
             )}
-            {currentPage === 'campanas' && (() => {
-              try {
-                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
-              } catch { /* noop */ }
-              return null;
-            })() || currentPage === 'campanas' && (
+            {/* El plan es la única puerta: si compró la sección, entra. El
+                orden lo cuida el Camino. Antes esto estaba escrito dentro de
+                un bloque que leía el progreso, no lo usaba y devolvía null
+                siempre, así que la condición se evaluaba dos veces para nada. */}
+            {currentPage === 'campanas' && (
               <Campanas
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
+                onIrAlCamino={() => setCurrentPage('roadmap')}
               />
             )}
-            {currentPage === 'creador' && (() => {
-              try {
-                const set = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
-                // El plan es la única puerta: si compró la sección, entra. El orden lo cuida el Camino.
-              } catch { /* noop */ }
-              return null;
-            })() || currentPage === 'creador' && (
+            {currentPage === 'creador' && (
               <CreadorContenido
                 userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined}
@@ -646,8 +836,8 @@ export default function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-surface border border-[rgba(232,150,46,0.12)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b border-[rgba(232,150,46,0.12)]">
+          <div className="w-full max-w-2xl bg-surface border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--line, rgba(142,104,36,0.18))]">
               <h2 className="text-xl font-medium text-cream">Ajustes de la Cuenta</h2>
               <button
                 onClick={() => setShowSettings(false)}
@@ -659,7 +849,7 @@ export default function App() {
 
             <div className="flex flex-1 overflow-hidden">
               {/* Settings Sidebar */}
-              <div className="w-1/3 border-r border-[rgba(232,150,46,0.12)] p-4 space-y-2 bg-surface/50 flex flex-col">
+              <div className="w-1/3 border-r border-[var(--line, rgba(142,104,36,0.18))] p-4 space-y-2 bg-surface/50 flex flex-col">
                 <div className="flex-1 space-y-2">
                   {([
                     { id: 'perfil' as SettingsTab, label: 'Perfil', icon: User },
@@ -698,7 +888,7 @@ export default function App() {
                       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                       <button
                         onClick={() => avatarInputRef.current?.click()}
-                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[rgba(232,150,46,0.18)] hover:border-gold/50 transition-colors overflow-hidden"
+                        className="relative group w-20 h-20 rounded-full border-2 border-dashed border-[var(--line2, rgba(142,104,36,0.30))] hover:border-gold/50 transition-colors overflow-hidden"
                       >
                         {avatarUrl ? (
                           <img loading="lazy" src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -722,7 +912,7 @@ export default function App() {
                             type="text"
                             value={profileDraft.nombre}
                             onChange={e => setProfileDraft({ ...profileDraft, nombre: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                         <div>
@@ -731,7 +921,7 @@ export default function App() {
                             type="email"
                             value={profileDraft.email}
                             disabled
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream/55 cursor-not-allowed"
                           />
                           <p className="text-xs text-cream/45 mt-1">El email no se puede cambiar desde aquí</p>
                         </div>
@@ -741,12 +931,12 @@ export default function App() {
                             type="text"
                             value={profileDraft.especialidad}
                             onChange={e => setProfileDraft({ ...profileDraft, especialidad: e.target.value })}
-                            className="w-full bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
+                            className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg px-4 py-2.5 text-cream focus:outline-none focus:border-gold/50"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="pt-6 border-t border-[rgba(232,150,46,0.12)] flex justify-end gap-3">
+                    <div className="pt-6 border-t border-[var(--line, rgba(142,104,36,0.18))] flex justify-end gap-3">
                       <button onClick={() => setShowSettings(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-cream/75 hover:text-cream transition-colors">
                         Cancelar
                       </button>
@@ -757,14 +947,29 @@ export default function App() {
                   </div>
                 )}
 
+                {/* QUÉ AVISOS LLEGAN, SIN INTERRUPTORES QUE NO GUARDAN.
+                    Había cuatro switches, todos encendidos, sin nada detrás:
+                    el cliente apagaba «Mensajes del equipo», cerraba, volvía
+                    a abrir, y estaba encendido otra vez. Y entre tanto creía
+                    que lo había apagado.
+                    Mientras no exista dónde guardar esa preferencia, la
+                    pantalla dice la verdad: estos son los avisos que llegan. */}
                 {settingsTab === 'notificaciones' && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-cream mb-4">Preferencias de Notificaciones</h3>
-                    {['Recordatorios del diario', 'Mensajes del equipo', 'Recordatorios de tareas', 'Resumen semanal'].map((item, i) => (
-                      <label key={i} className="flex items-center justify-between py-3 border-b border-[rgba(232,150,46,0.1)]">
-                        <span className="text-sm text-cream/80">{item}</span>
-                        <input type="checkbox" defaultChecked className="w-4 h-4 rounded accent-gold" />
-                      </label>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-cream mb-1">Tus avisos</h3>
+                    <p className="text-[15px] text-cream/65 leading-relaxed">
+                      Te llegan a la campana de arriba, y suenan mientras tienes la app abierta.
+                    </p>
+                    {[
+                      ['Cuando el equipo te responde', 'Tu mensaje de Soporte, respondido.'],
+                      ['Cuando se gana un cinturón', 'Al cerrar la jornada que lo entrega.'],
+                      ['Cuando una evidencia se revisa', 'Con el motivo, si hace falta subir otra.'],
+                      ['Cuando se abre algo nuevo', 'Tu Biblioteca, tu Creador, tu próxima etapa.'],
+                    ].map(([titulo, detalle]) => (
+                      <div key={titulo} className="py-3 border-b border-[var(--line, rgba(142,104,36,0.18))]">
+                        <p className="text-[17px] text-cream/90">{titulo}</p>
+                        <p className="text-[15px] text-cream/60 mt-0.5 leading-relaxed">{detalle}</p>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -782,7 +987,7 @@ export default function App() {
                           if (error) toast.error('No pudimos enviar el email. Intenta de nuevo.');
                           else toast.success('Listo: revisa tu correo (' + email + ') y sigue el enlace.');
                         }}
-                        className="px-4 py-2 rounded-xl border border-[rgba(232,150,46,0.25)] text-gold text-sm hover:bg-gold/10 transition-colors"
+                        className="px-4 py-2 rounded-xl border border-[var(--line2, rgba(142,104,36,0.30))] text-gold text-sm hover:bg-gold/10 transition-colors"
                       >
                         Enviarme el email de restablecimiento
                       </button>
@@ -790,18 +995,43 @@ export default function App() {
                   </div>
                 )}
 
+                {/* LO QUE CONTRATÓ, CON SU NOMBRE.
+                    Decía «Tu Clínica Digital — DWY». DWY es un código interno
+                    y al cliente no le dice nada; peor, es de la escalera
+                    vieja. Lo que compró hoy es La Base, El Ascenso o La
+                    Instalación, y eso sí lo reconoce porque es lo que pagó. */}
                 {settingsTab === 'facturacion' && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-cream mb-4">Facturación</h3>
-                    <div className="bg-surface/50 border border-[rgba(232,150,46,0.12)] p-4 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-cream/80">Plan Actual</span>
-                        <span className="px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-medium">
-                          Tu Clínica Digital — {profile.plan}
-                        </span>
-                      </div>
-                      <p className="text-xs text-cream/55">Programa de 90 días</p>
-                    </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-cream mb-1">Lo que contrataste</h3>
+                    {(() => {
+                      const esc = supabaseProfile?.servicio_contratado;
+                      const t = esc ? TICKETS[esc] : null;
+                      const dias = diasRestantes(supabaseProfile);
+                      return (
+                        <>
+                          <div className="rounded-2xl border border-gold/25 p-4">
+                            <p className="text-[19px] font-bold text-cream">
+                              {t ? t.nombre : 'Tu programa de 90 días'}
+                            </p>
+                            {t && (
+                              <p className="text-[17px] text-cream/75 mt-1.5 leading-relaxed">{t.incluye}</p>
+                            )}
+                          </div>
+                          {dias !== null && (
+                            <p className="text-[17px] text-cream/70 leading-relaxed">
+                              {dias > 0
+                                ? `Tu acceso sigue abierto ${dias} ${dias === 1 ? 'día' : 'días'} más.`
+                                : 'Tu acceso está para renovar: escríbenos por Soporte y lo abrimos.'}
+                            </p>
+                          )}
+                          {supabaseProfile?.cima_incluida && (
+                            <p className="text-[17px] text-cream/70 leading-relaxed">
+                              Tienes La Cima incluida: los cuatro días en Bariloche.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

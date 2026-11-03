@@ -114,7 +114,7 @@ export async function fetchImageAsBase64(
 
 export async function deleteCreativoAssets(
   creativoId: string,
-  userId: string,
+  _userId: string,
 ): Promise<void> {
   if (!isSupabaseReady() || !supabase) return;
 

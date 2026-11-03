@@ -4,7 +4,7 @@
  * El error que la motivó: el ADN se chequeaba contra códigos del Camino viejo
  * (1-P1.5, H-P7.3) y nunca se sellaba. Esta prueba busca en TODO el código
  * cualquier referencia a una jornada, un pilar, una sesión guiada, una
- * herramienta, un entrenador, un grado o una clave del ADN, y verifica que
+ * un entrenador, un grado o una clave del ADN, y verifica que
  * exista de verdad.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -12,7 +12,6 @@ import { join } from 'node:path';
 import { SEED_ROADMAP_V2, roadmap } from '../src/lib/roadmapSeed';
 import { CINTURONES } from '../src/lib/cinturones';
 import { SESIONES_GUIADAS } from '../src/lib/sesionesGuiadas';
-import { HERRAMIENTAS_V3 } from '../src/lib/herramientas';
 
 let fallas = 0;
 const ok = (c: boolean, m: string, d = '') => { console.log(`${c ? '✓' : '✗'} ${m}${c || !d ? '' : '\n    ' + d}`); if (!c) fallas++; };
@@ -23,7 +22,6 @@ const progresos = new Set(metas.map((m) => `${m.pilar}-${m.codigo}`));
 const pilares = new Set(SEED_ROADMAP_V2.map((p) => String(p.numero)));
 const clavesAdn = new Set(metas.flatMap((m) => m.adn_fields ?? []));
 const sesiones = new Set(Object.keys(SESIONES_GUIADAS));
-const herramientas = new Set(HERRAMIENTAS_V3.map((h) => h.id));
 const agentes = new Set(roadmap.agentes.map((a) => a.id));
 const grados = new Set(CINTURONES.map((c) => c.id));
 
@@ -61,10 +59,9 @@ const delCamino = new Set([
   ...roadmap.piezas.map((x) => x.codigo),
   ...roadmap.tutoriales.map((x) => x.codigo),
   ...sesiones,          // las sesiones guiadas se referencian igual que las piezas
-  ...herramientas,
 ]);
 const codHuerfanos = huerfanos(/'(P\d[A-Z]?\.[\w.]+)'/g, delCamino)
-  .filter((x) => !x.startsWith('lib/herramientas.ts') && !x.startsWith('lib/adnSchema.ts')
+  .filter((x) => !x.startsWith('lib/adnSchema.ts')
                 && !x.startsWith('lib/consultorio.ts')   // indexado por pieza, se resuelve por jornada
                 && !x.startsWith('components/campanas/')
                 && !x.startsWith('lib/guionesVideos.ts')       // guiones de piezas que ya no se piden
@@ -104,12 +101,21 @@ const piezasDelCamino = new Set(roadmap.jornadas.flatMap((j) => j.piezas ?? []))
 const sesionesSinPieza = [...sesiones].filter((c) => !piezasDelCamino.has(c));
 ok(sesionesSinPieza.length === 0, 'toda sesión guiada cuelga de una pieza del Camino', sesionesSinPieza.join(', '));
 
-// Ninguna jornada abre ya el catálogo viejo de herramientas: si alguna lo
-// hiciera, el panel quedaría vacío (fue el bug del 19 de septiembre).
-const conHerramienta = SEED_ROADMAP_V2.flatMap((p) => p.metas).filter((m) => m.herramienta_id);
-const rotas = conHerramienta.filter((m) => !herramientas.has(m.herramienta_id as string));
-ok(rotas.length === 0, 'ninguna jornada abre una herramienta que no existe',
-   rotas.map((m) => `día ${m.dia_asignado}: ${m.herramienta_id}`).join(', '));
+/*
+ * El catálogo de herramientas salió del código el 1 de nov. Antes la vara era
+ * «que ninguna jornada abra una que no existe»; ahora no existe ninguna, así
+ * que la vara es que NINGUNA jornada apunte a una herramienta. Si alguien
+ * vuelve a poner un `herramienta_id`, el cliente tocaría un botón que no
+ * lleva a ningún lado, y esto lo caza antes.
+ *
+ * Se mira el JSON crudo y no el tipo: el campo salió de `RoadmapMeta`, así
+ * que TypeScript ya frena a quien lo escriba en el código. La puerta que
+ * queda abierta es el seed, que lo genera un script de Python.
+ */
+const seedCrudo = readFileSync('src/lib/roadmap.seed.json', 'utf8');
+const conHerramienta = [...seedCrudo.matchAll(/"herramienta_id"\s*:\s*("[^"]*")/g)].map((m) => m[1]);
+ok(conHerramienta.length === 0, 'ninguna jornada apunta a una herramienta: el catálogo ya no existe',
+   conHerramienta.join(', '));
 const pilaresDeAdn = new Set(SEED_ROADMAP_V2.map((p) => String(p.numero)));
 ok(pilares.size === pilaresDeAdn.size, 'los pilares son los mismos en todos lados');
 

@@ -11,10 +11,16 @@
  *      Centroamérica voseante)
  *   - "tuteo" → tú / tienes / quieres / sabes (resto de LATAM, España, Caribe)
  *
- * El COACH IA puede seguir hablándole a la usuaria en voseo argentino (es la
- * voz de Javo, parte de la marca). Pero el CONTENIDO que se publica al
- * cliente final (landings, anuncios, copy, reels) debe usar el dialecto del
- * país de la usuaria — salvo que ella diga lo contrario.
+ * Esto decide el dialecto del CONTENIDO QUE SE PUBLICA —páginas, anuncios,
+ * textos, videos—, que usa el del país del sanador, salvo que él diga otra
+ * cosa.
+ *
+ * Lo que la app le habla a ÉL es otra cosa y no se decide acá: es castellano
+ * neutro siempre, en todas las pantallas y en todos los entrenadores, sin
+ * importar su país. Este comentario decía lo contrario —que el Mentor podía
+ * vosear porque era la voz de la casa— y quedó de una decisión anterior: los
+ * clientes son de Ecuador, Panamá, Chile y Venezuela. El código ya lo hacía
+ * bien; el comentario era el que mentía.
  */
 
 export type Dialecto = 'voseo' | 'tuteo';
@@ -109,3 +115,11 @@ El contenido va dirigido al avatar de cliente del profesional · usa TUTEO (espa
 - Si el avatar del cliente tiene un campo "lenguaje" con frases textuales · respetá esas frases exactas (esas son las palabras reales que dice el cliente final · no las traduzcas).
 `.trim();
 }
+
+/**
+ * Las formas de voseo que un entrenador NUNCA debe usar al hablarle al
+ * sanador. Vive aca —y no dentro del prompt— porque este archivo es el
+ * unico exento de la lente de voseo de auditoria.py: es el que documenta
+ * ambos registros a proposito.
+ */
+export const FORMAS_VOSEO = 'vos · tenés · podés · querés';

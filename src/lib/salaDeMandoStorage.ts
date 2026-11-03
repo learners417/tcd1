@@ -1,4 +1,5 @@
 import { db } from './supabase';
+import { hoyISO } from './diaPrograma';
 import type { Decision } from './salaDeMando';
 
 /**
@@ -72,7 +73,7 @@ export async function marcarEncendida(clienteId: string): Promise<void> {
   const { error } = await db()
     .from('profiles')
     .update({
-      campana_desde: new Date().toISOString().slice(0, 10),
+      campana_desde: hoyISO(),
       campana_pausada: false,
     })
     .eq('id', clienteId);

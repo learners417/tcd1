@@ -16,6 +16,7 @@ import {
   Crown,
   Pencil,
   ArrowRight,
+  ArrowLeft,
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase, isSupabaseReady } from '../lib/supabase';
@@ -26,6 +27,7 @@ import { usePersistedState, setSerializers } from '../lib/usePersistedState';
 import { PAISES } from '../lib/vozLocalizada';
 import CustomSelect from '../components/CustomSelect';
 import { toast } from 'sonner';
+import { mensajeDeFalla } from '../lib/conexion';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,6 +56,8 @@ interface ManualNegocioProps {
    * cache en memoria sigue viejo.
    */
   onProfileFieldUpdate?: (fields: Record<string, unknown>) => void;
+  /** Cuando se abre desde Tu ADN, el botón de volver regresa a las piezas. */
+  onVolver?: () => void;
 }
 
 // ── Section definitions ──────────────────────────────────────────────────────
@@ -67,9 +71,9 @@ const SECTIONS: readonly SectionDef[] = [
     icon: Heart,
     fields: [
       { key: 'adn_linea_tiempo', label: 'Línea de tiempo vital', type: 'string' },
-      { key: 'historia_300', label: 'Historia -- version larga', type: 'string' },
-      { key: 'historia_150', label: 'Historia -- version media', type: 'string' },
-      { key: 'historia_50', label: 'Historia -- version corta', type: 'string' },
+      { key: 'historia_300', label: 'Historia — versión larga', type: 'string' },
+      { key: 'historia_150', label: 'Historia — versión media', type: 'string' },
+      { key: 'historia_50', label: 'Historia — versión corta', type: 'string' },
       { key: 'adn_cinco_por_que', label: 'Los 5 por que', type: 'array' },
       { key: 'proposito', label: 'Propósito', type: 'string' },
       { key: 'adn_carta_futuro', label: 'Carta al yo del futuro', type: 'string' },
@@ -282,7 +286,7 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
         </div>
         <button
           onClick={() => navigateToTask(setCurrentPage, field.key)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gold hover:text-goldhi bg-gold/10 hover:bg-gold/15 border border-[rgba(232,150,46,0.12)] rounded-lg transition-all whitespace-nowrap shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gold hover:text-goldhi bg-gold/10 hover:bg-gold/15 border border-[var(--line, rgba(142,104,36,0.18))] rounded-lg transition-all whitespace-nowrap shrink-0"
         >
           Completar
           <ArrowRight className="w-3 h-3" />
@@ -305,7 +309,7 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
         </button>
       </div>
 
-      <div className="pl-3 border-l-2 border-[rgba(232,150,46,0.10)]">
+      <div className="pl-3 border-l-2 border-[var(--line, rgba(142,104,36,0.18))]">
         {field.type === 'object' && field.key === 'adn_avatar' ? (
           <AvatarCard data={value as AvatarData} />
         ) : field.type === 'array' && Array.isArray(value) ? (
@@ -320,7 +324,7 @@ function FieldItem({ field, perfil, setCurrentPage }: FieldItemProps) {
               ))}
           </ol>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none prose-p:text-cream/80 prose-p:leading-relaxed prose-h1:text-base prose-h1:font-semibold prose-h1:text-gold prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:text-sm prose-h2:font-semibold prose-h2:text-gold prose-h2:mt-3 prose-h2:mb-1 prose-h3:text-sm prose-h3:font-medium prose-h3:text-gold/80 prose-h3:mt-2 prose-h3:mb-1 prose-h4:text-sm prose-h4:font-medium prose-h4:text-cream/70 prose-strong:text-cream prose-strong:font-semibold prose-em:text-cream/70 prose-li:text-cream/80 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-hr:border-[rgba(232,150,46,0.10)] prose-a:text-gold prose-a:underline">
+          <div className="prose prose-invert prose-sm max-w-none prose-p:text-cream/80 prose-p:leading-relaxed prose-h1:text-base prose-h1:font-semibold prose-h1:text-gold prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:text-sm prose-h2:font-semibold prose-h2:text-gold prose-h2:mt-3 prose-h2:mb-1 prose-h3:text-sm prose-h3:font-medium prose-h3:text-gold/80 prose-h3:mt-2 prose-h3:mb-1 prose-h4:text-sm prose-h4:font-medium prose-h4:text-cream/70 prose-strong:text-cream prose-strong:font-semibold prose-em:text-cream/70 prose-li:text-cream/80 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-hr:border-[var(--line, rgba(142,104,36,0.18))] prose-a:text-gold prose-a:underline">
             <Markdown>{String(value)}</Markdown>
           </div>
         )}
@@ -345,13 +349,13 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
   const Icon = section.icon;
 
   return (
-    <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#B0822E' }}>
+    <div className="card-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl overflow-hidden" style={{ borderLeftWidth: 3, borderLeftColor: '#B0822E' }}>
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between p-5 hover:bg-cream/[0.02] transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0 text-left">
-          <div className="w-9 h-9 rounded-lg bg-gold/10 border border-[rgba(232,150,46,0.12)] flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-gold/10 border border-[var(--line, rgba(142,104,36,0.18))] flex items-center justify-center shrink-0">
             <Icon className="w-4.5 h-4.5 text-gold" />
           </div>
           <div className="min-w-0">
@@ -372,7 +376,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
       </button>
 
       {isExpanded && (
-        <div className="border-t border-[rgba(232,150,46,0.1)] divide-y divide-[rgba(232,150,46,0.06)]">
+        <div className="border-t border-[var(--line, rgba(142,104,36,0.18))] divide-y divide-[var(--line, rgba(142,104,36,0.18))]">
           {section.fields.map((field) => (
             <FieldItem
               key={field.key}
@@ -389,7 +393,7 @@ function SectionCard({ section, perfil, isExpanded, onToggle, setCurrentPage }: 
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfileFieldUpdate }: ManualNegocioProps) {
+export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfileFieldUpdate, onVolver }: ManualNegocioProps) {
   const [expanded, setExpanded] = usePersistedState<Set<string>>(
     'tcd_manual_expanded',
     () => new Set([SECTIONS[0].id]),
@@ -418,12 +422,11 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       if (error) throw error;
       toast.success('País guardado · la IA va a adaptar el contenido al tono local');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '';
-      toast.error(
-        msg.includes('column') && msg.includes('pais')
-          ? 'Falta correr la migracion: ALTER TABLE profiles ADD COLUMN país text'
-          : 'No se pudo guardar el país · pruébalo de nuevo',
-      );
+      // Que falte la columna en la base es un problema de operación, no del
+      // cliente: él no puede correr una migración. Antes se le mostraba la
+      // sentencia en pantalla. Ahora la ve el registro, y él ve qué hacer.
+      console.error('[manual-negocio] no se pudo guardar el país', err);
+      toast.error(mensajeDeFalla(err, 'guardar tu país'));
     } finally {
       setSavingPais(false);
     }
@@ -501,8 +504,17 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-12">
+      {onVolver && (
+        <button
+          type="button"
+          onClick={onVolver}
+          className="flex items-center gap-2 text-sm text-cream/75 hover:text-cream transition-colors uppercase tracking-wider font-bold bg-gold/5 hover:bg-gold/10 px-4 min-h-[44px] rounded-xl w-max"
+        >
+          <ArrowLeft className="w-4 h-4" /> Volver a tus piezas
+        </button>
+      )}
       {/* Header with overall progress */}
-      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-6">
+      <div className="card-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl p-6">
         <h1
           className="text-2xl font-bold text-cream tracking-tight"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
@@ -514,12 +526,19 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
         </p>
 
         <div className="mt-5">
-          <div className="flex justify-between items-center mb-2">
+          {/*
+            Tres formas de lo mismo en un renglón: el porcentaje, la fracción
+            con barra y, en cada sección de abajo, «7 de 8 completados». La
+            barra hay que decodificarla; «26 de 28» se lee, y es como cuentan
+            las tarjetas de Métricas y el cierre del Camino. El porcentaje se
+            queda: con veintiocho campos dice de un vistazo cuánto falta.
+          */}
+          <div className="flex justify-between items-center gap-3 mb-2">
             <span className="text-sm text-cream/75">
               ADN completado: {progressPct}%
             </span>
-            <span className="text-xs text-gold font-semibold">
-              {totalCompleted}/{totalFields}
+            <span className="text-sm text-gold font-semibold shrink-0">
+              {totalCompleted} de {totalFields}
             </span>
           </div>
           <div className="h-2 bg-cream/5 rounded-full overflow-hidden">
@@ -535,7 +554,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
       </div>
 
       {/* Pais del profesional — afecta el tono del contenido publicable */}
-      <div className="card-panel border border-[rgba(232,150,46,0.12)] rounded-2xl p-5">
+      <div className="card-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-2xl p-5">
         <div className="mb-3 min-w-0">
           <p className="text-sm font-semibold text-cream">País del profesional</p>
           <p className="text-xs text-cream/65 mt-1 leading-relaxed">

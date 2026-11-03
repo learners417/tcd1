@@ -96,7 +96,7 @@ const comprado = comoVaElCirculo(armarMarcador({
   clientesActivos: 11, clientesQueVendieron: 8, clientesEnRojo: 1,
   facturadoClientes: 9000, minutosTotales: 1100, trabasDelSistema: 0,
 }), antes);
-linea(!comprado.sano && comprado.texto.includes('no escala'),
+linea(!comprado.sano && comprado.texto.includes('no crece'),
   'venden más pero cuesta más: se está comprando resultado con horas');
 
 const aliviado = comoVaElCirculo(armarMarcador({

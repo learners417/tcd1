@@ -5,6 +5,7 @@
  * apagado, con el resultado de cada pieza. Es la puerta, no el muro.
  */
 import React from 'react';
+import { Lock } from 'lucide-react';
 import { waLink } from '../lib/planes';
 import { PIEZAS_ADN, estadoPieza, planLimitado } from '../lib/adnPiezas';
 import { VOC } from '../lib/vocabulario';
@@ -22,8 +23,8 @@ export default function GraduacionSemanaBlanca() {
   const selladas = suyas.filter((p) => estadoPieza(p).sellada);
 
   return (
-    <div className="card-panel p-6 sm:p-7 border border-gold/35 bg-gradient-to-b from-gold/[0.09] to-transparent">
-      <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-2">🥋 Terminaste tus 5 días</p>
+    <div className="card-panel p-6 sm:p-7 border border-gold/35 bg-gold/[0.09]">
+      <p className="text-sm font-bold uppercase tracking-[0.28em] text-gold mb-2">Terminaste tus 5 días</p>
       <p className="text-lg text-cream leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
         Hace cinco días tu precio no decía lo que vale tu trabajo.
       </p>
@@ -51,7 +52,7 @@ export default function GraduacionSemanaBlanca() {
         <div className="space-y-1.5">
           {faltan.map((p) => (
             <div key={p.id} className="flex items-start gap-2.5">
-              <span className="text-cream/30 text-sm mt-0.5">🔒</span>
+              <Lock className="w-4 h-4 text-cream/30 mt-0.5 shrink-0" />
               <p className="text-sm text-cream/55 flex-1">{VOC(p.titulo)} <span className="text-cream/35">— {p.que}</span></p>
             </div>
           ))}
@@ -59,7 +60,7 @@ export default function GraduacionSemanaBlanca() {
       </div>
 
       <div className="mt-5 pt-5 border-t border-cream/10">
-        <p className="text-sm font-bold uppercase tracking-wider text-gold mb-2">🎁 Y te dejo dos sesiones más, abiertas</p>
+        <p className="text-sm font-bold uppercase tracking-wider text-gold mb-2">Y te dejo dos sesiones más, abiertas</p>
         <p className="text-sm text-cream/70 leading-relaxed">
           <strong className="text-cream/90">El dinero en el cuerpo</strong> — para que tu precio también lo sostenga tu voz, no solo tu cabeza.<br />
           <strong className="text-cream/90">Tu creencia nueva y el Estandarte</strong> — la frase que vas a leer cada vez que dudes.

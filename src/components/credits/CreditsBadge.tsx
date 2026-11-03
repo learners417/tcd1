@@ -6,7 +6,7 @@
  *   - low:     amarillo intenso
  *   - empty:   rojo
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Coins, AlertTriangle } from 'lucide-react';
 import BuyCreditsModal from './BuyCreditsModal';
 import { useCreditsBalance } from './useCreditsBalance';
@@ -53,7 +53,7 @@ export default function CreditsBadge({ userId, variant = 'expanded' }: CreditsBa
         ) : (
           <span>
             {balance.total}{' '}
-            <span className="opacity-60 font-normal text-[12px]">créditos</span>
+            <span className="opacity-60 font-normal text-[15px]">créditos</span>
           </span>
         )}
       </button>

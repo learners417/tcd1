@@ -38,7 +38,7 @@ const bordes: Array<[string, NumerosSemana]> = [
 ];
 
 for (const [nombre, n] of bordes) {
-  const cadena = calcularCadena(n);
+  const cadena = calcularCadena(n, []);
   const malos: string[] = [];
   for (const i of cadena) {
     if (i.valor !== null && !Number.isFinite(i.valor)) malos.push(`${i.id}=${i.valor}`);

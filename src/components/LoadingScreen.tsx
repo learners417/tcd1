@@ -8,7 +8,7 @@ interface Props {
   label?: string;
 }
 
-export default function LoadingScreen({ label = 'Preparando tu dojo…' }: Props) {
+export default function LoadingScreen({ label = 'Preparando tu Camino…' }: Props) {
   return (
     <div className="relative min-h-screen bg-ink flex items-center justify-center overflow-hidden">
       {/* Background glows */}

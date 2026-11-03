@@ -8,7 +8,7 @@ const casos: Array<[string, any, string]> = [
    { ...base, conversaciones: 10, agendas: 4, llamadasTomadas: 3, ofertasPresentadas: 3,
      ventas: 1, facturado: 1000, cobrado: 500 }, 'costo por conversación'],
 
-  ['El DM pierde a la gente — 5% agenda',
+  ['El DM pierde a las personas — 5% agenda',
    { ...base, conversaciones: 100, agendas: 5, llamadasTomadas: 4, ofertasPresentadas: 4,
      ventas: 1, facturado: 1000, cobrado: 500 }, 'conversación → agenda'],
 
@@ -31,7 +31,7 @@ const casos: Array<[string, any, string]> = [
 
 let ok = 0;
 for (const [nombre, n, esperado] of casos) {
-  const d = encontrarDomino(calcularCadena(n));
+  const d = encontrarDomino(calcularCadena(n, []));
   const acierta = (d.titulo + ' ' + d.porque).toLowerCase().includes(esperado.toLowerCase());
   if (acierta) ok++;
   console.log(`${acierta ? '✓' : '✗'} ${nombre}`);

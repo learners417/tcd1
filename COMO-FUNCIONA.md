@@ -326,8 +326,14 @@ las pestañas internas del cliente que están en `INTERNAS` (Mi Sistema, Histori
 las pestañas de Campañas…). Si agregas una pestaña, agrégala ahí: es una línea.
 Detecta además el texto apilado letra por letra en cajas angostas.
 
-Hoy se miden **38 vistas**. Solo el primer estado de cada una, sin datos reales:
-las listas llenas, las ventanas y los formularios a medio completar todavía no.
+Cuántas vistas se miden lo dice el propio medidor al final de su corrida
+(`VISTAS MEDIDAS`), y la auditoría lo repite desde ahí. Antes el número estaba
+escrito a mano en los dos lugares y se desfasó sin que nadie lo notara: decía
+38 mientras el medidor recorría 39, y una de esas 39 era una pestaña borrada
+que medía dos veces la pantalla anterior.
+
+Se mide solo el primer estado de cada vista, sin datos reales: las listas
+llenas, las ventanas y los formularios a medio completar todavía no.
 
 Desde el 16 sep **todas** las pantallas del cliente están en la lista estricta:
 cualquier falta nueva pone la auditoría en rojo.

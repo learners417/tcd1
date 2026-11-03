@@ -29,6 +29,7 @@ import type {
 } from '../../lib/campanasTypes';
 import { IMAGE_FORMAT_OPTIONS } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 const ANGULOS: { id: AnguloCreativo; label: string; descripcion: string }[] = [
   { id: 'directo', label: 'Directo', descripcion: 'Claro y profesional' },
@@ -66,14 +67,14 @@ const TABS: TabConfig[] = [
     slideCount: 1,
     lockFormat: false,
     eyebrow: 'Generador de imagen',
-    descripcion: 'Crea una imagen unica para feed, story o anuncio.',
+    descripcion: 'Crea una imagen única para feed, story o anuncio.',
   },
   {
     id: 'edicion',
     label: 'Edicion',
     icon: Wand2,
-    eyebrow: 'Edicion de imagen',
-    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamano y formato original.',
+    eyebrow: 'Edición de imagen',
+    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamaño y formato original.',
   },
   {
     id: 'carrusel',
@@ -113,17 +114,16 @@ const TABS: TabConfig[] = [
     label: 'Manual de marca',
     icon: Palette,
     eyebrow: 'Manual de marca',
-    descripcion: 'Paleta, tipografia y reglas que mandan sobre cualquier estilo o referencia al generar imagenes.',
+    descripcion: 'Paleta, tipografía y reglas que mandan sobre cualquier estilo o referencia al generar imagenes.',
   },
 ];
 
 interface Props {
   userId?: string;
   perfil?: Partial<ProfileV2>;
-  geminiKey?: string;
 }
 
-export default function CreativosView({ userId, perfil, geminiKey }: Props) {
+export default function CreativosView({ userId, perfil }: Props) {
   const [activeTab, setActiveTab] = useState<SubTab>('imagen');
   const [angulo, setAngulo] = useState<AnguloCreativo>('directo');
   const [images, setImages] = useState<{ base64: string; mimeType: string; modelUsed: string }[]>([]);
@@ -171,8 +171,7 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
       const list = await fetchCreativos(userId);
       setCreativos(list);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al cargar historial: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'cargar tu historial'));
     } finally {
       setLoadingHist(false);
     }
@@ -262,8 +261,7 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           );
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al guardar: ${msg}`);
+        toast.error(mensajeDeFalla(err, 'guardar la pieza'));
       } finally {
         setSaving(false);
         saveInFlightRef.current = false;
@@ -297,7 +295,7 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           <HeaderIcon className="w-5 h-5 text-gold" />
         </div>
         <div>
-          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold mb-0.5">
+          <p className="text-sm font-bold tracking-[0.2em] uppercase text-gold mb-0.5">
             {config.eyebrow}
           </p>
           <h2 className="text-xl font-light text-cream">
@@ -306,12 +304,12 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               con IA
             </span>
           </h2>
-          <p className="text-[11px] text-cream/55 mt-1">{config.descripcion}</p>
+          <p className="text-sm text-cream/55 mt-1">{config.descripcion}</p>
         </div>
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[rgba(232,150,46,0.10)] pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-[var(--line, rgba(142,104,36,0.18))] pb-3">
         {TABS.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -375,7 +373,6 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           <CreativoEdicion
             userId={userId}
             perfil={perfilLocal ?? {}}
-            geminiKey={geminiKey}
             onSaved={() => { /* historial se recarga al cambiar a la tab */ }}
           />
         </div>
@@ -384,14 +381,14 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
       {/* GENERADORES (imagen / carrusel / youtube) */}
       {activeTab !== 'historial' && activeTab !== 'manual_marca' && activeTab !== 'edicion' && (
         <>
-          {/* Angulo de comunicacion (opcional) */}
+          {/* Ángulo de comunicación (opcional) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-3.5 h-3.5 text-cream/55" />
-              <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-cream/65">
-                Angulo de comunicacion
+              <span className="text-sm font-bold tracking-[0.15em] uppercase text-cream/65">
+                Ángulo de comunicación
               </span>
-              <span className="text-[11px] text-cream/25">— opcional, orienta el tono visual</span>
+              <span className="text-sm text-cream/25">— opcional, orienta el tono visual</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {ANGULOS.map((a) => {
@@ -406,10 +403,10 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
                         : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'
                     }`}
                   >
-                    <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/80'}`}>
+                    <div className={`text-sm font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/80'}`}>
                       {a.label}
                     </div>
-                    <div className="text-[11px] text-cream/45 mt-0.5 leading-tight">{a.descripcion}</div>
+                    <div className="text-sm text-cream/45 mt-0.5 leading-tight">{a.descripcion}</div>
                   </button>
                 );
               })}
@@ -422,7 +419,6 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
               key={activeTab}
               angulo={angulo}
               perfil={perfilLocal ?? {}}
-              geminiKey={geminiKey}
               initialFormat={config.format ?? '1:1'}
               initialSlideCount={config.slideCount ?? 1}
               lockFormat={config.lockFormat ?? false}
@@ -433,18 +429,18 @@ export default function CreativosView({ userId, perfil, geminiKey }: Props) {
           {/* Estado del auto-guardado */}
           {images.length > 0 && (
             <div className="flex items-center justify-between rounded-xl bg-gold/5 border border-gold/20 px-4 py-2.5">
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-sm">
                 {saving ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Guardando en historial…</span></>
                 ) : saved ? (
-                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automaticamente en historial</span></>
+                  <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> <span className="text-cream/70">Guardado automáticamente en historial</span></>
                 ) : (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin text-gold" /> <span className="text-cream/75">Preparando…</span></>
                 )}
               </div>
               <button
                 onClick={() => setActiveTab('historial')}
-                className="text-[11px] font-semibold text-gold hover:underline"
+                className="text-sm font-semibold text-gold hover:underline"
               >
                 Ver historial →
               </button>

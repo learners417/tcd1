@@ -53,7 +53,7 @@ export const ETAPAS: Etapa[] = [
  * De la etapa 4 no se sale sin el cobro de prueba.
  *
  * Es la única regla dura del recorrido, y existe porque encender una campaña
- * con la cadena sin probar es tirar el presupuesto: la gente comenta, no le
+ * con la cadena sin probar es tirar el presupuesto: las personas comentan, no les
  * llega el mensaje, y el cliente descubre el problema con la pauta corriendo.
  */
 export const ETAPA_CON_CANDADO = 4;

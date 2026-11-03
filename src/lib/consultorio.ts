@@ -98,7 +98,7 @@ export const CONSULTORIO: Pregunta[] = [
     r: 'Para eso está tu Puerta Chica, que armas el día 46. Un tramo corto de tu método, con precio de entrada, que se acredita si toma el programa completo. Eso es una puerta, no un descuento.' },
   { codigo: 2, p: 'No me sale esto de quemar cartas, me parece raro.',
     r: 'Entonces no lo hagas así. Escribe lo que tengas que escribir y ciérralo como te salga: tirarlo, guardarlo, leerlo en voz alta una vez. Lo que importa es nombrarlo y soltarlo, no la ceremonia.' },
-  { codigo: 'P1.1', p: '¿Por qué no empezamos directamente con el marketing?',
+  { codigo: 'P1.1', p: '¿Por qué no empezamos directamente con la captación?',
     r: 'Porque el mejor anuncio del mundo te trae una llamada donde vas a decir tu precio. Si en esa llamada no lo sostienes, todo lo anterior no sirvió. Es una semana, y es la que hace que las otras once rindan.' },
   { codigo: 'P0.2', p: 'No tengo todos los números que me pide la Foto de Partida.',
     r: 'Pon lo que sepas y estima el resto con sinceridad. No es una auditoría: es tu punto cero. El día 87 la vas a comparar con la de llegada, y ahí lo único que importa es que hoy hayas sido honesto.' },
@@ -147,7 +147,7 @@ export const CONSULTORIO: Pregunta[] = [
   { codigo: 'P4.2e', p: '¿No es mucho pedir tantos datos antes de agendar?',
     r: 'El que de verdad quiere resolverlo los completa. El que abandona en la pregunta cuatro no iba a comprar: te ahorró cuarenta y cinco minutos.' },
   { codigo: 'P4.1', p: '¿Necesito tener seguidores para que esto funcione?',
-    r: 'No. Tu campaña le muestra tu anuncio a gente que no te conoce, y tu página hace el resto. Los seguidores ayudan después, cuando ya tienes qué vender. Por eso el contenido va en el mes 3.' },
+    r: 'No. Tu campaña le muestra tu anuncio a personas que no te conocen, y tu página hace el resto. Los seguidores ayudan después, cuando ya tienes qué vender. Por eso el contenido va en el mes 3.' },
   { codigo: 'P4.2b', p: '¿Tengo que publicar todos los días?',
     r: 'No, y menos ahora. Tu perfil hoy solo tiene que confirmar que eres una persona real que trabaja en serio. Publicar todas las semanas es otro programa y empieza después de estos noventa días.' },
   { codigo: 'P4.4', p: '¿Y si me rechazan la cuenta publicitaria?',
@@ -181,7 +181,7 @@ export const CONSULTORIO: Pregunta[] = [
 
   // ─── Sistema 5 · la marca ────────────────────────────────────────────────
   { codigo: 'P7.4', p: '¿No debería haber empezado por el contenido?',
-    r: 'No hay relación directa entre publicar y facturar. Hay profesionales con miles de seguidores que no llegan a fin de mes. Publicar sin tener qué vender es trabajar gratis con más pasos.' },
+    r: 'No hay relación directa entre publicar y facturar. Hay profesionales con miles de seguidores que no llegan a fin de mes. Publicar sin tener qué vender es trabajar de más sin cobrar.' },
   { codigo: 'P7.7', p: '¿Y si no se me ocurre qué publicar?',
     r: 'No lo inventes: sácalo de tu Matriz ABC, que hiciste con las palabras literales de quienes atiendes. Ahí están los tres temas que te van a durar un trimestre.' },
   { codigo: 'P7.8', p: '¿Tengo que grabar con buena cámara?',

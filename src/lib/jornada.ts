@@ -21,6 +21,8 @@
  * cantidad de clientes, y es lo único que distingue una app que reemplaza
  * trabajo de una que solo suma pantallas.
  */
+import type { Funcion } from './funciones';
+import { hoyISO } from './diaPrograma';
 
 export interface Jornada {
   personaId: string;
@@ -40,6 +42,15 @@ export interface Jornada {
   traba?: string;
   /** De qué cliente fue la traba. */
   trabaCliente?: string;
+  /**
+   * En qué funciones se fue el día.
+   *
+   * Es el dato que le faltaba a la tabla de La Semana: los minutos de reloj
+   * existían, pero no en qué se habían gastado, así que cinco de las seis
+   * funciones se dibujaban en cero para siempre. No se piden minutos por
+   * función —nadie los sabe— solo en qué trabajó; los minutos se reparten.
+   */
+  funciones?: Funcion[];
 }
 
 /** Una jornada que quedó abierta más de esto, se cerró sola en la vida real. */
@@ -52,7 +63,7 @@ export function iniciarJornada(
 ): Jornada {
   return {
     personaId,
-    dia: ahora.toISOString().slice(0, 10),
+    dia: hoyISO(ahora),
     inicio: ahora.toISOString(),
     planeados,
     cerradas: [],
@@ -62,7 +73,11 @@ export function iniciarJornada(
 
 export function cerrarJornada(
   j: Jornada,
-  x: { cerradas: string[]; atendidos: string[]; traba?: string; trabaCliente?: string },
+  x: {
+    cerradas: string[]; atendidos: string[];
+    traba?: string; trabaCliente?: string;
+    funciones?: Funcion[];
+  },
   ahora = new Date(),
 ): Jornada {
   return {
@@ -72,6 +87,7 @@ export function cerrarJornada(
     atendidos: x.atendidos,
     traba: x.traba?.trim() || undefined,
     trabaCliente: x.trabaCliente,
+    funciones: x.funciones ?? [],
   };
 }
 
@@ -196,7 +212,7 @@ export function armarMarcador(x: {
  *
  * Dos números: cuántos venden y cuánto cuesta cada uno. El círculo va bien
  * cuando el primero sube **y** el segundo baja. Si suben los dos, se está
- * comprando resultado con trabajo — y eso no escala.
+ * comprando resultado con trabajo — y eso no crece.
  */
 export function comoVaElCirculo(
   hoy: Marcador,
@@ -216,7 +232,7 @@ export function comoVaElCirculo(
   }
   if (masVenden && !menosTrabajo) {
     return {
-      texto: 'Venden más, pero cada uno cuesta más trabajo. Se está comprando resultado con horas, y eso no escala.',
+      texto: 'Venden más, pero cada uno cuesta más trabajo. Se está comprando resultado con horas, y eso no crece.',
       sano: false,
     };
   }

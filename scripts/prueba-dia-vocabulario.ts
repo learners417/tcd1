@@ -12,10 +12,9 @@ import {
   estaEnFaseAutonomia, mensajeDeRitmo, fechaLocal,
   esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar,
 } from '../src/lib/diaPrograma';
+import { readFileSync, existsSync } from 'node:fs';
 import { SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
-import { opcionesDePartida, jornadasHasta, resumenDePartida, diaDeLaOpcion } from '../src/lib/puntoDePartida';
 import { cinturonDesdeProgreso } from '../src/lib/cinturones';
-import { HERRAMIENTAS, HERRAMIENTAS_V3, getHerramienta, herramientasV3 } from '../src/lib/herramientas';
 import { SESIONES_GUIADAS, sesionGuiadaDe } from '../src/lib/sesionesGuiadas';
 import { setFamiliaActual, getFamiliaActual, TOKEN_CRUDO, vocabularizar } from '../src/lib/vocabulario';
 
@@ -64,7 +63,14 @@ const casos = [mensajeDeRitmo(71, 12, 42), mensajeDeRitmo(15, 13, 2), mensajeDeR
 ok(casos[0].tono === 'lejos' && casos[1].tono === 'cerca' && casos[2].tono === 'al_dia' && casos[3].tono === 'al_dia', 'tonos: lejos / cerca / al día / al día');
 const negativas = /atr[aá]s|atras(o|ado)|no vas|te atrasaste|perdiste/i;
 ok(casos.every((c) => !negativas.test(c.texto)), 'ningún mensaje dice "atrás", "atraso" ni "perdiste"');
-ok(casos[0].texto.includes('día 12') && casos[0].texto.includes('Día 71'), 'el mensaje dice qué paso toca y en qué día está');
+/*
+ * Antes era «Día 71 de 90 · tu próximo paso es el del día 12»: los dos números
+ * son ciertos —uno es el calendario, el otro el avance— pero en el mismo
+ * renglón y sin nombrar cuál es cuál se leen como una contradicción. Ahora
+ * primero va el paso, que es lo que puede hacer hoy, y los días de contexto.
+ */
+ok(casos[0].texto.includes('día 12') && casos[0].texto.includes('71 días'),
+  'el mensaje dice primero qué paso toca y después cuántos días lleva');
 ok(casos.every((c) => c.texto.length <= 110), 'cada mensaje entra en tres líneas de teléfono (≤110 caracteres)');
 
 console.log('\n── los pilares se abren por el camino, no quedan todos cerrados ──');
@@ -90,24 +96,24 @@ ok(pilarAlcanzado(primerPaso.p.metas, 0, primerPaso.m.dia_asignado ?? 0), `el pi
 const reglasViejas = new Set(['auto', 'completar_anterior', 'venta_real', 'qa_verde']);
 ok(SEED_ROADMAP_V2.every((p) => !reglasViejas.has(p.desbloqueo)), 'control: el seed ya no usa las reglas viejas (por eso hacía falta la nueva)');
 
-console.log('\n── el punto de partida del cliente que ya venía andando ──');
-const ops = opcionesDePartida();
-ok(ops.length === 10, `hay ${ops.length} opciones, una por grado ganable`);
-ok(ops.every((o) => o.loQueYaTienes && !/cintur/i.test(o.loQueYaTienes)), 'cada opción dice lo que YA TIENE, no el nombre del grado');
-const campana = ops.find((o) => o.id === '4gup')!;
-ok(campana.dia === 31, `«${campana.loQueYaTienes}» entra en el día ${campana.dia}`);
-const marcadas = jornadasHasta(SEED_ROADMAP_V2, campana.dia);
-ok(marcadas.length > 0 && marcadas.length < 90, `marca ${marcadas.length} jornadas, no las 90`);
-const codigos = new Set(marcadas.map((m) => m.codigo));
-const todas = SEED_ROADMAP_V2.flatMap((p) => p.metas.map((m) => ({ p, m })));
-ok(!codigos.has('P0.d0'), 'no marca la entrega técnica: es del equipo');
-ok(todas.filter(({ m }) => codigos.has(m.codigo)).every(({ m }) => (m.dia_asignado ?? 0) <= 31), 'no marca nada posterior al día elegido');
-ok(!todas.some(({ m }) => codigos.has(m.codigo) && m.evidencia_requerida?.del_mercado), 'no marca lo que depende de que otro pague: eso se gana');
-const grado = cinturonDesdeProgreso(new Set(marcadas.map((m) => m.clave)));
-ok(grado.id === '4gup', `con eso marcado, el cinturón queda en ${grado.nombre}`);
-ok(diaDeLaOpcion('inventado') === null && resumenDePartida(SEED_ROADMAP_V2, 'inventado') === null, 'una opción inventada no rompe nada');
-const cero = jornadasHasta(SEED_ROADMAP_V2, 0);
-ok(cero.length === 0, 'el que empieza de cero no arrastra nada');
+console.log('\n── lo que ya tiene: en revisión, no por hecho ──');
+// Acá había un bloque que probaba puntoDePartida.ts: un módulo que marcaba
+// hasta ochenta jornadas COMO HECHAS según lo que el cliente dijera tener.
+//
+// El producto descartó eso a propósito —«nadie se salta el Camino: el que
+// llega con la agenda llena y el que empieza de cero recorren lo mismo»— y la
+// pantalla se reescribió sobre yaTienes.ts, que las deja EN REVISIÓN: las hace
+// igual, más cortas, con el Crítico midiendo lo que trae.
+//
+// El módulo viejo y esta prueba sobrevivieron al cambio. Eso es peor que
+// código muerto: es código muerto con prueba en verde, que parece vivo y
+// correcto, y lo primero que invita es a volver a cablearlo. Se borraron los
+// dos. Lo que queda verificado es que la pantalla usa el camino nuevo.
+const ya = readFileSync('src/components/PuntoDePartida.tsx', 'utf-8');
+ok(/from '\.\.\/lib\/yaTienes'/.test(ya),
+  'la pantalla marca lo que ya tiene como revisión, no como jornada cumplida');
+ok(!existsSync('src/lib/puntoDePartida.ts'),
+  'y el módulo que las daba por hechas ya no existe para tentar a nadie');
 
 // ── 2. El vocabulario ─────────────────────────────────────────────────────
 console.log('\n── ningún token crudo sale del catálogo ──');
@@ -131,54 +137,50 @@ function tokensEn(valor: unknown, ruta: string, out: string[], vistos = new Set<
   }
 }
 
-// Control: el catálogo crudo SÍ tiene tokens (si no, esta prueba no prueba nada).
+/*
+ * Control: el corpus crudo SÍ tiene tokens, o esta prueba no prueba nada.
+ * Era el catálogo de herramientas más las sesiones; el catálogo salió del
+ * código el 1 de nov, así que quedan las sesiones guiadas, que son el cuerpo
+ * de texto con tokens que el cliente lee de verdad.
+ */
 const crudos: string[] = [];
-for (const h of [...HERRAMIENTAS_V3, ...HERRAMIENTAS]) tokensEn(h, h.id, crudos);
 for (const [c, sgu] of Object.entries(SESIONES_GUIADAS)) tokensEn(sgu, c, crudos);
-ok(crudos.length > 20, `control: el catálogo crudo tiene ${crudos.length} textos con tokens (la prueba tiene qué atrapar)`);
+ok(crudos.length > 20, `control: el corpus crudo tiene ${crudos.length} textos con tokens (la prueba tiene qué atrapar)`);
 
 const familias = [
   ['clinica', 'Psicóloga'],
   ['acompanamiento', 'Coach ontológico'],
   ['formacion', 'Entrenador personal'],
 ] as const;
-const ids = [...new Set([...HERRAMIENTAS_V3, ...HERRAMIENTAS].map((h) => h.id))];
 for (const [fam, esp] of familias) {
   setFamiliaActual(esp);
   ok(getFamiliaActual() === fam, `familia ${fam} detectada desde "${esp}"`);
   const fugas: string[] = [];
-  for (const id of ids) tokensEn(getHerramienta(id), id, fugas);
-  for (const h of herramientasV3()) tokensEn(h, `lista:${h.id}`, fugas);
   for (const c of Object.keys(SESIONES_GUIADAS)) tokensEn(sesionGuiadaDe(c), c, fugas);
-  ok(fugas.length === 0, `${fam}: ${ids.length} herramientas y ${Object.keys(SESIONES_GUIADAS).length} sesiones sin tokens crudos${fugas.length ? ` — ${fugas.slice(0, 3).join(' | ')}` : ''}`);
+  ok(fugas.length === 0, `${fam}: ${Object.keys(SESIONES_GUIADAS).length} sesiones sin tokens crudos${fugas.length ? ` — ${fugas.slice(0, 3).join(' | ')}` : ''}`);
 }
 
-console.log('\n── el caso exacto de la captura ──');
-setFamiliaActual('Médica clínica');
-const conDolor = [...HERRAMIENTAS_V3, ...HERRAMIENTAS].find((h) => h.constructorFases?.etiquetaOpciones.includes('dolor central'));
-ok(!!conDolor, 'existe la herramienta "Elige el dolor central"');
-const etiqueta = conDolor ? getHerramienta(conDolor.id)?.constructorFases?.etiquetaOpciones ?? '' : '';
-ok(etiqueta === 'Elige el dolor central de tu paciente', `se lee: "${etiqueta}"`);
-setFamiliaActual('Coach');
-const etiquetaCoach = conDolor ? getHerramienta(conDolor.id)?.constructorFases?.etiquetaOpciones ?? '' : '';
-ok(etiquetaCoach.endsWith('de tu consultante') || !etiquetaCoach.includes('{{'), `para un coach: "${etiquetaCoach}"`);
+/*
+ * Acá iba «el caso exacto de la captura»: una herramienta del catálogo cuya
+ * etiqueta decía «Elige el dolor central de tu {{paciente}}». El catálogo
+ * salió del código, así que el caso no tiene sujeto. Lo que protegía —que la
+ * sustitución llegue hasta el texto que el cliente lee— lo cubren las
+ * familias de arriba sobre las sesiones guiadas.
+ */
 
 console.log('\n── estabilidad (sin re-renders en bucle) ──');
 setFamiliaActual('Psicóloga');
-const id0 = ids[0];
-ok(getHerramienta(id0) === getHerramienta(id0), 'misma herramienta, misma familia → misma referencia');
 ok(sesionGuiadaDe('P0.3') === sesionGuiadaDe('P0.3'), 'misma sesión → misma referencia');
-const conPrompt = [...HERRAMIENTAS_V3, ...HERRAMIENTAS].find((h) => h.constructorFases);
-if (conPrompt) {
-  const a = getHerramienta(conPrompt.id)!.constructorFases!.promptOpciones;
-  const b = getHerramienta(conPrompt.id)!.constructorFases!.promptOpciones;
-  ok(a === b, 'la función de prompt envuelta también es estable');
-}
 ok(vocabularizar(null) === null && vocabularizar(undefined) === undefined && vocabularizar(3) === 3, 'valores vacíos pasan intactos');
-const original = HERRAMIENTAS_V3[0];
-const antes = JSON.stringify(original, (_k, v) => (typeof v === 'function' ? 'fn' : v));
-getHerramienta(original.id);
-ok(JSON.stringify(original, (_k, v) => (typeof v === 'function' ? 'fn' : v)) === antes, 'el catálogo original no se modifica (sigue con tokens para otras familias)');
+/*
+ * Y la fuente no se toca al vocabularizar: la sesión cruda sigue con sus
+ * tokens, que es lo que permite servirla a otra familia después.
+ */
+const crudaAntes = JSON.stringify(SESIONES_GUIADAS['P0.3'], (_k, v) => (typeof v === 'function' ? 'fn' : v));
+setFamiliaActual('Coach');
+sesionGuiadaDe('P0.3');
+ok(JSON.stringify(SESIONES_GUIADAS['P0.3'], (_k, v) => (typeof v === 'function' ? 'fn' : v)) === crudaAntes,
+   'la sesión original no se modifica (sigue con tokens para otras familias)');
 
 console.log(fallas === 0 ? '\n✓ TODO EN VERDE' : `\n✗ ${fallas} FALLAS`);
 process.exit(fallas === 0 ? 0 : 1);

@@ -170,6 +170,10 @@ create table if not exists sala_metricas_semana (
   objetivo text default 'mensajes'
     check (objetivo in ('perfil','mensajes','mensajes_alto')),
   gasto numeric default 0,
+  -- Con el gasto da el costo de aparecer (CPM), y con el alcance la
+  -- frecuencia. Faltaba, y por eso esos dos indicadores no podían medirse:
+  -- el peor de los dos no decía «sin datos», decía que estaba todo bien.
+  impresiones numeric default 0,
   alcance int default 0,
   comentarios int default 0,
   conversaciones int default 0,
@@ -519,7 +523,7 @@ language plpgsql security definer as $$
 begin
   insert into sala_metricas_semana (
     cliente_id, semana_iso, anuncio, objetivo, precio,
-    gasto, alcance, comentarios, conversaciones, agendas,
+    gasto, impresiones, alcance, comentarios, conversaciones, agendas,
     llamadas_tomadas, ofertas_presentadas, ventas,
     facturado, cobrado, cuotas_por_cobrar, cuotas_cobradas,
     piezas_publicadas, mensajes_enviados,
@@ -530,6 +534,7 @@ begin
     coalesce(p_datos->>'objetivo', 'mensajes'),
     coalesce((p_datos->>'precio')::numeric, 0),
     coalesce((p_datos->>'gasto')::numeric, 0),
+    coalesce((p_datos->>'impresiones')::numeric, 0),
     coalesce((p_datos->>'alcance')::int, 0),
     coalesce((p_datos->>'comentarios')::int, 0),
     coalesce((p_datos->>'conversaciones')::int, 0),
@@ -553,7 +558,8 @@ begin
   on conflict (cliente_id, semana_iso) where anuncio is null
   do update set
     objetivo = excluded.objetivo, precio = excluded.precio,
-    gasto = excluded.gasto, alcance = excluded.alcance,
+    gasto = excluded.gasto, impresiones = excluded.impresiones,
+    alcance = excluded.alcance,
     comentarios = excluded.comentarios, conversaciones = excluded.conversaciones,
     agendas = excluded.agendas, llamadas_tomadas = excluded.llamadas_tomadas,
     ofertas_presentadas = excluded.ofertas_presentadas, ventas = excluded.ventas,

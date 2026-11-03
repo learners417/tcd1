@@ -4,11 +4,13 @@
  *  - registra el hito en `hitos_cinturon` (la evidencia)
  *  - actualiza `profiles.cinturon` (el estado visible)
  *  - deriva el cinturón desde el progreso local (para Sidebar/Dashboard)
- * La validación del comprobante (screenshot/pago) ocurre conversacionalmente
- * con el Coach ANTES de completar la tarea — este servicio registra el logro.
+ * La validación del comprobante (captura/pago) ocurre conversacionalmente
+ * con tu Mentor ANTES de completar la tarea — este servicio registra el logro.
  */
 import { supabase } from './supabase';
 import type { PilarId } from './supabase';
+import { claveDelDia } from './roadmapSeed';
+import { esPasoDelCliente } from './diaPrograma';
 import {
   CINTURONES,
   SEED_ROADMAP_V2,
@@ -20,21 +22,18 @@ export type { Cinturon };
 export { CINTURONES, calcularCinturon };
 
 /** Mapeo pilar → cinturón (espejo del seed, para registro en DB). */
-const CINTURON_POR_PILAR: Record<string, string> = {
-  P0: 'blanco',
-  P1: 'amarillo',
-  P2: 'amarillo_punta_verde',
-  P3: 'verde',
-  P4: 'verde_punta_azul',
-  P5: 'azul',
-  P6: 'rojo',
-  P7: 'negro',
-};
+/**
+ * Pilar → cinturón. Antes era un mapa a mano con ocho nombres que el seed ya no
+ * usa: escribía en la base ids inexistentes. Ahora sale del mismo seed.
+ */
+const CINTURON_POR_PILAR: Record<string, string> = Object.fromEntries(
+  SEED_ROADMAP_V2.map((p) => [p.id, calcularCinturon(p.id).id]),
+);
 
-/** Pilares cuyo hito requiere comprobante visual (validado con el Coach). */
+/** Pilares cuyo hito requiere comprobante visual (validado con tu Mentor). */
 const HITOS_CON_COMPROBANTE: Record<string, string> = {
-  P4: 'screenshot de campaña activa',
-  P5: 'screenshot de la primera llamada (Meet/Zoom)',
+  P4: 'captura de campaña activa',
+  P5: 'captura de la primera llamada (Meet/Zoom)',
   P6: 'comprobante del primer pago',
   P7: 'comprobantes de los 10 pacientes',
 };
@@ -82,7 +81,7 @@ export async function otorgarCinturonPorPilar(pilarId: PilarId): Promise<void> {
       estado: 'aprobado',
       agente: 'coach',
       feedback_agente: HITOS_CON_COMPROBANTE[pilarId]
-        ? `Validado con el Coach (${HITOS_CON_COMPROBANTE[pilarId]}).`
+        ? `Validado con tu Mentor (${HITOS_CON_COMPROBANTE[pilarId]}).`
         : null,
       aprobado_at: new Date().toISOString(),
     });
@@ -90,12 +89,14 @@ export async function otorgarCinturonPorPilar(pilarId: PilarId): Promise<void> {
     // upsert idempotente sobre (usuario_id, cinturon)
     await supabase
       .from('hitos_cinturon')
-      .upsert(hitos, { onConflict: 'usuario_id,cinturon', ignoreDuplicates: true });
+      .insert(hitos); // duplicados o constraint ausente: se ignora abajo
 
     // El cinturón visible del perfil = el más alto (este, por orden de juego).
-    await supabase.from('profiles').update({ cinturon: cinturonId }).eq('id', uid);
-  } catch {
+    const { error } = await supabase.from('profiles').update({ cinturon: cinturonId }).eq('id', uid);
+    if (error) console.error('[cinturones] el cinturón no quedó en la base:', error.message);
+  } catch (e) {
     /* red o RLS: el progreso local no se bloquea por esto */
+    console.error('[cinturones] el cinturón no quedó en la base:', e);
   }
 }
 
@@ -108,7 +109,9 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
   let masAlto: Cinturon = CINTURONES[0];
 
   for (const pilar of SEED_ROADMAP_V2) {
-    const metas = pilar.metas ?? [];
+    // Solo los pasos que el cliente hace: los días de campo y los fines de
+    // semana no se completan, y exigirlos dejaba el grado trabado para siempre.
+    const metas = (pilar.metas ?? []).filter(esPasoDelCliente);
     if (metas.length === 0) continue;
     const completo = metas.every((m) => completadas.has(`${pilar.numero}-${m.codigo}`));
     if (completo) {
@@ -118,8 +121,8 @@ export function cinturonDesdeProgreso(completadas: Set<string>): Cinturon {
   }
 
   // La punta amarilla: la quema (P1.3) o EL NÚMERO (P1.5) completados, sin P1 cerrado todavía.
-  if (masAlto.id === 'blanco' && (completadas.has('1-P1.3') || completadas.has('1-P1.5'))) {
-    const punta = CINTURONES.find((c) => c.id === 'blanco_punta_amarilla');
+  if (masAlto.id === '10gup' && (completadas.has(claveDelDia(1)) || completadas.has(claveDelDia(5)))) {
+    const punta = CINTURONES.find((c) => c.id === '9gup');
     if (punta) masAlto = punta;
   }
 

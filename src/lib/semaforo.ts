@@ -15,7 +15,9 @@
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 import { diaDelPrograma, diasHabilesDeAtraso, esPasoDelCliente } from './diaPrograma';
 import { accesoDelPerfil, estadoDeAcceso, type Acceso } from './ventanaDeAcceso';
-import { pausaActiva, retomaEl, enPalabras } from './pausaGlobal';
+import { soporteCerrado, vuelveElSoporte, avisadosEntre, enPalabras } from './ventanaSinSoporte';
+import { semanasSinCargar, type SemanaDeNumeros } from './numerosDelCliente';
+import { diasReclamables, seEstaCayendo, ultima, type Sesion } from './sesionesHumanas';
 
 export type Color = 'rojo' | 'amarillo' | 'verde';
 
@@ -23,6 +25,10 @@ export type Color = 'rojo' | 'amarillo' | 'verde';
 export const ATRASO_AMARILLO = 3;
 export const ATRASO_ROJO = 7;
 export const DIAS_SIN_ENTRAR_ROJO = 5;
+/** Desde qué día del Camino ya se le pidió cargar sus números. */
+export const DIA_EN_QUE_YA_MIDE = 26;
+/** Semanas sin cargar a partir de las cuales hay que escribirle. */
+export const SEMANAS_SIN_NUMEROS = 3;
 
 export interface ClienteParaSemaforo {
   id: string;
@@ -35,6 +41,12 @@ export interface ClienteParaSemaforo {
   completadas: Set<string>;
   /** La última vez que abrió la app, en aaaa-mm-dd. */
   ultimoIngreso?: string | null;
+  /** Las semanas de números que cargó. Vacío es que todavía no cargó ninguna. */
+  numeros?: SemanaDeNumeros[];
+  /** Las sesiones con personas que recibió. Vacío: todavía ninguna. */
+  sesiones?: Sesion[];
+  /** Qué contrató. Decide cada cuánto le toca una sesión. */
+  servicio?: string | null;
 }
 
 export interface FilaDelSemaforo {
@@ -48,6 +60,10 @@ export interface FilaDelSemaforo {
   jornadaAtrasada: { dia: number; titulo: string; diasDeAtraso: number } | null;
   diasSinEntrar: number | null;
   ultimoIngreso: string | null;
+  /** Hace cuántos días que no tiene una sesión. null: todavía no tuvo ninguna. */
+  diasSinSesion: number | null;
+  /** Hace cuántas semanas que no carga sus números. null: nunca cargó o no corresponde. */
+  semanasSinNumeros: number | null;
   /** Los días que le quedan de ventana, o null si ya se cerró. */
   diasDeVentana: number | null;
   /** Por qué está en ese color, en una línea. */
@@ -99,24 +115,40 @@ export function filaDe(c: ClienteParaSemaforo, hoy: string = hoyISO()): FilaDelS
   const estado = acceso ? estadoDeAcceso(acceso, hoy) : null;
   const cerradoPorPago = Boolean(estado && !estado.abierto && estado.motivo === 'esperando el pago de tu cuota');
 
-  // Con el Camino parado para todos, el semáforo calla: nadie está atrasado
-  // de algo que nadie podía hacer. La única luz que sigue encendida es la del
-  // pago, porque esa no depende de la pausa.
-  const parado = pausaActiva(hoy);
-  if (parado && !cerradoPorPago) {
-    return {
-      id: c.id,
-      nombre: c.nombre,
-      color: 'verde',
-      semana: dia > 0 ? Math.floor((dia - 1) / 7) + 1 : 0,
-      dia,
-      jornadaAtrasada: null,
-      diasSinEntrar: sinEntrar,
-      ultimoIngreso: c.ultimoIngreso ?? null,
-      diasDeVentana: estado && estado.abierto ? estado.diasRestantes : null,
-      porque: `El Camino está en pausa. Retoma el ${enPalabras(retomaEl(parado))}.`,
-    };
-  }
+  // Hace cuántas semanas que no carga sus números. Solo cuenta a partir del
+  // día en que el Camino se los pidió: antes de eso no hay nada que cargar.
+  const yaDebeMedir = dia >= DIA_EN_QUE_YA_MIDE;
+  const sinNumeros = yaDebeMedir
+    ? (c.numeros && c.numeros.length ? semanasSinCargar(c.numeros, hoy) : Infinity)
+    : null;
+  const numerosFlojos = sinNumeros !== null && sinNumeros >= SEMANAS_SIN_NUMEROS;
+
+  // El acompañamiento que compró y no está recibiendo.
+  //
+  // Los días en que el soporte estaba cerrado y avisado se descuentan: de esos
+  // días el cliente estaba enterado y al equipo no se le pueden reclamar.
+  const ultimaSesion = c.sesiones?.length ? ultima(c.sesiones) : null;
+  const avisados = ultimaSesion ? avisadosEntre(ultimaSesion.fecha, hoy) : 0;
+  const diasSinUna = c.sesiones?.length
+    ? diasReclamables(c.sesiones, hoy, avisados)
+    : null;
+  const acompanamientoFlojo = c.sesiones?.length
+    ? seEstaCayendo(c.sesiones, c.servicio, hoy, avisados)
+    : false;
+  const nuncaCargo = yaDebeMedir && (!c.numeros || c.numeros.length === 0);
+
+  // EL SOPORTE CERRADO NO APAGA EL SEMÁFORO.
+  //
+  // Antes, una «pausa global» devolvía verde a toda la cartera y el semáforo
+  // callaba un mes entero: el cliente que dejó de entrar en diciembre
+  // reaparecía en rojo recién a fin de enero, cuando ya se había ido.
+  //
+  // El Camino no se para. Lo que se cierra son los días en que el equipo no
+  // responde, y eso cambia UNA cosa: esos días no se le pueden reclamar al
+  // equipo. Así que se descuentan de la cuenta de abandono y nada más. Todo
+  // lo que depende del cliente —entrar, cerrar su día, cargar sus números—
+  // se sigue midiendo igual.
+  const cerrado = soporteCerrado(hoy);
 
   let color: Color = 'verde';
   let porque = 'Al día y entrando.';
@@ -134,8 +166,33 @@ export function filaDe(c: ClienteParaSemaforo, hoy: string = hoyISO()): FilaDelS
   } else if (sinEntrar !== null && sinEntrar >= DIAS_SIN_ENTRAR_ROJO) {
     color = 'rojo';
     porque = `Hace ${sinEntrar} días que no entra.`;
+  } else if (color === 'verde' && acompanamientoFlojo) {
+    // VA ANTES QUE LA DE LOS NÚMEROS, a propósito.
+    //
+    // «No carga sus números» es algo que el cliente tiene que corregir. Esto
+    // es lo que el EQUIPO le debe: compró acompañamiento y hace rato que no lo
+    // recibe. De las dos, esta es la que hace que alguien se vaya — y es la
+    // más silenciosa, porque el cliente que deja de recibir no se queja: se
+    // va. Mostrar primero lo que él tiene que corregir, mientras le debemos
+    // sesiones, es mirar para el lado equivocado.
+    color = 'amarillo';
+    porque = `Al día, pero hace ${diasSinUna} días que no tiene una sesión. Se le está cayendo el acompañamiento.`;
+  } else if (color === 'verde' && numerosFlojos) {
+    // Al día con las jornadas, pero sin mirar sus propios números. Nadie
+    // corrige una campaña que no mira.
+    color = 'amarillo';
+    porque = nuncaCargo
+      ? 'Al día, pero todavía no cargó sus números ni una vez.'
+      : `Al día, pero hace ${sinNumeros} semanas que no carga sus números.`;
   } else if (color === 'verde' && sinEntrar !== null && sinEntrar >= DIAS_SIN_ENTRAR_ROJO) {
     color = 'rojo';
+  }
+
+  // Si hoy el soporte está cerrado, el equipo tiene que saberlo antes de
+  // escribirle: su mensaje va a esperar. No cambia el color —el problema del
+  // cliente sigue ahí— pero cambia qué puede hacer hoy quien lo lee.
+  if (cerrado && color !== 'verde') {
+    porque += ` Hoy no hay soporte: se responde desde el ${enPalabras(vuelveElSoporte(cerrado))}.`;
   }
 
   return {
@@ -148,6 +205,8 @@ export function filaDe(c: ClienteParaSemaforo, hoy: string = hoyISO()): FilaDelS
     diasSinEntrar: sinEntrar,
     ultimoIngreso: c.ultimoIngreso ?? null,
     diasDeVentana: estado && estado.abierto ? estado.diasRestantes : null,
+    diasSinSesion: diasSinUna,
+    semanasSinNumeros: Number.isFinite(sinNumeros as number) ? (sinNumeros as number) : null,
     porque,
   };
 }

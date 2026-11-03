@@ -155,7 +155,7 @@ function PersonColumn({
             <div className="text-sm font-bold text-cream truncate" style={{ color: color.text }}>
               {personName}
             </div>
-            <div className="text-[11px] text-cream/55">
+            <div className="text-sm text-cream/55">
               {activeCount} activa{activeCount === 1 ? '' : 's'}
               {tareas.length !== activeCount && ` · ${tareas.length - activeCount} compl.`}
             </div>
@@ -170,7 +170,7 @@ function PersonColumn({
       >
         {tareas.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-cream/15 text-xs px-3 text-center">
-            Sin tareas asignadas. Arrastrá una acá para reasignar.
+            Sin tareas asignadas. Arrastra una acá para reasignar.
           </div>
         ) : (
           BUCKET_ORDER.map(bucket => {
@@ -180,10 +180,10 @@ function PersonColumn({
             return (
               <div key={bucket} className="space-y-2">
                 <div className="flex items-center justify-between px-2">
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isVencidas ? 'text-red-400' : 'text-cream/55'}`}>
+                  <span className={`text-sm font-bold uppercase tracking-wider ${isVencidas ? 'text-red-400' : 'text-cream/55'}`}>
                     {BUCKET_LABELS[bucket]}
                   </span>
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${isVencidas ? 'bg-red-500/15 text-red-400' : 'bg-cream/5 text-cream/55'}`}>
+                  <span className={`text-sm font-bold px-1.5 py-0.5 rounded-full ${isVencidas ? 'bg-red-500/15 text-red-400' : 'bg-cream/5 text-cream/55'}`}>
                     {items.length}
                   </span>
                 </div>
@@ -297,7 +297,7 @@ export default function TaskByPersonView({
             <PersonColumn
               key={m.id}
               personId={m.id}
-              personName={m.id === currentUserId ? `${m.nombre ?? 'Yo'} (vos)` : m.nombre ?? 'Sin nombre'}
+              personName={m.id === currentUserId ? `${m.nombre ?? 'Yo'} (tú)` : m.nombre ?? 'Sin nombre'}
               tareas={byPerson.get(m.id) ?? []}
               currentUserId={currentUserId}
               onStatusChange={onStatusChange}

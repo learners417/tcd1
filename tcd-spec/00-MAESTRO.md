@@ -127,19 +127,27 @@ personas que pagan poco.
 
 ## 4. Los cinco sistemas
 
-Los 90 días viven adentro de cinco bloques. Las sesiones nunca se muestran todas
-juntas: se muestran dentro de su sistema.
+**Esta tabla sale de `datos/roadmap.seed.json`, que es la única fuente de
+fechas del Camino.** Antes estaba escrita a mano acá y decía otra cosa: otros
+nombres («Tú» en vez de «Tu reset», «Tu sistema de venta» en vez de «Tu
+captación automática») y otros rangos. El cliente veía una cosa en la app y
+otra en lo que se le había vendido. Si cambia el seed, la auditoría avisa que
+esta tabla quedó vieja.
 
-| # | Sistema | Días | Qué sale de acá |
-|---|---|---|---|
-| 1 | Tú | 1–12 | Su clínica cargada, su número, su precio digno, su cartera ordenada |
-| 2 | Tu programa | 15–19 | Método probado, oferta, garantía, escalera |
-| 3 | Tu sistema de venta | 22–46 | Circuito, página, VSL, formulario, campaña, llamada |
-| 4 | Tu clínica adentro | 2 y 47–53 | Mi Clínica desde el día 2, y su app de entrega en el mes 2 |
-| 5 | Tu plan de marca | 61–67 | Matriz ABC y las doce semanas escritas |
+Y los sistemas **no son bloques consecutivos: se entrelazan a propósito.** Cada
+uno tiene su cuerpo —los días seguidos donde se construye— y después vuelve en
+días sueltos, cuando ya hay con qué revisarlo. El sistema 1 se escribe en la
+primera semana y se vuelve a tocar el día 80, con el control de los 7.000 USD.
 
-El sistema 4 es el único con dos momentos, y hay que decirlo: **se ordena el día
-2 lo que ya tiene, y se arma en el mes 2 lo que va a entregar.**
+| # | Sistema | Su cuerpo | Vuelve en los días | Jornadas |
+|---|---|---|---|---|
+| 1 | **Tu reset** | 1-5 | 32, 66, 80 | 8 |
+| 2 | **Tu programa de alto impacto** | 8-12 | 24, 46 | 6 |
+| 3 | **Tu captación automática** | 15-33 | 43, 45, 47, 50, 57, 64, 71, 73, 78 | 23 |
+| 4 | **Tu propia app** | 36-44 | 52, 59 | 8 |
+| 5 | **Tu ecosistema circular** | 85-86 | — | 2 |
+
+Las sesiones nunca se muestran todas juntas: se muestran dentro de su sistema.
 
 ---
 

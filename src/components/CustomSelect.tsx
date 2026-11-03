@@ -2,7 +2,7 @@
  * CustomSelect.tsx
  * Dropdown estilizado con el tema dark de la app. Reemplaza los <select> nativos.
  */
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface CustomSelectProps {
@@ -58,10 +58,16 @@ export default function CustomSelect({
           bg-black/20 border rounded-xl px-3 py-3
           text-sm text-cream text-left
           transition-all duration-150 outline-none
-          ${open ? 'border-gold/50 ring-1 ring-gold/20' : 'border-[rgba(232,150,46,0.12)] hover:border-[rgba(232,150,46,0.18)]'}
+          ${open ? 'elegido' : 'border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line2, rgba(142,104,36,0.30))]'}
         `}
       >
-        <span className={value ? 'text-cream' : 'text-cream/55'}>{selectedLabel}</span>
+        {/* `una-linea`, que es la clase de la casa, y no `truncate`: en tema claro
+            `truncate` está desactivada a propósito —un nombre de cliente cortado a
+            la mitad no sirve— y `una-linea` es la excepción escrita para las cajas
+            de alto fijo. En una columna angosta la etiqueta pasaba a dos renglones
+            y el chevron, centrado, quedaba en el hueco entre los dos, alineado a
+            nada: medido en 49 px de alto con 24 de interlínea. */}
+        <span className={`min-w-0 una-linea ${value ? 'text-cream' : 'text-cream/55'}`}>{selectedLabel}</span>
         <ChevronDown
           className={`w-4 h-4 text-cream/75 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
@@ -69,7 +75,7 @@ export default function CustomSelect({
 
       {open && (
         <div
-          className={`absolute z-50 left-0 right-0 bg-panel border border-[rgba(232,150,46,0.12)] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
+          className={`absolute z-50 left-0 right-0 bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl shadow-xl shadow-black/50 overflow-y-auto ${openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}
           style={{ maxHeight: `${DROPDOWN_MAX_HEIGHT}px` }}
         >
           {options.map((opt) => (

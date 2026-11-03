@@ -48,7 +48,7 @@ export const INGREDIENTES: Ingrediente[] = [
   { id: 'analogia', nombre: 'ANALOGÍA', descripcion: 'Explicación «de primer grado» para lo técnico o abstracto. Nunca lenguaje técnico. Menciona siempre lo SIMPLE que es.' },
   { id: 'nombre', nombre: 'NOMBRE PROPIO', descripcion: 'Todo lo que ofreces tiene nombre nuevo. Con nombre suena a sistema; sin nombre suena a consejo.' },
   { id: 'prueba', nombre: 'PRUEBA', descripcion: 'Un testimonio o resultado real en alguna pantalla. Calla al escéptico sin decir una palabra.' },
-  { id: 'dolor', nombre: 'DOLOR > PLACER', descripcion: 'La gente compra para SALIR del dolor. Habla el lenguaje interno de tu cliente, con sus palabras exactas — las que dice cuando nadie lo escucha.' },
+  { id: 'dolor', nombre: 'DOLOR > PLACER', descripcion: 'Se compra para SALIR del dolor. Habla el lenguaje interno de tu cliente, con sus palabras exactas — las que dice cuando nadie lo escucha.' },
   { id: 'aclaracion', nombre: 'ACLARACIÓN', descripcion: 'Una línea honesta que baja la promesa. Confianza y filtro en un solo movimiento.' },
   { id: 'cta', nombre: 'CTA', descripcion: '«Comenta [PALABRA]». A veces se pide la palabra ya en las primeras líneas del caption, antes de contar nada.' },
 ];
@@ -96,7 +96,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       '✗ [TÁCTICA VIEJA 1] — una línea de por qué no alcanza.',
       '✗ [TÁCTICA VIEJA 2] — una línea.',
       '✗ [TÁCTICA VIEJA 3] — una línea.',
-      '«Lo que SÍ necesitas 👉» — 3 puntos numerados, cada uno con una línea del porqué (el QUÉ, no el CÓMO).',
+      '«Lo que SÍ necesitas» — 3 puntos numerados, cada uno con una línea del porqué (el QUÉ, no el CÓMO).',
       'Prueba: [TESTIMONIO O RESULTADO REAL].',
       '«Abre [CUPOS] lugares para [PROGRAMA]. Comenta [PALABRA] y te envío los detalles.»',
     ],
@@ -107,7 +107,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
   {
     id: 2, nombre: 'La analogía de primer grado', familia: 'resultado_metodo',
     cuando: 'Cuando tu método es difícil de explicar o suena técnico. Traduce lo abstracto a una imagen que un niño entiende.',
-    porque: 'Lo simple se siente lograble — y la gente solo compra lo que cree poder lograr. La imagen se recuerda y se repite: la analogía viaja de boca en boca; la explicación técnica muere en la pantalla.',
+    porque: 'Lo simple se siente lograble — y solo se compra lo que se cree poder lograr. La imagen se recuerda y se repite: la analogía viaja de boca en boca; la explicación técnica muere en la pantalla.',
     estructura: [
       'Hook por resultado: «Cómo [RESULTADO CONCRETO] sin [SACRIFICIO QUE TEMEN]».',
       '«Funciona como [ANALOGÍA SIMPLE DE LA VIDA REAL]» — desarrollada en 2 o 3 pantallas.',
@@ -123,7 +123,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
   {
     id: 3, nombre: 'El dolor agravado', familia: 'dolor_historia',
     cuando: 'Para el cliente que ya sabe que tiene el problema. Cada pantalla aprieta la llaga; el cierre trae la esperanza.',
-    porque: 'La gente compra para salir del dolor, y nombrar su diálogo interno con sus palabras exactas produce el efecto «me lee la mente» — la señal más fuerte de que entiendes su caso.',
+    porque: 'Se compra para salir del dolor, y nombrar su diálogo interno con sus palabras exactas produce el efecto «me lee la mente» — la señal más fuerte de que entiendes su caso.',
     estructura: [
       'Pregunta de dolor: «¿Por qué [PROBLEMA QUE VIVE] y cómo arreglarlo?»',
       'Problema 1 + agravarlo con su lenguaje interno + media pista de solución.',
@@ -304,7 +304,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       'CTA: «Comenta [PALABRA]».',
     ],
     caption: '«El error no fue trabajar poco. Fue trabajar en lo equivocado. Comenta [PALABRA].»',
-    ejemplo: '«Me tomó 4 años tener mi agenda como la quería. Y este fue mi peor error: intentar convencer a gente que no estaba lista.»',
+    ejemplo: '«Me tomó 4 años tener mi agenda como la quería. Y este fue mi peor error: intentar convencer a personas que no estaban listas.»',
     errorComun: 'Confesar un error que tu cliente no comete. Solo funciona si el error confesado es el espejo exacto de su conducta actual — se elige mirando al cliente, no la biografía propia.',
   },
   {
@@ -319,7 +319,7 @@ export const FORMULAS_ANUNCIOS: FormulaAnuncio[] = [
       'CTA: «Comenta [PALABRA]».',
     ],
     caption: '«Si te viste en alguna de estas líneas, esto es para ti. Comenta [PALABRA].»',
-    ejemplo: '«La mayoría pasa el mes persiguiendo gente por mensajes, bajando el precio, tratando de convencer a personas que todavía no están listas…»',
+    ejemplo: '«La mayoría pasa el mes persiguiendo personas por mensajes, bajando el precio, tratando de convencer a personas que todavía no están listas…»',
     errorComun: 'Detalles vagos. El espejo vive de la precisión quirúrgica: «revisa el teléfono a las 6:50 antes de levantarse» retrata; «está muy ocupado» no retrata a nadie.',
   },
   {
@@ -420,7 +420,7 @@ export const REGLA_URGENCIA =
 /* ══════════════════ EL DM AUTOMÁTICO ══════════════════ */
 
 export const DM_AUTOMATICO = {
-  mensaje: '«¡Buenísimo! Acá tienes todo lo de [PROGRAMA] 👉 [LINK A LA PÁGINA].\nMíralo tranquilo y cuéntame: [PREGUNTA].»',
+  mensaje: '«¡Buenísimo! Acá tienes todo lo de [PROGRAMA]: [LINK A LA PÁGINA].\nMíralo tranquilo y cuéntame: [PREGUNTA].»',
   reglaPregunta: 'La [PREGUNTA] es UNA sola, fácil de contestar, y sobre SU situación — nunca sobre el programa. Ejemplos: «¿hace cuánto vienes con esto?», «¿qué probaste hasta ahora?», «¿es para ti o para tu equipo?».',
   seguimiento: '«¿Pudiste verlo? ¿Qué te quedó dando vueltas?» — a las 24-48 h, solo a quien pidió el link y no avanzó. Un solo seguimiento.',
   reglasPalabra: [
@@ -511,7 +511,7 @@ export function veredictoAnuncio(
   const u = UMBRALES[objetivo];
   const { gasto, visitas, conversaciones, agendas } = d;
   if (!gasto && !visitas && !conversaciones) {
-    return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+    return { estado: 'sin_datos', texto: 'Cargando datos… con más números, el tablero decide.' };
   }
   const base = objetivo === 'perfil' ? visitas : conversaciones;
   const costo = base > 0 ? gasto / base : null;
@@ -531,7 +531,7 @@ export function veredictoAnuncio(
   if (conversaciones >= 8 && agendas / conversaciones < METRICAS_REGLAS.minConversacionAAgenda) {
     return {
       estado: 'amarillo',
-      texto: `Solo ${Math.round((agendas / conversaciones) * 100)}% de tus conversaciones agenda (deberia ser 25% o mas). El anuncio trae gente; el DM la pierde.`,
+      texto: `Solo ${Math.round((agendas / conversaciones) * 100)}% de tus conversaciones agenda (deberia ser 25% o mas). El anuncio trae personas; el DM las pierde.`,
     };
   }
   if (conversaciones > 0 && agendas > 0) {
@@ -540,7 +540,7 @@ export function veredictoAnuncio(
       texto: `$${(gasto / conversaciones).toFixed(2)} por conversación y agenda. Este queda.`,
     };
   }
-  return { estado: 'sin_datos', texto: 'Cargando datos… con mas numeros, el tablero decide.' };
+  return { estado: 'sin_datos', texto: 'Cargando datos… con más números, el tablero decide.' };
 }
 
 /* ══════════════════ AUDITORÍA DE INGREDIENTES ══════════════════ */

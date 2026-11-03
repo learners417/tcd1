@@ -40,7 +40,7 @@ export type CargaSemanal = Partial<Record<Campo, ValorConFirma>>;
 export const NOMBRE_CAMPO: Record<Campo, string> = {
   gasto: 'lo que gastaste en pauta',
   impresiones: 'las impresiones',
-  alcance: 'a cuánta gente llegó',
+  alcance: 'a cuántas personas llegó',
   comentarios: 'los comentarios',
   conversaciones: 'las conversaciones nuevas',
   agendas: 'las agendas',
@@ -111,7 +111,7 @@ export function firmaDe(v: ValorConFirma | undefined): string {
 // ── EL DIAGNÓSTICO PARCIAL ─────────────────────────────────────────────────
 
 /**
- * Los tramos del embudo, y qué campos hacen falta para poder opinar de cada uno.
+ * Los tramos de la captación, y qué campos hacen falta para poder opinar de cada uno.
  *
  * El orden importa: se va de arriba hacia abajo y se dice hasta dónde se
  * llega. Si falta un campo del medio, se puede opinar de lo de arriba y se
@@ -123,7 +123,7 @@ const TRAMOS: Array<{
   /** Lo que se puede afirmar si están todos. */
   loQueDice: string;
 }> = [
-  { nombre: 'si el anuncio trae gente',
+  { nombre: 'si el anuncio trae personas',
     necesita: ['gasto', 'impresiones', 'alcance', 'comentarios'],
     loQueDice: 'si el anuncio para el scroll y a qué costo' },
   { nombre: 'si el mensaje abre conversaciones',

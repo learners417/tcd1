@@ -26,8 +26,10 @@ export default defineConfig(({mode}) => {
           name: 'Tu Clínica Digital',
           short_name: 'TCD',
           description: 'Tu clínica digital — el camino de 90 días.',
-          theme_color: '#080808',
-          background_color: '#080808',
+          // El crema del tema claro, que es el único que ve el cliente: la
+          // pantalla de arranque abría en negro para entrar a una app crema.
+          theme_color: '#EAE4D9',
+          background_color: '#EAE4D9',
           display: 'standalone',
           orientation: 'portrait',
           start_url: '/',

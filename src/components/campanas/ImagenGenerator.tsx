@@ -27,6 +27,7 @@ import {
   IMAGE_QUALITY_OPTIONS, IMAGE_QUALITY_DEFAULT,
 } from '../../lib/campanasTypes';
 import type { ProfileV2 } from '../../lib/supabase';
+import { mensajeDeFalla } from '../../lib/conexion';
 
 const MAX_REFS = 5;
 
@@ -53,7 +54,6 @@ interface Props {
   copies?: CopyGenerado[];
   angulo?: AnguloCreativo;
   perfil: Partial<ProfileV2>;
-  geminiKey?: string;
   initialFormat?: ImageFormat;
   initialSlideCount?: number;
   lockFormat?: boolean;
@@ -65,7 +65,7 @@ interface Props {
   ) => void;
 }
 
-export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, initialFormat, initialSlideCount, lockFormat, onImagesGenerated }: Props) {
+export default function ImagenGenerator({ copies, angulo, perfil, initialFormat, initialSlideCount, lockFormat, onImagesGenerated }: Props) {
   const copyList = copies ?? [];
   const effectiveAngulo: AnguloCreativo = angulo ?? 'directo';
 
@@ -145,14 +145,14 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
     const remaining = MAX_REFS - current.length;
     if (remaining <= 0) {
-      toast.error(`Maximo ${MAX_REFS} imagenes`);
+      toast.error(`Máximo ${MAX_REFS} imagenes`);
       e.target.value = '';
       return;
     }
 
     const toProcess = files.slice(0, remaining);
     if (files.length > remaining) {
-      toast.error(`Solo se agregaron ${remaining} de ${files.length} (maximo ${MAX_REFS})`);
+      toast.error(`Solo se agregaron ${remaining} de ${files.length} (máximo ${MAX_REFS})`);
     }
 
     const newRefs: ReferenceImage[] = [];
@@ -233,14 +233,14 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
     // Validate custom text for single image: solo H1 obligatorio
     if (!isCarousel && genMode === 'texto_personalizado') {
       if (!customText.h1.trim()) {
-        toast.error('Completa al menos el H1 (titulo principal)'); return;
+        toast.error('Completa al menos el H1 (título principal)'); return;
       }
     }
     if (isCarousel) {
       const invalid = slideConfigs.findIndex(
         cfg => cfg.textSource === 'personalizado' && !cfg.customText?.h1?.trim()
       );
-      if (invalid >= 0) { toast.error(`Completa al menos el H1 (titulo) en slide ${invalid + 1}`); return; }
+      if (invalid >= 0) { toast.error(`Completa al menos el H1 (título) en slide ${invalid + 1}`); return; }
 
       // Carrusel con IA: sin tema + sin copies = 10 slides identicos.
       // Forzamos tema escrito o copies explicitos para que cada slide sea distinto.
@@ -299,7 +299,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           ...baseOpts,
           customText: effectiveCustomText,
         });
-        const result = await generateImageWithFallback(prompt, setProgress, refs, { geminiKey, format, quality });
+        const result = await generateImageWithFallback(prompt, setProgress, refs, { format, quality });
         const imgs = [{ base64: result.imageBase64, mimeType: result.mimeType, modelUsed: result.modelUsed }];
         setImages(imgs);
         setSlidePrompts([prompt]);
@@ -329,7 +329,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               perfil,
               styleRefs.length > 0 ? undefined : estilo,
             );
-            const text = await generateText({ prompt: narrPrompt });
+            const text = await generateText({ feature: 'creativo', tarea: 'chat', prompt: narrPrompt });
             const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
             const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -409,7 +409,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
         const results = await generateCarouselImages(prompts, (slideIdx, prog) => {
           setCurrentSlide(slideIdx);
           setProgress(prog);
-        }, refs, { geminiKey, format, quality });
+        }, refs, { format, quality });
         const imgs = results.map((r) => ({ base64: r.imageBase64, mimeType: r.mimeType, modelUsed: r.modelUsed }));
         setImages(imgs);
         setSlidePrompts(prompts);
@@ -421,13 +421,12 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           : `${results.length} imagenes de carrusel generadas`);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(msg);
+      toast.error(mensajeDeFalla(err, 'generar las imágenes'));
     } finally {
       setGenerating(false);
       setProgress(null);
     }
-  }, [copyList, effectiveAngulo, perfil, geminiKey, onImagesGenerated, estilo, mode, genMode, instrucciones, characterRefs, styleRefs, customText, slideConfigs, format, quality, userPrompt, textSource, isCarousel, totalSlides]);
+  }, [copyList, effectiveAngulo, perfil, onImagesGenerated, estilo, mode, genMode, instrucciones, characterRefs, styleRefs, customText, slideConfigs, format, quality, userPrompt, textSource, isCarousel, totalSlides]);
 
   // ─── Regenerar UNA sola slide ──────────────────────────────────────────────
   // Reconstruye el prompt desde el estado UI actual (estilo, tema, instrucciones,
@@ -517,7 +516,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
     setRegeneratingIdx(idx);
     try {
-      const result = await generateImageWithFallback(prompt, setProgress, refs, { geminiKey, format, quality });
+      const result = await generateImageWithFallback(prompt, setProgress, refs, { format, quality });
       // Guardar el prompt nuevo y las refs actuales para futuras regeneraciones
       setSlidePrompts(prev => { const next = [...prev]; next[idx] = prompt; return next; });
       setSlideRefsUsed(prev => { const next = [...prev]; next[idx] = refs; return next; });
@@ -535,8 +534,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       onImagesGenerated(next, mode, promptsForEntry, { asNewEntry: true });
       toast.success(`Slide ${idx + 1} regenerada`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error regenerando slide ${idx + 1}: ${msg}`);
+      toast.error(mensajeDeFalla(err, `rehacer la lámina ${idx + 1}`));
     } finally {
       setRegeneratingIdx(null);
       setProgress(null);
@@ -544,7 +542,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
   }, [
     totalSlides, isCarousel, characterRefs, styleRefs, estilo, mode, instrucciones,
     userPrompt, format, genMode, customText, copyList, effectiveAngulo, perfil,
-    slideConfigs, savedNarrative, geminiKey, quality, onImagesGenerated,
+    slideConfigs, savedNarrative, quality, onImagesGenerated,
   ]);
 
   // ─── Edicion sutil con IA ──────────────────────────────────────────────────
@@ -560,7 +558,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
         { base64: baseImg.base64, mimeType: baseImg.mimeType },
         editPrompt.trim(),
         setProgress,
-        { geminiKey, format, quality },
+        { format, quality },
       );
       // Mismo motivo que en regenerateSingle: nada de side effects dentro del
       // updater (StrictMode invoca el updater dos veces en dev).
@@ -575,35 +573,34 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       setEditPrompt('');
       toast.success('Edicion aplicada');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error en la edicion: ${msg}`);
+      toast.error(mensajeDeFalla(err, 'editar la imagen'));
     } finally {
       setEditing(false);
       setProgress(null);
     }
-  }, [geminiKey, editPrompt, images, previewIdx, mode, onImagesGenerated, format, quality, slidePrompts]);
+  }, [editPrompt, images, previewIdx, mode, onImagesGenerated, format, quality, slidePrompts]);
 
   return (
     <div className="space-y-3">
       {/* ─── Tema / contexto del contenido (input principal) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
-          Tema o contexto del contenido <span className="text-cream/25 normal-case font-normal tracking-normal">— opcional, no se usa como descripcion literal</span>
+        <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+          Tema o contexto del contenido <span className="text-cream/25 normal-case font-normal tracking-normal">— opcional, no se usa como descripción literal</span>
         </label>
         <textarea
           value={userPrompt}
           onChange={(e) => setUserPrompt(e.target.value)}
           rows={3}
-          placeholder="Ej: estres en profesionales de la salud, transicion de carrera a las 40, importancia del descanso. Si subis una referencia visual, ese estilo manda — esto solo orienta el angulo del contenido."
-          className="w-full bg-black/20 border border-[rgba(232,150,46,0.14)] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
+          placeholder="Ej: estres en profesionales de la salud, transicion de carrera a las 40, importancia del descanso. Si subes una referencia visual, ese estilo manda — esto solo orienta el angulo del contenido."
+          className="w-full bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/60 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none"
         />
       </div>
 
       {/* ─── Reference Images (multi, up to 5 each) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+        <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
           Imagenes de referencia (opcional — hasta {MAX_REFS} por tipo)
-          <span className="text-cream/25 normal-case font-normal tracking-normal"> — se comprimen automaticamente al subirlas</span>
+          <span className="text-cream/25 normal-case font-normal tracking-normal"> — se comprimen automáticamente al subirlas</span>
         </label>
         {(() => {
           const totalBytes =
@@ -613,9 +610,9 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           const pct = Math.min(100, Math.round((totalBytes / MAX_REQUEST_PAYLOAD_BYTES) * 100));
           const danger = totalBytes > MAX_REQUEST_PAYLOAD_BYTES;
           const warn = !danger && pct >= 75;
-          const color = danger ? '#EF4444' : warn ? '#E8962E' : '#22C55E';
+          const color = danger ? '#EF4444' : warn ? '#B0822E' : '#22C55E';
           return (
-            <div className="mb-2 flex items-center gap-2 text-[11px]">
+            <div className="mb-2 flex items-center gap-2 text-sm">
               <span style={{ color }} className="font-semibold">
                 {formatBytes(totalBytes)} / {formatBytes(MAX_REQUEST_PAYLOAD_BYTES)}
               </span>
@@ -637,16 +634,16 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-cream/55" />
-                <span className="text-[11px] font-semibold text-cream/70">Personaje</span>
+                <span className="text-sm font-semibold text-cream/70">Personaje</span>
               </div>
-              <span className="text-[11px] text-cream/45">{characterRefs.length}/{MAX_REFS}</span>
+              <span className="text-sm text-cream/45">{characterRefs.length}/{MAX_REFS}</span>
             </div>
             {characterRefs.length > 0 && (
               <div className="grid grid-cols-3 gap-1.5">
                 {characterRefs.map((ref, idx) => (
                   <div key={idx} className="relative">
                     <img loading="lazy" src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref personaje ${idx + 1}`} />
-                    <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-[8px] font-medium">
+                    <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-xs font-medium">
                       {formatBytes(base64SizeBytes(ref.base64))}
                     </span>
                     <button onClick={() => removeRef(characterRefs, setCharacterRefs, idx)} className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/70 text-white hover:bg-red-500/80 transition-colors">
@@ -659,7 +656,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {characterRefs.length < MAX_REFS && (
               <label className="flex items-center justify-center gap-2 p-2.5 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 transition-colors">
                 <Upload className="w-4 h-4 text-cream/20" />
-                <span className="text-[11px] text-cream/45">Subir foto</span>
+                <span className="text-sm text-cream/45">Subir foto</span>
                 <input type="file" multiple accept={ACCEPT_ATTR} className="hidden" onChange={(e) => handleRefUpload(e, characterRefs, setCharacterRefs)} />
               </label>
             )}
@@ -670,16 +667,16 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <PaletteIcon className="w-3.5 h-3.5 text-cream/55" />
-                <span className="text-[11px] font-semibold text-cream/70">Estilo de diseño</span>
+                <span className="text-sm font-semibold text-cream/70">Estilo de diseño</span>
               </div>
-              <span className="text-[11px] text-cream/45">{styleRefs.length}/{MAX_REFS}</span>
+              <span className="text-sm text-cream/45">{styleRefs.length}/{MAX_REFS}</span>
             </div>
             {styleRefs.length > 0 && (
               <div className="grid grid-cols-3 gap-1.5">
                 {styleRefs.map((ref, idx) => (
                   <div key={idx} className="relative">
                     <img loading="lazy" src={`data:${ref.mimeType};base64,${ref.base64}`} className="w-full h-14 object-cover rounded-md" alt={`Ref estilo ${idx + 1}`} />
-                    <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-[8px] font-medium">
+                    <span className="absolute bottom-0.5 left-0.5 px-1 py-px rounded bg-black/70 text-white text-xs font-medium">
                       {formatBytes(base64SizeBytes(ref.base64))}
                     </span>
                     <button onClick={() => removeRef(styleRefs, setStyleRefs, idx)} className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/70 text-white hover:bg-red-500/80 transition-colors">
@@ -692,7 +689,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {styleRefs.length < MAX_REFS && (
               <label className="flex items-center justify-center gap-2 p-2.5 border border-dashed border-cream/10 rounded-lg cursor-pointer hover:border-gold/30 transition-colors">
                 <Upload className="w-4 h-4 text-cream/20" />
-                <span className="text-[11px] text-cream/45">Subir diseño</span>
+                <span className="text-sm text-cream/45">Subir diseño</span>
                 <input type="file" multiple accept={ACCEPT_ATTR} className="hidden" onChange={(e) => handleRefUpload(e, styleRefs, setStyleRefs)} />
               </label>
             )}
@@ -703,27 +700,27 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {/* ─── Format selector ─── */}
       {!lockFormat && (
         <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+          <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
             Formato
           </label>
           <div className="flex flex-wrap gap-1.5">
             {(Object.entries(IMAGE_FORMAT_OPTIONS) as [ImageFormat, typeof IMAGE_FORMAT_OPTIONS[ImageFormat]][]).map(([key, opt]) => {
               const isActive = format === key;
               return (
-                <button key={key} onClick={() => setFormat(key)} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${isActive ? 'bg-gold/15 border-gold/40 text-gold' : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'}`}>
+                <button key={key} onClick={() => setFormat(key)} className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${isActive ? 'elegido-etiqueta' : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'}`}>
                   {opt.label}
                 </button>
               );
             })}
           </div>
-          <p className="text-[11px] text-cream/25 mt-1">{IMAGE_FORMAT_OPTIONS[format].descripcion} — {IMAGE_FORMAT_OPTIONS[format].width}x{IMAGE_FORMAT_OPTIONS[format].height}px</p>
+          <p className="text-sm text-cream/25 mt-1">{IMAGE_FORMAT_OPTIONS[format].descripcion} — {IMAGE_FORMAT_OPTIONS[format].width}x{IMAGE_FORMAT_OPTIONS[format].height}px</p>
         </div>
       )}
 
-      {/* ─── Calidad de generacion (OpenAI gpt-image-2) ─── */}
+      {/* ─── Calidad de generación (OpenAI gpt-image-2) ─── */}
       <div>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
-          Calidad de generacion
+        <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+          Calidad de generación
           <span className="text-cream/25 normal-case font-normal tracking-normal"> — impacta costo y velocidad</span>
         </label>
         <div className="flex flex-wrap gap-1.5">
@@ -733,9 +730,9 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               <button
                 key={key}
                 onClick={() => setQuality(key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                   isActive
-                    ? 'bg-gold/15 border-gold/40 text-gold'
+                    ? 'elegido-etiqueta'
                     : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                 }`}
               >
@@ -744,7 +741,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             );
           })}
         </div>
-        <p className="text-[11px] text-cream/25 mt-1">
+        <p className="text-sm text-cream/25 mt-1">
           {IMAGE_QUALITY_OPTIONS[quality].descripcion} — {IMAGE_QUALITY_OPTIONS[quality].costoAprox}
         </p>
       </div>
@@ -752,7 +749,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {/* ─── Cantidad de imagenes (single vs carrusel) ─── */}
       {copyList.length <= 1 && (
         <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
+          <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
             Cantidad de imagenes
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -762,9 +759,9 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                 <button
                   key={n}
                   onClick={() => setSlideCount(n)}
-                  className={`w-9 h-9 rounded-lg text-xs font-semibold border transition-all ${
+                  className={`w-9 h-9 rounded-lg text-sm font-semibold border transition-all ${
                     isActive
-                      ? 'bg-gold/15 border-gold/40 text-gold'
+                      ? 'elegido-etiqueta'
                       : 'border-cream/10 text-cream/55 hover:border-cream/25 hover:text-cream/75'
                   }`}
                 >
@@ -773,7 +770,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               );
             })}
           </div>
-          <p className="text-[11px] text-cream/25 mt-1">
+          <p className="text-sm text-cream/25 mt-1">
             {slideCount === 1 ? 'Una imagen' : `Carrusel de ${slideCount} slides — consistencia visual entre slides`}
           </p>
         </div>
@@ -781,34 +778,34 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Unified mode selector (IA Completa / Texto personalizado / Solo fondo) ─── */}
       <div>
-          <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
-            Modo de generacion
+          <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+            Modo de generación
           </label>
           <div className="grid grid-cols-3 gap-2">
-            <button onClick={() => setGenMode('ia_completa')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'ia_completa' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
+            <button onClick={() => setGenMode('ia_completa')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'ia_completa' ? 'elegido' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Sparkles className={`w-3.5 h-3.5 ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream/55'}`} />
-                <span className={`text-xs font-semibold ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream'}`}>IA Completa</span>
+                <span className={`text-sm font-semibold ${genMode === 'ia_completa' ? 'text-gold' : 'text-cream'}`}>IA Completa</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">La IA elige el texto segun tu prompt y angulo</p>
+              <p className="text-sm text-cream/45 leading-tight">La IA elige el texto según tu prompt y angulo</p>
             </button>
-            <button onClick={() => setGenMode('texto_personalizado')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'texto_personalizado' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
+            <button onClick={() => setGenMode('texto_personalizado')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'texto_personalizado' ? 'elegido' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Type className={`w-3.5 h-3.5 ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream/55'}`} />
-                <span className={`text-xs font-semibold ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream'}`}>Texto personalizado</span>
+                <span className={`text-sm font-semibold ${genMode === 'texto_personalizado' ? 'text-gold' : 'text-cream'}`}>Texto personalizado</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Vos escribis el texto que va en la imagen</p>
+              <p className="text-sm text-cream/45 leading-tight">Tú escribes el texto que va en la imagen</p>
             </button>
-            <button onClick={() => setGenMode('solo_fondo')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'solo_fondo' ? 'border-gold/50 bg-gold/5' : 'hover:border-gold/30'}`}>
+            <button onClick={() => setGenMode('solo_fondo')} className={`card-panel p-2.5 text-left transition-all ${genMode === 'solo_fondo' ? 'elegido' : 'hover:border-gold/30'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Pencil className={`w-3.5 h-3.5 ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream/55'}`} />
-                <span className={`text-xs font-semibold ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream'}`}>Solo fondo</span>
+                <span className={`text-sm font-semibold ${genMode === 'solo_fondo' ? 'text-gold' : 'text-cream'}`}>Solo fondo</span>
               </div>
-              <p className="text-[11px] text-cream/45 leading-tight">Sin texto — lo agregas tú despues</p>
+              <p className="text-sm text-cream/45 leading-tight">Sin texto — lo agregas tú después</p>
             </button>
           </div>
           {isCarousel && genMode === 'texto_personalizado' && (
-            <p className="text-[11px] text-cream/55 mt-1.5">
+            <p className="text-sm text-cream/55 mt-1.5">
               Configura el texto de cada slide abajo en "Control por slide"
             </p>
           )}
@@ -816,17 +813,17 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Style gallery (disabled when style refs uploaded) ─── */}
       <div className={styleGridDisabled ? 'opacity-40' : ''}>
-        <label className="block text-[11px] font-bold tracking-wider uppercase text-cream/55 mb-2">
-          Estilo visual {styleGridDisabled && <span className="text-[11px] font-normal normal-case tracking-normal text-cream/45">— desactivado (hay referencia de estilo cargada)</span>}
+        <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
+          Estilo visual {styleGridDisabled && <span className="text-sm font-normal normal-case tracking-normal text-cream/45">— desactivado (hay referencia de estilo cargada)</span>}
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {(Object.entries(ESTILO_VISUAL_OPTIONS) as [EstiloVisual, typeof ESTILO_VISUAL_OPTIONS[EstiloVisual]][]).map(([key, opt]) => {
             const Icon = ESTILO_ICONS[key];
             const isActive = estilo === key && !styleGridDisabled;
             return (
-              <button key={key} onClick={() => setEstilo(key)} disabled={styleGridDisabled} className={`p-2 rounded-xl border text-left transition-all disabled:cursor-not-allowed ${isActive ? 'border-gold/50 bg-gold/10' : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'}`}>
+              <button key={key} onClick={() => setEstilo(key)} disabled={styleGridDisabled} className={`p-2 rounded-xl border text-left transition-all disabled:cursor-not-allowed ${isActive ? 'elegido' : 'border-cream/5 hover:border-gold/25 hover:bg-cream/[0.02]'}`}>
                 <Icon className={`w-3.5 h-3.5 mb-0.5 ${isActive ? 'text-gold' : 'text-cream/45'}`} />
-                <div className={`text-[11px] font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/70'}`}>{opt.titulo}</div>
+                <div className={`text-sm font-semibold leading-tight ${isActive ? 'text-gold' : 'text-cream/70'}`}>{opt.titulo}</div>
               </button>
             );
           })}
@@ -835,21 +832,21 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Custom text inputs (single image, texto_personalizado) ─── */}
       {!isCarousel && genMode === 'texto_personalizado' && (
-        <div className="space-y-2.5 p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
+        <div className="space-y-2.5 p-4 rounded-xl bg-panel border border-[var(--line, rgba(142,104,36,0.18))]">
           <div>
-            <label className="text-[11px] font-bold text-gold uppercase tracking-wider">H1 — Titulo *</label>
-            <input type="text" value={customText.h1} onChange={(e) => setCustomText(prev => ({ ...prev, h1: e.target.value }))} placeholder="Tu titulo principal..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
+            <label className="text-sm font-bold text-gold uppercase tracking-wider">H1 — Título *</label>
+            <input type="text" value={customText.h1} onChange={(e) => setCustomText(prev => ({ ...prev, h1: e.target.value }))} placeholder="Tu título principal..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-cream/65 uppercase tracking-wider">H2 — Subtitulo (opcional)</label>
-            <input type="text" value={customText.h2} onChange={(e) => setCustomText(prev => ({ ...prev, h2: e.target.value }))} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
+            <label className="text-sm font-bold text-cream/65 uppercase tracking-wider">H2 — Subtitulo (opcional)</label>
+            <input type="text" value={customText.h2} onChange={(e) => setCustomText(prev => ({ ...prev, h2: e.target.value }))} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-cream/45 uppercase tracking-wider">H3 — Terciario (opcional)</label>
-            <input type="text" value={customText.h3 ?? ''} onChange={(e) => setCustomText(prev => ({ ...prev, h3: e.target.value || undefined }))} placeholder="Texto adicional..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.10)] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
+            <label className="text-sm font-bold text-cream/45 uppercase tracking-wider">H3 — Terciario (opcional)</label>
+            <input type="text" value={customText.h3 ?? ''} onChange={(e) => setCustomText(prev => ({ ...prev, h3: e.target.value || undefined }))} placeholder="Texto adicional..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20" />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-gold uppercase tracking-wider">CTA — Boton (opcional)</label>
+            <label className="text-sm font-bold text-gold uppercase tracking-wider">CTA — Boton (opcional)</label>
             <input type="text" value={customText.cta} onChange={(e) => setCustomText(prev => ({ ...prev, cta: e.target.value }))} placeholder="Ej: Reserva tu lugar" className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2.5 text-gold text-sm font-semibold focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-gold/20" />
           </div>
         </div>
@@ -859,13 +856,13 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {isCarousel && slideConfigs.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-[11px] font-bold tracking-wider uppercase text-cream/55">Control por slide</label>
+            <label className="text-sm font-bold tracking-wider uppercase text-cream/55">Control por slide</label>
             <button
               onClick={() => {
                 const current = slideConfigs[activeConfigSlide];
                 if (current) { setSlideConfigs(slideConfigs.map(() => ({ ...current }))); toast.success('Aplicado a todos los slides'); }
               }}
-              className="text-[11px] text-gold/60 hover:text-gold transition-colors"
+              className="text-sm text-gold/60 hover:text-gold transition-colors"
             >
               Aplicar a todos
             </button>
@@ -873,18 +870,18 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
           <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
             {Array.from({ length: totalSlides }).map((_, idx) => (
-              <button key={idx} onClick={() => setActiveConfigSlide(idx)} className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${activeConfigSlide === idx ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 hover:text-cream/65 border border-transparent'}`}>
+              <button key={idx} onClick={() => setActiveConfigSlide(idx)} className={`px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 transition-all ${activeConfigSlide === idx ? 'elegido-etiqueta' : 'bg-cream/5 text-cream/45 hover:text-cream/65 border border-transparent'}`}>
                 Slide {idx + 1}
               </button>
             ))}
           </div>
 
-          <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)] space-y-3">
+          <div className="p-4 rounded-xl bg-panel border border-[var(--line, rgba(142,104,36,0.18))] space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'ia' })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'ia' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
+              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'ia' })} className={`p-2 rounded-lg text-sm font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'ia' ? 'elegido-etiqueta' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
                 Texto de IA
               </button>
-              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'personalizado', customText: slideConfigs[activeConfigSlide]?.customText ?? { h1: '', h2: '', cta: '' } })} className={`p-2 rounded-lg text-xs font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'personalizado' ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
+              <button onClick={() => updateSlideConfig(activeConfigSlide, { textSource: 'personalizado', customText: slideConfigs[activeConfigSlide]?.customText ?? { h1: '', h2: '', cta: '' } })} className={`p-2 rounded-lg text-sm font-medium transition-all ${slideConfigs[activeConfigSlide]?.textSource === 'personalizado' ? 'elegido-etiqueta' : 'bg-cream/5 text-cream/45 border border-transparent'}`}>
                 Texto personalizado
               </button>
             </div>
@@ -892,26 +889,26 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             {slideConfigs[activeConfigSlide]?.textSource === 'personalizado' && (
               <div className="space-y-2">
                 <div>
-                  <label className="text-[11px] font-bold text-gold uppercase tracking-wider">H1 *</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h1 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h1', e.target.value)} placeholder="Titulo del slide..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
+                  <label className="text-sm font-bold text-gold uppercase tracking-wider">H1 *</label>
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h1 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h1', e.target.value)} placeholder="Título del slide..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2 text-cream text-sm focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-cream/65 uppercase tracking-wider">H2 (opcional)</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h2 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h2', e.target.value)} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
+                  <label className="text-sm font-bold text-cream/65 uppercase tracking-wider">H2 (opcional)</label>
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h2 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h2', e.target.value)} placeholder="Subtitulo..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2 text-cream text-sm focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-cream/45 uppercase tracking-wider">H3</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h3 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h3', e.target.value)} placeholder="Opcional..." className="w-full mt-1 bg-black/20 border border-[rgba(232,150,46,0.10)] rounded-xl px-3 py-2 text-cream text-xs focus:border-gold/50 placeholder-cream/20" />
+                  <label className="text-sm font-bold text-cream/45 uppercase tracking-wider">H3</label>
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.h3 ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'h3', e.target.value)} placeholder="Opcional..." className="w-full mt-1 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3 py-2 text-cream text-sm focus:border-gold/50 placeholder-cream/20" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-gold uppercase tracking-wider">CTA (opcional)</label>
-                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.cta ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'cta', e.target.value)} placeholder="Boton de accion..." className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2 text-gold text-xs font-semibold focus:border-gold/50 placeholder-gold/20" />
+                  <label className="text-sm font-bold text-gold uppercase tracking-wider">CTA (opcional)</label>
+                  <input type="text" value={slideConfigs[activeConfigSlide]?.customText?.cta ?? ''} onChange={(e) => updateSlideCustomText(activeConfigSlide, 'cta', e.target.value)} placeholder="Boton de acción..." className="w-full mt-1 bg-black/20 border border-gold/30 rounded-xl px-3 py-2 text-gold text-sm font-semibold focus:border-gold/50 placeholder-gold/20" />
                 </div>
               </div>
             )}
 
             {slideConfigs[activeConfigSlide]?.textSource === 'ia' && copyList[activeConfigSlide] && (
-              <div className="text-xs text-cream/55 space-y-1">
+              <div className="text-sm text-cream/55 space-y-1">
                 <p><span className="text-cream/20">Titulo:</span> {copyList[activeConfigSlide].titulo}</p>
                 <p><span className="text-cream/20">CTA:</span> {copyList[activeConfigSlide].cta_texto}</p>
               </div>
@@ -922,12 +919,12 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Custom instructions ─── */}
       <div>
-        <button onClick={() => setShowInstrucciones(!showInstrucciones)} className="flex items-center gap-2 text-[11px] font-bold tracking-wider uppercase text-cream/55 hover:text-cream/75 transition-colors">
+        <button onClick={() => setShowInstrucciones(!showInstrucciones)} className="flex items-center gap-2 text-sm font-bold tracking-wider uppercase text-cream/55 hover:text-cream/75 transition-colors">
           {showInstrucciones ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           Instrucciones adicionales (opcional)
         </button>
         {showInstrucciones && (
-          <textarea className="w-full mt-2 bg-black/20 border border-[rgba(232,150,46,0.12)] rounded-xl p-3 text-cream text-xs focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none" rows={3} placeholder="Ej: Mujer profesional de 35 años en consultorio moderno, luz natural..." value={instrucciones} onChange={(e) => setInstrucciones(e.target.value)} />
+          <textarea className="w-full mt-2 bg-black/20 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-3 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all placeholder-cream/20 resize-none" rows={3} placeholder="Ej: Mujer profesional de 35 años en consultorio moderno, luz natural..." value={instrucciones} onChange={(e) => setInstrucciones(e.target.value)} />
         )}
       </div>
 
@@ -937,7 +934,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
           <button
             onClick={() => generate()}
             disabled={generating}
-            title="Reemplaza la version actual con una nueva generacion"
+            title="Reemplaza la version actual con una nueva generación"
             className="btn-secondary flex items-center justify-center gap-2 disabled:opacity-40"
           >
             <RotateCcw className="w-4 h-4" /> Regenerar
@@ -962,15 +959,15 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
 
       {/* ─── Progress ─── */}
       {generating && progress && (
-        <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)]">
+        <div className="p-4 rounded-xl bg-panel border border-[var(--line, rgba(142,104,36,0.18))]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-cream/75">Modelo: <span className="text-gold">{progress.modelName}</span></span>
-            <span className="text-xs text-cream/55">Intento {progress.attempt}/{progress.total}</span>
+            <span className="text-sm text-cream/75">Modelo: <span className="text-gold">{progress.modelName}</span></span>
+            <span className="text-sm text-cream/55">Intento {progress.attempt}/{progress.total}</span>
           </div>
           <div className="h-1.5 bg-cream/10 rounded-full overflow-hidden">
             <div className="h-full bg-gold rounded-full transition-all duration-500" style={{ width: `${(progress.attempt / progress.total) * 100}%` }} />
           </div>
-          {progress.status === 'failed' && <p className="text-xs text-danger/60 mt-1">Fallo, intentando siguiente modelo...</p>}
+          {progress.status === 'failed' && <p className="text-sm text-danger/60 mt-1">Fallo, intentando siguiente modelo...</p>}
         </div>
       )}
 
@@ -978,11 +975,11 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
       {images.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-cream/55">
+            <span className="text-sm text-cream/55">
               {images.length === 1 ? 'Imagen generada' : `${images.length} imagenes generadas`}
               {mode === 'fondo' && ' (solo fondo)'}
             </span>
-            <button onClick={() => generate()} disabled={generating} className="flex items-center gap-1 text-xs text-gold/60 hover:text-gold transition-colors">
+            <button onClick={() => generate()} disabled={generating} className="flex items-center gap-1 text-sm text-gold/60 hover:text-gold transition-colors">
               <RotateCcw className="w-3 h-3" /> Regenerar
             </button>
           </div>
@@ -993,7 +990,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                 <div key={idx} className="relative shrink-0 group">
                   <button
                     onClick={() => setPreviewIdx(idx)}
-                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${previewIdx === idx ? 'border-gold' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${previewIdx === idx ? 'elegido' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <img loading="lazy" src={base64ToDataUrl(img.base64, img.mimeType)} alt={`Pieza ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -1002,7 +999,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
                       onClick={(e) => { e.stopPropagation(); regenerateSingle(idx); }}
                       disabled={regeneratingIdx !== null || generating || editing}
                       title={`Regenerar pieza ${idx + 1}`}
-                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#0F0F0F] border border-gold/40 text-gold flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-gold/15 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[var(--bg-card,#17150F)] border border-gold/40 text-gold flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-gold/15 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {regeneratingIdx === idx
                         ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -1015,13 +1012,13 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
             </div>
           )}
 
-          <div className="relative rounded-xl overflow-hidden border border-[rgba(232,150,46,0.10)] max-w-sm mx-auto">
+          <div className="relative rounded-xl overflow-hidden border border-[var(--line, rgba(142,104,36,0.18))] max-w-sm mx-auto">
             <img loading="lazy" src={base64ToDataUrl(images[previewIdx].base64, images[previewIdx].mimeType)} alt="Preview" className="w-full h-auto block" />
             {images.length > 1 && slidePrompts[previewIdx] && (
               <button
                 onClick={() => regenerateSingle(previewIdx)}
                 disabled={regeneratingIdx !== null || generating || editing}
-                className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/70 backdrop-blur-sm text-xs text-gold hover:bg-black/85 border border-gold/30 transition-all disabled:opacity-40"
+                className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/70 backdrop-blur-sm text-sm text-gold hover:bg-black/85 border border-gold/30 transition-all disabled:opacity-40"
               >
                 {regeneratingIdx === previewIdx
                   ? <><Loader2 className="w-3 h-3 animate-spin" /> Regenerando...</>
@@ -1030,34 +1027,34 @@ export default function ImagenGenerator({ copies, angulo, perfil, geminiKey, ini
               </button>
             )}
           </div>
-          <p className="text-[11px] text-cream/45 text-center">Modelo: {images[previewIdx].modelUsed}</p>
+          <p className="text-sm text-cream/45 text-center">Modelo: {images[previewIdx].modelUsed}</p>
 
           {/* ─── Edicion sutil con IA (Nano Banana edit mode) ─── */}
-          <div className="p-4 rounded-xl bg-panel border border-[rgba(232,150,46,0.10)] space-y-2">
+          <div className="p-4 rounded-xl bg-panel border border-[var(--line, rgba(142,104,36,0.18))] space-y-2">
             <div className="flex items-center gap-2">
               <Wand2 className="w-3.5 h-3.5 text-gold" />
-              <span className="text-[11px] font-bold tracking-wider uppercase text-gold">
+              <span className="text-sm font-bold tracking-wider uppercase text-gold">
                 Editar con IA {images.length > 1 ? `(pieza ${previewIdx + 1})` : ''}
               </span>
-              <span className="text-[11px] text-cream/45 normal-case font-normal">— retoque sutil, mantiene composicion</span>
+              <span className="text-sm text-cream/45 normal-case font-normal">— retoque sutil, mantiene composición</span>
             </div>
             <textarea
               value={editPrompt}
               onChange={(e) => setEditPrompt(e.target.value)}
               rows={2}
               placeholder="Ej: quita el logo de la esquina inferior derecha; cambia el color del boton a dorado; borra el icono pequeño del costado izquierdo"
-              className="w-full bg-black/30 border border-[rgba(232,150,46,0.12)] rounded-xl p-2.5 text-cream text-xs focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20 resize-none"
+              className="w-full bg-black/30 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl p-2.5 text-cream text-sm focus:border-gold/50 focus:ring-1 focus:ring-gold/30 placeholder-cream/20 resize-none"
               disabled={editing || regeneratingIdx !== null || generating}
             />
             <div className="flex justify-end">
               <button
                 onClick={applyEdit}
                 disabled={editing || !editPrompt.trim() || regeneratingIdx !== null || generating}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold/15 text-gold border border-gold/40 text-xs font-semibold hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold/15 text-gold border border-gold/40 text-sm font-semibold hover:bg-gold/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {editing
-                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Aplicando edicion...</>
-                  : <><Wand2 className="w-3.5 h-3.5" /> Aplicar edicion</>
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Aplicando edición...</>
+                  : <><Wand2 className="w-3.5 h-3.5" /> Aplicar edición</>
                 }
               </button>
             </div>

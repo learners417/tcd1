@@ -1,6 +1,6 @@
 import type { ProfileV2 } from '../supabase';
 import type { AdnFieldKey } from './types';
-import { getPaisInfo, instruccionesDialecto } from '../vozLocalizada';
+import { getPaisInfo, instruccionesDialecto, FORMAS_VOSEO } from '../vozLocalizada';
 
 /**
  * Mapper: nomenclatura simbólica del brief (IRRavatar_demografia, NEGoferta_mid)
@@ -125,11 +125,11 @@ export function buildAdnContext(
 
   // El bloque de dialecto SOLO aplica al contenido publicable (reels · stories ·
   // carruseles · copies que el sanador publicará). La voz interna del entrenador
-  // hablando con el sanador queda regida por voz-javo.ts (voseo universal).
+  // hablando con el sanador es SIEMPRE de tú, sin importar su país (ver abajo).
   const cadena = buildCadenaCustodia(perfil);
   return `${paisLinea}\n${camposLista}\n${cadena}\n${instruccionesDialecto(perfil.pais)}\n\nREGLA DE APLICACIÓN DEL DIALECTO:\n- Las reglas de dialecto de arriba aplican al contenido publicable (texto de reels · stories · carruseles · copies · landings · anuncios) que el sanador publicará a sus clientes finales.
-- Tu voz como entrenador hablándole AL sanador SE ADAPTA a la persona: usa el trato de su país por defecto (Argentina/Uruguay/Paraguay/Nicaragua → vos; el resto → tú), y si el sanador te escribe con el otro trato, espejalo — el individuo manda sobre el país. Con moderación (máximo una cada varios mensajes, jamás forzada) podés usar expresiones naturales de su país para que la conversación se sienta de casa.
-- Cuando entregues un guión / copy / texto final · respetá el dialecto del país del sanador.`;
+- Tu voz como entrenador hablándole AL sanador es SIEMPRE de TÚ (tú · tienes · puedes · quieres), sin importar su país. Nunca uses voseo (${FORMAS_VOSEO}) para hablarle a él, y si el sanador te escribe con el otro trato, espejalo — el individuo manda sobre el país. Con moderación (máximo una cada varios mensajes, jamás forzada) puedes usar expresiones naturales de su país para que la conversación se sienta de casa.
+- Cuando entregues un guión / copy / texto final · respeta el dialecto del país del sanador.`;
 }
 
 /**
@@ -166,7 +166,7 @@ export function buildCadenaCustodia(perfil: Partial<ProfileV2>): string {
     }
   } catch { /* noop */ }
   if (piezas.length === 0) return '';
-  return `\nLA CADENA DE CUSTODIA — lo que este sanador YA construyó antes de llegar a vos (citalo al abrir · construí SOBRE esto · jamás lo pidas de nuevo ni lo reescribas sin su permiso):\n${piezas.join('\n')}\nSi tu trabajo depende de una de estas piezas · abrí la conversación nombrándola ("Escuché tu número: … · tu oferta la construimos sobre eso").\n`;
+  return `\nLA CADENA DE CUSTODIA — lo que este sanador YA construyó antes de llegar a ti (cítalo al abrir · construye SOBRE esto · jamás lo pidas de nuevo ni lo reescribas sin su permiso):\n${piezas.join('\n')}\nSi tu trabajo depende de una de estas piezas · abre la conversación nombrándola ("Escuché tu número: … · tu oferta la construimos sobre eso").\n`;
 }
 
 export function getNombreSanador(perfil: Partial<ProfileV2>): string {

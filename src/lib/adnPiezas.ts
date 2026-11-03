@@ -8,7 +8,7 @@
  * 9 piezas del ALMA (el ikigai, en orden causal) + 5 ACTIVOS de operación.
  */
 
-import { planActualPermite } from './planes';
+import { planActualPermite, enElTramoDelNumeroLocal } from './planes';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
 
 export type GrupoPieza = 'alma' | 'activo';
@@ -80,11 +80,15 @@ function leerJSON<T>(clave: string, porDefecto: T): T {
   try { return JSON.parse(localStorage.getItem(clave) ?? '') as T; } catch { return porDefecto; }
 }
 
+/*
+ * Una sola pregunta, un solo lugar.
+ *
+ * Esto leía `plan` y devolvía true para todo el que hubiera entrado por los
+ * $27, sin mirar si después había pagado. Como `plan` no se limpia nunca, al
+ * que subía a La Base le seguía escondiendo las piezas que acababa de comprar.
+ */
 export function planLimitado(): boolean {
-  try {
-    const p = localStorage.getItem('tcd_plan') || (leerJSON<{ plan?: string }>('tcd_profile', {}).plan ?? '');
-    return p === 'ELNUMERO';
-  } catch { return false; }
+  return enElTramoDelNumeroLocal();
 }
 
 /** ¿Está sellada esta pieza? Con la fecha del sello si la hay. */

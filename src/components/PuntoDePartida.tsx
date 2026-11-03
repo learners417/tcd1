@@ -9,9 +9,11 @@
  * de cero recorren lo mismo: es el recorrido el que los convierte en directores
  * de su clínica. Antes esta pantalla daba ochenta jornadas por hechas.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { YA_TIENES, KEY_YA_TIENES } from '../lib/yaTienes';
+import { planActualPermite } from '../lib/planes';
+import { pilarDelDia } from '../lib/roadmapSeed';
 import { VOC } from '../lib/vocabulario';
 
 export const KEY_PARTIDA = 'tcd_punto_de_partida_v1';
@@ -24,6 +26,25 @@ interface Props {
 
 export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
   const [elegidas, setElegidas] = useState<string[]>([]);
+
+  /*
+   * Solo lo que su plan alcanza.
+   *
+   * La lista tiene once cosas, repartidas por los noventa días. A quien compró
+   * el escalón de entrada —los cinco días de Tu reset— se le mostraban las
+   * once igual, así que lo primero que leía al abrir la app era una lista de
+   * diez cosas que su plan no incluye: «tengo campañas corriendo», «tengo
+   * Meta conectado». Marcar cualquiera de esas no le cambiaba nada, porque
+   * esas jornadas no son suyas todavía.
+   *
+   * Las puertas del Camino ya le dicen con qué se abre cada tramo y cuánto
+   * cuesta. Esta pantalla no es el lugar de venderle: es el lugar de
+   * preguntarle por lo que SÍ va a hacer esta semana.
+   */
+  const suyas = YA_TIENES.filter((c) => {
+    const pilar = pilarDelDia(c.dia);
+    return pilar === null || planActualPermite(pilar);
+  });
 
   const alternar = (id: string) =>
     setElegidas((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -49,7 +70,7 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
       </p>
 
       <ul className="mt-4 space-y-2">
-        {YA_TIENES.map((o) => {
+        {suyas.map((o) => {
           const activa = elegidas.includes(o.id);
           return (
             <li key={o.id}>
@@ -57,12 +78,19 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
                 type="button"
                 aria-pressed={activa}
                 onClick={() => alternar(o.id)}
-                className={`w-full min-h-[56px] flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
-                  activa ? 'border-gold bg-[var(--card,#FFFDF7)]' : 'border-[var(--line2,#DFD3BC)]'
+                /*
+                  `items-start` y no `items-center`: seis de las once frases
+                  ocupan dos renglones, y centrado el círculo quedaba en el
+                  hueco entre el primero y el segundo, flotando. Alineado
+                  arriba, con el `mt-0.5` que lo pone en la línea del primer
+                  renglón, la columna de círculos queda derecha.
+                */
+                className={`w-full min-h-[56px] flex items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
+                  activa ? 'elegido' : 'border-[var(--line2,#DFD3BC)]'
                 }`}
               >
                 <span
-                  className="w-7 h-7 shrink-0 rounded-full grid place-items-center border"
+                  className="w-7 h-7 shrink-0 mt-0.5 rounded-full grid place-items-center border"
                   style={activa
                     ? { background: 'var(--tilde, #4A7C59)', borderColor: 'var(--tilde, #4A7C59)' }
                     : { borderColor: 'var(--line2, #DFD3BC)' }}
@@ -86,7 +114,7 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
         type="button"
         onClick={confirmar}
         className="mt-4 w-full min-h-[52px] rounded-[20px] text-[18px] font-semibold"
-        style={{ background: 'var(--oro-d, #8E6824)', color: '#FFFDF7' }}
+        style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
       >
         Empezar el día 1
       </button>

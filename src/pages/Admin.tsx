@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import CustomSelect from '../components/CustomSelect';
 import TasksPipeline from '../components/admin/TasksPipeline';
 import MigrationWizard from '../components/admin/MigrationWizard';
+import { loQueAbre } from '../lib/queAbreCadaOferta';
+import { ofertaReservada } from '../lib/laOfertaQueSigue';
 import AdnPermisosControl from '../components/admin/AdnPermisosControl';
 import { calcularCinturon, cinturonDesdeProgreso } from '../lib/cinturones';
 import { notificarMensajeAdmin } from '../lib/notifications';
@@ -15,20 +17,40 @@ import TableroPlata from '../components/admin/TableroPlata';
 import PanelMotorIA from '../components/admin/PanelMotorIA';
 import Supervision from '../components/admin/Supervision';
 import SalaDeMando from '../components/admin/SalaDeMando';
-import { rolDe, ROLES, puedeVer, tabsDe } from '../lib/roles';
+import { rolDe, ROLES } from '../lib/roles';
 import MiRol from '../components/admin/MiRol';
 import CargarSesion from '../components/admin/CargarSesion';
 import LaSemana from '../components/admin/LaSemana';
 import LaCasa from '../components/admin/LaCasa';
 import ListaDeHoy from '../components/admin/ListaDeHoy';
+import SeguimientoDeTodos from '../components/admin/SeguimientoDeTodos';
+import ReportesYGrupales from '../components/admin/ReportesYGrupales';
+import HabilitarMigraciones from '../components/admin/HabilitarMigraciones';
 import BandejaSoporte from '../components/admin/BandejaSoporte';
 import type { AperturaDeTarea } from '../lib/cerebro';
-import CuadroDelCliente from '../components/admin/CuadroDelCliente';
+import ServicioDelCliente from '../components/admin/ServicioDelCliente';
+import { cuantosEsperan, comoSeLee, subirArchivo, TOPE_ARCHIVO } from '../lib/soporteDatos';
+import MontajeDelCliente from '../components/admin/MontajeDelCliente';
+import BibliotecaDelCliente from '../components/admin/BibliotecaDelCliente';
+import AcompanamientoDelCliente from '../components/admin/AcompanamientoDelCliente';
+import { sesionesDeVarios } from '../lib/sesionesDatos';
+import { cuantasDioEstaSemana, type Sesion } from '../lib/sesionesHumanas';
+import { copiar } from '../lib/copiar';
+import CargarSesionHumana from '../components/admin/CargarSesionHumana';
+import { TICKETS, type Ticket } from '../lib/cuadroTickets';
+import { cierreDeLaVentana, accesoDelPerfil, estadoDeAcceso, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
 import JornadaPanel from '../components/admin/Jornada';
+import ColaDeEvidencias from '../components/admin/ColaDeEvidencias';
+import { habilitarMigracion } from '../lib/migracionDatos';
+import {
+  veredictosDelCliente, decidirEvidencia, lecturaDelVeredicto, type Veredicto,
+} from '../lib/veredictoEvidencia';
 import { jornadasRecientes } from '../lib/jornadaStorage';
-import { comparativaSemana } from '../lib/mesaPlataStorage';
+import { comparativaSemana, rachasDeTodos } from '../lib/mesaPlataStorage';
+import { armarCola, type ItemCola } from '../lib/colaExcepciones';
+import { repartirLaCola, type ResultadoDeLaPasada } from '../lib/avisosStorage';
+import type { PlanComercial } from '../lib/planes';
 import type { Jornada as JornadaTipo } from '../lib/jornada';
-import { rolDe as rolPermisos } from '../lib/permisos';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
   Stethoscope, CheckCircle2, Circle, LogOut,
@@ -41,7 +63,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass, CalendarDays,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck, Cpu,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer } from 'lucide-react';
+  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer, Paperclip } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
@@ -65,9 +87,12 @@ import { claveDelDia } from '../lib/roadmapSeed';
 import { filaDe, semaforoDe } from '../lib/semaforo';
 import { ultimosIngresos } from '../lib/activity';
 import SemaforoClientes from '../components/admin/SemaforoClientes';
-import PausaGlobalPanel from '../components/admin/PausaGlobalPanel';
-import { pausaVigente, type PausaGlobal } from '../lib/pausaGlobal';
-import { cargarPausas } from '../lib/pausasDatos';
+import SinSoportePanel from '../components/admin/SinSoportePanel';
+import NumerosDelCliente from '../components/admin/NumerosDelCliente';
+import { numerosDeVarios } from '../lib/numerosDatos';
+import type { SemanaDeNumeros } from '../lib/numerosDelCliente';
+import { sinSoporteHoy, hoyISO, type VentanaSinSoporte } from '../lib/ventanaSinSoporte';
+import { cargarVentanas } from '../lib/ventanasDatos';
 import HechoAfueraPanel from '../components/admin/HechoAfueraPanel';
 import { jornadasAbiertas } from '../lib/semaforo';
 import { hechasAfuera } from '../lib/hechoAfuera';
@@ -75,7 +100,7 @@ import { hechasAfuera } from '../lib/hechoAfuera';
 // ─── TIPOS Y CONSTANTES ─────────────────────────────────────────────────────────
 
 type AdminRol = 'owner' | 'manager' | 'staff';
-type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'plata' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana' | 'casa';
+type MainTab = 'clientes' | 'pipeline' | 'mensajes' | 'metricas' | 'videos' | 'equipo' | 'campanas' | 'creativos' | 'tareas' | 'motor' | 'hoy' | 'supervision' | 'sala' | 'mirol' | 'sesiones' | 'semana' | 'casa';
 type DetalleTab = 'resumen' | 'diario' | 'evidencias' | 'mentor' | 'sesiones' | 'metricas' | 'mensajes' | 'notas' | 'adn';
 type MensajesChannel = 'comunidad' | 'victorias' | 'consultas' | 'privados';
 
@@ -115,15 +140,6 @@ interface AdminVideo {
   descripcion: string;
   youtubeUrl: string;
   duracion?: string;
-}
-
-interface AdminChecklistItem {
-  id: string;
-  admin_id: string;
-  titulo: string;
-  categoria: 'diaria' | 'semanal' | 'mensual';
-  completada: boolean;
-  fecha_completada?: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -195,179 +211,18 @@ function derivePilarFromProgress(tareas_completadas: number): PilarId {
 
 // ─── COMPONENTE CHAT GLOBAL ADMIN ────────────────────────────────────────────────
 
-function GlobalChat({ canal, adminProfile }: { canal: string; adminProfile: Profile }) {
-  const [messages, setMessages] = useState<Mensaje[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [enviando, setEnviando] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
-  const adminAvatarUrl = localStorage.getItem(`tcd_admin_avatar_${adminProfile.id}`) || '';
-
-  useEffect(() => {
-    if (!supabase) return;
-    setLoading(true);
-    supabase
-      .from('mensajes')
-      .select('*, emisor:profiles!emisor_id(nombre, rol)')
-      .eq('canal', canal)
-      .order('created_at')
-      .then(({ data }) => {
-        if (data) setMessages(data as Mensaje[]);
-        setLoading(false);
-      });
-
-    const channel = supabase
-      .channel(`admin-global-${canal}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes', filter: `canal=eq.${canal}` },
-        async (payload) => {
-          const { data } = await supabase!.from('mensajes').select('*, emisor:profiles!emisor_id(nombre, rol)').eq('id', payload.new.id).single();
-          if (data) setMessages(prev => [...prev, data as Mensaje]);
-        }
-      ).subscribe();
-    return () => { supabase!.removeChannel(channel); };
-  }, [canal]);
-
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-
-  async function send() {
-    if (!supabase || !input.trim()) return;
-    setEnviando(true);
-    try {
-      const { error } = await db().from('mensajes').insert({
-        canal, emisor_id: adminProfile.id, contenido: input.trim()
-      });
-      if (error) throw error;
-      setInput('');
-    } catch {
-      toast.error('Error enviando mensaje al canal');
-    } finally {
-      setEnviando(false);
-    }
-  }
-
-  async function handleUploadFile(file: File, tipo: 'imagen' | 'audio') {
-    if (!supabase) return;
-    setUploading(true);
-    try {
-      const ext = file.name.split('.').pop() ?? (tipo === 'imagen' ? 'jpg' : 'mp3');
-      const path = `admin/${Date.now()}.${ext}`;
-      const { data, error } = await db().storage.from('mensajes-archivos').upload(path, file);
-      if (error) throw error;
-      const { data: { publicUrl } } = db().storage.from('mensajes-archivos').getPublicUrl(data.path);
-      const { error: msgErr } = await db().from('mensajes').insert({
-        canal, emisor_id: adminProfile.id, contenido: '', tipo_archivo: tipo, archivo_url: publicUrl
-      });
-      if (msgErr) throw msgErr;
-    } catch {
-      toast.error('Error subiendo archivo. Verifica que el bucket exista en Supabase.');
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col h-full min-h-0 bg-surface/30 border border-gold/12 rounded-2xl overflow-hidden">
-      {/* Hidden file inputs */}
-      <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
-        onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'imagen'); e.target.value = ''; }} />
-      <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
-        onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadFile(f, 'audio'); e.target.value = ''; }} />
-
-      <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
-        {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <MessageSquare className="w-12 h-12 text-gray-800 mb-4" />
-            <p className="text-cream/55">Este canal está en silencio. Rompelo tú.</p>
-          </div>
-        ) : (
-          messages.map((m) => {
-            const isMe = m.emisor_id === adminProfile.id;
-            const isAdmin = m.emisor?.rol === 'admin';
-            const senderName = m.emisor?.nombre ?? (isMe ? adminProfile.nombre : '?');
-            const initial = senderName.charAt(0).toUpperCase();
-            return (
-              <div key={m.id} className={`flex gap-2.5 items-end max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                {isMe && adminAvatarUrl ? (
-                  <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-gold/30">
-                    <img loading="lazy" src={adminAvatarUrl} alt={senderName} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 border ${
-                    isAdmin ? 'bg-gold/20 border-gold/30 text-gold'
-                             : 'bg-gold/10 border-gold/12 text-cream'
-                  }`}>
-                    {isAdmin ? <Shield className="w-3.5 h-3.5" /> : initial}
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <span className={`text-sm font-semibold px-1 ${isAdmin ? 'text-gold' : 'text-cream/55'} ${isMe ? 'text-right' : ''}`}>
-                    {senderName}{isAdmin ? ' · Coach' : ''}
-                  </span>
-                  <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    isMe ? 'bg-gold/25 text-cream border border-gold/20 rounded-tr-sm'
-                         : isAdmin ? 'bg-gold/20 text-gold border border-gold/20 rounded-tl-sm'
-                         : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
-                  }`}>
-                    {m.tipo_archivo === 'imagen' && m.archivo_url && (
-                      <img loading="lazy" src={m.archivo_url} alt="imagen" className="max-w-xs rounded-xl mb-2 cursor-pointer hover:opacity-90"
-                           onClick={() => window.open(m.archivo_url)} />
-                    )}
-                    {m.tipo_archivo === 'audio' && m.archivo_url && (
-                      <audio controls src={m.archivo_url} className="w-full mb-2 rounded-lg" />
-                    )}
-                    {m.contenido && <p>{m.contenido}</p>}
-                    <p className={`text-sm mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
-                      {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="p-4 border-t border-gold/12 shrink-0 bg-surface/20">
-        <div className="flex gap-2 items-end">
-          <div className="flex flex-col gap-1 shrink-0">
-            <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading}
-              title="Subir imagen"
-              className="w-10 h-10 rounded-xl bg-gold/5 border border-gold/12 hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
-              <Image className="w-4 h-4" />
-            </button>
-            <button type="button" onClick={() => audioInputRef.current?.click()} disabled={uploading}
-              title="Subir audio"
-              className="w-10 h-10 rounded-xl bg-gold/5 border border-gold/12 hover:bg-gold/10 flex items-center justify-center text-cream/75 hover:text-cream transition-colors disabled:opacity-50">
-              <Mic className="w-4 h-4" />
-            </button>
-          </div>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-            placeholder={uploading ? 'Subiendo archivo...' : 'Enviar mensaje al canal...'}
-            disabled={enviando || uploading}
-            className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all disabled:opacity-50"
-          />
-          <button
-            onClick={send}
-            disabled={!input.trim() || enviando || uploading}
-            className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 shrink-0"
-          >
-            {enviando || uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+/*
+ * ACÁ VIVÍA GlobalChat — 173 líneas que ninguna pantalla dibujaba.
+ *
+ * Era el chat de los canales de comunidad. Cuando esos canales se
+ * recortaron, la lista quedó con un solo elemento («Privados») y la
+ * condición que lo montaba —`mensajesChannel !== 'privados'`— pasó a ser
+ * imposible. Siguió compilando y nadie lo notó.
+ *
+ * Lo único que tenía y no estaba en otro lado era la subida de archivos.
+ * Eso se rescató: el equipo ahora adjunta desde el chat real del cliente,
+ * con la misma pieza que usa el cliente para mandar su captura.
+ */
 
 // ─── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────────
 
@@ -381,7 +236,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
    */
   const rol = rolDe((adminProfile as any).admin_rol);
   const defRol = ROLES[rol];
-  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'plata', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa'];
+  const VALID_MAIN_TABS: MainTab[] = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos', 'tareas', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa'];
   const [mainTab, setMainTab] = usePersistedState<MainTab>(
     'tcd_admin_main_tab',
     'clientes',
@@ -390,7 +245,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   // Las tabs de dueño no pueden dejar a un manager mirando una pantalla vacía:
   // el título se dibuja igual pero el cuerpo está detrás de una guarda de rol.
   // Pasa cuando la tab quedó guardada de una sesión anterior o llegó por URL.
-  const TABS_SOLO_DUENO: MainTab[] = ['equipo', 'plata', 'motor', 'sala'];
+  const TABS_SOLO_DUENO: MainTab[] = ['equipo', 'motor', 'sala'];
   useEffect(() => {
     if (adminRol !== 'owner' && adminRol && TABS_SOLO_DUENO.includes(mainTab)) {
       setMainTab('clientes');
@@ -414,8 +269,11 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   // Clientes
   const [clientes, setClientes] = useState<ClienteConEstado[]>([]);
   const [marcadasAfuera, setMarcadasAfuera] = useState<Set<string>>(new Set());
-  const [pausas, setPausas] = useState<PausaGlobal[]>([]);
-  useEffect(() => { void cargarPausas().then(setPausas); }, []);
+  const [pausas, setPausas] = useState<VentanaSinSoporte[]>([]);
+  const [numerosPorCliente, setNumerosPorCliente] = useState<Record<string, SemanaDeNumeros[]>>({});
+  /** Las sesiones de cada uno: el semáforo marca a quien dejó de recibirlas. */
+  const [sesionesPorCliente, setSesionesPorCliente] = useState<Record<string, Sesion[]>>({});
+  useEffect(() => { void cargarVentanas().then(setPausas); }, []);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState<ClienteConEstado | null>(null);
 
@@ -435,7 +293,10 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
       case 'campanas':  setMainTab('campanas'); break;
       case 'creador':   setMainTab('creativos'); break;
       case 'clientes':
-        setMainTab(a.seccion === 'numeros' ? 'plata' : 'clientes');
+        // Los números van a «De un vistazo», que los muestra y además tiene
+        // su barra de pestañas. La Mesa de plata era la única pantalla a la
+        // que se llegaba por accidente y de la que no se podía volver.
+        setMainTab(a.seccion === 'numeros' ? 'supervision' : 'clientes');
         break;
       default: setMainTab('hoy');
     }
@@ -479,6 +340,16 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   }, []);
   const [evidenciasCliente, setEvidenciasCliente] = useState<{ meta: string; archivos: { name: string; path: string }[] }[]>([]);
   const [evidenciasLoading, setEvidenciasLoading] = useState(false);
+  const [veredictosCliente, setVeredictosCliente] = useState<Map<string, Veredicto>>(new Map());
+  /** El archivo cuyo rechazo se está escribiendo, en la ficha. */
+  const [rechazoEnFicha, setRechazoEnFicha] = useState<{ archivo: string; meta: string; motivo: string } | null>(null);
+  /**
+   * LAS EVIDENCIAS DEL CLIENTE, CON SU VEREDICTO.
+   *
+   * Listaba los archivos y los abría: sin estado, sin motivo, sin botón. O
+   * sea que la decisión de la IA —que ya existía— no se veía en ninguna
+   * pantalla del equipo, y la que ella rechazaba no se podía revisar.
+   */
   const cargarEvidenciasCliente = useCallback(async (clienteId: string) => {
     if (!supabase) return;
     setEvidenciasLoading(true);
@@ -493,10 +364,21 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
         if (files.length > 0) resultado.push({ meta: c.name.replace(/_/g, '.'), archivos: files });
       }
       setEvidenciasCliente(resultado);
+      // El veredicto de cada archivo, en una consulta para todo el cliente.
+      setVeredictosCliente(await veredictosDelCliente(clienteId));
     } finally {
       setEvidenciasLoading(false);
     }
   }, []);
+  /** Decide sobre una evidencia desde la ficha, y el cliente recibe el aviso. */
+  const decidirDesdeLaFicha = async (
+    archivo: string, meta: string, estado: 'aprobada' | 'rechazada', motivo: string,
+  ) => {
+    if (!selectedCliente) return;
+    const ok = await decidirEvidencia(archivo, estado, motivo, selectedCliente.id, meta);
+    if (ok) setVeredictosCliente(await veredictosDelCliente(selectedCliente.id));
+    else toast.error('Esa decisión no se guardó. Recarga la pantalla e intenta de nuevo.');
+  };
   const abrirEvidencia = async (path: string) => {
     if (!supabase) return;
     const { data } = await db().storage.from('task-attachments').createSignedUrl(path, 3600);
@@ -515,6 +397,35 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     frenadas: Array<{ clienteId: string; nombre: string; cuello: string; semanasIgual: number; enRiesgo: number }>;
   }>({ vendieron: 0, facturado: 0, frenadas: [] });
 
+  /**
+   * LA COLA DEL DÍA.
+   *
+   * `armarCola` estaba escrita, probada y sin usar: doscientas cincuenta líneas
+   * que ordenan el trabajo por dinero en riesgo y deciden qué resuelve la app
+   * sola y qué necesita una persona. La pantalla de Hoy recibía `items={[]}`
+   * fijo, así que la cabecera de la jornada decía siempre que no había nada y
+   * la carga del rol medía cero.
+   */
+  const [cola, setCola] = useState<ItemCola[]>([]);
+
+  /**
+   * LO QUE LA APP HIZO SOLA CON ESA COLA.
+   *
+   * La cola se mostraba y no pasaba nada más: ni le salía un aviso al cliente,
+   * ni quedaba una tarea para nadie. Ahora cada cosa termina en algún lado, y
+   * este recuento es para poder decirlo: sin un número a la vista, el trabajo
+   * que la app hace sola parece que no existe.
+   */
+  const [pasada, setPasada] = useState<ResultadoDeLaPasada | null>(null);
+
+  /** Las sesiones que dio quien está mirando, en los últimos siete días. */
+  const misSesionesDeLaSemana = useMemo(() => {
+    const mias = Object.values(sesionesPorCliente).flat();
+    return cuantasDioEstaSemana(
+      mias, (adminProfile as { nombre?: string } | null)?.nombre, hoyISO(),
+    );
+  }, [sesionesPorCliente, adminProfile]);
+
   const [campanasClienteId, setCampanasClienteId] = usePersistedState<string | null>(
     'tcd_admin_campanas_cliente',
     null,
@@ -522,23 +433,57 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   );
 
   /**
-   * Las jornadas del equipo y la comparativa de la semana.
+   * Las jornadas del equipo, la comparativa de la semana y la cola del día.
    *
-   * Se cargan cuando se abre Hoy o La Semana, no al entrar al Admin: son dos
+   * Se cargan cuando se abre Hoy o La Semana, no al entrar al Admin: son
    * consultas que no le sirven a nadie que esté mirando otra cosa.
+   *
+   * Las rachas se piden acá porque sin ellas la cola subestima el trabajo: un
+   * cliente que viene fallando cinco semanas con `semanasIgual` en cero no
+   * escala nunca a una persona, y queda esperando un aviso automático que ya
+   * se le mandó cuatro veces.
    */
   useEffect(() => {
-    if (mainTab !== 'semana' && mainTab !== 'hoy') return;
+    // 'mirol' entra en la lista porque su barra de carga se mide con la cola:
+    // sin esto, quien abre Mi rol directo ve su semana vacía.
+    if (mainTab !== 'semana' && mainTab !== 'hoy' && mainTab !== 'mirol') return;
     let vivo = true;
     void (async () => {
       try {
-        const [js, comp] = await Promise.all([
-          jornadasRecientes(7),
-          comparativaSemana(clientes.map((c) => c.id)),
+        const ids = clientes.map((c) => c.id);
+        const [js, comp, rachas] = await Promise.all([
+          // 28 días, no 7: La Semana compara esta semana contra el promedio de
+          // las anteriores, y con una sola semana cargada el promedio es null
+          // y la columna de tendencia no puede mostrar nada nunca.
+          jornadasRecientes(28),
+          comparativaSemana(ids),
+          rachasDeTodos(ids),
         ]);
         if (!vivo) return;
         setJornadasEquipo(js);
         const nombre = (id: string) => clientes.find((c) => c.id === id)?.nombre ?? 'Cliente';
+        const planDe = (id: string): PlanComercial =>
+          ((clientes.find((c) => c.id === id) as { plan_comercial?: string } | undefined)
+            ?.plan_comercial as PlanComercial) ?? 'completo';
+
+        const colaDeHoy = armarCola(comp.map((f) => ({
+          ...f,
+          nombre: nombre(f.clienteId),
+          plan: planDe(f.clienteId),
+          semanasIgual: rachas.get(f.clienteId) ?? 0,
+        })));
+        setCola(colaDeHoy);
+
+        // Y acá la cola deja de ser una lista para mirar. Lo que ya se avisó
+        // dos veces sin resultado, y lo que nunca fue para la app, quedan como
+        // tarea de una persona. Los avisos al cliente NO salen de acá: los
+        // manda el cron diario, y con los dos lados mandando el cliente
+        // recibía el mismo aviso dos veces. Va después de pintar la cola a
+        // propósito: la pantalla no espera al reparto para mostrarse.
+        void repartirLaCola(colaDeHoy, (adminProfile as { id?: string }).id ?? '')
+          .then((r) => { if (vivo) setPasada(r); })
+          .catch(() => { /* la pantalla funciona igual; el aviso sale la próxima */ });
+
         setSemanaClientes({
           vendieron: comp.filter((f) => (f.ventas ?? 0) > 0).length,
           facturado: comp.reduce((t, f) => t + (f.facturado || 0), 0),
@@ -548,7 +493,7 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
               clienteId: f.clienteId,
               nombre: nombre(f.clienteId),
               cuello: f.domino?.titulo ?? 'Sin diagnóstico',
-              semanasIgual: 0,
+              semanasIgual: rachas.get(f.clienteId) ?? 0,
               enRiesgo: Math.round(f.facturado * Math.min(f.urgencia, 5)),
             })),
         });
@@ -577,7 +522,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [metricasLoading, setMetricasLoading] = useState(false);
   const [filtroMetricasId, setFiltroMetricasId] = useState<string | null>(null);
   const [metricasTareas, setMetricasTareas] = useState<any[]>([]);
-  const [metricasOutputs, setMetricasOutputs] = useState<any[]>([]);
   const [metricasTareasLoading, setMetricasTareasLoading] = useState(false);
   const [pilarExpandido, setPilarExpandido] = useState<Record<number, boolean>>({});
   const [satisfaccionGlobal, setSatisfaccionGlobal] = useState<number | null>(null);
@@ -601,6 +545,23 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     nombre: '', email: '', password: '', especialidad: '', plan: 'DWY' as 'DWY' | 'DFY' | 'IMPLEMENTACION',
     fecha_inicio: new Date().toISOString().split('T')[0],
     status: 'ONBOARDING' as UserStatus,
+    // Qué le debe el equipo, y hasta cuándo tiene la app. Antes nada de esto
+    // se podía cargar desde acá: había que ponerlo a mano en la base o por
+    // script, y como nadie lo hacía, todos quedaban sin ventana de acceso.
+    servicio: 'base' as Ticket,
+    acceso: 'noventa' as TipoDeAcceso,
+    /*
+     * QUE TRAIGA SU TRABAJO, DESDE EL ALTA.
+     *
+     * La llave de la migración estaba solo en Hoy, en una lista aparte. O sea
+     * que dar de alta a alguien que ya tiene su plan y su método hechos eran
+     * dos pantallas y un viaje de vuelta por cada persona — y el que se
+     * olvidaba del segundo paso le dejaba al cliente un Camino que le pide
+     * cosas que ya tiene hechas afuera.
+     *
+     * Se decide acá, que es donde ya se sabe de quién se trata.
+     */
+    traeSuTrabajo: false,
   });
   const [creando, setCreando] = useState(false);
 
@@ -618,6 +579,9 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [chatMessages, setChatMessages] = useState<Mensaje[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatEnviando, setChatEnviando] = useState(false);
+  /** Lo que el equipo le va a mandar al cliente con el próximo mensaje. */
+  const [chatAdjunto, setChatAdjunto] = useState<File | null>(null);
+  const chatArchivoRef = useRef<HTMLInputElement>(null);
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -650,8 +614,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [eliminando, setEliminando] = useState(false);
 
   // Manager checklist
-  const [checklistItems, setChecklistItems] = useState<AdminChecklistItem[]>([]);
-  const [checklistLoading, setChecklistLoading] = useState(false);
 
   // ─── EFFECTS ──────────────────────────────────────────────────────────────────
 
@@ -682,50 +644,63 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
       cargarRatingsCliente(filtroMetricasId);
     } else {
       setMetricasTareas([]);
-      setMetricasOutputs([]);
       setClienteRatings([]);
     }
   }, [filtroMetricasId]);
 
-  // Manager checklist load
-  useEffect(() => {
-    if (adminRol === 'manager') cargarChecklist();
-  }, [adminRol]);
-
-  // Channel notifications
+  /**
+   * CUANDO UN CLIENTE ESCRIBE, EL EQUIPO SE ENTERA.
+   *
+   * Acá había un `.map()` sobre una lista vacía: quedó así cuando se recortaron
+   * los canales de comunidad, y desde entonces no se suscribía a nada. Ninguna
+   * notificación aparecía, y el contador de la pestaña nunca se encendía — sin
+   * que nada fallara, porque recorrer una lista vacía no es un error.
+   *
+   * El soporte entrante son los mensajes privados sin destinatario: el cliente
+   * le escribe al equipo, no a una persona.
+   */
   useEffect(() => {
     if (!supabase) return;
-    const chatChannels = [] as const; // L2: comunidad v1 sin muro — solo Privados
-    const ICONS = { comunidad: Users, victorias: Trophy, consultas: Hash } as const;
 
-    const subs = chatChannels.map(ch =>
-      supabase!.channel(`admin-notif-${ch}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes', filter: `canal=eq.${ch}` },
-          async (payload) => {
-            if (mainTab === 'mensajes' && mensajesChannel === ch) return;
-            if (payload.new.emisor_id === adminProfile.id) return;
+    // Lo que ya estaba esperando antes de abrir la pantalla.
+    void cuantosEsperan().then((n) => {
+      setChannelUnread((prev) => ({ ...prev, soporte: n }));
+    });
 
-            const { data: m } = await supabase!.from('mensajes')
-              .select('*, emisor:profiles!emisor_id(nombre, rol)')
-              .eq('id', payload.new.id).single();
+    const sub = db().channel('admin-soporte-entrante')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'mensajes', filter: 'canal=eq.privado' },
+        async (payload) => {
+          // Solo lo entrante: la respuesta del propio equipo lleva destinatario.
+          if (payload.new.receptor_id) return;
+          if (payload.new.emisor_id === adminProfile.id) return;
 
-            const nombre = (m?.emisor as { nombre?: string } | undefined)?.nombre ?? 'Alguien';
-            const preview = (payload.new.contenido ?? '').slice(0, 60);
-            const ChIcon = ICONS[ch];
+          const { data: m } = await supabase!.from('mensajes')
+            .select('*, emisor:profiles!emisor_id(nombre, rol)')
+            .eq('id', payload.new.id).single();
 
-            toast(nombre, {
-              description: preview || 'Archivo adjunto',
-              action: { label: 'Ver', onClick: () => { setMainTab('mensajes'); setMensajesChannel(ch); } },
-              icon: React.createElement(ChIcon, { className: 'w-4 h-4 text-gold' }),
-              duration: 6000,
-            });
+          const nombre = (m?.emisor as { nombre?: string } | undefined)?.nombre ?? 'Un cliente';
+          const texto = (payload.new.contenido ?? '').slice(0, 60);
+          const roto = payload.new.tipo === 'roto';
 
-            setChannelUnread(prev => ({ ...prev, [ch]: (prev[ch] ?? 0) + 1 }));
-          }
-        ).subscribe()
-    );
-    return () => { subs.forEach(s => supabase!.removeChannel(s)); };
-  }, [mainTab, mensajesChannel, adminProfile.id]);
+          toast(roto ? `${nombre} · algo no le funciona` : nombre, {
+            description: texto || comoSeLee(payload.new.tipo_archivo),
+            action: { label: 'Ver', onClick: () => { setMainTab('mensajes'); setMensajesChannel('privados'); } },
+            icon: React.createElement(MessageSquare, { className: 'w-4 h-4 text-gold' }),
+            duration: roto ? 12_000 : 6000,
+          });
+
+          setChannelUnread(prev => ({ ...prev, soporte: (prev.soporte ?? 0) + 1 }));
+        }
+      ).subscribe();
+
+    return () => { if (supabase) supabase.removeChannel(sub); };
+  }, [adminProfile.id]);
+
+  // Entrar a Mensajes es haberlos visto.
+  useEffect(() => {
+    if (mainTab === 'mensajes') setChannelUnread(prev => ({ ...prev, soporte: 0 }));
+  }, [mainTab]);
 
   // Realtime for privados DM
   useEffect(() => {
@@ -846,12 +821,10 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
     if (!supabase) return;
     setMetricasTareasLoading(true);
     try {
-      const [tareasRes, outputsRes] = await Promise.all([
+      const [tareasRes] = await Promise.all([
         db().from('hoja_de_ruta').select('*').eq('usuario_id', clientId).eq('completada', true),
-        db().from('herramienta_outputs').select('*').eq('usuario_id', clientId),
       ]);
       setMetricasTareas(tareasRes.data ?? []);
-      setMetricasOutputs(outputsRes.data ?? []);
     } catch {
       // tables may not exist yet
     } finally {
@@ -974,12 +947,34 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       if (error || !profiles) { setLoading(false); return; }
       // ═══ Blindaje: el RPC puede no traer las columnas del plan — las mergeamos directo ═══
       try {
-        const { data: planes } = await db().from('profiles').select('id, plan_comercial, plan_reservado, acceso_hasta');
+        const { data: planes } = await db().from('profiles')
+          .select('id, plan_comercial, plan_reservado, acceso_hasta, acceso_tipo, servicio_contratado, cima_incluida, biblioteca_abierta, biblioteca_abierta_el');
         if (planes) {
           const porId = new Map(planes.map((x) => [x.id, x]));
-          for (const p of profiles as Array<{ id: string; plan_comercial?: string; plan_reservado?: string | null; acceso_hasta?: string | null }>) {
+          for (const p of profiles as Array<{
+            id: string; plan_comercial?: string; plan_reservado?: string | null;
+            acceso_hasta?: string | null; acceso_tipo?: string | null;
+            servicio_contratado?: string | null; cima_incluida?: boolean | null;
+            biblioteca_abierta?: boolean | null; biblioteca_abierta_el?: string | null;
+          }>) {
             const extra = porId.get(p.id);
-            if (extra) { p.plan_comercial = extra.plan_comercial; p.plan_reservado = extra.plan_reservado; p.acceso_hasta = extra.acceso_hasta; }
+            if (extra) {
+              p.plan_comercial = extra.plan_comercial;
+              p.plan_reservado = extra.plan_reservado;
+              p.acceso_hasta = extra.acceso_hasta;
+              // Sin estas tres, la ficha no sabe qué contrató y la matriz le
+              // pide los 62 ítems a todo el mundo.
+              p.acceso_tipo = extra.acceso_tipo;
+              p.servicio_contratado = extra.servicio_contratado;
+              p.cima_incluida = extra.cima_incluida;
+              // Y sin estas dos el interruptor de la Biblioteca se dibuja
+              // siempre cerrado, aunque el permiso esté dado en la base. Es el
+              // mismo olvido que dejó la matriz pidiéndole los 62 ítems a todo
+              // el mundo: la columna existe, la consulta la trae, y el merge
+              // no la copia.
+              p.biblioteca_abierta = extra.biblioteca_abierta;
+              p.biblioteca_abierta_el = extra.biblioteca_abierta_el;
+            }
           }
         }
       } catch { /* sin las columnas todavía: el SQL no corrió — la UI degrada a 'completo' sin romper */ }
@@ -1007,6 +1002,15 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       // Una sola consulta para el último ingreso de todos: el semáforo lo
       // necesita por fila, y de a uno serían veinte viajes cada mañana.
       const ingresos = await ultimosIngresos(profiles.map((p: Profile) => p.id));
+      // Los números de todos en una sola consulta: el semáforo los necesita
+      // para marcar a quien corre anuncios sin mirarlos.
+      const numeros = await numerosDeVarios(profiles.map((p: Profile) => p.id));
+      setNumerosPorCliente(numeros);
+
+      // Y sus sesiones, también de una sola vez: quien compró acompañamiento y
+      // hace tres semanas que no tiene una se está yendo sin que nadie lo vea.
+      const sesiones = await sesionesDeVarios(profiles.map((p: Profile) => p.id));
+      setSesionesPorCliente(sesiones);
 
       const clientesConEstado = await Promise.all(profiles.map(async (p: Profile) => {
         const { dia, semana } = calcDias(p.fecha_inicio);
@@ -1173,14 +1177,12 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
         const { data } = await db().rpc('get_user_diary', { target_user_id: userId });
         setDetalleDiario(data ?? []);
       } else if (detalleTab === 'metricas') {
-        const [metricsRes, tareasRes, outputsRes] = await Promise.all([
+        const [metricsRes, tareasRes] = await Promise.all([
           db().rpc('get_user_metrics', { target_user_id: userId }),
           db().from('hoja_de_ruta').select('*').eq('usuario_id', userId).eq('completada', true),
-          db().from('herramienta_outputs').select('*').eq('usuario_id', userId),
         ]);
         setDetalleMetricas(metricsRes.data ?? []);
         setMetricasTareas(tareasRes.data ?? []);
-        setMetricasOutputs(outputsRes.data ?? []);
         setPilarExpandido({});
       } else if (detalleTab === 'mensajes') {
         const { data } = await supabase
@@ -1223,7 +1225,7 @@ VENTAS REALES: ${selectedCliente.ventas_count}
 ÚLTIMO DIARIO: ${diarioResumen}
 MÉTRICAS NEGOCIO: ${lastMetric ? `${lastMetric.leads} leads, ${lastMetric.conversaciones ?? 0} llamadas, ${lastMetric.ventas} ventas en la última semana` : 'sin datos de métricas aún'}
 
-Generá un briefing para el coach en 3 partes:
+Genera un briefing para el coach en 3 partes:
 1. ESTADO ACTUAL (1-2 oraciones sobre dónde está el cliente y su ritmo real)
 2. RIESGO O PUNTO CRÍTICO (qué puede frenar el avance si no se interviene)
 3. ACCIÓN SUGERIDA PARA EL COACH (qué decirle o hacer en la próxima interacción — específico y directo)
@@ -1260,6 +1262,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       });
       if (error) throw error;
       void notificarMensajeAdmin(selectedCliente.id, adminProfile.nombre ?? 'El equipo');
+      // Cierra el reloj: sin esto la bandeja sigue mostrando a alguien que ya
+      // fue atendido, y el compromiso de 24 horas no mide nada.
+      void db().rpc('marcar_respondido', { p_cliente: selectedCliente.id });
     } catch {
       setDetalleMensajes(prev => prev.filter(m => m.id !== tempId));
       setMensajeInput(texto);
@@ -1286,9 +1291,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   }
 
   async function enviarChatMsg() {
-    if (!supabase || !chatCliente || !chatInput.trim()) return;
+    if (!supabase || !chatCliente || (!chatInput.trim() && !chatAdjunto)) return;
     setChatEnviando(true);
     const texto = chatInput.trim();
+    const archivo = chatAdjunto;
     const tempId = crypto.randomUUID();
     const optimistic: Mensaje = {
       id: tempId, canal: 'privado', emisor_id: adminProfile.id,
@@ -1296,12 +1302,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     } as Mensaje;
     setChatMessages(prev => [...prev, optimistic]);
     setChatInput('');
+    setChatAdjunto(null);
     try {
+      const subido = archivo ? await subirArchivo(archivo, adminProfile.id) : null;
       const { error } = await db().from('mensajes').insert({
-        canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto
+        canal: 'privado', emisor_id: adminProfile.id, receptor_id: chatCliente.id, contenido: texto,
+        tipo_archivo: subido?.tipo ?? null, archivo_url: subido?.url ?? null,
       });
       if (error) throw error;
       void notificarMensajeAdmin(chatCliente.id, adminProfile.nombre ?? 'El equipo');
+      void db().rpc('marcar_respondido', { p_cliente: chatCliente.id });
     } catch {
       setChatMessages(prev => prev.filter(m => m.id !== tempId));
       setChatInput(texto);
@@ -1538,17 +1548,21 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     setGuardandoAdmin(true);
     try {
       if (supabase) {
-        await db().from('profiles').update({
+        // Con el error mirado: Supabase lo DEVUELVE, no lo lanza, así que el
+        // `catch` de abajo no lo veía nunca y el cartel decía «Perfil
+        // actualizado» aunque no se hubiera guardado nada.
+        const { error } = await db().from('profiles').update({
           nombre: adminDraft.nombre,
           especialidad: adminDraft.cargo,
         }).eq('id', adminProfile.id);
+        if (error) throw new Error(error.message);
       }
       adminProfile.nombre = adminDraft.nombre;
       adminProfile.especialidad = adminDraft.cargo;
       toast.success('Perfil actualizado.');
       setShowAdminSettings(false);
     } catch {
-      toast.error('Error al guardar. Intentá de nuevo.');
+      toast.error('No se guardó. Intenta de nuevo.');
     } finally {
       setGuardandoAdmin(false);
     }
@@ -1591,19 +1605,90 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       if (error) throw error;
 
       if (signUpData.user && supabase) {
-        await new Promise(r => setTimeout(r, 1500));
-        await db().from('profiles').update({
+        /*
+         * SE ESPERA A QUE LA FICHA EXISTA, Y SE COMPRUEBA QUE SE ESCRIBIÓ.
+         *
+         * La ficha no la crea este código: la crea un disparador de la base
+         * cuando entra la cuenta. Acá había un `setTimeout` de 1500 ms y
+         * después un update cuyo resultado no se miraba.
+         *
+         * O sea que si el disparador tardaba un poco más —y en un alta tras
+         * otra, tarda—, el update no encontraba la fila, afectaba cero filas
+         * sin devolver error, y el cartel decía «Cuenta creada». El cliente
+         * quedaba con la fecha de inicio del disparador en vez de la elegida
+         * y SIN ventana de acceso: su Camino arrancaba el día equivocado y su
+         * acceso no cerraba nunca.
+         *
+         * Ahora se pregunta por la ficha hasta diez veces, y el update pide
+         * de vuelta la fila que tocó: si no vuelve ninguna, es un error que
+         * se ve.
+         */
+        let existe = false;
+        for (let i = 0; i < 10 && !existe; i++) {
+          await new Promise(r => setTimeout(r, i === 0 ? 400 : 600));
+          const { data: fila } = await db().from('profiles')
+            .select('id').eq('id', signUpData.user.id).maybeSingle();
+          existe = Boolean(fila);
+        }
+        if (!existe) {
+          throw new Error(
+            'La cuenta se creó, pero su ficha todavía no apareció en la base. '
+            + 'Espera un momento y cárgale los datos desde su ficha.');
+        }
+
+        // El cierre sale de la ventana elegida, ya corrido por las pausas
+        // globales: una pausa no le come días de acceso a nadie.
+        const cierra = cierreDeLaVentana(
+          { tipo: nuevoForm.acceso, inicio: nuevoForm.fecha_inicio },
+        );
+        const { data: tocadas, error: eFicha } = await db().from('profiles').update({
           especialidad: nuevoForm.especialidad.trim() || null,
           plan: nuevoForm.plan,
           fecha_inicio: nuevoForm.fecha_inicio,
           status: nuevoForm.status,
           onboarding_completed: nuevoForm.status !== 'ONBOARDING',
-        }).eq('id', signUpData.user.id);
+          acceso_tipo: nuevoForm.acceso,
+          acceso_hasta: cierra,
+        }).eq('id', signUpData.user.id).select('id');
+        if (eFicha) throw eFicha;
+        if (!tocadas || tocadas.length === 0) {
+          throw new Error(
+            'La cuenta se creó, pero sus datos no se guardaron. '
+            + 'Cárgalos desde su ficha antes de darle el acceso.');
+        }
+
+        // El escalón se marca con el RPC y no con el update de arriba, porque
+        // el RPC además sella quién lo marcó y cuándo. Y esa fecha es la que
+        // hace correr el tope del Camino: escribiendo la columna a mano, un
+        // alta en La Base quedaba sin marcar —el valor es el mismo que el
+        // default— y el cliente abría los 90 días completos.
+        const { error: eMarca } = await db().rpc('marcar_servicio', {
+          p_cliente: signUpData.user.id,
+          p_servicio: nuevoForm.servicio,
+          p_cima: null,
+        });
+        if (eMarca) throw eMarca;
+
+        // Y si ya trae su trabajo hecho, la llave queda abierta desde el alta:
+        // al entrar le aparece «Trae tu trabajo» en su HOY, sin un segundo
+        // viaje por otra pantalla.
+        // Por la función de la biblioteca y no con un rpc a mano: los nombres
+        // de los parámetros viven en un solo lugar, y PostgREST resuelve estas
+        // llamadas por nombre de argumento.
+        if (nuevoForm.traeSuTrabajo) {
+          await habilitarMigracion(signUpData.user.id, true);
+        }
       }
 
-      toast.success(`Cuenta creada para ${nuevoForm.nombre}. Ya puede iniciar sesión.`);
+      toast.success(nuevoForm.traeSuTrabajo
+        ? `Cuenta creada para ${nuevoForm.nombre}. Al entrar le aparece «Trae tu trabajo».`
+        : `Cuenta creada para ${nuevoForm.nombre}. Ya puede iniciar sesión.`);
       setShowNuevoCliente(false);
-      setNuevoForm({ nombre: '', email: '', password: '', especialidad: '', plan: 'DWY', fecha_inicio: new Date().toISOString().split('T')[0], status: 'ONBOARDING' });
+      setNuevoForm({
+        nombre: '', email: '', password: '', especialidad: '', plan: 'DWY',
+        fecha_inicio: new Date().toISOString().split('T')[0], status: 'ONBOARDING',
+        servicio: 'base', acceso: 'noventa', traeSuTrabajo: false,
+      });
       await cargarClientes();
     } catch (e: any) {
       toast.error(`Error creando cuenta: ${e.message}`);
@@ -1735,39 +1820,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     }
   }
 
-  async function cargarChecklist() {
-    if (!supabase) return;
-    setChecklistLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('admin_tareas_checklist')
-        .select('*')
-        .eq('admin_id', adminProfile.id)
-        .order('created_at');
-      if (error) throw error;
-      setChecklistItems((data ?? []) as AdminChecklistItem[]);
-    } catch {
-      // table may not exist yet
-    } finally {
-      setChecklistLoading(false);
-    }
-  }
 
-  async function toggleChecklistItem(itemId: string, completada: boolean) {
-    if (!supabase) return;
-    try {
-      const { error } = await supabase
-        .from('admin_tareas_checklist')
-        .update({ completada, fecha_completada: completada ? new Date().toISOString() : null })
-        .eq('id', itemId);
-      if (error) throw error;
-      setChecklistItems(prev => prev.map(item =>
-        item.id === itemId ? { ...item, completada, fecha_completada: completada ? new Date().toISOString() : undefined } : item
-      ));
-    } catch {
-      toast.error('Error actualizando tarea');
-    }
-  }
 
   const detailTabs: { id: DetalleTab; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: 'Resumen', icon: TrendingUp },
@@ -1877,7 +1930,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
     sala: 'Sala de Mando — qué está frenado y quién lo destraba',
     mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
     sesiones: 'Cargar sesión — que lo que se dijo lo herede el equipo',
-    plata: 'Mesa de plata — la cadena de cada cuenta',
     motor: 'Motor de IA — qué se usa, qué cuesta, qué falla',
   };
 
@@ -1899,7 +1951,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-gold/10 bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
         <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
           <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
-            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shadow-[0_0_20px_rgba(232,150,46,0.18)] shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shrink-0">
               <Stethoscope className="w-5 h-5 text-cream" />
             </div>
             <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
@@ -1922,9 +1974,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               .filter(item => !item.ownerOnly || adminRol === 'owner' || !adminRol)
               // Ya no se ordenan por rol: son cuatro y su orden es el del día.
               .map(item => {
-                const totalUnread = item.id === 'mensajes'
-                  ? (channelUnread['comunidad'] ?? 0) + (channelUnread['victorias'] ?? 0) + (channelUnread['consultas'] ?? 0)
-                  : 0;
+                const totalUnread = item.id === 'mensajes' ? (channelUnread.soporte ?? 0) : 0;
                 return (
                   <button
                     key={item.id}
@@ -1948,7 +1998,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     <span className="relative shrink-0">
                       <item.icon className="w-4 h-4" />
                       {sidebarCollapsed && totalUnread > 0 && (
-                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_6px_rgba(232,150,46,0.6)]" />
+                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold" />
                       )}
                     </span>
                     <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
@@ -2034,17 +2084,20 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'pipeline' && (
             <>
-              {/* Qué le falta instalar SEGÚN LO QUE PAGÓ. Estuvo construido y
-                  suelto hasta que existió el puente plan ↔ ticket: sin él la
-                  app no sabía que un cliente «verde» es uno de $5.000, y el de
-                  ticket alto no recibía nada distinto acá adentro. */}
+              {/* El servicio contratado y qué le falta de ese servicio.
+                  Antes esto se adivinaba del plan de acceso —un cliente de
+                  $497 figuraba con $5.000 de instalación— y se montaba sin
+                  los tildes, así que decía «le faltan 42» para todos. */}
               {selectedCliente && (
                 <div className="mb-6">
-                  <p className="text-sm font-bold uppercase tracking-widest text-cream/45 mb-3">
-                    {selectedCliente.nombre} — qué le falta según su plan
-                  </p>
-                  <CuadroDelCliente
-                    plan={(selectedCliente as { plan_comercial?: string | null }).plan_comercial}
+                  <ServicioDelCliente
+                    clienteId={selectedCliente.id}
+                    nombre={selectedCliente.nombre}
+                    servicio={(selectedCliente as { servicio_contratado?: string | null }).servicio_contratado}
+                    cima={(selectedCliente as { cima_incluida?: boolean | null }).cima_incluida}
+                    acceso={(selectedCliente as { acceso_tipo?: string | null }).acceso_tipo}
+                    inicio={selectedCliente.fecha_inicio}
+                    adminId={adminProfile.id}
                   />
                 </div>
               )}
@@ -2055,8 +2108,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <ol className="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-sm text-cream/70 list-decimal list-inside">
                   <li>Crear su subcuenta GHL desde el snapshot maestro</li>
                   <li>Alta en TCD (botón Nuevo cliente) — mail + contraseña temporal + plan</li>
+                  <li><strong className="text-cream/90">Marcar qué servicio contrató</strong>, acá arriba — decide cuánto le debe el equipo</li>
                   <li>Alta en MiClínica Digital (misma identidad)</li>
-                  <li>Bienvenida por mail: las 2 llaves + sus accesos (Discord solo DWY/DFY)</li>
+                  <li>Bienvenida por mail: las 2 llaves y sus accesos. Las dudas van por Soporte, dentro de la app</li>
                   <li>Día 1: verificar el Pacto firmado y la Foto de Partida</li>
                   <li>Semana 1: la ronda diaria del semáforo (verde = no tocar)</li>
                   <li>Día 22-26: acompañar el montaje técnico (sistema + dominio)</li>
@@ -2072,11 +2126,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ═══════════════════════════════════════════════════════════════════════ */}
           {mainTab === 'clientes' && !selectedCliente && (
             <div className="max-w-6xl mx-auto space-y-5">
-              {/* Con el Camino parado, esto va primero: cambia cómo se lee todo lo demás. */}
-              {pausaVigente(pausas) ? (
-              <PausaGlobalPanel
+              {/* Con el soporte cerrado, esto va primero: el equipo tiene que
+                  saber que lo que escriba hoy se contesta más adelante. */}
+              {sinSoporteHoy(pausas) ? (
+              <SinSoportePanel
                 pausas={pausas}
-                vigente={pausaVigente(pausas)}
+                vigente={sinSoporteHoy(pausas)}
                 cuantos={clientes.length}
                 quien={(adminProfile as { nombre?: string } | null)?.nombre ?? 'el equipo'}
                 onCambio={setPausas}
@@ -2093,6 +2148,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   acceso_dias_devueltos: c.acceso_dias_devueltos,
                   completadas: c.completadas,
                   ultimoIngreso: c.ultimo_ingreso,
+                  numeros: numerosPorCliente[c.id],
+                  sesiones: sesionesPorCliente[c.id],
+                  servicio: (c as { servicio_contratado?: string | null }).servicio_contratado,
                 })))}
                 onAbrir={(id) => {
                   const c = clientes.find((x) => x.id === id);
@@ -2100,11 +2158,11 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 }}
               />
 
-              {/* Parar el Camino de todos: fiestas, mudanzas, lo que haga falta. */}
-              {pausaVigente(pausas) ? null : (
-              <PausaGlobalPanel
+              {/* Cerrar el soporte unos días: fiestas, mudanzas, lo que haga falta. */}
+              {sinSoporteHoy(pausas) ? null : (
+              <SinSoportePanel
                 pausas={pausas}
-                vigente={pausaVigente(pausas)}
+                vigente={sinSoporteHoy(pausas)}
                 cuantos={clientes.length}
                 quien={(adminProfile as { nombre?: string } | null)?.nombre ?? 'el equipo'}
                 onCambio={setPausas}
@@ -2113,8 +2171,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
               {/* Header row */}
               <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="relative flex-1 max-w-sm">
+                {/* `flex-wrap` y `shrink-0` en los filtros: en el teléfono los tres
+                    entraban en un solo renglón y cada uno se encogía —el de planes
+                    quedaba en 126 px— así que «Todos los planes» pasaba a dos
+                    renglones con el chevron flotando en el medio, o salía cortado.
+                    Envueltos, cada filtro conserva su ancho y bajan de a uno. */}
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                  <div className="relative flex-1 min-w-[200px] max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/45" />
                     <input
                       type="text"
@@ -2129,13 +2192,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onChange={(val) => setFiltroPlan(val)}
                     options={[
                       { value: 'ALL', label: 'Todos los planes' },
-                      { value: 'blanco', label: '🥋 Semana Blanca' },
+                      { value: 'blanco', label: '⚪ Semana Blanca' },
                       { value: 'amarillo', label: '🟡 Tu Base' },
                       { value: 'verde', label: '🟢 Tu Sistema' },
                       { value: 'negro', label: '⬛ Completo' },
                       { value: 'completo', label: 'Clásicos' },
                     ]}
-                    className="w-44"
+                    /* `w-52`, no `w-44`: «Todos los planes» pedía 143 px y la caja
+                       daba 126. Medido, no estimado. */
+                    className="w-52 shrink-0"
                   />
                   <CustomSelect
                     value={filtroStatus}
@@ -2148,7 +2213,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       { value: 'CHURNED', label: 'Inactivos' },
                       { value: 'COMPLETED', label: 'Completados' },
                     ]}
-                    className="w-48"
+                    className="w-48 shrink-0"
                   />
                 </div>
                 <button
@@ -2218,7 +2283,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             <td className="px-4 py-3 text-sm text-cream/65">{c.fecha_inicio}</td>
                             <td className="px-4 py-3 text-sm text-cream/75 font-medium">Día {c.dia_programa}{c.dias_atraso > 0 && <span className={`${c.dias_atraso > 3 ? 'text-danger' : 'text-gold'} ml-1.5 text-sm`} title={`${c.dias_atraso} días hábiles de atraso`}>⚠ {c.dias_atraso}d atraso</span>}
                     {(() => { const p = (c as { plan_comercial?: string }).plan_comercial; if (!p || p === 'completo') return null;
-                      const map: Record<string, [string, string]> = { blanco: ['🥋 Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
+                      const map: Record<string, [string, string]> = { blanco: ['⚪ Blanca', 'rgba(242,239,233,0.5)'], amarillo: ['🟡 Base', '#F4D06F'], verde: ['🟢 Sistema', '#3D9B63'], negro: ['⬛ Completo', '#F2EFE9'] };
                       const [l, col] = map[p] ?? [p, '#F2EFE9'];
                       return <span className="ml-2 text-sm font-semibold px-2 py-0.5 rounded-full border" style={{ color: col, borderColor: 'rgba(242,239,233,0.15)' }}>{l}</span>; })()}
                     {(c as { plan_comercial?: string }).plan_comercial === 'blanco' && (
@@ -2336,9 +2401,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           onClick={() => {
                             const nombre = selectedCliente.nombre.split(' ')[0];
                             const msj = selectedCliente.traba_sesion
-                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado. 🥋`
-                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que el dojo no te ve. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos. 🥋`;
-                            try { navigator.clipboard?.writeText(msj); } catch { /* noop */ }
+                              ? `${nombre}, vi que "${selectedCliente.traba_sesion.titulo}" te está esperando hace ${selectedCliente.traba_sesion.dias} días. Los cuartos no se limpian solos — ¿qué te frenó? Cuéntame y lo destrabamos juntos. De frente, no de costado.`
+                              : `${nombre}, hace ${selectedCliente.dias_sin_sesion} días que no te vemos en el Camino. El camino no se camina solo — ¿qué está pasando? Escríbeme y retomamos hoy, aunque sea 20 minutos.`;
+                            // El mensaje se deja escrito en el chat igual, así
+                            // que si la copia falla no se pierde nada: por eso
+                            // acá no hay aviso de error.
+                            void copiar(msj);
                             setDetalleTab('mensajes');
                             setEmpujonListo(msj);
                           }}
@@ -2411,7 +2479,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       <tab.icon className="w-3.5 h-3.5" />
                       {tab.label}
                       {detalleTab === tab.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full shadow-[0_0_10px_rgba(232,150,46,0.5)]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold rounded-t-full" />
                       )}
                     </button>
                   ))}
@@ -2426,6 +2494,40 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                       {/* ── RESUMEN ── */}
                       {detalleTab === 'resumen' && (
                         <div className="space-y-6">
+                          {/* Cómo le va con lo que ya puso a andar: la frase con la que se le escribe. */}
+                          <NumerosDelCliente
+                            nombre={selectedCliente.nombre ?? 'Este cliente'}
+                            filas={numerosPorCliente[selectedCliente.id] ?? []}
+                          />
+                          {/* Qué montó antes de encender, y los links para
+                              mirar su campaña. Hasta hoy los ocho candados
+                              vivían en su navegador y el equipo no los veía. */}
+                          {/* Cuántas sesiones tuvo de verdad y hace cuánto que
+                              no tiene una. Es lo único de la oferta que no
+                              dejaba rastro en la app. */}
+                          <AcompanamientoDelCliente
+                            clienteId={selectedCliente.id}
+                            servicio={(selectedCliente as { servicio_contratado?: string | null }).servicio_contratado}
+                          />
+                          <MontajeDelCliente
+                            clienteId={selectedCliente.id}
+                            nombre={selectedCliente.nombre ?? 'Este cliente'}
+                          />
+                          {/* Abrirle todo el material sin esperar su día del
+                              Camino. Hace falta para el de La Instalación, que
+                              no lo recorre, y para el que renovó. */}
+                          <BibliotecaDelCliente
+                            clienteId={selectedCliente.id}
+                            nombre={selectedCliente.nombre ?? 'Este cliente'}
+                            abierta={Boolean((selectedCliente as { biblioteca_abierta?: boolean }).biblioteca_abierta)}
+                            abiertaEl={(selectedCliente as { biblioteca_abierta_el?: string | null }).biblioteca_abierta_el}
+                            quienCarga={(adminProfile as { id?: string }).id}
+                            onCambio={(abierta) => {
+                              setSelectedCliente((c) => (c ? { ...c, biblioteca_abierta: abierta } as typeof c : c));
+                              setClientes((cs) => cs.map((c) => (c.id === selectedCliente.id
+                                ? { ...c, biblioteca_abierta: abierta } as typeof c : c)));
+                            }}
+                          />
                           {/* Para que el semáforo no marque en rojo a quien trabaja por fuera de la app. */}
                           <HechoAfueraPanel
                             usuarioId={selectedCliente.id}
@@ -2451,7 +2553,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <div className="bg-panel border border-gold/15 rounded-2xl p-4">
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
                             <div className="flex flex-wrap gap-2">
-                              {([['blanco','🥋 Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
+                              {([['blanco','⚪ Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
                                   onClick={async () => {
                                     if (!supabase) return;
@@ -2467,8 +2569,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               ))}
                             </div>
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mt-3 mb-2">Reservó (lo que eligió en el WhatsApp)</p>
+                            {/* Lo que se le muestra al cliente sale de acá. Las opciones
+                                eran los colores de la escalera vieja, así que la app le
+                                decía «tu lugar está reservado · $497» de un precio que ya
+                                no se vende. Lo anotado entonces no se borra: se avisa, y
+                                mientras no se elija uno de hoy el cliente ve el escalón
+                                que sigue, que es verdad siempre. */}
+                            {(() => {
+                              const guardado = (selectedCliente as { plan_reservado?: string | null }).plan_reservado ?? '';
+                              if (!guardado || ofertaReservada(guardado)) return null;
+                              return (
+                                <p className="text-sm text-cream/60 mb-2">
+                                  Anotado con la escalera anterior: <span className="text-goldhi">{guardado}</span>. Elige el escalón de hoy para que lo vea en su pantalla.
+                                </p>
+                              );
+                            })()}
                             <div className="flex flex-wrap gap-2">
-                              {([['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['','Sin reserva']] as const).map(([p, label]) => (
+                              {([['base','La Base · $1.000'],['ascenso','El Ascenso · $3.000'],['instalacion','La Instalación · $5.000'],['','Sin reserva']] as const).map(([p, label]) => (
                                 <button key={p || 'ninguno'}
                                   onClick={async () => {
                                     if (!supabase) return;
@@ -2554,7 +2671,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         <div className="flex flex-col items-center gap-2 flex-1">
                                           <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 shrink-0 transition-all ${
                                             isActive
-                                              ? 'bg-gold border-gold shadow-[0_0_14px_rgba(232,150,46,0.45)]'
+                                              ? 'bg-gold border-gold'
                                               : isDone
                                               ? 'bg-success/15 border-success/60'
                                               : 'bg-ink border-gold/10'
@@ -2751,15 +2868,67 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     </div>
                   ) : (
                     evidenciasCliente.map((g) => (
-                      <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4">
-                        <p className="text-sm font-bold uppercase tracking-widest text-gold mb-2">Sesión {g.meta}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {g.archivos.map((f) => (
-                            <button key={f.path} onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-sm text-gold hover:bg-gold/20 transition-colors">
-                              📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
-                            </button>
-                          ))}
-                        </div>
+                      <div key={g.meta} className="rounded-xl border border-gold/10 bg-panel p-4 space-y-3">
+                        <p className="text-sm font-bold uppercase tracking-widest text-gold">Sesión {g.meta}</p>
+                        {g.archivos.map((f) => {
+                          const v = veredictosCliente.get(f.path);
+                          const lectura = lecturaDelVeredicto(v);
+                          const tono = lectura.tono === 'bien' ? 'bg-success/15 text-success'
+                            : lectura.tono === 'frena' ? 'bg-danger/15 text-danger'
+                            : lectura.tono === 'espera' ? 'bg-gold/15 text-gold'
+                            : 'bg-cream/[0.07] text-cream/60';
+                          return (
+                            <div key={f.path} className="rounded-lg border border-cream/10 p-3">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <button onClick={() => abrirEvidencia(f.path)} className="px-3 py-2 rounded-lg bg-gold/10 border border-gold/25 text-sm text-gold hover:bg-gold/20 transition-colors">
+                                  📎 {f.name.length > 28 ? f.name.slice(0, 28) + '…' : f.name}
+                                </button>
+                                <span className={`rounded-lg px-2.5 py-1 text-sm ${tono}`}>{lectura.texto}</span>
+                              </div>
+                              {v?.motivo && <p className="text-sm text-cream/55 mt-2 leading-relaxed">«{v.motivo}»</p>}
+                              {/* Aprobar y pedir otra, desde acá también: la
+                                  cola de Hoy trae lo que espera decisión, y
+                                  esta pestaña es donde se revisa el camino
+                                  entero de un cliente. */}
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {v?.estado !== 'aprobada' && (
+                                  <button onClick={() => void decidirDesdeLaFicha(f.path, g.meta, 'aprobada', '')}
+                                    className="rounded-lg px-3 py-2 text-sm font-bold bg-success/15 text-success hover:bg-success/25 transition-colors">
+                                    Aprobar
+                                  </button>
+                                )}
+                                {rechazoEnFicha?.archivo !== f.path && (
+                                  <button onClick={() => setRechazoEnFicha({ archivo: f.path, meta: g.meta, motivo: v?.motivo ?? '' })}
+                                    className="rounded-lg px-3 py-2 text-sm font-bold bg-danger/12 text-danger hover:bg-danger/20 transition-colors">
+                                    Pedirle otra
+                                  </button>
+                                )}
+                              </div>
+                              {rechazoEnFicha?.archivo === f.path && (
+                                <div className="mt-2 rounded-lg border border-danger/25 bg-danger/[0.04] p-3">
+                                  <label className="block text-sm text-cream/70 mb-2">Lo que va a leer:</label>
+                                  <textarea
+                                    value={rechazoEnFicha.motivo}
+                                    onChange={(e) => setRechazoEnFicha({ archivo: f.path, meta: g.meta, motivo: e.target.value })}
+                                    rows={2}
+                                    placeholder="Qué tiene que mostrar la foto que suba."
+                                    className="w-full rounded-lg bg-cream/[0.05] border border-cream/15 px-3 py-2 text-sm text-cream/90 placeholder:text-cream/35"
+                                  />
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    <button onClick={() => { void decidirDesdeLaFicha(f.path, g.meta, 'rechazada', rechazoEnFicha.motivo); setRechazoEnFicha(null); }}
+                                      className="rounded-lg px-3 py-2 text-sm font-bold bg-danger/15 text-danger hover:bg-danger/25 transition-colors">
+                                      Pedirle otra y avisarle
+                                    </button>
+                                    <button onClick={() => setRechazoEnFicha(null)}
+                                      className="rounded-lg px-3 py-2 text-sm text-cream/60 hover:text-cream/90 transition-colors">
+                                      Dejarlo así
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     ))
                   )}
@@ -2875,10 +3044,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                         {pilar.metas.map(meta => {
                                           const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                           if (!tareaData) return null;
-                                          const herramientaOutput = meta.herramienta_id
-                                            ? metricasOutputs.find((o: any) => o.herramienta_id === meta.herramienta_id)
-                                            : null;
-                                          const rawOutput = tareaData.output_generado ?? herramientaOutput?.output ?? null;
+                                          const rawOutput = tareaData.output_generado ?? null;
                                           const hasOutput = !!rawOutput;
                                           return (
                                             <button
@@ -3017,7 +3183,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 <>
                 {empujonListo && (
                   <div className="mb-3 rounded-xl border border-gold/30 bg-gold/8 p-3">
-                    <p className="text-sm font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pegalo abajo (Ctrl+V) y ajustalo si quieres</p>
+                    <p className="text-sm font-bold uppercase tracking-wider text-gold mb-1">⚡ Empujón copiado al portapapeles — pégalo abajo (Ctrl+V) y ajústalo si quieres</p>
                     <p className="text-sm text-white/70 italic">{empujonListo}</p>
                   </div>
                 )}
@@ -3028,7 +3194,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           {detalleMensajes.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
                               <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                              <p className="text-cream/55 text-sm">Comenzá la conversación con {selectedCliente.nombre}</p>
+                              <p className="text-cream/55 text-sm">Comienza la conversación con {selectedCliente.nombre}</p>
                             </div>
                           ) : detalleMensajes.map(m => {
                             const isMe = m.emisor_id === adminProfile.id;
@@ -3088,16 +3254,10 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 )}
               </div>
 
-              {/* Manager checklist floating panel */}
-              {adminRol === 'manager' && checklistItems.length > 0 && (
-                <div className="w-[260px] shrink-0">
-                  <ManagerChecklist
-                    items={checklistItems}
-                    onToggle={toggleChecklistItem}
-                    loading={checklistLoading}
-                  />
-                </div>
-              )}
+              {/* Acá iba el checklist del manager. Nunca se dibujó: su
+                  guarda pedía que la tabla tuviera filas y nada en la app las
+                  escribía. Y lo que prometía —las tareas recurrentes del
+                  equipo— ya lo hace la pestaña Tareas, que sí funciona. */}
             </div>
           )}
 
@@ -3123,9 +3283,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   >
                     <ch.icon className="w-4 h-4" />
                     {ch.label}
-                    {(channelUnread[ch.id] ?? 0) > 0 && (
+                    {(channelUnread.soporte ?? 0) > 0 && (
                       <span className="min-w-[16px] h-[16px] px-1 rounded-full bg-gold text-cream text-sm font-bold flex items-center justify-center">
-                        {channelUnread[ch.id]}
+                        {channelUnread.soporte}
                       </span>
                     )}
                     {mensajesChannel === ch.id && (
@@ -3135,13 +3295,9 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 ))}
               </div>
 
-              {/* Channel content */}
-              {mensajesChannel !== 'privados' ? (
-                <div className="flex-1 min-h-0 p-4">
-                  <GlobalChat canal={mensajesChannel} adminProfile={adminProfile} />
-                </div>
-              ) : (
-                /* Privados: WhatsApp-style */
+              {/* La conversación con cada cliente. Queda un solo canal: los de
+                  comunidad se recortaron, y el chat que los dibujaba vivía sin
+                  que ninguna pantalla lo montara. */}
                 <div className="flex flex-1 min-h-0 overflow-hidden">
                   {/* Left: client list */}
                   <div className="w-[280px] shrink-0 border-r border-gold/12 flex flex-col bg-black/20">
@@ -3192,7 +3348,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         ) : chatMessages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center">
                             <MessageSquare className="w-10 h-10 text-gray-800 mb-4" />
-                            <p className="text-cream/55 text-sm">Comenzá la conversación con {chatCliente.nombre}</p>
+                            <p className="text-cream/55 text-sm">Comienza la conversación con {chatCliente.nombre}</p>
                           </div>
                         ) : chatMessages.map(m => {
                           const isMe = m.emisor_id === adminProfile.id;
@@ -3212,6 +3368,23 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                        : 'bg-surface/60 text-cream/90 border border-gold/12 rounded-tl-sm'
                                 }`}>
                                   <p>{m.contenido}</p>
+                                  {/* Lo que mandó el cliente. La mitad de lo que
+                                      manda alguien pidiendo ayuda es una captura. */}
+                                  {m.archivo_url ? (
+                                    m.tipo_archivo === 'imagen' ? (
+                                      <a href={m.archivo_url} target="_blank" rel="noreferrer" className="block mt-2">
+                                        <img src={m.archivo_url} alt="Lo que mandó" loading="lazy"
+                                          className="rounded-xl border border-cream/15 max-h-72 w-auto" />
+                                      </a>
+                                    ) : m.tipo_archivo === 'audio' ? (
+                                      <audio controls src={m.archivo_url} className="mt-2 w-full" />
+                                    ) : (
+                                      <a href={m.archivo_url} target="_blank" rel="noreferrer"
+                                        className="mt-2 flex items-center gap-2 text-gold underline min-h-[44px]">
+                                        <Paperclip className="w-4 h-4" /> Ver el archivo
+                                      </a>
+                                    )
+                                  ) : null}
                                   <p className={`text-sm mt-1.5 opacity-40 ${isMe ? 'text-right' : ''}`}>
                                     {new Date(m.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
@@ -3229,30 +3402,61 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             value={chatInput}
                             onChange={e => setChatInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarChatMsg()}
-                            placeholder={`Mensaje a ${chatCliente.nombre}...`}
+                            placeholder={chatAdjunto ? `Cuéntale a ${chatCliente.nombre} qué le mandas…` : `Mensaje a ${chatCliente.nombre}...`}
                             disabled={chatEnviando}
                             className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                           />
+                          {/* Adjuntar. Esto existía solo dentro de un chat de
+                              canal que ninguna pantalla dibujaba, así que el
+                              equipo no podía mandarle una captura a nadie. */}
+                          <input ref={chatArchivoRef} type="file" className="hidden"
+                            accept="image/*,audio/*,.pdf,.txt,.csv,.doc,.docx"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) {
+                                if (f.size > TOPE_ARCHIVO) toast.error(`${f.name} pesa más de 8 MB.`);
+                                else setChatAdjunto(f);
+                              }
+                              e.target.value = '';
+                            }} />
+                          <button
+                            type="button"
+                            onClick={() => chatArchivoRef.current?.click()}
+                            aria-label="Adjuntar una captura o un archivo"
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-colors ${
+                              chatAdjunto ? 'border-gold/50 bg-gold/10 text-gold' : 'border-gold/12 bg-black/20 text-cream/70 hover:text-cream'
+                            }`}
+                          >
+                            <Paperclip className="w-5 h-5" />
+                          </button>
                           <button
                             onClick={enviarChatMsg}
-                            disabled={!chatInput.trim() || chatEnviando}
+                            disabled={(!chatInput.trim() && !chatAdjunto) || chatEnviando}
                             className="btn-primary w-12 h-12 rounded-xl flex items-center justify-center disabled:opacity-50 transition-colors shadow-lg shadow-gold/20"
                           >
                             {chatEnviando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                           </button>
                         </div>
+                        {chatAdjunto && (
+                          <div className="mt-2 flex items-center gap-2 rounded-lg border border-gold/25 bg-gold/[0.06] px-3 py-2">
+                            <Paperclip className="w-4 h-4 text-gold shrink-0" />
+                            <span className="text-sm text-cream/80 truncate flex-1">{chatAdjunto.name}</span>
+                            <button type="button" onClick={() => setChatAdjunto(null)}
+                              aria-label="Sacar el archivo"
+                              className="w-11 h-11 flex items-center justify-center text-cream/60 hover:text-cream">×</button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
                     <div className="flex-1 flex items-center justify-center text-center">
                       <div>
                         <MessageSquare className="w-12 h-12 text-gray-800 mx-auto mb-4" />
-                        <p className="text-cream/55 text-sm">Seleccioná un cliente para chatear</p>
+                        <p className="text-cream/55 text-sm">Elige un cliente para escribirle</p>
                       </div>
                     </div>
                   )}
                 </div>
-              )}
             </div>
           )}
 
@@ -3498,7 +3702,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         <s.IconComp className={`w-8 h-8 ${s.color}`} />
                         <div>
                           <p className={`text-3xl font-light ${s.color} mb-0.5`}>{s.count}</p>
-                          <p className="text-sm text-cream/75 font-medium">{s.label}</p>
+                          <p className="text-sm text-cream/75 font-semibold">{s.label}</p>
                         </div>
                       </div>
                     ))}
@@ -3630,10 +3834,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                     {pilar.metas.map(meta => {
                                       const tareaData = tareasCompletadasPilar.find((t: any) => t.meta_codigo === meta.codigo);
                                       if (!tareaData) return null;
-                                      const herramientaOutput = meta.herramienta_id
-                                        ? metricasOutputs.find((o: any) => o.herramienta_id === meta.herramienta_id)
-                                        : null;
-                                      const rawOutput = tareaData.output_generado ?? herramientaOutput?.output ?? null;
+                                      const rawOutput = tareaData.output_generado ?? null;
                                       const hasOutput = !!rawOutput;
                                       return (
                                         <button
@@ -3792,8 +3993,12 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
             <div className="w-full space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-light text-white tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Gestión de Equipo</h2>
-                  <p className="text-sm text-white/55 mt-1">Administrá roles y permisos de los miembros del equipo.</p>
+                  {/* El encabezado de la pestaña ya dice «Gestión de Equipo»: este decía
+                      lo mismo dos veces en la misma pantalla. La pestaña de Videos ya
+                      resolvía esto con un nombre propio para su panel. Y el color va en
+                      `cream`, que es el token de la casa, como el h2 de Videos. */}
+                  <h2 className="text-2xl font-light text-cream tracking-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Roles y permisos</h2>
+                  <p className="text-sm text-white/55 mt-1">Administra roles y permisos de los miembros del equipo.</p>
                 </div>
                 <button onClick={() => setShowAddTeamMember(true)} className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold">
                   <Plus className="w-4 h-4" /> Agregar Miembro
@@ -4042,11 +4247,53 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {mainTab === 'hoy' && (
             <JornadaPanel
               personaId={(adminProfile as { id?: string }).id ?? ''}
-              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
-              items={[]}
+              rol={rol}
+              items={cola}
+              sesiones={misSesionesDeLaSemana}
+              enInstalacion={clientes.filter((c) =>
+                ((c as { etapa_actual?: number | null }).etapa_actual ?? 0) < 5).length}
               jornadasDelEquipo={jornadasEquipo.filter(
                 (j) => j.personaId !== (adminProfile as { id?: string }).id)}
             >
+            {/* LO QUE LA APP YA HIZO, antes de pedirle nada a nadie.
+                Aparece solo cuando hizo algo: un cartel que dice «0 y 0»
+                todos los días se deja de leer, y entonces tampoco se lee el
+                día que dice algo. */}
+            {pasada && (pasada.escalados > 0 || pasada.deLaPersona > 0 || pasada.losLleveLaApp > 0) && (
+              <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 mb-4">
+                <p className="text-[15px] text-cream/90">
+                  {pasada.escalados + pasada.deLaPersona > 0 ? (
+                    <>Quedaron{' '}
+                      <strong className="text-gold">{pasada.escalados + pasada.deLaPersona}</strong>
+                      {pasada.escalados + pasada.deLaPersona === 1 ? ' tarea' : ' tareas'}{' '}
+                      en tu lista, de la semana de tus clientes.
+                    </>
+                  ) : (
+                    <>Las{' '}
+                      <strong className="text-gold">{pasada.losLleveLaApp}</strong>{' '}
+                      {pasada.losLleveLaApp === 1 ? 'cuenta' : 'cuentas'} que están trabadas
+                      las lleva la app sola por ahora.
+                    </>
+                  )}
+                </p>
+                {pasada.escalados > 0 && (
+                  <p className="text-[15px] text-cream/65 mt-1">
+                    De esas,{' '}
+                    <strong className="text-cream/85">{pasada.escalados}</strong>{' '}
+                    {pasada.escalados === 1 ? 'venía' : 'venían'} avisada dos veces y el
+                    problema sigue: ahí hace falta que hables con la persona.
+                  </p>
+                )}
+                {pasada.losLleveLaApp > 0 && pasada.escalados + pasada.deLaPersona > 0 && (
+                  <p className="text-[15px] text-cream/65 mt-1">
+                    Otras{' '}
+                    <strong className="text-cream/85">{pasada.losLleveLaApp}</strong>{' '}
+                    las está llevando la app sola: el cliente ya tiene su aviso.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Arriba de todo: alguien esperando respuesta manda sobre
                 cualquier cuello. Una cuenta rota se destraba mañana; una
                 persona esperando se va hoy. */}
@@ -4056,11 +4303,44 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               })}
             />
 
+            {/* Después de quien espera respuesta, quien está TRABADO.
+                Una evidencia rechazada no deja cerrar la jornada: el cliente
+                está mirando una pantalla que le pide otra foto y la decisión
+                es de acá. Se calla cuando no hay ninguna. */}
+            <ColaDeEvidencias
+              onAbrirCliente={(id) => {
+                const c = clientes.find((x) => x.id === id);
+                if (c) setSelectedCliente(c as never);
+                setDetalleTab('evidencias');
+                setMainTab('clientes');
+              }}
+            />
+
             <ListaDeHoy
               personaId={(adminProfile as { id?: string }).id ?? ''}
               onAbrir={abrirDestino}
               clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))}
             />
+
+            {/* CÓMO VA CADA UNO.
+                La lista de arriba muestra TAREAS: quien no generó ninguna no
+                aparece, y el que no aparece es justamente el que se está yendo
+                en silencio. Esta muestra a los diez, con cuántas mentorías
+                seguidas se perdió cada uno — que hasta ahora no se veía en
+                ninguna pantalla hasta que el cliente avisaba. */}
+            <SeguimientoDeTodos onAbrir={abrirDestino} />
+
+            {/* Los reportes de La Base y las mentorías con su link: los dos
+                trabajos que vivían en Discord y en el calendario aparte. */}
+            <ReportesYGrupales
+              quienSoy={(adminProfile as { id?: string }).id ?? ''}
+              nombres={Object.fromEntries(clientes.map((c) => [c.id, c.nombre]))}
+            />
+
+            {/* La llave de la migración. El asistente del Admin sigue estando
+                para los casos en que haya que hacerla por alguien; esto es
+                para que la haga el cliente, que es quien conoce su material. */}
+            <HabilitarMigraciones />
 
             {/* La cola vieja SE FUE de acá.
 
@@ -4087,7 +4367,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
           {mainTab === 'semana' && (
             <LaSemana
-              rol={rolPermisos((adminProfile as { admin_rol?: string }).admin_rol)}
+              rol={rol}
               jornadas={jornadasEquipo}
               clientesActivos={clientes.filter((c) =>
                 ((c as { estado?: string }).estado ?? 'ACTIVE') === 'ACTIVE').length}
@@ -4118,6 +4398,15 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
               ) : (
                 <p className="text-sm text-cream/45">Elige un cliente para cargar su sesión.</p>
               )}
+
+              {/* Lo de arriba extrae las DECISIONES de una transcripción. Esto
+                  registra que la sesión OCURRIÓ, que es lo que sostiene la
+                  promesa de acompañamiento — y es la única forma de cargar una
+                  grupal, que tiene varios asistentes a la vez. */}
+              <CargarSesionHumana
+                clientes={clientes.map((c) => ({ id: c.id, nombre: c.nombre }))}
+                quienLaDio={(adminProfile as { nombre?: string }).nombre ?? 'tu equipo'}
+              />
             </div>
           )}
 
@@ -4126,7 +4415,13 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {mainTab === 'mirol' && (
             <MiRol rol={rol}
               enInstalacion={clientes.filter((c) =>
-                ((c as { etapa_actual?: number | null }).etapa_actual ?? 0) < 5).length} />
+                ((c as { etapa_actual?: number | null }).etapa_actual ?? 0) < 5).length}
+              /* La barra de carga estaba siempre casi en cero porque estos dos
+                 nunca llegaban: el panel medía la instalación y nada más.
+                 Una cuenta frenada es trabajo que alguien tiene que destrabar
+                 a mano, y una sesión dada son noventa minutos reales. */
+              excepciones={cola.filter((i) => i.quien !== 'la app').length}
+              sesiones={misSesionesDeLaSemana} />
           )}
 
           {mainTab === 'sala' && (adminRol === 'owner' || !adminRol) && (
@@ -4139,34 +4434,16 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           )}
 
           {mainTab === 'motor' && (adminRol === 'owner' || !adminRol) && (
-            <PanelMotorIA />
+            <PanelMotorIA clientes={clientes.map((c) => ({
+              id: c.id, nombre: c.nombre,
+              servicio: (c as { servicio_contratado?: string | null }).servicio_contratado ?? null,
+            }))} />
           )}
 
-          {mainTab === 'plata' && (adminRol === 'owner' || !adminRol) && (
-            <div className="max-w-6xl mx-auto space-y-5">
-              {/* Sin selector propio, esta tab decía "elige un cliente arriba"
-                  y arriba no había nada que elegir. */}
-              <div className="card-panel p-4">
-                <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
-                  De qué cliente
-                </label>
-                <CustomSelect
-                  value={campanasClienteId ?? ''}
-                  onChange={(val) => setCampanasClienteId(val || null)}
-                  options={clientes.map(c => ({
-                    value: c.id,
-                    label: `${c.nombre} — ${c.especialidad ?? 'Sin especialidad'}`,
-                  }))}
-                />
-              </div>
-            <TableroPlata
-              clienteId={campanasClienteId ?? undefined}
-              nombreCliente={
-                clientes.find((c) => c.id === campanasClienteId)?.nombre ?? undefined
-              }
-            />
-            </div>
-          )}
+          {/* Acá estaba la Mesa de plata. Mostraba lo mismo que «De un
+              vistazo», que además tiene su barra de pestañas: a esta se
+              llegaba solo por accidente, desde una tarea, y al llegar no
+              había cómo volver. */}
 
           {mainTab === 'tareas' && (
             <TasksPipeline
@@ -4415,6 +4692,124 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   ]}
                 />
               </div>
+
+              {/* Lo que decide el trabajo y el tiempo. Antes no se podía cargar
+                  desde acá: había que escribirlo a mano en la base, así que
+                  todos quedaban sin ventana de acceso y en el escalón más bajo
+                  sin que nadie lo hubiera decidido. */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Qué contrató</label>
+                  <CustomSelect
+                    value={nuevoForm.servicio}
+                    onChange={(val) => setNuevoForm({ ...nuevoForm, servicio: val as Ticket })}
+                    options={(['base', 'ascenso', 'instalacion'] as Ticket[]).map((t) => ({
+                      value: t,
+                      label: `${TICKETS[t].nombre} — ${TICKETS[t].precio.toLocaleString('es')} USD`,
+                    }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Hasta cuándo</label>
+                  <CustomSelect
+                    value={nuevoForm.acceso}
+                    onChange={(val) => setNuevoForm({ ...nuevoForm, acceso: val as TipoDeAcceso })}
+                    options={[
+                      { value: 'noventa', label: '90 días' },
+                      { value: 'treinta', label: '30 días' },
+                      { value: 'cuotas', label: 'En cuotas' },
+                    ]}
+                  />
+                </div>
+              </div>
+              {/* Qué abre lo que acaba de elegir, antes de crear la cuenta.
+                  Elegir entre tres nombres sin ver qué le abre a la persona es
+                  de las decisiones más caras de esta pantalla: de esto depende
+                  cuánto del Camino ve y cuánto trabajo le debe el equipo. */}
+              {(() => {
+                const abre = loQueAbre(nuevoForm.servicio);
+                return (
+                  <div className="rounded-2xl border border-gold/30 p-4">
+                    <p className="text-[15px] font-bold uppercase tracking-[0.18em] text-gold">
+                      {TICKETS[nuevoForm.servicio].nombre} le abre
+                    </p>
+                    <ul className="mt-2 flex flex-col gap-1.5">
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.camino}</li>
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.monta}</li>
+                      <li className="text-[17px] leading-snug text-cream/85">{abre.entregas}</li>
+                    </ul>
+                    <p className="mt-2.5 text-[15px] text-cream/60">
+                      {TICKETS[nuevoForm.servicio].criterio}
+                    </p>
+                  </div>
+                );
+              })()}
+
+              <p className="text-[17px] text-cream/60">
+                Su acceso cierra el{' '}
+                <strong className="text-cream/80">
+                  {cierreDeLaVentana({ tipo: nuevoForm.acceso, inicio: nuevoForm.fecha_inicio })}
+                </strong>
+                . Si paga en cuotas, cada una se carga después en su ficha.
+              </p>
+
+              {/* SI LA VENTANA YA ESTÁ CERRADA, NO ENTRA.
+                  Su ventana de acceso se cuenta desde la fecha de inicio. Con
+                  la fecha real de un cliente que empezó hace meses, la app le
+                  muestra la pantalla de cierre en vez de la app: no es un
+                  error, es la ventana vencida el mismo día del alta.
+                  Las dos cosas son distintas y la app ya las separa: esta
+                  fecha abre su ACCESO; su avance en el Camino se siembra con
+                  el asistente de migración. */}
+              {(() => {
+                const a = accesoDelPerfil({ fecha_inicio: nuevoForm.fecha_inicio, acceso_tipo: nuevoForm.acceso });
+                const e = a ? estadoDeAcceso(a) : null;
+                if (!e || e.abierto) return null;
+                return (
+                  <div className="rounded-2xl border border-danger/40 bg-danger/[0.06] p-4">
+                    <p className="text-[17px] text-cream/90 leading-relaxed">
+                      Con esta fecha de inicio su acceso ya está cerrado: al entrar
+                      va a ver la pantalla de cierre, no la app.
+                    </p>
+                    <p className="text-[17px] text-cream/70 leading-relaxed mt-1.5">
+                      Si viene trabajando desde hace meses, pon la fecha de hoy: esta
+                      fecha abre su acceso. Su avance en el Camino se carga aparte, con
+                      el asistente de migración.
+                    </p>
+                  </div>
+                );
+              })()}
+
+              {/* YA VIENE CON SU TRABAJO HECHO.
+                  Para los que llegan de Discord con su plan, su método y su
+                  oferta ya armados. La llave estaba solo en Hoy, en otra
+                  lista: dar de alta a uno de ellos eran dos pantallas, y el
+                  segundo paso es el que se olvida. */}
+              <button type="button"
+                onClick={() => setNuevoForm({ ...nuevoForm, traeSuTrabajo: !nuevoForm.traeSuTrabajo })}
+                className={`w-full text-left rounded-2xl border p-4 transition-colors ${
+                  nuevoForm.traeSuTrabajo
+                    ? 'border-gold/35 bg-gold/[0.06]'
+                    : 'border-cream/12 hover:border-cream/25'}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center ${
+                    nuevoForm.traeSuTrabajo
+                      ? 'border-gold/60 bg-gold/20 text-gold'
+                      : 'border-cream/25 text-transparent'}`}>
+                    <Check className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[17px] font-bold text-cream leading-snug">
+                      Ya tiene su plan y su método hechos: que los traiga él
+                    </p>
+                    <p className="text-[15px] text-cream/60 leading-relaxed mt-1">
+                      {nuevoForm.traeSuTrabajo
+                        ? 'Al entrar le aparece «Trae tu trabajo» en su HOY. Pega su material, lo revisa campo por campo, y queda con su ADN cargado y sus Campañas listas.'
+                        : 'Para los que llegan con todo armado de antes. Se puede abrir después desde Hoy.'}
+                    </p>
+                  </div>
+                </div>
+              </button>
 
             </div>
 
@@ -4703,74 +5098,3 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
 // ─── MANAGER CHECKLIST COMPONENT ────────────────────────────────────────────────
 
-function ManagerChecklist({
-  items,
-  onToggle,
-  loading,
-}: {
-  items: AdminChecklistItem[];
-  onToggle: (id: string, completada: boolean) => void;
-  loading: boolean;
-}) {
-  const categorias: { key: AdminChecklistItem['categoria']; label: string }[] = [
-    { key: 'diaria', label: 'Tareas del día' },
-    { key: 'semanal', label: 'Semanales' },
-    { key: 'mensual', label: 'Mensuales' },
-  ];
-
-  const diarias = items.filter(i => i.categoria === 'diaria');
-  const completadasDiarias = diarias.filter(i => i.completada).length;
-
-  return (
-    <div className="card-panel border border-gold/12 rounded-2xl p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        <ClipboardList className="w-4 h-4 text-gold" />
-        <h3 className="text-sm font-bold uppercase tracking-widest text-gold">Checklist</h3>
-      </div>
-      {diarias.length > 0 && (
-        <p className="text-sm text-cream/55 font-medium">
-          {completadasDiarias}/{diarias.length} tareas del día
-        </p>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 text-gold animate-spin" /></div>
-      ) : items.length === 0 ? (
-        <p className="text-sm text-cream/45">Sin tareas asignadas</p>
-      ) : (
-        categorias.map(cat => {
-          const catItems = items.filter(i => i.categoria === cat.key);
-          if (catItems.length === 0) return null;
-          return (
-            <div key={cat.key}>
-              <p className="text-sm font-bold uppercase tracking-wider text-cream/55 mb-2">{cat.label}</p>
-              <div className="space-y-1.5">
-                {catItems.map(item => (
-                  <label
-                    key={item.id}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gold/5 cursor-pointer transition-colors"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onToggle(item.id, !item.completada)}
-                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                        item.completada
-                          ? 'bg-success border-success text-cream'
-                          : 'border-gold/18 text-transparent hover:border-gold/50'
-                      }`}
-                    >
-                      <Check className="w-3 h-3" />
-                    </button>
-                    <span className={`text-sm ${item.completada ? 'text-cream/45 line-through' : 'text-cream/80'}`}>
-                      {item.titulo}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
-}

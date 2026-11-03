@@ -307,7 +307,7 @@
     },
     {
       "codigo": "P4.4c",
-      "titulo": "Cuándo escalar y cuándo apagar",
+      "titulo": "Cuándo crecer y cuándo apagar",
       "dia": 46,
       "sistema": 3,
       "set": "pantalla",
@@ -434,63 +434,63 @@
     {
       "codigo": "L-02",
       "titulo": "Cargar consultantes, agenda y cobros",
-      "dia": 2,
+      "dia": 17,
       "minutos": 9,
       "donde": "MCD"
     },
     {
       "codigo": "L-03",
       "titulo": "Tu link de pago",
-      "dia": 9,
+      "dia": 5,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-04",
       "titulo": "Facturar y llevar la cuenta",
-      "dia": 9,
+      "dia": 17,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-05",
       "titulo": "Subir tu página y publicarla",
-      "dia": 25,
+      "dia": 16,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-06",
       "titulo": "Tu subdominio",
-      "dia": 25,
+      "dia": 16,
       "minutos": 3,
       "donde": "Sistema"
     },
     {
       "codigo": "L-07",
       "titulo": "Subir tu video a la página",
-      "dia": 28,
+      "dia": 17,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-08",
       "titulo": "Tu formulario de filtro",
-      "dia": 28,
+      "dia": 17,
       "minutos": 6,
       "donde": "Sistema"
     },
     {
       "codigo": "L-09",
       "titulo": "Tu calendario en dos pasos",
-      "dia": 28,
+      "dia": 17,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-10",
       "titulo": "Tu página de preparación",
-      "dia": 28,
+      "dia": 17,
       "minutos": 4,
       "donde": "Sistema"
     },
@@ -539,35 +539,35 @@
     {
       "codigo": "L-17",
       "titulo": "Grabar tus llamadas",
-      "dia": 39,
+      "dia": 23,
       "minutos": 4,
       "donde": "Sistema"
     },
     {
       "codigo": "L-18",
-      "titulo": "Tu bandeja y tu embudo",
-      "dia": 44,
+      "titulo": "Tu bandeja y tu captación",
+      "dia": 25,
       "minutos": 7,
       "donde": "Sistema"
     },
     {
       "codigo": "L-19",
       "titulo": "Tus respuestas automáticas",
-      "dia": 44,
+      "dia": 25,
       "minutos": 5,
       "donde": "Sistema"
     },
     {
       "codigo": "L-20",
       "titulo": "Grabar y editar con el celular",
-      "dia": 67,
+      "dia": 86,
       "minutos": 5,
       "donde": "Celular"
     },
     {
       "codigo": "L-21",
       "titulo": "Programar tu contenido del mes",
-      "dia": 67,
+      "dia": 86,
       "minutos": 5,
       "donde": "Sistema"
     }
@@ -581,8 +581,8 @@
       "dia": 1,
       "dia_estimado": 1,
       "significado": "La semilla bajo la nieve",
-      "forma": "Tus diez números de entrada",
-      "se_gana_con": "Tus diez números de entrada",
+      "forma": "Tus seis números de entrada",
+      "se_gana_con": "Tus seis números de entrada",
       "por_evidencia": true,
       "en_ventana": false
     },
@@ -770,7 +770,7 @@
     {
       "id": "ramiro",
       "nombre": "Ramiro",
-      "rol": "tu embudo",
+      "rol": "tu captación",
       "dia_estimado": 26,
       "se_abre_con": "campana_activa"
     },
@@ -791,19 +791,19 @@
     },
     {
       "id": "F-PAGINA",
-      "regla": "El día 26 no abre sin el enlace de la página",
+      "regla": "Del día 16 en adelante, nada abre sin el enlace de la página",
       "apertura": "adn.sistema.url_pagina",
       "mensaje": "Sin página publicada, el guion del video no tiene dónde vivir."
     },
     {
       "id": "F-RODAJE",
-      "regla": "La fecha de rodaje se elige el día 19",
+      "regla": "La fecha de rodaje se elige antes del día 15",
       "apertura": "evento.rodaje_agendado",
       "mensaje": "Elige el día. El rodaje que no tiene fecha no ocurre."
     },
     {
       "id": "F-14DIAS",
-      "regla": "Escalar o apagar queda cerrado del 31 al 45",
+      "regla": "Crecer o apagar queda cerrado del 31 al 45",
       "apertura": "dia>=46",
       "mensaje": "Faltan {n} días. Tu campaña está aprendiendo."
     },
@@ -821,7 +821,7 @@
     },
     {
       "id": "F-PRECIO",
-      "regla": "El precio del día 17 no puede ser menor al del día 9",
+      "regla": "El precio de la oferta del día 10 no puede ser menor al precio digno del día 5",
       "apertura": "oferta.precio>=numeros.precio_digno",
       "mensaje": "Tu oferta no puede valer menos que lo que ya cobras."
     },
@@ -898,7 +898,7 @@
       "manual": "LID-1",
       "acceso": null,
       "pasos": [
-        "Contesta las diez preguntas de tu medición de entrada",
+        "Contesta las seis preguntas de tu medición de entrada",
         "Elige dónde y a qué hora vas a construir esto cada día",
         "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
         "Divide: esa es tu hora real neta",
@@ -907,10 +907,10 @@
       "evidencias": [
         {
           "tipo": "numero",
-          "nombre": "Tus diez números de entrada",
-          "valida": "las diez respuestas, 1 a 10",
+          "nombre": "Tus seis números de entrada",
+          "valida": "los seis números de entrada cargados",
           "del_mercado": false,
-          "pide": "Contesta las diez preguntas. Quedan guardadas hasta el día 87."
+          "pide": "Contesta las seis preguntas. Quedan guardadas hasta el día 82, cuando vuelves a medir."
         },
         {
           "tipo": "imagen",
@@ -945,13 +945,13 @@
       "cinturon": "10gup",
       "jornada_larga": false,
       "lleva": "Tu medición de entrada y tu hora real neta, escritas.",
-      "veredicto": "Ya sabes de dónde partes. El día 87 lo vuelves a medir.",
+      "veredicto": "Ya sabes de dónde partes. El día 82 lo vuelves a medir.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
       "checklist": [
-        "Contesta las diez preguntas de tu medición de entrada",
+        "Contesta las seis preguntas de tu medición de entrada",
         "Elige dónde y a qué hora vas a construir esto cada día",
         "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
         "Divide: esa es tu hora real neta",
@@ -1114,7 +1114,9 @@
         "P1.5",
         "P3.7"
       ],
-      "tutoriales": [],
+      "tutoriales": [
+        "L-03"
+      ],
       "agente": "vera",
       "manual": "LID-3",
       "acceso": null,
@@ -1361,7 +1363,7 @@
         "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
         "Plazo, con fecha de cierre",
         "Entregables: lo que la persona recibe, no lo que tú haces",
-        "Precio con número, nunca menor al que sellaste el día 8",
+        "Precio con número, nunca menor al que sellaste el día 5",
         "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
       ],
       "evidencias": [
@@ -1391,7 +1393,7 @@
         "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
         "Plazo, con fecha de cierre",
         "Entregables: lo que la persona recibe, no lo que tú haces",
-        "Precio con número, nunca menor al que sellaste el día 8",
+        "Precio con número, nunca menor al que sellaste el día 5",
         "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
       ]
     },
@@ -1421,10 +1423,10 @@
       "evidencias": [
         {
           "tipo": "imagen",
-          "nombre": "Tu embudo dibujado",
+          "nombre": "Tu captación dibujada",
           "valida": "dos ramas: recurso y video de venta",
           "del_mercado": false,
-          "pide": "Sube la foto de tu embudo, con las dos ramas."
+          "pide": "Sube la foto de tu captación, con las dos ramas."
         },
         {
           "tipo": "texto",
@@ -1689,7 +1691,8 @@
         "L-08",
         "L-09",
         "L-10",
-        "L-02"
+        "L-02",
+        "L-04"
       ],
       "agente": "lucas",
       "manual": null,
@@ -2348,8 +2351,8 @@
       "manual": null,
       "acceso": null,
       "pasos": [
-        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
-        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso",
+        "Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
         "Reparte el presupuesto mitad y mitad",
         "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
         "Enciende y anota la fecha y la hora"
@@ -2378,8 +2381,8 @@
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
       "checklist": [
-        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso gratuito",
-        "Campaña 2, retargeting: quienes vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
+        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso",
+        "Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
         "Reparte el presupuesto mitad y mitad",
         "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
         "Enciende y anota la fecha y la hora"
@@ -2862,7 +2865,7 @@
     {
       "dia": 43,
       "tipo": "sesion",
-      "titulo": "Escalar o apagar",
+      "titulo": "Crecer o apagar",
       "sistema": 3,
       "minutos": 45,
       "piezas": [
@@ -3200,29 +3203,41 @@
     },
     {
       "dia": 51,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tu cobranza de la semana",
+      "sistema": 3,
+      "minutos": 25,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Lista las cuotas que tocaban esta semana y cuáles entraron",
+        "Escríbele hoy a cada uno que no pagó, uno por uno",
+        "Anota en tus números lo cobrado, no lo facturado"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Cuotas que tocaban y cuotas que entraron",
+          "valida": "los dos números de esta semana",
+          "del_mercado": false,
+          "pide": "Carga los dos números: cuántas tocaban y cuántas entraron."
+        }
+      ],
+      "adn_escribe": [
+        "numeros.cuotas_cobradas"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "La lista de lo que falta cobrar, con un mensaje enviado a cada uno.",
+      "veredicto": "Lo que vendiste y no cobraste no es una venta todavía.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3264,56 +3279,78 @@
     },
     {
       "dia": 53,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "El que no entra, derivado",
+      "sistema": 1,
+      "minutos": 20,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Escribe en una línea a quién NO atiendes",
+        "Elige a dos colegas a quienes derivar, y escríbeles para avisarles",
+        "Guarda el mensaje con el que derivas, para no improvisarlo"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Tu criterio de derivación y tus dos colegas",
+          "valida": "a quién no atiendes y a quién le derivas",
+          "del_mercado": false,
+          "pide": "Escribe a quién no atiendes y los dos colegas a quienes derivas."
+        }
+      ],
+      "adn_escribe": [
+        "oferta.criterio_derivacion"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tu criterio escrito y dos colegas avisados.",
+      "veredicto": "Una agenda llena del que no puede pagar es una agenda vacía con más trabajo.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
       "dia": 54,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tu segundo creativo",
+      "sistema": 3,
+      "minutos": 30,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Mira cuál de tus anuncios trae las agendas más baratas",
+        "Graba tres variantes del MISMO 20, con otro gancho",
+        "Súbelas al mismo conjunto, sin tocar el que gana"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Tres variantes grabadas",
+          "valida": "tres piezas nuevas del mismo mensaje",
+          "del_mercado": false,
+          "pide": "Sube la captura de las tres variantes cargadas."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tres variantes nuevas del mensaje que ya funciona.",
+      "veredicto": "El creativo que rindió un mes se gasta. El reemplazo se graba antes, no después.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3425,29 +3462,41 @@
     },
     {
       "dia": 58,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "La conversación de renovación",
+      "sistema": 2,
+      "minutos": 30,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Mira quiénes terminan en las próximas tres semanas",
+        "Escríbele a cada uno para hablar ANTES de que termine",
+        "Prepara qué le ofreces después: no es el mismo programa otra vez"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Tu oferta de continuidad, en tres líneas",
+          "valida": "qué sigue después del programa",
+          "del_mercado": false,
+          "pide": "Escribe en tres líneas qué le ofreces al que termina."
+        }
+      ],
+      "adn_escribe": [
+        "oferta.continuidad"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tu oferta de continuidad escrita y las conversaciones agendadas.",
+      "veredicto": "Al que termina se le habla antes. Después ya decidió.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3489,56 +3538,78 @@
     },
     {
       "dia": 60,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tu agenda de la semana que viene",
+      "sistema": 4,
+      "minutos": 20,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Bloquea tus horas de construcción antes que las de atender",
+        "Deja dos espacios libres para lo que se caiga",
+        "Pon el bloque de números del viernes, con hora"
+      ],
+      "evidencias": [
+        {
+          "tipo": "imagen",
+          "nombre": "Tu semana bloqueada",
+          "valida": "los bloques de construcción visibles en el calendario",
+          "del_mercado": false,
+          "pide": "Sube la captura de tu semana con los bloques puestos."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "La semana que viene, bloqueada antes de que la llenen.",
+      "veredicto": "La hora que no bloqueaste la ocupa la urgencia de otro.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
       "dia": 61,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Lo que respondiste tres veces",
+      "sistema": 4,
+      "minutos": 25,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Anota las tres preguntas que más te repitieron este mes",
+        "Escribe la respuesta una sola vez, bien",
+        "Déjala donde el consultante la encuentra solo: tu app o tu mensaje automático"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Tres respuestas escritas una sola vez",
+          "valida": "las tres preguntas con su respuesta",
+          "del_mercado": false,
+          "pide": "Pega las tres preguntas con su respuesta."
+        }
+      ],
+      "adn_escribe": [
+        "sistema.respuestas_guardadas"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tres respuestas que ya no vas a volver a escribir.",
+      "veredicto": "Lo que repetiste tres veces deja de necesitarte el día que lo escribes.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3650,29 +3721,39 @@
     },
     {
       "dia": 65,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tus números contra tu banda",
+      "sistema": 3,
+      "minutos": 25,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Mira tu costo por agenda y tu costo por conversación de esta semana",
+        "Compáralos con la referencia de TU país, no con la semana pasada",
+        "Elige UN número para mover, y anota qué vas a cambiar"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "El número que eliges mover",
+          "valida": "un indicador y qué vas a cambiar",
+          "del_mercado": false,
+          "pide": "Elige el número y escribe en una línea qué vas a cambiar."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Un solo número elegido, con su cambio escrito.",
+      "veredicto": "Compararte contra tu semana pasada te dice si mejoraste. Contra tu banda, si te alcanza.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3719,56 +3800,80 @@
     },
     {
       "dia": 67,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "El primero que termina",
+      "sistema": 5,
+      "minutos": 30,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Cierra con él: qué se llevó, en sus palabras",
+        "Pídele el resultado en una frase y el permiso por escrito",
+        "Pídele el referido en vivo, al final de la llamada"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Cierre, resultado y referido",
+          "valida": "la frase con permiso y el nombre del referido",
+          "del_mercado": false,
+          "pide": "Pega su frase con el permiso, y el nombre del referido si salió."
+        }
+      ],
+      "adn_escribe": [
+        "prueba.casos_cerrados"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Un cierre completo: resultado, permiso y referido.",
+      "veredicto": "El referido se pide en vivo. Por escrito casi nunca sale.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
       "dia": 68,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tu precio de la próxima camada",
+      "sistema": 2,
+      "minutos": 25,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Suma lo que ya puedes probar: resultados, casos y testimonios",
+        "Sube el precio de la próxima camada y escribe el número",
+        "Deja el precio viejo solo para quien ya estaba hablando contigo"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tu precio nuevo",
+          "valida": "el número, mayor al anterior",
+          "del_mercado": false,
+          "pide": "Carga tu precio nuevo."
+        }
+      ],
+      "adn_escribe": [
+        "oferta.precio_nuevo"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tu precio nuevo escrito, con la prueba que lo sostiene.",
+      "veredicto": "El precio sube con la prueba, no con las ganas.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3880,29 +3985,39 @@
     },
     {
       "dia": 72,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Los que se enfriaron",
+      "sistema": 3,
+      "minutos": 25,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
+      "pasos": [
+        "Lista las agendas que no se presentaron y las llamadas sin cierre del último mes",
+        "Escríbele a cada uno con algo nuevo, nunca con «¿cómo vas?»",
+        "Anota cuántos contestaron"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Contactados y contestados",
+          "valida": "los dos números de la recuperación",
+          "del_mercado": false,
+          "pide": "Carga a cuántos escribiste y cuántos contestaron."
+        }
+      ],
       "adn_escribe": [],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tu lista de enfriados, contactada en un día.",
+      "veredicto": "El que no se presentó sigue teniendo el problema. Lo que falta es un motivo nuevo.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -3946,29 +4061,41 @@
     },
     {
       "dia": 74,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Tu hora real, otra vez",
+      "sistema": 1,
+      "minutos": 20,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Suma lo que cobraste este mes y las horas que trabajaste de verdad",
+        "Divide: esa es tu hora real neta de hoy",
+        "Compárala con la del día 1 y escribe la diferencia"
+      ],
+      "evidencias": [
+        {
+          "tipo": "numero",
+          "nombre": "Tu hora real de hoy",
+          "valida": "el número, comparado con el del día 1",
+          "del_mercado": false,
+          "pide": "Carga tu hora real de hoy."
+        }
+      ],
+      "adn_escribe": [
+        "numeros.hora_real_actual"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "Tu hora real de hoy, al lado de la del día 1.",
+      "veredicto": "Es el único número que mide si el programa funcionó.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -4107,29 +4234,41 @@
     },
     {
       "dia": 79,
-      "tipo": "campo",
-      "titulo": "Día de atender",
-      "sistema": null,
-      "minutos": 0,
+      "tipo": "sesion",
+      "titulo": "Lo que sigue sin ti",
+      "sistema": 4,
+      "minutos": 30,
       "piezas": [],
       "tutoriales": [],
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
-      "evidencias": [],
-      "adn_escribe": [],
+      "pasos": [
+        "Lista lo que pasa solo: anuncios, mensajes, agenda, cobro, entrega",
+        "Marca lo que se apaga si no entras una semana",
+        "Elige UNO de los que se apagan y déjalo andando antes del día 90"
+      ],
+      "evidencias": [
+        {
+          "tipo": "texto",
+          "nombre": "Lo que se apaga y el que dejas andando",
+          "valida": "la lista marcada y el que elegiste",
+          "del_mercado": false,
+          "pide": "Pega la lista marcada y cuál elegiste dejar andando."
+        }
+      ],
+      "adn_escribe": [
+        "sistema.lo_que_corre_solo"
+      ],
       "freno_activa": [],
       "freno_levanta": [],
       "cinturon": null,
       "jornada_larga": false,
-      "lleva": "Un día de consulta, sin tarea de app.",
-      "veredicto": "El camino sigue mañana. Hoy tu trabajo es atender bien.",
-      "acciones_campo": [
-        "Hoy atiendes. La app no te pide nada"
-      ],
+      "lleva": "La lista de lo que corre solo, y uno más que ahora también.",
+      "veredicto": "Lo que se apaga cuando no entras una semana todavía es tu trabajo, no tu sistema.",
+      "acciones_campo": [],
       "nota": null,
-      "paso_esencial": null,
+      "paso_esencial": 3,
       "avanza_sin_evidencia": false
     },
     {
@@ -4550,7 +4689,7 @@
       "cinturon": "1dan",
       "jornada_larga": false,
       "lleva": "Tus noventa días cerrados, con tus dos números lado a lado.",
-      "veredicto": "Terminaste. Tienes número, precio, método, oferta, embudo, app y tu ecosistema andando.",
+      "veredicto": "Terminaste. Tienes número, precio, método, oferta, captación, app y tu ecosistema andando.",
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 1,
