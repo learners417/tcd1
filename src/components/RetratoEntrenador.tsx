@@ -141,10 +141,22 @@ const Ceja = ({ x, y, giro = 0, largo = 9 }: { x: number; y: number; giro?: numb
  * pelados y los nueve se parecían entre sí — lo único que se veía de cada
  * peinado era un hilo.
  *
- * Ahora el casco nace en y=33 —un quinto de la cabeza, que es donde nace el
- * pelo de verdad— y la cúpula sube por encima del cráneo y baja por los
- * costados hasta la altura de la oreja. Eso le da masa, y la masa es lo que
- * hace que un peinado se distinga de otro.
+ * Ahora la cúpula sube por encima del cráneo y baja por los costados hasta la
+ * altura de la oreja. Eso le da masa, y la masa es lo que hace que un peinado
+ * se distinga de otro.
+ *
+ * ═══ Y LA FRENTE TIENE QUE EXISTIR ═══
+ *
+ * La línea de nacimiento estaba en y=32 con las cejas en y=37: cinco unidades
+ * de frente en una cara de cuarenta y ocho. Ampliados a cuatro aumentos, cinco
+ * de los siete entrenadores tenían una banda oscura cruzándoles la frente al
+ * ras de la ceja — se leía como una vincha o el borde de una peluca, no como
+ * pelo. Los dos que sí funcionaban —Mateo con su afro y Sofi con la raya al
+ * medio— eran justo los dos que mostraban frente.
+ *
+ * La línea subió a y=27. Diez unidades entre el nacimiento y la ceja, que es
+ * más o menos el tercio de cara que tiene una frente de verdad, y la cúpula
+ * no se movió: el volumen de arriba sigue entero.
  */
 const CARAS: Record<string, Cara> = {
   /* Sofi — melena larga y lacia, raya al medio, cara alargada. */
@@ -152,7 +164,7 @@ const CARAS: Record<string, Cara> = {
     paisaje: 'lago', piel: PIEL.clara, pelo: '#3B2A1E', rx: 18, ry: 23,
     ojos: 9.5, nariz: 54, boca: 6.5, curva: 2,
     atras: <path d="M25 50 C24 18, 72 18, 71 50 C71 66, 73 80, 75 96 L62 96 C61 76, 60 60, 59 48 Z M37 48 C36 60, 35 76, 34 96 L21 96 C23 80, 25 66, 25 50 Z" />,
-    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 41, 66 33, 48 32 C30 33, 27 41, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 41, 66 31, 48 30 C30 31, 27 41, 25 50 Z" />,
     cejas: <><Ceja x={38} y={37} giro={0.5} /><Ceja x={58} y={37} giro={-0.5} /></>,
   },
   /* Caro — melena corta al mentón, flequillo que cruza, cara redonda. */
@@ -160,7 +172,7 @@ const CARAS: Record<string, Cara> = {
     paisaje: 'montana', piel: PIEL.media, pelo: '#4A2B1A', rx: 19, ry: 22,
     ojos: 9, nariz: 54, boca: 7.5, curva: 2.6,
     atras: <path d="M25 50 C24 18, 72 18, 71 50 C71 60, 72 66, 70 72 L60 72 C63 62, 62 54, 61 48 Z M35 48 C34 54, 33 62, 36 72 L26 72 C24 66, 25 60, 25 50 Z" />,
-    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 42, 68 34, 58 31 C50 36, 38 37, 31 34 C28 38, 26 43, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 42, 68 32, 58 29 C50 34, 38 35, 31 32 C28 38, 26 43, 25 50 Z" />,
     cejas: <><Ceja x={38} y={37} giro={1.4} /><Ceja x={58} y={37} giro={-1.4} /></>,
   },
   /* Vera — recogido alto apoyado en la cúpula, frente despejada. */
@@ -168,14 +180,14 @@ const CARAS: Record<string, Cara> = {
     paisaje: 'viento', piel: PIEL.clara, pelo: '#2E2118', rx: 17, ry: 22,
     ojos: 8.5, nariz: 53, boca: 6, curva: 1.2,
     atras: <circle cx="48" cy="20" r="10" />,
-    adelante: <path d="M27 48 C26 19, 70 19, 69 48 C67 40, 64 33, 48 32 C32 33, 29 40, 27 48 Z" />,
+    adelante: <path d="M27 48 C26 19, 70 19, 69 48 C67 40, 64 31, 48 30 C32 31, 29 40, 27 48 Z" />,
     cejas: <><Ceja x={38} y={37} giro={0.8} largo={8} /><Ceja x={58} y={37} giro={-0.8} largo={8} /></>,
   },
   /* Ramiro — pelo corto, barba recortada que sigue la mandíbula. */
   ramiro: {
     paisaje: 'rio', piel: PIEL.media, pelo: '#241A12', rx: 19, ry: 23,
     ojos: 10, nariz: 57, boca: 7, curva: 1,
-    adelante: <path d="M26 50 C25 19, 71 19, 70 50 C68 41, 65 33, 48 32 C31 33, 28 41, 26 50 Z" />,
+    adelante: <path d="M26 50 C25 19, 71 19, 70 50 C68 41, 65 31, 48 30 C31 31, 28 41, 26 50 Z" />,
     barba: <path d="M31 54 C31 62, 35 70, 41 73 C45 75, 51 75, 55 73 C61 70, 65 62, 65 54 C63 63, 57 68, 48 68 C39 68, 33 63, 31 54 Z" />,
     cejas: <><Ceja x={38} y={36} giro={1} largo={11} /><Ceja x={58} y={36} giro={-1} largo={11} /></>,
   },
@@ -183,7 +195,7 @@ const CARAS: Record<string, Cara> = {
   lucas: {
     paisaje: 'bosque', piel: PIEL.clara, pelo: '#6B4A2A', rx: 20, ry: 22,
     ojos: 10.5, nariz: 55, boca: 8, curva: 1.8,
-    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C69 41, 67 33, 57 31 C50 35, 40 35, 33 32 C29 36, 27 43, 26 50 Z" />,
+    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C69 41, 67 31, 57 29 C50 33, 40 33, 33 30 C29 34, 27 43, 26 50 Z" />,
     cejas: <><Ceja x={38} y={37} giro={0.4} largo={10} /><Ceja x={58} y={37} giro={-0.4} largo={10} /></>,
   },
   /* Bruno — calvo con las entradas marcadas, barba llena. */
@@ -199,7 +211,7 @@ const CARAS: Record<string, Cara> = {
     paisaje: 'bosque', piel: PIEL.media, pelo: '#33231A', rx: 18, ry: 24,
     ojos: 8.5, nariz: 56, boca: 6.5, curva: 0.8,
     atras: <path d="M25 50 C24 17, 72 17, 71 50 C71 60, 72 66, 70 70 L61 70 C64 60, 63 54, 62 48 Z M34 48 C33 54, 32 60, 35 70 L26 70 C24 66, 25 60, 25 50 Z" />,
-    adelante: <path d="M25 50 C24 17, 72 17, 71 50 C70 42, 68 34, 61 32 C55 27, 43 28, 36 33 C30 35, 27 42, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 17, 72 17, 71 50 C70 42, 68 32, 61 30 C55 30, 43 31, 36 31 C30 33, 27 42, 25 50 Z" />,
     cejas: <><Ceja x={38} y={38} giro={1.8} /><Ceja x={58} y={37} giro={-1.2} /></>,
   },
   /* Mateo — rulos. Tres bultos sobre la cúpula, nunca a la misma altura. */
@@ -207,14 +219,14 @@ const CARAS: Record<string, Cara> = {
     paisaje: 'viento', piel: PIEL.oscura, pelo: '#1F1710', rx: 19, ry: 22,
     ojos: 9.5, nariz: 54, boca: 7.5, curva: 2.8,
     atras: <><circle cx="30" cy="29" r="11" /><circle cx="48" cy="17" r="13" /><circle cx="66" cy="30" r="10" /></>,
-    adelante: <path d="M26 50 C25 20, 71 20, 70 50 C68 42, 65 33, 48 32 C31 33, 28 42, 26 50 Z" />,
+    adelante: <path d="M26 50 C25 20, 71 20, 70 50 C68 42, 65 31, 48 30 C31 31, 28 42, 26 50 Z" />,
     cejas: <><Ceja x={38} y={37} giro={1} /><Ceja x={58} y={37} giro={-1} /></>,
   },
   /* El Mentor — pelo corto peinado hacia atrás, barba corta. */
   mentor: {
     paisaje: 'lago', piel: PIEL.media, pelo: '#2A1D14', rx: 19, ry: 23,
     ojos: 9.5, nariz: 56, boca: 7, curva: 1.4,
-    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C68 41, 66 32, 48 31 C30 32, 28 41, 26 50 Z" />,
+    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C68 41, 66 30, 48 29 C30 30, 28 41, 26 50 Z" />,
     barba: <path d="M31 53 C31 62, 35 71, 41 74 C45 76, 51 76, 55 74 C61 71, 65 62, 65 53 C63 63, 57 69, 48 69 C39 69, 33 63, 31 53 Z" />,
     cejas: <><Ceja x={38} y={36} giro={0.8} largo={10} /><Ceja x={58} y={36} giro={-0.8} largo={10} /></>,
   },

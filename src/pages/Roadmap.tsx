@@ -288,16 +288,16 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
   return (
     <div className="mt-4 pt-4 border-t border-[var(--line, rgba(142,104,36,0.18))]">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55">Documenta tu trabajo</p>
+        <p className="text-[15px] font-bold uppercase tracking-[0.25em] text-cream/55">Documenta tu trabajo</p>
         <button
           onClick={() => inputRef.current?.click()}
           disabled={subiendo}
-          className="text-sm px-3 py-1.5 rounded-lg border border-[var(--line2, rgba(142,104,36,0.30))] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+          className="text-[15px] px-3 py-1.5 rounded-lg border border-[var(--line2, rgba(142,104,36,0.30))] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
         >
           {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
         </button>
       </div>
-      {items.length > 0 && <p className="text-sm text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
+      {items.length > 0 && <p className="text-[15px] text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
       <input ref={inputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt" className="hidden" onChange={async (e) => {
         const f = e.target.files?.[0];
         if (!f || !userId) return;
@@ -331,7 +331,17 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
   // T2/T3 · registrar venta + graduación (rediseño 4 fases)
-  const [, setPartidaResuelta] = useState(false);
+  /*
+   * `partidaResuelta` se lee de localStorage UNA vez, al montar: si ya
+   * contestó «qué tienes andando», la pregunta no vuelve. Antes esto era un
+   * `useState(false)` que solo servía para forzar un render, y la condición
+   * se recalculaba leyendo localStorage dentro del JSX. Ahora el valor vive
+   * en el estado, que es lo que decide si El Camino muestra la pregunta o se
+   * muestra entero.
+   */
+  const [partidaResuelta, setPartidaResuelta] = useState<boolean>(() => {
+    try { return Boolean(localStorage.getItem(KEY_PARTIDA)); } catch { return true; }
+  });
   const [ventaModal, setVentaModal] = useState(false);
   const [ventaMonto, setVentaMonto] = useState('');
   const [ventaGuardando, setVentaGuardando] = useState(false);
@@ -1210,8 +1220,32 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-cream/55 text-sm">
+      <div className="flex items-center justify-center h-64 text-cream/55 text-[15px]">
         Cargando El Camino...
+      </div>
+    );
+  }
+
+  /*
+   * ─── EL DÍA CERO ES UNA PANTALLA SOLA ────────────────────────────────
+   *
+   * «¿Qué ya tienes andando?» son once casillas, y estaban ARRIBA del resto
+   * del Camino: el que abría la app por primera vez leía once frases y, un
+   * metro y medio más abajo, el cinturón, el anillo y la jornada de hoy.
+   * Medido: 5690 px de alto y la primera pantalla y media ocupadas por una
+   * lista de cosas que todavía no hizo.
+   *
+   * Es una pregunta de una sola vez. Entonces es una pantalla de una sola
+   * vez: se responde y se va, y El Camino aparece detrás con su cinturón y
+   * su jornada de hoy. Una decisión por pantalla.
+   */
+  if (!partidaResuelta && completadas.size === 0) {
+    return (
+      <div className="max-w-xl mx-auto pb-12 animate-in fade-in duration-500">
+        <PuntoDePartida
+          onGuardar={marcarPartida}
+          onCerrar={() => setPartidaResuelta(true)}
+        />
       </div>
     );
   }
@@ -1221,23 +1255,17 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
       {/* ── Notificación de celebración ── */}
       {celebracion && (
-        <div className="fade-rise fixed top-6 right-6 z-50 bg-gold/90 backdrop-blur text-ink text-sm font-semibold px-5 py-3 rounded-2xl shadow-xl animate-in slide-in-from-right duration-300">
+        /*
+          El aviso venía en oro relleno al 90% con `shadow-xl`: relleno y
+          halo, las dos cosas que el oro de esta casa no hace. Ahora es la
+          tarjeta de papel con su línea de oro de 1px, que es como se avisa
+          acá. Sigue entrando desde la derecha.
+        */
+        <div className="fade-rise fixed top-6 right-6 z-50 max-w-[22rem] rounded-2xl border px-5 py-3 text-[15px] leading-snug font-semibold animate-in slide-in-from-right duration-300"
+          style={{ background: 'var(--card, #FFFDF7)', borderColor: 'var(--oro, #B0822E)', color: 'var(--tinta, #2B2723)' }}>
           {celebracion}
         </div>
       )}
-
-      {/* ── Punto de partida: una sola vez, para el que ya venía andando ── */}
-      {(() => {
-        let yaEligio = true;
-        try { yaEligio = Boolean(localStorage.getItem(KEY_PARTIDA)); } catch { yaEligio = true; }
-        if (yaEligio || completadas.size > 0) return null;
-        return (
-          <PuntoDePartida
-            onGuardar={marcarPartida}
-            onCerrar={() => setPartidaResuelta(true)}
-          />
-        );
-      })()}
 
       {/* Lo que quedó viejo cuando cambió una pieza de su ADN. */}
       {desfasajes.length > 0 && (
@@ -1394,7 +1422,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                     <h2 className="text-[22px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
                       {VOC(fase.titulo)}
                     </h2>
-                    <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
+                    <p className="text-[15px] text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
                   </div>
                 </div>
               )}
@@ -1429,10 +1457,25 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       }}
                       disabled={pilar.estado === 'bloqueado'}
                       className={`relative text-left p-4 sm:p-5 min-w-0 rounded-2xl border transition-all duration-300 ${
+                        /*
+                          EL TRAMO CERRADO SE VEÍA COMO TEXTO HUÉRFANO.
+
+                          Borde `--line` (#EBE1CF) sobre el papel del Camino:
+                          dos tonos que casi no se distinguen, así que la
+                          tarjeta desaparecía y lo que quedaba era «Sistema 1
+                          · Tu reset / Días 32 a 38 / Se abre el día 32»
+                          flotando al lado de las tarjetas abiertas, como si
+                          la pantalla se hubiera roto ahí.
+
+                          Punteado y con el borde que sí se ve. Es la misma
+                          convención de la grilla de «Tu camino por dentro» y
+                          de las jornadas cerradas: en toda la app, punteado
+                          quiere decir «todavía no».
+                        */
                         pilar.estado === 'bloqueado'
-                          ? 'bg-transparent border-[var(--line,#EBE1CF)] cursor-not-allowed'
+                          ? 'bg-transparent border-dashed border-[var(--line2,#DFD3BC)] cursor-not-allowed'
                           : pilar.estado === 'plan_bloqueado'
-                          ? 'bg-transparent border-[var(--line,#EBE1CF)]'
+                          ? 'bg-transparent border-dashed border-[var(--line2,#DFD3BC)]'
                           : isSelected
                           ? 'bg-[var(--card,#FFFDF7)] border-gold'
                           : pilar.estado === 'completado'
@@ -1474,14 +1517,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
-                        <p className="text-sm text-cream/45 mt-1.5 leading-tight">
+                        <p className="text-[15px] text-cream/60 mt-1.5 leading-snug">
                           {primerDiaDelPilar(pilar.metas) !== null ? `Se abre el día ${primerDiaDelPilar(pilar.metas)}` : ''}
                         </p>
                       )}
                       {pilar.estado === 'plan_bloqueado' && (() => {
                         const oferta = laOfertaQueSigue(pilar.numero);
                         return (
-                          <span className="block text-sm text-gold/85 mt-1.5 leading-relaxed">
+                          <span className="block text-[15px] text-goldhi mt-1.5 leading-snug">
                             Se abre con <strong>{oferta.nombre}</strong> · {oferta.precio} — toca para verlo
                           </span>
                         );
@@ -1526,13 +1569,18 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
               {/* Progreso del pilar */}
               <div className="mt-4 space-y-1.5">
-                <div className="flex justify-between text-xs text-cream/55">
-                  {/* El segundo contador decía «0 ★ completadas» sin decir
-                      completadas de qué, y «completadas» donde el resto de la
-                      app dice «hechas». Las estrellas son las jornadas que
-                      cierran tramo: eso es lo que cuenta. */}
+                {/*
+                  ERAN DOS CONTADORES PARA UNA SOLA COSA.
+
+                  A la derecha decía «0 ★ de cierre»: una cifra, una estrella
+                  rellena y dos palabras, que hay que descifrar. Y abajo del
+                  mismo tramo, en una frase entera, ya estaba dicho: «Te
+                  faltan 2 jornadas para cerrar este tramo».
+
+                  Se queda la frase. Acá, el contador que se lee sin traducir.
+                */}
+                <div className="text-[15px] text-cream/60">
                   <span>{pilar.metasCompletadas} de {pilar.totalMetas} jornadas hechas</span>
-                  <span className="flex items-center gap-1 shrink-0">{pilar.estrellas_completadas} <Star className="w-3.5 h-3.5 text-gold fill-gold inline" /> de cierre</span>
                 </div>
                 <div className="h-1.5 bg-gold/5 rounded-full overflow-hidden">
                   <div
@@ -1546,7 +1594,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               {(pilar.desbloqueo === 'venta_real' || pilar.desbloqueo === 'qa_verde') && (
                 <div className="mt-3 flex items-start gap-2 bg-gold/10 border border-gold/20 rounded-xl px-3 py-2">
                   <AlertCircle className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                  <p className="text-xs text-gold">
+                  <p className="text-[15px] text-gold">
                     {pilar.desbloqueo === 'venta_real'
                       ? 'Este pilar se desbloqueó porque registraste tu primera venta real.'
                       : 'Este pilar se desbloqueó porque tu camino de captación pasó sus 24 puntos de control.'}
@@ -1566,7 +1614,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                   <Trophy className={`w-4 h-4 shrink-0 mt-0.5 ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`} />
-                  <p className={`text-xs font-semibold ${
+                  <p className={`text-[15px] font-semibold ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`}>
                     {pilar.hito_mensaje}
@@ -1597,9 +1645,24 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           setTimeout(() => taskRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
                         }
                       }}
+                      /*
+                        LA JORNADA CERRADA NO SE APAGA: SE PUNTEA.
+
+                        Venía `opacity-40`, que es el mismo arreglo que la
+                        grilla de «Tu camino por dentro» ya tuvo que
+                        deshacer: a cuarenta por ciento sobre el papel, el
+                        texto mide 2,5:1 y el piso de lectura es 4,5. El
+                        cliente ve seis o siete de estas en cada tramo, y lo
+                        que leía eran manchas, no días.
+
+                        El borde punteado es lo que dice «todavía no», igual
+                        que en la grilla. El texto queda legible, que es lo
+                        que hace falta: la jornada cerrada tiene que poder
+                        leerse —es lo que viene— sin poder tocarse.
+                      */
                       className={`group flex items-start gap-4 p-4 rounded-xl transition-all border ${
                         !unlocked
-                          ? 'opacity-40 cursor-not-allowed bg-surface/20 border-[var(--line, rgba(142,104,36,0.18))]'
+                          ? 'cursor-not-allowed bg-surface/20 border-dashed border-[var(--line2,#DFD3BC)]'
                           : estaCompletada
                           ? 'bg-success/5 border-success/15 cursor-pointer'
                           : isActive
@@ -1609,7 +1672,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                     >
                       <div className="shrink-0 mt-0.5">
                         {!unlocked ? (
-                          <Lock className="w-5 h-5 text-cream/20" />
+                          <Lock className="w-5 h-5 text-cream/55" />
                         ) : estaCompletada ? (
                           <CheckCircle2 className="w-5 h-5 text-success" />
                         ) : (
@@ -1621,21 +1684,48 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           {/* El código y el tipo son del equipo: el cliente ve el día. */}
                           <span className="text-[15px] text-cream/60">Día {meta.dia_asignado}</span>
                           {meta.es_estrella && (
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <Star className="w-4 h-4 text-gold" />
                           )}
                           {tieneOutput && (
-                            <FileText className="w-3 h-3 text-success" />
+                            <FileText className="w-4 h-4 text-success" />
                           )}
                         </div>
                         {/* Con la sesión abierta el título ya está adentro: no se repite. */}
                         {!isActive && (
-                          <p className={`text-base font-semibold ${estaCompletada ? 'text-cream/55 line-through' : 'text-cream'}`}>
+                          /*
+                            SIN TACHADO.
+
+                            La jornada hecha venía con el título tachado. Un
+                            tachón es lo que se le hace a lo que se canceló o
+                            se escribió mal, no a lo que alguien terminó: el
+                            cliente veía su trabajo hecho con una raya encima.
+                            El tilde verde de la izquierda ya dice que está
+                            hecha, y el tono apagado dice que ya no es la de
+                            hoy. Dos señales alcanzan.
+                          */
+                          <p className={`text-[17px] font-semibold ${estaCompletada ? 'text-cream/55' : 'text-cream'}`}>
                             {VOC(meta.titulo)}
                           </p>
                         )}
                         {/* Lo que se lleva se dice una sola vez, dentro de la sesión. */}
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-cream/45 font-semibold">
+                        {/*
+                          ERA UNA FILA DE TRES COLUMNAS DE SETENTA PÍXELES.
+
+                          `flex items-center gap-3` con tres hijos de texto, y
+                          sin permiso de bajar de renglón. En la jornada 31
+                          —la que cierra el tramo y encima está cerrada— los
+                          tres hijos aparecen juntos: «90 min», «Cierra este
+                          tramo» y «Se enciende con tus tres anuncios
+                          grabados». Medido a 390 px, cada uno quedaba en una
+                          columna de unos setenta píxeles, partido en cuatro y
+                          cinco renglones: tres torres de palabras sueltas.
+
+                          Son tres datos distintos, no una fila. Cada uno en
+                          su renglón, y a quince píxeles, que es el piso de
+                          esta casa — venían los tres en doce.
+                        */}
+                        <div className="flex flex-col items-start gap-1.5 mt-2">
+                          <span className="text-[15px] text-cream/60 font-semibold">
                             {meta.tiempo_estimado}
                           </span>
                           {/* El oro de la casa, no el amarillo de catálogo:
@@ -1648,20 +1738,20 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                                la palabra que las puertas cambiaron por «se
                                abre». La estrella marca la jornada que cierra el
                                tramo: eso es lo que dice. */
-                            <span className="text-xs text-gold font-semibold flex items-start gap-1">
-                              <Star className="w-3 h-3 mt-0.5 shrink-0 fill-gold" /> Cierra este tramo
+                            <span className="text-[15px] text-goldhi font-semibold flex items-start gap-1.5">
+                              <Star className="w-4 h-4 mt-0.5 shrink-0" /> Cierra este tramo
                             </span>
                           )}
                           {!unlocked && (
                             teaserDeMeta(meta.codigo) ? (
-                              <span className="text-xs text-gold/80 font-semibold flex items-start gap-1.5 leading-relaxed">
-                                <Lock className="w-3 h-3 mt-0.5 shrink-0" />
+                              <span className="text-[15px] text-goldhi font-semibold flex items-start gap-1.5 leading-snug">
+                                <Lock className="w-4 h-4 mt-0.5 shrink-0" />
                                 <span>{teaserDeMeta(meta.codigo)}</span>
                               </span>
                             ) : (
-                              <span className="text-xs text-cream/45 font-semibold flex items-center gap-1">
-                                <Lock className="w-3 h-3" />{' '}
-                                {bloqueoMsg ?? 'Completa la tarea anterior primero'}
+                              <span className="text-[15px] text-cream/60 font-semibold flex items-start gap-1.5 leading-snug">
+                                <Lock className="w-4 h-4 mt-0.5 shrink-0" />
+                                <span>{bloqueoMsg ?? 'Completa la tarea anterior primero'}</span>
                               </span>
                             )
                           )}
@@ -1729,7 +1819,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                                 0.16em, que es la versalita del lado del cliente; estaba
                                 en 17 con 0.25em, el único caso así en toda la app. */}
                             <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between gap-4">
-                              <button onClick={() => setActiveMeta(null)} className="shrink-0 whitespace-nowrap text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
+                              <button onClick={() => setActiveMeta(null)} className="shrink-0 whitespace-nowrap text-[15px] font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
                               <p className="hidden sm:block shrink-0 whitespace-nowrap text-[15px] font-bold uppercase tracking-[0.16em] text-gold">Sesión en curso</p>
                               <span className="shrink-0 whitespace-nowrap text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
                             </div>
@@ -1835,15 +1925,34 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               const todasCompletas = pilar.estrellas_completadas >= pilar.metas.filter((m) => m.es_estrella).length;
               return (
                 <div className="px-4 pb-4">
-                  <div className={`text-xs rounded-xl px-4 py-3 border ${
-                    todasCompletas
-                      ? 'bg-success/10 border-success/20 text-success'
-                      : 'bg-surface/50 border-[var(--line, rgba(142,104,36,0.18))] text-cream/55'
-                  }`}>
-                    {todasCompletas
-                      ? <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-success inline shrink-0" /> Terminaste este tramo. El siguiente ya está abierto.</span>
-                      : <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-yellow-400 fill-yellow-400 inline shrink-0" /> Te falta {pilar.metas.filter((m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)).length === 1 ? 'una jornada' : `${pilar.metas.filter((m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`)).length} jornadas`} para cerrar este tramo.</span>}
-                  </div>
+                  {/*
+                    TRES ARREGLOS EN UN RENGLÓN.
+
+                    · Decía «Te falta 2 jornadas». El verbo concuerda con el
+                      número, no con el singular de la frase corta.
+                    · Era `text-xs`, doce píxeles: por debajo del piso de
+                      quince de la casa, en la línea que dice cuánto falta.
+                    · La estrella venía `text-yellow-400 fill-yellow-400`, un
+                      amarillo de semáforo relleno. El oro de esta casa va en
+                      líneas de 1px, versalitas y numerales — nunca relleno.
+                      Ahora es la estrella del oro mate, sin relleno.
+                  */}
+                  {(() => {
+                    const faltan = pilar.metas.filter(
+                      (m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`),
+                    ).length;
+                    return (
+                      <div className={`text-[15px] leading-snug rounded-xl px-4 py-3 border ${
+                        todasCompletas
+                          ? 'bg-success/10 border-success/20 text-success'
+                          : 'bg-surface/50 border-[var(--line, rgba(142,104,36,0.18))] text-cream/70'
+                      }`}>
+                        {todasCompletas
+                          ? <span className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 mt-0.5 text-success shrink-0" /> Terminaste este tramo. El siguiente ya está abierto.</span>
+                          : <span className="flex items-start gap-2"><Star className="w-4 h-4 mt-0.5 text-gold shrink-0" /> {faltan === 1 ? 'Te falta una jornada' : `Te faltan ${faltan} jornadas`} para cerrar este tramo.</span>}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
@@ -1855,23 +1964,30 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       {ventaModal && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setVentaModal(false)}>
           <div className="max-w-sm w-full rounded-2xl border border-gold/30 bg-panel p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+            <h3 className="text-[22px] leading-tight text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
               Registrar una venta
             </h3>
-            <p className="text-xs text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
-            <label className="text-sm uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
+            <p className="text-[15px] text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
+            <label className="text-[15px] uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
             <input
               type="number" inputMode="decimal"
               value={ventaMonto}
               onChange={(e) => setVentaMonto(e.target.value)}
               placeholder="1000"
               autoFocus
-              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none"
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-[15px] focus:border-gold/50 focus:outline-none"
             />
+            {/*
+              Era `bg-gold text-black`: un rectángulo de oro relleno, que es
+              justo lo que el oro de esta casa no hace. El oro va en la línea
+              de 1px, en la versalita y en el numeral. El botón que confirma
+              es el mismo de toda la app: tinta sobre papel.
+            */}
             <button
               onClick={registrarVenta}
               disabled={ventaGuardando || !ventaMonto}
-              className="w-full py-3 rounded-xl bg-gold text-black text-sm font-semibold hover:bg-goldhi transition-colors disabled:opacity-40"
+              className="w-full min-h-[52px] rounded-[20px] text-[17px] font-semibold transition-opacity disabled:opacity-40"
+              style={{ background: 'var(--tinta-boton, #2A2118)', color: 'var(--papel-boton, #FBF8F1)' }}
             >
               {ventaGuardando ? 'Guardando…' : 'Registrar'}
             </button>

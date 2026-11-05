@@ -182,6 +182,25 @@ try:
         check('el primer día va al día', 'vas al día' in pag.evaluate('() => document.body.innerText'))
         pag.close()
 
+        print('══ el día cero: la pregunta ocupa la pantalla sola ══')
+        pag = nav.new_page(viewport={'width': 360, 'height': 800})
+        pag.goto(f'{BASE}?dias=1&hechas=0&partida=preguntar')
+        pag.wait_for_selector('text=¿Qué ya tienes andando?', timeout=30000)
+        pag.wait_for_timeout(500)
+        t = pag.evaluate('() => document.body.innerText')
+        check('se ve la pregunta del día cero', '¿Qué ya tienes andando?' in t)
+        # Lo que NO tiene que estar: el Camino entero debajo de la pregunta.
+        # Era pantalla y media de casillas y después el cinturón, el anillo y
+        # la jornada de hoy, todo junto. Una decisión por pantalla.
+        check('y nada del Camino debajo', 'Registrar venta' not in t and 'Cinturón' not in t,
+              t[:120].replace('\n', ' · '))
+        check('el botón para seguir está a la vista', 'Empezar el día 1' in t)
+        m = pag.evaluate(MEDIR)
+        check('la página no se desplaza de costado', m['scrollW'] <= m['vw'] + 1)
+        check('ningún texto queda fuera de la pantalla', not m['fuera'], '; '.join(m['fuera'][:3]))
+        check('ningún texto visible mide menos de 13 px', not m['chica'], '; '.join(m['chica'][:4]))
+        pag.close()
+
         print('══ "Empezar" abre el paso de verdad ══')
         pag = nav.new_page(viewport={'width': 360, 'height': 800})
         pag.goto(f'{BASE}?dias=20&hechas=15')

@@ -30,6 +30,23 @@ const marcadas = hasta
   ? SEED_ROADMAP_V2.flatMap((p) => p.metas.filter((m) => (m.dia_asignado ?? 0) < Number(hasta)).map((m) => `${p.numero}-${m.codigo}`))
   : claves.slice(0, hechas);
 localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(marcadas));
+
+/*
+ * ─── QUIÉN YA CONTESTÓ «¿QUÉ YA TIENES ANDANDO?» ─────────────────────
+ *
+ * El Camino con cero jornadas hechas y sin esa respuesta muestra SOLO la
+ * pregunta del día cero: es una decisión y ocupa su propia pantalla. Antes
+ * la pregunta iba arriba del Camino entero, así que el visor nunca tuvo que
+ * distinguir los dos casos.
+ *
+ * Ahora sí. Por omisión el visor monta un cliente que YA contestó, que es el
+ * que las doce lentes de `prueba-movil.py` quieren medir —cinturón, anillo,
+ * jornada de hoy, registrar venta—. Con `?partida=preguntar` monta al que
+ * recién abre la app, para medir la pantalla de la pregunta.
+ */
+if (q.get('partida') !== 'preguntar') {
+  localStorage.setItem('tcd_punto_de_partida_v1', marcadas.length ? 'con-base' : 'cero');
+}
 const perfil = { nombre: 'Julia', especialidad: esp, fecha_inicio: fecha, plan: 'DWY', dia_programa: 37 }; // 37 = el valor congelado de la base; no debe verse
 localStorage.setItem('tcd_profile', JSON.stringify(perfil));
 setFamiliaActual(esp);

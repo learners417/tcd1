@@ -80,9 +80,13 @@ export interface LaVia {
 export const LA_BASE: LaVia = {
   via: 'reporte',
   nombre: 'Tu reporte',
-  queEs:
-    'Escribes cuando quieras y te contesto por escrito. Cuéntame dónde estás, '
-    + 'qué trabó y qué necesitas: lo leo completo y te respondo una por una.',
+  /*
+    Eran treinta y tres palabras arriba de un formulario que hace las mismas
+    tres preguntas tres centímetros más abajo, con su propia etiqueta cada
+    una. Lo que el párrafo tiene que decir es lo único que el formulario no
+    dice: que contesta una persona, por escrito.
+  */
+  queEs: 'Escribes cuando quieras y te contesto por escrito, una por una.',
   cuandoLeContestan: 'Te contesto en 48 horas hábiles, de lunes a viernes.',
   escribeEnComunidad: false,
   leeComunidad: true,

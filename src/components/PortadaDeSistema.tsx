@@ -109,12 +109,25 @@ function Tira({ paisaje }: { paisaje: Paisaje }) {
   return (
     <div className="flex items-center gap-4 rounded-xl overflow-hidden border"
       style={{ borderColor: 'rgba(201,168,111,0.24)', background: paisaje.color.lecho }}>
-      <div className="shrink-0 w-[104px] h-[72px] overflow-hidden">
-        <PaisajeIlustrado paisaje={paisaje} alto={72} ancho={104} apaisado className="w-full h-full" />
+      {/*
+        ERA DE 104 × 72 Y LA MONTAÑA PARECÍA UNA CALCOMANÍA.
+
+        Estas cinco ilustraciones son lo mejor que tiene la casa —son las
+        mismas de las tapas de imprenta— y acá entraban en un recorte del
+        tamaño de un sello: del lago se veía una franja de agua, de la
+        montaña una punta. A 140 × 96 la ilustración vuelve a leerse como un
+        paisaje sin que la tira deje de ser una tira.
+
+        Y sin `truncate` en la frase: «Mirarte antes de moverte» entra, pero
+        «Subir por etapas hasta la cumbre» se cortaba en «Subir por etapas…».
+        Es la enseñanza del sistema; cortada no enseña nada. Dos renglones.
+      */}
+      <div className="shrink-0 w-[140px] h-[96px] overflow-hidden">
+        <PaisajeIlustrado paisaje={paisaje} alto={96} ancho={140} apaisado className="w-full h-full" />
       </div>
       <div className="flex-1 py-3 pr-4 min-w-0">
         <p className="rotulo-libro oro-paisaje truncate">{paisaje.nombre}</p>
-        <p className="prosa-libro sobre-paisaje-2 truncate" style={{ fontStyle: 'italic' }}>
+        <p className="prosa-libro sobre-paisaje-2 leading-snug" style={{ fontStyle: 'italic' }}>
           {paisaje.ensena}
         </p>
       </div>

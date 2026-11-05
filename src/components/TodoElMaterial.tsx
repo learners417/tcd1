@@ -16,7 +16,7 @@
  * para buscar algo puntual, y debajo la organización para recorrer.
  */
 import { useMemo, useState } from 'react';
-import { Search, Play, ListOrdered, X } from 'lucide-react';
+import { Search, Play, ListOrdered, X, ChevronDown } from 'lucide-react';
 import {
   armarCatalogo, loQuePuedeVer, porOrigen, buscar, comoLaVe,
   COMO_SE_LLAMA_EL_ORIGEN, type PiezaDeBiblioteca, type Origen, type TitulosPorDia,
@@ -37,6 +37,7 @@ export default function TodoElMaterial({
   bibliotecaAbierta: boolean;
 }) {
   const [texto, setTexto] = useState('');
+  const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set());
   const [abierto, setAbierto] = useState<PiezaDeBiblioteca | null>(null);
 
   const catalogo = useMemo(
@@ -49,6 +50,8 @@ export default function TodoElMaterial({
   );
   const encontradas = useMemo(() => buscar(suyas, texto), [suyas, texto]);
   const grupos = useMemo(() => porOrigen(encontradas), [encontradas]);
+  /* Con algo escrito en el buscador, todos los grupos se muestran abiertos. */
+  const buscando = texto.trim().length > 0;
 
   return (
     <section className="card-panel p-5 sm:p-6 mb-5" aria-label="Todo el material">
@@ -83,13 +86,42 @@ export default function TodoElMaterial({
         ORDEN_SECCIONES.map((origen) => {
           const piezas = grupos[origen];
           if (piezas.length === 0) return null;
+          /*
+            ═══ LOS GRUPOS ARRANCAN CERRADOS ═══
+
+            Las treinta y tres piezas se listaban todas, abiertas, una debajo
+            de otra: la pantalla medía 5.500 píxeles de alto —seis pantallas y
+            media de teléfono— y 52 cosas tocables. Para encontrar algo había
+            que pasar por todo.
+
+            Cerrados, la pantalla abre con cuatro renglones que dicen qué hay
+            y cuánto: «Del Camino 8», «Paso a paso 16». El que sabe qué busca
+            usa el buscador de arriba; el que viene a recorrer abre el grupo
+            que le interesa.
+
+            Buscando se abren solos: esconder resultados de una búsqueda sería
+            esconder justo lo que se pidió.
+          */
+          const abiertoEste = buscando || abiertos.has(origen);
           return (
-            <div key={origen} className="mt-6">
-              <p className="text-[17px] font-bold text-cream/70">
-                {COMO_SE_LLAMA_EL_ORIGEN[origen]}
-                <span className="ml-2 font-normal text-cream/45">{piezas.length}</span>
-              </p>
-              <ul className="mt-2 divide-y divide-gold/10">
+            <div key={origen} className="mt-4">
+              <button
+                type="button"
+                onClick={() => setAbiertos((s) => {
+                  const n = new Set(s);
+                  if (n.has(origen)) n.delete(origen); else n.add(origen);
+                  return n;
+                })}
+                aria-expanded={abiertoEste}
+                className="w-full min-h-[52px] flex items-center justify-between gap-3 text-left"
+              >
+                <span className="text-[18px] font-bold text-cream">
+                  {COMO_SE_LLAMA_EL_ORIGEN[origen]}
+                  <span className="ml-2 font-normal text-cream/50">{piezas.length}</span>
+                </span>
+                <ChevronDown className={`w-5 h-5 shrink-0 text-cream/50 transition-transform ${abiertoEste ? 'rotate-180' : ''}`} />
+              </button>
+              <ul className={`mt-1 divide-y divide-gold/10 ${abiertoEste ? '' : 'hidden'}`}>
                 {piezas.map((p) => (
                   <li key={p.id}>
                     <button

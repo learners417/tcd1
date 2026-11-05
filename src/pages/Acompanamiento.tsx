@@ -16,7 +16,7 @@
  * lugar ve una invitación, que termina en venta y no en reclamo.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Send, Video, Calendar, Lock, MessageSquare, Trophy, Loader2 } from 'lucide-react';
+import { Send, Video, Calendar, Lock, MessageSquare, Trophy, Loader2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   viaDe, canalesDe, puedeEscribirEn, INVITACION_AL_ACOMPANAMIENTO, A_DONDE_VA,
@@ -81,7 +81,7 @@ export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadCh
         <h1 className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>
           Acompañamiento
         </h1>
-        <p className="text-sm text-cream/65 mt-1 leading-relaxed">{via.queEs}</p>
+        <p className="text-[15px] text-cream/65 mt-1 leading-relaxed">{via.queEs}</p>
       </div>
 
       {/* LAS PESTAÑAS — solo las que tiene. Sin huecos, sin candados. */}
@@ -115,15 +115,15 @@ export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadCh
       {/* LA INVITACIÓN — para La Base, al pie y una sola vez. */}
       {!via.tieneMentorias && pestana === 'contacto' && (
         <div className="card-panel p-5 border-gold/25">
-          <p className="text-sm font-bold text-cream mb-2">
+          <p className="text-[15px] font-bold text-cream mb-2">
             {INVITACION_AL_ACOMPANAMIENTO.titulo}
           </p>
           <div className="space-y-1.5">
             {INVITACION_AL_ACOMPANAMIENTO.queGana.map((x) => (
-              <p key={x} className="text-sm text-cream/75 leading-relaxed">· {x}</p>
+              <p key={x} className="text-[15px] text-cream/75 leading-relaxed">· {x}</p>
             ))}
           </div>
-          <p className="text-sm text-gold mt-3 leading-relaxed">
+          <p className="text-[15px] text-gold mt-3 leading-relaxed">
             {INVITACION_AL_ACOMPANAMIENTO.comoSeSuma}
           </p>
         </div>
@@ -138,7 +138,7 @@ function Pestana({ activa, onClick, icono: Icono, label }: {
 }) {
   return (
     <button onClick={onClick}
-      className={`flex items-center gap-2 px-3 min-h-[44px] rounded-lg text-sm font-bold whitespace-nowrap border ${
+      className={`flex items-center gap-2 px-3 min-h-[44px] rounded-lg text-[15px] font-bold whitespace-nowrap border ${
         activa ? 'bg-gold/15 text-gold border-gold/30'
         : 'text-cream/65 border-transparent'}`}>
       <Icono className="w-4 h-4" /> {label}
@@ -149,6 +149,7 @@ function Pestana({ activa, onClick, icono: Icono, label }: {
 /* ══════════════════ EL REPORTE — la vía de La Base ══════════════════ */
 
 function ElReporte({ clienteId }: { clienteId?: string }) {
+  const [mapaAbierto, setMapaAbierto] = useState(false);
   const [donde, setDonde] = useState('');
   const [trabo, setTrabo] = useState('');
   const [necesito, setNecesito] = useState('');
@@ -187,18 +188,36 @@ function ElReporte({ clienteId }: { clienteId?: string }) {
           nada», y eso no se puede contestar de una sola vez — que es
           justamente lo que esta vía ofrece. */}
       <div className="card-panel p-5">
-        <p className="text-sm font-bold text-cream mb-1">Escribe tu reporte</p>
-        <p className="text-sm text-cream/60 leading-relaxed mb-3">
+        {/*
+          «Cuanto más concreto, más sirve la respuesta» se fue: era el consejo
+          de cómo escribir, y ahora cada caja lo muestra en su propio
+          marcador. Queda el dato que ninguna otra parte da — cuándo llega la
+          respuesta y quién la escribe.
+        */}
+        <p className="text-[17px] font-semibold text-cream mb-1">Escribe tu reporte</p>
+        <p className="text-[15px] text-cream/70 leading-snug mb-4">
           Te contesto por escrito en 48 horas hábiles, de lunes a viernes.
-          Cuanto más concreto, más sirve la respuesta.
         </p>
 
         {esperando && (
-          <p className="text-sm text-gold leading-relaxed mb-3">
+          <p className="text-[15px] text-gold leading-relaxed mb-3">
             Tienes uno esperando respuesta. Puedes mandar otro, y los contesto los dos.
           </p>
         )}
 
+        {/*
+          LA AYUDA ENTRÓ ADENTRO DE LA CAJA.
+
+          Cada pregunta traía su renglón de ayuda ARRIBA del campo: etiqueta,
+          ayuda, caja. Tres veces, más el párrafo de la tarjeta, más el de la
+          pantalla: cuatro capas de explicación para un formulario de tres
+          cajas, y la primera caja aparecía a media pantalla de scroll.
+
+          La ayuda dice qué escribir, así que su lugar es adentro del campo
+          donde se escribe. Como marcador de posición se va sola al escribir
+          la primera letra, que es cuando deja de hacer falta — y el bloque
+          pasa de tres renglones a uno por pregunta.
+        */}
         {[
           { v: donde, set: setDonde, label: '¿Dónde estás?',
             ayuda: 'En qué sesión o en qué paso de tu campaña.' },
@@ -208,51 +227,76 @@ function ElReporte({ clienteId }: { clienteId?: string }) {
             ayuda: 'Una revisión, una decisión, un paso a paso.' },
         ].map((c) => (
           <div key={c.label} className="mb-3">
-            <label className="block text-sm font-bold text-cream/80">{c.label}</label>
-            <p className="text-sm text-cream/50 mb-1.5">{c.ayuda}</p>
+            <label className="block text-[17px] font-semibold text-cream mb-1.5">{c.label}</label>
             <textarea value={c.v} onChange={(e) => c.set(e.target.value)} rows={2}
-              className="w-full bg-black/20 border border-gold/15 rounded-xl px-3 py-2.5 text-cream text-sm focus:border-gold/50" />
+              placeholder={c.ayuda} aria-label={`${c.label} ${c.ayuda}`}
+              className="w-full bg-black/20 border border-gold/15 rounded-xl px-3 py-2.5 text-cream text-[15px] leading-snug placeholder:text-cream/45 focus:border-gold/50" />
           </div>
         ))}
 
         <button onClick={() => void mandar()} disabled={mandando}
-          className="w-full min-h-[44px] btn-primary rounded-xl text-sm font-bold disabled:opacity-50">
+          className="w-full min-h-[44px] btn-primary rounded-xl text-[15px] font-bold disabled:opacity-50">
           {mandando ? 'Mandando…' : 'Mandar mi reporte'}
         </button>
       </div>
 
-      {/* A DÓNDE VA CADA COSA — antes de escribir, no después de la respuesta. */}
+      {/*
+        A DÓNDE VA CADA COSA — AHORA PLEGADO.
+
+        Son nueve destinos y unas ciento ochenta palabras: el mapa completo
+        de la app en prosa, abierto siempre, entre el formulario y el resto.
+        Medido, esta pantalla abría con 313 palabras y era la más cargada que
+        quedaba.
+
+        Pero el que llega acá ya decidió escribir. El mapa sirve a quien duda
+        si este es el lugar, que es una persona distinta y menos frecuente.
+        Un renglón que se abre: el que duda lo abre, el que no, no lo lee.
+      */}
       <div className="card-panel p-5">
-        <p className="text-sm font-bold text-cream mb-2">Antes de escribir, mira si ya está acá</p>
-        <div className="space-y-1.5">
-          {A_DONDE_VA.map((d) => (
-            <p key={d.loQueTrae} className="text-sm text-cream/70 leading-relaxed">
-              <span className="text-cream/90">{d.loQueTrae}</span> — {d.donde}
-              {d.quien ? ` · ${d.quien}` : ''}
-            </p>
-          ))}
-        </div>
+        <button type="button" onClick={() => setMapaAbierto((x) => !x)}
+          aria-expanded={mapaAbierto}
+          /*
+            `items-start`, no `items-center`: en el teléfono este título
+            ocupa dos renglones, y centrado el chevrón quedaba en el hueco
+            entre el primero y el segundo, flotando contra nada. Es la misma
+            corrección que ya tienen los círculos de «¿Qué ya tienes
+            andando?». `mt-0.5` lo pone en la línea del primer renglón.
+          */
+          className="w-full min-h-[44px] flex items-start justify-between gap-3 text-left">
+          <span className="text-[17px] font-semibold leading-snug text-cream">Antes de escribir, mira si ya está acá</span>
+          <ChevronDown className={`w-5 h-5 mt-0.5 shrink-0 text-gold transition-transform ${mapaAbierto ? 'rotate-180' : ''}`} />
+        </button>
+        {mapaAbierto && (
+          <div className="mt-3 space-y-2">
+            {A_DONDE_VA.map((d) => (
+              <p key={d.loQueTrae} className="text-[15px] text-cream/70 leading-snug">
+                <span className="text-cream">{d.loQueTrae}</span> — {d.donde}
+                {d.quien ? ` · ${d.quien}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
 
       {mios === null ? (
-        <p className="text-sm text-cream/55">Buscando tus reportes…</p>
+        <p className="text-[15px] text-cream/55">Buscando tus reportes…</p>
       ) : mios.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm font-bold text-cream">Tus reportes</p>
+          <p className="text-[15px] font-bold text-cream">Tus reportes</p>
           {mios.map((r) => (
             <div key={r.id} className={`card-panel p-4 ${
               r.respuesta ? 'border-success/20' : 'border-gold/20'}`}>
-              <p className="text-xs uppercase tracking-wider text-cream/45">
+              <p className="text-[15px] uppercase tracking-wider text-cream/45">
                 {new Date(r.creado_en).toLocaleDateString('es', { day: 'numeric', month: 'long' })}
                 {r.respuesta ? ' · respondido' : ' · esperando'}
               </p>
-              {r.donde_estoy && <p className="text-sm text-cream/80 mt-1.5">{r.donde_estoy}</p>}
-              {r.que_trabo && <p className="text-sm text-cream/70 mt-1">{r.que_trabo}</p>}
-              {r.que_necesito && <p className="text-sm text-cream/70 mt-1">{r.que_necesito}</p>}
+              {r.donde_estoy && <p className="text-[15px] text-cream/80 mt-1.5">{r.donde_estoy}</p>}
+              {r.que_trabo && <p className="text-[15px] text-cream/70 mt-1">{r.que_trabo}</p>}
+              {r.que_necesito && <p className="text-[15px] text-cream/70 mt-1">{r.que_necesito}</p>}
               {r.respuesta && (
                 <div className="mt-3 pt-3 border-t border-cream/10">
-                  <p className="text-xs uppercase tracking-wider text-gold/70 mb-1">La respuesta</p>
-                  <p className="text-sm text-cream/85 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-[15px] uppercase tracking-wider text-gold/70 mb-1">La respuesta</p>
+                  <p className="text-[15px] text-cream/85 whitespace-pre-wrap leading-relaxed">
                     {r.respuesta}
                   </p>
                 </div>
@@ -297,7 +341,7 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
   };
 
   if (sesiones === null) {
-    return <p className="text-sm text-cream/55 flex items-center gap-2">
+    return <p className="text-[15px] text-cream/55 flex items-center gap-2">
       <Loader2 className="w-4 h-4 animate-spin" /> Buscando tus encuentros…
     </p>;
   }
@@ -305,8 +349,8 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
   return (
     <div className="space-y-3">
       <div className="card-panel p-5">
-        <p className="text-sm font-bold text-cream mb-1">Tus tres encuentros por semana</p>
-        <p className="text-sm text-cream/70 leading-relaxed">
+        <p className="text-[15px] font-bold text-cream mb-1">Tus tres encuentros por semana</p>
+        <p className="text-[15px] text-cream/70 leading-relaxed">
           {losTresEncuentros()}. El link está acá: entras directo, sin que
           nadie te lo mande.
         </p>
@@ -314,7 +358,7 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
 
       {sesiones.length === 0 ? (
         <div className="card-panel p-5">
-          <p className="text-sm text-cream/70 leading-relaxed">
+          <p className="text-[15px] text-cream/70 leading-relaxed">
             Todavía no hay encuentros cargados. Cuando el equipo los suba, aparecen
             acá con su link.
           </p>
@@ -331,19 +375,19 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
           <div key={s.id} className={`card-panel p-4 ${enVivo ? 'border-success/40' : ''}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                <p className="text-xs uppercase tracking-wider text-gold/70">
+                <p className="text-[15px] uppercase tracking-wider text-gold/70">
                   {elDiaYElTema(s.tema)}
                 </p>
-                <p className="text-sm font-bold text-cream mt-0.5">
+                <p className="text-[15px] font-bold text-cream mt-0.5">
                   {cuando.toLocaleDateString('es', { day: 'numeric', month: 'long' })}
                   {' · '}
                   {cuando.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
                 </p>
-                {enVivo && <p className="text-sm text-success mt-0.5">Está pasando ahora</p>}
+                {enVivo && <p className="text-[15px] text-success mt-0.5">Está pasando ahora</p>}
               </div>
               {s.url_reunion && (
                 <button onClick={() => entrar(s)}
-                  className={`min-h-[44px] px-4 rounded-xl text-sm font-bold shrink-0 ${
+                  className={`min-h-[44px] px-4 rounded-xl text-[15px] font-bold shrink-0 ${
                     enVivo ? 'btn-primary' : 'border border-gold/35 text-gold'}`}>
                   Entrar
                 </button>
@@ -351,7 +395,7 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
             </div>
             {s.url_grabacion && (
               <a href={s.url_grabacion} target="_blank" rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-2 min-h-[44px] text-sm font-bold text-cream/70">
+                className="mt-2 inline-flex items-center gap-2 min-h-[44px] text-[15px] font-bold text-cream/70">
                 <Video className="w-4 h-4" /> Ver la grabación
               </a>
             )}
@@ -362,8 +406,8 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
       {/* EL ARCHIVO. Las que ya pasaron y quedaron grabadas. */}
       {grabadas.length > 0 && (
         <div className="card-panel p-5">
-          <p className="text-sm font-bold text-cream mb-1">Las que te perdiste</p>
-          <p className="text-sm text-cream/60 leading-relaxed mb-3">
+          <p className="text-[15px] font-bold text-cream mb-1">Las que te perdiste</p>
+          <p className="text-[15px] text-cream/60 leading-relaxed mb-3">
             Quedan grabadas. Si faltaste a una, está acá.
           </p>
           <div className="space-y-2">
@@ -372,10 +416,10 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
                 className="flex items-center gap-3 min-h-[44px] rounded-xl border border-cream/12 px-3 py-2">
                 <Video className="w-4 h-4 text-gold/70 shrink-0" />
                 <span className="flex-1">
-                  <span className="block text-sm font-bold text-cream">
+                  <span className="block text-[15px] font-bold text-cream">
                     {elDiaYElTema(g.tema)}
                   </span>
-                  <span className="block text-sm text-cream/55">
+                  <span className="block text-[15px] text-cream/55">
                     {new Date(g.empieza_en).toLocaleDateString('es', { day: 'numeric', month: 'long' })}
                   </span>
                 </span>
@@ -422,9 +466,9 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
   return (
     <div className="card-panel p-5">
       {mensajes === null ? (
-        <p className="text-sm text-cream/55">Cargando…</p>
+        <p className="text-[15px] text-cream/55">Cargando…</p>
       ) : mensajes.length === 0 ? (
-        <p className="text-sm text-cream/70 leading-relaxed">
+        <p className="text-[15px] text-cream/70 leading-relaxed">
           Todavía no escribió nadie.
           {puedeEscribir ? ' Puedes abrirlo tú.' : ''}
         </p>
@@ -432,13 +476,13 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
         <div className="space-y-3 max-h-[55vh] overflow-y-auto overscroll-contain mb-3">
           {mensajes.map((m) => (
             <div key={m.id}>
-              <p className="text-xs uppercase tracking-wider text-cream/45">
+              <p className="text-[15px] uppercase tracking-wider text-cream/45">
                 {m.autor_nombre || 'Alguien'}
                 {m.del_equipo ? ' · del equipo' : ''}
                 {' · '}
                 {new Date(m.creado_en).toLocaleDateString('es', { day: 'numeric', month: 'short' })}
               </p>
-              <p className={`text-sm whitespace-pre-wrap leading-relaxed ${
+              <p className={`text-[15px] whitespace-pre-wrap leading-relaxed ${
                 m.del_equipo ? 'text-gold/90' : 'text-cream/85'}`}>
                 {m.texto}
               </p>
@@ -452,7 +496,7 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
           <input value={texto} onChange={(e) => setTexto(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void mandar(); } }}
             placeholder="Escribe acá"
-            className="flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-sm focus:border-gold/50 placeholder-cream/25" />
+            className="flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-[15px] focus:border-gold/50 placeholder-cream/25" />
           <button onClick={() => void mandar()} disabled={mandando || !texto.trim()}
             className="min-h-[44px] px-4 rounded-xl btn-primary disabled:opacity-40">
             <Send className="w-4 h-4" />
@@ -461,7 +505,7 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
       ) : (
         /* El único canal que ve La Base es Victorias, y lo lee. Se dice por qué
            en positivo: lo que puede hacer, no lo que le falta. */
-        <p className="text-sm text-cream/60 leading-relaxed flex gap-2">
+        <p className="text-[15px] text-cream/60 leading-relaxed flex gap-2">
           <Lock className="w-4 h-4 shrink-0 mt-0.5" />
           <span>Acá lees lo que están logrando los demás. Para escribir y preguntar
           en los canales, súmate al acompañamiento.</span>

@@ -64,9 +64,14 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
       <h2 className="mt-2 text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
         ¿Qué ya tienes andando?
       </h2>
+      {/*
+        Eran veintisiete palabras explicando la mecánica —«en vez de
+        construir, revisas lo que traes y corriges lo que falte»— arriba de
+        once casillas. La mecánica se entiende al llegar a esa jornada, que
+        es cuando importa. Acá alcanza con qué hacer.
+      */}
       <p className="mt-2 text-[17px] text-cream/70">
-        Marca todo lo que ya está hecho. Esos días los haces igual, más cortos: en vez de
-        construir, revisas lo que traes y corriges lo que falte.
+        Marca lo que ya está hecho. Esas jornadas las haces igual, más cortas.
       </p>
 
       <ul className="mt-4 space-y-2">
@@ -104,11 +109,16 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
         })}
       </ul>
 
-      <p className="mt-4 text-[17px] text-cream">
-        {elegidas.length === 0
-          ? 'Empiezas desde el día 1, con todo por construir.'
-          : `Empiezas desde el día 1. ${elegidas.length} ${elegidas.length === 1 ? 'jornada va' : 'jornadas van'} en modo revisión.`}
-      </p>
+      {/*
+        El renglón de estado solo cuando hay algo marcado: con cero casillas
+        decía «empiezas desde el día 1, con todo por construir», que es lo
+        mismo que dice el botón de abajo dos centímetros después.
+      */}
+      {elegidas.length > 0 && (
+        <p className="mt-4 text-[17px] text-cream">
+          {elegidas.length} {elegidas.length === 1 ? 'jornada va' : 'jornadas van'} en modo revisión.
+        </p>
+      )}
 
       <button
         type="button"

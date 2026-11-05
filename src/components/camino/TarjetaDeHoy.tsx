@@ -70,7 +70,19 @@ export default function TarjetaDeHoy({ hoy, esFinde, onEmpezar }: Props) {
           {esFinde && (
             <p className="mt-3 text-[17px] text-cream/70">El fin de semana descansas. Si quieres adelantar, está listo.</p>
           )}
-          <button type="button" onClick={onEmpezar} className="btn-ios-primary mt-5 w-full">
+          {/*
+            EL BOTÓN NO MIDE LO QUE MIDE LA PANTALLA.
+
+            `w-full` dentro de una tarjeta de 892 px daba un «Empezar» de 846
+            px de ancho: en un teléfono el botón ancho es lo correcto —el
+            pulgar llega a cualquier parte—, pero en una computadora un bloque
+            de tinta de casi un metro de pantalla para una palabra de siete
+            letras no se lee como el botón principal, se lee como una franja.
+
+            Desde `sm` se queda en 280, que es el ancho de un botón que se
+            toca con el mouse y se mira sin recorrerlo.
+          */}
+          <button type="button" onClick={onEmpezar} className="btn-ios-primary mt-5 w-full sm:w-[280px]">
             Empezar
           </button>
         </section>

@@ -122,49 +122,69 @@ export default function EncabezadoCamino({
 
   return (
     <div className="space-y-4">
-      {/* ── Dónde estás ── */}
+      {/* ── Dónde estás ──
+          EN COMPUTADORA ERA UNA COLUMNA DE TELÉFONO ESTIRADA.
+
+          Todo apilado y centrado: el grado arriba, el anillo en el medio, el
+          sistema y el ritmo abajo. En un teléfono es lo correcto. Medido a
+          1440 px, la tarjeta salía de 892 de ancho por 440 de alto con el
+          anillo de 188 solo en el centro y el resto vacío a los dos lados:
+          hay que bajar media pantalla para llegar a la jornada de hoy, que es
+          lo único que se viene a hacer.
+
+          Desde `md` es una fila: el anillo a la izquierda en su ancho, y a su
+          derecha el grado, el sistema y el ritmo, alineados a la izquierda
+          como se lee. Misma tarjeta, misma información, la mitad de alto. */}
       <section className="card-panel p-5 sm:p-6" aria-label="Tu avance">
-        {/* El nombre de la pantalla ya está en la barra de arriba: acá va el grado. */}
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-[26px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-            Cinturón {cinturon.nombre}
-          </h1>
-          <CintaCinturon cinturon={cinturon} variante="tira" />
+        <div className="md:flex md:items-center md:gap-8">
+          <div className="md:order-2 md:flex-1 md:min-w-0">
+            {/* El nombre de la pantalla ya está en la barra de arriba: acá va el grado. */}
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-[26px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                Cinturón {cinturon.nombre}
+              </h1>
+              <CintaCinturon cinturon={cinturon} variante="tira" />
+            </div>
+            <p className="mt-1 text-[17px] text-cream/70">{cinturon.metafora}</p>
+
+            {sis && (
+              <p className="mt-4 text-center md:text-left text-[17px] text-cream">
+                {sis.esSistema
+                  ? <>Sistema {sis.n} de {sistemas.filter((x) => x.esSistema).length} · <span className="font-semibold">{sis.nombre}</span></>
+                  : <span className="font-semibold">{sis.nombre}</span>}
+              </p>
+            )}
+            {/*
+              EL RITMO SE LEE, NO SE PINTA.
+
+              Eran tres renglones enteros en oro, centrados, debajo del
+              anillo: un párrafo pintado de dorado es relleno de oro en forma
+              de texto, y la vara de la casa lo reserva para las líneas de
+              1px, las versalitas y los numerales. Encima competía con el 50
+              del anillo, que está justo arriba y que SÍ es un numeral.
+
+              Ahora el párrafo va en la tinta y el color queda en la línea de
+              1px de su izquierda: oro cuando hay algo que recuperar, verde
+              cuando está al día. Es el mismo tratamiento que ya tenía en Hoy,
+              así que las dos pantallas dicen el estado de la misma forma.
+
+              Y vive en la columna del texto: en computadora, suelto debajo de
+              la fila, arrancaba en el borde izquierdo de la tarjeta, debajo
+              del anillo, sin nada que lo sostuviera.
+            */}
+            <p
+              data-ritmo={ritmo.tono}
+              className="mt-3 mx-auto md:mx-0 max-w-[32ch] text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
+              style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}
+            >
+              {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
+            </p>
+          </div>
+
+          <div className="mt-5 md:mt-0 md:order-1 md:shrink-0">
+            <Anillo sistemas={sistemas} actual={sistemaActual} />
+          </div>
         </div>
-        <p className="mt-1 text-[17px] text-cream/70">{cinturon.metafora}</p>
-
-        <div className="mt-5">
-          <Anillo sistemas={sistemas} actual={sistemaActual} />
-        </div>
-
-        {sis && (
-          <p className="mt-4 text-center text-[17px] text-cream">
-            {sis.esSistema
-              ? <>Sistema {sis.n} de {sistemas.filter((x) => x.esSistema).length} · <span className="font-semibold">{sis.nombre}</span></>
-              : <span className="font-semibold">{sis.nombre}</span>}
-          </p>
-        )}
-        {/*
-          EL RITMO SE LEE, NO SE PINTA.
-
-          Eran tres renglones enteros en oro, centrados, debajo del anillo: un
-          párrafo pintado de dorado es relleno de oro en forma de texto, y la
-          vara de la casa lo reserva para las líneas de 1px, las versalitas y
-          los numerales. Encima competía con el 50 del anillo, que está justo
-          arriba y que SÍ es un numeral.
-
-          Ahora el párrafo va en la tinta y el color queda en la línea de 1px
-          de su izquierda: oro cuando hay algo que recuperar, verde cuando
-          está al día. Es el mismo tratamiento que ya tenía en Hoy, así que
-          las dos pantallas dicen el estado de la misma forma.
-        */}
-        <p
-          data-ritmo={ritmo.tono}
-          className="mt-3 mx-auto max-w-[32ch] text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
-          style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}
-        >
-          {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
-        </p>
       </section>
 
       {/* ── Qué hacer ── */}
@@ -193,7 +213,24 @@ export default function EncabezadoCamino({
           a 360 y 390 la fila sigue siendo una sola. */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1">
         <p className="text-[17px] text-cream whitespace-nowrap">
-          <span className="text-[24px] text-goldhi" style={{ fontFamily: 'var(--font-display)' }}>{ventas}</span> de 10 {VOC('{{consultantes}}')}
+          {/*
+            EL CERO SE LEÍA COMO UN PARÉNTESIS VACÍO: «() de 10 pacientes».
+
+            Es la Cormorant. Es una serif de contraste alto: sus trazos
+            horizontales son hilos y los verticales son gruesos, que es
+            exactamente lo que la hace linda en un título de 52 px —el 21 del
+            anillo, cuatro tarjetas más arriba, se ve perfecto—. A 24 px esos
+            hilos de arriba y abajo del cero no llegan a dibujarse, y lo que
+            queda en pantalla son los dos palos de los costados. `lining-nums`
+            no lo arregla: no es la forma de la cifra, es el grosor.
+
+            Entonces la cifra chica no va en la Cormorant. Va en la tipografía
+            del texto, que tiene el cero cerrado y parejo, en seminegrita para
+            que siga pesando más que el «de 10» que la sigue. `tabular-nums`
+            la deja en ancho fijo, así que la fila no se corre al pasar de 9 a
+            10. El anillo se queda como está: ahí el tamaño la sostiene.
+          */}
+          <span className="text-[24px] font-semibold text-goldhi num-tab">{ventas}</span> de 10 {VOC('{{consultantes}}')}
         </p>
         <button type="button" onClick={onRegistrarVenta} className="min-h-[44px] px-2 text-[17px] font-semibold text-goldhi whitespace-nowrap">
           Registrar venta
