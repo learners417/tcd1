@@ -4,6 +4,8 @@ import MapaCincoDias from '../components/MapaCincoDias';
 import TableroNumeros from '../components/TableroNumeros';
 import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
 import CadenaADN from '../components/CadenaADN';
+import CabeceraDelDia from '../components/CabeceraDelDia';
+import { paisajeDelDia } from '../lib/losCincoPaisajes';
 import type { Profile } from '../lib/supabase';
 import { planDelCliente, diasRestantes, PILAR_MAX, waLink, usosSemana, TOPE_MENTOR_SEMANAL, enElTramoDelNumero } from '../lib/planes';
 import { laOferta, laOfertaTrasElAcceso, ofertaReservada } from '../lib/laOfertaQueSigue';
@@ -461,10 +463,11 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         <TableroDeLaSemana clienteId={userId} paises={paisesDelCliente} />
       )}
 
-      {/* ── Tu día: saludo, grado y ritmo. El mismo ritmo que El Camino. ── */}
+      {/* ── Tu día: el paisaje en el que estás, el saludo y el ritmo. ──
+             El grado NO está acá: vive en El Camino, al lado de su anillo,
+             que es donde el grado ES el progreso. Repetido acá no agregaba un
+             dato, agregaba un renglón. */}
       {!enAntesala && (() => {
-        let c = null as ReturnType<typeof cinturonDesdeProgreso> | null;
-        try { const saved = localStorage.getItem('tcd_hoja_ruta_v2'); c = cinturonDesdeProgreso(new Set(saved ? JSON.parse(saved) : [])); } catch { c = null; }
         let fechaInicio = (perfil as { fecha_inicio?: string } | undefined)?.fecha_inicio;
         if (!fechaInicio) { try { fechaInicio = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.fecha_inicio; } catch { /* noop */ } }
         const diaProg = diaDelPrograma(fechaInicio) ?? 1;
@@ -472,43 +475,34 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         const ritmo = mensajeDeRitmo(diaProg, data.tareasHoy.length ? diaPaso : null, diasHabilesDeAtraso(fechaInicio, diaPaso, diaProg));
         const hora = new Date().getHours();
         const saludo = hora < 13 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
+        /* El paisaje sale del día de trabajo —el paso que le toca— y no del
+           día del calendario: si volvió después de unos días, el Camino lo
+           espera donde lo dejó y la cabecera tiene que decir lo mismo. */
+        const paisaje = paisajeDelDia(diaPaso ?? diaProg);
         return (
-          <section className="card-panel p-5 sm:p-6" aria-label="Tu día">
-            <div className="flex items-center justify-between gap-3">
-              <h1 className="text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
-                {saludo}{nombreDisplay ? `, ${nombreDisplay}` : ''}.
-              </h1>
-              {/*
-                La cinta del grado salió de acá. Al lado del saludo no agrega
-                nada que el renglón de abajo no diga, y con el Cinturón BLANCO
-                —el de todos los que recién entran— es una píldora de 54 por 16
-                sin nada adentro: se lee como un elemento que no cargó, justo
-                en lo primero que mira el cliente nuevo.
-                Donde sí dice algo es en el Camino, al lado de su barra: ahí la
-                cinta ES el progreso. Acá el nombre y la metáfora alcanzan.
-              */}
-            </div>
-            {c && <p className="mt-1 text-[17px] text-cream/70">Cinturón {c.nombre} · {c.metafora}</p>}
+          <>
+            {paisaje ? (
+              <CabeceraDelDia paisaje={paisaje} saludo={saludo} nombre={nombreDisplay || undefined} dia={diaProg} />
+            ) : (
+              <section className="card-panel p-5 sm:p-6" aria-label="Tu día">
+                <h1 className="text-[28px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                  {saludo}{nombreDisplay ? `, ${nombreDisplay}` : ''}.
+                </h1>
+              </section>
+            )}
             {/*
               EL RITMO SE LEE, NO SE SEÑALA.
 
-              Eran tres renglones enteros en oro, que es lo primero que se ve
-              al abrir la app y lo más saturado de la pantalla: un párrafo
-              pintado de dorado es relleno de oro en forma de texto, y la vara
-              lo reserva para las líneas de 1px, las versalitas y los
-              numerales. Encima competía con el saludo, que está justo arriba.
-
-              Ahora el párrafo va en la tinta —se lee— y el color queda en la
-              línea de 1px de su izquierda, que es donde el estado puede
-              decirse sin gritar: oro cuando hay algo que recuperar, verde
-              cuando está al día.
+              Va en la tinta y el color queda en la línea de 1px de su
+              izquierda, que es donde el estado puede decirse sin gritar: oro
+              cuando hay algo que recuperar, verde cuando está al día.
             */}
             <p data-ritmo={ritmo.tono}
-               className="mt-2 text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
+               className="text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
                style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}>
               {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
             </p>
-          </section>
+          </>
         );
       })()}
 

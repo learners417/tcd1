@@ -4,7 +4,7 @@ auditoria.py — LA BATERÍA COMPLETA DE TCD.
 Regla de la casa: ningún ZIP sale sin esto en verde.
 Corre: python3 auditoria.py   (desde la raíz del repo, con node_modules instalado)
 """
-import re, glob, subprocess, sys
+import re, os, glob, subprocess, sys
 from collections import defaultdict
 
 F = 0
@@ -191,10 +191,14 @@ _pant = ['src/pages/Dashboard.tsx','src/pages/Roadmap.tsx','src/pages/ADN.tsx','
 _sinvoc = [f.split('/')[-1] for f in _pant if 'VOC' not in todo.get(f,'')]
 check('ninguna pantalla del cliente muestra tokens en crudo', not _sinvoc, str(_sinvoc))
 
-_sb = todo.get('src/components/Sidebar.tsx','')
-_nitems = _sb.count("as MenuItem,")
-check('el menu tiene 5 destinos o menos', 0 < _nitems <= 5, f'{_nitems} items')
-_viejos = [l for l in ['El Camino','Mi ADN','Lo que sigue','El Metodo','El Método','Entrenadores IA'] if f"label: '{l}'" in _sb]
+# La barra lateral se fue: hay UNA navegacion para los dos anchos. Lo que se
+# cuida ahora es que sea una sola y que tenga cuatro destinos.
+_bt0 = todo.get('src/components/BottomTabBar.tsx','')
+check('no hay una segunda navegacion', not os.path.exists('src/components/Sidebar.tsx'),
+      'dos navegaciones distintas es la forma mas rapida de que alguien se pierda')
+_nitems = len(re.findall(r"id: '[a-z]+', label:", _bt0))
+check('la navegacion tiene 4 destinos', _nitems == 4, f'{_nitems} items')
+_viejos = [l for l in ['El Camino','Mi ADN','Lo que sigue','El Metodo','El Método','Entrenadores IA'] if f"label: '{l}'" in _bt0]
 check('los nombres siguen el sistema Tu/Tus', not _viejos, str(_viejos))
 
 try:
@@ -209,19 +213,17 @@ except Exception:
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
 
 _bt = todo.get('src/components/BottomTabBar.tsx','')
-_sb = todo.get('src/components/Sidebar.tsx','')
-# El cuarto destino cambia con el avance —Mi ADN hasta que le toque montar,
-# Campañas desde ahí— y las dos navegaciones lo preguntan a `destinoQueCambia`.
-# La barra conserva el literal en su lista y lo cambia al pintar; el menú
-# lateral lo arma directo, así que ahí no hay literal que encontrar. Lo que
-# esta lente cuida es que los dos lleven a lo mismo, no cómo está escrito.
-_dinamico = lambda s: {'campanas'} if 'destinoQueCambia' in s else set()
-_ids_bt = set(re.findall(r"id: '([a-z]+)'", _bt)) | _dinamico(_bt)
-_ids_sb = set(re.findall(r"id: '([a-z]+)', icon", _sb)) | _dinamico(_sb)
-check('la barra de abajo y el menu lateral llevan a lo mismo', _ids_bt == _ids_sb, f'abajo {sorted(_ids_bt)} / lateral {sorted(_ids_sb)}')
-check('y el cuarto destino lo deciden las dos con la misma función',
-      ('destinoQueCambia' in _bt) == ('destinoQueCambia' in _sb),
-      'con una sola que lo pregunte, las dos navegaciones dicen cosas distintas')
+# Los cuatro destinos son fijos: ninguno cambia de nombre ni de pantalla con
+# el avance. Antes el cuarto cambiaba —Mi ADN hasta que le tocaba montar,
+# Campañas desde ahi— y la navegacion se movia debajo del cliente.
+_ids_bt = [m for m in re.findall(r"id: '([a-z]+)', label:", _bt)]
+check('la navegacion lleva a los cuatro de siempre',
+      _ids_bt == ['dashboard', 'roadmap', 'entrenadores', 'mensajes'],
+      f'{_ids_bt}')
+check('y ninguno cambia con el avance', 'destinoQueCambia' not in _bt,
+      'lo que aprendiste a encontrar tiene que seguir donde estaba')
+check('la misma barra en el telefono y en la computadora', 'md:hidden' not in _bt,
+      'dos formas de navegar es volver a aprender la app en cada pantalla')
 
 try:
     _css = open('src/index.css', encoding='utf-8').read()
@@ -3116,7 +3118,9 @@ check('la meta la escribe el cliente, en dinero', "meta: number | null" in _tn)
 check('lo que se lleva el estado se descuenta solo', 'retencion' in _tn and 'neto' in _tn)
 check('las horas se anotan por semana', 'anotarHoras' in _tn and 'lunesDe' in _tn)
 check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in _tn)
-check('se abre desde el Camino', 'TusNumeros' in _rm_tn and 'tu meta y tus cobros' in _rm_tn)
+# El boton suelto con su renglon de explicacion es ahora una tarjeta de la
+# grilla «Tu Camino por dentro». Lo que se cuida es que tenga puerta.
+check('se abre desde el Camino', 'TusNumeros' in _rm_tn and "label: 'Tus números'" in _rm_tn)
 check('sin letra chica en la pantalla de números',
       not re.search(r'text-\[1[0-4]px\]|text-xs|text-sm', _tnv))
 check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros.ts'))
@@ -3172,7 +3176,7 @@ check('las trece semanas tienen nombre',
       _semanas_hr is not None and len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) == 13,
       'cuenta: ' + str(len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) if _semanas_hr else 0))
 check('los hitos están escritos', _hr.count('Tu ') >= 10)
-check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and 'tus noventa días' in _rm_hr)
+check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and "label: 'Hoja de Ruta'" in _rm_hr)
 check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
 check('existe la prueba de la Hoja de Ruta', _os64.path.exists('scripts/prueba-hoja-de-ruta.ts'))
 
@@ -3596,10 +3600,9 @@ print('══ 12) LO QUE FALLABA EN SILENCIO ══')
 
 # El cliente no tenía por dónde cerrar sesión: el modal existía completo y la
 # única función que lo abría se le pasaba al Sidebar, que no la usaba.
-_side = rd('src/components/Sidebar.tsx')
 _topb = rd('src/components/Topbar.tsx')
-check('el cliente puede abrir su cuenta y cerrar sesión, desde las dos barras',
-      'onClick={onOpenSettings}' in _side and 'onClick={onOpenSettings}' in _topb,
+check('el cliente puede abrir su cuenta y cerrar sesión desde el encabezado',
+      'onClick={onOpenSettings}' in _topb,
       'el modal existía y nada lo abría')
 
 # El alcance se mide caminando el grafo, no con una lista de arreglos viejos.

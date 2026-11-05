@@ -159,19 +159,18 @@ ok(/<Acompanamiento/.test(app), 'está cableada en la app');
 ok(!/<Mensajes userId=\{supabaseProfile\?\.id\} \/>/.test(app),
   'y reemplazó la pantalla de Soporte sola, sin sumar un sexto destino al menú');
 const bottom = codigoDe('src/components/BottomTabBar.tsx');
-const lateral = codigoDe('src/components/Sidebar.tsx');
 // Esta asercion pedia la MISMA etiqueta en las dos navegaciones, y el medidor
 // en Chromium real demostro que no se puede: «Acompañamiento» con cinco
 // pestañas en 390 px se sale de la pantalla, y lo marco en las quince vistas
 // del cliente a la vez. Lo que de verdad tiene que coincidir es el DESTINO
 // —que es lo que verifica la lente de la auditoria, comparando ids— no el
 // ancho del texto.
-ok(/id: 'mensajes'/.test(bottom) && /id: 'mensajes'/.test(lateral),
-  'las dos navegaciones llevan al mismo destino');
-ok(/Acompañamiento/.test(lateral),
-  'en el menú lateral, donde hay ancho, va el nombre completo');
+ok(/id: 'mensajes'/.test(bottom),
+  'la navegación lleva a Acompañamiento');
+ok(/nombreCompleto: 'Acompañamiento'/.test(bottom),
+  'con el nombre completo declarado, que es el que usa el encabezado donde hay ancho');
 ok(/label: 'Contacto'/.test(bottom),
-  'y abajo va corto: con el nombre largo se salía de la pantalla en el teléfono');
+  'y en la barra va corto: con el nombre largo se salía de la pantalla en el teléfono');
 
 console.log('\n══ el admin ══');
 const hoy = codigoDe('src/components/admin/ListaDeHoy.tsx');

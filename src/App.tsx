@@ -6,7 +6,6 @@
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cargarVentanas } from './lib/ventanasDatos';
-import Sidebar from './components/Sidebar';
 import BottomTabBar from './components/BottomTabBar';
 import MiClinica from './pages/MiClinica';
 import NumeroPanel from './components/numero/NumeroPanel';
@@ -39,8 +38,7 @@ import { recordTodayActivity } from './lib/activity';
 import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
 import { mensajeDeFalla } from './lib/conexion';
-import { diaDelPrograma, dondeVa } from './lib/diaPrograma';
-import { diaDeLaProximaJornada, jornadasCerradas } from './lib/roadmapSeed';
+import { diaDelPrograma } from './lib/diaPrograma';
 import Entrenadores from './pages/Entrenadores';
 import { MessageSquare } from 'lucide-react';
 import { setFamiliaActual } from './lib/vocabulario';
@@ -292,8 +290,6 @@ export default function App() {
     return () => { vivo = false; };
   }, [supabaseProfile?.id]);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -727,37 +723,30 @@ export default function App() {
   return (
     <div data-pausas={pausasListas ? 'cargadas' : 'cargando'}
          className="flex h-screen bg-ink text-cream overflow-hidden font-sans selection:bg-gold/30">
-      {/* Background Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
+      {/*
+        ─── ACÁ HABÍA DOS GLOBOS DE ORO DIFUMINADOS ──────────────────────────
+        Medio alto y medio ancho de la pantalla cada uno, `blur-[120px]`, uno
+        arriba a la izquierda y otro abajo a la derecha, detrás de TODA la app.
+        Es un glow, y la regla de la casa lo dice sin excepción: oro mate solo
+        en líneas de 1px, versalitas y numerales — nunca relleno, nunca
+        degradé, nunca glow. El medidor no los cazaba porque busca sombras
+        doradas en los elementos, y esto eran dos divs de fondo.
 
-      {/* Mobile overlay backdrop */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      <Sidebar
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        onOpenSettings={openSettings}
-        onSignOut={handleSignOut}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(v => !v)}
-        mobileOpen={mobileMenuOpen}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
-
+        ─── Y ACÁ ESTABA LA BARRA LATERAL ───────────────────────────────────
+        256 px fijos en la computadora con el logo, la ficha del cliente, doce
+        destinos y un botón de contraer. Se fue entera: la navegación es una
+        sola —la de abajo— y es la misma en los dos anchos. Lo que vivía en
+        «Todo lo demás» ahora vive dentro de El Camino, que es de lo que es
+        parte.
+      */}
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         <Topbar
-              onOpenSettings={openSettings} currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} onMobileMenuToggle={() => setMobileMenuOpen(v => !v)} />
-        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
-          donde={dondeVa(supabaseProfile?.fecha_inicio, diaDeLaProximaJornada(jornadasCerradas()))}
-          onMore={() => setMobileMenuOpen(true)} />
+              onOpenSettings={openSettings} currentPage={currentPage} onBack={goBack} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />
+        <BottomTabBar currentPage={currentPage} setCurrentPage={setCurrentPage} userId={supabaseProfile?.id} />
         <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide">
-          <div className="p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-6 max-w-6xl mx-auto w-full">
+          {/* El aire de abajo lo pide la barra, que ahora flota también en la
+              computadora: sin esto, la última tarjeta queda debajo de la isla. */}
+          <div className="p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-28 max-w-6xl mx-auto w-full">
             <CeremoniaCinturon />
             {currentPage === 'dashboard' && <Dashboard setCurrentPage={setCurrentPage} userId={supabaseProfile?.id}
                 perfil={supabaseProfile ?? undefined} />}

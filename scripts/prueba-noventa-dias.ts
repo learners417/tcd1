@@ -19,7 +19,6 @@
 import { readFileSync } from 'node:fs';
 import { dondeVa, yaLlegoAlDia, faltaParaLlegar } from '../src/lib/diaPrograma';
 import { diaDeLaProximaJornada, SEED_ROADMAP_V2 } from '../src/lib/roadmapSeed';
-import { destinoQueCambia, DIA_EN_QUE_EMPIEZA_CAMPANAS } from '../src/lib/destinoDelMomento';
 import { ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo } from '../src/lib/entregasDelEquipo';
 import { rubricaDe } from '../src/lib/rubricas';
 
@@ -82,20 +81,25 @@ const todas = new Set<string>();
 for (const p of SEED_ROADMAP_V2) for (const m of p.metas) todas.add(`${p.numero}-${m.codigo}`);
 ok(diaDeLaProximaJornada(todas) === null, 'con todo cerrado, no hay próxima');
 
-// ── 3 · El destino que cambia ──────────────────────────────────────────────
-console.log('\n══ el cuarto destino ══');
-ok(destinoQueCambia(dondeVa(inicioParaDia(10), 10)).id === 'adn',
-  'antes de montar, ese lugar lo ocupa Mi ADN: es lo que está construyendo');
-ok(destinoQueCambia(dondeVa(inicioParaDia(31), 29)).id === 'campanas',
-  'y el día que le toca montar, se convierte en Campañas');
-ok(destinoQueCambia(null).id === 'campanas',
-  'sin saber dónde va, manda Campañas: mejor de más que un lugar vacío mientras carga');
-ok(DIA_EN_QUE_EMPIEZA_CAMPANAS === 29, 'el día está en una sola constante');
-
+// ── 3 · La navegación no se mueve ──────────────────────────────────────────
+//
+// ACÁ HABÍA TRES ASERCIONES SOBRE «EL CUARTO DESTINO».
+//
+// La barra tenía cinco lugares y el cuarto cambiaba con el avance: decía «Mi
+// ADN» hasta el día 29 y «Campañas» desde ahí. La intención era no gastar un
+// lugar en algo que todavía dice «todavía no». El efecto era que la
+// navegación se movía debajo del cliente, y lo que aprendió a encontrar
+// dejaba de estar.
+//
+// Ahora son cuatro fijos y `destinoDelMomento.ts` no existe. Campañas vive
+// dentro de El Camino, que es de lo que es parte: se usa EL día que toca
+// montar, no cualquier día.
+console.log('\n══ la navegación no se mueve ══');
 const nav = codigoDe('src/components/BottomTabBar.tsx');
-const lat = codigoDe('src/components/Sidebar.tsx');
-ok(/destinoQueCambia/.test(nav) && /destinoQueCambia/.test(lat),
-  'las dos navegaciones preguntan lo mismo, así que dicen lo mismo');
+ok(!/destinoQueCambia/.test(nav),
+  'la barra no cambia con el avance: lo que aprendiste a encontrar sigue donde estaba');
+ok((nav.match(/id: '[a-z]+', label:/g) ?? []).length === 4,
+  'y son cuatro, los mismos en el teléfono y en la computadora');
 
 // ── 4 · Las entregas del equipo ────────────────────────────────────────────
 console.log('\n══ las entregas ══');

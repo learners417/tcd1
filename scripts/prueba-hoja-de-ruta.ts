@@ -33,7 +33,10 @@ ok(fechaCorta(null, 15) === '', 'sin fecha de inicio no inventa fechas');
 console.log('\n── vive adentro del Camino ──');
 const roadmap = readFileSync('src/pages/Roadmap.tsx', 'utf8');
 ok(/HojaDeRuta/.test(roadmap), 'se abre desde el Camino');
-ok(/tus noventa días ›/.test(roadmap), 'con su botón propio, al lado del ADN');
+// El boton suelto con su renglon de explicacion —«tus noventa dias ›»— paso a
+// ser una tarjeta mas de la grilla «Tu Camino por dentro», con el resto de las
+// partes. Lo que se cuida es que siga teniendo su puerta, no como esta escrita.
+ok(/label: 'Hoja de Ruta'/.test(roadmap), 'con su tarjeta en la grilla del Camino');
 const vista = readFileSync('src/components/camino/HojaDeRuta.tsx', 'utf8');
 ok(/d\.minutos > 0 && completadas\.has/.test(vista), 'cuenta las jornadas con trabajo, no los días de campo');
 ok(/arrancaLunes/.test(vista), 'solo promete el fin de semana libre a quien arranca en lunes');

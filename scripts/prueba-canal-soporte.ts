@@ -42,7 +42,7 @@ const cerebro = leer('src/lib/cerebroStorage.ts');
 const avisos = leer('src/lib/notifications.ts');
 const topbar = leer('src/components/Topbar.tsx');
 const destinos = leer('src/lib/destinos.ts');
-const sidebar = leer('src/components/Sidebar.tsx');
+const barra = leer('src/components/BottomTabBar.tsx');
 const tipos = leer('src/lib/supabase.ts');
 const mig = leer('supabase/migrations/20261009_canal_unico_soporte.sql');
 
@@ -107,10 +107,10 @@ ok(/setCurrentPage\('mensajes'\)/.test(topbar) && /LifeBuoy/.test(topbar),
 // La regla de los cinco destinos no era el problema: el problema era CUÁL de
 // los cinco. Salió Clínica, que no era un destino de esta app sino un
 // window.open a otra, y encima bloqueado hasta el pilar 6.
-ok(/id: 'mensajes', icon/.test(sidebar),
-  'y Soporte ES uno de los cinco destinos: un canal que no se encuentra manda al cliente a buscar al equipo afuera de la app');
-ok((soloCodigo(sidebar).match(/as MenuItem,/g) ?? []).length <= 5,
-  'el menú sigue teniendo cinco destinos o menos');
+ok(/id: 'mensajes', label: 'Contacto'/.test(barra),
+  'y Contacto ES uno de los cuatro destinos: un canal que no se encuentra manda al cliente a buscar al equipo afuera de la app');
+ok((soloCodigo(barra).match(/id: '[a-z]+', label:/g) ?? []).length === 4,
+  'la navegación tiene cuatro destinos, y son los mismos en los dos anchos');
 ok(/accion_url: '\/mensajes'/.test(avisos),
   'el aviso del equipo apunta a Soporte');
 ok(!/accion_url: '\/dashboard'/.test(cerebro),

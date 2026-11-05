@@ -58,7 +58,9 @@ ok(lunesDe(new Date('2026-09-26T12:00:00')) === '2026-09-21', 'las horas se agru
 console.log('\n── vive adentro del Camino ──');
 const roadmap = readFileSync('src/pages/Roadmap.tsx', 'utf8');
 ok(/TusNumeros/.test(roadmap), 'se abre desde el Camino');
-ok(/tu meta y tus cobros ›/.test(roadmap), 'con su botón propio');
+// Lo mismo que la Hoja de Ruta: el boton suelto es ahora una tarjeta de la
+// grilla «Tu Camino por dentro».
+ok(/label: 'Tus números'/.test(roadmap), 'con su tarjeta en la grilla del Camino');
 ok(/onRegistrarCobro=\{\(\) => setVentaModal\(true\)\}/.test(roadmap), 'y desde ahí puede anotar un cobro');
 const pantalla = readFileSync('src/components/TusNumeros.tsx', 'utf8');
 ok(!/text-\[1[0-4]px\]|text-xs|text-sm/.test(pantalla), 'sin letra chica');

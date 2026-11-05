@@ -31,6 +31,8 @@ import {
   Handshake,
   Palette,
   BarChart3,
+  Coins,
+  CalendarRange,
 } from 'lucide-react';
 
 // ─── Icon map for pilar icons ─────────────────────────────────────────────────
@@ -98,6 +100,7 @@ import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
 import { tutorialEscrito } from '../lib/tutorialesDeLupe';
 import { paisajeDeSistema, paisajeDelDia } from '../lib/losCincoPaisajes';
 import PortadaDeSistema from '../components/PortadaDeSistema';
+import PartesDelCamino from '../components/PartesDelCamino';
 import { baseDeOnboarding } from '../lib/onboardingBase';
 import VeredictoCriticoPanel from '../components/VeredictoCriticoPanel';
 import { claveDelDia, codigoDelDia, jornadaDe } from '../lib/roadmapSeed';
@@ -1251,54 +1254,34 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         </section>
       )}
 
-      {/* Sus números: su meta, lo que lleva cobrado y sus horas. */}
-      {numerosAbiertos ? (
+      {/* ═══ LAS PARTES DE EL CAMINO ═══
+
+          Acá había TRES botones sueltos —«Tus números», «Tu Hoja de Ruta» y
+          «Mi ADN»— cada uno con su renglón de explicación, uno debajo del
+          otro, antes de que la pantalla dijera dónde estás.
+
+          Ahora son una grilla con todo lo que es parte del Camino, y eso
+          incluye lo que se quedó sin puerta cuando la barra pasó a cuatro
+          destinos fijos: el Método, el Diario, Métricas, Campañas, el Creador
+          y Mi Clínica. Sin esto, en el teléfono no había forma de abrirlas.
+
+          Los dos paneles que se despliegan acá mismo entran en la misma
+          grilla: para el cliente son lo mismo que el resto. */}
+      {numerosAbiertos && (
         <TusNumeros
           cobros={ventas.map((v) => ({ fecha: v.fecha, monto: v.monto ?? 0 }))}
           onRegistrarCobro={() => setVentaModal(true)}
           onCerrar={() => setNumerosAbiertos(false)}
         />
-      ) : (
-        <button
-          type="button"
-          onClick={() => setNumerosAbiertos(true)}
-          className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between"
-        >
-          <span className="text-[17px] font-semibold text-cream">Tus números</span>
-          <span className="text-[15px] text-cream/70">tu meta y tus cobros ›</span>
-        </button>
       )}
-
-      {/* Su Hoja de Ruta: los noventa días a la vista desde el primer día. */}
-      {rutaAbierta ? (
+      {rutaAbierta && (
         <HojaDeRuta
           fechaInicio={perfil?.fecha_inicio}
           completadas={completadas}
           diaDeHoy={diaActual}
           onCerrar={() => setRutaAbierta(false)}
         />
-      ) : (
-        <button
-          type="button"
-          onClick={() => setRutaAbierta(true)}
-          className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between"
-        >
-          <span className="text-[17px] font-semibold text-cream">Tu Hoja de Ruta</span>
-          <span className="text-[15px] text-cream/70">tus noventa días ›</span>
-        </button>
       )}
-
-      {/* El ADN vive acá: es lo que vas sellando en el Camino. */}
-      <button
-        type="button"
-        onClick={() => onNavigate?.('adn')}
-        className="w-full min-h-[56px] rounded-2xl border border-[var(--line2,#DFD3BC)] px-4 flex items-center justify-between text-left"
-      >
-        {/* El destino se llama «Mi ADN» en la barra, el buscador y las
-            pestañas: el botón que lleva ahí dice el mismo nombre. */}
-        <span className="text-[17px] font-semibold text-cream">Mi ADN</span>
-        <span className="text-[15px] text-cream/70">lo que ya sellaste ›</span>
-      </button>
 
       {/* ── Encabezado: dónde estás y qué hacer hoy (10-DISENO) ── */}
       <EncabezadoCamino
@@ -1334,6 +1317,20 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           setActiveMeta(cod);
           setTimeout(() => document.getElementById(`meta-${cod}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
         }}
+      />
+
+      {/* Las partes van DESPUÉS de dónde estás y qué hacer hoy: puestas
+          arriba empujaban el anillo y la jornada del día debajo del pliegue,
+          que es lo contrario de lo que esta pantalla tiene que contestar
+          primero. Es un directorio, y los directorios van al final. */}
+      <PartesDelCamino
+        cinturonOrden={cinturonCamino?.orden ?? 1}
+        modulosActivos={(perfil as { modulos_activos?: string[] } | undefined)?.modulos_activos ?? []}
+        locales={[
+          { id: 'cobros', label: 'Tus números', icon: Coins, onClick: () => setNumerosAbiertos((v) => !v) },
+          { id: 'ruta', label: 'Hoja de Ruta', icon: CalendarRange, onClick: () => setRutaAbierta((v) => !v) },
+        ]}
+        onIr={(id) => onNavigate?.(id)}
       />
 
       {/* ── Banner Día 45 (Regla #6 v8) ── */}

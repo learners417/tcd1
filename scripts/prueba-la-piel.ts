@@ -204,9 +204,11 @@ ok(
 
 console.log('\n── cada ícono dice lo suyo ──');
 const barra = leer('src/components/BottomTabBar.tsx');
+// El cuarto destino ya no cambia: la barra tiene cuatro fijos. Lo que se
+// cuida ahora es que cada icono siga diciendo lo suyo.
 ok(
-  /icon: cuarto\.icono/.test(barra),
-  'el cuarto destino cambia de ícono junto con su nombre',
+  !/cuarto\.icono/.test(barra),
+  'ningún destino cambia de ícono con el avance',
 );
 ok(
   /'entrenadores'[^\n]*icon: Dumbbell/.test(barra),

@@ -24,14 +24,14 @@ const leer = (r: string) => (existsSync(r) ? readFileSync(r, 'utf-8') : '');
 // ── 1 · El cliente puede salir de su cuenta ───────────────────────────────
 console.log('══ cerrar sesión ══');
 const app = leer('src/App.tsx');
-const side = leer('src/components/Sidebar.tsx');
 const top = leer('src/components/Topbar.tsx');
-ok(/onOpenSettings=\{openSettings\}/.test(app) && (app.match(/onOpenSettings=\{openSettings\}/g) ?? []).length >= 2,
-  'la función que abre su cuenta llega a las dos barras, no a una sola');
-ok(/onClick=\{onOpenSettings\}/.test(side),
-  'el Sidebar la USA: antes la recibía y no la usaba, así que nada abría el modal');
+// Antes esto pedia que la funcion llegara a LAS DOS barras —la lateral y la
+// de arriba— y que la lateral la usara. La lateral ya no existe: la cuenta se
+// abre desde el encabezado, que esta en los dos anchos.
+ok(/onOpenSettings=\{openSettings\}/.test(app),
+  'la función que abre su cuenta llega al encabezado');
 ok(/onClick=\{onOpenSettings\}/.test(top),
-  'y el teléfono también tiene su botón: ahí no hay Sidebar');
+  'y el encabezado la USA: antes la recibía y no la usaba, así que nada abría el modal');
 ok(/Cerrar sesión/.test(app), 'y adentro está el cerrar sesión');
 
 // ── 2 · Los 21 tutoriales ─────────────────────────────────────────────────

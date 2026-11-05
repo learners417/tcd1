@@ -144,10 +144,24 @@ export default function EncabezadoCamino({
               : <span className="font-semibold">{sis.nombre}</span>}
           </p>
         )}
+        {/*
+          EL RITMO SE LEE, NO SE PINTA.
+
+          Eran tres renglones enteros en oro, centrados, debajo del anillo: un
+          párrafo pintado de dorado es relleno de oro en forma de texto, y la
+          vara de la casa lo reserva para las líneas de 1px, las versalitas y
+          los numerales. Encima competía con el 50 del anillo, que está justo
+          arriba y que SÍ es un numeral.
+
+          Ahora el párrafo va en la tinta y el color queda en la línea de 1px
+          de su izquierda: oro cuando hay algo que recuperar, verde cuando
+          está al día. Es el mismo tratamiento que ya tenía en Hoy, así que
+          las dos pantallas dicen el estado de la misma forma.
+        */}
         <p
           data-ritmo={ritmo.tono}
-          className="mt-2 text-center text-[17px] leading-snug"
-          style={{ color: ritmo.tono === 'al_dia' ? 'var(--tilde, #4A7C59)' : 'var(--oro-d, #8E6824)' }}
+          className="mt-3 mx-auto max-w-[32ch] text-[17px] leading-snug text-cream/85 border-l-2 pl-3"
+          style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}
         >
           {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
         </p>

@@ -78,15 +78,43 @@ export function mapaDelMenu(): string {
 }
 
 /**
- * Los que viven arriba del menú y en la barra de abajo.
+ * LOS CUATRO. Los mismos en el teléfono y en la computadora, siempre.
  *
- * Son cinco en pantalla, pero acá hay seis: el cuarto lugar lo ocupa Mi ADN
- * hasta que le toca montar, y Campañas desde entonces. Los dos cuentan como
- * principales para que ninguno aparezca dos veces en el menú.
+ * ═══ POR QUÉ CUATRO Y POR QUÉ FIJOS ═══
+ *
+ * Eran cinco, y el cuarto CAMBIABA de nombre, de ícono y de destino según el
+ * avance: decía «Mi ADN» hasta que te tocaba montar y después «Campañas». La
+ * intención era buena —no gastar un lugar en algo que todavía dice «todavía
+ * no»— y el efecto era el contrario: la navegación se movía debajo del
+ * cliente. Lo que ayer estaba cuarto hoy es otra cosa, y lo que aprendiste a
+ * encontrar dejó de estar.
+ *
+ * Una barra que no se mueve se aprende una vez. Y cuatro palabras entran
+ * cómodas hasta en un Android de 320 px, que con cinco iba al límite.
+ *
+ * Lo que salió no se perdió: vive dentro de El Camino, que es de lo que son
+ * parte. Mi ADN son las piezas que sellaste en el Camino; Campañas, Métricas y
+ * el Creador son las herramientas de los días que te toquen; el Método son los
+ * libros que lo explican. Ninguna de esas se usa «cualquier día»: se usa EL
+ * día. Y ese es el criterio de esta barra desde siempre — si algo se usa en un
+ * día concreto, no va acá, va en ese día.
  */
-export const PRINCIPALES = ['dashboard', 'roadmap', 'entrenadores', 'adn', 'campanas', 'mensajes'];
+export const PRINCIPALES = ['dashboard', 'roadmap', 'entrenadores', 'mensajes'];
 
-/** Todo lo que no entra en los cinco de arriba. */
+/**
+ * Lo que vive DENTRO de El Camino.
+ *
+ * El Mentor queda afuera de esta lista a propósito: no es una parte del
+ * Camino, es con quién lo caminas, y por eso está en el encabezado, a una
+ * mano de distancia desde cualquier pantalla.
+ */
+export const DENTRO_DEL_CAMINO = ['numero', 'adn', 'biblioteca', 'diario', 'metrics', 'campanas', 'creador', 'miclinica'];
+
+/** Las partes de El Camino, en el orden en que se encuentran. */
+export const destinosDelCamino = (): Destino[] =>
+  DENTRO_DEL_CAMINO.map((id) => DESTINOS.find((d) => d.id === id)).filter((d): d is Destino => Boolean(d));
+
+/** Todo lo que no entra en los cuatro de la barra. */
 export const otrosDestinos = (): Destino[] =>
   DESTINOS.filter((d) => !PRINCIPALES.includes(d.id));
 

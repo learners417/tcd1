@@ -25,11 +25,13 @@
  *
  * Correr con: npx tsx scripts/prueba-soporte-visible.ts
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import {
   URL_MI_CLINICA, LAS_DOS_LLAVES, QUE_HACE_ALLA,
   loQueSeLleva, cuantasListas, comoLoEncuentra, ANTES_DE_ABRIR,
 } from '../src/lib/miClinica';
+
+const existe = (ruta: string) => existsSync(ruta);
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -38,7 +40,6 @@ const ok = (cond: boolean, que: string) => {
 };
 
 const abajo = readFileSync('src/components/BottomTabBar.tsx', 'utf-8');
-const lateral = readFileSync('src/components/Sidebar.tsx', 'utf-8');
 const app = readFileSync('src/App.tsx', 'utf-8');
 const topbar = readFileSync('src/components/Topbar.tsx', 'utf-8');
 
@@ -46,39 +47,36 @@ const idsDe = (txt: string, re: RegExp) =>
   [...txt.matchAll(re)].map((m) => m[1]);
 
 // ── 1 · Soporte está donde se ve ───────────────────────────────────────────
-console.log('══ soporte está en las dos navegaciones ══');
-// El cuarto destino cambia con el avance —Mi ADN hasta que le toque montar,
-// Campañas desde ahí— así que en el código no es un literal: es `cuarto.id`.
-// Se normaliza a 'campanas' para poder comparar las dos listas, que es lo que
-// esta lente cuida: que las dos navegaciones digan lo mismo.
-const idsDeNav = (txt: string, re: RegExp) => {
-  const ids = [...txt.matchAll(re)].map((m) => m[1]);
-  // Va en su lugar, el cuarto: el orden es parte de lo que esta lente cuida.
-  // La barra de abajo conserva el literal en su lista y lo cambia al pintar;
-  // el menú lateral lo arma directo. Solo hace falta reponerlo donde no está.
-  if (/cuarto\.id/.test(txt) && !ids.includes('campanas')) ids.splice(3, 0, 'campanas');
-  return ids;
-};
-const enAbajo = idsDeNav(abajo, /id: '([a-z]+)'/g);
-const enLateral = idsDeNav(lateral, /id: '([a-z]+)', icon/g);
+//
+// ═══ ESTA LENTE CAMBIÓ DE PREGUNTA, Y A PROPÓSITO ═══
+//
+// Antes preguntaba si las DOS navegaciones decían lo mismo: la barra de abajo
+// del teléfono y el menú lateral de la computadora. La respuesta buena a esa
+// pregunta era mantener dos listas sincronizadas para siempre.
+//
+// Ahora hay una sola navegación para los dos anchos, así que la pregunta es
+// mejor: que sea una, que sean cuatro, y que ninguna cambie con el avance.
+console.log('══ hay UNA navegación, y Contacto está en ella ══');
+const enAbajo = [...abajo.matchAll(/id: '([a-z]+)'/g)].map((m) => m[1]);
 
-ok(/destinoQueCambia/.test(abajo) && /destinoQueCambia/.test(lateral),
-  'el cuarto destino cambia con el avance, y las dos navegaciones lo preguntan igual');
+ok(!existe('src/components/Sidebar.tsx'),
+  'el menú lateral ya no existe: dos navegaciones distintas es la forma más rápida de que alguien se pierda');
+ok(!/Sidebar/.test(app.replace(/\{\/\*[\s\S]*?\*\/\}/g, '')),
+  'y la app no lo monta');
 ok(enAbajo.includes('mensajes'),
-  'en la barra de abajo, que es la que usan los clientes en el celular');
-ok(enLateral.includes('mensajes'), 'y en el menú lateral');
-ok(enAbajo.length === 5 && enLateral.length === 5,
-  'siguen siendo cinco destinos: un sexto hace dudar cuál navegación mirar');
-ok(JSON.stringify(enAbajo) === JSON.stringify(enLateral),
-  `y los mismos en el mismo orden: ${enAbajo.join(' · ')}`);
+  'Contacto está en la barra, que es la única puerta al equipo');
+ok(enAbajo.length === 4,
+  `son cuatro destinos: ${enAbajo.join(' · ')}`);
+ok(!/destinoQueCambia/.test(abajo),
+  'y ninguno cambia con el avance: una barra que se mueve debajo del cliente se aprende dos veces');
+ok(!/md:hidden/.test(abajo),
+  'la misma barra se ve en el teléfono y en la computadora');
 
-console.log('\n══ y Clínica salió de la barra ══');
-ok(!enAbajo.includes('miclinica') && !enLateral.includes('miclinica'),
+console.log('\n══ y Clínica sigue fuera de la barra ══');
+ok(!enAbajo.includes('miclinica'),
   'no era un destino de esta app: era un window.open a otra');
-ok(!/window\.open\('https:\/\/mcd/.test(abajo) && !/window\.open\('https:\/\/mcd/.test(lateral),
-  'ninguna de las dos navegaciones te saca de TCD al tocar un destino');
-ok(/minPilar: 6/.test(lateral) === false,
-  'y con ella se fue el destino que estaba bloqueado los primeros 35 días');
+ok(!/window\.open\('https:\/\/mcd/.test(abajo),
+  'la navegación no te saca de TCD al tocar un destino');
 
 // ── 2 · La página sobrevive a cerrar la app ────────────────────────────────
 console.log('\n══ la página sobrevive a cerrar la app ══');
@@ -176,8 +174,8 @@ ok(/noopener,noreferrer/.test(pantalla), 'la pestaña nueva se abre sin dejarle 
 ok(new RegExp(URL_MI_CLINICA.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(
   readFileSync('src/lib/miClinica.ts', 'utf-8')),
   'la dirección vive en una sola constante: estaba escrita en dos pantallas');
-ok(!/mcd-eight/.test(abajo) && !/mcd-eight/.test(lateral),
-  'y ya no está repetida en las navegaciones');
+ok(!/mcd-eight/.test(abajo),
+  'y ya no está repetida en la navegación');
 ok(!/text-xs|text-sm|text-\[1[0-5]px\]/.test(pantalla), 'sin letra chica');
 
 console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);

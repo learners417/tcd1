@@ -245,10 +245,9 @@ ok(
   /text-xl leading-tight text-cream una-linea/.test(topbar),
   'el título sigue a 20 px: el serif de display no baja de ahí',
 );
-const lateral = leer('src/components/Sidebar.tsx');
 ok(
-  /label: 'Entrenadores'/.test(lateral),
-  'y el menú lateral, donde hay ancho, dice el nombre completo',
+  /nombreCompleto: 'Entrenadores'/.test(barra),
+  'y el nombre completo queda declarado, que es el que usa el encabezado donde hay ancho',
 );
 ok(
   /ANCHO_ANGOSTO = 320/.test(medidor),

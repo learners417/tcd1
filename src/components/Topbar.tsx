@@ -1,7 +1,7 @@
 import { planActual, planPermitePilar } from '../lib/planes';
 import { DESTINOS } from '../lib/destinos';
 import { useState, useEffect, useRef } from 'react';
-import { UserCircle2, Search, Bell, X, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Menu, Megaphone, ChevronLeft, Sparkles, Hexagon, LifeBuoy } from 'lucide-react';
+import { UserCircle2, Search, Bell, X, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Megaphone, ChevronLeft, Sparkles, Hexagon, LifeBuoy } from 'lucide-react';
 import { toast } from 'sonner';
 import { obtenerNotificaciones, marcarLeida, marcarTodasLeidas, contarNoLeidas, type NotificacionDB } from '../lib/notifications';
 import { comoSeVeElAviso } from '../lib/avisoVisual';
@@ -18,7 +18,6 @@ interface TopbarProps {
   onBack?: () => void;
   setCurrentPage: (page: string) => void;
   userId?: string;
-  onMobileMenuToggle: () => void;
   /** Abre su cuenta: sus datos y el cerrar sesión. */
   onOpenSettings?: () => void;
 }
@@ -185,7 +184,7 @@ function tiempoRelativo(fechaISO: string): string {
   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
-export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onMobileMenuToggle, onOpenSettings }: TopbarProps) {
+export default function Topbar({ currentPage, onBack, setCurrentPage, userId, onOpenSettings }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -378,14 +377,18 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
           tiene `una-linea`. El lente `recortado` del medidor mide que el
           nombre entre: si algo vuelve a esta barra y lo empuja, falla ahí.
         */}
-        <div className="md:hidden flex flex-1 items-center gap-1.5 min-w-0">
-          {currentPage && currentPage !== 'dashboard' && onBack ? (
+        <div className="flex flex-1 items-center gap-1.5 min-w-0">
+          {/*
+            ACÁ ESTABA LA HAMBURGUESA. Abría la barra lateral, y la barra
+            lateral ya no existe: los cuatro destinos están abajo, a la vista,
+            en los dos anchos. Un botón que abre un menú con lo mismo que ya se
+            ve es una puerta de más para perderse.
+
+            Queda solo el volver, y solo donde hay a dónde volver.
+          */}
+          {currentPage && currentPage !== 'dashboard' && onBack && (
             <button onClick={onBack} className="btn-icon -ml-2 shrink-0" aria-label="Volver">
               <ChevronLeft className="w-6 h-6" />
-            </button>
-          ) : (
-            <button onClick={onMobileMenuToggle} className="btn-icon -ml-2 shrink-0" aria-label="Abrir menú">
-              <Menu className="w-5 h-5" />
             </button>
           )}
           {/* `una-linea` y no `truncate` a secas: la barra mide 56 px y el

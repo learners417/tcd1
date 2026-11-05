@@ -52,8 +52,10 @@ const flags = leer('src/lib/featureFlags.ts');
 const medidor = leer('scripts/medir-app.py');
 
 console.log('\n── el título reclama su lugar ──');
+// Sin `md:hidden`: el nombre de la pantalla se ve TAMBIEN en la computadora.
+// Antes lo decia la barra lateral, y la barra lateral ya no existe.
 ok(
-  /md:hidden flex flex-1 items-center/.test(topbar),
+  /flex flex-1 items-center/.test(topbar),
   'el grupo del título lleva `flex-1`: toma el hueco en vez de esperar que sobre',
 );
 /*
