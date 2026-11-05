@@ -3498,6 +3498,28 @@ check(f'las {len(_pruebas)} pruebas de escenario corren en verde', not _rojas, '
 if _os10.path.exists('scripts/prueba-pantallas.tsx'):
     _r = subprocess.run(['npx', 'tsx', '--import', './scripts/entorno-navegador.mjs', 'scripts/prueba-pantallas.tsx'], capture_output=True, text=True)
     check('las pantallas montan y dibujan', _r.returncode == 0, (_r.stdout + _r.stderr).strip().split('\n')[-1][:120])
+
+# ── El SQL que decide quién ve qué, ejercido contra PostgreSQL ─────────
+#
+# `prueba-sql.sh` se mira por dentro más arriba —se comprueba que su andamiaje
+# diga la verdad— pero las pruebas de política hay que CORRERLAS: una política
+# mal escrita se instala igual y la app escribe igual. Se nota el día que un
+# cliente abre la consola y lee lo de los demás.
+#
+# Si no hay PostgreSQL local, el script sale en 0 diciendo que no puede, y
+# esta lente queda en verde: no vale frenar el paquete por una herramienta
+# que falta en esta máquina. Lo que no vale es que falle y nadie lo mire.
+for _sh, _loQuePrueba in [
+    ('scripts/prueba-donde-cae-lo-que-se-rompe.sh', 'donde cae lo que se le rompe a un cliente'),
+    ('scripts/prueba-puesta-al-dia.sh', 'la puesta al día de la base'),
+]:
+    if not _os10.path.exists(_sh):
+        continue
+    _r = subprocess.run(['bash', _sh], capture_output=True, text=True)
+    _rojas_sh = [l.strip() for l in _r.stdout.split('\n') if l.strip().startswith('✗')]
+    check(f'{_loQuePrueba}: su SQL corre y sus políticas se cumplen',
+          _r.returncode == 0 and not _rojas_sh,
+          '; '.join(_rojas_sh[:3]) or (_r.stdout + _r.stderr).strip().split('\n')[-1][:160])
 SIN_MEDIR_MOVIL = False
 _nav = _os10.environ.get('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
 try:

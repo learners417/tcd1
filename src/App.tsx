@@ -5,6 +5,7 @@
 
 import CeremoniaCinturon from './components/CeremoniaCinturon';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { CLAVE_PANTALLA } from './lib/pantallaActual';
 import { cargarVentanas } from './lib/ventanasDatos';
 import BottomTabBar from './components/BottomTabBar';
 import MiClinica from './pages/MiClinica';
@@ -89,7 +90,10 @@ const VALID_PAGES = [
   // aparece solo mientras el equipo le habilitó la migración y no la terminó.
   'migracion',
 ] as const;
-const PAGE_STORAGE_KEY = 'tcd_current_page';
+/* La clave vive en `lib/pantallaActual` porque `avisarFalla` también la
+   necesita: con el nombre escrito en dos archivos, cambiarlo en uno deja al
+   otro leyendo una clave que ya no existe, sin romperse y sin avisar. */
+const PAGE_STORAGE_KEY = CLAVE_PANTALLA;
 
 /**
  * Las páginas que ya no existen, y a dónde va cada una.

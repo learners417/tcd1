@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Clock } from 'lucide-react';
+import LoQueSeRompio from './LoQueSeRompio';
 import {
   OBJETIVO, PRINCIPIOS, jornadasDeInduccion,
   MINUTOS_DE_CONTENIDO, SE_APRENDE_EN_EL_LUGAR,
@@ -22,7 +23,7 @@ export default function LaCasa() {
     catch { return new Set(); }
   });
   const [vista, setVista] = useState<
-    'induccion' | 'objetivo' | 'principios' | 'historia' | 'sistema'>('induccion');
+    'induccion' | 'objetivo' | 'principios' | 'historia' | 'sistema' | 'fallas'>('induccion');
 
   const marcar = (n: number) => {
     setHechas((h) => {
@@ -39,13 +40,23 @@ export default function LaCasa() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
 
-      <div className="flex gap-2">
+      {/* `flex-wrap`: con la sexta pestaña la fila ya no entra en un teléfono
+          y se iba de costado. Bajan de renglón. */}
+      <div className="flex flex-wrap gap-2">
         {([
           ['induccion', 'Tus primeros 3 días'],
           ['objetivo', 'Qué prometemos'],
           ['principios', 'Cómo se decide'],
           ['historia', 'Por qué Javo'],
           ['sistema', 'El sistema por dentro'],
+          /*
+            «Lo que se rompió» vive acá y no en una pestaña propia del Admin
+            porque es la misma pregunta que el resto de esta pantalla: cómo
+            anda la casa. Y porque una pestaña nueva arriba se mira el primer
+            día y después no; esto se mira cuando un cliente avisa que algo no
+            le funcionó, que es cuando se entra a buscar.
+          */
+          ['fallas', 'Lo que se rompió'],
         ] as const).map(([id, label]) => (
           <button key={id} onClick={() => setVista(id)}
             className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
@@ -56,6 +67,8 @@ export default function LaCasa() {
           </button>
         ))}
       </div>
+
+      {vista === 'fallas' && <LoQueSeRompio />}
 
       {/* ── LA INDUCCIÓN ── */}
       {vista === 'induccion' && (
