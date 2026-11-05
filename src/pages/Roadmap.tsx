@@ -288,16 +288,16 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
   return (
     <div className="mt-4 pt-4 border-t border-[var(--line, rgba(142,104,36,0.18))]">
       <div className="flex items-center justify-between">
-        <p className="text-[15px] font-bold uppercase tracking-[0.25em] text-cream/55">Documenta tu trabajo</p>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cream/55">Documenta tu trabajo</p>
         <button
           onClick={() => inputRef.current?.click()}
           disabled={subiendo}
-          className="text-[15px] px-3 py-1.5 rounded-lg border border-[var(--line2, rgba(142,104,36,0.30))] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+          className="text-sm px-3 py-1.5 rounded-lg border border-[var(--line2, rgba(142,104,36,0.30))] text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
         >
           {subiendo ? 'Subiendo…' : '+ Subir foto · captura · doc'}
         </button>
       </div>
-      {items.length > 0 && <p className="text-[15px] text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
+      {items.length > 0 && <p className="text-sm text-success mt-1.5">✓ {items.length} {items.length === 1 ? 'evidencia guardada' : 'evidencias guardadas'} — tu equipo las ve</p>}
       <input ref={inputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt" className="hidden" onChange={async (e) => {
         const f = e.target.files?.[0];
         if (!f || !userId) return;
@@ -1125,7 +1125,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     const minutosTotales = todos.reduce((n, x) => n + (x.minutos ?? 0), 0);
     return (
       <div className="space-y-4">
-        <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-goldhi">
           {/*
             Decía «Los 3 pasos a paso de hoy»: mal escrito —«pasos a paso» no
             se dice— y además contaba en «pasos», que en esta app son los
@@ -1220,7 +1220,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-cream/55 text-[15px]">
+      <div className="flex items-center justify-center h-64 text-cream/55 text-sm">
         Cargando El Camino...
       </div>
     );
@@ -1261,7 +1261,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           tarjeta de papel con su línea de oro de 1px, que es como se avisa
           acá. Sigue entrando desde la derecha.
         */
-        <div className="fade-rise fixed top-6 right-6 z-50 max-w-[22rem] rounded-2xl border px-5 py-3 text-[15px] leading-snug font-semibold animate-in slide-in-from-right duration-300"
+        <div className="fade-rise fixed top-6 right-6 z-50 max-w-[22rem] rounded-2xl border px-5 py-3 text-xs leading-snug font-semibold animate-in slide-in-from-right duration-300"
           style={{ background: 'var(--card, #FFFDF7)', borderColor: 'var(--oro, #B0822E)', color: 'var(--tinta, #2B2723)' }}>
           {celebracion}
         </div>
@@ -1270,12 +1270,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       {/* Lo que quedó viejo cuando cambió una pieza de su ADN. */}
       {desfasajes.length > 0 && (
         <section className="card-panel p-5" aria-label="Para que todo diga lo mismo">
-          <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Para que todo diga lo mismo</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-goldhi">Para que todo diga lo mismo</p>
           <ul className="mt-3 space-y-3">
             {desfasajes.map((d) => (
               <li key={d.dia} className="text-[17px] text-cream">
                 {VOC(avisoDe(d))}
-                <span className="block text-[15px] text-cream/60">Está en el día {d.dia}</span>
+                <span className="block text-xs text-cream/60">Está en el día {d.dia}</span>
               </li>
             ))}
           </ul>
@@ -1422,7 +1422,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                     <h2 className="text-[22px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
                       {VOC(fase.titulo)}
                     </h2>
-                    <p className="text-[15px] text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
+                    <p className="text-sm text-cream/55 mt-0.5">{VOC(fase.subtitulo)}</p>
                   </div>
                 </div>
               )}
@@ -1497,7 +1497,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       </div>
                       {/* El cliente no cuenta pilares: ve su sistema, y solo cuando cambia. */}
                       {abreSistema.has(pilar.numero) && (
-                        <p className="text-[15px] text-cream/60">
+                        <p className="text-xs text-cream/60">
                           {VOC(pilar.subtitulo)}
                         </p>
                       )}
@@ -1517,14 +1517,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
                       {/* Condición de desbloqueo especial */}
                       {pilar.estado === 'bloqueado' && (
-                        <p className="text-[15px] text-cream/60 mt-1.5 leading-snug">
+                        <p className="text-xs text-cream/60 mt-1.5 leading-snug">
                           {primerDiaDelPilar(pilar.metas) !== null ? `Se abre el día ${primerDiaDelPilar(pilar.metas)}` : ''}
                         </p>
                       )}
                       {pilar.estado === 'plan_bloqueado' && (() => {
                         const oferta = laOfertaQueSigue(pilar.numero);
                         return (
-                          <span className="block text-[15px] text-goldhi mt-1.5 leading-snug">
+                          <span className="block text-sm text-goldhi mt-1.5 leading-snug">
                             Se abre con <strong>{oferta.nombre}</strong> · {oferta.precio} — toca para verlo
                           </span>
                         );
@@ -1551,7 +1551,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 <div className="flex items-center gap-3">
                   {(() => { const IconComp = ICON_MAP[pilar.icon]; return IconComp ? <IconComp className="w-8 h-8 text-gold" /> : null; })()}
                   <div>
-                    <p className="text-[15px] text-gold uppercase tracking-wider font-bold">
+                    <p className="text-xs text-gold uppercase tracking-wider font-bold">
                       {VOC(pilar.subtitulo)}
                     </p>
                     <h2 className="text-xl text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{VOC(pilar.titulo)}</h2>
@@ -1579,7 +1579,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
                   Se queda la frase. Acá, el contador que se lee sin traducir.
                 */}
-                <div className="text-[15px] text-cream/60">
+                <div className="text-xs text-cream/60">
                   <span>{pilar.metasCompletadas} de {pilar.totalMetas} jornadas hechas</span>
                 </div>
                 <div className="h-1.5 bg-gold/5 rounded-full overflow-hidden">
@@ -1594,7 +1594,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
               {(pilar.desbloqueo === 'venta_real' || pilar.desbloqueo === 'qa_verde') && (
                 <div className="mt-3 flex items-start gap-2 bg-gold/10 border border-gold/20 rounded-xl px-3 py-2">
                   <AlertCircle className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                  <p className="text-[15px] text-gold">
+                  <p className="text-xs text-gold">
                     {pilar.desbloqueo === 'venta_real'
                       ? 'Este pilar se desbloqueó porque registraste tu primera venta real.'
                       : 'Este pilar se desbloqueó porque tu camino de captación pasó sus 24 puntos de control.'}
@@ -1614,7 +1614,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                   <Trophy className={`w-4 h-4 shrink-0 mt-0.5 ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`} />
-                  <p className={`text-[15px] font-semibold ${
+                  <p className={`text-xs font-semibold ${
                     pilar.hito_tipo === 'urgent' ? 'text-danger' : pilar.hito_tipo === 'checkpoint' ? 'text-success' : 'text-gold'
                   }`}>
                     {pilar.hito_mensaje}
@@ -1682,7 +1682,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           {/* El código y el tipo son del equipo: el cliente ve el día. */}
-                          <span className="text-[15px] text-cream/60">Día {meta.dia_asignado}</span>
+                          <span className="text-xs text-cream/60">Día {meta.dia_asignado}</span>
                           {meta.es_estrella && (
                             <Star className="w-4 h-4 text-gold" />
                           )}
@@ -1725,7 +1725,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           esta casa — venían los tres en doce.
                         */}
                         <div className="flex flex-col items-start gap-1.5 mt-2">
-                          <span className="text-[15px] text-cream/60 font-semibold">
+                          <span className="text-xs text-cream/60 font-semibold">
                             {meta.tiempo_estimado}
                           </span>
                           {/* El oro de la casa, no el amarillo de catálogo:
@@ -1738,18 +1738,18 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                                la palabra que las puertas cambiaron por «se
                                abre». La estrella marca la jornada que cierra el
                                tramo: eso es lo que dice. */
-                            <span className="text-[15px] text-goldhi font-semibold flex items-start gap-1.5">
+                            <span className="text-sm text-goldhi font-semibold flex items-start gap-1.5">
                               <Star className="w-4 h-4 mt-0.5 shrink-0" /> Cierra este tramo
                             </span>
                           )}
                           {!unlocked && (
                             teaserDeMeta(meta.codigo) ? (
-                              <span className="text-[15px] text-goldhi font-semibold flex items-start gap-1.5 leading-snug">
+                              <span className="text-sm text-goldhi font-semibold flex items-start gap-1.5 leading-snug">
                                 <Lock className="w-4 h-4 mt-0.5 shrink-0" />
                                 <span>{teaserDeMeta(meta.codigo)}</span>
                               </span>
                             ) : (
-                              <span className="text-[15px] text-cream/60 font-semibold flex items-start gap-1.5 leading-snug">
+                              <span className="text-sm text-cream/60 font-semibold flex items-start gap-1.5 leading-snug">
                                 <Lock className="w-4 h-4 mt-0.5 shrink-0" />
                                 <span>{bloqueoMsg ?? 'Completa la tarea anterior primero'}</span>
                               </span>
@@ -1819,9 +1819,9 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                                 0.16em, que es la versalita del lado del cliente; estaba
                                 en 17 con 0.25em, el único caso así en toda la app. */}
                             <div className="sticky top-0 z-10 bg-[var(--bg-card,#17150F)]/95 backdrop-blur border-b border-gold/15 px-4 py-3 flex items-center justify-between gap-4">
-                              <button onClick={() => setActiveMeta(null)} className="shrink-0 whitespace-nowrap text-[15px] font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
-                              <p className="hidden sm:block shrink-0 whitespace-nowrap text-[15px] font-bold uppercase tracking-[0.16em] text-gold">Sesión en curso</p>
-                              <span className="shrink-0 whitespace-nowrap text-[15px] text-cream/55">{meta.tiempo_estimado}</span>
+                              <button onClick={() => setActiveMeta(null)} className="shrink-0 whitespace-nowrap text-xs font-bold text-cream/50 hover:text-cream">✕ Guardar y salir</button>
+                              <p className="hidden sm:block shrink-0 whitespace-nowrap text-xs font-bold uppercase tracking-[0.16em] text-gold">Sesión en curso</p>
+                              <span className="shrink-0 whitespace-nowrap text-xs text-cream/55">{meta.tiempo_estimado}</span>
                             </div>
                             <div className="max-w-2xl mx-auto px-4 py-6">
 
@@ -1942,7 +1942,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                       (m) => esPasoDelCliente(m) && !completadas.has(`${pilar.numero}-${m.codigo}`),
                     ).length;
                     return (
-                      <div className={`text-[15px] leading-snug rounded-xl px-4 py-3 border ${
+                      <div className={`text-sm leading-snug rounded-xl px-4 py-3 border ${
                         todasCompletas
                           ? 'bg-success/10 border-success/20 text-success'
                           : 'bg-surface/50 border-[var(--line, rgba(142,104,36,0.18))] text-cream/70'
@@ -1967,15 +1967,15 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
             <h3 className="text-[22px] leading-tight text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
               Registrar una venta
             </h3>
-            <p className="text-[15px] text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
-            <label className="text-[15px] uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
+            <p className="text-xs text-cream/65 mb-4">{VOC('Un {{consultante}} más cobrado con tu precio digno. El contador avanza contigo.')}</p>
+            <label className="text-sm uppercase tracking-widest text-gold font-bold">Monto (USD)</label>
             <input
               type="number" inputMode="decimal"
               value={ventaMonto}
               onChange={(e) => setVentaMonto(e.target.value)}
               placeholder="1000"
               autoFocus
-              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-[15px] focus:border-gold/50 focus:outline-none"
+              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none"
             />
             {/*
               Era `bg-gold text-black`: un rectángulo de oro relleno, que es

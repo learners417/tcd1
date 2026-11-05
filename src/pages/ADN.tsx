@@ -209,7 +209,18 @@ export default function ADN({ perfil, userId, setCurrentPage, onProfileFieldUpda
           <FileText className="w-5 h-5 text-gold shrink-0" />
           <span className="flex-1 min-w-0">
             <span className="block text-sm font-semibold text-cream">Mi ADN completo</span>
-            <span className="block text-[15px] text-cream/55 mt-0.5">Los veintiocho campos con su contenido, tu país, y el paso que completa cada uno</span>
+            {/*
+              DOS CUENTAS PARA LA MISMA COSA.
+
+              Arriba la pantalla dice «0 de 14 sellados» y acá abajo decía
+              «los veintiocho campos». Las dos son ciertas —catorce piezas,
+              veintiocho campos adentro— pero el cliente lee catorce y
+              veintiocho en la misma pantalla y no sabe cuál es su ADN.
+
+              La cuenta que importa es la de arriba, que es la que avanza. Acá
+              alcanza con decir qué hay adentro.
+            */}
+            <span className="block text-[15px] text-cream/55 mt-0.5">Todo lo que escribiste en cada pieza, tu país, y el paso que completa cada uno</span>
           </span>
           <ChevronRight className="w-4 h-4 text-cream/45 shrink-0" />
         </button>

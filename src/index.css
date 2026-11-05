@@ -19,6 +19,20 @@
   --text-xs: 0.9375rem;   /* 15px — solo metadatos, nunca instrucciones */
   --text-sm: 1.0625rem;   /* 17px — el minimo de todo lo que se lee para hacer */
 }
+/* ─── CUIDADO AL LEER UNA CLASE DE TAMANO EN ESTE REPO ──────────────────
+ *
+ * Las dos lineas de arriba REDEFINEN la escala de Tailwind. En Tailwind de
+ * fabrica `text-xs` son 12px y `text-sm` son 14px; aca son 15 y 17.
+ *
+ * Quien abra un `.tsx` y vea `text-sm` sin pasar por aca va a leer 14px y va
+ * a querer "arreglarlo". Ya paso: una barrida cambio 45 `text-sm` por
+ * `text-[15px]` creyendo que los subia de 14 a 15, y lo que hizo fue BAJAR
+ * de 17 a 15 texto que estaba bien — cuarenta y cinco veces, en dos
+ * pantallas, en una sola pasada.
+ *
+ * La regla no es el nombre de la clase, es el numero: nada por debajo de 15,
+ * y lo que dice que hacer no baja de 17. `text-xs` cumple el piso.
+ * ────────────────────────────────────────────────────────────────────── */
 @plugin "@tailwindcss/typography";
 
 /* Safelist: dynamic pilar color classes used in Roadmap.tsx */

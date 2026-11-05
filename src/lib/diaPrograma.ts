@@ -144,9 +144,20 @@ export function mensajeDeRitmo(diaHoy: number, diaDelPaso: number | null, atraso
       texto: `Hoy toca tu paso del día ${diaDelPaso}. Llevas ${diaHoy} días y con uno por día recuperas el ritmo.`,
     };
   }
+  /*
+   * Y ESTA FRASE SE HABÍA QUEDADO CON EL ORDEN VIEJO.
+   *
+   * Arriba se arregló el caso de poco atraso —«Hoy toca tu paso del día N»—
+   * pero este, el de mucho atraso, seguía arrancando con «Tu próximo paso es
+   * el del día 1. Llevas 20 días»: los dos números pegados y el chico
+   * primero, que es exactamente lo que el comentario de arriba dice que no
+   * se hace. En pantalla se lee como un error de la app.
+   *
+   * Mismo orden que su hermana: primero qué toca hoy, después cuánto lleva.
+   */
   return {
     tono: 'lejos',
-    texto: `Tu próximo paso es el del día ${diaDelPaso}. Llevas ${diaHoy} días — tu Mentor te arma el plan para llegar al 90.`,
+    texto: `Hoy toca tu paso del día ${diaDelPaso}. Llevas ${diaHoy} días — tu Mentor te arma el plan para llegar al 90.`,
   };
 }
 

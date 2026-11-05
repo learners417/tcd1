@@ -703,9 +703,22 @@ Devuelve SOLO este JSON:
               {/* Energía general */}
               <div className="bg-surface/30 rounded-xl p-4 border border-[var(--line, rgba(142,104,36,0.18))]">
                 <p className="text-xs font-medium text-cream/80 uppercase tracking-wider flex items-center gap-2 mb-3">
-                  <Zap className="w-4 h-4 text-yellow-400" /> ¿Cómo estuvo tu energía hoy?
+                  <Zap className="w-4 h-4 text-gold" /> ¿Cómo estuvo tu energía hoy?
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {/*
+                  CINCO OPCIONES EN DOS COLUMNAS DEJAN UNA HUÉRFANA.
+
+                  «En cero · Bajo · Normal · Bien · Encendido» caían de a dos
+                  y «Encendido» quedaba sola abajo, media tarjeta vacía al
+                  lado. Y partida en dos columnas una escala deja de leerse
+                  como escala: no se ve que va de menos a más.
+
+                  En el teléfono, una debajo de otra: es una escalera, de «en
+                  cero» a «encendido», y se recorre con el pulgar en línea
+                  recta. Desde `sm` vuelven a ser cinco en fila, que ahí
+                  entran y se comparan de un vistazo.
+                */}
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                   {NIVELES_ENERGIA.map((n) => {
                     const activo = energia === n.valor;
                     return (
@@ -715,15 +728,26 @@ Devuelve SOLO este JSON:
                         onClick={() => setEnergia(n.valor)}
                         className={`rounded-xl border py-2.5 px-3 flex sm:flex-col items-center gap-2 sm:gap-1 transition-colors ${activo ? 'elegido' : 'border-cream/10 hover:border-cream/30'}`}
                       >
-                        <span className="block text-xl leading-none font-semibold" style={{ fontFamily: 'var(--font-display)' }}>{n.valor}</span>
+                        {/*
+                          Venía en la Cormorant a 20 px. Es la misma trampa
+                          que el «0 de 10 pacientes» del Camino: sus trazos
+                          horizontales son hilos, y en ese tamaño el 2 y el 10
+                          se deshilachan. Acá además son la escala, así que
+                          tienen que leerse de un golpe. `num-tab` les da
+                          ancho fijo, para que las cinco cajas midan igual.
+                        */}
+                        <span className="block text-[22px] leading-none font-semibold num-tab shrink-0 w-7 text-center">{n.valor}</span>
                         <span className={`block text-[15px] font-semibold leading-tight ${activo ? 'text-gold' : 'text-cream/55'}`}>{n.palabra}</span>
                       </button>
                     );
                   })}
                 </div>
                 {ayerEntry && (
-                  <p className="text-sm text-cream/45 mt-2 text-center">
-                    Ayer tuviste <span className="text-success">{ayerEntry.energia}</span>
+                  /* El número de ayer no es un acierto: venía en el verde
+                     que esta casa usa para lo que se tildó. Va en la tinta,
+                     que es lo que es — un dato. */
+                  <p className="text-sm text-cream/60 mt-2 text-center">
+                    Ayer tuviste <span className="num-tab font-semibold text-cream">{ayerEntry.energia}</span>
                     {energia !== ayerEntry.energia && ` — ${energia > ayerEntry.energia ? 'subiste' : 'bajaste'} ${Math.abs(energia - ayerEntry.energia)}`}
                   </p>
                 )}
@@ -758,7 +782,11 @@ Devuelve SOLO este JSON:
               {/* + más detalle (opcional) — colapsado: el cierre básico son 3 taps */}
               <div>
                 <button type="button" onClick={() => setMasDetalle((v) => !v)} className="min-h-[44px] text-[15px] text-gold hover:text-goldhi transition-colors text-left">
-                  {masDetalle ? '− menos detalle' : '+ más detalle (opcional): dimensiones · actividades · checkeos'}
+                  {/* Decía «dimensiones · actividades · checkeos»: dos
+                      palabras del modelo de datos y una que no existe en
+                      castellano. Lo que hay detrás es cómo estuvo el cuerpo y
+                      la cabeza, qué hizo y qué marcó. */}
+                  {masDetalle ? '− menos detalle' : '+ más detalle (opcional): cómo estuviste · qué hiciste · qué marcaste'}
                 </button>
                 {masDetalle && (
                   <div className="mt-4 space-y-6">
@@ -872,10 +900,18 @@ Devuelve SOLO este JSON:
                   <><Send className="w-4 h-4" /> Guardar entrada del día</>
                 )}
               </button>
-              <p className="text-sm text-cream/45 text-center -mt-3">
+              {/*
+                «Dos minutos» ya estaba dicho arriba, en la cabecera de la
+                tarjeta: «Dos toques y una línea. Nada más.» Decir dos veces
+                que es rápido no lo hace más rápido, y el renglón del final es
+                el último que se lee antes de guardar: ahí va lo que todavía
+                no se dijo. Con racha, la racha — que es suya y no se repite
+                en ningún otro lado.
+              */}
+              <p className="text-sm text-cream/60 text-center -mt-3">
                 {racha > 0
                   ? `Llevas ${racha} ${racha === 1 ? 'día' : 'días'} seguidos. Esto es lo que tu Mentor va a recordar mañana.`
-                  : 'Dos minutos. Esto es lo que tu Mentor va a recordar mañana.'}
+                  : 'Esto es lo que tu Mentor va a recordar mañana.'}
               </p>
             </div>
           )}

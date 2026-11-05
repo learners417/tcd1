@@ -68,7 +68,10 @@ export const PIEZAS_ADN: PiezaADN[] = [
     sesion: 'Tu Matriz ABC', grupo: 'activo', plan: 'completo', pilar: 2, chequeo: {clave: 'avatar.matriz_abc' } },
   { id: 'mensaje', titulo: 'Tu Mensaje', que: 'el gancho que atrae a tu {{consultante}} ideal',
     sesion: 'El mensaje que atrae a TU paciente', grupo: 'activo', plan: 'completo', pilar: 4, chequeo: {clave: 'trafico.recurso' } },
-  { id: 'script', titulo: 'Tu Script de Ventas', que: 'la conversación que cierra sin empujar',
+  /* «Script» era la única palabra en inglés de las catorce piezas, en una
+     app que se lee en castellano neutro de punta a punta. El id no se toca:
+     es la clave del dato. */
+  { id: 'script', titulo: 'Tu Guion de Ventas', que: 'la conversación que cierra sin empujar',
     sesion: 'Tu script de ventas propio', grupo: 'activo', plan: 'completo', pilar: 5, chequeo: {clave: 'voz.objeciones_reales' } },
   { id: 'protocolo', titulo: 'Tu Protocolo de Entrega', que: 'cómo entregas sin quemarte',
     sesion: 'Tu protocolo de entrega', grupo: 'activo', plan: 'completo', pilar: 6, chequeo: {clave: 'entrega.estaciones' } },
