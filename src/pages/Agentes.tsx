@@ -14,6 +14,7 @@
  *   El score se parsea de las respuestas y actualiza `agent_skill_progress`.
  */
 import { TOPE_AGENTE_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
+import RetratoEntrenador from '../components/RetratoEntrenador';
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   Loader2,
@@ -551,8 +552,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
               en mayúsculas en medio de una frase es un grito: el énfasis lo
               da la frase, que ya dice «una sola».
             */}
-            Cada uno entrena una sola habilidad, hasta que la haces sola. Se
-            abren a medida que avanzas en El Camino.
+            Cada uno entrena una habilidad hasta que la haces sin ayuda.
           </p>
         </div>
 
@@ -638,7 +638,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
             {(() => {
               const ident = identidadDe(agenteActivo.id);
               return ident ? (
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 bg-black/30" style={{ borderColor: ident.anillo }}><span className="text-xl font-bold text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span></div>
+                <RetratoEntrenador quien={agenteActivo.id} tam={44} className="shrink-0" />
               ) : (IconActivo && <IconActivo className="w-6 h-6 text-gold" />);
             })()}
             <div>
@@ -824,15 +824,26 @@ interface AgenteCardProps {
 // ═══ LAS IDENTIDADES — cada entrenador con su mundo (ZIP humano) ═══
 // Disciplina de diseño: la MISMA tarjeta; la identidad vive en el emoji + la frase.
 // 3 familias de acento: cálidos (acompañan) · fríos (técnicos) · ámbar de la casa.
-const IDENTIDADES: Record<string, { inicial: string; frase: string; anillo: string }> = {
-  sofi:   { inicial: 'S', frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.', anillo: 'var(--oro, #B0822E)' },
-  caro:   { inicial: 'C', frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.', anillo: 'var(--oro, #B0822E)' },
-  vera:   { inicial: 'V', frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.', anillo: 'var(--oro, #B0822E)' },
-  ramiro: { inicial: 'R', frase: 'Medimos, ajustamos, crecemos. Los números cuentan la verdad.', anillo: 'rgba(96,165,250,0.40)' },
-  lucas:  { inicial: 'L', frase: 'Lo técnico sin sufrimiento. Paso a paso, hasta que funciona.', anillo: 'rgba(96,165,250,0.40)' },
-  bruno:  { inicial: 'B', frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.', anillo: 'rgba(96,165,250,0.40)' },
-  diego:  { inicial: 'D', frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.', anillo: 'rgba(244,182,92,0.50)' },
-  mateo:  { inicial: 'M', frase: 'Guiones y contenido que suenan a ti — cero humo, cero plantillas.', anillo: 'rgba(244,182,92,0.50)' },
+/*
+ * ─── SE FUERON `inicial` Y `anillo` ──────────────────────────────────────
+ *
+ * La inicial la reemplazó el retrato de perfil. El anillo era un color por
+ * entrenador —y tres de los ocho eran un azul frío, rgba(96,165,250), que no
+ * está en la paleta de ningún libro—; ahora el aro es una línea de 1px en
+ * oro, la misma en los nueve, y el color propio de cada uno vive en el fondo
+ * de su retrato, tomado de los cinco paisajes.
+ *
+ * Queda la frase: es lo que dice la cabecera del chat cuando se abre.
+ */
+const IDENTIDADES: Record<string, { frase: string }> = {
+  sofi:   { frase: 'Te entreno a conversar con {{consultantes}} sin rogar ni convencer — filtrar es cuidar.' },
+  caro:   { frase: 'El miedo a la cámara se entrena. Conmigo grabas con oficio, sin sufrir.' },
+  vera:   { frase: 'Tu esencia es tu marca. Te ayudo a que se vea lo que ya eres.' },
+  ramiro: { frase: 'Medimos, ajustamos, crecemos. Los números cuentan la verdad.' },
+  lucas:  { frase: 'Lo técnico sin sufrimiento. Paso a paso, hasta que funciona.' },
+  bruno:  { frase: 'El dinero sano de tu práctica: cobrar bien, guardar mejor, crecer tranquilo.' },
+  diego:  { frase: 'Vender sin presionar. Preguntas que abren, silencios que cierran.' },
+  mateo:  { frase: 'Guiones y contenido que suenan a ti — cero humo, cero plantillas.' },
 };
 /**
  * Del id del agente a la clave del entrenador.
@@ -895,29 +906,20 @@ function AgenteCard({
         {(() => {
           const ident = identidadDe(agente.id);
           if (ident) {
+            /*
+             * ─── ACÁ HABÍA UNA LETRA DENTRO DE UN CÍRCULO ────────────────
+             *
+             * «C» para Caro, «M» para Mateo, «M» otra vez para el Mentor.
+             * Ocho guías que acompañan noventa días, dibujados con su
+             * inicial. Y el anillo de tres de ellos era un azul frío
+             * —rgba(96,165,250)— que no está en la paleta de ningún libro.
+             *
+             * Ahora cada uno tiene su retrato: un camafeo de perfil, color
+             * plano, con el aro de oro de 1px. Lo cerrado se ve igual, sin
+             * apagarlo: el candado lo dice en su renglón.
+             */
             return (
-              <div
-                /*
-                 * ─── EL DISCO ERA TEMA OSCURO FILTRÁNDOSE ────────────────
-                 *
-                 * `bg-black/30` sobre el papel crema da un disco gris sucio, y
-                 * el anillo del bloqueado era `rgba(255,255,255,0.10)`: blanco
-                 * al diez por ciento sobre crema, o sea nada. Por eso los ocho
-                 * entrenadores se veían como el círculo gris con inicial de
-                 * cualquier app, con su anillo de color declarado y sin
-                 * mostrarse.
-                 *
-                 * Ahora el fondo es la tinta de papel de la casa y el anillo
-                 * del que todavía no se abrió es la línea de la casa — fina y
-                 * presente, no ausente.
-                 */
-                className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border-2 bg-surface/30`}
-                style={{ borderColor: unlocked ? ident.anillo : 'var(--line2, #DFD3BC)' }}
-              >
-                {/* 20px es el piso de la Garamond: debajo de eso su altura de x
-                    la hace leer como un cuerpo dos puntos más chico. */}
-                <span className={`text-xl font-bold ${unlocked ? 'text-cream' : 'text-cream/50'}`} style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{ident.inicial}</span>
-              </div>
+              <RetratoEntrenador quien={agente.id} tam={48} className="shrink-0" />
             );
           }
           return IconComp ? (
@@ -971,16 +973,24 @@ function AgenteCard({
               </span>
             )}
           </div>
+          {/*
+            ─── ERAN TRES RENGLONES Y UN PÁRRAFO ─────────────────────────
+            El rol, el subtítulo y debajo un párrafo entero: sesenta palabras
+            por entrenador, ocho entrenadores, antes de poder tocar nada.
+            Medido: esta pantalla abría con 343 palabras.
+
+            Queda el rol, que es lo que dice de qué entrena. El subtítulo
+            repetía el rol con otras palabras, y el párrafo —«se abre cuando
+            selles tu historia…»— dice lo mismo que el botón de abajo, que
+            para eso se llama «Ver requisitos». Lo que no se entiende por el
+            nombre y el rol se entiende entrando, que cuesta un toque y no
+            cuesta leer.
+          */}
           {rolDe(agente.titulo) && (
-            <p className="text-xs text-white/65 mt-0.5">{rolDe(agente.titulo)}</p>
+            <p className="text-[15px] text-white/70 mt-0.5">{rolDe(agente.titulo)}</p>
           )}
-          <p className="text-xs text-white/55 mt-0.5">{VOC(agente.subtitulo)}</p>
         </div>
       </div>
-
-      <p className="text-xs text-white/65 leading-relaxed">
-        {VOC(unlocked ? (identidadDe(agente.id)?.frase ?? agente.descripcion) : reason)}
-      </p>
 
       <div
         className={`mt-3 flex items-center ${unlocked ? 'justify-between gap-3' : 'justify-end'} text-sm font-medium uppercase tracking-wider ${

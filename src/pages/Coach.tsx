@@ -1,6 +1,7 @@
 import { resumenOrigenParaMentor } from '../lib/origen';
 import { resumenRuedaParaMentor } from '../lib/rueda';
 import { planDelCliente, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
+import RetratoEntrenador from '../components/RetratoEntrenador';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { safeGet } from '../lib/safeStorage';
 /* `Bot` estaba importado y no se dibujaba en ningún lado. Fuera: un import
@@ -259,6 +260,8 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
   }, [userId]);
 
   const [guardadoOk, setGuardadoOk] = useState(false);
+  /* Si la foto del Mentor está en el paquete, manda la foto; si no, el camafeo. */
+  const [fotoDelMentor, setFotoDelMentor] = useState(true);
   const persist = useCallback(
     async (msgs: Message[]) => {
       if (userId) {
@@ -517,12 +520,28 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
       */}
       <div className="p-5 border-b border-[var(--line, rgba(142,104,36,0.18))] bg-gold/[0.03] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <img
-            src="/javo.jpg"
-            alt=""
-            className="w-11 h-11 rounded-full object-cover border border-gold/40 shrink-0"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+          {/*
+            LA CARA DEL MENTOR.
+
+            Era una foto que, si no estaba, se escondía sola —y no está: el
+            archivo no existe en el paquete. O sea que la cabecera del Mentor
+            quedaba sin cara, y el único retrato suyo en toda la app era una
+            «M» en itálica dentro de un círculo.
+
+            Ahora si la foto está, manda la foto: una cara de verdad es más
+            humana que cualquier dibujo. Y si no está, queda el camafeo, el
+            mismo que tienen los ocho entrenadores. Nunca el hueco.
+          */}
+          {fotoDelMentor ? (
+            <img
+              src="/javo.jpg"
+              alt=""
+              className="w-11 h-11 rounded-full object-cover border border-gold/40 shrink-0"
+              onError={() => setFotoDelMentor(false)}
+            />
+          ) : (
+            <RetratoEntrenador quien="mentor" tam={44} className="shrink-0" />
+          )}
           <div className="min-w-0">
             {/*
               Decía «Tu Mentor» con la barra de arriba diciendo «Tu Mentor» a
@@ -564,7 +583,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               }`}
             >
               {msg.role === 'assistant' ? (
-                <span className="text-[17px] font-bold" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>M</span>
+                <RetratoEntrenador quien="mentor" tam={32} />
               ) : avatarUrl ? (
                 <img loading="lazy" src={avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (

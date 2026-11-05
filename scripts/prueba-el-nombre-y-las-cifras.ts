@@ -205,9 +205,22 @@ ok(
   !/rgba\(255,\s*255,\s*255,\s*0\.10\)/.test(agentes),
   'el anillo del entrenador que todavía no se abrió es la línea de la casa, no blanco al 10%',
 );
+/*
+ * ESTA ASERCIÓN CAMBIÓ DE PREGUNTA.
+ *
+ * Pedía que el disco de la inicial pintara el anillo de color declarado para
+ * cada entrenador. Esos anillos ya no existen: la inicial dentro de un
+ * círculo pasó a ser un retrato de perfil, y el aro es una línea de 1px en
+ * oro, igual en los nueve. Tres de los anillos viejos eran además un azul
+ * frío que no está en la paleta de ningún libro.
+ */
 ok(
-  /borderColor: unlocked \? ident\.anillo : 'var\(--line2/.test(agentes),
-  'y cada entrenador muestra el anillo de color que tiene declarado',
+  /<RetratoEntrenador quien=\{agente\.id\}/.test(agentes),
+  'cada entrenador muestra su retrato, no su inicial',
+);
+ok(
+  !/rgba\(96,\s*165,\s*250/.test(agentes),
+  'y ninguno lleva el azul frío que no pertenece a la paleta de los libros',
 );
 const diario = leer('src/pages/DiarioDirector.tsx');
 ok(
