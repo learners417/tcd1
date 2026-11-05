@@ -41,6 +41,18 @@
 # Al revés sí duele: si una migración nueva NO corrió y el código sí subió, el
 # código busca algo que no está. Por eso el SQL va SIEMPRE antes que el push.
 
+# ─── EL PUNTO CONOCIDO BUENO ───────────────────────────────────────────────
+#
+#     928a79d  · 5 de noviembre de 2026, antes de dar acceso a clientes reales
+#
+# La batería entera en verde, con una sola cosa por escribir (el día 45). Si
+# hay que volver a un lugar seguro y no se sabe a cuál, es este.
+#
+# Va escrito acá y no como etiqueta de git porque el remoto de este proyecto
+# no acepta etiquetas —`main` sube, los tags no—, así que una etiqueta vive
+# solo en la máquina donde se creó y desaparece con ella. Un renglón en un
+# archivo de `main` sobrevive.
+
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
