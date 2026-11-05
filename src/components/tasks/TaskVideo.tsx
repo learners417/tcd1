@@ -9,13 +9,20 @@ interface TaskVideoProps {
   meta: RoadmapMeta;
   onComplete: () => void;
   isCompleted: boolean;
+  /**
+   * Si la jornada trae su paso a paso. Lo sabe el Camino, no esta pantalla:
+   * el cartel de «tu sesión, escrita» afirmaba que la instrucción está más
+   * abajo, y en la jornada que no tiene pasos esa frase es mentira.
+   * Por omisión `true`, que es el caso de casi todas.
+   */
+  hayPasos?: boolean;
 }
 
 function getYoutubeEmbedUrl(videoId: string): string {
   return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
 }
 
-export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoProps) {
+export default function TaskVideo({ meta, onComplete, isCompleted, hayPasos = true }: TaskVideoProps) {
   const [watched, setWatched] = useState(isCompleted);
 
   const handleMarkWatched = () => {
@@ -87,12 +94,31 @@ export default function TaskVideo({ meta, onComplete, isCompleted }: TaskVideoPr
                 </div>
               );
             }
+            /*
+              ═══ EL CARTEL NO PROMETE LO QUE NO ESTÁ ═══
+
+              Decía siempre «Tienes la instrucción completa aquí abajo». Es
+              una afirmación sobre algo que vive FUERA de este componente —los
+              pasos de la jornada— y cuando esa jornada no tiene pasos, el
+              cliente lee la promesa y abajo no hay nada.
+
+              Lo encontró una lente nueva recorriendo las 91 jornadas: el día
+              45, «Tu primer consultante nuevo», es una sesión de 30 minutos
+              sin video, sin lección y con `pasos: []`. Y no es una jornada
+              cualquiera: su evidencia es el cobro del sistema, o sea el día
+              del primer consultante que paga.
+
+              Con pasos, la frase se queda como estaba. Sin pasos, dice lo que
+              esa pantalla sí tiene: lo que se lleva, y dónde sube la prueba.
+            */
             return (
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                 <Play className="w-12 h-12 mb-3" style={{ color: 'var(--gold, #8E6824)', opacity: 0.45 }} />
                 <p className="text-[17px] text-cream">Tu sesión, escrita</p>
                 <p className="text-[15px] text-cream/60 mt-2 leading-relaxed max-w-sm">
-                  Tienes la instrucción completa aquí abajo.
+                  {hayPasos
+                    ? 'Tienes la instrucción completa aquí abajo.'
+                    : 'Esta jornada la haces en tu consultorio. Al terminar, subes la prueba en el último paso.'}
                 </p>
               </div>
             );

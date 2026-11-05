@@ -71,8 +71,36 @@ export default function PuntoDePartida({ onGuardar, onCerrar }: Props) {
         es cuando importa. Acá alcanza con qué hacer.
       */}
       <p className="mt-2 text-[17px] text-cream/70">
-        Marca lo que ya está hecho. Esas jornadas las haces igual, más cortas.
+        Se pregunta una sola vez. Marca lo que ya está hecho — esas jornadas las
+        haces igual, más cortas.
       </p>
+
+      {/*
+        ═══ LA SALIDA ESTABA DEBAJO DE SEIS CASILLAS ═══
+
+        Caminando el día 1 de un cliente nuevo, clic por clic: toca «Empezar»
+        en su jornada de hoy —el único botón importante de la app— y cae acá.
+        Y en esta primera pantalla lo único que hay son once casillas: el
+        botón para seguir queda después de todas, a un scroll y medio.
+
+        El que ya viene andando marca las suyas y sigue, bien. Pero el que
+        empieza de cero —que es la mayoría el día 1— no tiene nada que marcar,
+        y lo que ve es una lista de once cosas que NO hizo, sin salida a la
+        vista. Ese es el momento exacto en que alguien cierra la app.
+
+        El botón de arriba es para él: un toque y está adentro. El de abajo se
+        queda para el que marcó algo, que llega hasta ahí de todos modos.
+      */}
+      {elegidas.length === 0 && (
+        <button
+          type="button"
+          onClick={confirmar}
+          className="mt-4 w-full min-h-[52px] rounded-[20px] border text-[17px] font-semibold text-cream"
+          style={{ borderColor: 'var(--line2, #DFD3BC)' }}
+        >
+          Empiezo de cero · ir a mi día 1
+        </button>
+      )}
 
       <ul className="mt-4 space-y-2">
         {suyas.map((o) => {

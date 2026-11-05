@@ -1779,6 +1779,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                               const tuto = tutorialDelDia(meta.dia_asignado);
                               const suyo = meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') ? (
                                 <TaskVideo
+                                  hayPasos={pasosDeHoy(meta).length > 0}
                                   meta={meta}
                                   onComplete={() => handleCompleteTask(pilar.numero, meta)}
                                   isCompleted={estaCompletada}
