@@ -1,196 +1,228 @@
 /**
  * LOS RETRATOS — la cara de cada entrenador y la del Mentor.
  *
- * ═══ QUÉ REEMPLAZA ═══
+ * ═══ DOS INTENTOS ANTERIORES, Y POR QUÉ NO SERVÍAN ═══
  *
- * Una letra dentro de un círculo fino: «C» para Caro, «M» para Mateo, «M»
- * otra vez para el Mentor. Nueve guías de los que se espera que acompañen
- * durante noventa días, representados por su inicial.
+ * 1. DE FRENTE, EN SILUETA. Cabeza ovalada, hombros, pelo encima, todo en
+ *    color plano. Los nueve eran la misma mancha: de frente, sin rasgos, un
+ *    óvalo oscuro es un óvalo oscuro.
  *
- * ═══ EL PRIMER INTENTO NO SIRVIÓ, Y POR QUÉ ═══
+ * 2. DE PERFIL, EN SILUETA. La idea era que el perfil fuera el rasgo —la
+ *    frente, la nariz, el mentón—. Pero la línea del perfil es un dos por
+ *    ciento del dibujo y el otro noventa y ocho es masa oscura: a 48 píxeles
+ *    se lee la masa, no la línea. Seguían siendo nueve manchas.
  *
- * Primero se dibujaron de frente: cabeza ovalada, hombros, y el pelo encima.
- * Mirados en el visor, los nueve eran la misma mancha. De frente, lo único
- * que distingue a una persona son los rasgos —ojos, boca, nariz— y los
- * rasgos dibujados caen en caricatura casi siempre. Sin rasgos, de frente,
- * no queda nada: nueve óvalos iguales.
+ * La conclusión de las dos: LO QUE HACE QUE ALGO SEA UNA CARA SON LOS
+ * RASGOS. Sin ojos no hay persona, por bien dibujado que esté el contorno.
  *
- * ═══ POR QUÉ DE PERFIL ═══
+ * ═══ CÓMO ESTÁN HECHOS AHORA ═══
  *
- * El perfil ES el rasgo. La frente, la nariz, el labio y el mentón dibujan
- * una línea que se reconoce como una persona concreta sin dibujar un solo
- * ojo, y que sigue leyéndose a 36 píxeles. Es la convención del camafeo y de
- * los frontispicios de los libros viejos, que es de donde viene la estética
- * de esta app.
+ * Retrato de frente, con la cara en un tono de piel y los rasgos en línea de
+ * tinta: cejas, ojos, nariz y boca. El pelo es masa; la cara es línea. Ese
+ * contraste —relleno contra trazo— es lo que separa un retrato editorial de
+ * un ícono, y es la misma lógica de las tapas: capas planas, nada de
+ * degradés, nada de brillos.
  *
- * Y resuelve el contraste: el busto va en tinta oscura sobre un fondo claro
- * del mismo color. La silueta se separa sola, sin depender de que el pelo
- * tenga otro tono.
+ * Lo que mantiene la seriedad y lo aleja del dibujo animado:
  *
- * ═══ CÓMO ESTÁN HECHOS ═══
+ *   · Los ojos son almendras chicas con el párpado marcado, nunca círculos
+ *     grandes con brillo. El ojo redondo y enorme es la marca del dibujo
+ *     infantil.
+ *   · La boca es una línea con una curva mínima. Ninguno sonríe de oreja a
+ *     oreja.
+ *   · Las proporciones son adultas: la cabeza ocupa poco más de un tercio de
+ *     la altura del busto, no la mitad.
+ *   · Un solo grosor de línea en todo el dibujo.
+ *   · Las asimetrías son a propósito. Una cara perfectamente simétrica se ve
+ *     hecha por una máquina.
  *
- * Con el lenguaje de las tapas: color plano, por capas, con una línea de oro
- * —el aro— y nada más de oro. En SVG puro: pesa nada y se ve igual en un
- * teléfono viejo que en una pantalla grande.
+ * ═══ LOS COLORES ═══
  *
- * Cada perfil está dibujado a mano con coordenadas. Las narices son
- * distintas, los mentones son distintos y las frentes son distintas: eso es
- * lo que hace que sean nueve personas y no un ícono repetido.
+ * El fondo de cada uno sale de los cinco paisajes, que es lo que los ata al
+ * mundo del Camino y de los libros. La ropa toma el tono oscuro del mismo
+ * paisaje. La piel y el pelo son los únicos colores nuevos, y son los que
+ * hacen falta para que una cara parezca una cara.
+ *
+ * El aro es una línea de 1px en oro, igual en los nueve.
  */
 import React from 'react';
 import { TINTA_LIBRO } from '../lib/losCincoPaisajes';
 
 const ORO = TINTA_LIBRO.oro;
+/** El trazo de los rasgos. Uno solo, en todo el dibujo. */
+const TRAZO = 2;
 
-/** El fondo claro y la tinta del busto. Dos tonos, mucho contraste. */
-interface Tinta { fondo: string; tinta: string }
-
-/**
- * La paleta sale de los cinco paisajes, no de colores nuevos: el lago, la
- * montaña, el viento, el río y el bosque. Así los entrenadores pertenecen al
- * mismo mundo que el Camino en el que aparecen.
- *
- * ACÁ HABÍA UN AZUL FRÍO —rgba(96,165,250)— en tres de los ocho anillos, y
- * un ámbar brillante en otros dos. Ninguno está en la paleta de la casa, y
- * el azul sobre papel crema era lo único de toda la app que no pertenecía a
- * ningún libro.
- */
-const TINTAS: Record<string, Tinta> = {
-  lago:    { fondo: '#9FC5D8', tinta: '#123A52' },
-  montana: { fondo: '#D8B49C', tinta: '#5C3523' },
-  viento:  { fondo: '#CFC892', tinta: '#4A4522' },
-  rio:     { fondo: '#A6CFC8', tinta: '#11423E' },
-  bosque:  { fondo: '#B6C9A8', tinta: '#223A27' },
+/** Los fondos y las ropas, de los cinco paisajes. */
+const PAISAJE = {
+  lago:    { fondo: '#9FC5D8', ropa: '#123A52' },
+  montana: { fondo: '#D9B59D', ropa: '#5C3523' },
+  viento:  { fondo: '#D2CB95', ropa: '#4A4522' },
+  rio:     { fondo: '#A6CFC8', ropa: '#11423E' },
+  bosque:  { fondo: '#B8CBAA', ropa: '#223A27' },
 };
 
-/**
- * EL BUSTO, DE PERFIL, MIRANDO A LA IZQUIERDA.
- *
- * Una sola silueta cerrada. El borde izquierdo es la cara: se entra por la
- * frente, baja por el puente, sale la nariz, entra el labio, sale el mentón,
- * y de ahí al cuello y al hombro.
- *
- * `perfil` es lo único que cambia de persona a persona —el tramo de la
- * frente al mentón— y el resto se comparte, que es lo que las vuelve una
- * familia.
- */
-function Busto({ c, perfil, nuca = 'C70 58, 66 56, 63 52' }: { c: Tinta; perfil: string; nuca?: string }) {
-  return (
-    <path
-      d={`M74 96 L74 70 ${nuca} ${perfil} C38 64, 44 66, 46 72 C32 76, 22 84, 22 96 Z`}
-      fill={c.tinta}
-    />
-  );
+/** Las pieles. Tres tonos, y el de la tinta para los rasgos. */
+const PIEL = {
+  clara:  '#E8C6A8',
+  media:  '#C98F67',
+  oscura: '#8D5A3C',
+};
+const TINTA = '#2B2723';
+
+interface Cara {
+  paisaje: keyof typeof PAISAJE;
+  piel: string;
+  pelo: string;
+  /** El pelo que va DETRÁS de la cabeza: melenas, recogidos, rulos. */
+  atras?: React.ReactNode;
+  /** El pelo que va ADELANTE: flequillos, entradas, coronilla. */
+  adelante: React.ReactNode;
+  /** Barba, bigote, lo que va sobre el mentón. */
+  barba?: React.ReactNode;
+  /** Las cejas. Cambian el gesto más que ninguna otra línea. */
+  cejas: React.ReactNode;
+  /** El óvalo de la cara: ancho y alto. Nadie tiene la misma cabeza. */
+  rx?: number;
+  ry?: number;
+  /*
+   * ═══ Y NADIE TIENE LOS MISMOS RASGOS ═══
+   *
+   * Con el pelo arreglado los nueve seguían compartiendo una sola máscara:
+   * los mismos ojos a la misma distancia, la misma nariz, la misma boca. El
+   * peinado alcanzaba para distinguirlos de a dos, no de a nueve.
+   *
+   * Estos cuatro números son los que de verdad cambian una cara: cuán
+   * separados están los ojos, cuán larga es la nariz, cuán ancha la boca y
+   * cuánto se curva. Son los mismos cuatro que mira un retratista antes de
+   * dibujar nada.
+   */
+  /** Separación de los ojos desde el centro. Lo normal ronda 9. */
+  ojos?: number;
+  /** Dónde cae la punta de la nariz. */
+  nariz?: number;
+  /** Medio ancho de la boca. */
+  boca?: number;
+  /** Cuánto baja el centro del labio. Cero es una línea recta. */
+  curva?: number;
 }
 
-type Dibujo = (c: Tinta) => React.ReactNode;
+/* Las piezas que comparten los nueve, para que sean una familia. */
+const Ojo = ({ x, y = 46 }: { x: number; y?: number }) => (
+  <>
+    {/* La almendra: dos curvas que se cierran. Nunca un círculo. */}
+    <path d={`M${x - 4.5} ${y} Q${x} ${y - 3.4} ${x + 4.5} ${y} Q${x} ${y + 2.6} ${x - 4.5} ${y}`}
+      fill="none" stroke={TINTA} strokeWidth={TRAZO * 0.8} strokeLinecap="round" />
+    {/* El iris, apoyado en el párpado de arriba. Chico. */}
+    <circle cx={x} cy={y - 0.4} r="1.7" fill={TINTA} />
+  </>
+);
 
-/**
- * Nueve perfiles. El tramo que va de la coronilla al mentón, escrito como
- * una curva por persona.
+const Nariz = ({ y = 55 }: { y?: number }) => (
+  <path d={`M46 ${y - 5} L44.5 ${y + 1.5} Q47 ${y + 3} 49.5 ${y + 1}`}
+    fill="none" stroke={TINTA} strokeWidth={TRAZO * 0.8} strokeLinecap="round" strokeLinejoin="round" />
+);
+
+const Boca = ({ y = 63, ancho = 7, curva = 1.6 }: { y?: number; ancho?: number; curva?: number }) => (
+  <path d={`M${48 - ancho} ${y} Q48 ${y + curva} ${48 + ancho} ${y}`}
+    fill="none" stroke={TINTA} strokeWidth={TRAZO * 0.85} strokeLinecap="round" />
+);
+
+const Ceja = ({ x, y, giro = 0, largo = 9 }: { x: number; y: number; giro?: number; largo?: number }) => (
+  <path d={`M${x - largo / 2} ${y + giro} Q${x} ${y - 2.4} ${x + largo / 2} ${y - giro}`}
+    fill="none" stroke={TINTA} strokeWidth={TRAZO * 0.9} strokeLinecap="round" />
+);
+
+/*
+ * ═══ EL PELO TIENE QUE TENER VOLUMEN Y NACER DONDE NACE ═══
+ *
+ * En la primera versión con rasgos, el casco de pelo era una cinta de dos
+ * píxeles apoyada en la coronilla: la línea de nacimiento quedaba en el alto
+ * del cráneo y abajo sobraba una frente enorme. Por eso la mitad parecían
+ * pelados y los nueve se parecían entre sí — lo único que se veía de cada
+ * peinado era un hilo.
+ *
+ * Ahora el casco nace en y=33 —un quinto de la cabeza, que es donde nace el
+ * pelo de verdad— y la cúpula sube por encima del cráneo y baja por los
+ * costados hasta la altura de la oreja. Eso le da masa, y la masa es lo que
+ * hace que un peinado se distinga de otro.
  */
-const DIBUJOS: Record<string, { tinta: keyof typeof TINTAS; dibujo: Dibujo }> = {
-  /* Sofi — frente alta, nariz corta y recta, pelo largo por la espalda. */
+const CARAS: Record<string, Cara> = {
+  /* Sofi — melena larga y lacia, raya al medio, cara alargada. */
   sofi: {
-    tinta: 'lago',
-    dibujo: (c) => (
-      <>
-        <path d="M63 24 C78 30, 80 56, 78 96 L62 96 C68 70, 66 44, 60 30 Z" fill={c.tinta} opacity="0.8" />
-        <Busto c={c} perfil="C60 40, 56 20, 42 20 C31 20, 26 30, 27 40 L24 47 L29 50 L26 55 L32 60" />
-        <path d="M27 38 C26 22, 36 15, 46 16 C58 17, 66 26, 65 40 C60 28, 52 23, 44 23 C35 23, 29 29, 27 38 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'lago', piel: PIEL.clara, pelo: '#3B2A1E', rx: 18, ry: 23,
+    ojos: 9.5, nariz: 54, boca: 6.5, curva: 2,
+    atras: <path d="M25 50 C24 18, 72 18, 71 50 C71 66, 73 80, 75 96 L62 96 C61 76, 60 60, 59 48 Z M37 48 C36 60, 35 76, 34 96 L21 96 C23 80, 25 66, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 41, 66 33, 48 32 C30 33, 27 41, 25 50 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={0.5} /><Ceja x={58} y={37} giro={-0.5} /></>,
   },
-  /* Caro — mentón corto, nariz respingada, melena a la altura del mentón. */
+  /* Caro — melena corta al mentón, flequillo que cruza, cara redonda. */
   caro: {
-    tinta: 'montana',
-    dibujo: (c) => (
-      <>
-        <Busto c={c} perfil="C61 40, 57 21, 43 21 C32 21, 27 31, 28 41 L25 47 L31 49 L28 54 L34 59" />
-        <path d="M28 40 C26 23, 37 16, 47 17 C60 18, 67 27, 66 42 C66 50, 67 56, 65 61 L58 61 C61 52, 60 42, 59 36 C54 29, 46 25, 39 27 C33 29, 29 34, 28 40 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'montana', piel: PIEL.media, pelo: '#4A2B1A', rx: 19, ry: 22,
+    ojos: 9, nariz: 54, boca: 7.5, curva: 2.6,
+    atras: <path d="M25 50 C24 18, 72 18, 71 50 C71 60, 72 66, 70 72 L60 72 C63 62, 62 54, 61 48 Z M35 48 C34 54, 33 62, 36 72 L26 72 C24 66, 25 60, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 18, 72 18, 71 50 C69 42, 68 34, 58 31 C50 36, 38 37, 31 34 C28 38, 26 43, 25 50 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={1.4} /><Ceja x={58} y={37} giro={-1.4} /></>,
   },
-  /* Vera — recogido alto en la nuca, frente despejada, nariz fina. */
+  /* Vera — recogido alto apoyado en la cúpula, frente despejada. */
   vera: {
-    tinta: 'viento',
-    dibujo: (c) => (
-      <>
-        <circle cx="71" cy="29" r="9" fill={c.tinta} />
-        <Busto c={c} perfil="C60 39, 56 19, 42 19 C31 19, 26 29, 27 39 L23 46 L29 49 L25 54 L32 59" />
-        <path d="M27 37 C26 21, 37 14, 47 15 C59 16, 66 25, 65 38 C60 27, 52 22, 44 22 C35 22, 29 28, 27 37 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'viento', piel: PIEL.clara, pelo: '#2E2118', rx: 17, ry: 22,
+    ojos: 8.5, nariz: 53, boca: 6, curva: 1.2,
+    atras: <circle cx="48" cy="20" r="10" />,
+    adelante: <path d="M27 48 C26 19, 70 19, 69 48 C67 40, 64 33, 48 32 C32 33, 29 40, 27 48 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={0.8} largo={8} /><Ceja x={58} y={37} giro={-0.8} largo={8} /></>,
   },
-  /* Ramiro — nariz grande y recta, barba recortada que alarga el mentón. */
+  /* Ramiro — pelo corto, barba recortada que sigue la mandíbula. */
   ramiro: {
-    tinta: 'rio',
-    dibujo: (c) => (
-      <>
-        <Busto c={c} perfil="C61 41, 57 22, 43 22 C32 22, 27 32, 28 42 L22 50 L29 52 L26 57 L31 63 C38 66, 44 64, 48 60" />
-        <path d="M28 41 C27 25, 38 18, 48 19 C60 20, 67 29, 66 42 C61 31, 53 26, 45 26 C36 26, 30 32, 28 41 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'rio', piel: PIEL.media, pelo: '#241A12', rx: 19, ry: 23,
+    ojos: 10, nariz: 57, boca: 7, curva: 1,
+    adelante: <path d="M26 50 C25 19, 71 19, 70 50 C68 41, 65 33, 48 32 C31 33, 28 41, 26 50 Z" />,
+    barba: <path d="M31 54 C31 62, 35 70, 41 73 C45 75, 51 75, 55 73 C61 70, 65 62, 65 54 C63 63, 57 68, 48 68 C39 68, 33 63, 31 54 Z" />,
+    cejas: <><Ceja x={38} y={36} giro={1} largo={11} /><Ceja x={58} y={36} giro={-1} largo={11} /></>,
   },
-  /* Lucas — frente recta, mentón cuadrado, pelo corto con raya. */
+  /* Lucas — raya al costado marcada, mandíbula ancha. */
   lucas: {
-    tinta: 'bosque',
-    dibujo: (c) => (
-      <>
-        <Busto c={c} perfil="C61 40, 58 22, 43 22 C33 22, 28 31, 28 41 L24 48 L30 50 L28 56 L30 61 L38 62" />
-        <path d="M28 40 C27 24, 38 17, 48 18 C60 19, 67 27, 66 40 C62 32, 56 27, 48 26 C40 25, 32 31, 28 40 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'bosque', piel: PIEL.clara, pelo: '#6B4A2A', rx: 20, ry: 22,
+    ojos: 10.5, nariz: 55, boca: 8, curva: 1.8,
+    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C69 41, 67 33, 57 31 C50 35, 40 35, 33 32 C29 36, 27 43, 26 50 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={0.4} largo={10} /><Ceja x={58} y={37} giro={-0.4} largo={10} /></>,
   },
-  /* Bruno — calvo, barba llena. La cabeza se ve entera. */
+  /* Bruno — calvo con las entradas marcadas, barba llena. */
   bruno: {
-    tinta: 'montana',
-    dibujo: (c) => (
-      <>
-        <Busto c={c} perfil="C62 40, 58 20, 43 20 C31 20, 26 31, 27 41 L22 49 L29 51 L25 57 L30 65 C39 69, 47 66, 51 60" />
-      </>
-    ),
+    paisaje: 'montana', piel: PIEL.oscura, pelo: '#1C1410', rx: 20, ry: 23,
+    ojos: 10, nariz: 56, boca: 8.5, curva: 2.2,
+    adelante: <path d="M27 52 C27 44, 28 38, 31 35 C30 42, 30 48, 30 52 Z M69 52 C69 44, 68 38, 65 35 C66 42, 66 48, 66 52 Z" />,
+    barba: <path d="M29 52 C29 63, 34 73, 41 76 C45 78, 51 78, 55 76 C62 73, 67 63, 67 52 C65 64, 58 70, 48 70 C38 70, 31 64, 29 52 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={1.2} largo={11} /><Ceja x={58} y={37} giro={-1.2} largo={11} /></>,
   },
-  /* Diego — ondas medias que se abren atrás, nariz con caballete. */
+  /* Diego — ondas medias que caen por detrás de la oreja, cara larga. */
   diego: {
-    tinta: 'bosque',
-    dibujo: (c) => (
-      <>
-        <path d="M64 26 C76 32, 76 50, 72 64 L62 64 C66 50, 66 36, 60 30 Z" fill={c.tinta} opacity="0.8" />
-        <Busto c={c} perfil="C61 40, 57 21, 43 21 C32 21, 27 31, 28 41 L23 48 L30 50 L27 55 L33 60" />
-        <path d="M28 40 C26 22, 38 15, 48 16 C61 17, 68 27, 66 42 C64 33, 60 28, 56 29 C50 24, 40 24, 34 30 C31 31, 29 35, 28 40 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'bosque', piel: PIEL.media, pelo: '#33231A', rx: 18, ry: 24,
+    ojos: 8.5, nariz: 56, boca: 6.5, curva: 0.8,
+    atras: <path d="M25 50 C24 17, 72 17, 71 50 C71 60, 72 66, 70 70 L61 70 C64 60, 63 54, 62 48 Z M34 48 C33 54, 32 60, 35 70 L26 70 C24 66, 25 60, 25 50 Z" />,
+    adelante: <path d="M25 50 C24 17, 72 17, 71 50 C70 42, 68 34, 61 32 C55 27, 43 28, 36 33 C30 35, 27 42, 25 50 Z" />,
+    cejas: <><Ceja x={38} y={38} giro={1.8} /><Ceja x={58} y={37} giro={-1.2} /></>,
   },
-  /* Mateo — rulos. Tres bultos, nunca a la misma altura. */
+  /* Mateo — rulos. Tres bultos sobre la cúpula, nunca a la misma altura. */
   mateo: {
-    tinta: 'viento',
-    dibujo: (c) => (
-      <>
-        <circle cx="38" cy="18" r="9" fill={c.tinta} />
-        <circle cx="52" cy="14" r="10" fill={c.tinta} />
-        <circle cx="65" cy="21" r="9" fill={c.tinta} />
-        <Busto c={c} perfil="C61 40, 57 23, 43 23 C32 23, 27 32, 28 42 L24 48 L30 50 L27 56 L33 61" />
-        <path d="M28 41 C27 26, 38 20, 48 21 C60 22, 67 30, 66 43 C61 32, 53 27, 45 27 C36 27, 30 33, 28 41 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'viento', piel: PIEL.oscura, pelo: '#1F1710', rx: 19, ry: 22,
+    ojos: 9.5, nariz: 54, boca: 7.5, curva: 2.8,
+    atras: <><circle cx="30" cy="29" r="11" /><circle cx="48" cy="17" r="13" /><circle cx="66" cy="30" r="10" /></>,
+    adelante: <path d="M26 50 C25 20, 71 20, 70 50 C68 42, 65 33, 48 32 C31 33, 28 42, 26 50 Z" />,
+    cejas: <><Ceja x={38} y={37} giro={1} /><Ceja x={58} y={37} giro={-1} /></>,
   },
-  /* El Mentor — frente amplia, nariz marcada, barba corta. El que más se
-     mira de los nueve: es el único que acompaña el Camino entero. */
+  /* El Mentor — pelo corto peinado hacia atrás, barba corta. */
   mentor: {
-    tinta: 'lago',
-    dibujo: (c) => (
-      <>
-        <Busto c={c} perfil="C61 40, 57 21, 42 21 C31 21, 26 31, 27 41 L21 49 L28 51 L25 56 L30 63 C38 67, 45 64, 49 59" />
-        <path d="M27 40 C26 23, 37 16, 47 17 C60 18, 67 27, 66 41 C61 30, 53 25, 45 25 C36 25, 29 31, 27 40 Z" fill={c.tinta} />
-      </>
-    ),
+    paisaje: 'lago', piel: PIEL.media, pelo: '#2A1D14', rx: 19, ry: 23,
+    ojos: 9.5, nariz: 56, boca: 7, curva: 1.4,
+    adelante: <path d="M26 50 C25 18, 71 18, 70 50 C68 41, 66 32, 48 31 C30 32, 28 41, 26 50 Z" />,
+    barba: <path d="M31 53 C31 62, 35 71, 41 74 C45 76, 51 76, 55 74 C61 71, 65 62, 65 53 C63 63, 57 69, 48 69 C39 69, 33 63, 31 53 Z" />,
+    cejas: <><Ceja x={38} y={36} giro={0.8} largo={10} /><Ceja x={58} y={36} giro={-0.8} largo={10} /></>,
   },
 };
 
 function clave(quien: string): string | null {
   const q = (quien || '').toLowerCase();
-  return Object.keys(DIBUJOS).find((k) => q.includes(k)) ?? null;
+  return Object.keys(CARAS).find((k) => q.includes(k)) ?? null;
 }
 
 /** Si hay un retrato dibujado para ese nombre. */
@@ -207,9 +239,11 @@ export default function RetratoEntrenador({
   className?: string;
 }) {
   const k = clave(quien) ?? 'mentor';
-  const { tinta, dibujo } = DIBUJOS[k];
-  const c = TINTAS[tinta];
+  const c = CARAS[k];
+  const p = PAISAJE[c.paisaje];
   const id = `ret-${k}`;
+  const rx = c.rx ?? 19;
+  const ry = c.ry ?? 23;
   return (
     <svg
       width={tam} height={tam} viewBox="0 0 96 96"
@@ -221,8 +255,35 @@ export default function RetratoEntrenador({
         <clipPath id={id}><circle cx="48" cy="48" r="47" /></clipPath>
       </defs>
       <g clipPath={`url(#${id})`}>
-        <circle cx="48" cy="48" r="47" fill={c.fondo} />
-        {dibujo(c)}
+        <circle cx="48" cy="48" r="47" fill={p.fondo} />
+
+        {/* El pelo de atrás, antes que nada. */}
+        <g fill={c.pelo}>{c.atras}</g>
+
+        {/* Los hombros y el cuello. El cuello en piel: sin él la cabeza
+            flota, que es lo que más delata a un avatar mal armado. */}
+        <path d="M41 66 H55 V80 H41 Z" fill={c.piel} />
+        <path d="M2 96 C2 82, 20 75, 48 75 C76 75, 94 82, 94 96 Z" fill={p.ropa} />
+
+        {/* La cara. */}
+        <ellipse cx="48" cy="45" rx={rx + 1} ry={ry + 1} fill={c.piel} />
+
+        {/* Las orejas, apenas. Dan ancho a la cabeza sin pedir atención. */}
+        <ellipse cx={47 - rx} cy="48" rx="2.6" ry="4" fill={c.piel} />
+        <ellipse cx={49 + rx} cy="48" rx="2.6" ry="4" fill={c.piel} />
+
+        {/* La barba va sobre la cara y debajo del pelo de adelante. */}
+        {c.barba && <g fill={c.pelo}>{c.barba}</g>}
+
+        {/* Los rasgos. */}
+        {c.cejas}
+        <Ojo x={48 - (c.ojos ?? 9)} />
+        <Ojo x={48 + (c.ojos ?? 9)} />
+        <Nariz y={c.nariz ?? 55} />
+        <Boca y={(c.nariz ?? 55) + 8} ancho={c.boca ?? 7} curva={c.curva ?? 1.6} />
+
+        {/* El pelo de adelante, lo último: tapa el nacimiento. */}
+        <g fill={c.pelo}>{c.adelante}</g>
       </g>
       {/* El aro: una línea de 1px en oro. Nunca relleno. */}
       <circle cx="48" cy="48" r="46.5" fill="none" stroke={ORO} strokeWidth="1" opacity="0.7" />

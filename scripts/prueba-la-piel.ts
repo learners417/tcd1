@@ -80,8 +80,13 @@ const ORO_DEL_TEMA = new Set(['#b0822e', '#8e6824', '#74551c', '#a8875a', '#f3ea
 /*
  * Los paisajes de la tapa tienen sus propios colores —terracota, granate,
  * dorado del sol— y son del tema, no oros inventados. Su archivo queda fuera.
+ *
+ * Los retratos también: una cara necesita tonos de piel y de pelo, y esos no
+ * son ni pueden ser tokens del tema —no cambian con el papel ni con la
+ * tinta—. Sus fondos y sus ropas SÍ salen de los cinco paisajes; lo único
+ * propio son las tres pieles y los nueve pelos.
  */
-const PALETAS_PROPIAS = /losCincoPaisajes\.ts$|teamColors\.ts$/;
+const PALETAS_PROPIAS = /losCincoPaisajes\.ts$|teamColors\.ts$|RetratoEntrenador\.tsx$/;
 /*
  * `var(--line, rgba(...))` es el patrón de toda la app: el token manda y el
  * literal es su respaldo para cuando el tema todavía no cargó. Un hex ahí
