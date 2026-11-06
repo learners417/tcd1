@@ -1817,8 +1817,14 @@ _dentroDeOtra42 = {'plata'} if '<TableroPlata' in rd('src/components/admin/Super
 _perdidas42 = sorted(_render42 - _menu42 - _dentro42 - _dentroDeOtra42)
 check('ninguna pantalla quedó inalcanzable',
       not _perdidas42, ', '.join(_perdidas42))
+# La comparación se mudó: los cuatro momentos salieron de la barra lateral
+# —que ya no existe— y viven en `BarraDelAdmin`. Ahora son dos mitades y las
+# dos tienen que estar: el Admin le pasa el MOMENTO, y la barra compara
+# contra eso. Si el Admin le pasara `mainTab`, entrar a una pestaña interna
+# apagaría la barra entera; si la barra comparara otra cosa, lo mismo.
+_barra42 = rd('src/components/admin/BarraDelAdmin.tsx')
 check('el menú marca el MOMENTO, no la pantalla exacta',
-      'momentoActual === item.id' in _adm42,
+      'actual={momentoActual}' in _adm42 and 'actual === d.id' in _barra42,
       'si marcara la pantalla, entrar a una pestaña interna apagaría el menú entero')
 
 # ── 6.43 · El diagnóstico no miente ────────────────────────────────────

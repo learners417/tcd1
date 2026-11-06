@@ -10,6 +10,7 @@ import { notificarMensajeAdmin } from '../lib/notifications';
 import CintaCinturon from '../components/CintaCinturon';
 import { calcularRachaDesdeFechas } from '../lib/racha';
 import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso } from '../lib/diaPrograma';
+import BarraDelAdmin from '../components/admin/BarraDelAdmin';
 import NotificationBell from '../components/NotificationBell';
 import AdminClienteADN from '../components/admin/AdminClienteADN';
 import PreactivacionMatriz from '../components/admin/PreactivacionMatriz';
@@ -1940,124 +1941,62 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-gold/10 rounded-full blur-[150px] pointer-events-none" />
 
       {/* Mobile overlay backdrop */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      {/*
+        ═══ LA BARRA LATERAL Y LA HAMBURGUESA SE FUERON ═══
 
-      {/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:inset-auto md:translate-x-0 md:z-20 ${sidebarCollapsed ? 'md:w-[72px]' : 'md:w-[220px]'} shrink-0 border-r border-gold/10 bg-[#0E0E0E] flex flex-col transition-all duration-300`}>
-        <div className={`p-5 ${sidebarCollapsed ? 'md:p-3' : ''} transition-all duration-300`}>
-          <div className={`flex items-center gap-3 mb-8 ${sidebarCollapsed ? 'md:justify-center md:gap-0 md:mb-6' : ''}`}>
-            <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shrink-0">
-              <Stethoscope className="w-5 h-5 text-cream" />
-            </div>
-            <div className={`${sidebarCollapsed ? 'md:hidden' : ''} min-w-0`}>
-              <h1 className="text-sm font-semibold text-cream tracking-wide truncate">Tu Clínica Digital</h1>
-              <p className="text-sm text-gold uppercase tracking-widest font-bold">Admin</p>
-            </div>
-          </div>
+        El agrupado estaba bien hecho: diecisiete entradas planas ya eran
+        cuatro momentos —Hoy, La Semana, Clientes, El Negocio— con lo de
+        adentro en pestañas arriba del contenido.
 
-          {/* Toggle expand/collapse — solo desktop */}
-          <button
-            onClick={() => setSidebarCollapsed(v => !v)}
-            className={`hidden md:flex items-center justify-center w-full mb-3 py-1.5 rounded-lg text-cream/55 hover:text-gold hover:bg-gold/10 transition-colors`}
-            title={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
-          >
-            <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} />
-          </button>
+        Lo que estaba mal era dónde vivían esos cuatro: en una barra lateral
+        de fondo #0E0E0E en computadora, y detrás de una hamburguesa en el
+        teléfono. Dos cosas que esta casa ya había decidido no hacer — los
+        cuatro destinos van fijos y a la vista, iguales en teléfono y en
+        computadora (por eso se borró `Sidebar.tsx` del lado del cliente), y
+        no hay fondos negros.
 
-          <nav className="space-y-0.5">
-            {sidebarItems
-              .filter(item => !item.ownerOnly || adminRol === 'owner' || !adminRol)
-              // Ya no se ordenan por rol: son cuatro y su orden es el del día.
-              .map(item => {
-                const totalUnread = item.id === 'mensajes' ? (channelUnread.soporte ?? 0) : 0;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setMainTab(item.id);
-                      setMobileMenuOpen(false);
-                      if (item.id === 'mensajes') {
-                        setChannelUnread(prev => ({ ...prev, comunidad: 0, victorias: 0, consultas: 0 }));
-                      }
-                    }}
-                    title={sidebarCollapsed ? item.label : undefined}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative ${sidebarCollapsed ? 'md:justify-center md:px-0 md:gap-0' : ''} ${
-                      momentoActual === item.id
-                        ? 'bg-gold/10 text-gold'
-                        : 'text-cream/75 hover:bg-gold/10 hover:text-cream'
-                    }`}
-                  >
-                    {momentoActual === item.id && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gold rounded-r-full" />
-                    )}
-                    <span className="relative shrink-0">
-                      <item.icon className="w-4 h-4" />
-                      {sidebarCollapsed && totalUnread > 0 && (
-                        <span className="hidden md:block absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gold" />
-                      )}
-                    </span>
-                    <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>{item.label}</span>
-                    {totalUnread > 0 && (
-                      <span className={`${sidebarCollapsed ? 'md:hidden' : ''} ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-cream text-sm font-bold flex items-center justify-center`}>
-                        {totalUnread}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-          </nav>
-        </div>
+        El que opera esto lo abre todos los días. Con los momentos
+        escondidos, cambiar de momento cuesta dos toques en vez de uno, y
+        quien recién entra al equipo no ve el mapa: ve un título y una
+        rayita.
 
-        <div className={`mt-auto p-5 ${sidebarCollapsed ? 'md:p-3' : ''} border-t border-gold/10 transition-all duration-300`}>
-          <div className={`flex items-center gap-3 mb-4 ${sidebarCollapsed ? 'md:justify-center md:gap-0' : ''}`}>
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center text-sm font-bold border border-gold/18 shrink-0">
-              {adminAvatar
-                ? <img loading="lazy" src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
-                : adminProfile.nombre.charAt(0).toUpperCase()
-              }
-            </div>
-            <div className={`flex-1 min-w-0 ${sidebarCollapsed ? 'md:hidden' : ''}`}>
-              <p className="text-sm font-medium text-cream truncate">{adminProfile.nombre}</p>
-              <p className="text-sm text-cream/55 truncate">{adminProfile.especialidad || 'Director'}</p>
-            </div>
-            <button
-              onClick={() => { setAdminDraft({ nombre: adminProfile.nombre, cargo: adminProfile.especialidad || 'Director' }); setShowAdminSettings(true); }}
-              className={`${sidebarCollapsed ? 'md:hidden' : ''} w-7 h-7 rounded-lg bg-gold/5 hover:bg-gold/10 flex items-center justify-center text-cream/55 hover:text-cream transition-colors shrink-0`}
-              title="Ajustes de perfil"
-            >
-              <Settings className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <button
-            onClick={onSignOut}
-            title={sidebarCollapsed ? 'Salir del sistema' : undefined}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-cream/75 hover:bg-gold/5 hover:text-cream transition-colors ${sidebarCollapsed ? 'md:gap-0' : ''}`}
-          >
-            <LogOut className="w-3.5 h-3.5 shrink-0" />
-            <span className={`${sidebarCollapsed ? 'md:hidden' : ''}`}>Salir del sistema</span>
-          </button>
-        </div>
-      </aside>
+        Lo que la barra lateral también guardaba —quién soy y cómo salgo— se
+        mudó al encabezado, que es donde vive en el resto de la app.
+      */}
 
       {/* ─── MAIN CONTENT ──────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
         <header className="h-16 border-b border-gold/10 flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
-          <button
-            onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors"
-            aria-label="Abrir menú"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          {/* La hamburguesa no tiene qué abrir: los cuatro momentos están
+              abajo, fijos. */}
           <h2 className="text-[20px] leading-tight truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-cream)' }}>
             {headerTitles[mainTab]}
           </h2>
           <div className="ml-auto flex items-center gap-2">
+            {/* Venían al pie de la barra lateral. Acá el avatar abre los
+                ajustes de perfil —era un engranaje aparte de 28 px, por
+                debajo de la zona táctil— y la salida queda como ícono, que
+                es como está en el resto de la app. */}
+            <button
+              onClick={() => { setAdminDraft({ nombre: adminProfile.nombre, cargo: adminProfile.especialidad || 'Director' }); setShowAdminSettings(true); }}
+              className="w-11 h-11 flex items-center justify-center shrink-0"
+              title={`${adminProfile.nombre} · ajustes de perfil`}
+              aria-label={`${adminProfile.nombre} · ajustes de perfil`}
+            >
+              <span className="w-9 h-9 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center text-[15px] font-bold border border-gold/18">
+                {adminAvatar
+                  ? <img loading="lazy" src={adminAvatar} alt="" className="w-full h-full object-cover" />
+                  : adminProfile.nombre.charAt(0).toUpperCase()}
+              </span>
+            </button>
+            <button
+              onClick={onSignOut}
+              className="w-11 h-11 flex items-center justify-center rounded-full text-cream/75 hover:text-cream hover:bg-gold/10 transition-colors shrink-0"
+              title="Salir del sistema"
+              aria-label="Salir del sistema"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
             <NotificationBell
               userId={adminProfile.id}
               size="sm"
@@ -2077,7 +2016,38 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           </div>
         </header>
 
-        <div className={`flex-1 scrollbar-hide ${mainTab === 'mensajes' ? 'overflow-hidden flex flex-col' : mainTab === 'pipeline' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto p-6'}`}>
+        {/* `pb-28`: la barra de los cuatro momentos flota encima del final
+            del contenido. Sin esto, el último botón de cada pantalla queda
+            debajo de ella y no se puede tocar — que es justo el defecto que
+            esta barra viene a sacar, no a traer. */}
+        <div className={`flex-1 scrollbar-hide pb-28 ${mainTab === 'mensajes' ? 'overflow-hidden flex flex-col' : mainTab === 'pipeline' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto p-6'}`}>
+
+          {/* ═══ LAS PESTAÑAS DEL MOMENTO, ARRIBA ═══
+
+              Su comentario decía «se dibuja como pestañas arriba del
+              contenido» y estaban escritas DOS MIL LÍNEAS más abajo, después
+              de todos los bloques de cada tab: en pantalla caían al final,
+              debajo de todo. Nadie lo había visto porque abajo no choca con
+              nada; al poner la barra de los cuatro momentos quedaron atrás de
+              ella, con «Campañas» tapada a la mitad.
+
+              Van donde decía el comentario: lo primero debajo del encabezado,
+              que es donde se busca con qué seguir. */}
+          {/* Lo que vive adentro del momento. Nada quedó inalcanzable: lo que
+              antes era una entrada del menú ahora es una pestaña de acá. */}
+          {pestanasDelMomento.length > 1 && (
+            <div className="flex gap-2 flex-wrap mb-5">
+              {pestanasDelMomento.map((h) => (
+                <button key={h.id} onClick={() => setMainTab(h.id)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                    mainTab === h.id
+                      ? 'bg-gold/20 border border-gold/50 text-gold'
+                      : 'border border-cream/15 text-cream/60 hover:text-cream/85'}`}>
+                  {h.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* ═══════════════════════════════════════════════════════════════════════
               TAB: ACTIVACIÓN (Checklist Pre-Activación por cliente)
@@ -4228,21 +4198,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           {/* ═══════════════════════════════════════════════════════════════
               TAB: TAREAS INTERNAS
               ═══════════════════════════════════════════════════════════════ */}
-          {/* Lo que vive adentro del momento. Nada quedó inalcanzable: lo que
-              antes era una entrada del menú ahora es una pestaña de acá. */}
-          {pestanasDelMomento.length > 1 && (
-            <div className="flex gap-2 flex-wrap mb-5">
-              {pestanasDelMomento.map((h) => (
-                <button key={h.id} onClick={() => setMainTab(h.id)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                    mainTab === h.id
-                      ? 'bg-gold/20 border border-gold/50 text-gold'
-                      : 'border border-cream/15 text-cream/60 hover:text-cream/85'}`}>
-                  {h.label}
-                </button>
-              ))}
-            </div>
-          )}
 
           {mainTab === 'hoy' && (
             <JornadaPanel
@@ -4457,6 +4412,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
           )}
 
         </div>
+
+        <BarraDelAdmin
+          /* Misma guarda que las pestañas de adentro, línea 1915: el que no
+              es dueño no ve «El Negocio», y le quedan tres momentos. */
+          destinos={sidebarItems.filter((i) => !i.ownerOnly || adminRol === 'owner' || !adminRol)}
+          actual={momentoActual}
+          ir={(id) => setMainTab(id as MainTab)}
+        />
       </main>
 
       {/* ─── MODAL AJUSTES ADMIN ────────────────────────────────────────────────── */}
