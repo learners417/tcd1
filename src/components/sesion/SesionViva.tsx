@@ -12,6 +12,7 @@
  * La sesión queda registrada igual y sobrevive a cerrar la app.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import ElEncargo from './ElEncargo';
 import { Check, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   type SesionEnCurso,
@@ -169,6 +170,13 @@ export default function SesionViva({
 
       {pantalla === 'haz' && (
         <section className="space-y-4">
+          {/*
+            El encargo va ANTES del paso a paso, cuando esa jornada tiene uno.
+            El orden es el del trabajo: primero se copia y se pega, después se
+            revisa lo que volvió. Abajo del paso a paso quedaría después de la
+            revisión, que es tarde.
+          */}
+          <ElEncargo codigo={metaCodigo} />
           {pasos && pasos.length > 0 && (
             <div className="card-panel p-5 sm:p-6">
               <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso</p>

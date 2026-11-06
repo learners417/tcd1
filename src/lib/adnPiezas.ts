@@ -79,7 +79,15 @@ export const PIEZAS_ADN: PiezaADN[] = [
 
 /* ══════════ Lectura del estado (local-first, sin red) ══════════ */
 
-function leerJSON<T>(clave: string, porDefecto: T): T {
+/**
+ * Lee del almacén del navegador sin romperse con un JSON corrupto.
+ *
+ * Exportada para `elEncargo`, que saca de acá los mismos datos del ADN para
+ * armar lo que el cliente le pasa a Claude. Esta función ya estaba copiada en
+ * `ConstructorAnuncios`; una tercera copia habría sido el momento en que tres
+ * lugares empiezan a leer el almacén de tres formas distintas.
+ */
+export function leerJSON<T>(clave: string, porDefecto: T): T {
   try { return JSON.parse(localStorage.getItem(clave) ?? '') as T; } catch { return porDefecto; }
 }
 
