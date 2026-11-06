@@ -67,11 +67,17 @@ El mapa de los 5 días y su viernes en vivo se absorben en la jornada del día
 Ya hay tres siembras de unos 25 minutos: Foto de Partida, el origen en tres
 preguntas, y la rueda con su Para Qué. Eso se queda. Se le suma:
 
+**Una sola sesión, de unos 15 minutos, y entra al terminarla.** Sale con todo
+—su etapa, su ADN provisorio y su calendario— y recién ahí ve la app. Ese es
+el momento en que la app se gana el precio, y se recibe entero.
+
 **1 · La bienvenida que mueve.** Por qué está acá y qué va a tener en 90 días.
 
-**2 · Subir lo que tenga.** Su Instagram, su web, un PDF, su libro. La app lo
-lee y **sigue preguntando hasta poder dictaminar** — no corta porque llegó a
-diez preguntas.
+**2 · Subir lo que tenga: archivos y enlaces.** Un PDF, su libro, un
+documento — y además el enlace de su web o su Instagram, que la app lee sola.
+Lo que ya publicó dice más de su negocio que lo que contesta en un
+formulario. La app **sigue preguntando hasta poder dictaminar**: no corta
+porque llegó a diez preguntas.
 
 **3 · El dictamen.** Sobre los cinco ejes que ya están diseñados:
 
@@ -131,9 +137,17 @@ ahí en adelante **toda la app usa ese número**: su oferta, su página y sus
 anuncios se arman con él. Cae viernes, el día de la sesión en vivo, que es
 donde trae su número. Y el lunes lo cobra.
 
-**El nombre es «Tu nuevo precio»** en la app, la landing y los videos. El día
+**El nombre es «Tu Precio Nuevo»** en la app, la landing y los videos. El día
 5 ya tiene su video grabado. «Semana Blanca» queda solo como nombre del plan
 en el Admin, que es lo que siempre fue.
+
+**Y es el mismo nombre que la oferta de entrada de 97 USD, a propósito:**
+quien compra esos 97 hace exactamente estos cinco días. La oferta ES el
+protocolo, así que un solo nombre dice las dos cosas.
+
+Lo que eso deja a la vista: **la app todavía cobra ese escalón a 27 USD con
+21 días de acceso.** El precio y la ventana tienen que coincidir con la
+oferta. Entra en el turno 6, junto a las otras fugas.
 
 ---
 
@@ -197,7 +211,7 @@ Nadie pega nada. Antes de construirlo confirmo que tu plan tenga webhooks.
 | **3** | **Los días 1 al 5.** «Tu nuevo precio» escrito, con la rueda que ya existe y el protocolo de reemplazos. El día 5 sella precio y valor hora. | Los cinco días caminados. El número aparece después en la oferta, la página y los anuncios. |
 | **4** | **El Camino personalizado sin saltos.** Lo que ya tiene, en versión corta con su pieza cargada. | Un cliente con método entra y ve su día del método en versión corta, no tildado en silencio. |
 | **5** | **Los 9 encargos nuevos** y el día que abre al entrenador correcto. | La lente de encargos pasa en los 12. Ninguno queda sin decir qué revisar. |
-| **6** | **Las tres fugas:** Fathom por webhook · el tageo del comprador ($497/$997 sin tag = acceso total) · la puerta del día 91 con los tres pases. | Una sesión de prueba entra sola. Un comprador sin tag queda en el plan correcto. El día 91 ofrece renovar. |
+| **6** | **Las cuatro fugas:** Fathom por webhook · el tageo del comprador ($497/$997 sin tag = acceso total) · el escalón de entrada a 97 USD con su ventana · la puerta del día 91 con los tres pases. | Una sesión de prueba entra sola. Un comprador sin tag queda en el plan correcto. Lo que cobra la app y lo que cobra la landing dicen lo mismo. El día 91 ofrece renovar. |
 | **7** | **Botones vacíos y callejones.** Todo botón que no hace nada, todo estado vacío sin salida. | Una lente nueva que los encuentra sola, para que no vuelvan. |
 | **8** | **Estética, teléfono.** Jerarquía, aire, la línea de oro donde corresponde. | Capturas de las 7 pantallas, miradas. |
 | **9** | **Estética, computadora.** Lo mismo a 1440. | Capturas a 1440, miradas. |
