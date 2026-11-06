@@ -6,11 +6,27 @@ Escrito el jueves 5 de noviembre de 2026, 22:30.
 
 ## El diagnóstico, en tres líneas
 
-**1 · El Admin nunca se midió.** Las 87 vistas en verde de todo este arco son
-del lado del cliente. La vara tiene su modo `--admin`, pero hay que pedírselo
-a mano y hoy devuelve **cero en las 17 pestañas y en todas las lentes** — o
-sea que está rota para el Admin. El Admin sí renderiza: lo que no funciona es
-el instrumento. Por eso nunca apareció un defecto ahí: nadie miró.
+**1 · Las 22 lentes pasan y la pantalla igual está mal.** (Corregido el
+turno 1: primero leí esos ceros como «no se midió». Son cero FALTAS. La
+auditoría sí mide el Admin —104 vistas, no 87— y pasa las 22 lentes.)
+
+Lo que no pasa es otra cosa. Esas lentes miran contraste, tamaños y
+desbordes, no CUÁNTO hay en la pantalla. Del lado del cliente también daban
+cero mientras El Camino abría con 545 palabras; por eso se construyó
+`medir-densidad.py`. Ese nunca había apuntado al Admin. Apuntado:
+
+| pantalla | palabras | toques |
+|---|---|---|
+| **admin:videos** | **1.341** | **107** |
+| admin:casa | 849 | 25 |
+| admin:semana | 290 | 9 |
+| admin:mirol | 214 | 13 |
+| *la peor del cliente (adn)* | *250* | *22* |
+
+Y una que sí era un agujero: el control estricto decía
+`if p in resultados` — la pantalla estricta que no se medía se salteaba en
+SILENCIO y después imprimía «✓ las pantallas estrictas cumplen la
+especificación». Arreglado: lo que no se midió se nombra y falla.
 
 **2 · Diecisiete pestañas.** `clientes · pipeline · mensajes · metricas ·
 videos · equipo · campanas · creativos · tareas · motor · hoy · supervision ·

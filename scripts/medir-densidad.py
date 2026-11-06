@@ -96,19 +96,47 @@ def main():
                 ctx = nav.new_context(viewport={'width': ancho, 'height': 900}, device_scale_factor=1)
                 MA.fijar_reloj(ctx, MA.RELOJ)
                 print(f"\n══ a {ancho} px ══")
-                print(f"{'pantalla':16} {'palabras':>9} {'toques':>7} {'tarjetas':>9} {'superf':>7} {'imagen':>7}")
-                for d in DESTINOS:
+                print(f"{'pantalla':16} {'palabras':>9} {'toques':>7} {'tarjetas':>9} "
+                      f"{'superf':>7} {'imagen':>7} {'alto':>7}")
+
+                def medir(nombre, abrir, captura):
                     pag = ctx.new_page()
-                    pag.goto(base)
-                    MA.preparar(pag, d)
-                    pag.reload()
+                    abrir(pag)
                     pag.wait_for_timeout(2500)
                     m = pag.evaluate(CONTAR)
-                    print(f"{d:16} {m['palabras']:>9} {m['tocables']:>7} "
-                          f"{m['tarjetas']:>9} {m['superficies']:>7} {m['imagen']:>7}")
-                    if ancho != 390:
-                        pag.screenshot(path=f'/tmp/ancho-{d}.png')
+                    # El alto real: la app scrollea un `main` interno, así que
+                    # el alto del cuerpo miente. Donde no hay `main` —el visor
+                    # del Admin— vale el del documento.
+                    alto = pag.evaluate(
+                        "() => { const m = document.querySelector('main');"
+                        "  return m ? m.scrollHeight : document.documentElement.scrollHeight; }")
+                    print(f"{nombre:16} {m['palabras']:>9} {m['tocables']:>7} "
+                          f"{m['tarjetas']:>9} {m['superficies']:>7} {m['imagen']:>7} {alto:>6}px")
+                    if captura:
+                        pag.screenshot(path=captura)
                     pag.close()
+                    return m, alto
+
+                for d in DESTINOS:
+                    def abrir(pag, d=d):
+                        pag.goto(base); MA.preparar(pag, d); pag.reload()
+                    medir(d, abrir, f'/tmp/ancho-{d}.png' if ancho != 390 else None)
+
+                # ─── Y EL ADMIN ───────────────────────────────────────────
+                #
+                # Nunca se midió acá. `medir-app.py --admin` sí lo recorre y
+                # sus 22 lentes dan cero — pero esas lentes miran contraste,
+                # tamaños y desbordes, no CUÁNTO hay en la pantalla. Del lado
+                # del cliente también daban cero mientras El Camino abría con
+                # 545 palabras y 51 cosas tocables; por eso existe este
+                # archivo. El Admin tiene diecisiete pestañas y nadie las
+                # contó nunca.
+                if '--admin' in sys.argv:
+                    print(f"\n── el Admin, a {ancho} px ──")
+                    for t in MA.ADMIN:
+                        def abrir(pag, t=t):
+                            pag.goto(f'{base}scripts/visor/admin.html?tab={t}')
+                        medir(f'admin:{t}', abrir, f'/tmp/dens-admin-{t}-{ancho}.png')
                 ctx.close()
             nav.close()
     finally:

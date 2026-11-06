@@ -1521,12 +1521,35 @@ def main():
 
     if estricto:
         estrictas = ESTRICTAS + ([f'admin:{t}' for t in ADMIN] if ADMIN_ESTRICTO else [])
-        malas = [p for p in estrictas if p in resultados and (any(
+
+        # ─── UNA PANTALLA QUE NO SE MIDIÓ NO ES UNA PANTALLA QUE CUMPLE ───
+        #
+        # Esto decía `if p in resultados and (...)`: la pantalla estricta que
+        # no estaba en los resultados se salteaba EN SILENCIO, y dos renglones
+        # después se imprimía «✓ las pantallas estrictas cumplen la
+        # especificación».
+        #
+        # Con `ADMIN_ESTRICTO = True`, las 17 pestañas del Admin están en esta
+        # lista. Pero solo se miden cuando se pasa `--admin`, y la auditoría
+        # corre `--estricto` a secas. O sea que durante meses la vara dijo que
+        # había revisado 17 pantallas que nunca miró — y el Admin es justo la
+        # mitad de la app donde nunca apareció un defecto.
+        #
+        # Vale para cualquiera, no solo el Admin: una pantalla que se rompe al
+        # montar, o a la que le cambian el nombre, desaparecía del control en
+        # vez de hacerlo fallar. Lo que no se midió se nombra.
+        sin_medir = [p for p in estrictas if p not in resultados]
+        if sin_medir:
+            print('✗ pantallas estrictas que NO se midieron (¿falta --admin?):',
+                  ', '.join(sin_medir))
+            sys.exit(1)
+
+        malas = [p for p in estrictas if any(
             (resultados[p][c] if c in ('lateral', 'tokens') else len(resultados[p][c])) for c in COLUMNAS)
-            or any(resultados[p].get(k, 0) > v for k, v in COMPOSICION.items()))]
+            or any(resultados[p].get(k, 0) > v for k, v in COMPOSICION.items())]
         if malas:
             print('✗ pantallas estrictas con faltas:', ', '.join(malas)); sys.exit(1)
-        print('✓ las pantallas estrictas cumplen la especificación')
+        print(f'✓ las {len(estrictas)} pantallas estrictas cumplen la especificación')
 
 
 if __name__ == '__main__':
