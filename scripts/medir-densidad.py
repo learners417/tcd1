@@ -20,6 +20,7 @@ tiempo.
     python3 scripts/medir-densidad.py --ancho   además, a 1440 px (escritorio)
 """
 import importlib.util
+import pathlib
 import os
 import subprocess
 import sys
@@ -82,7 +83,14 @@ def main():
     puerto = MA.puerto_libre()
     srv = subprocess.Popen(['npx', 'vite', '--port', str(puerto), '--strictPort', '--host', '127.0.0.1'],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                           env={**os.environ, 'DISABLE_HMR': 'true'}, start_new_session=True)
+                           env={**os.environ, 'DISABLE_HMR': 'true',
+                                # La misma base inexistente que usa medir-app:
+                                # sin estas dos, `cargarClientes` sale por
+                                # `if (!supabase) return` y el Admin se mide
+                                # vacío. Contesta Playwright, abajo.
+                                'VITE_SUPABASE_URL': 'http://base-de-prueba.invalid',
+                                'VITE_SUPABASE_ANON_KEY': 'clave-de-prueba'},
+                           start_new_session=True)
     base = f'http://127.0.0.1:{puerto}/'
     try:
         for _ in range(80):
@@ -94,6 +102,12 @@ def main():
             nav = pw.chromium.launch()
             for ancho in anchos:
                 ctx = nav.new_context(viewport={'width': ancho, 'height': 900}, device_scale_factor=1)
+                # Los seis clientes de prueba, en el contexto: vale para todas
+                # las páginas que se abran después.
+                _sp = importlib.util.spec_from_file_location(
+                    'datos_admin', str(pathlib.Path(__file__).parent / 'datos-de-prueba-admin.py'))
+                _da = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_da)
+                _da.instalar(ctx)
                 MA.fijar_reloj(ctx, MA.RELOJ)
                 print(f"\n══ a {ancho} px ══")
                 print(f"{'pantalla':16} {'palabras':>9} {'toques':>7} {'tarjetas':>9} "

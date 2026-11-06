@@ -3561,7 +3561,23 @@ if _hay_nav:
     check('El Camino se lee entero en 360 y 390 px (Chromium real)', _r.returncode == 0, '; '.join(_malas[:3]) or _r.stderr[-200:])
     # Toda la app contra 10-DISENO. Las pantallas de ESTRICTAS no pueden tener
     # ni una falta; el total del resto se informa y tiene que ir bajando.
-    _r = subprocess.run([sys.executable, 'scripts/medir-app.py', '--estricto', '--admin'], capture_output=True, text=True)
+    # ─── DOS CORRIDAS, PORQUE SON DOS APPS ───────────────────────────────
+    #
+    # El lado del cliente está hecho para andar SIN conexión, con localStorage.
+    # El Admin lee todo de Supabase: sin base, sus diecisiete pantallas se
+    # miden vacías —«todavía no hay clientes con el Camino andando»— y durante
+    # meses eso fue lo único que se midió de esa mitad de la app.
+    #
+    # `--con-base` le da credenciales a una base que no existe, para que la app
+    # cree su cliente, y Playwright contesta con seis personas de prueba. Pero
+    # la variable es por proceso de Vite: dándosela también al cliente, nueve
+    # de sus pantallas cambiaron de forma y aparecieron faltas en metrics,
+    # diario, biblioteca y campañas — medidas en un estado que ningún cliente
+    # ve nunca.
+    #
+    # Entonces el cliente se mide como corre para un cliente, y el Admin como
+    # corre para el equipo. Las dos corridas tienen que dar verde.
+    _r = subprocess.run([sys.executable, 'scripts/medir-app.py', '--estricto'], capture_output=True, text=True)
     _tot = re.search(r'TOTAL de faltas: (\d+)', _r.stdout)
     # El número sale del medidor, no escrito acá. Estuvo escrito a mano y se
     # desfasó: decía 38 cuando el medidor recorría 39, una de ellas una pestaña
@@ -3569,10 +3585,20 @@ if _hay_nav:
     # envejece sin avisar; este no puede.
     _m = re.search(r'VISTAS MEDIDAS: (\d+)', _r.stdout)
     _cuantas = _m.group(1) if _m else '?'
-    check(f'las {_cuantas} vistas (cliente, pestañas internas y Admin) cumplen 10-DISENO',
+    check(f'las {_cuantas} vistas del cliente cumplen 10-DISENO',
           _r.returncode == 0, _r.stdout.strip().split('\n')[-1][:160])
     if _tot:
-        print(f'  · faltas de diseño en toda la app: {_tot.group(1)}')
+        print(f'  · faltas de diseño en el lado del cliente: {_tot.group(1)}')
+
+    # Y el Admin, con sus seis personas de prueba adentro.
+    _ra = subprocess.run([sys.executable, 'scripts/medir-app.py', '--estricto', '--admin', '--con-base'],
+                         capture_output=True, text=True)
+    _ma = re.search(r'VISTAS MEDIDAS: (\d+)', _ra.stdout)
+    check(f'las {_ma.group(1) if _ma else "?"} vistas del Admin cumplen 10-DISENO (con clientes adentro)',
+          _ra.returncode == 0, _ra.stdout.strip().split('\n')[-1][:160])
+    _tota = re.search(r'TOTAL de faltas: (\d+)', _ra.stdout)
+    if _tota:
+        print(f'  · faltas de diseño en el Admin: {_tota.group(1)}')
 else:
     SIN_MEDIR_MOVIL = True
     print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')

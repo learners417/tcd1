@@ -260,7 +260,16 @@ export default function PanelMotorIA({
         {fallas === null ? (
           <p className="text-sm text-cream/40">Cargando…</p>
         ) : fallas.length === 0 ? (
-          <p className="text-sm text-success/70">Ninguna. El motor viene entero.</p>
+          /* `text-success/70` sobre el papel mide 3,4:1 y el piso de lectura
+             son 4,5. El verde al 70% se ve bien en una pantalla buena y
+             desaparece en un teléfono al sol, que es donde se lee esto. El
+             verde entero cumple y sigue diciendo lo mismo: está todo bien.
+
+             (Comentario sin llaves: adentro de una rama de ternario ya
+             estamos en una expresión, y un comentario entre llaves abriría
+             un objeto. Y ojo con nombrar esa forma acá adentro: lleva el
+             cierre de comentario, y cierra este.) */
+          <p className="text-sm text-success">Ninguna. El motor viene entero.</p>
         ) : (
           <div className="space-y-2">
             {fallas.map((f, i) => (

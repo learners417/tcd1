@@ -214,6 +214,26 @@ ESTRICTAS = (list(PANTALLAS) + [n for n, _, _ in INTERNAS]
              + [f'{p}>angosto' for p in ANGOSTAS]
              + [f'{p}>largo' for p in LARGAS])
 ADMIN_ESTRICTO = True  # el Admin llegó a cero el 16 sep
+
+# ─── LA BASE DE MENTIRA ES SOLO PARA EL ADMIN ──────────────────────────────
+#
+# Con estas dos variables, `src/lib/supabase.ts` crea su cliente y la app sale
+# a pedir datos; sin ellas, `cargarClientes` sale por `if (!supabase) return` y
+# las diecisiete pantallas del Admin se miden VACÍAS.
+#
+# Pero la variable es por proceso de Vite, así que se la da a TODA la app — y
+# el lado del cliente está hecho para andar sin conexión, con localStorage.
+# Dándosela a los dos, nueve pantallas del cliente cambiaron de forma y
+# aparecieron faltas en metrics, diario, biblioteca y campañas: medidas en un
+# estado que ningún cliente ve.
+#
+# Entonces son dos corridas distintas, que es lo correcto igual: el cliente se
+# mide como corre para un cliente —sin base— y el Admin como corre para el
+# equipo, con seis personas adentro.
+CREDENCIALES_DE_PRUEBA = {
+    'VITE_SUPABASE_URL': 'http://base-de-prueba.invalid',
+    'VITE_SUPABASE_ANON_KEY': 'clave-de-prueba',
+} if '--con-base' in sys.argv else {}
 COLUMNAS = ['lateral', 'fuera', 'chica', 'tactil', 'degrade', 'brillo', 'versal', 'insignia', 'tokens', 'contraste', 'cortado', 'desborde', 'tildes', 'oroRelleno', 'serifChico', 'aplastado', 'lineaTinta', 'notaAlPie', 'iconoFlotante', 'nombreDoble', 'cifrasBajas', 'errores']
 # El lente de composición informa siempre y solo falla pasado su techo.
 #
@@ -1122,11 +1142,37 @@ def main():
         pass
     estricto = '--estricto' in sys.argv
     solo = [a for a in sys.argv[1:] if not a.startswith('--')]
+
+    # `--con-base` existe para una sola cosa: medir el Admin con clientes
+    # adentro. Y esas credenciales se las queda TODO el proceso de Vite, así
+    # que si en la misma corrida se midieran las pantallas del cliente,
+    # saldrían con una conexión que ningún cliente tiene — fue lo que pasó: de
+    # golpe metrics, diario, biblioteca y campañas aparecieron con faltas,
+    # medidas en un estado que no existe. Entonces esta corrida es del Admin y
+    # de nada más.
+    if '--con-base' in sys.argv and not solo:
+        solo = [f'admin:{t}' for t in ADMIN]
     pantallas = [x for x in solo if x in PANTALLAS or x.startswith('admin:')] if solo else list(PANTALLAS)
     puerto = puerto_libre()
     srv = subprocess.Popen(['npx', 'vite', '--port', str(puerto), '--strictPort', '--host', '127.0.0.1'],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                           env={**os.environ, 'DISABLE_HMR': 'true'},
+                           env={**os.environ, 'DISABLE_HMR': 'true',
+                                # ─── UNA BASE QUE NO EXISTE, A PROPÓSITO ───
+                                #
+                                # `src/lib/supabase.ts` solo crea su cliente si
+                                # estas dos variables están; sin ellas,
+                                # `cargarClientes` arranca con `if (!supabase)
+                                # return` y TODAS las pantallas del Admin se
+                                # miden vacías. Durante meses «admin:clientes»
+                                # midió 96 palabras, y esas 96 son «todavía no
+                                # hay clientes con el Camino andando».
+                                #
+                                # Con estas, la app crea el cliente y sale a
+                                # pedir. Nadie contesta de ese host: contesta
+                                # Playwright, con `datos-de-prueba-admin.py`.
+                                # El código de producción no se entera y no
+                                # lleva una línea de prueba adentro.
+                                **CREDENCIALES_DE_PRUEBA},
                            start_new_session=True)  # su propio grupo: así se mata entero
     base = f'http://127.0.0.1:{puerto}/'
     resultados = {}
@@ -1139,6 +1185,12 @@ def main():
         with sync_playwright() as pw:
             nav = pw.chromium.launch()
             ctx = nav.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=2)
+            # Los seis clientes de prueba, para que el Admin no se mida vacío.
+            import importlib.util as _iu
+            _sp = _iu.spec_from_file_location(
+                'datos_admin', os.path.join(os.path.dirname(__file__), 'datos-de-prueba-admin.py'))
+            _datos_admin = _iu.module_from_spec(_sp); _sp.loader.exec_module(_datos_admin)
+            _datos_admin.instalar(ctx)
             fijar_reloj(ctx, RELOJ)
             solo_admin = [x for x in pantallas if x.startswith('admin:')]
             pantallas = [x for x in pantallas if not x.startswith('admin:')]
@@ -1520,7 +1572,21 @@ def main():
     print('detalle en /tmp/medir-app.json · capturas en /tmp/app-<pantalla>.png')
 
     if estricto:
-        estrictas = ESTRICTAS + ([f'admin:{t}' for t in ADMIN] if ADMIN_ESTRICTO else [])
+        # Las del Admin entran en la lista estricta solo si esta corrida las
+        # midió. Sin `--admin` no se miden —y no se pueden medir bien sin
+        # `--con-base`, porque sin base salen vacías— así que pedirlas acá
+        # haría fallar a la corrida del cliente por pantallas que no le tocan.
+        # El control de «no se midió» que sigue vale para las que sí se
+        # pidieron, que es lo que tiene que atrapar.
+        estrictas = ESTRICTAS + ([f'admin:{t}' for t in ADMIN]
+                                 if ADMIN_ESTRICTO and '--admin' in sys.argv else [])
+        # Cuando a la corrida se le pidió un subconjunto, el control estricto
+        # es sobre ESE subconjunto. Si no, la corrida del Admin —que no mide
+        # las del cliente a propósito— se queja de las sesenta y cuatro que no
+        # le tocaban. El control de «no se midió» de abajo sigue valiendo para
+        # lo que sí se pidió, que es lo que tiene que atrapar.
+        if solo:
+            estrictas = [p for p in estrictas if p in solo]
 
         # ─── UNA PANTALLA QUE NO SE MIDIÓ NO ES UNA PANTALLA QUE CUMPLE ───
         #
