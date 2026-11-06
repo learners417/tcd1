@@ -1914,25 +1914,36 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
   const pestanasDelMomento = (DENTRO_DE[momentoActual] ?? [])
     .filter((h) => !h.ownerOnly || adminRol === 'owner' || !adminRol);
 
-  const headerTitles: Record<MainTab, string> = {
-    clientes: 'Panel de Control — Clientes',
-    pipeline: 'Checklist de Pre-Activación',
-    mensajes: 'Centro de Mensajes',
-    metricas: 'Métricas Globales del Programa',
-    videos: 'Gestión de Videos',
-    equipo: 'Gestión de Equipo',
-    campanas: 'Campañas & Creativos',
-    creativos: 'Generador de Creativos',
-    tareas: 'Pipeline de Tareas Internas',
-    hoy: 'Hoy — lo que hay que atender',
-    semana: 'La Semana — el marcador, las trabas y lo frenado',
-    casa: 'La casa — qué prometemos, cómo se decide, y tus primeros 3 días',
-    supervision: 'Supervisión — todas las cuentas a la vez',
-    sala: 'Sala de Mando — qué está frenado y quién lo destraba',
-    mirol: 'Mi rol — qué me toca, qué no, y cuánto llevo encima',
-    sesiones: 'Cargar sesión — que lo que se dijo lo herede el equipo',
-    motor: 'Motor de IA — qué se usa, qué cuesta, qué falla',
-  };
+  /*
+   * ═══ UN NOMBRE POR PANTALLA, EN UN SOLO LUGAR ═══
+   *
+   * Acá vivía `headerTitles`: diecisiete nombres, uno por pestaña. Y las
+   * pestañas del momento tienen SU propia lista de etiquetas. O sea dos
+   * nombres para cada pantalla, escritos en dos lados — y discrepaban en casi
+   * todas:
+   *
+   *     pastilla «De un vistazo»   ·   encabezado «Supervisión»
+   *     pastilla «Mi día»          ·   encabezado «Hoy»
+   *     pastilla «Todos»           ·   encabezado «Clientes»
+   *     pastilla «Mi motor»        ·   encabezado «Sala de Mando»
+   *
+   * Los dos en pantalla al mismo tiempo, a tres centímetros uno del otro.
+   *
+   * Además esos títulos traían una explicación pegada con guion —«La Semana —
+   * el marcador, las trabas y lo frenado»— que a 390 px ocupaba tres
+   * renglones en un encabezado de 64, y el primero salía CORTADO. Eso tenía
+   * sentido cuando el momento vivía escondido en la barra lateral y este era
+   * el único lugar donde sabías dónde estabas; desde que los cuatro momentos
+   * están fijos abajo, sobra.
+   *
+   * Ahora el encabezado dice el MOMENTO —el mismo nombre que la barra, que es
+   * lo que un encabezado de página hace— y la pastilla dice la pantalla. Un
+   * nombre por cosa, y los nombres de pantalla viven en un solo lugar: las
+   * pestañas.
+   */
+  const tituloDelMomento =
+    sidebarItems.find((i) => i.id === momentoActual)?.label ?? '';
+
 
   // ─── RENDER ───────────────────────────────────────────────────────────────────
 
@@ -1969,8 +1980,8 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
         <header className="h-16 border-b border-gold/10 flex items-center gap-3 px-4 md:px-6 shrink-0 bg-black/20 backdrop-blur-md">
           {/* La hamburguesa no tiene qué abrir: los cuatro momentos están
               abajo, fijos. */}
-          <h2 className="text-[20px] leading-tight truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-cream)' }}>
-            {headerTitles[mainTab]}
+          <h2 className="text-[20px] leading-tight truncate min-w-0" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-cream)' }}>
+            {tituloDelMomento}
           </h2>
           <div className="ml-auto flex items-center gap-2">
             {/* Venían al pie de la barra lateral. Acá el avatar abre los

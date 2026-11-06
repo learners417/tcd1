@@ -30,12 +30,23 @@ def solo_codigo(s: str) -> str:
 # Se comprueba PERTENENCIA al array, nunca una cadena con el corchete
 # pegado: anclar a la posición hizo que agregar una tab después rompiera
 # el chequeo de la anterior. Pasó tres veces (plata, motor, hoy).
-def _tab_completa(tab: str, titulo: str) -> bool:
+def _tab_completa(tab: str) -> bool:
+    """¿Esta pestaña está cableada en todos los lugares que la hacen existir?
+
+    Eran CINCO superficies; ahora son cuatro, y es una mejora: la quinta era
+    `headerTitles`, un diccionario de títulos por pestaña que convivía con las
+    etiquetas de las pestañas del momento. Dos nombres para cada pantalla, en
+    dos listas, discrepando en casi todas —la pastilla decía «De un vistazo» y
+    el encabezado «Supervisión», los dos en pantalla a la vez—. Se borró, y el
+    encabezado ahora dice el momento, que sale de la misma lista que la barra.
+
+    Una superficie menos es un lugar menos donde olvidarse de algo.
+    """
     _a = rd('src/pages/Admin.tsx')
     _m = re.search(r'VALID_MAIN_TABS: MainTab\[\] = \[(.*?)\]', _a, re.S)
     en_array = bool(_m) and f"'{tab}'" in _m.group(1)
     return (f"| '{tab}'" in _a and en_array and f"id: '{tab}'" in _a
-            and titulo in _a and f"mainTab === '{tab}'" in _a)
+            and f"mainTab === '{tab}'" in _a)
 
 
 print('══ 1) COMPILACIÓN ══')
@@ -484,8 +495,8 @@ import os as _os69
 if _os69.path.exists('src/components/admin/PanelMotorIA.tsx'):
     _pan = rd('src/components/admin/PanelMotorIA.tsx')
     _adm69 = rd('src/pages/Admin.tsx')
-    check('el panel del motor está en las 5 superficies del Admin',
-          _tab_completa('motor', "motor: 'Motor de IA"))
+    check('el panel del motor está cableada en las 4 superficies del Admin',
+          _tab_completa('motor'))
     check('el panel responde las 4 preguntas (uso, costo, fallas, latencia)',
           all(k in _pan for k in ('panel_ia_por_modelo', 'panel_ia_fallas',
                                   'panel_ia_total', 'ms_p95')))
@@ -980,8 +991,8 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
           'el de $1.000 tiene que costar cero minutos cuando todo va bien')
     check('lo que necesita persona va antes que lo que resuelve la app',
           "a.quien === 'la app' ? 0 : 1" in _cola)
-    check('la tab Hoy está en las 5 superficies del Admin',
-          _tab_completa('hoy', "hoy: 'Hoy —"))
+    check('la tab Hoy está cableada en las 4 superficies del Admin',
+          _tab_completa('hoy'))
     check('la cola es la PRIMERA tab del menú',
           _adm20.index("id: 'hoy'") < _adm20.index("id: 'clientes'"),
           'es lo primero que se abre cada día')
@@ -1031,8 +1042,8 @@ if _os21.path.exists('src/components/admin/Supervision.tsx'):
           'sin esto nada escalaba nunca de la app a una persona')
     check('el contador es lógica pura y se puede probar sin la base',
           'contarRacha' in _cola21 and 'from ./supabase' not in _cola21)
-    check('la tab Supervisión está en las 5 superficies',
-          _tab_completa('supervision', "supervision: 'Supervisión"))
+    check('la tab Supervisión está cableada en las 4 superficies',
+          _tab_completa('supervision'))
 
 # ── 6.22 · La app empuja; la persona atiende lo que la app no pudo ─────
 # El sistema de notificaciones existía completo pero NADIE LO DISPARABA
@@ -1267,8 +1278,8 @@ if _os28.path.exists('src/lib/salaDeMando.ts'):
     check('la lógica de la Sala se puede probar sin la base',
           'supabase' not in _sm,
           'la que habla con la base vive en salaDeMandoStorage')
-    check('la Sala está en las 5 superficies del Admin',
-          _tab_completa('sala', "sala: 'Sala de Mando"))
+    check('la Sala está cableada en las 4 superficies del Admin',
+          _tab_completa('sala'))
     check('la Sala está probada con escenarios',
           _os28.path.exists('scripts/prueba-sala.ts'))
 
@@ -1356,8 +1367,8 @@ if _os29.path.exists('src/lib/roles.ts'):
     check('el traspaso está escrito, con el porqué de cada paso',
           'TRASPASO' in _rl and _rl.count('porque:') >= 7,
           'una conversación se olvida y el que la dio se vuelve necesario para siempre')
-    check('la pantalla del rol está en las 5 superficies',
-          _tab_completa('mirol', "mirol: 'Mi rol"))
+    check('la pantalla del rol está cableada en las 4 superficies',
+          _tab_completa('mirol'))
     check('los roles están probados con escenarios',
           _os29.path.exists('scripts/prueba-roles.ts'))
 
@@ -1395,8 +1406,8 @@ if _os30.path.exists('src/lib/transcripcion.ts'):
           'resumenParaElCliente' in _tr and 'crearNotificacion' in _cs)
     check('un error al guardar no pierde lo leído',
           'Lo leído sigue acá' in _cs)
-    check('la tab está en las 5 superficies',
-          _tab_completa('sesiones', "sesiones: 'Cargar sesión"))
+    check('la tab está cableada en las 4 superficies',
+          _tab_completa('sesiones'))
     check('cargar la sesión le toca a acompañamiento',
           "'sesiones'" in rd('src/lib/roles.ts'))
     check('la extracción está probada',

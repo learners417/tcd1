@@ -56,7 +56,27 @@ const m = armarMarcador({
 });
 linea(m.pctVendiendo === 64, `7 de 11 es ${m.pctVendiendo}%`);
 linea(m.minutosPorCliente === 44, `y cuesta ${m.minutosPorCliente} minutos por cliente`);
-linea(m.titular.includes('no vendieron'), `el titular señala lo que falta: "${m.titular}"`);
+/*
+ * Esta línea pedía que el titular dijera «no vendieron». O sea que la prueba
+ * exigía el defecto: el primer renglón que el equipo lee cada lunes, escrito
+ * por descarte. La regla de la casa es decir lo que la cosa ES.
+ *
+ * Ahora se pide lo que el titular tiene que cumplir, no sus palabras exactas:
+ * el marcador de los que vendieron, los frenados nombrados como lo que son, y
+ * ninguna negación. Así el día que se reescriba mejor, la prueba no estorba.
+ */
+linea(
+  /\d+ de \d+ vendieron/.test(m.titular)
+    && /destrabes/.test(m.titular)
+    && !/\bno\b/.test(m.titular),
+  `el titular da el marcador y nombra lo frenado, sin negaciones: "${m.titular}"`,
+);
+linea(
+  armarMarcador({ clientesActivos: 4, clientesQueVendieron: 3, clientesEnRojo: 1,
+    facturadoClientes: 1, minutosTotales: 60, trabasDelSistema: 0 })
+    .titular.includes('Una cuenta espera que la destrabes'),
+  'con una sola frenada, concuerda en singular',
+);
 
 const conTraba = armarMarcador({
   clientesActivos: 11, clientesQueVendieron: 10, clientesEnRojo: 0,

@@ -187,12 +187,27 @@ export function armarMarcador(x: {
       ? 'Hay una traba que ya se repitió tres veces. Mientras siga, va a seguir costando trabajo todas las semanas.'
       : `Hay ${x.trabasDelSistema} trabas repetidas. Mientras sigan, van a seguir costando trabajo todas las semanas.`;
   } else if (x.clientesEnRojo > 0) {
-    const sinVender = x.clientesActivos - x.clientesQueVendieron;
-    titular = `${sinVender} ${sinVender === 1 ? 'cliente no vendió' : 'clientes no vendieron'} esta semana. ${x.clientesEnRojo} ${x.clientesEnRojo === 1 ? 'está frenado' : 'están frenados'}.`;
+    /*
+     * ═══ EL TITULAR DICE QUÉ PASÓ, NO QUÉ NO PASÓ ═══
+     *
+     * Decía «6 clientes no vendieron esta semana. 6 están frenados.» Es el
+     * primer renglón que el equipo lee cada lunes, y estaba escrito por
+     * descarte: dos negaciones seguidas y ningún número de lo que SÍ pasó.
+     *
+     * La regla de la casa es decir lo que la cosa es. Y acá además hay un
+     * dato mejor: cuántos vendieron, sobre cuántos. Eso es el marcador. Los
+     * frenados siguen nombrados —son los que hay que destrabar— pero como lo
+     * que son, no como el hueco de lo otro.
+     */
+    titular = x.clientesEnRojo === 1
+      ? `${x.clientesQueVendieron} de ${x.clientesActivos} vendieron. Una cuenta espera que la destrabes.`
+      : `${x.clientesQueVendieron} de ${x.clientesActivos} vendieron. ${x.clientesEnRojo} cuentas esperan que las destrabes.`;
   } else if (pct === 100) {
     titular = 'Vendieron todos. Esta es la semana que hay que poder repetir.';
   } else {
-    titular = `${x.clientesQueVendieron} de ${x.clientesActivos} vendieron. Los que faltan no están frenados: falta volumen.`;
+    /* «Los que faltan NO están frenados» abre una duda que no existía: hace
+       pensar que podrían estarlo. Lo que pasa es que falta volumen. */
+    titular = `${x.clientesQueVendieron} de ${x.clientesActivos} vendieron. Al resto le falta volumen.`;
   }
 
   return {
