@@ -72,9 +72,15 @@ export const DESTINOS: Destino[] = [
  *
  * Derivado de `DESTINOS`, que es la lista que alimenta el buscador y el menú:
  * mientras los nombres salgan de acá, el mapa no puede envejecer.
+ *
+ * SIN LAS CINCO QUE VIVEN EN SU DÍA. El Soporte dice «usa estos nombres
+ * exactos» y manda al cliente a tocar lo que nombra: si nombra Campañas, el
+ * cliente la busca en el menú y no está. La regla es la misma que arregló
+ * este mapa la vez anterior —los nombres tienen que ser los que el cliente
+ * ve— solo que ahora cinco de ellos se ven adentro de su jornada.
  */
 export function mapaDelMenu(): string {
-  return DESTINOS.map((d) => d.label).join(' · ');
+  return DESTINOS.filter((d) => !EN_SU_DIA.includes(d.id)).map((d) => d.label).join(' · ');
 }
 
 /**
@@ -102,13 +108,42 @@ export function mapaDelMenu(): string {
 export const PRINCIPALES = ['dashboard', 'roadmap', 'entrenadores', 'mensajes'];
 
 /**
- * Lo que vive DENTRO de El Camino.
+ * LAS TRES VISTAS DE CONSULTA — lo que se mira cualquier día.
  *
- * El Mentor queda afuera de esta lista a propósito: no es una parte del
- * Camino, es con quién lo caminas, y por eso está en el encabezado, a una
- * mano de distancia desde cualquier pantalla.
+ * ═══ ERAN OCHO ═══
+ *
+ * La grilla dentro de El Camino tenía ocho casillas: Mi Número, Mi ADN, El
+ * Método, el Diario, Métricas, Campañas, el Creador y Mi Clínica. Ocho
+ * nombres que hay que leer para encontrar uno, en la pantalla que ya era la
+ * más pesada de la app.
+ *
+ * Y el criterio para achicarla ya estaba escrito en esta misma casa: si algo
+ * se usa en UN día concreto, no va en una lista — va en ese día. Lo que pasa
+ * es que no se había aplicado hasta el fondo.
+ *
+ * Quedan las tres que se consultan CUALQUIER día:
+ *
+ *   Mi ADN      lo que ya selló, junto
+ *   El Método   sus libros y las clases
+ *   Métricas    sus números
+ *
+ * Las otras cinco viven en su día, en `laPuertaDelDia.ts`. Siguen en
+ * `DESTINOS` —el buscador las encuentra por nombre, que es como vuelve quien
+ * ya estuvo— pero salen del menú y de esta grilla.
+ *
+ * El Mentor queda afuera a propósito: no es una parte del Camino, es con
+ * quién lo caminas, y por eso está en el encabezado.
  */
-export const DENTRO_DEL_CAMINO = ['numero', 'adn', 'biblioteca', 'diario', 'metrics', 'campanas', 'creador', 'miclinica'];
+export const DENTRO_DEL_CAMINO = ['adn', 'biblioteca', 'metrics'];
+
+/**
+ * Las que salieron del menú y viven en su día.
+ *
+ * Están acá para que se vea de un vistazo qué se movió, y para que la lente
+ * que busca pantallas huérfanas tenga contra qué comparar. La lista de qué
+ * día abre cada una vive en `laPuertaDelDia.ts`.
+ */
+export const EN_SU_DIA = ['numero', 'diario', 'campanas', 'creador', 'miclinica'];
 
 /** Las partes de El Camino, en el orden en que se encuentran. */
 export const destinosDelCamino = (): Destino[] =>

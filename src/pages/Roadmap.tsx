@@ -1775,6 +1775,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
+                            onIr={(id) => onNavigate?.(id)}
                             video={(() => {
                               const tuto = tutorialDelDia(meta.dia_asignado);
                               const suyo = meta.video_youtube_id && !meta.video_youtube_id.startsWith('PLACEHOLDER') ? (
@@ -1838,6 +1839,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
+                            onIr={(id) => onNavigate?.(id)}
                             video={tutorialDelDia(meta.dia_asignado) ?? undefined}
                             evidencia={(
                               <>

@@ -2991,8 +2991,17 @@ check('la Fase Autonomía se decide por el paso, no por la fecha',
       re.search(r'estaEnFaseAutonomia\(\s*diaEsperado', _rm) is not None)
 _db = todo.get('src/pages/Dashboard.tsx', '')
 check('Hoy muestra solo pasos del cliente (nunca la entrega técnica del equipo)', 'esPasoDelCliente(meta)' in _db)
+# La regla no cambió —la tarjeta de hoy va primero— pero contra qué se compara
+# sí: `<CadenaADN>` salió de Hoy (era «MI ADN · 0 de 14 sellados» en el medio
+# de la pantalla del día; esa vista vive entera en Mi ADN). Comparar contra un
+# componente que ya no está hacía que `find` devolviera -1 y la lente marcara
+# en rojo una pantalla correcta. Ahora se compara contra lo que SÍ está debajo:
+# «En marcha» y la lista de movimientos que la sigue.
 check('Hoy abre con la tarjeta de hoy, antes que todo lo demás',
-      0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha') and _db.find('<TarjetaDeHoy') < _db.find('<CadenaADN'))
+      0 < _db.find('<TarjetaDeHoy') < _db.find('<EnMarcha')
+      and _db.find('<TarjetaDeHoy') < _db.find('const movimientos'))
+check('y la cadena del ADN ya no duplica a Mi ADN dentro de Hoy',
+      '<CadenaADN' not in _db)
 check('En marcha se abre por el paso, no por la fecha', 'if (diaProg < 11) return null' not in _db)
 # ── Los números del cliente, a la vista del equipo (2 oct) ─────────
 _nc  = rd('src/lib/numerosDelCliente.ts'); _nd = rd('src/lib/numerosDatos.ts')

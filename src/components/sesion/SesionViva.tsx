@@ -13,6 +13,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import ElEncargo from './ElEncargo';
+import LaPuerta from './LaPuerta';
 import { Check, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   type SesionEnCurso,
@@ -52,6 +53,12 @@ interface Props {
   children: React.ReactNode;
   video?: React.ReactNode;
   evidencia?: React.ReactNode;
+  /**
+   * Para abrir la pantalla que este día necesita —Mi Número el día del
+   * precio, Campañas el día que enciende. Esas pantallas salieron del menú y
+   * su única puerta en el recorrido es esta.
+   */
+  onIr?: (destino: string) => void;
 }
 
 const ROTULO: Record<PantallaSesion, string> = {
@@ -60,7 +67,7 @@ const ROTULO: Record<PantallaSesion, string> = {
 
 export default function SesionViva({
   metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre, base,
-  tiempoEstimado, isCompleted, userId, children, video, evidencia,
+  tiempoEstimado, isCompleted, userId, children, video, evidencia, onIr,
 }: Props) {
   const orden = useMemo<PantallaSesion[]>(
     () => ['llevas', ...(video ? (['mira'] as PantallaSesion[]) : []), 'haz', 'sube', 'listo'],
@@ -177,6 +184,12 @@ export default function SesionViva({
             revisión, que es tarde.
           */}
           <ElEncargo codigo={metaCodigo} />
+          {/*
+            Y la puerta, cuando este día abre una pantalla. Va con el encargo
+            y antes del paso a paso porque es la herramienta con la que se
+            hace el trabajo de hoy, no algo que se mira al final.
+          */}
+          {onIr && <LaPuerta codigo={metaCodigo} onIr={onIr} />}
           {pasos && pasos.length > 0 && (
             <div className="card-panel p-5 sm:p-6">
               <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Paso a paso</p>

@@ -3,7 +3,6 @@ import { TarjetaViernes, BonosNumero } from '../components/ExtrasNumero';
 import MapaCincoDias from '../components/MapaCincoDias';
 import TableroNumeros from '../components/TableroNumeros';
 import GraduacionSemanaBlanca from '../components/GraduacionSemanaBlanca';
-import CadenaADN from '../components/CadenaADN';
 import CabeceraDelDia from '../components/CabeceraDelDia';
 import { paisajeDelDia } from '../lib/losCincoPaisajes';
 import type { Profile } from '../lib/supabase';
@@ -625,8 +624,21 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
           Camino le pide cosas que ya tiene hechas afuera. */}
       <TraeTuTrabajo userId={userId} onIr={() => setCurrentPage('migracion')} />
 
-      {/* S10 — La Cadena del ADN: el ikigai encendiéndose */}
-      <CadenaADN onAbrir={() => setCurrentPage('adn')} />
+      {/*
+        ═══ LA CADENA DEL ADN SALIÓ DE ACÁ ═══
+
+        Era el bloque «MI ADN · 0 de 14 sellados» con las nueve piezas
+        listadas, en el medio de la pantalla de hoy. Dos motivos para sacarlo:
+
+        1. No es de hoy. Es la vista de consulta de lo que ya selló, y esa
+           vista existe entera en Mi ADN: catorce piezas, con su fecha de
+           sellado y en qué sesión se completa cada una. Esto era un resumen
+           de nueve de las catorce.
+        2. En cero decía «0 de 14 sellados» al que recién entra, que es el
+           único momento en que nadie selló nada todavía.
+
+        Mi ADN es destino: se entra desde la grilla de El Camino.
+      */}
 
       {/* LA SESIÓN — el único plato */}
       <div className="space-y-6">
@@ -722,10 +734,18 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
   // sé qué tiene que hacer». Sin él, lo segundo se mostraba como lo primero.
   const sesionHecha = yaCargo && data.tareasHoy.length === 0;
           const mentorRestantes = Math.max(0, TOPE_MENTOR_SEMANAL - usosSemana('mentor'));
+          /*
+           * `n` puede venir vacío: cuando queda UN solo movimiento, el
+           * numeral sobra. Un «1» solo no ordena nada —no hay un 2— y lo que
+           * hace es prometer una lista que no está. El tilde del hecho sí se
+           * dibuja siempre, porque ese dice algo.
+           */
           const Fila = ({ n, done, titulo, meta, onClick }: { n: string; done?: boolean; titulo: string; meta: string; onClick?: () => void }) => (
             <button onClick={onClick} disabled={!onClick}
               className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${done ? 'border-success/25 bg-success/[0.04] opacity-70' : 'border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 hover:border-gold/30'}`}>
-              <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
+              {(done || n) && (
+                <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${done ? 'bg-success text-black' : 'bg-gold/15 text-gold'}`}>{done ? '✓' : n}</span>
+              )}
               <span className="flex-1 min-w-0">
                 {/* 600, no 500: era el cuarto peso sobre 17 px en el tablero lleno,
                     con el techo en tres. 500 y 600 son el mismo gesto. */}
@@ -735,21 +755,94 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               {onClick && <ChevronRight className="w-4 h-4 text-cream/40" />}
             </button>
           );
+          /*
+           * ═══ LA PANTALLA SE REPETÍA A SÍ MISMA ═══
+           *
+           * Arriba está `TarjetaDeHoy`: el paso del día, con su título, su
+           * duración, con qué sale y el botón «Empezar». Y acá abajo la
+           * primera fila decía «Tu sesión del Camino · 20-30 min · el plato
+           * del día» y llevaba al mismo lugar.
+           *
+           * Era la misma cosa dos veces, con dos nombres y dos formas, en la
+           * pantalla que tiene que contestar UNA pregunta. Y la repetición
+           * empujaba el botón de arriba abajo del pliegue: lo único que esta
+           * pantalla existe para lograr quedaba cortado.
+           *
+           * Ahora la fila aparece SOLO cuando no hay tarjeta —porque ya hizo
+           * su sesión, o porque hoy no hay— que es cuando hace falta decir
+           * algo sobre ella. Y los números salen de la posición, así agregar
+           * o sacar un movimiento no deja una lista numerada 1, 3, 4.
+           */
+          const hayTarjeta = Boolean(data.tareasHoy[0]);
+          const movimientos: { titulo: string; meta: string; done?: boolean; onClick?: () => void }[] = [];
+          if (!hayTarjeta) {
+            movimientos.push({
+              titulo: 'Tu sesión del Camino',
+              meta: sesionHecha ? 'Hecha — hoy avanzaste' : '20-30 min · el plato del día',
+              done: sesionHecha,
+              onClick: () => setCurrentPage('roadmap'),
+            });
+          }
+          if (sistemaVivo) {
+            movimientos.push({
+              titulo: '10 minutos de campo',
+              meta: 'Responde a tus interesados y registra en Mi Clínica — y vuelve: el Camino te espera',
+              onClick: () => window.open('https://mcd-eight.vercel.app', '_blank'),
+            });
+          }
+          movimientos.push({
+            titulo: 'Tu pregunta al Mentor',
+            meta: mentorRestantes > 0
+              ? `Si algo te frena · te quedan ${mentorRestantes} esta semana`
+              : 'Sin consultas esta semana — el lunes se renuevan',
+            onClick: () => setCurrentPage('coach'),
+          });
+          /*
+           * El cierre del día solo entra cuando se puede tocar. Antes se
+           * dibujaba siempre, y hasta el día 5 decía «Se abre al sellar tu
+           * precio» sin ser tocable: una fila que ocupa lugar, no hace nada,
+           * y le cuenta al que recién entra algo que todavía no le sirve.
+           */
+          if (diarioAbierto) {
+            movimientos.push({
+              titulo: 'El cierre del día',
+              meta: '3 min · tu Diario alimenta a tu Mentor',
+              onClick: () => setCurrentPage('diario'),
+            });
+          }
           return (
             <>
+            {movimientos.length > 0 && (
             <div className="card-panel p-5">
-              <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Tu jornada de hoy</p>
-              <p className="mt-1 mb-3 text-[17px] text-cream/70">Cuatro horas: dos de atender, una de construir y una de dirigir.</p>
-              <div className="space-y-2">
-                <Fila n="1" done={sesionHecha} titulo="Tu sesión del Camino" meta={sesionHecha ? 'Hecha — hoy avanzaste' : '20-30 min · el plato del día'} onClick={() => setCurrentPage('roadmap')} />
-                {sistemaVivo && (
-                  <Fila n="2" titulo="10 minutos de campo" meta="Responde a tus interesados y registra en Mi Clínica — y vuelve: el Camino te espera"
-                    onClick={() => window.open('https://mcd-eight.vercel.app', '_blank')} />
-                )}
-                <Fila n={sistemaVivo ? '3' : '2'} titulo="Tu pregunta al Mentor" meta={mentorRestantes > 0 ? `Si algo te frena · te quedan ${mentorRestantes} esta semana` : 'Sin consultas esta semana — el lunes se renuevan'} onClick={() => setCurrentPage('coach')} />
-                <Fila n={sistemaVivo ? '4' : '3'} titulo="El cierre del día" meta={diarioAbierto ? "3 min · tu Diario alimenta a tu Mentor" : "Se abre al sellar tu precio — día 5"} onClick={diarioAbierto ? () => setCurrentPage('diario') : undefined} />
+              <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                {hayTarjeta ? 'Y después' : 'Tu jornada de hoy'}
+              </p>
+              {/*
+                LA JORNADA DE CUATRO HORAS SE DICE CUANDO ES VERDAD.
+
+                «Cuatro horas: dos de atender, una de construir y una de
+                dirigir» es el marco del día y se decidió a propósito. Lo que
+                no se sostiene es decirlo encima de la tarjeta de hoy: ahí la
+                lista son los movimientos que quedan DESPUÉS de la sesión
+                —una pregunta al Mentor, el cierre— y prometer cuatro horas
+                arriba de dos filas es prometer lo que la pantalla no muestra.
+
+                Así que el marco entra cuando la lista ES el día: cuando no
+                hay tarjeta porque ya hizo su sesión o porque hoy no toca.
+              */}
+              {!hayTarjeta && (
+                <p className="mt-1 text-[17px] text-cream/70">
+                  Cuatro horas: dos de atender, una de construir y una de dirigir.
+                </p>
+              )}
+              <div className="mt-3 space-y-2">
+                {movimientos.map((m, i) => (
+                  <Fila key={m.titulo} n={movimientos.length > 1 ? String(i + 1) : ''} done={m.done}
+                    titulo={m.titulo} meta={m.meta} onClick={m.onClick} />
+                ))}
               </div>
             </div>
+            )}
             {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}
             {data.tareasHoy[1] && (
               <div className="card-panel p-5">
