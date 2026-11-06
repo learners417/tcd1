@@ -178,18 +178,69 @@ resto.
 
 ---
 
-## Los videos — ya estaba resuelto
+## Los videos — el inventario real
 
-**14 de 64 tienen enlace, y eso alcanza.** En septiembre decidiste lanzar con
-los que tienes y grabar los demás solo si hace falta o los clientes los piden.
+Medido sobre el Camino de hoy. **Son dos cosas distintas que veníamos
+contando juntas.**
 
-Lo que falta no es grabar: es que **la pantalla deje de prometer el botón.**
-Donde no hay video, la jornada arranca con el texto del día. Y hay **36
-guiones escritos** que alimentan al Mentor, así que el contenido del día
-existe igual.
+### 1 · Pantalla — los graba quien opera, no Javo
 
-En el Admin: la lista de lo que falta, ordenada por cuándo le pega al primer
-cliente, para que decidas con el dato a la vista.
+**21 tutoriales · 13 grabados con video y PDF · 8 por grabar.**
+
+Los ocho ya tienen su paso a paso ESCRITO, con la salida del error. El
+cliente puede hacerlos hoy leyendo: el video se suma arriba cuando llegue.
+
+| | Lo que resuelve |
+|---|---|
+| L-02 | Cargar tus consultantes, tu agenda y tus cobros |
+| L-03 | Tu link de pago |
+| L-04 | Facturar y llevar la cuenta |
+| L-05 | Subir tu página y publicarla |
+| L-18 | Tu bandeja y tu captación |
+| L-19 | Tus respuestas automáticas |
+| L-20 | Grabar y editar con el celular |
+| L-21 | Programar tu contenido del mes |
+
+Capturar pantalla siguiendo un texto que ya existe: **una mañana.**
+
+### 2 · Javo a cámara — doce, no cincuenta y tres
+
+91 jornadas, 24 de fin de semana, **67 hábiles**. Catorce tienen video.
+
+De las 53 que quedan, **doce enseñan una decisión que cuesta** — y esas son
+las que valen el rodaje. El resto son procedimiento (lo cubre el tutorial) o
+son días de operación de las semanas 8 a 12, donde el cliente ya está
+vendiendo y un video es ruido.
+
+| Día | Qué enseña |
+|---|---|
+| 2 | Tu árbol y el dinero |
+| 3 | Cómo te frenas y cómo te empujas |
+| 4 | Tu protocolo, escrito por ti |
+| 18 | Le avisas a tu entorno |
+| 24 | Tu preventa: los tres primeros |
+| 25 | Tu recuperador |
+| 26 | Tu primera venta y tus números |
+| 43 | Crecer o apagar |
+| 47 | La máquina de 10 |
+| 68 | Tu precio de la próxima camada |
+| 85 | Tu ecosistema circular |
+| 90 | Tu graduación |
+
+Seis minutos cada uno, con el guion escrito antes: **una tarde de rodaje.**
+
+### 3 · Los otros 41 días no llevan video
+
+Llevan la instrucción del día, y la pantalla **no nombra ningún video que no
+exista** — eso ya está decidido y es lo que se construye en el turno 11.
+
+### Una corrección
+
+Había dicho que 36 guiones escritos alimentaban al Mentor cuando falta el
+video. Son 36, pero **solo 8 calzan con el Camino de hoy**: los otros 28
+están atados a códigos que ya no existen (P9.1, P10.2, P4.1c). El respaldo
+del Mentor es más flaco de lo que dije, y por eso los doce guiones nuevos se
+escriben antes del rodaje, no después.
 
 ---
 
@@ -232,6 +283,9 @@ vea caro. Si hay que recortar, se recorta por el final.
 - **Los 3 links de pago** y **los 5 mensajes de los libros en GHL.**
 - **Qué libro alimenta cada uno de los días 1 al 5.** Propongo en el turno 3 y
   corriges.
+- **Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
+  mañana).** Los 12 guiones los escribo en el turno 3; los 8 tutoriales ya
+  tienen su paso a paso escrito.
 - **Los pasos del día 45** — «Tu primer consultante nuevo».
 - **La palabra de la garantía.** Hoy dice «seguimos gratis». En la app conviene
   «seguimos hasta que ande», que dice lo mismo en positivo.
