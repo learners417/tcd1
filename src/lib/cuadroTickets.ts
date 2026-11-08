@@ -33,10 +33,53 @@ import { SECTIONS, STEPS, type PreactivacionStep } from './preactivacionSteps';
  */
 export type Ticket = 'base' | 'ascenso' | 'instalacion';
 
+/**
+ * ═══ LOS PRECIOS TIENEN FECHA ═══
+ *
+ * Javo subió la mentoría y la instalación a partir del 1 de enero de 2027. La
+ * primera versión de este archivo tenía el precio escrito como un número
+ * suelto, y eso trae dos problemas, uno ya pasado y otro por venir:
+ *
+ *   · YA PASÓ. La Instalación figuraba en 5.000 cuando él la vende a 6.000.
+ *     Mil dólares menos, en la pantalla, a la cara del cliente.
+ *   · VA A PASAR. El 1 de enero los dos precios suben, y un número suelto
+ *     obliga a tocar el código ese día. Si nadie lo toca, la app vende barato
+ *     y nadie se entera hasta que alguien compara.
+ *
+ * Así que el precio es una lista con fecha de arranque, y la app se queda con
+ * el último tramo que ya empezó. Enero pasa solo.
+ */
+export interface PrecioConFecha {
+  /** Desde cuándo rige, en ISO. El primero del arreglo no lleva fecha. */
+  desde?: string;
+  precio: number;
+}
+
+/**
+ * El precio que rige hoy, o en la fecha que se le pase.
+ *
+ * La fecha se arma EN LOCAL, no con `toISOString()`. La primera versión usaba
+ * UTC y la auditoría la puso roja: en Buenos Aires —UTC−3— de las 21:00 en
+ * adelante `toISOString()` ya devuelve la fecha de mañana, así que el precio
+ * nuevo iba a arrancar a las nueve de la noche del 31 de diciembre. Tres
+ * horas de vender a otro precio, en la noche en que nadie mira.
+ *
+ * La casa ya tenía la regla escrita y su guardián puesto. Es la convención de
+ * `antesala.ts`: año, mes y día del reloj del cliente.
+ */
+export function precioVigente(lista: PrecioConFecha[], cuando: Date = new Date()): number {
+  const hoy = `${cuando.getFullYear()}-${String(cuando.getMonth() + 1).padStart(2, '0')}-${String(cuando.getDate()).padStart(2, '0')}`;
+  const vigentes = lista.filter((p) => !p.desde || p.desde <= hoy);
+  return (vigentes[vigentes.length - 1] ?? lista[0]).precio;
+}
+
 export interface DefinicionTicket {
   id: Ticket;
   nombre: string;
+  /** El precio de hoy, resuelto de `precios`. */
   precio: number;
+  /** La lista completa, con sus fechas. */
+  precios: PrecioConFecha[];
   /** Quién hace el trabajo técnico. */
   quienInstala: 'el cliente, con los tutoriales' | 'el cliente, con acompañamiento' | 'el equipo';
   /** Qué incluye, dicho como se le dijo al cliente. */
@@ -47,13 +90,17 @@ export interface DefinicionTicket {
 
 export const TICKETS: Record<Ticket, DefinicionTicket> = {
   base: {
-    id: 'base', nombre: 'La Base', precio: 1000,
+    id: 'base', nombre: 'La Base',
+    precios: [{ precio: 1000 }],
+    get precio() { return precioVigente(this.precios); },
     quienInstala: 'el cliente, con los tutoriales',
     incluye: 'Los cuatro manuales, su plan de 90 días escrito, tres sesiones uno a uno (una por mes) y la app.',
     criterio: 'Todo lo técnico lo hace él con el paso a paso adentro de la app. Si algo necesita que una persona se lo explique, es una pantalla mal hecha.',
   },
   ascenso: {
-    id: 'ascenso', nombre: 'El Ascenso', precio: 3000,
+    id: 'ascenso', nombre: 'El Ascenso',
+    precios: [{ precio: 3000 }, { desde: '2027-01-01', precio: 3500 }],
+    get precio() { return precioVigente(this.precios); },
     quienInstala: 'el cliente, con acompañamiento',
     // «Los cinco sistemas» sin decir quién los monta es donde choca con la
     // promesa de la landing: en este escalón los monta ÉL, acompañado. Si eso
@@ -62,7 +109,9 @@ export const TICKETS: Record<Ticket, DefinicionTicket> = {
     criterio: 'Lo construyen juntos: él ejecuta y aprende, el equipo lo acompaña en vivo. Si el equipo termina haciéndolo por él, dejó de ser una mentoría.',
   },
   instalacion: {
-    id: 'instalacion', nombre: 'La Instalación', precio: 5000,
+    id: 'instalacion', nombre: 'La Instalación',
+    precios: [{ precio: 6000 }, { desde: '2027-01-01', precio: 7000 }],
+    get precio() { return precioVigente(this.precios); },
     quienInstala: 'el equipo',
     incluye: 'El equipo monta todo —landing, app, automatizaciones, campañas—, una sesión uno a uno, y la app.',
     criterio: 'El cliente pone su método y su voz, y aprueba. El resto lo monta el equipo.',

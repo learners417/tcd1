@@ -13,6 +13,7 @@
  * Correr con: npx tsx scripts/prueba-cuadro.ts
  */
 import { readFileSync } from 'node:fs';
+import { LO_QUE_VENDE } from './prueba-los-precios-tienen-fecha';
 import { STEPS, SECTIONS } from '../src/lib/preactivacionSteps';
 import {
   TICKETS, CIMA, cuadroDe, resumirCuadro, marcarBloques, bloquesDisponibles,
@@ -45,8 +46,10 @@ linea(TODOS.every((t) => TICKETS[t].criterio.length > 40),
 linea(TODOS.every((t) => TICKETS[t].incluye.length > 40),
   'y dice qué incluye, como se le dijo al cliente');
 linea(TICKETS.base.precio === 1000 && TICKETS.ascenso.precio === 3000
-   && TICKETS.instalacion.precio === 5000,
-  'los precios son los que se venden: 1.000 · 3.000 · 5.000');
+   && TICKETS.instalacion.precio === LO_QUE_VENDE.instalacion.hoy,
+  `los precios son los que se venden: ${LO_QUE_VENDE.base.hoy.toLocaleString('es-AR')} · ${
+     LO_QUE_VENDE.ascenso.hoy.toLocaleString('es-AR')} · ${
+     LO_QUE_VENDE.instalacion.hoy.toLocaleString('es-AR')}`);
 linea(TICKETS.base.precio < TICKETS.ascenso.precio
    && TICKETS.ascenso.precio < TICKETS.instalacion.precio,
   'y están en orden');

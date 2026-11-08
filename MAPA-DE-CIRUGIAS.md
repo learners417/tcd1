@@ -189,6 +189,67 @@ cámara** (la dosis de Caro). Si entran, entran como preguntas 11 y 12.
 
 ---
 
+## LA COLA DE TURNOS — se corre sola, sin que Javo la empuje
+
+Javo pidió el 8 de noviembre que los turnos sigan solos. Esta es la cola. Cada
+turno que arranca toma **el primero que no esté cerrado**, lo termina, lo
+empaqueta con la batería en verde y lo marca acá. Nada de elegir por gusto.
+
+**La regla que no se negocia:** verificar la premisa ANTES de construir. Nueve
+veces de nueve, lo que este mapa daba por faltante ya existía, o lo que daba
+por andando estaba ciego. Medir, mirar la captura o los datos reales, y
+después tocar. Cada lente nueva se prueba contra su propio fallo.
+
+**Lo que NO se toca solo:** precios, promesas, garantías, y cualquier texto
+que el cliente lea en un momento de venta. Eso se propone con opciones y
+espera el clic.
+
+| # | turno | estado |
+|---|---|---|
+| 1 | El dictamen al cerrar la bienvenida | **cerrado** · `d865bda` |
+| 2 | El candado: la pauta espera la primera venta | **cerrado** · `906a020` |
+| 3 | Mi Clínica nombrada como la casa, y los seis números una sola vez | **cerrado** · `197c789` |
+| 4 | Los precios con fecha: enero sube solo | **cerrado** |
+| 5 | La radiografía de 15 minutos, cronometrada | escrita, por construir |
+| 6 | MCD: su batería propia (hoy no tiene ninguna) | abierto |
+| 7 | MCD: el puente verificado de los dos lados | abierto |
+| 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
+| 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
+| 10 | Estética computadora | espera su clic |
+
+### Lo que bloquea la venta y es de Javo
+
+Ninguna de estas cuatro la puede hacer Claude. Van en cada parte que se le dé.
+
+1. Correr `supabase/migrations/20261105_donde_cae_lo_que_se_rompe.sql`.
+   **Es la única que ya está rota para alguien que pague hoy:** la app le dice
+   «ya nos llegó el aviso» y no llega nada.
+2. El workflow de GHL que manda el campo `plan` (verde/negro). Sin él, quien
+   paga 997 y quien paga 497 entran igual, con todo abierto.
+3. Los pasos del día 45 — la única jornada sin contenido.
+4. Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
+   mañana). Los títulos están más abajo en este mapa.
+
+### Los repos, ordenados el 8 de noviembre
+
+| repo | qué es |
+|---|---|
+| `learners417/tcd1` | **TCD, el vivo** |
+| `learners417/tuclinica-app` | TCD viejo — conviene archivarlo |
+| `learners417/mcd` | **MCD, el real** |
+| `learners417/miclinica-app` | ya archivado ✓ |
+| `learners417/clinica-del-lider-app` | **CdL, el vivo** |
+| `learners417/clinica-del-lider` | CdL viejo — conviene archivarlo |
+
+La duda de los «dos repos» era de Clínica del Líder, no de MCD: el duplicado
+de MCD ya estaba archivado.
+
+**MCD se trabaja en la misma sesión que TCD**, no en un chat aparte: comparten
+el mismo Supabase y el puente tiene un lado en cada repo —`api/mcd-bridge.ts`
+en TCD y `/api/integrations/tcd` en MCD—. Tocar un lado a ciegas rompe el otro.
+
+---
+
 ## LAS DECISIONES DEL 8 DE NOVIEMBRE
 
 Javo eligió cinco cosas en una vuelta. Quedan acá para que no se vuelvan a

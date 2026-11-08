@@ -26,6 +26,7 @@ import {
   laOferta, laOfertaQueSigue, laOfertaTrasElAcceso, ofertaReservada,
 } from '../src/lib/laOfertaQueSigue';
 import { TICKETS } from '../src/lib/cuadroTickets';
+import { LO_QUE_VENDE } from './prueba-los-precios-tienen-fecha';
 import { PILAR_MAX } from '../src/lib/planes';
 import { ULTIMO_DIA_DE_BASE } from '../src/lib/topeDelEscalon';
 
@@ -63,7 +64,21 @@ ok(primerPilarDeAscenso?.[1][0] === ULTIMO_DIA_DE_BASE + 1,
 console.log('\n── los precios salen del cuadro de tickets ──');
 ok(precioDe('base') === '$1.000', 'La Base dice $1.000', precioDe('base'));
 ok(precioDe('ascenso') === '$3.000', 'El Ascenso dice $3.000', precioDe('ascenso'));
-ok(precioDe('instalacion') === '$5.000', 'La Instalación dice $5.000', precioDe('instalacion'));
+/*
+ * El precio NO se clava acá.
+ *
+ * Esta línea decía `=== '$5.000'`, y era verdad cuando se escribió. Javo pasó
+ * La Instalación a 6.000 y esta lente quedó defendiendo el precio viejo: con
+ * dos lugares declarando lo que vale, el que se olvida gana.
+ *
+ * Lo que vende está declarado en UN lugar —`prueba-los-precios-tienen-fecha.ts`,
+ * la tabla LO_QUE_VENDE— y acá se compara contra eso. Esta lente sigue
+ * cuidando lo suyo: que el precio llegue armado a la pantalla. Cuánto es, lo
+ * dice la otra.
+ */
+ok(precioDe('instalacion') === `$${LO_QUE_VENDE.instalacion.hoy.toLocaleString('es-AR')}`,
+   `La Instalación dice $${LO_QUE_VENDE.instalacion.hoy.toLocaleString('es-AR')}`,
+   precioDe('instalacion'));
 // Con punto de miles y sin decimales: «$1000» o «$1,000» no se leen como precio.
 ok(/^\$\d\.\d{3}$/.test(precioDe('base')), 'el miles va con punto, no con coma');
 (['base', 'ascenso', 'instalacion'] as const).forEach((t) => {
