@@ -3536,14 +3536,36 @@ _pruebas = sorted(glob.glob('scripts/prueba-*.ts'))
 #
 # Va en su propio renglón: se ve igual de fuerte, pero no se confunde.
 PENDIENTES_DE_CONTENIDO = {'prueba-ninguna-jornada-vacia.ts'}
-_rojas, _pendientes = [], []
-for _p in _pruebas:
+# ─── EN PARALELO, PORQUE SON CIENTO DIECISIETE ─────────────────────────
+#
+# Una por una tardaban casi cuatro minutos, y cada `npx tsx` se pasa la mayor
+# parte del tiempo esperando: arranca, compila, lee archivos. Ocho a la vez
+# bajan los cuatro minutos a treinta y cinco segundos, medido.
+#
+# Importa más de lo que parece: la auditoría entera pasa de diez minutos a
+# seis y medio, y una batería que se puede correr dos veces en una hora se
+# corre antes de empaquetar. Una que tarda diez minutos se corre después, que
+# es el error que ya cometí una vez esta semana.
+#
+# El orden del informe NO depende del orden en que terminan: los resultados
+# se ordenan por nombre antes de contarlos, para que dos corridas iguales
+# impriman lo mismo.
+import concurrent.futures as _cf_pr
+
+def _correr_prueba(_p):
     _r = subprocess.run(['npx', 'tsx', _p], capture_output=True, text=True)
-    if _r.returncode == 0:
+    return _p, _r.returncode, _r.stdout
+
+with _cf_pr.ThreadPoolExecutor(max_workers=8) as _ex_pr:
+    _salidas = sorted(_ex_pr.map(_correr_prueba, _pruebas), key=lambda t: t[0])
+
+_rojas, _pendientes = [], []
+for _p, _codigo, _salida in _salidas:
+    if _codigo == 0:
         continue
     _nom = _p.split('/')[-1]
     if _nom in PENDIENTES_DE_CONTENIDO:
-        _detalle = [l.strip() for l in _r.stdout.split('\n') if l.strip().startswith('día ')]
+        _detalle = [l.strip() for l in _salida.split('\n') if l.strip().startswith('día ')]
         _pendientes.append(f"{_nom}: {'; '.join(_detalle[:3]) or 'ver su salida'}")
     else:
         _rojas.append(_nom)

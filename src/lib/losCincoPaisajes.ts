@@ -31,6 +31,8 @@
  * de mil quinientos años se lee como algo que ya era verdad antes de que
  * alguien la escribiera.
  */
+import { roadmap } from './roadmapSeed';
+
 
 /* ══════════════════ LA PALETA DEL LIBRO ══════════════════ */
 
@@ -237,6 +239,27 @@ export function paisajeDelDia(dia: number | null | undefined): Paisaje | null {
     if (dia >= desde) actual = p;
   }
   return actual;
+}
+
+/**
+ * El primer y el último día de un paisaje, inclusive.
+ *
+ * Vive acá y no en quien lo necesita, por el mismo motivo que `paisajeDelDia`:
+ * el parseo de `dias` tiene que pasar en un solo lugar. Cuando `estaciones.ts`
+ * se escribió sus propios rangos a mano, 21 de los 90 días quedaron mostrando
+ * un paisaje en Hoy y nombrando otro en El Camino.
+ *
+ * El último día de un paisaje es el día antes de que arranque el siguiente, no
+ * el número que dice su propio `dias`: entre el 5 y el 8 el cliente sigue en el
+ * lago, y el lago tiene que poder decir hasta dónde llega. El último de todos
+ * cierra en el total del Camino.
+ */
+export function tramoDelPaisaje(id: IdPaisaje): { desde: number; hasta: number } {
+  const desdes = PAISAJES.map((p) => Number(/(\d+)/.exec(p.dias)?.[1] ?? 0));
+  const i = PAISAJES.findIndex((p) => p.id === id);
+  if (i < 0) return { desde: 0, hasta: 0 };
+  const siguiente = desdes[i + 1];
+  return { desde: desdes[i], hasta: siguiente ? siguiente - 1 : roadmap.dias };
 }
 
 /* ══════════════════ LA COLECCIÓN, PARA NOMBRARLA ══════════════════ */
