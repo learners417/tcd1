@@ -3650,6 +3650,36 @@ if _hay_nav:
     _tota = re.search(r'TOTAL de faltas: (\d+)', _ra.stdout)
     if _tota:
         print(f'  · faltas de diseño en el Admin: {_tota.group(1)}')
+
+    # ── Y LO QUE EL CLIENTE GUARDA, QUE ES LO ÚNICO QUE SE TOCA ─────────
+    #
+    # El medidor MIRA: abre, fotografía y cuenta. Un botón que no guarda es
+    # invisible para él — la pantalla se ve perfecta, las 22 lentes dan cero,
+    # y el cliente pierde su trabajo. Ya pasó: el Camino borraba 71 jornadas
+    # al abrirse mientras todas las vistas daban cero.
+    #
+    # `medir-guardado.py` es lo único que TOCA: llega a la jornada del día,
+    # escribe en el Diario, carga sus números, recarga y pregunta si siguen
+    # ahí. Y hasta hoy NO estaba en la batería: lo corría quien se acordara.
+    #
+    # Peor todavía: el 7 de noviembre el botón de entrada al Camino pasó a
+    # decir «Ver mis 90 días», la sonda lo buscaba por su texto viejo, y dejó
+    # de llegar a la jornada. O sea que estuvo sin probar nada y el único
+    # aviso fue una celda de la tabla del medidor. Por eso entra acá, donde
+    # su fallo pone la batería en rojo, y por eso la puerta lleva un gancho
+    # —`data-puerta="hoja-de-ruta"`— en vez de una etiqueta que se renombra.
+    _rg = subprocess.run([sys.executable, 'scripts/medir-guardado.py'],
+                         capture_output=True, text=True)
+    _bucles = _re.findall(r'^\s*✓ (\w+) —', _rg.stdout, _re.M)
+    _rotos = [l.strip() for l in _rg.stdout.split('\n') if l.strip().startswith('✗')]
+    check('lo que el cliente escribe sobrevive a recargar (los 4 bucles que toca)',
+          _rg.returncode == 0 and len(_bucles) == 4,
+          ' · '.join(_rotos[:3]) or f'bucles en verde: {", ".join(_bucles) or "ninguno"}')
+    # Si la puerta se encontró por su texto, el contrato con la app se rompió.
+    for _l in _rg.stdout.split('\n'):
+        if '⚠' in _l:
+            check('la sonda llega a la jornada por su gancho, no por su etiqueta',
+                  False, _l.strip()[:150])
 else:
     SIN_MEDIR_MOVIL = True
     print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')

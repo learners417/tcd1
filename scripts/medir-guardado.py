@@ -323,22 +323,43 @@ def abrir_jornada_del_dia(pag):
     # —tocarlas contrae, no despliega— y la lista de jornadas vive detrás de
     # «Tu Hoja de Ruta». Confundir el mapa con la lista fue lo que hizo que
     # esta sonda diera tres veces «no hay jornadas» con la app entera andando.
+    # SE BUSCA EL GANCHO, NO EL TEXTO.
+    #
+    # Esta sonda buscaba el botón por su texto, /Hoja de Ruta/i. El 7 de
+    # noviembre el botón pasó a decir «Ver mis 90 días» y la sonda dejó de
+    # encontrar la puerta: no volvió a probar si el trabajo del cliente
+    # sobrevive a recargar, que es lo único que mide este archivo. Y el fallo
+    # no se vio, porque salía como una celda de la tabla del medidor.
+    #
+    # El contrato ahora es `data-puerta="hoja-de-ruta"`, puesto en
+    # EncabezadoCamino.tsx. El texto queda de respaldo por si el gancho se
+    # pierde en una refactorización, y si se entra por el texto se avisa:
+    # andar por el respaldo quiere decir que el contrato se rompió.
+    GANCHO = '[data-puerta="hoja-de-ruta"]'
     try:
-        pag.wait_for_function(
-            """() => [...document.querySelectorAll('#root button')]
-                 .some((b) => !b.closest('aside') && /Hoja de Ruta/i.test(b.textContent || ''))""",
-            timeout=20000)
+        pag.wait_for_selector(GANCHO, timeout=20000)
+        puerta = (pag.inner_text(GANCHO) or '').strip()[:44]
+        pag.click(GANCHO)
     except Exception:
-        return {'falla': 'el Camino no ofrece la entrada a la hoja de ruta', 'jornada': None, 'activa': False}
-
-    puerta = pag.evaluate("""() => {
-      const b = [...document.querySelectorAll('#root button')]
-        .filter((x) => !x.closest('aside'))
-        .find((x) => /Hoja de Ruta/i.test(x.textContent || ''));
-      b.dataset.puerta = '1';
-      return (b.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
-    }""")
-    pag.click('[data-puerta="1"]')
+        try:
+            pag.wait_for_function(
+                """() => [...document.querySelectorAll('#root button')]
+                     .some((b) => !b.closest('aside')
+                            && /Hoja de Ruta|Ver mis 90/i.test(b.textContent || ''))""",
+                timeout=8000)
+            puerta = pag.evaluate("""() => {
+              const b = [...document.querySelectorAll('#root button')]
+                .filter((x) => !x.closest('aside'))
+                .find((x) => /Hoja de Ruta|Ver mis 90/i.test(x.textContent || ''));
+              b.dataset.puerta = '1';
+              return (b.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 44);
+            }""")
+            pag.click('[data-puerta="1"]')
+            print(f'  ⚠ la puerta se encontró por su texto («{puerta}») y no por '
+                  f'{GANCHO}: el gancho de EncabezadoCamino.tsx se perdió')
+        except Exception:
+            return {'falla': 'el Camino no ofrece la entrada a la hoja de ruta',
+                    'jornada': None, 'activa': False}
 
     # EL TRAMO DEL DÍA YA VIENE ABIERTO.
     #

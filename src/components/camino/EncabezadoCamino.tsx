@@ -122,7 +122,19 @@ function Anillo({ sistemas, actual, onAbrirRuta }: { sistemas: SistemaAvance[]; 
           la casilla competía con las vistas de consulta sin ser una.
         */}
         {onAbrirRuta && (
-          <button type="button" onClick={onAbrirRuta}
+          /*
+            `data-puerta="hoja-de-ruta"` NO es para el estilo: es el contrato
+            con las sondas que tocan. `medir-guardado.py` llega a la jornada
+            del día por acá, y la primera versión de este botón se buscaba por
+            su texto —«Hoja de Ruta»—. El día que el botón pasó a decir «Ver
+            mis 90 días», la sonda dejó de encontrar la puerta y dejó de
+            probar si el trabajo del cliente sobrevive a recargar. Siguió en
+            verde, sin probar nada.
+
+            El texto es del cliente y se cambia cuando haga falta. El gancho es
+            de las sondas y no se toca.
+          */
+          <button type="button" onClick={onAbrirRuta} data-puerta="hoja-de-ruta"
             className="mt-1.5 text-[15px] font-semibold text-gold underline underline-offset-4">
             Ver mis 90 días
           </button>

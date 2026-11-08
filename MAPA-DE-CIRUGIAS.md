@@ -314,8 +314,39 @@ de los días 71 al 84» no existe. Esos catorce días son el tramo de ejecución
 del Río, que es exactamente lo que el río enseña —que todo corra solo—, y el
 ecosistema se queda en el Bosque, 85 a 90, donde el contenido ya está escrito.
 
+**Lo segundo que encontró la medición, y no es estética.**
+
+El medidor dio cero faltas en las 22 lentes visuales de las 87 pantallas del
+cliente. Una sola celda en rojo, en la pantalla donde el cliente hace el
+trabajo del día: *«el Camino no ofrece la entrada a la hoja de ruta»*.
+
+Era mío. En el turno 1 ese botón pasó de decir «Hoja de Ruta» a decir «Ver mis
+90 días», y `medir-guardado.py` buscaba su puerta por el texto viejo.
+
+Esa sonda es **la única que toca la app** en vez de mirarla: llega a la jornada
+del día, escribe en el Diario, carga los números, recarga y pregunta si siguen
+ahí. Su encabezado explica por qué existe — *el Camino borraba 71 jornadas al
+abrirse y las 61 vistas del medidor daban cero mientras lo hacía*.
+
+Dos cosas estaban mal a la vez:
+
+1. La sonda estuvo sin probar nada desde el turno 1, y el único aviso fue una
+   celda dentro de una tabla de 22 columnas.
+2. **No estaba en la batería.** La corría quien se acordara, así que el verde
+   de «el ZIP puede salir» nunca la incluyó.
+
+Arreglado: la puerta lleva un gancho que no se renombra
+(`data-puerta="hoja-de-ruta"`), la sonda lo busca por ahí y entra a la batería,
+donde su fallo la pone en rojo. Se probó que el guardián guarda: sacado el
+gancho a propósito, avisa.
+
+Y corrida de verdad: **los cuatro bucles pasan.** El cliente no está perdiendo
+su trabajo — pero eso no se sabía, se supo ahora.
+
 **Después sí, la estética:** jerarquía, aire, y la línea de oro donde
-corresponde.
+corresponde. El medidor da cero faltas en las 22 lentes, así que lo que queda
+ahí no son reglas rotas: es gusto, y el gusto es de Javo. Va como opciones para
+un clic, con la recomendación primera.
 
 ## CIRUGÍA 9 · Estética, computadora
 
