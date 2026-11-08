@@ -1,5 +1,6 @@
 import BotonAudio from './sesion/BotonAudio';
 import { guardarLetra } from '../lib/laFotoYLaLetra';
+import HojaDeRuta from './camino/HojaDeRuta';
 import { getOrigen, setOrigen } from '../lib/origen';
 import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
 import { useState } from 'react';
@@ -85,6 +86,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [ogPaciente, setOgPaciente] = useState('');
   const [situacion, setSituacion] = useState<Situacion>(SITUACION_VACIA);
   const [savingSit, setSavingSit] = useState(false);
+  const [rutaAbierta, setRutaAbierta] = useState(false);
   const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
   const [pqIni, setPqIni] = useState('');
 
@@ -932,7 +934,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           </div>
         )}
 
-        {step === 'welcome' && (
+        {step === 'welcome' && !rutaAbierta && (
           <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-3xl p-8 shadow-2xl text-center animate-in fade-in slide-in-from-bottom-4 duration-400">
             {/* Era verde macizo de 64×64 con un `shadow-[0_0_30px]` encima: lo
                 más saturado de la pantalla, más un GLOW, que la regla de la
@@ -994,6 +996,26 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               ))}
             </div>
 
+            {/*
+              SUS NOVENTA DÍAS, ANTES DE EMPEZARLOS.
+              El mapa del viaje pide que la bienvenida cierre mostrándole su
+              calendario día por día, con las estaciones a la vista, y dice por
+              qué: es donde la app se gana el precio. Alguien que acaba de
+              pagar necesita ver que lo que compró ya está escrito.
+              No va embutido acá: la Hoja de Ruta son trece semanas plegables y
+              esta pantalla tiene una idea sola. Se abre como vista propia, la
+              misma que ya se abre desde el Camino, con el mismo componente —
+              no hay una segunda copia del calendario.
+            */}
+            <button
+              type="button"
+              onClick={() => { setRutaAbierta(true); window.scrollTo({ top: 0 }); }}
+              className="w-full min-h-[52px] mb-3 rounded-xl border text-[17px] font-semibold text-cream flex items-center justify-center gap-2"
+              style={{ borderColor: 'var(--line2, #DFD3BC)' }}
+            >
+              <Map className="w-4 h-4 text-gold" /> Ver mis 90 días
+            </button>
+
             <button
               onClick={() => setStep('pacto')}
               className="w-full py-4 rounded-xl btn-primary flex items-center justify-center gap-2"
@@ -1001,6 +1023,27 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               <ArrowRight className="w-4 h-4" /> Continuar
             </button>
           </div>
+        )}
+
+        {/*
+          La Hoja de Ruta, abierta desde la bienvenida.
+
+          REEMPLAZA al panel, no se le cuelga abajo. La primera versión la
+          montaba debajo del botón, igual que en el Camino, y ahí es correcto
+          porque la página entera es el Camino. Acá el wizard vive dentro de un
+          contenedor que scrollea: la hoja aparecía fuera de la vista y el
+          cliente tocaba «Ver mis 90 días» sin ver pasar nada. Un botón que no
+          parece hacer nada es lo mismo que un botón muerto.
+
+          Entra vacía y en el día 1: todavía no completó ninguna jornada.
+        */}
+        {rutaAbierta && (
+          <HojaDeRuta
+            fechaInicio={profile.fecha_inicio ?? null}
+            completadas={new Set<string>()}
+            diaDeHoy={1}
+            onCerrar={() => setRutaAbierta(false)}
+          />
         )}
 
 

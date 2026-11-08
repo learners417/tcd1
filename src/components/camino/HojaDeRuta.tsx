@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { diasDeLaRuta, fechaCorta, fechaDelDia, SEMANAS } from '../../lib/hojaDeRuta';
 import { VOC } from '../../lib/vocabulario';
+import { nombreDelTramo } from '../../lib/estaciones';
 
 interface Props {
   fechaInicio?: string | null;
@@ -70,6 +71,24 @@ export default function HojaDeRuta({ fechaInicio, completadas, diaDeHoy, onCerra
               >
                 <span>
                   <span className="block text-[17px] font-semibold text-cream">Semana {n} · {VOC(SEMANAS[n] ?? '')}</span>
+                  {/*
+                    LA ESTACIÓN DE LA SEMANA.
+                    El nombre propio de la semana —«En ti», «Grabas y empiezas a
+                    vender»— dice qué HACE. La estación dice DÓNDE está del
+                    viaje, y con qué libro del sur. Son dos cosas distintas y
+                    las dos sirven, así que van las dos.
+                    Sale de `estacionDelDia`, que es la fuente única: el
+                    comentario de SEMANAS dejó escrito que de los días 45 a 84
+                    «no había de dónde sacar el nombre» porque no pertenecen a
+                    ningún sistema. Las estaciones sí los cubren — ese tramo es
+                    el Río — y por eso acá ya hay de dónde.
+                  */}
+                  {(() => {
+                    const tramo = nombreDelTramo(jornadas[0].dia, jornadas[jornadas.length - 1].dia);
+                    return (
+                      <span className="block text-[15px] text-cream/50">{tramo}</span>
+                    );
+                  })()}
                   <span className="block text-[15px] text-cream/60">
                     {fechaCorta(fechaInicio, jornadas[0].dia) || `días ${jornadas[0].dia} a ${jornadas[jornadas.length - 1].dia}`}
                   </span>

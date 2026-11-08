@@ -1497,6 +1497,24 @@ def main():
                     m['errores'] = errores if i == 1 else []
                     m['titulo'] = firma.split(' ~ ')[0]
                     pag.screenshot(path=f'/tmp/app-bienvenida-{i:02d}.png')
+                    # Y EL FINAL DEL PASO, que es donde viven los botones.
+                    #
+                    # El wizard scrollea adentro de su propio contenedor
+                    # (`max-h-[90vh] overflow-y-auto`), así que la captura del
+                    # viewport corta por la mitad: los pasos largos mostraban
+                    # el medio y sus botones no se veían en ninguna foto. Las
+                    # faltas sí se medían —el medidor lee el DOM, no la foto—
+                    # pero para MIRAR hacía falta esto.
+                    try:
+                        pag.evaluate("""() => {
+                          const c = [...document.querySelectorAll('.overflow-y-auto')]
+                            .find((e) => e.scrollHeight > e.clientHeight);
+                          if (c) c.scrollTop = c.scrollHeight;
+                        }""")
+                        pag.wait_for_timeout(400)
+                        pag.screenshot(path=f'/tmp/app-bienvenida-{i:02d}-fin.png')
+                    except Exception:
+                        pass
                     resultados[nombre] = m
                     if not avanzar_wizard(pag):
                         # El último paso (la guía) no tiene continuar: ahí
