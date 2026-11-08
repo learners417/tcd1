@@ -1,0 +1,311 @@
+# El mapa de cirugías — de acá a la versión de venta
+
+Escrito el sábado 7 de noviembre de 2026, contra el **Mapa del viaje
+completo**: cinco estaciones —Lago, Montaña, Viento, Río, Bosque— cada una con
+su libro, su tramo de días, lo que se hace en la app, sus tres piezas de
+instalación y su logro con candado.
+
+Reemplaza el plan de diez turnos. **La vara sigue siendo la tuya del 12 de
+octubre:** «el mejor vehículo para que mis clientes en automático logren la
+promesa, de punto A hacia B».
+
+---
+
+## Primero, la pregunta que ordena todo
+
+**Si el cliente ya tiene Claude, ¿para qué la app?**
+
+Si no se contesta bien, la app es un catálogo caro de cosas que Claude hace
+mejor. Contestada bien, la app es lo único que hace que Claude le sirva.
+
+**Claude es el taller. La app es el plano y el capataz.** Cinco cosas que
+Claude solo no hace:
+
+| | Por qué la app |
+|---|---|
+| **Sabe qué pedir hoy** | El encargo sale lleno con su ADN. Una conversación en blanco es donde se pierde: pasa 90 días construyendo en vez de vendiendo |
+| **Guarda lo que sale** | Catorce piezas selladas con su fecha. Claude no recuerda entre conversaciones, y él no sabe armarse proyectos |
+| **Mide** | La cuenta de los 10 —300 conversaciones, 57 agendas, 40 llamadas, 10 consultantes— con sus números reales adentro |
+| **Frena** | El candado: sin su reset no pasa a Montaña, sin su primera venta no enciende pauta. Claude nunca le dice que no |
+| **Avisa** | El riego de la mañana, el recordatorio, el viernes de los números. Claude espera a que él abra |
+
+Las dos frases que lo resumen, y que valen para el copy: **la app no reemplaza
+a Claude, lo apunta.** Y: **la máquina propone, tú decides, revisas y firmas.**
+
+---
+
+## CIRUGÍA 0 · La alineación — antes de grabar
+
+Medido contra el mapa:
+
+| El mapa dice | La app lo pone en |
+|---|---|
+| Río · tu propia app · días **57-70** | «Tu app, con tu marca» el día **38** · «El alta» el **37** · «Invitar al primero» el **40** |
+| Bosque · tu ecosistema · días **71-84** | «Tu ecosistema circular» el **85** · «Las doce semanas» el **86** |
+
+Lago (1-7) y Montaña (8-14) coinciden. El desfase arranca en Viento y se
+arrastra hasta el final.
+
+Y el pilar **P9B es un bloque de 43 días** —del 48 al 90— haciendo el trabajo
+de tres estaciones. Por eso las semanas 8 a 12 se sienten como operación
+indiferenciada: no están divididas.
+
+**Qué se hace:** los 91 días se reparten en las cinco estaciones con sus
+rangos, P9B se parte en Viento · Río · Bosque · Cierre, y cada jornada declara
+a qué estación pertenece.
+
+**Por qué va primera:** estás grabando videos que pertenecen a una estación y
+la app los serviría en otra.
+
+**Cómo se sabe que quedó:** una lente que compara el día de cada jornada
+contra el rango de su estación y falla si alguno se corre.
+
+---
+
+## CIRUGÍA 1 · Los cinco días que se venden solos
+
+El Lago. Es la oferta de 97 USD y es el protocolo: quien compra esos 97 hace
+exactamente estos cinco días.
+
+| Día | Qué trabaja | Qué queda escrito |
+|---|---|---|
+| **1** | Sentido y propósito | Su frase propia |
+| **2** | La rueda de 8 dimensiones + su protocolo de reemplazos | Su medición de entrada, y «si pasa X, hago Y» |
+| **3** | Su creencia sobre el dinero | La creencia nueva |
+| **4** | Su visión de empresa a 3 años | Su visión en una página |
+| **5** | **Su precio nuevo y el valor de su hora** | El número |
+
+**Lo que hace que quieran seguir, y hay que construirlo:**
+
+- **El día 5 cierra con el número sellado y la puerta abierta**, no con un
+  cartel de venta. La graduación ya existe; lo que falta es que muestre lo que
+  dejó hecho —su precio, su Guardián, su rueda— y recién después lo que sigue.
+- **El riego**: el audio de tu voz para cada mañana. No existe en la app
+  todavía. Los cinco primeros son los que deciden si vuelve el día 2.
+- **La rueda medida el día 2 es su foto de partida**, y vuelve el día 87 como
+  foto de llegada. Ese par de números es su testimonio.
+
+**Y la fuga:** la app cobra ese escalón a **27 USD con 21 días** de acceso.
+La oferta son **97**. El precio y la ventana tienen que decir lo mismo.
+
+---
+
+## CIRUGÍA 2 · El onboarding que dictamina
+
+Una sola sesión de unos 15 minutos, y entra al terminarla. Extiende las tres
+siembras que ya existen —Foto de Partida, el origen en tres preguntas, la
+rueda con su Para Qué— y les suma:
+
+**Subir archivos y enlaces.** Un PDF, su libro, un documento, y el enlace de
+su web o su Instagram, que la app lee sola. Lo que ya publicó dice más de su
+negocio que lo que contesta en un formulario.
+
+**El dictamen**, sobre los cinco ejes que ya están diseñados:
+
+| Eje | Qué define |
+|---|---|
+| ¿Método propio? | **Avatar A** lo crea · **Avatar B** lo ordena y poda |
+| ¿Avatar, oferta y precio? | Los arma, o los valida en versión corta |
+| ¿Cuántos servicios? | Podar «mil servicios» a UNA oferta |
+| ¿Su relación con el dinero? | Dosis del protocolo |
+| ¿Cámara y tiempo? | Cuánto Caro, y el tamaño de cada día |
+
+Avatar B —México y Ecuador— es el mercado principal.
+
+**Termina con tres cosas en pantalla:** en qué etapa está · su ADN provisorio
+con fecha de sellado · y su calendario de 90 días, día por día, con las cinco
+estaciones a la vista. Ese tercer punto es donde la app se gana el precio.
+
+Regla que se mantiene: nada se pregunta dos veces.
+
+---
+
+## CIRUGÍA 3 · El candado por logro, no por día
+
+Hoy el Camino avanza por días. El mapa avanza por **logros**:
+
+| Estación | Se abre con |
+|---|---|
+| Lago | El primer día |
+| Montaña | Su reset hecho |
+| Viento | Su programa listo |
+| Río | Tres ventas pagas |
+| Bosque | Siete mil dólares vendidos |
+
+Eso es lo que convierte la app en mentor y no en curso. Y respeta tu decisión
+del 23 de septiembre: **nadie se salta jornadas** — lo que ya tiene lo revisa
+en versión corta, con su pieza cargada.
+
+La publicidad se enciende con su primera venta, no antes. Ese freno solo
+puede vivir en la app.
+
+---
+
+## CIRUGÍA 4 · La app al lado de Claude
+
+Lo más práctico del producto, y lo que hoy casi no existe.
+
+**Los encargos: de 3 a 12.** El texto ya lleno con sus datos que le pega a
+Claude, en las jornadas donde tiene que **producir** algo: su oferta, su
+página, sus tres anuncios, sus guiones, sus carruseles, su protocolo de
+entrega, sus mensajes de seguimiento, su perfil, su escalera. Los días de
+pensar, decidir o practicar no llevan encargo.
+
+**Su proyecto «Mi clínica» en Claude, armado el día 1.** El mapa lo pone como
+la primera herramienta del Lago. La app le da el texto de las instrucciones
+del proyecto con su ADN adentro: a partir de ahí, cada encargo cae en un
+Claude que ya sabe quién es.
+
+**Las herramientas por estación, que el mapa ya ordena:**
+
+| Estación | Lo que suma |
+|---|---|
+| Lago | Proyecto «Mi clínica», artefactos, modo de voz, Calendar, Canva |
+| Montaña | Sus veinte en el Sistema, su enlace de pago, el mapa de su programa como artefacto, su kit de marca |
+| Viento | **Meta conectado a Claude**, tres palabras clave, agente de WhatsApp, confirmaciones de 24 y 2 horas, una tarea programada de los viernes |
+| Río | **Claude Code, GitHub y Vercel**, etapas y colores en el Sistema, guías y audios hechos con Claude |
+| Bosque | Tareas programadas, Metricool, Opus Clip, y su libro escrito con Claude |
+
+**Las campañas montadas por él, con criterio.** Lo que hay que dejarle
+escrito, no improvisado: el presupuesto de arranque, las dos capas (perfil
+fijo y captación), los catorce días sin tocar nada, y cuándo subir
+presupuesto. Eso es un encargo con el criterio adentro, no un prompt suelto.
+
+**Los 8 entrenadores quedan, y el día abre al que toca:** Caro (cámara),
+Mateo (contenido), Diego (producto), Vera (precio), Sofi (filtrar), Ramiro
+(números), Lucas (llamada), Bruno (post-venta).
+
+---
+
+## CIRUGÍA 5 · Lo que la app mide por él
+
+La cuenta de los 10 ya existe en el código: **300 conversaciones → 57 agendas
+→ 40 llamadas → 10 consultantes a 1.000 USD**. Tasas: agenda 19 %, asistencia
+70 %, cierre 25 %.
+
+Lo que falta es que esa cuenta **empuje cada día**: que el viernes pida sus
+tres números, que el diagnóstico diga cuál de los tres cuellos tiene —volumen,
+filtro o cierre— y que el día siguiente venga con el trabajo de ese cuello.
+
+Más lo que entra solo: **sus llamadas por Fathom** (webhook), **sus campañas
+por Meta**, y sus métricas.
+
+---
+
+## CIRUGÍA 6 · Las cuatro fugas
+
+- **Fathom por webhook** — termina la sesión, entra la transcripción, salen los
+  compromisos como pasos de su día.
+- **El tageo del comprador** — sin el campo `plan` del workflow de GHL, quien
+  paga 997 y quien paga 497 entran igual, con todo abierto.
+- **El escalón de entrada a 97 USD** con su ventana de acceso.
+- **La puerta del día 91** con los tres pases: 97 la app sola · 497 con
+  mentorías grupales · 997 con 1 a 1.
+
+---
+
+## CIRUGÍA 7 · Botones vacíos y callejones
+
+Todo botón que no hace nada, todo estado vacío sin salida, todo lugar donde se
+queda trabado. Con una lente nueva que los encuentra sola.
+
+---
+
+## CIRUGÍA 8 · Estética, teléfono
+
+Que se vea más caro: jerarquía, aire, la línea de oro donde corresponde, y el
+color de cada estación —el azul del lago, la terracota de la montaña, el ocre
+del viento, el turquesa del río, el verde del bosque— llevado a la app, que
+hoy no los usa.
+
+## CIRUGÍA 9 · Estética, computadora
+
+Lo mismo a 1440.
+
+## CIRUGÍA 10 · Punta a punta y cierre
+
+Cliente y Admin, clic por clic, con datos de verdad. Batería entera y
+verificación en vivo.
+
+---
+
+## El orden, y por qué
+
+| # | Cirugía | Por qué ahí |
+|---|---|---|
+| **0** | La alineación a las cinco estaciones | Bloquea el rodaje |
+| **1** | Los cinco días que se venden solos | Es lo que se cobra primero |
+| **2** | El onboarding que dictamina | Es la primera impresión |
+| **3** | El candado por logro | Es lo que la hace mentor |
+| **4** | La app al lado de Claude | Es lo más práctico, y casi no existe |
+| **5** | Lo que mide por él | Es la promesa de los 10.000 |
+| **6** | Las cuatro fugas | Es dinero que se va |
+| **7** | Botones vacíos | Es «imposible perderse» |
+| **8-9** | Estética | Es «más caro» |
+| **10** | Punta a punta | Es el punto bueno |
+
+De la 0 a la 6 se puede cobrar. De la 7 a la 10 se ve caro.
+
+---
+
+## Lo que es tuyo
+
+- **El SQL de `fallas_vistas`** — hasta que corra, si a un cliente se le traba
+  una pantalla, la app le dice «ya nos llegó el aviso» y no llega nada.
+- **El workflow de GHL que manda el `plan`** (verde/negro).
+- **El plan de Fathom** — confirmar que incluye webhooks.
+- **Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
+  mañana).** La lista está abajo.
+- **El riego**: 90 audios cortos de tu voz, uno por mañana. Los cinco del Lago
+  primero.
+- **Los 3 links de pago** y **los 5 mensajes de los libros en GHL.**
+- **Qué libro alimenta cada día 1 al 5** — propongo en la cirugía 1 y
+  corriges.
+- **Los pasos del día 45.**
+- **La palabra de la garantía.** Hoy dice «seguimos gratis». En la app conviene
+  «seguimos hasta que ande», que dice lo mismo en positivo.
+
+---
+
+## Los videos que faltan
+
+**A cámara, 12:** Tu árbol y el dinero · Cómo te frenas y cómo te empujas · Tu
+protocolo, escrito por ti · Le avisas a tu entorno · Tu preventa: los tres
+primeros · Tu recuperador · Tu primera venta y tus números · Crecer o apagar ·
+La máquina de 10 · Tu precio de la próxima camada · Tu ecosistema circular ·
+Tu graduación.
+
+**De pantalla, 8:** Cargar tus consultantes, tu agenda y tus cobros · Tu link
+de pago · Facturar y llevar la cuenta · Subir tu página y publicarla · Tu
+bandeja y tu captación · Tus respuestas automáticas · Grabar y editar con el
+celular · Programar tu contenido del mes.
+
+Los ocho de pantalla ya tienen su paso a paso escrito con la salida del error:
+el cliente los hace hoy leyendo.
+
+De los 36 guiones escritos, **solo 8 calzan con el Camino de hoy** — los otros
+28 están atados a códigos que ya no existen. Los 12 nuevos se escriben antes
+del rodaje.
+
+---
+
+## Las decisiones ya tomadas
+
+- Cuatro destinos fijos abajo. De 13 pantallas a 7: tres vistas de consulta
+  (Mi ADN, El Método, Métricas) y cinco que viven en su día.
+- Hoy = su jornada de hoy, entera.
+- «Tu Precio Nuevo» nombra la oferta de 97 y el protocolo de los días 1 al 5,
+  a propósito.
+- Un solo Camino de 91 días; nadie saltea, lo que ya tiene lo revisa corto.
+- El onboarding sube archivos y enlaces, y se entra al terminarlo.
+- Fathom entra por webhook.
+- Los videos: donde no hay, el día no lo nombra.
+
+---
+
+## La regla
+
+Medir, después mirar la captura, después tocar. En este arco cada defecto que
+valió la pena salió de MIRAR, nunca de leer el código. Y cada vez que la vara
+dijo verde con la app todavía floja, era porque la vara no estaba apuntando
+ahí.
