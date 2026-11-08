@@ -77,8 +77,8 @@ export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
   }, []);
 
   const runEdit = useCallback(async () => {
-    if (!baseImage) { toast.error('Sumi la imagen a editar'); return; }
-    if (!editInstruction.trim()) { toast.error('Describi el cambio que quieres aplicar'); return; }
+    if (!baseImage) { toast.error('Suma la imagen que quieres editar'); return; }
+    if (!editInstruction.trim()) { toast.error('Describe el cambio que quieres aplicar'); return; }
 
     setEditing(true);
     setResult(null);
@@ -131,7 +131,7 @@ export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
         mimeType: resized.mimeType,
         modelUsed: aiResult.modelUsed,
       });
-      toast.success('Edicion lista');
+      toast.success('Edición lista');
     } catch (err) {
       toast.error(mensajeDeFalla(err, 'editar la imagen'));
     } finally {
@@ -230,7 +230,7 @@ export default function CreativoEdicion({ campana, userId, onSaved }: Props) {
           Edición de imagen
         </h3>
         <p className="text-sm text-cream/55 mt-1">
-          Sumi una imagen existente, escribi los cambios y opcionalmente una referencia de personaje. La salida mantiene el tamano original.
+          Suma una imagen que ya tienes, escribe el cambio que quieres y, si hace falta, una referencia de personaje. La salida mantiene el tamaño original.
         </p>
       </div>
 

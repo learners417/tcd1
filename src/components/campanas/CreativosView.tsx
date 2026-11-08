@@ -74,7 +74,7 @@ const TABS: TabConfig[] = [
     label: 'Edicion',
     icon: Wand2,
     eyebrow: 'Edición de imagen',
-    descripcion: 'Sumi una imagen existente y pedi cambios puntuales — respeta el tamaño y formato original.',
+    descripcion: 'Suma una imagen que ya tienes y pide cambios puntuales: respeta el tamaño y el formato original.',
   },
   {
     id: 'carrusel',

@@ -104,7 +104,7 @@ export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadCh
           : <Mensajes userId={clienteId} onUnreadChange={onUnreadChange} />
       )}
 
-      {pestana === 'calendario' && <LasMentorias clienteId={clienteId} />}
+      {pestana === 'calendario' && <LasMentorias clienteId={clienteId} onEscribirle={() => setPestana('contacto')} />}
 
       {canales.map((c) => pestana === c.id && (
         <UnCanal key={c.id} canal={c.id}
@@ -318,7 +318,7 @@ function ElReporte({ clienteId }: { clienteId?: string }) {
 
 /* ══════════════════ LAS MENTORÍAS ══════════════════ */
 
-function LasMentorias({ clienteId }: { clienteId?: string }) {
+function LasMentorias({ clienteId, onEscribirle }: { clienteId?: string; onEscribirle?: () => void }) {
   const [sesiones, setSesiones] = useState<SesionGrupal[] | null>(null);
   /**
    * Las grabaciones de las que ya pasaron.
@@ -357,11 +357,36 @@ function LasMentorias({ clienteId }: { clienteId?: string }) {
       </div>
 
       {sesiones.length === 0 ? (
-        <div className="card-panel p-5">
-          <p className="text-sm text-cream/70 leading-relaxed">
-            Todavía no hay encuentros cargados. Cuando el equipo los suba, aparecen
-            acá con su link.
+        /*
+          ═══ ESTE ERA EL CALLEJÓN MÁS CARO DE LA APP ═══
+
+          Uno de los cuatro destinos fijos, abierto el primer día, decía:
+          «todavía no hay encuentros cargados; cuando el equipo los suba,
+          aparecen acá». Y nada más. Sin un botón, sin una salida.
+
+          Peor: tres renglones más arriba la misma pantalla promete «tus tres
+          encuentros por semana — el link está acá, entras directo». La
+          pantalla se contradice sola, y el que la lee el día 1 se queda con
+          que le vendieron encuentros que no existen.
+
+          Ahora dice lo que SÍ tiene hoy y lo deja a un toque: su equipo lee
+          lo que escriba, el mismo día.
+        */
+        <div className="card-panel p-5 space-y-3">
+          <p className="text-[17px] text-cream/75 leading-relaxed">
+            Los encuentros de tu semana aparecen acá con su link, cada uno a su hora.
           </p>
+          <p className="text-[17px] text-cream/75 leading-relaxed">
+            Mientras tanto tu equipo te lee: escribe qué estás haciendo y qué
+            necesitas, y te contestan el mismo día.
+          </p>
+          {onEscribirle && (
+            <button type="button" onClick={onEscribirle}
+              className="w-full min-h-[52px] rounded-[20px] border text-[17px] font-semibold text-cream"
+              style={{ borderColor: 'var(--line2, #DFD3BC)' }}>
+              Escribirle a tu equipo
+            </button>
+          )}
         </div>
       ) : sesiones.map((s) => {
         const cuando = new Date(s.empieza_en);

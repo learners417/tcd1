@@ -226,7 +226,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
       styleRefs.length > 0 ||
       (genMode === 'texto_personalizado' && customText.h1.trim().length > 0);
     if (!hasAnyInput) {
-      toast.error('Escribi un tema, sumi una imagen de referencia o completa el texto personalizado');
+      toast.error('Escribe un tema, suma una imagen de referencia o completa el texto propio');
       return;
     }
 
@@ -251,7 +251,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
         genMode === 'ia_completa' &&
         userPrompt.trim().length === 0
       ) {
-        toast.error('Para un carrusel con IA escribi el tema o contexto — sino todos los slides salen iguales.');
+        toast.error('Para un carrusel con IA escribe el tema o el contexto: si no, todos los slides salen iguales.');
         return;
       }
     }
@@ -547,7 +547,7 @@ export default function ImagenGenerator({ copies, angulo, perfil, initialFormat,
 
   // ─── Edicion sutil con IA ──────────────────────────────────────────────────
   const applyEdit = useCallback(async () => {
-    if (!editPrompt.trim()) { toast.error('Describi el cambio que quieres aplicar'); return; }
+    if (!editPrompt.trim()) { toast.error('Describe el cambio que quieres aplicar'); return; }
     if (images.length === 0) return;
 
     const idx = previewIdx;

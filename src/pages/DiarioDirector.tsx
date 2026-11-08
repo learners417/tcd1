@@ -927,7 +927,26 @@ Devuelve SOLO este JSON:
             </div>
           )}
           {entries.length === 0 && !loading && (
-            <p className="text-center text-cream/55 text-sm py-12">Aún no hay entradas en el Diario.</p>
+            /*
+              UN ESTADO VACÍO TIENE QUE DAR LA SALIDA. Esto era una sola línea
+              gris —«Aún no hay entradas en el Diario»— y nada más: el cliente
+              abría su historial el primer día, leía que no tenía nada, y la
+              pantalla se terminaba ahí. El botón para escribir estaba en el
+              encabezado, en la otra vista, y había que encontrarlo.
+
+              Y en positivo: dice lo que el Diario SÍ hace, no que está vacío.
+            */
+            <div className="text-center py-12 space-y-3">
+              <p className="text-[17px] text-cream/70 leading-snug max-w-sm mx-auto">
+                Tu Diario empieza con la primera línea que escribas. Tu Mentor lo lee
+                y con eso te conoce mejor cada semana.
+              </p>
+              <button type="button" onClick={() => setVista('formulario')}
+                className="min-h-[52px] px-6 rounded-[20px] border text-[17px] font-semibold text-cream"
+                style={{ borderColor: 'var(--line2, #DFD3BC)' }}>
+                Escribir la primera
+              </button>
+            </div>
           )}
           {entries.map((entrada) => (
             <div key={entrada.id} className="card-panel p-5 rounded-2xl border-l-4 border-l-gold/50 space-y-3">

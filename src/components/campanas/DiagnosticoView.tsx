@@ -81,7 +81,7 @@ Responde con las siguientes secciones:
 ## Diagnostico General
 (Estado general de la campaña: buena, regular, necesita ajustes urgentes)
 
-## Metricas Clave — Analisis
+## Métricas clave — Análisis
 (Analiza cada metrica vs benchmarks del nicho salud. Indica si esta por encima, en rango, o por debajo)
 
 ## Problemas Detectados
@@ -91,9 +91,9 @@ Responde con las siguientes secciones:
 (Pasos concretos a seguir, ordenados por prioridad. Ser ESPECIFICO con acciones en Meta Ads Manager)
 
 ## Benchmarks de Referencia
-(Metricas tipicas para campañas del nicho salud para que el usuario pueda comparar)
+(Métricas típicas de campañas del nicho salud, para que el cliente pueda comparar)
 
-Escribe en espanol, tono directo y profesional. Se especifico con los numeros.`;
+Escribe en español neutro, tono directo y profesional. Sé específico con los números.`;
 
     try {
       let textoCompleto = '';

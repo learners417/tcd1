@@ -4117,6 +4117,17 @@ check('y NO se escribe cuando solo vino un color de acceso',
       'adivinarlo es el puente que hacía figurar a un cliente de $497 con '
       'la instalación completa contratada')
 
+# ── Ningún botón muerto, ningún callejón ──────────────────────────────
+# Dos defectos que no dan error y por eso ninguna otra lente los veía: el
+# manejador que trae su onClick y está vacío, y la pantalla vacía que no
+# ofrece ni un botón ni una frase que diga qué la va a llenar. El cliente
+# no ve nada roto; simplemente ahí se le termina el camino.
+_call = subprocess.run(['npx', 'tsx', 'scripts/prueba-ningun-callejon.ts'],
+                       capture_output=True, text=True)
+check('ninguna pantalla del cliente termina en un callejón',
+      _call.returncode == 0,
+      ' · '.join(l.strip() for l in _call.stdout.split('\n') if l.strip().startswith('✗'))[:220])
+
 _sube = subprocess.run(['npx', 'tsx', 'scripts/prueba-sube-de-escalon.ts'],
                        capture_output=True, text=True)
 check('sube de escalón y se le abre lo que pagó',

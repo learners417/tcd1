@@ -162,7 +162,7 @@ export default function CreativoDetalle({ creativo, userId, onBack, onDeleted }:
   // ─── Editar con IA la slide activa ───────────────────────────────────────
   const handleApplyEdit = async () => {
     if (!editPrompt.trim()) {
-      toast.error('Describi el cambio que quieres aplicar');
+      toast.error('Describe el cambio que quieres aplicar');
       return;
     }
     const asset = assets[activeSlide];

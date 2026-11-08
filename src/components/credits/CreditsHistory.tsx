@@ -46,8 +46,11 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
 
   if (txs.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-white/55">
-        Sin movimientos todavía
+      <div className="text-center py-8 px-4">
+        <p className="text-[17px] text-white/70 leading-snug max-w-xs mx-auto">
+          Acá va a quedar cada imagen que generes y cada recarga que hagas,
+          con su fecha. Todavía no hay movimientos.
+        </p>
       </div>
     );
   }

@@ -147,6 +147,36 @@ const VOSEO = new RegExp(
   'i',
 );
 
+/*
+ * El quinto hueco, y el que se comió tres frases de pantalla: el voseo
+ * escrito SIN su tilde. «Sumi una imagen», «escribi los cambios»,
+ * «Describi en detalle», «transcribi literalmente». Ninguno de los cuatro
+ * patrones de arriba los veía, porque todos buscan la tilde — y acá no hay.
+ *
+ * La regla que los encuentra es más ancha que el voseo y más fácil de
+ * defender: una palabra que SOLO existe con su tilde, escrita sin ella, está
+ * mal de las dos maneras posibles. O es voseo («escribí los cambios») o es un
+ * acento que falta («escribí yo»). En los dos casos hay que tocarla, y en los
+ * dos casos la forma correcta en pantalla es la de tú: escribe, describe.
+ *
+ * Por qué una lista cerrada y no el patrón «termina en -i»: se midió. El
+ * patrón encuentra 30 palabras en la app y 25 son nombres del código
+ * —`creadasPorMi`, `goldHi`, `setPqIni`— y nombres propios —`hormozi`,
+ * `gemini`, `openai`, `ikigai`. Cinco de treinta es un lente que se ignora.
+ */
+const SIN_SU_TILDE = new RegExp(
+  '\\b(' +
+  'describi|escribi|transcribi|descubri|recibi|percibi|' +
+  'volvi|segui|consegui|elegi|vivi|sali|medi|perdi|' +
+  'devolve|sostene|respondeme|' +
+  'sumi' +
+  /* OJO: «mira» y «pega» NO van acá. El imperativo de tú de los verbos en
+   * -ar no lleva tilde —mira, pega, suma— así que son castellano neutro
+   * perfecto. Esta lista probó llevarlos y marcó 92 faltas falsas de una. */
+  ')(?![a-záéíóúñü])',
+  'i',
+);
+
 function archivos(dir: string): string[] {
   const out: string[] = [];
   for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
@@ -193,6 +223,9 @@ for (const p of archivos('src')) {
     // El imperativo con el pronombre pegado, que no lleva tilde al final.
     const e = l.match(ENCLITICO);
     if (e) marcar(e[0]);
+    // Y el voseo escrito sin su tilde, que no termina en -á y nadie veía.
+    const t = l.match(SIN_SU_TILDE);
+    if (t) marcar(t[0]);
     // Y el mismo voseo escrito en versalitas, que ningún otro patrón ve.
     for (const v of l.match(VOSEO_MAYUSCULA) ?? []) {
       if (!MAYUSCULA_BIEN.has(v)) { marcar(v); break; }

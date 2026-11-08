@@ -193,9 +193,9 @@ El CTA debe ser el puente entre ambos mundos.`,
 
   curiosidad: `ANGULO CURIOSIDAD:
 Crea un OPEN LOOP irresistible. El usuario NECESITA hacer clic para cerrar el loop.
-No reveles la respuesta en el anuncio. Insinua, sugiere, pero no completes.
-Estructura: "Descubri [algo inesperado] sobre [tema] que [resultado sorprendente]..."
-Usa numeros especificos y detalles intrigantes.`,
+No reveles la respuesta en el anuncio. Insinúa, sugiere, pero no completes.
+Estructura: "Descubre [algo inesperado] sobre [tema] que [resultado sorprendente]..."
+Usa números específicos y detalles intrigantes.`,
 
   autoridad: `ANGULO AUTORIDAD:
 Posicionate como EL experto. Menciona tu metodo propio, anos de experiencia, resultados.

@@ -123,7 +123,7 @@ FORMATO DE RESPUESTA (Markdown — respeta esta estructura EXACTA):
 
 REGLAS:
 - Usa el LENGUAJE EXACTO del avatar si esta disponible
-- Tono profesional pero cercano, en espanol
+- Tono profesional pero cercano, en español neutro
 - NO uses jerga medica compleja
 - Cada slide debe poder leerse SOLO en 2 segundos
 - La palabra clave del slide final DEBE coincidir con la del caption`;
@@ -161,7 +161,7 @@ REGLAS:
 - Cada variante debe tener un enfoque DIFERENTE entre si (no repetir hooks)
 - Usa el LENGUAJE EXACTO del avatar si esta disponible
 - El H1 de la imagen debe frenar el scroll en 1-2 segundos
-- Tono profesional pero accesible, en espanol
+- Tono profesional pero accesible, en español neutro
 - NO uses jerga medica compleja`;
 
     const prompt = tipo === 'carrusel' ? carruselPrompt : imagenPrompt;

@@ -161,6 +161,28 @@ en versión corta, con su pieza cargada.
 La publicidad se enciende con su primera venta, no antes. Ese freno solo
 puede vivir en la app.
 
+**Corrección del 8 de noviembre, después de leer el código:** el título de esta
+cirugía dice de más. El Camino **ya no avanza por días de calendario**. Avanza
+por `diaDeTrabajo`, que es el día de su próxima jornada sin terminar, y ese
+número —dice el comentario del archivo— «manda sobre TODO lo que se abre o se
+cierra». Quien no completa, no avanza. Eso ya está.
+
+Lo que falta es otra cosa, y más chica de lo que parecía: los **cinco candados
+de salida**, que no son pasos completados sino hechos del negocio. Ya están
+declarados en `estaciones.ts` (`CANDADOS`). Lo que hay que conectar es de dónde
+se lee cada uno:
+
+| Candado | El hecho | ¿Existe el dato? |
+|---|---|---|
+| Lago → Montaña | precio nuevo sellado | **sí** — `elNumero.ts`, con su fecha |
+| Montaña → Viento | programa con enlace de pago | por confirmar |
+| Viento → Río | tres ventas pagas | **falta** — hay que decidir de dónde sale |
+| Río → Bosque | 7.000 USD vendidos | **falta** — lo mismo |
+
+O sea que la cirugía 3 no es reescribir el desbloqueo: es **decidir de dónde
+sale «una venta paga»**. Mientras eso no esté, el candado de la pauta no puede
+existir, y es el que más te importa.
+
 ---
 
 ## CIRUGÍA 4 · La app al lado de Claude
@@ -226,19 +248,74 @@ por Meta**, y sus métricas.
 
 ---
 
-## CIRUGÍA 7 · Botones vacíos y callejones
+## CIRUGÍA 7 · Botones vacíos y callejones — HECHA el 8 de noviembre
 
-Todo botón que no hace nada, todo estado vacío sin salida, todo lugar donde se
-queda trabado. Con una lente nueva que los encuentra sola.
+Lente nueva: `prueba-ningun-callejon.ts`, registrada en la batería. Mira tres
+cosas en las 107 pantallas del cliente: el manejador que trae su `onClick` y
+está vacío, el enlace que no lleva a ningún lado, y el estado vacío que no
+ofrece ni un botón ni una frase que diga qué lo va a llenar.
+
+La regla que quedó escrita para los estados vacíos tiene **dos** salidas, no
+una: o hay algo que tocar, o hay prosa suficiente para explicar qué va a
+aparecer ahí. «Sin movimientos todavía» no es ninguna de las dos.
+
+**Lo que encontró y se arregló:**
+
+| Dónde | Qué decía | Qué dice |
+|---|---|---|
+| Historial de créditos | «Sin movimientos todavía» | qué imagen y qué recarga van a quedar ahí |
+| Diario, sin entradas | nada que tocar | el botón «Escribir la primera» |
+| Encuentros, sin ninguno | nada que tocar | el botón para escribirle al equipo |
+
+**Y el agujero que destapó, que valía más:** la lente del castellano neutro no
+veía el voseo escrito **sin su tilde**. «Sumi una imagen», «escribi los
+cambios», «Describi el cambio», «transcribi literalmente» — cinco frases de
+pantalla hablándole de vos al cliente, más un «tamano» sin la ñ y tres
+«espanol» dentro de encabezados que el modelo copia al informe. Arregladas, y
+la lente ahora las caza: una palabra que solo existe con su tilde, escrita sin
+ella, está mal de las dos maneras posibles.
+
+Se midió antes de escribir la regla: el patrón ancho «termina en -i» encuentra
+30 palabras en la app y 25 son nombres del código. Por eso la lista es cerrada.
 
 ---
 
 ## CIRUGÍA 8 · Estética, teléfono
 
-Que se vea más caro: jerarquía, aire, la línea de oro donde corresponde, y el
-color de cada estación —el azul del lago, la terracota de la montaña, el ocre
-del viento, el turquesa del río, el verde del bosque— llevado a la app, que
-hoy no los usa.
+**Primero una corrección mía de la cirugía 0, y es lo más caro de esta lista.**
+
+Este mapa decía que la app «hoy no usa» los colores de las estaciones. Es al
+revés: `losCincoPaisajes.ts` ya los tiene desde antes, **sacados del PDF de
+imprenta**, con cinco tonos cada uno y el contraste medido uno por uno — el
+ocre del viento daba 2,2 a 1 sobre blanco y por eso tiene un «lecho» aparte
+para el texto. Y ya se ven: Hoy abre con el paisaje del día y El Camino muestra
+la portada del sistema.
+
+Lo que hice en la cirugía 0 fue inventar cinco colores más en `estaciones.ts`
+y, peor, **inventar los tramos de días otra vez**. Resultado medido:
+
+> **21 de los 90 días la app se contradice sola.** El día 75 Hoy muestra el
+> Río y El Camino dice «El Bosque». El día 90 Hoy muestra el Bosque y El
+> Camino dice «El Cierre».
+
+`paisajeDelDia` tiene razón y mi tabla no, por un motivo que ese archivo ya
+tenía escrito antes de que yo lo tocara: *«los rangos salen del seed y se
+parsean para que haya un solo lugar donde viven: con los números escritos acá
+y allá, el día que se mueva una jornada la app mostraría el paisaje de otro
+sistema»*. Los libros son cinco paisajes, no seis, y los tramos salen del seed:
+1-5, 8-12, 15-33, 36-44, 85-86.
+
+**La corrección:** `estaciones.ts` deja de tener color y deja de tener rangos.
+Se queda con lo único que agregó de verdad —el candado de cada estación, con
+qué se abre y qué te deja— y el resto lo pide al paisaje. Un solo lugar.
+
+Y se cae solo un pendiente que yo mismo había creado: el «Bosque sin contenido
+de los días 71 al 84» no existe. Esos catorce días son el tramo de ejecución
+del Río, que es exactamente lo que el río enseña —que todo corra solo—, y el
+ecosistema se queda en el Bosque, 85 a 90, donde el contenido ya está escrito.
+
+**Después sí, la estética:** jerarquía, aire, y la línea de oro donde
+corresponde.
 
 ## CIRUGÍA 9 · Estética, computadora
 
