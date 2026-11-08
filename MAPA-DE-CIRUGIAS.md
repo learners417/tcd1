@@ -140,6 +140,42 @@ estaciones a la vista. Ese tercer punto es donde la app se gana el precio.
 
 Regla que se mantiene: nada se pregunta dos veces.
 
+### Corrección del 8 de noviembre, después de leer el código
+
+**Las preguntas ya existen, y son más de las que esta tabla acreditaba.** El
+paso `diagnostico` de la bienvenida pregunta **diez** cosas, no cinco: método
+propio · freno · nicho · qué pasa cuando dice su precio · tiempo real por día ·
+de dónde llegan hoy · qué entrega entre sesiones · cada cuánto publica · cómo
+quiere que le hable el Mentor · si el trabajo espiritual es parte de su vida. Y
+el paso `situacion` pregunta su escalera.
+
+El encabezado decía «Siete preguntas» con diez abajo. Corregido.
+
+**Y la bienvenida borraba lo que el cliente acababa de escribir.** Los dos
+pasos escribían la misma columna jsonb, cada uno con su lista de campos, y el
+segundo —el diagnóstico— no incluía `situacion`. Un UPDATE de jsonb reemplaza
+el valor entero: la escalera del cliente se perdía un minuto después de
+escribirla. Arreglado con un solo compositor, más su lente, probada contra su
+propio fallo. Queda anotado que `medir-guardado.py` no tiene bucle de la
+bienvenida: es el próximo que le falta.
+
+**Entonces lo que falta de esta cirugía son DOS cosas, las dos mías:**
+
+1. **El dictamen en pantalla.** En qué etapa está · su ADN provisorio con fecha
+   de sellado · su calendario de 90 días día por día. Hoy el cierre le promete
+   lo mismo a todos: «10 consultantes a tu precio digno y 10 horas menos por
+   semana».
+
+2. **Que el dictamen sirva para algo.** `avatar_tipo` se guarda y **nadie lo
+   lee**. El cliente contesta si tiene método propio o no —lo que según este
+   mapa decide si lo *crea* (Avatar A) o lo *ordena y poda* (Avatar B)— y el
+   camino le sale igual a los dos. Ese es el verdadero trabajo de la cirugía 2:
+   sin esto, el dictamen es un cartel.
+
+Lo que sigue sin estar en ninguno de los dos pasos, y es decisión de producto:
+**¿cuántos servicios tiene?** (podar «mil servicios» a UNA oferta) y **la
+cámara** (la dosis de Caro). Si entran, entran como preguntas 11 y 12.
+
 ---
 
 ## CIRUGÍA 3 · El candado por logro, no por día
