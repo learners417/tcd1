@@ -34,33 +34,55 @@ a Claude, lo apunta.** Y: **la máquina propone, tú decides, revisas y firmas.*
 
 ---
 
-## CIRUGÍA 0 · La alineación — antes de grabar
+## CIRUGÍA 0 · La alineación — HECHA el 7 de noviembre
 
-Medido contra el mapa:
+Las cinco estaciones son ahora una dimensión real de la app, en
+`src/lib/estaciones.ts`: cada una con su libro, su tramo, su color, con qué
+se abre y qué deja.
 
-| El mapa dice | La app lo pone en |
+**Lo que el cliente veía:** «Días 48 a 90» como nombre de un tramo. Un rango
+no dice dónde está, ni con qué libro, ni qué va a lograr.
+**Lo que ve ahora:** «El Lago», «El Río», «Del Viento al Río» cuando cruza.
+
+**No se partió el pilar P9B**, y a propósito: los ids de pilar están cableados
+en el esquema del ADN, los cinturones, las compuertas de plan y las respuestas
+del Mentor. Partirlo arrastraba seis archivos de plomería para cambiar algo
+que el cliente nunca ve. La estación es una dimensión aparte, derivada del
+día: el pilar es de la máquina, la estación es del cliente.
+
+**Dos lugares donde el Camino le ganó al mapa, decididos el 7 de noviembre:**
+
+| | Qué ganó |
 |---|---|
-| Río · tu propia app · días **57-70** | «Tu app, con tu marca» el día **38** · «El alta» el **37** · «Invitar al primero» el **40** |
-| Bosque · tu ecosistema · días **71-84** | «Tu ecosistema circular» el **85** · «Las doce semanas» el **86** |
+| **El Río arranca el 37, no el 57** | El cliente arma su app cuando ya tiene a quién meter adentro: vende el 26, su primer consultante entra el 40. Esperar al 57 son 19 días atendiendo a mano a personas que ya pagaron |
+| **El ecosistema se queda en el 85 y 86** | El día 85 trae su veredicto escrito: «sesenta días sin publicar fue a propósito; ahora tienes qué vender y cómo venderlo, recién ahora el contenido rinde» |
 
-Lago (1-7) y Montaña (8-14) coinciden. El desfase arranca en Viento y se
-arrastra hasta el final.
+| Estación | Días | |
+|---|---|---|
+| El Lago | 1-7 | Tu reset · libertad mental |
+| La Montaña | 8-14 | Tu programa · libertad financiera |
+| El Viento | 15-36 | Tu captación · libertad emocional |
+| El Río | 37-70 | Tu propia app · libertad energética |
+| El Bosque | 71-84 | Tu ecosistema · libertad de tiempo |
+| El Cierre | 85-90 | Tu trimestre que viene |
 
-Y el pilar **P9B es un bloque de 43 días** —del 48 al 90— haciendo el trabajo
-de tres estaciones. Por eso las semanas 8 a 12 se sienten como operación
-indiferenciada: no están divididas.
+**La grilla volvió a tres.** «Tu Camino por dentro» tenía cinco casillas. Las
+dos de más tenían otra puerta a lo mismo en la misma pantalla: la Hoja de Ruta
+ahora cuelga del anillo de jornadas y los cobros del contador de consultantes.
+Ningún panel se borró.
 
-**Qué se hace:** los 91 días se reparten en las cinco estaciones con sus
-rangos, P9B se parte en Viento · Río · Bosque · Cierre, y cada jornada declara
-a qué estación pertenece.
+**La lente:** `prueba-las-cinco-estaciones.ts` — que los 90 días estén
+cubiertos una sola vez, que los tramos se toquen sin pisarse, que cada estación
+diga con qué se abre y qué deja, y que las jornadas comprometidas por el mapa
+estén en su tramo.
 
-**Por qué va primera:** estás grabando videos que pertenecen a una estación y
-la app los serviría en otra.
+### Lo que esta cirugía deja anotado
 
-**Cómo se sabe que quedó:** una lente que compara el día de cada jornada
-contra el rango de su estación y falla si alguno se corre.
-
----
+- **El Bosque se quedó sin contenido propio.** Sus catorce días (71-84) son
+  operación. Le faltan su perfil, sus cinco alianzas, sus tres invitaciones
+  —podcast, live y medio— y su libro, que el mapa pide y la app no tiene.
+- **El subtítulo del tramo miente:** el pilar de los días 32 a 38 dice
+  «Sistema 1 · Tu reset», que es el sistema del Lago. Va a la cirugía 7.
 
 ## CIRUGÍA 1 · Los cinco días que se venden solos
 

@@ -33,10 +33,19 @@ ok(fechaCorta(null, 15) === '', 'sin fecha de inicio no inventa fechas');
 console.log('\n── vive adentro del Camino ──');
 const roadmap = readFileSync('src/pages/Roadmap.tsx', 'utf8');
 ok(/HojaDeRuta/.test(roadmap), 'se abre desde el Camino');
-// El boton suelto con su renglon de explicacion —«tus noventa dias ›»— paso a
-// ser una tarjeta mas de la grilla «Tu Camino por dentro», con el resto de las
-// partes. Lo que se cuida es que siga teniendo su puerta, no como esta escrita.
-ok(/label: 'Hoja de Ruta'/.test(roadmap), 'con su tarjeta en la grilla del Camino');
+/*
+ * LA REGLA ES QUE TENGA PUERTA, NO CUAL. Esta linea decia «tiene su tarjeta
+ * en la grilla» y guardaba la implementacion, no la regla: el dia que la
+ * grilla volvio a tres casillas —decision del 7 de noviembre— esto se puso
+ * rojo sin que nada se hubiera roto.
+ *
+ * Su puerta ahora cuelga del anillo de jornadas, que es lo que contesta
+ * «cuanto llevo»: la Hoja de Ruta es esa misma pregunta con el detalle de las
+ * doce semanas. Lo que se cuida es que el boton exista y que alguien lo abra.
+ */
+ok(/onAbrirRuta=\{\(\) => setRutaAbierta\(true\)\}/.test(roadmap), 'el Camino le pasa su puerta al encabezado');
+const encabezado = readFileSync('src/components/camino/EncabezadoCamino.tsx', 'utf8');
+ok(/Ver mis 90 d\u00edas/.test(encabezado), 'y el anillo la abre');
 const vista = readFileSync('src/components/camino/HojaDeRuta.tsx', 'utf8');
 ok(/d\.minutos > 0 && completadas\.has/.test(vista), 'cuenta las jornadas con trabajo, no los días de campo');
 ok(/arrancaLunes/.test(vista), 'solo promete el fin de semana libre a quien arranca en lunes');

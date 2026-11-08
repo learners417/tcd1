@@ -95,6 +95,7 @@ import Dia45Banner from '../components/Dia45Banner';
 import { validarADNDia45, compararFotoPartida } from '../lib/diaValidator';
 import { usePersistedState } from '../lib/usePersistedState';
 import { VOC } from '../lib/vocabulario';
+import { nombreDelTramo } from '../lib/estaciones';
 import PuntoDePartida, { KEY_PARTIDA } from '../components/PuntoDePartida';
 import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
 import { tutorialEscrito } from '../lib/tutorialesDeLupe';
@@ -142,6 +143,9 @@ interface PilarConEstado extends RoadmapPilar {
   metasCompletadas: number;
   totalMetas: number;
   estrellas_completadas: number;
+  /** Primer y último día del tramo, sacados de sus jornadas. */
+  diasInicio: number;
+  diasFin: number;
 }
 
 interface Props {
@@ -744,7 +748,19 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     const estrellas_completadas = pilar.metas.filter(
       (m) => m.es_estrella && completadas.has(`${pilar.numero}-${m.codigo}`),
     ).length;
-    return { ...pilar, estado, metasCompletadas, totalMetas: pilar.metas.length, estrellas_completadas };
+    /*
+     * El tramo de días sale de las jornadas del pilar, no de un campo: el
+     * seed no lo trae, y calcularlo acá lo deja siempre en hora aunque una
+     * jornada se mueva de día.
+     */
+    const diasDelPilar = pilar.metas
+      .map((m) => m.dia_asignado)
+      .filter((d): d is number => typeof d === 'number');
+    return {
+      ...pilar, estado, metasCompletadas, totalMetas: pilar.metas.length, estrellas_completadas,
+      diasInicio: diasDelPilar.length ? Math.min(...diasDelPilar) : 0,
+      diasFin: diasDelPilar.length ? Math.max(...diasDelPilar) : 0,
+    };
   });
 
   // ─── Auto-expand first incomplete pilar on load ─────────────────────────
@@ -1313,6 +1329,8 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
 
       {/* ── Encabezado: dónde estás y qué hacer hoy (10-DISENO) ── */}
       <EncabezadoCamino
+        onAbrirRuta={() => setRutaAbierta(true)}
+        onAbrirNumeros={() => setNumerosAbiertos(true)}
         cinturon={cinturonCamino}
         sistemas={sistemasAvance}
         sistemaActual={pasoDeHoy?.sistema ?? null}
@@ -1354,10 +1372,20 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       <PartesDelCamino
         cinturonOrden={cinturonCamino?.orden ?? 1}
         modulosActivos={(perfil as { modulos_activos?: string[] } | undefined)?.modulos_activos ?? []}
-        locales={[
-          { id: 'cobros', label: 'Tus números', icon: Coins, onClick: () => setNumerosAbiertos((v) => !v) },
-          { id: 'ruta', label: 'Hoja de Ruta', icon: CalendarRange, onClick: () => setRutaAbierta((v) => !v) },
-        ]}
+        /*
+          LA GRILLA VUELVE A TRES. Tenía cinco: «Tus números» y «Hoja de Ruta»
+          se sumaban a las tres vistas de consulta. Las dos sobraban por el
+          mismo motivo — ya había otra puerta a lo mismo en esta pantalla:
+
+          · «Hoja de Ruta» son sus noventa días semana por semana. Ahora se
+            abre desde el anillo de jornadas, que es lo que contesta «cuánto
+            llevo».
+          · «Tus números» son sus cobros. Ahora se abren desde el contador de
+            consultantes, que es la misma cuenta.
+
+          Ningún panel se borró: los dos quedaron pegados a lo que hablan de
+          ellos, en vez de competir en una grilla.
+        */
         onIr={(id) => onNavigate?.(id)}
       />
 
@@ -1501,9 +1529,41 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                           {VOC(pilar.subtitulo)}
                         </p>
                       )}
-                      <p lang="es" className={`text-[17px] leading-snug font-semibold mt-0.5 hyphens-auto [overflow-wrap:anywhere] ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/55' : 'text-cream'}`}>
-                        {VOC(pilar.titulo)}
-                      </p>
+                      {/*
+                        EL TRAMO SE NOMBRA POR SU ESTACIÓN, NO POR SU RANGO.
+
+                        `pilar.titulo` es literalmente un rango: «Días 2 a 5»,
+                        «Días 48 a 90». Un rango no dice dónde está el cliente,
+                        ni con qué libro, ni qué va a lograr — y el último eran
+                        cuarenta y tres días bajo un solo cartel, el trabajo de
+                        tres estaciones sin nombre propio.
+
+                        Ahora dice «El Lago», «El Río», o «Del Viento al
+                        Cierre» cuando cruza varias. El rango sigue abajo, en
+                        chico, porque el dato de qué días son sirve: lo que no
+                        sirve es que sea el nombre.
+                      */}
+                      {(() => {
+                        /*
+                         * El día 0 —la entrega técnica— no pertenece a ninguna
+                         * estación, así que su tramo no tiene nombre y
+                         * `nombreDelTramo` devuelve el rango. Ahí el renglón de
+                         * abajo diría exactamente lo mismo dos veces, que es el
+                         * defecto que esto vino a arreglar.
+                         */
+                        const nombre = nombreDelTramo(pilar.diasInicio, pilar.diasFin);
+                        const rango = `Días ${pilar.diasInicio} a ${pilar.diasFin}`;
+                        return (
+                          <>
+                            <p lang="es" className={`text-[17px] leading-snug font-semibold mt-0.5 hyphens-auto [overflow-wrap:anywhere] ${(pilar.estado === 'bloqueado' || pilar.estado === 'plan_bloqueado') ? 'text-cream/55' : 'text-cream'}`}>
+                              {nombre}
+                            </p>
+                            {nombre !== rango && (
+                              <p className="text-[15px] text-cream/60 mt-0.5">{rango}</p>
+                            )}
+                          </>
+                        );
+                      })()}
 
                       {/* Mini barra de progreso */}
                       {pilar.estado !== 'bloqueado' && pilar.estado !== 'plan_bloqueado' && (

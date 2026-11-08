@@ -52,9 +52,13 @@ interface Props {
   ventas: number;
   onEmpezar: () => void;
   onRegistrarVenta: () => void;
+  /** Abre sus noventa días semana por semana, desde el anillo. */
+  onAbrirRuta?: () => void;
+  /** Abre sus cobros, desde el contador de consultantes. */
+  onAbrirNumeros?: () => void;
 }
 
-function Anillo({ sistemas, actual }: { sistemas: SistemaAvance[]; actual: number | null }) {
+function Anillo({ sistemas, actual, onAbrirRuta }: { sistemas: SistemaAvance[]; actual: number | null; onAbrirRuta?: () => void }) {
   const tam = 188;
   const c = tam / 2;
   const r = 78;
@@ -110,6 +114,19 @@ function Anillo({ sistemas, actual }: { sistemas: SistemaAvance[]; actual: numbe
           es como la nombra el dato, la Hoja de Ruta y el cierre de cuentas.
         */}
         <span className="mt-1 text-[15px] text-cream/65">de {total} jornadas</span>
+        {/*
+          LA HOJA DE RUTA SE ABRE DESDE ACÁ, no desde una casilla en una
+          grilla. El anillo es lo que contesta «cuánto llevo»; la Hoja de Ruta
+          es la misma pregunta con el detalle: sus noventa días semana por
+          semana, con fechas reales y los hitos marcados. Vivían separadas, y
+          la casilla competía con las vistas de consulta sin ser una.
+        */}
+        {onAbrirRuta && (
+          <button type="button" onClick={onAbrirRuta}
+            className="mt-1.5 text-[15px] font-semibold text-gold underline underline-offset-4">
+            Ver mis 90 días
+          </button>
+        )}
       </div>
     </div>
   );
@@ -117,6 +134,7 @@ function Anillo({ sistemas, actual }: { sistemas: SistemaAvance[]; actual: numbe
 
 export default function EncabezadoCamino({
   cinturon, sistemas, sistemaActual, ritmo, hoy, esFinde, faseAutonomia, ventas, onEmpezar, onRegistrarVenta,
+  onAbrirRuta, onAbrirNumeros,
 }: Props) {
   const sis = sistemas.find((s) => s.n === sistemaActual) ?? null;
 
@@ -182,7 +200,7 @@ export default function EncabezadoCamino({
           </div>
 
           <div className="mt-5 md:mt-0 md:order-1 md:shrink-0">
-            <Anillo sistemas={sistemas} actual={sistemaActual} />
+            <Anillo sistemas={sistemas} actual={sistemaActual} onAbrirRuta={onAbrirRuta} />
           </div>
         </div>
       </section>
@@ -230,7 +248,16 @@ export default function EncabezadoCamino({
             la deja en ancho fijo, así que la fila no se corre al pasar de 9 a
             10. El anillo se queda como está: ahí el tamaño la sostiene.
           */}
-          <span className="text-[24px] font-semibold text-goldhi num-tab">{ventas}</span> de 10 {VOC('{{consultantes}}')}
+          {/*
+            EL CONTADOR ABRE SUS COBROS. Era una línea muerta al lado de un
+            botón de registrar, y sus números vivían en una casilla aparte de
+            la grilla: dos puertas para la misma cuenta. El contador es la
+            cuenta; tocarlo muestra de dónde sale.
+          */}
+          <button type="button" onClick={onAbrirNumeros} disabled={!onAbrirNumeros}
+            className="text-left min-h-[44px]">
+            <span className="text-[24px] font-semibold text-goldhi num-tab">{ventas}</span> de 10 {VOC('{{consultantes}}')}
+          </button>
         </p>
         <button type="button" onClick={onRegistrarVenta} className="min-h-[44px] px-2 text-[17px] font-semibold text-goldhi whitespace-nowrap">
           Registrar venta

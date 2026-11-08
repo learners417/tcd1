@@ -60,7 +60,14 @@ const roadmap = readFileSync('src/pages/Roadmap.tsx', 'utf8');
 ok(/TusNumeros/.test(roadmap), 'se abre desde el Camino');
 // Lo mismo que la Hoja de Ruta: el boton suelto es ahora una tarjeta de la
 // grilla «Tu Camino por dentro».
-ok(/label: 'Tus números'/.test(roadmap), 'con su tarjeta en la grilla del Camino');
+/*
+ * Misma correccion que en la Hoja de Ruta: la regla es que sus cobros tengan
+ * puerta, no que esa puerta sea una casilla. Desde el 7 de noviembre se abren
+ * tocando el contador de consultantes —«0 de 10»—, que es la misma cuenta.
+ */
+ok(/onAbrirNumeros=\{\(\) => setNumerosAbiertos\(true\)\}/.test(roadmap), 'el Camino le pasa su puerta al encabezado');
+const encab = readFileSync('src/components/camino/EncabezadoCamino.tsx', 'utf8');
+ok(/onClick=\{onAbrirNumeros\}/.test(encab), 'y el contador de consultantes la abre');
 ok(/onRegistrarCobro=\{\(\) => setVentaModal\(true\)\}/.test(roadmap), 'y desde ahí puede anotar un cobro');
 const pantalla = readFileSync('src/components/TusNumeros.tsx', 'utf8');
 ok(!/text-\[1[0-4]px\]|text-xs|text-sm/.test(pantalla), 'sin letra chica');
