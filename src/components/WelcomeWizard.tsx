@@ -94,6 +94,56 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [dxEntrega, setDxEntrega] = useState('');
   const [dxPublica, setDxPublica] = useState('');
 
+  /**
+   * EL JSON `diagnostico`, COMPLETO, EN UN SOLO LUGAR.
+   *
+   * ═══ EL BUG QUE ESTO CIERRA (8 de noviembre) ═══
+   *
+   * `diagnostico` es una columna jsonb y los dos pasos de la bienvenida la
+   * escribían por separado, cada uno con SU lista de campos:
+   *
+   *   guardarSituacion   → { freno … trabajo_espiritual, situacion }
+   *   guardarDiagnostico → { freno … trabajo_espiritual, llegan, entrega, publica }
+   *
+   * El orden de los pasos es `situacion` y DESPUÉS `diagnostico`. Un UPDATE de
+   * jsonb reemplaza el valor entero, no mezcla. Así que el segundo guardado
+   * borraba `situacion` —la escalera del cliente, su oferta, lo que ya vende—
+   * un minuto después de que lo escribiera. En la bienvenida, que es la
+   * primera pantalla de alguien que acaba de pagar.
+   *
+   * No lo vio nadie porque las dos escrituras son correctas por separado, y la
+   * sonda que recarga y pregunta si el trabajo sigue ahí mira El Camino, el
+   * Diario y Mi Número — la bienvenida no estaba entre sus bucles.
+   *
+   * Ahora hay UN compositor. Los dos pasos escriben el objeto completo con lo
+   * que haya hasta ese momento, así que ninguno puede dejar afuera un campo
+   * del otro. Un campo nuevo se agrega acá y los dos lo escriben.
+   */
+  const payloadDiagnostico = (conSituacion: boolean) => ({
+    freno: dxFreno,
+    nicho_hipotesis: dxNicho,
+    dinero: dxDinero,
+    tiempo: dxTiempo,
+    estilo_mentor: dxEstilo,
+    trabajo_espiritual: dxFe,
+    llegan: dxLlegan,
+    entrega: dxEntrega,
+    publica: dxPublica,
+    /* En el paso de la situación va la del formulario; en el diagnóstico, la
+       que ya quedó guardada, que es justo la que se estaba perdiendo. */
+    situacion: conSituacion ? situacion : situacionGuardada(),
+  });
+
+  /** La situación que ya está en el teléfono, para no pisarla con un vacío. */
+  const situacionGuardada = (): Situacion => {
+    if (situacionCompleta(situacion)) return situacion;
+    try {
+      const raw = localStorage.getItem('tcd_situacion');
+      if (raw) return { ...SITUACION_VACIA, ...(JSON.parse(raw) as Situacion) };
+    } catch { /* noop */ }
+    return situacion;
+  };
+
   const guardarDiagnostico = async () => {
     if (!dxAvatar) return;
     setDxSaving(true);
@@ -124,7 +174,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           new Promise<{ error?: unknown } | null>((res) => setTimeout(() => res(null), 8000)),
           supabase.from('profiles').update({
           avatar_tipo: dxAvatar,
-          diagnostico: { freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo, estilo_mentor: dxEstilo, trabajo_espiritual: dxFe, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica },
+          diagnostico: payloadDiagnostico(false),
           ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
           ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
         }).eq('id', profile.id),
@@ -151,11 +201,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         await Promise.race([
           new Promise((res) => setTimeout(res, 8000)),
           supabase.from('profiles').update({
-            diagnostico: {
-              freno: dxFreno, nicho_hipotesis: dxNicho, dinero: dxDinero, tiempo: dxTiempo,
-              estilo_mentor: dxEstilo, trabajo_espiritual: dxFe,
-              situacion,
-            },
+            diagnostico: payloadDiagnostico(true),
           }).eq('id', profile.id),
         ]);
       }
@@ -624,7 +670,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
-              <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Siete preguntas — la semilla de tu ADN</h2>
+              <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Diez preguntas — la semilla de tu ADN</h2>
               <p className="text-sm text-cream/55 mt-1">Con esto tu plan arranca personalizado. Un minuto, sin vueltas.</p>
             </div>
 
