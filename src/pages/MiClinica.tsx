@@ -89,6 +89,13 @@ export default function MiClinica(
                 {l.que}
               </p>
               <p className="mt-2 text-[17px] leading-relaxed text-cream/65">{VOC(l.como)}</p>
+              {/* Hasta cuándo dura. El contraste entre las dos es el mensaje:
+                  el Camino se cierra, la Clínica se queda. */}
+              <p className={`mt-3 pt-3 border-t text-[17px] leading-snug ${
+                i === 1 ? 'text-cream/85' : 'text-cream/55'}`}
+                style={{ borderColor: 'var(--line, rgba(142,104,36,0.18))' }}>
+                {VOC(l.cuando)}
+              </p>
             </div>
           ))}
         </div>

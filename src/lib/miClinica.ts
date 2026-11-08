@@ -31,11 +31,31 @@ export const LAS_DOS_LLAVES = {
     nombre: 'El Camino',
     que: 'Donde te construyes',
     como: 'Una sesión por día, cuarenta y cinco minutos. Acá armas tu método, tu oferta, tu página y tus campañas.',
+    /*
+      ═══ HASTA CUÁNDO DURA CADA UNA ═══
+
+      El día 38 el cliente abre Mi Clínica por primera vez y le pone su marca.
+      Hasta hoy nada le decía que esa app no termina con el programa: llegaba
+      al día 91, le aparecía una mensualidad, y era la primera vez que se
+      enteraba de que eso se paga aparte.
+
+      El contraste ES el mensaje, y por eso va en las dos tarjetas y no en un
+      aviso suelto: una se cierra, la otra se queda. Cuando lo lee el día 38
+      —con su marca recién puesta y su primer consultante por entrar— la
+      mensualidad del día 91 deja de ser un cobro nuevo y pasa a ser lo que
+      ya venía usando.
+
+      Javo decidió el 8 de noviembre que Mi Clínica es la casa y no un
+      producto aparte: no se vende suelta, va incluida mientras esté en el
+      ecosistema. Esta línea es cómo la app lo dice.
+    */
+    cuando: 'Se cierra el día 90, con tu sistema andando.',
   },
   clinica: {
     nombre: 'Mi Clínica',
     que: 'Donde operas',
     como: 'Acá atiendes. Tus consultantes, sus protocolos, su seguimiento y sus pagos, todo en un lugar.',
+    cuando: 'Sigue siendo tuya el día 91, con todo lo que cargaste adentro.',
   },
 } as const;
 

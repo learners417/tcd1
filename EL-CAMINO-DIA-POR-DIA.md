@@ -83,7 +83,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 75 min · sistema 1: Tu reset · entrenador: espejo*
 
-- Contesta las seis preguntas de tu medición de entrada
+- Confirma tus seis números de entrada: ya los cargaste al entrar, ajústalos si algo cambió
 - Elige dónde y a qué hora vas a construir esto cada día
 - Suma lo que cobraste el último mes y las horas que trabajaste de verdad
 - Divide: esa es tu hora real neta
