@@ -189,6 +189,73 @@ cámara** (la dosis de Caro). Si entran, entran como preguntas 11 y 12.
 
 ---
 
+## LAS DECISIONES DEL 8 DE NOVIEMBRE
+
+Javo eligió cinco cosas en una vuelta. Quedan acá para que no se vuelvan a
+discutir.
+
+### 1 · El dictamen: «Tu etapa y tu puerta» — HECHO
+
+La bienvenida cierra con un veredicto, no con un resumen. Cinco etapas, todas
+con la forma «Tienes X. Te falta Y.». En `elDictamen.ts`.
+
+### 2 · Ninguna versión corta de las jornadas — CERRADO
+
+La letra A/B cambia el tono del Mentor y el Camino queda igual para todos.
+Respeta al pie la decisión del 23 de septiembre: nadie se salta jornadas.
+No hay nada que construir.
+
+### 3 · MiClínica es LA CASA, no el producto — decidido, falta nombrarlo
+
+MCD **no se vende suelto**. Va incluido mientras el cliente esté en el
+ecosistema: es la app donde vive, y la mensualidad posterior a los 90 días
+compra app + acompañamiento, no software.
+
+**Por qué, con números.** El mercado de gestión para consultorios crece de
+13.810 a 20.750 millones USD (2026→2031, 8,48% anual) y los consultorios de 2
+a 5 profesionales son el segmento más rápido (10,19%). Pero el SaaS vendido a
+negocios chicos tiene retención neta mediana del **97%** —el negocio mediano
+se achica dentro de su propia base— y los productos nativos de IA por debajo
+de 50 USD al mes retienen **23% bruto**. Vender MCD suelto y barato a
+profesionales sueltos es estructuralmente el peor negocio de esa tabla, y abre
+un frente de soporte que hoy no tiene equipo.
+*Fuentes: Mordor Intelligence (mercado) y The SaaS Library sobre datos de
+Benchmarkit, SaaS Capital y McKinsey (retención). Ninguna es de un vendedor
+del producto del que habla.*
+
+**Lo que falta, y es de producto:** los días 38 a 44 el cliente marca «su
+app» y **nada le dice que eso es MiClínica**, su casa, ni que sigue siendo
+suya desde el día 91. Llega al día 91 y le aparece un cobro mensual por algo
+que nunca le nombraron así. Pendiente mío.
+
+**Y el gris se aclaró:** «la otra app que van a crear» no es otra app. Los
+días 38-44 son *Tu app, con tu marca* · *Tus etapas* · *Invitar al primero* ·
+*Rodaje de tu app*, y la decisión de julio ya decía que el entregable del
+paciente vive en el Portal de MCD con la marca del profesional. TCD enseña,
+MiClínica aloja.
+
+### 4 · La venta paga: la carga a mano y listo — HECHO
+
+El candado del día 31 se abre con la venta registrada a mano **o** con el
+cobro que MiClínica reporta. Javo eligió esto sabiendo el costo —alguien
+puede tildarla sin haber vendido— porque prefiere eso a trabar a quien vendió
+por transferencia.
+
+### 5 · La radiografía: 15 minutos de una, cronometrados — por construir
+
+Un solo tramo, con el reloj a la vista, pidiendo sinceridad y brevedad, y un
+premio al terminar a tiempo. FODA personal y profesional, rueda de la vida,
+sus archivos (páginas, redes, PDF), su audio, por qué compró y por qué nos
+eligió, y qué días de los 90 le importan más. Los tres tickets pasan por el
+mismo rayos X.
+
+El riesgo que Javo aceptó al elegirlo: **el que abandona a los 9 minutos se
+queda sin dictamen, sin calendario y sin nada, y ya pagó.** Lo que se
+construya tiene que cuidar ese flanco: guardar cada tramo apenas se contesta,
+para que volver sea seguir y no empezar de nuevo.
+
+---
+
 ## CIRUGÍA 3 · El candado por logro, no por día
 
 Hoy el Camino avanza por días. El mapa avanza por **logros**:

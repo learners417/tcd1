@@ -1,4 +1,5 @@
 import { teaserDeMeta } from '../lib/teasers';
+import { candadoDelDia, abiertoPorSusHechos, type HechosDelNegocio } from '../lib/elCandado';
 import { hoyISO } from '../lib/diaPrograma';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { listarEvidencias, subirEvidencia } from '../lib/evidencia';
@@ -334,6 +335,7 @@ function EvidenciaUniversal({ userId, metaCodigo }: { userId?: string; metaCodig
 export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpdate }: Props) {
   const [completadas, setCompletadas] = useState<Set<string>>(new Set());
   const [ventas, setVentas] = useState<VentaRegistrada[]>([]);
+  const [cobroEnMiClinica, setCobroEnMiClinica] = useState(false);
   // T2/T3 · registrar venta + graduación (rediseño 4 fases)
   /*
    * `partidaResuelta` se lee de localStorage UNA vez, al montar: si ya
@@ -457,6 +459,35 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         supabase.from('ventas_registradas').select('*').eq('usuario_id', userId),
         supabase.from('programa_videos').select('pilar_id, youtube_url').order('created_at', { ascending: true }),
       ]);
+
+      /*
+       * ─── SI MICLÍNICA YA VIO SU PRIMER COBRO ─────────────────────────
+       *
+       * El candado del día 31 —la pauta no se enciende antes de la primera
+       * venta— se abre con cualquiera de las dos: la venta que el cliente
+       * registra a mano, o el cobro que MiClínica reporta sola.
+       *
+       * Se consulta acá y no se toma de otra pantalla a propósito. El puente
+       * ya se consulta en Hoy, y la tentación era que Hoy lo guardara en el
+       * teléfono y el Camino lo leyera de ahí. Esta misma semana una llave
+       * compartida entre dos pantallas —la foto y la letra del avatar— se
+       * pisó sola y le rompió la cara al cliente en todas las pantallas. Dos
+       * consultas a un endpoint barato cuestan menos que un dato con dos
+       * dueños.
+       *
+       * Si el puente no contesta, el candado queda en manos de la venta
+       * registrada a mano, que siempre está disponible: nadie queda trabado
+       * por una consulta que falló.
+       */
+      let cobroMCD = false;
+      try {
+        const email = (await supabase.auth.getUser()).data.user?.email;
+        if (email) {
+          const r = await fetch(`/api/mcd-bridge?email=${encodeURIComponent(email)}`);
+          if (r.ok) cobroMCD = Boolean((await r.json())?.cobro_verificado);
+        }
+      } catch { /* sin puente, manda la venta registrada a mano */ }
+      setCobroEnMiClinica(cobroMCD);
 
       if (hdr) {
         /*
@@ -1689,8 +1720,35 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 const key = `${pilar.numero}-${meta.codigo}`;
                 const estaCompletada = completadas.has(key);
                 const tieneOutput = taskOutputs.has(key);
-                const unlocked = isTaskUnlocked(meta, pilar, completadas, perfil);
-                const bloqueoMsg = !unlocked ? motivoBloqueo(meta, perfil, completadas) : null;
+                /*
+                 * ─── EL CANDADO POR HECHO, ENCIMA DEL CANDADO POR ORDEN ───
+                 *
+                 * `isTaskUnlocked` mira el ORDEN: que la jornada anterior
+                 * esté hecha, que el plan la incluya. Eso está bien y no se
+                 * toca.
+                 *
+                 * Encima va el candado por HECHO: hay días que no se abren
+                 * aunque el cliente haya llegado, porque falta algo de su
+                 * negocio. Hoy hay uno: la pauta del día 31 no se enciende
+                 * antes de su primera venta.
+                 *
+                 * El mensaje NO es «completa la tarea anterior»: es el motivo
+                 * de verdad y qué hacer para abrirlo. Un candado sin motivo
+                 * visible es una pared; con el motivo a la vista es una
+                 * instrucción.
+                 */
+                const hechos: HechosDelNegocio = {
+                  ventasRegistradas: ventas.length,
+                  cobroVerificadoEnMiClinica: cobroEnMiClinica,
+                };
+                const candado = candadoDelDia(meta.dia_asignado);
+                const abiertoPorHechos = abiertoPorSusHechos(meta.dia_asignado, hechos);
+                const unlocked = isTaskUnlocked(meta, pilar, completadas, perfil) && abiertoPorHechos;
+                const bloqueoMsg = !unlocked
+                  ? (!abiertoPorHechos && candado
+                      ? `Se abre con: ${candado.abreCon}. ${candado.comoLoAbres}`
+                      : motivoBloqueo(meta, perfil, completadas))
+                  : null;
                 const isActive = activeMeta === meta.codigo;
                 const badge = getTypeBadge(meta.tipo);
                 const BadgeIcon = badge.icon;
