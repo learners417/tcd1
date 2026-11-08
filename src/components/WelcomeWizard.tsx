@@ -1,6 +1,7 @@
 import BotonAudio from './sesion/BotonAudio';
 import { guardarLetra } from '../lib/laFotoYLaLetra';
 import HojaDeRuta from './camino/HojaDeRuta';
+import { dictaminar } from '../lib/elDictamen';
 import { getOrigen, setOrigen } from '../lib/origen';
 import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
 import { useState } from 'react';
@@ -995,6 +996,57 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 </div>
               ))}
             </div>
+
+            {/*
+              EL DICTAMEN.
+              La bienvenida no cierra con un resumen de lo que contestó: cierra
+              con un veredicto. Le nombra la etapa en la que está, con sus
+              datos, y le muestra la puerta por donde entra. Javo eligió esta
+              forma entre tres el 8 de noviembre.
+              La etapa sale de `elDictamen.ts`, que decide por los HECHOS del
+              cliente y no por qué pantalla los trajo: cuando el onboarding se
+              rehaga, esto sigue andando.
+            */}
+            {(() => {
+              const d = dictaminar({
+                avatar: dxAvatar,
+                vendioAlPrecio: situacionGuardada().vendio_al_precio,
+                escalera: situacionGuardada().escalera,
+                llegan: dxLlegan,
+              });
+              return (
+                /* `text-left` a propósito: el panel hereda el centrado de la
+                   pantalla, y un párrafo de tres líneas centrado queda con el
+                   borde dentado y se lee peor — más todavía para alguien con
+                   TDAH. Las tarjetas de arriba ya van a la izquierda. */
+                <div className="mb-6 rounded-2xl border p-5 text-left"
+                  style={{ borderColor: 'var(--line2, #DFD3BC)' }}>
+                  <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                    Tu punto de partida
+                  </p>
+                  <p className="mt-3 text-[17px] leading-snug text-cream">{d.tienes}</p>
+                  <p className="mt-1 text-[17px] leading-snug text-cream">{d.teFalta}</p>
+
+                  <p className="mt-5 text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                    Tu etapa
+                  </p>
+                  <p className="mt-2 text-[22px] leading-tight text-cream"
+                    style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
+                    {d.etapa}
+                  </p>
+
+                  <p className="mt-5 text-[17px] leading-snug text-cream/80">
+                    Tu ADN provisorio ya está escrito con lo que acabas de contarme.
+                    Se sella el día <span className="num-tab text-gold">{d.diaDeSellado}</span>,
+                    cuando pongas tu precio nuevo.
+                  </p>
+                  <p className="mt-3 text-[17px] leading-snug text-cream/80">
+                    De acá al día <span className="num-tab">90</span> pasas por cinco
+                    paisajes. Empiezas en {d.primeraEstacion}.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/*
               SUS NOVENTA DÍAS, ANTES DE EMPEZARLOS.
