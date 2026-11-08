@@ -3144,9 +3144,14 @@ check('la meta la escribe el cliente, en dinero', "meta: number | null" in _tn)
 check('lo que se lleva el estado se descuenta solo', 'retencion' in _tn and 'neto' in _tn)
 check('las horas se anotan por semana', 'anotarHoras' in _tn and 'lunesDe' in _tn)
 check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in _tn)
-# El boton suelto con su renglon de explicacion es ahora una tarjeta de la
-# grilla «Tu Camino por dentro». Lo que se cuida es que tenga puerta.
-check('se abre desde el Camino', 'TusNumeros' in _rm_tn and "label: 'Tus números'" in _rm_tn)
+# La regla es que sus cobros tengan PUERTA, no cual. Esta linea guardaba la
+# implementacion —«tiene su tarjeta en la grilla»— y se puso roja el dia que la
+# grilla volvio a tres casillas, sin que nada se hubiera roto. Desde el 7 de
+# noviembre la puerta es el contador de consultantes, que es la misma cuenta.
+_enc_cam = rd('src/components/camino/EncabezadoCamino.tsx')
+check('sus cobros se abren desde el contador de consultantes',
+      'TusNumeros' in _rm_tn and 'onAbrirNumeros={() => setNumerosAbiertos(true)}' in _rm_tn
+      and 'onClick={onAbrirNumeros}' in _enc_cam)
 check('sin letra chica en la pantalla de números',
       not re.search(r'text-\[1[0-4]px\]|text-xs|text-sm', _tnv))
 check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros.ts'))
@@ -3202,7 +3207,11 @@ check('las trece semanas tienen nombre',
       _semanas_hr is not None and len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) == 13,
       'cuenta: ' + str(len(re.findall(r'^\s*\d+:', _semanas_hr.group(1), re.M)) if _semanas_hr else 0))
 check('los hitos están escritos', _hr.count('Tu ') >= 10)
-check('la Hoja de Ruta se abre desde el Camino', 'HojaDeRuta' in _rm_hr and "label: 'Hoja de Ruta'" in _rm_hr)
+# Misma correccion: la puerta de la Hoja de Ruta cuelga del anillo de jornadas,
+# que es lo que contesta «cuanto llevo». Lo que se cuida es que exista.
+check('la Hoja de Ruta se abre desde el anillo de jornadas',
+      'HojaDeRuta' in _rm_hr and 'onAbrirRuta={() => setRutaAbierta(true)}' in _rm_hr
+      and 'Ver mis 90 d\u00edas' in rd('src/components/camino/EncabezadoCamino.tsx'))
 check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
 check('existe la prueba de la Hoja de Ruta', _os64.path.exists('scripts/prueba-hoja-de-ruta.ts'))
 
