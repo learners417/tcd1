@@ -166,11 +166,22 @@ bienvenida: es el próximo que le falta.
    lo mismo a todos: «10 consultantes a tu precio digno y 10 horas menos por
    semana».
 
-2. **Que el dictamen sirva para algo.** `avatar_tipo` se guarda y **nadie lo
-   lee**. El cliente contesta si tiene método propio o no —lo que según este
-   mapa decide si lo *crea* (Avatar A) o lo *ordena y poda* (Avatar B)— y el
-   camino le sale igual a los dos. Ese es el verdadero trabajo de la cirugía 2:
-   sin esto, el dictamen es un cartel.
+2. ~~Que el dictamen sirva para algo: `avatar_tipo` se guarda y nadie lo lee.~~
+   **Falso, corregido el 8 de noviembre.** Lo leí mal: busqué `dxAvatar`, el
+   nombre de la variable del formulario, en vez de `avatar_tipo`, el de la
+   columna. El Mentor **sí** lo lee y le cambia toda la postura — Avatar B
+   recibe *«YA tiene años de práctica… tu trabajo es ORDENAR y ponerle nombre,
+   no enseñarle desde cero; su dolor es el TECHO»* y Avatar A *«todavía no
+   tiene método… acompañalo a construir; su dolor es el PRESENTE»*—, y además
+   le pasa las diez respuestas crudas como «el espejo del wow inicial». Estaba
+   bien hecho desde antes.
+
+   Lo que **sí** falta: que la letra cambie el CAMINO, no solo el tono del
+   Mentor. Hoy las jornadas que crean lo que el Avatar B ya tiene —su avatar,
+   su método, su oferta— le salen iguales que al Avatar A. No existe mecanismo
+   de «versión corta» en ninguna parte (verificado). Eso es trabajo de producto
+   y de contenido: qué jornadas tienen versión corta y qué dice cada una.
+   **Decisión de Javo**, anotada acá y no inventada.
 
 Lo que sigue sin estar en ninguno de los dos pasos, y es decisión de producto:
 **¿cuántos servicios tiene?** (podar «mil servicios» a UNA oferta) y **la

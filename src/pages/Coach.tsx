@@ -1,4 +1,5 @@
 import { resumenOrigenParaMentor } from '../lib/origen';
+import { leerFoto } from '../lib/laFotoYLaLetra';
 import { resumenRuedaParaMentor } from '../lib/rueda';
 import { planDelCliente, TOPE_MENTOR_BLANCO, TOPE_MENTOR_SEMANAL, usosSemana, consumirUso } from '../lib/planes';
 import RetratoEntrenador from '../components/RetratoEntrenador';
@@ -464,7 +465,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
     [],
   );
 
-  const avatarUrl = localStorage.getItem('tcd_avatar') || '';
+  const avatarUrl = leerFoto();
   const profile = (() => {
     try {
       return safeGet<{ fecha_inicio?: string; nombre?: string; [k: string]: unknown }>('tcd_profile', {});

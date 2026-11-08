@@ -1,4 +1,5 @@
 import { planActual, planPermitePilar } from '../lib/planes';
+import { leerFoto } from '../lib/laFotoYLaLetra';
 import { DESTINOS } from '../lib/destinos';
 import { useState, useEffect, useRef } from 'react';
 import { UserCircle2, Search, Bell, X, MessageSquare, LayoutDashboard, Map, TrendingUp, BookOpen, Library, Megaphone, ChevronLeft, Sparkles, Hexagon, LifeBuoy } from 'lucide-react';
@@ -581,10 +582,10 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
           */}
           <div className="hidden md:flex items-center gap-2 pl-4 border-l border-[var(--line, rgba(142,104,36,0.18))]">
             {(() => {
-              const avatarUrl = localStorage.getItem('tcd_avatar');
+              const avatarUrl = leerFoto();
               const initial = (profile.nombre || 'P').charAt(0).toUpperCase();
               return avatarUrl ? (
-                <img loading="lazy" src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[var(--line2, rgba(142,104,36,0.30))] object-cover" />
+                <img loading="lazy" src={avatarUrl} alt="Tu foto" className="w-9 h-9 rounded-full border border-[var(--line2, rgba(142,104,36,0.30))] object-cover" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-sm font-bold text-gold">
                   {initial}

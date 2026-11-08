@@ -6,6 +6,7 @@
  * construye dinámicamente el system prompt con todos los datos del usuario.
  */
 import { ESTRATEGIA_CUPOS } from './agents/estrategia';
+import { leerLetra } from './laFotoYLaLetra';
 import type { ProfileV2, DiarioEntradaV2, MetricaSemana, MetricaSemanaV2, HojaDeRutaItem } from './supabase';
 import { NIVEL_NOMBRES } from './supabase';
 import { SEED_ROADMAP_V2 } from './roadmapSeed';
@@ -202,7 +203,15 @@ function buildCoachSystemPromptBase(ctx: ContextoCoach): string {
     .map(([k, v]) => `- ${k}: ${v}`)
     .join('\n');
 
-  if (avatarSanador === 'A') { try { avatarSanador = localStorage.getItem('tcd_avatar') ?? 'A'; } catch { /* noop */ } }
+  /*
+   * Si la base no trajo la letra, se busca la del teléfono — pero SOLO si es
+   * una letra. Antes se tomaba el valor crudo de `tcd_avatar`, y en esa llave
+   * también vivía la foto de perfil: un `data:` URL entraba como tipo de
+   * avatar, no coincidía con 'B', y un sanador con años de práctica recibía el
+   * tono de quien recién empieza. Ahora la foto tiene su propia llave y esto
+   * acepta nada más que 'A' o 'B'.
+   */
+  if (avatarSanador !== 'B') avatarSanador = leerLetra() ?? avatarSanador;
   const contextoAvatar = avatarSanador === 'B'
     ? '\n\nAVATAR DEL SANADOR — ESTABLECIDO: este sanador YA tiene años de práctica, marca y un método propio (aunque sin nombre). NO le hables como principiante ni le expliques lo básico. Tu trabajo con él es ORDENAR y ponerle nombre a lo que ya hace hace años, no enseñarle desde cero. Reconocé su experiencia. Su dolor es el TECHO (está estancado, no quebrado).'
     : '\n\nAVATAR DEL SANADOR — EN CONSTRUCCIÓN: este sanador todavía no tiene un método claro ni sistema. Acompañalo a construir desde sus fortalezas, paso a paso, sin abrumar. Su dolor es el PRESENTE (agenda llena, cuenta vacía).';

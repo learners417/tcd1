@@ -4,6 +4,7 @@
  */
 
 import CeremoniaCinturon from './components/CeremoniaCinturon';
+import { leerFoto, guardarFoto, guardarLetra } from './lib/laFotoYLaLetra';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CLAVE_PANTALLA } from './lib/pantallaActual';
 import { cargarVentanas } from './lib/ventanasDatos';
@@ -294,7 +295,7 @@ export default function App() {
     return () => { vivo = false; };
   }, [supabaseProfile?.id]);
 
-  const [avatarUrl, setAvatarUrl] = useState<string>(() => localStorage.getItem('tcd_avatar') || '');
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => leerFoto());
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -422,7 +423,7 @@ export default function App() {
         const diaReal = diaDelPrograma((data as { fecha_inicio?: string }).fecha_inicio);
         if (diaReal !== null) (data as { dia_programa?: number }).dia_programa = diaReal;
         setSupabaseProfile(data as SupabaseProfile);
-        try { const at = (data as { avatar_tipo?: string })?.avatar_tipo; if (at === 'A' || at === 'B') localStorage.setItem('tcd_avatar', at); } catch { /* noop */ }
+        guardarLetra((data as { avatar_tipo?: string })?.avatar_tipo);
         syncProfileToLocalStorage(data as SupabaseProfile);
         const p: Profile = {
           nombre: data.nombre,
@@ -465,7 +466,7 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
-      localStorage.setItem('tcd_avatar', dataUrl);
+      guardarFoto(dataUrl);
       setAvatarUrl(dataUrl);
     };
     reader.readAsDataURL(file);

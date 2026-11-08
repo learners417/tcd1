@@ -79,11 +79,23 @@ ok(
 /*
  * El avatar del teléfono: 53 píxeles para una inicial que no se toca. Queda
  * en pantalla grande, donde el lugar sobra y acompaña a «Tu cuenta».
+ *
+ * ═══ POR QUÉ ESTE ANCLAJE SE REESCRIBIÓ (8 nov) ═══
+ *
+ * Buscaba el bloque por la cadena `localStorage.getItem('tcd_avatar')`. El
+ * día que la foto pasó a leerse por su módulo —porque esa llave guardaba la
+ * foto Y la letra A/B, y se pisaban— el `indexOf` dio -1, el `slice` quedó en
+ * basura y la lente se puso roja sin que la barra hubiera cambiado.
+ *
+ * La regla no es «se lee de localStorage»: es que la inicial del cliente viva
+ * en un contenedor que el teléfono esconde. Así que el ancla es la inicial
+ * misma, que es de lo que habla la regla, y se mira el contenedor que la
+ * envuelve. El bloque cabe en 600 caracteres con holgura.
  */
-const avatar = topbar.slice(topbar.indexOf("localStorage.getItem('tcd_avatar')") - 600,
-                            topbar.indexOf("localStorage.getItem('tcd_avatar')"));
+const iInicial = topbar.indexOf('{initial}');
+const avatar = iInicial > 0 ? topbar.slice(Math.max(0, iInicial - 900), iInicial) : '';
 ok(
-  /hidden md:flex items-center gap-2 pl-4/.test(avatar),
+  iInicial > 0 && /hidden md:flex items-center gap-2 pl-4/.test(avatar),
   'la inicial del cliente —que no es un botón— queda en pantalla grande',
 );
 

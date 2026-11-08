@@ -1,4 +1,5 @@
 import BotonAudio from './sesion/BotonAudio';
+import { guardarLetra } from '../lib/laFotoYLaLetra';
 import { getOrigen, setOrigen } from '../lib/origen';
 import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
 import { useState } from 'react';
@@ -148,7 +149,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     if (!dxAvatar) return;
     setDxSaving(true);
     try {
-      localStorage.setItem('tcd_avatar', dxAvatar);
+      guardarLetra(dxAvatar);
       try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica }));
       localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
       localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
