@@ -217,6 +217,15 @@ espera el clic.
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
 | 11 | **El Tablero guarda 34 códigos que el Camino no busca** | **el próximo** · medido el 9 nov |
+| 12 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
+| 13 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
+| 14 | Cirugía 4 · La app al lado de Claude | en la cola |
+| 15 | Cirugía 5 · Lo que la app mide por él | en la cola |
+
+La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
+precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
+cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
+el flanco, y lo que queda en ellas es gusto suyo.
 
 ### El cero era del teléfono vacío — turnos 9 y 10, el 9 de noviembre
 
