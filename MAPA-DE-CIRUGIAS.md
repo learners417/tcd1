@@ -216,7 +216,7 @@ espera el clic.
 | 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
-| 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `PENDIENTE` · la pantalla final decía «queda registrado» sin estarlo |
+| 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **el próximo** · medido el 9 nov |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
 | 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
@@ -301,7 +301,7 @@ lo pide.
 
 ### Los cinco días, caminados en pantalla — turno 11, el 9 de noviembre
 
-Commit `PENDIENTE`. Una lente nueva, `scripts/caminar-los-cinco-dias.py`, en
+Commit `b0d3ce6`. Una lente nueva, `scripts/caminar-los-cinco-dias.py`, en
 la batería. Es lo único que se le cobra a quien entra solo por la página —«los
 8 libros y los cinco primeros días de mi app»— y hasta hoy nadie lo había
 ejecutado nunca.
