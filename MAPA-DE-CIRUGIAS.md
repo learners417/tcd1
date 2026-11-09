@@ -213,7 +213,7 @@ espera el clic.
 | 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `8036e01` · el reloj y el premio esperan su clic |
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | **cerrado** · `f3e9ddc` · 46 lentes |
 | 7 | MCD: el puente verificado de los dos lados | **cerrado** · `817cb96` + `7c6e524` (MCD) · 15 + 5 lentes |
-| 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `HASH` · 19 lentes |
+| 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
 | 10 | Estética computadora | espera su clic |
 
@@ -355,7 +355,7 @@ de la batería, y conviene hacerlo con tiempo, no antes de una venta.
 ### La cadena del pago, ejecutada — turno 8, cerrado el 9 de noviembre
 
 `scripts/prueba-el-recorrido-del-que-paga.ts`, 19 lentes, registrada en la
-batería. Corre las dos rutas que convierten a un desconocido en cliente y
+batería. Commit `4b3366b`. Corre las dos rutas que convierten a un desconocido en cliente y
 después en cliente de $1.000 —`/api/alta-numero` y `/api/ghl-webhook`— contra
 un Supabase falso que decide como el real, y lee lo que queda escrito en la
 fila con las MISMAS funciones que lee la app.
