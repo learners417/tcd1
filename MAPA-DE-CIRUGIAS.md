@@ -210,7 +210,7 @@ espera el clic.
 | 2 | El candado: la pauta espera la primera venta | **cerrado** · `906a020` |
 | 3 | Mi Clínica nombrada como la casa, y los seis números una sola vez | **cerrado** · `197c789` |
 | 4 | Los precios con fecha: enero sube solo | **cerrado** |
-| 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `PENDIENTE_HASH` · el reloj y el premio esperan su clic |
+| 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `8036e01` · el reloj y el premio esperan su clic |
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | abierto |
 | 7 | MCD: el puente verificado de los dos lados | abierto |
 | 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
