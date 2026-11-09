@@ -236,14 +236,55 @@ export default function SesionViva({
         </section>
       )}
 
+      {/*
+        ─── LA ÚLTIMA PANTALLA NO PUEDE MENTIR ──────────────────────────────
+
+        Decía «Listo · Queda registrado en tu Camino» SIEMPRE: era texto fijo,
+        sin mirar una sola vez si la jornada se había cerrado. Y a esta
+        pantalla se llega con el botón «Siguiente» de abajo, que no pide nada.
+
+        Caminado el 9 de noviembre, los cinco días en pantalla: el día 4 pide
+        una foto para cerrarse —es la única de las cinco cuya evidencia es un
+        archivo—, así que «Marcar como completado» queda apagado. El cliente
+        toca «Siguiente», llega acá, lee que su jornada quedó registrada, y
+        cierra la app. No quedó registrada nada: al otro día el día 4 lo
+        esperaba abierto y su Camino seguía diciendo 3 de 64.
+
+        Lo mismo valía para los otros cuatro días: alcanzaba con tocar
+        «Siguiente» dos veces en vez del botón verde.
+
+        Ahora esta pantalla dice lo que pasó. Si la jornada está cerrada, el
+        texto de siempre; si no, lo dice y devuelve al paso donde se cierra.
+      */}
       {pantalla === 'listo' && (
         <section className="card-panel p-5 sm:p-6">
-          <p className="text-[15px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--tilde, #4A7C59)' }}>Listo</p>
+          <p className={`text-[15px] font-bold uppercase tracking-[0.16em] ${isCompleted ? '' : 'text-goldhi'}`}
+            style={isCompleted ? { color: 'var(--tilde, #4A7C59)' } : undefined}>
+            {isCompleted ? 'Listo' : 'Todavía no'}
+          </p>
           <h2 className="mt-2 text-[26px] leading-tight text-cream" style={{ fontFamily: 'var(--font-display)', fontStyle: 'normal' }}>
             {metaTitulo}
           </h2>
-          {seAbre && <p className="mt-2 text-[19px] leading-relaxed text-cream">{seAbre}</p>}
-          <p className="mt-2 text-[17px] text-cream/70">Queda registrado en tu Camino. Mañana sigue el paso que toca.</p>
+          {isCompleted ? (
+            <>
+              {seAbre && <p className="mt-2 text-[19px] leading-relaxed text-cream">{seAbre}</p>}
+              <p className="mt-2 text-[17px] text-cream/70">Queda registrado en tu Camino. Mañana sigue el paso que toca.</p>
+            </>
+          ) : (
+            <>
+              <p className="mt-2 text-[19px] leading-relaxed text-cream">
+                Esta jornada todavía no quedó registrada en tu Camino.
+              </p>
+              <p className="mt-2 text-[17px] text-cream/70">
+                Vuelve al paso «{ROTULO.haz}» y márcala como completada. Si te pide una
+                evidencia, ahí mismo la subes.
+              </p>
+              <button type="button" onClick={() => setPantalla('haz')}
+                className="mt-4 min-h-[52px] w-full rounded-[20px] border border-[var(--line2,#DFD3BC)] text-[17px] font-semibold text-cream">
+                Volver a cerrarla <ArrowRight className="w-4 h-4 inline ml-1" />
+              </button>
+            </>
+          )}
         </section>
       )}
 

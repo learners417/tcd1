@@ -3743,6 +3743,27 @@ if _hay_nav:
         if '⚠' in _l:
             check('la sonda llega a la jornada por su gancho, no por su etiqueta',
                   False, _l.strip()[:150])
+
+    # ── LOS CINCO DÍAS QUE SE VENDEN, EJECUTADOS ───────────────────────
+    #
+    # Es lo único que se le cobra a quien entra solo por la página. De esos
+    # cinco días la batería medía el SEED (`prueba-los-cinco-dias.ts`, que no
+    # abre el navegador) y la LLEGADA a la jornada (`medir-guardado.py`, cuyo
+    # propio comentario dice «NO cubre cerrarla… queda por cubrir»). Nadie
+    # había hecho nunca en pantalla lo que hace el que paga: entrar a la
+    # sesión, trabajarla, cerrarla y que se le abra la de mañana.
+    #
+    # Al caminarlo por primera vez —turno 11, 9 de noviembre— apareció que la
+    # última pantalla de la sesión decía «Queda registrado en tu Camino» sin
+    # mirar nunca si la jornada se había cerrado.
+    _c5 = subprocess.run([sys.executable, 'scripts/caminar-los-cinco-dias.py'],
+                         capture_output=True, text=True)
+    _c5rojas = [l.strip() for l in _c5.stdout.split('\n') if l.strip().startswith('✗')]
+    _c5verdes = [l for l in _c5.stdout.split('\n') if l.strip().startswith('✓ día')]
+    check('los cinco días que se venden se abren, se trabajan y se cierran en pantalla',
+          _c5.returncode == 0 and len(_c5verdes) == 5,
+          ' · '.join(_c5rojas[:3]) or f'días en verde: {len(_c5verdes)} de 5'
+          or (_c5.stdout + _c5.stderr).strip().split('\n')[-1][:160])
 else:
     SIN_MEDIR_MOVIL = True
     print('  ⚠ SIN MEDIR: no hay Chromium de Playwright. Instalar con:')

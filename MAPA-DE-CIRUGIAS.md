@@ -216,8 +216,8 @@ espera el clic.
 | 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
-| 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **el próximo** · Javo pidió el 9 nov que lo básico sea lo único que importa hoy |
-| 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | en la cola · medido el 9 nov |
+| 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `PENDIENTE` · la pantalla final decía «queda registrado» sin estarlo |
+| 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **el próximo** · medido el 9 nov |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
 | 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
@@ -298,6 +298,73 @@ que queda ahí sigue siendo gusto. Una sola cosa de forma, por si la quiere: a
 «Historial» queda solo en el segundo. Entra en uno si se achica la sangría o
 se acorta el rótulo, como se hizo con «Entrenadores → Entrenar». Ninguna regla
 lo pide.
+
+### Los cinco días, caminados en pantalla — turno 11, el 9 de noviembre
+
+Commit `PENDIENTE`. Una lente nueva, `scripts/caminar-los-cinco-dias.py`, en
+la batería. Es lo único que se le cobra a quien entra solo por la página —«los
+8 libros y los cinco primeros días de mi app»— y hasta hoy nadie lo había
+ejecutado nunca.
+
+**La premisa era cierta por una vez, y por eso encontró algo.** De los cinco
+días la batería medía dos cosas, y ninguna era ésta:
+
+- `prueba-los-cinco-dias.ts` mide el **seed**: que los cinco existan, que el
+  plan los abra, que ninguno se pise. Es aritmética sobre un archivo; no abre
+  el navegador.
+- `medir-guardado.py` **llega** a la jornada y la toca, y su propio comentario
+  dice qué deja afuera: *«NO cubre cerrarla… Queda por cubrir, y es lo
+  próximo.»* Esto es lo próximo.
+
+**Lo que se encontró al caminarlo: la última pantalla de la sesión mentía.**
+
+La sesión de una jornada son cinco pantallas —Te llevas · Mira · Haz · Sube ·
+Listo— y a la última se llega con el botón «Siguiente» de abajo, que no pide
+nada. Esa pantalla decía, con texto fijo y sin mirar nunca si la jornada se
+había cerrado:
+
+> **Listo** · *Queda registrado en tu Camino. Mañana sigue el paso que toca.*
+
+**El día 4 terminaba así siempre.** De los cinco, es el único cuya evidencia
+es un archivo —«sube la foto de tu protocolo pegado»—, así que «Marcar como
+completado» queda apagado hasta subirla. El cliente recorre la sesión entera,
+toca «Siguiente», lee que su jornada quedó registrada y cierra la app. No
+quedó registrado nada: al otro día el día 4 lo espera abierto y el anillo
+sigue diciendo 3 de 64. Y en los otros cuatro días alcanzaba con tocar
+«Siguiente» dos veces en vez del botón verde para leer lo mismo.
+
+Ahora esa pantalla dice lo que pasó: con la jornada cerrada, el texto de
+siempre; sin cerrar, **«Todavía no · Esta jornada todavía no quedó registrada
+en tu Camino»**, con el camino de vuelta al paso donde se cierra. Medido en
+los dos temas.
+
+**Lo que la lente recorre, día por día:** que la jornada del día sea la que el
+Camino ofrece abierta · que la sesión se recorra entera —incluida la antesala
+de tres toques del player guiado y los 2,1 segundos del ritual, que no son el
+final aunque no haya ningún botón— · que lo escrito sobreviva a recargar · que
+la pantalla final no mienta · que la jornada cerrada siga cerrada después de
+recargar · y que, cerrada, mañana sea el día siguiente.
+
+**Probada contra su propio fallo, en tres formas** (`--probarme`): se pone
+roja si el día de hoy ya está cerrado y no hay nada que abrir; si una jornada
+que pide un archivo se cierra igual sin adjuntar nada; y si se le devuelve a
+la pantalla final la frase fija que tenía antes de este turno.
+
+**Dos cosas que la sonda aprendió y quedan escritas para no repetirlas:** los
+botones se buscan en el contenedor de más arriba —`SesionViva` va en z-[60] y
+el player guiado en z-[70] encima— porque los de la Hoja de Ruta quedan
+abajo, pintados y tapados, y una sonda que los ve «visibles» se cuelga
+esperando tocar uno que nadie puede tocar. Y el orden de la lista de botones
+es la lente: con «Siguiente» arriba de «Marcar como completado», el recorrido
+pasaba de largo por el único botón que cierra la jornada y después culpaba a
+la app.
+
+**Lo que queda anotado y no se tocó:** el día 4 es el único de los cinco que
+**necesita conexión para cerrarse**. Su evidencia vive en Storage de Supabase;
+sin base no hay dónde subirla y el día no cierra. El resto del lado del
+cliente anda sin conexión. Si alguna vez quieres que ese día cierre sin la
+foto, es el campo `avanza_sin_evidencia` de esa jornada en el seed —y es
+decisión tuya, no de la lente.
 
 ### Lo que bloquea la venta y es de Javo
 
@@ -616,7 +683,7 @@ que el Camino nunca busca.** Un enlace pegado ahí se guarda bien y no se ve
 nunca. Los 27 videos que ya están cargados por archivo sí caen todos en
 códigos que el Camino busca —van por día—, así que lo que anda hoy anda; lo que
 no anda es cargar los nuevos desde el Tablero. Javo tiene los videos grabados y
-esperando: es el turno 11, el próximo de la cola.
+esperando: es el turno 12, el próximo de la cola.
 
 **Una cosa más, del repo `landings`:** `build.py` tenía la carpeta de imágenes
 clavada a mano a la ruta de otra sesión, y el `if os.path.exists` de al lado
