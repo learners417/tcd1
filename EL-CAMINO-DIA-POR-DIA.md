@@ -678,6 +678,12 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 30 min · sistema 3: Tu captación automática*
 
+- Prueba tu enlace de pago desde el teléfono de otra persona: que llegue hasta el comprobante
+- Revisa que tu página cargue en menos de tres segundos en datos móviles
+- Abre tus números y mira de dónde vino cada consulta de esta semana
+- Si alguien pagó y no te conocía, regístralo con su origen
+- Contesta las conversaciones sin responder, y no toques la campaña
+
 **Lo que queda hecho:** Cobro del sistema
 
 **Cinturón:** Rojo

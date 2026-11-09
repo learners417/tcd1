@@ -2968,7 +2968,13 @@
       "agente": null,
       "manual": null,
       "acceso": null,
-      "pasos": [],
+      "pasos": [
+        "Prueba tu enlace de pago desde el teléfono de otra persona: que llegue hasta el comprobante",
+        "Revisa que tu página cargue en menos de tres segundos en datos móviles",
+        "Abre tus números y mira de dónde vino cada consulta de esta semana",
+        "Si alguien pagó y no te conocía, regístralo con su origen",
+        "Contesta las conversaciones sin responder, y no toques la campaña"
+      ],
       "evidencias": [
         {
           "tipo": "evento",
@@ -2987,9 +2993,15 @@
       "veredicto": "La máquina camina: alguien pagó sin conocerte. Eso ya no depende de tu agenda.",
       "acciones_campo": [],
       "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
-      "paso_esencial": null,
+      "paso_esencial": 5,
       "avanza_sin_evidencia": true,
-      "checklist": []
+      "checklist": [
+        "Prueba tu enlace de pago desde el teléfono de otra persona: que llegue hasta el comprobante",
+        "Revisa que tu página cargue en menos de tres segundos en datos móviles",
+        "Abre tus números y mira de dónde vino cada consulta de esta semana",
+        "Si alguien pagó y no te conocía, regístralo con su origen",
+        "Contesta las conversaciones sin responder, y no toques la campaña"
+      ]
     },
     {
       "dia": 46,
