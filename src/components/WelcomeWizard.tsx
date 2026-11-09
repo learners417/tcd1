@@ -48,7 +48,38 @@ import { destinoPorId } from '../lib/destinos';
 import { VOC } from '../lib/vocabulario';
 import { enElTramoDelNumero } from '../lib/planes';
 import { CAMPOS, estaCompleta, loQueFalta, guardar, leer, KEY_ENTRADA, type Medicion } from '../lib/medicion';
+import { leerRespuestas, anotar, olvidarBorrador, type Respuestas } from '../lib/laRadiografia';
 import { mensajeDeFalla } from '../lib/conexion';
+
+/**
+ * CADA RESPUESTA SE ANOTA AL TIPEARLA, NO AL APRETAR EL BOTÓN.
+ *
+ * El estado de un campo de la bienvenida vive en dos lados a la vez: en la
+ * pantalla, para que se vea, y en el borrador de la radiografía, para que
+ * volver sea seguir. Esto los mantiene juntos sin tocar un solo `onChange`:
+ * el único cambio está en cómo nace el estado.
+ *
+ * Por qué así y no con un efecto que guarde todo junto: un efecto corre
+ * DESPUÉS del render, y el que cierra la pestaña a los nueve minutos no
+ * siempre le da ese tiempo. Acá se escribe en la misma tecla.
+ */
+function useAnotado<K extends keyof Respuestas>(
+  campo: K,
+  inicial: Respuestas[K],
+) {
+  const [valor, setValorRaw] = useState<Respuestas[K]>(inicial);
+  const set = (siguiente: Respuestas[K] | ((prev: Respuestas[K]) => Respuestas[K])) => {
+    setValorRaw((prev) => {
+      const v = typeof siguiente === 'function'
+        ? (siguiente as (p: Respuestas[K]) => Respuestas[K])(prev)
+        : siguiente;
+      /* Anotar es una mezcla del mismo valor: repetirla no cambia nada. */
+      anotar({ [campo]: v } as unknown as Partial<Respuestas>);
+      return v;
+    });
+  };
+  return [valor, set] as const;
+}
 
 export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProps) {
   const [step, setStepRaw] = useState<Step>(() => {
@@ -63,40 +94,50 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   });
   const completarWizard = (primeraPagina?: string) => {
     try { localStorage.removeItem('tcd_wizard_step_v1'); } catch { /* noop */ }
+    olvidarBorrador();
     onComplete(primeraPagina);
   };
   const setStep = (siguiente: Step) => {
     try { localStorage.setItem('tcd_wizard_step_v1', siguiente); } catch { /* noop */ }
     setStepRaw(siguiente);
   };
+  /*
+   * LO QUE YA CONTESTÓ, LEÍDO UNA VEZ AL ABRIR.
+   *
+   * Hasta el 9 de noviembre esto era solo la medición: los seis números eran
+   * el único de veinte campos que volvía. El que recargaba caía en el paso
+   * correcto con el formulario en blanco y tipeaba todo otra vez.
+   */
+  const [respuestas] = useState<Respuestas>(() => leerRespuestas());
+
   // ── Tu medición de entrada: los seis números del primer día ──
-  const [medicionEntrada, setMedicionEntrada] = useState<Medicion>(() => leer(KEY_ENTRADA) ?? {});
+  const [medicionEntrada, setMedicionEntrada] = useAnotado('numeros', respuestas.numeros);
 
   // ── El Diagnóstico (Lote 1 · la semilla del ADN) ──
-  const [dxAvatar, setDxAvatar] = useState<'A' | 'B' | null>(null);
-  const [dxFreno, setDxFreno] = useState('');
-  const [dxNicho, setDxNicho] = useState('');
-  const [dxDinero, setDxDinero] = useState('');
-  const [dxTiempo, setDxTiempo] = useState('');
-  const [dxEstilo, setDxEstilo] = useState<'hueso' | 'guantes' | ''>('');
-  const [dxFe, setDxFe] = useState<'si' | 'no' | ''>('');
+  const [dxAvatar, setDxAvatar] = useAnotado('avatar', respuestas.avatar);
+  const [dxFreno, setDxFreno] = useAnotado('freno', respuestas.freno);
+  const [dxNicho, setDxNicho] = useAnotado('nicho', respuestas.nicho);
+  const [dxDinero, setDxDinero] = useAnotado('dinero', respuestas.dinero);
+  const [dxTiempo, setDxTiempo] = useAnotado('tiempo', respuestas.tiempo);
+  const [dxEstilo, setDxEstilo] = useAnotado('estilo', respuestas.estilo);
+  const [dxFe, setDxFe] = useAnotado('fe', respuestas.fe);
   const [dxSaving, setDxSaving] = useState(false);
   // ── S6: las siembras del ikigai ──
-  const [ogPorque, setOgPorque] = useState('');
-  const [ogHerida, setOgHerida] = useState('');
-  const [ogPaciente, setOgPaciente] = useState('');
-  const [situacion, setSituacion] = useState<Situacion>(SITUACION_VACIA);
+  const [ogPorque, setOgPorque] = useAnotado('porque', respuestas.porque);
+  const [ogHerida, setOgHerida] = useAnotado('herida', respuestas.herida);
+  const [ogPaciente, setOgPaciente] = useAnotado('paciente', respuestas.paciente);
+  const [situacion, setSituacion] = useAnotado('situacion', respuestas.situacion);
   const [savingSit, setSavingSit] = useState(false);
   const [rutaAbierta, setRutaAbierta] = useState(false);
-  const [ruedaIni, setRuedaIni] = useState<ValoresRueda>({});
-  const [pqIni, setPqIni] = useState('');
+  const [ruedaIni, setRuedaIni] = useAnotado('rueda', respuestas.rueda);
+  const [pqIni, setPqIni] = useAnotado('para_que', respuestas.para_que);
 
   // Las tres bases que faltaban: de dónde llegan hoy, qué entrega entre
   // sesiones y dónde publica. Con esto el Camino arranca con sus datos y no
   // le vuelve a preguntar lo mismo el día 22, el 47 y el 61.
-  const [dxLlegan, setDxLlegan] = useState('');
-  const [dxEntrega, setDxEntrega] = useState('');
-  const [dxPublica, setDxPublica] = useState('');
+  const [dxLlegan, setDxLlegan] = useAnotado('llegan', respuestas.llegan);
+  const [dxEntrega, setDxEntrega] = useAnotado('entrega', respuestas.entrega);
+  const [dxPublica, setDxPublica] = useAnotado('publica', respuestas.publica);
 
   /**
    * EL JSON `diagnostico`, COMPLETO, EN UN SOLO LUGAR.
@@ -133,6 +174,17 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     llegan: dxLlegan,
     entrega: dxEntrega,
     publica: dxPublica,
+    /*
+     * LAS CUATRO DEL PERFIL, que hasta el 9 de noviembre no se guardaban en
+     * ninguna parte. El paso del perfil se las pregunta, el cliente las
+     * contesta y se perdían al avanzar. Viajan acá porque este es el único
+     * escritor de `diagnostico`: agregarlas en otro lado las volvería a
+     * borrar, que es exactamente el bug del 8 de noviembre.
+     */
+    energia,
+    frustracion,
+    ingresos_mensuales: ingresosMensuales,
+    horas_semana: horasSemana,
     /* En el paso de la situación va la del formulario; en el diagnóstico, la
        que ya quedó guardada, que es justo la que se estaba perdiendo. */
     situacion: conSituacion ? situacion : situacionGuardada(),
@@ -215,8 +267,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   };
 
   // ── El Pacto (F3) ──
-  const [pactoTexto, setPactoTexto] = useState('');
-  const [pactoFirma, setPactoFirma] = useState('');
+  const [pactoTexto, setPactoTexto] = useAnotado('pacto_texto', respuestas.pacto_texto);
+  const [pactoFirma, setPactoFirma] = useAnotado('pacto_firma', respuestas.pacto_firma);
 
   // Step 1 — password
   const [newPassword, setNewPassword] = useState('');
@@ -225,13 +277,13 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [savingPwd, setSavingPwd] = useState(false);
 
   // Step 2 — profile
-  const [especialidad, setEspecialidad] = useState(profile.especialidad ?? '');
-  const [especialidadOtro, setEspecialidadOtro] = useState('');
-  const [pais, setPais] = useState(profile.pais ?? '');
-  const [ingresosMensuales, setIngresosMensuales] = useState('');
-  const [horasSemana, setHorasSemana] = useState('');
-  const [frustracion, setFrustracion] = useState('');
-  const [energia, setEnergia] = useState(5);
+  const [especialidad, setEspecialidad] = useAnotado('especialidad', respuestas.especialidad || (profile.especialidad ?? ''));
+  const [especialidadOtro, setEspecialidadOtro] = useAnotado('especialidad_otro', respuestas.especialidad_otro);
+  const [pais, setPais] = useAnotado('pais', respuestas.pais || (profile.pais ?? ''));
+  const [ingresosMensuales, setIngresosMensuales] = useAnotado('ingresos_mensuales', respuestas.ingresos_mensuales);
+  const [horasSemana, setHorasSemana] = useAnotado('horas_semana', respuestas.horas_semana);
+  const [frustracion, setFrustracion] = useAnotado('frustracion', respuestas.frustracion);
+  const [energia, setEnergia] = useAnotado('energia', respuestas.energia);
   const [savingProfile, setSavingProfile] = useState(false);
   /*
    * Cada nivel entra a SU camino: los 5 días o los 90.

@@ -210,7 +210,7 @@ espera el clic.
 | 2 | El candado: la pauta espera la primera venta | **cerrado** · `906a020` |
 | 3 | Mi Clínica nombrada como la casa, y los seis números una sola vez | **cerrado** · `197c789` |
 | 4 | Los precios con fecha: enero sube solo | **cerrado** |
-| 5 | La radiografía de 15 minutos, cronometrada | escrita, por construir |
+| 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `PENDIENTE_HASH` · el reloj y el premio esperan su clic |
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | abierto |
 | 7 | MCD: el puente verificado de los dos lados | abierto |
 | 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
@@ -314,6 +314,63 @@ El riesgo que Javo aceptó al elegirlo: **el que abandona a los 9 minutos se
 queda sin dictamen, sin calendario y sin nada, y ya pagó.** Lo que se
 construya tiene que cuidar ese flanco: guardar cada tramo apenas se contesta,
 para que volver sea seguir y no empezar de nuevo.
+
+#### Lo que se midió el 9 de noviembre, antes de construir
+
+La premisa estaba mal de los dos lados, y el agujero era más grande que el del
+mapa. La bienvenida **ya guardaba** cada tramo al apretar el botón —en el
+teléfono y en la base— y **ya recordaba en qué paso quedó**. Eso estaba. Lo que
+no existía era la vuelta:
+
+1. De los **veinte campos** que el cliente contesta, **uno solo** se volvía a
+   leer al abrir: los seis números. Los otros diecinueve nacían vacíos. El que
+   recargaba —volver de WhatsApp, pestaña descartada, señal que cortó— caía en
+   el paso correcto con **el formulario en blanco**, y tipeaba otra vez lo que
+   la app ya tenía guardado.
+2. Y **cuatro de esos campos no se guardaban en ninguna parte**: el paso del
+   perfil le pide su energía, su frustración, lo que facturó el mes y las horas
+   de su semana. Las cuatro respuestas se escribían en la pantalla y se
+   perdían al avanzar. El comentario del archivo decía «lo que el cliente
+   contesta en el wizard ya queda en su perfil» — para estas cuatro era falso.
+
+#### Lo que se construyó — el flanco, cerrado
+
+`src/lib/laRadiografia.ts`: un borrador que se escribe **en cada tecla**, no al
+apretar el botón, y una lectura que arma las respuestas con el borrador
+adelante y lo ya guardado atrás. Los veintiséis campos de la bienvenida nacen
+de lo que el cliente ya contestó. Las cuatro huérfanas viajan ahora en
+`payloadDiagnostico`, que es el único escritor del jsonb —agregarlas en otra
+escritura las borraría, que es el bug del 8 de noviembre—. El borrador se
+limpia al cerrar la bienvenida.
+
+La lente: `scripts/prueba-la-radiografia-se-retoma.ts`. Trae su propio
+`localStorage` porque la batería corre cada lente sin entorno de navegador.
+Probada contra sus tres fallos —un campo que vuelve a nacer vacío, un borrador
+que reemplaza en vez de mezclar, las cuatro fuera del compositor—: roja en los
+tres, verde al restaurar.
+
+#### Lo que espera su clic, y por qué
+
+Dos piezas del turno 5 no las toca Claude solo:
+
+1. **El reloj a la vista.** Choca con una decisión que ya está escrita en el
+   código: `src/components/sesion/SesionViva.tsx` dice «un reloj corriendo
+   apura y no ayuda: el tiempo se dice una vez, al inicio». Las dos posturas
+   son defendibles y la diferencia la ve el cliente. Opciones para su clic:
+   **(a)** reloj corriendo, como dice el turno 5; **(b)** el tiempo dicho una
+   vez al abrir y nunca más, como el resto de la casa; **(c)** una barra de
+   avance sin minutos — sabe cuánto falta, no cuánto tarda.
+2. **El premio al terminar a tiempo.** Es una promesa, y las promesas esperan
+   su clic. Falta decir **qué** es el premio antes de poder construirlo.
+
+Y el tramo único —fundir los diez pasos en uno— junto con las preguntas nuevas
+que el turno 5 pide (FODA personal y profesional, sus archivos, el audio, qué
+días de los 90 le importan más) son texto que el cliente lee en su primera
+pantalla después de pagar: van detrás del clic del reloj, porque la forma del
+tramo depende de si hay reloj o no.
+
+Lo que **ya no depende de nada de eso** es el flanco, y está cerrado: el que
+abandona a los 9 minutos y vuelve, sigue.
 
 ---
 
