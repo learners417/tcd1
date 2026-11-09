@@ -216,11 +216,12 @@ espera el clic.
 | 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
-| 11 | **El Tablero guarda 34 códigos que el Camino no busca** | **el próximo** · medido el 9 nov |
-| 12 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
-| 13 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
-| 14 | Cirugía 4 · La app al lado de Claude | en la cola |
-| 15 | Cirugía 5 · Lo que la app mide por él | en la cola |
+| 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **el próximo** · Javo pidió el 9 nov que lo básico sea lo único que importa hoy |
+| 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | en la cola · medido el 9 nov |
+| 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
+| 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
+| 15 | Cirugía 4 · La app al lado de Claude | en la cola |
+| 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
@@ -300,7 +301,35 @@ lo pide.
 
 ### Lo que bloquea la venta y es de Javo
 
-Ninguna de estas cuatro la puede hacer Claude. Van en cada parte que se le dé.
+Ninguna de estas la puede hacer Claude. Van en cada parte que se le dé.
+
+0. **LO ÚNICO QUE FALTA PARA QUE ENTREN SOLOS.** El botón de 97 de la página
+   hoy no cobra: `src/config.js` de `landings` termina con
+   `if (!window.TCD.librosPorCorreo) window.TCD.pagos.obra = ''`, y
+   `librosPorCorreo` está en `false` esperando el correo de entrega de los
+   libros. Mientras siga así, el botón abre su WhatsApp y la venta la cierra
+   él a mano.
+
+   Cuando el correo de GHL que manda los ocho libros ande, son dos cosas:
+
+   · `librosPorCorreo: true` en `src/config.js` (eso lo hace Claude).
+   · En GHL, el producto «Tu nuevo precio» → workflow **Order Submitted** →
+     acción Webhook:
+
+   ```
+   POST   https://app.tuclinica.digital/api/alta-numero
+   Header x-alta-key: <ALTA_NUMERO_KEY, o la TCD_INTEGRATION_KEY del puente>
+   Body   { "email": "{{contact.email}}", "nombre": "{{contact.name}}" }
+   ```
+
+   Con eso la app hace sola lo demás: crea el usuario, le manda el correo de
+   «crea tu contraseña y entra», y le abre **exactamente los días 1 al 5 por
+   21 días de calendario** — que es, palabra por palabra, lo que la página
+   promete. Medido y congelado en `prueba-los-cinco-dias.ts`.
+
+   El webhook de los escalones (`/api/ghl-webhook`) **no** sirve para esto:
+   busca a un cliente que ya existe y no crea el usuario. Para la entrada va
+   `/api/alta-numero`.
 
 1. ~~Correr `supabase/migrations/20261105_donde_cae_lo_que_se_rompe.sql`.~~
    **HECHO el 9 de noviembre.** Era la única que ya estaba rota para alguien
@@ -312,7 +341,7 @@ Ninguna de estas cuatro la puede hacer Claude. Van en cada parte que se le dé.
 3. ~~Los pasos del día 45.~~ **HECHO el 8 de noviembre:** las 91 jornadas
    tienen contenido.
 4. Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
-   mañana). Los títulos están más abajo en este mapa. **Esperar el turno 11**
+   mañana). Los títulos están más abajo en este mapa. **Esperar el turno 12**
    antes de cargarlos: hoy 34 de las 43 filas del Tablero guardan el enlace
    en un código que el Camino no lee.
 5. Purgar jsDelivr de las nueve páginas del commit `3a6d0cd` de `landings`

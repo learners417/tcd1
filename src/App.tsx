@@ -41,6 +41,7 @@ import { setSentryUser } from './lib/sentry';
 import { toast } from 'sonner';
 import { mensajeDeFalla } from './lib/conexion';
 import { diaDelPrograma } from './lib/diaPrograma';
+import { marcarPrimerIngreso } from './lib/elPrimerIngreso';
 import Entrenadores from './pages/Entrenadores';
 import { MessageSquare } from 'lucide-react';
 import { setFamiliaActual } from './lib/vocabulario';
@@ -267,6 +268,13 @@ export default function App() {
         const locales = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
         filas.filter((r) => r.completada)
           .forEach((r) => locales.add(`${r.pilar_numero}-${r.meta_codigo}`));
+
+        /* La jornada de la entrega técnica dice «se marca solo: primer
+           ingreso» y nadie la marcaba: era la primera tarjeta del Camino,
+           abierta para siempre. Acá es donde se sabe qué está cerrado. */
+        const primera = await marcarPrimerIngreso(uid, locales);
+        if (primera) locales.add(primera);
+
         localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify([...locales]));
 
         /*
