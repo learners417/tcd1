@@ -168,7 +168,27 @@ PRIMERAS = ['dashboard', 'roadmap', 'adn', 'diario', 'metrics', 'biblioteca', 'm
 # Las que cambian de verdad cuando hay datos: las que muestran numerales, listas
 # largas o los textos que el cliente escribió. En El Método y Entrenadores el
 # contenido es el mismo con cuenta llena o vacía, así que no suman una vista.
-CON_DATOS = ['dashboard', 'roadmap', 'adn', 'metrics', 'numero', 'manualNegocio']
+#
+# ── 'diario' ENTRÓ EL 9 DE NOVIEMBRE, Y ES LA LECCIÓN DE SIEMPRE ──────────
+#
+# Esta lista decía que en el Diario «el contenido es el mismo con cuenta llena
+# o vacía». Es al revés: el Diario vacío y el Diario con una semana escrita
+# son DOS PANTALLAS. Vacío muestra el formulario; con la entrada de hoy
+# guardada muestra la confirmación, el puntaje, seis tarjetas de numerales y
+# tres píldoras —energía, racha, historial— que vacío no existen.
+#
+# Medido ese día: el Diario vacío daba cero faltas, y el mismo Diario con la
+# cuenta llena daba DIEZ, entre ellas el párrafo que explica para qué sirve la
+# pantalla aplastado a 0 px de ancho. Es la pantalla que el cliente toca todos
+# los días, y es la única de los cinco destinos de la barra que nunca se había
+# medido con lo que él escribe adentro.
+#
+# Y con 'diario' entraron 'entrenadores' y 'mensajes', que son los otros dos
+# destinos de la barra de abajo que se medían vacíos. Los cuatro destinos de
+# esa barra son los que el cliente pisa todos los días; que se midan con su
+# cuenta adentro lo vigila una lente de `auditoria.py`, no esta lista.
+CON_DATOS = ['dashboard', 'roadmap', 'adn', 'metrics', 'numero', 'manualNegocio',
+             'diario', 'entrenadores', 'mensajes']
 
 # ── EL TELÉFONO ANGOSTO ──
 #
@@ -194,6 +214,26 @@ CON_DATOS = ['dashboard', 'roadmap', 'adn', 'metrics', 'numero', 'manualNegocio'
 ANGOSTAS = ['dashboard', 'roadmap', 'entrenadores', 'campanas', 'mensajes', 'adn', 'metrics']
 ANCHO_ANGOSTO = 320
 
+# ── LA COMPUTADORA ──
+#
+# Todo lo de arriba —las 22 lentes, las 87 vistas, el cero que este mapa daba
+# por hecho— se midió SIEMPRE a 390 px, y a 320 el angosto. Nunca a un ancho
+# de escritorio: buscado el 9 de noviembre por todo el repo, el único 1440 que
+# existía era el de `medir-densidad.py`, que cuenta palabras y toques y no
+# mira una sola regla, y que además no está en la batería.
+#
+# O sea que el «cero faltas» era un cero DEL TELÉFONO. El cliente abre esto en
+# la computadora —es donde trabaja— y de ese ancho no se sabía nada.
+#
+# A 1440 la app no se estira: las rejillas pasan de dos columnas a tres
+# (`md:grid-cols-3`) y los rótulos que allá se partían acá entran, y al revés.
+# Son otras cajas con el mismo contenido, así que son otras faltas.
+#
+# Van las mismas pantallas que el angosto, más el Diario, y CON DATOS por lo
+# mismo: con la cuenta vacía casi nada de esto se dibuja.
+ANCHAS = ['dashboard', 'roadmap', 'entrenadores', 'campanas', 'mensajes', 'adn', 'metrics', 'diario']
+ANCHO_ANCHO = 1440
+
 # ── EL CLIENTE QUE ESCRIBE MUCHO ──
 #
 # La cuenta con datos tiene textos realistas pero CORTOS: el campo se llama
@@ -212,6 +252,7 @@ ESTRICTAS = (list(PANTALLAS) + [n for n, _, _ in INTERNAS]
              + [f'{p}>fondo' for p in ['roadmap', 'biblioteca', 'coach']]
              + [f'{p}>lleno' for p in CON_DATOS]
              + [f'{p}>angosto' for p in ANGOSTAS]
+             + [f'{p}>ancho' for p in ANCHAS]
              + [f'{p}>largo' for p in LARGAS])
 ADMIN_ESTRICTO = True  # el Admin llegó a cero el 16 sep
 
@@ -1362,6 +1403,29 @@ def main():
                     m = medir_pantalla(pag); m['errores'] = errores
                     pag.screenshot(path=f'/tmp/app-{p}-angosto.png')
                     resultados[f'{p}>angosto'] = m; pag.close()
+
+            # ── La computadora ──
+            #
+            # La misma cuenta con datos, a 1440. Lo que se busca acá es lo
+            # contrario del angosto: la rejilla que se abre a tres columnas y
+            # parte rótulos que en el teléfono entraban enteros, el ícono que
+            # queda flotando contra un rótulo de dos renglones, y el panel que
+            # se estira sobre nada.
+            #
+            # Se mide con `device_scale_factor` 1, que es lo que tiene una
+            # pantalla de escritorio; el teléfono va a 2.
+            if not solo or 'ancho' in solo:
+                for p in (ANCHAS if not solo
+                          else [x for x in ANCHAS if f'{x}>ancho' in solo or x in solo or 'ancho' in solo]):
+                    pag = ctx.new_page(); errores = []
+                    pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
+                    pag.set_viewport_size({'width': ANCHO_ANCHO, 'height': 900})
+                    pag.goto(base); preparar(pag, p, dias=estado_lleno()['dias'],
+                                             lleno=estado_lleno()); pag.reload()
+                    pag.wait_for_timeout(2800)
+                    m = medir_pantalla(pag); m['errores'] = errores
+                    pag.screenshot(path=f'/tmp/app-{p}-ancho.png')
+                    resultados[f'{p}>ancho'] = m; pag.close()
 
             # ── El cliente que escribe mucho ──
             #

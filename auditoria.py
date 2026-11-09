@@ -1544,6 +1544,68 @@ else:
 check('el medidor mide las pestañas que existen, y todas',
       not _falla33b, '; '.join(_falla33b[:4]))
 
+# ── 6.33c · Los destinos de la barra se miden CON LA CUENTA ADENTRO ────
+#
+# Hermana de la de arriba, y encontrada igual de tarde. Aquella vigila que el
+# medidor no pida una pantalla que no existe; ésta, que no mida vacía una que
+# el cliente usa llena.
+#
+# `CON_DATOS` decía qué pantallas «cambian de verdad cuando hay datos», y el
+# Diario no estaba: la lista afirmaba que su contenido «es el mismo con cuenta
+# llena o vacía». Medido el 9 de noviembre, era al revés y por goleada: el
+# Diario vacío muestra el formulario y daba CERO faltas; el mismo Diario con
+# la semana escrita muestra otra pantalla entera —confirmación, puntaje, seis
+# tarjetas de numerales, tres píldoras— y daba DIEZ, con el párrafo que
+# explica para qué sirve aplastado a 0 px de ancho en un teléfono.
+#
+# La regla que queda: los destinos de la barra de abajo son los que el cliente
+# pisa todos los días. Ninguno puede medirse sólo vacío.
+_barra33 = set(_re33.findall(r"\{\s*id:\s*'([a-zA-Z]+)'", rd('src/components/BottomTabBar.tsx')))
+_cd33 = _re33.search(r"^CON_DATOS = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
+_falla33c = []
+if not _barra33 or not _cd33:
+    _falla33c.append('no se pudo leer la barra de abajo o la lista CON_DATOS del medidor')
+else:
+    _conDatos33 = set(_re33.findall(r"'([a-zA-Z]+)'", _cd33.group(1)))
+    for _x in sorted(_barra33 - _conDatos33):
+        _falla33c.append(f"'{_x}' es un destino de la barra y el medidor lo mide sólo vacío")
+    if 'diario' not in _conDatos33:
+        _falla33c.append("'diario' salió de CON_DATOS: es la pantalla que el cliente escribe todos los días")
+
+check('los destinos de la barra se miden con la cuenta llena, no vacíos',
+      not _falla33c, '; '.join(_falla33c[:4]))
+
+# ── 6.33d · Y se miden también en la computadora ───────────────────────
+#
+# Las 22 lentes nacieron a 390 px y ahí se quedaron. Buscado el 9 de noviembre
+# por todo el repo, el único ancho de escritorio que existía era el de
+# `medir-densidad.py` —que cuenta palabras y toques, no mira una sola regla, y
+# ni siquiera está en la batería—. El «cero faltas» del que este proyecto
+# venía hablando era un cero del teléfono.
+#
+# No es el mismo dibujo con más aire: a 1440 las rejillas se abren de dos
+# columnas a tres, y un rótulo que allá entraba acá se parte en dos renglones
+# —con su ícono flotando en el hueco—. Son otras cajas, así que son otras
+# faltas, y el cliente trabaja en la computadora.
+_an33 = _re33.search(r"^ANCHAS = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
+_anchoVal33 = _re33.search(r"^ANCHO_ANCHO = (\d+)$", rd('scripts/medir-app.py'), _re33.M)
+_falla33d = []
+if not _an33 or not _anchoVal33:
+    _falla33d.append('el medidor no declara una corrida de escritorio (ANCHAS / ANCHO_ANCHO)')
+else:
+    _anchas33 = set(_re33.findall(r"'([a-zA-Z]+)'", _an33.group(1)))
+    if int(_anchoVal33.group(1)) < 1280:
+        _falla33d.append(f'ANCHO_ANCHO es {_anchoVal33.group(1)}: eso no es una computadora')
+    for _x in sorted(_barra33 - _anchas33):
+        _falla33d.append(f"'{_x}' es un destino de la barra y nadie lo mide en la computadora")
+    if 'diario' not in _anchas33:
+        _falla33d.append("'diario' no se mide en la computadora")
+    if '>ancho' not in rd('scripts/medir-app.py'):
+        _falla33d.append('ANCHAS está declarada pero ninguna vista sale con el sufijo >ancho')
+
+check('y se miden también en la computadora, no sólo en el teléfono',
+      not _falla33d, '; '.join(_falla33d[:4]))
+
 # ── 6.33c · UN SOLO CALENDARIO ─────────────────────────────────────────
 #
 # Los cinco sistemas del Camino estaban escritos en dos lados y no decían lo

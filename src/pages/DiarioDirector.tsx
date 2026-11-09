@@ -195,12 +195,38 @@ function KpiCard({
   tone?: 'default' | 'green' | 'warn';
   delta?: string;
 }) {
+  /*
+    ─── EL ORO ESCRITO A MANO SE SALTEABA LA REGLA DE CONTRASTE ────────────
+
+    Decía `text-[var(--oro,#B0822E)]`. El tema claro endereza el oro de texto
+    en tres reglas —`text-gold`, `text-gold/…`, `text-goldhi`— y ninguna
+    alcanza a una clase escrita entre corchetes: el valor crudo llegaba
+    intacto a la pantalla. #B0822E sobre la tarjeta da 3,09:1, por debajo de
+    AA, y es el color del número cuando el dato viene flojo — «0%» de foco en
+    el negocio, justo el que el cliente tiene que leer.
+
+    `text-goldhi` toma `--oro-t` (#74551C, 6,14:1). Es la misma familia, un
+    tono más oscuro, y es el que la casa ya usa para el oro de texto.
+  */
   const valColor =
-    tone === 'green' ? 'text-success' : tone === 'warn' ? 'text-[var(--oro,#B0822E)]' : 'text-cream';
+    tone === 'green' ? 'text-success' : tone === 'warn' ? 'text-goldhi' : 'text-cream';
   return (
     <div className="card-panel p-4 rounded-2xl border border-[var(--line, rgba(142,104,36,0.18))]">
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <Icon className="w-3.5 h-3.5 text-gold/60" />
+      {/*
+        ─── EL ÍCONO CENTRADO CONTRA UN RÓTULO DE DOS RENGLONES ─────────────
+
+        Era `items-center`. «ÍNDICE DE BIENESTAR» entra en un renglón sólo si
+        la tarjeta es ancha; en el teléfono son dos columnas y los seis
+        rótulos se parten. Con el ícono centrado sobre 49 px de alto y una
+        interlínea de 24, el ícono queda flotando en el HUECO entre los dos
+        renglones, alineado a nada.
+
+        `items-start` y el mismo `mt-[3px]` que usa el calendario del
+        encabezado: el ícono se apoya en la primera línea, que es donde el ojo
+        la busca.
+      */}
+      <div className="flex items-start gap-1.5 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-gold/60 mt-[3px] shrink-0" />
         <p className="text-sm text-cream/55 uppercase tracking-widest font-semibold">{label}</p>
       </div>
       <p className={`text-xl font-medium ${valColor}`}>{value}</p>
@@ -462,8 +488,31 @@ Devuelve SOLO este JSON:
         `items-start` porque con `items-end` el botón se alineaba con el
         último renglón del párrafo, que es donde no lo busca nadie.
       */}
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
+      {/*
+        ─── Y EL MISMO BUG OTRA VEZ, PORQUE LA DERECHA CRECIÓ ───────────────
+
+        El arreglo de arriba —`flex-1 min-w-0` a la izquierda, `shrink-0` a la
+        derecha— se escribió cuando a la derecha había UN botón. Hoy hay tres
+        píldoras de 44 px: la energía de los últimos siete días, la racha y el
+        Historial. Juntas piden cerca de 300 px y no ceden ninguno, porque
+        `shrink-0` es precisamente eso.
+
+        En un teléfono de 390 lo que queda para la izquierda es prácticamente
+        cero, y `min-w-0` le permite llegar a cero: medido el 9 de noviembre,
+        el párrafo que explica para qué sirve el diario quedó en **0 px de
+        ancho y 461 de alto** — una letra por renglón, ilegible.
+
+        Y no se veía, porque las tres píldoras sólo aparecen cuando el cliente
+        TIENE racha y energía cargada, y el medidor abría este diario vacío.
+        Con la cuenta llena entra al medidor desde hoy.
+
+        El arreglo: en el teléfono los dos grupos se apilan —el texto arriba,
+        las píldoras abajo, cada uno con el ancho entero— y desde `sm` vuelve
+        la fila de siempre. El `flex-wrap` del grupo derecho es el seguro por
+        si mañana aparece una cuarta píldora.
+      */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+        <div className="sm:flex-1 sm:min-w-0">
           {/*
             ─── ACÁ DECÍA «DIARIO DEL FUNDADOR» ─────────────────────────────
             La barra de arriba dice «Diario» a ochenta píxeles. Un diario abre
@@ -508,7 +557,7 @@ Devuelve SOLO este JSON:
             <span className="text-sm text-cream/55 whitespace-nowrap">{cronoSegundos === 0 ? 'listo, guarda cuando quieras' : cronoActivo ? 'tu cierre en 3 minutos' : 'tócalo si lo quieres medir'}</span>
           </button>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           {energiaPromedio !== null && (
             <div className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl border ${
               energiaPromedio >= 7 ? 'text-success bg-emerald-500/10 border-emerald-500/20' :
@@ -612,7 +661,15 @@ Devuelve SOLO este JSON:
                     <Check className="w-6 h-6 text-success" />
                   </div>
                   <div>
-                    <h3 className="text-base font-medium text-success">Entrada del día completada</h3>
+                    {/*
+                      Era `text-base` —16 px— en la Garamond de display. El
+                      serif de la casa por debajo de 20 px tiene la altura de
+                      x tan baja que lee más chico que el sans de 17 que lleva
+                      abajo: el título quedaba más chico que su propia
+                      explicación y la jerarquía se daba vuelta. 20 px es el
+                      piso que el medidor pide para este serif.
+                    */}
+                    <h3 className="text-xl font-medium text-success">Entrada del día completada</h3>
                     <p className="text-sm text-success/70 mt-0.5">Tu cierre quedó guardado. Esto es lo que dicen tus números.</p>
                   </div>
                 </div>
@@ -866,7 +923,11 @@ Devuelve SOLO este JSON:
                     const Icon = CHECKEO_ICONS[chip.id] ?? Check;
                     const onColor = chip.positivo
                       ? 'border-success/30 text-success bg-success/5'
-                      : 'border-[var(--oro,#B0822E)]/30 text-[var(--oro,#B0822E)] bg-[var(--oro,#B0822E)]/5';
+                      /* Mismo oro escrito a mano que en KpiCard: el borde y el
+                         fondo pueden quedarse con el valor crudo —no son
+                         texto—, pero el TEXTO toma `text-goldhi`, que es el
+                         que el tema claro endereza a `--oro-t`. */
+                      : 'border-[var(--oro,#B0822E)]/30 text-goldhi bg-[var(--oro,#B0822E)]/5';
                     return (
                       <button
                         key={chip.id}
