@@ -211,7 +211,7 @@ espera el clic.
 | 3 | Mi Clínica nombrada como la casa, y los seis números una sola vez | **cerrado** · `197c789` |
 | 4 | Los precios con fecha: enero sube solo | **cerrado** |
 | 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `8036e01` · el reloj y el premio esperan su clic |
-| 6 | MCD: su batería propia (hoy no tiene ninguna) | abierto |
+| 6 | MCD: su batería propia (hoy no tiene ninguna) | **cerrado** · `f3e9ddc` · 46 lentes |
 | 7 | MCD: el puente verificado de los dos lados | abierto |
 | 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
 | 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
@@ -247,6 +247,53 @@ de MCD ya estaba archivado.
 **MCD se trabaja en la misma sesión que TCD**, no en un chat aparte: comparten
 el mismo Supabase y el puente tiene un lado en cada repo —`api/mcd-bridge.ts`
 en TCD y `/api/integrations/tcd` en MCD—. Tocar un lado a ciegas rompe el otro.
+
+### La batería de MCD — turno 6, cerrado el 9 de noviembre
+
+`auditoria.py` en la raíz de MCD, nueve bloques, 46 lentes. Se corre con
+`npm run bateria` (o `bateria:rapida`, que saltea el build). Qué cuida y por
+qué está en `README-BATERIA.md` del repo.
+
+La premisa del mapa era cierta por una vez: MCD no tenía NADA. Tres scripts en
+el `package.json` —dev, build, start— y ninguno miraba si el código es
+correcto; ni `tsc --noEmit`. Lo que sí sorprendió es que, corriéndolo, **el
+código ya estaba limpio**: `tsc` y `next build` pasan los dos. Lo que faltaba
+no era arreglar MCD, era poder darse cuenta cuando se rompa.
+
+**Tres cosas que la batería encontró al escribirse, y se arreglaron:**
+
+1. **El puente comparaba su clave con `!==` pelado**, mientras el webhook —la
+   otra puerta al mismo dato, los cobros de un cliente— usaba
+   `timingSafeEqual`. Una comparación que corta en el primer carácter distinto
+   se puede cronometrar desde afuera para adivinar la clave de a un carácter.
+   Igualado.
+2. **MCD no tenía `.gitignore`.** El primer commit con `git add -A` se llevó
+   10.496 archivos —`node_modules` y `.next` enteros, packs de webpack de
+   43 MB— y GitHub lo rechazó en el pre-receive. Ese rechazo fue la suerte:
+   nada impedía que la próxima vez entrara el `.env.local`, y de git no vuelve
+   —un `.env` subido una vez obliga a rotar todas las claves—. Ahora hay
+   `.gitignore` y una lente que mira que nada de eso quede rastreado.
+3. **La batería no estaba en el `package.json`**, que es exactamente cómo una
+   batería se corre una vez y se olvida.
+
+**Y una que quedó bien y conviene saber por qué:** `cobros_verificados`, el
+número que viaja a TCD y dispara el cinturón Rojo, cuenta FILAS de `cobros`
+sin filtrar por nada. Es honesto solo porque `receipt_path` es `not null`: una
+fila no puede existir sin su comprobante. El día que alguien la vuelva
+nullable, ese número empieza a mentir y el Rojo se otorga sin evidencia. Hay
+una lente para cada mitad, y una tercera que mira que ninguna migración
+posterior le saque el `not null`.
+
+**Lo que espera su clic:** al instalar las dependencias apareció un
+`package-lock.json`, que MCD nunca tuvo. **No se subió**, y queda ignorado.
+Un lockfile es buena práctica, pero subir ESTE fija las versiones que se
+resolvieron el 9 de noviembre y cambia lo que Vercel instala en el próximo
+deploy respecto de lo que corre hoy. Si lo quiere: sacar la línea del
+`.gitignore`, `npm install`, y subirlo.
+
+**Lo que esta batería todavía NO prueba:** el puente de punta a punta. Mira
+solo el lado de MCD —que los cinco campos del contrato no cambien de nombre—.
+La ida y vuelta de verdad, con `api/mcd-bridge.ts` de este lado, es el turno 7.
 
 ---
 
