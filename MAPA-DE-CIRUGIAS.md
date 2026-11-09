@@ -212,7 +212,7 @@ espera el clic.
 | 4 | Los precios con fecha: enero sube solo | **cerrado** |
 | 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `8036e01` · el reloj y el premio esperan su clic |
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | **cerrado** · `f3e9ddc` · 46 lentes |
-| 7 | MCD: el puente verificado de los dos lados | abierto |
+| 7 | MCD: el puente verificado de los dos lados | **cerrado** · `817cb96` + `7c6e524` (MCD) · 15 + 5 lentes |
 | 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
 | 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
 | 10 | Estética computadora | espera su clic |
@@ -291,9 +291,66 @@ resolvieron el 9 de noviembre y cambia lo que Vercel instala en el próximo
 deploy respecto de lo que corre hoy. Si lo quiere: sacar la línea del
 `.gitignore`, `npm install`, y subirlo.
 
-**Lo que esta batería todavía NO prueba:** el puente de punta a punta. Mira
-solo el lado de MCD —que los cinco campos del contrato no cambien de nombre—.
-La ida y vuelta de verdad, con `api/mcd-bridge.ts` de este lado, es el turno 7.
+**Lo que esta batería todavía NO probaba:** el puente de punta a punta. Eso
+fue el turno 7, acá abajo.
+
+### El puente de los dos lados — turno 7, cerrado el 9 de noviembre
+
+`scripts/prueba-el-puente-de-las-dos-apps.ts` en TCD (15 lentes) y cinco
+lentes nuevas en el bloque 8 de la batería de MCD. Commits: `817cb96` en TCD y
+`7c6e524` en MCD.
+
+**La premisa del mapa era cierta, y peor de lo que decía.** No es que el lado
+de TCD estuviera sin probar: **nadie había ejecutado nunca ese handler**. Lo
+único que lo miraba era una línea de `prueba-el-candado-por-hecho.ts` que
+comprobaba que el Camino escribiera la palabra `mcd-bridge` en algún lado. Se
+medía que el cable estuviera enchufado, nunca que pasara corriente. La prueba
+nueva corre la ruta de verdad contra un MCD falso que decide igual que el real
+—clave por header, 404 si el cliente no está, los cinco campos del contrato—,
+en las nueve formas en que la ida y vuelta puede terminar.
+
+**Cuatro cosas que aparecieron al ejecutarlo, y se arreglaron:**
+
+1. **Todo fallo del otro lado se veía igual que «no vendió».** Con la clave
+   distinta en los dos entornos —o sin poner en uno—, MCD contesta 401, y acá
+   eso era indistinguible de un cliente que no cobró: el Cinturón Rojo no
+   llega nunca y el día 31 no se abre nunca, en silencio y para siempre. El
+   200 se queda —MCD caído no debe romper TCD—, pero ahora `mcd_status` viaja
+   SIEMPRE, también con `'ok'` cuando salió bien, y el 401 y el 404 tienen
+   nombre propio: `clave_rechazada` y `cliente_no_esta_en_mcd`.
+2. **La búsqueda del cliente en MCD distinguía mayúsculas.** El índice que
+   existe para eso es `practitioners(lower(email))`, del 8 de julio, y la
+   consulta era un `.eq('email', …)` pelado que no lo usa ni respeta su
+   intención. Una sola mayúscula guardada y el endpoint contesta 404 — que,
+   por lo de arriba, se leía como «no vendió». Ahora el camino normal sigue
+   siendo el exacto y la barrida sin mayúsculas corre sólo si el exacto no
+   encontró nada, verificando en JS lo que vuelve (`ilike` trata `_` y `%`
+   como comodines, y el `_` es legal en un email).
+3. **El contador y el cinturón podían contradecirse.** `cobros_verificados`
+   cuenta filas; el Rojo miraba sólo `primer_cobro`. Una fila sin fecha hacía
+   que el X/10 dijera «2» y el cinturón «nunca vendió», los dos leyendo la
+   misma fila. Hoy no puede pasar —`paid_at` es `not null`—; ahora tampoco el
+   día que alguien la vuelva nullable.
+4. **El entorno se leía al cargar el módulo.** Eso fijaba la clave en el
+   primer arranque —rotarla exigía redeploy— y dejaba la ruta imposible de
+   ejecutar en una prueba. Es, literalmente, por qué nadie la había corrido.
+
+**Cómo saber hoy si el puente está vivo**, sin abrir nada:
+
+```
+curl 'https://<dominio-de-TCD>/api/mcd-bridge?email=<un-cliente>'
+```
+
+`mcd_status: "ok"` → el puente anda. `"clave_rechazada"` → las dos claves no
+coinciden. `"sin_integration_key"` → falta en el entorno de TCD.
+`"cliente_no_esta_en_mcd"` → ese cliente no tiene cuenta en MiClínica.
+`"mcd_caido"` → MCD no contesta.
+
+**Lo que espera su clic:** al instalar las dependencias de MCD, npm avisa que
+`next@14.2.15` tiene una vulnerabilidad conocida y pide subir de versión.
+Subir Next cambia lo que Vercel compila en el próximo deploy respecto de lo
+que corre hoy, así que no se tocó. Es un `npm i next@latest` más una corrida
+de la batería, y conviene hacerlo con tiempo, no antes de una venta.
 
 ---
 
