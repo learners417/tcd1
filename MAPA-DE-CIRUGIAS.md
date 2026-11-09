@@ -213,7 +213,7 @@ espera el clic.
 | 5 | La radiografía de 15 minutos, cronometrada | **el flanco cerrado** · `8036e01` · el reloj y el premio esperan su clic |
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | **cerrado** · `f3e9ddc` · 46 lentes |
 | 7 | MCD: el puente verificado de los dos lados | **cerrado** · `817cb96` + `7c6e524` (MCD) · 15 + 5 lentes |
-| 8 | El recorrido punta a punta del que paga 97 y sube a 1.000 | abierto |
+| 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `HASH` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
 | 10 | Estética computadora | espera su clic |
 
@@ -351,6 +351,92 @@ coinciden. `"sin_integration_key"` → falta en el entorno de TCD.
 Subir Next cambia lo que Vercel compila en el próximo deploy respecto de lo
 que corre hoy, así que no se tocó. Es un `npm i next@latest` más una corrida
 de la batería, y conviene hacerlo con tiempo, no antes de una venta.
+
+### La cadena del pago, ejecutada — turno 8, cerrado el 9 de noviembre
+
+`scripts/prueba-el-recorrido-del-que-paga.ts`, 19 lentes, registrada en la
+batería. Corre las dos rutas que convierten a un desconocido en cliente y
+después en cliente de $1.000 —`/api/alta-numero` y `/api/ghl-webhook`— contra
+un Supabase falso que decide como el real, y lee lo que queda escrito en la
+fila con las MISMAS funciones que lee la app.
+
+**La premisa del mapa era cierta, y por la misma razón que el turno 7.** Nadie
+había ejecutado nunca esas dos rutas. Lo que las miraba era grep sobre su
+propio texto —dos lentes de `auditoria.py` buscando cadenas dentro del
+archivo— y `prueba-sube-de-escalon.ts`, que **replica a mano** lo que el
+webhook supuestamente escribe:
+
+```ts
+const yaPago = { plan_comercial: 'amarillo', servicio_contratado: 'base' };
+```
+
+Esa línea es una copia, no una medición: el día que el webhook escribiera otra
+cosa, esa prueba seguiría verde para siempre. Y acá costaba más que en el
+puente, porque esta cadena ES la venta.
+
+**Cinco cosas que aparecieron al ejecutarla, y se arreglaron:**
+
+1. **El que pagaba el escalón de entrada se llevaba los noventa días
+   GRATIS.** El trigger `on_auth_user_created` —el de `fix-supabase.sql`—
+   inserta el perfil con `plan = 'DWY'` en el mismo instante en que se crea el
+   usuario. El alta preguntaba «¿ya tiene plan?» y se abstenía de pisarlo: ese
+   resguardo era para el cliente viejo y le caía a TODOS los compradores
+   nuevos. `planDe('DWY')` devuelve `'completo'`, que son noventa y nueve
+   pilares. Sin ventana de vencimiento, y sin nada que ofrecerle a $1.000: el
+   escalón siguiente no existía para él. **Era el turno 8 roto en su primer
+   paso.** La pregunta correcta no es qué dice la columna, es quién la
+   escribió: si el usuario lo acabamos de crear nosotros, lo que haya en
+   `plan` es el default del trigger y no lo compró nadie.
+2. **El pago escribía el QUÉ y no el CUÁNDO.** `topeDelEscalon` apaga el tope
+   entero cuando `servicio_marcado_el` está vacío —a propósito, para no
+   cerrarles los días 13 al 90 a los clientes de hoy, que están en `'base'`
+   sólo porque nadie los marcó—. El webhook escribía `servicio_contratado` y
+   dejaba la fecha en null, o sea que la venta automática producía exactamente
+   la ficha que el tope ignora: el de La Base abría los noventa días, la
+   puerta de su primera etapa no aparecía nunca, y **las entregas del equipo
+   no se disparaban para el que pagó La Instalación.** El pago es el momento
+   en que una persona lo habría marcado a mano.
+3. **Un cobro podía BAJARLE el acceso a quien ya había pagado más arriba.**
+   `plan_comercial` y `acceso_hasta` se pisaban sin mirar qué había: ganaba el
+   último webhook, no el escalón más alto. Un producto viejo de GHL que manda
+   `plan: "blanco"`, un workflow que se dispara doble sobre un order bump, o
+   un reenvío de un cobro de hace meses, dejaba al cliente de $3.000 con los
+   cinco días abiertos y un vencimiento a 21. Pagó y la app le cerró el
+   Camino, sin error en ninguna pantalla. La regla que quedó: **un cobro sólo
+   puede querer decir «pagó esto», nunca «pagó menos»** — bajar un acceso es
+   del Admin, donde lo hace una persona que sabe por qué.
+4. **El perfil que crea el alta no guardaba su email**, que es justo la columna
+   por la que el webhook del pago busca al cliente cuando sube. Lo obligaba a
+   caer en su respaldo —paginar `auth.users`— para los clientes que la venta
+   automática crea, que son todos los que importan.
+5. **El entorno se leía al cargar el módulo**, igual que en el puente: la
+   clave quedaba fijada en el primer arranque —rotarla exigía redeploy— y la
+   ruta era imposible de ejecutar en una prueba. Es, otra vez, por qué nadie
+   la había corrido.
+
+**Y una sutileza que el arreglo 2 trajo, resuelta antes de salir:** sellar la
+fecha ENCIENDE el tope, así que sellarla de más quita días. A un cliente de
+siempre —`'completo'`— al que le entrara un cobro de La Base por un order bump
+mal apuntado, el Camino se le habría cortado en el día 12. Por eso el escalón
+se sella **sólo cuando ese cobro también le movió el acceso**, o sea cuando de
+verdad es el escalón que compró: un cobro que no le abre nada no puede
+cerrarle nada. Tiene su lente.
+
+**Las dos lentes de texto de `auditoria.py` se re-apuntaron a la propiedad**,
+no a la cadena literal que buscaban. Buscar `"if (ticket) cambios…"` dentro de
+un archivo es exactamente la clase de lente que este turno vino a corregir.
+
+**Qué cambia para un cliente que compre mañana**, dicho sin rodeos: el que
+paga La Base ahora tiene el Camino **hasta el día 12**, que es lo que compró y
+lo que la pantalla del candado le ofreció. Hasta hoy se le abría entero por el
+agujero del punto 2. Si en algún momento preferís que La Base siga abriendo
+los noventa días, es una línea —y es decisión tuya, no de la prueba.
+
+**Lo que sigue siendo tuyo y no se tocó:** la app cobra el escalón de entrada
+a **27 USD con 21 días** de acceso y la oferta son **97** (está anotado arriba,
+en la CIRUGÍA 1, como «la fuga»). Es un precio y un texto de venta, así que
+espera tu clic. Las lentes de este turno no miran el monto: miran que lo que
+se cobra abra lo que se vendió, cualquiera sea el número.
 
 ---
 

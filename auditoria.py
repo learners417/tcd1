@@ -2310,7 +2310,8 @@ import os as _os54
 if _os54.path.exists('api/ghl-webhook.ts'):
     _wh54 = rd('api/ghl-webhook.ts')
     check('el webhook de pago busca por perfil, no por la primera página',
-          "from('profiles').select('id').eq('email'" in _wh54)
+          "from('profiles').select(COLUMNAS).eq('email', email)" in _wh54
+          and "const COLUMNAS = 'id," in _wh54)
     check('y si tiene que paginar, pagina de verdad',
           'perPage: 200' in _wh54 and 'pagina <= 20' in _wh54,
           'listUsers() sin argumentos trae 50 y calla el resto')
@@ -4164,10 +4165,17 @@ check('y el ticket pagado abre el tramo que le corresponde',
 check('el servicio contratado lo escribe el pago, no una persona',
       'cambios.servicio_contratado = ticket' in _wh73,
       'si lo tiene que marcar alguien a mano, la venta no es automática')
+# La escritura del servicio vive detrás de `ticket &&`: un color de acceso no
+# tiene autoridad para escribirla. Adivinarlo es el puente que hacía figurar a
+# un cliente de $497 con la instalación completa contratada. Que la propiedad
+# se cumpla al EJECUTAR la ruta lo mide la lente 18 de
+# scripts/prueba-el-recorrido-del-que-paga.ts; esto cuida que el guardia siga
+# en el código y nadie lo saque de un renglón.
+_tras_el_guardia73 = _wh73.split('cambios.servicio_contratado = ticket;')[0]
+_guardia73 = _tras_el_guardia73.rstrip().endswith(') {') and 'if (ticket &&' in _tras_el_guardia73.split('\n')[-2]
 check('y NO se escribe cuando solo vino un color de acceso',
-      'if (ticket) cambios.servicio_contratado' in _wh73,
-      'adivinarlo es el puente que hacía figurar a un cliente de $497 con '
-      'la instalación completa contratada')
+      bool(_guardia73),
+      'la escritura del servicio tiene que seguir detrás de `if (ticket && …)`')
 
 # ── Ningún botón muerto, ningún callejón ──────────────────────────────
 # Dos defectos que no dan error y por eso ninguna otra lente los veía: el
@@ -4197,6 +4205,39 @@ _pte = subprocess.run(['npx', 'tsx', 'scripts/prueba-el-puente-de-las-dos-apps.t
 check('el puente con MiClínica anda y se puede ver si no anda',
       _pte.returncode == 0,
       ' · '.join(l.strip() for l in _pte.stdout.split('\n') if l.strip().startswith('✗'))[:220])
+
+# ── La cadena del pago, ejecutada ─────────────────────────────────────
+# Las dos rutas que convierten a un desconocido en cliente y después en
+# cliente de $1.000: /api/alta-numero y /api/ghl-webhook. Nadie las ejecutaba:
+# lo que las miraba era grep sobre su propio texto (la 6.54 y la 7.3 de acá) y
+# una prueba que REPLICABA a mano lo que el webhook supuestamente escribe. Si
+# el webhook escribiera otra cosa, esa réplica seguiría verde para siempre.
+# Ahora los dos handlers corren contra un Supabase falso que decide como el
+# real —incluido el trigger que estampa plan='DWY' en cada perfil nuevo— y lo
+# que queda escrito se lee con las mismas funciones que lee la app.
+_pago = subprocess.run(['npx', 'tsx', 'scripts/prueba-el-recorrido-del-que-paga.ts'],
+                       capture_output=True, text=True)
+check('el que paga la entrada entra, y el que sube recibe lo que pagó',
+      _pago.returncode == 0,
+      ' · '.join(l.strip() for l in _pago.stdout.split('\n') if l.strip().startswith('✗'))[:220])
+
+# El alta no puede volver a respetar el default del trigger: ése era el agujero
+# por el que el comprador del escalón de entrada se llevaba los noventa días.
+_alta = rd('api/alta-numero.ts')
+check('el alta mira si el usuario es nuevo, no qué dice su columna plan',
+      'recienCreado' in _alta and "estado === 'invitado'" in _alta,
+      "preguntar '¿ya tiene plan?' da siempre sí: el trigger "
+      "on_auth_user_created escribe 'DWY' al crear el usuario")
+check('y el perfil que crea guarda su email',
+      'id: userId, email,' in _alta,
+      'es la columna por la que el webhook del pago busca al cliente')
+_wh = rd('api/ghl-webhook.ts')
+check('un cobro no puede bajarle el acceso a quien pagó más arriba',
+      'noEsUnaBaja' in _wh and 'ALTURA_DEL_ACCESO' in _wh,
+      'un webhook viejo con plan:"blanco" dejaba al de $3.000 con los 5 días')
+check('y el pago sella la fecha del escalón, que es la que enciende el tope',
+      'cambios.servicio_marcado_el' in _wh,
+      'sin fecha, topeDelEscalon se apaga entero y el de La Base abre los 90 días')
 
 print()
 if F == 0 and _pendientes:
