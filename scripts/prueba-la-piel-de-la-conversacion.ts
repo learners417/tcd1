@@ -202,9 +202,40 @@ console.log('\n── las entrenadoras no nombran códigos ──');
  * háblale de tú, siempre».
  */
 const agentes2 = leer('src/pages/Agentes.tsx');
+
+/*
+ * Esta comprobación se agarraba de la frase literal «NO se lo digas nunca», y
+ * se puso roja el 9 de noviembre cuando el bloque se reescribió diciendo lo
+ * mismo con otras palabras. La regla no se había roto: se había roto el
+ * ancla. Ahora mira las dos mitades de la regla por lo que son:
+ *
+ *   1. que el bloque PROHÍBA nombrar el código, en cualquier redacción;
+ *   2. que no traiga una lista de códigos — que era el defecto real: les daba
+ *      P0.2, P2.3, P4.2b para que los dijeran, y encima once de esos códigos
+ *      ya no existían.
+ *
+ * Lo segundo es lo que de verdad cierra la puerta: sin códigos adentro, no
+ * hay nada que se pueda filtrar al cliente.
+ */
+/* Los `===` son del texto del prompt y de ningún otro lado. Sin ellos, el
+   recorte arrancaba en el comentario que explica el bloque —que nombra los
+   códigos viejos justamente para contar qué se corrigió— y los contaba como
+   si estuvieran adentro. */
+const bloque = /=== CONTEXTO VIGENTE DEL PROGRAMA[\s\S]*?=== FIN DEL CONTEXTO VIGENTE ===/.exec(agentes2)?.[0] ?? '';
 ok(
-  /NO se lo digas nunca/.test(agentes2),
+  bloque.length > 0,
+  'el contexto que gobierna a las entrenadoras se encuentra y se puede medir',
+);
+ok(
+  /(NUNCA|NO)[^.]{0,80}c[óo]digo/i.test(bloque) || /NO se lo digas nunca/.test(bloque),
   'el código del paso es referencia interna: la instrucción dice que no se nombra',
+);
+const codigosSueltos = [...bloque.matchAll(/\bP\d+\.\d+[a-z]?\b/g)].map((m) => m[0]);
+ok(
+  codigosSueltos.length === 0,
+  codigosSueltos.length === 0
+    ? 'y no les pone ningún código a mano para que lo repitan'
+    : `y no les pone códigos a mano: trae ${codigosSueltos.length} (${codigosSueltos.slice(0, 5).join(' ')})`,
 );
 const vose = [...agentes2.matchAll(/\b(referite|fijate|tenés|podés|querés|sabés|mandá|anotá|preguntá|armá|poné|elegí|sos)\b/g)];
 ok(

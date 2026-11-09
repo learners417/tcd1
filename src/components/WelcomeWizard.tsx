@@ -829,7 +829,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 si esto le sirve: iba al 45% en itálica, la letra de la nota al
                 pie. */}
             {dxAvatar && (
-              <p className="text-sm text-cream/80">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold">{VOC('10 {{consultantes}} a tu precio digno')} y 10 horas menos por semana — en 90 días</strong>. Método CLINICA, una sesión por día.</p>
+              <p className="text-sm text-cream/80">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold">{VOC('10 {{consultantes}} a tu precio digno')} y 10 horas menos por semana — en 90 días</strong>. Cinco estaciones, del lago al bosque, una sesión por día.</p>
             )}
 
             <button
@@ -1010,7 +1010,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               {VOC('Ya diste el primer paso más difícil: decidir que tu trabajo vale lo suficiente como para invertir en él. Eso mismo — cobrar con dignidad — es lo que vas a aprender a hacer con cada {{consultante}}.')}
             </p>
             <p className="text-sm text-cream/70 leading-relaxed mb-2">
-              {esCincoDias ? <>Estás por empezar <strong className="text-cream/90">tus 5 días</strong>: una micro-sesión guiada por día — 30 minutos, un paso por pantalla. El viernes nos vemos en vivo y el lunes cobras tu precio nuevo.</> : <>Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un cinturón — 9 cinturones, del Blanco al Negro: <strong className="text-gold">{VOC('10 {{consultantes}} de $1.000')}</strong>.
+              {esCincoDias ? <>Estás por empezar <strong className="text-cream/90">tus 5 días</strong>: una micro-sesión guiada por día — 30 minutos, un paso por pantalla. El viernes nos vemos en vivo y el lunes cobras tu precio nuevo.</> : <>Estás por empezar un camino de 90 días: <strong className="text-cream/90">una sesión de trabajo por día</strong> (de 45 minutos a 2 horas; la primera semana, la del dinero, pide un poco más), de lunes a viernes. Cada sesión te deja algo construido. Cada hito se prueba con evidencia. Cada logro real gana un grado, del blanco al negro: <strong className="text-gold">{VOC('10 {{consultantes}} de $1.000')}</strong>.
             </>}</p>
             <p className="text-sm text-cream/80 leading-relaxed mb-6">
               <span className="text-gold font-semibold">Nuestro equipo</span> te acompaña en todo el proceso — seguimos tu progreso, respondemos tus dudas y te guiamos paso a paso. Puedes escribirnos en cualquier momento desde Contacto.

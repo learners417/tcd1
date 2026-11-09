@@ -216,6 +216,7 @@ espera el clic.
 | 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
+| 11 | **El Tablero guarda 34 códigos que el Camino no busca** | **el próximo** · medido el 9 nov |
 
 ### El cero era del teléfono vacío — turnos 9 y 10, el 9 de noviembre
 
@@ -292,14 +293,22 @@ lo pide.
 
 Ninguna de estas cuatro la puede hacer Claude. Van en cada parte que se le dé.
 
-1. Correr `supabase/migrations/20261105_donde_cae_lo_que_se_rompe.sql`.
-   **Es la única que ya está rota para alguien que pague hoy:** la app le dice
-   «ya nos llegó el aviso» y no llega nada.
+1. ~~Correr `supabase/migrations/20261105_donde_cae_lo_que_se_rompe.sql`.~~
+   **HECHO el 9 de noviembre.** Era la única que ya estaba rota para alguien
+   que pagara hoy.
 2. El workflow de GHL que manda el campo `plan` (verde/negro). Sin él, quien
-   paga 997 y quien paga 497 entran igual, con todo abierto.
-3. Los pasos del día 45 — la única jornada sin contenido.
+   paga 997 y quien paga 497 entran igual, con todo abierto. **No bloquea la
+   venta:** el Admin escribe `plan_comercial` a mano, así que cada comprador
+   se le puede abrir uno por uno hasta que el workflow exista.
+3. ~~Los pasos del día 45.~~ **HECHO el 8 de noviembre:** las 91 jornadas
+   tienen contenido.
 4. Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
-   mañana). Los títulos están más abajo en este mapa.
+   mañana). Los títulos están más abajo en este mapa. **Esperar el turno 11**
+   antes de cargarlos: hoy 34 de las 43 filas del Tablero guardan el enlace
+   en un código que el Camino no lee.
+5. Purgar jsDelivr de las nueve páginas del commit `3a6d0cd` de `landings`
+   (esta sesión no tiene salida a `purge.jsdelivr.net`). Hasta que se purgue,
+   jsDelivr puede seguir sirviendo la versión anterior de esas páginas.
 
 ### Los repos, ordenados el 8 de noviembre
 
@@ -510,6 +519,72 @@ espera tu clic. Las lentes de este turno no miran el monto: miran que lo que
 se cobra abra lo que se vendió, cualquiera sea el número.
 
 ---
+
+### La revisión del 9 de noviembre — libro, app y landings
+
+Javo preguntó si los tres hablaban de lo mismo: mismas letras, método, pasos,
+sistemas. Se midió, no se opinó: se clonó `learners417/landings`, se leyeron
+las 43 páginas publicadas y los primeros capítulos de los ocho libros, y se
+comparó contra el seed.
+
+**Lo que ya estaba alineado, palabra por palabra.** Las cinco estaciones, sus
+cinco libros, las cinco libertades y los candados —con qué se abre cada una y
+qué deja— coinciden entre la app y `/camino`. «Se abre con tres ventas pagas»
+está igual en los dos lados. Los ocho libros y las siete libertades de
+`/libros` tampoco se contradicen con la app: las cinco del Camino son cinco de
+esas siete.
+
+**Lo que no coincidía, y se corrigió.**
+
+1. **Los días de tres de las cinco estaciones.** Las landings publicaban el
+   viento hasta el 56, el río del 57 al 70 y el bosque del 71 al 84; la app,
+   15-35, 36-84 y 85-90. Para decidir quién tenía razón se miró el contenido
+   de las 91 jornadas: el día 38 es «Tu app, con tu marca» —que es el río, y
+   la landing lo ponía en el viento— y los días 85 a 90 son el ecosistema, la
+   foto de llegada y el plan de 180 días, que es el bosque y la landing
+   llamaba «el cierre». Javo eligió corregir las landings. Commit `3a6d0cd`
+   del repo `landings`: nueve páginas, el bosque absorbe el cierre, y
+   desaparece el bloque aparte del día 85 al 90.
+2. **La app contaba otra arquitectura en los cuatro lugares donde HABLA.** El
+   Mentor —con quien el cliente conversa todos los días—, la voz de Javo de
+   los agentes, el panel del método y el guion del video de bienvenida decían
+   «Método CLINICA, 7 etapas, 9 cinturones». Nadie más lo dice: las landings
+   nunca nombraron CLINICA y el seed tiene once grados, no nueve. La
+   bienvenida misma, que es la primera pantalla que alguien lee después de
+   pagar, decía nueve cinturones.
+3. **El bloque que gobierna a los ocho entrenadores citaba once códigos de
+   paso que ya no existen.** `P0.2`, `P2.3`, `P4.2b`… todos resuelven a
+   `null`; los códigos reales salen del día. Estaba escrito a mano en julio y
+   envejeció solo. Ahora se arma desde `PAISAJES` y `CANDADOS`, así que no
+   puede volver a desfasarse.
+
+Lo cuida `prueba-un-solo-relato.ts`: que nadie vuelva a nombrar la
+arquitectura vieja, que la cantidad de grados que una frase afirma sea la que
+el seed declara, que el Mentor sepa en qué camino está parado, que la cadena
+de promesas cierre de estación a estación, y que un video grabado con un guion
+que cambió quede marcado para regrabar.
+
+**El video de bienvenida ya estaba grabado con la frase vieja.** Javo eligió
+regrabarlo. Quedó marcado en `POR_REGRABAR` de `videosCargados.ts` y el
+Tablero de Grabación lo muestra en rojo: sin esa marca, la tilde verde de esa
+jornada decía que estaba lista.
+
+**Y apareció el turno 9, que es más grande que todo lo anterior.** El Tablero
+de Grabación tiene una fila por pieza —43— y guarda el enlace con el código de
+la pieza (`P8.1`). El Camino busca el video por el código de la JORNADA, que
+sale de `jornada.piezas` y sólo adopta una pieza por jornada. Simulando las dos
+mitades con sus funciones reales: **34 de las 43 filas guardan un `pilar_id`
+que el Camino nunca busca.** Un enlace pegado ahí se guarda bien y no se ve
+nunca. Los 27 videos que ya están cargados por archivo sí caen todos en
+códigos que el Camino busca —van por día—, así que lo que anda hoy anda; lo que
+no anda es cargar los nuevos desde el Tablero. Javo tiene los videos grabados y
+esperando: es el turno 11, el próximo de la cola.
+
+**Una cosa más, del repo `landings`:** `build.py` tenía la carpeta de imágenes
+clavada a mano a la ruta de otra sesión, y el `if os.path.exists` de al lado
+hacía que, clonado en otro lugar, el build se armara igual y sin una sola
+imagen. 34 páginas con las tapas vacías y ningún error. Arreglado en el mismo
+commit: la ruta sale del repo y lo que falte corta el build.
 
 ## LAS DECISIONES DEL 8 DE NOVIEMBRE
 

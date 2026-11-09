@@ -16,6 +16,21 @@ export function idDeYoutube(url: string): string | null {
   return m ? m[1] : null;
 }
 
+/**
+ * LOS QUE HAY QUE REGRABAR — el video está cargado y su guion cambió.
+ *
+ * No alcanza con corregir el guion: el video que el cliente mira sigue
+ * diciendo lo de antes. Un guion corregido sin esta marca es la forma más
+ * silenciosa de que las dos cosas se separen para siempre, porque el tablero
+ * muestra la jornada con su tilde verde y nadie vuelve a mirarla.
+ *
+ * La llave es el DÍA, igual que los enlaces: es lo único que no cambia cuando
+ * el Camino se reordena. Se saca la línea cuando el video nuevo está arriba.
+ */
+export const POR_REGRABAR: Record<number | string, string> = {
+  1: 'El guion decía «siete etapas, se llaman CLINICA». Ahora dice cinco estaciones, del lago al bosque (9 nov 2026).',
+};
+
 /** código de jornada o de tutorial → enlace. */
 export const VIDEOS_POR_JORNADA: Record<string | number, string> = {
   // ── Javo ──

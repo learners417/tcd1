@@ -13,8 +13,8 @@ export interface Complemento {
 
 export const COMPLEMENTOS: Record<string, Complemento> = {
   'r-bienvenido': {
-    resumen: 'El mapa completo: 90 días, 4 fases visibles, 9 cinturones. No es un curso — es un camino con niveles, donde cada sesión de 20-30 minutos deja algo construido.',
-    mapa: ['El Camino es una sesión por día, de lunes a viernes', 'Cada cinturón se gana con un hito verificable, no con asistencia', 'El progreso visible sostiene la constancia cuando la motivación falla'],
+    resumen: 'El mapa completo: 90 días, cinco estaciones del lago al bosque, once grados. No es un curso — es un camino con niveles, donde cada sesión de 20-30 minutos deja algo construido.',
+    mapa: ['El Camino es una sesión por día, de lunes a viernes', 'En cada estación instalas un sistema y ganas una libertad', 'Cada grado se gana con un hito verificable, no con asistencia', 'El progreso visible sostiene la constancia cuando la motivación falla'],
     referente: 'Yu-kai Chou (Octalysis): el avance que se VE es el motor psicológico más fuerte de un juego bien diseñado.',
     dato: '44 sesiones de trabajo, a una por día hábil, son exactamente tus 90 días. La matemática cierra: alcanza con presentarte.',
   },

@@ -83,6 +83,9 @@ import {
   type ChatAttachment,
 } from '../lib/chatAttachments';
 import { VOC } from '../lib/vocabulario';
+import { PAISAJES, tramoDelPaisaje } from '../lib/losCincoPaisajes';
+import { CANDADOS } from '../lib/estaciones';
+import { roadmap } from '../lib/roadmapSeed';
 import { copiar, NO_SE_PUDO_COPIAR } from '../lib/copiar';
 import {
   AGENTES,
@@ -101,18 +104,37 @@ import {
 } from '../lib/agents';
 
 /**
- * CONTEXTO DEL REDISEÑO (jul 2026) — se antepone al system prompt de TODOS
- * los entrenadores para alinearlos al modelo nuevo. Las configs individuales
- * pueden mencionar la estructura vieja; ESTE bloque manda.
+ * CONTEXTO VIGENTE DEL PROGRAMA — se antepone al system prompt de TODOS los
+ * entrenadores. Las configs individuales pueden mencionar estructuras viejas;
+ * ESTE bloque manda.
+ *
+ * ═══ POR QUÉ SE ARMA SOLO Y NO SE ESCRIBE A MANO (9 de noviembre) ═══
+ *
+ * Escrito a mano en julio, decía: «Método CLINICA: 90 días, 4 FASES, 8
+ * pilares, 34 tareas», nombraba nueve cinturones por color y citaba once
+ * códigos de paso —P0.2, P2.3, P4.2b…— que hoy resuelven todos a `null`: los
+ * códigos reales salen del día (P0.0, P2.d8, P8.d45). O sea que el bloque que
+ * «manda sobre cualquier referencia anterior» le describía a los ocho
+ * entrenadores un producto que ya no existe, mientras la landing por la que
+ * el cliente pagó vendía cinco estaciones.
+ *
+ * No pasó por descuido: pasó porque era una copia. Un texto a mano de la
+ * arquitectura envejece el día que la arquitectura cambia, y nadie va a
+ * acordarse de venir acá. Armado desde `PAISAJES` y `CANDADOS`, no puede
+ * desfasarse: si mañana se mueven los días o las promesas, los entrenadores
+ * se enteran en la misma corrida.
  */
 const CONTEXTO_REDISENO = `=== CONTEXTO VIGENTE DEL PROGRAMA (manda sobre cualquier referencia anterior) ===
-El programa es el Método CLINICA: 90 días, 4 FASES, 8 pilares, 34 tareas.
-· Fase 1 — Sanar el Dinero (P1, días 2-7): protocolo de 7 días; termina con SU precio definido.
-· Fase 2 — Tu Protocolo (P2 método con nombre · P3 oferta de $1.000, días 8-14).
-· Fase 3 — Captación y Ventas (P4 sistema: Meta Business Agent en WhatsApp + campaña validada con 3 anuncios de $2/día · P5 llamadas con la estructura W, días 15-45).
-· Fase 4 — Servicio y Crecimiento (P6 primer pago · P7 de 1 a 10 pacientes, días 43-90).
-El progreso se mide en CINTURONES: Blanco → punta amarilla → Amarillo → punta verde → Verde → punta azul → Azul → Rojo → Negro (Sanador Libre: 10 pacientes · $10K).
-EL ADN DEL NEGOCIO (lo que SÍ existe. El código entre paréntesis es para que sepas de qué paso viene cada cosa: NO se lo digas nunca. Al cliente nómbrale la cosa por su nombre, y el paso por su día): Historia/Propósito/Legado (P0.2) · el paciente ideal y LA MATRIZ ABC compartida — infierno/obstáculos/cielo (P2.3) · el método con nombre (P2.4) · la oferta principal y la escalera (P3.2) · la PUV (P4.2) · el perfil IG optimizado (P4.2b) · tus 3 anuncios y la campaña única (P4.3-P4.4) · el montaje de campaña (P4.6) · el script de ventas (P5.2) · el protocolo de entrega (P6.2). Todo se construye desde El Camino y queda consolidado en su ADN.
+El Camino son ${roadmap.dias} días y CINCO ESTACIONES, del lago al bosque. En cada una el sanador instala un sistema y gana una libertad:
+${PAISAJES.map((p) => {
+  const t = tramoDelPaisaje(p.id);
+  const c = CANDADOS[p.id];
+  return `· ${p.nombre} (días ${t.desde}-${t.hasta}) — ${c.libertad}. Se abre con: ${c.seAbreCon}. Lo deja con: ${c.teDeja}.`;
+}).join('\n')}
+Cada estación se abre con el logro de la anterior: no es un calendario, es una cadena.
+El progreso se mide en GRADOS que se ganan con evidencia, no con asistencia.
+EL ADN DEL NEGOCIO (lo que SÍ existe y el Camino le va escribiendo): su historia y su linaje · su hora real neta y su precio digno · su método, su oferta y su garantía · su enlace de pago y su página · su rama de tráfico y su audiencia contada · su voz, con sus frases propias y las objeciones reales que escucha · su cartera y sus cierres · lo que entrega grabado y lo que entrega en vivo.
+NUNCA le nombres un código de paso: al cliente se le nombra la cosa por su nombre y el paso por su DÍA.
 TRATO: háblale de tú, siempre, sin importar su país.
 === FIN DEL CONTEXTO VIGENTE ===`;
 

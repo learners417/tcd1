@@ -1,7 +1,13 @@
 /**
  * guionesVideos.ts — Los guiones completos de cada video de El Camino (Lote B · jul 2026)
  *
- * Escritos con la voz de Javo, el método CLINICA y el libro Sanadores Libres.
+ * Escritos con la voz de Javo, las cinco estaciones y el libro Sanadores Libres.
+ *
+ * El 9 de noviembre, el guion de P0.0 —el de bienvenida— decía «el camino
+ * tiene siete etapas, se llaman CLINICA». La app ya no tiene siete etapas y
+ * ni los libros ni las landings nombraron nunca CLINICA. Se corrigió a las
+ * cinco estaciones, y el video que ya estaba grabado con la frase vieja quedó
+ * marcado para regrabar en `videosCargados.ts`.
  * Sirven DOS propósitos:
  *  1. Son el guión que Javo graba (referencia de producción).
  *  2. Alimentan al Mentor IA: cuando un video falta, el Mentor NO improvisa —
@@ -42,14 +48,14 @@ Estos 90 días tienen un objetivo concreto: que consigas 10 pacientes a tu preci
 
 [CÓMO FUNCIONA · 2-3min]
 Tienes dos llaves. Esta app, El Camino, es donde te construyes: una sesión por día, cuarenta y cinco minutos. Y Mi Clínica, tu otra app, es donde tu práctica ya empieza a ordenarse desde hoy.
-El camino tiene siete etapas — se llaman CLINICA. No son pasos de un método de ventas: son cambios en cómo te ves a ti mismo. Vas a ganar cinturones, pero no por leer: por hacer cosas reales en el mundo. Cada cinturón es una identidad nueva.
+El camino tiene cinco estaciones, del lago al bosque. No son pasos de un método de ventas: en cada una instalas un sistema y ganas una libertad. Vas a ganar grados, pero no por leer: por hacer cosas reales en el mundo. Cada grado es una identidad nueva.
 
 [LA PRIMERA PARADA · 3-4min]
 Y hay una primera parada que casi nadie se anima a dar: sanar tu relación con el dinero. Antes de vender nada, antes de un solo anuncio. Porque de nada sirve el mejor sistema si algo adentro tuyo te frena a cobrar lo que vales. Ahí empezamos.
 
 [CIERRE · 4-4:30]
 Si en algún momento quieres la filosofía completa detrás de todo esto, está en el libro, Sanadores Libres. Léelo cuando quieras. Para empezar no te hace falta. Lo único que necesitas hoy es dar el primer paso. Nos vemos adentro.`,
-    esencia: 'Estos 90 días buscan que consigas 10 pacientes a tu precio digno ($1.000) y te quede el SISTEMA para repetirlo. Dos apps: El Camino (te construyes) y Mi Clínica (operas). Siete etapas CLINICA, cinturones que se ganan haciendo. La primera parada, la que nadie hace: sanar tu relación con el dinero.',
+    esencia: 'Estos 90 días buscan que consigas 10 pacientes a tu precio digno ($1.000) y te quede el SISTEMA para repetirlo. Dos apps: El Camino (te construyes) y Mi Clínica (operas). Cinco estaciones, del lago al bosque; grados que se ganan haciendo. La primera parada, la que nadie hace: sanar tu relación con el dinero.',
   },
 
   'P0.4': {

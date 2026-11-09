@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Check, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { roadmap, SEED_ROADMAP_V2 } from '../../lib/roadmapSeed';
-import { VIDEOS_POR_JORNADA, PDFS_POR_TUTORIAL } from '../../lib/videosCargados';
+import { VIDEOS_POR_JORNADA, PDFS_POR_TUTORIAL, POR_REGRABAR } from '../../lib/videosCargados';
 
 interface Fila {
   codigo: string;
@@ -141,6 +141,13 @@ export default function TableroGrabacion() {
                   <p className="text-[15px] text-cream/60">
                     Día {f.dia} · {f.quien} · {f.minutos} min{f.donde ? ` · ${f.donde}` : ''}
                   </p>
+                  {/* El video está cargado y su guion cambió: la tilde verde
+                      sola haría pensar que esta jornada ya está lista. */}
+                  {POR_REGRABAR[f.dia] && (
+                    <p className="mt-1 text-[15px]" style={{ color: 'var(--tacha, #B4472E)' }}>
+                      Para regrabar · {POR_REGRABAR[f.dia]}
+                    </p>
+                  )}
                   {PDFS_POR_TUTORIAL[f.codigo] && (
                     <a href={PDFS_POR_TUTORIAL[f.codigo]} target="_blank" rel="noreferrer"
                       className="mt-1 mr-4 inline-flex items-center gap-1.5 min-h-[44px] text-[15px] text-goldhi">
