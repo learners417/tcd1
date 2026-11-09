@@ -4186,6 +4186,18 @@ check('sube de escalón y se le abre lo que pagó',
       _sube.returncode == 0,
       ' · '.join(l.strip() for l in _sube.stdout.split('\n') if l.startswith('✗'))[:200])
 
+# ── El puente con MiClínica, de los dos lados ─────────────────────────
+# El único camino por el que un hecho de MCD —el cliente cobró— entra a TCD.
+# De él cuelgan el Cinturón Rojo y el candado del día 31. Nadie ejecutaba este
+# handler: se medía que el Camino nombrara la palabra `mcd-bridge`, nunca que
+# pasara corriente. La prueba corre la ruta de verdad contra un MCD falso que
+# decide igual que el real, en las nueve formas en que la ida y vuelta termina.
+_pte = subprocess.run(['npx', 'tsx', 'scripts/prueba-el-puente-de-las-dos-apps.ts'],
+                      capture_output=True, text=True)
+check('el puente con MiClínica anda y se puede ver si no anda',
+      _pte.returncode == 0,
+      ' · '.join(l.strip() for l in _pte.stdout.split('\n') if l.strip().startswith('✗'))[:220])
+
 print()
 if F == 0 and _pendientes:
     print(f'════ BATERÍA EN VERDE · {len(_pendientes)} cosa(s) por ESCRIBIR, arriba con ⧗ ════')
