@@ -214,8 +214,79 @@ espera el clic.
 | 6 | MCD: su batería propia (hoy no tiene ninguna) | **cerrado** · `f3e9ddc` · 46 lentes |
 | 7 | MCD: el puente verificado de los dos lados | **cerrado** · `817cb96` + `7c6e524` (MCD) · 15 + 5 lentes |
 | 8 | El recorrido punta a punta del que paga la entrada y sube a 1.000 | **cerrado** · `4b3366b` · 19 lentes |
-| 9 | Estética teléfono: jerarquía y aire (0 faltas de regla; es gusto) | espera su clic |
-| 10 | Estética computadora | espera su clic |
+| 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
+| 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
+
+### El cero era del teléfono vacío — turnos 9 y 10, el 9 de noviembre
+
+Commit `8dff8ab`. Dos lentes nuevas en `auditoria.py`, once vistas nuevas en
+el medidor: de 87 a 98, todas en cero.
+
+**La premisa de estos dos turnos era falsa por partida doble, y de la forma de
+siempre.** La tabla decía «0 faltas de regla; lo que queda es gusto». Ese cero
+tenía dos agujeros, y nadie podía verlos porque los dos están en lo que el
+medidor NO mira:
+
+1. **Las 22 lentes visuales se midieron siempre a 390 px.** Buscado por todo
+   el repo: el único 1440 que existía era el de `medir-densidad.py`, que
+   cuenta palabras y toques, no mira una sola regla, y ni siquiera está en la
+   batería. El turno 10 —«lo mismo a 1440»— esperaba el clic de Javo sobre una
+   medición que nunca se había hecho.
+2. **El Diario se midió siempre vacío.** `CON_DATOS` afirmaba que su contenido
+   «es el mismo con cuenta llena o vacía». Es al revés: vacío muestra el
+   formulario; con la entrada de hoy guardada muestra otra pantalla entera
+   —confirmación, puntaje, seis tarjetas de numerales y tres píldoras que
+   vacío no existen—.
+
+Medido el 9 de noviembre: **el Diario vacío daba cero faltas y el mismo Diario
+con la semana escrita daba DIEZ.** A 1440, siete más. Es la pantalla que el
+cliente toca todos los días.
+
+**Lo que estaba roto, y por qué:**
+
+1. **El párrafo que explica para qué sirve el Diario quedaba en 0 px de ancho
+   y 461 de alto** — una letra por renglón, ilegible, en un teléfono. Es el
+   MISMO bug que el encabezado ya tenía arreglado, con su comentario y todo:
+   `flex-1 min-w-0` a la izquierda, `shrink-0` a la derecha. Ese arreglo se
+   escribió cuando a la derecha había UN botón. Hoy hay tres píldoras de 44 px
+   —energía, racha, Historial— que piden cerca de 300 px y no ceden ninguno,
+   y `min-w-0` deja que la izquierda llegue a cero. Y sólo aparecen cuando el
+   cliente TIENE racha: por eso el medidor, que lo abría vacío, nunca lo vio.
+2. **Dos maneras de escribir el oro de texto se salteaban las reglas AA del
+   tema claro.** `text-[var(--oro,#B0822E)]` —una clase entre corchetes— no la
+   alcanza ninguna de las tres reglas que enderezan el oro, así que el valor
+   crudo llegaba intacto: 3,09:1. Y `text-amber-*` apuntaba a `--oro-d`, que
+   pasa AA sobre la tarjeta (4,52) y NO sobre los otros tres fondos de la casa
+   (3,99 / 3,66 / 3,77). El ámbar casi nunca está sobre la tarjeta: está sobre
+   un chip tintado. `--oro-t` existía desde antes y su comentario dice
+   exactamente para qué —«el oro de TEXTO va un tono más oscuro… así también
+   pasa AA sobre los fondos tintados»—. La regla estaba escrita; el amarillo
+   nunca la había apuntado.
+3. **`text-success/NN` y `text-danger/NN` no tenían regla de contraste**, al
+   revés que el crema, que la tiene dos líneas más arriba en el mismo archivo.
+   Son 30 usos entre el cliente y el Admin. `text-success/70` da 3,61:1. Se
+   enderezan al tono entero —verde 7,49, rojo 6,33, los dos AA sobre los
+   cuatro fondos—, igual que el crema.
+4. **El título del serif a 16 px leía más chico que su propia explicación.**
+5. **El ícono de las seis tarjetas de numerales flotaba en el hueco** entre
+   los dos renglones del rótulo, alineado a nada.
+
+**Las dos lentes nuevas, probadas contra su propio fallo en siete formas:**
+
+- *los destinos de la barra se miden con la cuenta llena, no vacíos* — se pone
+  roja si sale `diario` de `CON_DATOS`, si sale cualquier destino de la barra
+  de abajo, y si mañana aparece un destino nuevo que nadie mide.
+- *y se miden también en la computadora, no sólo en el teléfono* — se pone
+  roja si se borra la corrida de escritorio, si el ancho baja de 1280, si sale
+  un destino de `ANCHAS`, y con el destino nuevo.
+
+**Lo que NO se tocó, y es su clic:** la jerarquía y el aire. Con las faltas de
+regla en cero otra vez —ahora en los dos anchos y con la cuenta adentro—, lo
+que queda ahí sigue siendo gusto. Una sola cosa de forma, por si la quiere: a
+390 px las tres píldoras del encabezado se reparten en dos renglones y el
+«Historial» queda solo en el segundo. Entra en uno si se achica la sangría o
+se acorta el rótulo, como se hizo con «Entrenadores → Entrenar». Ninguna regla
+lo pide.
 
 ### Lo que bloquea la venta y es de Javo
 
