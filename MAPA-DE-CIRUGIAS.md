@@ -217,8 +217,8 @@ espera el clic.
 | 9 | Estética teléfono: jerarquía y aire | **el flanco cerrado** · `8dff8ab` · el cero era del teléfono vacío; la jerarquía y el aire esperan su clic |
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
 | 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
-| 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **el próximo** · medido el 9 nov |
-| 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | en la cola |
+| 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
+| 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el próximo** |
 | 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
@@ -408,9 +408,8 @@ Ninguna de estas la puede hacer Claude. Van en cada parte que se le dé.
 3. ~~Los pasos del día 45.~~ **HECHO el 8 de noviembre:** las 91 jornadas
    tienen contenido.
 4. Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
-   mañana). Los títulos están más abajo en este mapa. **Esperar el turno 12**
-   antes de cargarlos: hoy 34 de las 43 filas del Tablero guardan el enlace
-   en un código que el Camino no lee.
+   mañana). Los títulos están más abajo en este mapa. **Ya se pueden cargar
+   desde el Tablero:** el turno 12 lo arregló el 9 de noviembre.
 5. Purgar jsDelivr de las nueve páginas del commit `3a6d0cd` de `landings`
    (esta sesión no tiene salida a `purge.jsdelivr.net`). Hasta que se purgue,
    jsDelivr puede seguir sirviendo la versión anterior de esas páginas.
@@ -683,7 +682,8 @@ que el Camino nunca busca.** Un enlace pegado ahí se guarda bien y no se ve
 nunca. Los 27 videos que ya están cargados por archivo sí caen todos en
 códigos que el Camino busca —van por día—, así que lo que anda hoy anda; lo que
 no anda es cargar los nuevos desde el Tablero. Javo tiene los videos grabados y
-esperando: es el turno 12, el próximo de la cola.
+esperando: fue el turno 12, cerrado el 9 de noviembre, y el detalle está al
+final de este mapa.
 
 **Una cosa más, del repo `landings`:** `build.py` tenía la carpeta de imágenes
 clavada a mano a la ruta de otra sesión, y el `if os.path.exists` de al lado
@@ -1112,3 +1112,73 @@ Medir, después mirar la captura, después tocar. En este arco cada defecto que
 valió la pena salió de MIRAR, nunca de leer el código. Y cada vez que la vara
 dijo verde con la app todavía floja, era porque la vara no estaba apuntando
 ahí.
+
+### El Tablero cargaba donde el Camino no mira — turno 12, el 9 de noviembre
+
+Commit `8c11913`. Una lente nueva,
+`scripts/prueba-el-tablero-carga-donde-el-camino-mira.ts`, con ocho miradas, y
+tres líneas nuevas en `auditoria.py`.
+
+**La premisa era cierta, y por una vez de menos.** El mapa decía «34 de las 43
+filas». Medido con las funciones reales antes de tocar nada, el agujero era
+más grande en tres direcciones que nadie había mirado:
+
+1. **Las 34 piezas ciegas, confirmadas.** El Tablero guardaba el enlace en
+   `programa_videos.pilar_id` con el código de la PIEZA (`P8.1`); el Camino lo
+   busca por el código de la JORNADA (`P2.d8`), que lleva el día adentro. El
+   enlace se guardaba bien, la tilde se ponía verde, y el cliente no veía el
+   video nunca.
+2. **Las 9 que sí caían en un código buscado eran las peores de todas.** Ocho
+   de esas nueve coinciden por casualidad con la jornada de OTRO día. El
+   Tablero mostraba «P8.2 · Subir tus videos y materiales · día 39» cuando esa
+   pieza es del día 51, y un enlace pegado ahí aparecía en la sesión del día
+   39. No eran «las que funcionan»: eran las que entregan el video equivocado
+   al día equivocado.
+3. **El Tablero tiene 64 filas, no 43.** Son 43 piezas de Javo más 21 pasos a
+   paso de Lupe. Los de Lupe sí andaban: el Camino los pide por su propio
+   código (`L-01`).
+4. **El contador decía «13 de 64 con enlace» con 27 videos cargados.** Los 14
+   de Javo vienen por archivo atados a su DÍA y el Tablero los buscaba por el
+   código de la pieza: sus propios videos grabados le aparecían sin grabar, sin
+   tilde, listos para que los grabara de nuevo.
+5. **Cuatro videos del archivo caen en jornadas que ninguna pieza nombra** —los
+   días 10, 11, 30 y 32—. El cliente los ve y el Tablero no los listaba, así
+   que no había manera de corregirles el enlace desde ahí.
+
+**La causa de fondo, que es la de siempre: una regla con dos copias.** La regla
+de reparto —«el video se busca por el código de la jornada, y después por el
+del pilar»— vivía dentro de un `useMemo` de `Roadmap.tsx`, donde nadie la podía
+consultar. El Tablero contestaba la misma pregunta con una segunda copia, la de
+la pieza, y la copia estaba mal. Ahora hay una: `src/lib/elTableroDeGrabacion.ts`
+contesta «¿dónde se guarda esto para que el Camino lo encuentre?» y
+`mapaConLaBase` + `videoDeCadaJornada` contestan «¿qué ve el Camino?». Las usan
+el Tablero, el Camino y la lente.
+
+**Sin migración de base.** Las 34 claves viejas se traducen al leer: lo que
+alguien ya pegó sigue valiendo y cae donde el Camino lo busca.
+
+**El tropiezo propio, que vale anotar.** La primera versión traducía las claves
+viejas a ciegas, y como nueve códigos de pieza son además el código de la
+jornada de otro día, desviaba esos videos: siete días quedaron ciegos. La lente
+lo cazó en la primera corrida. Esos nueve se dejan donde están —ahí la clave
+vieja y la nueva son indistinguibles, y mover el video es peor que dejarlo—.
+
+**La lente mira la respuesta, no la implementación.** Fila por fila pega un
+enlace donde el Tablero lo guardaría y le pregunta al Camino si lo muestra, y
+en qué día. Probada contra su propio fallo en cinco formas: se pone roja si la
+clave vuelve a ser la de la pieza (43 filas ciegas), si el día de una fila sale
+del código parecido en vez de su pieza, si las claves viejas se traducen a
+ciegas, si un día con dos piezas deja de declararlo, y si el contador vuelve a
+buscar por el código de la pieza (14 enlaces huérfanos).
+
+**Y tres checks viejos de `auditoria.py` estaban mirando la forma, no la
+respuesta.** «el tablero del Admin pisa lo que viene por archivo» daba verde
+con `VIDEOS_POR_JORNADA` presente en el archivo, mientras el Tablero buscaba
+esos mismos 14 videos por la clave equivocada. Los tres apuntan ahora a la
+fuente única.
+
+**Lo que queda, y es su clic:** cuatro días tienen dos piezas cada uno —el 1,
+el 22, el 31 y el 55— y el Camino muestra un video por jornada. Hoy el Tablero
+lo dice en voz alta («el día 22 comparte su lugar con P4.1»), y las dos piezas
+comparten el enlace. Si querés que sean dos videos separados en la misma
+sesión, eso es un cambio de lo que el cliente ve y espera tu decisión.
