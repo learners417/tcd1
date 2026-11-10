@@ -45,6 +45,7 @@
  *   ALTA_REDIRECT_URL          → opcional; default https://app.tuclinica.digital
  */
 import { createClient } from '@supabase/supabase-js';
+import { DIAS_DE_ACCESO } from '../src/lib/laVentanaDeAcceso.js';
 
 type VercelRequest = {
   method?: string;
@@ -54,8 +55,15 @@ type VercelRequest = {
 };
 type VercelResponse = { status: (n: number) => { json: (b: unknown) => unknown } };
 
-/** Los 21 días de calendario que tiene para hacer sus 5 sesiones. */
-const DIAS_DE_LA_VENTANA = 21;
+/**
+ * Los días de calendario que tiene para hacer sus 5 sesiones.
+ *
+ * Sale de `laVentanaDeAcceso`, que es la misma declaración que lee el webhook
+ * de los escalones y el botón del Admin. Escrito a mano acá, el número era
+ * 21 en esta ruta, 21 en el webhook y 7 en el Admin — y como el acceso hoy se
+ * abre siempre desde el Admin, el que llegaba al cliente era el 7.
+ */
+const DIAS_DE_LA_VENTANA = DIAS_DE_ACCESO.blanco ?? 21;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });

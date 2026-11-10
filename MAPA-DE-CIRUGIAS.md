@@ -218,7 +218,7 @@ espera el clic.
 | 10 | Estética computadora | **el flanco cerrado** · `8dff8ab` · 1440 entra al medidor, en cero; el gusto espera su clic |
 | 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
-| 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el próximo** |
+| 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
 | 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
@@ -623,6 +623,39 @@ espera tu clic. Las lentes de este turno no miran el monto: miran que lo que
 se cobra abra lo que se vendió, cualquiera sea el número.
 
 ---
+
+### El Admin daba una ventana de acceso distinta a la de las rutas de pago
+
+Turno 13, la mitad del Admin. El acceso se abre desde tres lugares y cada uno
+tenía su propio número escrito a mano:
+
+|  | las rutas de pago | el botón del Admin |
+|---|---|---|
+| blanco | 21 días | **7 días** |
+| amarillo | sin vencimiento | 45 días |
+| verde y negro | sin vencimiento | 90 días |
+
+Y el botón del Admin es el ÚNICO camino que se usa hoy: mientras el workflow
+de GHL no exista, cada comprador se abre a mano. O sea que la entrada de 97
+venía dando siete días en vez de veintiuno —con siete no entra ni el viernes
+en vivo si compró un sábado— y a un cliente que paga se le ponía una fecha de
+corte que la ruta automática no le pone.
+
+Ahora hay una sola declaración, `laVentanaDeAcceso.ts`, y la leen las dos
+rutas de pago y el Admin. Javo eligió el 9 de noviembre que los escalones
+pagos no vencen: el Camino termina solo el día 90 porque se le acaba el
+contenido, y Mi Clínica sigue siendo suya el día 91.
+
+En el mismo barrido: los botones de reserva del Admin decían «La Instalación ·
+$5.000» meses después de que el precio pasara a $6.000, porque el nombre y el
+precio estaban escritos a mano. Salen de `cuadroTickets`, que es donde vive lo
+que Javo vende, así que en enero suben solos.
+
+Dos lentes re-apuntadas, las dos por la misma razón de siempre: cuidaban una
+regla correcta agarrándose de un texto literal. La de los cinco días contaba
+el número en cada ruta —y pasaba en verde justo porque no miraba el tercer
+lugar—; la de la auditoría pedía el literal «La Base · $1.000», que era
+exactamente el problema que quería evitar.
 
 ### La revisión del 9 de noviembre — libro, app y landings
 

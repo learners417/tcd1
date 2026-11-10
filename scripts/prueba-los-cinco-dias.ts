@@ -33,6 +33,7 @@ import { pilarDelDia, codigoDelDia, roadmap } from '../src/lib/roadmapSeed';
 import { PILAR_MAX, planDe } from '../src/lib/planes';
 import { estacionDelDia } from '../src/lib/estaciones';
 import { jornadaDelPrimerIngreso, DIA_DEL_PRIMER_INGRESO } from '../src/lib/elPrimerIngreso';
+import { DIAS_DE_ACCESO } from '../src/lib/laVentanaDeAcceso';
 
 const raiz = join(import.meta.dirname, '..');
 let fallas = 0;
@@ -65,21 +66,33 @@ if (JSON.stringify(abiertos) !== JSON.stringify(LOS_CINCO)) {
   bien('la entrada abre los días 1 al 5, que es lo que promete la página');
 }
 
-/* ── 2 · La ventana de calendario es una sola, y son 21 días ──
+/* ── 2 · La ventana de calendario es UNA SOLA declaración ──
  *
- * El alta la escribe y el webhook la escribe: si los dos números se separan,
- * dos compradores de lo mismo tienen ventanas distintas según por qué ruta
- * entró su pago.
+ * Antes esta comprobación buscaba el número a mano en cada ruta, y pasaba en
+ * verde porque las dos rutas automáticas decían 21. Lo que no miraba era el
+ * tercer lugar donde el número estaba escrito: el botón del Admin, que daba
+ * 7 días —y que es el ÚNICO camino que se usa mientras GHL no esté conectado,
+ * así que era el único número que llegaba al cliente—.
+ *
+ * Por eso ahora no cuenta números repetidos: pide que haya uno solo y que los
+ * tres lugares lo lean. Un número que vive en un lugar no puede desfasarse.
  */
-for (const [arch, re] of [
-  ['api/alta-numero.ts', /DIAS_DE_LA_VENTANA\s*=\s*(\d+)/],
-  ['api/ghl-webhook.ts', /(\d+)\s*\*\s*86400000/],
-] as const) {
-  const t = readFileSync(join(raiz, arch), 'utf8');
-  const n = Number(re.exec(t)?.[1] ?? 0);
-  if (n !== DIAS_DE_LA_VENTANA) mal(`${arch} da una ventana de ${n} días y no de ${DIAS_DE_LA_VENTANA}`);
+if (DIAS_DE_ACCESO.blanco !== DIAS_DE_LA_VENTANA) {
+  mal(`la entrada da ${DIAS_DE_ACCESO.blanco} días de ventana y la página promete ${DIAS_DE_LA_VENTANA}`);
 }
-bien(`la ventana es de ${DIAS_DE_LA_VENTANA} días por las dos rutas de pago`);
+for (const arch of ['api/alta-numero.ts', 'api/ghl-webhook.ts', 'src/pages/Admin.tsx'] as const) {
+  const t = readFileSync(join(raiz, arch), 'utf8');
+  /* Se mira el IMPORT, no el nombre suelto: los tres archivos lo nombran en
+     sus comentarios para explicar por qué existe, y con el nombre suelto esta
+     comprobación se quedaba verde al sacar el import de verdad. */
+  if (!/from\s+'[^']*laVentanaDeAcceso(?:\.js)?'/.test(t)) {
+    mal(`${arch} no importa \`laVentanaDeAcceso\`: tiene su propio número`);
+  }
+  /* Y que no quede uno escrito a mano al lado del que se importa. */
+  const aMano = /(\b(?:7|14|21|30|45|60|90)\b)\s*\*\s*86400000/.exec(t);
+  if (aMano) mal(`${arch} todavía calcula una ventana a mano: ${aMano[0]}`);
+}
+bien(`la ventana es una sola declaración de ${DIAS_DE_ACCESO.blanco} días, y la leen las dos rutas de pago y el Admin`);
 
 /* ── 3 · La primera tarjeta se cierra sola, como dice su evidencia ── */
 const j0 = jornadaDelPrimerIngreso();

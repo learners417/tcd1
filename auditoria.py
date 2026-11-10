@@ -4215,9 +4215,19 @@ check('ninguna pantalla del cliente nombra la escalera vieja',
 # Y el Admin reserva con las ofertas de hoy, que es de donde sale lo que el
 # cliente ve en su pantalla de vencimiento.
 _adm72 = rd('src/pages/Admin.tsx')
+# Esta comprobación pedía el texto literal «'base','La Base · $1.000'», y se
+# puso roja el 9 de noviembre cuando esos nombres pasaron a salir de
+# `cuadroTickets`. La regla no se había roto: se había roto el ancla. Y el
+# literal era además el problema que la regla quería evitar — «La Instalación ·
+# $5.000» siguió en pantalla meses después de que el precio pasara a $6.000.
+# Así que ahora pide lo que de verdad la cumple: que los nombres y los precios
+# salgan del cuadro, y que no quede ningún precio escrito a mano al lado.
+_del_cuadro72 = 'TICKETS.instalacion.precio' in _adm72 and 'TICKETS.base.precio' in _adm72
+_precio_a_mano72 = _re72.findall(r'(?:La Base|El Ascenso|La Instalación)\s*·\s*\$[\d.,]+', _adm72)
 check('el Admin reserva cupo con las ofertas de hoy',
-      "['base','La Base" in _adm72.replace(' ', '') or "'base','La Base · $1.000'" in _adm72,
-      'las opciones eran los colores viejos, y el cliente veía ese precio')
+      _del_cuadro72 and not _precio_a_mano72,
+      f'precio escrito a mano: {_precio_a_mano72[:3]}' if _precio_a_mano72
+      else 'los nombres y precios tienen que salir de cuadroTickets, no escritos acá')
 check('y avisa cuando lo anotado es de la escalera anterior',
       'Anotado con la escalera anterior' in _adm72,
       'si no, el equipo no se entera de que ese cupo no le llega al cliente')

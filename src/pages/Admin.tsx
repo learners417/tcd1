@@ -51,6 +51,7 @@ import { comparativaSemana, rachasDeTodos } from '../lib/mesaPlataStorage';
 import { armarCola, type ItemCola } from '../lib/colaExcepciones';
 import { repartirLaCola, type ResultadoDeLaPasada } from '../lib/avisosStorage';
 import type { PlanComercial } from '../lib/planes';
+import { accesoHasta, cuantoDura } from '../lib/laVentanaDeAcceso';
 import type { Jornada as JornadaTipo } from '../lib/jornada';
 import {
   Users, Send, ChevronRight, X, Plus, Loader2,
@@ -2534,18 +2535,24 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                           <div className="bg-panel border border-gold/15 rounded-2xl p-4">
                             <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-2">Plan comercial · la escalera</p>
                             <div className="flex flex-wrap gap-2">
-                              {([['blanco','⚪ Semana Blanca (+7d)'],['amarillo','🟡 Tu Base (+45d)'],['verde','🟢 Tu Sistema (+90d)'],['negro','⬛ Completo (+90d)'],['completo','Cliente clásico']] as const).map(([p, label]) => (
+                              {/* Cuánto dura cada escalón sale de `laVentanaDeAcceso`, que
+                                  es la misma declaración que usan las dos rutas de pago.
+                                  Antes estaba escrito acá a mano y no coincidía en tres de
+                                  los cinco: la Semana Blanca daba 7 días en vez de 21, y a
+                                  los pagos les ponía un corte que la ruta automática no les
+                                  pone. Como el acceso hoy se abre SIEMPRE desde este botón,
+                                  el número de acá era el único que llegaba al cliente. */}
+                              {([['blanco','⚪ Semana Blanca'],['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
                                   onClick={async () => {
                                     if (!supabase) return;
-                                    const dias = p === 'blanco' ? 7 : p === 'amarillo' ? 45 : (p === 'verde' || p === 'negro') ? 90 : null;
-                                    const hasta = dias ? new Date(Date.now() + dias * 86400000).toISOString() : null;
+                                    const hasta = accesoHasta(p);
                                     const { error } = await db().from('profiles').update({ plan_comercial: p, acceso_hasta: hasta }).eq('id', selectedCliente.id);
                                     if (error) toast.error('No se pudo cambiar el plan');
                                     else { toast.success(`Plan ${label} activado`); void cargarClientes(); }
                                   }}
                                   className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${((selectedCliente as { plan_comercial?: string }).plan_comercial ?? 'completo') === p ? 'border-gold text-goldhi bg-gold/10' : 'border-[rgba(242,239,233,0.15)] text-cream/75 hover:border-gold/40'}`}>
-                                  {label}
+                                  {label} <span className="text-cream/55 num-tab">({cuantoDura(p)})</span>
                                 </button>
                               ))}
                             </div>
@@ -2566,7 +2573,14 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               );
                             })()}
                             <div className="flex flex-wrap gap-2">
-                              {([['base','La Base · $1.000'],['ascenso','El Ascenso · $3.000'],['instalacion','La Instalación · $5.000'],['','Sin reserva']] as const).map(([p, label]) => (
+                              {/* El nombre y el precio salen de `cuadroTickets`, que es
+                                  donde vive lo que Javo vende. Escritos a mano acá, «La
+                                  Instalación · $5.000» siguió en pantalla después de que
+                                  el precio pasara a $6.000, y en enero vuelve a subir. */}
+                              {([['base', `${TICKETS.base.nombre} · $${TICKETS.base.precio.toLocaleString('es-AR')}`],
+                                 ['ascenso', `${TICKETS.ascenso.nombre} · $${TICKETS.ascenso.precio.toLocaleString('es-AR')}`],
+                                 ['instalacion', `${TICKETS.instalacion.nombre} · $${TICKETS.instalacion.precio.toLocaleString('es-AR')}`],
+                                 ['', 'Sin reserva']] as const).map(([p, label]) => (
                                 <button key={p || 'ninguno'}
                                   onClick={async () => {
                                     if (!supabase) return;

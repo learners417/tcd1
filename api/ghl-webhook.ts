@@ -29,6 +29,7 @@
  * productos viejos en GHL que los mandan.
  */
 import { getAdminClient } from './_lib/credits-server.js';
+import { accesoHasta, type EscalonDeAcceso } from '../src/lib/laVentanaDeAcceso.js';
 
 const PLANES_VALIDOS = ['blanco', 'amarillo', 'verde', 'negro'] as const;
 type PlanComercial = (typeof PLANES_VALIDOS)[number];
@@ -62,12 +63,15 @@ const LO_QUE_ABRE: Record<Ticket, PlanComercial> = {
   instalacion: 'negro',
 };
 
-/** La Semana Blanca vence a los 21 días; los planes pagos no vencen. */
+/**
+ * La Semana Blanca vence; los planes pagos no.
+ *
+ * El cuánto sale de `laVentanaDeAcceso`, que es la misma declaración que lee
+ * el alta de la entrada y el botón del Admin. Escrito a mano en cada lado, el
+ * número no coincidía en tres de los cinco escalones.
+ */
 function accesoHastaDe(plan: PlanComercial): string | null {
-  // 21 días: sus 5 días + su viernes en vivo (aunque el corte lo mande al siguiente)
-  // + la garantía de repetir la semana. Después entra el modo lectura digno.
-  if (plan === 'blanco') return new Date(Date.now() + 21 * 86400000).toISOString();
-  return null;
+  return accesoHasta(plan as EscalonDeAcceso);
 }
 
 /**
