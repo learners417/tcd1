@@ -219,7 +219,7 @@ espera el clic.
 | 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
-| 14 | Cirugía 6 · Las cuatro fugas (Fathom por webhook y las otras tres) | en la cola |
+| 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el próximo** |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
@@ -944,13 +944,31 @@ por Meta**, y sus métricas.
 
 ## CIRUGÍA 6 · Las cuatro fugas
 
-- **Fathom por webhook** — termina la sesión, entra la transcripción, salen los
-  compromisos como pasos de su día.
-- **El tageo del comprador** — sin el campo `plan` del workflow de GHL, quien
-  paga 997 y quien paga 497 entran igual, con todo abierto.
-- **El escalón de entrada a 97 USD** con su ventana de acceso.
-- **La puerta del día 91** con los tres pases: 97 la app sola · 497 con
-  mentorías grupales · 997 con 1 a 1.
+Medidas una por una el 9 de noviembre, antes de abrir el turno 14. De las
+cuatro, **queda una sola de este lado**:
+
+- **Fathom por webhook** — ABIERTA. No hay ninguna ruta en `api/` que reciba
+  una transcripción: termina la sesión y no entra nada. Fathom se nombra en
+  `cuadroTickets`, en `videosCargados` y en `preactivacionSteps`, así que está
+  vendido y contado, pero el camino de entrada no existe. Es el turno 14, y se
+  parte en dos: la ruta y su lente de este lado, y en Fathom el destino del
+  webhook, que es de Javo.
+- ~~**El tageo del comprador**~~ — del lado de la app, CERRADA. `planDe` lee
+  `plan_comercial` y cae en abierto solo cuando no sabe, a propósito; el Admin
+  escribe el escalón a mano y ahora con la misma declaración que las rutas de
+  pago. Lo que falta es el workflow de GHL que manda el campo, y eso es de
+  Javo: está en «lo que bloquea la venta y es de Javo».
+- ~~**El escalón de entrada a 97 USD con su ventana de acceso**~~ — CERRADA el
+  9 de noviembre por los turnos 11 y 13: abre exactamente los días 1 al 5, la
+  ventana es de 21 días y sale de una sola declaración que leen las dos rutas
+  de pago y el Admin. La receta de GHL para que entren solos está escrita en
+  este mapa.
+- ~~**La puerta del día 91**~~ — CERRADA. `PuertaSiguienteNivel.tsx` saca lo
+  que ofrece de `laOfertaQueSigue` y pinta `oferta.abre` y `oferta.boton`: no
+  nombra ningún precio a mano. Los tres pases de 97 · 497 · 997 que decía esta
+  línea son la escalera vieja; hoy la escalera es 1.000 · 3.000 · 6.000 con la
+  entrada de 97, y la auditoría ya cuida que los cinco puntos de venta tiren
+  del módulo.
 
 ---
 
