@@ -3477,8 +3477,12 @@ check('lo complementario vive en la Biblioteca, no en el Camino',
       and '<TodoElMaterial' in todo.get('src/pages/Biblioteca.tsx', ''))
 check('y una sola vez: no por dos listas en la misma pantalla',
       '<Complementos />' not in todo.get('src/pages/Biblioteca.tsx', ''))
+# Lo del archivo entra por `enlacesPorClave`, que traduce la clave del día a
+# la del Camino. Mirar `VIDEOS_POR_JORNADA` a secas daba verde con el Tablero
+# buscando los 14 videos de Javo por el código de la pieza: los tenía en la
+# mano y los mostraba sin grabar (turno 12).
 check('el tablero del Admin pisa lo que viene por archivo',
-      'VIDEOS_POR_JORNADA' in rd('src/components/admin/TableroGrabacion.tsx'))
+      'enlacesPorClave' in rd('src/components/admin/TableroGrabacion.tsx'))
 
 # ── Los tutoriales del Camino: dónde están y cuáles faltan ─────────────
 # Un tutorial atado a un día que el cliente no abre es un tutorial que no
@@ -3520,9 +3524,15 @@ check('el ADN usa los nombres congelados', 'El alma' not in _adn and 'Quién ere
 _tg = rd('src/components/admin/TableroGrabacion.tsx')
 _adm = todo.get('src/pages/Admin.tsx', '')
 check('el tablero de grabación está en el Admin', 'TableroGrabacion' in _adm and 'programa_videos' in _tg)
-check('el tablero lista las piezas y los tutoriales', 'roadmap.piezas' in _tg and 'roadmap.tutoriales' in _tg)
+_etg = rd('src/lib/elTableroDeGrabacion.ts')
+check('el tablero lista las piezas y los tutoriales',
+      'filasDeGrabacion' in _tg and 'roadmap.piezas' in _etg and 'roadmap.tutoriales' in _etg)
 _rmv = todo.get('src/pages/Roadmap.tsx', '')
-check('el video se busca primero por jornada y después por pilar', 'videosPorPilar[meta.codigo]' in _rmv)
+# La regla está en `videoDeCadaJornada` y el Camino la llama: estaba escrita
+# dentro de un `useMemo` de esta pantalla, y el Tablero guardaba contra una
+# segunda copia que no coincidía (turno 12).
+check('el video se busca primero por jornada y después por pilar',
+      'mapa[meta.codigo]' in _vc and 'videoDeCadaJornada(SEED_ROADMAP_V2' in _rmv)
 check('el tutorial del día aparece en su sesión cuando tiene enlace', 'tutorialDelDia' in _rmv)
 
 # ── Lo que ya tiene andando (C3) ──────────────────────────────────────
@@ -3582,6 +3592,32 @@ _crudo = [f.split('/')[-1] for f, src in todo.items()
           if (f.startswith('src/components') or f.startswith('src/pages'))
           and re.search(r'import\s*\{[^}]*\b(HERRAMIENTAS_V3|HERRAMIENTAS|SESIONES_GUIADAS)\b[^}]*\}\s*from', src)]
 check('ninguna pantalla lee el catálogo crudo (con tokens sin traducir)', not _crudo, str(_crudo))
+
+# ── EL TABLERO DE GRABACIÓN GUARDA DONDE EL CAMINO MIRA ───────────────
+#
+# Turno 12, 9 de noviembre. El Tablero guardaba el enlace de YouTube en
+# `programa_videos.pilar_id` con el código de la PIEZA (`P8.1`) y el Camino lo
+# busca por el código de la JORNADA (`P2.d8`), que lleva el día adentro.
+# Medido con las funciones reales, antes de tocar nada: **34 de las 43 piezas**
+# guardaban un código que el Camino nunca busca —enlace guardado, tilde verde,
+# cliente sin video—, las 9 que sí caían en un código buscado caían en la
+# jornada de OTRO día, y el contador decía «13 de 64 con enlace» con 27 videos
+# cargados.
+#
+# La causa de fondo era una regla con dos copias: la del Tablero y la que vivía
+# dentro de un `useMemo` de `Roadmap.tsx`. Ahora hay una sola, y estas tres
+# líneas miran que siga habiendo una.
+_tab12 = rd('src/components/admin/TableroGrabacion.tsx')
+_vid12 = rd('src/lib/videosCargados.ts')
+_road12 = rd('src/pages/Roadmap.tsx')
+check('el Tablero guarda con la clave que el Camino lee, no con la de la pieza',
+      'pilar_id: fila.clave' in _tab12 and 'pilar_id: fila.codigo' not in _tab12)
+check('el reparto de videos del Camino vive en un solo lugar',
+      'export function videoDeCadaJornada' in _vid12
+      and 'videoDeCadaJornada(SEED_ROADMAP_V2' in _road12
+      and 'mapaConLaBase(' in _road12)
+check('existe la lente del Tablero contra el Camino',
+      _os64.path.exists('scripts/prueba-el-tablero-carga-donde-el-camino-mira.ts'))
 
 print('══ 10) EJECUCIÓN (lo que el texto no ve) ══')
 # Hasta el 15 sep esta batería solo LEÍA archivos: ninguna prueba se corría.

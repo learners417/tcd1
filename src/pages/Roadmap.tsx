@@ -98,7 +98,8 @@ import { usePersistedState } from '../lib/usePersistedState';
 import { VOC } from '../lib/vocabulario';
 import { nombreDelTramo } from '../lib/estaciones';
 import PuntoDePartida, { KEY_PARTIDA } from '../components/PuntoDePartida';
-import { mapaDeVideos, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
+import { mapaDeVideos, mapaConLaBase, videoDeCadaJornada, PDFS_POR_TUTORIAL } from '../lib/videosCargados';
+import { clavesLegadas } from '../lib/elTableroDeGrabacion';
 import { tutorialEscrito } from '../lib/tutorialesDeLupe';
 import { paisajeDeSistema, paisajeDelDia } from '../lib/losCincoPaisajes';
 import PortadaDeSistema from '../components/PortadaDeSistema';
@@ -424,21 +425,14 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   // Camino cortado en el día 5 con el candado del día 6 puesto.
   const planLimitado = useMemo(() => enElTramoDelNumeroLocal(), []);
 
-  const seedConVideos: RoadmapPilar[] = useMemo(() => {
-    if (Object.keys(videosPorPilar).length === 0) return SEED_ROADMAP_V2;
-    return SEED_ROADMAP_V2.map(pilar => {
-      const delPilar = videosPorPilar[pilar.id];
-      return {
-        ...pilar,
-        // El enlace se busca primero por la jornada (P1.0) y después por el
-        // pilar: así cada video cae en el día que le toca.
-        metas: pilar.metas.map(meta => {
-          const ytId = videosPorPilar[meta.codigo] ?? (meta.tipo === 'VIDEO' ? delPilar : undefined);
-          return ytId ? { ...meta, video_youtube_id: ytId } : meta;
-        }),
-      };
-    });
-  }, [videosPorPilar]);
+  // El reparto vive en `videoDeCadaJornada`: primero por el código de la
+  // jornada y después, sólo para una jornada de video sin el suyo, por el del
+  // pilar. Estaba escrito acá adentro, y por eso el Tablero guardaba con una
+  // segunda copia de la regla —la de la pieza— que no coincidía con ésta.
+  const seedConVideos: RoadmapPilar[] = useMemo(
+    () => videoDeCadaJornada(SEED_ROADMAP_V2, videosPorPilar),
+    [videosPorPilar],
+  );
 
   // ─── Cargar datos de Supabase ───────────────────────────────────────────
   useEffect(() => {
@@ -525,14 +519,12 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       if (vts) setVentas(vts as VentaRegistrada[]);
 
       if (vids) {
-        // Lo cargado en el tablero pisa a lo que viene por archivo.
-        const map: Record<string, string> = mapaDeVideos();
-        for (const v of vids as { pilar_id: string | null; youtube_url: string }[]) {
-          if (!v.pilar_id || !v.youtube_url) continue;
-          const ytId = getYoutubeVideoId(v.youtube_url);
-          if (ytId) map[v.pilar_id] = ytId;
-        }
-        setVideosPorPilar(map);
+        // Lo cargado en el tablero pisa a lo que viene por archivo, y una fila
+        // guardada con el código viejo de la pieza se traduce al leer.
+        setVideosPorPilar(mapaConLaBase(
+          vids as { pilar_id: string | null; youtube_url: string }[],
+          clavesLegadas(),
+        ));
       }
 
       yaCargo.current = true;

@@ -107,6 +107,71 @@ export function mapaDeVideos(): Record<string, string> {
   return out;
 }
 
+/**
+ * Los ENLACES del archivo, con la clave con la que el Camino los busca.
+ *
+ * Igual que `mapaDeVideos`, pero devuelve la URL y no el id: el Tablero
+ * muestra «Ver el video», que necesita el enlace entero.
+ */
+export function enlacesPorClave(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [clave, url] of Object.entries(VIDEOS_POR_JORNADA)) {
+    const codigo = /^\d+$/.test(clave) ? codigoDelDia(Number(clave)) : clave;
+    if (codigo) out[codigo] = url;
+  }
+  return out;
+}
+
+/**
+ * ═══ EL MAPA QUE LEE EL CAMINO, CON LA BASE ADENTRO ═══
+ *
+ * Lo que el Tablero de Grabación guarda en `programa_videos` pisa a lo que
+ * viene por archivo. Esta función es la ÚNICA que sabe cómo se arma ese mapa.
+ *
+ * Estaba escrita dentro de `Roadmap.tsx`, en un `useEffect`, y por eso ni el
+ * Tablero ni ninguna lente podían preguntarle «¿el Camino va a encontrar este
+ * enlace?». El Tablero contestaba esa pregunta con una segunda copia de la
+ * regla —la clave de la pieza— y la copia estaba mal: 34 de las 43 piezas
+ * guardaban un código que el Camino nunca busca.
+ *
+ * `legados` traduce las claves viejas: una fila guardada con el código de la
+ * pieza (`P8.1`) sigue valiendo y cae donde el Camino la busca.
+ */
+export function mapaConLaBase(
+  filas: Array<{ pilar_id: string | null; youtube_url: string | null }>,
+  legados: Record<string, string> = {},
+): Record<string, string> {
+  const out = mapaDeVideos();
+  for (const f of filas) {
+    if (!f.pilar_id || !f.youtube_url) continue;
+    const id = idDeYoutube(f.youtube_url);
+    if (!id) continue;
+    out[legados[f.pilar_id] ?? f.pilar_id] = id;
+  }
+  return out;
+}
+
+/**
+ * EL VIDEO DE CADA JORNADA — la regla con la que el Camino reparte los enlaces.
+ *
+ * Primero por el código de la jornada (`P2.d8`), y después, sólo para una
+ * jornada de tipo VIDEO que no tenga el suyo, el del pilar. Vivía dentro de un
+ * `useMemo` de `Roadmap.tsx`: acá la pueden mirar el Tablero y las lentes.
+ */
+export function videoDeCadaJornada<
+  M extends { codigo: string; tipo: string; video_youtube_id: string | null },
+  P extends { id: string; metas: M[] },
+>(pilares: P[], mapa: Record<string, string>): P[] {
+  if (Object.keys(mapa).length === 0) return pilares;
+  return pilares.map((pilar) => ({
+    ...pilar,
+    metas: pilar.metas.map((meta) => {
+      const id = mapa[meta.codigo] ?? (meta.tipo === 'VIDEO' ? mapa[pilar.id] : undefined);
+      return id ? { ...meta, video_youtube_id: id } : meta;
+    }),
+  }));
+}
+
 /** El video de una jornada, por su código. */
 export function videoDeJornada(codigo: string): string | undefined {
   const d = diaDelCodigo(codigo);

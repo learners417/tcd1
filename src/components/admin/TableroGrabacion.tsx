@@ -5,52 +5,29 @@
  * donde aparece. Se pega el enlace y queda atado a esa sesión: no hay que
  * saber nada de pilares ni de tablas.
  *
- * Guarda en `programa_videos`, usando `pilar_id` para el código de la jornada
- * (P1.0) o del tutorial (L-01). Sin migración de base.
+ * Guarda en `programa_videos.pilar_id`, con LA CLAVE CON LA QUE EL CAMINO LO
+ * BUSCA —el código de la jornada del día (`P2.d8`) para una pieza de Javo, y
+ * el código propio (`L-01`) para un paso a paso de Lupe—. Sin migración de
+ * base: lo que esté guardado con el código viejo de la pieza se traduce al
+ * leer.
+ *
+ * Antes guardaba el código de la pieza, que el Camino no busca: 34 de las 43
+ * piezas se guardaban bien y no se veían nunca, y el contador decía «13 de 64»
+ * con 27 videos cargados. El por qué está en `src/lib/elTableroDeGrabacion.ts`,
+ * que es ahora el único lugar donde vive esa regla.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { roadmap, SEED_ROADMAP_V2 } from '../../lib/roadmapSeed';
-import { VIDEOS_POR_JORNADA, PDFS_POR_TUTORIAL, POR_REGRABAR } from '../../lib/videosCargados';
-
-interface Fila {
-  codigo: string;
-  titulo: string;
-  dia: number;
-  quien: 'Javo' | 'Lupe';
-  minutos: number;
-  donde?: string;
-}
-
-function filas(): Fila[] {
-  const metasPorPieza = new Map<string, { titulo: string; dia: number }>();
-  for (const p of SEED_ROADMAP_V2) {
-    for (const m of p.metas) metasPorPieza.set(m.codigo, { titulo: m.titulo, dia: m.dia_asignado ?? 0 });
-  }
-  const piezas: Fila[] = roadmap.piezas.map((p) => ({
-    codigo: p.codigo,
-    titulo: p.titulo,
-    dia: metasPorPieza.get(p.codigo)?.dia ?? p.dia ?? 0,
-    quien: 'Javo' as const,
-    minutos: p.minutos,
-    donde: p.set,
-  }));
-  const tutos: Fila[] = roadmap.tutoriales.map((t) => ({
-    codigo: t.codigo,
-    titulo: t.titulo,
-    dia: t.dia,
-    quien: 'Lupe' as const,
-    minutos: t.minutos,
-    donde: t.donde,
-  }));
-  return [...piezas, ...tutos].sort((a, b) => a.dia - b.dia || a.codigo.localeCompare(b.codigo));
-}
+import { enlacesPorClave, PDFS_POR_TUTORIAL, POR_REGRABAR } from '../../lib/videosCargados';
+import { filasDeGrabacion, clavesLegadas, type FilaDeGrabacion } from '../../lib/elTableroDeGrabacion';
 
 export default function TableroGrabacion() {
-  const todas = useMemo(filas, []);
+  const todas = useMemo(filasDeGrabacion, []);
+  const legados = useMemo(clavesLegadas, []);
   // Lo que ya viene cargado por archivo se ve igual; lo de la base lo pisa.
-  const [links, setLinks] = useState<Record<string, string>>({ ...VIDEOS_POR_JORNADA });
+  // Las dos cosas se guardan por la clave del Camino, no por la de la pieza.
+  const [links, setLinks] = useState<Record<string, string>>(enlacesPorClave);
   const [ids, setIds] = useState<Record<string, string>>({});
   const [editando, setEditando] = useState<string | null>(null);
   const [borrador, setBorrador] = useState('');
@@ -62,21 +39,25 @@ export default function TableroGrabacion() {
       if (!supabase) return;
       const { data } = await supabase.from('programa_videos').select('id, pilar_id, youtube_url');
       if (!data) return;
-      const l: Record<string, string> = { ...VIDEOS_POR_JORNADA }; const i: Record<string, string> = {};
+      const l: Record<string, string> = enlacesPorClave(); const i: Record<string, string> = {};
       for (const v of data as Array<{ id: string; pilar_id: string | null; youtube_url: string | null }>) {
-        if (v.pilar_id && v.youtube_url) { l[v.pilar_id] = v.youtube_url; i[v.pilar_id] = v.id; }
+        if (!v.pilar_id || !v.youtube_url) continue;
+        // La clave vieja —el código de la pieza— se traduce a la de hoy.
+        const clave = legados[v.pilar_id] ?? v.pilar_id;
+        l[clave] = v.youtube_url; i[clave] = v.id;
       }
       setLinks(l); setIds(i);
     })();
-  }, []);
+  }, [legados]);
 
-  const guardar = async (fila: Fila) => {
-    if (!supabase) return;
+  const guardar = async (fila: FilaDeGrabacion) => {
+    if (!supabase || !fila.clave) return;
     setGuardando(true);
     const url = borrador.trim();
-    const existente = ids[fila.codigo];
+    const existente = ids[fila.clave];
     const campos = {
-      pilar_id: fila.codigo,
+      // Acá estaba el turno 12: iba `fila.codigo`, que el Camino no busca.
+      pilar_id: fila.clave,
       titulo: fila.titulo,
       descripcion: `${fila.quien} · día ${fila.dia}`,
       youtube_url: url,
@@ -85,14 +66,14 @@ export default function TableroGrabacion() {
     if (existente) await supabase.from('programa_videos').update(campos).eq('id', existente);
     else {
       const { data } = await supabase.from('programa_videos').insert(campos).select('id').single();
-      if (data?.id) setIds((p) => ({ ...p, [fila.codigo]: data.id as string }));
+      if (data?.id) setIds((p) => ({ ...p, [fila.clave]: data.id as string }));
     }
-    setLinks((p) => ({ ...p, [fila.codigo]: url }));
+    setLinks((p) => ({ ...p, [fila.clave]: url }));
     setEditando(null); setBorrador(''); setGuardando(false);
   };
 
   const lista = todas.filter((f) => quien === 'todos' || f.quien === quien);
-  const cargados = lista.filter((f) => links[f.codigo]).length;
+  const cargados = lista.filter((f) => links[f.clave]).length;
 
   return (
     <div className="space-y-4">
@@ -123,7 +104,7 @@ export default function TableroGrabacion() {
 
       <ul className="card-panel divide-y divide-[var(--line,#EBE1CF)]">
         {lista.map((f) => {
-          const url = links[f.codigo];
+          const url = links[f.clave];
           const abierto = editando === f.codigo;
           return (
             <li key={f.codigo} className="p-4">
@@ -139,13 +120,23 @@ export default function TableroGrabacion() {
                 <div className="min-w-0 flex-1">
                   <p className="text-[17px] font-semibold text-cream">{f.titulo}</p>
                   <p className="text-[15px] text-cream/60">
-                    Día {f.dia} · {f.quien} · {f.minutos} min{f.donde ? ` · ${f.donde}` : ''}
+                    {/* Las jornadas que ya tienen video y ninguna pieza nombra
+                        no traen minutos: no se inventa un «0 min». */}
+                    Día {f.dia} · {f.quien}{f.minutos > 0 ? ` · ${f.minutos} min` : ''}{f.donde ? ` · ${f.donde}` : ''}
                   </p>
                   {/* El video está cargado y su guion cambió: la tilde verde
                       sola haría pensar que esta jornada ya está lista. */}
                   {POR_REGRABAR[f.dia] && (
                     <p className="mt-1 text-[15px]" style={{ color: 'var(--tacha, #B4472E)' }}>
                       Para regrabar · {POR_REGRABAR[f.dia]}
+                    </p>
+                  )}
+                  {/* El Camino muestra UN video por jornada. Dos piezas del
+                      mismo día comparten ese lugar: se dice acá en vez de que
+                      la segunda pise a la primera sin que se vea. */}
+                  {f.comparteCon.length > 0 && (
+                    <p className="mt-1 text-[15px] text-cream/60">
+                      El día {f.dia} comparte su lugar en el Camino con {f.comparteCon.join(', ')}: se sube un video por jornada.
                     </p>
                   )}
                   {PDFS_POR_TUTORIAL[f.codigo] && (
