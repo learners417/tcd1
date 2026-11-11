@@ -220,7 +220,7 @@ espera el clic.
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
-| 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `PENDIENTE` · 12 encargos, 1 lente, 60 miradas |
+| 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
@@ -230,7 +230,7 @@ el flanco, y lo que queda en ellas es gusto suyo.
 
 ### El encargo existía y no lo vio nunca nadie — turno 15, el 11 de noviembre
 
-Commit `PENDIENTE`. Doce encargos donde había tres, una lente nueva
+Commit `da9c71c`. Doce encargos donde había tres, una lente nueva
 —`scripts/prueba-el-encargo-llega.ts`, sesenta miradas— y el espejo que les
 faltaba.
 
