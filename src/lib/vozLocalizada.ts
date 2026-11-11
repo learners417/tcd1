@@ -123,3 +123,23 @@ El contenido va dirigido al avatar de cliente del profesional · usa TUTEO (espa
  * ambos registros a proposito.
  */
 export const FORMAS_VOSEO = 'vos · tenés · podés · querés';
+
+/**
+ * El trato en una línea, para pegar adentro de un encargo.
+ *
+ * `instruccionesDialecto` es un bloque de seis renglones en mayúsculas: sirve
+ * para un prompt que arma la app por dentro, no para un texto que el cliente
+ * lee y copia con la mano. Un encargo necesita una sola frase, dicha como se
+ * la diría una persona a otra.
+ *
+ * Vive acá y no en `elEncargo` por la misma razón que `FORMAS_VOSEO`: este es
+ * el único archivo exento de la lente de voseo, porque es el que documenta
+ * los dos registros a propósito. Escrita allá, la lente la marcaría — y con
+ * razón, porque nadie que la lea de paso puede saber que esas palabras son
+ * para los consultantes del cliente y no para el cliente.
+ */
+export function tratoParaContenido(paisCodigo: string | null | undefined): string {
+  return dialectoParaContenido(paisCodigo) === 'voseo'
+    ? `de vos (${FORMAS_VOSEO})`
+    : 'de tú (tú · tienes · puedes · quieres)';
+}

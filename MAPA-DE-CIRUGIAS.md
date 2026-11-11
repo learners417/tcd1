@@ -220,13 +220,97 @@ espera el clic.
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
-| 15 | Cirugía 4 · La app al lado de Claude | en la cola |
+| 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `PENDIENTE` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
+
+### El encargo existía y no lo vio nunca nadie — turno 15, el 11 de noviembre
+
+Commit `PENDIENTE`. Doce encargos donde había tres, una lente nueva
+—`scripts/prueba-el-encargo-llega.ts`, sesenta miradas— y el espejo que les
+faltaba.
+
+**La premisa decía «de 3 a 12». El número de partida no era tres: era cero.**
+
+Hay dos juegos de códigos en el Camino y se parecen tanto que se pueden
+confundir leyendo el archivo entero sin notarlo. Las **piezas** son los
+cuarenta y tres videos a grabar: `P3.1`, `P4.2d`, `P4.4`. Las **metas** son
+las noventa y un jornadas que el cliente abre: `P2.d10`, `P3.d16`, `P9B.d61`.
+Se tocan en nueve códigos y en ninguno más.
+
+Los tres encargos estaban escritos con el código del VIDEO. `SesionViva` le
+pasa a `ElEncargo` el código de la JORNADA. O sea que `encargoDe()` devolvía
+`null` los noventa y un días, el componente se iba sin pintar nada, y la
+pantalla que existe para que el cliente no abra nunca una conversación en
+blanco no se mostró ni una vez desde que se escribió.
+
+**Y la lente estaba en verde.** Probaba `armarEncargo()` con datos puestos a
+mano: la plantilla andaba, los huecos se nombraban, las reglas de redacción se
+cumplían. Todo cierto, y ninguna de esas preguntas es «¿esto llega a una
+pantalla?». Es el mismo defecto que el del Tablero en el turno 12: una lente
+correcta que se agarra de lo que tiene a mano en vez de lo que el cliente ve.
+
+**Lo segundo, que habría multiplicado por cuatro.** `datosDelCliente()` leía
+cinco claves crudas del navegador. Llegaban dos —`nombre` y `especialidad`—.
+`pais`, `promesa`, `nicho` y `precio` no existen como clave en `tcd_profile`,
+y `adn_avatar` sí existe pero es un OBJETO —nombre ficticio, edad, dolores,
+sueños—, así que el filtro de texto lo descartaba en silencio: a quién sirve
+el cliente salía hueco aunque lo tuviera sellado hacía semanas. El encargo que
+existe para salir lleno salía con cuatro huecos de seis, siempre, para todos.
+Escribir nueve encargos más encima de ese caño era multiplicar el defecto.
+
+**De dónde sale ahora cada dato, y por qué ese y no otro:**
+
+| | |
+|---|---|
+| `pais`, `nicho`, `posicionamiento`, `avatar_cliente` | estaban en la base y nadie los espejaba. Cuatro líneas en `auth.ts` |
+| `promesa` | es su PUV, «la frase que te separa de todos los demás». Buscada por todo el repo: «promesa» no es columna de nada, y el PUV es exactamente lo que un encargo necesita |
+| `precio` | sale de `tcd_el_numero`, su precio NUEVO, el del día 5. El viejo no sirve: el encargo arma lo que va a vender de ahora en adelante |
+| `avatar` | prefiere el campo de texto; si solo está el objeto del ADN lo aplana a algo legible en vez de tirarlo |
+| `dialecto` | no es un dato suyo: se DERIVA del país |
+
+**El dialecto, que es el que nadie pide y cambia la salida entera.** Los tres
+encargos pedían la salida «en castellano neutro». Pero lo que sale de ahí no
+lo lee el cliente: lo leen SUS consultantes, en su país. `vozLocalizada.ts`
+tiene eso resuelto desde que Sol reportó que la IA le escribía las landings en
+voseo argentino — y el encargo no lo usaba. Un médico argentino pedía su
+página y le volvía un texto que le habla de tú a pacientes que se hablan de
+vos: se usa igual, se lee prestado. Ahora cada encargo lleva el trato de su
+país adentro.
+
+La frase quedó en `vozLocalizada.ts` y no en `elEncargo.ts`, aunque allá sea
+donde se usa: ese archivo es el único exento de la lente de voseo, porque es
+el que documenta los dos registros a propósito. Escrita en el otro, la lente
+la marcaba —y con razón: nadie que la lea de paso puede saber que esas
+palabras son para los consultantes del cliente y no para el cliente.
+
+**Los doce, en la jornada que produce la cosa:** las instrucciones de su
+proyecto en Claude (día 1), su método con etapas (9), su oferta de 1.000 en
+una página (10), sus guiones (11), su página (16), el aviso a su entorno (18),
+su recuperador (25), sus tres anuncios (30), su protocolo de entrega (39), sus
+respuestas guardadas (61), su escalera (66) y sus carruseles (85). Los días de
+pensar, decidir o practicar siguen sin encargo, y no hay pestaña ni catálogo:
+cada uno vive adentro de su jornada y en ningún otro lado.
+
+**La lente, probada contra su propio fallo en nueve formas:** se pone roja si
+un encargo vuelve al código de un video, si cae en una jornada de tipo TAREA
+—que no abre la sesión—, si la sesión pasa a montarse detrás de otro tipo, si
+alguien apaga el encargo con un comentario, si un encargo pide un dato que
+nada llena nunca, si el lector deja de devolver uno de los declarados, si el
+espejo de `auth.ts` pierde un campo, y si se cuela un token de vocabulario
+`{{…}}`, que el armador convierte en hueco justo donde iba la palabra
+correcta. Los tipos de jornada que abren la sesión no se escriben a mano: se
+leen de `Roadmap.tsx`, buscando hacia atrás desde cada montaje de
+`SesionViva`, así que el día que eso cambie la lista cambia sola.
+
+**Lo que quedó anotado y no se tocó.** El mapa pide además las herramientas
+por estación —Meta conectado, Claude Code, GitHub, Vercel, Metricool— y las
+campañas con criterio adentro. Eso es un encargo por herramienta y entra
+cuando haya jornada que lo pida; hoy ninguna de las noventa y una lo nombra.
 
 ### La transcripción entra sola, y espera — turno 14, el 11 de noviembre
 

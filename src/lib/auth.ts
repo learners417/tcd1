@@ -113,6 +113,27 @@ export function syncProfileToLocalStorage(profile: Profile): void {
     adn_avatar: v2.adn_avatar ?? null,
     metodo_nombre: v2.metodo_nombre ?? '',
     oferta_mid: v2.oferta_mid ?? '',
+    /*
+     * ═══ LOS CUATRO QUE EL ENCARGO PIDE Y NADIE ESPEJABA ═══
+     *
+     * El Encargo —lo que el cliente le pega a Claude— nombra su país, su
+     * nicho, su promesa y a quién sirve. Los cuatro están en la base, en
+     * ProfileV2, y ninguno llegaba acá: el encargo salía con cuatro huecos
+     * «[tu país: todavía sin sellar]» en la pantalla que existe justamente
+     * para que salga lleno.
+     *
+     * El país se captura el primer día en la bienvenida y se puede corregir
+     * en el Manual: es el dato que decide el dialecto de todo lo que el
+     * cliente PUBLICA —su página, sus anuncios—, así que sin él la salida
+     * vuelve en un castellano que no es el de sus consultantes.
+     *
+     * Cada uno con su respaldo porque el Camino los sella en dos lugares
+     * según la versión del ADN con la que entró el cliente.
+     */
+    pais: v2.pais ?? '',
+    nicho: v2.nicho ?? v2.adn_nicho ?? '',
+    posicionamiento: v2.posicionamiento ?? v2.adn_usp ?? '',
+    avatar_cliente: v2.avatar_cliente ?? '',
     // El permiso de la Biblioteca. Sin espejarlo, el menú del Topbar la
     // esconde por plan aunque el equipo se la haya abierto: el cliente
     // tendría el permiso dado y ninguna forma de llegar.
