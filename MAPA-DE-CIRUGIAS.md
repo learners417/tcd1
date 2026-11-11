@@ -219,7 +219,7 @@ espera el clic.
 | 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
-| 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `HASH` · 75 miradas · en Fathom, el destino del webhook es tuyo |
+| 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
@@ -230,7 +230,7 @@ el flanco, y lo que queda en ellas es gusto suyo.
 
 ### La transcripción entra sola, y espera — turno 14, el 11 de noviembre
 
-Commit `HASH`. Una lente nueva, `scripts/prueba-fathom-entra.ts`, con setenta y cinco
+Commit `ccf89ab`. Una lente nueva, `scripts/prueba-fathom-entra.ts`, con setenta y nueve
 miradas, y la ruta que faltaba: `api/fathom-webhook.ts`.
 
 **La premisa era cierta a medias, y la mitad que faltaba cambiaba el turno.**
