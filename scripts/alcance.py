@@ -43,6 +43,7 @@ FUERA_A_PROPOSITO = {
     'src/lib/topeDelEscalon.ts': 'lo usan las pantallas Y el cron; el cron lo importa aparte',
     'src/lib/cerebroCliente.ts': 'lo usa el Admin a través de su prueba de escenario; pendiente de cablear',
     'src/lib/libroYPacientes.ts': 'material del libro: lo leen los scripts que arman los PDF',
+    'src/lib/transcripcionDeFathom.ts': 'lo usa el webhook de Fathom (api/fathom-webhook.ts): ninguna pantalla lee el cuerpo crudo que manda Fathom',
 }
 
 #   · Y los imports de varias líneas, que son la mayoría:

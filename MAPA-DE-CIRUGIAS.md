@@ -219,7 +219,7 @@ espera el clic.
 | 11 | **Los cinco días, ejecutados en pantalla**: abrir, guardar y avanzar del 1 al 5 | **cerrado** · `b0d3ce6` · la pantalla final decía «queda registrado» sin estarlo |
 | 12 | El Tablero guarda 34 códigos que el Camino no busca (los videos son extra) | **cerrado** · `8c11913` · 1 lente, 8 miradas |
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
-| 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el próximo** |
+| 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `HASH` · 75 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | en la cola |
 | 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
 
@@ -227,6 +227,92 @@ La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toc
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
+
+### La transcripción entra sola, y espera — turno 14, el 11 de noviembre
+
+Commit `HASH`. Una lente nueva, `scripts/prueba-fathom-entra.ts`, con setenta y cinco
+miradas, y la ruta que faltaba: `api/fathom-webhook.ts`.
+
+**La premisa era cierta a medias, y la mitad que faltaba cambiaba el turno.**
+El mapa decía «no hay ninguna ruta en `api/` que reciba una transcripción».
+Cierto: las once rutas de `api/` están y ninguna recibe una. Lo que el mapa no
+decía —y decide qué había que construir— es que **toda la máquina de leerla ya
+existía**: `src/lib/transcripcion.ts`, con su prompt de extracción y su lector
+tolerante, y `CargarSesion.tsx`, la pantalla donde una persona revisa lo que
+salió, desmarca lo mal leído y recién entonces se guarda. Con su regla escrita
+en el encabezado, en mayúsculas:
+
+> «NADA SE GUARDA SIN QUE UN HUMANO LO CONFIRME. Una transcripción mal leída
+> que se guarda sola es peor que no tenerla: se vuelve un dato falso con
+> apariencia de registro.»
+
+Así que el turno NO era «que la app lea transcripciones»: eso estaba hecho. Era
+conectar la entrada a esa revisión **sin saltearla**. Un webhook que extrajera
+y guardara solo —que es lo que uno escribe si no mira antes— habría roto esa
+regla justo en el lugar más caro: el registro de decisiones del negocio.
+
+**Y lo que no existía en ninguna parte:** un lugar donde dejar la
+transcripción. `sesiones` existe y es otra cosa —el registro de que la sesión
+OCURRIÓ, de donde sale el «te dimos 3 de las 3 que te prometimos» del cierre
+del Camino— y no tiene columna de transcripción. Buscada la palabra por todo el
+repo: no aparece en un solo `.sql`.
+
+**La trampa del formato, que es la mitad del trabajo.** El campo `transcript`
+de Fathom no es un texto: es un arreglo de turnos de habla
+—`{ speaker: { display_name }, text, timestamp }`—. Un `String(cuerpo.transcript)`
+guarda la cadena `[object Object]`: quince caracteres que pasan cualquier
+chequeo de «vino algo», y la sesión queda registrada como recibida y es
+ilegible para siempre. Aplanarlo conserva quién dijo qué y tira las marcas de
+tiempo, que gastarían el presupuesto de 24.000 caracteres del prompt en algo
+que el modelo no usa.
+
+**Las cuatro decisiones que no son obvias:**
+
+1. **La que nadie reconoce entra igual.** Si el email de la invitación no
+   coincide con ningún cliente, la transcripción queda con `cliente_id` en
+   NULL y el equipo elige el cliente a mano. Descartarla sería perder la
+   sesión por un email mal escrito, que es exactamente la fuga que esta ruta
+   vino a tapar.
+2. **El cliente es el de afuera.** En una sesión los dos lados tienen cuenta.
+   Buscando en el orden en que vienen los invitados, en toda reunión que
+   organiza Javo el primer email que existe en `profiles` es el de Javo, y la
+   sesión queda colgada de la ficha de quien la dio. Se busca primero por
+   `is_external`, y quien tiene `admin_rol` es equipo aunque su `rol` diga
+   cliente.
+3. **Si la base no puede guardar, contesta 5xx** — al revés que
+   `ghl-webhook`, que contesta 200 con el motivo adentro. Esa ruta puede:
+   el cobro queda registrado en GHL y se reconstruye. Acá el hecho es el único
+   texto de una conversación que ya terminó, y un 2xx le dice a Fathom
+   «recibido» y no vuelve a intentarlo nunca.
+4. **Sale de la cola al confirmar, no al abrirla.** Marcarla al abrirla
+   dejaría afuera de la cola una revisión que se interrumpe —se cierra la
+   pestaña, se cae la red— sin que nadie haya guardado nada, y nadie volvería
+   a verla.
+
+**La lente, probada contra su propio fallo en seis formas:** se pone roja si se
+vuelve al `String()` ingenuo (34 miradas), si se busca a los invitados en el
+orden en que vienen, si se saca la pregunta de idempotencia que hace que el
+reintento de Fathom no duplique, si el fallo de guardado contesta 200 en lugar
+de 5xx, si la que nadie reconoce se descarta, y si la revisada no sale de la
+cola. Y cuatro miradas afirman por el camino —no por suposición— que la ruta no
+tocó `notificaciones`, ni el registro de decisiones, ni `sesiones`, ni ningún
+modelo.
+
+**Y de paso, lo que la batería encontró porque esto la empujó.** La lente de
+imports de `api/` miraba sólo los archivos de `api/`. Alcanzaba hasta hoy por
+casualidad: el único módulo de `src/` que una ruta tocaba —`laVentanaDeAcceso`—
+no importa nada, así que la cadena terminaba en el primer salto. El de Fathom
+importa dos, y al seguir la cadena entera apareció uno de verdad:
+`src/lib/valueChain.ts` importaba `./mercados` sin extensión, y a ese módulo lo
+carga `api/cron/alarmas-inactividad.ts`. En Node ESM puro eso es
+ERR_MODULE_NOT_FOUND en el arranque frío — y al ser un cron, falla sin que
+nadie lo vea. Arreglado. La lente ahora sigue el grafo y saltea los imports de
+solo tipos, que el compilador borra: sin esa calibración daba nueve hallazgos
+donde hay uno, y una lente que grita lobo enseña a ignorarla.
+
+**Lo que NO se tocó, y es tuyo:** el destino del webhook en Fathom, la
+migración y la variable de entorno. Las tres están arriba, en «lo que es
+tuyo», en el orden en que van.
 
 ### El cero era del teléfono vacío — turnos 9 y 10, el 9 de noviembre
 
@@ -947,12 +1033,12 @@ por Meta**, y sus métricas.
 Medidas una por una el 9 de noviembre, antes de abrir el turno 14. De las
 cuatro, **queda una sola de este lado**:
 
-- **Fathom por webhook** — ABIERTA. No hay ninguna ruta en `api/` que reciba
-  una transcripción: termina la sesión y no entra nada. Fathom se nombra en
-  `cuadroTickets`, en `videosCargados` y en `preactivacionSteps`, así que está
-  vendido y contado, pero el camino de entrada no existe. Es el turno 14, y se
-  parte en dos: la ruta y su lente de este lado, y en Fathom el destino del
-  webhook, que es de Javo.
+- ~~**Fathom por webhook**~~ — del lado de la app, CERRADA el 11 de noviembre
+  por el turno 14. `api/fathom-webhook.ts` recibe la transcripción, reconoce
+  al cliente por el email de la invitación y la deja en una cola de
+  pendientes que el Admin muestra arriba de «Cargar sesión». Lo que falta es
+  el destino del webhook en Fathom, y eso es tuyo: está abajo, en «lo que es
+  tuyo».
 - ~~**El tageo del comprador**~~ — del lado de la app, CERRADA. `planDe` lee
   `plan_comercial` y cae en abierto solo cuando no sabe, a propósito; el Admin
   escribe el escalón a mano y ahora con la misma declaración que las rutas de
@@ -1107,7 +1193,15 @@ De la 0 a la 6 se puede cobrar. De la 7 a la 10 se ve caro.
 - **El SQL de `fallas_vistas`** — hasta que corra, si a un cliente se le traba
   una pantalla, la app le dice «ya nos llegó el aviso» y no llega nada.
 - **El workflow de GHL que manda el `plan`** (verde/negro).
-- **El plan de Fathom** — confirmar que incluye webhooks.
+- **El plan de Fathom** — confirmar que incluye webhooks, y después tres
+  cosas, en este orden: correr
+  `supabase/migrations/20261111_las_transcripciones_que_llegan_solas.sql`;
+  poner `FATHOM_WEBHOOK_SECRET` en Vercel; y en Fathom → Settings → Webhooks
+  crear uno a `https://<tu-app>/api/fathom-webhook` con el header
+  `x-fathom-secret` (si su plan no deja mandar headers, la misma clave entra
+  como `?clave=`) y con **`include_transcript` prendido** — sin eso no viene
+  el texto y la ruta contesta diciendo exactamente eso. Mientras no esté,
+  nada se rompe: la pantalla de cargar a mano sigue igual.
 - **Grabar: 12 videos a cámara (una tarde) y 8 tutoriales de pantalla (una
   mañana).** La lista está abajo.
 - **El riego**: 90 audios cortos de tu voz, uno por mañana. Los cinco del Lago

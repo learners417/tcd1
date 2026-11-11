@@ -38,8 +38,16 @@ export type TipoIndicador = 'predictivo' | 'historico';
 
 // ── Lo que se carga ────────────────────────────────────────────────────────
 
+/*
+ * `.js` porque este módulo lo alcanza `api/cron/alarmas-inactividad.ts`, que
+ * corre en Node ESM puro: sin la extensión, el cron muere en el arranque
+ * frío con ERR_MODULE_NOT_FOUND y, al ser un cron, falla sin que nadie lo
+ * vea. Lo encontró el 11 de noviembre la lente de imports, el día que dejó
+ * de mirar sólo los archivos de `api/` y empezó a seguir la cadena.
+ */
+import { bandaDe } from './mercados.js';
+
 /** Los números crudos de una semana. Todo lo demás se calcula. */
-import { bandaDe } from './mercados';
 
 export interface NumerosSemana {
   /** Precio del programa que vende. Manda sobre casi todas las referencias. */

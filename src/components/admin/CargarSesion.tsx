@@ -4,6 +4,7 @@ import { generateText } from '../../lib/aiProvider';
 import { crearNotificacion } from '../../lib/notifications';
 import { guardarDecision } from '../../lib/salaDeMandoStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
+import { sacarDeLaCola } from '../../lib/transcripcionesRecibidas';
 import {
   promptDeExtraccion, leerExtraccion, puedeExtraerse, resumirExtraccion,
   type Extraccion, type Pendiente,
@@ -22,6 +23,12 @@ import {
  *   · las decisiones → al registro de decisiones
  *   · los pendientes del cliente → un aviso dentro de su app
  *   · el resumen → se lo lleva él, escrito para él
+ *
+ * La transcripción puede llegar pegada a mano o entrar sola por el webhook
+ * de Fathom (`api/fathom-webhook.ts`). Las dos terminan acá, en la misma
+ * revisión: lo que entra solo se guarda en una cola y no toca nada hasta que
+ * alguien confirma. Por eso esta pantalla recibe `recibidaId` — para sacar de
+ * esa cola la que acaba de revisarse, y que no vuelva a aparecer mañana.
  */
 
 const ETIQUETA_DUENO: Record<Pendiente['dueno'], string> = {
@@ -35,13 +42,21 @@ export default function CargarSesion({
   nombreCliente,
   quienLaDio,
   onGuardada,
+  textoInicial = '',
+  recibidaId = null,
+  onRevisada,
 }: {
   clienteId: string;
   nombreCliente: string;
   quienLaDio: string;
   onGuardada?: () => void;
+  /** El texto que entró solo por webhook, ya pegado. */
+  textoInicial?: string;
+  /** La fila de la cola de la que salió, para sacarla al confirmar. */
+  recibidaId?: string | null;
+  onRevisada?: () => void;
 }) {
-  const [texto, setTexto] = useState('');
+  const [texto, setTexto] = useState(textoInicial);
   const [extraccion, setExtraccion] = useState<Extraccion | null>(null);
   const [leyendo, setLeyendo] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -109,6 +124,21 @@ export default function CargarSesion({
           ].filter(Boolean).join('\n').slice(0, 500),
           accion_url: '/dashboard',
         });
+      }
+
+      /*
+       * La que entró sola sale de la cola ACÁ y no antes: si se marcara al
+       * abrirla, una revisión que se interrumpe —se cierra la pestaña, se
+       * cae la red— dejaría la transcripción fuera de la cola sin que nadie
+       * haya guardado nada, y nadie volvería a verla.
+       *
+       * Si este marcado falla, lo guardado no se pierde: lo único que pasa
+       * es que la transcripción vuelve a aparecer mañana, que es el lado
+       * correcto para fallar.
+       */
+      if (recibidaId) {
+        await sacarDeLaCola(recibidaId, 'cargada');
+        onRevisada?.();
       }
 
       setListo(true);

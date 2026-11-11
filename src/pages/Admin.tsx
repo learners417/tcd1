@@ -38,6 +38,8 @@ import { sesionesDeVarios } from '../lib/sesionesDatos';
 import { cuantasDioEstaSemana, type Sesion } from '../lib/sesionesHumanas';
 import { copiar } from '../lib/copiar';
 import CargarSesionHumana from '../components/admin/CargarSesionHumana';
+import LoQueLlegoDeFathom from '../components/admin/LoQueLlegoDeFathom';
+import type { TranscripcionRecibida } from '../lib/transcripcionesRecibidas';
 import { TICKETS, type Ticket } from '../lib/cuadroTickets';
 import { cierreDeLaVentana, accesoDelPerfil, estadoDeAcceso, type TipoDeAcceso } from '../lib/ventanaDeAcceso';
 import JornadaPanel from '../components/admin/Jornada';
@@ -433,6 +435,13 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
     null,
     { validate: (v) => v === null || typeof v === 'string' },
   );
+
+  /*
+   * La transcripción que entró sola por Fathom y se eligió para revisar.
+   * NO se persiste: es el texto crudo de una conversación con un cliente y
+   * no tiene por qué quedar en el navegador después de cerrar la pestaña.
+   */
+  const [fathomElegida, setFathomElegida] = useState<TranscripcionRecibida | null>(null);
 
   /**
    * Las jornadas del equipo, la comparativa de la semana y la cola del día.
@@ -4359,6 +4368,27 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
 
           {mainTab === 'sesiones' && (
             <div className="max-w-3xl mx-auto space-y-5">
+              {/* Lo que entró solo por el webhook de Fathom y espera revisión.
+                  Va arriba porque es trabajo que ya llegó: elegir una la pega
+                  en «Cargar sesión» con su cliente ya puesto. */}
+              <LoQueLlegoDeFathom
+                onElegir={(t) => {
+                  if (t.cliente_id) setCampanasClienteId(t.cliente_id);
+                  setFathomElegida(t);
+                }}
+              />
+              {fathomElegida && (
+                <p className="text-sm text-cream/55">
+                  Revisando lo que llegó de Fathom
+                  {fathomElegida.titulo ? ` — ${fathomElegida.titulo}` : ''}.
+                  {!fathomElegida.cliente_id && ' Nadie la reconoció: elige de qué cliente fue.'}
+                  {' '}
+                  <button onClick={() => setFathomElegida(null)}
+                    className="font-bold text-gold hover:text-goldhi">
+                    Dejarla para después
+                  </button>
+                </p>
+              )}
               <div className="card-panel p-4">
                 <label className="block text-sm font-bold tracking-wider uppercase text-cream/55 mb-2">
                   De qué cliente fue la sesión
@@ -4370,10 +4400,18 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 />
               </div>
               {campanasClienteId ? (
+                /* `key` fuerza el remontaje cuando se elige otra: el texto
+                   pegado es el estado inicial de la pantalla, y sincronizarlo
+                   con un efecto le pisaría al que está escribiendo a mano. */
                 <CargarSesion
+                  key={fathomElegida?.id ?? 'a-mano'}
                   clienteId={campanasClienteId}
                   nombreCliente={clientes.find((c) => c.id === campanasClienteId)?.nombre ?? 'el cliente'}
-                  quienLaDio={(adminProfile as { nombre?: string }).nombre ?? 'tu equipo'}
+                  quienLaDio={fathomElegida?.quien_la_dio
+                    || (adminProfile as { nombre?: string }).nombre || 'tu equipo'}
+                  textoInicial={fathomElegida?.transcripcion ?? ''}
+                  recibidaId={fathomElegida?.id ?? null}
+                  onRevisada={() => setFathomElegida(null)}
                 />
               ) : (
                 <p className="text-sm text-cream/45">Elige un cliente para cargar su sesión.</p>
