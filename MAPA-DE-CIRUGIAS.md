@@ -234,53 +234,45 @@ diecisiete están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el fl
 y lo que queda adentro es tu clic, no trabajo. Así que la tarea programada
 sigue encendida y sin nada que tomar.
 
-**Dos premisas del encargo de la tarea ya no son ciertas, y por eso no se
-apagó sola:** dice «los diez turnos» —son diecisiete— y dice que MCD «hoy NO
-tiene batería de ningún tipo: ése es su primer turno». MCD tiene su batería
-desde el 9 de noviembre: `auditoria.py` en su raíz, nueve bloques, 46 lentes,
-cerrada por el turno 6 (`f3e9ddc`), más las 5 del puente del turno 7
-(`7c6e524`). Lo que MCD no tiene es `prueba-*.ts`: su batería es toda Python.
+**Dos premisas del encargo de la tarea ya no son ciertas.** Dice «los diez
+turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún tipo:
+ése es su primer turno». MCD tiene su batería desde el 9 de noviembre:
+`auditoria.py` en su raíz, nueve bloques, 46 lentes, cerrada por el turno 6
+(`f3e9ddc`), más las 5 del puente del turno 7 (`7c6e524`). Lo que MCD no tiene
+es `prueba-*.ts`: su batería es toda Python.
 
 **Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
 nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
 
-**La tarea NO se pudo apagar sola, el 12 de noviembre.** Su propio encargo dice
-«cuando los turnos estén cerrados, desactivar esta tarea programada», y el
-turno lo intentó: el permiso de la sesión lo rechazó —apagar una tarea
-programada necesita tu visto—. Así que **la tarea sigue encendida y va a
-despertar cada cuatro horas sin nada que tomar**, hasta que la apagues tú en
-Tareas programadas («Cola de turnos TCD y MCD») o le escribas turnos nuevos a
-esta tabla. Que no la apague el próximo turno por su cuenta: va a chocar con el
-mismo permiso.
+### El apagado solo: probado tres veces que no puede. Ningún turno más lo reintente
 
-**Confirmado dos veces, el 12 de noviembre a las 07:25 UTC.** El turno despertó,
-encontró la cola sin nada que tomar y volvió a intentar apagarse: el permiso lo
-rechazó otra vez, con el mismo motivo. Verificado de paso que main está en
-GitHub —`241ddd7` local y remoto son el mismo commit, nada quedó sin subir— y
-que la tabla no tiene turnos nuevos escritos. **Ningún turno más debe reintentar
-el apagado: está probado que no puede.** La tarea va a seguir despertando cada
-cuatro horas hasta que la apagues tú en Tareas programadas o le escribas turnos
-nuevos a la tabla.
+El encargo de la tarea dice «cuando los turnos estén cerrados, desactivar esta
+tarea programada». Tres turnos lo intentaron —el del cierre, el de las 07:25
+UTC y el de las 11:40 UTC del 12 de noviembre— y las tres veces **el permiso de
+la sesión lo rechazó: apagar una tarea programada necesita tu visto**, y en un
+turno dormido no hay quién lo dé. Está probado: **no se reintenta más**, porque
+choca siempre con el mismo permiso y gasta el turno.
 
-**Tercera vez, el 12 de noviembre a las 11:40 UTC — y esta vez se midió todo
-desde frío.** La cola seguía sin turnos abiertos y no se reintentó el apagado,
-porque ya está probado que no puede. En su lugar el turno corrió **las dos
-baterías enteras sobre un contenedor reciclado**, y las dos quedaron en verde:
-TCD con `tsc` limpio, `npm run build` limpio, **131 de 131** `prueba-*.ts` y
-`auditoria.py` con 868 miradas («el ZIP puede salir»); MCD con sus 52. Las dos
-apps compilan y pasan desde un clon frío, sin nada arrastrado de la sesión
-anterior.
+Así que **la tarea despierta cada cuatro horas sin nada que tomar**, hasta que
+la apagues tú en Tareas programadas («Cola de turnos TCD y MCD») o le escribas
+turnos nuevos a la tabla.
 
-**Cuarta vez, el 12 de noviembre a las 15:50 UTC.** La cola seguía sin turnos
-abiertos y no se reintentó el apagado. Las dos baterías volvieron a correr
-enteras desde frío y quedaron en verde: TCD con `tsc` limpio, `npm run build`
-limpio, **131 de 131** `prueba-*.ts` y `auditoria.py` con **868 miradas, cero
-faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio en la
-primera corrida y su batería de **52** en verde. Lo que este turno encontró al
-verificar es la trampa del `HEAD` suelto de nuevo, y está corregida arriba.
+### Las despertadas sin nada que tomar, y lo que se midió en cada una
 
-**Y un dato de operación, para que nadie lea un cuelgue donde no hay uno:
-`auditoria.py` de TCD tarda unos 22 minutos.** No es lento por el texto: el
+Ninguna construyó nada —no hay qué— y ninguna, de la tercera en adelante,
+reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
+útil que queda cuando la cola está vacía:
+
+| cuándo (12 nov, UTC) | lo medido |
+|---|---|
+| 07:25 | main en GitHub al día (`241ddd7` local y remoto, el mismo commit); la tabla sin turnos nuevos |
+| 11:40 | las dos baterías enteras sobre contenedor reciclado, las dos en verde: TCD con `tsc` y `npm run build` limpios, **131 de 131** `prueba-*.ts`, `auditoria.py` con 868 miradas («el ZIP puede salir»); MCD con sus 52 |
+| 15:50 | lo mismo otra vez en verde —TCD 131 de 131 y 868 miradas, cero faltas; MCD `tsc` y `next build` limpios y sus 52— y de paso se cazó la trampa del `HEAD` suelto |
+| 19:25 | nada había cambiado desde las 15:50 —cero commits nuevos, los dos árboles limpios, `HEAD` idéntico a `origin/main` en los dos repos— y las dos trampas de contenedor volvieron a aparecer: `node_modules` en cero y `HEAD` suelto con la `main` local de TCD **quince** commits atrás. Las dos baterías se corrieron enteras igual, para no commitear este mismo apunte sin verde: TCD con `tsc` y `npm run build` limpios, las **131 de 131** pruebas en verde dentro del bloque 10 y `auditoria.py` con **868 miradas, cero faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio **en la primera corrida** y sus **52** en verde |
+
+### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
+
+**`auditoria.py` de TCD tarda unos 22 minutos**, y no es lento por el texto: el
 bloque 10 vuelve a correr las 131 pruebas y además levanta Chromium de verdad
 para medir las 93 vistas del cliente y las 17 del Admin. Eso **pasa del límite
 de 5 minutos** que tiene un comando en primer plano, así que el turno que la
@@ -288,10 +280,10 @@ corra de frente la va a ver morir por tiempo sin que nada esté roto. **Se corre
 en segundo plano, redirigida a un archivo, y se mira el archivo cada tanto.** La
 de MCD, en cambio, termina en segundos.
 
-**Lo que hay que saber antes de leer una batería en rojo: el contenedor se
-recicla y `node_modules` vuelve vacío.** Medido hoy: sin dependencias, TCD tira
-**14.153 errores de `tsc`** y MCD marca **2 fallas** —`tsc` y `next build`—, y
-ninguna de las dos es del código. Son el mismo `node_modules` en cero.
+**El contenedor se recicla y `node_modules` vuelve vacío.** Medido: sin
+dependencias, TCD tira **14.153 errores de `tsc`** y MCD marca **2 fallas**
+—`tsc` y `next build`—, y ninguna de las dos es del código. Son el mismo
+`node_modules` en cero.
 
 **Y cada repo se instala distinto, que es la trampa:**
 
@@ -305,30 +297,20 @@ existe. No es una falla del repo —el lockfile se sacó el 9 de noviembre
 (`f481901`) y quedó ignorado, porque subir el que se resuelve hoy cambia lo que
 Vercel instala y eso es decisión tuya, no de la batería—. Si una batería de MCD
 aparece roja en `tsc` o en `next build`, lo primero es mirar si hay
-dependencias, y la segunda si `.next` quedó de una instalación vieja: hoy la
+dependencias, y la segunda si `.next` quedó de una instalación vieja: una
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
 
-**Y una trampa peor, que se cazó al intentar subir este mismo apunte: los dos
-repos estaban en `HEAD` suelto.** En TCD el `HEAD` suelto tenía los commits al
-día, pero la rama `main` local se había quedado **doce commits atrás**. Así que
-`git push origin main` —el comando del encargo— sube la rama vieja y GitHub lo
-rechaza por *non-fast-forward*, aunque el trabajo esté bien hecho y encima de
-`origin/main`. El commit no se pierde, pero el turno se va creyendo que no pudo
-subir. **Si vuelve a pasar, el que sube es `git push origin HEAD:main`, y
-después `git checkout -B main HEAD` para reengancharla.**
-
-**Y no «se arregló»: vuelve en cada contenedor nuevo. Medido el 12 de noviembre
-a las 15:50 UTC, en el cuarto turno sin nada que tomar.** El turno anterior
-escribió que las dos ramas quedaban pegadas, y era cierto —en su contenedor—.
-Pero eso es estado local de git, no contenido del repo: no viaja en un commit.
-Hoy el clon volvió a despertar con `HEAD` suelto y la `main` local de TCD
-**catorce commits atrás** otra vez; MCD, suelto pero al día. Nada se había
-quedado sin subir: en los dos repos `HEAD` era idéntico a `origin/main` y el
-árbol estaba limpio. **Así que ningún turno puede dejar esto arreglado para el
-siguiente. La regla es la del comando: subir siempre con `git push origin
-HEAD:main`, y no fiarse de `git push origin main` ni leer un rechazo como
-trabajo perdido.**
+**La trampa del `HEAD` suelto, que vuelve en cada contenedor nuevo.** Los dos
+repos despiertan en `HEAD` suelto, al día, pero la rama `main` **local** de TCD
+se queda muy atrás —doce commits una vez, catorce otra, quince el 12 de
+noviembre a las 19:25—. Así que `git push origin main` —el comando del encargo—
+sube la rama vieja y GitHub lo rechaza por *non-fast-forward*, aunque el trabajo
+esté bien hecho y encima de `origin/main`. **Esto ningún turno puede dejarlo
+arreglado para el siguiente: es estado local de git, no contenido del repo, y no
+viaja en un commit.** La regla es la del comando: subir siempre con `git push
+origin HEAD:main`, después `git checkout -B main HEAD` para reengancharla en
+este contenedor, y no leer un rechazo como trabajo perdido.
 
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
