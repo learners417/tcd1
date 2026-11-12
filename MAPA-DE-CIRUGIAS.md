@@ -244,18 +244,30 @@ es `prueba-*.ts`: su batería es toda Python.
 **Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
 nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
 
-### El apagado solo: probado tres veces que no puede. Ningún turno más lo reintente
+### El apagado solo: cuatro veces que no puede, y recién ahora se sabe por qué
 
 El encargo de la tarea dice «cuando los turnos estén cerrados, desactivar esta
-tarea programada». Tres turnos lo intentaron —el del cierre, el de las 07:25
-UTC y el de las 11:40 UTC del 12 de noviembre— y las tres veces **el permiso de
-la sesión lo rechazó: apagar una tarea programada necesita tu visto**, y en un
-turno dormido no hay quién lo dé. Está probado: **no se reintenta más**, porque
-choca siempre con el mismo permiso y gasta el turno.
+tarea programada». Cuatro turnos lo intentaron —el del cierre, el de las 07:25,
+el de las 11:40 y el de las 23:25 UTC del 12 de noviembre— y las cuatro veces
+salió rechazado. **Pero el motivo que este mapa daba estaba mal, y era un motivo
+que te mandaba a tocar donde no servía.**
+
+Decía «el permiso de la sesión lo rechazó: apagar una tarea programada necesita
+tu visto». Medido el 12 de noviembre a las 23:25: la tarea **ya corre en
+aprobación automática** —su `permission_mode` es `auto`—, así que no es que le
+falte tu visto. Lo que lo rechaza es **el clasificador del modo automático, por
+la categoría «Cowork Scheduled Task Delete»**: apagar una tarea programada está
+fuera de lo que una sesión dormida puede hacer sola, pase lo que pase con los
+permisos de la tarea.
+
+La consecuencia práctica es la que importa: **no hay ningún ajuste de la tarea
+que lo desbloquee.** Ponerla en aprobación automática no sirve —ya lo está—. Lo
+único que la apaga eres tú, con dos toques en Tareas programadas («Cola de
+turnos TCD y MCD»). Y para los turnos: **no se reintenta más**, porque choca
+siempre con el mismo clasificador y gasta el turno.
 
 Así que **la tarea despierta cada cuatro horas sin nada que tomar**, hasta que
-la apagues tú en Tareas programadas («Cola de turnos TCD y MCD») o le escribas
-turnos nuevos a la tabla.
+la apagues tú o le escribas turnos nuevos a la tabla.
 
 ### Las despertadas sin nada que tomar, y lo que se midió en cada una
 
@@ -269,6 +281,7 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | 11:40 | las dos baterías enteras sobre contenedor reciclado, las dos en verde: TCD con `tsc` y `npm run build` limpios, **131 de 131** `prueba-*.ts`, `auditoria.py` con 868 miradas («el ZIP puede salir»); MCD con sus 52 |
 | 15:50 | lo mismo otra vez en verde —TCD 131 de 131 y 868 miradas, cero faltas; MCD `tsc` y `next build` limpios y sus 52— y de paso se cazó la trampa del `HEAD` suelto |
 | 19:25 | nada había cambiado desde las 15:50 —cero commits nuevos, los dos árboles limpios, `HEAD` idéntico a `origin/main` en los dos repos— y las dos trampas de contenedor volvieron a aparecer: `node_modules` en cero y `HEAD` suelto con la `main` local de TCD **quince** commits atrás. Las dos baterías se corrieron enteras igual, para no commitear este mismo apunte sin verde: TCD con `tsc` y `npm run build` limpios, las **131 de 131** pruebas en verde dentro del bloque 10 y `auditoria.py` con **868 miradas, cero faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio **en la primera corrida** y sus **52** en verde |
+| 23:25 | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y se midió por qué el apagado se rechaza (arriba). Se verificaron además las dos premisas que quedan abiertas del lado de Javo: el purgado de jsDelivr **sigue sin salida** (el proxy contesta 403 a `purge.jsdelivr.net`), y el botón de 97 sigue esperando el correo de GHL. Las dos baterías enteras desde frío, las dos en verde: TCD con `tsc` y `npm run build` limpios, las **131** `prueba-*.ts` más `prueba-pantallas.tsx` y `auditoria.py` con **868 miradas, cero faltas**; MCD con `tsc` limpio, `next build` limpio en la primera corrida y sus **52** |
 
 ### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
 
@@ -300,6 +313,21 @@ aparece roja en `tsc` o en `next build`, lo primero es mirar si hay
 dependencias, y la segunda si `.next` quedó de una instalación vieja: una
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
+
+**Las pruebas son 132 archivos, no 131, y la que sobra no se corre igual que
+las otras.** Son **131** `prueba-*.ts` más **una** `.tsx`:
+`prueba-pantallas.tsx`, la que monta las pantallas de verdad. Esa necesita su
+entorno de navegador y se corre así —tal como la corre el bloque 10 de
+`auditoria.py`—:
+
+```
+npx tsx --import ./scripts/entorno-navegador.mjs scripts/prueba-pantallas.tsx
+```
+
+Si un turno recorre el directorio con `npx tsx` pelado, esa única se pone roja
+sin que nada esté roto: le falta el DOM, no le falla una mirada. Medido el 12 de
+noviembre a las 23:25, que es cuando se cayó en la trampa y por eso queda
+escrita.
 
 **La trampa del `HEAD` suelto, que vuelve en cada contenedor nuevo.** Los dos
 repos despiertan en `HEAD` suelto, al día, pero la rama `main` **local** de TCD
