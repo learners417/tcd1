@@ -1,5 +1,5 @@
 import { db } from './supabase';
-import { semanaISO } from './bitacoraCampana';
+import { guardarFusionado } from './losDiezEnLaBase';
 
 /**
  * QUE LOS NÚMEROS DEL CLIENTE LLEGUEN AL EQUIPO.
@@ -56,36 +56,32 @@ export async function subirNumerosDelCliente(
   const suma = (campo: keyof FilaAnuncio) =>
     filas.reduce((t, f) => t + num(f[campo]), 0);
 
-  try {
-    // Los nombres de los parámetros son los de la función, no los que
-    // parecen. PostgREST resuelve los RPC POR NOMBRE DE ARGUMENTO: con
-    // `p_cliente` y `p_semana` la llamada devolvía PGRST202 y el `return
-    // !error` la daba por buena. O sea que los números que cargaba el cliente
-    // no llegaban nunca a la base: su propio tablero le seguía diciendo
-    // «todavía no cargaste tus números», la cola del equipo lo marcaba sin
-    // datos todas las semanas, y el cron le mandaba el aviso de que faltaban.
-    // Existían solo si alguien los copiaba a mano en la Mesa de plata.
-    const { error } = await db().rpc('guardar_semana_cliente', {
-      p_cliente_id: clienteId,
-      p_semana_iso: semanaISO(),
-      p_datos: {
-        gasto: suma('gasto'),
-        conversaciones: suma('conversaciones'),
-        agendas: suma('agendas'),
-        // `visitas` es lo que el tablero llama a los comentarios del anuncio.
-        comentarios: suma('visitas'),
-      },
-    });
-    if (error) {
-      // Que no se lo coma el silencio: éste es el que estuvo roto meses.
-      console.error('[tableroSync] no se pudieron guardar los números:', error.message);
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('[tableroSync] excepción guardando los números:', e);
-    return false;
-  }
+  /*
+   * ═══ ESCRIBÍA CUATRO CAMPOS Y BORRABA DIECIOCHO ═══
+   *
+   * Esto llamaba al RPC con las cuatro columnas que sabe —gasto,
+   * conversaciones, agendas, comentarios— y `guardar_semana_cliente` es un
+   * UPSERT que pisa las veintiuna con lo que venga, poniendo en cero todo lo
+   * que no venga por el `coalesce`.
+   *
+   * O sea que cargar los números del Constructor el viernes **borraba de esa
+   * semana** lo facturado y lo cobrado que había anotado Lupe en la Mesa de
+   * plata, las llamadas, las ventas y los clientes activos. Nadie lo veía:
+   * el RPC devuelve éxito, y la fila queda escrita —con ceros.
+   *
+   * Ahora pasa por el único camino que escribe contra ese RPC, que trae la
+   * semana que está y le encima lo que esta pantalla sabe. Lo verifica
+   * `scripts/prueba-los-diez-llegan.ts`.
+   *
+   * Los nombres son los de la cadena, no los de la pantalla: `visitas` es
+   * como el tablero de cupos llama a los comentarios del anuncio.
+   */
+  return guardarFusionado(clienteId, {
+    gasto: suma('gasto'),
+    conversaciones: suma('conversaciones'),
+    agendas: suma('agendas'),
+    comentarios: suma('visitas'),
+  });
 }
 
 // ── El brief y los anuncios generados ──────────────────────────────────────

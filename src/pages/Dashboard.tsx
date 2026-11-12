@@ -26,6 +26,7 @@ import { diaDelPrograma, semanaDelPrograma, diasHabilesDeAtraso, mensajeDeRitmo,
 import { yaEncendio } from '../lib/montajeCampana';
 import { montajeDe } from '../lib/montajeDatos';
 import TableroDeLaSemana from '../components/TableroDeLaSemana';
+import { trabajoDeHoy } from '../lib/tablero';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
 import { soporteCerrado } from '../lib/ventanaSinSoporte';
@@ -790,6 +791,26 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               onClick: () => window.open('https://mcd-eight.vercel.app', '_blank'),
             });
           }
+          /*
+           * ═══ EL DÍA SIGUIENTE VIENE CON EL TRABAJO DE SU CUELLO ═══
+           *
+           * Hasta acá el diagnóstico del viernes moría en su tarjeta: el
+           * cliente leía «tu cuello es el cierre» y el día siguiente la app
+           * abría igual que el día 3. Medir sin que la medición cambie el día
+           * siguiente es un tablero decorativo.
+           *
+           * Solo aparece si cargó la semana y hay un cuello: a quien va en
+           * ritmo la app ya le dijo que no cambie nada, y ponerle un
+           * movimiento sería contradecirse en la misma pantalla.
+           */
+          const cuello = sistemaVivo ? trabajoDeHoy(proximoHito?.diaPrograma ?? 30) : null;
+          if (cuello) {
+            movimientos.push({
+              titulo: cuello.titulo,
+              meta: cuello.meta,
+              onClick: () => setCurrentPage(cuello.destino),
+            });
+          }
           movimientos.push({
             titulo: 'Tu pregunta al Mentor',
             meta: mentorRestantes > 0
@@ -843,7 +864,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
               </div>
             </div>
             )}
-            {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} />}
+            {sistemaVivo && <TableroNumeros dia={proximoHito?.diaPrograma ?? 30} clienteId={userId} />}
             {data.tareasHoy[1] && (
               <div className="card-panel p-5">
                 <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">Mañana</p>

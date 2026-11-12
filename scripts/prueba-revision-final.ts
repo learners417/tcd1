@@ -72,12 +72,21 @@ ok(!/as never/.test(leer('src/components/admin/Jornada.tsx')),
 
 // ── 4 · Los números del cliente llegan a la base ──────────────────────────
 console.log('\n══ los números de su semana ══');
-const sync = leer('src/lib/tableroSync.ts');
-ok(/p_cliente_id: clienteId/.test(sync) && /p_semana_iso: semanaISO\(\)/.test(sync),
+/*
+ * La llamada se mudó de `tableroSync.ts` a `losDiezEnLaBase.ts`, que es el
+ * único lugar del repo que escribe contra ese RPC: ahora pasan por ahí tanto
+ * los tres números del viernes como los del tablero de cupos, y se fusiona
+ * con la semana que está en vez de pisar las veintiuna columnas. Lo cuida
+ * `scripts/prueba-los-diez-llegan.ts`. El guardián sigue al código: lo que
+ * esto protege —los nombres de los argumentos y que la falla se vea— es lo
+ * mismo, en el archivo donde pasa.
+ */
+const sync = leer('src/lib/losDiezEnLaBase.ts');
+ok(/p_cliente_id: clienteId/.test(sync) && /p_semana_iso: semana/.test(sync),
   'el RPC se llama con los nombres que declara la función: PostgREST resuelve por nombre de argumento');
 ok(!/p_cliente: clienteId,\s*\n\s*p_semana:/.test(sync),
   'y ya no con los que parecían');
-ok(/console\.error\('\[tableroSync\]/.test(sync),
+ok(/console\.error\('\[losDiez\]/.test(sync),
   'y si falla se ve: el `return !error` daba la llamada por buena y los números no llegaban nunca');
 
 // ── 5 · Los mensajes en vivo ──────────────────────────────────────────────

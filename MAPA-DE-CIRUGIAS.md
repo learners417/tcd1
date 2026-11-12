@@ -221,12 +221,100 @@ espera el clic.
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
-| 16 | Cirugía 5 · Lo que la app mide por él | en la cola |
+| 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `HASH` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
+| 17 | MCD: su primer turno — la batería que no tiene | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
+
+### Medía para nadie — turno 16, el 12 de noviembre
+
+Commit `HASH`. Una lente nueva, `scripts/prueba-los-diez-llegan.ts`, con
+cuarenta y cinco miradas, y los tres caños que faltaban.
+
+**La premisa decía que faltaba construir las tres patas. Dos ya estaban, y la
+que no estaba no era la que el mapa nombraba.**
+
+El pedido del viernes existe: `TableroNumeros` se pone el borde dorado los
+viernes y le pide los tres números. El diagnóstico existe: `diagnosticar`
+nombra volumen, filtro o cierre y escribe la acción de cada uno. Las tasas, la
+cadena y la meta de los diez están medidas desde antes.
+
+**Lo que faltaba es que algo de eso saliera de la pantalla donde estaba.**
+
+**Uno: guardaba en el navegador y nada más.** `src/lib/tablero.ts` lo importaba
+UN solo archivo —la tarjeta— y no tenía ninguna lente encima. Dos tarjetas más
+arriba, en la MISMA pantalla de Hoy, `TableroDeLaSemana` lee la base: el
+viernes a la tarde, con los tres números recién cargados, le seguía diciendo
+«todavía no cargaste tus números». La cola del equipo lo marcaba sin datos
+todas las semanas, el cron le mandaba el aviso de que faltaban, y su «X de 10»
+arrancaba de cero el día que abría la app en el teléfono.
+
+Y no era falta de cañería. La migración `20261021_sus_numeros_son_suyos` abrió
+la tabla y el RPC **exactamente para esto** —«ahora cada uno lee y carga los
+suyos»— y la pantalla que se lo pide nunca se cableó. Ni la llave coincidía: el
+espejo decía «2026-11-09» y la base «2026-W46», así que las dos mitades del
+mismo dato no podían ni reconocerse.
+
+**Dos: escribir tres números borraba dieciocho.** `guardar_semana_cliente` es
+un UPSERT que pisa las veintiuna columnas y pone en cero lo que no venga.
+`subirNumerosDelCliente` le mandaba cuatro: cargar los números del Constructor
+el viernes **borraba de esa semana** lo facturado y lo cobrado que había
+anotado Lupe en la Mesa de plata, las llamadas, las ventas y los clientes
+activos. Con éxito en la respuesta. Ahora los dos escritores pasan por
+`losDiezEnLaBase.ts`, que trae la semana que está y le encima lo nuevo; nadie
+escribe campos sueltos contra ese RPC, y la lente se pone roja si aparece un
+tercer escritor que lo intente.
+
+**Tres, y es la pata que el mapa pedía: el diagnóstico no cambiaba ningún
+día.** `diagnosticar` no la llamaba nadie más que su propia tarjeta. El cliente
+leía «tu cuello es el cierre» el viernes y el sábado la app abría igual que el
+día 3. Ahora el cuello entra como un movimiento del día en Hoy, con el botón
+que abre dónde se trabaja —Campañas para el volumen, Entrenadores para el
+filtro y el cierre, que es donde ya mandan los avisos escritos para esos mismos
+cuellos—. A quien va en ritmo no se le pone nada: la app acaba de decirle que
+no cambie nada, y darle trabajo sería contradecirse en la misma pantalla.
+
+**Y la cuenta no era la que decía.** Este mapa y el encabezado del archivo
+dicen «300 conversaciones → 57 agendas → 40 llamadas → 10». La app muestra
+**306 → 58 → 40 → 10**. Las 40 llamadas son exactas; las agendas dan 57,14 y la
+cadena redondea para arriba, porque media agenda no agenda a nadie: 58. Y 58 /
+0,19 da 306. Los números lindos salen de redondear las agendas para abajo —57 /
+0,19 da 300 justo—, que es la cuenta de un folleto. Se midió: el 300 no estaba
+escrito en ninguna pantalla ni en ninguna oferta, solo en ese comentario, así
+que lo que el cliente lee hoy es 306 y el comentario se corrigió. **Si la
+oferta tiene que decir 300, eso cambia un número que el cliente lee: espera tu
+clic.**
+
+**La lente, probada contra su propio fallo en diez formas:** se pone roja si la
+tarjeta vuelve a guardar solo en el navegador, si Hoy la monta sin decirle de
+quién son los números, si aparece un escritor que le manda campos sueltos al
+RPC, si la fusión pisa la semana del equipo, si el espejo y la base vuelven a
+nombrar distinto la misma semana, si un cuello apunta a una página que el
+router no dibuja, si el diagnóstico vuelve a morir en su tarjeta, si el
+encabezado cuenta una cadena distinta de la que corre, si se le inventa un
+cuello a quien no cargó, y si uno de los tres se pide con un nombre que la
+cadena no tiene.
+
+**Y una falta mía que la lente tapaba.** Mandé el cuello del filtro y el del
+cierre a `'agentes'`, que era la ruta vieja de Entrenadores y salió del router
+al unificar las dos rutas: `setCurrentPage('agentes')` deja la pantalla en
+blanco sin romper nada. La lente lo dejó pasar en verde, porque cosechaba los
+nombres de página del bloque crudo de `VALID_PAGES` —y arriba hay un comentario
+que nombra `'agentes'` entre comillas justo para contar que ya no existe. O
+sea: la comprobación se agarraba del renglón que dice que la ruta no está. Es
+el mismo defecto que mira la lente, una capa más arriba. Ahora se quitan los
+comentarios antes de cosechar, y hay una mirada que pide expresamente que
+«agentes» no entre por ahí.
+
+**Lo que quedó anotado y no se tocó.** La cirugía 5 pide además las campañas
+por Meta y las métricas adentro de la cuenta; y el eslabón de las **agendas**
+no se le pide nunca —el formulario son tres números y la rama del filtro usa
+las llamadas como si fueran las agendas, que es por qué su texto dice «solo
+agendaste N llamadas»—. Pedir un cuarto número cambia lo que la pantalla le
+pide al cliente: es decisión tuya si el viernes son tres datos o cuatro.
 
 ### El encargo existía y no lo vio nunca nadie — turno 15, el 11 de noviembre
 

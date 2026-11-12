@@ -2,32 +2,85 @@
  * TU TABLERO — la matemática de los 10, viva (ZIP C).
  * Tres números por semana. Un diagnóstico. Una acción.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { VOC } from '../lib/vocabulario';
 import {
-  cadenaPara, metaSemanal, semanaActual, registrarSemana, ventasTotales,
+  cadenaPara, metaSemanal, semanaActual, sembrarEspejo, ventasTotales,
   diagnosticar, META_PACIENTES,
 } from '../lib/tablero';
+import { guardarFusionado, leerLosTres, ventasAcumuladas } from '../lib/losDiezEnLaBase';
 
-export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
-  const hechas = ventasTotales();
-  const total = cadenaPara(Math.max(1, META_PACIENTES - hechas));
-  const meta = metaSemanal(dia, hechas);
+/**
+ * ═══ POR QUÉ ESTA TARJETA HABLA CON LA BASE ═══
+ *
+ * Guardaba en el navegador y nada más. Dos tarjetas más arriba, en la misma
+ * pantalla, `TableroDeLaSemana` lee la base y le decía «todavía no cargaste
+ * tus números» el viernes a la tarde, con los números recién cargados. Está
+ * contado entero en `losDiezEnLaBase.ts`.
+ *
+ * El espejo local sigue puesto, pero cambió de papel: ya no es el dueño del
+ * dato, es la copia que permite pintar la tarjeta en el primer render y armar
+ * el movimiento del día sin esperar una consulta.
+ */
+export default function TableroNumeros({ dia = 30, clienteId }: { dia?: number; clienteId?: string }) {
   const yaCargada = semanaActual();
 
+  const [hechas, setHechas] = useState(ventasTotales());
   const [abierto, setAbierto] = useState(false);
   const [conv, setConv] = useState(String(yaCargada?.conversaciones ?? ''));
   const [llam, setLlam] = useState(String(yaCargada?.llamadas ?? ''));
   const [vent, setVent] = useState(String(yaCargada?.ventas ?? ''));
   const [guardada, setGuardada] = useState<typeof yaCargada>(yaCargada);
+  const [noSubio, setNoSubio] = useState(false);
+
+  const total = cadenaPara(Math.max(1, META_PACIENTES - hechas));
+  const meta = metaSemanal(dia, hechas);
+
+  // La base manda. Lo que había en el navegador se pinta primero para que la
+  // tarjeta no parpadee, y se reemplaza con lo que esté guardado de verdad.
+  useEffect(() => {
+    if (!clienteId) return;
+    let vivo = true;
+    void (async () => {
+      const [tres, acumuladas] = await Promise.all([
+        leerLosTres(clienteId),
+        ventasAcumuladas(clienteId),
+      ]);
+      if (!vivo) return;
+      if (acumuladas !== null) setHechas(acumuladas);
+      if (tres) {
+        const s = {
+          conversaciones: tres.conversaciones,
+          llamadas: tres.llamadasTomadas,
+          ventas: tres.ventas,
+        };
+        sembrarEspejo(s);
+        setGuardada({ ...s, fecha: '' });
+        setConv(String(s.conversaciones));
+        setLlam(String(s.llamadas));
+        setVent(String(s.ventas));
+      }
+    })();
+    return () => { vivo = false; };
+  }, [clienteId]);
 
   const dx = guardada ? diagnosticar(guardada, meta) : null;
 
   function guardar() {
     const s = { conversaciones: Number(conv) || 0, llamadas: Number(llam) || 0, ventas: Number(vent) || 0 };
-    registrarSemana(s);
+    sembrarEspejo(s);
     setGuardada({ ...s, fecha: '' });
     setAbierto(false);
+    setNoSubio(false);
+    // Fusionado, nunca campo por campo: el RPC pisa las veintiuna columnas.
+    void guardarFusionado(clienteId, {
+      conversaciones: s.conversaciones,
+      llamadasTomadas: s.llamadas,
+      ventas: s.ventas,
+    }).then((llego) => {
+      if (!llego) setNoSubio(true);
+      else void ventasAcumuladas(clienteId).then((v) => { if (v !== null) setHechas(v); });
+    });
   }
 
   /*
@@ -108,6 +161,13 @@ export default function TableroNumeros({ dia = 30 }: { dia?: number }) {
         <button onClick={() => setAbierto(true)} className="mt-3 text-xs font-bold text-gold hover:text-goldhi">
           {guardada ? 'Corregir mis números de esta semana →' : 'Cargar mis 3 números de esta semana →'}
         </button>
+      )}
+
+      {/* Que no quede la duda de si llegó: el equipo mira la base, no el navegador. */}
+      {noSubio && (
+        <p className="mt-2 text-xs text-cream/60">
+          Quedaron guardados en este dispositivo. Todavía no llegaron al equipo — vuelve a entrar con señal y se suben.
+        </p>
       )}
     </div>
   );

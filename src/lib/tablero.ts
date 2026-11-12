@@ -2,7 +2,19 @@
  * tablero.ts — LA MATEMÁTICA DE LOS 10 (ZIP C).
  *
  * La promesa deja de ser una frase y pasa a ser una cuenta:
- *   300 conversaciones → 57 agendas → 40 llamadas → 10 pacientes.
+ *   306 conversaciones → 58 agendas → 40 llamadas → 10 pacientes.
+ *
+ * Acá decía «300 → 57 → 40 → 10», y eso NO es lo que la app le muestra. Las
+ * 40 llamadas son exactas —10 / 0,25—; las agendas dan 57,14 y la cadena
+ * redondea para ARRIBA, porque media agenda no agenda a nadie: 58. Y 58 /
+ * 0,19 da 306. Los números lindos salen de redondear las agendas para abajo
+ * —57 / 0,19 da 300 justo—, que es la cuenta de un folleto, no la de alguien
+ * que tiene que juntar diez.
+ *
+ * Se corrige el comentario y no la cuenta: el 300 no está escrito en ninguna
+ * pantalla ni en ninguna oferta —se midió, es el único lugar del repo donde
+ * aparecía—, así que lo que el cliente lee hoy es 306. Si la oferta tiene que
+ * decir 300, eso cambia una promesa y espera su clic.
  *
  * Los porcentajes no son optimismo: son los rangos que se miden en ventas
  * por llamada (cierre 21-29%) y en asistencia a citas agendadas (60-75%,
@@ -11,6 +23,8 @@
  * El tablero registra 3 números por semana y dice DÓNDE está la fuga.
  * Nada más. Tres números, un diagnóstico, una acción.
  */
+
+import { semanaISO } from './bitacoraCampana';
 
 export const META_PACIENTES = 10;
 export const TASA_CIERRE = 0.25;      // de cada 4 llamadas reales, 1 dice que sí
@@ -65,11 +79,16 @@ export function historialTablero(): SemanaTablero[] {
   } catch { return []; }
 }
 
+/**
+ * La llave de la semana.
+ *
+ * Era el lunes en fecha corta —«2026-11-09»— y la base guarda la semana ISO
+ * —«2026-W46»—. Dos llaves para la misma semana: el espejo local y la fila de
+ * la base no se podían reconocer entre sí ni para leerse ni para pisarse. Es
+ * la misma de `semanaISO` para que haya una sola.
+ */
 export function lunesDeEstaSemana(): string {
-  const d = new Date();
-  const diff = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - diff);
-  return d.toISOString().split('T')[0];
+  return semanaISO();
 }
 
 export function registrarSemana(s: Omit<SemanaTablero, 'fecha'>): void {
@@ -85,6 +104,18 @@ export function semanaActual(): SemanaTablero | null {
 
 export function ventasTotales(): number {
   return historialTablero().reduce((a, s) => a + (s.ventas || 0), 0);
+}
+
+/**
+ * Deja en el espejo local lo que vino de la base.
+ *
+ * El espejo dejó de ser el dueño del dato y pasó a ser una copia: la base
+ * manda. Hace falta porque la pantalla de Hoy decide sincrónicamente —en el
+ * mismo render— si le pone al cliente el movimiento de su cuello, y no puede
+ * esperar una consulta para armar la lista del día.
+ */
+export function sembrarEspejo(s: Omit<SemanaTablero, 'fecha'>): void {
+  registrarSemana(s);
 }
 
 /* ══════════ El diagnóstico: dónde está la fuga ══════════ */
@@ -127,4 +158,63 @@ export function diagnosticar(s: SemanaTablero, meta: CadenaMeta): Diagnostico {
     detalle: 'Tus tres números están donde tienen que estar.',
     accion: 'No cambies nada. Repite exactamente lo mismo la semana que viene.',
   };
+}
+
+/* ══════════ Y el día siguiente viene con el trabajo de ese cuello ══════════ */
+
+/**
+ * ═══ LA PATA QUE FALTABA ═══
+ *
+ * El diagnóstico moría dentro de la tarjeta. `diagnosticar` no la llamaba
+ * nadie más que `TableroNumeros`: el cliente leía «tu cuello es el cierre» el
+ * viernes y el sábado la app volvía a abrir igual que el día 3, sin una sola
+ * línea que se acordara de lo que acababa de medir.
+ *
+ * El destino no se inventa acá: es el mismo al que ya mandan los avisos
+ * escritos para ese cuello en `avisosCliente.ts`, y los entrenadores viven en
+ * Agentes. Un movimiento que lleva a otro lado sería un tercer criterio para
+ * la misma situación.
+ */
+export interface TrabajoDelCuello {
+  titulo: string;
+  meta: string;
+  /** La página de la app, con el nombre que usa el router. */
+  destino: 'campanas' | 'entrenadores';
+}
+
+export const TRABAJO_POR_CUELLO: Record<
+  Exclude<Diagnostico['cuello'], 'ninguno'>,
+  TrabajoDelCuello
+> = {
+  volumen: {
+    titulo: 'Tu cuello de esta semana: el volumen',
+    meta: 'Te escriben pocas personas. Sube el presupuesto o publica más — es lo único que mueve ese número',
+    destino: 'campanas',
+  },
+  filtro: {
+    titulo: 'Tu cuello de esta semana: entre el chat y la llamada',
+    meta: 'Llegan y no avanzan. Sofi revisa tus DM; y confirma cada cita 24 h y 2 h antes',
+    destino: 'entrenadores',
+  },
+  cierre: {
+    titulo: 'Tu cuello de esta semana: el cierre',
+    meta: 'Las llamadas ocurren y la decisión no. Un roleplay con Lucas antes de la próxima',
+    destino: 'entrenadores',
+  },
+};
+
+/**
+ * El cuello que le toca hoy, leído del espejo. Sincrónico a propósito.
+ *
+ * null cuando no cargó la semana —no se le inventa un cuello a quien no dio
+ * números— y cuando está en ritmo: «no cambies nada» no es un movimiento del
+ * día, y ponerlo como uno le daría trabajo donde la app acaba de decirle que
+ * no hace falta.
+ */
+export function trabajoDeHoy(diaActual: number): TrabajoDelCuello | null {
+  const s = semanaActual();
+  if (!s) return null;
+  const dx = diagnosticar(s, metaSemanal(diaActual, ventasTotales()));
+  if (dx.cuello === 'ninguno') return null;
+  return TRABAJO_POR_CUELLO[dx.cuello];
 }

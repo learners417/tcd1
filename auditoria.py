@@ -3902,10 +3902,26 @@ check('y hay un solo helper para eso',
 
 # Los números que carga el cliente llegan a la base: el RPC se llamaba con
 # nombres que la función no declara, y PostgREST resuelve por nombre.
-_sync = solo_codigo(rd('src/lib/tableroSync.ts'))
+#
+# La llamada se mudó de tableroSync.ts a losDiezEnLaBase.ts, que ahora es el
+# UNICO lugar del repo que escribe contra ese RPC: pasan por ahi los tres
+# numeros del viernes y los del tablero de cupos, fusionados con la semana que
+# esta en vez de pisar las veintiuna columnas. Lo cuida
+# scripts/prueba-los-diez-llegan.ts.
+_sync = solo_codigo(rd('src/lib/losDiezEnLaBase.ts'))
 check('los números del cliente llegan a la base (los nombres del RPC)',
-      'p_cliente_id: clienteId' in _sync and 'p_semana_iso: semanaISO()' in _sync,
+      'p_cliente_id: clienteId' in _sync and 'p_semana_iso: semana' in _sync,
       'con p_cliente/p_semana la llamada fallaba y el código la daba por buena')
+
+# Y que nadie mas le escriba campos sueltos: el UPSERT pisa las 21 columnas y
+# pone en cero lo que no venga, asi que un escritor sin fusionar borra lo que
+# cargo el equipo esa semana, con exito en la respuesta.
+_escriben = sorted(r for r, t in todo.items()
+                   if r.startswith(('src/', 'api/'))
+                   and "rpc('guardar_semana_cliente'" in solo_codigo(t))
+check('y solo dos archivos escriben la semana, los dos con la fila entera',
+      _escriben == ['src/lib/losDiezEnLaBase.ts', 'src/lib/mesaPlataStorage.ts'],
+      ', '.join(_escriben))
 
 # Los mensajes en vivo: seis suscripciones escuchaban una tabla sin publicar.
 check('la tabla de mensajes está en la publicación de tiempo real',
