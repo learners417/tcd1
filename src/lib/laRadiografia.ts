@@ -66,8 +66,41 @@ export interface CuatroDelPerfil {
   energia: number;
 }
 
+/**
+ * LAS PREGUNTAS NUEVAS DEL TURNO 17 — y las dos que NO se agregaron.
+ *
+ * El turno pedía «FODA personal y profesional, sus archivos, su audio, qué
+ * días le importan». Medido el 12 de noviembre, contra la regla de la casa de
+ * que nada se pregunta dos veces:
+ *
+ *   · FODA · F — `fortaleza`. No estaba. Entra.
+ *   · FODA · D — ya se pregunta DOS veces: `freno` («tu freno principal al
+ *     arrancar», que además viaja a `adn_diagnostico_capa`) y `frustracion`.
+ *     No entra: preguntarla de nuevo sería la tercera.
+ *   · FODA · O — ya se pregunta con `nicho` y `llegan`. No entra.
+ *   · FODA · A — `amenaza`. No estaba. Entra.
+ *   · sus archivos — `enlaces` y `archivos`. No estaban. Entran.
+ *   · su audio — YA EXISTÍA, y ya estaba en la bienvenida: `BotonAudio`
+ *     (grabar → transcribir → el texto cae en la respuesta) colgaba de los
+ *     tres campos del origen y del Para Qué. Lo que faltaba era ponerlo en los
+ *     demás campos abiertos, que no es un campo nuevo. No hay nada acá.
+ *   · qué días le importan — `dias_que_importan`. No estaba. Entra.
+ */
+export interface PreguntasDelTramo {
+  /** FODA · F: lo que hace mejor que cualquiera de su especialidad. */
+  fortaleza: string;
+  /** FODA · A: lo de afuera que le puede sacar consultantes. */
+  amenaza: string;
+  /** Su web, su Instagram, su página: los enlaces, tal cual los pegó. */
+  enlaces: string;
+  /** Los caminos de Storage de lo que subió. Solo rutas, nunca el archivo. */
+  archivos: string[];
+  /** Los ids de paisaje que eligió — los de `estaciones.ts`, no texto libre. */
+  dias_que_importan: string[];
+}
+
 /** Todo lo que la radiografía le pregunta. Un campo nuevo se agrega acá. */
-export interface Respuestas extends CuatroDelPerfil {
+export interface Respuestas extends CuatroDelPerfil, PreguntasDelTramo {
   especialidad: string;
   especialidad_otro: string;
   pais: string;
@@ -97,6 +130,7 @@ export const ENERGIA_POR_DEFECTO = 5;
 
 export const RESPUESTAS_VACIAS: Respuestas = {
   ingresos_mensuales: '', horas_semana: '', frustracion: '', energia: ENERGIA_POR_DEFECTO,
+  fortaleza: '', amenaza: '', enlaces: '', archivos: [], dias_que_importan: [],
   especialidad: '', especialidad_otro: '', pais: '',
   situacion: SITUACION_VACIA,
   avatar: null, freno: '', nicho: '', dinero: '', tiempo: '', estilo: '', fe: '',
@@ -222,6 +256,25 @@ export function leerRespuestas(): Respuestas {
     para_que: primero(b.para_que, g.para_que, ''),
     pacto_texto: primero(b.pacto_texto, g.pacto_texto, ''),
     pacto_firma: primero(b.pacto_firma, g.pacto_firma, ''),
+    /*
+     * LAS CINCO DEL TURNO 17. Solo borrador: no tienen dueño en `loGuardado()`
+     * porque no hay ninguna llave vieja que las tenga —son nuevas— y viajan a
+     * la base dentro de `diagnostico`, por el único compositor. El día que
+     * alguna tenga su propia llave local, se agrega a `loGuardado()` y entra
+     * acá con `primero(...)` como el resto.
+     *
+     * Las dos se copian por prolijidad, no por seguridad: `leerBorrador()` hace
+     * `JSON.parse`, así que cada llamada ya devuelve objetos nuevos y mutar lo
+     * que sale de acá no puede ensuciar el borrador. Se midió el 12 de
+     * noviembre, justamente porque la primera versión de la lente afirmaba lo
+     * contrario y salía verde con la copia puesta Y quitada: una mirada que no
+     * puede fallar no está mirando.
+     */
+    fortaleza: primero(b.fortaleza, undefined, ''),
+    amenaza: primero(b.amenaza, undefined, ''),
+    enlaces: primero(b.enlaces, undefined, ''),
+    archivos: Array.isArray(b.archivos) ? [...b.archivos] : [],
+    dias_que_importan: Array.isArray(b.dias_que_importan) ? [...b.dias_que_importan] : [],
   };
 }
 
@@ -237,6 +290,8 @@ export const TRAMOS = [
   { id: 'situacion', nombre: 'Tu situación', campos: ['situacion'] as const },
   { id: 'diagnostico', nombre: 'Tu diagnóstico',
     campos: ['avatar', 'freno', 'nicho', 'dinero', 'tiempo', 'llegan', 'entrega', 'publica'] as const },
+  { id: 'loTuyo', nombre: 'Lo tuyo y tus días',
+    campos: ['fortaleza', 'amenaza', 'enlaces', 'archivos', 'dias_que_importan'] as const },
   { id: 'origen', nombre: 'Por qué esta profesión', campos: ['porque', 'herida', 'paciente'] as const },
   { id: 'numeros', nombre: 'Tus seis números', campos: ['numeros'] as const },
   { id: 'rueda', nombre: 'Tu rueda', campos: ['rueda', 'para_que'] as const },

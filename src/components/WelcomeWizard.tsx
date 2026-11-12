@@ -4,7 +4,7 @@ import HojaDeRuta from './camino/HojaDeRuta';
 import { dictaminar } from '../lib/elDictamen';
 import { getOrigen, setOrigen } from '../lib/origen';
 import { DIMENSIONES_RUEDA, type ValoresRueda, guardarMedicion, setParaQue } from '../lib/rueda';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Eye, EyeOff, Loader2, CheckCircle2, Sparkles, Map, LockKeyhole, UserCircle, Compass } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../lib/supabase';
@@ -17,7 +17,44 @@ interface WelcomeWizardProps {
   onComplete: (firstPage?: string) => void;
 }
 
-type Step = 'password' | 'profile' | 'situacion' | 'diagnostico' | 'origen' | 'numeros' | 'rueda' | 'welcome' | 'pacto' | 'guide';
+/**
+ * ─── EL TRAMO ÚNICO (turno 17, 12 de noviembre) ────────────────────────────
+ *
+ * Javo eligió el 8 de noviembre que la entrada sea UN solo tramo largo. Antes
+ * había diez pasos acá, y el mapa pedía «fundir los diez». Medido: de los diez
+ * SEIS preguntaban —perfil, situación, diagnóstico, origen, números, rueda— y
+ * los otros cuatro no son preguntas y no se pueden fundir con nada:
+ *
+ *   · `password` es autenticación, y pasa antes de que haya a quién preguntar;
+ *   · `welcome` es el DICTAMEN, que es la salida de lo que contestó;
+ *   · `pacto` es una firma, y una firma se firma sola;
+ *   · `guide` es la orientación del final.
+ *
+ * Así que fundir los diez son los seis en uno: `radiografia`.
+ *
+ * Lo que la fusión arregla sin proponérselo: el salto de `guardarDiagnostico`
+ * mandaba a `welcome` a quien ya tenía el origen contestado, y se llevaba
+ * puestos los pasos de los números y la rueda. Ese cliente completaba la
+ * bienvenida sin sus seis números —«sin esto no hay con qué comparar al
+ * final»— y sin su rueda. En un tramo único no hay nada que saltar: las
+ * secciones están todas en la misma pantalla.
+ */
+type Step = 'password' | 'radiografia' | 'welcome' | 'pacto' | 'guide';
+
+/**
+ * Los pasos de antes, para el que está a mitad de camino HOY.
+ *
+ * `tcd_wizard_step_v1` tiene en el teléfono de cualquiera que esté en la
+ * bienvenida uno de los diez nombres viejos. Sin esta tabla, el que recarga
+ * después de que esto suba encuentra un paso que ya no existe: la lista de
+ * pasos no lo incluye, cae a `password` y le pide la contraseña de nuevo —o,
+ * peor, se guarda tal cual y ninguna rama lo dibuja: pantalla en blanco con el
+ * cliente adentro.
+ */
+const PASOS_VIEJOS: Record<string, Step> = {
+  profile: 'radiografia', situacion: 'radiografia', diagnostico: 'radiografia',
+  origen: 'radiografia', numeros: 'radiografia', rueda: 'radiografia',
+};
 
 const ESPECIALIDADES = [
   'Psicólogo/a',
@@ -41,7 +78,7 @@ const ESPECIALIDADES = [
   'Otro',
 ];
 
-const STEPS: Step[] = ['password', 'profile', 'situacion', 'diagnostico', 'origen', 'numeros', 'rueda', 'welcome', 'pacto', 'guide'];
+const STEPS: Step[] = ['password', 'radiografia', 'welcome', 'pacto', 'guide'];
 
 import PasoSituacion, { SITUACION_VACIA, situacionCompleta, type Situacion } from './onboarding/PasoSituacion';
 import { destinoPorId } from '../lib/destinos';
@@ -49,6 +86,9 @@ import { VOC } from '../lib/vocabulario';
 import { enElTramoDelNumero } from '../lib/planes';
 import { CAMPOS, estaCompleta, loQueFalta, guardar, leer, KEY_ENTRADA, type Medicion } from '../lib/medicion';
 import { leerRespuestas, anotar, olvidarBorrador, type Respuestas } from '../lib/laRadiografia';
+import { arrancar, comoSeLee, olvidar as olvidarReloj, restante, sePaso } from '../lib/elRelojDeLaRadiografia';
+import { subirArchivoDeLaRadiografia } from '../lib/losArchivosDeLaRadiografia';
+import { PAISAJES } from '../lib/losCincoPaisajes';
 import { mensajeDeFalla } from '../lib/conexion';
 
 /**
@@ -87,14 +127,16 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     // pestaña descartada), retomamos exactamente donde quedó — nunca más
     // "elegir contraseña" dos veces.
     try {
-      const guardado = localStorage.getItem('tcd_wizard_step_v1') as Step | null;
-      if (guardado && (STEPS as string[]).includes(guardado)) return guardado;
+      const guardado = localStorage.getItem('tcd_wizard_step_v1');
+      if (guardado && (STEPS as string[]).includes(guardado)) return guardado as Step;
+      if (guardado && PASOS_VIEJOS[guardado]) return PASOS_VIEJOS[guardado];
     } catch { /* noop */ }
     return 'password';
   });
   const completarWizard = (primeraPagina?: string) => {
     try { localStorage.removeItem('tcd_wizard_step_v1'); } catch { /* noop */ }
     olvidarBorrador();
+    olvidarReloj();
     onComplete(primeraPagina);
   };
   const setStep = (siguiente: Step) => {
@@ -110,6 +152,26 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
    */
   const [respuestas] = useState<Respuestas>(() => leerRespuestas());
 
+  /*
+   * ─── EL RELOJ ─────────────────────────────────────────────────────────────
+   * Arranca la primera vez que el cliente ve el tramo y no se reinicia al
+   * recargar: los quince son de una. Se redibuja cada segundo, y pasarse no
+   * cierra nada —ver `elRelojDeLaRadiografia.ts`—.
+   */
+  const [ahora, setAhora] = useState(() => Date.now());
+
+  /* ── Las cinco del turno 17 ── */
+  const [fortaleza, setFortaleza] = useAnotado('fortaleza', respuestas.fortaleza);
+  const [amenaza, setAmenaza] = useAnotado('amenaza', respuestas.amenaza);
+  const [enlaces, setEnlaces] = useAnotado('enlaces', respuestas.enlaces);
+  const [archivos, setArchivos] = useAnotado('archivos', respuestas.archivos);
+  const [diasQueImportan, setDiasQueImportan] = useAnotado('dias_que_importan', respuestas.dias_que_importan);
+  const [subiendo, setSubiendo] = useState(false);
+  const [fallaDeSubida, setFallaDeSubida] = useState('');
+  /** Qué sección pide el botón del final, cuando pide algo. */
+  const [loQuePide, setLoQuePide] = useState('');
+  const [cerrandoTramo, setCerrandoTramo] = useState(false);
+
   // ── Tu medición de entrada: los seis números del primer día ──
   const [medicionEntrada, setMedicionEntrada] = useAnotado('numeros', respuestas.numeros);
 
@@ -121,13 +183,11 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [dxTiempo, setDxTiempo] = useAnotado('tiempo', respuestas.tiempo);
   const [dxEstilo, setDxEstilo] = useAnotado('estilo', respuestas.estilo);
   const [dxFe, setDxFe] = useAnotado('fe', respuestas.fe);
-  const [dxSaving, setDxSaving] = useState(false);
   // ── S6: las siembras del ikigai ──
   const [ogPorque, setOgPorque] = useAnotado('porque', respuestas.porque);
   const [ogHerida, setOgHerida] = useAnotado('herida', respuestas.herida);
   const [ogPaciente, setOgPaciente] = useAnotado('paciente', respuestas.paciente);
   const [situacion, setSituacion] = useAnotado('situacion', respuestas.situacion);
-  const [savingSit, setSavingSit] = useState(false);
   const [rutaAbierta, setRutaAbierta] = useState(false);
   const [ruedaIni, setRuedaIni] = useAnotado('rueda', respuestas.rueda);
   const [pqIni, setPqIni] = useAnotado('para_que', respuestas.para_que);
@@ -185,6 +245,17 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     frustracion,
     ingresos_mensuales: ingresosMensuales,
     horas_semana: horasSemana,
+    /*
+     * LAS CINCO DEL TURNO 17. Viajan acá por el mismo motivo que las cuatro del
+     * perfil: este es el único escritor de `diagnostico`, y agregarlas en otra
+     * escritura las borraría. `archivos` guarda CAMINOS de Storage, nunca el
+     * archivo: el jsonb de un perfil no es donde va un PDF.
+     */
+    fortaleza,
+    amenaza,
+    enlaces,
+    archivos,
+    dias_que_importan: diasQueImportan,
     /* En el paso de la situación va la del formulario; en el diagnóstico, la
        que ya quedó guardada, que es justo la que se estaba perdiendo. */
     situacion: conSituacion ? situacion : situacionGuardada(),
@@ -198,72 +269,6 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
       if (raw) return { ...SITUACION_VACIA, ...(JSON.parse(raw) as Situacion) };
     } catch { /* noop */ }
     return situacion;
-  };
-
-  const guardarDiagnostico = async () => {
-    if (!dxAvatar) return;
-    setDxSaving(true);
-    try {
-      guardarLetra(dxAvatar);
-      try { localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica }));
-      localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
-      localStorage.setItem('tcd_fe', dxFe || 'no'); } catch { /* noop */ }
-      if (supabase) {
-        // Paracaídas móvil: con señal floja, el guardado no puede colgar el botón.
-        // 8 segundos y avanzamos igual — lo local ya quedó, el servidor se sincroniza después.
-        /*
-         * El resultado se MIRA, aunque no se bloquee al cliente.
-         *
-         * Antes se descartaba, y `update()` devuelve `{error}` en vez de
-         * lanzar: si una columna del payload no está en el esquema, PostgREST
-         * rechaza el UPDATE ENTERO (PGRST204) y las que sí existen tampoco se
-         * guardan. Eso estuvo pasando con `avatar_tipo` y `diagnostico`, que
-         * ninguna migración creaba, y se llevaba puestas a `adn_nicho` y
-         * `adn_diagnostico_capa`. Sin un solo mensaje en ningún lado: ni el
-         * cliente ni nosotros podíamos saberlo.
-         *
-         * No se le avisa al cliente ni se le corta el paso —el paracaídas de
-         * abajo existe justo para que con señal floja el botón no se cuelgue—
-         * pero queda escrito, que es lo que Sentry recoge.
-         */
-        const guardado = await Promise.race([
-          new Promise<{ error?: unknown } | null>((res) => setTimeout(() => res(null), 8000)),
-          supabase.from('profiles').update({
-          avatar_tipo: dxAvatar,
-          diagnostico: payloadDiagnostico(false),
-          ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
-          ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
-        }).eq('id', profile.id),
-        ]);
-        if (guardado && guardado.error) {
-          console.error('[bienvenida] el diagnóstico no se guardó:', guardado.error);
-        }
-      }
-    } catch (e) { console.error('[bienvenida] el diagnóstico no se guardó:', e); }
-    setDxSaving(false);
-    setStep(getOrigen().porque ? 'welcome' : 'origen'); // nada se pregunta dos veces
-  };
-  /**
-   * Guarda la situación. Va dentro del JSON `diagnostico`, que ya existe: así no
-   * hace falta migración y no se rompe nada si el servidor todavía no tiene las
-   * columnas nuevas. Cuando se corra la migración, esto se mueve a sus campos.
-   */
-  const guardarSituacion = async () => {
-    setSavingSit(true);
-    try {
-      try { localStorage.setItem('tcd_situacion', JSON.stringify(situacion)); } catch { /* noop */ }
-      if (supabase) {
-        // Mismo paracaídas móvil que el diagnóstico: con señal floja no se cuelga.
-        await Promise.race([
-          new Promise((res) => setTimeout(res, 8000)),
-          supabase.from('profiles').update({
-            diagnostico: payloadDiagnostico(true),
-          }).eq('id', profile.id),
-        ]);
-      }
-    } catch { /* no bloqueamos el flujo */ }
-    setSavingSit(false);
-    setStep('diagnostico');
   };
 
   // ── El Pacto (F3) ──
@@ -284,7 +289,6 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   const [horasSemana, setHorasSemana] = useAnotado('horas_semana', respuestas.horas_semana);
   const [frustracion, setFrustracion] = useAnotado('frustracion', respuestas.frustracion);
   const [energia, setEnergia] = useAnotado('energia', respuestas.energia);
-  const [savingProfile, setSavingProfile] = useState(false);
   /*
    * Cada nivel entra a SU camino: los 5 días o los 90.
    *
@@ -303,13 +307,13 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
       toast.error('Las contraseñas no coinciden');
       return;
     }
-    if (!supabase) { setStep('profile'); return; }
+    if (!supabase) { setStep('radiografia'); return; }
 
     setSavingPwd(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      setStep('profile');
+      setStep('radiografia');
     } catch (err: unknown) {
       toast.error(mensajeDeFalla(err, 'cambiar tu contraseña'));
     } finally {
@@ -317,68 +321,102 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
     }
   }
 
-  async function handleProfileSubmit() {
-    setSavingProfile(true);
-    try {
-      const espFinal = especialidad === 'Otro' && especialidadOtro.trim()
-        ? especialidadOtro.trim()
-        : especialidad;
-
-      if (supabase) {
-        // Guardar especialidad y pais en perfil
-        const update: Record<string, string> = {};
-        if (espFinal) update.especialidad = espFinal;
-        if (pais) update.pais = pais;
-        if (Object.keys(update).length > 0) {
-          // Si esto no llega, su especialidad se pierde y la app le habla de
-          // «pacientes» a un coach. No se bloquea el onboarding por eso, pero
-          // se ve en la consola.
-          const { error: eEsp } = await supabase.from('profiles').update(update).eq('id', profile.id);
-          if (eEsp) console.error('[wizard] especialidad y país no se guardaron:', eEsp.message);
-        }
-
-        // NO se inserta una fila de diario acá.
-      //
-      // Esto escribía una fila con la columna vieja `respuestas`, y el Diario
-      // la lee con el mapeo nuevo (`diario_cuerpo`, `diario_mente`, …). Como la
-      // encontraba por fecha, el día 1 le mostraba «Entrada del día completada»
-      // con un 0 gigante sobre «de 100 puntos», bienestar 0 y equilibrio 0/10 —
-      // y además le escondía el formulario, así que no podía cargar su diario
-      // real de ese día.
-      //
-      // Lo que el cliente contesta en el wizard ya queda en su perfil. Su
-      // primera entrada de diario la escribe él, en el Diario.
-      }
-      /*
-       * ─── POR QUÉ ACÁ VA `situacion` Y NO `diagnostico` ──────────────────
-       *
-       * El paso `situacion` estaba en STEPS —contaba para los puntos de
-       * arriba— y tenía su bloque de render, pero NADIE llamaba nunca a
-       * setStep('situacion'): el perfil saltaba derecho al diagnóstico. Dos
-       * consecuencias, las dos medidas:
-       *
-       * 1. Los puntos contaban diez pasos y solo nueve podían ocurrir: la
-       *    barra del cliente no se llenaba nunca.
-       * 2. `tcd_situacion` no se escribía jamás, así que `carriles.ts` —el
-       *    módulo que decide el canal, los límites del colegio, la agenda
-       *    llena y por dónde arrancan los días 1 a 10— corría con la entrada
-       *    vacía para TODOS. De sus seis carriles el camino consume uno,
-       *    `conLimites`, y alimenta el ángulo del día en el Dashboard: con
-       *    `tienePrueba = diaProg >= 76`, del día 1 al 75 el ángulo se
-       *    reemplazaba igual, pero del 76 al 91 lo único que protegía era
-       *    `conLimites`, apagado. Dos semanas pidiéndole prueba social a quien
-       *    su colegio se la prohíbe.
-       *
-       * El paso tiene «Saltar», así que no obliga a nadie.
-       */
-      setStep('situacion');
-    } catch {
-      // No bloqueamos el flujo si algo falla
-      setStep('situacion');
-    } finally {
-      setSavingProfile(false);
+  /**
+   * CERRAR EL TRAMO — un botón, un guardado, en orden.
+   *
+   * ═══ POR QUÉ ESTO NO PUEDE VOLVER A SER SEIS GUARDADOS ═══
+   *
+   * Hasta el turno 17 cada paso guardaba lo suyo al apretar su botón, y DOS de
+   * ellos escribían la misma columna jsonb: de ahí salió el bug del 8 de
+   * noviembre, que borraba la escalera del cliente un minuto después de que la
+   * escribiera. El compositor lo tapó. En un tramo único el problema
+   * desaparece de raíz: hay UNA escritura del jsonb y es la del compositor.
+   *
+   * El orden no es decorativo. Lo que vive en el teléfono va primero —es
+   * instantáneo y no puede fallar por señal— y después lo que viaja. Así el que
+   * pierde la conexión justo acá igual tiene su medición, su origen y su rueda
+   * guardadas donde la app las lee.
+   *
+   * Lo único que el tramo EXIGE son los seis números, que es lo que ya exigía
+   * su paso, y el avatar, que es lo que ya exigía el suyo. Todo lo demás se
+   * puede dejar en blanco: el que abandona a los nueve minutos y vuelve sigue
+   * donde estaba, y el que no quiere contestar algo entra igual.
+   */
+  async function cerrarElTramo() {
+    if (!dxAvatar) {
+      setLoQuePide('Falta una sola cosa: si ya tienes un método propio o todavía no. Está en «Tu diagnóstico».');
+      return;
     }
+    if (!estaCompleta(medicionEntrada)) {
+      setLoQuePide(`Faltan ${loQueFalta(medicionEntrada).length} de tus seis números. Sin ellos no hay con qué comparar al final.`);
+      return;
+    }
+    setLoQuePide('');
+    setCerrandoTramo(true);
+
+    /* ── 1. El teléfono, que no falla ── */
+    guardarLetra(dxAvatar);
+    guardar(KEY_ENTRADA, medicionEntrada);
+    setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() });
+    if (Object.keys(ruedaIni).length > 0) guardarMedicion(ruedaIni);
+    if (pqIni.trim()) setParaQue(pqIni.trim());
+    try {
+      localStorage.setItem('tcd_situacion', JSON.stringify(situacion));
+      localStorage.setItem('tcd_diagnostico', JSON.stringify({ freno: dxFreno, nicho: dxNicho, dinero: dxDinero, tiempo: dxTiempo, llegan: dxLlegan, entrega: dxEntrega, publica: dxPublica }));
+      localStorage.setItem('tcd_estilo_mentor', dxEstilo || 'hueso');
+      localStorage.setItem('tcd_fe', dxFe || 'no');
+    } catch { /* noop */ }
+
+    /* ── 2. Lo que viaja, con el mismo paracaídas móvil de antes ── */
+    try {
+      if (supabase) {
+        const espFinal = especialidad === 'Otro' && especialidadOtro.trim()
+          ? especialidadOtro.trim()
+          : especialidad;
+        /*
+         * LA FILA VA ESCRITA ADENTRO DEL `update`, no en una variable aparte.
+         *
+         * No es gusto: `prueba-la-bienvenida-no-se-pisa.ts` lee este archivo y
+         * comprueba que toda escritura de la columna `diagnostico` pase por el
+         * compositor. Una lente que lee texto no puede seguir una variable, y
+         * con la fila armada afuera la escritura le quedaba invisible: la
+         * lente dijo «ninguna escritura encontrada» —verde por ciego— cuando
+         * se probó así. Acá la escritura está a la vista de quien la mira.
+         */
+        const guardado = await Promise.race([
+          new Promise<{ error?: unknown } | null>((res) => setTimeout(() => res(null), 8000)),
+          supabase.from('profiles').update({
+            avatar_tipo: dxAvatar,
+            /* El ÚNICO escritor del jsonb, y ahora de verdad único. */
+            diagnostico: payloadDiagnostico(true),
+            adn_medicion_entrada: medicionEntrada,
+            ...(espFinal ? { especialidad: espFinal } : {}),
+            ...(pais ? { pais } : {}),
+            ...(dxNicho.trim() ? { adn_nicho: dxNicho.trim() } : {}),
+            ...(dxFreno ? { adn_diagnostico_capa: `Tu freno principal al arrancar: ${dxFreno}. El Camino lo trabaja desde la primera semana.` } : {}),
+          }).eq('id', profile.id),
+        ]);
+        if (guardado && guardado.error) {
+          console.error('[bienvenida] el tramo no se guardó en la base:', guardado.error);
+        }
+      }
+    } catch (e) { console.error('[bienvenida] el tramo no se guardó en la base:', e); }
+
+    setCerrandoTramo(false);
+    setStep('welcome');
   }
+
+  /*
+   * `handleProfileSubmit` salió con la fusión (turno 17). Guardaba la
+   * especialidad y el país y mandaba a `situacion`; las dos cosas las hace
+   * ahora `cerrarElTramo`, en la misma escritura que todo lo demás.
+   *
+   * Su comentario largo sobre por qué el paso `situacion` nunca se alcanzaba
+   * ya no describe nada: en un tramo único no hay un paso que otro paso pueda
+   * saltear. Lo que ese comentario medía —`tcd_situacion` sin escribirse
+   * jamás, y `carriles.ts` corriendo con la entrada vacía para TODOS— se
+   * cierra acá por construcción.
+   */
 
   /**
    * CERRAR EL ONBOARDING, COMPROBADO.
@@ -424,6 +462,20 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
   // Sin nombre el saludo va solo, en vez de «Hola, ».
   const nombreCorto = (profile.nombre ?? '').trim().split(' ')[0];
   const currentStepIndex = STEPS.indexOf(step);
+  const enTramo = step === 'radiografia';
+
+  /*
+   * El reloj arranca al entrar al tramo y late una vez por segundo. El
+   * intervalo se limpia al salir: un `setInterval` suelto en la primera
+   * pantalla de alguien que acaba de pagar le calienta el teléfono por nada.
+   */
+  useEffect(() => {
+    if (!enTramo) return;
+    arrancar();
+    setAhora(Date.now());
+    const late = setInterval(() => setAhora(Date.now()), 1000);
+    return () => clearInterval(late);
+  }, [enTramo]);
 
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-4 selection:bg-gold/30">
@@ -468,6 +520,36 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
             />
           ))}
         </div>
+
+        {/*
+          ─── EL RELOJ ───────────────────────────────────────────────────────
+          Javo eligió «los 15 de una, cronometrados». Va a la vista, y la
+          condición que eligió con él va escrita al lado, porque un reloj sin
+          esa frase se lee como un examen: PASARSE NO CIERRA NADA.
+          No hay ningún candado que lea `sePaso()`. Lo único que ponía en juego
+          era el premio, y el premio no existe —ver el mapa, turno 17—.
+        */}
+        {enTramo && (
+          <div className="mb-6 flex items-baseline justify-between gap-3 border-b pb-3"
+            style={{ borderColor: 'var(--line, rgba(142,104,36,0.18))' }}>
+            {/*
+              17 px y no 15, medido: en esta pantalla el tamaño 15 ya tenía
+              tres pesos —500 en las opciones, 600 en las preguntas, 700 en el
+              numeral— y el techo de la regla de composición es tres por
+              tamaño. Un cuarto peso en 15 es la única falta de diseño que este
+              turno introdujo, y el medidor la cazó. En 17 el peso 400 ya
+              existe: la frase entra sin agregar nada.
+            */}
+            <p className="text-[17px] text-cream/60">
+              {sePaso(ahora)
+                ? 'Te pasaste de los 15, y no pasa nada: sigue a tu ritmo.'
+                : 'Son 15 minutos, de una sola sentada.'}
+            </p>
+            <p className={`num-tab shrink-0 text-[17px] tabular-nums ${sePaso(ahora) ? 'text-cream/45' : 'text-gold'}`}>
+              {sePaso(ahora) ? `+${comoSeLee(restante(ahora))}` : comoSeLee(restante(ahora))}
+            </p>
+          </div>
+        )}
 
         {/* ── STEP 1: PASSWORD ── */}
         {step === 'password' && (
@@ -552,7 +634,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
         )}
 
         {/* ── STEP 2: PROFILE ── */}
-        {step === 'profile' && (
+        {enTramo && (
+          /* ── SECCIÓN 1 · Quién eres y cómo estás hoy ── */
           <div className="bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-3xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-400">
             <div className="mb-6">
               {/* El mismo cuadrado de oro macizo del primer paso, en otro paso
@@ -626,7 +709,25 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                       key={n}
                       type="button"
                       onClick={() => setEnergia(n)}
-                      className={`w-11 h-11 rounded-lg text-xs font-bold transition-all ${
+                      /*
+                       * 16 px y no 15, medido con el medidor de diseño.
+                       *
+                       * Al fundir los seis pasos en uno, los cuatro pesos que
+                       * antes vivían en PANTALLAS DISTINTAS quedaron en la
+                       * misma vista: el tamaño 15 juntó 400 (las notas entre
+                       * paréntesis), 500 (las opciones), 600 (las preguntas) y
+                       * 700 (estos números). El techo de la regla es tres
+                       * pesos por tamaño, y la falta la cazó el medidor — no
+                       * la vio ninguna lente de texto.
+                       *
+                       * Se movió ESTE, de los cuatro, por dos razones: son los
+                       * elementos menos numerosos del grupo, y 15 px la casa
+                       * lo reserva para metadatos —`--text-xs`: «solo
+                       * metadatos, nunca instrucciones»—. Un número que el
+                       * cliente TOCA no es un metadato. En 16 el peso 700 no
+                       * existía: entra sin empujar nada.
+                       */
+                      className={`w-11 h-11 rounded-lg text-base font-bold transition-all ${
                         n <= energia
                           ? 'bg-amber-500 text-ink shadow-sm shadow-amber-500/30'
                           : 'bg-panel text-cream/45 border border-[var(--line, rgba(142,104,36,0.18))] hover:border-[var(--line2, rgba(142,104,36,0.30))]'
@@ -649,7 +750,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                   rows={3}
                   className="w-full bg-black/40 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors resize-none"
                 />
-                <p className="text-sm text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio.</p>
+                {/* El botón de voz EXISTÍA y ya estaba en esta pantalla, colgado
+                    del origen y del Para Qué. Lo que faltaba era ponerlo en los
+                    demás campos abiertos: el turno 17 lo pedía como «pregunta
+                    nueva» y no era una pregunta, era este botón acá. */}
+                <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => setFrustracion((p) => (p ? p + '\n' : '') + t)} /></div>
+                <p className="text-sm text-cream/45 mt-1.5">Tu Mentor va a leer esto para entenderte desde el inicio. Puedes responder hablando.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -676,43 +782,18 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setStep('welcome')}
-                className="px-5 py-3 rounded-xl text-sm text-cream/55 hover:text-cream/80 transition-colors"
-              >
-                Saltar
-              </button>
-              <button
-                onClick={handleProfileSubmit}
-                disabled={savingProfile}
-                className="flex-1 py-3 rounded-xl btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Continuar</>}
-              </button>
-            </div>
+            {/* El botón de este paso salió con la fusión: en un tramo único hay
+                un solo botón, al final de todo. El «Saltar» que había acá
+                mandaba derecho a `welcome` y se llevaba las seis secciones por
+                delante — en el tramo no hay a dónde saltar. */}
           </div>
         )}
 
         {/* ── STEP 3: TU SITUACIÓN ── */}
-        {step === 'situacion' && (
+        {enTramo && (
+          /* ── SECCIÓN 2 · Tu situación ── */
           <div>
             <PasoSituacion valor={situacion} onChange={setSituacion} />
-            <div className="flex gap-3 mt-8">
-              <button
-                onClick={() => setStep('diagnostico')}
-                className="px-5 py-3 rounded-xl text-sm text-cream/55 hover:text-cream/80 transition-colors"
-              >
-                Saltar
-              </button>
-              <button
-                onClick={guardarSituacion}
-                disabled={savingSit}
-                className="flex-1 py-3 rounded-xl btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {savingSit ? 'Guardando…' : 'Seguir'}
-              </button>
-            </div>
             {!situacionCompleta(situacion) && (
               <p className="text-xs text-cream/45 mt-3 text-center">
                 Puedes seguir sin completar todo. Lo que falte lo cerramos en tus
@@ -722,7 +803,8 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
           </div>
         )}
 
-        {step === 'diagnostico' && (
+        {enTramo && (
+          /* ── SECCIÓN 3 · Tu diagnóstico ── */
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
@@ -832,18 +914,115 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               <p className="text-sm text-cream/80">Listo. Con esto tu ADN ya tiene su semilla. Tu plan: <strong className="text-gold">{VOC('10 {{consultantes}} a tu precio digno')} y 10 horas menos por semana — en 90 días</strong>. Cinco estaciones, del lago al bosque, una sesión por día.</p>
             )}
 
-            <button
-              onClick={guardarDiagnostico}
-              disabled={!dxAvatar || dxSaving}
-              className="w-full py-3.5 rounded-xl btn-primary disabled:opacity-40"
-            >
-              {dxSaving ? 'Guardando…' : 'Continuar →'}
-            </button>
+          </div>
+        )}
+
+        {enTramo && (
+          /*
+           * ─── SECCIÓN 4 · LO TUYO Y TUS DÍAS (turno 17) ───────────────────
+           *
+           * Las cuatro que el mapa pedía y no existían. Las que NO están acá
+           * tienen su motivo escrito en `laRadiografia.ts`: la D y la O del
+           * FODA ya se preguntan arriba —`freno`, `frustracion`, `nicho`,
+           * `llegan`— y la regla de la casa es que nada se pregunta dos veces.
+           *
+           * Ninguna es obligatoria: el cierre del tramo no las mira.
+           */
+          <div className="space-y-6 fade-rise">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Lo tuyo</p>
+              <h2 className="text-2xl font-light text-cream mt-2" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Lo que ya tienes, y lo que te puede sacar</h2>
+              <p className="text-sm text-cream/55 mt-1">Dos preguntas cortas. Lo primero que se te venga: casi siempre es lo verdadero.</p>
+            </div>
+
+            {[
+              { v: fortaleza, set: setFortaleza,
+                q: VOC('1 · ¿Qué haces mejor que cualquiera de tu especialidad?'),
+                ph: 'Eso que tus {{consultantes}} te agradecen y a ti te parece normal…' },
+              { v: amenaza, set: setAmenaza,
+                q: VOC('2 · ¿Qué de afuera te puede sacar {{consultantes}} este año?'),
+                ph: 'Lo que no depende de ti y te preocupa…' },
+            ].map((item, i) => (
+              <div key={i}>
+                <p className="text-sm font-medium text-cream/85 mb-2">{item.q}</p>
+                <textarea value={item.v} onChange={(e) => item.set(e.target.value)} rows={3} placeholder={VOC(item.ph)}
+                  className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
+                <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => item.set((item.v ? item.v + '\n' : '') + t)} /></div>
+              </div>
+            ))}
+
+            {/* ── Sus archivos y sus enlaces ──
+                El mapa dice por qué: «lo que ya publicó dice más de su negocio
+                que lo que contesta en un formulario». */}
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">3 · Tu web, tu Instagram, tu página — pega los enlaces</p>
+              <textarea value={enlaces} onChange={(e) => setEnlaces(e.target.value)} rows={2} placeholder="Uno por línea. Lo que tengas."
+                className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">Y si tienes un PDF, tu libro o un documento tuyo, súbelo</p>
+              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold text-cream cursor-pointer min-h-[44px]"
+                style={{ borderColor: 'var(--line2, #DFD3BC)' }}>
+                {subiendo ? 'Subiendo…' : archivos.length > 0 ? `✓ ${archivos.length} subido${archivos.length > 1 ? 's' : ''} · agregar otro` : 'Subir un archivo'}
+                <input
+                  type="file"
+                  accept="image/*,audio/*,.pdf,.doc,.docx"
+                  className="hidden"
+                  disabled={subiendo}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setSubiendo(true);
+                    setFallaDeSubida('');
+                    const r = await subirArchivoDeLaRadiografia(profile.id, file);
+                    if (r.ok) setArchivos((prev) => [...prev, r.evidencia.path]);
+                    else setFallaDeSubida(r.motivo);
+                    setSubiendo(false);
+                    /* El input se limpia: sin esto, subir el MISMO archivo dos
+                       veces no dispara el cambio y parece que no hizo nada. */
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              {fallaDeSubida && <p className="text-sm text-danger mt-2">{fallaDeSubida}</p>}
+              <p className="text-sm text-cream/45 mt-2">Opcional. Si no tienes nada a mano, sigue: esto se puede subir después.</p>
+            </div>
+
+            {/* ── Qué días le importan ──
+                Los cinco paisajes salen de `losCincoPaisajes.ts`, no escritos a
+                mano: el día que se mueva una jornada, esta lista se mueve con
+                ella. Es la misma lección que costó 21 días de app
+                contradiciéndose sola. */}
+            <div>
+              <p className="text-sm font-medium text-cream/85 mb-2">4 · De tus 90 días, ¿qué tramo te importa más? Marca los que quieras</p>
+              <div className="space-y-2">
+                {PAISAJES.map((pj) => {
+                  const marcado = diasQueImportan.includes(pj.id);
+                  return (
+                    <button
+                      key={pj.id}
+                      type="button"
+                      onClick={() => setDiasQueImportan((prev) => (
+                        prev.includes(pj.id) ? prev.filter((x) => x !== pj.id) : [...prev, pj.id]
+                      ))}
+                      className={`w-full text-left px-4 py-3 rounded-xl border min-h-[52px] transition-colors ${marcado ? 'border-gold/60 bg-gold/[0.06]' : 'bg-surface/50'}`}
+                      style={marcado ? undefined : { borderColor: 'var(--line, rgba(142,104,36,0.18))' }}
+                    >
+                      <p className={`text-[17px] ${marcado ? 'text-gold' : 'text-cream'}`}>{pj.nombre} · {pj.sistema}</p>
+                      <p className="text-sm text-cream/55">{pj.dias} — {pj.ensena}</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-sm text-cream/45 mt-2">Esto no cambia tu orden: el Camino es el mismo. Nos dice dónde apretar.</p>
+            </div>
           </div>
         )}
 
         {/* ── S6 · SIEMBRA 2: TU ORIGEN — de aquí nace todo ── */}
-        {step === 'origen' && (
+        {enTramo && (
+          /* ── SECCIÓN 5 · Tu origen ── */
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu origen</p>
@@ -862,17 +1041,12 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => item.set((item.v ? item.v + '\n' : '') + t)} /></div>
               </div>
             ))}
-            <button
-              onClick={() => { setOrigen({ porque: ogPorque.trim(), herida: ogHerida.trim(), paciente: ogPaciente.trim() }); setStep('numeros'); }}
-              className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
-            >
-              Grabar en mi ADN y seguir →
-            </button>
           </div>
         )}
 
         {/* ── Tu medición de entrada: sin esto no hay con qué comparar al final ── */}
-        {step === 'numeros' && (
+        {enTramo && (
+          /* ── SECCIÓN 6 · Tus seis números ── */
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-[15px] font-bold uppercase tracking-[0.3em] text-gold">Tu punto de partida</p>
@@ -907,24 +1081,19 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               </div>
             ))}
 
-            <button
-              disabled={!estaCompleta(medicionEntrada)}
-              onClick={() => {
-                guardar(KEY_ENTRADA, medicionEntrada);
-                void supabase?.from('profiles').update({ adn_medicion_entrada: medicionEntrada }).eq('id', profile.id);
-                setStep(esCincoDias ? 'welcome' : 'rueda');
-              }}
-              className="w-full btn-primary font-bold py-3.5 rounded-xl text-[17px] disabled:opacity-40"
-            >
-              {estaCompleta(medicionEntrada)
-                ? 'Guardar mi punto de partida →'
-                : `Te faltan ${loQueFalta(medicionEntrada).length} de 6`}
-            </button>
+            {!estaCompleta(medicionEntrada) && (
+              <p className="text-[17px] text-cream/55">
+                Te faltan {loQueFalta(medicionEntrada).length} de 6. Son los únicos
+                que el tramo pide completos: sin ellos no hay con qué comparar al
+                final.
+              </p>
+            )}
           </div>
         )}
 
         {/* ── S6 · SIEMBRA 3: TU RUEDA + TU PARA QUÉ — la foto vital de partida ── */}
-        {step === 'rueda' && (
+        {enTramo && !esCincoDias && (
+          /* ── SECCIÓN 7 · Tu rueda. No va para los cinco días: su medición es otra. ── */
           <div className="space-y-6 fade-rise">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-gold">Tu foto vital de partida</p>
@@ -974,16 +1143,34 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
                 className="w-full bg-surface/50 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-3.5 py-2.5 text-sm text-cream placeholder:text-cream/35 focus:outline-none focus:border-gold/50" />
               <div className="flex justify-end mt-1"><BotonAudio onTexto={(t) => setPqIni((p) => (p ? p + '\n' : '') + t)} /></div>
             </div>
+          </div>
+        )}
+
+        {/*
+          ─── EL ÚNICO BOTÓN DEL TRAMO ──────────────────────────────────────
+          Donde antes había seis. Lo que pide, lo dice: `loQuePide` nombra la
+          sección que falta en vez de quedarse apagado sin explicar por qué,
+          que es lo que hacía el botón del diagnóstico cuando el avatar estaba
+          sin elegir.
+        */}
+        {enTramo && (
+          <div className="mt-8">
+            {loQuePide && (
+              <p className="text-[17px] text-gold leading-relaxed mb-3">{loQuePide}</p>
+            )}
             <button
-              onClick={() => {
-                if (Object.keys(ruedaIni).length > 0) guardarMedicion(ruedaIni);
-                if (pqIni.trim()) setParaQue(pqIni.trim());
-                setStep('welcome');
-              }}
-              className="w-full btn-primary font-bold py-3.5 rounded-xl text-sm"
+              onClick={cerrarElTramo}
+              disabled={cerrandoTramo}
+              className="w-full py-4 rounded-xl btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Grabar mi foto de partida →
+              {cerrandoTramo
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando…</>
+                : <><ArrowRight className="w-4 h-4" /> Listo, dame mi punto de partida</>}
             </button>
+            <p className="text-sm text-cream/45 text-center mt-3">
+              Todo lo que escribiste ya quedó guardado. Si cierras y vuelves,
+              sigues desde acá.
+            </p>
           </div>
         )}
 
@@ -1182,8 +1369,9 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
               onChange={(e) => setPactoTexto(e.target.value)}
               rows={4}
               placeholder="Hago este camino porque…"
-              className="w-full mt-1.5 mb-4 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none resize-none"
+              className="w-full mt-1.5 px-4 py-3 rounded-xl bg-ink border border-cream/15 text-cream text-sm focus:border-gold/50 focus:outline-none resize-none"
             />
+            <div className="flex justify-end mt-1 mb-4"><BotonAudio onTexto={(t) => setPactoTexto((p) => (p ? p + '\n' : '') + t)} /></div>
             <label className="text-sm uppercase tracking-widest text-gold font-bold">Tu firma (nombre completo)</label>
             <input
               value={pactoFirma}

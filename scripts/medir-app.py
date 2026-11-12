@@ -73,7 +73,7 @@ Uso:
   python3 scripts/medir-app.py --estricto   → sale con error si alguna pantalla
                                               de la lista ESTRICTAS tiene algo
 """
-import json, os, signal, socket, subprocess, sys, time, urllib.request
+import json, os, re, signal, socket, subprocess, sys, time, urllib.request
 
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', '/opt/pw-browsers')
 from playwright.sync_api import sync_playwright
@@ -1533,7 +1533,17 @@ def main():
                 pag.screenshot(path='/tmp/app-graduacion-lleno.png')
                 resultados['graduacion>lleno'] = m; pag.close()
 
-            # ── La bienvenida: los primeros diez minutos, los DIEZ pasos ──
+            # ── La bienvenida: los primeros quince minutos, los CINCO pasos ──
+            #
+            # EL NÚMERO SALE DEL CÓDIGO, no escrito acá. Decía diez, y el 12 de
+            # noviembre el turno 17 fundió los seis pasos de preguntas en un
+            # tramo único: quedan cinco —contraseña, tramo, dictamen, pacto y
+            # guía—. El medidor marcó «el wizard se cortó en el paso 5 de 10» y
+            # tenía razón en lo que medía y no en con qué lo comparaba.
+            #
+            # Un contador a mano envejece sin avisar, que es la lección que ya
+            # está escrita unos renglones más abajo para las vistas medidas.
+            # Este se lee de `STEPS`.
             #
             # Lo primero que ve quien acaba de pagar, antes de la antesala.
             # Mucho tiempo se midió solo el primer paso —el de la contraseña—
@@ -1549,6 +1559,11 @@ def main():
                 pag.on('pageerror', lambda e, errores=errores: errores.append(str(e)[:120]))
                 pag.goto(base); preparar(pag, 'dashboard', dias=1, bienvenida=True); pag.reload()
                 pag.wait_for_timeout(2800)
+                _wiz_src = open('src/components/WelcomeWizard.tsx', encoding='utf-8').read()
+                _m_pasos = re.search(r"const STEPS: Step\[\] = \[(.*?)\];", _wiz_src, re.S)
+                CUANTOS_PASOS = len(re.findall(r"'[a-z]+'", _m_pasos.group(1))) if _m_pasos else 0
+                if CUANTOS_PASOS == 0:
+                    errores.append('no se pudo leer STEPS de la bienvenida: el medidor no sabe cuántos pasos esperar')
                 vistos = []
                 for i in range(1, 15):
                     firma = pag.evaluate(WIZ_FIRMA)
@@ -1582,9 +1597,10 @@ def main():
                     resultados[nombre] = m
                     if not avanzar_wizard(pag):
                         # El último paso (la guía) no tiene continuar: ahí
-                        # termina el wizard. Diez pasos recorridos es correcto.
-                        if i < 10:
-                            errores.append(f'el wizard se cortó en el paso {i} de 10')
+                        # termina el wizard. Recorrer los que declara `STEPS`
+                        # es lo correcto, sean cinco o sean diez.
+                        if i < CUANTOS_PASOS:
+                            errores.append(f'el wizard se cortó en el paso {i} de {CUANTOS_PASOS}')
                         break
                 pag.close()
 

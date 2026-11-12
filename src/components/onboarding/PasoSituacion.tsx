@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { VOC } from '../../lib/vocabulario';
+import BotonAudio from '../sesion/BotonAudio';
 
 /**
  * TU SITUACIÓN — el paso que faltaba en el onboarding.
@@ -185,8 +186,11 @@ export default function PasoSituacion({
           ]}
         />
         {s.limites_certeza === 'si_claros' && (
-          <textarea className={`${campo} min-h-[96px]`} placeholder="Cuáles, en tus palabras"
-            value={s.limites_eticos} onChange={(e) => set({ limites_eticos: e.target.value })} />
+          <>
+            <textarea className={`${campo} min-h-[96px]`} placeholder="Cuáles, en tus palabras"
+              value={s.limites_eticos} onChange={(e) => set({ limites_eticos: e.target.value })} />
+            <div className="flex justify-end"><BotonAudio onTexto={(t) => set({ limites_eticos: (s.limites_eticos ? s.limites_eticos + '\n' : '') + t })} /></div>
+          </>
         )}
       </div>
 
@@ -207,8 +211,11 @@ export default function PasoSituacion({
           ]}
         />
         {s.garantia_estado === 'definida' && (
-          <textarea className={`${campo} min-h-[96px]`} placeholder="Descríbela"
-            value={s.garantia} onChange={(e) => set({ garantia: e.target.value })} />
+          <>
+            <textarea className={`${campo} min-h-[96px]`} placeholder="Descríbela"
+              value={s.garantia} onChange={(e) => set({ garantia: e.target.value })} />
+            <div className="flex justify-end"><BotonAudio onTexto={(t) => set({ garantia: (s.garantia ? s.garantia + '\n' : '') + t })} /></div>
+          </>
         )}
       </div>
 
@@ -222,6 +229,7 @@ export default function PasoSituacion({
         </p>
         <textarea className={`${campo} min-h-[96px]`} placeholder="Antes y después"
           value={s.escalera} onChange={(e) => set({ escalera: e.target.value })} />
+        <div className="flex justify-end"><BotonAudio onTexto={(t) => set({ escalera: (s.escalera ? s.escalera + '\n' : '') + t })} /></div>
       </div>
 
       {/* ── la brecha ── la pregunta más importante del formulario ── */}
@@ -234,6 +242,7 @@ export default function PasoSituacion({
         <textarea className={`${campo} min-h-[120px]`}
           placeholder="Lo que sea, con el tiempo que lleva"
           value={s.brecha} onChange={(e) => set({ brecha: e.target.value })} />
+        <div className="flex justify-end"><BotonAudio onTexto={(t) => set({ brecha: (s.brecha ? s.brecha + '\n' : '') + t })} /></div>
       </div>
     </div>
   );

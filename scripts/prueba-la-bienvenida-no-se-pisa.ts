@@ -58,10 +58,29 @@ if (!TIENE_COMPOSITOR) {
  * Se buscan las asignaciones `diagnostico:` dentro de un update. Las que no
  * llaman al compositor son objetos escritos a mano, y son el defecto.
  */
-const escrituras = [...codigo.matchAll(/diagnostico:\s*([^,\n]*)/g)].map((m) => m[1].trim());
+/*
+ * SOLO LAS ESCRITURAS DE LA COLUMNA, no cualquier llave que se llame igual.
+ *
+ * Esto buscaba `diagnostico:` en todo el archivo, y el 12 de noviembre empezó
+ * a cazar algo que no es una escritura: la tabla `PASOS_VIEJOS` del tramo
+ * único traduce el paso viejo llamado `diagnostico` al tramo nuevo, y esa
+ * llave se lee igual que la columna. La lente decía «1 de 2 escrituras arma el
+ * objeto a mano» señalando `'radiografia'`.
+ *
+ * Se mira dentro de los `.update({ … })`, que es donde una escritura de verdad
+ * puede estar. Es MÁS estricto que antes, no menos: un objeto armado a mano
+ * dentro de un update sigue saliendo rojo, y ahora además no hay forma de
+ * callar la lente poniéndole otro nombre a una variable.
+ */
+const updates = [...codigo.matchAll(/\.update\(\s*(\{[\s\S]*?\})\s*\)/g)].map((m) => m[1]);
+const escrituras = updates
+  .flatMap((u) => [...u.matchAll(/diagnostico:\s*([^,\n]*)/g)])
+  .map((m) => m[1].trim());
 const aMano = escrituras.filter((e) => !e.startsWith('payloadDiagnostico'));
 if (escrituras.length === 0) {
-  mal('ninguna escritura de `diagnostico` encontrada: ¿cambió el nombre de la columna?');
+  mal('ninguna escritura de `diagnostico` encontrada: o cambió el nombre de la '
+    + 'columna, o la fila se arma en una variable y `.update(fila)` la esconde '
+    + 'de esta lente — escribila adentro del update');
 } else if (aMano.length) {
   mal(`${aMano.length} de ${escrituras.length} escrituras de \`diagnostico\` arman el objeto a mano:`);
   for (const a of aMano.slice(0, 4)) console.log(`      ${a.slice(0, 80)}`);

@@ -222,20 +222,20 @@ espera el clic.
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
-| 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **el próximo** · las dos decisiones que la frenaban quedaron tomadas el 11 nov |
+| 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `PENDIENTE_HASH` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
 
-**La cola quedó sin turnos abiertos el 12 de noviembre, con el turno 16.** Los
-dieciséis están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el flanco
+**La cola quedó sin turnos abiertos el 12 de noviembre, con el turno 17.** Los
+diecisiete están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el flanco
 y lo que queda adentro es tu clic, no trabajo. Así que la tarea programada
 sigue encendida y sin nada que tomar.
 
 **Dos premisas del encargo de la tarea ya no son ciertas, y por eso no se
-apagó sola:** dice «los diez turnos» —son dieciséis— y dice que MCD «hoy NO
+apagó sola:** dice «los diez turnos» —son diecisiete— y dice que MCD «hoy NO
 tiene batería de ningún tipo: ése es su primer turno». MCD tiene su batería
 desde el 9 de noviembre: `auditoria.py` en su raíz, nueve bloques, 46 lentes,
 cerrada por el turno 6 (`f3e9ddc`), más las 5 del puente del turno 7
@@ -243,6 +243,105 @@ cerrada por el turno 6 (`f3e9ddc`), más las 5 del puente del turno 7
 
 **Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
 nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
+
+### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
+
+Commit `PENDIENTE_HASH`. La bienvenida pasó de diez pasos a cinco, con los
+quince minutos a la vista, cinco preguntas nuevas y una lente propia de
+sesenta y cuatro miradas.
+
+**La premisa estaba mal en tres de sus cuatro partes.**
+
+**Uno: «fundir los diez pasos» son seis.** De los diez pasos, SEIS preguntaban
+—perfil, situación, diagnóstico, origen, números, rueda—. Los otros cuatro no
+son preguntas y no se funden con nada: la contraseña pasa antes de que haya a
+quién preguntar, el dictamen es la salida de lo que contestó, la firma se firma
+sola y la guía es la orientación del final. El tramo único son los seis en uno.
+
+**Dos: «su audio» ya existía, y ya estaba en esta pantalla.** `BotonAudio`
+—grabar, transcribir, el texto cae en la respuesta— colgaba de los tres campos
+del origen y del Para Qué desde antes. No era una pregunta nueva: era ese botón
+en los campos que no lo tenían. Ahora está también en la frustración, en el
+pacto y en los cuatro campos abiertos de la situación.
+
+**Tres, y es el que importa: el premio ya se le daba a todos.** La decisión del
+11 de noviembre fue «el premio es que su día 1 se abre ahí mismo, en vez de
+mañana». Medido: `fecha_inicio` se estampa HOY al dar de alta —`api/alta-numero.ts`
+y el Admin—, `diaDelPrograma` acota el resultado a 1 como mínimo, y la última
+pantalla de la bienvenida ya dice «Tu sesión de hoy te espera: el Día 1 completo»
+y lleva al Camino. **No hay ningún «mañana» del que rescatarlo.** Y un premio que
+el que se pasa también recibe no es un premio.
+
+Así que el reloj se construyó SIN premio, y eso tiene consecuencia: su única
+apuesta quedó vacía. Hoy el reloj dice el tiempo y nada más —«Son 15 minutos, de
+una sola sentada», y si se pasa, «te pasaste de los 15, y no pasa nada»—. **Si
+querés que terminar a tiempo gane algo, hay que decir QUÉ, y eso es una promesa
+que el cliente lee: espera tu clic.** Lo que no se puede ofrecer como premio es
+el día 1, porque ya lo tiene.
+
+**Lo que la fusión arregló sin proponérselo.** `guardarDiagnostico` mandaba a la
+pantalla del dictamen a quien ya tuviera el origen contestado, y de paso se
+llevaba los pasos de los números y de la rueda: ese cliente terminaba la
+bienvenida **sin sus seis números** —«sin esto no hay con qué comparar al
+final»— y sin su rueda. En un tramo único no hay nada que saltear. Y el jsonb
+`diagnostico` pasó de dos escritores con compositor a **un solo escritor de
+verdad**: el bug del 8 de noviembre ya no tiene dónde volver a nacer.
+
+**Las preguntas nuevas son cinco, no cuatro, y el FODA entra a la mitad.** La
+regla de la casa es que nada se pregunta dos veces, y dos de las cuatro letras
+ya estaban: la **D** se pregunta DOS veces —`freno` («tu freno principal al
+arrancar», que además viaja al ADN) y `frustracion`— y la **O** la cubren
+`nicho` y `llegan`. Entran la **F** («¿qué haces mejor que cualquiera de tu
+especialidad?») y la **A** («¿qué de afuera te puede sacar consultantes este
+año?»), más los enlaces, los archivos y los cinco tramos que le importan. Los
+archivos no abren un segundo subidor: delegan en `evidencia.ts`, con su tope de
+50 MB y sus mensajes ya escritos, bajo una carpeta reservada que no es el código
+de ninguna de las 90 jornadas.
+
+**La lente, probada contra sus once fallos.** `scripts/prueba-la-radiografia-en-un-tramo.ts`
+se pone roja si el reloj reinicia al recargar, si alguien le cuelga un candado a
+`sePaso()`, si el tramo se vuelve a partir en pasos, si el cliente que hoy está
+a mitad de la bienvenida pierde su traducción, si una pregunta nueva deja de
+viajar o vuelve a nacer vacía, si anotar una lista pisa la otra, si vuelve un
+segundo escritor del jsonb, si los archivos abren su propio bucket, si el cierre
+deja de pedir los seis números, y si el reloj se cuela en la sesión de cada día
+—que es la decisión que se tomó al revés y sigue en pie—.
+
+**Y la bienvenida ahora se MONTA en la batería.** Es la primera pantalla de
+alguien que acaba de pagar, tiene mil cuatrocientas líneas, y ninguna lente la
+ejecutaba: la única que la miraba la leía como texto. `prueba-pantallas.tsx` la
+monta entera y comprueba que las seis secciones dibujen, que el reloj esté, que
+haya un solo botón, y que los seis nombres de paso viejos caigan en el tramo en
+vez de en una pantalla en blanco.
+
+**Cuatro lentes de la casa estaban apuntadas a la forma vieja, y se
+re-apuntaron a la propiedad** —el mismo arreglo del turno 14—:
+
+| la lente | miraba | mira |
+|---|---|---|
+| `prueba-medicion` | el `disabled` del botón del paso | que el cierre exija los seis |
+| `prueba-medicion` | el orden `'origen', 'numeros'` en la lista | que los números se pidan antes del ADN |
+| `prueba-la-bienvenida-no-se-pisa` | `diagnostico:` en todo el archivo | solo adentro de un `.update()` |
+| `medir-app.py` | «el wizard se cortó en el paso 5 de **10**» | los pasos que declara `STEPS` |
+
+La tercera había empezado a marcar en rojo la tabla de traducción de pasos
+—una llave que se llama `diagnostico` no es una escritura de la columna— y
+quedó **más** estricta que antes, no menos. La cuarta tenía el diez escrito a
+mano, que es el contador que envejece sin avisar del que ese mismo archivo ya
+advertía dos renglones más abajo.
+
+**Y una falta mía que el medidor cazó y ninguna lente de texto podía ver.** Al
+juntar seis pasos en una vista, los pesos tipográficos que vivían en pantallas
+distintas quedaron en la misma: el tamaño 15 juntó cuatro —400, 500, 600 y
+700— y el techo de la regla son tres. Se movieron dos cosas, las dos medidas:
+la frase del reloj a 17 px (donde el 400 ya existía) y los números del 1 al 10
+de la energía a 16 px, porque 15 px la casa lo reserva para metadatos y un
+número que el cliente TOCA no es un metadato. El medidor volvió a cero faltas
+en las 93 vistas. **Si alguno de esos dos tamaños no te gusta, es una línea.**
+
+**Lo que quedó anotado y no se tocó.** El premio, dicho arriba. Y las 98 vistas
+del medidor ahora son 93: no se borró ninguna pantalla, se fundieron cinco
+pasos en uno.
 
 ### Medía para nadie — turno 16, el 12 de noviembre
 
@@ -933,7 +1032,9 @@ visual a ciegas. Alcanza con que señale una pantalla y diga qué le molesta.
 
 **La tarea programada queda encendida**, con el turno 17 para tomar. Apagarla
 ahora habría dejado ese trabajo esperando a que él lo empuje, que es
-exactamente lo que pidió no tener que hacer.
+exactamente lo que pidió no tener que hacer. *(El turno 17 se cerró el 12 de
+noviembre; de sus dos decisiones, el reloj se construyó y el premio se disolvió
+al medirlo. Está arriba.)*
 
 ### El Admin daba una ventana de acceso distinta a la de las rutas de pago
 
@@ -1087,7 +1188,7 @@ cobro que MiClínica reporta. Javo eligió esto sabiendo el costo —alguien
 puede tildarla sin haber vendido— porque prefiere eso a trabar a quien vendió
 por transferencia.
 
-### 5 · La radiografía: 15 minutos de una, cronometrados — por construir
+### 5 · La radiografía: 15 minutos de una, cronometrados — HECHA el 12 de noviembre (turno 17)
 
 Un solo tramo, con el reloj a la vista, pidiendo sinceridad y brevedad, y un
 premio al terminar a tiempo. FODA personal y profesional, rueda de la vida,
@@ -1147,10 +1248,15 @@ en una línea si no le cierran:
    pregunta sigue ahí; lo único que se pierde es el premio. Así el reloj
    empuja a contestar lo primero que se le viene —que es casi siempre lo
    verdadero— sin castigar a quien piensa.
-2. **El premio es que su día 1 se abre ahí mismo**, en vez de mañana. No
-   cuesta nada, es coherente con su filosofía —el que se mueve, avanza— y lo
-   que gana es impulso, que es justo lo que necesita en sus primeros minutos.
-   Un regalo suelto no haría eso.
+2. ~~**El premio es que su día 1 se abre ahí mismo**, en vez de mañana.~~
+   **Se disolvió al medirlo, el 12 de noviembre.** Ya se le abre ahí mismo, a
+   todos: `fecha_inicio` se estampa HOY al dar de alta, `diaDelPrograma` acota
+   a 1 como mínimo, y la última pantalla de la bienvenida ya dice «Tu sesión de
+   hoy te espera: el Día 1 completo» y lleva al Camino. No hay ningún «mañana»
+   del que rescatarlo, y un premio que el que se pasa también recibe no es un
+   premio. **El reloj se construyó sin premio: dice el tiempo y nada más.** Si
+   terminar a tiempo tiene que ganar algo, hay que decir QUÉ — y eso es una
+   promesa que el cliente lee, así que espera tu clic.
 
 Con esas dos tomadas, el tramo único y las cuatro preguntas nuevas dejan de
 estar trabados: es el turno 17.
@@ -1177,6 +1283,10 @@ tramo depende de si hay reloj o no.
 
 Lo que **ya no depende de nada de eso** es el flanco, y está cerrado: el que
 abandona a los 9 minutos y vuelve, sigue.
+
+**Y el 12 de noviembre se cerró el resto**: el tramo único, el reloj y las
+preguntas nuevas, con el premio medido y descartado. El detalle está arriba, en
+«El tramo único, y un premio que no existía».
 
 ---
 

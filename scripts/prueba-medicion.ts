@@ -56,8 +56,28 @@ ok(comparar(null, salida).every((p) => p.entrada === null && /Falta medirlo/.tes
 console.log('\n── dónde vive ──');
 const wizard = readFileSync('src/components/WelcomeWizard.tsx', 'utf8');
 ok(/'numeros'/.test(wizard) && /KEY_ENTRADA/.test(wizard), 'la entrada se pide en el onboarding');
-ok(/disabled=\{!estaCompleta\(medicionEntrada\)\}/.test(wizard), 'y no deja seguir hasta que estén los seis');
-ok(wizard.indexOf("'origen', 'numeros'") > 0, 'va después de su origen y antes de que se arme su ADN');
+/*
+ * LAS DOS MIRADAS DE ABAJO SE RE-APUNTARON A LA PROPIEDAD el 12 de noviembre,
+ * con el turno 17 — el mismo arreglo que el turno 14 le hizo a dos lentes de
+ * la auditoría. Buscaban la FORMA que tenía la pantalla:
+ *
+ *   · `disabled={!estaCompleta(medicionEntrada)}` — el botón del paso de los
+ *     números, que ya no existe: la bienvenida se fundió en un tramo único y
+ *     tiene UN botón al final.
+ *   · `'origen', 'numeros'` — el orden de dos pasos en la lista, que en un
+ *     tramo único no existe tampoco.
+ *
+ * Lo que protegían SIGUE siendo verdad y sigue importando, así que se pregunta
+ * por eso y no por la forma: que los seis números no se puedan saltear, y que
+ * se pidan antes de que se arme el ADN.
+ */
+const cierre = /async function cerrarElTramo\(\) \{(.*?)\n  \}/s.exec(wizard)?.[1] ?? '';
+ok(/if \(!estaCompleta\(medicionEntrada\)\)/.test(cierre) && /return;/.test(cierre),
+  'y no deja seguir hasta que estén los seis');
+const pasos = /const STEPS: Step\[\] = \[(.*?)\];/s.exec(wizard)?.[1] ?? '';
+ok(pasos.indexOf("'radiografia'") > 0 && pasos.indexOf("'radiografia'") < pasos.indexOf("'welcome'")
+  && /guardar\(KEY_ENTRADA, medicionEntrada\)/.test(cierre),
+  'va después de su origen y antes de que se arme su ADN');
 
 const roadmap = readFileSync('src/pages/Roadmap.tsx', 'utf8');
 const pantalla = readFileSync('src/components/tasks/AntesYDespues.tsx', 'utf8');

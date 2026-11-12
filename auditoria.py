@@ -3438,6 +3438,40 @@ _ww = todo.get('src/components/WelcomeWizard.tsx', '')
 check('el primer ingreso habla con el vocabulario del cliente',
       'VOC(' in _ww and 'pacientes:' not in _ww)
 
+# ── La radiografía en un solo tramo (turno 17) ────────────────────────
+#
+# La entrada es UN tramo, con los quince minutos a la vista y la condición que
+# Javo eligió con ellos: pasarse no cierra nada. Las tres cosas se pueden
+# deshacer sin que nada reviente, así que se miran acá y, con miradas, en
+# `prueba-la-radiografia-en-un-tramo.ts`.
+_pasos17 = re.search(r"const STEPS: Step\[\] = \[(.*?)\];", _ww, re.S)
+_pasos17 = _pasos17.group(1) if _pasos17 else ''
+check('la entrada del cliente es un solo tramo, no diez pasos',
+      "'radiografia'" in _pasos17
+      and not [v for v in ('profile', 'situacion', 'diagnostico', 'origen', 'numeros', 'rueda')
+               if f"'{v}'" in _pasos17],
+      'de los diez pasos SEIS preguntaban; los otros cuatro —contraseña, '
+      'dictamen, firma y guía— no se funden con nada')
+check('y el que hoy está a mitad de la bienvenida cae en el tramo',
+      'PASOS_VIEJOS' in _ww and 'PASOS_VIEJOS[guardado]' in _ww,
+      'su teléfono tiene uno de los nombres viejos: sin tabla, ninguna rama lo dibuja')
+check('el reloj de la radiografía está a la vista y no cierra nada',
+      _os64.path.exists('src/lib/elRelojDeLaRadiografia.ts')
+      and 'sePaso(' in _ww
+      and not re.search(r'disabled=\{[^}]*sePaso', _ww),
+      'Javo lo eligió con una condición: pasarse solo costaba el premio')
+check('y la sesión de cada día sigue sin reloj',
+      'elRelojDeLaRadiografia' not in todo.get('src/components/sesion/SesionViva.tsx', ''),
+      'esa decisión se tomó al revés y sigue en pie')
+check('las cinco preguntas nuevas viajan por el único escritor del jsonb',
+      len(re.findall(r'diagnostico:\s*payloadDiagnostico', _ww)) == 1
+      and all(c in _ww for c in ('fortaleza', 'amenaza', 'enlaces', 'archivos', 'dias_que_importan')))
+check('y los archivos que sube no abren un segundo bucket',
+      _os64.path.exists('src/lib/losArchivosDeLaRadiografia.ts')
+      and "from './evidencia'" in rd('src/lib/losArchivosDeLaRadiografia.ts'))
+check('existe la lente del tramo único',
+      _os64.path.exists('scripts/prueba-la-radiografia-en-un-tramo.ts'))
+
 # ── Los videos ya grabados (C3) ──────────────────────────────────────
 _vc = rd('src/lib/videosCargados.ts')
 # Los videos se guardan por DÍA: el código cambia cada vez que el Camino se

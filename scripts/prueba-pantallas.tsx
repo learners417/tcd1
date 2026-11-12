@@ -232,6 +232,65 @@ async function main() {
   linea(htmlJefe.includes('Humano por cliente'),
     'y sí ve el rendimiento del equipo');
 
+  /*
+   * ══ LA BIENVENIDA, MONTADA ══
+   *
+   * LA PANTALLA QUE NINGUNA LENTE MONTABA. Es la primera que ve alguien que
+   * acaba de pagar, tiene mil cuatrocientas líneas, y hasta el turno 17
+   * ningún lente la ejecutaba: el único que la mira —
+   * `prueba-la-radiografia-se-retoma.ts`— la lee como texto.
+   *
+   * Y el turno 17 la fundió de diez pasos en cinco. Un tramo que compila
+   * perfecto y revienta al abrirse deja al cliente con la pantalla en blanco
+   * adentro de lo que acaba de comprar.
+   */
+  console.log('\n══ la bienvenida ══');
+
+  const { default: WelcomeWizard } = await import('../src/components/WelcomeWizard');
+  const perfilNuevo = {
+    id: 'u-1', nombre: 'Natalia Pérez', email: 'n@ej.com', plan: 'DWY',
+    fecha_inicio: '2026-11-12', onboarding_completed: false,
+  } as unknown as Parameters<typeof WelcomeWizard>[0]['profile'];
+
+  localStorage.clear();
+  const htmlPwd = rr(<WelcomeWizard profile={perfilNuevo} onComplete={nada} />);
+  linea(htmlPwd.includes('contraseña') || htmlPwd.includes('Contraseña'),
+    'la bienvenida abre en la contraseña, que es el primer paso');
+
+  /* El tramo único: las SEIS secciones en la misma pantalla. */
+  localStorage.setItem('tcd_wizard_step_v1', 'radiografia');
+  const htmlTramo = rr(<WelcomeWizard profile={perfilNuevo} onComplete={nada} />);
+  const secciones: [string, string][] = [
+    ['frustración', 'Tu Mentor va a leer esto'],
+    ['situación', 'Tu escalera'],
+    ['diagnóstico', 'Lo que ya sabías'],
+    ['lo tuyo', 'mejor que cualquiera de tu especialidad'],
+    ['origen', 'de aquí nace todo'],
+    ['números', 'Seis números de hoy'],
+  ];
+  for (const [nombre, marca] of secciones) {
+    linea(htmlTramo.includes(marca), `el tramo trae la sección de ${nombre}`);
+  }
+  linea(htmlTramo.includes('15 minutos, de una sola sentada'),
+    'con el reloj a la vista y su condición escrita');
+  linea(htmlTramo.includes('Listo, dame mi punto de partida'),
+    'y un solo botón al final, donde antes había seis');
+  linea(!htmlTramo.includes('>Saltar<'),
+    'sin ningún «Saltar»: en un tramo único no hay a dónde saltar');
+
+  /*
+   * EL QUE ESTÁ A MITAD DE CAMINO HOY. Su teléfono tiene uno de los nombres
+   * viejos. Sin la tabla de traducción, ninguna rama lo dibuja: pantalla en
+   * blanco con el cliente adentro.
+   */
+  for (const viejo of ['profile', 'situacion', 'diagnostico', 'origen', 'numeros', 'rueda']) {
+    localStorage.setItem('tcd_wizard_step_v1', viejo);
+    const html = rr(<WelcomeWizard profile={perfilNuevo} onComplete={nada} />);
+    linea(html.includes('Seis números de hoy'),
+      `el que quedó en «${viejo}» cae en el tramo, no en una pantalla en blanco`);
+  }
+  localStorage.clear();
+
   console.log(`\n${fallas === 0 ? '✓ TODO EN VERDE' : `✗ ${fallas} FALLAS`}`);
   process.exit(fallas === 0 ? 0 : 1);
 }
