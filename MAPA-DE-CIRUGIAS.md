@@ -262,6 +262,36 @@ el apagado: está probado que no puede.** La tarea va a seguir despertando cada
 cuatro horas hasta que la apagues tú en Tareas programadas o le escribas turnos
 nuevos a la tabla.
 
+**Tercera vez, el 12 de noviembre a las 11:40 UTC — y esta vez se midió todo
+desde frío.** La cola seguía sin turnos abiertos y no se reintentó el apagado,
+porque ya está probado que no puede. En su lugar el turno corrió **las dos
+baterías enteras sobre un contenedor reciclado**, y las dos quedaron en verde:
+TCD con `tsc` limpio, `npm run build` limpio, **131 de 131** `prueba-*.ts` y
+`auditoria.py` con 868 miradas («el ZIP puede salir»); MCD con sus 52. Las dos
+apps compilan y pasan desde un clon frío, sin nada arrastrado de la sesión
+anterior.
+
+**Lo que hay que saber antes de leer una batería en rojo: el contenedor se
+recicla y `node_modules` vuelve vacío.** Medido hoy: sin dependencias, TCD tira
+**14.153 errores de `tsc`** y MCD marca **2 fallas** —`tsc` y `next build`—, y
+ninguna de las dos es del código. Son el mismo `node_modules` en cero.
+
+**Y cada repo se instala distinto, que es la trampa:**
+
+| repo | el comando | por qué |
+|---|---|---|
+| TCD | `npm ci` | tiene `package-lock.json` |
+| MCD | `npm install` | **no** tiene lockfile, y es a propósito |
+
+En MCD `npm ci` **no corre**: aborta con `EUSAGE` pidiendo un lockfile que no
+existe. No es una falla del repo —el lockfile se sacó el 9 de noviembre
+(`f481901`) y quedó ignorado, porque subir el que se resuelve hoy cambia lo que
+Vercel instala y eso es decisión tuya, no de la batería—. Si una batería de MCD
+aparece roja en `tsc` o en `next build`, lo primero es mirar si hay
+dependencias, y la segunda si `.next` quedó de una instalación vieja: hoy la
+primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
+los tipos de Next ya generados.
+
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
 Commit `acc1f1a`. La bienvenida pasó de diez pasos a cinco, con los
