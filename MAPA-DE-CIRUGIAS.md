@@ -244,6 +244,15 @@ cerrada por el turno 6 (`f3e9ddc`), más las 5 del puente del turno 7
 **Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
 nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
 
+**La tarea NO se pudo apagar sola, el 12 de noviembre.** Su propio encargo dice
+«cuando los turnos estén cerrados, desactivar esta tarea programada», y el
+turno lo intentó: el permiso de la sesión lo rechazó —apagar una tarea
+programada necesita tu visto—. Así que **la tarea sigue encendida y va a
+despertar cada cuatro horas sin nada que tomar**, hasta que la apagues tú en
+Tareas programadas («Cola de turnos TCD y MCD») o le escribas turnos nuevos a
+esta tabla. Que no la apague el próximo turno por su cuenta: va a chocar con el
+mismo permiso.
+
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
 Commit `acc1f1a`. La bienvenida pasó de diez pasos a cinco, con los
