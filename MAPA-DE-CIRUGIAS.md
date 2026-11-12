@@ -222,7 +222,7 @@ espera el clic.
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
-| 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `PENDIENTE_HASH` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
+| 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `acc1f1a` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
@@ -246,7 +246,7 @@ nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
 
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
-Commit `PENDIENTE_HASH`. La bienvenida pasó de diez pasos a cinco, con los
+Commit `acc1f1a`. La bienvenida pasó de diez pasos a cinco, con los
 quince minutos a la vista, cinco preguntas nuevas y una lente propia de
 sesenta y cuatro miradas.
 
