@@ -1,6 +1,6 @@
 /**
  * LA GRADUACIÓN DE LOS 5 DÍAS — ZIP A/B.
- * Aparece cuando el comprador de EL NÚMERO ($27) completa su día 5.
+ * Aparece cuando el comprador de EL NÚMERO —la entrada— completa su día 5.
  * Lee la taxonomía única del ADN: muestra lo que selló y lo que sigue
  * apagado, con el resultado de cada pieza. Es la puerta, no el muro.
  */

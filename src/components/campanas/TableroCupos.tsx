@@ -18,6 +18,7 @@ import {
   type EntradaBitacora,
 } from '../../lib/bitacoraCampana';
 import { formulaPorId } from '../../lib/formulasAnuncios';
+import { cadenaPara } from '../../lib/tablero';
 import { subirNumerosDelCliente } from '../../lib/tableroSync';
 
 const KEY_DIA = 'tcd_tablero_diario_v1';
@@ -584,8 +585,18 @@ export default function TableroCupos(
           </>
         )}
 
+        {/* El número sale de `cadenaPara`, que es la cadena de verdad.
+            Escrito a mano acá decía «~5 conversaciones por día te dan las
+            ~300 del mes»: el 300 venía de redondear las agendas para abajo
+            —la cuenta real da 306— y 5 por día dan 150, no 300. Dos números
+            equivocados, en la única pantalla donde el cliente los lee.
+            Y no se dice cuántas por día: 306 entre 30 da 10,2, así que
+            cualquier entero redondo vuelve a no cerrar. El mes sí cierra. */}
         {totalSemana > 0 && (
-          <p className="text-sm text-cream/45 mt-1">La cuenta de los 10: ~5 conversaciones por día te dan las ~300 del mes — de ahí salen tus agendas y tus llamadas.</p>
+          <p className="text-sm text-cream/45 mt-1">
+            La cuenta de los 10: <span className="num-tab">{cadenaPara().conversaciones}</span> conversaciones
+            en el mes — de ahí salen tus agendas y tus llamadas.
+          </p>
         )}
       </div>
     </div>

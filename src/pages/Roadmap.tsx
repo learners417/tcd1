@@ -419,7 +419,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   const taskRef = useRef<HTMLDivElement>(null);
 
   // ─── Seed enriquecido con videos reales de programa_videos ─────────────
-  // ── Gating por plan: EL NÚMERO ($27) abre P0-P1; el resto queda visible y bloqueado ──
+  // ── Gating por plan: EL NÚMERO (la entrada) abre P0-P1; el resto queda visible y bloqueado ──
   // La pregunta vive en planes.ts: acá leía `plan` a mano y, como esa columna
   // no se limpia al subir de escalón, al que pagaba La Base le dejaba el
   // Camino cortado en el día 5 con el candado del día 6 puesto.
@@ -1492,7 +1492,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                            *
                            * Acá ofrecía «Tu Sistema · $497» y, más arriba, «El
                            * Programa Completo · $997»: la escalera vieja. El que
-                           * pagaba los $27 llegaba al día 6 enganchado, tocaba
+                           * pagaba la entrada llegaba al día 6 enganchado, tocaba
                            * este botón, y veía un nombre y un precio que ya no
                            * se venden. La venta automática se cortaba ahí.
                            */

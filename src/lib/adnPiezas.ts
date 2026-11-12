@@ -95,7 +95,7 @@ export function leerJSON<T>(clave: string, porDefecto: T): T {
  * Una sola pregunta, un solo lugar.
  *
  * Esto leía `plan` y devolvía true para todo el que hubiera entrado por los
- * $27, sin mirar si después había pagado. Como `plan` no se limpia nunca, al
+ * la entrada, sin mirar si después había pagado. Como `plan` no se limpia nunca, al
  * que subía a La Base le seguía escondiendo las piezas que acababa de comprar.
  */
 export function planLimitado(): boolean {

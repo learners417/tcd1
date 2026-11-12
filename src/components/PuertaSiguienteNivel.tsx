@@ -3,7 +3,7 @@
  *
  * Para quien tiene un tramo intermedio de acceso: le muestra lo que ya selló,
  * las piezas que le faltan con el nombre de la sesión donde se ganan, y la
- * puerta al nivel que sigue. El del $27 no la ve: tiene su propia graduación
+ * puerta al nivel que sigue. El de la entrada no la ve: tiene su propia graduación
  * de los 5 días.
  *
  * La oferta de la puerta sale de `laOfertaQueSigue`, no de los nombres de

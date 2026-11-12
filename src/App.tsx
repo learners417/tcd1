@@ -191,7 +191,7 @@ export default function App() {
   // ya se pintaron vuelvan a calcular su día con el corrimiento puesto.
   const [pausasListas, setPausasListas] = useState(false);
   useEffect(() => { void cargarVentanas().then(() => setPausasListas(true)); }, []);
-  // El comprador de EL NÚMERO ($27) entra directo a su tramo corto: Mi Número
+  // El comprador de EL NÚMERO —la entrada— entra directo a su tramo corto: Mi Número
   useEffect(() => {
     try {
       const plan = localStorage.getItem('tcd_plan') || JSON.parse(localStorage.getItem('tcd_profile') ?? '{}')?.plan;

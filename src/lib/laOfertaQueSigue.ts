@@ -3,7 +3,7 @@
  *
  * ═══ QUÉ PROBLEMA RESUELVE ═══
  *
- * EL NÚMERO ($27) abre hasta el día 5 y corta ahí, que es donde se gana el
+ * EL NÚMERO —la entrada— abre hasta el día 5 y corta ahí, que es donde se gana el
  * grado «Precio digno». Es el mejor momento para ofrecerle seguir: tiene su
  * precio decidido y un grado ganado.
  *
@@ -11,10 +11,28 @@
  * arriba, «El Programa Completo · $997». Esa es la escalera vieja, de cuando
  * los planes se llamaban por color y se cortaban por pilar.
  *
- * La de hoy es La Base ($1.000), El Ascenso ($3.000) y La Instalación
- * ($5.000), y vive en `cuadroTickets`. Así que el que pagaba $27, llegaba al
- * día 6 enganchado, tocaba el botón y veía un nombre y un precio que ya no se
- * venden. La venta automática se cortaba justo ahí.
+ * La de hoy es La Base, El Ascenso y La Instalación, y sus precios viven en
+ * `cuadroTickets` —con fecha, así que en enero suben solos—. Así que el que
+ * pagaba la entrada, llegaba al día 6 enganchado, tocaba el botón y veía un
+ * nombre y un precio que ya no se venden. La venta automática se cortaba
+ * justo ahí.
+ *
+ * ═══ POR QUÉ ACÁ NO HAY NINGÚN NÚMERO ESCRITO ═══
+ *
+ * Porque este archivo los pone en pantalla, no los decide. Los de la escalera
+ * salen de `cuadroTickets`; el de la entrada no está en la app en ninguna
+ * forma, y es a propósito: **la app no cobra, abre acceso.** El precio de la
+ * entrada lo pone la página que la vende —hoy 97 USD, con su línea «los 8
+ * libros y los cinco primeros días de mi app»— y vive en el repo `landings`.
+ *
+ * Hasta el 11 de noviembre había catorce comentarios en siete archivos que
+ * decían «$27», que fue el precio de la entrada hace tiempo. Ninguno llegaba
+ * a una pantalla, pero cualquiera que leyera el código salía creyendo que la
+ * app cobra 27 — y eso ya había hecho que este mapa anotara un «conflicto de
+ * precios» que no existía. Ahora la entrada se nombra por su nombre.
+ *
+ * Lo que NO se renombra es el valor guardado `plan = 'ELNUMERO'`: está
+ * escrito en la base de clientes reales y es lo que les abre sus cinco días.
  *
  * ═══ POR QUÉ UN ESCALÓN POR VEZ ═══
  *
@@ -22,7 +40,7 @@
  * Ascenso. Cada candado ofrece el escalón que lo abre, no el catálogo: elegir
  * entre tres en el momento de pagar es la forma más cara de no decidir.
  *
- *     $27 ──día 5──▸ La Base $1.000 ──día 12──▸ El Ascenso $3.000
+ *     la entrada ──día 5──▸ La Base $1.000 ──día 12──▸ El Ascenso $3.000
  *
  * ═══ POR QUÉ NO VIVE EN `planes.ts` ═══
  *
@@ -109,7 +127,7 @@ export function laOfertaQueSigue(pilarNum: number) {
 /**
  * LA OFERTA DE CUANDO SE VENCE EL ACCESO.
  *
- * El que paga $27 tiene 21 días de calendario para hacer sus 5 sesiones. El
+ * El que paga la entrada tiene 21 días de calendario para hacer sus 5 sesiones. El
  * día 22 el acceso se cierra, y esa pantalla es el punto de venta más caro de
  * la app: tiene su precio nuevo decidido, su grado ganado, y acaba de perder
  * la puerta.

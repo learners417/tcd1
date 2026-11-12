@@ -80,7 +80,7 @@ export function planDe(perfil?: Partial<Profile> | null): PlanComercial {
    *
    * Acá se preguntaba primero por `plan === 'ELNUMERO'` y se devolvía
    * 'blanco' sin mirar nada más. Y `plan` no se limpia cuando alguien sube de
-   * escalón: así que el que entraba por los $27 y después pagaba La Base
+   * escalón: así que el que entraba por la entrada y después pagaba La Base
    * **seguía viendo el Camino cortado en el día 5**, con el candado del día 6
    * puesto, justo después de pagar. Pasaba igual si el equipo le abría el
    * acceso a mano desde el Admin.
@@ -90,7 +90,7 @@ export function planDe(perfil?: Partial<Profile> | null): PlanComercial {
    */
   const pago = planPagado(perfil);
   if (pago) return pago;
-  // EL NÚMERO ($27, alta automática) = los 5 días: mismo tramo, mismo tope
+  // EL NÚMERO (la entrada, alta automática) = los 5 días: mismo tramo, mismo tope
   if ((perfil as { plan?: string } | undefined)?.plan === 'ELNUMERO') return 'blanco';
   return 'completo';
 }
@@ -118,7 +118,7 @@ export function planDelCliente(perfil?: Partial<Profile> | null): PlanComercial 
 }
 
 /**
- * ¿Está en el tramo de los $27 y todavía no subió?
+ * ¿Está en el tramo de la entrada y todavía no subió?
  *
  * La pregunta que importa no es «entró por EL NÚMERO» —eso queda escrito para
  * siempre— sino «su acceso es el de los 5 días y nada más». Vivía repetida en

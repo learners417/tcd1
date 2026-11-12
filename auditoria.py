@@ -4256,6 +4256,22 @@ _sueltos72 = [_os72.path.basename(f) for f in _PUNTOS72
 check(f'los {len(_PUNTOS72)} puntos de venta tiran de la misma fuente',
       not _sueltos72, ', '.join(_sueltos72))
 
+# Y la cuenta de los 10 tampoco se escribe a mano en una pantalla.
+#
+# El 11 de noviembre, `TableroCupos.tsx` le decía al cliente «~5 conversaciones
+# por día te dan las ~300 del mes». Los dos números estaban mal: la cadena real
+# da 306 —el 300 sale de redondear las agendas para abajo, y media agenda no
+# agenda a nadie— y 5 por día dan 150, no 300. Era la única pantalla donde el
+# cliente lee esa cuenta. Ahora sale de `cadenaPara`.
+_CADENA72 = _re72.compile(r'~?\s*(?:150|300)\s*(?:conversaciones|del mes)|(?:conversaciones|agendas)[^<\n]{0,20}~\s*(?:150|300)')
+_aMano72 = []
+for _f72 in _g72.glob('src/**/*.tsx', recursive=True):
+    _vivo72 = _sin_comentarios72(rd(_f72))
+    if _CADENA72.search(_vivo72):
+        _aMano72.append(_os72.path.basename(_f72))
+check('la cuenta de los 10 sale de la cadena, no escrita a mano',
+      not _aMano72, ', '.join(sorted(set(_aMano72))))
+
 # El puente que no debe volver: traducir un plan de acceso a un ticket.
 _ofs72 = rd('src/lib/laOfertaQueSigue.ts')
 check('un plan de acceso NO se traduce a un ticket de venta',

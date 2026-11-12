@@ -289,7 +289,7 @@ export default function WelcomeWizard({ profile, onComplete }: WelcomeWizardProp
    * Cada nivel entra a SU camino: los 5 días o los 90.
    *
    * Lee el tramo, no por dónde entró: `plan` queda en 'ELNUMERO' para
-   * siempre, así que quien pagó los $27 y después La Base antes de entrar la
+   * siempre, así que quien pagó la entrada y después La Base antes de entrar la
    * primera vez veía la bienvenida de los 5 días con 12 abiertos.
    */
   const esCincoDias = enElTramoDelNumero(profile as Partial<Profile>);

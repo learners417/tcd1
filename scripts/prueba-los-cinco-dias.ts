@@ -27,7 +27,7 @@
  * devuelve 'completo' porque 'blanco' va en `plan_comercial`, no en `plan`:
  * son dos columnas distintas a propósito.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { pilarDelDia, codigoDelDia, roadmap } from '../src/lib/roadmapSeed';
 import { PILAR_MAX, planDe } from '../src/lib/planes';
@@ -133,6 +133,56 @@ for (const d of LOS_CINCO) {
 }
 bien('los cinco días tienen título, pasos, evidencia con lo que pide, ADN y entrenador');
 bien('los cinco caen en El lago, que es el libro que se lee con ellos');
+
+/* ── 4b · La app no escribe el precio de la entrada en ningún lado ──
+ *
+ * La app no cobra: abre acceso. El precio de la entrada lo pone la página que
+ * la vende, y vive en el repo `landings`. Escrito también acá, se desfasa sin
+ * que nadie se entere: el 11 de noviembre había catorce comentarios en siete
+ * archivos diciendo «$27», que fue el precio hace tiempo. Ninguno llegaba a
+ * una pantalla, y aun así alcanzó para que el mapa anotara un conflicto de
+ * precios que no existía.
+ *
+ * Los precios de la escalera sí viven en la app, en `cuadroTickets`, porque
+ * los pinta ella. Esta comprobación mira sólo el de la entrada.
+ *
+ * Y mira el CÓDIGO, no los comentarios. En su primera corrida se marcó a sí
+ * misma: el comentario de arriba nombra el 97 y el 27 justamente para contar
+ * qué se corrigió. Un comentario no llega a ninguna pantalla; lo que hay que
+ * impedir es que el número vuelva al código. Los saltos de línea se conservan
+ * —el comentario se vacía, no se borra— para que el número de línea que
+ * imprime sea el de verdad.
+ */
+const soloCodigo = (t: string) => t
+  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/^(\s*)\/\/.*$/gm, '$1');
+
+function bajoSrc(dir: string): string[] {
+  const out: string[] = [];
+  for (const e of readdirSync(join(raiz, dir), { withFileTypes: true })) {
+    const p = `${dir}/${e.name}`;
+    if (e.isDirectory()) out.push(...bajoSrc(p));
+    else if (/\.tsx?$/.test(e.name)) out.push(p);
+  }
+  return out;
+}
+
+/* Los dos órdenes, porque se escribe de las dos formas: «97 USD» y «USD 97».
+   La primera versión solo miraba el primero y el test de mordida lo encontró. */
+const ENTRADA_A_MANO = /\$\s?(?:27|97)\b|\b(?:27|97)\s?USD\b|\bUSD\s?(?:27|97)\b/;
+const conPrecio: string[] = [];
+for (const f of bajoSrc('src')) {
+  const codigo = soloCodigo(readFileSync(join(raiz, f), 'utf8'));
+  codigo.split('\n').forEach((l, i) => {
+    if (ENTRADA_A_MANO.test(l)) conPrecio.push(`${f}:${i + 1}  ${l.trim().slice(0, 70)}`);
+  });
+}
+if (conPrecio.length) {
+  mal(`${conPrecio.length} lugar(es) escriben el precio de la entrada, que es de la página:`);
+  for (const c of conPrecio.slice(0, 6)) console.log(`      ${c}`);
+} else {
+  bien('la app no escribe el precio de la entrada: lo pone la página que la vende');
+}
 
 /* ── 5 · El día 5 sella el precio y deja con qué cobrar ──
  *

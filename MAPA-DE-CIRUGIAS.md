@@ -222,6 +222,7 @@ espera el clic.
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
+| 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **el próximo** · las dos decisiones que la frenaban quedaron tomadas el 11 nov |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
@@ -896,6 +897,44 @@ se cobra abra lo que se vendió, cualquiera sea el número.
 
 ---
 
+### Lo que se resolvió el 11 de noviembre, con «resolvé todo»
+
+Javo pidió que se resolvieran los cinco clics pendientes. Tres se resolvieron,
+uno se disolvió al medirlo y uno sigue siendo suyo porque no es medible.
+
+**El precio de entrada: no había ningún conflicto.** El mapa decía «la app
+cobra 27 y la oferta son 97». Medido: ni el 27 ni el 97 están en ninguna
+pantalla de la app. Los catorce «$27» que había estaban todos en comentarios,
+en siete archivos, y eran el precio de la entrada de hace tiempo. **La app no
+cobra: abre acceso.** El precio lo pone la página que la vende —hoy 97 USD, con
+su línea «los 8 libros y los cinco primeros días de mi app»— y vive en el repo
+`landings`. Los comentarios ahora nombran la entrada por su nombre, el valor
+guardado `plan = 'ELNUMERO'` quedó intacto —está en la base de clientes
+reales— y `prueba-los-cinco-dias.ts` se pone roja si el número vuelve al
+código, en sus tres formas de escribirse.
+
+**La cuenta de los 10: queda 306, y el mapa estaba equivocado.** Este mapa
+decía que el 300 «no estaba escrito en ninguna pantalla». Sí estaba:
+`TableroCupos.tsx` le decía al cliente «~5 conversaciones por día te dan las
+~300 del mes», y los dos números estaban mal. La cadena real da 306 —el 300
+sale de redondear las agendas para abajo, y media agenda no agenda a nadie— y
+5 por día dan 150, no 300. Ahora el número sale de `cadenaPara` y la pantalla
+no dice cuántas por día: 306 entre 30 da 10,2, así que cualquier entero redondo
+vuelve a no cerrar. El mes sí cierra. La auditoría se pone roja si el número
+escrito a mano vuelve.
+
+**El reloj y el premio de la radiografía: tomados.** Están arriba, en la
+cirugía 2, con su razón. El trabajo que destraban es el turno 17.
+
+**La estética sigue siendo suya, y es lo único que no se resolvió.** El
+medidor da cero faltas de regla en las 98 vistas: no hay nada medible que
+arreglar. Lo que queda es gusto, y adivinarlo sería rehacer su identidad
+visual a ciegas. Alcanza con que señale una pantalla y diga qué le molesta.
+
+**La tarea programada queda encendida**, con el turno 17 para tomar. Apagarla
+ahora habría dejado ese trabajo esperando a que él lo empuje, que es
+exactamente lo que pidió no tener que hacer.
+
 ### El Admin daba una ventana de acceso distinta a la de las rutas de pago
 
 Turno 13, la mitad del Admin. El acceso se abre desde tres lugares y cada uno
@@ -1095,9 +1134,30 @@ Probada contra sus tres fallos —un campo que vuelve a nacer vacío, un borrado
 que reemplaza en vez de mezclar, las cuatro fuera del compositor—: roja en los
 tres, verde al restaurar.
 
-#### Lo que espera su clic, y por qué
+#### Las dos decisiones, tomadas el 11 de noviembre
 
-Dos piezas del turno 5 no las toca Claude solo:
+Javo pidió que se resolviera todo. Las dos quedaron así, y las dos se cambian
+en una línea si no le cierran:
+
+1. **El reloj queda a la vista**, como eligió el 8 de noviembre («los 15 de
+   una, cronometrados»). Choca con una decisión anterior escrita en
+   `SesionViva.tsx` —«un reloj corriendo apura y no ayuda»— y se resolvió a
+   favor de su clic, que es más nuevo y es suyo. Con una condición que viene
+   del propio diseño del turno 5: **pasarse de tiempo no cierra nada.** La
+   pregunta sigue ahí; lo único que se pierde es el premio. Así el reloj
+   empuja a contestar lo primero que se le viene —que es casi siempre lo
+   verdadero— sin castigar a quien piensa.
+2. **El premio es que su día 1 se abre ahí mismo**, en vez de mañana. No
+   cuesta nada, es coherente con su filosofía —el que se mueve, avanza— y lo
+   que gana es impulso, que es justo lo que necesita en sus primeros minutos.
+   Un regalo suelto no haría eso.
+
+Con esas dos tomadas, el tramo único y las cuatro preguntas nuevas dejan de
+estar trabados: es el turno 17.
+
+#### Lo que decía antes, y por qué estaba trabado
+
+Dos piezas del turno 5 no las tocaba Claude solo:
 
 1. **El reloj a la vista.** Choca con una decisión que ya está escrita en el
    código: `src/components/sesion/SesionViva.tsx` dice «un reloj corriendo
