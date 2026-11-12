@@ -222,12 +222,26 @@ espera el clic.
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
-| 17 | MCD: su primer turno — la batería que no tiene | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
+
+**La cola quedó sin turnos abiertos el 12 de noviembre, con el turno 16.** Los
+dieciséis están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el flanco
+y lo que queda adentro es tu clic, no trabajo. Así que la tarea programada
+sigue encendida y sin nada que tomar.
+
+**Dos premisas del encargo de la tarea ya no son ciertas, y por eso no se
+apagó sola:** dice «los diez turnos» —son dieciséis— y dice que MCD «hoy NO
+tiene batería de ningún tipo: ése es su primer turno». MCD tiene su batería
+desde el 9 de noviembre: `auditoria.py` en su raíz, nueve bloques, 46 lentes,
+cerrada por el turno 6 (`f3e9ddc`), más las 5 del puente del turno 7
+(`7c6e524`). Lo que MCD no tiene es `prueba-*.ts`: su batería es toda Python.
+
+**Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
+nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
 
 ### Medía para nadie — turno 16, el 12 de noviembre
 
