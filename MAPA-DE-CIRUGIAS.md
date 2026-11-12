@@ -271,6 +271,23 @@ TCD con `tsc` limpio, `npm run build` limpio, **131 de 131** `prueba-*.ts` y
 apps compilan y pasan desde un clon frío, sin nada arrastrado de la sesión
 anterior.
 
+**Cuarta vez, el 12 de noviembre a las 15:50 UTC.** La cola seguía sin turnos
+abiertos y no se reintentó el apagado. Las dos baterías volvieron a correr
+enteras desde frío y quedaron en verde: TCD con `tsc` limpio, `npm run build`
+limpio, **131 de 131** `prueba-*.ts` y `auditoria.py` con **868 miradas, cero
+faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio en la
+primera corrida y su batería de **52** en verde. Lo que este turno encontró al
+verificar es la trampa del `HEAD` suelto de nuevo, y está corregida arriba.
+
+**Y un dato de operación, para que nadie lea un cuelgue donde no hay uno:
+`auditoria.py` de TCD tarda unos 22 minutos.** No es lento por el texto: el
+bloque 10 vuelve a correr las 131 pruebas y además levanta Chromium de verdad
+para medir las 93 vistas del cliente y las 17 del Admin. Eso **pasa del límite
+de 5 minutos** que tiene un comando en primer plano, así que el turno que la
+corra de frente la va a ver morir por tiempo sin que nada esté roto. **Se corre
+en segundo plano, redirigida a un archivo, y se mira el archivo cada tanto.** La
+de MCD, en cambio, termina en segundos.
+
 **Lo que hay que saber antes de leer una batería en rojo: el contenedor se
 recicla y `node_modules` vuelve vacío.** Medido hoy: sin dependencias, TCD tira
 **14.153 errores de `tsc`** y MCD marca **2 fallas** —`tsc` y `next build`—, y
@@ -298,9 +315,20 @@ día, pero la rama `main` local se había quedado **doce commits atrás**. Así 
 `git push origin main` —el comando del encargo— sube la rama vieja y GitHub lo
 rechaza por *non-fast-forward*, aunque el trabajo esté bien hecho y encima de
 `origin/main`. El commit no se pierde, pero el turno se va creyendo que no pudo
-subir. Se arregló: las dos ramas `main` vuelven a estar pegadas a su `HEAD` y a
-`origin/main`. **Si vuelve a pasar, el que sube es `git push origin HEAD:main`,
-y después `git checkout -B main <hash>` para reengancharla.**
+subir. **Si vuelve a pasar, el que sube es `git push origin HEAD:main`, y
+después `git checkout -B main HEAD` para reengancharla.**
+
+**Y no «se arregló»: vuelve en cada contenedor nuevo. Medido el 12 de noviembre
+a las 15:50 UTC, en el cuarto turno sin nada que tomar.** El turno anterior
+escribió que las dos ramas quedaban pegadas, y era cierto —en su contenedor—.
+Pero eso es estado local de git, no contenido del repo: no viaja en un commit.
+Hoy el clon volvió a despertar con `HEAD` suelto y la `main` local de TCD
+**catorce commits atrás** otra vez; MCD, suelto pero al día. Nada se había
+quedado sin subir: en los dos repos `HEAD` era idéntico a `origin/main` y el
+árbol estaba limpio. **Así que ningún turno puede dejar esto arreglado para el
+siguiente. La regla es la del comando: subir siempre con `git push origin
+HEAD:main`, y no fiarse de `git push origin main` ni leer un rechazo como
+trabajo perdido.**
 
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
