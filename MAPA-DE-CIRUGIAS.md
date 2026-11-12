@@ -292,6 +292,16 @@ dependencias, y la segunda si `.next` quedó de una instalación vieja: hoy la
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
 
+**Y una trampa peor, que se cazó al intentar subir este mismo apunte: los dos
+repos estaban en `HEAD` suelto.** En TCD el `HEAD` suelto tenía los commits al
+día, pero la rama `main` local se había quedado **doce commits atrás**. Así que
+`git push origin main` —el comando del encargo— sube la rama vieja y GitHub lo
+rechaza por *non-fast-forward*, aunque el trabajo esté bien hecho y encima de
+`origin/main`. El commit no se pierde, pero el turno se va creyendo que no pudo
+subir. Se arregló: las dos ramas `main` vuelven a estar pegadas a su `HEAD` y a
+`origin/main`. **Si vuelve a pasar, el que sube es `git push origin HEAD:main`,
+y después `git checkout -B main <hash>` para reengancharla.**
+
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
 Commit `acc1f1a`. La bienvenida pasó de diez pasos a cinco, con los
