@@ -253,6 +253,15 @@ Tareas programadas («Cola de turnos TCD y MCD») o le escribas turnos nuevos a
 esta tabla. Que no la apague el próximo turno por su cuenta: va a chocar con el
 mismo permiso.
 
+**Confirmado dos veces, el 12 de noviembre a las 07:25 UTC.** El turno despertó,
+encontró la cola sin nada que tomar y volvió a intentar apagarse: el permiso lo
+rechazó otra vez, con el mismo motivo. Verificado de paso que main está en
+GitHub —`241ddd7` local y remoto son el mismo commit, nada quedó sin subir— y
+que la tabla no tiene turnos nuevos escritos. **Ningún turno más debe reintentar
+el apagado: está probado que no puede.** La tarea va a seguir despertando cada
+cuatro horas hasta que la apagues tú en Tareas programadas o le escribas turnos
+nuevos a la tabla.
+
 ### El tramo único, y un premio que no existía — turno 17, el 12 de noviembre
 
 Commit `acc1f1a`. La bienvenida pasó de diez pasos a cinco, con los
