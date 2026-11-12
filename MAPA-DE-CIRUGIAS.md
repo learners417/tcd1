@@ -221,7 +221,7 @@ espera el clic.
 | 13 | Cirugía 10 · Punta a punta: cliente y Admin, clic por clic, con datos de verdad | **el flanco del Admin cerrado** · la ventana de acceso daba tres números distintos |
 | 14 | Cirugía 6 · **Fathom por webhook** — las otras tres fugas quedaron cerradas, medido el 9 nov | **el flanco de la app cerrado** · `ccf89ab` · 79 miradas · en Fathom, el destino del webhook es tuyo |
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
-| 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `HASH` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
+| 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
 | 17 | MCD: su primer turno — la batería que no tiene | en la cola |
 
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
@@ -231,7 +231,7 @@ el flanco, y lo que queda en ellas es gusto suyo.
 
 ### Medía para nadie — turno 16, el 12 de noviembre
 
-Commit `HASH`. Una lente nueva, `scripts/prueba-los-diez-llegan.ts`, con
+Commit `cf99bcc`. Una lente nueva, `scripts/prueba-los-diez-llegan.ts`, con
 cuarenta y cinco miradas, y los tres caños que faltaban.
 
 **La premisa decía que faltaba construir las tres patas. Dos ya estaban, y la
