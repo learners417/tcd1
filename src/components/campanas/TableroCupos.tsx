@@ -555,7 +555,7 @@ export default function TableroCupos(
                     value={f[PASOS[paso].k]}
                     onChange={(e) => setFila(i, PASOS[paso].k, e.target.value)}
                     placeholder="0"
-                    className="flex-1 bg-surface/40 border border-cream/15 rounded-xl px-4 py-3 text-xl text-cream text-center" />
+                    className="min-w-0 flex-1 bg-surface/40 border border-cream/15 rounded-xl px-4 py-3 text-xl text-cream text-center" />
                 </div>
               ))}
             </div>

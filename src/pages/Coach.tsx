@@ -704,7 +704,7 @@ export default function Coach({ userId, perfil }: { userId?: string; perfil?: Pa
               ya lo dice el encabezado.
             */
             placeholder={isTyping ? 'Armando la respuesta...' : 'Cuéntale dónde estás'}
-            className="flex-1 bg-white/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
+            className="min-w-0 flex-1 bg-white/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl py-3.5 pl-4 pr-14 text-[17px] text-white placeholder-white/30 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all disabled:opacity-50 shadow-inner"
           />
           <button
             type="submit"

@@ -248,8 +248,10 @@ no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
 **Y si quieres escribir uno, el 13 de noviembre aparecieron dos candidatos con el
 trabajo ya medido:** subir el `next` de MCD, y subir el editor de TCD (las dos
-con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero, más
-chico, es bajar el editor a `lazy()` para que no viaje en el bundle de todos.
+con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero
+—bajar el editor a `lazy()`— quedó medido el 13 de noviembre a las 19:25, y el
+corte resultó ser otro: el Admin entero (su botón, abajo en «El tercer
+candidato, ya medido»).
 
 ### El apagado solo: no es la categoría del borrado, es cualquier escritura
 
@@ -301,6 +303,100 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **13 nov, 03:23** | la cola seguía igual: las 17 filas cerradas, **cero commits de Javo** en los dos repos —el último de TCD es `efa4731`, de un turno, y el de MCD `7c6e524`, del 9 de noviembre—, los dos árboles limpios y `HEAD` idéntico a `origin/main`. Se midió **por qué el apagado se rechaza, otra vez y mejor**: no es la categoría del borrado, es cualquier escritura (arriba). No se corrió la batería para medir de nuevo un verde que ya dio verde cinco veces: se corrió para poder commitear este apunte |
 | **13 nov, 11:24** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y las dos trampas de contenedor otra vez (`node_modules` en cero, `HEAD` suelto en **los dos** repos). Esta despertada sí trajo algo: se intentó lo único que faltaba medir —**si las dos apps están de pie** en vivo— y **no se puede desde acá**: el proxy contesta 403 al CONNECT de `app.tuclinica.digital` y de `mcd-eight.vercel.app`. Una sesión dormida no puede mirar las apps, igual que no puede tocar la tarea. Con esa puerta cerrada se miró lo que sí se alcanza —las dependencias— y de ahí salió el hallazgo de abajo |
 | **13 nov, 15:25** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo en los dos repos (`81d20eb` en TCD, `7c6e524` en MCD), los dos árboles limpios y `HEAD` en `origin/main`— y `node_modules` otra vez en cero. Con la cola vacía se fue a medir **el segundo hallazgo que el mapa daba por «un triaje entero»**: los tres avisos de TCD que viajan al navegador. Dos de las tres premisas se cayeron —`dompurify` no es del editor sino de `jspdf`, en trozo aparte y por un camino que la app no llama nunca; y el editor solo lo escribe staff, con RLS verificada— y la salida quedó probada entera en dos copias, las dos en verde, con botón de tres (abajo) |
+| **13 nov, 19:25** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo—, y esta despertada **no midió: encontró una falta de regla en main y la cerró**. Al medir el tercer candidato (bajar el editor a `lazy()`) la batería se puso roja en `campanas>nueva`, y la premisa se cayó del lado bueno: **el rojo no era del `lazy()`**. Está en main desde antes, y el medidor lo veía solo a veces. En «Montar en Meta» la pantalla se desplazaba **18 px de costado** en un teléfono de 390. Arreglados los **doce** campos que lo causaban, endurecida la lente que lo dejaba pasar y escrita una lente nueva que lo lee en el código (abajo) |
+
+### El 13 de noviembre a las 19:25: una falta de regla que estuvo seis corridas en verde
+
+Esta despertada salió a medir el tercer candidato —bajar el editor a `lazy()`— y
+lo que encontró fue otra cosa. **La premisa se verificó y se cayó del lado
+bueno:** la batería se puso roja, pero el rojo **no lo causaba el `lazy()`**.
+
+Cómo quedó probado, porque importa: la copia con el `lazy()` dio roja en
+`campanas>nueva`, y una copia **sin tocar una sola línea** —main puro, solo el
+medidor instrumentado para que dijera QUÉ desborda— dio **roja tres de tres**.
+Así que la falta ya estaba en main.
+
+**Qué era.** En «Montar en Meta» la página se desplaza **18 píxeles de costado**
+en un teléfono de 390: el contenido pide 408. El culpable no se ve en la
+captura: la fila del campo de preguntas pide **363 px dentro de una caja de
+300**. Un `<input>` trae un ancho propio de unos 20 caracteres y, como hijo de
+`flex`, **no baja de ese ancho** si no se le permite (`min-width: 0`). Estaba
+escrito `className="flex-1 …"` y faltaba el permiso.
+
+**No era uno: eran doce.** La misma forma aparece en el Mentor, en Mensajes (dos),
+en Acompañamiento, en Agentes, en el Tablero de cupos, en la Sala de Mando, en
+el Admin (tres) y en el Panel. Quedaron arreglados los **once** que no declaran
+mínimo a propósito; el de `Dashboard` se deja como está, porque su
+`min-w-[180px]` es una decisión escrita.
+
+**Por qué estuvo en verde seis corridas, que es la parte que había que
+arreglar.** La lente del desplazamiento lateral **intentaba desplazar** la
+página (`scrollLeft = 200`) y preguntaba si se movió. Eso contesta si en ESE
+instante se puede: la tira de pestañas de Campañas se mueve sola hasta la
+pestaña activa y las pantallas entran con medio segundo de animación, así que el
+mismo desborde salía **rojo medido solo y verde dentro de la recorrida entera**.
+Una lente que depende del momento no es una lente: es una moneda.
+
+Ahora mide además **el ancho**, que no depende del momento
+(`scrollWidth > clientWidth`). Con la lente endurecida y el arreglo puesto, las
+**93** pantallas del cliente y las **17** del Admin dan **cero faltas**; con el
+defecto reintroducido a propósito, se pone **roja**.
+
+Y como el medidor necesita un navegador y tarda, se escribió también
+`scripts/prueba-campos-angostos.ts`: lee el código y falla si un `<input>`,
+`<textarea>` o `<select>` con `flex-1` no declara su mínimo. Son **132** pruebas
+ahora, no 131. Probada contra su propio fallo: roja con el defecto, verde sin él.
+
+### El tercer candidato, ya medido: el editor no es el corte, el Admin sí
+
+El mapa decía «el tercero, más chico, es bajar el editor a `lazy()`». Medido, el
+corte chico es el equivocado, y hay uno mejor por el mismo trabajo.
+
+**La premisa, verificada.** El editor **sí** viaja en el bundle de todos: 37
+módulos, **1.018 KB** de fuente, 14,4 % del bundle principal. Pero se llega a él
+por un solo camino —`pages/Admin` → `TasksPipeline` → `TaskModal` → los
+comentarios del tablero—, y midiendo eso apareció lo de verdad: **el Admin
+entero viaja en el bundle de todos**. `pages/Admin.tsx` (288 KB) más
+`components/admin` (453 KB) los descarga cada cliente, y ninguno de los dos los
+va a abrir nunca. Hoy no hay **un solo** `lazy()` en la app.
+
+Las dos salidas están probadas en copias aparte. Lo que baja todo cliente —lo
+que el navegador pide antes de dibujar— es esto:
+
+| | hoy | **A · solo el editor** | **B · el Admin entero** |
+|---|---|---|---|
+| JS que baja todo cliente | 3.406 KB | **3.026 KB** | **2.480 KB** |
+| lo mismo, comprimido | 998 KB | **878 KB** | **734 KB** |
+| cuánto menos | — | −12 % | **−26 %** |
+| el editor en el bundle de todos | **sí** | no | no |
+| el Admin en el bundle de todos | **sí** | **sí** | no |
+| `tsc --noEmit` | limpio | limpio | limpio |
+| `npm run build` | limpio | limpio | limpio |
+| las `prueba-*.ts` | verde | verde | **131/131** |
+| `prueba-pantallas.tsx` | verde | verde | **verde** |
+| el medidor de pantallas | cero faltas | cero faltas | cero faltas |
+
+La B es dos líneas en `App.tsx` —`lazy(() => import('./pages/Admin'))` y un
+`Suspense` con la pantalla de carga que la app ya usa— y mueve 948 KB a un trozo
+aparte que solo baja quien entra con rol admin. La A son tres `lazy()` en los
+componentes del tablero y deja el Admin donde está.
+
+**Lo que cambia para ti, y es la razón de que esto espere tu clic:** con la B,
+cuando TÚ entras al Admin, hay un parpadeo de la pantalla de carga mientras baja
+ese trozo (una vez, después queda en caché y el service worker lo precachea).
+Para el cliente no cambia nada salvo que su primera carga pesa un cuarto menos.
+
+**Botón de tres:**
+
+- **B · el Admin entero** — −26 % de la primera carga del cliente, dos líneas,
+  batería entera en verde. *(Es lo que recomiendo: el que paga es el cliente en
+  su teléfono, y el precio lo pagas tú una vez por sesión en una pantalla que
+  abres sabiendo que es la tuya.)*
+- **A · solo el editor** — −12 %, sin parpadeo en ninguna parte.
+- **Dejarlo** — la primera carga sigue como hoy.
+
+Ninguna de las dos toca dependencias, así que ninguna cambia lo que Vercel
+instala: es código de la app, reversible con un `git revert`.
 
 ### El hallazgo del 13 de noviembre: el Next de MCD tiene veinte parches atrás
 
@@ -477,8 +573,9 @@ dependencias, y la segunda si `.next` quedó de una instalación vieja: una
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
 
-**Las pruebas son 132 archivos, no 131, y la que sobra no se corre igual que
-las otras.** Son **131** `prueba-*.ts` más **una** `.tsx`:
+**Las pruebas son 133 archivos, y la que sobra no se corre igual que
+las otras.** Son **132** `prueba-*.ts` —la 132 es
+`prueba-campos-angostos.ts`, del 13 de noviembre— más **una** `.tsx`:
 `prueba-pantallas.tsx`, la que monta las pantallas de verdad. Esa necesita su
 entorno de navegador y se corre así —tal como la corre el bloque 10 de
 `auditoria.py`—:

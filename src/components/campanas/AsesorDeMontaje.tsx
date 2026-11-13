@@ -343,7 +343,7 @@ export default function AsesorDeMontaje(
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void preguntar(entrada); } }}
             placeholder={`Sobre el paso ${pasoActual.n}…`}
             disabled={escribiendo}
-            className="flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-sm focus:border-gold/50 placeholder-cream/25" />
+            className="min-w-0 flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-sm focus:border-gold/50 placeholder-cream/25" />
           <button onClick={() => void preguntar(entrada)} disabled={escribiendo || !entrada.trim()}
             className="min-h-[44px] px-4 rounded-xl btn-primary disabled:opacity-40">
             <Send className="w-4 h-4" />

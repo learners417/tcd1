@@ -3154,7 +3154,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) agregarNota(); }}
                               placeholder="Escribe una nota interna... (Ctrl+Enter para guardar)"
                               rows={3}
-                              className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
+                              className="min-w-0 flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-4 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all resize-none"
                             />
                             <button
                               onClick={agregarNota}
@@ -3244,7 +3244,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensajePrivado()}
                         placeholder="Escribe un mensaje privado..."
                         disabled={enviando}
-                        className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                        className="min-w-0 flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                       />
                       <button
                         onClick={enviarMensajePrivado}
@@ -3408,7 +3408,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarChatMsg()}
                             placeholder={chatAdjunto ? `Cuéntale a ${chatCliente.nombre} qué le mandas…` : `Mensaje a ${chatCliente.nombre}...`}
                             disabled={chatEnviando}
-                            className="flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
+                            className="min-w-0 flex-1 bg-black/20 border border-gold/12 rounded-lg py-3 px-5 text-sm text-cream focus:outline-none focus:border-gold/50 transition-all"
                           />
                           {/* Adjuntar. Esto existía solo dentro de un chat de
                               canal que ninguna pantalla dibujaba, así que el

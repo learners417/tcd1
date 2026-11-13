@@ -371,6 +371,15 @@ MEDIR = r"""
   // ¿Se puede desplazar de costado? Se intenta, no se deduce del ancho.
   for (const e of [document.scrollingElement, document.querySelector('main')].filter(Boolean)) {
     e.scrollLeft = 200; if (e.scrollLeft > 1) r.lateral = 1; e.scrollLeft = 0;
+    // Y la medida directa del ancho, que es la que no depende del momento.
+    //
+    // Intentar desplazar solo contesta si en ESE instante se puede: la tira de
+    // pestañas de Campañas se mueve sola hasta la activa y las pantallas
+    // entran con medio segundo de animación, así que el MISMO desborde —el
+    // campo de `AsesorDeMontaje`, 408 px de contenido en 390 de pantalla—
+    // salía rojo medido solo y verde dentro de la recorrida entera. Quedó
+    // escondido así durante seis corridas de la batería.
+    if (e.scrollWidth > e.clientWidth + 1) r.lateral = 1;
   }
   // Un panel fijo que está entero fuera de la pantalla está escondido (menú cerrado).
   let tapa;   // el panel que cubre la pantalla entera, si lo hay (se busca una vez)

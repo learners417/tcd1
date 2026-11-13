@@ -813,7 +813,7 @@ export default function Agentes({ userId, perfil, setCurrentPage }: AgentesProps
           }}
           placeholder="Escribe tu respuesta o pega una captura (Ctrl+V)..."
           rows={2}
-          className="flex-1 bg-gold/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
+          className="min-w-0 flex-1 bg-gold/5 border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl px-4 py-3 text-white text-sm resize-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
         />
         <button
           onClick={() => enviarMensaje(inputUsuario)}

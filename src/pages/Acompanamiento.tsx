@@ -521,7 +521,7 @@ function UnCanal({ canal, puedeEscribir, clienteId, nombre }: {
           <input value={texto} onChange={(e) => setTexto(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void mandar(); } }}
             placeholder="Escribe acá"
-            className="flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-sm focus:border-gold/50 placeholder-cream/25" />
+            className="min-w-0 flex-1 min-h-[44px] bg-black/20 border border-gold/15 rounded-xl px-4 text-cream text-sm focus:border-gold/50 placeholder-cream/25" />
           <button onClick={() => void mandar()} disabled={mandando || !texto.trim()}
             className="min-h-[44px] px-4 rounded-xl btn-primary disabled:opacity-40">
             <Send className="w-4 h-4" />

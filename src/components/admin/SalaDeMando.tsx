@@ -294,7 +294,7 @@ function Decisiones({ onProblema }: { onProblema: (m: string | null) => void }) 
       <div className="flex gap-2">
         <input value={buscar} onChange={(e) => setBuscar(e.target.value)}
           placeholder="Buscar una decisión…"
-          className="flex-1 bg-surface/40 border border-cream/15 rounded-xl px-3 py-2 text-sm text-cream" />
+          className="min-w-0 flex-1 bg-surface/40 border border-cream/15 rounded-xl px-3 py-2 text-sm text-cream" />
         <button onClick={() => setAbriendo((a) => !a)}
           className="flex items-center gap-1 btn-primary px-3 py-2 rounded-xl text-sm font-bold shrink-0">
           {abriendo ? <X size={13} /> : <Plus size={13} />}
