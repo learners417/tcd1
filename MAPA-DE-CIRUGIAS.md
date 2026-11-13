@@ -246,6 +246,10 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
+**Y si quieres escribir uno, el 13 de noviembre apareció el primer candidato
+con el trabajo ya medido:** subir el `next` de MCD, abajo en «El hallazgo del 13
+de noviembre».
+
 ### El apagado solo: no es la categoría del borrado, es cualquier escritura
 
 El encargo de la tarea dice «cuando los turnos estén cerrados, desactivar esta
@@ -294,6 +298,76 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | 19:25 | nada había cambiado desde las 15:50 —cero commits nuevos, los dos árboles limpios, `HEAD` idéntico a `origin/main` en los dos repos— y las dos trampas de contenedor volvieron a aparecer: `node_modules` en cero y `HEAD` suelto con la `main` local de TCD **quince** commits atrás. Las dos baterías se corrieron enteras igual, para no commitear este mismo apunte sin verde: TCD con `tsc` y `npm run build` limpios, las **131 de 131** pruebas en verde dentro del bloque 10 y `auditoria.py` con **868 miradas, cero faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio **en la primera corrida** y sus **52** en verde |
 | 23:25 | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y se midió por qué el apagado se rechaza (arriba). Se verificaron además las dos premisas que quedan abiertas del lado de Javo: el purgado de jsDelivr **sigue sin salida** (el proxy contesta 403 a `purge.jsdelivr.net`), y el botón de 97 sigue esperando el correo de GHL. Las dos baterías enteras desde frío, las dos en verde: TCD con `tsc` y `npm run build` limpios, las **131** `prueba-*.ts` más `prueba-pantallas.tsx` y `auditoria.py` con **868 miradas, cero faltas**; MCD con `tsc` limpio, `next build` limpio en la primera corrida y sus **52** |
 | **13 nov, 03:23** | la cola seguía igual: las 17 filas cerradas, **cero commits de Javo** en los dos repos —el último de TCD es `efa4731`, de un turno, y el de MCD `7c6e524`, del 9 de noviembre—, los dos árboles limpios y `HEAD` idéntico a `origin/main`. Se midió **por qué el apagado se rechaza, otra vez y mejor**: no es la categoría del borrado, es cualquier escritura (arriba). No se corrió la batería para medir de nuevo un verde que ya dio verde cinco veces: se corrió para poder commitear este apunte |
+| **13 nov, 11:24** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y las dos trampas de contenedor otra vez (`node_modules` en cero, `HEAD` suelto en **los dos** repos). Esta despertada sí trajo algo: se intentó lo único que faltaba medir —**si las dos apps están de pie** en vivo— y **no se puede desde acá**: el proxy contesta 403 al CONNECT de `app.tuclinica.digital` y de `mcd-eight.vercel.app`. Una sesión dormida no puede mirar las apps, igual que no puede tocar la tarea. Con esa puerta cerrada se miró lo que sí se alcanza —las dependencias— y de ahí salió el hallazgo de abajo |
+
+### El hallazgo del 13 de noviembre: el Next de MCD tiene veinte parches atrás
+
+Con la cola vacía y las apps fuera de alcance, esta despertada miró las
+dependencias. **MCD corre `next` clavado en 14.2.15**, y npm marca ahí 34 avisos
+de seguridad, 4 de ellos críticos. El que importa de verdad es uno:
+**Authorization Bypass in Next.js Middleware** —el del encabezado
+`x-middleware-subrequest`—, porque en MCD **el middleware es el único portero de
+primera línea** de `/dashboard`, `/pacientes`, `/protocolos`, `/agenda`,
+`/cobros`, `/personas`, `/marca`, `/admin`, `/conversaciones` y `/asistente`.
+
+**Antes de alarmarse, se verificó la premisa, y la premisa se cae en la parte
+que asusta.** Que el portero de adelante se pueda saltar no deja los datos a la
+vista, porque detrás hay un segundo portero en cada puerta:
+
+- **Las páginas del cliente no preguntan quién sos: pregunta la base.** Todas
+  leen con la llave anónima y la sesión del navegador, y las nueve tablas tienen
+  RLS con `auth.uid() = practitioner_id`. Sin sesión, `auth.uid()` es nulo y
+  **no vuelve ninguna fila**: la pantalla se vería vacía, no ajena.
+- **`/admin` sí usa la llave de servicio —que se salta el RLS— pero se
+  defiende sola**: `user.email !== ADMIN_EMAIL` redirige, y cada acción de ese
+  formulario lo vuelve a preguntar antes de escribir.
+- **Las tres rutas de API que usan la llave de servicio también**: la de alta
+  pide admin y contesta 403; el webhook de GHL y el puente de TCD comparan su
+  secreto en tiempo constante y contestan 401.
+
+Así que **no hay fuga medida**. Lo que hay es el portero de adelante con un
+agujero conocido, y una sola capa de más entre eso y los datos de pacientes.
+
+**El salto está medido y da verde, pero no se tomó solo.** Se probó 14.2.35 —el
+último parche de la línea 14.2, sin cambio de mayor y sin tocar una línea de
+código— en una copia aparte, con la batería entera:
+
+| | 14.2.15 (hoy) | 14.2.35 (probado) |
+|---|---|---|
+| `tsc --noEmit` | limpio | limpio |
+| `next build` | limpio | limpio |
+| `auditoria.py` | 52 en verde | **52 en verde** |
+| avisos de `next` | 34 | **25** |
+| críticos | 4 | **3** |
+| el bypass del middleware | **abierto** | **cerrado** |
+
+Los tres críticos que quedan **no te tocan**: uno es de servidores Windows (esto
+corre en Linux), y los otros dos son del optimizador de imágenes por AVIF y por
+SVG —**MCD no importa `next/image` en ninguna parte** y `next.config` no declara
+dominios remotos—. El cuarto, el del middleware, es el que se cierra.
+
+**Por qué no se subió solo, y es la misma razón que el 9 de noviembre.** Ese día
+un turno sacó el `package-lock.json` a propósito, y lo escribió así: fijar
+versiones **cambia lo que Vercel instala en el próximo deploy** respecto de lo
+que corre hoy, y eso lo decides tú. Subir `next` de 14.2.15 a 14.2.35 es
+exactamente eso. El trabajo reversible está hecho y medido; falta tu clic.
+
+**Botón de dos:**
+
+- **Subirlo** — una línea en `package.json`, batería en verde ya probada, cierra
+  el bypass del middleware. *(Es lo que recomiendo: el cambio es de parche, no
+  toca código, y lo que cierra es el agujero del único portero de primera línea
+  de las pantallas con datos de pacientes.)*
+- **Dejarlo** — las segundas puertas aguantan, no hay fuga medida, y el deploy
+  de hoy sigue siendo el de hoy.
+
+**Y hay un segundo hallazgo, más chico, que no se tocó:** TCD arrastra 67 avisos
+—2 críticos, 15 altos—, pero son casi todos de herramientas de construcción
+(`vite`, `postcss`, `browserslist`, `picomatch`), que no viajan al navegador del
+cliente. Los que sí viajan son tres: `dompurify`, `prosemirror-view` y
+`@tiptap/core`, los del editor de texto, todos de familia XSS. Eso es un triaje
+entero y **no se improvisa en una despertada**: si lo quieres, es un turno de la
+tabla y lo escribes tú.
 
 ### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
 
