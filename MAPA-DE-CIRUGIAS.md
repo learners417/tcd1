@@ -305,6 +305,86 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **13 nov, 15:25** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo en los dos repos (`81d20eb` en TCD, `7c6e524` en MCD), los dos árboles limpios y `HEAD` en `origin/main`— y `node_modules` otra vez en cero. Con la cola vacía se fue a medir **el segundo hallazgo que el mapa daba por «un triaje entero»**: los tres avisos de TCD que viajan al navegador. Dos de las tres premisas se cayeron —`dompurify` no es del editor sino de `jspdf`, en trozo aparte y por un camino que la app no llama nunca; y el editor solo lo escribe staff, con RLS verificada— y la salida quedó probada entera en dos copias, las dos en verde, con botón de tres (abajo) |
 | **13 nov, 19:25** · `53775e5` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo—, y esta despertada **no midió: encontró una falta de regla en main y la cerró**. Al medir el tercer candidato (bajar el editor a `lazy()`) la batería se puso roja en `campanas>nueva`, y la premisa se cayó del lado bueno: **el rojo no era del `lazy()`**. Está en main desde antes, y el medidor lo veía solo a veces. En «Montar en Meta» la pantalla se desplazaba **18 px de costado** en un teléfono de 390. Arreglados los **doce** campos que lo causaban, endurecida la lente que lo dejaba pasar y escrita una lente nueva que lo lee en el código (abajo) |
 
+| **13 nov, 23:30** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`7770186` en TCD, `7c6e524` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` otra vez en cero en los dos repos. Esta despertada **no midió el código de MCD: midió su batería**, y encontró **dos lentes ciegas** en los dos bloques que la batería dice que existe para cuidar —la llave y el token—. Las dos daban verde con el defecto puesto. Endurecidas y probadas contra su propio fallo (abajo) · `ed9705e` en MCD |
+
+### El 13 de noviembre a las 23:30: la batería de MCD daba verde con la guarda sacada
+
+La cola está vacía y las apps no se alcanzan desde acá, así que esta despertada
+fue a mirar lo único que queda y nunca se había mirado: **la batería de MCD
+contra sí misma**. Sus 52 lentes se habían corrido seis veces en verde; lo que
+no se había probado es si ese verde significa algo.
+
+**Dos no significaban nada.** Las dos están en los bloques 4 y 5 —«cada puerta
+pide su llave» y «el token del cliente no viaja en claro»—, que es exactamente
+lo que el prólogo de esa batería dice que protege: «su llave, su plata, su
+token, su lista completa».
+
+**Primera: la guarda de las rutas se leía del archivo crudo.** La lente pedía
+que `auth.getUser`, `x-integration-key` o `GHL_WEBHOOK_SECRET` apareciera en el
+texto de la ruta. En el texto, no en el código. Medido: se le sacó a
+`/api/notificaciones` la llamada real y se dejó arriba **un comentario que la
+nombra** —«esta ruta valida la sesión con supabase.auth.getUser()»—, y la
+batería dio **las diez rutas en verde**. El archivo mismo ya tenía esa lección
+escrita tres líneas más abajo, para la comparación de la clave: «mirar el
+archivo crudo daba verde aunque la comparación de verdad hubiera vuelto al
+`!==`». No estaba aplicada acá.
+
+Y había un segundo agujero en la misma lente, más grande: **pedía la guarda por
+archivo, no por handler.** `/api/notificaciones` expone `GET` y `POST`; con la
+guarda sacada solo al `POST`, la vieja lente **no veía nada** —el `GET` todavía
+la nombra—. Ahora se mide handler por handler, sin comentarios, y son **doce
+handlers en diez rutas**, no diez rutas. Con el `POST` desguarnecido, la lente
+lo nombra: `notificaciones/route.ts POST`.
+
+Se le agregó además la pregunta que faltaba: que el handler que pregunta
+**corte** —que conteste 401 o 403—, no que solo pregunte. Son 53 lentes ahora,
+no 52.
+
+**Segunda: «ninguna pantalla del navegador toca el service role» miraba solo la
+primera línea.** La lente decidía si un archivo corre en el navegador leyendo
+`t.split('\n')[0]`, es decir buscando `'use client'` en la línea 1 exacta. La
+directiva de Next admite comentarios y líneas en blanco encima —es válido y es
+lo normal cuando alguien le pone una nota o una licencia— y con eso la lente
+queda ciega. Medido: a `CopyButton.tsx` se le puso **un comentario encima** y un
+`import { createAdminClient }`, o sea la llave que se salta el RLS entero dentro
+de una pantalla que se descarga al navegador, y la batería dio **verde**. Ahora
+se recorre el prólogo —comentarios y blancos— hasta la primera línea de código
+de verdad.
+
+**Lo que NO se encontró, porque se fue a buscar primero y la premisa se cayó.**
+Antes de tocar la batería se buscó el defecto real en el código de MCD, y no
+está: los doce handlers tienen hoy su guarda de verdad (el de `mensajes` la
+tiene factorizada en un `auth()` local, y está bien hecho —la lente nueva sigue
+una vuelta de llamadas locales para no marcarlo en rojo por error—); las ocho
+pantallas de navegador tienen su `'use client'` en la línea 1 y ninguna toca el
+service role; el `access_token` del portal es un `uuid` con
+`gen_random_uuid()`, no adivinable, con índice único; y el `.single()` del
+portal y del Tablero **no revienta** —se desestructura solo `data`, así que una
+fila que no está deja `null` y la pantalla lo contempla (`notFound()` en el
+portal, `n?.` en cada número del Tablero)—. También se buscó el defecto del
+turno 19:25 —el campo angosto dentro de un `flex`— en MCD: **no hay un solo
+`flex-1` en todo `src`**, así que esa forma no existe ahí.
+
+O sea: **no había fuga. Había dos lentes que no la habrían visto.** Eso es lo
+que se arregló.
+
+**Las tres pruebas contra su propio fallo, porque es la regla:**
+
+| el defecto reintroducido | la lente vieja | la lente nueva |
+|---|---|---|
+| service role en una pantalla de navegador, con un comentario encima | **verde** | **roja**, y la nombra |
+| guarda sacada de una ruta, con el comentario que la nombra en su lugar | **verde** | **roja**, los dos handlers |
+| guarda sacada solo al `POST`, el `GET` intacto | **verde** | **roja**, solo el `POST` |
+
+Con el código limpio, la batería de MCD da **53 de 53 en verde**, `tsc` limpio y
+`next build` limpio. Commit `ed9705e` en MCD.
+
+**Y queda un candidato medido, que no se tomó para no inflar este turno:** la
+batería de TCD tiene 4.445 líneas y usa `solo_codigo` **22 veces**. Cuántas de
+sus otras lentes leen crudo —y por lo tanto darían verde con el arreglo sacado y
+el comentario puesto— no está medido. Es un turno de la tabla si lo quieres: la
+misma auditoría de la auditoría, del lado de TCD.
+
 ### El 13 de noviembre a las 19:25: una falta de regla que estuvo seis corridas en verde
 
 Esta despertada salió a medir el tercer candidato —bajar el editor a `lazy()`— y
