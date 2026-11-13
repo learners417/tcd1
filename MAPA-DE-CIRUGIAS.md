@@ -246,9 +246,10 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-**Y si quieres escribir uno, el 13 de noviembre apareció el primer candidato
-con el trabajo ya medido:** subir el `next` de MCD, abajo en «El hallazgo del 13
-de noviembre».
+**Y si quieres escribir uno, el 13 de noviembre aparecieron dos candidatos con el
+trabajo ya medido:** subir el `next` de MCD, y subir el editor de TCD (las dos
+con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero, más
+chico, es bajar el editor a `lazy()` para que no viaje en el bundle de todos.
 
 ### El apagado solo: no es la categoría del borrado, es cualquier escritura
 
@@ -299,6 +300,7 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | 23:25 | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y se midió por qué el apagado se rechaza (arriba). Se verificaron además las dos premisas que quedan abiertas del lado de Javo: el purgado de jsDelivr **sigue sin salida** (el proxy contesta 403 a `purge.jsdelivr.net`), y el botón de 97 sigue esperando el correo de GHL. Las dos baterías enteras desde frío, las dos en verde: TCD con `tsc` y `npm run build` limpios, las **131** `prueba-*.ts` más `prueba-pantallas.tsx` y `auditoria.py` con **868 miradas, cero faltas**; MCD con `tsc` limpio, `next build` limpio en la primera corrida y sus **52** |
 | **13 nov, 03:23** | la cola seguía igual: las 17 filas cerradas, **cero commits de Javo** en los dos repos —el último de TCD es `efa4731`, de un turno, y el de MCD `7c6e524`, del 9 de noviembre—, los dos árboles limpios y `HEAD` idéntico a `origin/main`. Se midió **por qué el apagado se rechaza, otra vez y mejor**: no es la categoría del borrado, es cualquier escritura (arriba). No se corrió la batería para medir de nuevo un verde que ya dio verde cinco veces: se corrió para poder commitear este apunte |
 | **13 nov, 11:24** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y las dos trampas de contenedor otra vez (`node_modules` en cero, `HEAD` suelto en **los dos** repos). Esta despertada sí trajo algo: se intentó lo único que faltaba medir —**si las dos apps están de pie** en vivo— y **no se puede desde acá**: el proxy contesta 403 al CONNECT de `app.tuclinica.digital` y de `mcd-eight.vercel.app`. Una sesión dormida no puede mirar las apps, igual que no puede tocar la tarea. Con esa puerta cerrada se miró lo que sí se alcanza —las dependencias— y de ahí salió el hallazgo de abajo |
+| **13 nov, 15:25** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo en los dos repos (`81d20eb` en TCD, `7c6e524` en MCD), los dos árboles limpios y `HEAD` en `origin/main`— y `node_modules` otra vez en cero. Con la cola vacía se fue a medir **el segundo hallazgo que el mapa daba por «un triaje entero»**: los tres avisos de TCD que viajan al navegador. Dos de las tres premisas se cayeron —`dompurify` no es del editor sino de `jspdf`, en trozo aparte y por un camino que la app no llama nunca; y el editor solo lo escribe staff, con RLS verificada— y la salida quedó probada entera en dos copias, las dos en verde, con botón de tres (abajo) |
 
 ### El hallazgo del 13 de noviembre: el Next de MCD tiene veinte parches atrás
 
@@ -361,13 +363,88 @@ exactamente eso. El trabajo reversible está hecho y medido; falta tu clic.
 - **Dejarlo** — las segundas puertas aguantan, no hay fuga medida, y el deploy
   de hoy sigue siendo el de hoy.
 
-**Y hay un segundo hallazgo, más chico, que no se tocó:** TCD arrastra 67 avisos
-—2 críticos, 15 altos—, pero son casi todos de herramientas de construcción
-(`vite`, `postcss`, `browserslist`, `picomatch`), que no viajan al navegador del
-cliente. Los que sí viajan son tres: `dompurify`, `prosemirror-view` y
-`@tiptap/core`, los del editor de texto, todos de familia XSS. Eso es un triaje
-entero y **no se improvisa en una despertada**: si lo quieres, es un turno de la
-tabla y lo escribes tú.
+**Y hay un segundo hallazgo, que el 13 de noviembre a las 15:25 quedó medido y
+deja de ser «un triaje entero».** Lo que este mapa decía era: TCD arrastra 67
+avisos —2 críticos, 15 altos—, casi todos de herramientas de construcción
+(`vite`, `postcss`, `browserslist`, `picomatch`) que no viajan al navegador, y
+los tres que sí viajan son `dompurify`, `prosemirror-view` y `@tiptap/core`,
+«los del editor de texto, todos de familia XSS».
+
+**Dos de las tres premisas de esa frase se caen.**
+
+- **`dompurify` no es del editor, y su código no se ejecuta nunca.** No está en
+  `package.json` ni se importa en una sola línea de `src`: lo arrastra
+  `jspdf@4.2.1`, y jspdf entra con **import dinámico** (`await import('jspdf')`)
+  en un solo lugar, `CertificadoModal`. En el build real sale en su propio
+  trozo aparte —`dist/assets/purify.es-*.js`, al lado de `jspdf.es.min-*.js`—,
+  o sea que solo se descarga cuando alguien genera un certificado. Y el único
+  camino de jspdf que usa DOMPurify es su método `.html()`, que **la app no
+  llama en ninguna parte** (verificado con grep en todo `src`). Los 17 avisos de
+  DOMPurify apuntan a código que no corre.
+- **El editor sí viaja, pero su contenido solo lo escribe el equipo.**
+  `@tiptap/core` y `prosemirror-view` salen en el bundle principal
+  (`dist/assets/index-*.js`), así que los descarga todo el que abre la app. Pero
+  el editor **se monta en un solo lugar**: `admin/TaskModal` → `TaskComments`,
+  los comentarios del tablero interno. La tabla es
+  `admin_tareas_comentarios`, y sus tres políticas de RLS —leer, insertar,
+  borrar— exigen `profiles.rol = 'admin'` o `admin_rol IN
+  ('owner','manager','staff')`; el RPC de lectura `get_tarea_comentarios` es
+  `SECURITY DEFINER` y **vuelve a preguntar lo mismo adentro**. Un cliente no
+  puede escribir ahí. Así que el HTML hostil que dispararía el aviso de tiptap
+  tendría que escribirlo alguien de tu equipo, ya logueado como staff.
+
+La premisa que **sí** se sostiene es la del medio: de los 67 avisos, los dos
+críticos (`protobufjs`, `proxy-addr`) y trece de los quince altos son de
+herramientas que no llegan al navegador del cliente. **Los dos que llegan y son
+alcanzables son los del editor**, y los dos tienen arreglo **sin cambio de
+mayor**: `@tiptap/core` pide `>3.30.4` (hoy 3.23.4, la línea 3 va por 3.34.0) y
+`prosemirror-view` pide `>=1.42.3` (hoy 1.41.8, va por 1.42.9).
+
+**Las dos salidas están probadas enteras en copias aparte, las dos en verde.**
+La diferencia entre ellas no es el verde: es **cuánto cambia lo que Vercel
+instala en el próximo deploy**, que es lo de siempre.
+
+| | hoy | **A · solo el editor** | **B · lock entero** |
+|---|---|---|---|
+| `tsc --noEmit` | limpio | limpio | limpio |
+| `npm run build` | limpio | limpio | limpio |
+| las 131 `prueba-*.ts` | 131/131 | **131/131** | **131/131** |
+| `prueba-pantallas.tsx` | verde | **verde** | **verde** |
+| avisos de npm | 67 | **37** | **11** |
+| críticos / altos | 2 / 15 | 2 / 13 | **0 / 0** |
+| `@tiptap/core` + `prosemirror-view` | **altos** | **limpios** | **limpios** |
+| `vite` / `postcss` / `dompurify` | 6.4.1 / 8.5.8 / 3.3.3 | **iguales que hoy** | movidos |
+
+**La A no se puede hacer con un `npm update`, y por eso queda escrito cómo.**
+La familia de tiptap clava sus pares de forma exacta (`peer
+@tiptap/core@"3.23.4"`), así que npm se niega a mover las siete dependencias
+directas dejando las ~20 sub-extensiones donde están: `npm install
+--package-lock-only` aborta con `ERESOLVE` por mucho que se le nombren todos los
+paquetes a la vez. Lo que sí funciona, medido: **borrar del
+`package-lock.json` las 43 entradas de `@tiptap/*` y `prosemirror-*`, subir los
+siete rangos a `^3.34.0` y dejar que npm resuelva solo ese subárbol.** El resto
+del lock queda intacto —`vite` sigue en 6.4.1 y `postcss` en 8.5.8—, que es
+justo lo que la hace mínima.
+
+**Botón de tres:**
+
+- **A · subir solo el editor** — `package.json` con los siete `@tiptap/*` en
+  `^3.34.0` y el subárbol del lock rehecho. Cierra los dos avisos alcanzables y
+  **no mueve nada más** de lo que Vercel instala hoy. *(Es lo que recomiendo:
+  es el único cambio que toca exactamente lo que está medido como alcanzable, y
+  deja el resto del deploy idéntico al de hoy.)*
+- **B · rehacer el lock entero** — 67 avisos pasan a 11, cero críticos y cero
+  altos, batería en verde igual. Pero mueve `vite`, `postcss` y otros 700
+  paquetes: el próximo deploy ya no instala lo que instala hoy.
+- **Dejarlo** — el único que puede disparar el aviso del editor es tu propio
+  equipo desde el tablero interno, y `dompurify` no se ejecuta nunca. No hay
+  fuga alcanzable por un cliente.
+
+**Y queda un apunte que no es de seguridad:** el editor viaja en el bundle
+principal (3,18 MB) aunque solo se monte en el Admin. Todo cliente que abre la
+app se descarga tiptap y prosemirror para nada. Eso es peso, no riesgo, y es
+**un turno de la tabla si lo quieres** —un `lazy()` en `TaskModal`—, no una
+decisión de venta.
 
 ### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
 
