@@ -241,10 +241,12 @@ turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún 
 (`f3e9ddc`), más las 5 del puente del turno 7 (`7c6e524`). Lo que MCD no tiene
 es `prueba-*.ts`: su batería es toda Python.
 
-**Decisión tuya, y es un botón:** o se apaga la tarea, o le escribes turnos
-nuevos a esta tabla y sigue sola. No se inventan turnos acá: la cola es tuya.
+**Decisión tuya, y es un botón de tres:** apagar la tarea, espaciarla (de cada
+cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
+esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
+no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-### El apagado solo: cuatro veces que no puede, y recién ahora se sabe por qué
+### El apagado solo: no es la categoría del borrado, es cualquier escritura
 
 El encargo de la tarea dice «cuando los turnos estén cerrados, desactivar esta
 tarea programada». Cuatro turnos lo intentaron —el del cierre, el de las 07:25,
@@ -255,16 +257,25 @@ que te mandaba a tocar donde no servía.**
 Decía «el permiso de la sesión lo rechazó: apagar una tarea programada necesita
 tu visto». Medido el 12 de noviembre a las 23:25: la tarea **ya corre en
 aprobación automática** —su `permission_mode` es `auto`—, así que no es que le
-falte tu visto. Lo que lo rechaza es **el clasificador del modo automático, por
-la categoría «Cowork Scheduled Task Delete»**: apagar una tarea programada está
-fuera de lo que una sesión dormida puede hacer sola, pase lo que pase con los
-permisos de la tarea.
+falte tu visto. Lo que lo rechaza es **el clasificador del modo automático**, y
+ese mismo día quedó anotado con la categoría «Cowork Scheduled Task Delete», o
+sea: lo que no se puede es borrarla.
 
-La consecuencia práctica es la que importa: **no hay ningún ajuste de la tarea
-que lo desbloquee.** Ponerla en aprobación automática no sirve —ya lo está—. Lo
-único que la apaga eres tú, con dos toques en Tareas programadas («Cola de
-turnos TCD y MCD»). Y para los turnos: **no se reintenta más**, porque choca
-siempre con el mismo clasificador y gasta el turno.
+**Eso también estaba corto, y se midió el 13 de noviembre a las 03:23.** No es
+la categoría del borrado: es **cualquier escritura sobre la tarea**. Ese turno
+no intentó apagarla —el mapa ya decía que no se reintenta—; intentó algo mucho
+menor y reversible: **espaciarla**, dejar de despertar cada cuatro horas y pasar
+a una vez al día, con `update_trigger` y solo el `cron_expression`, sin tocar el
+`enabled`. Salió rechazado igual, y la categoría que devolvió fue **«Cowork
+Scheduled Task Write»**.
+
+La consecuencia práctica es la que importa, y ahora es completa: **una sesión
+dormida no puede tocar esta tarea de ninguna manera.** No apagarla, no
+espaciarla, no cambiarle una coma. Ponerla en aprobación automática no sirve
+—ya lo está—. Lo único que la apaga **o la espacia** eres tú, con dos toques en
+Tareas programadas («Cola de turnos TCD y MCD»). Y para los turnos: **no se
+reintenta nada de esto**, ni el apagado ni la cadencia, porque los dos chocan
+con el mismo clasificador y gastan el turno.
 
 Así que **la tarea despierta cada cuatro horas sin nada que tomar**, hasta que
 la apagues tú o le escribas turnos nuevos a la tabla.
@@ -282,6 +293,7 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | 15:50 | lo mismo otra vez en verde —TCD 131 de 131 y 868 miradas, cero faltas; MCD `tsc` y `next build` limpios y sus 52— y de paso se cazó la trampa del `HEAD` suelto |
 | 19:25 | nada había cambiado desde las 15:50 —cero commits nuevos, los dos árboles limpios, `HEAD` idéntico a `origin/main` en los dos repos— y las dos trampas de contenedor volvieron a aparecer: `node_modules` en cero y `HEAD` suelto con la `main` local de TCD **quince** commits atrás. Las dos baterías se corrieron enteras igual, para no commitear este mismo apunte sin verde: TCD con `tsc` y `npm run build` limpios, las **131 de 131** pruebas en verde dentro del bloque 10 y `auditoria.py` con **868 miradas, cero faltas** («el ZIP puede salir»); MCD con `tsc` limpio, `next build` limpio **en la primera corrida** y sus **52** en verde |
 | 23:25 | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo, los dos repos en `origin/main`— y se midió por qué el apagado se rechaza (arriba). Se verificaron además las dos premisas que quedan abiertas del lado de Javo: el purgado de jsDelivr **sigue sin salida** (el proxy contesta 403 a `purge.jsdelivr.net`), y el botón de 97 sigue esperando el correo de GHL. Las dos baterías enteras desde frío, las dos en verde: TCD con `tsc` y `npm run build` limpios, las **131** `prueba-*.ts` más `prueba-pantallas.tsx` y `auditoria.py` con **868 miradas, cero faltas**; MCD con `tsc` limpio, `next build` limpio en la primera corrida y sus **52** |
+| **13 nov, 03:23** | la cola seguía igual: las 17 filas cerradas, **cero commits de Javo** en los dos repos —el último de TCD es `efa4731`, de un turno, y el de MCD `7c6e524`, del 9 de noviembre—, los dos árboles limpios y `HEAD` idéntico a `origin/main`. Se midió **por qué el apagado se rechaza, otra vez y mejor**: no es la categoría del borrado, es cualquier escritura (arriba). No se corrió la batería para medir de nuevo un verde que ya dio verde cinco veces: se corrió para poder commitear este apunte |
 
 ### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
 
