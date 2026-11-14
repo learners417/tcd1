@@ -246,13 +246,13 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-**Y si quieres escribir uno, hay cuatro candidatos con el trabajo ya medido.**
-El primero es del 14 de noviembre a las 11:30, y es mecánico: **pasar las 183
-afirmaciones de presencia que la batería de TCD hace sobre archivos crudos** a
-`cod(…)`, y extender la lente del bloque 16 a las tres formas que no mira
-(`.count`, `re.search` y el fragmento con paréntesis). Medido: ninguna de las
-183 miente hoy —las 22 que leen un comentario son las de EXPLICACIÓN, a
-propósito—, así que es prevención, no un agujero abierto. El segundo es
+**Y si quieres escribir uno, hay tres candidatos con el trabajo ya medido.**
+El primero —pasar las afirmaciones de presencia sobre crudo a `cod(…)`— lo
+cerró el turno del 14 a las 15:25 (`da98ce6`), y no era prevención: la lente
+estaba verde por un punto y coma y había cuatro ausencias que eran el defecto
+(abajo, en «El 14 de noviembre a las 15:25»). Lo que queda de ese frente es
+el recorrido por AST de la ausencia, anotado al final de esa misma sección. El
+siguiente es
 **cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
 «El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
@@ -320,6 +320,115 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **14 nov, 07:26** · `00a92d2` + `e5a3260` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`9de0794` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` suelto otra vez en los dos repos—, `node_modules` en cero. Esta despertada fue a medir **la lente que el turno anterior dejó puesta**, y la lente estaba tapada con una lista de nueve nombres: tres mecanismos que no estaban en esa lista se sacaron del código dejando el nombre en un comentario y la batería dio **878 en verde, cero faltas**. Uno de los tres pasó incluso leyendo `rdc()`: `solo_codigo` no sacaba el comentario del **final** de la línea. Cerrado en los dos repos, y de paso dos lentes que mentían en main: una se contradecía con otra y otra **medía para nadie** (abajo) |
 
 | **14 nov, 11:30** · `a76e8e7` (MCD) + `e5b3704` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`e1058f8` en TCD, `e5a3260` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` en cero en los dos. Esta despertada fue a por el único candidato que el mapa daba por no medido —**la batería de MCD contra sí misma**, el espejo de lo que TCD cerró a las 03:30 y 07:26— y lo que encontró es peor que una lente ciega: **con la lista de pantallas protegidas vaciada y la de verdad dejada en un comentario una línea encima, las 57 lentes daban verde y las diez pantallas de cliente quedaban abiertas sin sesión**, con los pacientes detrás. Dos defectos más pasaron igual, y al migrar aparecieron una lente que medía un comentario en main y el `--` del SQL que `solo_codigo` no saca (abajo) |
+
+| **14 nov, 15:25** · `da98ce6` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`93c3961` en TCD, `a76e8e7` en MCD), los dos árboles limpios y `HEAD` suelto en los dos—, `node_modules` en cero. Esta despertada tomó el candidato que el mapa daba por **mecánico y preventivo** («ninguna de las 183 miente hoy») y la premisa se cayó dos veces: la lente del bloque 16 **estaba verde por un punto y coma** —veía la asignación cruda solo al principio de la línea, así que once presencias con forma de nombre vivían hoy en la forma exacta que la lente prohíbe—, y había **cuatro ausencias que eran el defecto**, donde un comentario escondía al endpoint que cobra sin poder devolver el crédito. Seis formas cerradas, 225 medidas pasadas al código, y una lente que medía la cadena vacía (abajo) |
+
+### El 14 de noviembre a las 15:25: la lente estaba verde por un punto y coma
+
+El mapa dejaba este turno escrito como **prevención**: pasar las 183
+afirmaciones de presencia sobre archivo crudo a `cod(…)` y extender la lente
+del bloque 16 a tres formas, con la nota de que **ninguna miente hoy**. Se
+verificó antes de construir, y la premisa se cayó dos veces.
+
+**Primero: la lente del bloque 16 no veía lo que prohíbe.** Su detector de
+variables crudas anclaba al principio de la línea
+(`^\s*nombre = rd('…')`), así que en una línea como
+
+```python
+_adm_nc = rd('src/pages/Admin.tsx'); _sem_nc = rd('src/lib/semaforo.ts')
+```
+
+**la segunda no existía para ella.** Medido: 17 variables crudas invisibles, y
+sobre ellas **once afirmaciones de presencia con forma de nombre** —
+`cargarVentanas`, `PASOS_VIEJOS`, `SEMANAS_SIN_NUMEROS`, `TestEneagrama`,
+`fechaCorta`…—, o sea la forma exacta que esa lente existe para prohibir,
+verde por un `;`. No era prevención: era un agujero abierto, latente igual,
+pero abierto. Tampoco veía `rd(f'…')` ni el `rd(_f)` de un `for`.
+
+**Y aparecieron tres formas más de las que el mapa anotaba, al medirlas:** el
+contenido de los archivos guardado en un **diccionario**
+(`todo = {f: rd(f) for f in glob(…)}`, `_API64`, `_SRC46`…) y leído por la
+variable de un `for` o por `COL.get('ruta','')`. Ahí vivía
+`'guardarLlamada' in _s`, en la lente del cobro que puede devolver el crédito.
+
+**Segundo, y peor: cuatro ausencias que eran el defecto.** La regla escrita
+decía «la AUSENCIA se queda en crudo a propósito: pedir que algo no esté ni en
+un comentario es más estricto». Es verdad cuando la ausencia es **la
+prohibición** (que el campo viejo no esté). Es al revés cuando la ausencia es
+**el defecto**:
+
+```python
+if ('guardarLlamada' in cod(_s) and 'deshacerCobro' not in _s)
+```
+
+Ahí lo que se pide es que el mecanismo **exista**; sobre crudo, un
+`// deshacerCobro(…)` comentado lo hace parecer presente y **el endpoint que
+cobra sin poder devolver no se marca**. Es el defecto del turno de las 07:26,
+entrando por la otra puerta. Las cuatro quedaron en código: `rutaDe(` (la
+puerta de las rutas de IA), `deshacerCobro` dos veces y
+`devolverCreditoServer`.
+
+#### Qué quedó puesto
+
+**225 medidas pasaron al código** (`cod(…)` / `rdc(…)`), y la lente del bloque
+16 ahora mira **seis formas** sobre lo que lee un archivo fuente crudo:
+presencia `in`, `.count(…)`, `re.search/findall/finditer/match(…, crudo)`, el
+`in rd('…')` directo, la variable de un `for` sobre un diccionario de archivos
+y el `COL.get('ruta','')`. Con dos reglas nuevas de forma:
+
+1. **Mecanismo** es puntuación de código o un identificador con mayúscula
+   interna, `_`, `$` o un dígito. «Prefiero elegirlas yo» y «COBRO DE PRUEBA»
+   no lo son: una frase con espacios vive en un comentario con todo derecho, y
+   ésa es la excepción de las lentes de EXPLICACIÓN, que siguen leyendo crudo.
+2. En una **expresión regular** los paréntesis son del lenguaje de la regex,
+   no del código, así que ahí se juzga solo por identificadores. Sin esa
+   distinción, el buscador de voseo —`\b\w+(?:ás|és|ís)\b`, que mide el
+   idioma y lee crudo con derecho— salía marcado.
+
+**Y de paso, una lente que medía la cadena vacía.** `_css = todo.get('src/index.css','')`,
+y `todo` son los `.ts/.tsx` del repo: el `.css` nunca estuvo en ese
+diccionario. O sea que «el botón primario no lleva degradé» comparaba contra
+`''` y daba verde sola desde que se escribió. Ahora lee el archivo.
+
+#### Las pruebas contra su propio fallo
+
+La lente se prueba contra **11 fugas puestas a propósito** (una por forma, más
+el `;`, el `rd(f'…')` y el `rd(_f)` del `for`) y contra **9 casos que tiene
+que dejar pasar** (la ausencia en crudo, la frase, el texto del idioma, y lo
+ya medido en código). Las fixtures viven en un tramo delimitado que el
+escáner saltea, y **otra lente mide que ese tramo no sirva de escondite**:
+corto y sin un solo `check(` adentro.
+
+Y la prueba que importa, ejecutando sobre el código de verdad —
+`scripts/probar-la-lente-del-crudo.py`, dentro de la batería—: cinco
+mecanismos se sacan del código en memoria dejando el nombre en un comentario,
+uno por cada forma cerrada.
+
+| el mecanismo sacado | de dónde | sobre crudo | en el código |
+|---|---|---|---|
+| `cargarVentanas` (las ventanas de reclamo del cliente) | `src/App.tsx` | **verde** | **roja** |
+| `setFamiliaActual` (la familia profesional con cada perfil) | `src/App.tsx` | **verde** | **roja** |
+| `inputMode=` (el teclado numérico del Admin) | `NumerosDeLaSemana.tsx` | **verde** | **roja** |
+| `SEMANAS: Record<number, string>` (las trece semanas) | `src/lib/hojaDeRuta.ts` | **verde** | **roja** |
+| `deshacerCobro` (la devolución del crédito) | `api/ai/generate.ts` | **verde** | **roja** |
+
+TCD cierra con **884 miradas, cero faltas** («el ZIP puede salir»), `tsc` y
+`npm run build` limpios y las **133** pruebas en verde. Commit `da98ce6`. MCD
+no se tocó.
+
+#### El candidato medido para el próximo turno
+
+**La ausencia-como-defecto no se puede cuidar con una expresión regular.** Hay
+**75 ausencias de mecanismo sobre crudo** en la batería; **21** tienen una
+presencia al lado, y de ésas las 4 que eran recolectores de infracción ya
+quedaron cerradas. Las otras 17 son la prohibición legítima —«el campo viejo
+no está»— y ahí el crudo es más estricto. Distinguir las dos por líneas no
+sirve: la expresión suele ocupar tres o cuatro líneas, y el `check(` que
+decide el sentido está en otra. **Se necesita un recorrido por AST** de
+`auditoria.py`: encontrar cada `NotIn` sobre una variable cruda y preguntar si
+su sentencia es un `check(…)` —prohibición, crudo— o un recolector que
+`append`ea —defecto, código—. Medido, no leído: ésa es la forma que queda, y
+es la última de este frente.
 
 ### El 14 de noviembre a las 11:30: la lista de pantallas protegidas vivía en un comentario
 
