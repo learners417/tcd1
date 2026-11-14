@@ -311,6 +311,101 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **14 nov, 03:30** · `f3195b2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`c7586ca` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` otra vez en cero. Esta despertada fue a por el candidato que el turno anterior dejó anotado —**la batería de TCD contra sí misma**— y encontró, antes que la lente, **el agujero**: cinco de las seis rutas de `api/ai/` no preguntaban quién llama, y cualquiera con la URL gastaba las llaves de proveedor de la casa. Cerrado con una puerta única, el token del lado del navegador, una prueba que ejecuta los seis handlers y el bloque 16 de la batería (abajo). Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, **133 pruebas**, **878 miradas, cero faltas**; MCD sin tocar y con sus **53** en verde |
 
+| **14 nov, 07:26** · `pendiente` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`9de0794` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` suelto otra vez en los dos repos—, `node_modules` en cero. Esta despertada fue a medir **la lente que el turno anterior dejó puesta**, y la lente estaba tapada con una lista de nueve nombres: tres mecanismos que no estaban en esa lista se sacaron del código dejando el nombre en un comentario y la batería dio **878 en verde, cero faltas**. Uno de los tres pasó incluso leyendo `rdc()`: `solo_codigo` no sacaba el comentario del **final** de la línea. Cerrado en los dos repos, y de paso dos lentes que mentían en main: una se contradecía con otra y otra **medía para nadie** (abajo) |
+
+### El 14 de noviembre a las 07:26: la lente nueva estaba tapada con una lista de nueve nombres
+
+El turno de las 03:30 cerró el agujero de las rutas de IA y dejó una lente
+para que no vuelva: «ningún nombre de mecanismo se mide sobre el archivo
+crudo». Esa lente era **una lista de nueve nombres de plata**. Esta despertada
+fue a verificar esa premisa, y la lista era el error.
+
+**Medido primero, construido después.** La batería de TCD lee **204 variables
+del archivo crudo** —el archivo con sus comentarios— y mide **220
+afirmaciones de presencia** contra ellas. Nueve nombres protegidos de más de
+doscientas afirmaciones.
+
+**Y se probó ejecutando, con tres mecanismos que NO estaban en la lista:**
+
+| el defecto puesto | lo que se rompe de verdad | la batería |
+|---|---|---|
+| `marcarEncendida` fuera de Supervisión | ningún cliente se puede marcar como encendido: quedan «instalando» para siempre | **878 en verde** |
+| `formulasBloqueadas` fuera del Constructor | no se le explica qué fórmulas todavía no le sirven | **878 en verde** |
+| `deshacerCobro` fuera de la cadena de `generate` | si la cadena falla, el cliente **pierde el crédito** | **878 en verde** |
+
+Los tres con el nombre dejado en un comentario, `tsc` limpio y las 133 pruebas
+en verde. El tercero es el que importa: **su lente ya leía `rdc()`**, la
+versión endurecida del 14 de noviembre a las 03:30. Pasó igual porque
+`solo_codigo` sacaba el comentario de bloque y el de línea entera, **pero no el
+del final de la línea**: `await Promise.resolve(); // deshacerCobro(…)`
+contaba como código. O sea que el endurecimiento de la madrugada era, para
+cualquier defecto escrito al final de una línea, decorativo.
+
+#### Qué quedó puesto
+
+**El limpiador saca también el comentario del final**, sin tocar las barras
+que viven dentro de un texto (`'https://x.dev//y'`), de una expresión regular
+(`/^https?:\/\//i`) ni del código de al lado. Las tres cosas las prueba una
+lente nueva sobre una cadena armada a mano, así que si alguien simplifica el
+limpiador, la batería lo dice.
+
+**La regla dejó de ser una lista.** Toda afirmación de presencia de algo con
+**forma de código** sobre un archivo fuente se mide sin comentarios: 307
+afirmaciones pasaron a `cod(…)` —el ayudante nuevo, que limpia texto ya
+leído— o a `rdc(…)`. Forma de código es un nombre tipo `marcarEncendida` o
+`TOPE_REINVERSION`, o un fragmento con paréntesis, igual o punto y coma
+(`const pago = planPagado(perfil);`).
+
+**Y lo que sigue leyendo el archivo crudo, a propósito y escrito:** las 23
+lentes que miden que una EXPLICACIÓN esté escrita («GHL reintenta», «La base
+manda», «paraliza»), porque una frase del idioma vive en un comentario con
+todo derecho; y las afirmaciones de AUSENCIA (`'x' not in …`), porque pedir
+que algo no esté **ni en un comentario** es más estricto, no menos.
+
+#### Dos lentes que mentían en main, encontradas al migrarlas
+
+**1 · La batería se contradecía a sí misma.** Una lente pedía «el Camino
+arranca el lunes siguiente» con `proximoLunes` en las dos puntas. En el Camino
+**ya no está, y se sacó a propósito**: escribía un lunes futuro en el perfil,
+le congelaba el día en «1 de 90», le pisaba la fecha que el equipo cargó en el
+alta y le dejaba dos fechas de cierre. Seguía dando verde porque el nombre
+quedó en el comentario que explica por qué se sacó. Y en otro bloque hay una
+lente que pide **lo contrario** (`proximoLunes` NO en el Camino). Ahora dice lo
+que el código hace: `proximoLunes` existe para las migraciones, el Camino no lo
+usa, y la fecha la pone el alta —si falta, es HOY—.
+
+**2 · Del lado de MCD, una lente medía para nadie.** «Todo el que guarda un
+token lo cifra» buscaba la columna `ghl_token`, y **esa columna no existe en
+MCD**: el PIT de GoHighLevel —acceso total a los pacientes y al WhatsApp del
+cliente— vive en `private_token` de `ghl_connections`. `ghl_token` aparecía en
+un solo lugar de todo el repo: en esa línea de la batería. La lista salía
+vacía, y una lista vacía es la forma en que una lente se apaga sola sin
+avisar. Con la columna de verdad **seguía** dando verde con el token guardado
+en claro, porque miraba el archivo entero y el `import { encryptToken }` de
+arriba ya alcanzaba. Ahora se mide **el valor que se escribe**, y una lente
+nueva exige que la lista tenga a alguien.
+
+MCD tenía además el mismo agujero del comentario al final: con la comparación
+de la clave del puente cambiada por un `!==` pelado —la que se puede adivinar
+cronometrando— y `timingSafeEqual` dejado al final de esa misma línea, sus 53
+lentes daban verde. Su limpiador quedó igual al de TCD, con su propia lente.
+
+#### Las seis pruebas contra su propio fallo
+
+| el defecto reintroducido | antes | ahora |
+|---|---|---|
+| `marcarEncendida` fuera del código, el nombre en un comentario | **verde** | **roja** |
+| `formulasBloqueadas` fuera del código, ídem | **verde** | **roja** |
+| `deshacerCobro` fuera de la cadena, el nombre al final de la línea | **verde** | **roja**, 3 lentes |
+| una lente de nombre vuelta al archivo crudo | no existía | **roja**, con línea y nombre |
+| `solo_codigo` sin sacar el comentario del final | no existía | **roja** |
+| MCD: la clave del puente con `!==` y el nombre al final de la línea | **verde** | **roja**, 2 lentes |
+| MCD: el token guardado en claro en el `upsert` | **verde** | **roja** |
+
+Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, las
+**133 pruebas**, **880 miradas, cero faltas** («el ZIP puede salir»); MCD con
+`tsc` limpio, `next build` limpio y sus **57**.
+
 ### El 14 de noviembre a las 03:30: cinco rutas de IA no preguntaban quién llama
 
 La cola sigue vacía y las apps no se alcanzan desde acá, así que esta

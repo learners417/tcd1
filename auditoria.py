@@ -17,8 +17,52 @@ def rd(f): return open(f, encoding='utf-8', errors='replace').read()
 def rdc(f): return solo_codigo(rd(f))
 
 
+_SIN_COMENTARIOS: dict = {}
+
+
+def cod(s: str) -> str:
+    """El mismo texto YA LEIDO, sin comentarios.
+
+    Para medir un MECANISMO sobre contenido que la lente ya tiene en una
+    variable. Un nombre de mecanismo no se cumple con un comentario que lo
+    nombra: el 14 de noviembre se sacaron del codigo `marcarEncendida`,
+    `formulasBloqueadas` y `deshacerCobro` dejando el nombre en un comentario,
+    y la bateria dio las 878 en verde. El bloque 16 obliga a usar esto.
+    """
+    if s not in _SIN_COMENTARIOS: _SIN_COMENTARIOS[s] = solo_codigo(s)
+    return _SIN_COMENTARIOS[s]
+
+
+def _sin_comentario_al_final(l: str) -> str:
+    """Saca el `//` del final de UNA linea, sin tocar las barras que viven
+    dentro de un texto, de una expresion regular o de una URL.
+
+    El `//` al final era el agujero que quedaba: `solo_codigo` solo sacaba el
+    comentario que ocupa la linea entera, asi que
+    `await Promise.resolve(); // deshacerCobro(...)` dejaba el nombre dentro
+    del "codigo" y hasta las lentes de plata —las que el 14 de noviembre
+    pasaron a `rdc()`— seguian dando verde con la devolucion del credito
+    sacada de la cadena. Medido, no leido.
+    """
+    i, n, q = 0, len(l), None
+    while i < n:
+        c = l[i]
+        if q:                                  # dentro de un texto
+            if c == '\\': i += 2; continue
+            if c == q: q = None
+            i += 1; continue
+        if c == '\\': i += 2; continue         # /\/\/ de una regex
+        if c in '\'"`': q = c; i += 1; continue
+        if c == '/' and i + 1 < n and l[i+1] == '/':
+            if i > 0 and l[i-1] == ':': i += 2; continue   # https://
+            return l[:i]
+        i += 1
+    return l
+
+
 def solo_codigo(s: str) -> str:
-    """El archivo sin comentarios.
+    """El archivo sin comentarios: los de bloque, los de linea entera y los
+    del final de la linea.
 
     Tres lentes dieron falso positivo por mirar el archivo crudo: contaban la
     palabra prohibida, el writeText viejo o el campo retirado dentro del
@@ -27,7 +71,8 @@ def solo_codigo(s: str) -> str:
     """
     import re as _r
     s = _r.sub(r'/\*[\s\S]*?\*/', '', s)
-    return _r.sub(r'^\s*//.*$', '', s, flags=_r.M)
+    s = _r.sub(r'^\s*//.*$', '', s, flags=_r.M)
+    return '\n'.join(_sin_comentario_al_final(l) for l in s.split('\n'))
 
 # ── Ayudante: ¿una tab del Admin está en sus 5 superficies? ─────────────
 # Se comprueba PERTENENCIA al array, nunca una cadena con el corchete
@@ -414,7 +459,7 @@ if _os66.path.exists('api/_lib/uso-server.ts'):
           all('guardarLlamada' in rdc(f'api/ai/{f}')
               for f in ('generate.ts', 'stream.ts')))
     check('el guardián distingue crédito de tope',
-          'FEATURES_CON_CREDITO' in _srv and 'FEATURES_CON_TOPE' in _srv)
+          'FEATURES_CON_CREDITO' in cod(_srv) and 'FEATURES_CON_TOPE' in cod(_srv))
     check('el freno degrada dejando pasar, nunca bloqueando por infraestructura',
           'se deja pasar' in _srv)
 
@@ -425,7 +470,7 @@ import os as _os67
 if _os67.path.exists('src/lib/aiProvider.ts'):
     _ai = rd('src/lib/aiProvider.ts')
     check('las llamadas de IA tienen corte duro (AbortController)',
-          'AbortController' in _ai and 'TIMEOUT_MS' in _ai,
+          'AbortController' in cod(_ai) and 'TIMEOUT_MS' in cod(_ai),
           'sin timeout, un modelo colgado deja la pantalla girando para siempre')
     check('no se reintenta lo que ya es una decisión o ya se reintentó',
           'e.status === 402' in _ai and 'e.status === 502' in _ai,
@@ -476,7 +521,7 @@ if _os68.path.exists('api/_lib/gasto-server.ts'):
     _g68 = rd('api/_lib/gasto-server.ts')
     _guard68 = rd('api/_lib/guardian.ts')
     check('el plan se lee de la base, no de lo que dice el navegador',
-          "from('profiles')" in _g68 and 'plan_comercial' in _g68,
+          "from('profiles')" in _g68 and 'plan_comercial' in cod(_g68),
           'el plan decide cuánto puede gastar: no puede venir del cliente')
     check('sin plan conocido se asume el más chico, nunca el más grande',
           "PLAN_POR_DEFECTO: PlanComercial = 'blanco'" in _g68)
@@ -508,7 +553,7 @@ if _os69.path.exists('src/components/admin/PanelMotorIA.tsx'):
           'sala-de-mando.sql' in _pan,
           'un panel vacío parece un bug; tiene que decir que falta correr el SQL')
     check('el panel avisa cuándo el costo está calculado con precios estimados',
-          'estimados' in _pan)
+          'estimados' in cod(_pan))
     _ga = rd('api/_lib/gasto-server.ts')
     check('se anotan también las llamadas que FALLAN',
           'ok: false' in rdc('api/ai/generate.ts') and 'ok?: boolean' in rdc('api/_lib/gasto-server.ts'),
@@ -527,7 +572,7 @@ _apr = rd('src/lib/aprobacionAnuncio.ts')
 _cop = rd('src/lib/copiar.ts')
 _btn = rd('src/components/BotonCopiar.tsx')
 check('existe el recomendador de fórmulas',
-      'export function recomendarFormulas' in _fa)
+      'export function recomendarFormulas' in cod(_fa))
 check('cada recomendación explica POR QUÉ esa y no otra',
       'porQue:' in _fa and _fa.count('porQue:') >= 8)
 check('el Constructor arranca con lo recomendado, no con un default fijo',
@@ -535,7 +580,7 @@ check('el Constructor arranca con lo recomendado, no con un default fijo',
       and "{ piedras: 1, dolor_historia: 15, resultado_metodo: 10 }" not in _con,
       'el default viejo era el mismo para todos sin mirar el ADN')
 check('se le explica qué fórmulas todavía no le sirven y qué le falta',
-      'formulasBloqueadas' in _fa and 'formulasBloqueadas' in _con)
+      'formulasBloqueadas' in cod(_fa) and 'formulasBloqueadas' in cod(_con))
 check('el menú de las 18 sigue disponible, pero detrás de una puerta',
       'Prefiero elegirlas yo' in _con)
 check('Familia3 se define en un solo lugar',
@@ -560,11 +605,11 @@ check('el crítico usa la tarea auditoria, no la de escribir',
       "tarea: 'auditoria'" in _cr,
       'un modelo aprueba su propio texto casi siempre: el que juzga tiene que ser otro')
 check('el crítico escribe lo que falta, no solo lo señala',
-      'correcciones' in _cr and 'linea' in _cr)
+      'correcciones' in cod(_cr) and 'linea' in cod(_cr))
 check('el crítico revisa además las reglas de publicación',
-      'REGLAS_META' in _cr and 'alertasMeta' in _cr)
+      'REGLAS_META' in cod(_cr) and 'alertasMeta' in cod(_cr))
 check('el crítico nunca deja al sanador sin veredicto',
-      'const base = auditarPieza(texto)' in _cr and 'correcciones: null' in _cr)
+      'const base = auditarPieza(texto)' in cod(_cr) and 'correcciones: null' in _cr)
 _con611 = rd('src/components/campanas/ConstructorAnuncios.tsx')
 check('no se puede copiar una pieza que no está lista',
       'disabled={!listaParaPublicar}' in _con611)
@@ -589,12 +634,12 @@ check('las correcciones se aplican DONDE van, no siempre al final',
 # verificar nadie, y detrás de esa casilla se enciende una campaña con dinero
 # real.
 check('el candado de los anuncios se verifica solo, no se tilda a mano',
-      'estadoDeLasPiezas' in _mon
-      and "candadoCerrado(montaje, id)" in _mon
+      'estadoDeLasPiezas' in cod(_mon)
+      and "candadoCerrado(montaje, id)" in cod(_mon)
       and "c.id === 'dm' || c.id === 'trabajo'" in _mon,
       'detrás de esa casilla se enciende una campaña con dinero real')
 check('y los demás se cierran con su dato, no con un tilde',
-      'guardarMontaje' in _mon and 'pixel_id' in _mon and 'url_pagina' in _mon,
+      'guardarMontaje' in cod(_mon) and 'pixel_id' in cod(_mon) and 'url_pagina' in cod(_mon),
       'un tilde vacío no lo puede verificar nadie, ni el cliente a sí mismo')
 check('el candado dice QUÉ le falta a cuál pieza',
       'estadoPiezas.pendientes' in _mon)
@@ -604,8 +649,8 @@ check('el candado dice QUÉ le falta a cuál pieza',
 # tarda semanas y a veces no se recupera. Las reglas ya se le contaban al
 # modelo en el prompt, pero eso no es aplicarlas.
 check('existe el chequeo determinista de políticas',
-      'export function revisarPoliticas' in _fa
-      and 'export function puedePublicarse' in _fa,
+      'export function revisarPoliticas' in cod(_fa)
+      and 'export function puedePublicarse' in cod(_fa),
       'contarle las reglas al modelo no es lo mismo que verificarlas')
 check('cada alerta dice CÓMO se escribe lo mismo sin romper la regla',
       _fa.count('comoSeArregla:') >= 7,
@@ -617,7 +662,7 @@ check('cada alerta dice CÓMO se escribe lo mismo sin romper la regla',
 # se verifica es lo que importa: que la politica de Meta siga bloqueando, y
 # que los avisos de calidad tengan salida.
 check('las políticas bloquean el copiado en el Constructor',
-      'revisarPoliticas' in _con and 'estadoDePieza' in _con
+      'revisarPoliticas' in cod(_con) and 'estadoDePieza' in cod(_con)
       and 'bloqueantes: bloqueantes.length' in _con)
 check('una pieza bloqueada por Meta NO se puede aprobar a mano',
       "veredicto: 'bloqueada'" in _apr and 'puedeAprobarAMano: false' in _apr,
@@ -629,13 +674,13 @@ check('la aprobación muere si reescribe el anuncio',
       'export function huella' in _apr and 'estaAprobada(aprobadas' in _con,
       'sin eso aprobaba una version y publicaba otra')
 check('y la pantalla explica quién aprueba qué',
-      'COMO_FUNCIONA_LA_AUDITORIA' in _con,
+      'COMO_FUNCIONA_LA_AUDITORIA' in cod(_con),
       '«no me queda claro como es la auditoria, como la pasan, como la aprueban»')
 check('en cada estado hay una línea que dice qué sigue',
       'estado.queSigue' in _con,
       'el cartel decia «todavia no esta lista» y ahi terminaba')
 check('el candado del montaje mira políticas Y no solo ingredientes',
-      'revisarPoliticas' in _fa
+      'revisarPoliticas' in cod(_fa)
       and 'no se puede publicar' in _fa,
       'una pieza puede tener los 8 ingredientes y aun así ser irpublicable')
 check('se distingue lo que bloquea de lo que solo hay que revisar',
@@ -659,7 +704,7 @@ if _m:
           'primera venta esperada' not in _ses,
           'el plan que firma no puede decir una fecha distinta de su hoja de ruta')
     check('la sesion del plan de inversion nombra las fechas de la hoja',
-          f'dia {_dia}' in _ses or f'd\u00eda {_dia}' in _ses,
+          f'dia {_dia}' in cod(_ses) or f'd\u00eda {_dia}' in cod(_ses),
           'sin la fecha, el cliente firma un plan sin saber que espera')
 
 # ── 6.11d · CONSTRUIDO, PROBADO Y SIN CABLEAR ──────────────────────────
@@ -699,7 +744,7 @@ check('calcularCadena exige los paises, no los busca en los numeros',
 # escenario los agarraba.
 _dash = solo_codigo(todo.get('src/pages/Dashboard.tsx', ''))
 check('HOY no afirma "todo al dia" mientras todavia esta cargando',
-      'yaCargo && data.tareasHoy.length === 0' in _dash,
+      'yaCargo && data.tareasHoy.length === 0' in cod(_dash),
       'el dia 1 tachaba su sesion con "Hecha - el dojo te vio hoy"')
 check('y el fetch a Mi Clinica tiene corte',
       'corte.abort()' in _dash and 'signal: corte.signal' in _dash,
@@ -764,31 +809,31 @@ check('nadie llama a navigator.clipboard por su cuenta',
       not _crudo, '; '.join(_crudo[:5]))
 check('el helper unico existe y responde si copio',
       'export async function copiar' in _cop
-      and 'return conTextarea(texto)' in _cop
+      and 'return conTextarea(texto)' in cod(_cop)
       and 'Promise<boolean>' in _cop,
       'un copiar que no devuelve si funciono no se puede avisar')
 check('y tiene respaldo para donde la API moderna no corre',
-      'execCommand' in _cop and 'NO_SE_PUDO_COPIAR' in _cop)
+      'execCommand' in cod(_cop) and 'NO_SE_PUDO_COPIAR' in cod(_cop))
 check('el boton dice cuando NO pudo copiar',
-      "'copiado'" in _btn and "'fall" in _btn and 'NO_SE_PUDO_COPIAR' in _btn,
+      "'copiado'" in _btn and "'fall" in _btn and 'NO_SE_PUDO_COPIAR' in cod(_btn),
       'antes mostraba «Copiado» sin esperar el resultado')
 
 # ── 6.13 · El guion llega como carrusel, no como bloque de texto ───────
 check('existe el armado de láminas',
-      'export function armarCarrusel' in _fa)
+      'export function armarCarrusel' in cod(_fa))
 check('el guion se parte solo, sin una segunda llamada al modelo',
-      'PANTALLA' in _fa and 'armarCarrusel' in _con,
+      'PANTALLA' in cod(_fa) and 'armarCarrusel' in cod(_con),
       'el prompt ya pedía PANTALLA N: — faltaba leerlo')
 # Pedia writeText(l.texto) crudo. Ese writeText crudo ERA el bug: sin catch,
 # el boton no hacia nada en el telefono y el cartel decia «Copiado» igual.
 # Ahora hay un solo helper y la lente exige que se use.
 check('cada lámina se copia sola',
-      'carrusel.laminas.map' in _con and 'BotonCopiar' in _con
+      'carrusel.laminas.map' in _con and 'BotonCopiar' in cod(_con)
       and 'texto={l.texto}' in _con)
 check('se avisa cuando una lámina no entra en el teléfono',
-      'LARGO_MAX_LAMINA' in _fa and 'muy larga para el teléfono' in _con)
+      'LARGO_MAX_LAMINA' in cod(_fa) and 'muy larga para el teléfono' in _con)
 check('la palabra clave se exige en el cierre o en el post',
-      'palabraPresente' in _fa and 'palabraClave' in _fa,
+      'palabraPresente' in cod(_fa) and 'palabraClave' in cod(_fa),
       'sin la palabra, el comentario no dispara el mensaje y la campaña queda muda')
 check('el candado del montaje también la exige',
       'falta tu palabra' in _fa)
@@ -801,16 +846,16 @@ check('el candado del montaje también la exige',
 import os as _os614
 if _os614.path.exists('src/lib/paqueteCampana.ts'):
     _paq = rd('src/lib/paqueteCampana.ts')
-    check('existe el armado del paquete', 'export function armarPaquete' in _paq)
+    check('existe el armado del paquete', 'export function armarPaquete' in cod(_paq))
     check('el paquete NO genera nada nuevo, junta lo que existe',
           'generateText' not in _paq,
           'volver a generar lo ya sellado gastaría IA y daría otro texto')
     check('cada pieza dice DÓNDE se consigue si falta', 'donde:' in _paq)
-    check('se distingue lo obligatorio de lo opcional', 'obligatoria' in _paq)
+    check('se distingue lo obligatorio de lo opcional', 'obligatoria' in cod(_paq))
     check('una pieza con problema se muestra igual, no se esconde',
           "estado: problemas.length ? 'revisar' : 'listo'" in _paq)
     check('el paquete está en el Constructor con copiar todo y copiar por pieza',
-          'armarPaquete' in _con and 'paquete.textoCompleto' in _con
+          'armarPaquete' in cod(_con) and 'paquete.textoCompleto' in _con
           and 'texto={x.contenido}' in _con)
 
 # ── 6.15 · Cada candado del montaje lleva lo que lo resuelve ───────────
@@ -829,7 +874,7 @@ check('el montaje pide el tutorial por CLAVE, no por código',
 check('los candados nombran la sesión del Camino donde se sellan',
       _mon15.count("sesion: '") >= 4)
 check('el paso a paso no se traga el clic del candado',
-      'onClick={(e) => e.stopPropagation()}' in _mon15,
+      'onClick={(e) => e.stopPropagation()}' in cod(_mon15),
       'abrir el tutorial marcaría el candado sin querer')
 
 # ── 6.16 · La carga se puede hacer desde el teléfono ───────────────────
@@ -837,7 +882,7 @@ check('el paso a paso no se traga el clic del candado',
 # datos todo el resto del sistema queda ciego.
 _tab16 = rd('src/components/campanas/TableroCupos.tsx')
 check('la carga semanal va de a un dato por pantalla',
-      'PASOS[paso]' in _tab16 and 'setPaso' in _tab16,
+      'PASOS[paso]' in _tab16 and 'setPaso' in cod(_tab16),
       '12 casillas en una grilla de 4 columnas no se cargan en un teléfono')
 check('el orden sigue cómo se leen los números en el administrador',
       "donde: 'Columna" in _tab16,
@@ -862,12 +907,12 @@ import os as _os17
 if _os17.path.exists('src/lib/decidirCampana.ts'):
     _dec = rd('src/lib/decidirCampana.ts')
     _tab17 = rd('src/components/campanas/TableroCupos.tsx')
-    check('existe el motor de decisión', 'export function decidirCampana' in _dec)
+    check('existe el motor de decisión', 'export function decidirCampana' in cod(_dec))
     check('el motor NO usa IA: es determinista',
           'generateText' not in _dec and 'aiProvider' not in _dec,
           'un modelo que opina sobre números responde distinto el martes y el jueves')
     check('la regla del creativo muerto existe de verdad',
-          'DIAS_PARA_MUERTO' in _dec and "estado: 'muerto'" in _dec)
+          'DIAS_PARA_MUERTO' in cod(_dec) and "estado: 'muerto'" in _dec)
     check('un anuncio muerto se apaga aunque esté en medición',
           _dec.index('DIAS_PARA_MUERTO') < _dec.index('if (enMedicion)'),
           'esperar 14 días con cero conversaciones es tirar 11 de presupuesto')
@@ -875,9 +920,9 @@ if _os17.path.exists('src/lib/decidirCampana.ts'):
           'a.agendas === 0 && a.conversaciones >= 10' in _dec,
           'el tope de UMBRALES es de mercado; un ticket alto sostiene conversaciones más caras')
     check('semanasRefresh dejó de ser un dato muerto',
-          'semanasRefresh' in _dec and 'tocaRefrescar' in _dec)
+          'semanasRefresh' in cod(_dec) and 'tocaRefrescar' in cod(_dec))
     check('hay UNA sola acción principal por día',
-          'accionPrincipal' in _dec and 'decision.accionPrincipal' in _tab17)
+          'accionPrincipal' in cod(_dec) and 'decision.accionPrincipal' in _tab17)
     check('se cargan las ventas, que es lo que decide el ganador',
           "k: 'ventas'" in _tab17,
           'sin ventas el ganador solo puede decidirse por agendas')
@@ -890,13 +935,13 @@ import os as _os17
 if _os17.path.exists('src/lib/decidirCampana.ts'):
     _dec = rd('src/lib/decidirCampana.ts')
     check('el motor de decisión existe y es determinista',
-          'export function decidirCampana' in _dec and 'generateText' not in _dec,
+          'export function decidirCampana' in cod(_dec) and 'generateText' not in _dec,
           'mismas cifras, misma decisión, siempre: un modelo daría otra el jueves')
     check('el muerto se apaga aunque siga en medición',
-          'DIAS_PARA_MUERTO' in _dec,
+          'DIAS_PARA_MUERTO' in cod(_dec),
           'tres días de gasto sin una conversación no es ruido')
     check('el ganador exige venta, con la agenda como respaldo declarado',
-          'costoPorVenta' in _dec and 'costo por agenda' in _dec)
+          'costoPorVenta' in cod(_dec) and 'costo por agenda' in _dec)
     check('el comentario de arriba no contradice la regla de abajo',
           'Si TODAVÍA no vendió ninguno' in _dec,
           'decía que el ganador debe haber vendido y hay un respaldo que no lo exige')
@@ -915,25 +960,25 @@ if _os18.path.exists('src/lib/bitacoraCampana.ts'):
     _bit = rd('src/lib/bitacoraCampana.ts')
     _tab18 = rd('src/components/campanas/TableroCupos.tsx')
     check('existe la bitácora y guarda por semana',
-          'export function anotarSemana' in _bit and 'semanaISO' in _bit)
+          'export function anotarSemana' in cod(_bit) and 'semanaISO' in cod(_bit))
     check('volver a cargar la misma semana reemplaza, no duplica',
           'fuera.has' in _bit,
           'el viernes se carga, se corrige y se vuelve a cargar')
     check('la historia no se pisa: clave propia y separada',
           "KEY_BIT = 'tcd_bitacora_campana_v1'" in _tab18
-          and 'KEY_SEM' in _tab18)
+          and 'KEY_SEM' in cod(_tab18))
     check('cada anuncio se compara contra SÍ MISMO, no contra los otros',
           'anterior.set(e.indice' in _bit)
     check('la bitácora dice qué fórmula gana en ESTA cuenta',
-          'mejorFormula' in _bit and 'formulasQueFallaron' in _bit)
+          'mejorFormula' in cod(_bit) and 'formulasQueFallaron' in cod(_bit))
     check('fallar una vez no descarta una fórmula: hacen falta dos',
           'veces >= 2' in _bit,
           'descartar con un solo intento tira fórmulas que solo tuvieron mala semana')
     check('cuando hay ganador, el siguiente paso está a un toque',
-          'decision.ganador !== null && onIrAnuncios' in _tab18,
+          'decision.ganador !== null && onIrAnuncios' in cod(_tab18),
           'declarar el ganador sin ofrecer qué hacer deja el círculo abierto')
     check('el Tablero puede volver al Constructor',
-          'onIrAnuncios' in _tab18 and 'onIrAnuncios={onIrAnuncios}' in rd('src/components/campanas/MontajeCupos.tsx'))
+          'onIrAnuncios' in cod(_tab18) and 'onIrAnuncios={onIrAnuncios}' in rd('src/components/campanas/MontajeCupos.tsx'))
     check('la bitácora está probada con escenarios',
           _os18.path.exists('scripts/prueba-bitacora.ts'))
 
@@ -948,21 +993,21 @@ if _os19.path.exists('src/lib/mesaPlataStorage.ts'):
     _tp19 = rd('src/components/admin/TableroPlata.tsx')
     _adm19 = rd('src/pages/Admin.tsx')
     check('la Mesa de plata carga y guarda por cliente y semana',
-          'export async function cargarSemana' in _mp
-          and 'export async function guardarSemana' in _mp)
+          'export async function cargarSemana' in cod(_mp)
+          and 'export async function guardarSemana' in cod(_mp))
     check('al cambiar de cliente se trae SU semana',
-          'clienteId' in _tp19 and '[clienteId, semana]' in _tp19,
+          'clienteId' in cod(_tp19) and '[clienteId, semana]' in _tp19,
           'mostrar los números del cliente anterior es la peor forma de equivocarse')
     check('un error al guardar NO limpia lo cargado',
           'Tus números siguen acá' in _tp19,
           'perder veinte minutos de carga por un problema de red los hace dejar de cargar')
-    check('existe el historial por cliente', 'historialCliente' in _mp)
+    check('existe el historial por cliente', 'historialCliente' in cod(_mp))
     check('existe la comparativa entre cuentas',
-          'export async function comparativaSemana' in _mp)
+          'export async function comparativaSemana' in cod(_mp))
     check('la comparativa ordena por DINERO EN RIESGO, no alfabético',
           'facturado * Math.min' in _mp)
     check('el que no cargó sus números sube primero',
-          'sinCargar' in _mp,
+          'sinCargar' in cod(_mp),
           'sin datos no hay diagnóstico posible para esa cuenta')
     check('la tab tiene su propio selector de cliente',
           _adm19.count('De qué cliente') >= 1,
@@ -983,7 +1028,7 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
     _cd = rd('src/components/admin/ListaDeHoy.tsx')
     _adm20 = rd('src/pages/Admin.tsx')
     check('existe la cola y arma acciones, no diagnósticos',
-          'export function armarCola' in _cola and 'accion:' in _cola and 'como:' in _cola)
+          'export function armarCola' in cod(_cola) and 'accion:' in _cola and 'como:' in _cola)
     check('cada situación trae el mensaje listo para mandar',
           _cola.count('como:') >= 12,
           'señalar el problema sin dar la salida obliga a preguntar')
@@ -991,7 +1036,7 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
           'if (!id) continue' in _cola,
           'si aparecieran todas volvería a ser un tablero')
     check('el plan decide quién atiende',
-          'function quienAtiende' in _cola and 'SEMANAS_ANTES_DE_ESCALAR' in _cola,
+          'function quienAtiende' in cod(_cola) and 'SEMANAS_ANTES_DE_ESCALAR' in cod(_cola),
           'el de $1.000 tiene que costar cero minutos cuando todo va bien')
     check('lo que necesita persona va antes que lo que resuelve la app',
           "a.quien === 'la app' ? 0 : 1" in _cola)
@@ -1004,10 +1049,10 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
     # Copiar y marcar viven ahora en TarjetaCliente, que es la que dibuja
     # cada ítem de la lista.
     check('se puede copiar el mensaje y marcar lo hecho',
-          'Copy' in rd('src/components/admin/TarjetaCliente.tsx')
+          'Copy' in rdc('src/components/admin/TarjetaCliente.tsx')
           and 'Marcarla hecha' in _lh22)
     check('cuando falla la consulta lo dice en vez de verse vacía',
-          'mensajeDeFalla' in _lh22)
+          'mensajeDeFalla' in cod(_lh22))
     check('la cola está probada con escenarios',
           _os20.path.exists('scripts/prueba-cola.ts'))
 
@@ -1022,30 +1067,30 @@ if _os21.path.exists('src/components/admin/Supervision.tsx'):
     _cola21 = rd('src/lib/colaExcepciones.ts')
     _adm21 = rd('src/pages/Admin.tsx')
     check('existe la pantalla de supervisión con todas las cuentas a la vez',
-          'export async function supervision' in _mp21 and 'FilaSupervision' in _mp21)
+          'export async function supervision' in _mp21 and 'FilaSupervision' in cod(_mp21))
     check('un punto por tramo de la cadena, no una tabla de números',
           "'atraccion', 'conversion', 'retencion'" in _sup)
     # El cálculo se mudó a colaExcepciones para poder probarlo: acá se
     # verifica que la supervisión lo USE, no que lo repita.
     check('lo que no cargó números va primero',
-          'pesoDeLaCuenta' in _mp21 and 'PESO_SIN_DATOS' in _cola21,
+          'pesoDeLaCuenta' in cod(_mp21) and 'PESO_SIN_DATOS' in cod(_cola21),
           'sin datos no se puede decidir nada sobre esa cuenta')
     check('el orden pesa la insistencia, no solo lo roto',
-          'semanasIgual' in _mp21 and 'semanasIgual) * 0.5' in _cola21,
+          'semanasIgual' in cod(_mp21) and 'semanasIgual) * 0.5' in cod(_cola21),
           'tres semanas con el mismo problema pesa más que una')
     check('existe el contador de semanas seguidas',
-          'export function contarRacha' in _cola21)
+          'export function contarRacha' in cod(_cola21))
     check('la racha se corta cuando el cuello cambia',
           'if (c !== actual) break' in _cola21,
           'si el cuello se movió, el problema anterior se resolvió')
     check('una semana sana borra la racha',
           'if (!actual) return { cuello: null, semanas: 0 }' in _cola21)
     check('la cola YA USA la racha real, no un cero fijo',
-          'peso' in rd('src/lib/cerebro.ts')
-          and 'semanasIgual' in rd('src/lib/cerebro.ts'),
+          'peso' in rdc('src/lib/cerebro.ts')
+          and 'semanasIgual' in rdc('src/lib/cerebro.ts'),
           'sin esto nada escalaba nunca de la app a una persona')
     check('el contador es lógica pura y se puede probar sin la base',
-          'contarRacha' in _cola21 and 'from ./supabase' not in _cola21)
+          'contarRacha' in cod(_cola21) and 'from ./supabase' not in _cola21)
     check('la tab Supervisión está cableada en las 4 superficies',
           _tab_completa('supervision'))
 
@@ -1058,32 +1103,32 @@ if _os22.path.exists('src/lib/avisosCliente.ts'):
     _av = rd('src/lib/avisosCliente.ts')
     _cd22 = rd('src/components/admin/ListaDeHoy.tsx')
     _cola22 = rd('src/lib/colaExcepciones.ts')
-    check('existe el planificador de avisos', 'export function planificarAvisos' in _av)
+    check('existe el planificador de avisos', 'export function planificarAvisos' in cod(_av))
     check('el aviso se elige por el ID del cuello, no leyendo texto',
           'cuello: string;' in _cola22 and 'const clave = item.cuello;' in _av,
           'deducir el problema del texto de la situación es frágil')
     check('el mismo aviso NO sale dos veces en la misma semana',
-          'ultimaSemana[id] === semana' in _av,
+          'ultimaSemana[id] === semana' in cod(_av),
           'un aviso diario por el mismo motivo deja de leerse al segundo día')
     check('tras insistir sin resultado, escala en vez de repetir',
-          'AVISOS_ANTES_DE_ESCALAR' in _av and 'aEscalar' in _av)
+          'AVISOS_ANTES_DE_ESCALAR' in cod(_av) and 'aEscalar' in cod(_av))
     check('lo que ya atiende una persona no se le avisa al cliente',
           "item.quien !== 'la app'" in _av,
           'sería pedirle que se ocupe de algo de lo que ya se ocupa alguien')
     check('resuelto el problema, el contador vuelve a cero',
-          'export function olvidarAviso' in _av)
+          'export function olvidarAviso' in cod(_av))
     check('un cuello sin aviso escrito no se inventa',
           'if (!plantilla) continue' in _av)
     check('el aviso lleva a la pantalla donde se resuelve',
           'accion_url: aviso.destino' in _av)
     check('una persona puede escribirle por el mismo canal',
-          'export async function mandarMensajeDelEquipo' in _av
+          'export async function mandarMensajeDelEquipo' in cod(_av)
           and "tipo: 'admin'" in _av,
           'para el cliente no deberían sentirse como dos sistemas distintos')
     check('mandar nunca lanza: el trabajo de la persona no se pierde',
           _av.count('return false;') >= 2)
     check('la cola puede mandar el aviso dentro de la app',
-          'mandarleAlCliente' in rd('src/lib/cerebroStorage.ts'))
+          'mandarleAlCliente' in rdc('src/lib/cerebroStorage.ts'))
     check('los avisos están probados con escenarios',
           _os22.path.exists('scripts/prueba-avisos.ts'))
 
@@ -1120,7 +1165,7 @@ check('la puerta elegida preselecciona la regla de medición',
       "leer<string | null>('tcd_campana_objetivo'" in _th23,
       'elegía una puerta y esa decisión no llegaba a ningún lado')
 check('el pacto que el sanador firma vuelve a su pantalla',
-      'tcd_pacto' in rd('src/pages/Dashboard.tsx'),
+      'tcd_pacto' in rdc('src/pages/Dashboard.tsx'),
       'pedirle que firme algo y no volver a mostrárselo es lo contrario de un compromiso')
 
 # Los efectos asíncronos del código nuevo no tocan estado tras desmontar.
@@ -1142,18 +1187,18 @@ import os as _os24
 if _os24.path.exists('src/lib/conexion.ts'):
     _cx = rd('src/lib/conexion.ts')
     check('la app sabe cuándo no hay internet',
-          'useConexion' in _cx and "addEventListener('offline'" in _cx)
+          'useConexion' in cod(_cx) and "addEventListener('offline'" in _cx)
     check('se distingue sin internet de servidor caído de sesión vencida',
           all(x in _cx for x in ("'sin_internet'", "'servidor'", "'permiso'")),
           'la acción es distinta: esperar, avisar o volver a entrar')
     check('el sanador nunca ve el error técnico',
-          'mensajeDeFalla' in _cx and 'Failed to fetch' not in
+          'mensajeDeFalla' in cod(_cx) and 'Failed to fetch' not in
           rd('src/components/admin/TableroPlata.tsx'))
     check('sin internet se le dice que su trabajo no se perdió',
           'no se perdió' in _cx,
           'es lo único que evita que vuelva a escribir todo o abandone')
     check('la barra de sin internet está en la pantalla que se ve siempre',
-          'useConexion' in rd('src/components/Topbar.tsx'))
+          'useConexion' in rdc('src/components/Topbar.tsx'))
     _pantallas24 = ['TableroPlata', 'ListaDeHoy', 'Supervision', 'PanelMotorIA']
     _sin = [c for c in _pantallas24
             if 'mensajeDeFalla' not in rd(f'src/components/admin/{c}.tsx')]
@@ -1259,24 +1304,24 @@ if _os28.path.exists('src/lib/salaDeMando.ts'):
     _smc = rd('src/components/admin/SalaDeMando.tsx')
     _adm28 = rd('src/pages/Admin.tsx')
     check('las nueve etapas están declaradas con su criterio de salida',
-          _sm.count('criterioSalida:') >= 9 and 'ETAPAS' in _sm)
+          _sm.count('criterioSalida:') >= 9 and 'ETAPAS' in cod(_sm))
     check('cada etapa dice quién es el dueño', _sm.count('dueno:') >= 9)
     check('de la prueba de cadena no se sale sin el cobro',
-          'ETAPA_CON_CANDADO' in _sm and 'COBRO DE PRUEBA' in _sm
-          and 'ETAPA_CON_CANDADO' in _smc,
+          'ETAPA_CON_CANDADO' in cod(_sm) and 'COBRO DE PRUEBA' in _sm
+          and 'ETAPA_CON_CANDADO' in cod(_smc),
           'encender con la cadena sin probar es tirar el presupuesto')
     check('la etapa destino no marca atraso',
           'diasMax: 0, dueno: \'Cliente\'' in _sm,
           'un cliente en ritmo propio hace 200 días no está atrasado: está donde queremos')
     check('la ventana de 21 días hasta la activación se mide',
-          'DIAS_HASTA_ACTIVACION' in _sm and 'fueraDeVentana' in _sm)
+          'DIAS_HASTA_ACTIVACION' in cod(_sm) and 'fueraDeVentana' in cod(_sm))
     check('el freno de la pauta existe y manda sobre todo',
-          'DIAS_PAUTA_SIN_AGENDA' in _sm and 'cortar: true' in _sm,
+          'DIAS_PAUTA_SIN_AGENDA' in cod(_sm) and 'cortar: true' in _sm,
           'siete días sin una agenda no es mala suerte: es que el anuncio no funciona')
     check('la reinversión tiene tope',
-          'TOPE_REINVERSION' in _sm)
+          'TOPE_REINVERSION' in cod(_sm))
     check('una decisión no se borra, se deja de aplicar',
-          'derogarDecision' in rd('src/lib/salaDeMandoStorage.ts')
+          'derogarDecision' in rdc('src/lib/salaDeMandoStorage.ts')
           and 'vigente: false' in rd('src/lib/salaDeMandoStorage.ts'),
           'la historia de por qué se decidió algo importa')
     check('la lógica de la Sala se puede probar sin la base',
@@ -1297,10 +1342,10 @@ _tc29 = rd('src/components/campanas/TableroCupos.tsx')
 _con29 = rd('src/components/campanas/ConstructorAnuncios.tsx')
 
 check('el presupuesto NO usa el benchmark de comercio electrónico',
-      '0.50;' not in _vc29 and 'CAC_MEDIO' in _vc29,
+      '0.50;' not in _vc29 and 'CAC_MEDIO' in cod(_vc29),
       'decía $7 por semana donde hacen falta $154')
 check('el costo por conversación se deriva del CAC objetivo',
-      'costoConvReferencia' in _vc29 and 'convsPorVenta' in _vc29,
+      'costoConvReferencia' in cod(_vc29) and 'convsPorVenta' in cod(_vc29),
       'la cadena se dice a sí misma cuánto puede pagar')
 check('el colchón va a la actividad, no al presupuesto',
       'ventasObjetivo * real.precio * CAC_MEDIO' in _vc29,
@@ -1309,22 +1354,22 @@ check('cada tasa declara cuántos datos necesita para opinar',
       _vc29.count('necesita:') >= 12,
       'juzgar un cierre sobre dos llamadas es leer ruido')
 check('sin muestra suficiente el indicador no puede ser el dominó',
-      'insuficiente' in _vc29 and 'valor: insuficiente ? null : valor' in _vc29)
+      'insuficiente' in cod(_vc29) and 'valor: insuficiente ? null : valor' in _vc29)
 check('la base del referido son los que TERMINARON, no los activos',
-      'n.clientesQueTerminan, necesita: 3 });' in _vc29,
+      'n.clientesQueTerminan, necesita: 3 });' in cod(_vc29),
       'a alguien que empezó hace dos semanas no se le pide un referido')
 check('el refresco cuenta las semanas del GANADOR, no de la campaña',
-      'semanasGanando' in _tc29 and 'Math.floor(diasCampana / 7)' not in _tc29,
+      'semanasGanando' in cod(_tc29) and 'Math.floor(diasCampana / 7)' not in _tc29,
       'le pedía refrescar el ganador el día que lo encontraba')
 check('con números empatados no se corona a nadie',
-      'hayEmpate' in _dc29,
+      'hayEmpate' in cod(_dc29),
       'coronar al primero le hace apagar dos que estaban igual')
 check('una tanda de anuncios cuesta UN crédito',
       _con29.count("feature: 'constructor'") <= 2
       and 'primera ? { feature' in _con29,
       'cobraba cuatro donde la app promete uno')
 check('el cliente ve su marcador de los 90 días',
-      'Tus 90 días' in _tc29 and 'conversacionesNecesarias' in _tc29,
+      'Tus 90 días' in _tc29 and 'conversacionesNecesarias' in cod(_tc29),
       'la proyección vivía en el Admin y él nunca la leía')
 check('los cinco están probados con el viaje real',
       _os610.path.exists('scripts/prueba-verdad.ts'))
@@ -1367,9 +1412,9 @@ if _os29.path.exists('src/lib/roles.ts'):
     # que ya no se ordena por rol. Lo que el rol decide es QUÉ VE, y eso lo
     # verifica la lente 6.38 sobre las categorías de dato.
     check('el rol decide qué ve, y eso se verifica por categoría de dato',
-          'puedeVer' in rd('src/lib/permisos.ts'))
+          'puedeVer' in rdc('src/lib/permisos.ts'))
     check('el traspaso está escrito, con el porqué de cada paso',
-          'TRASPASO' in _rl and _rl.count('porque:') >= 7,
+          'TRASPASO' in cod(_rl) and _rl.count('porque:') >= 7,
           'una conversación se olvida y el que la dio se vuelve necesario para siempre')
     check('la pantalla del rol está cableada en las 4 superficies',
           _tab_completa('mirol'))
@@ -1399,7 +1444,7 @@ if _os30.path.exists('src/lib/transcripcion.ts'):
           "tarea: 'estructura'" in _cs,
           'no necesita voz: necesita obedecer el esquema')
     check('NADA se guarda sin que un humano lo confirme',
-          'Confirmar y guardar' in _cs and 'setFuera' in _cs,
+          'Confirmar y guardar' in _cs and 'setFuera' in cod(_cs),
           'una transcripción mal leída que se guarda sola es un dato falso con cara de registro')
     check('lee el JSON aunque el modelo lo envuelva',
           "indexOf('{')" in _tr and "lastIndexOf('}')" in _tr,
@@ -1407,7 +1452,7 @@ if _os30.path.exists('src/lib/transcripcion.ts'):
     check('una respuesta rota nunca revienta la pantalla',
           _tr.count('return EXTRACCION_VACIA') >= 3)
     check('el cliente recibe el resumen dentro de la app',
-          'resumenParaElCliente' in _tr and 'crearNotificacion' in _cs)
+          'resumenParaElCliente' in cod(_tr) and 'crearNotificacion' in cod(_cs))
     check('un error al guardar no pierde lo leído',
           'Lo leído sigue acá' in _cs)
     check('la tab está cableada en las 4 superficies',
@@ -1434,26 +1479,26 @@ if _os31.path.exists('src/lib/cuadroTickets.ts'):
     check('los cuatro tickets tienen su criterio escrito',
           _ct.count('criterio:') >= 4)
     check('al que va solo no se le muestran las tareas de instalador',
-          'NECESITA_INSTALADOR' in _ct and 'noAplica' in _ct,
+          'NECESITA_INSTALADOR' in cod(_ct) and 'noAplica' in cod(_ct),
           'mostrarle una tarea que no puede hacer y que nadie hará por él lo hace abandonar el cuadro')
     check('el avance cuenta solo lo que le aplica',
-          'i.noAplica' in _ct and 'export function avanceDe' in _ct)
+          'i.noAplica' in _ct and 'export function avanceDe' in cod(_ct))
     check('el cliente viejo entra marcando bloques enteros',
-          'export function marcarBloques' in _ct,
+          'export function marcarBloques' in cod(_ct),
           'no arranca de cero: arranca de donde está')
 
 # ── 6.32 · El libro y el puente con los pacientes ──────────────────────
 if _os31.path.exists('src/lib/libroYPacientes.ts'):
     _lp = rd('src/lib/libroYPacientes.ts')
     check('el libro está por capítulos, atado al pilar',
-          'CAPITULOS' in _lp and _lp.count('pilar:') >= 10)
+          'CAPITULOS' in cod(_lp) and _lp.count('pilar:') >= 10)
     check('cada capítulo dice de qué trata y cuánto tarda',
           _lp.count('sobre:') >= 10 and _lp.count('minutos:') >= 10)
     check('un capítulo cerrado explica por qué conviene esperar',
           'es teoría' in _lp,
           'leerlo antes es teoría; leerlo en su momento es la explicación de lo que le pasa')
     check('existe el puente para sostener a sus pacientes',
-          'estadoDePacientes' in _lp,
+          'estadoDePacientes' in cod(_lp),
           'el objetivo son diez PACIENTES, no diez ventas')
     check('el que está por terminar va primero',
           "'por terminar': 0" in _lp,
@@ -1669,8 +1714,8 @@ _sinPrueba = [m for m in _MOTORES if not any(m in _s for _s in _SCR34.values())]
 check('todo motor tiene al menos una prueba', not _sinPrueba, ', '.join(_sinPrueba))
 
 check('el peso de la cola es lógica pura y está probado',
-      'export function pesoDeLaCuenta' in rd('src/lib/colaExcepciones.ts')
-      and 'pesoDeLaCuenta' in rd('scripts/prueba-cola.ts'),
+      'export function pesoDeLaCuenta' in rdc('src/lib/colaExcepciones.ts')
+      and 'pesoDeLaCuenta' in rdc('scripts/prueba-cola.ts'),
       'es la decisión más importante del día: a quién se atiende primero')
 check('el peso no se repite en dos lados',
       'Math.min(c.urgencia, 5)' not in rd('src/lib/mesaPlataStorage.ts'),
@@ -1758,7 +1803,7 @@ if _os38.path.exists('src/lib/permisos.ts'):
     check('ningún empleado ve el dinero del dueño ni el rendimiento del equipo',
           not _fugas38, '; '.join(_fugas38))
     check('el permiso va sobre el DATO, no sobre la pantalla',
-          'export function puedeVer' in _pm and 'Categoria' in _pm,
+          'export function puedeVer' in cod(_pm) and 'Categoria' in cod(_pm),
           'si se esconden tabs, un número nuevo en una pantalla compartida se filtra')
     check('cada negativa tiene su porqué escrito',
           _pm.count('porQueNoVe') >= 4 and _pm.count(':') > 40,
@@ -1769,7 +1814,7 @@ if _os38.path.exists('src/lib/permisos.ts'):
           "requiere: ['dinero_tcd', 'motor_propio', 'rendimiento_equipo']" in _pm,
           'si dependiera, desarrollo entraría a la pantalla donde están las ventas del dueño')
     check('son cuatro momentos, no dieciséis tabs',
-          _pm.count("{ id: '") >= 4 and 'MOMENTOS' in _pm)
+          _pm.count("{ id: '") >= 4 and 'MOMENTOS' in cod(_pm))
     check('los permisos están probados',
           _os38.path.exists('scripts/prueba-permisos.ts'))
 
@@ -1777,13 +1822,13 @@ if _os38.path.exists('src/lib/permisos.ts'):
 if _os38.path.exists('src/lib/cierreDelDia.ts'):
     _cd39 = rd('src/lib/cierreDelDia.ts')
     check('las trabas se agrupan aunque estén escritas distinto',
-          'PARECIDO_MINIMO' in _cd39 and 'function raiz' in _cd39,
+          'PARECIDO_MINIMO' in cod(_cd39) and 'function raiz' in _cd39,
           'una traba que no se agrupa nunca llega a las tres veces y nunca se detecta')
     check('a las tres veces la traba pasa a ser del sistema',
-          'VECES_PARA_SER_SISTEMA' in _cd39,
+          'VECES_PARA_SER_SISTEMA' in cod(_cd39),
           'deja de ser un problema de esfuerzo: no se arregla insistiendo')
     check('los minutos se calculan, no se le preguntan a nadie',
-          'export function minutosDelDia' in _cd39)
+          'export function minutosDelDia' in cod(_cd39))
     check('el cierre está probado',
           _os38.path.exists('scripts/prueba-cierre.ts'))
 
@@ -1797,22 +1842,22 @@ if _os40.path.exists('src/lib/jornada.ts'):
     _js = rd('src/components/admin/Jornada.tsx')
     _ls = rd('src/components/admin/LaSemana.tsx')
     check('hay check-in y check-out, a la hora que sea',
-          'export function iniciarJornada' in _jo and 'export function cerrarJornada' in _jo)
+          'export function iniciarJornada' in cod(_jo) and 'export function cerrarJornada' in cod(_jo))
     check('una jornada olvidada no ensucia el número',
-          'HORAS_PARA_CERRAR_SOLA' in _jo,
+          'HORAS_PARA_CERRAR_SOLA' in cod(_jo),
           'una abierta 30 horas es alguien que se olvidó de cerrar, no que trabajó 30 horas')
     check('la app avisa si dos atienden la misma cuenta',
-          'export function cuentasPisadas' in _jo,
+          'export function cuentasPisadas' in cod(_jo),
           'es lo único que el check-in resuelve y el cierre solo no puede')
     check('el objetivo es UNO: que todos los clientes vendan',
-          'pctVendiendo' in _jo and 'clientesQueVendieron' in _jo)
+          'pctVendiendo' in cod(_jo) and 'clientesQueVendieron' in cod(_jo))
     # Pedía la frase «no escala». «Escala» es una de las palabras prohibidas de
     # la casa y la limpieza de vocabulario la reescribió a «eso no crece»: la
     # vara pinchaba sobre su propia regla. Mira las dos ramas que importa que
     # existan —vender más costando más, y aliviar sin resolver— por lo que
     # dicen y no por una palabra suelta.
     check('el círculo se mide con dos números a la vez',
-          'export function comoVaElCirculo' in _jo
+          'export function comoVaElCirculo' in cod(_jo)
           and 'cuesta más trabajo' in _jo and 'todavía no está resolviendo' in _jo,
           'si venden más pero cuesta más trabajo, se está comprando resultado con horas')
     check('una traba repetida manda sobre todo lo demás en el titular',
@@ -1842,7 +1887,7 @@ if _os41.path.exists('src/lib/jornadaStorage.ts'):
     _adm41 = rd('src/pages/Admin.tsx')
     check('las jornadas viven en la base, no en el navegador',
           'create table if not exists jornadas' in _sql41
-          and 'export async function jornadasRecientes' in _jst,
+          and 'export async function jornadasRecientes' in cod(_jst),
           'las trabas de uno tienen que llegarle al resto el viernes')
     check('abrir el día dos veces no duplica la jornada',
           'jornada_persona_dia' in _sql41 and 'on conflict (persona_id, dia)' in _sql41,
@@ -1856,7 +1901,7 @@ if _os41.path.exists('src/lib/jornadaStorage.ts'):
           'Tu traba no llegó al equipo' in _jp41,
           'es lo más valioso del cierre: perderla en silencio es lo peor que puede pasar')
     check('la base manda sobre el navegador',
-          'jornadaDeHoy' in _jp41,
+          'jornadaDeHoy' in cod(_jp41),
           'si abrió el día en el teléfono y entra por la computadora, tiene que ver su día abierto')
     check('Hoy envuelve la cola en la jornada',
           '<JornadaPanel' in _adm41 and '</JornadaPanel>' in _adm41)
@@ -1928,24 +1973,24 @@ if _os43.path.exists('src/lib/mercados.ts'):
     check('con varios países se toma el rango que abarca a todos',
           'Math.min(min' in _mk and 'Math.max(max' in _mk)
     check('y el poder de compra, del MÁS BAJO',
-          'poder = Math.min' in _mk,
+          'poder = Math.min' in cod(_mk),
           'si la mitad de la audiencia no puede pagar, eso ya explica una conversión floja')
     check('existe la frecuencia y dice que NO es el creativo',
           "add('frecuencia'" in _vc43 and 'No es el creativo' in _vc43,
           'sin ese número parece que la pieza se gastó cuando el público es angosto')
     check('la app acumula sus propios datos desde el día uno',
-          'export function aprenderDeSemana' in _mk)
+          'export function aprenderDeSemana' in cod(_mk))
     check('los datos propios ganan sobre la referencia',
-          'SEMANAS_PARA_CONFIAR' in _mk and 'propia = true' in _mk)
+          'SEMANAS_PARA_CONFIAR' in cod(_mk) and 'propia = true' in _mk)
     check('sin datos propios NO recomienda mercados',
           'Todavía no tengo datos propios' in _mk,
           'una recomendación inventada es peor que ninguna, y ya nos costó una vez')
     check('recomienda el que MÁS COMPRA, no el más barato',
           'pctCompra / Math.max' in _mk)
     check('existe lanzado o instalando',
-          'export function situacionDe' in _sm43 and 'EstadoCampana' in _sm43)
+          'export function situacionDe' in cod(_sm43) and 'EstadoCampana' in cod(_sm43))
     check('al que no encendió NUNCA se le habla de sus números',
-          'export function sePuedeDiagnosticar' in _sm43
+          'export function sePuedeDiagnosticar' in cod(_sm43)
           and "estado !== 'instalando'" in _sm43,
           'no tiene conversaciones: se le dice qué le falta para encender')
     check('la ficha abre en la conversación que corresponde',
@@ -1963,12 +2008,12 @@ if _os44.path.exists('src/lib/cargaCompartida.ts'):
     _sql44 = rd('sala-de-mando.sql')
     _wh44 = rd('api/ghl-agenda.ts')
     check('cada campo sabe quién lo cargó y cuándo',
-          'ValorConFirma' in _cc and 'export function firmaDe' in _cc,
+          'ValorConFirma' in cod(_cc) and 'export function firmaDe' in cod(_cc),
           'el que entra ve qué falta y lo completa, sin coordinar nada')
     check('un campo vacío lo dice, no queda en blanco',
           'nadie lo cargó todavía' in _cc)
     check('la app NUNCA se calla: dice hasta dónde puede opinar',
-          'export function hastaDondePuedoOpinar' in _cc
+          'export function hastaDondePuedoOpinar' in cod(_cc)
           and 'Todavía no puedo decirte nada' in _cc,
           'sin esto la cola mostraba «todo bien» cuando no sabía nada')
     check('y qué le falta para llegar más lejos',
@@ -1977,7 +2022,7 @@ if _os44.path.exists('src/lib/cargaCompartida.ts'):
     check('CERO es un dato: cargar cero no es no cargar',
           'carga[c] !== undefined' in _cc)
     check('se sabe de quién se espera cada campo',
-          'SE_ESPERA_DE' in _cc,
+          'SE_ESPERA_DE' in cod(_cc),
           'sirve para saber a quién recordarle, no para bloquear a nadie')
     check('la carga vive en la base con firma por campo',
           'create table if not exists carga_semanal' in _sql44
@@ -1990,7 +2035,7 @@ if _os44.path.exists('src/lib/cargaCompartida.ts'):
           'carga_equipo' in _sql44,
           'es la mitad del punto: que la cola no quede ciega')
     check('existe el webhook de agendas',
-          _os44.path.exists('api/ghl-agenda.ts') and 'sumar_campo' in _wh44)
+          _os44.path.exists('api/ghl-agenda.ts') and 'sumar_campo' in cod(_wh44))
     check('el webhook nunca falla ruidosamente',
           'GHL reintenta' in _wh44,
           'un reintento que suma dos veces ensucia la semana entera: mejor perder una agenda que contar de más')
@@ -2037,16 +2082,16 @@ if _os45.path.exists('src/lib/microPasos.ts'):
     check('lo que no es de un entrenador dice a quién va',
           "a: 'dev'" in _mp45)
     check('el entrenador abre sabiendo, sin preguntar lo que ya sabe',
-          'export function briefingPara' in _mp45 and 'no se lo preguntes' in _mp45,
+          'export function briefingPara' in cod(_mp45) and 'no se lo preguntes' in _mp45,
           'el que no sabe qué preguntar es el que más ayuda necesita')
     check('los ocho reciben la MISMA regla de derivación',
-          'export function bloqueDeDerivacion' in _mp45
+          'export function bloqueDeDerivacion' in cod(_mp45)
           and 'bloqueDeDerivacion(' in _ag45,
           'antes cada uno tenía su lista a mano y Diego no tenía ninguna')
     check('un entrenador no se deriva a sí mismo',
           'filter((e) => e !== yo)' in _mp45)
     check('la cola se agrupa por área, en el orden del embudo',
-          'export function agruparPorArea' in _mp45,
+          'export function agruparPorArea' in cod(_mp45),
           'tres casos de setting juntos cuestan menos que saltar entre temas')
     check('un cuello desconocido no se pierde de la cola',
           'sinArea.length > 0' in _mp45)
@@ -2073,8 +2118,8 @@ check('todo campo que la app lee se puede escribir desde algún lado',
       not _sinEscribir, ', '.join(_sinEscribir))
 
 check('se puede marcar una campaña como encendida',
-      'export async function marcarEncendida' in rd('src/lib/salaDeMandoStorage.ts')
-      and 'marcarEncendida' in rd('src/components/admin/Supervision.tsx'),
+      'export async function marcarEncendida' in rdc('src/lib/salaDeMandoStorage.ts')
+      and 'marcarEncendida' in rdc('src/components/admin/Supervision.tsx'),
       'sin esto, todos los clientes quedan «instalando» para siempre')
 check('pausar conserva desde cuándo estuvo al aire',
       'sin borrar desde cuándo' in rd('src/lib/salaDeMandoStorage.ts'),
@@ -2112,14 +2157,14 @@ if _os47.path.exists('src/lib/funciones.ts'):
     check('que el criterio suba NO es una alarma, y se dice por qué',
           'no un problema' in _fn and 'tres meses seguidos' in _fn)
     check('el gradiente por ticket está declarado',
-          'MINUTOS_QUE_PERMITE' in _fn and 'mil: 0' in _fn,
+          'MINUTOS_QUE_PERMITE' in cod(_fn) and 'mil: 0' in _fn,
           'un cliente de $1.000 tiene que costar cero: es el modelo de negocio')
     check('el exceso se convierte en tarea, no en queja sobre el cliente',
           'deuda que absorber tiene que pagar' in _fn)
     check('la reunión abre con UNA sola pregunta',
           '¿Qué función bajó sus minutos, y por qué?' in _tf)
     check('la tabla solo la ve quien ve el rendimiento del equipo',
-          'veRendimiento && (' in rd('src/components/admin/LaSemana.tsx'),
+          'veRendimiento && (' in rdc('src/components/admin/LaSemana.tsx'),
           'es información de dirección, no de todo el equipo')
     check('la medición por función está probada',
           _os47.path.exists('scripts/prueba-funciones.ts'))
@@ -2133,8 +2178,8 @@ if _os48.path.exists('src/lib/criterio.ts'):
     _cr = rd('src/lib/criterio.ts')
     _gl = rd('src/lib/glosario.ts')
     check('las tres situaciones de criterio están escritas',
-          _cr.count('cuando:') >= 3 and 'trabado_en_su_metodo' in _cr
-          and 'pide_fuera_de_plan' in _cr and 'quiere_pausar' in _cr)
+          _cr.count('cuando:') >= 3 and 'trabado_en_su_metodo' in cod(_cr)
+          and 'pide_fuera_de_plan' in cod(_cr) and 'quiere_pausar' in cod(_cr))
     check('cada una dice lo que PASA DE VERDAD, no solo qué hacer',
           _cr.count('loQuePasa:') >= 4)
     check('cada una trae el mensaje listo y su LÍMITE',
@@ -2143,15 +2188,15 @@ if _os48.path.exists('src/lib/criterio.ts'):
     check('cada negativa tiene su porqué',
           _cr.count('porque:') >= 7)
     check('prohíbe retener con descuento, con el motivo',
-          'descuento' in _cr and 'se va igual el mes que viene' in _cr)
+          'descuento' in cod(_cr) and 'se va igual el mes que viene' in _cr)
     check('una pausa sin fecha se llama por su nombre',
           'baja que nadie quiso decir' in _cr)
     check('y nombra lo incómodo: aceptar la baja sin mirar la cadena es falla nuestra',
           'falla de seguimiento' in _cr)
     check('tres pedidos iguales dejan de ser excepción',
-          'VECES_PARA_SER_PRODUCTO' in _cr and 'señal de producto' in _cr)
+          'VECES_PARA_SER_PRODUCTO' in cod(_cr) and 'señal de producto' in _cr)
     check('REUSA el agrupador de trabas en vez de escribir otro',
-          'agruparTrabas' in _cr,
+          'agruparTrabas' in cod(_cr),
           'dos agrupadores de texto parecido agrupan distinto y el mismo pedido cuenta dos veces')
     check('y su límite está documentado',
           'no por significado' in _cr,
@@ -2211,24 +2256,24 @@ if _os49.path.exists('src/lib/glosario.ts'):
 if _os49.path.exists('src/lib/casa.ts'):
     _ca49 = rd('src/lib/casa.ts')
     check('el objetivo estratégico vive dentro de la app',
-          'export const OBJETIVO' in _ca49 and 'elNumero' in _ca49,
+          'export const OBJETIVO' in cod(_ca49) and 'elNumero' in cod(_ca49),
           'un archivo en la raíz de un repo no lo abre nadie que no sea programador')
     check('los principios dicen qué discusión resuelve cada uno',
           _ca49.count('resuelve:') >= 7,
           'si no resuelven una discusión concreta, son valores de pared')
     check('la inducción son dos horas de contenido, no un mes',
-          'MINUTOS_DE_CONTENIDO' in _ca49 and _ca49.count('minutos: 20') == 6)
+          'MINUTOS_DE_CONTENIDO' in cod(_ca49) and _ca49.count('minutos: 20') == 6)
     check('cada sesión termina en una acción real, no en un quiz',
           _ca49.count('accion:') >= 6)
     check('y cada una justifica por qué no se puede aprender trabajando',
           _ca49.count('porQueAntes:') >= 6,
           'lo que se puede aprender haciendo no va en la inducción')
     check('lo que queda afuera dice dónde se aprende',
-          'SE_APRENDE_EN_EL_LUGAR' in _ca49,
+          'SE_APRENDE_EN_EL_LUGAR' in cod(_ca49),
           'para que nadie sienta que le falta algo por olvido')
     check('la inducción está dentro de la app y montada',
           _os49.path.exists('src/components/admin/LaCasa.tsx')
-          and 'LaCasa' in rd('src/pages/Admin.tsx'))
+          and 'LaCasa' in rdc('src/pages/Admin.tsx'))
     check('el objetivo y los principios están probados',
           _os49.path.exists('scripts/prueba-casa.ts'))
 
@@ -2244,15 +2289,15 @@ if _os50.path.exists('src/lib/respuestasSesion.ts'):
     _sq = rd('sala-de-mando.sql')
     check('lo que el cliente escribe se guarda en la base',
           'create table if not exists sesion_respuestas' in _sq
-          and 'guardarEnLaBase' in _rs)
+          and 'guardarEnLaBase' in cod(_rs))
     check('y el player lo sube en cada paso',
           'subir(st)' in _pl,
           'antes solo escribía en localStorage')
     check('la base manda sobre el navegador',
-          'leerLoQueEscribio' in _pl and 'La base manda' in _rs,
+          'leerLoQueEscribio' in cod(_pl) and 'La base manda' in _rs,
           'si empezó en el teléfono y sigue en la computadora, tiene que ver lo que escribió')
     check('si el guardado no llegó, se avisa',
-          'sinSubir' in _pl and 'seguir en silencio' in _rs,
+          'sinSubir' in cod(_pl) and 'seguir en silencio' in _rs,
           'un guardado que no llegó y nadie dijo nada es la peor forma de perder algo')
     check('el equipo puede leer lo que escribió sin pedirle que lo reenvíe',
           'sesion_resp_equipo' in _sq)
@@ -2272,7 +2317,7 @@ if _os50.path.exists('src/lib/cuadroTickets.ts'):
     _codigo50 = _re67.sub(r'/\*[\s\S]*?\*/', '', _ct50)
     _codigo50 = _re67.sub(r'//.*', '', _codigo50)
     check('el servicio NO se deriva del plan de acceso',
-          'TICKET_DE_PLAN' not in _ct50 and 'export function servicioDe' in _ct50,
+          'TICKET_DE_PLAN' not in _ct50 and 'export function servicioDe' in cod(_ct50),
           'el puente pegaba dos escaleras: el de $497 figuraba con $5.000 de instalación')
     check('y ningún color del plan aparece en el código que corre',
           not _re67.search(r'verde|negro|blanco|amarillo', _codigo50),
@@ -2284,18 +2329,18 @@ if _os50.path.exists('src/lib/cuadroTickets.ts'):
           all(f"precio: {p}" in _ct50 for p in (1000, 3000, 5000)),
           'La Base 1.000 · El Ascenso 3.000 · La Instalación 5.000')
     check('La Cima se suma aparte, no es un cuarto escalón',
-          'export const CIMA' in _ct50,
+          'export const CIMA' in cod(_ct50),
           'son cinco días en Bariloche: no cambia el reparto de los 62 ítems')
     check('el cuadro está MONTADO, no suelto',
           _os50.path.exists('src/components/admin/CuadroDelCliente.tsx')
-          and 'ServicioDelCliente' in rd('src/pages/Admin.tsx'),
+          and 'ServicioDelCliente' in rdc('src/pages/Admin.tsx'),
           'el que contrató la instalación tiene que ver lo que compró')
     check('y se monta CON los tildes y el botón',
           'hechos={' in rd('src/components/admin/ServicioDelCliente.tsx')
           and 'onMarcar={' in rd('src/components/admin/ServicioDelCliente.tsx'),
           'sin eso decía «le faltan 42 para encender» para todos, siempre, y no se podía tildar')
     check('el escalón se marca a mano, y queda quién lo marcó',
-          'marcar_servicio' in rd('src/components/admin/ServicioDelCliente.tsx'),
+          'marcar_servicio' in rdc('src/components/admin/ServicioDelCliente.tsx'),
           'es una decisión de plata: tiene que tener dueño y fecha')
 
 # ── 6.52 · El soporte, con reloj y compromiso ──────────────────────────
@@ -2305,21 +2350,21 @@ if _os50.path.exists('src/lib/cuadroTickets.ts'):
 if _os50.path.exists('src/lib/soporte.ts'):
     _so = rd('src/lib/soporte.ts')
     check('hay un compromiso de respuesta, con número',
-          'COMPROMISO' in _so and 'horas: 24' in _so and 'horas: 4' in _so,
+          'COMPROMISO' in cod(_so) and 'horas: 24' in _so and 'horas: 4' in _so,
           'un número que se puede fallar es mejor que ninguno')
     check('una duda y algo roto se tratan distinto',
           "'duda'" in _so and "'roto'" in _so
           and "vaA: 'absorber'" in _so,
           'una espera un día; algo roto le está costando dinero ahora')
     check('el mensaje sin responder aparece, con su reloj',
-          'export function mensajesQueEsperan' in _so and 'vencido' in _so)
+          'export function mensajesQueEsperan' in cod(_so) and 'vencido' in cod(_so))
     check('lo vencido va primero, no lo que llegó primero',
           'vencido ? 10_000 : 0' in _so)
     check('y NO se ordena por ticket',
           'ticket a propósito' in _so,
           'quien pagó menos y lleva tres días esperando está más cerca de irse')
     check('el marcador mide el % respondido dentro de lo prometido',
-          'pctATiempo' in _so)
+          'pctATiempo' in cod(_so))
     check('una bandeja vacía con mal porcentaje IGUAL es alarma',
           'pct < 80' in _so,
           'se responde tarde y después se pone al día, y el cliente ya lo sintió')
@@ -2338,9 +2383,9 @@ if _os53.path.exists('src/lib/tableroSync.ts'):
     _ts53 = rd('src/lib/tableroSync.ts')
     _tc53 = rd('src/components/campanas/TableroCupos.tsx')
     check('los números del tablero suben a la base',
-          'subirNumerosDelCliente' in _ts53 and 'subirNumerosDelCliente' in _tc53)
+          'subirNumerosDelCliente' in cod(_ts53) and 'subirNumerosDelCliente' in cod(_tc53))
     check('y la cadena de props llega hasta el tablero',
-          'clienteId' in rd('src/components/campanas/MontajeCupos.tsx')
+          'clienteId' in rdc('src/components/campanas/MontajeCupos.tsx')
           and 'clienteId={userId}' in rd('src/pages/Campanas.tsx'),
           'sin el id, sube a la nada')
     check('subir no corta la pantalla si falla la red',
@@ -2398,7 +2443,7 @@ import os as _os55, glob as _g55, re as _re55
 if _os55.path.exists('api/_lib/tope.ts'):
     _tp55 = rd('api/_lib/tope.ts')
     check('las llamadas a la IA tienen su propio tope de tiempo',
-          'TOPE_MS' in _tp55 and 'AbortController' in _tp55)
+          'TOPE_MS' in cod(_tp55) and 'AbortController' in cod(_tp55))
     check('y el tope es MÁS CORTO que el de la plataforma',
           '45_000' in _tp55,
           'así la función siempre llega a responder y a devolver el crédito')
@@ -2456,17 +2501,17 @@ if _os56.path.exists('src/lib/cerebro.ts'):
     _cs = rd('src/lib/cerebroStorage.ts')
     _sq56 = rd('sala-de-mando.sql')
     check('la cola CREA tareas, no las muestra y las olvida',
-          'crear_tarea_del_sistema' in _sq56 and 'crearDesdeElSistema' in _cs)
+          'crear_tarea_del_sistema' in _sq56 and 'crearDesdeElSistema' in cod(_cs))
     check('una causa, una tarea: no se duplica',
           'tarea_por_causa' in _sq56 and 'on conflict' in _sq56,
           'cada recálculo crearía otra tarea por el mismo cuello y la lista sería inusable')
     check('las cinco fuentes están, cada una con su origen',
           all(f'desde{x}' in _cb for x in ('LaCadena', 'ElSoporte', 'ElRecorrido', 'UnaSesion')))
     check('cada origen se explica solo',
-          'export const POR_QUE' in _cb,
+          'export const POR_QUE' in cod(_cb),
           'es lo que contesta «¿por qué esta tarea?» sin que nadie pregunte')
     check('cada tarea sabe A DÓNDE LLEVA',
-          'ETIQUETA_DESTINO' in _cb and 'Abrir el Creador' in _cb,
+          'ETIQUETA_DESTINO' in cod(_cb) and 'Abrir el Creador' in _cb,
           'nunca «buscalo vos»: siempre un botón que abre lo que hace falta')
     check('lo VENCIDO va primero, venga de donde venga',
           'a.vencida ? -1 : 1' in _cb,
@@ -2477,12 +2522,12 @@ if _os56.path.exists('src/lib/cerebro.ts'):
     check('lo técnico y lo de criterio NO se resuelven con un mensaje al cliente',
           "esTecnico || esCriterio ? 'escalar'" in _cb)
     check('la lista de Hoy es LA MISMA que la de Tareas',
-          'mi_lista_de_hoy' in _sq56 and 'miListaDeHoy' in _cs,
+          'mi_lista_de_hoy' in _sq56 and 'miListaDeHoy' in cod(_cs),
           'tener dos listas es lo que hizo que nadie entendiera su día')
 
     # EL BOTÓN QUE MENTÍA.
     check('«Mandárselo» manda de verdad',
-          'export async function mandarleAlCliente' in _cs
+          'export async function mandarleAlCliente' in cod(_cs)
           and "from('mensajes').insert" in _cs,
           'antes solo tachaba el ítem: el botón prometía algo y quien lo tocaba creía que pasó')
     # Pedía un insert directo a `notificaciones`, y es justo lo que NO funciona:
@@ -2509,9 +2554,9 @@ if _os57.path.exists('src/lib/cerebro.ts'):
     _lh57 = rd('src/components/admin/ListaDeHoy.tsx')
     _ad57 = rd('src/pages/Admin.tsx')
     check('el destino es un contrato, no una URL',
-          'AperturaDeTarea' in _cb57 and 'export function comoSeResuelve' in _cb57)
+          'AperturaDeTarea' in cod(_cb57) and 'export function comoSeResuelve' in cod(_cb57))
     check('y la pantalla que sabe navegar decide CÓMO',
-          'abrirDestino' in _ad57 and 'onAbrir' in _lh57)
+          'abrirDestino' in cod(_ad57) and 'onAbrir' in cod(_lh57))
     check('un mensaje NO navega: se manda desde donde está',
           'Sacarla de su lista para escribir' in _cb57,
           'mandar a alguien a otra pantalla a escribir un mensaje que ya está escrito es trabajo inventado')
@@ -2519,12 +2564,12 @@ if _os57.path.exists('src/lib/cerebro.ts'):
           'con su brief cargado' in _cb57,
           'pedirle a alguien que copie el brief de una pantalla a otra es el trabajo que sobra')
     check('el escalado sabe a quién va y por qué',
-          'export function aQuienEscala' in _cb57)
+          'export function aQuienEscala' in cod(_cb57))
     check('y al cliente se le avisa siempre que se escala',
-          'export function avisoDeEscalado' in _cb57,
+          'export function avisoDeEscalado' in cod(_cb57),
           'el silencio mientras alguien espera es lo que rompe la confianza')
     check('la lista dice POR QUÉ está cada tarea y por qué ahí',
-          'porQueAca' in _lh57 and 'POR_QUE[t.origen]' in _lh57)
+          'porQueAca' in cod(_lh57) and 'POR_QUE[t.origen]' in _lh57)
     check('si el mensaje no salió, se dice',
           'No salió: prueba de nuevo' in _lh57,
           'creer que salió cuando no salió es el error que esta pantalla vino a arreglar')
@@ -2557,11 +2602,11 @@ if _os58.path.exists('src/lib/frenos.ts'):
           'toUpperCase()' in _fr,
           'el freno es para que lea, no para que teclee')
     check('la lista de frenos tiene tope',
-          'TOPE_POR_NIVEL' in _fr,
+          'TOPE_POR_NIVEL' in cod(_fr),
           'cada freno nuevo le quita fuerza a los que ya están')
     check('el diálogo existe y distingue los tres niveles',
           _os58.path.exists('src/components/Freno.tsx')
-          and 'ShieldAlert' in rd('src/components/Freno.tsx'))
+          and 'ShieldAlert' in rdc('src/components/Freno.tsx'))
 
 # ── 6.59 · La Casa, completa ───────────────────────────────────────────
 if _os58.path.exists('src/lib/casa.ts'):
@@ -2574,17 +2619,17 @@ if _os58.path.exists('src/lib/casa.ts'):
           'Video pendiente de grabar' in _lc59,
           'así se sabe qué falta, en vez de no saber que faltaba')
     check('está la historia, con lo pendiente marcado',
-          'HISTORIA' in _ca59 and 'pendiente?: boolean' in _ca59,
+          'HISTORIA' in cod(_ca59) and 'pendiente?: boolean' in _ca59,
           'sin esto el equipo vende un sistema; con esto vende una convicción')
     check('y lo que solo puede escribir Javo está señalado',
           _ca59.count('pendiente: true') == 3)
     check('el sistema por dentro contesta las siete preguntas',
-          'SISTEMA_POR_DENTRO' in _ca59 and _ca59.count('pregunta:') >= 7,
+          'SISTEMA_POR_DENTRO' in cod(_ca59) and _ca59.count('pregunta:') >= 7,
           'es lo que permite defender una decisión de la app ante un cliente que la cuestiona')
     check('admite el error propio del benchmark ajeno',
           'nos pasó' in _ca59)
     check('los valores dicen QUÉ CUESTAN',
-          'cuestaEsto' in _ca59 and 'loAceptamosPorque' in _ca59,
+          'cuestaEsto' in cod(_ca59) and 'loAceptamosPorque' in cod(_ca59),
           'un valor sin costo es una frase')
     check('los frenos y La Casa están probados',
           _os58.path.exists('scripts/prueba-frenos.ts'))
@@ -2596,8 +2641,10 @@ if _os58.path.exists('src/lib/casa.ts'):
 import os as _os60
 if _os60.path.exists('src/lib/cerebroCliente.ts'):
     _cc60 = rd('src/lib/cerebroCliente.ts')
+    # `paraliza` es una palabra del idioma, no un mecanismo: vive en el
+    # comentario que explica por qué la lista es corta, y ahí es donde va.
     check('la lista del cliente es CORTA a propósito',
-          'CUANTAS_A_LA_VEZ' in _cc60 and 'paraliza' in _cc60,
+          'CUANTAS_A_LA_VEZ' in cod(_cc60) and 'paraliza' in _cc60,
           'un sanador que ve quince pendientes no elige el más importante: cierra la app')
     check('cargar los números gana a todo lo demás',
           'es lo único que desbloquea' in _cc60 or 'desbloquea a las otras' in _cc60,
@@ -2633,12 +2680,12 @@ import os as _os61
 if _os61.path.exists('src/components/campanas/MontajeCupos.tsx'):
     _mc61 = rd('src/components/campanas/MontajeCupos.tsx')
     check('encender avisa a la base, no solo al navegador',
-          'marcarEncendida' in _mc61,
+          'marcarEncendida' in cod(_mc61),
           'si no, el cliente enciende y el equipo no se entera')
     check('y pausar también',
-          'marcarPausada' in _mc61)
+          'marcarPausada' in cod(_mc61))
     check('encender pasa por el freno de escribir la palabra',
-          "frenoDe('encender_campana'" in _mc61 and 'confirmando' in _mc61,
+          "frenoDe('encender_campana'" in _mc61 and 'confirmando' in cod(_mc61),
           'es lo más caro que hace la app: el gasto empieza en ese momento')
     check('el freno se usa de verdad en algún lado',
           'from \'../Freno\'' in _mc61 or "from '../Freno'" in _mc61,
@@ -2684,12 +2731,12 @@ check('ninguna llamada a un proveedor de IA queda sin tope',
       not _sinTope63, ', '.join(_sinTope63))
 
 check('el tope del SDK se reparte entre los reintentos',
-      'TOPE_MS / (MAX_RETRIES + 1)' in rd('api/_lib/claude.ts'),
+      'TOPE_MS / (MAX_RETRIES + 1)' in rdc('api/_lib/claude.ts'),
       'tres intentos con el tope entero sumarían el triple y la plataforma mataría igual')
 
 # Y EL MENSAJE QUE MENTÍA.
 check('el Mentor dice la causa real, no «error de red»',
-      'mensajeDeFalla' in rd('src/pages/Coach.tsx')
+      'mensajeDeFalla' in rdc('src/pages/Coach.tsx')
       and 'Hubo un error de red' not in rd('src/pages/Coach.tsx'),
       'si se quedó sin créditos reintentar no sirve; decirle mal la causa lo deja probando lo que no funciona')
 
@@ -2794,7 +2841,7 @@ if _os66.path.exists('src/lib/soporteStorage.ts'):
     _ss66 = rd('src/lib/soporteStorage.ts')
     _lh66 = rd('src/components/admin/ListaDeHoy.tsx')
     check('los mensajes esperando se convierten en tareas',
-          'crearTareasDeSoporte' in _ss66 and 'crearTareasDeSoporte' in _lh66)
+          'crearTareasDeSoporte' in cod(_ss66) and 'crearTareasDeSoporte' in cod(_lh66))
     check('«respondido» se deduce, no se marca a mano',
           'resp > m.created_at' in _ss66,
           'marcar es una tarea más que alguien olvida, y entonces el reloj miente')
@@ -2811,7 +2858,7 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
     _nds = rd('src/components/admin/NumerosDeLaSemana.tsx')
     _sup67 = rd('src/components/admin/Supervision.tsx')
     check('el formulario con firma existe y está montado',
-          'firmaDe' in _nds and '<NumerosDeLaSemana' in _sup67)
+          'firmaDe' in cod(_nds) and '<NumerosDeLaSemana' in _sup67)
     check('se carga DENTRO del cliente, sin cambiar de pantalla',
           'sin cambiar de pantalla' in _sup67,
           'antes había que ir a otra tab, cargar ahí, y volver')
@@ -2824,7 +2871,7 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
           'Ese número no quedó' in _nds,
           'creer que se guardó cuando no se guardó es peor que un error')
     check('y dice hasta dónde se puede opinar con lo que hay',
-          'hastaDondePuedoOpinar' in _nds)
+          'hastaDondePuedoOpinar' in cod(_nds))
 
 # ── 6.66 · Nadie espera en silencio ────────────────────────────────────
 #
@@ -2837,18 +2884,18 @@ if _os66.path.exists('src/components/admin/BandejaSoporte.tsx'):
     _sql66 = rd('sala-de-mando.sql')
     _adm66 = rd('src/pages/Admin.tsx')
     check('los mensajes sin responder se ven',
-          'mensajesQueEsperan' in _bs66 and 'respondido_en' in _sql66)
+          'mensajesQueEsperan' in cod(_bs66) and 'respondido_en' in _sql66)
     check('y la bandeja va ARRIBA de la lista de tareas',
           _adm66.index('<BandejaSoporte') < _adm66.index('<ListaDeHoy'),
           'alguien esperando manda sobre cualquier cuello: una cuenta rota se destraba mañana, una persona esperando se va hoy')
     check('el compromiso se dice en la pantalla',
-          'Prometemos' in _bs66,
+          'Prometemos' in cod(_bs66),
           'un número que se puede fallar es mejor que ninguno')
     check('responder marca a TODOS los mensajes de esa persona',
-          'marcar_respondido' in _sql66 and 'marcar_respondido' in rd('src/lib/cerebroStorage.ts'),
+          'marcar_respondido' in _sql66 and 'marcar_respondido' in rdc('src/lib/cerebroStorage.ts'),
           'dejarlos abiertos haría que la bandeja muestre gente que ya fue atendida')
     check('se refresca sola, sin recargar la pantalla',
-          'setInterval' in _bs66,
+          'setInterval' in cod(_bs66),
           'alguien esperando no puede depender de que alguien recargue a mano')
     check('el primer dibujo dice PARA QUÉ SIRVE, no solo «cargando»',
           'Acá aparece todo el que escribió' in _bs66)
@@ -2866,13 +2913,13 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
     check('el EQUIPO carga por su puerta',
           '<NumerosDeLaSemana' in _sv67)
     check('y el CLIENTE por la suya',
-          '<NumerosDeLaSemana' in _mc67 or 'NumerosDeLaSemana' in _mc67,
+          '<NumerosDeLaSemana' in _mc67 or 'NumerosDeLaSemana' in cod(_mc67),
           'si solo carga uno, los dos lados siguen sin enterarse')
     check('los dos escriben en el MISMO lugar',
-          'guardar_campo' in rd('src/components/admin/NumerosDeLaSemana.tsx'),
+          'guardar_campo' in rdc('src/components/admin/NumerosDeLaSemana.tsx'),
           'dos formularios distintos es lo que dejaba la cola ciega')
     check('cada campo dice quién lo cargó',
-          'firmaDe' in rd('src/components/admin/NumerosDeLaSemana.tsx'))
+          'firmaDe' in rdc('src/components/admin/NumerosDeLaSemana.tsx'))
 
 # ── 6.68 · La app empuja sola ──────────────────────────────────────────
 #
@@ -2888,7 +2935,7 @@ check('los avisos al cliente se disparan solos',
 # escritas a mano, así que dieciséis avisos estaban escritos y no tenían forma
 # de dispararse — y son los tramos donde el cliente se cae DESPUÉS de vender.
 check('los veinte avisos pueden salir, no cuatro',
-      'numerosDeFila(fila)' in _cron68 and 'COLUMNAS_DE_SEMANA' in _cron68
+      'numerosDeFila(fila)' in _cron68 and 'COLUMNAS_DE_SEMANA' in cod(_cron68)
       and "it.agendas / it.conversaciones" not in _cron68,
       'el cron diagnostica con la misma cadena de valor que la cola del Admin')
 check('y juzga contra la banda de SUS países',
@@ -2933,14 +2980,14 @@ check('nadie puede escribir un aviso en nombre de otro',
 # Y la cola, que se calculaba y se mostraba sin que nada saliera de ahí.
 _rep68 = rd('src/lib/avisosStorage.ts')
 check('la cola del Admin termina en tareas de alguien',
-      'desdeLaCadena({' in _rep68 and 'crearDesdeElSistema(tarea, asignarA)' in _rep68
+      'desdeLaCadena({' in _rep68 and 'crearDesdeElSistema(tarea, asignarA)' in cod(_rep68)
       and 'repartirLaCola(colaDeHoy' in rd('src/pages/Admin.tsx'),
       'existía mientras la pantalla estaba abierta: quien no abría esa tab no se enteraba')
 check('y el reparto no manda avisos: eso es del cron',
       'mandarAviso' not in _rep68,
       'con los dos lados mandando, el cliente recibía el mismo aviso dos veces')
 check('el mapa de avisos se exporta, no se duplica',
-      'export const AVISOS' in rd('src/lib/avisosCliente.ts'))
+      'export const AVISOS' in rdc('src/lib/avisosCliente.ts'))
 
 print('══ 7) UI ══')
 # ─── POR QUÉ NO SE BUSCA CON `[^>]*` ───────────────────────────────────────
@@ -3102,19 +3149,19 @@ _adm_nc = rd('src/pages/Admin.tsx'); _sem_nc = rd('src/lib/semaforo.ts')
 _diag_nc = rd('src/components/campanas/DiagnosticoView.tsx')
 _mig_nc = rd('supabase/migrations/20261002_numeros_del_cliente.sql')
 check('los cruces se prueban solos (no tocan la base)',
-      "from './supabase'" not in _nc and 'costoPorAgenda' in _nc)
+      "from './supabase'" not in _nc and 'costoPorAgenda' in cod(_nc))
 check('sin denominador no se inventa un número', 'b > 0 ? a / b : null' in _nc)
 check('el equipo puede leer las métricas de todos',
       "rol = 'admin'" in _mig_nc and 'for select' in _mig_nc)
 check('pero la carga sigue siendo del cliente',
       'for insert' not in _mig_nc and 'for update' not in _mig_nc)
 check('se traen todos en una sola consulta', ".in('user_id', userIds)" in _nd)
-check('el panel está en la ficha del cliente', 'NumerosDelCliente' in _adm_nc)
+check('el panel está en la ficha del cliente', 'NumerosDelCliente' in cod(_adm_nc))
 check('el semáforo marca a quien no mira sus números',
       'SEMANAS_SIN_NUMEROS' in _sem_nc and 'DIA_EN_QUE_YA_MIDE' in _sem_nc)
 check('y no se lo reclama a quien todavía no llegó a medir',
       'const yaDebeMedir = dia >= DIA_EN_QUE_YA_MIDE' in _sem_nc)
-check('la lectura de campaña queda guardada', 'guardarDiagnostico' in _diag_nc)
+check('la lectura de campaña queda guardada', 'guardarDiagnostico' in cod(_diag_nc))
 check('sin letra chica en los números del cliente',
       not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _ncv))
 check('existe la prueba de los números', _os64.path.exists('scripts/prueba-numeros-admin.ts'))
@@ -3139,7 +3186,7 @@ _dash_pg = rd('src/pages/Dashboard.tsx'); _vent_pg = rd('src/lib/ventanaDeAcceso
 _hoja_pg = rd('src/lib/hojaDeRuta.ts')
 
 check('la regla se prueba sola (no toca la base)',
-      "from './supabase'" not in _vs and 'diasAvisadosEntre' in _vs)
+      "from './supabase'" not in _vs and 'diasAvisadosEntre' in cod(_vs))
 check('EL CAMINO NO SE PARA: el día del programa no descuenta nada',
       'corrimientoActual' not in _dia_pg and 'MS_DIA)' in _dia_pg,
       'congelar el día le quita al cliente el mes que compró sin pedírselo')
@@ -3159,12 +3206,12 @@ check('solo descuenta los días avisados del reclamo al equipo',
       'de esos días el cliente estaba enterado: no se le pueden reclamar al equipo')
 check('y le avisa al equipo que hoy su mensaje espera',
       'Hoy no hay soporte' in _sem_pg)
-check('el interruptor está en el Admin', 'SinSoportePanel' in _adm_pg)
+check('el interruptor está en el Admin', 'SinSoportePanel' in cod(_adm_pg))
 check('avisa qué va a pasar antes de confirmar, y qué NO',
-      'loQueVaAPasar' in _vsv and 'nadie pierde días' in _vs)
-check('se puede reabrir antes de tiempo', 'reabrirSoporte' in _vsv)
+      'loQueVaAPasar' in cod(_vsv) and 'nadie pierde días' in _vs)
+check('se puede reabrir antes de tiempo', 'reabrirSoporte' in cod(_vsv))
 check('al cliente se le dice cuándo se le responde',
-      'SinSoporteEstosDias' in _dash_pg and 'Respondemos desde el' in _vs)
+      'SinSoporteEstosDias' in cod(_dash_pg) and 'Respondemos desde el' in _vs)
 check('y que su Camino sigue corriendo',
       'sigue abierto y corriendo' in _vs,
       'quien leía que su Camino estaba parado dejaba de entrar, y el mes se le iba igual')
@@ -3206,9 +3253,9 @@ _ha = rd('src/lib/hechoAfuera.ts'); _hap = rd('src/components/admin/HechoAfueraP
 _adm_ha = rd('src/pages/Admin.tsx'); _rub_29 = rd('src/lib/rubricas.ts')
 _seed_29 = _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas']
 check('se puede cerrar una jornada que el cliente hizo afuera',
-      'marcarHechoAfuera' in _ha and 'HechoAfueraPanel' in _adm_ha)
-check('queda anotado quién la marcó', 'marcado_por' in _ha)
-check('y se puede volver atrás', 'desmarcarHechoAfuera' in _ha)
+      'marcarHechoAfuera' in cod(_ha) and 'HechoAfueraPanel' in cod(_adm_ha))
+check('queda anotado quién la marcó', 'marcado_por' in cod(_ha))
+check('y se puede volver atrás', 'desmarcarHechoAfuera' in cod(_ha))
 check('el obstáculo va con las palabras del consultante',
       'palabras de él' in _rub_29)
 check('la historia pide una imagen concreta', 'imagen concreta' in _rub_29)
@@ -3219,12 +3266,12 @@ check('la presentación de treinta segundos sale del día 11',
 _sm = rd('src/lib/semaforo.ts'); _smv = rd('src/components/admin/SemaforoClientes.tsx')
 _adm_sm = rd('src/pages/Admin.tsx')
 check('las varas del semáforo están en un solo lugar',
-      'ATRASO_AMARILLO = 3' in _sm and 'ATRASO_ROJO = 7' in _sm and 'DIAS_SIN_ENTRAR_ROJO = 5' in _sm)
+      'ATRASO_AMARILLO = 3' in cod(_sm) and 'ATRASO_ROJO = 7' in cod(_sm) and 'DIAS_SIN_ENTRAR_ROJO = 5' in cod(_sm))
 check('el rojo mira atraso, ausencia y cuota vencida',
-      'esperando el pago' in _sm and 'DIAS_SIN_ENTRAR_ROJO' in _sm)
-check('el atraso se cuenta en días hábiles', 'diasHabilesDeAtraso' in _sm)
+      'esperando el pago' in _sm and 'DIAS_SIN_ENTRAR_ROJO' in cod(_sm))
+check('el atraso se cuenta en días hábiles', 'diasHabilesDeAtraso' in cod(_sm))
 check('el Admin usa esa misma regla', 'filaDe({' in _adm_sm and 'semaforoDe(' in _adm_sm)
-check('la pantalla se abre en la pestaña de clientes', 'SemaforoClientes' in _adm_sm)
+check('la pantalla se abre en la pestaña de clientes', 'SemaforoClientes' in cod(_adm_sm))
 check('sin letra chica en el semáforo',
       not re.search(r'text-xs|text-sm|text-\[1[0-5]px\]', _smv))
 check('existe la prueba del semáforo', _os64.path.exists('scripts/prueba-semaforo.ts'))
@@ -3233,16 +3280,16 @@ check('existe la prueba del semáforo', _os64.path.exists('scripts/prueba-semafo
 _tn = rd('src/lib/tusNumeros.ts'); _tnv = rd('src/components/TusNumeros.tsx')
 _rm_tn = rd('src/pages/Roadmap.tsx')
 check('la meta la escribe el cliente, en dinero', "meta: number | null" in _tn)
-check('lo que se lleva el estado se descuenta solo', 'retencion' in _tn and 'neto' in _tn)
-check('las horas se anotan por semana', 'anotarHoras' in _tn and 'lunesDe' in _tn)
-check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in _tn)
+check('lo que se lleva el estado se descuenta solo', 'retencion' in cod(_tn) and 'neto' in cod(_tn))
+check('las horas se anotan por semana', 'anotarHoras' in cod(_tn) and 'lunesDe' in cod(_tn))
+check('su hora real de hoy se compara con la del día 1', 'horaRealInicial' in cod(_tn))
 # La regla es que sus cobros tengan PUERTA, no cual. Esta linea guardaba la
 # implementacion —«tiene su tarjeta en la grilla»— y se puso roja el dia que la
 # grilla volvio a tres casillas, sin que nada se hubiera roto. Desde el 7 de
 # noviembre la puerta es el contador de consultantes, que es la misma cuenta.
 _enc_cam = rd('src/components/camino/EncabezadoCamino.tsx')
 check('sus cobros se abren desde el contador de consultantes',
-      'TusNumeros' in _rm_tn and 'onAbrirNumeros={() => setNumerosAbiertos(true)}' in _rm_tn
+      'TusNumeros' in cod(_rm_tn) and 'onAbrirNumeros={() => setNumerosAbiertos(true)}' in cod(_rm_tn)
       and 'onClick={onAbrirNumeros}' in _enc_cam)
 check('sin letra chica en la pantalla de números',
       not re.search(r'text-\[1[0-4]px\]|text-xs|text-sm', _tnv))
@@ -3253,12 +3300,12 @@ check('existe el plan de migración de los pilotos',
       _os64.path.exists('scripts/migrar-pilotos.ts'))
 _mp = rd('scripts/migrar-pilotos.ts')
 check('la migración verifica lo que carga antes de cargarlo',
-      'diasEnRevision' in _mp and 'estadoDeAcceso' in _mp)
-check('los pilotos arrancan un lunes, como todos', 'proximoLunes' in _mp)
+      'diasEnRevision' in cod(_mp) and 'estadoDeAcceso' in cod(_mp))
+check('los pilotos arrancan un lunes, como todos', 'proximoLunes' in cod(_mp))
 
 # ── El paso a paso donde más se traba (24 sep) ─────────────────────
 _tt = rd('src/lib/tutorialesTecnicos.ts')
-check('los tutoriales técnicos se buscan por día', 'diaDelCodigo' in _tt and _tt.count('dia: ') >= 10)
+check('los tutoriales técnicos se buscan por día', 'diaDelCodigo' in cod(_tt) and _tt.count('dia: ') >= 10)
 check('están los cinco que faltaban',
       all(k in _tt for k in ['perfil-y-pagina', 'agenda-y-cobro', 'pixel-y-cuenta',
                              'encender-campanas', 'app-con-tu-marca']))
@@ -3271,12 +3318,12 @@ _app_va = rd('src/App.tsx'); _pc = rd('src/components/CierreDelCamino.tsx')
 check('el acceso se carga por cliente: treinta, noventa o cuotas',
       "'treinta'" in _va and "'cuotas'" in _va)
 check('la cuota impaga cierra y el pago reabre con los días devueltos',
-      'reabrirConPago' in _va and 'diasDevueltos' in _va)
+      'reabrirConPago' in cod(_va) and 'diasDevueltos' in cod(_va))
 check('el cierre de cuentas mide entregas y atraso',
-      'sinEvidencia' in _cc and 'atrasoMayor' in _cc)
-check('la vara de la garantía son siete días', 'DIAS_DE_TOLERANCIA = 7' in _cc)
+      'sinEvidencia' in cod(_cc) and 'atrasoMayor' in cod(_cc))
+check('la vara de la garantía son siete días', 'DIAS_DE_TOLERANCIA = 7' in cod(_cc))
 check('la app muestra el cierre cuando la ventana se cierra',
-      'CierreDelCamino' in _app_va and 'estadoDeAcceso' in _app_va)
+      'CierreDelCamino' in cod(_app_va) and 'estadoDeAcceso' in cod(_app_va))
 check('el cierre dice que nada se borra', 'Todo tu trabajo queda acá' in _pc)
 check('existe la prueba del acceso', _os64.path.exists('scripts/prueba-acceso.ts'))
 
@@ -3302,7 +3349,7 @@ check('los hitos están escritos', _hr.count('Tu ') >= 10)
 # Misma correccion: la puerta de la Hoja de Ruta cuelga del anillo de jornadas,
 # que es lo que contesta «cuanto llevo». Lo que se cuida es que exista.
 check('la Hoja de Ruta se abre desde el anillo de jornadas',
-      'HojaDeRuta' in _rm_hr and 'onAbrirRuta={() => setRutaAbierta(true)}' in _rm_hr
+      'HojaDeRuta' in cod(_rm_hr) and 'onAbrirRuta={() => setRutaAbierta(true)}' in cod(_rm_hr)
       and 'Ver mis 90 d\u00edas' in rd('src/components/camino/EncabezadoCamino.tsx'))
 check('cada jornada muestra su fecha real', 'fechaCorta' in _hrv)
 check('existe la prueba de la Hoja de Ruta', _os64.path.exists('scripts/prueba-hoja-de-ruta.ts'))
@@ -3335,15 +3382,25 @@ check('la pantalla de partida ya no da jornadas por hechas',
       'jornadasHasta' not in _pp and 'onMarcar' not in _rm24)
 check('todos arrancan el día 1', 'Empezar el día 1' in _pp)
 check('lo que ya tiene pasa a modo revisión, con su vara',
-      'codigosEnRevision' in _rm24 and 'pasosDeRevision' in _rm24)
+      'codigosEnRevision' in cod(_rm24) and 'pasosDeRevision' in cod(_rm24))
 check('la revisión se nota en la sesión', 'Esto ya lo tienes' in _rm24)
-check('el Camino arranca el lunes siguiente', 'proximoLunes' in _yt and 'proximoLunes' in _rm24)
+# Decía «el Camino arranca el lunes siguiente» y pedía `proximoLunes` en las
+# DOS puntas. En el Camino ya no está desde que se sacó a propósito —escribía
+# un lunes futuro en el perfil, le congelaba el día en «1 de 90» y le pisaba
+# la fecha del alta—, y seguía dando verde porque el nombre quedó en el
+# comentario que explica POR QUÉ se sacó. La lente 2.x ya pide lo contrario
+# (`proximoLunes` NO en el Camino), así que la batería se contradecía a sí
+# misma en dos bloques. Ahora dice lo que el código hace.
+check('`proximoLunes` existe para las migraciones, y el Camino no lo usa',
+      'proximoLunes' in cod(_yt) and 'proximoLunes' not in cod(_rm24)
+      and 'yaTieneFecha' in cod(_rm24),
+      'la fecha de arranque la pone el equipo en el alta; si falta, es HOY')
 check('existe la prueba del punto de partida', _os64.path.exists('scripts/prueba-ya-tienes.ts'))
 
 # ── El Crítico y el Mentor llegan con criterio (20 sep) ─────────────
 _rub = rd('src/lib/rubricas.ts'); _con = rd('src/lib/consultorio.ts')
 check('el Crítico se ve en la sesión, no solo en el catálogo',
-      'VeredictoCriticoPanel' in rd('src/pages/Roadmap.tsx'))
+      'VeredictoCriticoPanel' in rdc('src/pages/Roadmap.tsx'))
 check('hay rúbricas escritas para el Camino de 90 días', _rub.count("criterios:") >= 23)
 # Cada rúbrica trae su destino: un bloqueo sin salida es un muro.
 check('las rúbricas dicen dónde se arregla lo que no sale',
@@ -3363,13 +3420,13 @@ check('ninguna jornada abre el catálogo viejo de herramientas',
 check('las jornadas con entrenador se practican con él',
       "j.agente !== null ? 'COACH'" in rd('src/lib/roadmapSeed.ts'))
 check('el consultorio responde por jornada o por pieza',
-      'diaDelCodigo' in rd('src/lib/consultorio.ts'))
+      'diaDelCodigo' in rdc('src/lib/consultorio.ts'))
 check('el cliente no ve la palabra Pilar en su Camino', 'Pilar {pilar' not in _rm9)
 
 # ── El ADN se llena con el Camino ────────────────────────────────────
 _ap2 = rd('src/lib/adnPiezas.ts')
 check('el ADN se sella con las claves que escribe el Camino de hoy',
-      'clavesEscritas' in _ap2 and _ap2.count('clave:') >= 10)
+      'clavesEscritas' in cod(_ap2) and _ap2.count('clave:') >= 10)
 _claves_seed = {k for j in _json64.loads(rd('src/lib/roadmap.seed.json'))['jornadas'] for k in j.get('adn_escribe', [])}
 _apuntadas = set(re.findall(r"clave: '([\w.]+)'", _ap2))
 check('ninguna pieza del ADN apunta a una clave que no existe',
@@ -3394,7 +3451,7 @@ check('esas tres respuestas se guardan con el resto del diagnóstico',
       'llegan: dxLlegan' in _ww2 and 'publica: dxPublica' in _ww2)
 _ob = rd('src/lib/onboardingBase.ts')
 check('el Camino usa lo que ya contestó, no vuelve a preguntar',
-      'baseDeOnboarding' in _ob and 'baseDeOnboarding' in todo.get('src/pages/Roadmap.tsx', ''))
+      'baseDeOnboarding' in cod(_ob) and 'baseDeOnboarding' in todo.get('src/pages/Roadmap.tsx', ''))
 check('la sesión le muestra su propia respuesta',
       'base.etiqueta' in rd('src/components/sesion/SesionViva.tsx'))
 
@@ -3507,7 +3564,7 @@ _vc = rd('src/lib/videosCargados.ts')
 # reordena, el día no.
 _n_vids = _vc.count("': 'https://") + len(re.findall(r"^\s*\d+: 'https://", _vc, re.M))
 check(f'hay {_n_vids} videos cargados', _n_vids >= 20)
-_bloque_videos = _vc.split('VIDEOS_POR_JORNADA')[1].split('};')[0] if 'VIDEOS_POR_JORNADA' in _vc else ''
+_bloque_videos = _vc.split('VIDEOS_POR_JORNADA')[1].split('};')[0] if 'VIDEOS_POR_JORNADA' in cod(_vc) else ''
 _cods_video = re.findall(r"^\s*'?([\w.\-]+)'?: 'http", _bloque_videos, re.M)
 check('un video por jornada: ningún código repetido',
       len(_cods_video) == len(set(_cods_video)),
@@ -3528,15 +3585,15 @@ check('el precio se sella antes de ordenar la cartera',
            _pasos_precio.find('precio nuevo') < _pasos_precio.find('tres grupos'))),
       f'precio día {_dia_precio} · cartera día {_dia_cartera}')
 check('cada tutorial con PDF lo ofrece al lado de su video',
-      'PDFS_POR_TUTORIAL' in _vc and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
+      'PDFS_POR_TUTORIAL' in cod(_vc) and 'PDFS_POR_TUTORIAL' in todo.get('src/pages/Roadmap.tsx', ''))
 # Siguen en la Biblioteca, pero por una sola vía. Estaban por DOS: el catálogo
 # unificado los traía con su tema, y debajo un bloque propio los volvía a
 # listar agrupado por tema. El cliente leía nueve títulos repetidos —«Tu
 # historia», «Tu legado», «A quién sirves»— y no sabía si eran dos cosas o la
 # misma. Medido en el navegador con scripts/prueba-repetido.py.
 check('lo complementario vive en la Biblioteca, no en el Camino',
-      'COMPLEMENTOS' in _vc
-      and 'COMPLEMENTOS' in rd('src/lib/catalogoBiblioteca.ts')
+      'COMPLEMENTOS' in cod(_vc)
+      and 'COMPLEMENTOS' in rdc('src/lib/catalogoBiblioteca.ts')
       and '<TodoElMaterial' in todo.get('src/pages/Biblioteca.tsx', ''))
 check('y una sola vez: no por dos listas en la misma pantalla',
       '<Complementos />' not in todo.get('src/pages/Biblioteca.tsx', ''))
@@ -3545,7 +3602,7 @@ check('y una sola vez: no por dos listas en la misma pantalla',
 # buscando los 14 videos de Javo por el código de la pieza: los tenía en la
 # mano y los mostraba sin grabar (turno 12).
 check('el tablero del Admin pisa lo que viene por archivo',
-      'enlacesPorClave' in rd('src/components/admin/TableroGrabacion.tsx'))
+      'enlacesPorClave' in rdc('src/components/admin/TableroGrabacion.tsx'))
 
 # ── Los tutoriales del Camino: dónde están y cuáles faltan ─────────────
 # Un tutorial atado a un día que el cliente no abre es un tutorial que no
@@ -3578,18 +3635,18 @@ check('el paso de mañana también es del cliente', _db3.count('esPasoDelCliente
 
 # ── El ADN se lee en su tarjeta (C3) ─────────────────────────────────
 _ap = rd('src/lib/adnPiezas.ts'); _adn = todo.get('src/pages/ADN.tsx', '')
-check('cada pieza del ADN muestra lo que dice', 'contenidoDePieza' in _ap and 'contenidoDePieza' in _adn)
+check('cada pieza del ADN muestra lo que dice', 'contenidoDePieza' in cod(_ap) and 'contenidoDePieza' in _adn)
 check('lo sellado se lee pero no se edita por fuera', 'rehaces su sesión' in _adn)
-check('las piezas del origen se pueden escribir desde su tarjeta', 'guardarOrigen' in _ap and 'guardarOrigen' in _adn)
+check('las piezas del origen se pueden escribir desde su tarjeta', 'guardarOrigen' in cod(_ap) and 'guardarOrigen' in _adn)
 check('el ADN usa los nombres congelados', 'El alma' not in _adn and 'Quién eres' in _adn)
 
 # ── El tablero de grabación (C3) ─────────────────────────────────────
 _tg = rd('src/components/admin/TableroGrabacion.tsx')
 _adm = todo.get('src/pages/Admin.tsx', '')
-check('el tablero de grabación está en el Admin', 'TableroGrabacion' in _adm and 'programa_videos' in _tg)
+check('el tablero de grabación está en el Admin', 'TableroGrabacion' in _adm and 'programa_videos' in cod(_tg))
 _etg = rd('src/lib/elTableroDeGrabacion.ts')
 check('el tablero lista las piezas y los tutoriales',
-      'filasDeGrabacion' in _tg and 'roadmap.piezas' in _etg and 'roadmap.tutoriales' in _etg)
+      'filasDeGrabacion' in cod(_tg) and 'roadmap.piezas' in _etg and 'roadmap.tutoriales' in _etg)
 _rmv = todo.get('src/pages/Roadmap.tsx', '')
 # La regla está en `videoDeCadaJornada` y el Camino la llama: estaba escrita
 # dentro de un `useMemo` de esta pantalla, y el Tablero guardaba contra una
@@ -3602,15 +3659,15 @@ check('el tutorial del día aparece en su sesión cuando tiene enlace', 'tutoria
 _ppv = rd('src/components/PuntoDePartida.tsx')
 _yt = rd('src/lib/yaTienes.ts')
 _rmp = todo.get('src/pages/Roadmap.tsx', '')
-check('se le pregunta qué ya tiene andando', 'PuntoDePartida' in _rmp and 'YA_TIENES' in _ppv)
+check('se le pregunta qué ya tiene andando', 'PuntoDePartida' in _rmp and 'YA_TIENES' in cod(_ppv))
 check('y eso lo deja en revisión, no por hecho',
       'revisas lo que traes' in _ppv and 'codigosEnRevision' in _rmp,
       'las hace igual, más cortas, con el Crítico midiendo lo que trae')
-check('se pregunta una sola vez', 'KEY_PARTIDA' in _ppv)
+check('se pregunta una sola vez', 'KEY_PARTIDA' in cod(_ppv))
 check('lo marcado también se guarda en la base',
       'marcarPartida' in _rmp and "guardarFila('hoja_de_ruta'" in _rmp)
 check('y la revisión no se le pide a quien no trajo nada',
-      'proximoLunes' in _yt)
+      'proximoLunes' in cod(_yt))
 
 # ── La sesión en cinco pantallas (C2) ─────────────────────────────────
 _sv = todo.get('src/components/sesion/SesionViva.tsx', '')
@@ -3676,7 +3733,7 @@ _road12 = rd('src/pages/Roadmap.tsx')
 check('el Tablero guarda con la clave que el Camino lee, no con la de la pieza',
       'pilar_id: fila.clave' in _tab12 and 'pilar_id: fila.codigo' not in _tab12)
 check('el reparto de videos del Camino vive en un solo lugar',
-      'export function videoDeCadaJornada' in _vid12
+      'export function videoDeCadaJornada' in cod(_vid12)
       and 'videoDeCadaJornada(SEED_ROADMAP_V2' in _road12
       and 'mapaConLaBase(' in _road12)
 check('existe la lente del Tablero contra el Camino',
@@ -3887,7 +3944,7 @@ check('la antesala existe y la pantalla de Hoy la dibuja',
 check('el Camino no abre el día 1 hasta que la cerró',
       'leToca(perfil?.antesala' in _road)
 check('y al cerrarla se sella la fecha de inicio del Camino',
-      'campos.fecha_inicio = sella' in _dash)
+      'campos.fecha_inicio = sella' in cod(_dash))
 check('el tope por escalón corta el Camino',
       bool(_tope) and 'entraEnElEscalon(' in _road)
 check('el cron pregunta el escalón antes de mandarle una entrega al equipo',
@@ -3896,8 +3953,8 @@ check('el cron pregunta el escalón antes de mandarle una entrega al equipo',
 # `not null default 'base'`, así que mirar el valor le cortaría el Camino a
 # todos los clientes de hoy, que están en base porque nadie los marcó.
 check('y el tope corre con el escalón marcado, no con el default',
-      'estaMarcado' in _tope and 'servicio_marcado_el' in _road
-      and 'servicio_marcado_el' in _cronE)
+      'estaMarcado' in cod(_tope) and 'servicio_marcado_el' in cod(_road)
+      and 'servicio_marcado_el' in cod(_cronE))
 check('el módulo del tope no importa nada (lo usa el cron en frío)',
       not re.search(r'^import ', _tope, re.M))
 import os as _os31
@@ -3928,7 +3985,7 @@ check('y dice qué abre la oferta elegida antes de crear la cuenta',
       'loQueAbre(nuevoForm.servicio)' in rd('src/pages/Admin.tsx'))
 check('el Camino le dice quién monta lo técnico en su escalón',
       '<QuienMonta' in rd('src/pages/Roadmap.tsx')
-      and 'construyeSolo' in rd('src/components/camino/QuienMonta.tsx'))
+      and 'construyeSolo' in rdc('src/components/camino/QuienMonta.tsx'))
 check('y las tres ofertas tienen su prueba de escenario',
       _os31.path.exists('scripts/prueba-tres-ofertas.ts'))
 
@@ -3961,7 +4018,7 @@ for _r, _s in todo.items():
 check('ninguna fecha de un día se arma en UTC (se corre un día de noche)',
       not _utc, ', '.join(_utc[:4]))
 check('y hay un solo helper para eso',
-      'export function hoyISO' in rd('src/lib/diaPrograma.ts'))
+      'export function hoyISO' in rdc('src/lib/diaPrograma.ts'))
 
 # Los números que carga el cliente llegan a la base: el RPC se llamaba con
 # nombres que la función no declara, y PostgREST resuelve por nombre.
@@ -4016,7 +4073,7 @@ check('y el cálculo de carga no se llama con `as never`',
 # El veredicto de la garantía se calculaba contra una columna sin escritor.
 check('el atraso de cada jornada sale de la fecha que ya se guarda',
       'entregas={entregasReales}' in rd('src/App.tsx')
-      and 'fecha_completada' in rd('src/App.tsx'),
+      and 'fecha_completada' in rdc('src/App.tsx'),
       'profiles.entregas no tenía un solo escritor: el atraso daba cero para todos')
 
 # Lo repetido se mide en el navegador.
@@ -4072,8 +4129,8 @@ check('y llega con su icono: el tipo nuevo está en los dos lugares que dibujan 
 check('el veredicto tiene su prueba de escenario',
       _os31.path.exists('scripts/prueba-veredicto.ts'))
 check('y la fila de la cola se monta de verdad, con datos',
-      'export function FilaDeLaCola' in rd('src/components/admin/ColaDeEvidencias.tsx')
-      and 'FilaDeLaCola' in rd('scripts/prueba-pantallas.tsx'),
+      'export function FilaDeLaCola' in rdc('src/components/admin/ColaDeEvidencias.tsx')
+      and 'FilaDeLaCola' in rdc('scripts/prueba-pantallas.tsx'),
       'el render estático no corre los efectos: con la cola vacía el panel '
       'devuelve null y la fila no la montaba nadie')
 
@@ -4129,8 +4186,8 @@ check('las piezas que faltan se escriben en esa misma pantalla, sin voseo',
 # La llave de la migración se encendía solo desde Hoy, en otra lista: dar de
 # alta a alguien que ya trae su trabajo hecho eran dos pantallas.
 check('el alta puede abrir la migración en el mismo movimiento',
-      'traeSuTrabajo' in _adm14
-      and 'habilitarMigracion(signUpData.user.id, true)' in _adm14,
+      'traeSuTrabajo' in cod(_adm14)
+      and 'habilitarMigracion(signUpData.user.id, true)' in cod(_adm14),
       'estaba solo en Hoy, y el segundo paso es el que se olvida')
 check('apagada por defecto: no todo el que entra trae trabajo hecho',
       'traeSuTrabajo: false,' in _adm14)
@@ -4366,11 +4423,11 @@ check('la escalera que ve el cliente es la de hoy, de punta a punta',
 # cuando el cliente ya pagó.
 _pl73 = rd('src/lib/planes.ts')
 check('lo que pagó le gana a por dónde entró',
-      'const pago = planPagado(perfil);' in _pl73
+      'const pago = planPagado(perfil);' in cod(_pl73)
       and _pl73.index('const pago = planPagado(perfil);') < _pl73.index("?.plan === 'ELNUMERO') return 'blanco'"),
       'si ELNUMERO se mira primero, al que sube de escalón no se le abre nada')
 check('«está en el tramo del $27» vive en un solo lugar',
-      'export function enElTramoDelNumero' in _pl73)
+      'export function enElTramoDelNumero' in cod(_pl73))
 
 _repetido73 = [f for f in ['src/lib/adnPiezas.ts', 'src/pages/Roadmap.tsx', 'src/components/WelcomeWizard.tsx']
                if "=== 'ELNUMERO'" in rd(f)]
@@ -4384,10 +4441,10 @@ check('el webhook de pago acepta las ofertas que se venden',
       'con solo los colores, un producto que manda plan:"base" recibía '
       'PLAN_INVALIDO y el cliente pagaba sin que se le abriera nada')
 check('y el ticket pagado abre el tramo que le corresponde',
-      'LO_QUE_ABRE' in _wh73 and "base: 'amarillo'" in _wh73,
+      'LO_QUE_ABRE' in cod(_wh73) and "base: 'amarillo'" in _wh73,
       'La Base llega al día 12, que es el pilar 2')
 check('el servicio contratado lo escribe el pago, no una persona',
-      'cambios.servicio_contratado = ticket' in _wh73,
+      'cambios.servicio_contratado = ticket' in cod(_wh73),
       'si lo tiene que marcar alguien a mano, la venta no es automática')
 # La escritura del servicio vive detrás de `ticket &&`: un color de acceso no
 # tiene autoridad para escribirla. Adivinarlo es el puente que hacía figurar a
@@ -4449,7 +4506,7 @@ check('el que paga la entrada entra, y el que sube recibe lo que pagó',
 # por el que el comprador del escalón de entrada se llevaba los noventa días.
 _alta = rd('api/alta-numero.ts')
 check('el alta mira si el usuario es nuevo, no qué dice su columna plan',
-      'recienCreado' in _alta and "estado === 'invitado'" in _alta,
+      'recienCreado' in cod(_alta) and "estado === 'invitado'" in _alta,
       "preguntar '¿ya tiene plan?' da siempre sí: el trigger "
       "on_auth_user_created escribe 'DWY' al crear el usuario")
 check('y el perfil que crea guarda su email',
@@ -4457,7 +4514,7 @@ check('y el perfil que crea guarda su email',
       'es la columna por la que el webhook del pago busca al cliente')
 _wh = rd('api/ghl-webhook.ts')
 check('un cobro no puede bajarle el acceso a quien pagó más arriba',
-      'noEsUnaBaja' in _wh and 'ALTURA_DEL_ACCESO' in _wh,
+      'noEsUnaBaja' in cod(_wh) and 'ALTURA_DEL_ACCESO' in cod(_wh),
       'un webhook viejo con plan:"blanco" dejaba al de $3.000 con los 5 días')
 check('y el pago sella la fecha del escalón, que es la que enciende el tope',
       'cambios.servicio_marcado_el' in _wh,
@@ -4577,30 +4634,81 @@ check('y el token sale de la sesión, no del localStorage',
       'auth.getSession()' in rdc('src/lib/tokenSesion.ts')
       and 'localStorage' not in rdc('src/lib/tokenSesion.ts'))
 
-# ── La lente de la lente: lo que cuida plata se lee en el CÓDIGO ──────────
+# ── La lente de la lente: ningún NOMBRE se mide sobre el archivo crudo ────
 #
 # El 13 de noviembre, del lado de MCD, dos lentes daban verde con el defecto
 # puesto porque leían el archivo crudo: les alcanzaba con un comentario que
-# nombrara la guarda. Esta batería tenía la misma forma —703 afirmaciones de
-# presencia leídas en crudo contra 20 limpias— y el 14 de noviembre se midió
-# qué pasa: con `deshacerCobro`, `anotarCosto`, `verificarTopeBlanco` y el
-# signal del tope sacados del código y su nombre dejado en un comentario, la
-# batería daba las 859 en verde y las 132 pruebas también.
+# nombrara la guarda. El 14 de noviembre se midió que esta batería tenía la
+# misma forma y se tapó con una lista de nueve nombres de plata. La lista era
+# el error: el 14 de noviembre a las 07:26 se sacaron del código tres
+# mecanismos que NO estaban en esa lista —`marcarEncendida` (sin ella el
+# cliente queda «instalando» para siempre), `formulasBloqueadas` y
+# `deshacerCobro` (la devolución del crédito cuando la cadena falla)— dejando
+# el nombre en un comentario, y la batería dio **878 en verde, cero faltas**,
+# igual que sin defectos. Las 133 pruebas también.
 #
-# Las de plata ya pasan por `rdc()`. Esta lente es la que impide que vuelvan:
-# ningún nombre de mecanismo se mide sobre el archivo crudo.
-_MECANISMOS16 = ('deshacerCobro', 'anotarCosto', 'verificarTopeBlanco',
-                 'verificarTecho', 'devolverCreditoServer', 'guardarLlamada',
-                 'usuarioDeLaPuerta', 'getUserIdFromJwt', 'cabecerasConToken')
-_crudas16 = []
-for _n16, _l16 in enumerate(rd('auditoria.py').split('\n'), 1):
+# El defecto de `deshacerCobro` pasó por algo peor: su lente YA leía `rdc()`.
+# `solo_codigo` sacaba el comentario de línea entera y el de bloque, pero no
+# el del final de la línea, así que `await Promise.resolve(); // deshacerCobro(…)`
+# contaba como código. Las dos cosas quedaron cerradas acá:
+#
+#   · `solo_codigo` saca también el `//` del final, sin tocar las barras de
+#     una URL, de un texto ni de una regex (probado abajo contra las tres),
+#   · y la regla dejó de ser una lista de nombres: **toda** afirmación de
+#     presencia de algo con forma de identificador sobre un archivo fuente se
+#     mide en el código. 220 lentes pasaron a `cod(…)` o `rdc(…)`.
+#
+# Lo que SIGUE leyendo el archivo crudo, a propósito y sin excepción escrita:
+# las 23 lentes que miden que una EXPLICACIÓN esté escrita («GHL reintenta»,
+# «La base manda», «no por significado»…). Ésas no tienen forma de
+# identificador, así que esta lente no las mira: una frase con espacios vive
+# en un comentario porque ahí es donde va.
+#
+# Y las afirmaciones de AUSENCIA (`'x' not in …`) se quedan en crudo a
+# propósito: pedir que algo no esté ni en un comentario es más estricto, no
+# menos.
+# Forma de NOMBRE: camelCase, SCREAMING_SNAKE o algo con `_`/`$`. Una
+# palabra en minúscula pelada —«paraliza», «vencido», «neto»— es del
+# idioma, no un mecanismo, y vive en un comentario con todo derecho.
+_IDENT16 = _re16.compile(r'^(?=[A-Za-z_$])(?=.*[A-Z_$])[A-Za-z0-9_$]{4,}$')
+_FUENTE16 = ('.ts', '.tsx', '.js', '.jsx')
+_ASIG16 = _re16.compile(r'^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*rd\(\s*[\'"]([^\'"]+)[\'"]\s*\)')
+_PRES_VAR16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,160})\1\s+in\s+([A-Za-z_][A-Za-z0-9_]*)\b')
+_PRES_DIR16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,160})\1\s+in\s+rd\(\s*f?[\'"]([^\'"\n]+)[\'"]')
+_yo16 = rd('auditoria.py').split('\n')
+_vars_crudas16 = {}
+for _n16, _l16 in enumerate(_yo16, 1):
     if _l16.lstrip().startswith('#'): continue
-    for _mec16 in _MECANISMOS16:
-        if _re16.search(rf"'{_mec16}'[^\n]*\bin rd\(", _l16):
-            _crudas16.append(f'línea {_n16}: {_mec16}')
-check('ninguna lente de plata o de puerta lee el archivo crudo',
-      not _crudas16, '; '.join(_crudas16),
+    _m16 = _ASIG16.match(_l16)
+    if _m16 and _m16.group(2).endswith(_FUENTE16):
+        _vars_crudas16[_m16.group(1)] = _m16.group(2)
+_crudas16 = []
+for _n16, _l16 in enumerate(_yo16, 1):
+    if _l16.lstrip().startswith('#'): continue
+    for _m16 in _PRES_VAR16.finditer(_l16):
+        if _IDENT16.match(_m16.group(2)) and _m16.group(3) in _vars_crudas16:
+            _crudas16.append(f'línea {_n16}: {_m16.group(2)} sobre {_m16.group(3)} crudo')
+    for _m16 in _PRES_DIR16.finditer(_l16):
+        if _IDENT16.match(_m16.group(2)) and _m16.group(3).endswith(_FUENTE16):
+            _crudas16.append(f'línea {_n16}: {_m16.group(2)} sobre rd({_m16.group(3)})')
+check('ningún nombre de mecanismo se mide sobre el archivo crudo',
+      not _crudas16, '; '.join(_crudas16[:6]) + (f' …y {len(_crudas16) - 6} más' if len(_crudas16) > 6 else ''),
       )
+
+# Y la que cuida al limpiador: si `solo_codigo` no saca el `//` del final,
+# todo lo de arriba vuelve a ser decorativo.
+_PRUEBA16 = """const url = 'https://x.dev//y';
+const re = /^https?:\\/\\//i;
+await Promise.resolve(); // deshacerCobro(userId)
+// anotarCosto(algo)
+const vivo = marcarEncendida(id);"""
+_limpio16 = solo_codigo(_PRUEBA16)
+check('solo_codigo saca el comentario del final de la línea',
+      'deshacerCobro' not in _limpio16 and 'anotarCosto' not in _limpio16)
+check('y no se lleva la URL, la regex ni el código de al lado',
+      'https://x.dev//y' in _limpio16 and 'https?:' in _limpio16
+      and 'marcarEncendida' in _limpio16,
+      'una barra dentro de un texto o de una regex no es un comentario')
 
 
 print()
