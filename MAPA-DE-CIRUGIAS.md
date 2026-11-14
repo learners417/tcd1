@@ -246,9 +246,15 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-**Y si quieres escribir uno, hay tres candidatos con el trabajo ya medido.** El
-primero es del 14 de noviembre: **cerrar `/api/mcd-bridge`**, la última ruta sin
-llave, con su botón abajo en «El 14 de noviembre a las 03:30». Los otros dos son
+**Y si quieres escribir uno, hay cuatro candidatos con el trabajo ya medido.**
+El primero es del 14 de noviembre a las 11:30, y es mecánico: **pasar las 183
+afirmaciones de presencia que la batería de TCD hace sobre archivos crudos** a
+`cod(…)`, y extender la lente del bloque 16 a las tres formas que no mira
+(`.count`, `re.search` y el fragmento con paréntesis). Medido: ninguna de las
+183 miente hoy —las 22 que leen un comentario son las de EXPLICACIÓN, a
+propósito—, así que es prevención, no un agujero abierto. El segundo es
+**cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
+«El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
 con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero
 —bajar el editor a `lazy()`— quedó medido el 13 de noviembre a las 19:25, y el
@@ -312,6 +318,98 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **14 nov, 03:30** · `f3195b2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`c7586ca` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` otra vez en cero. Esta despertada fue a por el candidato que el turno anterior dejó anotado —**la batería de TCD contra sí misma**— y encontró, antes que la lente, **el agujero**: cinco de las seis rutas de `api/ai/` no preguntaban quién llama, y cualquiera con la URL gastaba las llaves de proveedor de la casa. Cerrado con una puerta única, el token del lado del navegador, una prueba que ejecuta los seis handlers y el bloque 16 de la batería (abajo). Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, **133 pruebas**, **878 miradas, cero faltas**; MCD sin tocar y con sus **53** en verde |
 
 | **14 nov, 07:26** · `00a92d2` + `e5a3260` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`9de0794` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` suelto otra vez en los dos repos—, `node_modules` en cero. Esta despertada fue a medir **la lente que el turno anterior dejó puesta**, y la lente estaba tapada con una lista de nueve nombres: tres mecanismos que no estaban en esa lista se sacaron del código dejando el nombre en un comentario y la batería dio **878 en verde, cero faltas**. Uno de los tres pasó incluso leyendo `rdc()`: `solo_codigo` no sacaba el comentario del **final** de la línea. Cerrado en los dos repos, y de paso dos lentes que mentían en main: una se contradecía con otra y otra **medía para nadie** (abajo) |
+
+| **14 nov, 11:30** · `a76e8e7` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`e1058f8` en TCD, `e5a3260` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` en cero en los dos. Esta despertada fue a por el único candidato que el mapa daba por no medido —**la batería de MCD contra sí misma**, el espejo de lo que TCD cerró a las 03:30 y 07:26— y lo que encontró es peor que una lente ciega: **con la lista de pantallas protegidas vaciada y la de verdad dejada en un comentario una línea encima, las 57 lentes daban verde y las diez pantallas de cliente quedaban abiertas sin sesión**, con los pacientes detrás. Dos defectos más pasaron igual, y al migrar aparecieron una lente que medía un comentario en main y el `--` del SQL que `solo_codigo` no saca (abajo) |
+
+### El 14 de noviembre a las 11:30: la lista de pantallas protegidas vivía en un comentario
+
+Los turnos del 14 a las 03:30 y 07:26 cerraron la auditoría de la auditoría
+**del lado de TCD**. Del lado de MCD quedaba hecho solo el limpiador. Esta
+despertada fue a medir lo que faltaba, y la premisa se cayó entera.
+
+**Medido primero, ejecutando.** Tres defectos puestos a propósito en MCD, cada
+uno con su nombre dejado en un comentario. Con los tres puestos: `tsc` limpio,
+`next build` limpio **en la primera corrida** y las **57 lentes en verde**.
+
+| el defecto puesto | lo que se rompe de verdad | la batería |
+|---|---|---|
+| `isProtected` vaciada, la lista real en un comentario una línea encima | **las diez pantallas de `(app)` abiertas sin sesión**, con los pacientes de un cliente detrás | **57 en verde** |
+| el `while` de `getContacts` por una sola vuelta, el nombre al final de la línea | las listas se truncan en 100 otra vez, en silencio: «faltan pacientes» | **57 en verde** |
+| `total_usd` fuera de la respuesta del puente | TCD calcula el cinturón sobre un `undefined` | **57 en verde** |
+
+El primero es el que importa, y no es del mismo tipo que los de TCD: la lente
+no pedía un nombre, hacía `re.search(r'isProtected\s*=\s*\[(.*?)\]', mw)`
+sobre el archivo crudo. **`re.search` devuelve la PRIMERA coincidencia**, y la
+primera era la del comentario. O sea que la lente leía la lista buena mientras
+el código corría con la vacía, y lo decía en verde.
+
+#### Qué quedó puesto
+
+**La regla pasó al lado de la variable, y se declara en el nombre.** Ninguno de
+los tres defectos tenía la forma que la lente del 07:26 miraba (`'nombre' in
+rd(…)`): los tres medían sobre una variable leída cruda más arriba. Así que:
+
+1. lo que se lee crudo de un archivo fuente **se llama `*_crudo`**, y
+2. sobre un `*_crudo` **solo se afirma AUSENCIA** —pedir que algo no esté ni en
+   un comentario es más estricto, no menos—. Toda PRESENCIA se mide sobre el
+   código: `rdc(archivo)`, `cod(texto)` o `solo_sql(sql)`.
+
+Las dos las mide una lente cada una, y la excepción que queda —el buscador de
+secretos, que tiene que mirar el archivo entero— **está escrita en su propia
+línea** (`# crudo a propósito`), no en una lista aparte.
+
+**Dos cosas más, que aparecieron al migrar:**
+
+**1 · Una lente medía un comentario en main.** «La llamada reintenta cuando GHL
+responde 429 o 5xx» pedía la palabra `retry` en `client.ts`, y la única que hay
+está en `// Retry en rate-limit o error de servidor`: **en el código el
+mecanismo se llama `attempt`**. El mecanismo existe —no había fuga—, pero la
+lente no lo miraba. Reescrita para medir la rama del 429: que vuelva a llamar y
+que tenga tope. Las dos versiones intermedias **fallaron su propia prueba** y se
+ajustaron: la función tiene otro `return ghlFetch(…)` y otro `attempt < 2` —los
+del timeout— y mirar la función entera daba verde con los del 429 sacados.
+
+**2 · `solo_codigo` saca el `//` de TypeScript y no el `--` de SQL.** La lente
+«un cobro no puede existir sin su comprobante (`receipt_path not null`)» se
+cumplía con una línea comentada. Probado: con el `not null` sacado de la
+migración y el nombre dejado en un `--`, la batería vieja daba **verde**. Y ése
+es justo el `not null` del que depende que `cobros_verificados` no mienta —el
+número con el que TCD otorga el cinturón Rojo—. Nuevo `solo_sql()`, con su
+lente y con la prueba de que no se lleva los guiones de un texto.
+
+#### Las siete pruebas contra su propio fallo
+
+| el defecto reintroducido | antes | ahora |
+|---|---|---|
+| `isProtected` vaciada, la lista real en un comentario | **verde** | **roja**, 2 lentes, y nombra las diez pantallas |
+| el `while` de `getContacts` por una vuelta, el nombre al final | **verde** | **roja**, 2 lentes |
+| `total_usd` fuera del puente | **verde** | **roja**, y dice cuál falta |
+| una lente vuelta al crudo (presencia sobre `*_crudo`) | no existía | **roja**, con línea y variable |
+| un `rd()` de archivo fuente sin llamarse `*_crudo` | no existía | **roja**, con línea y nombre |
+| `solo_sql` sin sacar el `--` | no existía | **roja** |
+| el `receipt_path not null` sacado, el nombre en un `--` | **verde** | **roja** |
+
+MCD cierra con **62 lentes**, `tsc` limpio y `next build` limpio. Commit
+`a76e8e7`.
+
+#### Y de paso: ¿le pasa lo mismo a TCD hoy?
+
+La misma forma existe en TCD —su lente mira el `'nombre' in rd(…)` y no el
+`.count(…)`, el `re.search(…, crudo)` ni el fragmento con paréntesis—, así que
+se midió: **171 variables crudas de archivo fuente y 183 afirmaciones de
+presencia** sobre ellas en esas tres formas.
+
+Pero la pregunta que importa no es cuántas hay, es **si alguna está hoy en
+verde por un comentario**. Se midió una por una, comparando el archivo crudo
+con el archivo limpio: **22 lo están, y las 22 son las lentes que miden que una
+EXPLICACIÓN esté escrita** —«GHL reintenta», «La base manda», «paraliza»—, que
+leen crudo a propósito y están declaradas así desde el 07:26. **Ninguna lente
+de mecanismo de TCD mide hoy un comentario.** Lo que queda es latente: un
+defecto escrito mañana en uno de esos 183 sitios pasaría en verde.
+
+**Es el candidato medido para el próximo turno**, y es mecánico: pasar esas 183
+a `cod(…)` y extender la lente del bloque 16 a las tres formas, con la batería
+de TCD en verde en cada paso.
 
 ### El 14 de noviembre a las 07:26: la lente nueva estaba tapada con una lista de nueve nombres
 
