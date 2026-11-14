@@ -246,17 +246,17 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-**Y si quieres escribir uno, hay tres candidatos con el trabajo ya medido.**
-El primero —pasar las afirmaciones de presencia sobre crudo a `cod(…)`— lo
-cerró el turno del 14 a las 15:25 (`da98ce6`), y no era prevención: la lente
-estaba verde por un punto y coma y había cuatro ausencias que eran el defecto
-(abajo, en «El 14 de noviembre a las 15:25»). Lo que queda de ese frente es
-el recorrido por AST de la ausencia, anotado al final de esa misma sección. El
-siguiente es
+**Y si quieres escribir uno, quedan tres candidatos con el trabajo ya medido,
+y los tres esperan tu clic.** El frente de la auditoría de la auditoría quedó
+**cerrado entero** el 14 a las 19:30 (abajo, en «El 14 de noviembre a las
+19:30»): el recorrido por AST de la ausencia era lo último que faltaba, y
+encontró tres ausencias vivas en un recolector —dos lentes ciegas hoy— más la
+lente del catch mudo, que conocía una sola manera de escribir «mudo». El
+primero de los tres que quedan es
 **cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
 «El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
-con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero
+con su botón, abajo en «El hallazgo del 13 de noviembre»). Y uno más
 —bajar el editor a `lazy()`— quedó medido el 13 de noviembre a las 19:25, y el
 corte resultó ser otro: el Admin entero (su botón, abajo en «El tercer
 candidato, ya medido»).
@@ -322,6 +322,91 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **14 nov, 11:30** · `a76e8e7` (MCD) + `e5b3704` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`e1058f8` en TCD, `e5a3260` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` en cero en los dos. Esta despertada fue a por el único candidato que el mapa daba por no medido —**la batería de MCD contra sí misma**, el espejo de lo que TCD cerró a las 03:30 y 07:26— y lo que encontró es peor que una lente ciega: **con la lista de pantallas protegidas vaciada y la de verdad dejada en un comentario una línea encima, las 57 lentes daban verde y las diez pantallas de cliente quedaban abiertas sin sesión**, con los pacientes detrás. Dos defectos más pasaron igual, y al migrar aparecieron una lente que medía un comentario en main y el `--` del SQL que `solo_codigo` no saca (abajo) |
 
 | **14 nov, 15:25** · `da98ce6` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`93c3961` en TCD, `a76e8e7` en MCD), los dos árboles limpios y `HEAD` suelto en los dos—, `node_modules` en cero. Esta despertada tomó el candidato que el mapa daba por **mecánico y preventivo** («ninguna de las 183 miente hoy») y la premisa se cayó dos veces: la lente del bloque 16 **estaba verde por un punto y coma** —veía la asignación cruda solo al principio de la línea, así que once presencias con forma de nombre vivían hoy en la forma exacta que la lente prohíbe—, y había **cuatro ausencias que eran el defecto**, donde un comentario escondía al endpoint que cobra sin poder devolver el crédito. Seis formas cerradas, 225 medidas pasadas al código, y una lente que medía la cadena vacía (abajo) |
+
+| **14 nov, 19:30** · `PENDIENTE` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+
+### El 14 de noviembre a las 19:30: tres ausencias seguían en un recolector
+
+El mapa dejaba este frente con una sola forma pendiente y la llamaba **la
+última de este frente**: «se necesita un recorrido por AST de `auditoria.py`:
+encontrar cada `NotIn` sobre una variable cruda y preguntar si su sentencia es
+un `check(…)` —prohibición, crudo— o un recolector que `append`ea —defecto,
+código—». Y daba la cuenta por hecha: **75 ausencias, 21 con una presencia al
+lado, las 4 recolectoras ya cerradas, las otras 17 la prohibición legítima.**
+
+Se midió con el árbol antes de construir, y la cuenta era otra: **46 ausencias
+de mecanismo sobre crudo, y tres de ellas en un recolector.** Las cuatro que el
+mapa daba por cerradas lo están; éstas son otras tres, en dos lentes, y las dos
+estaban **ciegas hoy** —no latentes—. Probado ejecutando, sacando el mecanismo
+del archivo de verdad y dejando el nombre en un comentario:
+
+| la lente | el defecto puesto | sobre crudo | en el código |
+|---|---|---|---|
+| «las pantallas nuevas traducen sus fallas» | `mensajeDeFalla` sacado de `TableroPlata.tsx` | **verde** | **roja** |
+| «los 4 puntos de venta tiran de la misma fuente» | `Dashboard.tsx` desconectado del módulo de la oferta | **verde** | **roja** |
+
+La primera deja al cliente viendo el error técnico del navegador donde tendría
+que leer qué pasó; la segunda deja un punto de venta con la escalera escrita a
+mano, que es justo lo que esa lente existe para impedir.
+
+**Y por qué no alcanza una expresión regular, ahora medido:** las dos formas se
+escriben **igual** (`'x' not in _s`). Lo que las distingue no está en la línea:
+está en qué hace la sentencia con el resultado, y el `check(` que lo decide
+suele estar tres líneas más abajo. Un `check(…)` **afirma** la ausencia —ahí el
+crudo es más estricto—. Una comprensión con `if`, un `append` o un `if` que
+recolecta marcan una **infracción** —ahí la ausencia es el defecto y el
+comentario la tapa—. El filtro que hace `continue` se queda en crudo a
+propósito: saltear menos archivos es mirar más, no menos.
+
+#### Y de paso, el catch mudo: la lente conocía una sola manera de escribirlo
+
+La lente «ninguna llamada de IA falla en silencio» buscaba el cuerpo
+`/* noop */` **exacto**. Las dos que están mudas de verdad en main se escriben
+distinto —`// resumen is optional` en `Admin.tsx` y
+`/* nice-to-have, silencioso */` en `DiarioDirector.tsx`— y **las dos daban
+verde desde que se escribieron**. Las dos son silencios a propósito, así que no
+se les inventó un mensaje: ahora se **declaran** con la fórmula
+`silencio a propósito:` y el motivo al lado, y una lente los cuenta —uno nuevo
+es una decisión, no un detalle—.
+
+El mudo pasó a medirse en el **código**: un catch cuyo cuerpo queda vacío al
+sacarle los comentarios está mudo, lo diga el comentario o no. Y se mira
+**cada** llamada del archivo, no la primera: el `break` de antes se gastaba en
+la primera coincidencia sobre el archivo crudo, y esa primera podía ser un
+comentario. Medido: con un `// generateText( …` arriba, un catch mudo de verdad
+3.000 bytes más abajo quedaba **sin mirar**.
+
+#### Las pruebas contra su propio fallo
+
+| el defecto reintroducido | antes | ahora |
+|---|---|---|
+| `mensajeDeFalla` sacado, el nombre en un comentario | **verde** | **roja**, y nombra la pantalla |
+| `Dashboard.tsx` desconectado, el nombre comentado | **verde** | **roja**, y nombra el archivo |
+| un catch mudo con la llamada nombrada en un comentario arriba | **verde** | **roja** |
+| un silencio sin declarar (en las dos formas) | **verde** | **roja** |
+| una lente migrada de vuelta al crudo (`rdc` → `rd`) | no existía | **roja**, con línea y contexto |
+| un `check(` escondido en el tramo de fixtures | no existía | **roja** |
+
+La lente nueva se prueba contra **6 recolectores** puestos a propósito —la
+comprensión con `if`, el `append` suelto, el `if` que recolecta, el
+`not re.search`, el `.count(…) == 0` y el diccionario de archivos— y contra
+**5 casos que tiene que dejar pasar**: la prohibición en un `check`, el `all(…)`
+de un `check`, el filtro que saltea, lo ya medido en código y una frase, que
+vive en un comentario con todo derecho. Las fixtures son **texto** —cadenas de
+Python—, así que el árbol de la batería no las ve como código; el escáner de
+texto, en cambio, sí, y por eso viven en su propio tramo delimitado, con la
+regla del escondite medida ahora **con el árbol** y no con la palabra (una
+fixture tiene que decir `check(`, porque es justo lo que la lente usa para
+distinguir la prohibición del recolector).
+
+TCD cierra con **889 miradas, cero faltas** («el ZIP puede salir»), `tsc` y
+`npm run build` limpios y las **133** pruebas en verde. MCD no se tocó y quedó
+con sus **62** en verde, `tsc` y `next build` limpios.
+
+**Con esto el frente de la auditoría de la auditoría queda cerrado de los dos
+lados y en las dos direcciones** —la presencia y la ausencia, TCD y MCD—. No
+queda candidato medido en esta tabla: los que siguen abiertos son los tres con
+botón (`/api/mcd-bridge`, el `next` de MCD, el editor de TCD).
 
 ### El 14 de noviembre a las 15:25: la lente estaba verde por un punto y coma
 
@@ -429,6 +514,11 @@ decide el sentido está en otra. **Se necesita un recorrido por AST** de
 su sentencia es un `check(…)` —prohibición, crudo— o un recolector que
 `append`ea —defecto, código—. Medido, no leído: ésa es la forma que queda, y
 es la última de este frente.
+
+> **Cerrado el 14 de noviembre a las 19:30.** Y la cuenta de arriba era otra:
+> medidas con el árbol, son **46** ausencias de mecanismo, no 75, y **tres**
+> seguían en un recolector —no cero—, en dos lentes que estaban ciegas hoy.
+> Está abajo, en «El 14 de noviembre a las 19:30».
 
 ### El 14 de noviembre a las 11:30: la lista de pantallas protegidas vivía en un comentario
 

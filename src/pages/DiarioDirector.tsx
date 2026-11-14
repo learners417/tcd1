@@ -449,7 +449,9 @@ Devuelve SOLO este JSON:
         }
         toast.success('Resumen de la semana generado por tu Mentor.');
       } catch {
-        /* nice-to-have, silencioso */
+        /* silencio a propósito: el resumen de la semana es un extra del
+           domingo; la entrada del día ya quedó guardada y avisada, así que
+           una falla acá no deja nada sin terminar. */
       } finally {
         setGenerandoResumen(false);
       }

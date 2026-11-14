@@ -822,7 +822,9 @@ Sé directa, empática y concisa. Sin bullet points, solo texto corrido. Sin emo
       const resumen = await generateText({ tarea: 'estructura', prompt });
       setTareaResumen(resumen);
     } catch {
-      // resumen is optional
+      /* silencio a propósito: el resumen para el equipo es un extra sobre la
+         tarea ya cargada; si no llega, la ficha simplemente no lo muestra y
+         nada queda a medias. */
     } finally {
       setTareaResumenLoading(false);
     }

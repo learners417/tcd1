@@ -491,19 +491,46 @@ if _os67.path.exists('src/lib/aiProvider.ts'):
               for f in ('generate.ts', 'stream.ts')))
 
     # Ningún catch alrededor de una llamada de IA puede quedar mudo.
+    #
+    # Medido el 14 de noviembre a las 19:30, y esta lente conocía UNA sola
+    # manera de escribir «mudo»: el cuerpo `/* noop */` exacto. Las dos que
+    # están mudas de verdad en main se escriben distinto —`// resumen is
+    # optional` en `Admin.tsx` y `/* nice-to-have, silencioso */` en
+    # `DiarioDirector.tsx`— y las dos daban verde desde que se escribieron.
+    # Ahora el mudo se mide en el CÓDIGO: un catch cuyo cuerpo queda vacío al
+    # sacarle los comentarios está mudo, lo diga el comentario o no lo diga.
+    #
+    # Y se mira CADA llamada del archivo, no la primera. El `break` de antes
+    # se gastaba en la primera coincidencia sobre el archivo crudo, y esa
+    # primera podía ser un comentario que nombra la llamada: con un
+    # `// generateText( …` arriba, un catch mudo de verdad 3.000 bytes más
+    # abajo quedaba sin mirar. Probado ejecutando.
+    #
+    # El silencio a propósito se declara en su propio catch, con la fórmula
+    # `silencio a propósito:` y el motivo al lado. Son dos, y los cuenta una
+    # lente: uno nuevo es una decisión, no un detalle.
     import re as _re67, glob as _g67
-    _mudos = []
+    _mudos, _declarados67 = [], []
+    _CATCH67 = _re67.compile(r'\}\s*catch\s*(?:\([^)]*\))?\s*\{([^{}]*)\}')
     for _f in _g67.glob('src/**/*.ts*', recursive=True):
         _src = rd(_f)
-        if 'generateText(' not in _src and 'streamText(' not in _src:
+        if 'generateText(' not in cod(_src) and 'streamText(' not in cod(_src):
             continue
         for _m in _re67.finditer(r'(generateText|streamText)\(', _src):
             _v = _src[_m.start(): _m.start() + 2500]
-            _c = _re67.search(r'\}\s*catch\s*(\([^)]*\))?\s*\{\s*/\*\s*noop\s*\*/\s*\}', _v)
-            if _c and 'localStorage' not in _v[max(0, _c.start() - 200):_c.start()]:
-                _mudos.append(_f.split('/')[-1])
-            break
-    check('ninguna llamada de IA falla en silencio', not _mudos, '; '.join(sorted(set(_mudos))))
+            _c = _CATCH67.search(_v)
+            if not _c or cod(_c.group(1)).strip():
+                continue                  # no hay catch cerca, o el catch hace algo
+            if 'localStorage' in _v[max(0, _c.start() - 200):_c.start()]:
+                continue                  # leer el localStorage y seguir no es fallar
+            _dnd67 = (f'{_f.split("/")[-1]}:'
+                      f'{_src[:_m.start() + _c.start()].count(chr(10)) + 1}')
+            if 'silencio a propósito:' in _c.group(1): _declarados67.append(_dnd67)
+            else: _mudos.append(_dnd67)
+    check('ninguna llamada de IA falla en silencio sin declararlo',
+          not _mudos, '; '.join(sorted(set(_mudos))))
+    check('los silencios declarados alrededor de la IA siguen siendo dos',
+          len(set(_declarados67)) == 2, f'{sorted(set(_declarados67))}')
 
 # El techo de la función tiene que estar declarado y por encima del corte del cliente.
 if _os67.path.exists('vercel.json'):
@@ -1206,8 +1233,12 @@ if _os24.path.exists('src/lib/conexion.ts'):
     check('la barra de sin internet está en la pantalla que se ve siempre',
           'useConexion' in rdc('src/components/Topbar.tsx'))
     _pantallas24 = ['TableroPlata', 'ListaDeHoy', 'Supervision', 'PanelMotorIA']
+    # La ausencia acá es EL DEFECTO, no la prohibición: lo que se pide es que
+    # el mecanismo EXISTA. Sobre crudo, un `// mensajeDeFalla` comentado lo
+    # hacía parecer presente y la pantalla sin traducir pasaba en verde
+    # (medido el 14 de noviembre a las 19:30, ejecutando). Va en código.
     _sin = [c for c in _pantallas24
-            if 'mensajeDeFalla' not in rd(f'src/components/admin/{c}.tsx')]
+            if 'mensajeDeFalla' not in rdc(f'src/components/admin/{c}.tsx')]
     check('las pantallas nuevas traducen sus fallas', not _sin, ', '.join(_sin))
     check('la lectura de fallas está probada',
           _os24.path.exists('scripts/prueba-conexion.ts'))
@@ -4378,8 +4409,10 @@ check('y avisa cuando lo anotado es de la escalera anterior',
 # Y los cinco puntos de venta tiran del módulo, no de los nombres de acceso.
 _PUNTOS72 = ['src/pages/Roadmap.tsx', 'src/components/PuertaSiguienteNivel.tsx',
              'src/App.tsx', 'src/pages/Dashboard.tsx']
+# Ausencia-como-defecto otra vez: se pide que el punto de venta TIRE del
+# módulo, así que un comentario que nombre `laOferta` no alcanza. En código.
 _sueltos72 = [_os72.path.basename(f) for f in _PUNTOS72
-              if 'laOfertaQueSigue' not in rd(f) and 'laOferta' not in rd(f)]
+              if 'laOfertaQueSigue' not in rdc(f) and 'laOferta' not in rdc(f)]
 check(f'los {len(_PUNTOS72)} puntos de venta tiran de la misma fuente',
       not _sueltos72, ', '.join(_sueltos72))
 
@@ -4553,7 +4586,7 @@ print('══ 16) LA PUERTA: cada ruta pide su llave, y corta ══')
 #   · la ruta pregunta quién llama,
 #   · y CORTA —401 o 403—, porque preguntar sin cortar no es una puerta,
 #   · y la identidad no vuelve a salir del cuerpo del pedido.
-import glob as _g16, os as _os16, re as _re16
+import glob as _g16, os as _os16, re as _re16, ast as _ast16
 
 # Las formas válidas de preguntar. Cada una es una puerta distinta y todas
 # terminan en lo mismo: la ruta sabe quién llama antes de gastar.
@@ -4784,13 +4817,35 @@ _yo16 = rd('auditoria.py').split('\n')
 # y traen las fugas puestas a propósito, así que el escáner las saltea. El
 # tramo se delimita con dos marcas y una lente lo mide: corto y sin `check(`
 # adentro, para que no sirva de escondite.
-_i16 = next(_k for _k, _l in enumerate(_yo16) if _l.startswith('#.LENTE16.PRUEBAS.INICIO'))
-_f16 = next(_k for _k, _l in enumerate(_yo16) if _l.startswith('#.LENTE16.PRUEBAS.FIN'))
-_vivo16 = ['' if _i16 <= _k <= _f16 else _l for _k, _l in enumerate(_yo16)]
-_tramo16 = _yo16[_i16:_f16 + 1]
-check('el tramo de pruebas de la lente 16 no es un escondite',
-      len(_tramo16) <= 48 and not any('check(' in _l for _l in _tramo16),
-      f'{len(_tramo16)} líneas')
+# Son DOS tramos: el de la lente de la PRESENCIA y el de la lente de la
+# AUSENCIA. Los dos traen fugas puestas a propósito —el segundo, un
+# `.count('inputMode=')` sobre crudo que esta lente marca con razón—, así que
+# el escáner de texto saltea los dos y una lente mide que ninguno sirva de
+# escondite: cortos y sin un solo `check(` adentro.
+_tramos16 = []
+for _nom16 in ('PRUEBAS', 'AUSENCIAS'):
+    _a16 = next(_k for _k, _l in enumerate(_yo16)
+                if _l.startswith(f'#.LENTE16.{_nom16}.INICIO'))
+    _b16 = next(_k for _k, _l in enumerate(_yo16)
+                if _l.startswith(f'#.LENTE16.{_nom16}.FIN'))
+    _tramos16.append((_nom16, _a16, _b16))
+_vivo16 = ['' if any(_a <= _k <= _b for _, _a, _b in _tramos16) else _l
+           for _k, _l in enumerate(_yo16)]
+# Y el «sin un solo check adentro» se mide con el ÁRBOL, no con el texto: las
+# fixtures de la lente de la ausencia son código de Python escrito como
+# CADENA, y una de ellas tiene que decir `check(` porque es justo lo que la
+# lente usa para distinguir la prohibición del recolector. Buscar la palabra
+# marcaba esa cadena; el árbol solo ve las llamadas de verdad.
+_ARB16 = _ast16.parse(rd('auditoria.py'))
+_checks16 = {_n16.lineno for _n16 in _ast16.walk(_ARB16)
+             if isinstance(_n16, _ast16.Call) and isinstance(_n16.func, _ast16.Name)
+             and _n16.func.id == 'check'}
+_largos16 = [f'{_n16}: {_b16 - _a16 + 1} líneas'
+             for _n16, _a16, _b16 in _tramos16
+             if _b16 - _a16 + 1 > 48
+             or any(_a16 + 1 <= _ln16 <= _b16 + 1 for _ln16 in _checks16)]
+check('los dos tramos de prueba de la lente 16 no son un escondite',
+      not _largos16, '; '.join(_largos16))
 
 _fuga16 = _fugas16(_vivo16)
 check('ningún mecanismo se mide sobre el archivo crudo (ni con `;`, ni .count, ni re.search)',
@@ -4832,6 +4887,228 @@ check('la lente 16 se pone roja con cada una de las 11 fugas puestas',
       not _sin_rojo16, '; '.join(_sin_rojo16))
 check('y deja pasar la ausencia en crudo, la frase y lo ya medido en código',
       not _mal_rojo16, '; '.join(_mal_rojo16))
+
+
+# ── La otra mitad de la misma regla: la AUSENCIA que es el DEFECTO ───────
+#
+# Medido el 14 de noviembre a las 19:30, con el árbol y ejecutando. El mapa
+# dejaba este frente escrito así: «hay 75 ausencias de mecanismo sobre crudo;
+# 21 tienen una presencia al lado, y de ésas las 4 que eran recolectores de
+# infracción ya quedaron cerradas; las otras 17 son la prohibición legítima».
+# La premisa se cayó: recorridas por AST las 46 ausencias de mecanismo que hay
+# de verdad, **tres seguían en un recolector**, en dos lentes, y las dos
+# estaban CIEGAS hoy —probado sacando el mecanismo del código de verdad y
+# dejando el nombre en un comentario—:
+#
+#   · «las pantallas nuevas traducen sus fallas» pedía `mensajeDeFalla` en las
+#     cuatro pantallas del Admin sobre el archivo crudo: con la traducción
+#     sacada de `TableroPlata.tsx` y el nombre en un comentario, verde.
+#   · «los 4 puntos de venta tiran de la misma fuente» pedía `laOferta` /
+#     `laOfertaQueSigue` igual: con `Dashboard.tsx` desconectado del módulo y
+#     el nombre comentado, verde.
+#
+# Y el motivo por el que esto no se puede cuidar con una expresión regular es
+# que las dos formas se ESCRIBEN IGUAL (`'x' not in _s`): lo que las distingue
+# no está en la línea, está en qué hace la sentencia con el resultado, y el
+# `check(` que lo decide suele estar tres líneas más abajo. Un `check(…)`
+# AFIRMA la ausencia —prohibición: pedir que algo no esté ni en un comentario
+# es más estricto—. Una comprensión con `if`, un `append` o un `if` que
+# recolecta marcan una INFRACCIÓN: ahí la ausencia es el defecto y el
+# comentario lo tapa. El filtro que hace `continue` se queda en crudo a
+# propósito: saltear menos archivos es mirar más, no menos.
+def _ausencias16(texto):
+    """Toda AUSENCIA de un mecanismo sobre un archivo fuente CRUDO que viva en
+    un RECOLECTOR de infracciones.
+
+    La ausencia sobre crudo es legítima cuando es LA PROHIBICIÓN —«el campo
+    viejo no está ni en un comentario»— y es el defecto cuando lo que se pide
+    es que el mecanismo EXISTA: ahí un comentario que lo nombra lo hace
+    parecer presente. Las dos formas se escriben igual (`'x' not in _s`), y
+    lo que las distingue no está en la línea: está en qué hace la sentencia
+    con el resultado. Un `check(…)` afirma; una comprensión con `if`, un
+    `append` o un `if` que recolecta marcan una infracción. Por eso esto se
+    mide con el árbol y no con una expresión regular.
+    """
+    try: _arb = _ast16.parse(texto)
+    except SyntaxError as e: return [f'no se pudo leer el árbol: {e}']
+
+    def _es_rd(n):
+        if not (isinstance(n, _ast16.Call) and isinstance(n.func, _ast16.Name)
+                and n.func.id in ('rd', 'rdc')): return None
+        if not n.args: return None
+        if n.func.id == 'rdc': return 'limpio'
+        a = n.args[0]
+        if isinstance(a, _ast16.Constant) and isinstance(a.value, str):
+            return 'crudo' if a.value.endswith(_FUENTE16) else None
+        return 'crudo'
+
+    crudas, cols = {}, {}
+    for n in _ast16.walk(_arb):
+        if isinstance(n, _ast16.Assign):
+            v, tg = n.value, [t.id for t in n.targets if isinstance(t, _ast16.Name)]
+            if _es_rd(v) == 'crudo':
+                for t in tg: crudas[t] = n.lineno
+            elif isinstance(v, _ast16.DictComp) and _es_rd(v.value) == 'crudo':
+                for t in tg: cols[t] = n.lineno
+            elif isinstance(v, _ast16.Dict) and any(_es_rd(x) == 'crudo' for x in v.values if x):
+                for t in tg: cols[t] = n.lineno
+            elif (isinstance(v, _ast16.Call) and isinstance(v.func, _ast16.Attribute)
+                  and v.func.attr == 'join'
+                  and any(_es_rd(x) == 'crudo' for x in _ast16.walk(v))):
+                for t in tg: crudas[t] = n.lineno
+    for n in _ast16.walk(_arb):
+        gen = [n] if isinstance(n, _ast16.For) else (
+            n.generators if isinstance(n, (_ast16.ListComp, _ast16.SetComp,
+                                           _ast16.DictComp, _ast16.GeneratorExp)) else [])
+        for g in gen:
+            it, base, items = g.iter, None, False
+            if (isinstance(it, _ast16.Call) and isinstance(it.func, _ast16.Attribute)
+                    and it.func.attr in ('items', 'values')
+                    and isinstance(it.func.value, _ast16.Name)):
+                base, items = it.func.value.id, it.func.attr == 'items'
+            elif isinstance(it, _ast16.Name): base = it.id
+            if base not in cols: continue
+            t = g.target
+            if isinstance(t, _ast16.Tuple) and len(t.elts) == 2 and isinstance(t.elts[1], _ast16.Name):
+                crudas[t.elts[1].id] = it.lineno
+            elif isinstance(t, _ast16.Name) and not items: crudas[t.id] = it.lineno
+
+    def _crudo(n):
+        if isinstance(n, _ast16.Name) and n.id in crudas: return n.id
+        if _es_rd(n) == 'crudo': return 'rd(…)'
+        if (isinstance(n, _ast16.Call) and isinstance(n.func, _ast16.Attribute)
+                and n.func.attr == 'get' and isinstance(n.func.value, _ast16.Name)
+                and n.func.value.id in cols): return n.func.value.id + '.get(…)'
+        if (isinstance(n, _ast16.Subscript) and isinstance(n.value, _ast16.Name)
+                and n.value.id in cols): return n.value.id + '[…]'
+        return None
+
+    _padre = {}
+    for n in _ast16.walk(_arb):
+        for c in _ast16.iter_child_nodes(n): _padre[c] = n
+
+    def _contexto(n):
+        _n = n
+        while _n in _padre:
+            p = _padre[_n]
+            if isinstance(p, (_ast16.ListComp, _ast16.SetComp, _ast16.DictComp,
+                              _ast16.GeneratorExp)):
+                en_if = any(any(x is n for x in _ast16.walk(i))
+                            for g in p.generators for i in g.ifs)
+                return 'RECOLECTOR' if en_if else 'afirmacion'
+            if (isinstance(p, _ast16.Call) and isinstance(p.func, _ast16.Attribute)
+                    and p.func.attr == 'append'): return 'RECOLECTOR'
+            if isinstance(p, _ast16.If):
+                _d = _ast16.dump(_ast16.Module(body=list(p.body), type_ignores=[]))
+                if 'Continue' in _d and len(p.body) <= 2: return 'filtro'
+                if "attr='append'" in _d: return 'RECOLECTOR'
+                return 'si-otro'
+            if (isinstance(p, _ast16.Call) and isinstance(p.func, _ast16.Name)
+                    and p.func.id == 'check'): return 'afirmacion'
+            _n = p
+        return 'suelto'
+
+    _aus = []
+    for n in _ast16.walk(_arb):
+        if isinstance(n, _ast16.Compare):
+            for op, c in zip(n.ops, n.comparators):
+                if isinstance(op, _ast16.NotIn):
+                    d = _crudo(c)
+                    if (d and isinstance(n.left, _ast16.Constant)
+                            and isinstance(n.left.value, str) and _mecanismo16(n.left.value)):
+                        _aus.append((n, n.left.value, d, 'not in'))
+            iz = n.left
+            if (isinstance(iz, _ast16.Call) and isinstance(iz.func, _ast16.Attribute)
+                    and iz.func.attr == 'count' and iz.args
+                    and isinstance(iz.args[0], _ast16.Constant)):
+                d = _crudo(iz.func.value)
+                for op, c in zip(n.ops, n.comparators):
+                    if (d and isinstance(op, (_ast16.Eq, _ast16.Lt, _ast16.LtE))
+                            and isinstance(c, _ast16.Constant) and c.value in (0, 1)
+                            and _mecanismo16(str(iz.args[0].value))):
+                        _aus.append((n, str(iz.args[0].value), d, '.count(…) == 0'))
+        if isinstance(n, _ast16.UnaryOp) and isinstance(n.op, _ast16.Not):
+            o = n.operand
+            if (isinstance(o, _ast16.Call) and isinstance(o.func, _ast16.Attribute)
+                    and o.func.attr in ('search', 'findall', 'finditer', 'match')
+                    and len(o.args) >= 2):
+                d = _crudo(o.args[1])
+                if (d and isinstance(o.args[0], _ast16.Constant)
+                        and _mecanismo16(str(o.args[0].value), solo_nombres=True)):
+                    _aus.append((n, str(o.args[0].value), d, 'not re.' + o.func.attr))
+            if isinstance(o, _ast16.Compare):
+                for op, c in zip(o.ops, o.comparators):
+                    if isinstance(op, _ast16.In):
+                        d = _crudo(c)
+                        if (d and isinstance(o.left, _ast16.Constant)
+                                and isinstance(o.left.value, str) and _mecanismo16(o.left.value)):
+                            _aus.append((n, o.left.value, d, 'not (… in …)'))
+
+    fugas, vistas = [], set()
+    for n, txt, d, forma in _aus:
+        ctx = _contexto(n)
+        if ctx in ('afirmacion', 'filtro'): continue
+        k = (n.lineno, txt, d, forma)
+        if k in vistas: continue
+        vistas.add(k)
+        fugas.append(f'línea {n.lineno}: {forma} {txt[:44]!r} sobre {d} '
+                     f'({"recolector de infracción" if ctx == "RECOLECTOR" else ctx})')
+    return fugas
+
+
+# Las dos lentes de la ausencia: la que lee el árbol de esta batería, y la
+# que se prueba contra sus propios recolectores. Las fixtures son TEXTO
+# —cadenas de Python—, así que el árbol de este archivo no las ve como código
+# y no necesitan tramo que las esconda.
+#.LENTE16.AUSENCIAS.INICIO — fugas puestas a propósito; el escáner no mira acá
+_AUS_ROJO16 = [
+    ("comprensión con if",
+     "_m = [c for c in P if 'mensajeDeFalla' not in rd(f'src/a/{c}.tsx')]"),
+    ("append suelto",
+     "_s = rd('src/a.ts')\n_l = []\nif 'deshacerCobro' not in _s: _l.append('x')"),
+    ("if que recolecta",
+     "for _f in g:\n    _s = rd(_f)\n    if 'rutaDe(' not in _s:\n        _l.append(_f)"),
+    ("not re.search",
+     "_s = rd('src/a.ts')\n_l = []\nif not re.search(r'setFamiliaActual', _s): _l.append(1)"),
+    ("count(…) == 0",
+     "_s = rd('src/a.ts')\n_l = []\nif _s.count('inputMode=') == 0: _l.append(1)"),
+    ("el diccionario de archivos",
+     "_C = {f: rd(f) for f in g}\n_l = []\nfor _p, _q in _C.items():\n"
+     "    if 'guardarLlamada' not in _q: _l.append(_p)"),
+]
+_AUS_VERDE16 = [
+    ("la prohibición en un check",
+     "_s = rd('src/a.ts')\ncheck('el campo viejo no está', 'plan_comercial' not in _s)"),
+    ("el all(…) de un check",
+     "check('nunca usa IA', all('generateText' not in rd(f'src/lib/{f}') for f in F))"),
+    ("el filtro que saltea",
+     "for _f in g:\n    _s = rd(_f)\n    if '<input' not in _s: continue\n    print(1)"),
+    ("lo ya medido en código",
+     "_m = [c for c in P if 'mensajeDeFalla' not in rdc(f'src/a/{c}.tsx')]"),
+    ("una frase, que vive en un comentario con derecho",
+     "_s = rd('src/a.ts')\n_l = []\nif 'La base manda' not in _s: _l.append(1)"),
+]
+#.LENTE16.AUSENCIAS.FIN
+_aus_sin_rojo16 = [_n for _n, _t in _AUS_ROJO16 if not _ausencias16(_t)]
+_aus_mal_rojo16 = [_n for _n, _t in _AUS_VERDE16 if _ausencias16(_t)]
+check('la lente de la ausencia se pone roja con los 6 recolectores',
+      not _aus_sin_rojo16, '; '.join(_aus_sin_rojo16))
+check('y deja pasar la prohibición, el filtro y lo ya medido en código',
+      not _aus_mal_rojo16, '; '.join(_aus_mal_rojo16))
+
+_au16 = _ausencias16(rd('auditoria.py'))
+check('ninguna ausencia de mecanismo sobre crudo vive en un recolector',
+      not _au16, '; '.join(_au16[:4]) + (f' …y {len(_au16) - 4} más' if len(_au16) > 4 else ''))
+
+# Y la prueba de que sirve, corrida sobre el código de verdad: los dos
+# mecanismos se sacan de su archivo dejando el nombre en un comentario, y la
+# lente de hoy tiene que ponerse roja en los dos mientras la de ayer, sobre
+# crudo, sigue ciega. Más el catch mudo que el `break` dejaba sin mirar.
+_pa16 = subprocess.run([sys.executable, 'scripts/probar-la-ausencia-que-era-el-defecto.py'],
+                       capture_output=True, text=True)
+check('la ausencia-como-defecto: ciega en crudo, roja en el código (probado ejecutando)',
+      _pa16.returncode == 0,
+      (_pa16.stdout + _pa16.stderr).strip().split('\n')[-1][:170])
 
 # Y la prueba de que todo esto sirve, corrida de verdad: cinco mecanismos se
 # sacan del código en memoria dejando el nombre en un comentario —uno por cada
