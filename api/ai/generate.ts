@@ -20,6 +20,7 @@
 import { callDeepSeek, isDeepSeekConfigured } from '../_lib/deepseek.js';
 import { callClaude, isClaudeConfigured } from '../_lib/claude.js';
 import { withSentry } from '../_lib/sentry.js';
+import { usuarioDeLaPuerta, SIN_PERMISO } from '../_lib/puerta.js';
 import { guardarLlamada, deshacerCobro, anotarCosto } from '../_lib/guardian.js';
 import { rutaDe, costoDe, normalizarUso, type PasoRuta } from '../_lib/router.js';
 
@@ -38,7 +39,14 @@ async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { prompt, systemInstruction, messages, userId, feature, tarea } = req.body ?? {};
+  // ─── La puerta ─────────────────────────────────────────────────────────
+  // Quién llama sale del token, no del cuerpo: `req.body.userId` es lo que el
+  // navegador dice de sí mismo. Sin token válido, acá se corta — antes de
+  // gastar un peso de proveedor. Ver api/_lib/puerta.ts.
+  const userId = await usuarioDeLaPuerta(req);
+  if (!userId) return res.status(401).json(SIN_PERMISO);
+
+  const { prompt, systemInstruction, messages, feature, tarea } = req.body ?? {};
 
   // ─── El guardián ───────────────────────────────────────────────────────
   // Un solo lugar decide si la llamada puede salir: crédito para las

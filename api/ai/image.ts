@@ -33,12 +33,11 @@
  */
 
 import {
-  extractJwt,
-  getUserIdFromJwt,
   consumeCreditServer,
   devolverCreditoServer,
 } from '../_lib/credits-server.js';
 import { withSentry, Sentry } from '../_lib/sentry.js';
+import { usuarioDeLaPuerta, SIN_PERMISO } from '../_lib/puerta.js';
 import { conTope } from '../_lib/tope.js';
 
 // Vercel function config · maxDuration aplica solo si tu plan lo soporta.
@@ -150,18 +149,16 @@ async function handleImageRequest(req: any, res: any) {
   let quienPaga: string | null = null;
   let creditsRemaining: number | null = null;
 
+  // ─── La puerta va AFUERA del interruptor de crédito ─────────────────────
+  // Identidad y cobro son dos cosas: con CREDITS_ENABLED='false' esta ruta
+  // quedaba abierta —gastando la llave de OpenAI de la casa— porque la única
+  // pregunta de quién llama vivía adentro del `if`. Preguntar siempre; cobrar
+  // solo cuando el crédito está encendido.
+  const userId = await usuarioDeLaPuerta(req);
+  if (!userId) return res.status(401).json(SIN_PERMISO);
+  quienPaga = userId;
+
   if (CREDITS_ENABLED) {
-    const jwt = extractJwt(req);
-    if (!jwt) {
-      return res.status(401).json({ error: 'UNAUTHORIZED', code: 'UNAUTHORIZED' });
-    }
-
-    const userId = await getUserIdFromJwt(jwt);
-    quienPaga = userId;
-    if (!userId) {
-      return res.status(401).json({ error: 'UNAUTHORIZED', code: 'UNAUTHORIZED' });
-    }
-
     try {
       const result = await consumeCreditServer(userId, {
         kind: 'image',

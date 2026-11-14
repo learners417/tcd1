@@ -20,6 +20,7 @@ import {
   MAX_UPLOAD_BYTES,
   formatBytes,
 } from './imageUploadUtils';
+import { cabecerasConToken } from './tokenSesion';
 
 const VISION_INSTRUCTION = `Describe en detalle lo que ves en esta imagen o captura de pantalla. Si es una captura de pantalla incluye: la pantalla o herramienta que se ve, los textos visibles (transcribe literalmente todo lo legible), los botones, las métricas o números, el layout general y cualquier dato relevante. Si es una foto incluye personas, objetos, contexto y detalles visuales. Devuelve la respuesta como texto plano en español neutro, sin saltos de línea innecesarios, lo mas completo posible (max 500 palabras).`;
 
@@ -171,7 +172,7 @@ async function describeImage(att: ChatAttachment): Promise<string> {
   try {
     const resp = await fetch('/api/ai/describe-image', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await cabecerasConToken(),
       body: JSON.stringify({
         imageBase64: att.imageBase64,
         mimeType: att.mimeType,

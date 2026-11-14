@@ -14,6 +14,9 @@ def check(nombre, ok, detalle=''):
     if not ok: F += 1
 def rd(f): return open(f, encoding='utf-8', errors='replace').read()
 
+def rdc(f): return solo_codigo(rd(f))
+
+
 def solo_codigo(s: str) -> str:
     """El archivo sin comentarios.
 
@@ -408,7 +411,7 @@ if _os66.path.exists('api/_lib/uso-server.ts'):
     check('el tope que avisa el cliente es el que aplica el servidor',
           not _desalineados, '; '.join(_desalineados))
     check('todo endpoint de IA de texto pasa por el guardián',
-          all('guardarLlamada' in rd(f'api/ai/{f}')
+          all('guardarLlamada' in rdc(f'api/ai/{f}')
               for f in ('generate.ts', 'stream.ts')))
     check('el guardián distingue crédito de tope',
           'FEATURES_CON_CREDITO' in _srv and 'FEATURES_CON_TOPE' in _srv)
@@ -429,9 +432,9 @@ if _os67.path.exists('src/lib/aiProvider.ts'):
           'reintentar un 502 multiplica las llamadas al modelo por un solo clic')
     _guard = rd('api/_lib/guardian.ts') if _os67.path.exists('api/_lib/guardian.ts') else ''
     check('existe la devolución de crédito cuando nadie entregó nada',
-          'deshacerCobro' in _guard)
+          'deshacerCobro' in rdc('api/_lib/guardian.ts'))
     check('los dos endpoints devuelven el crédito si falla la cadena',
-          all('deshacerCobro' in rd(f'api/ai/{f}') for f in ('generate.ts', 'stream.ts')))
+          all('deshacerCobro' in rdc(f'api/ai/{f}') for f in ('generate.ts', 'stream.ts')))
     check('una respuesta vacía se trata como falla, no como éxito',
           all('respuesta vacía del proveedor' in rd(f'api/ai/{f}')
               for f in ('generate.ts', 'stream.ts')))
@@ -478,12 +481,13 @@ if _os68.path.exists('api/_lib/gasto-server.ts'):
     check('sin plan conocido se asume el más chico, nunca el más grande',
           "PLAN_POR_DEFECTO: PlanComercial = 'blanco'" in _g68)
     check('el techo de gasto se aplica antes que cualquier otro freno',
-          _guard68.index('verificarTecho') < _guard68.index("freno === 'credito'"))
+          rdc('api/_lib/guardian.ts').index('verificarTecho')
+          < rdc('api/_lib/guardian.ts').index("freno === 'credito'"))
     check('el costo se anota DESPUÉS del éxito, no antes',
-          all('anotarCosto' in rd(f'api/ai/{f}') for f in ('generate.ts', 'stream.ts')))
+          all('anotarCosto' in rdc(f'api/ai/{f}') for f in ('generate.ts', 'stream.ts')))
     check('el tope del plan blanco se cuenta en el servidor',
-          'verificarTopeBlanco' in rd('api/_lib/uso-server.ts')
-          and 'verificarTopeBlanco' in _guard68,
+          'verificarTopeBlanco' in rdc('api/_lib/uso-server.ts')
+          and 'verificarTopeBlanco' in rdc('api/_lib/guardian.ts'),
           'antes vivía en localStorage y se esquivaba borrándolo')
     check('el medidor degrada dejando pasar, nunca frenando por infraestructura',
           _g68.count('se deja pasar') >= 2)
@@ -507,11 +511,11 @@ if _os69.path.exists('src/components/admin/PanelMotorIA.tsx'):
           'estimados' in _pan)
     _ga = rd('api/_lib/gasto-server.ts')
     check('se anotan también las llamadas que FALLAN',
-          'ok: false' in rd('api/ai/generate.ts') and 'ok?: boolean' in _ga,
+          'ok: false' in rdc('api/ai/generate.ts') and 'ok?: boolean' in rdc('api/_lib/gasto-server.ts'),
           'un modelo que falla el 30% no se ve en la factura, se ve en clientes trabados')
     check('se mide cuánto tarda cada llamada',
-          'const t0 = Date.now()' in rd('api/ai/generate.ts')
-          and 'const t0 = Date.now()' in rd('api/ai/stream.ts'))
+          'const t0 = Date.now()' in rdc('api/ai/generate.ts')
+          and 'const t0 = Date.now()' in rdc('api/ai/stream.ts'))
 
 # ── 6.10 · La app elige, no ofrece un menú ─────────────────────────────
 # "Las opciones matan al principiante": el cliente de $1.000 no tiene a
@@ -2372,10 +2376,11 @@ import os as _os54
 if _os54.path.exists('api/ghl-webhook.ts'):
     _wh54 = rd('api/ghl-webhook.ts')
     check('el webhook de pago busca por perfil, no por la primera página',
-          "from('profiles').select(COLUMNAS).eq('email', email)" in _wh54
-          and "const COLUMNAS = 'id," in _wh54)
+          "from('profiles').select(COLUMNAS).eq('email', email)" in rdc('api/ghl-webhook.ts')
+          and "const COLUMNAS = 'id," in rdc('api/ghl-webhook.ts'))
     check('y si tiene que paginar, pagina de verdad',
-          'perPage: 200' in _wh54 and 'pagina <= 20' in _wh54,
+          'perPage: 200' in rdc('api/ghl-webhook.ts')
+          and 'pagina <= 20' in rdc('api/ghl-webhook.ts'),
           'listUsers() sin argumentos trae 50 y calla el resto')
     check('el motivo está escrito, para que nadie lo vuelva atrás',
           'a partir del cliente 51' in _wh54)
@@ -2397,23 +2402,47 @@ if _os55.path.exists('api/_lib/tope.ts'):
     check('y el tope es MÁS CORTO que el de la plataforma',
           '45_000' in _tp55,
           'así la función siempre llega a responder y a devolver el crédito')
+    # No alcanza con que la palabra `signal,` esté en el archivo: la línea que
+    # la traía era la destructuración (`const { signal, limpiar } = conTope()`),
+    # así que la lente daba verde aunque el signal no viajara a la llamada.
+    # Medido el 14 de noviembre: sacado del fetch, la lente vieja no lo vio.
+    # El signal tiene que VIAJAR a la llamada, no solo existir en el archivo.
+    # La línea que traía la palabra era la destructuración —`const { signal,
+    # limpiar } = conTope()`—, así que con el signal sacado del fetch la lente
+    # vieja daba verde. Medido el 14 de noviembre de 2026.
+    def _fetch_sin_tope(_txt):
+        """Los `fetch(` de este código cuyas opciones no llevan signal."""
+        _sin = 0
+        for _mf in _re55.finditer(r'fetch\(', _txt):
+            _cola = _txt[_mf.end(): _mf.end() + 400]
+            if 'signal' not in _cola: _sin += 1
+        return _sin
+
+    _dsk = rdc('api/_lib/deepseek.ts')
     check('el tope está aplicado a la llamada real',
-          'signal,' in rd('api/_lib/deepseek.ts')
-          and 'limpiar()' in rd('api/_lib/deepseek.ts'))
+          _fetch_sin_tope(_dsk) == 0 and 'limpiar()' in _dsk,
+          'el signal tiene que viajar al fetch, no solo estar en el archivo')
     # TODA llamada a un proveedor de IA, no solo la de texto. Generar una
     # imagen tarda MÁS, así que ese endpoint es todavía más propenso.
+    #
+    # Y el host puede venir en una constante —`DEEPSEEK_ENDPOINT`—, así que
+    # buscar `fetch('https://api.…')` literal dejaba afuera justo al proveedor
+    # primario: se mira si el archivo nombra al proveedor en cualquier parte.
+    _PROVEEDORES55 = ('openai.com', 'anthropic.com', 'deepseek.com',
+                      'generativelanguage.googleapis.com')
     _sinTope55 = []
     for _f55 in _g55.glob('api/**/*.ts', recursive=True):
-        _s55 = rd(_f55)
-        if _re55.search(r'fetch\([\'"`]https://api\.(openai|anthropic|deepseek|generativelanguage)', _s55):
-            if 'signal' not in _s55: _sinTope55.append(_os55.path.basename(_f55))
+        _s55 = rdc(_f55)
+        if not any(_p in _s55 for _p in _PROVEEDORES55): continue
+        if 'fetch(' not in _s55: continue
+        if _fetch_sin_tope(_s55): _sinTope55.append(_os55.path.basename(_f55))
     check('NINGUNA llamada a un proveedor de IA queda sin tope',
-          not _sinTope55, ', '.join(_sinTope55))
+          not _sinTope55, ', '.join(sorted(_sinTope55)))
     _largos55 = [f for f in _g55.glob('api/ai/*.ts') if 'maxDuration: 120' in rd(f)]
     check('ninguna función pide más tiempo del que la plataforma da',
           not _largos55, ', '.join(_largos55))
     check('el motivo está escrito, para que nadie lo suba de nuevo',
-          'deshacerCobro' in rd('api/ai/generate.ts'))
+          'deshacerCobro' in rdc('api/ai/generate.ts'))
 
 # ── 6.56 · EL CEREBRO: una sola lista de trabajo ───────────────────────
 #
@@ -2711,8 +2740,8 @@ for _f64, _s64 in _API64.items():
         if 'deshacerCobro' not in _m.group(1) and 'status(5' in _m.group(1):
             _sinEnCatch64.append(_os64.path.basename(_f64))
 check('image.ts devuelve el crédito si no entregó la imagen',
-      'devolverCreditoServer' in rd('api/ai/image.ts')
-      and 'cobrado = true' in rd('api/ai/image.ts'),
+      'devolverCreditoServer' in rdc('api/ai/image.ts')
+      and 'cobrado = true' in rdc('api/ai/image.ts'),
       'el archivo decía «TODO: si quisiéramos auto-refund…» y esa deuda dejó sin créditos a dos clientas')
 
 check('la devolución está en el catch, donde de verdad falla',
@@ -4433,6 +4462,146 @@ check('un cobro no puede bajarle el acceso a quien pagó más arriba',
 check('y el pago sella la fecha del escalón, que es la que enciende el tope',
       'cambios.servicio_marcado_el' in _wh,
       'sin fecha, topeDelEscalon se apaga entero y el de La Base abre los 90 días')
+
+
+print('══ 16) LA PUERTA: cada ruta pide su llave, y corta ══')
+#
+# Medido el 14 de noviembre de 2026, y es el agujero más grande que encontró
+# la cola. Cinco de las seis rutas de `api/ai/` no preguntaban NADA: el usuario
+# llegaba en el cuerpo del pedido —`req.body.userId`, leído del localStorage
+# del navegador— y el guardián está escrito como opt-in: «sin userId no se
+# cobra ni se cuenta», o sea `permitido: true`. De ahí se siguen dos cosas:
+#
+#   1) un pedido sin `userId` salía a DeepSeek, a Claude o a Gemini con las
+#      llaves de la casa, sin crédito, sin tope y sin techo —el techo de gasto
+#      se mide por usuario y al anónimo no se le aplica ninguno—. La factura
+#      es de Javo, y alcanza con saber la URL.
+#   2) con el `userId` de otro, se le gastaba el crédito a otro.
+#
+# Probado de verdad, no leído: `scripts/prueba-la-puerta-de-la-ia.ts` corre los
+# seis handlers contra un Supabase falso. Contra main, sin una cabecera
+# `Authorization`, cinco contestaban 200 y llamaban al proveedor.
+#
+# Y esta batería, con sus 859 lentes, no nombraba ni una vez un 401, una clave
+# de puerta ni una sesión. Este bloque es esa lente que faltaba.
+#
+# Las tres reglas, medidas en el CÓDIGO (sin comentarios) y por handler:
+#   · la ruta pregunta quién llama,
+#   · y CORTA —401 o 403—, porque preguntar sin cortar no es una puerta,
+#   · y la identidad no vuelve a salir del cuerpo del pedido.
+import glob as _g16, os as _os16, re as _re16
+
+# Las formas válidas de preguntar. Cada una es una puerta distinta y todas
+# terminan en lo mismo: la ruta sabe quién llama antes de gastar.
+_FORMAS_DE_PREGUNTAR = (
+    'usuarioDeLaPuerta(',      # la sesión del cliente (api/_lib/puerta.ts)
+    'getUserIdFromJwt(',       # la misma, escrita a mano (PayPal)
+    'auth.getUser(',           # la sesión leída directo
+    'INTEGRATION_KEY',         # la llave compartida con MCD / con GHL
+    'WEBHOOK_SECRET',          # el secreto de un webhook
+    'CRON_SECRET',             # el secreto del cron de Vercel
+    'verifyWebhookSignature(', # la firma de PayPal
+)
+
+# La única ruta sin puerta, declarada a propósito y con su motivo. No es un
+# permiso: es un pendiente medido, con su botón en MAPA-DE-CIRUGIAS.md.
+# `/api/mcd-bridge?email=…` contesta si ESE email tiene un cobro verificado en
+# Mi Clínica Digital y cuánto. No gasta plata y no toca datos de pacientes,
+# pero contesta de cualquier email. Cerrarla es sacar el email del token en vez
+# de la query, y eso cambia la forma de la ruta y sus 15 lentes de prueba.
+_SIN_PUERTA_A_PROPOSITO = {'api/mcd-bridge.ts': 'contesta el estado de cobro de un email'}
+
+_rutas16 = sorted(f for f in _g16.glob('api/**/*.ts', recursive=True)
+                  if not f.startswith('api/_lib'))
+_sin_preguntar, _sin_cortar = [], []
+for _f16 in _rutas16:
+    if _f16 in _SIN_PUERTA_A_PROPOSITO: continue
+    _c16 = rdc(_f16)
+    if not any(_q in _c16 for _q in _FORMAS_DE_PREGUNTAR):
+        _sin_preguntar.append(_f16); continue
+    if not _re16.search(r'status\(40[13]\)', _c16):
+        _sin_cortar.append(_f16)
+
+check('toda ruta de api/ pregunta quién llama (menos la declarada)',
+      not _sin_preguntar, ', '.join(_sin_preguntar))
+check('y la que pregunta CORTA: 401 o 403',
+      not _sin_cortar, ', '.join(_sin_cortar),)
+check('la lista de rutas sin puerta no creció sola',
+      set(_SIN_PUERTA_A_PROPOSITO) == {'api/mcd-bridge.ts'},
+      'una ruta nueva en esa lista es una decisión, no un detalle')
+
+# ── Las seis rutas de IA: la identidad NO sale del cuerpo ─────────────────
+_IA16 = sorted(_g16.glob('api/ai/*.ts'))
+_del_cuerpo = []
+for _f16 in _IA16:
+    _c16 = rdc(_f16)
+    if (_re16.search(r'const \{[^}]*\buserId\b[^}]*\} = req\.body', _c16)
+            or _re16.search(r'\breq\.body[\s\S]{0,40}\buserId\b', _c16)
+            or 'body.userId' in _c16):
+        _del_cuerpo.append(_os16.path.basename(_f16))
+check('ninguna ruta de IA lee el usuario del cuerpo del pedido',
+      not _del_cuerpo, ', '.join(_del_cuerpo),)
+_sin_puerta_ia = [_os16.path.basename(f) for f in _IA16
+                  if 'usuarioDeLaPuerta(req)' not in rdc(f)]
+check('las seis rutas de IA usan la misma puerta',
+      not _sin_puerta_ia, ', '.join(_sin_puerta_ia),)
+
+# En image.ts la puerta vivía DENTRO de `if (CREDITS_ENABLED)`: con el
+# interruptor del crédito apagado, la ruta quedaba abierta. Identidad y cobro
+# son dos cosas distintas.
+_img16 = rdc('api/ai/image.ts')
+check('la puerta de las imágenes no depende del interruptor de crédito',
+      _img16.index('usuarioDeLaPuerta(req)') < _img16.index('if (CREDITS_ENABLED)'),
+      'preguntar quién llama va antes de decidir si se le cobra')
+
+# ── El otro lado: el navegador manda el token en las seis ─────────────────
+_LLAMADAS16 = {
+    'src/lib/aiProvider.ts': 2, 'src/lib/audioVoz.ts': 1,
+    'src/lib/visionEvidencia.ts': 1, 'src/lib/chatAttachments.ts': 1,
+    'src/lib/campanasImageGen.ts': 2,
+}
+_sin_token16 = []
+for _f16, _cuantas in _LLAMADAS16.items():
+    _c16 = rdc(_f16)
+    if _c16.count('cabecerasConToken()') < _cuantas:
+        _sin_token16.append(f'{_f16.split("/")[-1]} ({_c16.count("cabecerasConToken()")}/{_cuantas})')
+check('las seis llamadas del navegador a api/ai mandan el token',
+      not _sin_token16, '; '.join(_sin_token16),
+      )
+# Y ninguna arma el token a mano: una sola forma, un solo lugar donde mirar.
+_a_mano16 = [f.split('/')[-1] for f in _LLAMADAS16
+             if 'session?.access_token' in rdc(f)]
+check('ninguna lo arma a mano al lado de su fetch',
+      not _a_mano16, ', '.join(_a_mano16),)
+check('y el token sale de la sesión, no del localStorage',
+      'auth.getSession()' in rdc('src/lib/tokenSesion.ts')
+      and 'localStorage' not in rdc('src/lib/tokenSesion.ts'))
+
+# ── La lente de la lente: lo que cuida plata se lee en el CÓDIGO ──────────
+#
+# El 13 de noviembre, del lado de MCD, dos lentes daban verde con el defecto
+# puesto porque leían el archivo crudo: les alcanzaba con un comentario que
+# nombrara la guarda. Esta batería tenía la misma forma —703 afirmaciones de
+# presencia leídas en crudo contra 20 limpias— y el 14 de noviembre se midió
+# qué pasa: con `deshacerCobro`, `anotarCosto`, `verificarTopeBlanco` y el
+# signal del tope sacados del código y su nombre dejado en un comentario, la
+# batería daba las 859 en verde y las 132 pruebas también.
+#
+# Las de plata ya pasan por `rdc()`. Esta lente es la que impide que vuelvan:
+# ningún nombre de mecanismo se mide sobre el archivo crudo.
+_MECANISMOS16 = ('deshacerCobro', 'anotarCosto', 'verificarTopeBlanco',
+                 'verificarTecho', 'devolverCreditoServer', 'guardarLlamada',
+                 'usuarioDeLaPuerta', 'getUserIdFromJwt', 'cabecerasConToken')
+_crudas16 = []
+for _n16, _l16 in enumerate(rd('auditoria.py').split('\n'), 1):
+    if _l16.lstrip().startswith('#'): continue
+    for _mec16 in _MECANISMOS16:
+        if _re16.search(rf"'{_mec16}'[^\n]*\bin rd\(", _l16):
+            _crudas16.append(f'línea {_n16}: {_mec16}')
+check('ninguna lente de plata o de puerta lee el archivo crudo',
+      not _crudas16, '; '.join(_crudas16),
+      )
+
 
 print()
 if F == 0 and _pendientes:

@@ -9,6 +9,7 @@
  * El veredicto es solo una señal para el sanador (y, si duda, para el equipo).
  */
 import { fileToBase64 } from './imageUploadUtils';
+import { cabecerasConToken } from './tokenSesion';
 
 export interface VeredictoVision {
   ok: boolean;
@@ -26,13 +27,9 @@ export async function verificarEvidenciaVision(
     const { base64, mimeType } = await fileToBase64(file);
     const r = await fetch('/api/ai/vision', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await cabecerasConToken(),
       body: JSON.stringify({
         base64, mimeType, descripcion: descripcionEsperada, feature: 'sesion',
-        userId: (() => {
-          try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}').id ?? null; }
-          catch { return null; }
-        })(),
       }),
     });
     if (!r.ok) return null;

@@ -13,7 +13,7 @@
 import type { ImageFormat, ImageQuality } from './campanasTypes';
 import { OPENAI_IMAGE_SIZE, IMAGE_QUALITY_DEFAULT, IMAGE_FORMAT_OPTIONS } from './campanasTypes';
 import { resizeBase64ToExact } from './imageUploadUtils';
-import { supabase } from './supabase';
+import { cabecerasConToken } from './tokenSesion';
 
 // Error tipado para que la UI muestre el modal de "comprar creditos"
 export class InsufficientCreditsError extends Error {
@@ -161,13 +161,10 @@ async function tryOpenAI(
     referenceImages: refs.length > 0 ? refs : undefined,
   };
 
-  // Inyectar el JWT del usuario para que el endpoint pueda consumir credito.
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (supabase) {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
+  // El JWT del usuario: el endpoint lo necesita para saber a quién cobrarle,
+  // y desde el 14 de noviembre para dejarlo entrar. Una sola forma de armarlo
+  // para las seis rutas, en src/lib/tokenSesion.ts.
+  const headers = await cabecerasConToken();
 
   const resp = await withTimeout(
     fetch('/api/ai/image', {
@@ -329,7 +326,7 @@ export async function describeCharacter(
 ): Promise<string> {
   const resp = await fetch('/api/ai/describe-image', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await cabecerasConToken(),
     body: JSON.stringify({ imageBase64: image.base64, mimeType: image.mimeType }),
   });
   if (!resp.ok) {

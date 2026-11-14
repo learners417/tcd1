@@ -246,8 +246,10 @@ cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
 esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesión
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
-**Y si quieres escribir uno, el 13 de noviembre aparecieron dos candidatos con el
-trabajo ya medido:** subir el `next` de MCD, y subir el editor de TCD (las dos
+**Y si quieres escribir uno, hay tres candidatos con el trabajo ya medido.** El
+primero es del 14 de noviembre: **cerrar `/api/mcd-bridge`**, la última ruta sin
+llave, con su botón abajo en «El 14 de noviembre a las 03:30». Los otros dos son
+del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
 con su botón, abajo en «El hallazgo del 13 de noviembre»). El tercero
 —bajar el editor a `lazy()`— quedó medido el 13 de noviembre a las 19:25, y el
 corte resultó ser otro: el Admin entero (su botón, abajo en «El tercer
@@ -306,6 +308,141 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **13 nov, 19:25** · `53775e5` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo—, y esta despertada **no midió: encontró una falta de regla en main y la cerró**. Al medir el tercer candidato (bajar el editor a `lazy()`) la batería se puso roja en `campanas>nueva`, y la premisa se cayó del lado bueno: **el rojo no era del `lazy()`**. Está en main desde antes, y el medidor lo veía solo a veces. En «Montar en Meta» la pantalla se desplazaba **18 px de costado** en un teléfono de 390. Arreglados los **doce** campos que lo causaban, endurecida la lente que lo dejaba pasar y escrita una lente nueva que lo lee en el código (abajo) |
 
 | **13 nov, 23:30** | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`7770186` en TCD, `7c6e524` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` otra vez en cero en los dos repos. Esta despertada **no midió el código de MCD: midió su batería**, y encontró **dos lentes ciegas** en los dos bloques que la batería dice que existe para cuidar —la llave y el token—. Las dos daban verde con el defecto puesto. Endurecidas y probadas contra su propio fallo (abajo) · `ed9705e` en MCD |
+
+| **14 nov, 03:30** · `PENDIENTE` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`c7586ca` en TCD, `ed9705e` en MCD), los dos árboles limpios y `HEAD` en `origin/main`—, `node_modules` otra vez en cero. Esta despertada fue a por el candidato que el turno anterior dejó anotado —**la batería de TCD contra sí misma**— y encontró, antes que la lente, **el agujero**: cinco de las seis rutas de `api/ai/` no preguntaban quién llama, y cualquiera con la URL gastaba las llaves de proveedor de la casa. Cerrado con una puerta única, el token del lado del navegador, una prueba que ejecuta los seis handlers y el bloque 16 de la batería (abajo) |
+
+### El 14 de noviembre a las 03:30: cinco rutas de IA no preguntaban quién llama
+
+La cola sigue vacía y las apps no se alcanzan desde acá, así que esta
+despertada fue a mirar lo que el turno de MCD había dejado anotado como
+candidato: **la batería de TCD contra sí misma**. Lo que encontró en el camino
+es más grande que eso, y no es una lente ciega: es un agujero abierto.
+
+**Lo que se buscaba.** La batería de TCD tiene 4.445 líneas y usa `solo_codigo`
+—el lector que saca los comentarios— **19 veces**. Medido: de sus afirmaciones
+de presencia («esta cadena TIENE que estar»), **703 leen el archivo crudo** y
+solo 20 leen el código. O sea la misma forma que el 13 de noviembre dejó dos
+lentes de MCD dando verde con la guarda sacada.
+
+**Y pasa lo mismo, probado con la batería entera.** Se sacaron del código
+cuatro mecanismos de plata dejando su nombre en un comentario:
+`deshacerCobro` (la devolución del crédito cuando la cadena falla),
+las dos anotaciones de `anotarCosto`, el `verificarTopeBlanco` del guardián y
+el `signal` del tope en la llamada a DeepSeek. Con los cuatro defectos puestos,
+`tsc` quedó limpio, las **132 pruebas en verde** y la batería **sin una sola
+falta**. Ese verde no significaba nada.
+
+**Pero antes de arreglar la lente se fue a buscar el defecto de verdad, y
+estaba.** No en el guardián —que está bien hecho— sino un escalón antes:
+**la puerta.**
+
+#### El agujero: las rutas de IA no preguntaban nada
+
+De las seis rutas de `api/ai/`, **cinco no preguntaban quién llama**:
+`generate`, `stream`, `describe-image`, `transcribir` y `vision`. El usuario
+viajaba en el cuerpo del pedido —`req.body.userId`, leído del `localStorage`
+del navegador— y el guardián está escrito como opt-in, con su motivo:
+«sin userId no se cobra ni se cuenta; un olvido del front nunca cobra de más».
+Con `userId` nulo devuelve `permitido: true`.
+
+Las dos consecuencias se siguen de ahí:
+
+1. **Un pedido sin `userId` salía al proveedor con las llaves de la casa**, sin
+   crédito, sin tope y sin techo —el techo de gasto se mide por usuario, así
+   que al anónimo no se le aplica ninguno—. Alcanza con saber la URL. La
+   factura es tuya.
+2. **Con el `userId` de otro, se le gastaba el crédito a otro.**
+
+**No es una lectura del código: se ejecutó.** `scripts/prueba-la-puerta-de-la-ia.ts`
+corre los seis handlers de verdad contra un Supabase falso y mira si el
+proveedor llegó a ser llamado. Contra main, **sin una sola cabecera**:
+
+| ruta | contra main, sin token | a quién llamó |
+|---|---|---|
+| `generate` | **200** | api.deepseek.com |
+| `stream` | **200** | api.deepseek.com |
+| `describe-image` | **500** (tras llamar) | api.anthropic.com |
+| `transcribir` | **200** | generativelanguage (Gemini) |
+| `vision` | **200** | generativelanguage (Gemini) |
+| `image` | 401 | nadie |
+
+`image` era la única con puerta —y su puerta vivía **dentro** de
+`if (CREDITS_ENABLED)`: con ese interruptor apagado quedaba abierta también.
+Identidad y cobro son dos cosas distintas.
+
+**Y ninguna de las 859 lentes miraba esto.** La batería de TCD no nombraba ni
+una vez un 401, una clave de puerta ni una sesión. Las 132 pruebas tampoco:
+`prueba-guardian.ts` mide qué freno le toca a cada herramienta, que es
+configuración, y nunca ejecuta la cadena.
+
+#### Qué quedó puesto
+
+**Una sola puerta, en un solo lugar.** `api/_lib/puerta.ts`: el usuario sale
+del token (`Authorization: Bearer`, verificado contra Supabase) y nunca del
+cuerpo. Se usa en dos líneas, y la segunda es la que importa —preguntar sin
+cortar no es una puerta—. El patrón ya existía en la casa (las dos rutas de
+PayPal y `image` lo hacen así); lo que faltaba era un lugar que lo diga.
+
+**Las seis rutas lo usan**, y las cinco que leían `req.body.userId` dejaron de
+hacerlo. La puerta de `image` salió de adentro del interruptor del crédito.
+
+**El otro lado también:** `src/lib/tokenSesion.ts` arma las cabeceras con el
+token de la sesión, y las seis llamadas del navegador pasan por ahí (antes solo
+la de imágenes mandaba token, armado a mano al lado de su `fetch`). La app vive
+detrás del login, así que el token está siempre: pedirlo no le cierra la puerta
+a nadie que deba entrar.
+
+**El bloque 16 de la batería, que es la lente que faltaba.** Diez miradas, en
+el código y sin comentarios: toda ruta de `api/` pregunta quién llama; la que
+pregunta corta con 401 o 403; ninguna ruta de IA lee el usuario del cuerpo; las
+seis usan la misma puerta; la de imágenes no depende del interruptor; las seis
+llamadas del navegador mandan el token y ninguna lo arma a mano; el token sale
+de la sesión y no del `localStorage`; y la última, que es la lente de la lente:
+**ningún nombre de mecanismo se mide sobre el archivo crudo.**
+
+**Las lentes de plata pasaron a `rdc()`** —el archivo sin comentarios— y la del
+tope dejó de creerle a una palabra: pedía que `signal,` apareciera en
+`deepseek.ts`, y la línea que la traía era la destructuración
+(`const { signal, limpiar } = conTope()`), así que con el `signal` sacado del
+`fetch` daba verde. Ahora mide que viaje **a la llamada**. De paso se vio que
+esa lente no veía a DeepSeek: buscaba `fetch('https://api.…')` literal y el
+host del proveedor primario viene en una constante.
+
+**Las ocho pruebas contra su propio fallo, porque es la regla:**
+
+| el defecto reintroducido | la lente vieja | la lente nueva |
+|---|---|---|
+| la puerta sacada de `generate`, vuelve el `userId` del cuerpo | **no existía** | **roja**, 3 veces |
+| `vision` pregunta pero contesta 200 en vez de cortar | **no existía** | **roja** |
+| la puerta de imágenes vuelve adentro de `if (CREDITS_ENABLED)` | **no existía** | **roja** |
+| una llamada del navegador se queda sin token | **no existía** | **roja** |
+| el token armado a mano al lado del `fetch` | **no existía** | **roja**, 2 veces |
+| una lente de plata vuelve a `rd()` crudo | **no existía** | **roja** |
+| el `signal` sacado del `fetch` de DeepSeek | **verde** | **roja**, 2 veces |
+| una ruta nueva en `api/` sin puerta | **no existía** | **roja** |
+
+#### Lo que queda, y es tu clic
+
+**`/api/mcd-bridge` sigue sin puerta, a propósito y declarado.** Contesta si un
+email tiene cobro verificado en Mi Clínica Digital y cuánto, y contesta de
+cualquier email. No gasta plata y no toca datos de pacientes, pero cualquiera
+con la URL puede preguntar por el email que quiera. Está anotada en la lista de
+excepciones del bloque 16 —con una lente que avisa si esa lista crece—, no
+escondida.
+
+Cerrarla es sacar el email **del token** en vez de la query. Los dos lugares que
+la llaman (el Tablero y el Camino) ya mandan el email del propio cliente, así
+que para el cliente no cambia nada; lo que cambia es la forma de la ruta y sus
+**15 lentes de prueba**, que la llaman con `?email=`. Es un turno de la tabla
+si lo quieres, no una decisión de venta.
+
+**Botón de dos:**
+
+- **Cerrarla** — el email sale del token, la ruta deja de contestar por
+  terceros, y se rehacen las 15 lentes del puente. *(Es lo que recomiendo: es
+  la última puerta sin llave que queda, y el trabajo es acotado.)*
+- **Dejarla** — lo que se expone es el estado de cobro de un email que el que
+  pregunta ya tiene que conocer, y el puente queda como está.
 
 ### El 13 de noviembre a las 23:30: la batería de MCD daba verde con la guarda sacada
 
@@ -625,7 +762,7 @@ decisión de venta.
 ### Manual de operación de las baterías — lo que hay que saber antes de leer un rojo
 
 **`auditoria.py` de TCD tarda unos 22 minutos**, y no es lento por el texto: el
-bloque 10 vuelve a correr las 131 pruebas y además levanta Chromium de verdad
+bloque 10 vuelve a correr las 133 pruebas y además levanta Chromium de verdad
 para medir las 93 vistas del cliente y las 17 del Admin. Eso **pasa del límite
 de 5 minutos** que tiene un comando en primer plano, así que el turno que la
 corra de frente la va a ver morir por tiempo sin que nada esté roto. **Se corre
@@ -653,9 +790,10 @@ dependencias, y la segunda si `.next` quedó de una instalación vieja: una
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
 
-**Las pruebas son 133 archivos, y la que sobra no se corre igual que
-las otras.** Son **132** `prueba-*.ts` —la 132 es
-`prueba-campos-angostos.ts`, del 13 de noviembre— más **una** `.tsx`:
+**Las pruebas son 134 archivos, y la que sobra no se corre igual que
+las otras.** Son **133** `prueba-*.ts` —la 132 es
+`prueba-campos-angostos.ts`, del 13 de noviembre, y la 133
+`prueba-la-puerta-de-la-ia.ts`, del 14— más **una** `.tsx`:
 `prueba-pantallas.tsx`, la que monta las pantallas de verdad. Esa necesita su
 entorno de navegador y se corre así —tal como la corre el bloque 10 de
 `auditoria.py`—:

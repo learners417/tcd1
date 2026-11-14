@@ -5,6 +5,7 @@
  * Mismo transporte que visionEvidencia: Gemini multimodal con la clave VITE.
  * Sin clave o sin micrófono → la función degrada en silencio (no bloquea nada).
  */
+import { cabecerasConToken } from './tokenSesion';
 
 
 export function audioDisponible(): boolean {
@@ -22,14 +23,8 @@ export async function transcribirAudio(base64: string, mimeType: string): Promis
   try {
     const r = await fetch('/api/ai/transcribir', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        base64, mimeType, feature: 'sesion',
-        userId: (() => {
-          try { return JSON.parse(localStorage.getItem('tcd_profile') ?? '{}').id ?? null; }
-          catch { return null; }
-        })(),
-      }),
+      headers: await cabecerasConToken(),
+      body: JSON.stringify({ base64, mimeType, feature: 'sesion' }),
     });
     if (!r.ok) return null;
     const data = await r.json() as { texto?: string };

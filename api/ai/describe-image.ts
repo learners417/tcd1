@@ -20,6 +20,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { withSentry, Sentry } from '../_lib/sentry.js';
 import { TOPE_MS } from '../_lib/tope.js';
+import { usuarioDeLaPuerta, SIN_PERMISO } from '../_lib/puerta.js';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 1500;
@@ -31,6 +32,12 @@ async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // ─── La puerta ─────────────────────────────────────────────────────────
+  // Quién llama sale del token, no del cuerpo. Sin token válido, acá se corta
+  // —antes de gastar un peso de proveedor—. Ver api/_lib/puerta.ts.
+  const userId = await usuarioDeLaPuerta(req);
+  if (!userId) return res.status(401).json(SIN_PERMISO);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {

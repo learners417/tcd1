@@ -1,4 +1,5 @@
 import { withSentry } from '../_lib/sentry.js';
+import { usuarioDeLaPuerta, SIN_PERMISO } from '../_lib/puerta.js';
 import { guardarLlamada, anotarCosto, deshacerCobro } from '../_lib/guardian.js';
 import { conTope } from '../_lib/tope.js';
 
@@ -25,7 +26,14 @@ async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { base64, mimeType, descripcion, userId, feature } = req.body ?? {};
+  // ─── La puerta ─────────────────────────────────────────────────────────
+  // Quién llama sale del token, no del cuerpo: `req.body.userId` es lo que el
+  // navegador dice de sí mismo. Sin token válido, acá se corta — antes de
+  // gastar un peso de proveedor. Ver api/_lib/puerta.ts.
+  const userId = await usuarioDeLaPuerta(req);
+  if (!userId) return res.status(401).json(SIN_PERMISO);
+
+  const { base64, mimeType, descripcion, feature } = req.body ?? {};
   if (typeof base64 !== 'string' || !base64 || typeof descripcion !== 'string') {
     // Sin datos suficientes: sin veredicto, nunca un error en la cara.
     return res.status(200).json({ veredicto: null });

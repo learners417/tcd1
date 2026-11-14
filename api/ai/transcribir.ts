@@ -1,4 +1,5 @@
 import { withSentry } from '../_lib/sentry.js';
+import { usuarioDeLaPuerta, SIN_PERMISO } from '../_lib/puerta.js';
 import { guardarLlamada, anotarCosto, deshacerCobro } from '../_lib/guardian.js';
 import { conTope } from '../_lib/tope.js';
 
@@ -24,6 +25,13 @@ async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // ─── La puerta ─────────────────────────────────────────────────────────
+  // Quién llama sale del token, no del cuerpo: `req.body.userId` es lo que el
+  // navegador dice de sí mismo. Sin token válido, acá se corta — antes de
+  // gastar un peso de proveedor. Ver api/_lib/puerta.ts.
+  const userId = await usuarioDeLaPuerta(req);
+  if (!userId) return res.status(401).json(SIN_PERMISO);
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({
@@ -32,7 +40,7 @@ async function handler(req: any, res: any) {
     });
   }
 
-  const { base64, mimeType, userId, feature } = req.body ?? {};
+  const { base64, mimeType, feature } = req.body ?? {};
   if (typeof base64 !== 'string' || !base64) {
     return res.status(400).json({ error: 'Falta el audio' });
   }

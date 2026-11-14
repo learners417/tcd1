@@ -13,6 +13,7 @@
  * transitorio (5xx · timeout) hacemos hasta CLIENT_RETRIES intentos con
  * backoff. Errores no-transitorios (4xx) se propagan sin retry.
  */
+import { cabecerasConToken } from './tokenSesion';
 
 const API_BASE = '/api/ai';
 
@@ -67,14 +68,6 @@ export interface AIGenerateOptions {
   tarea?: 'guion' | 'chat' | 'estructura' | 'auditoria' | 'general';
 }
 
-/** El userId sale del perfil espejado; asi ninguna herramienta se lo tiene
- *  que acordar y no hay forma de cobrarle al usuario equivocado. */
-function userIdActual(): string | undefined {
-  try {
-    const p = JSON.parse(localStorage.getItem('tcd_profile') ?? '{}');
-    return typeof p?.id === 'string' && p.id ? p.id : undefined;
-  } catch { return undefined; }
-}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -151,8 +144,8 @@ export async function generateText(options: AIGenerateOptions): Promise<string> 
     try {
       const res = await fetchConCorte(`${API_BASE}/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...options, userId: userIdActual() }),
+        headers: await cabecerasConToken(),
+        body: JSON.stringify(options),
       });
 
       const contentType = res.headers.get('content-type') || '';
@@ -186,8 +179,8 @@ export async function* streamText(
     try {
       const res = await fetchConCorte(`${API_BASE}/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...options, userId: userIdActual() }),
+        headers: await cabecerasConToken(),
+        body: JSON.stringify(options),
       });
 
       const contentType = res.headers.get('content-type') || '';
