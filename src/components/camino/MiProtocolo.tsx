@@ -72,6 +72,8 @@ export default function MiProtocolo({ leccionesDeHoy, diasSostenidos = 0 }: Prop
   const [escrito, setEscrito] = useState<ProtocoloEscrito>(() => leerProtocolo());
   const [senales, setSenales] = useState<SenalesEscritas>(() => leerSenales());
   const [abierta, setAbierta] = useState<number | null>(null);
+  /* Las que faltan arrancan cerradas: la pantalla no empieza pidiendo 31 cosas. */
+  const [verFaltan, setVerFaltan] = useState(false);
 
   const hoy = useMemo(
     () => leccionesDeHoy.filter((n) => PIEZA_POR_NUMERO[n]),
@@ -130,15 +132,54 @@ export default function MiProtocolo({ leccionesDeHoy, diasSostenidos = 0 }: Prop
       )}
 
       {faltan.length > 0 && (
-        /* Las que faltan se cuentan, no se listan. Medido en el teléfono: los
+        /* Las que faltan se cuentan, no se listan: medido en el teléfono, los
            31 nombres seguidos son un párrafo de seis renglones que no se puede
-           hacer nada con él, y empuja hacia abajo lo que sí. Cada una llega el
-           día que su lección se lee, y ese día aparece arriba. */
-        <p className="text-[15px] leading-snug text-cream/60">
-          {faltan.length === 1
-            ? 'Queda una, y llega con su lección.'
-            : `Quedan ${faltan.length}, y cada una llega con su lección.`}
-        </p>
+           hacer nada con él, y empuja hacia abajo lo que sí.
+
+           PERO TIENEN QUE TENER ENTRADA. Hasta el 15 de noviembre esto era
+           solo el renglón de abajo, y entonces la única pieza que se podía
+           escribir era la de hoy: el que no escribía la suya el día que su
+           lección caía la perdía para siempre, y las 33 tenían una sola
+           oportunidad cada una. Por eso el renglón abre la lista, cerrada de
+           entrada: quieto por defecto, con camino de vuelta. */
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setVerFaltan(!verFaltan)}
+            aria-expanded={verFaltan}
+            className="min-h-[44px] text-left text-[15px] leading-snug text-cream/60 underline
+                       decoration-gold/30 underline-offset-4"
+          >
+            {faltan.length === 1
+              ? 'Queda una, y llega con su lección.'
+              : `Quedan ${faltan.length}, y cada una llega con su lección.`}
+            {' '}
+            {verFaltan ? 'Cerrar.' : 'Verlas.'}
+          </button>
+          {verFaltan && (
+            <div className="space-y-3">
+              {faltan.map((p) => (
+                <div key={p.numero}>
+                  <button
+                    type="button"
+                    onClick={() => setAbierta(abierta === p.numero ? null : p.numero)}
+                    aria-expanded={abierta === p.numero}
+                    className="w-full min-h-[52px] flex items-start gap-3 py-2 text-left"
+                  >
+                    <span className="num-tab text-cream/50 shrink-0">{String(p.numero).padStart(2, '0')}</span>
+                    <span className="text-[17px] leading-snug text-cream/60">{p.nombre}</span>
+                  </button>
+                  {abierta === p.numero && (
+                    <div className="pl-10 pb-3">
+                      <Campo numero={p.numero} valor={escrito[p.numero] ?? ''}
+                             onGuardar={(t) => guardar(p.numero, t)} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* ─── LA PISTA DE 66 ─── */}

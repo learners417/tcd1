@@ -75,6 +75,7 @@ import TaskVideo from '../components/tasks/TaskVideo';
 import TaskCoach from '../components/tasks/TaskCoach';
 import SesionViva from '../components/sesion/SesionViva';
 import MiProtocolo from '../components/camino/MiProtocolo';
+import { leccionesDelDia } from '../lib/miProtocolo';
 import ElJuegoDelSur from '../components/camino/ElJuegoDelSur';
 import { leerPasosAfuera } from '../lib/elJuegoDelSur';
 import { PAISAJES } from '../lib/losCincoPaisajes';
@@ -87,7 +88,7 @@ import PilarUnlockedModal from '../components/PilarUnlockedModal';
 import { planDelCliente, planPermitePilar, waLink, enElTramoDelNumeroLocal } from '../lib/planes';
 import { laOfertaQueSigue } from '../lib/laOfertaQueSigue';
 import Graduacion from '../components/Graduacion';
-import { registrarSesionCompletada } from '../lib/racha';
+import { registrarSesionCompletada, calcularRacha } from '../lib/racha';
 import { diaDelPrograma, diasHabilesDeAtraso, estaEnFaseAutonomia, mensajeDeRitmo, esPasoDelCliente, pilarAlcanzado, primerDiaDelPilar } from '../lib/diaPrograma';
 import { faltaEnLaAntesala, leToca, type Antesala } from '../lib/antesala';
 import { entraEnElEscalon, puertaDelEscalon } from '../lib/topeDelEscalon';
@@ -764,26 +765,36 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   let pasoDeHoy: (PasoDeHoy & { pilar: number; sistema: number | null }) | null = null;
   /* Los números de lección de ese mismo día: la pieza N del protocolo es la
      de la lección N, así que de acá sale cuál se escribe hoy. Se toma en el
-     mismo recorrido y no buscando otra vez, para que no puedan discrepar. */
+     mismo recorrido y no buscando otra vez, para que no puedan discrepar.
+
+     El recorrido es UNO y plano, en el orden del Camino, porque las piezas
+     necesitan ver también las jornadas que el paso saltea: las lecciones 7,
+     15 y 27 caen en fin de semana y su pieza llegaba nunca (`leccionesDelDia`
+     lo explica). Plano y una sola vez: el paso de hoy y sus piezas salen del
+     mismo índice. */
   let leccionesDeHoy: number[] = [];
-  buscarPaso: for (const pil of seedConVideos) {
-    for (const m of pil.metas ?? []) {
-      if (!esPasoDelCliente(m)) continue;
-      if (!completadas.has(`${pil.numero}-${m.codigo}`)) {
-        diaEsperado = m.dia_asignado ?? null;
-        pasoDeHoy = {
-          pilar: pil.numero,
-          sistema: m.sistema === 0 ? roadmap.sistemas.length + 2 : (m.sistema ?? roadmap.sistemas.length + 1),
-          codigo: m.codigo,
-          titulo: m.titulo,
-          descripcion: m.descripcion,
-          tiempo: m.tiempo_estimado,
-          salesCon: m.evidencia_requerida?.nombre ?? null,
-        };
-        leccionesDeHoy = (m.leccion ?? []).map((l) => l.numero);
-        break buscarPaso;
-      }
-    }
+  const enOrden = seedConVideos.flatMap((pil) =>
+    (pil.metas ?? []).map((m) => ({ pilar: pil.numero, m })),
+  );
+  let indiceDeHoy = -1;
+  for (let i = 0; i < enOrden.length; i++) {
+    const { pilar, m } = enOrden[i];
+    if (!esPasoDelCliente(m)) continue;
+    if (!completadas.has(`${pilar}-${m.codigo}`)) { indiceDeHoy = i; break; }
+  }
+  if (indiceDeHoy >= 0) {
+    const { pilar, m } = enOrden[indiceDeHoy];
+    diaEsperado = m.dia_asignado ?? null;
+    pasoDeHoy = {
+      pilar,
+      sistema: m.sistema === 0 ? roadmap.sistemas.length + 2 : (m.sistema ?? roadmap.sistemas.length + 1),
+      codigo: m.codigo,
+      titulo: m.titulo,
+      descripcion: m.descripcion,
+      tiempo: m.tiempo_estimado,
+      salesCon: m.evidencia_requerida?.nombre ?? null,
+    };
+    leccionesDeHoy = leccionesDelDia(enOrden.map((x) => x.m), indiceDeHoy);
   }
   // El anillo: cuántos pasos del cliente van hechos en cada sistema.
   // Las jornadas sin sistema (campo, ciclo, cierre) van en un último tramo,
@@ -1504,7 +1515,13 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       {/* MI PROTOCOLO · las 33 piezas que el Lago deja escritas. Va acá, con
           el trabajo del día y antes del directorio: la pieza de hoy es algo
           que se escribe hoy, no una sección que se visita. */}
-      <MiProtocolo leccionesDeHoy={leccionesDeHoy} />
+      {/* `diasSostenidos` no es decorado: sin él la pista de 66 queda clavada
+          en cero para siempre, que es lo que estaba. La racha de sesiones ya
+          existe y ya se guarda (`racha.ts`, días hábiles con gracia de uno).
+          Qué cuenta como «sostener» el protocolo —sesión o paso afuera— es
+          decisión de Javo, anotada en el mapa; mientras tanto la pista mide
+          lo único medido. */}
+      <MiProtocolo leccionesDeHoy={leccionesDeHoy} diasSostenidos={calcularRacha()} />
 
       <PartesDelCamino
         cinturonOrden={cinturonCamino?.orden ?? 1}

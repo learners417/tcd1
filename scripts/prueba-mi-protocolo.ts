@@ -15,6 +15,10 @@
  * Correr con: npx tsx scripts/prueba-mi-protocolo.ts
  */
 import { readFileSync } from 'node:fs';
+/* Las dos son lógica pura y no importan supabase, así que la lente puede
+   correr el recorrido de verdad en vez de leerlo como texto. */
+import { leccionesDelDia } from '../src/lib/miProtocolo';
+import { esPasoDelCliente } from '../src/lib/diaPrograma';
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -91,8 +95,66 @@ ok(/leccionesDeHoy/.test(pantalla), 'la pantalla recibe las lecciones del día')
 ok(/Tu pieza de hoy|Tus piezas de hoy/.test(pantalla), 'y abre primero la pieza de hoy');
 const camino = readFileSync('src/pages/Roadmap.tsx', 'utf-8');
 ok(/<MiProtocolo\s/.test(camino), 'y está puesta dentro de El Camino');
-ok(/leccionesDeHoy = \(m\.leccion/.test(camino),
+ok(/leccionesDeHoy = leccionesDelDia\(/.test(camino),
   'las lecciones del día salen del mismo recorrido que el paso de hoy');
+/* La pista de 66 con `diasSostenidos` sin pasar queda clavada en cero para
+   siempre: el defecto no es que falte el dato, es que el dibujo promete un
+   avance que no puede ocurrir. Medido el 15 de noviembre: así estaba. */
+ok(/<MiProtocolo[^/>]*diasSostenidos=\{/.test(camino),
+  'y la pista de 66 recibe los días sostenidos — sin eso queda en cero para siempre');
+
+console.log('\n══ ninguna de las 33 se pierde ══');
+
+/* EL DEFECTO QUE ESTO VIGILA, medido el 15 de noviembre de 2026:
+   «la pieza N es la de la lección N» era cierto y no alcanzaba. El Camino se
+   detiene solo en los pasos del cliente, y las lecciones 7, 15 y 27 caen en
+   los días 6 y 13 —fines de semana, que no se completan—, así que su pieza no
+   se pedía nunca: tres de las 33 eran imposibles de escribir y la pantalla
+   decía «cada una llega con su lección».
+   Se mide corriendo el recorrido entero, no leyendo el código. El orden del
+   JSON es el mismo que el del Camino —verificado contra `SEED_ROADMAP_V3`, 91
+   de 91— y la lente lo revisa por el día, que es lo que lo define. */
+interface JornadaMeta {
+  dia: number;
+  tipo: string;
+  minutos: number;
+  cinturon: string | null;
+  leccion?: { numero: number }[];
+}
+const jornadas = (JSON.parse(readFileSync('src/lib/roadmap.seed.json', 'utf-8')) as { jornadas: JornadaMeta[] }).jornadas;
+ok(jornadas.every((j, i) => i === 0 || jornadas[i - 1].dia <= j.dia),
+  'las jornadas están en el orden del Camino');
+
+const comoMeta = (j: JornadaMeta) => ({
+  leccion: j.leccion ?? [],
+  tipo_jornada: j.tipo,
+  tiempo_estimado: `${j.minutos} min`,
+  cinturon: j.cinturon,
+});
+const metas = jornadas.map(comoMeta);
+const pedidas = new Set<number>();
+let maxEnUnDia = 0;
+metas.forEach((m, i) => {
+  if (!esPasoDelCliente(m)) return;
+  const hoy = leccionesDelDia(metas, i);
+  hoy.forEach((n) => pedidas.add(n));
+  if (hoy.length > maxEnUnDia) maxEnUnDia = hoy.length;
+});
+const nunca = numeros.filter((n) => !pedidas.has(n));
+ok(nunca.length === 0, `las ${numeros.length} se piden alguna vez en los 90 días${
+  nunca.length ? ` — nunca se piden ${nunca.join(', ')}` : ''}`);
+ok(maxEnUnDia > 0 && maxEnUnDia <= 3,
+  `y ningún día pide más de tres (el peor pide ${maxEnUnDia})`);
+
+/* Y la otra mitad del mismo agujero: si la única pieza escribible es la de
+   hoy, el que no escribe la suya ese día la pierde para siempre. Las que
+   faltan se cuentan y no se listan —eso se queda—, pero el renglón abre la
+   lista y cada una se puede escribir. */
+const bloqueFaltan = pantalla.slice(pantalla.indexOf('faltan.length > 0'), pantalla.indexOf('LA PISTA DE 66'));
+ok(bloqueFaltan.length > 0 && /faltan\.map\(/.test(bloqueFaltan),
+  'las que faltan tienen entrada: la lista se abre');
+ok(/<Campo/.test(bloqueFaltan),
+  'y una pieza de días pasados se puede escribir — si no, cada una tiene una sola oportunidad');
 
 console.log(fallas === 0 ? '\n✓ el protocolo, en su lugar' : `\n✗ ${fallas} fallas`);
 process.exit(fallas === 0 ? 0 : 1);

@@ -28,6 +28,8 @@
  * reemplazan acá y nada más cambia.
  */
 
+import { esPasoDelCliente } from './diaPrograma';
+
 export interface PiezaDelProtocolo {
   /** No cambia nunca: el libro la nombra por su número. */
   numero: number;
@@ -188,4 +190,31 @@ export function guardarSenal(numero: number, campo: 0 | 1, texto: string): Senal
 /** Cuántas de las 33 están escritas. */
 export function cuantasEscritas(escrito: ProtocoloEscrito): number {
   return PIEZAS.filter((p) => (escrito[p.numero] ?? '').length > 0).length;
+}
+
+/* ═══════════════ QUÉ PIEZA SE PIDE HOY ═══════════════
+ *
+ * Medido el 15 de noviembre de 2026: la correspondencia «pieza N = lección N»
+ * era cierta y no alcanzaba. El Camino se detiene en los pasos del cliente, y
+ * las lecciones **7, 15 y 27 caen en fin de semana** —los días 6 y 13, que son
+ * de campo y no se completan—, así que su pieza no llegaba nunca. Tres de las
+ * 33 eran imposibles de escribir, y la pantalla decía «cada una llega con su
+ * lección» sin que esas tres pudieran llegar.
+ *
+ * El arrastre lo cierra: la pieza de una lección que cae en un día que no se
+ * camina se pide en el primer paso siguiente. La lección se lee el sábado; lo
+ * que se escribe, se escribe el lunes. Ninguna queda sin día, y el máximo
+ * sigue siendo dos piezas en un día (medido sobre los 64 pasos).
+ */
+export function leccionesDelDia(
+  metas: Array<{ leccion?: { numero: number }[]; tipo_jornada?: string | null; tiempo_estimado?: string | null; cinturon?: string | null }>,
+  indiceDeHoy: number,
+): number[] {
+  if (indiceDeHoy < 0 || indiceDeHoy >= metas.length) return [];
+  const numeros = (m: { leccion?: { numero: number }[] }) => (m.leccion ?? []).map((l) => l.numero);
+  const arrastre: number[] = [];
+  for (let i = indiceDeHoy - 1; i >= 0 && !esPasoDelCliente(metas[i]); i--) {
+    arrastre.unshift(...numeros(metas[i]));
+  }
+  return [...arrastre, ...numeros(metas[indiceDeHoy])];
 }
