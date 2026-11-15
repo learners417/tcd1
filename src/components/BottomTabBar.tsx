@@ -27,7 +27,7 @@
  * ese día.
  */
 import { useEffect, useState } from 'react';
-import { Sun, Map, Dumbbell, LifeBuoy } from 'lucide-react';
+import { Sun, Map, Dumbbell, Users } from 'lucide-react';
 import { sinLeerDelCliente } from '../lib/soporteDatos';
 import { supabase, isSupabaseReady } from '../lib/supabase';
 
@@ -57,10 +57,14 @@ const TABS: Tab[] = [
    */
   { id: 'entrenadores', label: 'Entrenar', nombreCompleto: 'Entrenadores', icon: Dumbbell },
   /*
-   * «Acompañamiento» es el nombre del destino y en la barra no entra. Acá va
-   * corto y el encabezado, donde hay ancho, lo dice entero.
+   * «Comunidad» desde el 15 nov 2026. Antes decía «Contacto».
+   *
+   * El motivo es que acá adentro cambió la cosa, no solo la palabra: el
+   * grupo de los clientes dejó de estar en Discord y en Skool y vive en
+   * Comunidades de GHL. Esta pestaña es la puerta a ese grupo, y abajo
+   * siguen estando tu reporte y tus victorias, que son entre tú y Javo.
    */
-  { id: 'mensajes', label: 'Contacto', nombreCompleto: 'Acompañamiento', icon: LifeBuoy },
+  { id: 'mensajes', label: 'Comunidad', nombreCompleto: 'Mi comunidad', icon: Users },
 ];
 
 interface Props {

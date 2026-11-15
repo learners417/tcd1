@@ -92,8 +92,15 @@ ok(!/oculto hasta que esté usable/.test(topbar),
  * que es lo que el programa promete. Esta prueba miraba el archivo viejo y
  * la palabra vieja: marcaba rojo con el canal funcionando.
  */
-ok(/id: 'mensajes', label: 'Acompañamiento'/.test(destinos),
-  'está en el buscador, con el nombre que usa el programa');
+/*
+ * Lo que se le pide es que ESTÉ, con un nombre. Cuál sea la palabra lo
+ * decide `prueba-un-destino-un-nombre.ts`, que compara los cuatro lugares
+ * entre sí: acá volver a escribirla a mano solo conseguía que esta lente se
+ * pusiera roja cada vez que el destino se renombraba. Pasó dos veces: de
+ * «Soporte» a «Acompañamiento», y de ahí a «Mi comunidad» el 15 nov 2026.
+ */
+ok(/id: 'mensajes', label: '[^']+'/.test(destinos),
+  'está en el buscador, con su nombre');
 ok(/setCurrentPage\('mensajes'\)/.test(topbar) && /LifeBuoy/.test(topbar),
   'y hay un botón fijo en la barra de arriba, visible en todas las pantallas y también en el teléfono');
 
@@ -107,8 +114,8 @@ ok(/setCurrentPage\('mensajes'\)/.test(topbar) && /LifeBuoy/.test(topbar),
 // La regla de los cinco destinos no era el problema: el problema era CUÁL de
 // los cinco. Salió Clínica, que no era un destino de esta app sino un
 // window.open a otra, y encima bloqueado hasta el pilar 6.
-ok(/id: 'mensajes', label: 'Contacto'/.test(barra),
-  'y Contacto ES uno de los cuatro destinos: un canal que no se encuentra manda al cliente a buscar al equipo afuera de la app');
+ok(/id: 'mensajes', label: '[^']+'/.test(barra),
+  'y ES uno de los cuatro destinos de la barra: un canal que no se encuentra manda al cliente a buscar afuera de la app');
 ok((soloCodigo(barra).match(/id: '[a-z]+', label:/g) ?? []).length === 4,
   'la navegación tiene cuatro destinos, y son los mismos en los dos anchos');
 ok(/accion_url: '\/mensajes'/.test(avisos),

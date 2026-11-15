@@ -28,8 +28,8 @@ export default defineConfig(({mode}) => {
           description: 'Tu clínica digital — el camino de 90 días.',
           // El crema del tema claro, que es el único que ve el cliente: la
           // pantalla de arranque abría en negro para entrar a una app crema.
-          theme_color: '#EAE4D9',
-          background_color: '#EAE4D9',
+          theme_color: '#F1EBE0',
+          background_color: '#F1EBE0',
           display: 'standalone',
           orientation: 'portrait',
           start_url: '/',

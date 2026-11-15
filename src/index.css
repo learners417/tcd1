@@ -3,8 +3,8 @@
 /* @theme · Tokens de marca como utilidades Tailwind (CP1). Mismos valores que la paleta original. */
 @theme {
   /* La letra de la casa también para la clase font-sans y el valor por defecto. */
-  --font-sans: 'Sora Variable', 'Sora', system-ui, sans-serif;
-  --font-serif: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+  --font-sans: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
+  --font-serif: 'Literata Variable', 'Literata', Georgia, serif;
   --color-ink: #080808;
   --color-panel: #111110;
   --color-surface: #1A1917;
@@ -71,19 +71,41 @@
   --text-muted: rgba(244, 239, 228, 0.62);
   --border-gold: rgba(176, 130, 46, 0.22);
   --border-gold-strong: rgba(176, 130, 46, 0.45);
-  --font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
-  /* La tercera familia: la de leer. La misma de los libros. */
-  --font-lectura: 'Lora Variable', 'Lora', Georgia, serif;
+  /* ═══ LAS TRES LETRAS, Y SUS TRES PAPELES ══════════════════════════
+   *
+   * La misma piel de las páginas, los libros y el video (15 nov 2026,
+   * claude/ARQUITECTURA-COLECCION.md §10). Cada una tiene UN papel y no
+   * se usa fuera de él:
+   *
+   *   --font-body     Manrope    lo que se MIRA y se toca: títulos,
+   *                              números, botones, fichas, etiquetas.
+   *   --font-lectura  Literata   lo que se LEE: todo texto de más de
+   *                              dos líneas.
+   *   --font-cita     Cormorant  lo que se CITA: epígrafes y frases de
+   *                              página entera, siempre en itálica.
+   *
+   * Antes eran Sora (interfaz), Lora (lectura) y Cormorant (títulos).
+   * El cambio de fondo es ese último: los títulos salen del serif y
+   * pasan a Manrope, que es la letra de la home.
+   */
+  --font-body: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
+  --font-lectura: 'Literata Variable', 'Literata', Georgia, serif;
+  --font-cita: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif;
   /* El oro de la colección: mate, tipo pan de oro. Sale del PDF de imprenta,
      no de una aproximación. Va en líneas de 1px, versalitas y numerales —
      nunca de relleno, nunca en degradé, nunca con brillo. */
   --oro-libro: #A8875A;
-  /* La letra de la tapa del libro. Ver la nota de la paleta, más abajo. */
-  --font-display: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif;
+  /* `--font-display` es el papel «título», y desde el 15 nov el título es
+     Manrope. El nombre se queda porque lo nombran 144 lugares del código;
+     lo que cambia es a qué apunta. Para citar, `--font-cita`. */
+  --font-display: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
 
   /* Geometria calida: esquinas suaves, no vivas. */
+  /* Tres esquinas y no más (ARQUITECTURA §10): 12 la ficha, 24 la tarjeta,
+     redondo el botón y el punto. La de 18 se iba a mitad de camino entre
+     dos papeles y hacía que nada se pareciera del todo a nada. */
   --radius-sm: 12px;
-  --radius: 18px;
+  --radius: 24px;
   --radius-lg: 24px;
 
   /* Matrix-specific tokens (preactivacion grid) so the table can
@@ -180,11 +202,51 @@ body,
  * cuando el caso lo pide. Los diecinueve títulos que ya traen la familia en
  * `style` inline no se mueven: inline gana en los dos casos.
  */
+/* ═══ 15 NOV 2026 · EL TÍTULO SALE DE LA ITÁLICA ═══════════════════════
+ *
+ * Todo lo de arriba describe el tiempo en que el título era Cormorant
+ * Garamond itálica. Desde la piel nueva el título es Manrope, y Manrope
+ * NO TIENE ITÁLICA: si se le pide, el navegador la inventa inclinando las
+ * letras, y esa inclinación falsa se ve barata —justo lo contrario de lo
+ * que se busca.
+ *
+ * Por eso acá el título va derecho. La itálica no se pierde: se muda a su
+ * papel, que es citar, con `--font-cita`.
+ */
 @layer base {
   h1, h2, h3 {
     font-family: var(--font-display);
-    font-style: italic;
+    font-style: normal;
   }
+}
+
+/* Los 144 lugares que piden la familia de título en `style` inline traen
+   muchos un `fontStyle: 'italic'` de aquella época. Inline gana a todo, así
+   que se endereza acá, en un solo lugar, hasta que el turno 2 los recorra
+   uno por uno. La cita de verdad lleva `.cita`, más abajo, y conserva su
+   itálica. */
+[style*="--font-display"]:not(.cita) {
+  font-style: normal !important;
+}
+
+/* ═══ LA CITA ═══════════════════════════════════════════════════════
+ *
+ * Lo único que va en Cormorant, y siempre en itálica: el epígrafe, la
+ * frase de página entera, la pregunta del día, el lema de la estación.
+ *
+ * Nunca baja de 20 px. La Cormorant tiene la altura de x muy baja: a 17
+ * se lee como un sans de 14, y ahí la jerarquía se da vuelta —la cita
+ * pasa a leerse más chica que el texto que la rodea—. Si no entra en 20,
+ * lo que sobra es texto, no cuerpo.
+ */
+.cita {
+  font-family: var(--font-cita);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.4;
+  /* Numerales altos: la Cormorant trae cifras de estilo antiguo y un «11»
+     dentro de una cita se leería como dos palitos. */
+  font-variant-numeric: lining-nums;
 }
 
 /*
@@ -381,7 +443,9 @@ body,
   /* Section title */
   .section-title {
     font-family: var(--font-display);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     font-size: 1.5rem;
     color: var(--text-cream);
   }
@@ -484,30 +548,63 @@ body,
   /* LOS TOKENS DE TAILWIND. Sin esto, cada clase text-cream, bg-ink y
      bg-panel sigue resolviendo a los valores del tema oscuro: texto casi
      blanco sobre crema. Era la causa del lavado. */
-  --color-ink: #EAE4D9;
-  --color-panel: #F6F2E9;
-  --color-surface: #E1DBCE;
-  --color-cream: #2B2724;
-  --color-gold: #B0822E;
-  --color-goldhi: #8E6824;
+  /* ═══ LA PIEL «PAISAJE» · 15 nov 2026 ══════════════════════════════
+   *
+   * Los valores salen tal cual de la home (tuclinica.digital), archivo
+   * `src/paisaje.css` del repo learners417/landings. Decidido por Javo:
+   * manda la home, y la app y los libros se alinean a ella. Un solo lugar
+   * donde vive el color de todo el ecosistema.
+   *
+   * Nombres de la home → qué son acá:
+   *   nieve   #FAF8F4   la tarjeta, lo que se apoya encima
+   *   papel   #F1EBE0   la página
+   *   papel-2 #E9E1D3   el chip, la tarjeta de segundo plano
+   *   tinta   #23201D   el texto
+   *   piedra  #5A534C   el texto secundario
+   *   hilo    #A8875A   el oro de la LÍNEA de 1 px
+   *   oro     #7A5F33   el oro del TEXTO: versalitas y numerales
+   *
+   * La tarjeta es más clara que la página, igual que antes: el papel de la
+   * banda con la ficha de nieve encima, que es como arma la home.
+   */
+  --color-ink: #F1EBE0;
+  --color-panel: #FAF8F4;
+  --color-surface: #E9E1D3;
+  --color-cream: #23201D;
+  --color-gold: #A8875A;
+  --color-goldhi: #7A5F33;
   --color-success: #2F5638;
   --color-danger: #9C3626;
 
-  --bg-root: #EAE4D9;
-  --bg-card: #F6F2E9;
-  --bg-surface2: #E1DBCE;
-  --accent-gold: #B0822E;
-  --accent-gold-hover: #8E6824;
-  --text-cream: #2B2724;
-  --text-muted: rgba(43, 39, 36, 0.7);
-  --border-gold: rgba(176, 130, 46, 0.4);
-  --border-gold-strong: rgba(176, 130, 46, 0.65);
+  --bg-root: #F1EBE0;
+  --bg-card: #FAF8F4;
+  --bg-surface2: #E9E1D3;
+  --accent-gold: #A8875A;
+  --accent-gold-hover: #7A5F33;
+  --text-cream: #23201D;
+  --text-muted: #5A534C;
+  --border-gold: rgba(168, 135, 90, 0.45);
+  --border-gold-strong: rgba(168, 135, 90, 0.75);
 
-  /* El paisaje de la tapa, para los fondos que hoy son manchas de color. */
-  --paisaje-montana: #B6BCBD;
-  --paisaje-bosque: #959F9F;
-  --paisaje-lago: #D4CDBC;
-  --paisaje-sol: #E3CB9D;
+  /* ═══ UN COLOR POR ESTACIÓN: EL DE SU TAPA ═════════════════════════
+   *
+   * Antes eran cuatro grises lavados (#B6BCBD, #959F9F, #D4CDBC, #E3CB9D)
+   * sacados de una tapa vieja, y no los usaba nadie. Ahora son los cinco
+   * de las tapas de verdad, los mismos de la home y de los libros.
+   *
+   * Sobre el viento y el río, el texto va en TINTA, no en crema: son los
+   * dos claros. Para texto chico sobre crema, su versión oscura
+   * (ARQUITECTURA §10): viento #7F5B19, río #1F6E6E.
+   */
+  --paisaje-lago: #2B4E68;
+  --paisaje-montana: #904932;
+  --paisaje-viento: #B48B3F;
+  --paisaje-rio: #46979E;
+  --paisaje-bosque: #294637;
+  --paisaje-viento-texto: #7F5B19;
+  --paisaje-rio-texto: #1F6E6E;
+  /* Sanadores Libres, el libro raíz. */
+  --paisaje-sanadores: #3F5450;
 
   /* Las siete capas del 7, de los cimientos al eje. */
   --libertad-mental: #3A3A33;
@@ -940,17 +1037,21 @@ html { font-variant-numeric: lining-nums; }
    foco oro de 2 px · movimiento de 120 ms o nada · fuentes de la casa.
    ═══════════════════════════════════════════════════════════════════ */
 [data-theme="light"] {
-  --ink: var(--text-cream);  --ink2: #6E6252;  --ink3: #9A8C78;
-  --oro: #B0822E;  --oro-d: #8E6824; --oro-soft: #F3EAD6;
-  /* El bloque de la acción: tinta sobre papel, para que el oro quede en la
-     línea. Un tono más cálido que el negro, del mismo lado que el papel. */
-  --tinta-boton: #2A2118; --tinta-boton-hover: #1B150F; --papel-boton: #FBF8F1;
-  /* El verde del tilde bajó un tono: con el papel de la tapa, que es más
-     cálido y más oscuro que el crema anterior, el verde de antes daba 4,4:1
-     y el piso de lectura es 4,5. Ahora da 5,5. */
-  --tilde: #3D6A4A; --tacha: #A33A2A; --ventana: #7A6FA3;
-  --card: var(--bg-card); --card2: var(--bg-surface2); --line: #EBE1CF; --line2: #DFD3BC;
-  --r: 20px; --r2: 26px; --r3: 99px;
+  --ink: var(--text-cream);  --ink2: #5A534C;  --ink3: #6B635A;
+  /* El oro, en sus dos papeles de la home: `hilo` para la línea de 1 px,
+     `oro` para el texto en versalitas y numerales. Nunca de relleno. */
+  --oro: #A8875A;  --oro-d: #7A5F33; --oro-soft: #F0E7D6;
+  /* El bloque de la acción es el LAGO, como en la home: el botón de
+     tuclinica.digital es azul lago con texto blanco. Así el oro se queda
+     donde tiene que estar, que es la línea. */
+  --tinta-boton: #2B4E68; --tinta-boton-hover: #213D52; --papel-boton: #FFFFFF;
+  /* Rojo que tacha y verde que tilda, los de ARQUITECTURA §10. Sobre la
+     tarjeta de nieve los dos pasan AA con holgura. */
+  --tilde: #2F5638; --tacha: #9C3626; --ventana: #7A6FA3;
+  --card: var(--bg-card); --card2: var(--bg-surface2);
+  --line: rgba(35, 32, 29, 0.14); --line2: rgba(35, 32, 29, 0.24);
+  /* Tres esquinas, no nueve: 12 la ficha, 24 la tarjeta, redondo el botón. */
+  --r: 12px; --r2: 24px; --r3: 999px;
   --sombra: 0 1px 2px rgba(42, 33, 24, 0.04), 0 6px 20px rgba(42, 33, 24, 0.05);
   /*
    * LAS SOMBRAS VIEJAS APUNTAN A LA DE LA CASA.
@@ -1160,9 +1261,12 @@ html { font-variant-numeric: lining-nums; }
 [data-theme="light"] .btn-primary {
   background: var(--tinta-boton) !important;
   color: var(--papel-boton) !important;
-  font-size: 17px;
-  min-height: 48px;
-  border-radius: var(--r);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  /* 58 px de alto y esquina redonda: el botón de la home, igual. */
+  min-height: 58px;
+  border-radius: var(--r3);
   box-shadow: none !important;
 }
 [data-theme="light"] .btn-primary:hover {

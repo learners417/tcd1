@@ -28,6 +28,30 @@
 import { paisajePorId, TINTA_LIBRO, COLECCION } from '../lib/losCincoPaisajes';
 import PaisajeIlustrado from './PaisajeIlustrado';
 
+/**
+ * EL CUERPO QUE ENTRA EN LA TAPA.
+ *
+ * Con la letra de título en Manrope (15 nov 2026), «Las siete libertades
+ * fundamentales» se salía de su tapa: la palabra más larga pide más ancho
+ * del que hay. Partir la palabra se ve mal en una tapa, y recortarla con
+ * puntos suspensivos es peor: una tapa que no dice su título no es una tapa.
+ *
+ * Así que lo que cede es el cuerpo, y cede por la palabra MÁS LARGA, que es
+ * la que decide si entra o no entra. Nunca baja de 17, que es el piso de la
+ * casa para lo que se lee.
+ */
+function cuerpoQueEntra(titulo: string, ancho: number): number {
+  /* El ancho útil: la tapa menos sus dos márgenes de 12 px. */
+  const util = ancho - 24;
+  const masLarga = titulo.split(/\s+/).reduce((a, b) => (b.length > a.length ? b : a), '');
+  /* Manrope a peso 600 mide algo menos de 0,58 em por letra en minúscula.
+     Se mide la palabra larga contra el ancho útil y se baja de a un paso. */
+  for (const cuerpo of [20, 19, 18, 17]) {
+    if (masLarga.length * cuerpo * 0.58 <= util) return cuerpo;
+  }
+  return 17;
+}
+
 export default function TapaDeLibro({
   id, titulo, orden, ancho = 150,
 }: {
@@ -94,7 +118,12 @@ export default function TapaDeLibro({
           dibujo siga perteneciendo al mismo estante. */}
       <div className="absolute left-3 right-3 top-4 h-px" style={{ background: TINTA_LIBRO.oro, opacity: 0.8 }} />
       <p className="leading-tight"
-        style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, color: TINTA_LIBRO.papel }}>
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: cuerpoQueEntra(titulo, ancho),
+          fontWeight: 600,
+          color: TINTA_LIBRO.papel,
+        }}>
         {titulo}
       </p>
     </div>

@@ -25,7 +25,7 @@ interface TopbarProps {
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Hoy', roadmap: 'El Camino', coach: 'Tu Mentor', numero: 'Mi Número',
-  mensajes: 'Acompañamiento', adn: 'Mi ADN', diario: 'Diario del Fundador',
+  mensajes: 'Mi comunidad', adn: 'Mi ADN', diario: 'Diario del Fundador',
   biblioteca: 'El Método', creador: 'Creador de Contenido',
   entrenadores: 'Entrenadores',
   campanas: 'Campañas', metrics: 'Métricas', manualNegocio: 'Manual del Negocio',
@@ -73,13 +73,11 @@ const TITULOS_CORTOS: Record<string, string> = {
   creador: 'Creador',
   manualNegocio: 'Manual',
   /*
-   * «Acompañamiento» es el nombre del destino y es la palabra del programa,
-   * pero es la más larga de todas y en la barra de 56 píxeles se corta con el
-   * botón del Mentor al lado. Arriba y abajo dicen «Contacto» —que es donde
-   * se toca— y el encabezado de la pantalla dice «Acompañamiento», que es lo
-   * que es. Las dos palabras conviven porque cada una contesta algo distinto.
+   * «Comunidad» desde el 15 nov 2026 (antes «Contacto»). El destino se
+   * llama «Mi comunidad»: arriba y abajo dicen la forma corta, que es la
+   * que entra en 56 píxeles con el botón del Mentor al lado.
    */
-  mensajes: 'Contacto',
+  mensajes: 'Comunidad',
   /*
    * «Entrenadores» son doce letras. Medido a 320 px, que es el piso de los
    * Android chicos: el título recibe 90 y a 20 px pide 103, así que salía con
@@ -395,7 +393,22 @@ export default function Topbar({ currentPage, onBack, setCurrentPage, userId, on
           {/* `una-linea` y no `truncate` a secas: la barra mide 56 px y el
               título que pasa a dos renglones se monta sobre los botones de la
               derecha. «El Camino» salía partido en tres. */}
-          <h1 className="text-xl leading-tight text-cream una-linea not-italic" style={{ fontFamily: 'var(--font-display)' }}>
+          {/* ── EL CUERPO DEL TÍTULO, Y POR QUÉ CAMBIÓ ──────────────────
+              Hasta el 15 nov 2026 el título era Cormorant Garamond, y por
+              eso no podía bajar de 20 px: su altura de x es tan baja que a
+              18 lee como un sans de 14 y el título queda más chico que su
+              propia descripción. Esa regla ataba las manos —«Entrenadores»
+              no entraba y lo que cedió fue la palabra.
+
+              Ahora el título es Manrope, que es sans: a 18 px se lee como
+              18 px. Manrope además es más ancha que la Garamond, así que a
+              320 px —el piso de los Android chicos— «Comunidad» pedía 106
+              de los 97 que tiene y salía cortada. Medido con
+              `medir-app.py`, lente `cortado`.
+
+              Así que en el teléfono angosto cede el cuerpo, que ahora puede
+              ceder, y no la palabra. Desde 360 px vuelve a 20. */}
+          <h1 className="text-[18px] min-[360px]:text-xl leading-tight text-cream una-linea not-italic" style={{ fontFamily: 'var(--font-display)' }}>
             {(currentPage && (TITULOS_CORTOS[currentPage] ?? PAGE_TITLES[currentPage])) || ''}
           </h1>
         </div>

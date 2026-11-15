@@ -26,7 +26,7 @@
  * lleve a otro lado.
  */
 import {
-  LayoutDashboard, Map, Sparkles, MessageSquare, LifeBuoy, TrendingUp,
+  LayoutDashboard, Map, Sparkles, MessageSquare, Users, TrendingUp,
   BookOpen, Library, Megaphone, Hexagon, Dna, PenLine, Target,
   type LucideIcon,
 } from 'lucide-react';
@@ -49,7 +49,10 @@ export const DESTINOS: Destino[] = [
   { id: 'entrenadores', label: 'Entrenadores', icon: Dna, desc: 'Practica con quien te corrige', minPilar: 0 },
   { id: 'adn', label: 'Mi ADN', icon: Sparkles, desc: 'Las piezas que ya sellaste', minPilar: 0 },
   { id: 'coach', label: 'Tu Mentor', icon: MessageSquare, desc: 'Tu guía del proceso', minPilar: 0 },
-  { id: 'mensajes', label: 'Acompañamiento', icon: LifeBuoy, desc: 'Escríbele al equipo, o pregunta a la IA', minPilar: 0 },
+  /* «Mi comunidad» desde el 15 nov 2026: el grupo de los clientes vive en
+     Comunidades de GHL, y esta pantalla es su puerta. Abajo siguen tu
+     reporte y tus victorias, que son entre tú y Javo. */
+  { id: 'mensajes', label: 'Mi comunidad', icon: Users, desc: 'El grupo, tu reporte y tus victorias', minPilar: 0 },
   { id: 'numero', label: 'Mi Número', icon: Target, desc: 'Tu precio nuevo y lo que lo sostiene', minPilar: 0 },
   { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0, minCinturon: 2 },
   { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Tus libros y las clases del método', minPilar: 2, minCinturon: 2 },

@@ -40,8 +40,24 @@ const ok = (cond: boolean, msg: string) => {
   else { console.log(`  ✗ ${msg}`); fallas++; }
 };
 
-/** El crema del tema claro, que es el único que ve el cliente. */
-const CREMA = '#EAE4D9';
+/*
+ * EL CREMA SALE DEL CSS, NO DE ACÁ.
+ *
+ * Esta prueba tenía el crema escrito a mano (`#EAE4D9`). El 15 nov 2026 la
+ * app pasó a la piel de la home y el crema cambió a `#F1EBE0`: la lente se
+ * puso roja no porque algo estuviera mal, sino porque el número de adentro
+ * había quedado viejo. Una lente que hay que editar cada vez que cambia lo
+ * que mide no mide nada: avisa de su propia desactualización.
+ *
+ * La regla que importa es que los CUATRO lugares digan lo mismo —el CSS, el
+ * `theme-color` del HTML, y el tema y el fondo de la app instalada—, porque
+ * si no, la pantalla de arranque abre de un color y la app aparece de otro.
+ * Así que el valor se toma del CSS, que es donde vive el color de la casa, y
+ * los otros tres se comparan contra él.
+ */
+const CREMA = (
+  /\[data-theme="light"\][\s\S]*?--bg-root:\s*(#[0-9A-Fa-f]{6})/.exec(css)?.[1] ?? ''
+).toUpperCase();
 
 console.log('\n── si ocupa la pantalla entera, reserva la franja ──');
 const ocupaTodo = /viewport-fit\s*=\s*cover/.test(html);
@@ -83,10 +99,9 @@ console.log('\n── el crema sigue siendo el fondo del cliente ──');
  * app. Esta es la que ata las dos cosas.
  */
 const fondoClaro = css.match(/--bg-root:\s*(#[0-9A-Fa-f]{6})\s*;[\s\S]{0,400}?--text-cream/);
-const declaraciones = [...css.matchAll(/--bg-root:\s*(#[0-9A-Fa-f]{6})/g)].map((m) => m[1].toUpperCase());
 ok(
-  declaraciones.includes(CREMA),
-  `el tema claro declara el crema como fondo (encontrados: ${declaraciones.join(', ') || 'ninguno'})`,
+  CREMA !== '',
+  `el tema claro declara su crema como fondo (dice «${CREMA || 'nada'}»)`,
 );
 void fondoClaro;
 

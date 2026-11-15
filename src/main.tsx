@@ -2,20 +2,29 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Toaster} from 'sonner';
 import App from './App.tsx';
-// Fuentes empaquetadas con la app: se ven igual sin conexión y sin depender de Google.
-import '@fontsource-variable/sora';
-// Cormorant Garamond: la letra de la tapa de «Las 7 libertades fundamentales».
-// Es la que da el aire de libro —fina, con contraste de trazo, con versalitas
-// que respiran— y pasa a ser la letra de los títulos de toda la app, para que
-// abrirla y abrir el libro se sientan la misma cosa.
+/* ═══ LAS TRES LETRAS DEL ECOSISTEMA (15 nov 2026) ═══════════════════
+ *
+ * Decidido por Javo para todo: páginas, libros, app y video. El detalle
+ * está en claude/ARQUITECTURA-COLECCION.md §10.
+ *
+ *   Manrope    lo que se MIRA y se toca — títulos, números, botones,
+ *              fichas, etiquetas. Es la letra de la home nueva
+ *              (tuclinica.digital) y la de los reels.
+ *   Literata   lo que se LEE — todo texto de más de dos líneas.
+ *   Cormorant  lo que se CITA — epígrafes y frases de página entera,
+ *              en itálica.
+ *
+ * Reemplazan a Sora (interfaz) y Lora (lectura). Las dos salen del
+ * `package.json` en el turno 2, cuando ya no quede ninguna referencia.
+ *
+ * Van empaquetadas con la app: se ven igual sin conexión y sin depender
+ * de Google.
+ */
+import '@fontsource-variable/manrope';
+import '@fontsource-variable/literata';
+import '@fontsource-variable/literata/wght-italic.css';
 import '@fontsource-variable/cormorant-garamond';
 import '@fontsource-variable/cormorant-garamond/wght-italic.css';
-// Lora: la letra con la que están impresos los libros de la colección. Va solo
-// donde el cliente LEE —el dato del paisaje, un tutorial, una lección— y no
-// donde opera. Sora sigue siendo la de la interfaz: botones, datos y números
-// se leen mejor en una sans, y una app entera en serif se lee como un PDF.
-import '@fontsource-variable/lora';
-import '@fontsource-variable/lora/wght-italic.css';
 import './index.css';
 import {initSentry, Sentry} from './lib/sentry';
 import {installDomTranslationGuard} from './lib/domTranslationGuard';

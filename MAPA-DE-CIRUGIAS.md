@@ -2885,3 +2885,128 @@ el 22, el 31 y el 55— y el Camino muestra un video por jornada. Hoy el Tablero
 lo dice en voz alta («el día 22 comparte su lugar con P4.1»), y las dos piezas
 comparten el enlace. Si querés que sean dos videos separados en la misma
 sesión, eso es un cambio de lo que el cliente ve y espera tu decisión.
+
+---
+
+# LA PIEL Y LOS TRES HILOS · plan de 7 turnos (15 nov 2026)
+
+Pedido de Javo: rehacer la app en lo estético, alineada con los libros y con la
+home nueva (tuclinica.digital, piel «Paisaje»), y dejar el paso a paso, el
+camino y los días 100 % alineados con los libros que se reescriben. El pedido
+completo está en `claude/APP-ALINEACION.md`; el detalle, en
+`claude/ARQUITECTURA-COLECCION.md` §6, §10 y §14.
+
+**La regla que no se toca:** los días y los nombres de `roadmap.seed.json`
+mandan. Los libros se ajustan a la app, nunca al revés.
+
+## Lo que encontré, medido
+
+**Primero, una corrección: la app no tiene fondo oscuro.** Lo parece al abrir
+`index.css` —los tokens de fábrica son negros— pero `index.html` lleva
+`data-theme="light"` y 206 reglas lo dan vuelta entero. Lo que se ve en el
+teléfono es crema con tinta cálida. Quien lea solo el principio del archivo va
+a «arreglar» algo que ya está bien.
+
+**Lo que sí pasa es más caro: hay dos pieles peleando.** Debajo del crema vive
+la paleta oscura completa, y encima 206 reglas la tapan a mano, una por una.
+Por eso los valores derivan: la app quedó con **otro crema** (#EAE4D9 contra el
+#FAF8F4 de la home), **otra letra** (Sora, Fraunces y Lora contra Manrope,
+Literata y Cormorant), **otro oro** (#B0822E contra #A8875A en línea y #7A5F33
+en texto) y **otros cinco colores de paisaje** —#B6BCBD, #959F9F, #D4CDBC y
+#E3CB9D, grises lavados— en lugar de los de las tapas. «Rehacer por completo en
+lo estético» es dejar una sola piel, no pintar encima de la que hay.
+
+**El tamaño real del cambio de color.** No son cinco mil ediciones: el color
+pasa por tokens. `text-cream` aparece 2.626 veces, `text-gold` 853,
+`border-gold` 660, `bg-gold` 587, `bg-surface` 126, `bg-panel` 80. Todo eso se
+mueve desde la raíz. Lo que sí pide mano: 101 `bg-cream`, 21 `text-ink`, 105
+`text-white`, 32 `text-black` y unos 250 colores escritos a mano en `.tsx`
+(#DFD3BC 71 veces, #B0822E 65, #17150F 22, #EAE4D9 20). El naranja prohibido
+#E8962E sigue en 4 lugares.
+
+**Los tres hilos no existen en los datos.** `roadmap.seed.json` no tiene
+`leccion`, ni `pausa`, ni `paso_afuera`, ni la pieza del protocolo. El día
+muestra título, lo que lleva, los minutos y los pasos. Nada de lo de adentro.
+
+**Las micro-tareas del papel nunca entraron.** El campo `checklist` existe en
+43 de las 91 jornadas y en las 43 es una **copia literal de `pasos`**. Las 530
+micro-tareas de `claude/checklist-90.json` siguen afuera. Hoy el papel y la app
+no dicen lo mismo, y ese era el punto.
+
+**«Mi protocolo» no existe.** Ninguna de las 33 piezas tiene dónde escribirse.
+
+**Del juego del sur hay una pieza y media.** `racha.ts` cuenta días hábiles
+seguidos con sesión —no pasos afuera— y tiene su regla de gracia. No hay vaso
+de 100 piedras, ni mapa de 90 días pintado, ni sellos por tramo, ni las 10
+palabras.
+
+**Y siguen los arreglos que pidió LIBROS el 12 de noviembre:** `planes.ts`
+vende a $997, `topeDelEscalon.ts` dice $5.000, `manuales.ts` dice «El Camino»,
+«Semana Blanca» y «Los 5 días» viven en 8 archivos, los cinco sistemas se
+llaman «de alto impacto», «automática» y «circular», `losCincoPaisajes.ts`
+mantiene los tres datos falsos (el Limay hasta el Atlántico, las raíces que se
+pasan azúcares, el cóndor que vuelve a mitad de camino) y los cinco libros del
+sur figuran como «escribiendo» y sin enlace.
+
+**Y una urgente, de otro frente:** la barra dice **Contacto** y abre un chat
+propio con cinco canales. El martes 17 los clientes entran a «Mentoría TCD».
+Esa pestaña tiene que decir **Comunidad** y llevar al grupo.
+
+## Lo que ya está bien y se queda
+
+- La tarjeta de Hoy ya abre con el paisaje del día, y los colores de
+  `losCincoPaisajes.ts` salen del PDF de imprenta con el contraste medido uno
+  por uno (el ocre del viento tiene su lecho aparte). Se conservan: lo que
+  cambia es que pasen a ser los de las tapas, con el mismo cuidado.
+- Los tramos de los paisajes se parsean del seed, para que vivan en un solo
+  lugar. Eso no se toca: lo que se suma es la etiqueta larga de la estación
+  («Días 1 a 7»), que es la de los libros y la home, al lado del tramo de
+  construcción («se arma del 1 al 5»).
+- El piso de letra de 15 px, con su comentario largo en `index.css`, y las 22
+  lentes visuales de `medir-app.py` en cero faltas sobre las pantallas del
+  cliente.
+
+## Los siete turnos
+
+**T1 · La muestra: una pantalla con la piel nueva.** Antes de repintar 53
+pantallas, se repinta una —Hoy— con la piel completa: Manrope para lo que se
+mira, Literata para lo que se lee, Cormorant itálica para lo que se cita; el
+crema y el oro de la home; los cinco colores de las tapas; esquinas 12, 24 y
+redondo. Va con capturas de celular. Es el mismo camino que funcionó en los
+libros: la lección 27 antes de las 33. En el mismo turno, la pestaña
+**Comunidad**, que es lo urgente del martes.
+
+**T2 · La piel en toda la app.** Una sola paleta: se va la capa oscura y se van
+las 206 reglas que la tapaban. Se reescribe `tcd-spec/10-DISENO.md` con la piel
+nueva y se reapuntan las lentes de `medir-app.py` —el contraste se mide contra
+el fondo nuevo— porque si no, el medidor sigue aprobando la piel vieja.
+Capturas de todas las pantallas del cliente.
+
+**T3 · Los tres hilos del día.** Campos nuevos en `roadmap.seed.json` —
+`leccion`, `pausa`, `paso_afuera`— sin tocar días, nombres ni pasos. El día
+pasa a mostrar: tu lección · tu pausa de 5 · tu paso afuera · lo que pide la
+app. La tabla de las lecciones la pasa LIBROS; hoy está completa la del Lago
+(ARQUITECTURA §4) y las otras cuatro llegan cuando cierre cada libro.
+
+**T4 · Las micro-tareas del papel.** Entran las 530 de `checklist-90.json` en
+el campo `checklist`, con su forma real (tarea con sus micro), y una lente que
+compara app contra papel para que no vuelvan a separarse.
+
+**T5 · Mi protocolo, las 33 piezas.** La pieza del día se escribe igual que en
+el libro; la guarda se va llenando; la pista de 66 con sus marcas en 21, 44 y
+66; y el chequeo semanal de tres preguntas contra el burnout (las tres
+dimensiones de la OMS, CIE-11).
+
+**T6 · El juego del sur.** Tu vaso de 100 piedras (logro 1, paso afuera 2; la
+orilla en 33, la travesía en 66, la otra orilla en 100), el mapa de 90 días que
+se pinta, la racha de pasos afuera con la regla de reenganche, un sello por
+tramo y las 10 palabras.
+
+**T7 · Los arreglos de LIBROS.** La escalera (997 a 1.000, 5.000 a 6.000), Tu
+nuevo precio en todos lados, los cinco sistemas con su nombre del impreso,
+`losCincoPaisajes.ts` (los tres datos y las etiquetas de días), `libros.ts`
+(los cinco publicados y con enlace), `libroYPacientes.ts` (los 11 capítulos que
+no existen) y «menos mapas para el mismo viaje».
+
+**Cada turno cierra igual:** batería en verde antes de subir, capturas de
+celular para tu visto, y el bloque APP de MAPA-TCD actualizado.

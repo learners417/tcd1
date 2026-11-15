@@ -127,15 +127,47 @@ ok(/con-capitular/.test(po), 'y la capitular en oro, como la primera letra de un
 ok(/sobre-paisaje/.test(po),
   'el texto con su clase propia: el tema claro le ganaba al color y el título salía casi negro sobre el azul');
 
+/*
+ * ─── LAS TRES LETRAS, CADA UNA EN SU PAPEL ──────────────────────────
+ *
+ * Esta prueba decía «y es Lora» y «la interfaz sigue en Sora». Eran los
+ * nombres de noviembre, no la regla. El 15 nov 2026 Javo aprobó una piel
+ * común para páginas, libros, app y video, y las letras cambiaron de
+ * nombre sin cambiar de papel (claude/ARQUITECTURA-COLECCION.md §10).
+ *
+ * La regla, que es lo que se mide acá, no se movió: hay TRES familias,
+ * cada una con UN papel, y las tres viajan empaquetadas con la app.
+ * Escrito así, el día que vuelvan a cambiar de nombre esta lente avisa
+ * si alguna pierde su papel, en vez de ponerse roja porque cambió una
+ * palabra.
+ */
 const css = readFileSync('src/index.css', 'utf-8');
-ok(/--font-lectura:/.test(css), 'existe la letra de lectura');
-ok(/Lora/.test(css), 'y es Lora, la de los libros');
-ok(/--font-body: 'Sora/.test(css),
-  'mientras la interfaz sigue en Sora: botones, datos y números se leen mejor en una sans');
+const main = readFileSync('src/main.tsx', 'utf-8');
+
+/** La familia declarada para un papel, tal como queda en el CSS. */
+const familiaDe = (papel: string) =>
+  new RegExp(`--font-${papel}:\\s*'([^']+)'`).exec(css)?.[1] ?? '';
+
+const lectura = familiaDe('lectura');
+const interfaz = familiaDe('body');
+const cita = familiaDe('cita');
+
+ok(lectura !== '', 'existe la letra de lectura');
+ok(/Literata/.test(lectura), `y es la serifa de los libros (hoy ${lectura || 'ninguna'})`);
+ok(/Manrope/.test(interfaz),
+  `mientras la interfaz es la sans de la home (hoy ${interfaz || 'ninguna'}): botones, datos y números se leen mejor en una sans`);
+ok(/Cormorant/.test(cita), `y la de citar es la Garamond (hoy ${cita || 'ninguna'})`);
+ok(lectura !== interfaz && interfaz !== cita && lectura !== cita,
+  'y son tres familias distintas: si dos papeles comparten letra, el papel que se pierde es el de citar');
+
 ok(/\.prosa-libro\.con-capitular::first-letter/.test(css), 'la capitular existe');
 ok(/\.accion-libro/.test(css), 'y el bloque de acción con su borde de 1px');
-const main = readFileSync('src/main.tsx', 'utf-8');
-ok(/fontsource-variable\/lora/.test(main), 'Lora se carga');
+
+/* Empaquetadas, no traídas de Google: la app se abre sin conexión. */
+for (const papel of [lectura, interfaz, cita]) {
+  const paquete = papel.replace(/ Variable$/, '').toLowerCase().replace(/\s+/g, '-');
+  ok(new RegExp(`fontsource-variable/${paquete}`).test(main), `${papel} se carga`);
+}
 
 const il = codigoDe('src/components/PaisajeIlustrado.tsx');
 ok(/apaisado/.test(il) && /scale\(-1,1\)/.test(il),

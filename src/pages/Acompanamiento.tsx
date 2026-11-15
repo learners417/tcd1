@@ -23,6 +23,7 @@ import {
   elDiaYElTema, losTresEncuentros,
   type IdCanal,
 } from '../lib/viaDeContacto';
+import { MI_COMUNIDAD, PUERTA_DE_LA_COMUNIDAD } from '../lib/miComunidad';
 import {
   mensajesDelCanal, escribirEnCanal, misReportes, mandarReporte,
   proximasGrupales, grabacionesGrupales, marcarQueEntro,
@@ -77,12 +78,34 @@ export default function Acompanamiento({ clienteId, nombre, servicio, onUnreadCh
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-2xl text-cream" style={{ fontFamily: 'var(--font-display)' }}>
-          Acompañamiento
-        </h1>
-        <p className="text-sm text-cream/65 mt-1 leading-relaxed">{via.queEs}</p>
-      </div>
+      {/*
+        LA PUERTA AL GRUPO, PRIMERO.
+
+        Es lo único de esta pantalla que lleva afuera de la app, y por eso va
+        arriba de todo: quien toca «Comunidad» viene a buscar a los demás. Lo
+        de abajo —tu reporte, tus victorias— es entre el cliente y Javo.
+      */}
+      <a
+        href={MI_COMUNIDAD}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card-panel block p-5 border-gold/25 no-underline"
+      >
+        <p className="text-base font-bold text-cream">{PUERTA_DE_LA_COMUNIDAD.titulo}</p>
+        <p className="text-sm text-cream/75 mt-1.5 leading-relaxed">
+          {PUERTA_DE_LA_COMUNIDAD.queEs}
+        </p>
+        <span className="btn-primary inline-flex items-center justify-center mt-4">
+          {PUERTA_DE_LA_COMUNIDAD.boton}
+        </span>
+      </a>
+
+      {/*
+        Y debajo, lo que es entre tú y Javo. Esta línea describe el reporte,
+        así que va acá y no arriba: arriba hablaba de otra cosa que la que
+        se veía. Sin título: la barra ya dice «Comunidad».
+      */}
+      <p className="text-sm text-cream/65 leading-relaxed">{via.queEs}</p>
 
       {/* LAS PESTAÑAS — solo las que tiene. Sin huecos, sin candados. */}
       <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-3 border-b border-gold/10">

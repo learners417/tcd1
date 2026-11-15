@@ -70,7 +70,11 @@ CASOS_PUERTA = [
     ('index.html', 'data-theme="light"', '<!--', '-->',
      'sin el atributo la app abre en el tema oscuro, y la lente que dice '
      'medirlo daba verde'),
-    ('src/index.css', '--color-ink: #EAE4D9', '/*', '*/',
+    # El valor del token se mueve cuando se mueve la piel: el 15 de noviembre
+    # de 2026 el crema pasó de #EAE4D9 al #F1EBE0 de la home y esta prueba
+    # avisó, como tiene que avisar, que su muestra había quedado vieja. Se usa
+    # el NOMBRE del token y no su valor: el nombre es lo que no cambia.
+    ('src/index.css', '--color-ink:', '/*', '*/',
      'sin el token, cada clase text-ink del tema claro vuelve al valor '
      'oscuro: texto casi blanco sobre crema'),
     ('src/index.css', '--surface: var(--bg-card)', '/*', '*/',

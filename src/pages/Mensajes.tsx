@@ -87,13 +87,16 @@ export default function Mensajes({ userId, onUnreadChange }: MensajesProps) {
     <div className="max-w-2xl mx-auto pb-12 animate-in fade-in duration-300">
       {/*
         Decía «Soporte», que era el CUARTO nombre del mismo lugar: la barra de
-        arriba y las pestañas dicen «Contacto», el buscador «Acompañamiento»,
+        arriba y las pestañas dicen «Comunidad», el buscador «Mi comunidad»,
         y acá adentro «Soporte». La prueba de los nombres miraba tres lugares y
         este es el cuarto — el encabezado DENTRO de la pantalla, que es el que
         el cliente tiene delante mientras lee.
+
+        Desde el 15 nov 2026 los cuatro dicen «Mi comunidad»: el grupo se mudó
+        a Comunidades de GHL y esta pantalla es su puerta.
       */}
-      <p className="text-2xl font-light text-cream mb-1" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>Acompañamiento</p>
-      <p className="text-sm text-cream/55 mb-5">Dos puertas: la respuesta al instante, o el equipo humano.</p>
+      <p className="text-2xl font-bold text-cream mb-1" style={{ fontFamily: 'var(--font-display)' }}>Mi comunidad</p>
+      <p className="text-sm text-cream/55 mb-5">El grupo donde están los demás, y tu línea directa con Javo.</p>
 
       <div className="grid grid-cols-2 gap-2 mb-5">
         <button onClick={() => setTab('ia')}

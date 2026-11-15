@@ -376,8 +376,20 @@ _luz5 = _c5[_c5.find('[data-theme="light"]'):]
 # El valor literal dejó de estar: `--surface` pasó a `var(--bg-card)` para que
 # el papel se defina en UN lugar. Lo que esta vara protege es que en tema claro
 # `--surface` NO caiga en el respaldo oscuro, así que mira eso y no un hex.
+# El comentario de arriba decía que esta vara mira la REGLA «y no un hex», y
+# abajo miraba un hex: `#F6F2E9`. El 15 de noviembre la app pasó a la piel de
+# la home, el papel de la tarjeta cambió a `#FAF8F4` y la vara se puso roja
+# sin que nada estuviera mal. Ahora hace lo que su comentario decía: que
+# `--surface` salga del papel, y que ese papel sea CLARO de verdad —se mide
+# su luminancia—, que es lo único que protege de volver al respaldo oscuro.
+_papel5 = _re.search(r'--bg-card:\s*#([0-9A-Fa-f]{6})', _luz5)
+def _es_claro(_hex):
+    _r, _g, _b = (int(_hex[_i:_i+2], 16) / 255 for _i in (0, 2, 4))
+    _lin = [(_c / 12.92 if _c <= 0.04045 else ((_c + 0.055) / 1.055) ** 2.4) for _c in (_r, _g, _b)]
+    return 0.2126 * _lin[0] + 0.7152 * _lin[1] + 0.0722 * _lin[2] > 0.6
 check('card-ios no cae en su respaldo negro',
-      '--surface: var(--bg-card)' in _luz5 and '--bg-card: #F6F2E9' in _luz5, '')
+      '--surface: var(--bg-card)' in _luz5 and _papel5 is not None and _es_claro(_papel5.group(1)),
+      f'papel de tarjeta: {_papel5.group(1) if _papel5 else "sin declarar"}')
 
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f

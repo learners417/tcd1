@@ -166,11 +166,27 @@ const bottom = codigoDe('src/components/BottomTabBar.tsx');
 // —que es lo que verifica la lente de la auditoria, comparando ids— no el
 // ancho del texto.
 ok(/id: 'mensajes'/.test(bottom),
-  'la navegación lleva a Acompañamiento');
-ok(/nombreCompleto: 'Acompañamiento'/.test(bottom),
-  'con el nombre completo declarado, que es el que usa el encabezado donde hay ancho');
-ok(/label: 'Contacto'/.test(bottom),
-  'y en la barra va corto: con el nombre largo se salía de la pantalla en el teléfono');
+  'la navegación lleva a esta pantalla');
+/*
+ * ESTA PRUEBA MIRA LA FORMA, NO LA PALABRA.
+ *
+ * Decía `nombreCompleto: 'Acompañamiento'` y `label: 'Contacto'`, los dos
+ * escritos a mano. El 15 nov 2026 el destino pasó a llamarse «Mi comunidad»
+ * —el grupo se mudó a Comunidades de GHL y esta pantalla es su puerta— y la
+ * lente se puso roja por el cambio de palabra, no por un defecto.
+ *
+ * Qué se le pide de verdad al destino: que declare SUS DOS nombres, el corto
+ * para la barra y el largo para donde hay ancho, y que el corto sea de
+ * verdad más corto. Que los cuatro lugares digan lo mismo lo comprueba
+ * `prueba-un-destino-un-nombre.ts`, que es su dueña.
+ */
+const tab = /id: 'mensajes', label: '([^']+)', nombreCompleto: '([^']+)'/.exec(bottom);
+ok(tab !== null, 'con sus dos nombres declarados: el corto de la barra y el largo');
+if (tab) {
+  const [, corto, largo] = tab;
+  ok(corto.length <= largo.length,
+    `y en la barra va el corto («${corto}» contra «${largo}»): con el largo se salía de la pantalla en el teléfono`);
+}
 
 console.log('\n══ el admin ══');
 const hoy = codigoDe('src/components/admin/ListaDeHoy.tsx');

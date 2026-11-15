@@ -72,7 +72,9 @@ export default function CabeceraDelDia({
           {/* La regla de 20 mm de la tapa, a escala. */}
           <div className="regla-libro regla-paisaje mt-3 mb-3" />
 
-          <p className="prosa-libro sobre-paisaje-2" style={{ fontStyle: 'italic' }}>
+          {/* El lema de la estación es una cita, no prosa: va en Cormorant
+              itálica, que es la letra de citar de toda la casa. */}
+          <p className="cita sobre-paisaje-2">
             {paisaje.nombre} · {paisaje.ensena}
           </p>
 
