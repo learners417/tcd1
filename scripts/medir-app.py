@@ -997,6 +997,21 @@ def preparar(pag, pantalla, dias=20, hechas=None, antesala=None, plan='implement
               antesala. Sin este caso la pantalla nueva no se medía nunca, y
               con él de default no se medía el Camino: hacen falta los dos.
     """
+    # `lleno` tiene que ser el ESTADO, no un sí. Pasado como `True` —que es
+    # lo que uno escribe sin pensar— llega al navegador como un booleano, y
+    # ahí `lleno.hechas` es `undefined`: se guarda la cadena "undefined", el
+    # `JSON.parse` falla, la cuenta queda vacía y la pantalla se mide como si
+    # fuera el día uno. Nada falla y la foto sale linda.
+    #
+    # Medido el 15 de noviembre, con un script propio que lo pasaba así: 0
+    # jornadas en vez de 71. El medidor siempre lo pasó bien —sus 17 vistas
+    # `>lleno` llaman a `estado_lleno()`—, pero el error no se veía, así que
+    # acá se convierte en un grito.
+    if lleno is True:
+        raise SystemExit(
+            "preparar(lleno=True) no sirve: `lleno` lleva el estado, no un sí. "
+            "Se pasa `lleno=estado_lleno()` (o `estado_lleno(True)` para el "
+            "modo largo).")
     pag.evaluate("""([pantalla, dias, hechas, antesala, plan, lleno, bienvenida]) => {
       localStorage.clear();
       const d = new Date(); d.setDate(d.getDate() - (dias - 1));

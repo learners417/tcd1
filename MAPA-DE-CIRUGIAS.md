@@ -341,6 +341,37 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
 | **15 nov, 18:30** · `5af53b5` | se tomó el **T4: las micro-tareas del papel**, y al empujarlo apareció lo que ninguna lente mira: **otra sesión había hecho el T3 en paralelo** (`df84d81`) y el remoto rechazó el commit. Dos archivos de datos, dos lentes y dos pantallas para lo mismo. Comparadas antes de tocar: su capa de lecciones y pausas es mejor —cada pausa con su marca y su fuente—, y **sus 28 pasos afuera eran cinco textos rotando**, así que «Cambia una línea de tu perfil» le salía seis veces en los 90 días. Quedó su capa con mis 28 pasos adentro, una sola de cada cosa. Y el campo `checklist` que el plan mandaba llenar **no lo dibujaba ninguna pantalla**: era copia textual de `pasos` (abajo, en «El 15 de noviembre a las 18:30») |
 
+### El 15 de noviembre a las 20:10: la corrección — el medidor nunca estuvo ciego
+
+**Lo escrito en el commit `58ced97` y en el chat estaba mal, y se corrige
+acá.** Decía que `preparar(lleno=True)` escribe las 71 jornadas hechas y la
+pantalla las deja en cero, «así que la cuenta llena del medidor nunca tuvo el
+Camino lleno». Es falso.
+
+Lo que pasó es más chico y más mío: **el script que escribí para sacar la
+foto pasaba `lleno=True`**, un booleano, donde va el estado. El medidor
+siempre lo pasó bien: sus diecisiete vistas `>lleno` llaman a
+`estado_lleno()` y reciben el diccionario con las 71 jornadas, el ADN
+escrito y los números del mes.
+
+Medido de los dos lados, en la misma corrida:
+
+| Lo que se pasa | Jornadas en el teléfono | Lo que muestra el tablero |
+|---|---|---|
+| `lleno=True` | 0 | sin piedras |
+| `lleno=estado_lleno()` | 71 | 70 piedras · La travesía |
+
+Por qué no se vio: con un booleano, `lleno.hechas` en el navegador es
+`undefined`, se guarda la cadena `"undefined"`, el `JSON.parse` falla, lo
+atrapa el `catch` y la cuenta queda vacía. **Nada falla, y la foto sale
+linda.** Es exactamente la forma de error que este búnker viene cazando toda
+la semana, y esta vez la escribí yo.
+
+Queda el arreglo que lo convierte en un grito: `preparar` ahora se planta si
+recibe `lleno=True`, y dice qué hay que pasar. El que se equivoque como yo se
+entera en la primera corrida, no en la foto.
+
+
 ### El 15 de noviembre a las 18:30: el mismo turno, hecho dos veces
 
 Turno **T4 de los siete**: las 530 micro-tareas del papel. Lo que encontró no

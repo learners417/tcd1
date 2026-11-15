@@ -69,23 +69,10 @@ def main():
             for dia in DIAS:
                 pag = ctx.new_page()
                 pag.goto(base)
-                _m.preparar(pag, 'roadmap', dias=dia, lleno=LLENO)
+                _m.preparar(pag, 'roadmap', dias=dia,
+                            lleno=_m.estado_lleno() if LLENO else False)
                 pag.reload()
                 pag.wait_for_timeout(2500)
-                if LLENO:
-                    # MEDIDO EL 15 DE NOVIEMBRE: `preparar(lleno=True)` escribe
-                    # las 71 jornadas hechas y, en la primera carga, la pantalla
-                    # las deja en cero —`tcd_hoja_ruta_v2` queda en `[]`—. O sea
-                    # que la cuenta «llena» del medidor nunca tuvo el Camino
-                    # lleno. Acá se vuelven a escribir después de esa carga, que
-                    # es cuando quedan. Queda anotado para arreglarlo en
-                    # `preparar`, que es de donde lo leen las 110 vistas.
-                    _est = _m.estado_lleno()
-                    pag.evaluate("h => localStorage.setItem('tcd_hoja_ruta_v2', JSON.stringify(h))",
-                                 _est['hechas'])
-                    pag.reload()
-                    pag.wait_for_timeout(2500)
-
                 # El Camino abre con su pregunta de una sola vez; hay que
                 # pasarla antes de ver nada.
                 for texto in ('Empiezo de cero', 'ir a mi día'):
